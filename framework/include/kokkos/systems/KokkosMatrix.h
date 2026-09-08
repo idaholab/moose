@@ -22,7 +22,7 @@
 namespace Moose::Kokkos
 {
 
-class System;
+class DofSpace;
 
 /**
  * The Kokkos wrapper class for PETSc matrix
@@ -61,12 +61,12 @@ public:
    * overwrites them.
    *
    * @param matrix The libMesh PetscMatrix
-   * @param system The Kokkos system
+   * @param dof_space The DOF layout whose sparsity pattern the matrix follows
    * @param coo_i Scratch storage for the COO row indices
    * @param coo_j Scratch storage for the COO column indices
    */
   void create(libMesh::SparseMatrix<PetscScalar> & matrix,
-              const System & system,
+              const DofSpace & dof_space,
               std::vector<PetscInt> & coo_i,
               std::vector<PetscInt> & coo_j);
   /**

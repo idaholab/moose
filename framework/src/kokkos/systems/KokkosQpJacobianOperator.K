@@ -45,6 +45,17 @@ QpJacobianOperator::diagonal(const TagID diag_tag)
   ::Kokkos::fence();
 }
 
+void
+QpJacobianOperator::assemble(Matrix & matrix)
+{
+  _matrix = matrix;
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, MatrixLoop> policy(
+      0, _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
 KOKKOS_FUNCTION void
 QpJacobianOperator::operator()(ApplyLoop, const ThreadID tid) const
 {
@@ -153,6 +164,59 @@ QpJacobianOperator::operator()(DiagonalLoop, const ThreadID tid) const
     }
 
     ::Kokkos::atomic_add(&_level.getDofValue(row, _y_tag), diagonal);
+  }
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
+
+  const auto num_dofs = basis.numDofs();
+
+  for (unsigned int i = 0; i < num_dofs; ++i)
+  {
+    auto row = _level.getElemLocalDofIndex(elem, i, var);
+
+    if (_level.isConstrained(row))
+      continue;
+
+    for (unsigned int j = 0; j < num_dofs; ++j)
+    {
+      // A column the level holds fixed carries an entry all the same, so that the assembled matrix
+      // reproduces the operator action on any vector, and the fixed rows of the hierarchy's vectors
+      // are what keep those columns from acting during a cycle
+      Real entry = 0;
+
+      for (unsigned int qp = 0; qp < num_qps; ++qp)
+      {
+        const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+
+        Real value_i, value_j;
+        Real3 grad_i, grad_j;
+
+        basis.basis(i, qp, value_i, grad_i);
+        basis.basis(j, qp, value_j, grad_j);
+
+        entry += value_i * (tensor.vv * value_j + tensor.vg * grad_j) +
+                 grad_i * (tensor.gv * value_j + tensor.gg * grad_j);
+      }
+
+      ::Kokkos::atomic_add(&_matrix(row, _level.getElemGlobalDofIndex(elem, j, var)), entry);
+    }
   }
 }
 

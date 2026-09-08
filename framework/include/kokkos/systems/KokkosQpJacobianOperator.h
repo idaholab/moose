@@ -12,6 +12,7 @@
 #include "KokkosQpJacobianLevel.h"
 #include "KokkosQpJacobianCache.h"
 #include "KokkosLevelBasisTable.h"
+#include "KokkosMatrix.h"
 #include "KokkosThread.h"
 
 namespace Moose::Kokkos
@@ -32,6 +33,10 @@ namespace Moose::Kokkos
  * The physics is never re-entered: a level that shares the fine quadrature rule needs only the
  * cached tensors and its own basis tables, which is what allows a coarse operator to be Galerkin
  * without an assembled coarse matrix.
+ *
+ * The same contraction also assembles a level into a sparse matrix, entry by entry, which is how
+ * the coarsest level reaches an algebraic-multigrid coarse solve while remaining the exact Galerkin
+ * operator of the fine linearization.
  */
 class QpJacobianOperator : public AssemblyHolder
 {
@@ -56,6 +61,9 @@ public:
   struct DiagonalLoop
   {
   };
+  struct MatrixLoop
+  {
+  };
   ///@}
 
   /**
@@ -71,8 +79,15 @@ public:
    */
   void diagonal(TagID diag_tag);
 
+  /**
+   * Accumulate the operator's entries into a matrix over the level's DOF layout
+   * @param matrix The matrix on the level
+   */
+  void assemble(Matrix & matrix);
+
   KOKKOS_FUNCTION void operator()(ApplyLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
 
 private:
   /**
@@ -97,6 +112,11 @@ private:
   TagID _x_tag = 0;
   TagID _y_tag = 0;
   ///@}
+
+  /**
+   * The matrix of the assembly loop, over the level's DOF layout
+   */
+  Matrix _matrix;
 };
 
 #endif

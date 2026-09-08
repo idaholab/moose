@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosMatrix.h"
-#include "KokkosFESystem.h"
+#include "KokkosDofSpace.h"
 
 namespace Moose::Kokkos
 {
 
 void
 Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix,
-               const System & system,
+               const DofSpace & dof_space,
                std::vector<PetscInt> & coo_i,
                std::vector<PetscInt> & coo_j)
 {
@@ -35,7 +35,7 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix,
   if (_is_alloc)
     return;
 
-  auto & sparsity = system.getSparsity();
+  auto & sparsity = dof_space.getSparsity();
 
   _matrix = petsc_matrix->mat();
   _nr = sparsity.row_ptr.size() - 1;
@@ -48,7 +48,7 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix,
   // device by find() for the life of the run, and every matrix tag preallocates from the same
   // sparsity.  Filling the scratch arrays here keeps that cost behind the early return above, which
   // matters because this call is reached on every host-to-device synchronization.
-  system.buildCooIndices(coo_i, coo_j);
+  dof_space.buildCooIndices(coo_i, coo_j);
 
   LibmeshPetscCallQ(MatSetPreallocationCOO(_matrix, coo_i.size(), coo_i.data(), coo_j.data()));
 

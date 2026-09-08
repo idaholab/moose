@@ -18,6 +18,7 @@
 
 #include "timpi/parallel_sync.h"
 
+#include <algorithm>
 #include <map>
 
 namespace Moose::Kokkos
@@ -167,6 +168,111 @@ DofSpace::setupDofs(libMesh::System & system)
 
   _local_comm_list.copyToDeviceNested();
   _ghost_comm_list.copyToDeviceNested();
+}
+
+void
+DofSpace::setupSparsity()
+{
+  auto * const pattern = _dof_map.get_sparsity_pattern();
+  bool have_pattern = pattern;
+
+  // Make sure to check whether the sparsity pattern graph returned by
+  // pattern->get_sparsity_pattern() is non-empty
+  getComm().verify(have_pattern);
+  if (!have_pattern)
+    return;
+  have_pattern = !pattern->get_sparsity_pattern().empty();
+  getComm().max(have_pattern);
+  if (!have_pattern)
+    return;
+
+  std::vector<PetscInt> col_idx;
+  std::vector<PetscInt> row_ptr = {0};
+
+  // The rows are laid out as the locally owned rows in ascending order followed by the ghost rows
+  // in send list order.  buildCooIndices() recovers each row's global index from that ordering, so
+  // the two must be kept consistent.
+  for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
+  {
+    auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
+
+    for (auto col : cols)
+      col_idx.push_back(col);
+
+    row_ptr.push_back(col_idx.size());
+  }
+
+  auto num_procs = _comm.size();
+
+  // Send the sparsity of the rows ghosted by each neighboring process to it, packed as
+  // [n_cols, cols..., n_cols, cols..., ...] in the order of its ghost DOFs. This is a sparse
+  // exchange with only the neighboring processes.
+  std::map<processor_id_type, std::vector<PetscInt>> send_rows;
+
+  for (const auto proc : make_range(num_procs))
+    for (auto r : _local_comm_list[proc])
+    {
+      auto & send = send_rows[proc];
+
+      send.push_back(row_ptr[r + 1] - row_ptr[r]);
+
+      for (PetscInt c = row_ptr[r]; c < row_ptr[r + 1]; ++c)
+        send.push_back(col_idx[c]);
+    }
+
+  std::vector<std::vector<PetscInt>> recv_rows(num_procs);
+
+  auto receive = [&recv_rows](const processor_id_type pid, std::vector<PetscInt> && rows)
+  { recv_rows[pid] = std::move(rows); };
+
+  TIMPI::push_parallel_vector_data(_comm, std::move(send_rows), receive);
+
+  std::vector<std::size_t> pos(num_procs);
+
+  for (auto r : _dof_map.get_send_list())
+  {
+    auto proc = _dof_map.dof_owner(r);
+    auto & rows = recv_rows[proc];
+    auto n_cols = rows[pos[proc]++];
+
+    for (PetscInt c = 0; c < n_cols; ++c)
+      col_idx.push_back(rows[pos[proc]++]);
+
+    row_ptr.push_back(col_idx.size());
+  }
+
+  _sparsity.col_idx = col_idx;
+  _sparsity.row_ptr = row_ptr;
+}
+
+void
+DofSpace::buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const
+{
+  const auto & col_idx = _sparsity.col_idx;
+  const auto & row_ptr = _sparsity.row_ptr;
+
+  coo_i.resize(col_idx.size());
+  coo_j.assign(&col_idx.begin(), &col_idx.end());
+
+  // Every nonzero of a row carries that row's global index, which setupSparsity() leaves implicit
+  // in the row ordering.  The two loops below walk the rows in the order it wrote them.
+  dof_id_type row = 0;
+
+  auto fill_row = [&](const PetscInt global_row)
+  {
+    std::fill(coo_i.begin() + row_ptr[row], coo_i.begin() + row_ptr[row + 1], global_row);
+    ++row;
+  };
+
+  for (const auto global_row : make_range(_dof_map.first_dof(), _dof_map.end_dof()))
+    fill_row(global_row);
+
+  for (const auto global_row : _dof_map.get_send_list())
+    fill_row(global_row);
+
+  mooseAssert(row == row_ptr.size() - 1,
+              "Kokkos DOF space error: the DOF map no longer describes the rows that setupSparsity() "
+              "recorded.");
 }
 
 void

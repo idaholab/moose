@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDofSpace.h"
+#include "KokkosMatrix.h"
 #include "KokkosVector.h"
 
 #include "libmesh/system.h"
@@ -47,8 +48,10 @@ public:
    * the Kokkos assembly so that reference shape data is cached for the level's FE types.
    * @param fine The fine solver system whose variables the level reproduces at reduced order
    * @param order The polynomial order of the level
+   * @param assemble Whether the level assembles its operator into a sparse matrix, which the
+   * coarsest level does so that a coarse solver can be applied to it
    */
-  PLevelSpace(NonlinearSystemBase & fine, unsigned int order);
+  PLevelSpace(NonlinearSystemBase & fine, unsigned int order, bool assemble = false);
 
   /**
    * Destructor
@@ -105,6 +108,26 @@ public:
    * @param diagonal The diagonal, in the level's DOF layout
    */
   void diagonal(const QpJacobianCache & cache, libMesh::NumericVector<Number> & diagonal);
+
+  /**
+   * Assemble the level's operator into the level's sparse matrix, which is the same contraction the
+   * operator action performs, taken entry by entry. Only a level constructed to assemble has a
+   * matrix to fill.
+   * @param cache The quadrature-point Jacobian cache, holding a linearization
+   */
+  void assembleMatrix(const QpJacobianCache & cache);
+
+  /**
+   * Get whether the level assembles its operator into a sparse matrix
+   * @returns Whether the level assembles
+   */
+  bool assembles() const { return _assemble; }
+
+  /**
+   * Get the level's assembled operator, which a coarse solver is applied to
+   * @returns The matrix
+   */
+  libMesh::SparseMatrix<Number> & matrix();
 
   /**
    * Prolong a vector of this level to the next finer level, y = P x
@@ -199,6 +222,9 @@ private:
   /// The polynomial order of the level
   const unsigned int _order;
 
+  /// Whether the level assembles its operator into a sparse matrix
+  const bool _assemble;
+
   /// The level's libMesh system, which owns its DofMap and vectors
   libMesh::System & _sys;
 
@@ -226,6 +252,12 @@ private:
 
   /// The number of DOFs the level holds fixed, over all processes
   dof_id_type _num_constrained_dofs = 0;
+
+  /// The level's assembled operator, which only a level that assembles carries
+  libMesh::SparseMatrix<Number> * _matrix_object = nullptr;
+
+  /// The level's assembled operator wrapped for device assembly
+  Matrix _matrix;
 
   /// The transfer between this level and the next finer level, built by initTransfer()
   std::unique_ptr<LevelTransfer> _prolongation;

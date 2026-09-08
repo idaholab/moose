@@ -57,6 +57,13 @@ PMultigrid::validParams()
       "It costs one application of the next finer level's operator and one of each direction of "
       "the transfer, per level per linearization.");
 
+  params.addParam<bool>(
+      "verify_level_matrices",
+      false,
+      "Whether to check the assembled operator of each level that assembles one against the "
+      "operator the level applies without a matrix, after every linearization. The check costs one "
+      "application of each of the two, per assembled level per linearization.");
+
   return params;
 }
 
@@ -65,7 +72,8 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
     _verify_level_operators(getParam<bool>("verify_level_operators")),
     _verify_level_transfers(getParam<bool>("verify_level_transfers")),
-    _verify_level_galerkin(getParam<bool>("verify_level_galerkin"))
+    _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
+    _verify_level_matrices(getParam<bool>("verify_level_matrices"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");
@@ -82,9 +90,10 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
 
   // The levels' systems have to exist before the equation systems are initialized, and their FE
   // types have to be registered before the Kokkos assembly caches reference shape data; the
-  // preconditioner is constructed ahead of both
-  for (const auto order : _level_orders)
-    _levels.push_back(std::make_unique<Moose::Kokkos::PLevelSpace>(_nl, order));
+  // preconditioner is constructed ahead of both. The coarsest level assembles its operator, which
+  // is what a coarse solver of the cycle is applied to; the orders ascend, so that is the first.
+  for (const auto i : index_range(_level_orders))
+    _levels.push_back(std::make_unique<Moose::Kokkos::PLevelSpace>(_nl, _level_orders[i], !i));
 }
 
 void
