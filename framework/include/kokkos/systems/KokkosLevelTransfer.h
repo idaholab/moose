@@ -95,7 +95,6 @@ public:
    */
   virtual void verify(const ConsoleStream & console);
 
-protected:
   /**
    * Fill a vector with a deterministic, non-constant pattern of its global DOF indices, so that a
    * verification is reproducible from run to run
@@ -105,6 +104,7 @@ protected:
   static void fillVerificationPattern(libMesh::NumericVector<Number> & vector,
                                       const libMesh::System & sys);
 
+protected:
   /// The coarse side of the level pair
   TransferSide _coarse;
 

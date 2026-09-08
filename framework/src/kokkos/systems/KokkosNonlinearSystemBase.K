@@ -12,6 +12,7 @@
 #include "KokkosNodalKernelBase.h"
 #include "KokkosNodalBCBase.h"
 #include "KokkosIntegratedBCBase.h"
+#include "KokkosLevelTransfer.h"
 
 #include "MaterialBase.h"
 #include "NonlinearSystemBase.h"
@@ -703,6 +704,12 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
+
+  // The Galerkin check applies this system's matrix-free operator, which manages the tags it needs
+  // itself, so it runs once the Jacobian sweep has released the tags it held: the state here is the
+  // state an operator application sees when the solve asks for one
+  if (_kokkos_mf_enabled)
+    verifyKokkosLevelGalerkin();
 }
 
 void
@@ -864,6 +871,12 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
+
+  // The Galerkin check applies this system's matrix-free operator, which manages the tags it needs
+  // itself, so it runs once the Jacobian sweep has released the tags it held: the state here is the
+  // state an operator application sees when the solve asks for one
+  if (_kokkos_mf_enabled)
+    verifyKokkosLevelGalerkin();
 }
 
 void
@@ -971,6 +984,85 @@ NonlinearSystemBase::verifyKokkosLevelOperators()
                  ", which exceeds a tolerance of ",
                  tolerance,
                  ".");
+  }
+}
+
+void
+NonlinearSystemBase::verifyKokkosLevelGalerkin()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyLevelGalerkin())
+    return;
+
+  TIME_SECTION("verifyKokkosLevelGalerkin", 1);
+
+  const auto & cache = _fe_problem.getKokkosFESystems()[number()].qpJacobianCache();
+  const auto & levels = pmg->levels();
+
+  for (const auto i : index_range(levels))
+  {
+    auto & level = *levels[i];
+
+    // The finer side of this level's transfer: the next coarse level where there is one, and this
+    // system at the finest pair
+    auto * const finer = i + 1 < levels.size() ? levels[i + 1].get() : nullptr;
+    auto & finer_sys = finer ? finer->system() : system();
+
+    auto x = level.system().solution->zero_clone();
+    auto direct = level.system().solution->zero_clone();
+    auto galerkin = level.system().solution->zero_clone();
+    auto prolonged = finer_sys.solution->zero_clone();
+    auto applied = finer_sys.solution->zero_clone();
+
+    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level.system());
+
+    // The hierarchy carries only corrections that vanish on the DOFs a level holds fixed, and the
+    // transfers leave those DOFs out of both directions, so the comparison is made on a vector of
+    // that space. A level's operator couples a fixed column into its free rows, which a transfer
+    // does not, and the two sides would part ways on a vector outside it.
+    level.zeroConstrained(*x);
+
+    level.apply(cache, *x, *direct);
+
+    level.prolong(*x, *prolonged);
+
+    if (finer)
+      finer->apply(cache, *prolonged, *applied);
+    else
+      computeKokkosJacobianVectorProduct(
+          libMesh::cast_ptr<libMesh::PetscVector<Number> *>(prolonged.get())->vec(),
+          libMesh::cast_ptr<libMesh::PetscVector<Number> *>(applied.get())->vec());
+
+    level.restrict(*applied, *galerkin);
+
+    galerkin->add(-1.0, *direct);
+
+    const auto error = galerkin->linfty_norm();
+    const auto scale = direct->linfty_norm();
+
+    // Both sides contract the same quadrature-point cache against bases that span the same space,
+    // in a different order and over a different number of degrees of freedom, so they agree to the
+    // roundoff of those contractions; the margin over the unit roundoff of double precision covers
+    // the element and quadrature-point sums
+    const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
+    _console << "p-multigrid level p = " << level.order()
+             << ": operator agrees with the operator of the next finer level carried through the "
+                "transfer to "
+             << error << " (tolerance " << tolerance << ")" << std::endl;
+
+    if (error > tolerance)
+      mooseError("The operator of the p-multigrid level of order ",
+                 level.order(),
+                 " differs from P^T A P, the operator of the next finer level carried through the "
+                 "level transfer, by ",
+                 error,
+                 ", which exceeds a tolerance of ",
+                 tolerance,
+                 ". Every level contracts the quadrature-point Jacobian cache, so a Jacobian "
+                 "contribution made outside that cache reaches the fine operator and no coarse "
+                 "level, and surfaces here.");
   }
 }
 

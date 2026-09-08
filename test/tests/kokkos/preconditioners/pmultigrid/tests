@@ -41,6 +41,22 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [level_galerkin]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # Two coarse levels put a coarse level on both sides of a transfer as well as against the solver
+    # system, and the check errors out on a mismatch at either pair
+    cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
+               "Preconditioning/pmg/verify_level_galerkin=true"
+    expect_out = 'p = 2: operator agrees with the operator of the next finer level carried through '
+                 'the transfer'
+    requirement = 'The p-multigrid preconditioner shall realize on each coarse level the Galerkin '
+                  'operator of the fine linearization, applying that operator in agreement with the '
+                  'next finer level operator carried through the level transfer.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_order_not_coarser]
     type = RunException
     input = 'pmultigrid.i'

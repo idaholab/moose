@@ -107,6 +107,27 @@ public:
   void diagonal(const QpJacobianCache & cache, libMesh::NumericVector<Number> & diagonal);
 
   /**
+   * Prolong a vector of this level to the next finer level, y = P x
+   * @param x The vector on this level
+   * @param y The vector on the next finer level
+   */
+  void prolong(const libMesh::NumericVector<Number> & x, libMesh::NumericVector<Number> & y);
+
+  /**
+   * Restrict a vector of the next finer level to this level, y = P^T x
+   * @param x The vector on the next finer level
+   * @param y The vector on this level
+   */
+  void restrict(const libMesh::NumericVector<Number> & x, libMesh::NumericVector<Number> & y);
+
+  /**
+   * Zero the entries of a vector of this level that the level holds fixed, which leaves the vector
+   * in the space of corrections the hierarchy carries
+   * @param x The vector to zero the fixed entries of
+   */
+  void zeroConstrained(libMesh::NumericVector<Number> & x);
+
+  /**
    * Get the level's device DOF layout
    * @returns The DOF layout
    */

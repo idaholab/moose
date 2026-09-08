@@ -198,6 +198,36 @@ PLevelSpace::verifyTransfer(const ConsoleStream & console)
   _prolongation->verify(console);
 }
 
+void
+PLevelSpace::prolong(const libMesh::NumericVector<Number> & x, libMesh::NumericVector<Number> & y)
+{
+  mooseAssert(_prolongation, "The p-multigrid level transfer has not been built yet.");
+
+  _prolongation->prolong(x, y);
+}
+
+void PLevelSpace::restrict(const libMesh::NumericVector<Number> & x,
+                           libMesh::NumericVector<Number> & y)
+{
+  mooseAssert(_prolongation, "The p-multigrid level transfer has not been built yet.");
+
+  _prolongation->restrict(x, y);
+}
+
+void
+PLevelSpace::zeroConstrained(libMesh::NumericVector<Number> & x)
+{
+  if (!_num_constrained_dofs)
+    return;
+
+  // The work vector takes the fixed part of x, which subtracting leaves the free part behind
+  *_x = x;
+
+  _x->pointwise_mult(*_x, *_constrained_rows);
+
+  x.add(-1.0, *_x);
+}
+
 TransferSide
 PLevelSpace::transferSide() const
 {
