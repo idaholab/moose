@@ -3,6 +3,7 @@
     type = 'RunApp'
     input = 'unrelated_face_material.i'
     issues = '#31418'
+    design = 'syntax/Materials/index.md'
     requirement = 'The system shall not evaluate an unrelated face material while executing user objects on a boundary.'
   []
   [direct_face_dependency]
@@ -10,6 +11,7 @@
     input = 'direct_face_dependency.i'
     csvdiff = 'direct_face_dependency_out.csv'
     issues = '#31418'
+    design = 'syntax/Materials/index.md'
     requirement = 'The system shall evaluate a face material directly required by a side user object.'
   []
   [boundary_face_dependency]
@@ -17,6 +19,7 @@
     input = 'boundary_face_dependency.i'
     csvdiff = 'boundary_face_dependency_out.csv'
     issues = '#31418'
+    design = 'syntax/Materials/index.md'
     requirement = 'The system shall evaluate face materials required by boundary-material dependencies of user objects.'
   []
 []
