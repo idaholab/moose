@@ -26,6 +26,11 @@ public:
   /// Mutually exclusive with the PETSc-native ST_PJFNK/ST_JFNK finite-difference matrix-free modes.
   bool _kokkos_matrix_free;
 
+  /// Whether a p-multigrid preconditioner drives the solve's PETSc preconditioner. The hierarchy is
+  /// configured level by level once the solver objects exist, so the preconditioner type a
+  /// matrix-free system would otherwise default to is left to that configuration.
+  bool _kokkos_p_multigrid;
+
   // solver parameters for eigenvalue problems
   Moose::EigenSolveType _eigen_solve_type;
   Moose::EigenProblemType _eigen_problem_type;

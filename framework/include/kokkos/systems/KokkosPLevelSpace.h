@@ -14,6 +14,7 @@
 #include "KokkosVector.h"
 
 #include "libmesh/system.h"
+#include "libmesh/wrapped_petsc.h"
 
 class ConsoleStream;
 class NonlinearSystemBase;
@@ -130,6 +131,45 @@ public:
   libMesh::SparseMatrix<Number> & matrix();
 
   /**
+   * Bring the level's operator up to date with the linearization the quadrature-point Jacobian
+   * cache holds. A level that assembles refills its matrix; every other level marks its shell
+   * changed, which is what makes the level's smoother rebuild what it reads from the operator.
+   * @param cache The quadrature-point Jacobian cache, holding a linearization
+   */
+  void updateOperator(const QpJacobianCache & cache);
+
+  /**
+   * Get the level's operator as a PETSc matrix, which is what a level of PETSc's multigrid takes
+   * for both its Krylov operator and its smoother's preconditioning matrix. A level that assembles
+   * hands over its assembled matrix; every other level hands over a shell whose matrix-vector
+   * product and diagonal are this level's contraction of the quadrature-point Jacobian cache.
+   * @returns The operator
+   */
+  Mat operatorMat() const;
+
+  /**
+   * Get the transfer to the next finer level as a PETSc matrix, whose product prolongs and whose
+   * transposed product restricts, which is what PETSc's multigrid takes for its interpolation
+   * @returns The interpolation
+   */
+  Mat interpolationMat() const;
+
+  /**
+   * Entry points of the level's shell matrices, which read the linearization from the fine system's
+   * quadrature-point Jacobian cache
+   */
+  ///@{
+  /// The operator shell's matrix-vector product
+  void applyToVec(Vec x, Vec y);
+  /// The operator shell's diagonal
+  void diagonalToVec(Vec diagonal);
+  /// The interpolation shell's matrix-vector product
+  void prolongToVec(Vec x, Vec y);
+  /// The interpolation shell's transposed matrix-vector product
+  void restrictToVec(Vec x, Vec y);
+  ///@}
+
+  /**
    * Prolong a vector of this level to the next finer level, y = P x
    * @param x The vector on this level
    * @param y The vector on the next finer level
@@ -207,6 +247,20 @@ private:
   QpJacobianLevel level() const;
 
   /**
+   * Get the fine system's quadrature-point Jacobian cache, which every level's operator contracts
+   * @returns The cache
+   */
+  const QpJacobianCache & cache() const;
+
+  /**
+   * Create a shell matrix over the level's DOF layout
+   * @param rows The system whose DOF layout the shell's rows are over
+   * @param columns The system whose DOF layout the shell's columns are over
+   * @param mat The shell
+   */
+  void createShell(const libMesh::System & rows, const libMesh::System & columns, Mat & mat);
+
+  /**
    * Wrap the level's vectors for device access and dispatch the operator
    * @param cache The quadrature-point Jacobian cache, holding a linearization
    * @param y The vector the operator scatters into
@@ -258,6 +312,13 @@ private:
 
   /// The level's assembled operator wrapped for device assembly
   Matrix _matrix;
+
+  /// The level's operator as a shell matrix, which a level that assembles its operator instead of
+  /// applying it does not carry
+  libMesh::WrappedPetsc<Mat> _operator;
+
+  /// The transfer to the next finer level as a shell matrix, built by initTransfer()
+  libMesh::WrappedPetsc<Mat> _interpolation;
 
   /// The transfer between this level and the next finer level, built by initTransfer()
   std::unique_ptr<LevelTransfer> _prolongation;

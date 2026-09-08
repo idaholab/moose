@@ -81,6 +81,18 @@
                   'order does not coarsen every variable of the solver system.'
   []
 
+  [solve]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false -ksp_view'
+    expect_out = 'type is MULTIPLICATIVE, levels=2 cycles=v.*Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall configure a PETSc multigrid hierarchy over '
+                  'its levels and the solver system, which converges the nonlinear solve it '
+                  'preconditions.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [requires_matrix_free]
     type = RunException
     input = 'pmultigrid.i'
