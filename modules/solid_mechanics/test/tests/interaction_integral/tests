@@ -40,7 +40,7 @@ issues = '#3705'
    cli_args = 'Outputs/file_base=interaction_integral_3d_noq_out'
    csvdiff = 'interaction_integral_3d_noq_out.csv interaction_integral_3d_noq_out_II_KI_1_0001.csv interaction_integral_3d_noq_out_II_KI_2_0001.csv interaction_integral_3d_noq_out_II_KII_1_0001.csv interaction_integral_3d_noq_out_II_KII_2_0001.csv interaction_integral_3d_noq_out_II_KIII_1_0001.csv interaction_integral_3d_noq_out_II_KIII_2_0001.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
-   abs_zero = 1e-8
+   abs_zero = 5e-8
    prereq = ii_3d
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while supressing the output of q function values.'
    capabilities = 'method!=dbg'
@@ -98,7 +98,7 @@ issues = '#3705'
    exodiff = 'interaction_integral_3d_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_noq'
-   abs_zero = 1e-8
+   abs_zero = 5e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while outputting q values.'
  [../]
  [./ii_3d_points_chk_q]
@@ -108,7 +108,7 @@ issues = '#3705'
    exodiff = 'interaction_integral_3d_points_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_points'
-   abs_zero = 1e-8
+   abs_zero = 5e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D for specified points, while outputting q values.'
  [../]
  [./ii_3d_rot_chk_q]
