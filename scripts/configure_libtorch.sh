@@ -167,17 +167,21 @@ function install_libtorch_python()
   "$python_executable" -m pip install --no-cache -r "$source_dir/requirements.txt" || return
 
   # PyTorch's setup.py always builds in <source>/build, which is also the build directory used by
-  # the C++-only build. When that build directory already exists, reconfigure it in place (with
-  # BUILD_PYTHON on and the install prefix setup.py expects) and keep its cache so the Python
-  # package reuses the objects already compiled there instead of rebuilding from scratch. Note
-  # that this leaves BUILD_PYTHON on in the cache, so a subsequent --fast C++ rebuild will also
-  # build the Python targets.
+  # the C++-only build. When that build directory already exists, reconfigure it in place and keep
+  # its cache so the Python package reuses the objects already compiled there instead of rebuilding
+  # from scratch. setup.py only translates the environment variables set above into cmake options
+  # when it configures from scratch, so the options where the Python build disagrees with the cache
+  # left behind by configure_libtorch (BUILD_PYTHON, BUILD_FUNCTORCH, USE_NUMPY) have to be passed
+  # here, along with the install prefix setup.py expects. Note that this leaves those options on in
+  # the cache, so a subsequent --fast C++ rebuild will also build the Python targets.
   if [[ -f "$source_dir/build/CMakeCache.txt" ]]; then
     unset CMAKE_FRESH
     cmake \
       -S "$source_dir" \
       -B "$source_dir/build" \
       -DBUILD_PYTHON=ON \
+      -DBUILD_FUNCTORCH=ON \
+      -DUSE_NUMPY=ON \
       -DPython_EXECUTABLE="$python_executable" \
       -DCMAKE_INSTALL_PREFIX="$source_dir/torch" || return
   else
