@@ -23,7 +23,7 @@ namespace Mortar
  * without an option, on exactly the second-order Lagrange faces whose untransformed weight
  * integral(N_k) is not positive: TRI6 vertices integrate to zero and QUAD8 corners to -1/3. QUAD9
  * is excluded because its weights are already positive, and every other type keeps the standard
- * dual construction.
+ * dual construction. libMesh documents the consequence on FEBase::get_dual_phi().
  *
  * This predicate mirrors that element-type rule so MOOSE can report the two user-visible
  * consequences of the transform -- that the coupling matrix D is no longer diagonal, and that the

@@ -18,7 +18,7 @@ The mortar system in MOOSE uses a segment-based approach for evaluation of morta
 
 One has the option to use Petrov-Galerkin interpolation for the Lagrange multiplier variable. This is typically useful for mechanical contact problems (see [Petrov-Galerkin_approach_for_Lagrange_multipliers.md]).
 
-For dual mortar on higher-order secondary faces (TRI6/QUAD8), MOOSE automatically applies the locally quadratic transformed dual basis of [!cite](popp2012dual), which restores strictly positive biorthogonality weights so quadratic dual mortar is well posed (see [Transformed_dual_basis_for_higher_order_mortar.md]).
+For dual mortar on higher-order secondary faces (TRI6/QUAD8), the locally quadratic transformed dual basis of [!cite](popp2012dual) is applied automatically, restoring strictly positive biorthogonality weights so quadratic dual mortar is well posed (see [Transformed_dual_basis_for_higher_order_mortar.md]).
 
 ### Overview
 

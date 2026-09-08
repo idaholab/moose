@@ -4,7 +4,7 @@
 
 Dual (biorthogonal) Lagrange multiplier bases are attractive for mortar contact because they make
 the mortar coupling matrix on the secondary side diagonal, which enables local condensation of the
-multiplier degrees of freedom. MOOSE builds the dual basis $\Phi$ so that it is biorthogonal to the
+multiplier degrees of freedom. The dual basis $\Phi$ is built so that it is biorthogonal to the
 standard shape-function basis $N$,
 
 \begin{equation}
@@ -16,16 +16,18 @@ where $\gamma$ is the secondary contact face and $d_k$ is the diagonal entry ass
 $k$. For first-order faces (e.g. QUAD4, TRI3) every $d_k$ is strictly positive and this construction
 is well posed.
 
-On the *serendipity* quadratic faces QUAD8 and TRI6 the construction breaks down because the raw
-diagonal is no longer positive: QUAD8 corner nodes have $d_k = -1/3$ and TRI6 vertex nodes have
-$d_k = 0$. The per-node physical-gap normalization used by mortar mechanical contact divides the
-weighted gap by $\int_{\gamma} \Phi_j\,\mathrm{d}\gamma = d_j$, so a zero or negative diagonal can make
+On the quadratic faces QUAD8 and TRI6 -- the latter despite spanning a complete quadratic space --
+the construction breaks down because the raw diagonal is no longer positive: QUAD8 corner nodes have
+$d_k = -1/3$ and TRI6 vertex nodes have $d_k = 0$, violating the *integral positivity* condition
+([!cite](popp2012dual), Eq. (4.2); the two values are their Eqs. (4.3) and (4.4)). The per-node
+physical-gap normalization used by mortar mechanical contact divides the weighted gap by
+$\int_{\gamma} \Phi_j\,\mathrm{d}\gamma = d_j$, so a zero or negative diagonal can make
 the nodal contact logic ill posed. The TRI6 case is unconditionally broken, since $d_k = 0$ makes that
 normalization undefined and the vertex dual shape functions vanish identically. A negative $d_k$, as on
 a QUAD8 corner, instead flips the sign of the per-node normalization; whether a particular problem
 visibly suffers depends on its active set, and a fully-compressed patch may still converge to the
 correct pressure. The full biquadratic QUAD9 face is unaffected -- its shape functions
-all satisfy the positivity condition and can be used directly, as [!cite](popp2012dual) show in
+all satisfy integral positivity and can be used directly, as [!cite](popp2012dual) show in
 Sec. 4.3, so its diagonals ($1/9$, $4/9$, $16/9$) are correspondingly all positive -- but HEX20 and
 TET10, the usual second-order 3D elements, present exactly the QUAD8 and TRI6 faces that fail, so
 dual mortar contact has in practice been confined to first-order secondary faces.

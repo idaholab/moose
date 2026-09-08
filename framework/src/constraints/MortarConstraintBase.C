@@ -178,8 +178,10 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   // Petrov-Galerkin weights the multiplier with the standard basis, whose per-node normalization is
   // the same non-positive quantity (zero at a TRI6 vertex, -1/3 at a QUAD8 corner) that the
   // transformed dual repairs, so the two cannot be combined on such a face; detect one and error
-  // out. The scan stops at the first match; the collective max keeps the decision consistent
-  // across ranks.
+  // out. Lifting the restriction would need a strictly positive weighting for the gap, e.g. the
+  // piecewise linear sub-element scheme of Carvalho et al., Comput. Mech. (2022),
+  // doi:10.1007/s00466-022-02226-2, Sec. 4.3. The scan stops at the first match; the collective max
+  // keeps the decision consistent across ranks.
   if (_use_petrov_galerkin && _use_dual)
   {
     bool higher_order_secondary = false;
