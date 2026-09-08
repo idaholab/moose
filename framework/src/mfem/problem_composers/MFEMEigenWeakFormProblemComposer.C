@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
 
 MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 
