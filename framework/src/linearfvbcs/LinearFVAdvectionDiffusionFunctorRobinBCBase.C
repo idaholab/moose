@@ -20,6 +20,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::LinearFVAdvectionDiffusionFunctorR
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters)
 {
+  _var.requestCellGradients();
 }
 
 Real
