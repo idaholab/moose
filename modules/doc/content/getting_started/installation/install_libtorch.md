@@ -24,10 +24,13 @@ The most commonly used options and environment variables are:
 
 - `--fast` — skip the update, clean, and configure steps (re-build only).
 - `--skip-submodule-update` — skip the submodule update step.
+- `--install-python-package` — additionally install the PyTorch Python package into the active Python environment.
 - `LIBTORCH_DIR` — installation directory. Defaults to `<MOOSE_DIR>/framework/contrib/pytorch/installed`.
 - `LIBTORCH_SRC_DIR` — use a custom libtorch source tree instead of the bundled submodule. Setting this implies `--skip-submodule-update`.
 - `LIBTORCH_JOBS` — number of parallel build jobs. Defaults to `MOOSE_JOBS`, or 1 if unset.
 - `PETSC_DIR` — path to the PETSc installation.
+
+By default the script installs only the C++ libtorch that `--with-libtorch` consumes. Passing `--install-python-package` additionally installs PyTorch into the active Python environment (activate the target conda environment before running the script), built with the same PETSc-consistent BLAS/LAPACK configuration. This is the from-source alternative to installing a PyTorch wheel when enabling [NEML2](install_neml2.md), which links against the PyTorch found in that environment.
 
 !alert! note title=GPU support
 CUDA is enabled automatically when a CUDA toolkit is detected on the system. For Intel GPU (XPU) support, export `USE_XPU=1` before invoking the script. General CMake environment variables are also respected, so other backends can be toggled by passing additional `-D...` arguments through to the configure step.
