@@ -204,6 +204,18 @@ public:
   virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
 
   /**
+   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
+   */
+  void addMFEMProblemComposer(const std::string & user_object_name,
+                              const std::string & name,
+                              InputParameters & parameters);
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer();
+
+  /**
    * Add an MFEM problem operator. Takes ownership.
    */
   void addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
@@ -266,13 +278,6 @@ public:
   void addMarker(const std::string & type,
                  const std::string & name,
                  InputParameters & parameters) override;
-
-  /**
-   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
-   */
-  void addMFEMProblemComposer(const std::string & user_object_name,
-                              const std::string & name,
-                              InputParameters & parameters);
 
   /**
    * Method called in AddMFEMSolverAction which records a solver for later dependency-ordered
