@@ -11,12 +11,13 @@
 
 #include "MFEMTimeDependentWeakFormProblemComposer.h"
 #include "TimeDependentEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
 
 MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 

@@ -11,12 +11,13 @@
 
 #include "MFEMComplexWeakFormProblemComposer.h"
 #include "ComplexEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMComplexWeakFormProblemComposer);
 
 MFEMComplexWeakFormProblemComposer::MFEMComplexWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 

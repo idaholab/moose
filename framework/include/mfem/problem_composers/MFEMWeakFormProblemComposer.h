@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMProblemComposer.h"
+#include "MFEMWeakFormProblemComposerBase.h"
 
 /**
  * MFEMWeakFormProblemComposer required to build an instance of
  * EquationSystemProblemOperator
  */
-class MFEMWeakFormProblemComposer : public MFEMProblemComposer
+class MFEMWeakFormProblemComposer : public MFEMWeakFormProblemComposerBase
 {
 public:
   MFEMWeakFormProblemComposer(const InputParameters & parameters);
