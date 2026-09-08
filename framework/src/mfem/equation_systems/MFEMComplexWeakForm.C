@@ -10,13 +10,23 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMComplexWeakForm.h"
-#include "ComplexEquationSystem.h"
+#include "MFEMComplexIntegratedBC.h"
+#include "MFEMComplexEssentialBC.h"
+#include "MFEMComplexKernel.h"
 
 registerMooseObject("MooseApp", MFEMComplexWeakForm);
 
 MFEMComplexWeakForm::MFEMComplexWeakForm(const InputParameters & parameters)
   : MFEMWeakFormBase(parameters)
 {
+}
+
+Moose::MFEM::ComplexEquationSystem &
+MFEMComplexWeakForm::complexEquationSystem()
+{
+  mooseAssert(std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_equation_system),
+              "The equation system built by MFEMComplexWeakForm is not a ComplexEquationSystem.");
+  return static_cast<Moose::MFEM::ComplexEquationSystem &>(*_equation_system);
 }
 
 void
@@ -27,12 +37,12 @@ MFEMComplexWeakForm::addBoundaryCondition(const std::string & name,
   if (dynamic_cast<const MFEMComplexIntegratedBC *>(&mfem_bc))
   {
     auto integrated_bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc);
-    _equation_system->AddComplexIntegratedBC(std::move(integrated_bc));
+    complexEquationSystem().AddComplexIntegratedBC(std::move(integrated_bc));
   }
   else if (dynamic_cast<const MFEMComplexEssentialBC *>(&mfem_bc))
   {
     auto essential_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(bc);
-    _equation_system->AddComplexEssentialBCs(std::move(essential_bc));
+    complexEquationSystem().AddComplexEssentialBCs(std::move(essential_bc));
   }
   else
     mooseError("Unsupported bc of name '", name, "' detected.");
@@ -44,15 +54,13 @@ MFEMComplexWeakForm::addKernel(const std::string & name, std::shared_ptr<MFEMKer
   auto complex_kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel);
   if (!complex_kernel)
     mooseError("Unsupported kernel of name '", name, "' detected.");
-  _equation_system->AddComplexKernel(std::move(complex_kernel));
+  complexEquationSystem().AddComplexKernel(std::move(complex_kernel));
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>
-MFEMComplexWeakForm::createEquationSystem()
+MFEMComplexWeakForm::makeEquationSystem()
 {
-  _equation_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-  initEquationSystem(_equation_system);
-  return _equation_system;
+  return std::make_shared<Moose::MFEM::ComplexEquationSystem>();
 }
 
 #endif

@@ -95,9 +95,11 @@ MFEMEigenproblem::resolveMFEMSolvers()
 std::shared_ptr<MFEMWeakFormBase>
 MFEMEigenproblem::addDefaultWeakForm()
 {
+  if (getNumericType() != MFEMProblem::NumericType::REAL)
+    mooseError("Complex MFEM eigenproblems are not currently supported. Please set the Problem "
+               "numeric type to 'real'.");
+
   InputParameters parameters = _factory.getValidParams("MFEMEigenproblemWeakForm");
-  mooseAssert(getNumericType() == MFEMProblem::NumericType::REAL,
-              "Complex MFEM eigenproblems are not currently supported.");
   return addObject<MFEMWeakFormBase>("MFEMEigenproblemWeakForm", "__DefaultWeakForm", parameters)
       .front();
 }

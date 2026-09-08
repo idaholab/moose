@@ -10,10 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMWeakForm.h"
-#include "TimeDependentEquationSystem.h"
-#include "EigenproblemEquationSystem.h"
-#include "ComplexEquationSystem.h"
-#include "MFEMEigenproblem.h"
+#include "MFEMIntegratedBC.h"
+#include "MFEMEssentialBC.h"
 
 registerMooseObject("MooseApp", MFEMWeakForm);
 
@@ -45,11 +43,9 @@ MFEMWeakForm::addKernel(const std::string & /*name*/, std::shared_ptr<MFEMKernel
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>
-MFEMWeakForm::createEquationSystem()
+MFEMWeakForm::makeEquationSystem()
 {
-  _equation_system = std::make_shared<Moose::MFEM::EquationSystem>();
-  initEquationSystem(_equation_system);
-  return _equation_system;
+  return std::make_shared<Moose::MFEM::EquationSystem>();
 }
 
 #endif

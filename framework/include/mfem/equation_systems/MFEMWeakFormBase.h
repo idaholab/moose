@@ -27,20 +27,28 @@ public:
 
   MFEMWeakFormBase(const InputParameters & parameters);
 
-  /// Constructs the EquationSystem.
-  virtual std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() = 0;
+  /// Constructs the EquationSystem, adds the requested kernels and boundary conditions to it, and
+  /// initialises it. Derived classes supply the system itself through makeEquationSystem().
+  std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem();
 
 protected:
+  /// Constructs the empty EquationSystem of the type this weak form builds.
+  virtual std::shared_ptr<Moose::MFEM::EquationSystem> makeEquationSystem() = 0;
+
   virtual void addBoundaryCondition(const std::string & name,
                                     std::shared_ptr<MFEMBoundaryCondition> bc) = 0;
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) = 0;
 
   /// Initialise the equation system. TODO: move all setup into EquationSystem constructors
-  void initEquationSystem(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system);
+  void initEquationSystem();
 
   std::vector<MFEMBoundaryConditionName> _bc_names;
   std::vector<MFEMKernelName> _kernel_names;
+
+  /// Stores the constructed EquationSystem. Kept non-public so that it is reached only through
+  /// createEquationSystem(), which returns it once fully initialised.
+  std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
 };
 
 #endif

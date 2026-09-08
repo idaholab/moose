@@ -18,7 +18,7 @@ InputParameters
 SetMFEMEquationSystemsAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Set EquationSystem operators to solve in this problem.");
+  params.addClassDescription("Set the EquationSystems to solve in this problem.");
   return params;
 }
 

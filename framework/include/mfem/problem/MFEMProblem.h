@@ -14,7 +14,7 @@
 #include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
-#include "MFEMWeakForm.h"
+#include "MFEMWeakFormBase.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
@@ -199,9 +199,23 @@ public:
   void setEquationSystems();
 
   /**
+   * Return the EquationSystem built by the weak form named @p weak_form_name. If the name is
+   * empty, return the problem's sole EquationSystem; it is an error to omit the name when more
+   * than one weak form has been added, since the choice would otherwise be silently arbitrary.
+   */
+  std::shared_ptr<Moose::MFEM::EquationSystem>
+  getEquationSystem(const std::string & weak_form_name = "") const;
+
+  /**
    * Get vector of all ProblemOperators added to this problem.
    */
-  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+
+  /**
+   * Get vector of all ProblemOperators added to this problem in a const context.
+   */
+  const std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> &
+  getProblemOperators() const;
 
   /**
    * Method called in AddMFEMProblemComposerAction which will create the problem composer.
@@ -211,7 +225,7 @@ public:
                               InputParameters & parameters);
 
   /**
-   * Add default weak form if none has been added by the user
+   * Add default problem composer if none has been added by the user
    */
   virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer();
 
@@ -223,7 +237,7 @@ public:
   /**
    * Set all MFEM ProblemOperators to solve in this problem
    */
-  virtual void setMFEMProblemOperators();
+  void setMFEMProblemOperators();
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
@@ -425,9 +439,19 @@ public:
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
   /**
-   * Default assembly level to use for EquationSystem assembly.
+   * Return the default assembly level to use for EquationSystem assembly.
    */
-  mfem::AssemblyLevel _default_assembly_level;
+  mfem::AssemblyLevel defaultAssemblyLevel() const { return _default_assembly_level; }
+
+  /**
+   * Set the default assembly level to use for EquationSystem assembly. Called by the MFEM
+   * executioners, which own the user-facing assembly_level parameter, during their construction;
+   * weak forms read it back when building their EquationSystems in setEquationSystems().
+   */
+  void setDefaultAssemblyLevel(mfem::AssemblyLevel assembly_level)
+  {
+    _default_assembly_level = assembly_level;
+  }
 
 protected:
   /**
@@ -472,6 +496,13 @@ protected:
    * Vector of MFEM problem operators executed in this problem.
    */
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
+
+  /**
+   * Default assembly level to use for EquationSystem assembly. Defaults to the same level as the
+   * assembly_level parameter shared by the MFEM executioners, so that the value is well-defined
+   * even if no MFEM executioner is in use.
+   */
+  mfem::AssemblyLevel _default_assembly_level{mfem::AssemblyLevel::LEGACY};
 };
 
 template <typename T>

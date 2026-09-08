@@ -23,12 +23,8 @@ class TimeDependentEquationSystemProblemOperator : public TimeDependentProblemOp
                                                    public EquationSystemInterface
 {
 public:
-  TimeDependentEquationSystemProblemOperator(MFEMProblem & problem)
-    : TimeDependentProblemOperator(problem),
-      _equation_system(std::dynamic_pointer_cast<TimeDependentEquationSystem>(
-          _problem_data.eqn_systems.begin()->second))
-  {
-  }
+  TimeDependentEquationSystemProblemOperator(MFEMProblem & problem,
+                                             const std::string & weak_form_name = "");
 
   virtual void SetGridFunctions() override;
   virtual void Init(mfem::BlockVector & X) override;

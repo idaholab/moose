@@ -95,4 +95,5 @@ DerivativeStringToJSON(MFEMFESpaceName);
 DerivativeStringToJSON(MFEMSolverName);
 DerivativeStringToJSON(MFEMKernelName);
 DerivativeStringToJSON(MFEMBoundaryConditionName);
+DerivativeStringToJSON(MFEMWeakFormName);
 #endif

@@ -10,10 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMWeakFormBase.h"
-#include "TimeDependentEquationSystem.h"
-#include "EigenproblemEquationSystem.h"
-#include "ComplexEquationSystem.h"
-#include "MFEMEigenproblem.h"
+#include "MFEMProblem.h"
 
 InputParameters
 MFEMWeakFormBase::validParams()
@@ -35,8 +32,16 @@ MFEMWeakFormBase::MFEMWeakFormBase(const InputParameters & parameters)
 {
 }
 
+std::shared_ptr<Moose::MFEM::EquationSystem>
+MFEMWeakFormBase::createEquationSystem()
+{
+  _equation_system = makeEquationSystem();
+  initEquationSystem();
+  return _equation_system;
+}
+
 void
-MFEMWeakFormBase::initEquationSystem(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system)
+MFEMWeakFormBase::initEquationSystem()
 {
   auto & problem_data = getMFEMProblem().getProblemData();
   if (_bc_names.empty()) // default to all BCs added by user
@@ -54,14 +59,14 @@ MFEMWeakFormBase::initEquationSystem(std::shared_ptr<Moose::MFEM::EquationSystem
       addKernel(kernel_name, problem_data.kernels.GetShared(kernel_name));
 
   if (problem_data.nonlinear_solver)
-    equation_system->SetGradientRequired(problem_data.nonlinear_solver->RequiresGradient());
+    _equation_system->SetGradientRequired(problem_data.nonlinear_solver->RequiresGradient());
 
-  equation_system->SetCoefficientManager(problem_data.coefficients);
+  _equation_system->SetCoefficientManager(problem_data.coefficients);
 
   // Set up initial conditions
-  equation_system->Init(problem_data.gridfunctions,
-                        problem_data.cmplx_gridfunctions,
-                        getMFEMProblem()._default_assembly_level);
+  _equation_system->Init(problem_data.gridfunctions,
+                         problem_data.cmplx_gridfunctions,
+                         getMFEMProblem().defaultAssemblyLevel());
 }
 
 #endif
