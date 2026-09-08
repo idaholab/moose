@@ -31,9 +31,6 @@ public:
   Moose::MFEM::CoefficientManager coefficients;
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
-  /// Persistent true-DoF solution vector backing trial grid functions after problem operator init.
-  mfem::BlockVector true_solution;
-
   std::shared_ptr<Moose::MFEM::NonlinearSolverBase> nonlinear_solver{nullptr};
   std::shared_ptr<Moose::MFEM::LinearSolverBase> jacobian_solver{nullptr};
 

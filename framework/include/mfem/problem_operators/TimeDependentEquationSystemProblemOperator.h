@@ -27,7 +27,7 @@ public:
                                              const std::string & weak_form_name = "");
 
   virtual void SetGridFunctions() override;
-  virtual void Init(mfem::BlockVector & X) override;
+  virtual void Init() override;
   virtual void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override;
   virtual void Solve() override;
 
