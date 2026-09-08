@@ -500,12 +500,6 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-
-  // add problem composers (and operators)
-  registerMooseObjectTask("add_mfem_problem_composer", MFEMProblemComposer, false);
-  addTaskDependency("add_mfem_problem_operator", "add_mfem_problem_composer");
-  addTaskDependency("setup_executioner", "add_mfem_problem_composer");
-
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
   addTaskDependency("add_mfem_submeshes", "create_problem_complete");
@@ -584,6 +578,12 @@ addActionTypes(Syntax & syntax)
   registerTask("set_mfem_problem_operators", true);
   addTaskDependency("set_mfem_problem_operators", "resolve_mfem_solvers");
   addTaskDependency("set_mfem_problem_operators", "set_mfem_equation_systems");
+
+  // add problem composers (and operators)
+  registerMooseObjectTask("add_mfem_problem_composer", MFEMProblemComposer, false);
+  addTaskDependency("set_mfem_problem_operators", "add_mfem_problem_composer");
+  addTaskDependency("setup_executioner", "add_mfem_problem_composer");
+
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics

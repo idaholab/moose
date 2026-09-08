@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "CustomProblemOperator.h"
+#include "MFEMProblem.h"
 
 // The custom operator constructor
 CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coef)

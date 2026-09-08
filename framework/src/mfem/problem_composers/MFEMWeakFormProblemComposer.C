@@ -25,7 +25,6 @@ MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
   if (mfem_problem.getNumericType() != MFEMProblem::NumericType::REAL)
     mooseError("Wrong numeric type. Please set the Problem numeric type to 'real'.");
 
-  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
   return std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
 }
 

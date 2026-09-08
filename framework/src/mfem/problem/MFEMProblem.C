@@ -528,23 +528,39 @@ MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase
 void
 MFEMProblem::setMFEMProblemOperators()
 {
+  if (!getProblemComposer())
+    _problem_composer = addDefaultProblemComposer();
+
+  addProblemOperator(getProblemComposer()->createProblemOperator(*this));
+
+  for (const auto & problem_operator : getProblemOperators())
+    problem_operator->Init(_problem_data.true_solution);
+}
+
+std::shared_ptr<MFEMProblemComposer>
+MFEMProblem::addDefaultProblemComposer()
+{
+  const std::string name = "__DefaultWeakFormProblemComposer";
+  InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
+  std::shared_ptr<MFEMProblemComposer> problem_composer{nullptr};
   if (isTransient())
-    addProblemOperator(
-        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this));
+    problem_composer =
+        addObject<MFEMProblemComposer>("MFEMTimeDependentWeakFormProblemComposer", name, params)
+            .front();
   else
   {
     if (getNumericType() == MFEMProblem::NumericType::REAL)
-      addProblemOperator(std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this));
+      problem_composer =
+          addObject<MFEMProblemComposer>("MFEMWeakFormProblemComposer", name, params).front();
     else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
-      addProblemOperator(
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this));
+      problem_composer =
+          addObject<MFEMProblemComposer>("MFEMComplexWeakFormProblemComposer", name, params)
+              .front();
     else
       mooseError("Unknown numeric type. "
                  "Please set the Problem numeric type to either 'real' or 'complex'.");
   }
-
-  for (const auto & problem_operator : getProblemOperators())
-    problem_operator->Init(_problem_data.true_solution);
+  return problem_composer;
 }
 
 int
