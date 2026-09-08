@@ -16,11 +16,11 @@ then configure MOOSE.
 
 !alert! note title=NEML2 uses the PyTorch in your Python environment
 The blessed way to enable NEML2 is a PyTorch installed in the active Python environment (a pip
-wheel, or a from-source build installed into that environment). This is distinct from MOOSE's
-standalone [libtorch](install_libtorch.md optional=True) capability, which downloads a prebuilt
-C++ libtorch distribution for MOOSE's own machine-learning features -- that download route is *not*
-used to enable NEML2. The `--with-libtorch` path given at configure time (below) simply points at
-the C++ libraries that ship inside your environment's PyTorch.
+wheel, or a from-source build installed into that environment). MOOSE's
+[libtorch](install_libtorch.md optional=True) setup script builds PyTorch from source and, with the
+`--install-python-package` option, can install the Python package needed by NEML2 into that
+environment. The `--with-libtorch` path given at configure time (below) points at the C++ libraries
+that ship inside the environment's PyTorch.
 !alert-end!
 
 ### 1. Provide PyTorch
@@ -36,12 +36,22 @@ pip install torch
 
 See [PyTorch download instructions](https://pytorch.org/get-started/locally/) for more details.
 
-**Alternative: build PyTorch from source.** Only necessary when a prebuilt wheel does not fit your
-needs — for example a specific CUDA architecture, a custom BLAS, or an unsupported platform. Follow
-the [PyTorch from-source instructions](https://github.com/pytorch/pytorch#from-source) and install
-the result into the active environment (so `python3 -c 'import torch'` resolves to it); NEML2 then
-links against it exactly as it would a wheel. Building against the same OpenBLAS that MOOSE's PETSc
-uses also avoids the BLAS/LAPACK conflict described below.
+**Alternative: build PyTorch from source.** Only necessary when a suitable PyTorch is not already
+installed in the environment and a prebuilt wheel does not fit your needs — for example a specific
+CUDA architecture, a custom BLAS, or an unsupported platform. Activate the target conda environment,
+then use MOOSE's libtorch setup script with `--install-python-package`; without this option, the
+script installs only the C++ libraries and does not provide the Python package required by NEML2.
+
+```bash
+cd ~/projects/moose
+./scripts/update_and_rebuild_libtorch.sh --install-python-package
+python -c "import torch; print(torch.__version__)"
+./scripts/update_and_rebuild_neml2.sh
+```
+
+This builds PyTorch against the same OpenBLAS used by MOOSE's PETSc, avoiding the BLAS/LAPACK
+conflict described below. If the active environment already has a suitable PyTorch installation,
+do not rebuild it; proceed directly to the NEML2 build in step 2.
 
 !alert! warning title=BLAS/LAPACK ABI conflict between the PyTorch wheel and PETSc
 PyTorch wheels bundle their own BLAS/LAPACK inside `libtorch_cpu.so` (it exports the standard LP64
