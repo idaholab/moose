@@ -403,21 +403,8 @@ EOF
         git checkout {{ PYTORCH_GIT_SHA }}
         git submodule update --init --depth 1 --recursive
 
-        # Install PyTorch's build requirements into the container Python
-        ${PYTHON_DIR}/bin/pip install --no-cache -r ${PYTORCH_SRC_DIR}/requirements.txt
+        source ${ROOT_BUILD_DIR}/configure_libtorch.sh
 
-        # Build options, consumed by PyTorch's setup.py as environment variables (mirrors
-        # the choices in scripts/configure_libtorch.sh):
-        #   * link BLAS/LAPACK against PETSc's OpenBLAS for ABI compatibility with PETSc
-        #   * disable distributed/MPI and unused CPU-acceleration libraries
-        #   * keep MAGMA for GPU linear algebra when CUDA is available
-        export USE_BLAS=1 BLAS=OpenBLAS USE_LAPACK=1
-        export CMAKE_INCLUDE_PATH="${PETSC_DIR}/include"
-        export CMAKE_LIBRARY_PATH="${PETSC_DIR}/lib"
-        export USE_MPI=0 USE_DISTRIBUTED=0 USE_GLOO=0 USE_NCCL=0 USE_XCCL=0 USE_TENSORPIPE=0
-        export USE_MKLDNN=0 USE_NNPACK=0 USE_XNNPACK=0 USE_PYTORCH_QNNPACK=0 USE_FBGEMM=0
-        export USE_KINETO=0 USE_ITT=0 BUILD_TEST=0
-        export MAX_JOBS=${MOOSE_JOBS}
         # Require CUDA if we have cuda available
         if [ -n "${CUDA_DIR:-}" ]; then
             # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild),
@@ -433,8 +420,10 @@ EOF
         PYTORCH_LOGS={{ PYTHON_DIR }}/logs
         mkdir -p ${PYTORCH_LOGS}
         CFLAGS="${OPTFLAGS[*]}" CXXFLAGS="${OPTFLAGS[*]}" \
-            ${PYTHON_DIR}/bin/pip install --no-cache --no-build-isolation . 2>&1 | \
-            tee ${PYTORCH_LOGS}/pytorch.build.log
+            install_libtorch_python \
+                "${PYTORCH_SRC_DIR}" \
+                "${PYTHON_DIR}/bin/python" \
+                "${MOOSE_JOBS}" 2>&1 | tee ${PYTORCH_LOGS}/pytorch.build.log
 
         # Cleanup
         rm -rf ${PYTORCH_SRC_DIR}
@@ -643,7 +632,9 @@ EOF
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {% if not WITHOUT_PYTORCH | to_bool %}
-    # neml2 (PyTorch is built from source inline; no separate script is copied)
+    # libtorch
+    {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
+    # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
 {%- endif %}
