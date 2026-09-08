@@ -26,7 +26,8 @@ MFEMComplexWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_pro
   if (mfem_problem.getNumericType() != MFEMProblem::NumericType::COMPLEX)
     mooseError("Wrong numeric type. Please set the Problem numeric type to 'complex'.");
 
-  return std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem,
+                                                                             _weak_form_name);
 }
 
 #endif

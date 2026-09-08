@@ -12,8 +12,6 @@
 #include "ProblemOperatorBase.h"
 #include "MFEMProblem.h"
 
-class MFEMProblem;
-
 namespace Moose::MFEM
 {
 

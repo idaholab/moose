@@ -128,7 +128,7 @@ public:
   [[nodiscard]] inline const_iterator end() const { return _field_map.end(); }
 
   /// Returns the number of elements in the map
-  int size() { return _field_map.size(); }
+  int size() const { return _field_map.size(); }
 
 protected:
   /// Returns a const iterator to the field.

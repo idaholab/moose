@@ -20,12 +20,8 @@ class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperato
 {
 
 public:
-  ComplexEquationSystemProblemOperator(MFEMProblem & problem)
-    : EquationSystemProblemOperator(problem),
-      _equation_system{std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(
-          _problem_data.eqn_systems.begin()->second)}
-  {
-  }
+  ComplexEquationSystemProblemOperator(MFEMProblem & problem,
+                                       const std::string & weak_form_name = "");
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override;

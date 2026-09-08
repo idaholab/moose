@@ -34,10 +34,9 @@ namespace Moose::MFEM
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(MFEMProblem & problem)
-    : ProblemOperator(problem), _equation_system(_problem_data.eqn_systems.begin()->second)
-  {
-  }
+  /// @param weak_form_name Name of the weak form supplying this operator's EquationSystem. If
+  /// empty, the problem's sole EquationSystem is used.
+  EquationSystemProblemOperator(MFEMProblem & problem, const std::string & weak_form_name = "");
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override;

@@ -38,8 +38,8 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
-  _mfem_problem._default_assembly_level =
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>();
+  _mfem_problem.setDefaultAssemblyLevel(
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 }
 
 void
