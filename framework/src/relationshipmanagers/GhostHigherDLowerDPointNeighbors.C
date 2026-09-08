@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", GhostHigherDLowerDPointNeighbors);
 
-using namespace libMesh;
-
 InputParameters
 GhostHigherDLowerDPointNeighbors::validParams()
 {
@@ -102,7 +100,7 @@ GhostHigherDLowerDPointNeighbors::operator>=(const RelationshipManager & other) 
          dynamic_cast<const GhostLowerDElems *>(&other);
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 GhostHigherDLowerDPointNeighbors::clone() const
 {
   return _app.getFactory().copyConstruct(*this);

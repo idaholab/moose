@@ -14,26 +14,24 @@
 
 #include "gtest/gtest.h"
 
-using namespace libMesh;
-
 TEST(DenseMatrixADReal, TryOperations)
 {
-  DenseMatrix<ADReal> a(3, 3);
-  DenseMatrix<ADReal> b(3, 3);
+  libMesh::DenseMatrix<ADReal> a(3, 3);
+  libMesh::DenseMatrix<ADReal> b(3, 3);
   a.left_multiply(b);
   a.left_multiply_transpose(b);
   a.right_multiply(b);
   a.right_multiply_transpose(b);
 
-  DenseVector<ADReal> vec(3);
-  DenseVector<ADReal> dest(3);
+  libMesh::DenseVector<ADReal> vec(3);
+  libMesh::DenseVector<ADReal> dest(3);
 
   a.vector_mult(dest, vec);
   a.vector_mult_transpose(dest, vec);
   a.vector_mult_add(dest, 1, vec);
   a.outer_product(vec, dest);
 
-  DenseMatrix<ADReal> sub(2, 2);
+  libMesh::DenseMatrix<ADReal> sub(2, 2);
   a.get_principal_submatrix(2, 2, sub);
 
   vec(0) = 1;
@@ -45,18 +43,18 @@ TEST(DenseMatrixADReal, TryOperations)
   a(2, 2) = 1;
 
   a.lu_solve(vec, dest);
-  EXPECT_NEAR(dest(0).value(), vec(0).value(), TOLERANCE);
-  EXPECT_NEAR(dest(1).value(), vec(1).value(), TOLERANCE);
-  EXPECT_NEAR(dest(2).value(), vec(2).value(), TOLERANCE);
+  EXPECT_NEAR(dest(0).value(), vec(0).value(), libMesh::TOLERANCE);
+  EXPECT_NEAR(dest(1).value(), vec(1).value(), libMesh::TOLERANCE);
+  EXPECT_NEAR(dest(2).value(), vec(2).value(), libMesh::TOLERANCE);
 
-  EXPECT_NEAR(1, a.det().value(), TOLERANCE);
+  EXPECT_NEAR(1, a.det().value(), libMesh::TOLERANCE);
 
   b(0, 0) = 1;
   b(1, 1) = 1;
   b(2, 2) = 1;
 
   b.cholesky_solve(vec, dest);
-  EXPECT_NEAR(dest(0).value(), vec(0).value(), TOLERANCE);
-  EXPECT_NEAR(dest(1).value(), vec(1).value(), TOLERANCE);
-  EXPECT_NEAR(dest(2).value(), vec(2).value(), TOLERANCE);
+  EXPECT_NEAR(dest(0).value(), vec(0).value(), libMesh::TOLERANCE);
+  EXPECT_NEAR(dest(1).value(), vec(1).value(), libMesh::TOLERANCE);
+  EXPECT_NEAR(dest(2).value(), vec(2).value(), libMesh::TOLERANCE);
 }

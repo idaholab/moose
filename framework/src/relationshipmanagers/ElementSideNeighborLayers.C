@@ -19,8 +19,6 @@
 #include "libmesh/point_neighbor_coupling.h"
 #include "libmesh/dof_map.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
 InputParameters
@@ -56,7 +54,7 @@ ElementSideNeighborLayers::ElementSideNeighborLayers(const ElementSideNeighborLa
 {
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 ElementSideNeighborLayers::clone() const
 {
   return _app.getFactory().copyConstruct(*this);
@@ -111,13 +109,13 @@ ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
   if (_use_point_neighbors)
   {
-    auto functor = std::make_unique<PointNeighborCoupling>();
+    auto functor = std::make_unique<libMesh::PointNeighborCoupling>();
     initFunctor(*functor);
     _functor = std::move(functor);
   }
   else
   {
-    auto functor = std::make_unique<DefaultCoupling>();
+    auto functor = std::make_unique<libMesh::DefaultCoupling>();
     initFunctor(*functor);
     _functor = std::move(functor);
   }
@@ -129,8 +127,10 @@ ElementSideNeighborLayers::dofmap_reinit()
   if (_dof_map)
   {
     if (_use_point_neighbors)
-      cast_ptr<PointNeighborCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
+      cast_ptr<libMesh::PointNeighborCoupling *>(_functor.get())
+          ->set_dof_coupling(_dof_map->_dof_coupling);
     else
-      cast_ptr<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
+      cast_ptr<libMesh::DefaultCoupling *>(_functor.get())
+          ->set_dof_coupling(_dof_map->_dof_coupling);
   }
 }

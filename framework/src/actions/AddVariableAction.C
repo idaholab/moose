@@ -20,8 +20,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
-using namespace libMesh;
-
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
 InputParameters
@@ -190,7 +188,7 @@ AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
   associateWithParameter("initial_condition", action_params);
 
   const auto fe_field_type = FEInterface::field_type(_fe_type);
-  const bool is_vector = fe_field_type == TYPE_VECTOR;
+  const bool is_vector = fe_field_type == libMesh::TYPE_VECTOR;
   const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
 
   if (_scalar_var)
@@ -265,7 +263,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
 
   if (is_array)
   {
-    if (fe_field_type == TYPE_VECTOR)
+    if (fe_field_type == libMesh::TYPE_VECTOR)
       ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
@@ -274,7 +272,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
     return "MooseVariableConstMonomial";
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
-  else if (fe_field_type == TYPE_VECTOR)
+  else if (fe_field_type == libMesh::TYPE_VECTOR)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

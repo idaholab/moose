@@ -12,8 +12,6 @@
 
 registerMooseObject("ThermalHydraulicsApp", AugmentSparsityBetweenElements);
 
-using namespace libMesh;
-
 InputParameters
 AugmentSparsityBetweenElements::validParams()
 {
@@ -35,7 +33,7 @@ AugmentSparsityBetweenElements::AugmentSparsityBetweenElements(
 {
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 AugmentSparsityBetweenElements::clone() const
 {
   return _app.getFactory().clone(*this);
@@ -71,7 +69,7 @@ AugmentSparsityBetweenElements::operator()(const MeshBase::const_element_iterato
                                            processor_id_type p,
                                            map_type & coupled_elements)
 {
-  const CouplingMatrix * const null_mat = libmesh_nullptr;
+  const libMesh::CouplingMatrix * const null_mat = libmesh_nullptr;
   for (const auto & elem : as_range(range_begin, range_end))
   {
     auto it = _elem_map.find(elem->id());

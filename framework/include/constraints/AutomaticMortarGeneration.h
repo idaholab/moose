@@ -31,23 +31,10 @@
 #include <unordered_map>
 
 // Forward declarations
-namespace libMesh
-{
-class MeshBase;
-class System;
-}
 class GetPot;
 
 // Using statements
-using libMesh::boundary_id_type;
 using libMesh::CompareDofObjectsByID;
-using libMesh::dof_id_type;
-using libMesh::Elem;
-using libMesh::MeshBase;
-using libMesh::Node;
-using libMesh::Point;
-using libMesh::Real;
-using libMesh::subdomain_id_type;
 
 typedef boundary_id_type BoundaryID;
 typedef subdomain_id_type SubdomainID;

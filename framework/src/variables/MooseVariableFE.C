@@ -18,8 +18,6 @@
 
 #include "libmesh/quadrature_monomial.h"
 
-using namespace libMesh;
-
 template <>
 InputParameters
 MooseVariableFE<Real>::validParams()
@@ -1045,7 +1043,7 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::ValueType
 MooseVariableFE<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
-  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  const libMesh::QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
@@ -1058,7 +1056,7 @@ MooseVariableFE<OutputType>::faceEvaluate(const FaceArg & face_arg,
                                           const StateArg & state,
                                           const std::vector<ValueType> & cache_data) const
 {
-  const QMonomial qrule(face_arg.fi->elem().dim() - 1, CONSTANT);
+  const libMesh::QMonomial qrule(face_arg.fi->elem().dim() - 1, CONSTANT);
   auto side_evaluate =
       [this, &qrule, &state, &cache_data](const Elem * const elem, const unsigned int side)
   {
@@ -1138,7 +1136,7 @@ typename MooseVariableFE<OutputType>::GradientType
 MooseVariableFE<OutputType>::evaluateGradient(const ElemArg & elem_arg,
                                               const StateArg & state) const
 {
-  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  const libMesh::QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
@@ -1172,7 +1170,7 @@ MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateAr
   mooseAssert(_time_integrator->dt(),
               "A time derivative is being requested but the time integrator wants to perform a 0s "
               "time step");
-  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  const libMesh::QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
@@ -1189,7 +1187,7 @@ MooseVariableFE<OutputType>::evaluateGradDot(const ElemArg & elem_arg, const Sta
   mooseAssert(_time_integrator->dt(),
               "A time derivative is being requested but the time integrator wants to perform a 0s "
               "time step");
-  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  const libMesh::QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);

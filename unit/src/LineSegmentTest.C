@@ -11,8 +11,6 @@
 
 #include "libmesh/plane.h"
 
-using namespace libMesh;
-
 TEST_F(LineSegmentTest, closestPointTest)
 {
   // positive x end cases
@@ -312,13 +310,13 @@ TEST_F(LineSegmentTest, containsPointTest)
 TEST_F(LineSegmentTest, planeIntersectTest)
 {
   Point result;
-  Plane xy;
+  libMesh::Plane xy;
   xy.xy_plane(1);
-  Plane xz;
+  libMesh::Plane xz;
   xz.xz_plane(1);
-  Plane yz;
+  libMesh::Plane yz;
   yz.yz_plane(1);
-  Plane diag(Point(0, 0, 0), Point(1, 1, 1), Point(-1, 1, 0));
+  libMesh::Plane diag(Point(0, 0, 0), Point(1, 1, 1), Point(-1, 1, 0));
 
   // Test all the 3D LineSegments against all 4 planes
   EXPECT_FALSE(_pos3x.intersect(xy, result));

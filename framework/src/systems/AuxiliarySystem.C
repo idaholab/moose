@@ -34,8 +34,6 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
@@ -269,7 +267,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (FEInterface::field_type(fe_type) == TYPE_VECTOR)
+    if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
     {
       auto * var = _vars[tid].getActualFieldVariable<RealVectorValue>(name);
       if (var)
@@ -872,7 +870,7 @@ AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+AuxiliarySystem::augmentSparsity(libMesh::SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<dof_id_type> & /*n_nz*/,
                                  std::vector<dof_id_type> &
                                  /*n_oz*/)

@@ -34,8 +34,6 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/tensor_value.h"
 
-using namespace libMesh;
-
 namespace TraceRayTools
 {
 
@@ -729,7 +727,7 @@ withinEdgeOnSide(const Elem * const elem,
 }
 
 template <typename T>
-typename std::enable_if<std::is_base_of<Cell, T>::value, bool>::type
+typename std::enable_if<std::is_base_of<libMesh::Cell, T>::value, bool>::type
 withinEdgeOnSideTempl(const Elem * const elem,
                       const Point & point,
                       const unsigned short side,

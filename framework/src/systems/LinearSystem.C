@@ -58,8 +58,6 @@
 
 #include <ios>
 
-using namespace libMesh;
-
 namespace Moose
 {
 void
@@ -317,7 +315,7 @@ LinearSystem::solve()
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
   auto & linear_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
   _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
   _converged = linear_solver.get_converged_reason() > 0;

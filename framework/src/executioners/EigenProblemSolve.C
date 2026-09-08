@@ -18,9 +18,6 @@
 
 #include "libmesh/petsc_solver_exception.h"
 
-// Needed for LIBMESH_CHECK_ERR
-using libMesh::PetscSolverException;
-
 InputParameters
 EigenProblemSolve::validParams()
 {

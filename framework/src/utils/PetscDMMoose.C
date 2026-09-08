@@ -32,8 +32,6 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/elem_side_builder.h"
 
-using namespace libMesh;
-
 template <typename I1, typename I2>
 void
 checkSize(const std::string & split_name, const I1 split_size, const I2 size_expected_by_parent)
@@ -53,7 +51,7 @@ checkSize(const std::string & split_name, const I1 split_size, const I2 size_exp
 struct DM_Moose
 {
   NonlinearSystemBase * _nl; // nonlinear system context
-  const DofMapBase * _dof_map;
+  const libMesh::DofMapBase * _dof_map;
   const System * _system;
   DM_Moose * _parent = nullptr;
   std::set<std::string> * _vars; // variables
@@ -236,7 +234,7 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
 }
 
 PetscErrorCode
-DMMooseSetDofMap(DM dm, const DofMapBase & dof_map)
+DMMooseSetDofMap(DM dm, const libMesh::DofMapBase & dof_map)
 {
   PetscFunctionBegin;
   LibmeshPetscCallQ(DMMooseValidityCheck(dm));
@@ -2060,7 +2058,7 @@ DMDestroy_Moose(DM dm)
 PetscErrorCode
 DMCreateMoose(MPI_Comm comm,
               NonlinearSystemBase & nl,
-              const DofMapBase & dof_map,
+              const libMesh::DofMapBase & dof_map,
               const System & system,
               const std::string & dm_name,
               DM * dm)

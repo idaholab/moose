@@ -13,8 +13,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", TestVectorType);
 
 InputParameters
@@ -41,7 +39,7 @@ TestVectorType::TestVectorType(const InputParameters & parameters)
                   ? (SystemBase &)_fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0)
                   : (SystemBase &)_fe_problem.getAuxiliarySystem()),
     _test_vec_name(getParam<std::string>("vector")),
-    _par_type(getParam<MooseEnum>("vector_type").getEnum<ParallelType>())
+    _par_type(getParam<MooseEnum>("vector_type").getEnum<libMesh::ParallelType>())
 {
 }
 

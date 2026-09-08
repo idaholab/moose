@@ -14,8 +14,6 @@
 
 #include "libmesh/point_neighbor_coupling.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ElementPointNeighborLayers);
 
 InputParameters
@@ -43,7 +41,7 @@ ElementPointNeighborLayers::ElementPointNeighborLayers(const ElementPointNeighbo
 {
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 ElementPointNeighborLayers::clone() const
 {
   return _app.getFactory().copyConstruct(*this);
@@ -73,7 +71,7 @@ ElementPointNeighborLayers::operator>=(const RelationshipManager & rhs) const
 void
 ElementPointNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
-  auto functor = std::make_unique<PointNeighborCoupling>();
+  auto functor = std::make_unique<libMesh::PointNeighborCoupling>();
   functor->set_n_levels(_layers);
 
   _functor = std::move(functor);

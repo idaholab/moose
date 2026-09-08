@@ -15,8 +15,6 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/enum_order.h"
 
-using namespace libMesh;
-
 // activeElementFraction integrates a predicate over the element with quadrature and returns the
 // active fraction of the total measure. On the unit square, a symmetric Gauss rule splits an
 // x < 0.5 half-space predicate exactly in two, and the all/none predicates give the exact
@@ -24,7 +22,7 @@ using namespace libMesh;
 TEST(ActiveElementFractionTest, UnitSquare)
 {
   Parallel::Communicator comm(MPI_COMM_SELF);
-  auto mesh = std::make_unique<SerialMesh>(comm);
+  auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
 
   Node * n0 = mesh->add_point(Point(0.0, 0.0, 0.0), 0);
   Node * n1 = mesh->add_point(Point(1.0, 0.0, 0.0), 1);

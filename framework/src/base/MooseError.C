@@ -14,8 +14,6 @@
 
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 namespace moose
 {
 
@@ -86,7 +84,7 @@ mooseErrorRaw(std::string msg,
     // anything thrown) and mooseError because we didn't understand
     // it, we just want to continue up the stack.
     if (this_thread_aborting)
-      libmesh_abort();
+      libMesh::libmesh_abort();
 
     this_thread_aborting = true;
 
@@ -113,7 +111,7 @@ mooseErrorRaw(std::string msg,
     if (show_trace && libMesh::global_n_processors() == 1)
     {
       std::ostringstream oss;
-      print_trace(oss);
+      libMesh::print_trace(oss);
       auto trace = oss.str();
       if (!prefix.empty()) // multiapp prefix
         MooseUtils::indentMessage(prefix, trace);
@@ -129,7 +127,7 @@ mooseErrorRaw(std::string msg,
     if (libMesh::global_n_processors() > 1)
       libMesh::write_traceout();
 
-    libmesh_abort();
+    libMesh::libmesh_abort();
   }
 }
 

@@ -64,8 +64,6 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/elem_side_builder.h"
 
-using namespace libMesh;
-
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
 namespace nanoflann
@@ -2987,7 +2985,7 @@ MooseMesh::init()
 std::vector<std::filesystem::path>
 MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
 {
-  CheckpointIO io(getMesh(), false);
+  libMesh::CheckpointIO io(getMesh(), false);
   io.write(file_base);
   return {};
 }
