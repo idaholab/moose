@@ -21,13 +21,10 @@ MFEMTimeDependentWeakForm::MFEMTimeDependentWeakForm(const InputParameters & par
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>
-MFEMTimeDependentWeakForm::createEquationSystem()
+MFEMTimeDependentWeakForm::makeEquationSystem()
 {
-  auto & problem_data = getMFEMProblem().getProblemData();
-  _equation_system =
-      std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(problem_data.time_derivative_map);
-  initEquationSystem(_equation_system);
-  return _equation_system;
+  return std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
+      getMFEMProblem().getProblemData().time_derivative_map);
 }
 
 #endif

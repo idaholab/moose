@@ -22,19 +22,19 @@ class MFEMComplexWeakForm : public MFEMWeakFormBase
 public:
   MFEMComplexWeakForm(const InputParameters & parameters);
 
-  /// Constructs the EquationSystem.
-  virtual std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() override;
-
 protected:
+  virtual std::shared_ptr<Moose::MFEM::EquationSystem> makeEquationSystem() override;
+
   virtual void addBoundaryCondition(const std::string & name,
                                     std::shared_ptr<MFEMBoundaryCondition> bc) override;
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
 
 private:
-  /// Stores the constructed ComplexEquationSystem. Intentionally marked private to ensure
-  /// other objects in the problem do not use it prior to full initialisation.
-  mutable std::shared_ptr<Moose::MFEM::ComplexEquationSystem> _equation_system{nullptr};
+  /// The equation system as a ComplexEquationSystem, which is the type this class builds in
+  /// makeEquationSystem(). Needed because the AddComplex* methods are declared only on the
+  /// derived system and so cannot be reached through the base-typed _equation_system.
+  Moose::MFEM::ComplexEquationSystem & complexEquationSystem();
 };
 
 #endif

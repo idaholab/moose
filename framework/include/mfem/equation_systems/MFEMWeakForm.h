@@ -21,18 +21,13 @@ class MFEMWeakForm : public MFEMWeakFormBase
 public:
   MFEMWeakForm(const InputParameters & parameters);
 
-  /// Constructs the EquationSystem.
-  virtual std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() override;
-
 protected:
+  virtual std::shared_ptr<Moose::MFEM::EquationSystem> makeEquationSystem() override;
+
   virtual void addBoundaryCondition(const std::string & name,
                                     std::shared_ptr<MFEMBoundaryCondition> bc) override;
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
-
-  /// Stores the constructed EquationSystem. Intentionally marked protected to ensure
-  /// other objects in the problem do not use it prior to full initialisation.
-  mutable std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
 };
 
 #endif
