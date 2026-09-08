@@ -50,6 +50,8 @@ public:
       RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
   virtual bool substeppingCapabilityEnabled() override;
   virtual bool substeppingCapabilityRequested() override;
+  virtual void initQpStatefulProperties() override;
+  virtual void propagateQpStatefulProperties() override;
   virtual void resetIncrementalMaterialProperties() override;
 
   virtual GenericReal<is_ad>
@@ -177,7 +179,7 @@ protected:
                           const GenericReal<is_ad> & porosity,
                           const CreepLaw & law);
 
-  /// Store one converged per-law gauge stress and preserve the legacy first-law output.
+  /// Store one converged per-law gauge stress.
   void setGaugeStress(std::size_t law_index, const GenericReal<is_ad> & gauge_stress);
 
   /// Evaluate and store all gauge-stress diagnostics at one converged constitutive state.
@@ -221,7 +223,7 @@ protected:
   /// Positive stress scale used to initialize and bound the gauge-stress Newton solve.
   GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress,
                                       const GenericReal<is_ad> & effective_hydro_stress) const;
-  /// Perform one explicit viscoplastic update over the current constitutive timestep.
+  /// Perform one viscoplastic update over the current constitutive timestep.
   virtual void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
                                   GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
                                   GenericRankTwoTensor<is_ad> & stress,
@@ -234,7 +236,21 @@ protected:
   unsigned int estimateNumberSubstepsFromState(const GenericRankTwoTensor<is_ad> & stress,
                                                const GenericReal<is_ad> & effective_hydro_stress,
                                                const GenericReal<is_ad> & porosity);
-  /// Integrate a prescribed number of explicit local constitutive substeps.
+  /// Estimate adaptive substeps from the previous accepted global-step effective inelastic rate.
+  unsigned int estimateAdaptiveNumberSubstepsFromHistory() const;
+  /// Store the converged current global-step effective inelastic rate for use after timestep acceptance.
+  void recordEffectiveInelasticStrainRate(
+      const GenericReal<is_ad> & effective_inelastic_strain_increment);
+  /**
+   * Check one accepted local effective inelastic increment against the requested substep target.
+   * If the target is exceeded, record an a-posteriori retry suggestion and throw so the adaptive
+   * driver can restart from the accepted global-old state.
+   */
+  void checkSubstepIncrement(const GenericReal<is_ad> & effective_inelastic_strain_increment,
+                             unsigned int total_number_substeps,
+                             unsigned int substep_index);
+
+  /// Integrate a prescribed number of local constitutive substeps.
   void updateStateSubstepInternal(
       GenericRankTwoTensor<is_ad> & strain_increment,
       GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
@@ -262,7 +278,7 @@ protected:
   /// Optional gas pressure in the pore/bubble
   const GenericMaterialProperty<Real, is_ad> * const _additional_porosity_pressure;
 
-  /// Gauge stress for the first creep law, retained for backward-compatible output.
+  /// Gauge stress for the first active creep law, retained for backward-compatible output.
   GenericMaterialProperty<Real, is_ad> & _gauge_stress;
 
   /// Per-law gauge stress outputs, declared only when multiple creep laws are supplied.
@@ -276,7 +292,7 @@ protected:
   /// Maximum value of equivalent stress above which an exception is thrown
   const Real _maximum_stress_magnitude;
 
-  /// Whether and how local explicit substepping is used
+  /// Whether and how local constitutive substepping is used
   const SubsteppingType _use_substepping;
 
   /// Target fraction of max_inelastic_increment in one local substep
@@ -286,6 +302,17 @@ protected:
 
   /// Maximum number of local constitutive substeps
   const unsigned int _maximum_number_substeps;
+
+  /// Current converged global-step effective inelastic rate.
+  GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_rate;
+  /// Previous accepted global-step effective inelastic rate used by adaptive substep prediction.
+  const MaterialProperty<Real> & _effective_inelastic_strain_rate_old;
+
+  /// A-posteriori number of substeps suggested by the last failed increment check.
+  unsigned int _suggested_number_substeps;
+
+  /// Effective inelastic increment from the last successful one-step update.
+  Real _last_effective_inelastic_strain_increment;
 
   /// Container for matrix hydrostatic stress
   GenericReal<is_ad> _hydro_stress;
