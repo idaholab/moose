@@ -114,6 +114,13 @@ LinearSystem::preInit()
 }
 
 void
+LinearSystem::initSolutionState()
+{
+  SolverSystem::initSolutionState();
+  LinearFVGradientInterface::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();

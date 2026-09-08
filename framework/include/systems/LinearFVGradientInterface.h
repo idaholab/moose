@@ -61,11 +61,15 @@ public:
                                             unsigned int oldest_state = 0);
 
 protected:
-  /// One vector per spatial component of a cell-centered gradient field.
+  /// Non-owning view with one vector per spatial component of a cell-centered gradient field.
   using GradientContainer = LinearFVGradientReader::GradientContainer;
 
   /// Gradient fields indexed by solution time state.
   using GradientStateContainer = LinearFVGradientReader::GradientStateContainer;
+
+  /// Owned vectors used for the current gradient and its replacement.
+  using OwnedGradientContainer =
+      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
 
   /// Compute and finalize all registered linear FV gradient fields.
   void computeGradients();
@@ -80,6 +84,9 @@ protected:
    * Initialize any unallocated gradient storage after solution-vector creation.
    */
   void initializeLinearFVGradientStorage();
+
+  /// Add named system vectors for requested old gradient states before restart data is loaded.
+  void initializeLinearFVGradientHistoryStorage();
 
   /**
    * Rebuild cached gradient values and reusable scratch storage after mesh/DOF changes.
@@ -103,7 +110,7 @@ protected:
    * Allocate one zeroed vector per spatial component for gradient storage.
    * @param container Component-vector container to rebuild.
    */
-  void initializeContainer(GradientContainer & container) const;
+  void initializeContainer(OwnedGradientContainer & container) const;
 
   /// Gradient values for all variables using the same gradient method.
   struct LinearFVGradientContainer
@@ -111,14 +118,23 @@ protected:
     /// Variable numbers whose gradients are stored in the gradient containers.
     std::unordered_set<unsigned int> variable_numbers;
 
+    /// Owned current gradient values.
+    OwnedGradientContainer current_values;
+
     /// Published gradient values indexed by solution time state.
     GradientStateContainer state_values;
 
     /// Replacement gradient values computed before publication.
-    GradientContainer next_values;
+    OwnedGradientContainer next_values;
 
     /// Whether the current gradient has received a computed value.
     bool has_computed_gradient = false;
+
+    /// Whether the old gradient states contain valid values.
+    bool has_initialized_history = false;
+
+    /// Whether restart data has been checked for this gradient method.
+    bool has_checked_restart_history = false;
   };
 
   /**
@@ -128,12 +144,31 @@ protected:
    */
   void ensureGradientStateStorage(LinearFVGradientContainer & container, unsigned int oldest_state);
 
+  /// Update the non-owning current-state view after owned vectors are rebuilt or swapped.
+  void updateCurrentGradientView(LinearFVGradientContainer & container) const;
+
+  /// Validate and mark gradient history loaded during restart or recovery.
+  void checkRestartedGradientHistory(const FVGradientMethod & method,
+                                     LinearFVGradientContainer & container);
+
+  /// Return the stable system-vector name for one old gradient component.
+  std::string gradientStateVectorName(const FVGradientMethod & method,
+                                      unsigned int state,
+                                      unsigned int component) const;
+
   /**
    * Copy one complete gradient field.
    * @param source Gradient field to copy.
    * @param destination Gradient field to overwrite.
    */
   void copyGradient(const GradientContainer & source, GradientContainer & destination) const;
+
+  /**
+   * Copy one published gradient field into owned replacement storage.
+   * @param source Gradient field to copy.
+   * @param destination Owned gradient field to overwrite.
+   */
+  void copyGradient(const GradientContainer & source, OwnedGradientContainer & destination) const;
 
   /// Compute and publish uninitialized gradients before their first time-state advancement.
   void initializeGradientStatesForTimeAdvance();

@@ -11,7 +11,6 @@
 
 #include "MooseTypes.h"
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,7 +32,7 @@ class LinearFVGradientReader
 {
 public:
   /// One vector per spatial component of the cell-centered gradient.
-  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
+  using GradientContainer = std::vector<libMesh::NumericVector<libMesh::Number> *>;
 
   /// Gradient fields indexed by solution time state.
   using GradientStateContainer = std::vector<GradientContainer>;

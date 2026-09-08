@@ -72,6 +72,13 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientInterface::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");

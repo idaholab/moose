@@ -160,11 +160,11 @@ approximately `n * d * N * sizeof(Number)` bytes per gradient method, excluding 
 and ghost entries.
 
 Historical state depth must be requested before solution-state initialization because an accurate
-old state cannot be synthesized later. The current clone-based storage supports fixed-mesh,
-in-memory timestep advancement and rejection. Rebuilding after a mesh or DOF change reinitializes
-the requested depth, but exact historical gradients are not preserved across that rebuild or
-checkpoint recovery. Exact preservation in those cases requires named projectable and restartable
-system vectors.
+old state cannot be created later. State `0` and the scratch field use private working vectors.
+States `1` and older use named system vectors that are included in checkpoints and updated when the
+mesh changes. A restart must use the same gradient method names and request no more history than the
+checkpoint contains. MOOSE reports an error when a requested gradient state is missing from the
+restart data rather than initializing it with an incorrect value.
 
 ## Boundary Conditions
 
