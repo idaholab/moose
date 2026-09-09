@@ -9,6 +9,8 @@
 
 #include "NewtonInversionControl.h"
 
+#include "MooseUtils.h"
+
 registerMooseObject("OptimizationApp", NewtonInversionControl);
 
 InputParameters
@@ -61,10 +63,29 @@ NewtonInversionControl::computeUpdate(unsigned int it, Real p_used, Real y, Real
     return {p_used + _parameter_delta, normalizedResidual(y), true};
   }
 
-  // Perturbed solve: a single guarded linear-model step over the base and perturbed samples is the
-  // finite-difference Newton update. Force a non-converged residual (and do not publish) so that
-  // convergence is only ever declared on a base iteration (where the recorded parameter is
-  // un-perturbed).
+  // Perturbed solve. The base iteration set the parameter to _p_base + _parameter_delta and nothing
+  // else should touch it before this solve reads it back, so p_used must equal that perturbed value.
+  // If it does not, an external object changed the parameter between the two solves -- most likely the
+  // parameter postprocessor was relaxed by listing it in the executioner's transformed_postprocessors
+  // -- so the finite-difference slope below would reflect a perturbation the model never actually saw.
+  // Fail loudly rather than return a silently wrong update. The fuzzy comparison only absorbs last-bit
+  // rounding (the value is written and read as the same double); a relaxation moves it by
+  // O(_parameter_delta), far above the default relative tolerance.
+  const Real p_perturbed = _p_base + _parameter_delta;
+  if (!MooseUtils::relativeFuzzyEqual(p_used, p_perturbed))
+    mooseError("The parameter postprocessor '",
+               _param_name,
+               "' changed between the base and perturbed solves (expected ",
+               p_perturbed,
+               ", read ",
+               p_used,
+               "); the finite-difference derivative would be invalid. Do not relax it via the "
+               "executioner's 'transformed_postprocessors' or otherwise modify it between "
+               "iterations.");
+
+  // A single guarded linear-model step over the base and perturbed samples is the finite-difference
+  // Newton update. Force a non-converged residual (and do not publish) so that convergence is only
+  // ever declared on a base iteration (where the recorded parameter is un-perturbed).
   const Real p_next = linearRootUpdate(_p_base, _y_base, p_used, y, y_target);
   return {p_next, _nonconverged_residual, false};
 }
