@@ -43,6 +43,7 @@ LMWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription(
       "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
+  params.set<bool>("allow_nodal_normal_derivatives") = true;
   params += LMWeightedGapUserObject::newParams();
   return params;
 }
@@ -267,6 +268,28 @@ LMWeightedGapUserObject::reinit()
     for (const auto qp : make_range(n_qp))
       _scaled_contact_pressure[qp] += phi[j][qp] * physical_pressure;
   }
+}
+
+const VariableTestValue &
+LMWeightedGapUserObject::tractionBasis() const
+{
+  return _lm_var->phiLower();
+}
+
+ADReal
+LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  const auto sys_num = _lm_var->sys().number();
+  const auto var_num = _lm_var->number();
+  mooseAssert(node.n_dofs(sys_num, var_num),
+              "The Lagrange multiplier must have a degree of freedom at this secondary node.");
+
+  // There is no lower-dimensional AD nodal value accessor, so seed the nodal Lagrange multiplier
+  // derivative directly, as the mortar contact constraints do.
+  const auto dof_index = node.dof_number(sys_num, var_num, 0);
+  ADReal nodal_pressure = (*_lm_var->sys().currentSolution())(dof_index);
+  Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
+  return nodal_pressure;
 }
 
 Real

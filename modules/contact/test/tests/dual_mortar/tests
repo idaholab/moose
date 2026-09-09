@@ -65,4 +65,51 @@
     mesh_mode = REPLICATED
     prereq = 'dm_contact_precon_no_adaptivity'
   []
+
+  [force_balance]
+    design = 'ContactAction.md NormalMortarMechanicalContact.md'
+    issues = '#33657'
+    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
+                  'curved interface, using'
+    # The balance ratios are compared against a gold of zero, so 'abs_zero' is what
+    # actually sets the strength of the assertion. An inconsistent contact force
+    # reaches 1e-2 of the transmitted load on this interface, while a consistent one
+    # leaves only the nonlinear solver's residual noise, measured at about 1e-12 of
+    # the load for the tolerances set in the input. 1e-8 sits between the two with
+    # several orders of margin on either side. It is repeated per test because the
+    # TestHarness does not inherit tester parameters from an enclosing block.
+    [dual]
+      type = 'CSVDiff'
+      input = 'dm_mechanical_contact_force_balance.i'
+      csvdiff = 'dual_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/use_dual=true '
+                 'Outputs/file_base=dual_mortar_force_balance'
+      detail = 'a dual (biorthogonal) Lagrange multiplier basis,'
+      mesh_mode = REPLICATED
+    []
+    [standard]
+      type = 'CSVDiff'
+      input = 'dm_mechanical_contact_force_balance.i'
+      csvdiff = 'std_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/use_dual=false '
+                 'Outputs/file_base=std_mortar_force_balance'
+      detail = 'a standard Lagrange multiplier basis, and'
+      mesh_mode = REPLICATED
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'dm_mechanical_contact_force_balance.i'
+      csvdiff = 'penalty_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      # A penalty of 1e6 against a Young's modulus of 1e6 is the stiffest value that
+      # still closes every step of the load history here; 1e7 and above stall on the
+      # third step.
+      cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
+                 'Outputs/file_base=penalty_mortar_force_balance'
+      detail = 'a penalty formulation.'
+      mesh_mode = REPLICATED
+    []
+  []
 []

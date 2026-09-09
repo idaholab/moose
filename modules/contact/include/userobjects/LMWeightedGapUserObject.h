@@ -40,6 +40,11 @@ public:
   virtual const ADVariableValue & contactPressure() const override;
   virtual void reinit() override;
   virtual Real getNormalContactPressure(const Node * const /*node*/) const override;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
+
+  /// The traction stays on the Lagrange multiplier's own basis, which is the basis adSlnLower()
+  /// uses. Under Petrov-Galerkin test() is the auxiliary standard basis carrying the weighted gap.
+  virtual const VariableTestValue & tractionBasis() const override;
 
   virtual void initialize() override;
   virtual void finalize() override;

@@ -1,0 +1,228 @@
+[Tests]
+  issues = '#33378'
+
+  [interpolated_normals_rejected]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = 'Constraints/normal_lm/interpolate_normals=true'
+    expect_err = 'cannot be combined with quadrature-point normal interpolation'
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
+  []
+
+  [unsupported_weighted_gap_uo]
+    type = RunException
+    input = unsupported_weighted_gap_uo.i
+    cli_args = 'Outputs/exodus=false'
+    expect_err = "Nodal-normal derivatives are not supported by user object 'czm_uo'."
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall reject a weighted-gap user object that does not '
+                  'support nodal-normal derivatives.'
+  []
+
+  [nonnodal_displacement]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = 'Variables/disp_x/family=MONOMIAL Variables/disp_x/order=CONSTANT'
+    expect_err = 'Nodal-normal derivatives require a nodal displacement variable.'
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall require nodal displacement variables when '
+                  'constructing nodal-normal derivatives.'
+  []
+
+  [cross_system_displacement]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = "Problem/nl_sys_names='displaced contact' Variables/disp_x/solver_sys=displaced "
+               "Variables/disp_y/solver_sys=contact Variables/disp_z/solver_sys=displaced "
+               "Variables/mortar_normal_lm/solver_sys=displaced Constraints/active=normal_lm"
+    expect_err = 'Nodal-normal derivatives require displacement variables in the nonlinear system '
+                 'assembled by this contact object.'
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall reject displacement variables from a different '
+                  'nonlinear system when constructing nodal-normal derivatives.'
+  []
+
+  [curved_3d_parallel]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/nx=2 '
+               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 '
+               'Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm '
+               'Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic '
+               'Problem/use_hash_table_matrix_assembly=true'
+    expect_out = 'Solve Converged!'
+    min_parallel = 2
+    max_parallel = 2
+    mesh_mode = DISTRIBUTED
+    design = 'ContactAction.md PenaltyFrictionUserObject.md AutomaticMortarGeneration.md'
+    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve '
+                  'on a fully overlapping, partitioned QUAD4 interface.'
+  []
+
+  [mortar_penalty_friction_jacobian]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 '
+               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 '
+               'Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm '
+               'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true '
+               '-snes_test_err 1e-7'
+    run_sim = false
+    # Bounds on the relative and absolute difference between the AD Jacobian and the
+    # '-snes_test_err 1e-7' finite-difference reference requested above. Rounded up from the
+    # observed differences to leave margin for platform-dependent roundoff in the mortar geometry.
+    ratio_tol = 2e-5
+    difference_tol = 1e-4
+    max_parallel = 1
+    design = 'ContactAction.md PenaltyFrictionUserObject.md'
+    requirement = 'Three-dimensional mortar-penalty friction shall compute a Jacobian that agrees '
+                  'with a finite-difference approximation when secondary nodal-normal and '
+                  'tangent-basis derivatives are included, without allocating new matrix nonzeros.'
+  []
+
+  [tri6_penalty_jacobian]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=1 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/top_block/elem_type=TET10 '
+               'Mesh/bottom_block/elem_type=TET10 Variables/disp_x/order=SECOND '
+               'Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND '
+               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
+               'Contact/mortar/penalty_friction=1e2 ICs/inactive=normal_lm '
+               'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=false '
+               '-snes_test_err 1e-7'
+    run_sim = false
+    # The penalty formulation is used because the Lagrange-multiplier complementarity condition is
+    # not differentiable at the initial active set, which makes the finite-difference reference
+    # meaningless there for every element type. The penalty is 1e2 so that the contact block, whose
+    # traction scales as penalty times the 1e-3 overclosure, is comparable to the bulk operator
+    # rather than negligible against it; below that the measured ratio is insensitive to whether the
+    # nodal-normal derivatives are present at all.
+    # Observed ratio 4.30e-4 and difference 2.10 with the derivatives included, against 9.45e-4 with
+    # them suppressed. These bounds sit between the two so the test fails if they are dropped.
+    ratio_tol = 6.4e-4
+    difference_tol = 3.1
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Three-dimensional mortar-penalty contact shall compute a Jacobian that agrees '
+                  'with a finite-difference approximation on a second-order TET10 mesh with TRI6 '
+                  'interface faces.'
+  []
+
+  [tri7_penalty_jacobian]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=1 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/top_block/elem_type=TET14 '
+               'Mesh/bottom_block/elem_type=TET14 Variables/disp_x/order=THIRD '
+               'Variables/disp_y/order=THIRD Variables/disp_z/order=THIRD '
+               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
+               'Contact/mortar/penalty_friction=1e2 ICs/inactive=normal_lm '
+               'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=false '
+               '-snes_test_err 1e-7'
+    run_sim = false
+    # Penalty chosen as for the TET10 case above. The curved interface of curved_3d_action.i is kept
+    # rather than flattened, because a flat interface makes the two sides exactly coplanar with
+    # aligned nodes, a degenerate mortar configuration whose finite-difference reference is far
+    # worse (ratio 1.4e-1) than the curved one.
+    # Observed ratio 2.32e-3 and difference 5.71 with the derivatives included, against 5.09e-3 with
+    # them suppressed. These bounds sit between the two so the test fails if they are dropped.
+    ratio_tol = 3.4e-3
+    difference_tol = 8.5
+    # Marked heavy, with a raised limit, because the finite-difference reference needs one residual
+    # evaluation per degree of freedom and third-order displacement on TET14 makes that ~300 s here.
+    # The TET10 case above covers the same code path within the ordinary suite's time budget; this
+    # case adds the enriched TET14-to-TRI7 mapping, where the face carries more mapping nodes than
+    # the displacement basis.
+    heavy = true
+    max_time = 600
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Three-dimensional mortar-penalty contact shall compute a Jacobian that agrees '
+                  'with a finite-difference approximation on an enriched TET14 mesh whose TRI7 '
+                  'interface faces carry more mapping nodes than the displacement basis.'
+  []
+
+  [mortar_contact_pjfnk]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
+               'Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 Contact/mortar/model=frictionless '
+               'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/solve_type=PJFNK '
+               'Executioner/end_time=0.05 Executioner/dt=0.05 Executioner/nl_abs_tol=1e-4'
+    # The mismatched top/bottom mesh (1x1x1 over 2x2x1) on this curved interface makes the active
+    # set of contact nodes cycle between a small number of configurations once the residual nears
+    # curved_3d_action.i's default 1e-10, the same reason the other RunApp/PetscJacobianTester
+    # tests above that reuse this input file loosen nl_abs_tol to 1e-4.
+    expect_out = 'Solve Converged!'
+    max_parallel = 1
+    design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md '
+             'AutomaticMortarGeneration.md'
+    requirement = 'Three-dimensional mortar contact shall support residual-only PJFNK evaluations '
+                  'and explicit preconditioning Jacobians with nodal-normal derivatives.'
+  []
+
+  [tri6_normal_derivatives]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=1 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/top_block/elem_type=TET10 '
+               'Mesh/bottom_block/elem_type=TET10 Variables/disp_x/order=SECOND '
+               'Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND '
+               'Contact/mortar/model=frictionless '
+               'Problem/error_on_jacobian_nonzero_reallocation=false Executioner/end_time=0.05 '
+               'Executioner/dt=0.05 Executioner/line_search=basic'
+    expect_out = 'Solve Converged!'
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Quasistatic mortar contact shall assemble and solve with active TET10 elements '
+                  'and TRI6 interface faces when sufficient AD storage is available.'
+  []
+
+  [tri7_normal_derivatives]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=1 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/top_block/elem_type=TET14 '
+               'Mesh/bottom_block/elem_type=TET14 Mesh/top_curve/z_function=z '
+               'Mesh/bottom_curve/z_function=z Variables/disp_x/order=THIRD '
+               'Variables/disp_y/order=THIRD Variables/disp_z/order=THIRD '
+               'Contact/mortar/model=frictionless '
+               'Problem/error_on_jacobian_nonzero_reallocation=false Executioner/end_time=0.05 '
+               'Executioner/dt=0.05 Executioner/line_search=basic'
+    expect_out = 'Solve Converged!'
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Quasistatic mortar contact shall execute with active TET14 elements and TRI7 '
+                  'interface faces when sufficient AD storage is available.'
+  []
+
+  [hex27_quad9]
+    type = RunApp
+    input = ../3d-mortar-contact/frictionless-mortar-3d-action.i
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 '
+               'Mesh/top_block/elem_type=HEX27 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=2 '
+               'Mesh/bottom_block/nz=1 Mesh/bottom_block/elem_type=HEX27 '
+               'Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Executioner/solve_type=NEWTON '
+               'Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
+    capabilities = 'ad_size>=200'
+    expect_out = 'The number of nodes in contact is [1-9][0-9]*'
+    max_parallel = 1
+    mesh_mode = REPLICATED
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Quasistatic mortar contact shall execute with active HEX27 elements and QUAD9 '
+                  'interface faces when sufficient AD storage is available.'
+  []
+[]
