@@ -148,6 +148,8 @@ class TestInputFileFormatSearch(TestHITBase):
         self.assertIn("initial_steps", params)
         self.assertEqual(len(params.keys()), 1)
 
+
+class TestLowerCaseOptionDocs(TestHITBase):
     def testLowerCaseOptionDocs(self):
         """
         Make sure lower-case enum option documentation is dumped.
