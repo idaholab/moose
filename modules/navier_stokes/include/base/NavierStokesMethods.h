@@ -12,6 +12,7 @@
 #include <vector>
 #include "Moose.h"
 #include "MooseUtils.h"
+#include "libmesh/utility.h"
 #include "ADReal.h"
 #include "metaphysicl/raw_type.h"
 #include "FEProblemBase.h"
@@ -115,6 +116,96 @@ template <typename T>
 T findyPlus(const T & mu, const T & rho, const T & u, Real dist);
 
 using MooseUtils::isZero;
+
+/**
+ * Schiller and Naumann's branch of the linear drag function, valid below the transition.
+ *
+ * Offered separately from dragFunction so that a solver which has already established from its
+ * inputs that the root lies on this branch can evaluate it without re-testing the Reynolds number
+ * on every pass. That matters: the two branches of dragFunction do not meet exactly, so an
+ * iteration whose intermediate iterates re-tested the transition could step across the seam and
+ * oscillate. See LinearWCNSFV2PSlipVelocityFunctorMaterial::solveSlipSpeed.
+ */
+template <typename T>
+T
+schillerNaumannDragFunction(const T & Re_p)
+{
+  using std::pow;
+  mooseAssert(MetaPhysicL::raw_value(Re_p) >= 0,
+              "The particle Reynolds number is formed from a magnitude");
+  return 1.0 + 0.15 * pow(Re_p, 0.687);
+}
+
+/**
+ * Re_p times the derivative of schillerNaumannDragFunction with respect to Re_p, written as the
+ * product because \f$ Re_p \, f'(Re_p) \f$ is finite at the origin while \f$ f' \f$ alone is not.
+ */
+inline Real
+schillerNaumannDragDerivative(Real Re_p)
+{
+  mooseAssert(Re_p >= 0, "The particle Reynolds number is formed from a magnitude");
+  return 0.15 * 0.687 * std::pow(Re_p, 0.687);
+}
+
+/**
+ * The linear drag function of a dispersed phase: Schiller and Naumann's correlation below the
+ * transition and Newton's regime above it. ANSYS Fluent Theory Guide equation 16.4-14.
+ *
+ * The function is strictly increasing, which is what makes the slip velocity solvable from the
+ * force balance. It is very nearly, but not exactly, continuous: at the transition the two
+ * branches give 18.262 and 18.300, a step of about 0.2%. Any iteration that evaluates this
+ * function must therefore be bracketed, or must select its branch in advance from a quantity that
+ * does not change as the iteration proceeds.
+ */
+template <typename T>
+T
+dragFunction(const T & Re_p)
+{
+  mooseAssert(MetaPhysicL::raw_value(Re_p) >= 0,
+              "The particle Reynolds number is formed from a magnitude");
+  return (Re_p <= 1000.0) ? schillerNaumannDragFunction(Re_p) : 0.0183 * Re_p;
+}
+
+/**
+ * The linear drag function of a distorted fluid particle.
+ *
+ * Above roughly a millimetre a bubble no longer behaves as a rigid sphere: it deforms, and its
+ * drag coefficient grows with size rather than falling with Reynolds number,
+ * \\f$ C_D = \\frac{2}{3} d_d \\sqrt{g \\Delta\\rho / \\sigma} \\f$. Manninen's closure carries the
+ * drag as the linear function \\f$ f_{drag} = C_D Re_p / 24 \\f$, which normalises Stokes drag to
+ * unity, so that coefficient becomes
+ *
+ * \\f[
+ *   f_{drag} = \\frac{d_d^2 \\rho_c \\left|u_s\\right|}{36 \\mu_c}
+ *              \\sqrt{\\frac{g \\Delta\\rho}{\\sigma}} .
+ * \\f]
+ *
+ * Substituted into the closure this returns the terminal velocity
+ * \\f$ \\sqrt{2}\\left(g\\sigma\\Delta\\rho/\\rho_c^2\\right)^{1/4} \\f$, independent of the
+ * particle size, which is the drift velocity correlation of Ishii for the bubbly flow regime.
+ * See Hibiki and Ishii, Int. J. Heat Mass Transfer 45 (2002) 707, equation (15).
+ *
+ * Unlike dragFunction this one is linear in the slip speed, so it is returned per unit speed: the
+ * caller multiplies by \\f$ \\left|u_s\\right| \\f$.
+ *
+ * @param particle_diameter diameter of the particles of the dispersed phase
+ * @param rho_c continuous phase density
+ * @param mu_c continuous phase dynamic viscosity
+ * @param delta_rho magnitude of the density difference between the phases
+ * @param sigma surface tension between the phases
+ * @param gravity_magnitude magnitude of the gravity vector
+ */
+inline Real
+distortedDragFunctionPerSpeed(Real particle_diameter,
+                              Real rho_c,
+                              Real mu_c,
+                              Real delta_rho,
+                              Real sigma,
+                              Real gravity_magnitude)
+{
+  return Utility::pow<2>(particle_diameter) * rho_c / (36.0 * mu_c) *
+         std::sqrt(gravity_magnitude * delta_rho / sigma);
+}
 
 /**
  * Compute the speed (velocity norm) given the supplied velocity
