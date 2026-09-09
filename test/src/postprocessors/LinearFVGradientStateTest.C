@@ -33,7 +33,8 @@ LinearFVGradientStateTest::validParams()
   params.addParam<bool>("face", false, "Read a selected element face instead of the element.");
   params.addParam<dof_id_type>(
       "element_id", 0, "Element ID used for element reads and adjacent-face selection.");
-  params.addParam<unsigned int>("face_side", 0, "Side of the selected element used for face reads.");
+  params.addParam<unsigned int>(
+      "face_side", 0, "Side of the selected element used for face reads.");
   params.addParam<unsigned int>("late_oldest_gradient_state",
                                 "Optional gradient depth to request during initial setup.");
   params.addClassDescription("Tests optional time-state storage for linear FV gradients.");
