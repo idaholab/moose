@@ -89,71 +89,71 @@
     requirement = "The system shall keep the mesh conformal when repairing an interior sliver whose non-absorbed edge is shared with another element."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver]
+  [repair_tet_degenerate]
     type = Exodiff
-    input = repair_tet_sliver.i
+    input = repair_tet_degenerate.i
     cli_args = '--mesh-only'
-    exodiff = 'repair_tet_sliver_in.e'
+    exodiff = 'repair_tet_degenerate_in.e'
     exodiff_opts = '-pedantic'
     recover = false
     issues = '#33566'
-    requirement = "The system shall be able to repair an interior sliver tetrahedron by edge collapse, producing a valid conformal mesh."
+    requirement = "The system shall be able to repair an interior degenerate tetrahedron by edge collapse, producing a valid conformal mesh."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_skip]
+  [repair_tet_degenerate_skip]
     type = RunApp
-    input = repair_tet_sliver_skip.i
+    input = repair_tet_degenerate_skip.i
     expect_out = 'could not be collapsed \(left in place\): 1'
     issues = '#33566'
-    requirement = "The system shall leave a sliver tetrahedron in place, rather than distorting the boundary, when it has no interior node that can be collapsed."
+    requirement = "The system shall leave a degenerate tetrahedron in place, rather than distorting the boundary, when it has no interior node that can be collapsed."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_needle]
+  [repair_tet_degenerate_needle]
     type = RunApp
-    input = repair_tet_sliver_needle.i
+    input = repair_tet_degenerate_needle.i
     expect_out = 'repaired by edge collapse: 1'
     issues = '#33566'
     requirement = "The system shall repair high-valence needle sliver tetrahedra (two nearly-adjacent nodes / a short shared edge) by edge collapse, keeping a valid conformal mesh."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_apex_outside]
+  [repair_tet_degenerate_apex_outside]
     type = RunApp
-    input = repair_tet_sliver_apex_outside.i
+    input = repair_tet_degenerate_apex_outside.i
     expect_out = 'repaired by edge collapse: 1'
     issues = '#33566'
-    requirement = "The system shall repair a flat sliver tetrahedron whose apex projects outside its opposite face (caught by the volume test, not the flap test), keeping a valid conformal mesh."
+    requirement = "The system shall repair a flat (pancake) tetrahedron whose apex projects outside its opposite face (caught by the volume test, not the flap test), keeping a valid conformal mesh."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_cluster]
+  [repair_tet_degenerate_cluster]
     type = RunApp
-    input = repair_tet_sliver_cluster.i
+    input = repair_tet_degenerate_cluster.i
     expect_out = 'repaired by edge collapse: 1'
     issues = '#33566'
-    requirement = "The system shall repair a cluster of adjacent sliver tetrahedra sharing nodes via node-disjoint passes, keeping a valid conformal mesh."
+    requirement = "The system shall repair a cluster of adjacent degenerate tetrahedra sharing nodes via node-disjoint passes, keeping a valid conformal mesh."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_high_valence]
+  [repair_tet_degenerate_high_valence]
     type = RunApp
-    input = repair_tet_sliver_high_valence.i
+    input = repair_tet_degenerate_high_valence.i
     expect_out = 'repaired by edge collapse: 1'
     issues = '#33566'
-    requirement = "The system shall repair a flat sliver tetrahedron at a high-valence interior node, keeping the surrounding neighborhood valid and conformal."
+    requirement = "The system shall repair a flat (pancake) tetrahedron at a high-valence interior node, keeping the surrounding neighborhood valid and conformal."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_octahedron]
+  [repair_tet_degenerate_octahedron]
     type = RunApp
-    input = repair_tet_sliver_octahedron.i
+    input = repair_tet_degenerate_octahedron.i
     expect_out = 'repaired by edge collapse: 1'
     issues = '#33566'
-    requirement = "The system shall, when repairing a sliver at an interior node where some candidate edge collapses would invert a neighbor, reject those and commit a valid collapse."
+    requirement = "The system shall, when repairing a degenerate tetrahedron at an interior node where some candidate edge collapses would invert a neighbor, reject those and commit a valid collapse."
     mesh_mode = 'replicated'
   []
-  [repair_tet_sliver_hybrid]
+  [repair_tet_degenerate_hybrid]
     type = RunApp
-    input = repair_tet_sliver_hybrid.i
+    input = repair_tet_degenerate_hybrid.i
     expect_out = 'could not be collapsed \(left in place\): 1'
     issues = '#33566'
-    requirement = "The system shall leave a sliver tetrahedron in place when its collapse star includes a non-tetrahedral element, rather than corrupting the mesh."
+    requirement = "The system shall leave a degenerate tetrahedron in place when its collapse star includes a non-tetrahedral element, rather than corrupting the mesh."
     mesh_mode = 'replicated'
   []
   [repair_pyramid_sliver]

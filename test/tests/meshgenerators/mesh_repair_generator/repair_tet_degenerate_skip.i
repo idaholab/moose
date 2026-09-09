@@ -1,7 +1,7 @@
 # A single flat TET4 sliver standing alone: all four of its nodes are on the mesh boundary, so every
 # edge collapse would distort the boundary surface and is rejected. The repair therefore leaves the
 # sliver in place and reports it as skipped, rather than corrupting the mesh. (A sliver can only be
-# collapsed when it has an interior node to remove, as in repair_tet_sliver.i.)
+# collapsed when it has an interior node to remove, as in repair_tet_degenerate.i.)
 [Mesh]
   [tet0]
     type = ElementGenerator

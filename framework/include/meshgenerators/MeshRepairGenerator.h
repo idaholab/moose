@@ -91,12 +91,13 @@ private:
   /// @param mesh the mesh to modify
   void repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const;
 
-  /// @brief Repair sliver (near-degenerate) TET4 elements by edge collapse. Each sliver is removed
-  ///        by collapsing one of its edges (merging a node onto another existing node), keeping a
-  ///        valid all-tetrahedral, conformal, manifold mesh. A candidate collapse is committed only
-  ///        if it does not invert/degenerate any neighbor, does not create a non-manifold
-  ///        configuration, and does not distort the mesh boundary; otherwise the sliver is left in
-  ///        place. Repairs run in node-disjoint passes.
+  /// @brief Repair degenerate TET4 elements by edge collapse: flat pancakes (apex flat against the
+  ///        largest face), needle slivers, and zero-volume tets are all flagged and removed the
+  ///        same way. Each is removed by collapsing one of its edges (merging a node onto another
+  ///        existing node), keeping a valid all-tetrahedral, conformal, manifold mesh. A candidate
+  ///        collapse is committed only if it does not invert/degenerate any neighbor, does not
+  ///        create a non-manifold configuration, and does not distort the mesh boundary; otherwise
+  ///        the element is left in place. Repairs run in node-disjoint passes.
   /// @param mesh the mesh to modify
   void repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) const;
 

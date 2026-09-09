@@ -164,7 +164,7 @@ MeshRepairGenerator::generate()
     // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
     repair2DSlivers(mesh);
 
-    // Repair sliver TET4 elements by edge collapse
+    // Repair degenerate TET4 elements (flat pancakes, needle slivers, zero-volume) by edge collapse
     repairDegenerateTets(mesh);
 
     // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
@@ -835,7 +835,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
   const Real vol_thresh = vol_scale * _zero_volume_tol;
-  // A reshaped tet must keep |volume| above this floor (10x to avoid creating a new sliver)
+  // A reshaped tet must keep |volume| above this floor (10x to avoid creating a new degenerate tet)
   const Real invert_floor = 10.0 * vol_scale * _tet_collapse_volume_floor;
 
   // Signed volume of a tet from its four corner points
@@ -876,8 +876,11 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
     return std::make_pair(best, best_side);
   };
 
-  // A TET4 is a sliver if its volume is negligible or its apex is flat against its largest face
-  auto isTetSliver = [&](const Elem & e)
+  // A TET4 is degenerate if its volume is negligible (a zero-volume or needle sliver) or its apex
+  // is flat against its largest face (a pancake). Both are removed by edge collapse below; there is
+  // no separate zero-volume-removal path (see the unimplemented removeSmallVolumeElements). A tet
+  // has no lower-topology target, so the fourth degeneracy kind does not apply here.
+  auto isDegenerateTet = [&](const Elem & e)
   {
     if (e.type() != TET4)
       return false;
@@ -917,10 +920,10 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
 
     // node id -> ids of ALL incident elements (used for the collapse star and the non-TET4 guard);
     // a tet-face -> use count (to find boundary faces independently of possibly-stale neighbor
-    // links); and the current TET4 slivers
+    // links); and the current degenerate TET4 elements
     std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
     std::map<std::array<dof_id_type, 3>, unsigned int> face_count;
-    std::vector<dof_id_type> sliver_ids;
+    std::vector<dof_id_type> degenerate_ids;
     for (const auto & elem : mesh->active_element_ptr_range())
     {
       for (const auto n : make_range(elem->n_nodes()))
@@ -932,8 +935,8 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
           const auto ns = elem->nodes_on_side(s);
           ++face_count[faceKey(elem->node_id(ns[0]), elem->node_id(ns[1]), elem->node_id(ns[2]))];
         }
-        if (isTetSliver(*elem))
-          sliver_ids.push_back(elem->id());
+        if (isDegenerateTet(*elem))
+          degenerate_ids.push_back(elem->id());
       }
     }
     // A node on a face used by a single tet is on the mesh boundary
@@ -952,10 +955,10 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
       return false;
     };
 
-    for (const auto sid : sliver_ids)
+    for (const auto sid : degenerate_ids)
     {
       Elem * s = mesh->query_elem_ptr(sid);
-      if (!s || s->type() != TET4 || touches_repaired(*s) || !isTetSliver(*s))
+      if (!s || s->type() != TET4 || touches_repaired(*s) || !isDegenerateTet(*s))
         continue;
 
       // Evaluate a candidate "collapse gone-node G onto kept-node K": returns whether it is a
@@ -985,7 +988,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
         for (const auto eid : libmesh_map_find(node_to_elems, K->id()))
           star.insert(eid);
 
-        // Non-TET4 guard: other routines for repairing slivers of another element type
+        // Non-TET4 guard: other routines repair degenerate elements of another element type
         for (const auto eid : star)
         {
           const Elem * e = mesh->query_elem_ptr(eid);
@@ -1013,7 +1016,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
           const Real vb = e->volume();
           const Real va = tetVolSub(*e, G, K);
           if (std::abs(va) < invert_floor)
-            return; // would invert or create a new sliver
+            return; // would invert or create a new degenerate tet
           if (std::abs(vb) >= invert_floor)
           {
             if ((vb > 0) != (va > 0))
@@ -1091,7 +1094,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
         }
       };
 
-      // Try all 6 edges of the sliver, both directions
+      // Try all 6 edges of the degenerate tet, both directions
       static const unsigned int tet_edges[6][2] = {{0, 1}, {1, 2}, {0, 2}, {0, 3}, {1, 3}, {2, 3}};
       for (const auto & ed : tet_edges)
       {
@@ -1103,7 +1106,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
       }
 
       if (!best_K)
-        continue; // no valid collapse this pass; remaining slivers are counted at the end
+        continue; // no valid collapse this pass; remaining degenerate tets are counted at the end
 
       // Whole-star node-disjointness: defer if any node of the collapse star was already repaired
       // this pass (keeps the per-pass node_to_elems / boundary_nodes maps valid for this collapse)
@@ -1147,7 +1150,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
       for (const auto bid : ids)
         boundary_info.add_node(best_K, bid);
 
-      // Commit: reshape (G -> K), delete the collapsing tets (incl. the sliver)
+      // Commit: reshape (G -> K), delete the collapsing tets (incl. the degenerate tet)
       for (const auto eid : best_reshaped)
       {
         Elem * e = mesh->query_elem_ptr(eid);
@@ -1179,19 +1182,19 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
     }
   }
 
-  // Count any slivers that remain (no valid collapse was found for them)
+  // Count any degenerate tets that remain (no valid collapse was found for them)
   for (const auto & elem : mesh->active_element_ptr_range())
-    if (elem->type() == TET4 && isTetSliver(*elem))
+    if (elem->type() == TET4 && isDegenerateTet(*elem))
       ++num_skipped;
 
   if (num_repaired)
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of tet sliver elements repaired by edge collapse: " << num_repaired
+    _console << "Number of degenerate tetrahedra repaired by edge collapse: " << num_repaired
              << std::endl;
     if (num_skipped)
-      _console << "Number of tet slivers that could not be collapsed (left in place): "
+      _console << "Number of degenerate tetrahedra that could not be collapsed (left in place): "
                << num_skipped << std::endl;
   }
 }
