@@ -138,6 +138,14 @@ public:
   void setupPositions();
 
   /**
+   * Build communicators and reserve backups using a custom rank configuration. Used by
+   * FEProblemBase::partitionConcurrentMultiApps() to (re)assign this multiapp the disjoint subset
+   * of ranks it will run on when multiapps are executed concurrently, before its sub-apps are
+   * created.
+   */
+  void init(unsigned int num_apps, const LocalRankConfig & config);
+
+  /**
    * Create the i-th local app
    * @param[in] i local app index
    */
@@ -453,11 +461,6 @@ protected:
    * Build communicators and reserve backups.
    */
   void init(unsigned int num_apps, bool batch_mode = false);
-
-  /**
-   * Same as other init method, except defining a custom rank configuration
-   */
-  void init(unsigned int num_apps, const LocalRankConfig & config);
 
   /**
    * Create the provided number of apps.

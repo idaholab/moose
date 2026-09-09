@@ -1694,6 +1694,19 @@ public:
    */
   bool execMultiApps(ExecFlagType type, bool auto_advance = true);
 
+  /**
+   * @return the number set for concurrent multiapp execution; greater than 1 enables running the
+   * multiapps of an 'execution_order_group' concurrently, each on its own subset of ranks
+   */
+  unsigned int numConcurrentMultiApps() const { return _num_concurrent_multiapps; }
+
+  /**
+   * Assign each multiapp that shares an 'execution_order_group' with others a disjoint subset of
+   * the ranks so that they can be solved concurrently (one multiapp per rank at a time). Only does
+   * anything when 'num_concurrent_multiapps' > 1. Must be called before the sub-apps are created.
+   */
+  void partitionConcurrentMultiApps();
+
   void finalizeMultiApps();
 
   /**

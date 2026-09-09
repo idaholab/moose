@@ -143,7 +143,6 @@
 
 // C++
 #include <cstring> // for "Jacobian" exception test
-#include <thread>
 
 // Anonymous namespace for helper function
 namespace
@@ -284,7 +283,13 @@ FEProblemBase::validParams()
                         "or transferring to/from Multiapps "
                         "(default: false)");
   params.addParam<unsigned int>(
-      "num_concurrent_multiapps", 1, "Number of concurrent multiapps to solve at once");
+      "num_concurrent_multiapps",
+      1,
+      "Set greater than 1 to solve the multiapps sharing an 'execution_order_group' "
+      "concurrently. Each such multiapp is assigned a disjoint subset of the MPI ranks "
+      "(partitioned using their 'min_procs_per_app'/'max_procs_per_app', otherwise evenly), so "
+      "they solve at the same time on different ranks. The specific value only acts as an "
+      "on/off switch; the number that run at once is set by the ranks available.");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -1408,6 +1413,9 @@ FEProblemBase::initialSetup()
   if (_multi_apps.hasObjects())
   {
     TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps", false);
+    // Assign concurrent multiapps their disjoint rank partitions before the sub-apps are created
+    // so that each is created on the communicator it will actually run on
+    partitionConcurrentMultiApps();
     _multi_apps.initialSetup();
   }
 
@@ -6112,6 +6120,80 @@ FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
     return _between_multi_app_transfers;
 }
 
+void
+FEProblemBase::partitionConcurrentMultiApps()
+{
+  if (_num_concurrent_multiapps <= 1)
+    return;
+
+  // Group the multiapps by execution order group. Only position-based multiapps are partitioned
+  // here; sampler-style (non-positions) multiapps assign their own rank configuration.
+  std::map<unsigned int, std::vector<std::shared_ptr<MultiApp>>> groups;
+  for (const auto & multi_app : _multi_apps.getActiveObjects())
+    if (multi_app->usingPositions())
+      groups[multi_app->getParam<unsigned int>("execution_order_group")].push_back(multi_app);
+
+  const auto n_procs = n_processors();
+  const auto my_rank = processor_id();
+
+  for (const auto & [_, group] : groups)
+  {
+    // Nothing to run concurrently unless the group has more than one multiapp
+    if (group.size() < 2)
+      continue;
+
+    // Number of ranks handed to each multiapp. Start each at its per-app minimum (at least one
+    // rank), then distribute the rest; caps prevent giving a multiapp more ranks than it could
+    // spread its apps over at 'max_procs_per_app'. With the defaults (min 1, max unbounded) this
+    // is just an even split.
+    std::vector<processor_id_type> count(group.size());
+    std::vector<processor_id_type> caps(group.size());
+    std::vector<processor_id_type> mins(group.size());
+    std::vector<processor_id_type> maxs(group.size());
+    processor_id_type min_total = 0;
+    for (const auto m : index_range(group))
+    {
+      // Each multiapp needs at least one rank, so a 'min_procs_per_app' of 0 is treated as 1
+      mins[m] = std::max(group[m]->getParam<processor_id_type>("min_procs_per_app"),
+                         cast_int<processor_id_type>(1));
+      maxs[m] = group[m]->getParam<processor_id_type>("max_procs_per_app");
+      const auto n_apps_m = cast_int<processor_id_type>(group[m]->numGlobalApps());
+      caps[m] = (maxs[m] >= n_procs) ? n_procs : std::min(n_procs, n_apps_m * maxs[m]);
+      count[m] = mins[m];
+      min_total += mins[m];
+    }
+
+    // Hand out the remaining ranks round-robin to multiapps still below their cap
+    processor_id_type remaining = n_procs - min_total;
+    bool progress = true;
+    while (remaining > 0 && progress)
+    {
+      progress = false;
+      for (const auto m : index_range(group))
+        if (remaining > 0 && count[m] < caps[m])
+        {
+          count[m]++;
+          remaining--;
+          progress = true;
+        }
+    }
+    // Any leftover ranks (all multiapps already at their cap) simply run no app in this group.
+
+    // Assign each multiapp a contiguous, disjoint rank range and (re)initialize it on that range.
+    // This is collective: every rank calls init() (hence buildComm's split) for every multiapp.
+    processor_id_type offset = 0;
+    for (const auto m : index_range(group))
+    {
+      LocalRankConfig cfg{0, 0, 0, 0, false, 0};
+      if (my_rank >= offset && my_rank < offset + count[m])
+        cfg = rankConfig(
+            my_rank - offset, count[m], group[m]->numGlobalApps(), mins[m], maxs[m], false);
+      group[m]->init(group[m]->numGlobalApps(), cfg);
+      offset += count[m];
+    }
+  }
+}
+
 bool
 FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 {
@@ -6168,63 +6250,33 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     for (const auto & [group_id, multi_app_group] : ordered_multi_apps)
     {
-
-      // We need the atomic to be able to 'exit' early in case of failures
-      std::atomic<bool> group_success{true};
+      bool group_success = true;
       if (_verbose_multiapps && ordered_multi_apps.size() > 1)
         _console << COLOR_CYAN << "\nExecuting MultiApps group " << Moose::stringify(group_id)
                  << COLOR_DEFAULT << std::endl;
 
-      if (multi_app_group.size() > 1)
+      if (_verbose_multiapps && multi_app_group.size() > 1)
       {
         // Let the user know about concurrent multiapp use (new option: help them set it up)
-        if (_verbose_multiapps)
-        {
-          _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
-          for (const auto & multi_app : multi_app_group)
-            _console << multi_app->name() << " ";
-          _console << COLOR_DEFAULT << std::endl;
-        }
+        _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
+        for (const auto & multi_app : multi_app_group)
+          _console << multi_app->name() << " ";
+        _console << COLOR_DEFAULT << std::endl;
       }
 
-      unsigned num_threads = _num_concurrent_multiapps;
-      std::vector<std::thread> threads;
+      // With concurrent multiapps, the multiapps in a group have each been assigned a disjoint
+      // subset of the ranks (see partitionConcurrentMultiApps()), so solveStep() does real work
+      // only on those ranks and returns early on the others. Looping here therefore lets different
+      // ranks advance different multiapps at the same time - the concurrency comes from the rank
+      // partition, not from threads, which keeps each rank single-threaded through the solve and
+      // avoids racing PETSc's process-global state (communicator and options database).
+      for (const auto & multi_app : multi_app_group)
+        if (!multi_app->solveStep(_dt, _time, auto_advance))
+          group_success = false;
 
-      const auto N = multi_app_group.size();
-      const auto chunk = (multi_app_group.size() + num_threads - 1) / num_threads;
-
-      for (const auto t : make_range(num_threads))
-      {
-        // Don't solve step if a single failure occurred
-        if (!group_success.load(std::memory_order_relaxed))
-          continue;
-
-        const auto begin = t * chunk;
-        const auto end = std::min(begin + chunk, N);
-        const auto & app_group = multi_app_group;
-
-        threads.emplace_back(
-            [begin, end, this, app_group, &group_success, &auto_advance]()
-            {
-              for (const auto i : make_range(begin, end))
-              {
-                // as far as libMesh is concerned, we're not
-                // {
-                //   Threads::spin_mutex::scoped_lock lock(get_function_mutex);
-                //   libMesh::Threads::in_threads = false;
-                // }
-
-                auto & multi_app = app_group[i];
-                bool local = multi_app->solveStep(_dt, _time, auto_advance);
-                if (!local)
-                  group_success.store(false, std::memory_order_relaxed);
-              }
-            });
-      }
-
-      // join all
-      for (auto & th : threads)
-        th.join();
+      // Whether to move on to the next group must be a collective decision so that every rank
+      // leaves the group loop together and stays aligned for the following collectives.
+      _communicator.min(group_success);
 
       // No need to solve the other groups if this group failed
       if (!group_success)

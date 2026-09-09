@@ -384,7 +384,11 @@ MultiApp::setupPositions()
   {
     fillPositions();
     init(_positions.size());
-    createApps();
+    // When multiapps are run concurrently, sub-app creation is deferred to initialSetup() so it
+    // happens after FEProblemBase::partitionConcurrentMultiApps() has (re)initialized this
+    // multiapp on the disjoint subset of ranks it will actually run on.
+    if (_fe_problem.numConcurrentMultiApps() <= 1)
+      createApps();
   }
 }
 
@@ -441,9 +445,9 @@ MultiApp::createLocalApp(const unsigned int i)
 void
 MultiApp::initialSetup()
 {
-  if (!_use_positions)
-    // if not using positions, we create the sub-apps in initialSetup instead of right after
-    // construction of MultiApp
+  // Sub-apps are created here (rather than in setupPositions) when we are not using positions, or
+  // when concurrent execution deferred creation until the rank partitioning was assigned.
+  if (!_use_positions || _fe_problem.numConcurrentMultiApps() > 1)
     createApps();
 }
 
