@@ -35,6 +35,36 @@ protected:
     return NS::slipVelocityVector(_u_slip, _v_slip, _w_slip, arg, state);
   }
 
+  /// The argument the current face is evaluated at: single sided on a boundary face, central
+  /// difference on an internal one
+  Moose::FaceArg currentFaceArg() const;
+
+  /**
+   * The value on the current face of a coefficient of the slip flux. A boundary face takes the
+   * single sided value; an internal face interpolates the values of its two cells with `method`,
+   * falling back to the arithmetic average where the two do not share a sign or one vanishes, the
+   * harmonic mean not being defined there.
+   * @param coefficient callable evaluating the coefficient at a space argument and a state
+   */
+  template <typename Coefficient>
+  Real faceCoefficient(const Coefficient & coefficient,
+                       const Moose::StateArg & state,
+                       Moose::FV::InterpMethod method) const
+  {
+    if (Moose::FV::onBoundary(*this, *_current_face_info))
+      return coefficient(singleSidedFaceArg(_current_face_info), state);
+
+    const Real elem_value = coefficient(makeElemArg(_current_face_info->elemPtr()), state);
+    const Real neighbor_value = coefficient(makeElemArg(_current_face_info->neighborPtr()), state);
+    if (elem_value * neighbor_value <= 0.0)
+      method = Moose::FV::InterpMethod::Average;
+
+    Real face_value;
+    Moose::FV::interpolate(
+        method, face_value, elem_value, neighbor_value, *_current_face_info, true);
+    return face_value;
+  }
+
   /// The dimension of the simulation
   const unsigned int _dim;
 

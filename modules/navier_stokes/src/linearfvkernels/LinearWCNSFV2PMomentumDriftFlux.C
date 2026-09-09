@@ -77,46 +77,14 @@ LinearWCNSFV2PMomentumDriftFlux::computeFlux()
 {
   const auto & normal = _current_face_info->normal();
   const auto state = determineState();
-  const bool on_boundary = Moose::FV::onBoundary(*this, *_current_face_info);
-
-  Moose::FaceArg face_arg;
-  if (on_boundary)
-    face_arg = singleSidedFaceArg(_current_face_info);
-  else
-    face_arg = makeCDFace(*_current_face_info);
-
-  const auto u_slip_vel_vec = slipVelocity(face_arg, state);
-
+  const auto u_slip_vel_vec = slipVelocity(currentFaceArg(), state);
   const auto uslipdotn = normal * u_slip_vel_vec;
 
   // The exact diffusion stress coefficient, beta_d beta_c / rho_m, evaluated on the face
-  Real face_coefficient;
-  if (on_boundary)
-    face_coefficient = diffusionStressCoefficient(face_arg, state);
-  else
-  {
-    const auto elem_arg = makeElemArg(_current_face_info->elemPtr());
-    const auto neigh_arg = makeElemArg(_current_face_info->neighborPtr());
-
-    const auto elem_coefficient = diffusionStressCoefficient(elem_arg, state);
-    const auto neighbor_coefficient = diffusionStressCoefficient(neigh_arg, state);
-
-    // beta_d beta_c / rho_m vanishes wherever either phase is absent, at a phase fraction of zero
-    // and again at one, and the harmonic mean is not defined there. Fall back to the arithmetic
-    // average on those faces. The coefficient weights an advective flux rather than acting as a
-    // diffusivity, so the arithmetic average is the natural choice for it in any case; the
-    // harmonic option is retained for continuity with the parameter's previous meaning.
-    const auto interp_method = (elem_coefficient > 0.0 && neighbor_coefficient > 0.0)
-                                   ? _density_interp_method
-                                   : Moose::FV::InterpMethod::Average;
-
-    Moose::FV::interpolate(interp_method,
-                           face_coefficient,
-                           elem_coefficient,
-                           neighbor_coefficient,
-                           *_current_face_info,
-                           true);
-  }
+  const auto face_coefficient = faceCoefficient([this](const auto & arg, const auto & state)
+                                                { return diffusionStressCoefficient(arg, state); },
+                                                state,
+                                                _density_interp_method);
 
   // The term is written as a flux carried by the slip velocity, so that the flux scale can be
   // reused below as the scale of the implicit surrogate.

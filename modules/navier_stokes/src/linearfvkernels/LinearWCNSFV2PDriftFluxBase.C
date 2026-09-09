@@ -52,3 +52,10 @@ LinearWCNSFV2PDriftFluxBase::setupFaceData(const FaceInfo * face_info)
   LinearFVFluxKernel::setupFaceData(face_info);
   _boundary_normal_factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 }
+
+Moose::FaceArg
+LinearWCNSFV2PDriftFluxBase::currentFaceArg() const
+{
+  return Moose::FV::onBoundary(*this, *_current_face_info) ? singleSidedFaceArg(_current_face_info)
+                                                           : makeCDFace(*_current_face_info);
+}
