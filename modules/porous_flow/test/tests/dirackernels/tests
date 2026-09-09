@@ -199,7 +199,7 @@
     expect_err = "must specify at least one of 'unit_weight' or 'unit_weight_fp'"
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if neither unit_weight nor unit_weight_fp is supplied'
     design = 'PorousFlowPeacemanBorehole.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
   [bh_except19]
     type = 'RunException'
@@ -208,7 +208,7 @@
     expect_err = "'unit_weight_temperature' must be supplied when 'unit_weight_fp' is supplied"
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if unit_weight_fp is supplied without unit_weight_temperature'
     design = 'PorousFlowPeacemanBorehole.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
   [bh_except20]
     type = 'RunException'
@@ -217,7 +217,7 @@
     expect_err = "must specify only one of 'unit_weight' .* or 'unit_weight_fp'"
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if both unit_weight and unit_weight_fp are supplied'
     design = 'PorousFlowPeacemanBorehole.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
 
   [pls01_00]
@@ -424,7 +424,7 @@
     csvdiff = 'bh_unit_weight.csv bh_unit_weight_point_fluxes_0001.csv'
     requirement = 'PorousFlowPeacemanBorehole shall compute the wellbore pressure from a constant fluid unit weight, producing the analytically-expected flux at each borehole point, reported via PorousFlowPointFluxQuantity and PorousFlowPlotPointFluxQuantity'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md PorousFlowPointFluxQuantity.md PorousFlowPlotPointFluxQuantity.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
   [bh_variable_unit_weight]
     type = 'CSVDiff'
@@ -432,7 +432,7 @@
     csvdiff = 'bh_variable_unit_weight.csv bh_variable_unit_weight_point_fluxes_0001.csv'
     requirement = 'PorousFlowPeacemanBorehole shall compute the wellbore pressure by integrating a fluid density evaluated from the temperature at each borehole point, agreeing with a hand-computed trapezoidal integration of the fluid unit weight'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
   [bh_variable_unit_weight_isothermal]
     type = 'CSVDiff'
@@ -442,7 +442,7 @@
     csvdiff = 'bh_variable_unit_weight_isothermal.csv bh_variable_unit_weight_isothermal_point_fluxes_0001.csv'
     requirement = 'PorousFlowPeacemanBorehole shall reproduce the constant-unit_weight wellbore pressure when the temperature-dependent fluid density is constant (thermal_expansion=0), since the trapezoidal density integral then telescopes to the constant-unit_weight formula'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
-    issues = '#TODO'
+    issues = '#33700'
   []
   [bh07]
     type = 'CSVDiff'
