@@ -11,6 +11,7 @@
 
 #include "EigenproblemESProblemOperator.h"
 #include "MFEMEigensolverBase.h"
+#include "MFEMEigenproblem.h"
 
 namespace Moose::MFEM
 {
@@ -35,7 +36,8 @@ void
 EigenproblemESProblemOperator::FormEquationSystemOperator()
 {
   GetEquationSystem()->BuildEquationSystem();
-  GetEquationSystem()->BuildEigenproblemJacobian(_true_x);
+  GetEquationSystem()->BuildEigenproblemJacobian(
+      _true_x, cast_ref<MFEMEigenproblem &>(_problem).getRHSCoefficient());
 }
 
 void

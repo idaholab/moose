@@ -45,22 +45,19 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
     mooseError("Complex numbers are not currently supported for eigenproblems.");
 
   if (isParamSetByUser("rhs_matrix_coefficient") && isParamSetByUser("rhs_coefficient"))
-    paramError("rhs_coefficient", "Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
+    paramError("rhs_coefficient",
+               "Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
                "non-default value.");
 }
 
-mfem::Coefficient &
+Moose::MFEM::EigenRHSCoefficient
 MFEMEigenproblem::getRHSCoefficient()
 {
-  return getCoefficients().getScalarCoefficient(
+  if (isParamSetByUser("rhs_matrix_coefficient"))
+    return &getCoefficients().getMatrixCoefficient(
+        getParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient"));
+  return &getCoefficients().getScalarCoefficient(
       getParam<MFEMScalarCoefficientName>("rhs_coefficient"));
-}
-
-mfem::MatrixCoefficient &
-MFEMEigenproblem::getRHSMatrixCoefficient()
-{
-  return getCoefficients().getMatrixCoefficient(
-      getParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient"));
 }
 
 void

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMProblem.h"
+#include "EigenproblemEquationSystem.h"
 
 class MFEMEigenproblem : public MFEMProblem
 {
@@ -31,11 +32,8 @@ public:
                            const std::string & var_name,
                            InputParameters & parameters) override;
 
-  /// Returns the scalar coefficient used to scale the right-hand side of the eigenproblem equation.
-  mfem::Coefficient & getRHSCoefficient();
-
-  /// Returns the matrix coefficient used to scale the right-hand side of the eigenproblem equation.
-  mfem::MatrixCoefficient & getRHSMatrixCoefficient();
+  /// Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
+  Moose::MFEM::EigenRHSCoefficient getRHSCoefficient();
 };
 
 #endif
