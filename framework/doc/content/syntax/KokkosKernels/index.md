@@ -7,9 +7,6 @@ Before reading this documentation, consider reading the following materials firs
 - [Kernels System](syntax/Kernels/index.md) to understand the MOOSE kernel system,
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE.
 
-!alert note
-Kokkos-MOOSE kernels do not support coupling with scalar variables yet.
-
 The Kokkos-MOOSE kernels are designed to resemble the original MOOSE kernels as much as possible for easier porting and adaptation.
 However, some differences still exist due to the fundamentally different programming paradigm between CPU and GPU.
 You can create your own kernel by subclassing `Moose::Kokkos::Kernel` as is done in the original MOOSE by inheriting `Kernel`.
@@ -21,6 +18,7 @@ In the original MOOSE, the following virtual functions should or optionally have
 virtual Real computeQpResidual() override;
 virtual Real computeQpJacobian() override;
 virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 ```
 
 Indices such as `_i`, `_j`, and `_qp` were made available in those functions as member variables.
@@ -45,6 +43,12 @@ KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                               const unsigned int jvar,
                                               const unsigned int qp,
                                               AssemblyDatum & datum) const;
+template <typename Derived>
+KOKKOS_FUNCTION Real computeQpOffDiagJacobianScalar(const unsigned int i,
+                                                    const unsigned int j,
+                                                    const unsigned int jvar,
+                                                    const unsigned int qp,
+                                                    AssemblyDatum & datum) const;
 ```
 
 The template argument `Derived` can be used for implementing static polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion by statically casting `this` pointer to the derived type and directly calling the derived class methods using the cast pointer.
