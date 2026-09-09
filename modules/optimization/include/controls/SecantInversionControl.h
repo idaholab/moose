@@ -29,10 +29,10 @@ protected:
   computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) override;
 
 private:
-  /// Perturbation applied on the first iteration of each sweep to seed the secant method
+  /// Perturbation applied on the first iteration of each fixed-point solve to seed the secant method
   const Real _initial_delta;
-  /// Previous iteration's parameter value (secant point); refreshed each sweep
+  /// Previous iteration's parameter value (secant point); refreshed each fixed-point solve
   Real _p_prev;
-  /// Previous iteration's output value (secant point); refreshed each sweep
+  /// Previous iteration's output value (secant point); refreshed each fixed-point solve
   Real _y_prev;
 };

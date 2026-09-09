@@ -15,7 +15,7 @@ has been transferred back, this control performs a single secant (quasi-Newton) 
 !equation
 p_{k+1} = p_k - (y_k - y_\text{target}) \frac{p_k - p_{k-1}}{y_k - y_{k-1}}
 
-On the first iteration of each sweep only one `(p, y)` pair is available, so the update is seeded by
+On the first iteration of each fixed-point solve only one `(p, y)` pair is available, so the update is seeded by
 perturbing `p` by `initial_delta`. The outer iteration count, convergence test, and time-step
 cutting are owned by the [Executioner](Executioner/index.md) and the
 [Convergence](Convergence/index.md) system (typically a [PostprocessorConvergence](PostprocessorConvergence.md)

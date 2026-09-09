@@ -73,14 +73,20 @@ InversionControlBase::InversionControlBase(const InputParameters & parameters)
 }
 
 unsigned int
-InversionControlBase::sweepIteration() const
+InversionControlBase::fixedPointIteration() const
 {
   Executioner * const executioner = _app.getExecutioner();
-  if (!executioner || !executioner->hasFixedPointSolve())
-    mooseError("requires an executioner that runs a fixed-point (MultiApp) solve; the current "
-               "executioner does not provide one.");
+  // hasSolveObject<FixedPointSolve>() guards the null (executor-style executioners never build one);
+  // hasFixedPointIteration() then checks that fixed-point iteration is actually enabled. Without the
+  // second check a standard executioner with no fixed-point settings still owns a FixedPointSolve, so
+  // the control would silently drift the parameter once per time step instead of iterating.
+  if (!executioner || !executioner->hasSolveObject<FixedPointSolve>() ||
+      !executioner->fixedPointSolve().hasFixedPointIteration())
+    mooseError("requires an executioner configured to perform fixed-point (MultiApp) iterations; set "
+               "'fixed_point_max_its' greater than 1 (or otherwise enable fixed-point iteration) on "
+               "the executioner.");
   // numFixedPointIts() returns _fixed_point_it + 1, i.e. 1 on the first iteration of each fresh
-  // fixed-point sweep (including a restep retry).
+  // fixed-point solve (including a restep retry).
   return executioner->fixedPointSolve().numFixedPointIts();
 }
 
@@ -93,7 +99,7 @@ InversionControlBase::targetValue() const
 void
 InversionControlBase::execute()
 {
-  const unsigned int it = sweepIteration();
+  const unsigned int it = fixedPointIteration();
   const Real p_used = _param;
   const Real y = _output;
   const Real y_target = targetValue();

@@ -50,13 +50,13 @@ protected:
   };
 
   /**
-   * Compute this iteration's update from the current sample: the 1-based sweep iteration \c it and
+   * Compute this iteration's update from the current sample: the 1-based fixed-point iteration \c it and
    * the (parameter, output) pair (\c p_used, \c y) that produced it, against target \c y_target.
    */
   virtual IterationUpdate computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) = 0;
 
-  /// 1-based fixed-point sweep iteration (1 on the first iteration of each sweep, including restep)
-  unsigned int sweepIteration() const;
+  /// 1-based fixed-point iteration (1 on the first iteration of each fixed-point solve, including restep)
+  unsigned int fixedPointIteration() const;
 
   /// Target output value at the current time
   Real targetValue() const;

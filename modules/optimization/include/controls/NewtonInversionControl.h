@@ -35,8 +35,8 @@ private:
   const Real _parameter_delta;
   /// Residual written on perturbed iterations so convergence is only declared on base iterations
   const Real _nonconverged_residual;
-  /// Parameter value of the current base solve (re-seeded each sweep; not restartable)
+  /// Parameter value of the current base solve (re-seeded each fixed-point solve; not restartable)
   Real _p_base;
-  /// Output value of the current base solve (re-seeded each sweep; not restartable)
+  /// Output value of the current base solve (re-seeded each fixed-point solve; not restartable)
   Real _y_base;
 };

@@ -23,7 +23,7 @@ SecantInversionControl::validParams()
       "initial_delta",
       1e-3,
       "initial_delta>0",
-      "Perturbation applied to the parameter on the first iteration of each fixed-point sweep to "
+      "Perturbation applied to the parameter on the first iteration of each fixed-point solve to "
       "seed the secant method.");
 
   return params;
@@ -48,7 +48,7 @@ SecantInversionControl::computeUpdate(unsigned int it, Real p_used, Real y, Real
     p_next = linearRootUpdate(_p_prev, _y_prev, p_used, y, y_target);
 
   // _p_prev/_y_prev are plain members, not restartable: they are re-seeded on the first iteration
-  // of every sweep (it == 1), so a recover at a step boundary loses nothing.
+  // of every fixed-point solve (it == 1), so a recover at a step boundary loses nothing.
   _p_prev = p_used;
   _y_prev = y;
 
