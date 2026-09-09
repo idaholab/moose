@@ -219,6 +219,27 @@
       jsondiff = pin_hex_3d_csg.json
       mesh_mode = REPLICATED
     []
+    [3d_hex_multiple_ducts]
+      detail = '3D hexagonal pin with multiple ducts and mutiple axial zones'
+      type = JSONDiff
+      input = pin_hex.i
+      cli_args = "Mesh/rmp/dim=3
+                  Mesh/rmp/axial_regions='1.0 1.0 1.0'
+                  Mesh/rmp/axial_mesh_intervals='1 1 1'
+                  Mesh/rmp/top_boundary_id=201
+                  Mesh/rmp/bottom_boundary_id=202
+                  Mesh/pin1/region_ids='11 12 13 14; 11 12 13 14; 11 12 13 14'
+                  Mesh/pin1/pin_type=1
+                  Mesh/pin1/ring_radii='0.4665'
+                  Mesh/pin1/duct_halfpitch='0.58 0.68'
+                  Mesh/pin1/mesh_intervals='1 1 1 1'
+                  Mesh/pin1/extrude=true
+                  Outputs/file_base=pin_hex_3d_multiple_duct
+                  --csg-only"
+      recover = false
+      jsondiff = pin_hex_3d_multiple_duct_csg.json
+      mesh_mode = REPLICATED
+    []
     [2d_square]
       detail = '2D square pin'
       type = JSONDiff
@@ -368,6 +389,28 @@
                   --csg-only"
       recover = false
       jsondiff = pin_hex_3d_engunit_csg.json
+      mesh_mode = REPLICATED
+    []
+    [3d_hex_multiple_ducts]
+      detail = '3D hexagonal pin with multiple ducts and mutiple axial zones'
+      type = JSONDiff
+      input = pin_hex.i
+      cli_args = "Mesh/rmp/dim=3
+                  Mesh/rmp/axial_regions='1.0 1.0 1.0'
+                  Mesh/rmp/axial_mesh_intervals='1 1 1'
+                  Mesh/rmp/top_boundary_id=201
+                  Mesh/rmp/bottom_boundary_id=202
+                  Mesh/pin1/region_ids='11 12 13 14; 11 12 13 14; 11 12 13 14'
+                  Mesh/pin1/pin_type=1
+                  Mesh/pin1/ring_radii='0.4665'
+                  Mesh/pin1/duct_halfpitch='0.58 0.68'
+                  Mesh/pin1/mesh_intervals='1 1 1 1'
+                  Mesh/pin1/extrude=true
+                  Outputs/file_base=pin_hex_3d_multiple_duct_engunit
+                  Mesh/rmp/expand_units=false
+                  --csg-only"
+      recover = false
+      jsondiff = pin_hex_3d_multiple_duct_engunit_csg.json
       mesh_mode = REPLICATED
     []
     [2d_square]
