@@ -6136,7 +6136,7 @@ FEProblemBase::partitionConcurrentMultiApps()
   const auto n_procs = n_processors();
   const auto my_rank = processor_id();
 
-  for (const auto & [_, group] : groups)
+  for (const auto & [group_id, group] : groups)
   {
     // Nothing to run concurrently unless the group has more than one multiapp
     if (group.size() < 2)
@@ -6162,6 +6162,18 @@ FEProblemBase::partitionConcurrentMultiApps()
       count[m] = mins[m];
       min_total += mins[m];
     }
+
+    if (min_total > n_procs)
+      mooseError("Not enough MPI ranks to run the ",
+                 group.size(),
+                 " multiapps of 'execution_order_group' ",
+                 group_id,
+                 " concurrently: they need at least ",
+                 min_total,
+                 " ranks (from 'min_procs_per_app') but only ",
+                 n_procs,
+                 " are available. Reduce the number of concurrent multiapps, lower "
+                 "'min_procs_per_app', or run with more processors.");
 
     // Hand out the remaining ranks round-robin to multiapps still below their cap
     processor_id_type remaining = n_procs - min_total;
