@@ -119,7 +119,7 @@ private:
   /// @param mesh the mesh to modify
   void repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const;
 
-  /// @brief Absorb a sliver element into the neighbor sharing the face with sorted node-id key
+  /// @brief Absorb a degenerate element into the neighbor sharing the face with sorted node-id key
   ///        @p shared_key, by replacing both with a single C0Polyhedron whose faces are both
   ///        elements' faces except the shared one. Side and edge boundary ids and the neighbor's
   ///        subdomain are carried onto the polyhedron. On success the polyhedron is added, both
@@ -127,21 +127,22 @@ private:
   ///        returned; if the union is not a valid convex cell the mesh is left unchanged and false
   ///        is returned.
   bool absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
-                              Elem * sliver,
+                              Elem * degenerate,
                               Elem * neighbor,
                               const std::vector<dof_id_type> & shared_key,
                               std::unordered_set<dof_id_type> & touched_nodes) const;
 
-  /// @brief Collapse a sliver element by merging each @p gone_kept node pair (moving the first node
-  ///        onto the second), e.g. one flat cap face of a wedge or hexahedron onto its opposite.
-  ///        The sliver is deleted and its neighbors stay valid: the merge is committed only if it
+  /// @brief Collapse a degenerate element by merging each @p gone_kept node pair (moving the first
+  ///        node onto the second), e.g. one flat cap face of a wedge or hexahedron onto its
+  ///        opposite. The element is deleted and its neighbors stay valid: the merge is committed
+  ///        only if it
   ///        leaves every other element in the collapse star non-degenerate and non-inverted (volume
   ///        above @p invert_floor), otherwise the mesh is left unchanged. The caller is responsible
   ///        for capturing the gone node pointers up front and for ensuring the connecting side faces
   ///        are unshared. Returns true and records the affected nodes in @p touched_nodes on commit.
   bool collapseByFaceMerge(
       std::unique_ptr<MeshBase> & mesh,
-      Elem * sliver,
+      Elem * degenerate,
       const std::vector<std::pair<Node *, Node *>> & gone_kept,
       const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
       std::unordered_set<dof_id_type> & touched_nodes,

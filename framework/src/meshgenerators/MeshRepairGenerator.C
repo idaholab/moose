@@ -1201,7 +1201,7 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
 
 bool
 MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
-                                            Elem * sliver,
+                                            Elem * degenerate,
                                             Elem * neighbor,
                                             const std::vector<dof_id_type> & shared_key,
                                             std::unordered_set<dof_id_type> & touched_nodes) const
@@ -1242,7 +1242,7 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
       face_bcs[key].insert(ids.begin(), ids.end());
     }
   };
-  for (Elem * e : {neighbor, sliver})
+  for (Elem * e : {neighbor, degenerate})
     for (const auto s : make_range(e->n_sides()))
       if (sideKey(e, s) != shared_key)
         add_face(e, s);
@@ -1268,7 +1268,7 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
     }
   };
   capture_edges(neighbor);
-  capture_edges(sliver);
+  capture_edges(degenerate);
 
   // Construct the union polyhedron and accept it only if it is a sound, convex cell. The
   // C0Polyhedron constructor tetrahedralizes the faces and throws if the union is non-convex or has
@@ -1322,7 +1322,7 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
   }
 
   // Move side boundary ids from the old elements onto the matching faces of the polyhedron
-  boundary_info.remove(sliver);
+  boundary_info.remove(degenerate);
   boundary_info.remove(neighbor);
   for (const auto s : make_range(added->n_sides()))
   {
@@ -1352,11 +1352,11 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
           boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
     }
 
-  for (const auto i : make_range(sliver->n_nodes()))
-    touched_nodes.insert(sliver->node_id(i));
+  for (const auto i : make_range(degenerate->n_nodes()))
+    touched_nodes.insert(degenerate->node_id(i));
   for (const auto i : make_range(neighbor->n_nodes()))
     touched_nodes.insert(neighbor->node_id(i));
-  mesh->delete_elem(sliver);
+  mesh->delete_elem(degenerate);
   mesh->delete_elem(neighbor);
   return true;
 }
@@ -1364,14 +1364,15 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
 bool
 MeshRepairGenerator::collapseByFaceMerge(
     std::unique_ptr<MeshBase> & mesh,
-    Elem * sliver,
+    Elem * degenerate,
     const std::vector<std::pair<Node *, Node *>> & gone_kept,
     const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
     std::unordered_set<dof_id_type> & touched_nodes,
     const Real invert_floor) const
 {
   // Substitution gone-node-id -> kept Node*, and the collapse star (all elements at a gone node).
-  // The gone Node pointers are captured by the caller before any mutation: the sliver is in its own
+  // The gone Node pointers are captured by the caller before any mutation: the degenerate element
+  // is in its own
   // star, so the substitution below overwrites its gone-node slots.
   std::map<dof_id_type, Node *> sub;
   std::set<dof_id_type> star;
@@ -1424,7 +1425,8 @@ MeshRepairGenerator::collapseByFaceMerge(
 
   // Validate. A moved polyhedron/polygon is retriangulated so its mapping reflects the new node
   // positions; retriangulate() throws if the reshaped cell cannot be tetrahedralized (inverted),
-  // which we treat as an invalid collapse. Every other star element (besides the sliver, which is
+  // which we treat as an invalid collapse. Every other star element (besides the degenerate one,
+  // which is
   // meant to become degenerate) must stay non-degenerate and keep a positive volume above the
   // floor.
   bool ok = true;
@@ -1444,7 +1446,7 @@ MeshRepairGenerator::collapseByFaceMerge(
     for (const auto eid : star)
     {
       Elem * e = mesh->query_elem_ptr(eid);
-      if (!e || e == sliver)
+      if (!e || e == degenerate)
         continue;
       std::set<dof_id_type> distinct;
       for (const auto n : make_range(e->n_nodes()))
@@ -1467,10 +1469,11 @@ MeshRepairGenerator::collapseByFaceMerge(
       catch (const std::exception &)
       {
       }
-    return false; // collapse would invert/degenerate a neighbor: leave the sliver in place
+    return false; // collapse would invert/degenerate a neighbor: leave the degenerate element in place
   }
 
-  // Commit: the sliver is now degenerate (each gone node coincides with its kept node); delete it
+  // Commit: the degenerate element is now collapsed (each gone node coincides with its kept node);
+  // delete it
   // and the now-orphaned gone nodes, and record the touched nodes so this pass stays node-disjoint.
   std::vector<Node *> gone_nodes;
   for (const auto & [gn, kn] : gone_kept)
@@ -1479,7 +1482,7 @@ MeshRepairGenerator::collapseByFaceMerge(
     touched_nodes.insert(kn->id());
     gone_nodes.push_back(gn);
   }
-  mesh->delete_elem(sliver);
+  mesh->delete_elem(degenerate);
   for (auto * g : gone_nodes)
     mesh->delete_node(g);
   return true;
