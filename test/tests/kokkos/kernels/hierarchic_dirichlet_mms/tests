@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md'
+
+  [convergence]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestHierarchicDirichletMMS
+    requirement = 'The Kokkos matrix-free Jacobian shall converge a HIERARCHIC finite element '
+                  'solution to a manufactured solution, whose Dirichlet boundary condition is a '
+                  'non-constant, non-preset Function value, at a rate consistent with increasing '
+                  'the polynomial order of the basis.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    max_threads = 1
+  []
+[]

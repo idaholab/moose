@@ -484,6 +484,14 @@ private:
 KOKKOS_FUNCTION inline Real
 RPNEvaluator::eval(const Real t, const Real3 p, const unsigned int qp, Datum * datum) const
 {
+  // init() has not run yet, e.g. because a consumer evaluated the function before the owning
+  // object's initialSetup() built the RPN sequence -- this can happen when libMesh's own
+  // constraint machinery evaluates a Kokkos function's host value during EquationSystems::init(),
+  // ahead of every object's initialSetup(). Nothing meaningful can be returned yet; a caller in
+  // that position recomputes the real value once the evaluator is built.
+  if (!_rpn.isAlloc())
+    return 0;
+
   Real stack[_stack_size];
 
   // Stack head position

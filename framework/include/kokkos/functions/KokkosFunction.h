@@ -182,6 +182,21 @@ public:
 
     return _wrapper_device->value(t, p);
   }
+  /**
+   * Evaluate a scalar value at point (t,x,y,z) on host, for a consumer that needs a value before
+   * any device dispatch has happened (e.g. libMesh's own constraint machinery, which runs on
+   * host only). Reads the host copy of the function directly, so this is safe to call regardless
+   * of backend, unlike value() above.
+   * @param t The time
+   * @param p The location in space (x,y,z)
+   * @returns The scalar value evaluated at the time and location
+   */
+  Real hostValue(Real t, Real3 p) const
+  {
+    mooseAssert(_wrapper_host, "The Kokkos function wrapper has not been initialized.");
+
+    return _wrapper_host->value(t, p);
+  }
   KOKKOS_FUNCTION Real3 vectorValue(Real t, Real3 p) const
   {
     KOKKOS_ASSERT(_wrapper_device);

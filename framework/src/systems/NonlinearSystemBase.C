@@ -227,7 +227,10 @@ NonlinearSystemBase::preInit()
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.solverParams(number())._kokkos_matrix_free)
+  {
     setupKokkosMatrixFreeSystemMatrix();
+    setupKokkosDirichletConstraints();
+  }
   // The full pattern serves Kokkos assembly into a compressed-row matrix, which a matrix-free
   // system has none of
   else if (_fe_problem.hasKokkosResidualObjects())
@@ -989,6 +992,13 @@ NonlinearSystemBase::setInitialSolution()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  // A time-dependent Dirichlet Function's value on a degree of freedom libMesh's constraint
+  // machinery reports beyond a mesh node (e.g. a HIERARCHIC edge/face mode) is sourced from the
+  // constraint machinery's own recomputed values, so both have to be refreshed once per
+  // timestep, ahead of the preset dispatch below reading them back out
+  if (_fe_problem.solverParams(number())._kokkos_matrix_free)
+    refreshKokkosDirichletConstraints();
+
   if (_kokkos_preset_nodal_bcs.hasObjects())
     setKokkosInitialSolution();
 

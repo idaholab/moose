@@ -1,7 +1,7 @@
-# The Kokkos counterpart of hierarchic.i, solved matrix-free. Both inputs are held to the same
-# result, which pins the orientation handling of the cached reference shape tables: a hierarchic
-# basis of order three carries edge shape functions whose sign follows the orientation of the edge
-# they belong to, so a triangular mesh presents several orientations to the tables.
+# The Kokkos counterpart of hierarchic.i, solved matrix-free. Each input is checked against its own
+# gold, which pins the orientation handling of the cached reference shape tables: a hierarchic basis
+# of order three carries edge shape functions whose sign follows the orientation of the edge they
+# belong to, so a triangular mesh presents several orientations to the tables.
 
 [Mesh]
   [square]
@@ -68,6 +68,6 @@
 []
 
 [Outputs]
-  file_base = hierarchic_orientation
+  file_base = hierarchic_orientation_kokkos
   csv = true
 []

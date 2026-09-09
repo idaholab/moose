@@ -162,6 +162,16 @@ public:
    * Free host and device copies of function
    */
   virtual void freeFunction() = 0;
+  /**
+   * Evaluate the wrapped function's value on host, for a consumer that needs a value before any
+   * device dispatch has happened (e.g. libMesh's own constraint machinery, which runs on host
+   * only). Reads the host copy of the function directly, so this is safe to call regardless of
+   * backend.
+   * @param t The time
+   * @param p The location in space (x,y,z)
+   * @returns The scalar value evaluated at the time and location
+   */
+  virtual Real value(Real t, Real3 p) = 0;
 };
 
 /**
@@ -190,6 +200,23 @@ public:
   FunctionWrapperDeviceBase * allocate() override final;
   void copyFunction() override final;
   void freeFunction() override final;
+  Real value(Real t, Real3 p) override final
+  {
+    // _function_host has not gone through Object's copy constructor, which is what materializes a
+    // symbol-associated scalar/field/material/function reference (e.g. "pi", a coupled variable, a
+    // Postprocessor) into an actually-evaluable value -- normally triggered the first time this
+    // function is copied for a Kokkos parallel dispatch. A host-side evaluation, needed before any
+    // dispatch has happened, has to trigger that same materialization itself.
+    //
+    // Rebuilt fresh on every call rather than cached in a member: the first call can happen before
+    // _function_host's own initialSetup() has run (e.g. libMesh's own constraint machinery
+    // evaluating a Dirichlet boundary's Function during EquationSystems::init(), ahead of every
+    // object's initialSetup()), and a cached copy taken at that point would stay stuck at that
+    // premature state even once _function_host becomes fully materialized and a later caller (e.g.
+    // a per-timestep constraint refresh) needs the real value. This is unrelated to, and does not
+    // reuse, the _function_copy/_function_device pair copyFunction() manages for device dispatch.
+    return Object(_function_host).value(t, p);
+  }
 
 private:
   /**
@@ -197,7 +224,7 @@ private:
    */
   const Object & _function_host;
   /**
-   * Copy of the function on host
+   * Copy of the function on host, used for device dispatch preparation only (see copyFunction())
    */
   std::unique_ptr<Object> _function_copy;
   /**

@@ -9,6 +9,8 @@
 
 #include "KokkosPLevelSpace.h"
 
+#include "KokkosConstraintOperator.h"
+#include "KokkosDirichletValueFunction.h"
 #include "KokkosElementEmbeddingTransfer.h"
 #include "KokkosFESystem.h"
 #include "KokkosNodalBCBase.h"
@@ -18,6 +20,7 @@
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
+#include "libmesh/dirichlet_boundaries.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/fe_interface.h"
@@ -146,6 +149,29 @@ PLevelSpace::init()
   // through a ghosted vector of the level's own
   _x = &_sys.add_vector("operator input", false, libMesh::GHOSTED);
 
+  // A Dirichlet boundary condition of the fine system additionally has to be registered on this
+  // level's own DofMap, so that libMesh's constraint machinery reports the same HIERARCHIC
+  // edge/face modes on it that it reports on the fine system's DofMap. This has to happen here
+  // rather than in the constructor because the fine system's nodal boundary condition warehouse is
+  // not yet populated at preconditioner-construction time, and it has to happen before
+  // setupConstrainedDofs() reads the level's DofMap constraints below.
+  bool has_dirichlet_bc = false;
+
+  for (const auto & bc : _fine.getKokkosNodalBCWarehouse().getActiveObjects())
+  {
+    const auto & nbc = static_cast<const NodalBCBase &>(*bc);
+
+    if (nbc.isDirichletBC())
+    {
+      _sys.get_dof_map().add_dirichlet_boundary(libMesh::DirichletBoundary(
+          nbc.boundaryIDs(), {nbc.variable().number()}, DirichletValueFunction(nbc)));
+      has_dirichlet_bc = true;
+    }
+  }
+
+  if (has_dirichlet_bc)
+    _sys.reinit_constraints();
+
   setupConstrainedDofs();
 
   if (_assemble)
@@ -191,55 +217,21 @@ void
 PLevelSpace::setupConstrainedDofs()
 {
   const auto & dof_map = _sys.get_dof_map();
-  const auto & mesh = dofSpace().kokkosMesh();
 
   auto * const solution =
       libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_sys.current_local_solution.get());
 
-  // The nodes a nodal boundary condition of the fine system pins, per variable. A level reproduces
-  // the fine system's variables in the same order, so one variable number indexes both, and a node
-  // that carries no DOF of the level's own order simply contributes nothing below.
-  std::vector<std::vector<bool>> pinned_node(_sys.n_vars());
+  // Every DOF a registered Dirichlet-type boundary condition of the fine system pins on this
+  // level's own DofMap -- vertex and bubble (e.g. HIERARCHIC edge/face mode) alike -- comes from
+  // libMesh's own DOF constraints, registered on this level's DofMap in init() above. A level
+  // carries no nonlinear solve of its own, so only the mask of constrained rows matters here;
+  // which row is preset is a solve-time distinction this level's operator does not make.
+  ConstraintOperator constraint_operator;
 
-  for (const auto & bc : _fine.getKokkosNodalBCWarehouse().getActiveObjects())
-  {
-    const auto & nbc = static_cast<const NodalBCBase &>(*bc);
+  constraint_operator.setup(
+      dof_map, *solution, dofSpace().getNumLocalDofs() + dofSpace().getNumGhostDofs(), {});
 
-    auto & pinned = pinned_node[nbc.variable().number()];
-
-    if (pinned.empty())
-      pinned.resize(mesh.getNumLocalNodes(), false);
-
-    for (const auto node : nbc.getContiguousNodes())
-      pinned[node] = true;
-  }
-
-  _constrained_dof.create(dofSpace().getNumLocalDofs() + dofSpace().getNumGhostDofs());
-  _constrained_dof = false;
-
-  std::vector<dof_id_type> dof_indices;
-
-  for (const auto var : make_range(_sys.n_vars()))
-  {
-    if (pinned_node[var].empty())
-      continue;
-
-    for (const auto * const node : mesh.getLocalNodes())
-    {
-      if (node->processor_id() != _sys.processor_id() ||
-          !pinned_node[var][mesh.getContiguousNodeID(node)])
-        continue;
-
-      dof_map.dof_indices(node, dof_indices, var);
-
-      for (const auto dof : dof_indices)
-        _constrained_dof[solution->map_global_to_local_index(dof)] = true;
-    }
-  }
-
-  dofSpace().syncGhostMask(_constrained_dof);
-
-  _constrained_dof.copyToDevice();
+  _constrained_dof = constraint_operator.constrainedMask();
 
   // The operator's fixed rows carry the identity, which this vector places there
   _constrained_rows = &_sys.add_vector("constrained rows", false);
