@@ -13,6 +13,8 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "MooseVariableField.h"
+#include "MooseMesh.h"
+#include "libmesh/mesh_base.h"
 
 template <typename OutputType>
 MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableField<OutputType> & var,
@@ -379,8 +381,15 @@ template <typename OutputType>
 void
 MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value)
 {
+  // dof_values here is indexed per shape function, with each entry holding all _count array
+  // components packed into a single OutputType value. setNodalValue writes only one shape
+  // function's value, so it is only valid for a variable with a single shape function, e.g. a
+  // nodal Lagrange variable or a CONSTANT-order elemental variable; a variable with more than
+  // one shape function must use setDofValues instead.
+  mooseAssert(_dof_indices.size() == _count,
+              "setNodalValue is only valid for a variable with a single shape function");
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  dof_values.resize(1);
+  dof_values.resize(/*n_shapes=*/1);
   dof_values[0] = value; // update variable nodal value
   _has_dof_values = true;
   _nodal_value = value;
@@ -395,6 +404,20 @@ template <>
 void
 MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value)
 {
+  // Unlike the generic implementation above, a vector-valued variable is never an array
+  // variable, so _count is always 1 and dof_values is indexed per component of the vector
+  // rather than per shape function -- each shape function contributes one raw degree of
+  // freedom per component given the finite element family and order constraints we set below.
+  mooseAssert(_count == 1, "Vector-valued variables cannot be array variables");
+  mooseAssert(
+      _var.feType().family == LAGRANGE_VEC ||
+          (_var.feType().family == MONOMIAL_VEC && _var.feType().order == CONSTANT),
+      "setNodalValue only makes sense for LAGRANGE_VEC or CONSTANT MONOMIAL_VEC vector variables");
+  mooseAssert(_dof_indices.size() <= _var.sys().mesh().getMesh().mesh_dimension(),
+              "The number of dof indices for a vector variable should be at most the mesh manifold "
+              "dimension. We cannot use an exact equality because it's possible the vector "
+              "variable could live on a lower-dimensional manifold.");
+
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
   dof_values.resize(_dof_indices.size());
   for (const auto i : index_range(dof_values))
