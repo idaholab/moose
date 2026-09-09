@@ -80,20 +80,26 @@ FESystem::setupCoupling()
 {
   if (auto * const nl_system = dynamic_cast<NonlinearSystemBase *>(&_system))
   {
-    _coupling.create(_num_vars);
+    _field_coupling.create(_num_vars);
 
-    std::map<unsigned int, std::vector<unsigned int>> coupling;
+    std::map<unsigned int, std::vector<unsigned int>> field_coupling;
+    std::vector<unsigned int> scalar_coupling;
 
     auto & ce = _system.feProblem().couplingEntries(0, nl_system->number());
 
     for (const auto & [ivar, jvar] : ce)
-      if (ivar->number() != jvar->number())
-        coupling[ivar->number()].push_back(jvar->number());
+      if (!_var_is_scalar[ivar->number()] && !_var_is_scalar[jvar->number()])
+        if (ivar->number() != jvar->number())
+          field_coupling[ivar->number()].push_back(jvar->number());
 
     for (const auto var : make_range(_num_vars))
-      _coupling[var] = coupling[var];
+      if (!_var_is_scalar[var])
+        _field_coupling[var] = field_coupling[var];
+      else
+        scalar_coupling.push_back(var);
 
-    _coupling.copyToDevice();
+    _field_coupling.copyToDevice();
+    _scalar_coupling = scalar_coupling;
   }
 }
 
@@ -114,6 +120,9 @@ FESystem::setupDofs()
 #endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    if (_var_is_scalar[var])
+      continue;
+
     std::vector<dof_id_type> dof_indices;
 
     _local_node_dof_index[var].create(num_nodes);
@@ -240,7 +249,7 @@ FESystem::reinit()
           if (!_qp_vector_solutions_curl[tag](sid, var).isAlloc())
             _qp_vector_solutions_curl[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
         }
-        else
+        else if (!_var_is_scalar[var])
         {
           if (!_qp_solutions[tag](sid, var).isAlloc())
             _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
@@ -283,6 +292,9 @@ FESystem::operator()(const ThreadID tid) const
   auto elem = _thread(tid, 1);
   auto var = _active_variables(_thread(tid, 2));
   auto tag = _active_solution_tags(_thread(tid, 3));
+
+  if (_var_is_scalar[var])
+    return;
 
   auto info = kokkosMesh().getElementInfo(elem);
   auto sid = info.subdomain;

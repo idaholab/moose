@@ -49,11 +49,20 @@ public:
   void reinit();
 
   /**
-   * Get the list of off-diagonal coupled variable numbers of a variable
+   * Get the list of off-diagonal coupled field variable numbers of a variable
    * @param var The variable number
-   * @returns The list of off-diagonal coupled variable numbers
+   * @returns The list of off-diagonal coupled field variable numbers
    */
-  KOKKOS_FUNCTION const auto & getCoupling(unsigned int var) const { return _coupling[var]; }
+  KOKKOS_FUNCTION const auto & getFieldCoupling(unsigned int var) const
+  {
+    return _field_coupling[var];
+  }
+
+  /**
+   * Get the list of off-diagonal coupled scalar variable numbers
+   * @returns The list of off-diagonal coupled scalar variable numbers
+   */
+  KOKKOS_FUNCTION const auto & getScalarCoupling() const { return _scalar_coupling; }
 
   /**
    * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
@@ -397,9 +406,12 @@ private:
   Array<bool> _var_is_vector;
 
   /**
-   * Off-diagonal coupled variable numbers of each variable
+   * Off-diagonal coupled field and scalar variable numbers of each variable
    */
-  Array<Array<unsigned int>> _coupling;
+  ///@{
+  Array<Array<unsigned int>> _field_coupling;
+  Array<unsigned int> _scalar_coupling;
+  ///@}
 
   /**
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
