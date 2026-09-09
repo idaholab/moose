@@ -81,11 +81,21 @@ protected:
   void updateFVGradient(const LinearFVGradientReader & reader);
 
   /**
-   * Initialize any unallocated gradient storage after solution-vector creation.
+   * Initialize private current and replacement gradient storage.
+   *
+   * This must run after the current local solution has been created and initialized, and after
+   * restart or recovery data has been loaded. At that point, it also validates any restored
+   * historical gradient storage.
    */
   void initializeLinearFVGradientStorage();
 
-  /// Add named system vectors for requested old gradient states before restart data is loaded.
+  /**
+   * Register named system vectors for requested historical gradient states.
+   *
+   * This must run after gradient state requirements are known and before restart or recovery data
+   * is loaded, so checkpoint data can be restored into these vectors. It does not initialize the
+   * current or replacement working storage.
+   */
   void initializeLinearFVGradientHistoryStorage();
 
   /**
@@ -118,13 +128,17 @@ protected:
     /// Variable numbers whose gradients are stored in the gradient containers.
     std::unordered_set<unsigned int> variable_numbers;
 
-    /// Owned current gradient values.
+    /// Owned current gradient values. We keep this outside of the system
+    /// because we should be able to recompute these.
     OwnedGradientContainer current_values;
 
-    /// Published gradient values indexed by solution time state.
+    /// Published gradient values indexed by solution time state. This is just the
+    /// vector of pointers to other vectors describing old gradients (if any) stored on the
+    /// system. To ensure we can map solutions and automatically use the checkpoint capabilities.
     GradientStateContainer state_values;
 
-    /// Replacement gradient values computed before publication.
+    /// Replacement gradient values computed before publication. We keep this outside of the system
+    /// because we should be able to recompute these.
     OwnedGradientContainer next_values;
 
     /// Whether the current gradient has received a computed value.
@@ -142,33 +156,19 @@ protected:
    * @param container Method container whose state storage should be grown.
    * @param oldest_state Oldest time state that must be stored.
    */
-  void ensureGradientStateStorage(LinearFVGradientContainer & container, unsigned int oldest_state);
+  void resizeGradientStateStorage(LinearFVGradientContainer & container, unsigned int oldest_state);
 
-  /// Update the non-owning current-state view after owned vectors are rebuilt or swapped.
-  void updateCurrentGradientView(LinearFVGradientContainer & container) const;
+  /// Set solution state zero to the current gradient.
+  void setCurrentGradientState(LinearFVGradientContainer & container) const;
 
   /// Validate and mark gradient history loaded during restart or recovery.
   void checkRestartedGradientHistory(const FVGradientMethod & method,
                                      LinearFVGradientContainer & container);
 
   /// Return the stable system-vector name for one old gradient component.
-  std::string gradientStateVectorName(const FVGradientMethod & method,
-                                      unsigned int state,
-                                      unsigned int component) const;
-
-  /**
-   * Copy one complete gradient field.
-   * @param source Gradient field to copy.
-   * @param destination Gradient field to overwrite.
-   */
-  void copyGradient(const GradientContainer & source, GradientContainer & destination) const;
-
-  /**
-   * Copy one published gradient field into owned replacement storage.
-   * @param source Gradient field to copy.
-   * @param destination Owned gradient field to overwrite.
-   */
-  void copyGradient(const GradientContainer & source, OwnedGradientContainer & destination) const;
+  static std::string gradientStateVectorName(const FVGradientMethod & method,
+                                             unsigned int state,
+                                             unsigned int component);
 
   /// Compute and publish uninitialized gradients before their first time-state advancement.
   void initializeGradientStatesForTimeAdvance();

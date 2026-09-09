@@ -155,9 +155,6 @@ The published time states and the scratch field have different purposes. Within-
 recomputation writes the scratch field and swaps it only with state `0`; it never advances history.
 Gradient history advances with the owning system's solution states, and timestep rejection restores
 state `0` from state `1`. Initial historical states are seeded from the initial current gradient.
-For mesh dimension `d`, system vector size `N`, and oldest requested state `n`, history adds
-approximately `n * d * N * sizeof(Number)` bytes per gradient method, excluding vector bookkeeping
-and ghost entries.
 
 Historical state depth must be requested before solution-state initialization because an accurate
 old state cannot be created later. State `0` and the scratch field use private working vectors.
