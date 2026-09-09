@@ -250,6 +250,8 @@ protected:
   Real & _time;
   /// Previous time
   Real & _time_old;
+  /// The time two steps back, kept so that functors can be evaluated at the older solution
+  Real & _time_older;
   /// Current delta t... or timestep size.
   Real & _dt;
   Real & _dt_old;
