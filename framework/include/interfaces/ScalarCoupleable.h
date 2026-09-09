@@ -9,6 +9,11 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosScalar.h"
+#include "KokkosVariableValue.h"
+#endif
+
 #include "Moose.h"
 
 // MOOSE includes
@@ -228,6 +233,26 @@ protected:
   const VariableValue & coupledScalarDotDotDu(const std::string & var_name,
                                               unsigned int comp = 0) const;
 
+#ifdef MOOSE_KOKKOS_SCOPE
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagScalarValueByName(const std::string & var_name,
+                                                                       const std::string & tag_name,
+                                                                       unsigned int comp = 0) const;
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagScalarValue(const std::string & var_name,
+                                                                 const std::string & tag_param_name,
+                                                                 unsigned int comp = 0) const;
+
+  Moose::Kokkos::VariableValue kokkosCoupledScalarValue(const std::string & var_name,
+                                                        unsigned int comp = 0) const;
+  Moose::Kokkos::VariableValue kokkosCoupledScalarValueOld(const std::string & var_name,
+                                                           unsigned int comp = 0) const;
+  Moose::Kokkos::VariableValue kokkosCoupledScalarValueOlder(const std::string & var_name,
+                                                             unsigned int comp = 0) const;
+  Moose::Kokkos::VariableValue kokkosCoupledScalarDot(const std::string & var_name,
+                                                      unsigned int comp = 0) const;
+  Moose::Kokkos::Scalar<const Real> kokkosCoupledScalarDotDu(const std::string & var_name,
+                                                             unsigned int comp = 0) const;
+#endif
+
   /**
    * Extract pointer to a scalar coupled variable
    * @param var_name Name of parameter desired
@@ -283,6 +308,12 @@ private:
    * @param fn_name The name of the function that called this method - used in the error message
    */
   void validateExecutionerType(const std::string & name, const std::string & fn_name) const;
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  Moose::Kokkos::Variable kokkosCoupledVectorTagScalarVariable(const std::string & var_name,
+                                                               const std::string & tag_name,
+                                                               unsigned int comp) const;
+#endif
 
   // Reference to the interface's input parameters
   const InputParameters & _sc_parameters;
