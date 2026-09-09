@@ -448,8 +448,8 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + components[dim];
       params.set<MooseEnum>("momentum_component") = components[dim];
       for (const auto j : make_range(dimension()))
-        params.set<std::vector<VariableName>>(vel_components[j]) = {
-            _flow_equations_physics->getVelocityNames()[j]};
+        params.set<SolverVariableName>(vel_components[j]) =
+            _flow_equations_physics->getVelocityNames()[j];
       params.set<MooseFunctorName>(NS::density) = _phase_1_density;
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
       params.set<MooseFunctorName>("rho_d") = _phase_2_density;
