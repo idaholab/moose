@@ -459,7 +459,7 @@ AdvancedOutput::initAvailableLists()
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
+        if (is_elemental_data && FEInterface::field_type(type) != libMesh::TYPE_VECTOR)
           _execute_data["elemental"].available.insert(vname);
         else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
@@ -545,7 +545,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
+        if (is_elemental_data && FEInterface::field_type(type) != libMesh::TYPE_VECTOR)
           _execute_data["elemental"].show.insert(vname);
         else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
@@ -599,7 +599,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
+        if (is_elemental_data && FEInterface::field_type(type) != libMesh::TYPE_VECTOR)
           _execute_data["elemental"].hide.insert(vname);
         else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
