@@ -5,13 +5,13 @@
 ## Overview
 
 `MFEMGenericFunctorMatrixMaterial` defines one or more matrix material properties with values
-obtained from coefficients on one or more subdomains of the mesh, given by the [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/block) parameter
+obtained from coefficients on one or more subdomains or boundaries of the mesh, given by the [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/block) or [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/boundary) parameters,
 if provided, or applied to the entire mesh if missing. The matrix material properties are named
 according to members in the [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/prop_names) parameter, with respective coefficients used to get property
 values given by the members of
 [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/prop_values). The
 coefficients in
-[!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/prop_names)
+[!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/prop_values)
 must be matrix-valued. Numeric constant matrix values can also be
 specified, but must be enclosed in curly braces to mark the start and
 end of the matrix, with entries given row by row and rows separated by

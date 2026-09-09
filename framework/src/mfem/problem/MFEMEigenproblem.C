@@ -32,7 +32,6 @@ MFEMEigenproblem::validParams()
       "1.",
       "Name of the coefficient to scale the right-hand side of the eigenproblem equation by.");
   params.addParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient",
-                                             "1.",
                                              "Name of the matrix coefficient to scale the "
                                              "right-hand side of the eigenproblem equation by.");
 
@@ -44,6 +43,10 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
   if (_num_type == NumericType::COMPLEX)
     mooseError("Complex numbers are not currently supported for eigenproblems.");
+
+  if (isParamSetByUser("rhs_matrix_coefficient") && isParamSetByUser("rhs_coefficient"))
+    paramError("rhs_coefficient", "Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
+               "non-default value.");
 }
 
 mfem::Coefficient &

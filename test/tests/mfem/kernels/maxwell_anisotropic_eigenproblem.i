@@ -1,5 +1,3 @@
-sqrt2_inv = 0.70710678118654752
-
 [Mesh]
   type = MFEMMesh
   file = ../mesh/beam-tet.mesh
@@ -31,7 +29,7 @@ sqrt2_inv = 0.70710678118654752
   [epsilon]
     type = MFEMGenericFunctorMatrixMaterial
     prop_names = epsilon
-    prop_values = '{2 ${sqrt2_inv} 0; ${sqrt2_inv} 2 ${sqrt2_inv}; 0 ${sqrt2_inv} 2}'
+    prop_values = '{2 ${fparse 1/sqrt(2)} 0; ${fparse 1/sqrt(2)} 2 ${fparse 1/sqrt(2)}; 0 ${fparse 1/sqrt(2)} 2}'
   []
 []
 

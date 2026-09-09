@@ -157,28 +157,24 @@ CoefficientManager::getMatrixCoefficientPtr(const std::string & name)
   if (this->_matrix_coeffs.hasCoefficient(name))
     return this->_matrix_coeffs.getCoefficientPtr(name);
   // If name not present, try to interpret it as a literal constant matrix. Rows are
-  // separated by ';' and entries within a row by whitespace/commas. Every row must
+  // separated by ';' and entries within a row by whitespace. Every row must
   // have the same number of entries; a string with no ';' is a single row.
   std::vector<std::string> row_strs;
   MooseUtils::tokenize(name, row_strs, 1, ";");
   std::vector<std::vector<mfem::real_t>> rows;
-  bool parsed = !row_strs.empty();
   for (const auto & row_str : row_strs)
   {
     std::vector<mfem::real_t> row_vals;
-    if (!MooseUtils::tokenizeAndConvert(row_str, row_vals) || row_vals.empty())
+    if (MooseUtils::tokenizeAndConvert(row_str, row_vals) && row_vals.size() > 0)
     {
-      parsed = false;
-      break;
+      rows.push_back(row_vals);
+      if (rows.back().size() != rows.front().size())
+        mooseError("Matrix coefficient literal '" + name + "' has rows of differing length.");
     }
-    rows.push_back(row_vals);
   }
-  if (parsed)
+  if (rows.size() &&
+      rows.size() == static_cast<std::size_t>(std::count(name.begin(), name.end(), ';')) + 1)
   {
-    for (const auto & row : rows)
-      if (row.size() != rows.front().size())
-        mooseError("Matrix coefficient literal '" + name +
-                   "' has rows with differing numbers of entries.");
     const int nrows = static_cast<int>(rows.size());
     const int ncols = static_cast<int>(rows.front().size());
     mfem::DenseMatrix mat(nrows, ncols);
