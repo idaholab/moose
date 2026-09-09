@@ -11,6 +11,8 @@
 #include "KokkosKernelBase.h"
 #include "KokkosNodalKernelBase.h"
 #include "KokkosNodalBCBase.h"
+#include "KokkosDirichletBCBase.h"
+#include "KokkosDirichletValueFunction.h"
 #include "KokkosIntegratedBCBase.h"
 #include "KokkosLevelTransfer.h"
 
@@ -21,6 +23,11 @@
 #include "PMultigrid.h"
 
 #include "libmesh/petsc_matrix_shell_matrix.h"
+#include "libmesh/dirichlet_boundaries.h"
+#include "libmesh/fe_interface.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/nonlinear_solver.h"
+#include "libmesh/periodic_boundaries.h"
 
 namespace
 {
@@ -141,6 +148,11 @@ NonlinearSystemBase::setKokkosInitialSolution()
   for (auto & nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->presetSolution(tag);
 
+  // Every DOF a preset Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
+  // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition preset
+  // above only reaches a boundary's mesh nodes
+  systems[number()].presetConstrainedSolution(tag);
+
   Kokkos::fence();
 
   for (auto & system : systems.constructedEntries())
@@ -163,6 +175,69 @@ NonlinearSystemBase::setupKokkosMatrixFreeSystemMatrix()
   // PetscMatrixShellMatrix::init(ParallelType), which sizes the shell from that DofMap.
   _matrix_free_operator = &system().add_matrix(
       "System Matrix", std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm()));
+}
+
+void
+NonlinearSystemBase::setupKokkosDirichletConstraints()
+{
+  auto & dof_map = _sys.get_dof_map();
+
+  // Null until the system has at least one periodic boundary
+  const auto * periodic_boundaries = dof_map.get_periodic_boundaries();
+
+  bool registered = false;
+
+  for (auto & nbc : _kokkos_nodal_bcs.getObjects(0))
+  {
+    auto * bc = dynamic_cast<Moose::Kokkos::NodalBCBase *>(nbc.get());
+
+    if (!bc || !bc->isDirichletBC())
+      continue;
+
+    // Enforcing this boundary condition beyond a mesh node requires disabling libMesh's exact
+    // constraint enforcement for the whole system below, which would also stop enforcing any
+    // periodic constraint already registered on it
+    if (periodic_boundaries && !periodic_boundaries->empty())
+      mooseError("Kokkos matrix-free boundary condition '",
+                 bc->name(),
+                 "' of type '",
+                 bc->type(),
+                 "' is a Dirichlet-type boundary condition, but system '",
+                 name(),
+                 "' also has a periodic boundary condition. This combination is not yet "
+                 "supported for a Kokkos matrix-free system.");
+
+    // A C_ONE family's projection needs a gradient functor no MOOSE Dirichlet boundary condition
+    // supplies (libMesh's ConstrainDirichlet::apply_dirichlet_impl only calls a plain-valued
+    // libMesh::FunctionBase for it)
+    if (libMesh::FEInterface::get_continuity(bc->variable().feType()) == libMesh::C_ONE)
+      mooseError("Kokkos matrix-free boundary condition '",
+                 bc->name(),
+                 "' of type '",
+                 bc->type(),
+                 "' is a Dirichlet-type boundary condition on variable '",
+                 bc->variable().name(),
+                 "', whose finite element family has C1 continuity. This is not supported.");
+
+    dof_map.add_dirichlet_boundary(libMesh::DirichletBoundary(
+        bc->boundaryIDs(), {bc->variable().number()}, Moose::Kokkos::DirichletValueFunction(*bc)));
+
+    registered = true;
+  }
+
+  // With no Dirichlet boundary registered above, exact constraint enforcement stays at libMesh's
+  // default so any periodic constraint on this system continues to be enforced as before
+  if (registered)
+    libMesh::cast_ref<libMesh::NonlinearImplicitSystem &>(_sys)
+        .nonlinear_solver->set_exact_constraint_enforcement(false);
+}
+
+void
+NonlinearSystemBase::refreshKokkosDirichletConstraints()
+{
+  _sys.reinit_constraints();
+
+  _fe_problem.getKokkosFESystems()[number()].setupConstraintOperator();
 }
 
 void
@@ -367,6 +442,11 @@ NonlinearSystemBase::computeKokkosJacobianDiagonal(Vec diag)
   for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianDiagonal();
 
+  // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
+  // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition diagonal
+  // above only reaches a boundary's mesh nodes
+  systems[number()].finalizeConstrainedDiagonal(_kokkos_mf_diag_tag, 1.0);
+
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
@@ -535,6 +615,14 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
     for (auto & nbc : nodal_bcs.getActiveObjects())
       nbc->computeResidual();
+
+    // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
+    // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition
+    // residual above only reaches a boundary's mesh nodes
+    const auto solution_tag = _fe_problem.getVectorTagID(Moose::SOLUTION_TAG);
+
+    for (auto tag : tags)
+      systems[number()].finalizeConstrainedResidual(tag, solution_tag);
   }
 
   // Close and restore vectors
@@ -1036,8 +1124,12 @@ NonlinearSystemBase::verifyKokkosLevelMatrices()
 
     Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level_sys);
 
-    // Both operators hold the same rows fixed and couple the same fixed columns into their free
-    // rows, so they agree on every vector of the level and the comparison needs no projection
+    // The assembled operator holds a fixed row and column to the identity, while the matrix-free
+    // operator only holds the row fixed and still couples a fixed column into its free rows; the
+    // two agree only on a vector that is already zero at every fixed DOF, which is what the
+    // hierarchy ever applies either operator to during a real cycle
+    level->zeroConstrained(*x);
+
     level->apply(cache, *x, *matrix_free);
 
     level->matrix().vector_mult(*assembled, *x);
@@ -1055,6 +1147,26 @@ NonlinearSystemBase::verifyKokkosLevelMatrices()
     _console << "p-multigrid level p = " << level->order()
              << ": assembled operator agrees with the matrix-free operator to " << error
              << " (tolerance " << tolerance << ")" << std::endl;
+
+    // The Kokkos matrix-free constraint enforcement forms the level's operator as C^T A C plus an
+    // identity on every constrained row (no asymmetric row-replacement term), so this measures, it
+    // does not assume, that the assembled matrix a coarse solver factors is actually symmetric
+    PetscBool is_symmetric;
+    LibmeshPetscCallA(
+        comm().get(),
+        MatIsSymmetric(
+            libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(level->matrix()).mat(),
+            1e-10,
+            &is_symmetric));
+
+    _console << "p-multigrid level p = " << level->order() << ": assembled operator is "
+             << (is_symmetric ? "symmetric" : "NOT symmetric") << " (measured, tolerance 1e-10)"
+             << std::endl;
+
+    if (!is_symmetric)
+      mooseError("The assembled operator of the p-multigrid level of order ",
+                 level->order(),
+                 " is not symmetric to within a tolerance of 1e-10.");
 
     if (error > tolerance)
       mooseError("The assembled operator of the p-multigrid level of order ",
@@ -1203,6 +1315,11 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 
   for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianVectorProduct();
+
+  // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
+  // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition action
+  // above only reaches a boundary's mesh nodes
+  systems[number()].finalizeConstrainedJacobianVectorProduct(_kokkos_mf_y_tag, _kokkos_mf_x_tag);
 
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);

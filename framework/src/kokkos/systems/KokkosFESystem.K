@@ -19,6 +19,7 @@
 
 #include "libmesh/system.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/dof_map.h"
 
 namespace Moose::Kokkos
 {
@@ -149,6 +150,8 @@ FESystem::setupNodalBCDofs()
 
   _nbc_matrix_tag_dof.create(MAX_TAG);
 
+  std::set<TagID> dirichlet_tags;
+
   for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
     auto nbc = static_cast<NodalBCBase *>(bc.get());
@@ -157,6 +160,35 @@ FESystem::setupNodalBCDofs()
 
     for (auto tag : matrix_tags)
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
+
+    if (nbc->isDirichletBC())
+      for (auto tag : matrix_tags)
+        dirichlet_tags.insert(tag);
+  }
+
+  // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
+  // HIERARCHIC edge/face mode) alike -- comes from one shared device-resident mirror of libMesh's
+  // own DOF constraints, rather than each boundary condition's own boundary-node walk above
+  if (!dirichlet_tags.empty())
+  {
+    setupConstraintOperator();
+
+    const auto & mask = _constraint_operator.constrainedMask();
+
+    for (auto tag : dirichlet_tags)
+    {
+      auto & dofs = _nbc_matrix_tag_dof[tag];
+
+      if (!dofs.isAlloc())
+      {
+        dofs.create(_num_local_dofs + _num_ghost_dofs);
+        dofs = false;
+      }
+
+      for (const auto dof : make_range(_num_local_dofs + _num_ghost_dofs))
+        if (mask[dof])
+          dofs[dof] = true;
+    }
   }
 
   _nbc_matrix_tag_dof.copyToDeviceNested();
@@ -185,6 +217,46 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
   syncGhostMask(dofs);
+}
+
+void
+FESystem::setupConstraintOperator()
+{
+  auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
+  auto & dof_map = _system.system().get_dof_map();
+
+  // ConstraintOperator itself takes every row libMesh's constraint machinery reports with no
+  // per-boundary-condition attribution; the one thing it cannot derive from the DofMap alone is
+  // whether a row is to be preset (pinned in the solution ahead of the nonlinear solve) or left
+  // for the solve to satisfy through its own residual/Jacobian row, which is a property of the
+  // registering boundary condition. This walk exists only to answer that one boolean per DOF.
+  std::unordered_map<dof_id_type, bool> preset_dofs;
+  std::vector<dof_id_type> dof_indices;
+
+  for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
+  {
+    auto nbc = static_cast<NodalBCBase *>(bc.get());
+
+    if (!nbc->isDirichletBC())
+      continue;
+
+    const auto var = nbc->variable().number();
+    const auto preset = nbc->preset();
+
+    for (auto boundary : nbc->boundaryIDs())
+      for (auto elem_id : _mesh.getBoundaryActiveSemiLocalElemIds(boundary))
+      {
+        dof_map.dof_indices(_mesh.elemPtr(elem_id), dof_indices, var);
+
+        for (const auto dof : dof_indices)
+          preset_dofs[dof] = preset;
+      }
+  }
+
+  auto * const solution =
+      libMesh::cast_ptr<PetscVector<Number> *>(_system.system().current_local_solution.get());
+
+  _constraint_operator.setup(dof_map, *solution, _num_local_dofs + _num_ghost_dofs, preset_dofs);
 }
 
 void

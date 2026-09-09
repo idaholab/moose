@@ -11,6 +11,7 @@
 
 #include "KokkosSystem.h"
 #include "KokkosAssembly.h"
+#include "KokkosConstraintOperator.h"
 #include "KokkosQpJacobianCache.h"
 #include "KokkosQpJacobianLevel.h"
 
@@ -160,6 +161,55 @@ public:
    * @returns The mask, indexed by local DOF index
    */
   const Array<bool> & getNodalBCMatrixTagDofs(TagID tag) const { return _nbc_matrix_tag_dof[tag]; }
+
+  /**
+   * (Re)build the device-resident mirror of every Dirichlet-type nodal boundary condition's DOF
+   * constraints libMesh's own constraint machinery currently reports. Called once when this
+   * system's nodal boundary conditions are first set up, and again once per timestep by
+   * NonlinearSystemBase::refreshKokkosDirichletConstraints() so a time-dependent Dirichlet
+   * Function's prescribed value stays current.
+   */
+  void setupConstraintOperator();
+
+  /**
+   * Set every row the constraint operator presets, in a tagged vector, to the value libMesh's
+   * constraint machinery reports for it
+   * @param tag The vector tag to preset
+   */
+  void presetConstrainedSolution(TagID tag) { _constraint_operator.presetSolution(getVector(tag)); }
+
+  /**
+   * Finalize the Kokkos matrix-free action vector at every row the constraint operator
+   * constrains, after the ordinary operator/kernel action has run
+   * @param y_tag The vector tag of the action vector
+   * @param x_tag The vector tag of the direction vector
+   */
+  void finalizeConstrainedJacobianVectorProduct(TagID y_tag, TagID x_tag)
+  {
+    _constraint_operator.finalizeJacobianVectorProduct(getVector(y_tag), getVector(x_tag));
+  }
+
+  /**
+   * Finalize a residual vector at every row the constraint operator constrains, after the
+   * ordinary kernel and boundary condition residual sweep has run
+   * @param residual_tag The vector tag of the residual vector
+   * @param solution_tag The vector tag of the current solution vector the row's own equation reads
+   */
+  void finalizeConstrainedResidual(TagID residual_tag, TagID solution_tag)
+  {
+    _constraint_operator.finalizeResidual(getVector(residual_tag), getVector(solution_tag));
+  }
+
+  /**
+   * Finalize the Kokkos matrix-free diagonal vector at every row the constraint operator
+   * constrains, after the ordinary operator/kernel diagonal sweep has run
+   * @param diag_tag The vector tag of the diagonal vector
+   * @param value The constrained-row diagonal value for the tag being computed
+   */
+  void finalizeConstrainedDiagonal(TagID diag_tag, Real value)
+  {
+    _constraint_operator.finalizeDiagonal(getVector(diag_tag), value);
+  }
 
   /**
    * Get the FE type ID of a variable
@@ -471,6 +521,12 @@ private:
    * Kokkos thread object
    */
   Thread<> _thread;
+
+  /**
+   * Device-resident mirror of every Dirichlet-type nodal boundary condition's DOF constraints,
+   * built and refreshed by setupConstraintOperator()
+   */
+  ConstraintOperator _constraint_operator;
 
   /**
    * The quadrature-point Jacobian cache, and whether it is in use for this system

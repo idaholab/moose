@@ -320,6 +320,25 @@ public:
   void setupKokkosMatrixFreeSystemMatrix();
 
   /**
+   * Register each active Kokkos Dirichlet-type nodal boundary condition on this system as a
+   * libMesh DirichletBoundary, so that the automatic constraint sweep EquationSystems::init()
+   * triggers computes a prescribed value for every degree of freedom the boundary condition's own
+   * variable has on the boundary, including a HIERARCHIC edge/face mode that the Kokkos
+   * device-side dispatch, keyed on boundary nodes, cannot itself reach. Must run before
+   * EquationSystems::init(). Only called when matrix-free mode is enabled.
+   */
+  void setupKokkosDirichletConstraints();
+
+  /**
+   * Recompute libMesh's own DOF constraints on this system and the Kokkos Dirichlet boundary
+   * conditions' cached prescribed values sourced from them, once per timestep, so a
+   * time-dependent Dirichlet Function's value on a degree of freedom libMesh's constraint
+   * machinery reports beyond a mesh node (e.g. a HIERARCHIC edge/face mode) stays current. Only
+   * called when matrix-free mode is enabled.
+   */
+  void refreshKokkosDirichletConstraints();
+
+  /**
    * Set up the persistent direction vector and vector tags used by the Kokkos matrix-free
    * Jacobian-vector product, propagate the tags to every active Kokkos kernel/nodal BC, and
    * register the shell operations the solve and its preconditioner call. Only called when
