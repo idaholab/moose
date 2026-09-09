@@ -19,36 +19,41 @@
                   "to newton."
   []
   [action_accept_on_max]
-    type = RunApp
+    type = CSVDiff
     input = action_secant.i
+    # A distinct file_base gives this reuse of action_secant.i its own output and recover checkpoint,
+    # avoiding a collision with the action_secant test.
     cli_args = 'SingleParameterInverseSolve/max_iterations=1 '
                'SingleParameterInverseSolve/accept_on_max_iterations=true '
-               'Outputs/csv=false'
-    # Reuses action_secant.i, so its recover checkpoint would collide with the action_secant test.
-    recover = false
+               'Outputs/file_base=action_accept_on_max_out'
+    csvdiff = action_accept_on_max_out.csv
     requirement = "The system shall, when the single-parameter inverse-solve block reaches the "
                   "maximum number of fixed-point iterations and accept-on-max is enabled, accept "
                   "the best estimate and continue without error."
   []
   [absolute_tolerance]
-    type = RunApp
+    type = CSVDiff
     input = action_secant.i
-    cli_args = 'SingleParameterInverseSolve/relative_tolerance=1e-30 Outputs/csv=false'
-    # Reuses action_secant.i, so its recover checkpoint would collide with the action_secant test.
-    recover = false
+    # A distinct file_base gives this reuse of action_secant.i its own output and recover checkpoint,
+    # avoiding a collision with the action_secant test.
+    cli_args = 'SingleParameterInverseSolve/relative_tolerance=1e-30 '
+               'Outputs/file_base=absolute_tolerance_out'
+    csvdiff = absolute_tolerance_out.csv
     requirement = "The system shall converge a single-parameter inverse solve using the absolute "
                   "tolerance criterion when the relative tolerance is negligible."
   []
   [action_newton_accept_on_max]
-    type = RunApp
+    type = CSVDiff
     input = action_newton.i
     # max_iterations=2 is even, so the cap falls on a perturbed Newton iteration -- the case where
-    # the accepted solution comes from the last base iteration.
+    # the accepted solution must come from the last base iteration (the initial parameter -3), not
+    # the perturbed extrapolation. num_steps=1 keeps that accepted value exact and portable. A
+    # distinct file_base avoids a recover-checkpoint collision with the action_newton test.
     cli_args = 'SingleParameterInverseSolve/max_iterations=2 '
                'SingleParameterInverseSolve/accept_on_max_iterations=true '
-               'Outputs/csv=false'
-    # Reuses action_newton.i, so its recover checkpoint would collide with the action_newton test.
-    recover = false
+               'Executioner/num_steps=1 '
+               'Outputs/file_base=action_newton_accept_on_max_out'
+    csvdiff = action_newton_accept_on_max_out.csv
     requirement = "The system shall, when the Newton single-parameter inverse-solve block reaches "
                   "the maximum number of fixed-point iterations on a perturbed iteration and "
                   "accept-on-max is enabled, accept the last base estimate and continue without "
