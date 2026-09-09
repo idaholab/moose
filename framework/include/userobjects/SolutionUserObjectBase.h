@@ -310,6 +310,11 @@ public:
    */
   MooseEnum getSolutionFileType() const;
 
+  /**
+   * Returns whether the imported solution has been initialized.
+   */
+  bool initialized() const { return _initialized; }
+
 protected:
   /**
    * Method for reading XDA mesh and equation systems file(s)

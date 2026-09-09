@@ -78,6 +78,26 @@ SolutionAux::initialSetup()
     _var_name = vars[0];
   }
 
+  if (_solution_object.initialized())
+    validateVariable();
+}
+
+void
+SolutionAux::compute()
+{
+  if (!_variable_is_validated)
+    validateVariable();
+
+  AuxKernel::compute();
+}
+
+void
+SolutionAux::validateVariable()
+{
+  mooseAssert(
+      _solution_object.initialized(),
+      "The SolutionUserObject must be initialized before validating its imported variable.");
+
   if (!_solution_object.isVariableScalarValued(_var_name))
     paramError(
         "from_variable",
@@ -85,13 +105,14 @@ SolutionAux::initialSetup()
         _var_name,
         "' is vector-valued, but SolutionAux supports only scalar-valued imported variables.");
 
-  // Require an explicit weighting policy for spatially discontinuous imported variables
   if (!_direct && _solution_object.isVariableADiscontinuousScalarField(_var_name) &&
       !_weighting_type)
     paramError("weighting_type",
                "A weighting policy must be specified when the imported variable '",
                _var_name,
                "' is spatially discontinuous.");
+
+  _variable_is_validated = true;
 }
 
 Real
