@@ -64,6 +64,42 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [interface_area_hibiki_ishii]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    csvdiff = 'interface-area-verification_out.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Hibiki and Ishii interfacial area closure, at which coalescence balances breakage.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_ishii_kim]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "model=ishii-kim Outputs/file_base=interface-area-verification-ik"
+    csvdiff = 'interface-area-verification-ik.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim interfacial area closure, at which random collision and wake entrainment balance turbulent impact.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_hibiki_ishii_coefficients]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "shape_factor=4 LinearFVKernels/sources/gamma_c=0.15 LinearFVKernels/sources/k_c=0.2 LinearFVKernels/sources/gamma_b=0.3 LinearFVKernels/sources/k_b=1.0 Outputs/file_base=interface-area-verification-hi-coefficients"
+    csvdiff = 'interface-area-verification-hi-coefficients.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Hibiki and Ishii closure when every one of its coefficients and the shape factor of the particle size are changed from their defaults, the root moving to the value the changed coefficients imply.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_ishii_kim_coefficients]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "model=ishii-kim LinearFVKernels/sources/c_rc=0.006 LinearFVKernels/sources/c_we=0.004 LinearFVKernels/sources/c_ti=0.1 LinearFVKernels/sources/c=2 LinearFVKernels/sources/we_cr=4 LinearFVKernels/sources/fd_max=0.7 Outputs/file_base=interface-area-verification-ik-coefficients"
+    csvdiff = 'interface-area-verification-ik-coefficients.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim closure when every one of its coefficients, its critical Weber number and its packing limit are changed from their defaults, the root moving to the value the changed coefficients imply.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [momentum_drift_flux_verification]
     type = CSVDiff
     input = 'momentum-drift-flux-verification.i'
@@ -152,6 +188,29 @@
     abs_zero = 1e-6
     design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVTimeDerivative.md'
     requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form: a factor of rho_m cp_m gives d(rho_m cp_m T)/dt, whose discrete sum telescopes, so the integral of rho_m cp_m T holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_m cp_m dT/dt, and the temperature does not move at all and the integral rises by a factor of two and two thirds, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [conservative_transient_interfacial_area]
+    type = CSVDiff
+    input = 'conservative-transient-interfacial-area.i'
+    csvdiff = 'conservative-transient-interfacial-area_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the transient of its conservative transport equation as d(rho_d xi)/dt, whose discrete sum telescopes, so the integral of rho_d xi holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_d d(xi)/dt, and the interfacial area does not move at all and the integral triples, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [conservative_transient_interfacial_area_compression]
+    type = CSVDiff
+    # The same case with the density falling rather than rising, which is one parameter, so the
+    # input is reused rather than copied
+    input = 'conservative-transient-interfacial-area.i'
+    cli_args = "rho_d_final_factor=0.3333333333333333 Outputs/file_base=conservative-transient-interfacial-area-compression_out"
+    csvdiff = 'conservative-transient-interfacial-area-compression_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density falls in time. The integral of rho_d xi shall hold to round-off over a fall to a third of the initial density, as it does over a tripling, which is the property of the conservative form of the transient term this case is built on. The sources of the interfacial area equation are not assembled here, so this says nothing about them.'
     max_threads = 1 # see libmesh issue #3808
   []
 
