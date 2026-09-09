@@ -1,5 +1,5 @@
-# A flat PYRAMID5 sliver whose apex projects inside the base but offset toward a corner (a
-# base-node-degenerate, asymmetric flat sliver). The apex must still project inside the quad
+# A flat PYRAMID5 pancake whose apex projects inside the base but offset toward a corner (a
+# base-node-degenerate, asymmetric flat pancake). The apex must still project inside the quad
 # base for the absorption to yield a valid cell.
 [Mesh]
   [hex]

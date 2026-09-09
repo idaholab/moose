@@ -1,6 +1,6 @@
-# A flat PYRAMID5 sliver (apex just above its quad base center) sitting on a HEX8, with four
-# TET4 neighbors sharing its triangular cap faces. The repair dissolves the shared quad and
-# absorbs the pyramid into the hex (-> a C0Polyhedron), leaving the four cap faces conformal.
+# Same flat-apex PYRAMID5 pancake on a HEX8, but one triangular cap face is shared with a
+# PRISM6 (the other three with TET4s): the cap face stays conformal against the prism after
+# the pyramid is absorbed into the hex.
 [Mesh]
   [hex]
     type = ElementGenerator
@@ -15,32 +15,16 @@
     element_connectivity = '0 1 2 3 4'
     elem_type = PYRAMID5
   []
-  [add_bdies_on_sliver]
-    type = SideSetsFromNormalsGenerator
-    input = 'pyr'
-    normals = '0 0 1
-               0 0 -1'
-    new_boundary = 'sliv_pointing_inside sliv_pointing_outside'
-    normal_tol = 1e-3
-  []
-  [tet0]
+  [prism0]
     type = ElementGenerator
-    input = add_bdies_on_sliver
-    nodal_positions = '0.5  0.5  1.01  0  0  1  1  0  1  0.5  0.5  2'
-    element_connectivity = '0 1 2 3'
-    elem_type = TET4
-  []
-  [add_bdies_on_collapsed_regular]
-    type = SideSetsFromNormalsGenerator
-    input = 'tet0'
-    normals = '0 0 1
-               0 0 -1'
-    new_boundary = 'coll_pointing_inside coll_pointing_outside'
-    normal_tol = 1e-3
+    input = pyr
+    nodal_positions = '0.5  0.5  1.01  0  0  1  1  0  1  0.5  0.5  2  0  0  2  1  0  2'
+    element_connectivity = '0 1 2 3 4 5'
+    elem_type = PRISM6
   []
   [tet1]
     type = ElementGenerator
-    input = add_bdies_on_collapsed_regular
+    input = prism0
     nodal_positions = '0.5  0.5  1.01  1  0  1  1  1  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4

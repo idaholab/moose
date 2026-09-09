@@ -1,6 +1,6 @@
-# A flat PYRAMID5 sliver whose apex projects inside the base but offset toward a corner (a
-# base-node-degenerate, asymmetric flat sliver). The apex must still project inside the quad
-# base for the absorption to yield a valid cell.
+# Same flat-apex PYRAMID5 pancake as repair_pyramid_pancake.i, but the element across its quad
+# base is a C0Polyhedron (a cube): the repair must absorb the pyramid into a polyhedron
+# neighbor and keep the mesh conformal.
 [Mesh]
   [poly]
     type = ElementGenerator
@@ -11,35 +11,35 @@
   [pyr]
     type = ElementGenerator
     input = poly
-    nodal_positions = '0  0  1  1  0  1  1  1  1  0  1  1  0.8  0.8  1.005'
+    nodal_positions = '0  0  1  1  0  1  1  1  1  0  1  1  0.5  0.5  1.01'
     element_connectivity = '0 1 2 3 4'
     elem_type = PYRAMID5
   []
   [tet0]
     type = ElementGenerator
     input = pyr
-    nodal_positions = '0.8  0.8  1.005  0  0  1  1  0  1  0.5  0.5  2'
+    nodal_positions = '0.5  0.5  1.01  0  0  1  1  0  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
   [tet1]
     type = ElementGenerator
     input = tet0
-    nodal_positions = '0.8  0.8  1.005  1  0  1  1  1  1  0.5  0.5  2'
+    nodal_positions = '0.5  0.5  1.01  1  0  1  1  1  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
   [tet2]
     type = ElementGenerator
     input = tet1
-    nodal_positions = '0.8  0.8  1.005  1  1  1  0  1  1  0.5  0.5  2'
+    nodal_positions = '0.5  0.5  1.01  1  1  1  0  1  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
   [tet3]
     type = ElementGenerator
     input = tet2
-    nodal_positions = '0.8  0.8  1.005  0  1  1  0  0  1  0.5  0.5  2'
+    nodal_positions = '0.5  0.5  1.01  0  1  1  0  0  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
@@ -48,6 +48,7 @@
     input = tet3
     fix_node_overlap = true
     fix_degenerate_elements = true
+    separate_blocks_by_element_types = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator

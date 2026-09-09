@@ -167,7 +167,7 @@ MeshRepairGenerator::generate()
     // Repair degenerate TET4 elements (flat pancakes, needle slivers, zero-volume) by edge collapse
     repairDegenerateTets(mesh);
 
-    // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
+    // Repair flat pancake PYRAMID5 elements by absorbing them into their quad-base neighbor
     repairPyramidPancakes(mesh);
 
     // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
@@ -1491,7 +1491,7 @@ MeshRepairGenerator::collapseByFaceMerge(
 void
 MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const
 {
-  // Bounding-box volume scale, used by the volume-based sliver test
+  // Bounding-box volume scale, used by the volume-based (zero-volume) degeneracy test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
@@ -1505,8 +1505,8 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
     return f;
   };
 
-  // A PYRAMID5 is a sliver if its volume is negligible or its apex is flat against its quad base
-  auto isPyramidSliver = [&](const Elem & e)
+  // A PYRAMID5 is degenerate if its volume is negligible (zero-volume) or its apex is flat against its quad base (a pancake)
+  auto isDegeneratePyramid = [&](const Elem & e)
   {
     if (e.type() != PYRAMID5)
       return false;
@@ -1542,9 +1542,9 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
     repaired_in_pass = false;
 
     // quad-face key -> ids of the 3D elements using that quad face (hex/prism/pyramid/polyhedron),
-    // and the current PYRAMID5 slivers
+    // and the current degenerate PYRAMID5 elements
     std::map<std::array<dof_id_type, 4>, std::vector<dof_id_type>> quad_to_elems;
-    std::vector<dof_id_type> sliver_ids;
+    std::vector<dof_id_type> degenerate_ids;
     for (const auto & elem : mesh->active_element_ptr_range())
     {
       if (elem->dim() != 3)
@@ -1559,8 +1559,8 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
                                 elem->node_id(ns[3]))]
               .push_back(elem->id());
       }
-      if (isPyramidSliver(*elem))
-        sliver_ids.push_back(elem->id());
+      if (isDegeneratePyramid(*elem))
+        degenerate_ids.push_back(elem->id());
     }
 
     std::unordered_set<dof_id_type> touched_nodes;
@@ -1572,10 +1572,10 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
       return false;
     };
 
-    for (const auto sid : sliver_ids)
+    for (const auto sid : degenerate_ids)
     {
       Elem * p = mesh->query_elem_ptr(sid);
-      if (!p || p->type() != PYRAMID5 || touches_repaired(*p) || !isPyramidSliver(*p))
+      if (!p || p->type() != PYRAMID5 || touches_repaired(*p) || !isDegeneratePyramid(*p))
         continue;
 
       // The quad base (side 4) and the element across it
@@ -1631,31 +1631,31 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
       }
 
       // Absorb the pyramid into the neighbor across the shared quad base: the four triangular cap
-      // faces become the rest of the polyhedron. Count a neighbor that was itself a sliver pyramid
-      // (two slivers glued base to base) so it is not lost from the totals.
-      const bool nbr_was_sliver = nbr->type() == PYRAMID5 && isPyramidSliver(*nbr);
+      // faces become the rest of the polyhedron. Count a neighbor that was itself a pancake pyramid
+      // (two pancakes glued base to base) so it is not lost from the totals.
+      const bool nbr_was_degenerate = nbr->type() == PYRAMID5 && isDegeneratePyramid(*nbr);
       const std::vector<dof_id_type> shared_key(base_key.begin(), base_key.end());
       if (absorbAcrossSharedFace(mesh, p, nbr, shared_key, touched_nodes))
       {
-        num_repaired += nbr_was_sliver ? 2 : 1;
+        num_repaired += nbr_was_degenerate ? 2 : 1;
         repaired_in_pass = true;
       }
     }
   }
 
-  // Count any pyramid slivers that remain (no quad-base neighbor or no valid absorption)
+  // Count any degenerate pyramids that remain (no quad-base neighbor or no valid absorption)
   for (const auto & elem : mesh->active_element_ptr_range())
-    if (elem->type() == PYRAMID5 && isPyramidSliver(*elem))
+    if (elem->type() == PYRAMID5 && isDegeneratePyramid(*elem))
       ++num_skipped;
 
   if (num_repaired)
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of pyramid sliver elements absorbed into a neighbor: " << num_repaired
+    _console << "Number of pyramid pancakes absorbed into a neighbor: " << num_repaired
              << std::endl;
     if (num_skipped)
-      _console << "Number of pyramid slivers that could not be absorbed (left in place): "
+      _console << "Number of degenerate pyramids that could not be absorbed (left in place): "
                << num_skipped << std::endl;
   }
 }

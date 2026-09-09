@@ -101,12 +101,14 @@ private:
   /// @param mesh the mesh to modify
   void repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) const;
 
-  /// @brief Repair sliver (near-degenerate, flat) PYRAMID5 elements by absorbing each into the
-  ///        element sharing its quad base. The shared quad face is dissolved and the neighbor (a
-  ///        hex, prism, polyhedron, or another pyramid) is replaced by a C0Polyhedron made of its
-  ///        remaining faces plus the sliver pyramid's four triangular side faces. No node is moved,
-  ///        so the surrounding elements stay conformal. A pyramid is left in place if it has no
-  ///        element across its quad base or the resulting polyhedron would be invalid.
+  /// @brief Repair flat pancake PYRAMID5 elements by absorbing each into the element sharing its
+  ///        quad base. The shared quad face is dissolved and the neighbor (a hex, prism, polyhedron,
+  ///        or another pyramid) is replaced by a C0Polyhedron made of its remaining faces plus the
+  ///        pancake pyramid's four triangular side faces. No node is moved, so the surrounding
+  ///        elements stay conformal. A pyramid is left in place if it has no element across its quad
+  ///        base or the resulting polyhedron would be invalid (a needle/zero-volume pyramid whose
+  ///        apex projects outside the base is flagged but not absorbed). Does not handle a PYRAMID5
+  ///        collapsed to a TET4 by a base-edge collapse; that is not yet implemented.
   /// @param mesh the mesh to modify
   void repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const;
 

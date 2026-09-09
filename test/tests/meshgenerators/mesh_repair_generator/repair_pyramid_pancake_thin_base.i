@@ -1,5 +1,5 @@
-# A flat PYRAMID5 sliver over a thin (high-aspect, near-aligned) quad base shared with a thin
-# HEX8. The pyramid is flagged as a sliver and absorbed into the (valid) thin hex.
+# A flat PYRAMID5 pancake over a thin (high-aspect, near-aligned) quad base shared with a thin
+# HEX8. The pyramid is flagged as a pancake and absorbed into the (valid) thin hex.
 [Mesh]
   [hex]
     type = ElementGenerator

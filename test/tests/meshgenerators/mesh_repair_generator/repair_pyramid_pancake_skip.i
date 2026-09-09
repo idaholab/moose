@@ -1,8 +1,8 @@
-# A flat PYRAMID5 sliver (apex just above its quad base) standing alone: its quad base is a free
+# A flat PYRAMID5 pancake (apex just above its quad base) standing alone: its quad base is a free
 # boundary face with no element across it, so there is nothing to absorb the pyramid into. The
-# repair leaves the sliver in place and reports it as skipped, rather than corrupting the mesh.
-# (A sliver pyramid can only be absorbed when an element shares its quad base, as in
-# repair_pyramid_sliver.i.)
+# repair leaves the pancake in place and reports it as skipped, rather than corrupting the mesh.
+# (A pancake pyramid can only be absorbed when an element shares its quad base, as in
+# repair_pyramid_pancake.i.)
 [Mesh]
   [pyr]
     type = ElementGenerator
