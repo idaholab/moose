@@ -145,6 +145,13 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
       (1.0 - _porosity_old[_qp]) * (_strain_increment[_qp] - elastic_strain_increment).trace() +
       _porosity_old[_qp];
 
+  enforceIntermediatePorosityBounds();
+}
+
+template <bool is_ad>
+void
+ViscoplasticityStressUpdateBaseTempl<is_ad>::enforceIntermediatePorosityBounds()
+{
   if (_intermediate_porosity < 0.0)
   {
     if (_negative_behavior == NegativeBehavior::ZERO)
