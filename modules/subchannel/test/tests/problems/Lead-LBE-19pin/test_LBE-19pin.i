@@ -36,6 +36,8 @@ P_out = 1.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
   verbose_subchannel = true
@@ -43,15 +45,15 @@ P_out = 1.0e5 # Pa
   pin_HTC_closure = 'Dittus-Boelter'
 
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
 
   full_output = true
   mixing_closure = 'Kim_and_Chung'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [Kim_and_Chung]
     type = SCMMixingKimAndChung

@@ -38,14 +38,14 @@ P_out = 155e+5 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
   mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [constant_beta]
     type = SCMMixingConstantBeta

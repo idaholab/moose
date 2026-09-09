@@ -62,13 +62,13 @@ heated_length = 1.0
 
 [SCMClosures]
   [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
   [Cheng_Todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []

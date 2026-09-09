@@ -35,14 +35,14 @@ pin_diameter = 0.00950
   P_out = report_pressure_outlet
   verbose_subchannel = true
   mixing_closure = 'Kim_and_Chung'
-  friction_closure = 'Cheng'
+  friction_closure = 'Chen'
   pin_HTC_closure = 'Dittus-Boelter'
   full_output = true
 []
 
 [SCMClosures]
-  [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
