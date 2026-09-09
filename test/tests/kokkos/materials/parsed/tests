@@ -8,6 +8,6 @@
     exodiff = 'kokkos_parsed_material_out.e'
     requirement = 'The Kokkos system shall support parsed material property calculations.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu'
+    compute_devices = 'cpu cuda'
   []
 []
