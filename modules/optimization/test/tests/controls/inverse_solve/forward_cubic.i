@@ -1,4 +1,8 @@
-# Linear forward model for the SingleParameterInverseSolve action test: du/dt = param_pp.
+# Nonlinear forward model shared by the secant, Newton, and action drivers in this directory.
+#
+# Solves the scalar ODE:  du/dt = param_pp^3,  u(0) = 0
+# After one unit step (dt = 1) the output is u = param_pp^3, so the per-step map y(p) = p^3 is
+# strongly nonlinear (an inflection at p = 0).
 
 [Mesh]
   type = GeneratedMesh
@@ -22,7 +26,7 @@
   [source]
     type = ParsedODEKernel
     variable = u
-    expression = '-param_pp'
+    expression = '-param_pp^3'
     postprocessors = param_pp
   []
 []

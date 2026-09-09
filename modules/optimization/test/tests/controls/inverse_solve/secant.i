@@ -1,29 +1,15 @@
-# Parity driver for NewtonInversionControl on the linear forward model.
+# Hand-written driver for SecantInversionControl.
 #
-# Forward map (per step): y(p) = u_prev + p.  Target f(t) = t^2  =>  p(t) = 2*t - 1.
-# The finite-difference derivative is exact for a linear map, so Newton reaches the
-# root in one step. Expected param_value = 1, 3, 5, 7, 9 at t = 1..5 (matches the
-# SecantInversionControl inverse_solve gold).
+# Finds param p(t) such that the forward output u(t) matches target f(t) = t^2.
+# Analytic solution (dt = 1): p(t) = 2*t - 1  =>  u = 1, 4, 9, 16, 25 at t = 1..5.
+# The converged parameter is published to `param_value` (1, 3, 5, 7, 9).
+#
+# The tests reuse this input with cli_args to reach the nonconverging cases: a one-iteration
+# budget (error and accept-on-max), and the nonlinear forward model that secant cannot solve.
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-[]
-
-[Variables]
-  [dummy]
-    family = SCALAR
-    order = FIRST
-    initial_condition = 0.0
-  []
-[]
-
-[ScalarKernels]
-  [null]
-    type = NullScalarKernel
-    variable = dummy
-  []
+# Supplies the Mesh and a Problem that skips the nonlinear-system check, so this orchestrating
+# main app needs no variables of its own.
+[Optimization]
 []
 
 [Functions]
@@ -36,7 +22,7 @@
 [MultiApps]
   [sub]
     type = TransientMultiApp
-    input_files = sub_linear.i
+    input_files = forward_linear.i
     execute_on = TIMESTEP_BEGIN
   []
 []
@@ -58,20 +44,24 @@
 []
 
 [Postprocessors]
+  # Working parameter guess: transferred to the sub, read and updated by the Control.
   [p]
     type = Receiver
     default = 1.0
     outputs = none
   []
+  # Sub-app output, filled by the FROM transfer.
   [output]
     type = Receiver
     outputs = none
   []
+  # Convergence residual, written (normalized) by the Control each iteration.
   [residual]
     type = Receiver
     default = 1e30
     outputs = none
   []
+  # Published converged parameter (the inverse-problem solution). This is the CSV output.
   [param_value]
     type = Receiver
     default = 0.0
@@ -79,14 +69,14 @@
 []
 
 [Controls]
-  [newton]
-    type = NewtonInversionControl
+  [secant]
+    type = SecantInversionControl
     output_postprocessor = output
     parameter_postprocessor = p
     residual_postprocessor = residual
     converged_parameter_postprocessor = param_value
     target_function = target_fn
-    parameter_delta = 1e-3
+    initial_delta = 1e-3
   []
 []
 

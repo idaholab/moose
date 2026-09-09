@@ -1,37 +1,184 @@
 [Tests]
-  design = 'SecantInversionControl.md'
   issues = '#33205'
 
-  [inverse_solve]
+  # Hand-written SecantInversionControl workflow (secant.i).
+  [secant]
     type = CSVDiff
-    input = main.i
-    csvdiff = main_out.csv
+    input = secant.i
+    csvdiff = secant_out.csv
+    design = 'SecantInversionControl.md'
     requirement = "The system shall solve a scalar inverse coupling problem by using a Control to "
                   "adjust a parameter with the secant method, driven by fixed-point iteration, so "
                   "that a sub-app output matches a target function at each time step."
   []
-  [error_on_max_iteration]
+  [secant_error_on_max_iteration]
     type = RunException
-    input = main.i
-    cli_args = 'Convergence/inv_conv/max_iterations=1 Executioner/dtmin=0.3 Outputs/csv=false'
+    input = secant.i
+    # A distinct file_base keeps this reuse of secant.i from sharing the secant test's output and
+    # recover checkpoint.
+    cli_args = 'Convergence/inv_conv/max_iterations=1 '
+               'Executioner/dtmin=0.3 '
+               'Outputs/csv=false '
+               'Outputs/file_base=secant_error_on_max_out'
     expect_err = 'Solve failed and timestep already at or below dtmin'
+    design = 'SecantInversionControl.md'
     requirement = "The system shall, when the fixed-point iteration cannot converge within the "
                   "maximum number of iterations and the time step cannot be reduced further, "
                   "cut the time step and error out."
   []
-  [accept_on_max_iteration]
+  [secant_accept_on_max_iteration]
     type = RunApp
-    input = main.i
+    input = secant.i
+    # A distinct file_base keeps this reuse of secant.i from sharing the secant test's output and
+    # recover checkpoint.
     cli_args = 'Convergence/inv_conv/max_iterations=1 '
                'Convergence/inv_conv/converge_at_max_iterations=true '
                'Convergence/inv_conv/verbose=true '
-               'Outputs/csv=false'
-    # verbose=true makes the Convergence announce the accept-on-max decision; matching it confirms the
-    # run actually took the accept-on-max branch rather than merely exiting without error.
+               'Outputs/csv=false '
+               'Outputs/file_base=secant_accept_on_max_out'
+    # verbose=true makes the Convergence announce the accept-on-max decision; matching it confirms
+    # the run actually took the accept-on-max branch rather than merely exiting without error.
     expect_out = 'Converged due to iterations \(1\) >= max iterations \(1\)'
-    # Reuses main.i, so its recover checkpoint would collide with the inverse_solve recover test.
-    recover = false
+    design = 'SecantInversionControl.md'
     requirement = "The system shall, when the fixed-point iteration reaches the maximum number of "
                   "iterations and accept-on-max is enabled, accept the best estimate and continue."
+  []
+  [secant_fails_on_nonlinear]
+    type = RunException
+    input = secant.i
+    # The same nonlinear problem the newton_nonlinear test solves: y(p) = p^3 against a target of
+    # 1000 from p0 = -3. Secant estimates df/dp from two iterates straddling the inflection at
+    # p = 0 and enters a bounded chaotic orbit, so with dtmin = dt the step cannot be cut and the
+    # run errors once max_iterations is exhausted.
+    cli_args = 'MultiApps/sub/input_files=forward_cubic.i '
+               'Functions/target_fn/expression=1000 '
+               'Postprocessors/p/default=-3 '
+               'Convergence/inv_conv/max_iterations=25 '
+               'Executioner/num_steps=1 '
+               'Executioner/dtmin=1 '
+               'Outputs/csv=false '
+               'Outputs/file_base=secant_fails_on_nonlinear_out'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    design = 'SecantInversionControl.md NewtonInversionControl.md'
+    requirement = "The system shall demonstrate that the secant-based inversion Control fails to "
+                  "converge within a fixed iteration budget on a nonlinear problem that the finite-"
+                  "difference Newton Control solves."
+  []
+
+  # Hand-written NewtonInversionControl workflow (newton.i).
+  [newton_linear]
+    type = CSVDiff
+    input = newton.i
+    csvdiff = newton_out.csv
+    design = 'NewtonInversionControl.md'
+    requirement = "The system shall solve a scalar inverse coupling problem using a finite-"
+                  "difference Newton Control driven by fixed-point iteration."
+  []
+  [newton_nonlinear]
+    type = CSVDiff
+    input = newton.i
+    csvdiff = newton_nonlinear_out.csv
+    # Nonlinear forward model du/dt = p^3 with target 1000*t needs du = 1000 per step, so the root
+    # is p = 10 at every step. The initial guess p0 = -3 sits on the wrong side of the inflection
+    # at p = 0; Newton samples a fresh local derivative each step and still converges. Newton
+    # spends two fixed-point iterations per update, hence max_iterations = 25.
+    cli_args = 'MultiApps/sub/input_files=forward_cubic.i '
+               'Functions/target_fn/expression="1000*t" '
+               'Postprocessors/p/default=-3 '
+               'Convergence/inv_conv/max_iterations=25 '
+               'Outputs/file_base=newton_nonlinear_out'
+    design = 'NewtonInversionControl.md'
+    requirement = "The system shall solve a nonlinear scalar inverse problem, where the sub-app "
+                  "output depends nonlinearly on the parameter, using a finite-difference Newton "
+                  "Control."
+  []
+
+  # Generated workflow from the SingleParameterInverseSolve action (action.i).
+  [action_secant]
+    type = CSVDiff
+    input = action.i
+    csvdiff = action_out.csv
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall generate a complete secant inverse-solve workflow (forward "
+                  "sub-app, transfers, postprocessors, convergence, and control) from a single "
+                  "SingleParameterInverseSolve block."
+  []
+  [action_newton]
+    type = CSVDiff
+    input = action.i
+    csvdiff = action_newton_out.csv
+    # Same nonlinear problem as the hand-written newton_nonlinear test, driven by the action.
+    cli_args = 'SingleParameterInverseSolve/method=newton '
+               'SingleParameterInverseSolve/forward_input=forward_cubic.i '
+               'Functions/target_fn/expression="1000*t" '
+               'SingleParameterInverseSolve/initial_parameter=-3 '
+               'SingleParameterInverseSolve/max_iterations=25 '
+               'Outputs/file_base=action_newton_out'
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall generate a complete finite-difference Newton inverse-solve "
+                  "workflow from a single SingleParameterInverseSolve block with the method set "
+                  "to newton."
+  []
+  [action_accept_on_max]
+    type = CSVDiff
+    input = action.i
+    csvdiff = action_accept_on_max_out.csv
+    cli_args = 'SingleParameterInverseSolve/max_iterations=1 '
+               'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'SingleParameterInverseSolve/verbose=true '
+               'Outputs/file_base=action_accept_on_max_out'
+    # verbose=true forwards to the generated convergence; matching its announcement confirms the
+    # generated workflow actually took the accept-on-max branch.
+    expect_out = 'Converged due to iterations \(1\) >= max iterations \(1\)'
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall, when the single-parameter inverse-solve block reaches the "
+                  "maximum number of fixed-point iterations and accept-on-max is enabled, accept "
+                  "the best estimate and continue without error."
+  []
+  [action_absolute_tolerance]
+    type = CSVDiff
+    input = action.i
+    csvdiff = action_absolute_tolerance_out.csv
+    cli_args = 'SingleParameterInverseSolve/relative_tolerance=1e-30 '
+               'Outputs/file_base=action_absolute_tolerance_out'
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall converge a single-parameter inverse solve using the absolute "
+                  "tolerance criterion when the relative tolerance is negligible."
+  []
+  [action_newton_accept_on_max]
+    type = CSVDiff
+    input = action.i
+    csvdiff = action_newton_accept_on_max_out.csv
+    # max_iterations=2 is even, so the cap falls on a perturbed Newton iteration -- the case where
+    # the accepted solution must come from the last base iteration (the initial parameter -3), not
+    # the perturbed extrapolation. num_steps=1 keeps that accepted value exact and portable.
+    cli_args = 'SingleParameterInverseSolve/method=newton '
+               'SingleParameterInverseSolve/forward_input=forward_cubic.i '
+               'Functions/target_fn/expression="1000*t" '
+               'SingleParameterInverseSolve/initial_parameter=-3 '
+               'SingleParameterInverseSolve/max_iterations=2 '
+               'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'Executioner/num_steps=1 '
+               'Outputs/file_base=action_newton_accept_on_max_out'
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall, when the Newton single-parameter inverse-solve block reaches "
+                  "the maximum number of fixed-point iterations on a perturbed iteration and "
+                  "accept-on-max is enabled, accept the last base estimate and continue without "
+                  "error."
+  []
+  [action_missing_convergence]
+    type = RunException
+    input = action.i
+    # Points the executioner at a convergence the action did not generate, which is the same
+    # misconfiguration as omitting the line: without it the fixed-point loop is not driven by the
+    # generated convergence and the inverse solve would silently not run.
+    cli_args = 'Executioner/multiapp_fixed_point_convergence=not_the_generated_convergence '
+               'Outputs/csv=false '
+               'Outputs/file_base=action_missing_convergence_out'
+    expect_err = "requires the executioner to use its generated convergence"
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall report a helpful error when the single-parameter inverse-solve "
+                  "block's generated convergence is not assigned to the executioner's "
+                  "multiapp_fixed_point_convergence."
   []
 []

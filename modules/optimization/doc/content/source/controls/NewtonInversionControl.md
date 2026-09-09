@@ -47,7 +47,7 @@ commits whatever sub-application state exists when the loop stops, which is the 
 
 ## Example Input Syntax
 
-!listing test/tests/controls/newton_inverse_solve/main_newton.i block=Controls Convergence
+!listing test/tests/controls/inverse_solve/newton.i block=Controls Convergence
 
 !syntax parameters /Controls/NewtonInversionControl
 

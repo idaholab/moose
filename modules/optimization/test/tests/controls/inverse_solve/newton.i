@@ -1,46 +1,32 @@
-# Driver for NewtonInversionControl on a nonlinear forward model.
+# Hand-written driver for NewtonInversionControl.
 #
-# Forward model: du/dt = p^3 (u accumulates p^3 each unit step). Target f(t) = 1000*t
-# needs du = 1000 per step  =>  p^3 = 1000  =>  root p = 10 at every step (u = 1000*t).
-# Initial guess p0 = -3 (wrong side of the inflection at p = 0). Finite-difference
-# Newton samples a fresh local derivative each step and converges to p = 10; the
-# secant method (see main_secant.i) enters a chaotic orbit and never converges.
+# Defaults match secant.i (linear forward model, target f(t) = t^2, initial guess p0 = 1) so the
+# two Controls can be compared on the same problem. Forward map (per step): y(p) = u_prev + p, so
+# the finite-difference derivative is exact and Newton reaches the root in one step. Expected
+# param_value = 1, 3, 5, 7, 9 at t = 1..5.
 #
-# NewtonInversionControl uses two fixed-point iterations per Newton step (base solve
-# at p, perturbed solve at p + parameter_delta), so allow a larger max_iterations.
+# The newton_nonlinear test reuses this input with cli_args to swap in the cubic forward model,
+# which secant cannot solve (see the secant_fails_on_nonlinear test).
+#
+# NewtonInversionControl uses two fixed-point iterations per Newton step (base solve at p,
+# perturbed solve at p + parameter_delta), so max_iterations must allow for both.
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-[]
-
-[Variables]
-  [dummy]
-    family = SCALAR
-    order = FIRST
-    initial_condition = 0.0
-  []
-[]
-
-[ScalarKernels]
-  [null]
-    type = NullScalarKernel
-    variable = dummy
-  []
+# Supplies the Mesh and a Problem that skips the nonlinear-system check, so this orchestrating
+# main app needs no variables of its own.
+[Optimization]
 []
 
 [Functions]
   [target_fn]
     type = ParsedFunction
-    expression = '1000*t'
+    expression = 't^2'
   []
 []
 
 [MultiApps]
   [sub]
     type = TransientMultiApp
-    input_files = sub.i
+    input_files = forward_linear.i
     execute_on = TIMESTEP_BEGIN
   []
 []
@@ -65,7 +51,7 @@
   # Working parameter guess: transferred to the sub, read and updated by the Control.
   [p]
     type = Receiver
-    default = -3.0
+    default = 1.0
     outputs = none
   []
   # Sub-app output, filled by the FROM transfer.
@@ -104,7 +90,7 @@
     type = PostprocessorConvergence
     postprocessor = residual
     tolerance = 1.0
-    max_iterations = 25
+    max_iterations = 50
   []
 []
 

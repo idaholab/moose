@@ -100,6 +100,6 @@ generated convergence's `converge_at_max_iterations`.
 
 ## Example Input Syntax
 
-!listing test/tests/controls/inverse_solve_action/action_secant.i
+!listing test/tests/controls/inverse_solve/action.i
 
 !syntax parameters /SingleParameterInverseSolve/SingleParameterInverseSolveAction

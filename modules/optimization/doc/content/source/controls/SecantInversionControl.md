@@ -26,7 +26,7 @@ current output; at convergence it holds the inverse-problem solution.
 
 ## Example Input Syntax
 
-!listing test/tests/controls/inverse_solve/main.i block=Controls Convergence
+!listing test/tests/controls/inverse_solve/secant.i block=Controls Convergence
 
 !syntax parameters /Controls/SecantInversionControl
 
