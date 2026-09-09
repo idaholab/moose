@@ -30,6 +30,6 @@
     type = MeshRepairGenerator
     input = add_bdy
     fix_node_overlap = true
-    fix_sliver_elements = true
+    fix_degenerate_elements = true
   []
 []

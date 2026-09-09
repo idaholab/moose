@@ -47,7 +47,7 @@
     type = MeshRepairGenerator
     input = tet3
     fix_node_overlap = true
-    fix_sliver_elements = true
+    fix_degenerate_elements = true
     separate_blocks_by_element_types = true
   []
   [diagnostics]

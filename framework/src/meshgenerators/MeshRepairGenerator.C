@@ -53,56 +53,62 @@ MeshRepairGenerator::validParams()
                         "Merge boundaries if they have the same name but different boundary IDs");
 
   params.addParam<bool>(
-      "fix_sliver_elements",
+      "fix_degenerate_elements",
       false,
-      "Whether to repair sliver (near-degenerate) first-order elements. A 2D sliver (TRI3, QUAD4, "
-      "polygon) is absorbed into its longest-edge neighbor: a triangle sliver against a triangle "
-      "neighbor splits that neighbor into two triangles (the mesh stays all-triangle), otherwise "
-      "the neighbor absorbs the sliver's vertices and is promoted to a polygon. A "
-      "TET4 sliver is removed by edge collapse, keeping a valid all-tetrahedral conformal mesh. A "
-      "flat PYRAMID5 sliver is absorbed into the element across its quad base, which becomes a "
-      "polyhedron. A flat PRISM6 (wedge) sliver is collapsed onto its opposite triangular face so "
-      "its neighbors meet, while a thin-cross-section wedge is absorbed into the element across "
-      "its longest quad side. A flat-slab HEX8 sliver is collapsed along its squashed pair of "
-      "opposite faces. Each repair keeps the mesh conformal, or leaves the sliver in place if no "
-      "valid repair exists.");
+      "Whether to repair degenerate (near-zero-quality) elements. Degeneracy is classified as: a "
+      "zero-volume element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
+      "needle tetrahedron, or in 2D a thin triangle, quadrilateral, or polygon); a pancake (thin "
+      "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
+      "or hexahedral slab); or an element collapsed to a lower topology by one or more short edges "
+      "or in-plane vertices (a quadrilateral becoming a triangle, a pyramid a tetrahedron, or a "
+      "hexahedron a prism). A 2D sliver (TRI3, QUAD4, polygon) is absorbed into its longest-edge "
+      "neighbor: a triangle sliver against a triangle neighbor splits that neighbor into two "
+      "triangles (the mesh stays all-triangle), otherwise the neighbor absorbs the sliver's "
+      "vertices and is promoted to a polygon. A TET4 is removed by edge collapse, keeping a valid "
+      "all-tetrahedral conformal mesh. A flat PYRAMID5 pancake is absorbed into the element across "
+      "its quad base, which becomes a polyhedron. A PRISM6 (wedge) is collapsed onto its opposite "
+      "triangular face (flat pancake) or absorbed into the element across its longest quad side "
+      "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
+      "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
+      "no valid repair exists. Repairs for elements collapsed to a lower topology (short-edge / "
+      "in-plane-vertex degeneracy) are not yet implemented.");
   params.addRangeCheckedParam<Real>(
-      "sliver_element_area_fraction",
+      "zero_area_fraction",
       1e-10,
-      "sliver_element_area_fraction>=0",
+      "zero_area_fraction>=0",
       "A 2D element whose area is below this fraction of the mesh surface-area scale is treated as "
-      "a sliver (set to 0 to disable this test). Only used when 'fix_sliver_elements' is set.");
+      "degenerate, i.e. a zero-area element (set to 0 to disable this test). Only used when "
+      "'fix_degenerate_elements' is set.");
   params.addRangeCheckedParam<Real>(
-      "sliver_element_flap_tol",
+      "flatness_tol",
       0.02,
-      "sliver_element_flap_tol>=0",
-      "A 2D element is treated as a sliver if every vertex other than the two ends of its longest "
+      "flatness_tol>=0",
+      "Relative distance tolerance of the flatness (flap) test used to flag flat pancakes and "
+      "slivers (set to 0 to disable this test). Only used when 'fix_degenerate_elements' is set. A "
+      "2D element is flagged as a sliver if every vertex other than the two ends of its longest "
       "edge lies within this fraction of the longest-edge length from that edge, projecting onto "
-      "its interior (set to 0 to disable this test). Only used when 'fix_sliver_elements' is "
-      "set. In 3D this is the distance from the apex to its opposite face (the largest face for a "
-      "TET4, the quad base for a PYRAMID5) as a fraction of sqrt(that face's area). For a PRISM6 "
-      "it "
-      "flags both a flat wedge (top triangle within this fraction of sqrt(area) of the bottom) and "
-      "a thin-cross-section wedge (a triangle vertex within this fraction of the longest edge). "
-      "For "
-      "a HEX8 it flags a flat slab (a pair of opposite faces within this fraction of sqrt(area) of "
-      "each other).");
+      "its interior. In 3D this is the distance from the apex to its opposite face (the largest "
+      "face for a TET4, the quad base for a PYRAMID5) as a fraction of sqrt(that face's area), "
+      "flagging a flat pancake. For a PRISM6 it flags both a flat (pancake) wedge (top triangle "
+      "within this fraction of sqrt(area) of the bottom) and a thin-cross-section (sliver/blade) "
+      "wedge (a triangle vertex within this fraction of the longest edge). For a HEX8 it flags a "
+      "flat-slab pancake (a pair of opposite faces within this fraction of sqrt(area) of each "
+      "other).");
   params.addRangeCheckedParam<Real>(
-      "sliver_element_volume_fraction",
+      "zero_volume_fraction",
       1e-10,
-      "sliver_element_volume_fraction>=0",
+      "zero_volume_fraction>=0",
       "A TET4, PYRAMID5, PRISM6, or HEX8 whose volume is below this fraction of the mesh "
-      "bounding-box volume is treated as a sliver (set to 0 to disable this test). Only used when "
-      "'fix_sliver_elements' is enabled.");
+      "bounding-box volume is treated as degenerate, i.e. a zero-volume element (set to 0 to "
+      "disable this test). Only used when 'fix_degenerate_elements' is enabled.");
   params.addRangeCheckedParam<Real>(
       "tet_collapse_volume_floor",
       1e-9,
       "tet_collapse_volume_floor>=0",
-      "When repairing a TET4, flat PRISM6 (wedge), or flat-slab HEX8 sliver by collapse, a "
-      "reshaped "
-      "neighbor is rejected (the collapse is not performed) if its volume would drop below this "
-      "fraction of the mesh bounding-box volume, to avoid inverting elements or creating new "
-      "slivers.");
+      "When repairing a TET4, flat PRISM6 (wedge) pancake, or flat-slab HEX8 pancake by collapse, "
+      "a reshaped neighbor is rejected (the collapse is not performed) if its volume would drop "
+      "below this fraction of the mesh bounding-box volume, to avoid inverting elements or "
+      "creating new degenerate elements.");
 
   params.addParam<bool>(
       "renumber_contiguously",
@@ -124,10 +130,10 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name")),
     _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
-    _fix_sliver_elements(getParam<bool>("fix_sliver_elements")),
-    _sliver_area_tol(getParam<Real>("sliver_element_area_fraction")),
-    _sliver_flap_tol(getParam<Real>("sliver_element_flap_tol")),
-    _sliver_volume_tol(getParam<Real>("sliver_element_volume_fraction")),
+    _fix_sliver_elements(getParam<bool>("fix_degenerate_elements")),
+    _sliver_area_tol(getParam<Real>("zero_area_fraction")),
+    _sliver_flap_tol(getParam<Real>("flatness_tol")),
+    _sliver_volume_tol(getParam<Real>("zero_volume_fraction")),
     _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&

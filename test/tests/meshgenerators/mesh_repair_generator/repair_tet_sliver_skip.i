@@ -12,7 +12,7 @@
   [repair]
     type = MeshRepairGenerator
     input = tet0
-    fix_sliver_elements = true
+    fix_degenerate_elements = true
   []
 []
 
