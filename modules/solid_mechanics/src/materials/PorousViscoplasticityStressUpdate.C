@@ -509,6 +509,20 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
 }
 
 template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::advanceSubstepPorosity(
+    const GenericRankTwoTensor<is_ad> & inelastic_strain_increment)
+{
+  // Local constitutive substeps represent smaller internal time increments. Advance this model's
+  // porosity between successful substeps so the next creep solve sees the state that would have
+  // resulted from taking a smaller global timestep. Retain the accepted global-old (1-f) factor so
+  // the accumulated local increments reproduce the existing full-step PorosityFromStrain update.
+  _intermediate_porosity +=
+      (1.0 - _porosity_old[_qp]) * inelastic_strain_increment.trace();
+  this->enforceIntermediatePorosityBounds();
+}
+
+template <bool is_ad>
 unsigned int
 PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & stress)
@@ -781,6 +795,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
         std::abs(MetaPhysicL::raw_value(sub_effective_inelastic_strain_increment));
     checkSubstepIncrement(
         sub_effective_inelastic_strain_increment, total_number_substeps, step + 1);
+    advanceSubstepPorosity(sub_inelastic_strain_increment);
 
     strain_increment += sub_strain_increment;
     inelastic_strain_increment += sub_inelastic_strain_increment;
@@ -850,8 +865,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       (*_gauge_stress_laws[law_index])[_qp] = original_gauge_stresses[law_index];
   };
 
-  // Keep this model's intermediate porosity fixed during the local substeps. It still includes
-  // porosity associated with inelastic increments already computed by the other inelastic models.
+  // Initialize this model's substep porosity from inelastic increments already computed by other
+  // inelastic models. Successful local substeps then advance it through advanceSubstepPorosity().
   this->updateIntermediatePorosity(original_strain_increment);
 
   unsigned int number_substeps;

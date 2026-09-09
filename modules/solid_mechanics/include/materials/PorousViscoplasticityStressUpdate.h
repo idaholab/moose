@@ -230,6 +230,13 @@ protected:
                                   const GenericRankFourTensor<is_ad> & elasticity_tensor,
                                   const GenericRankTwoTensor<is_ad> & elastic_strain_old,
                                   GenericReal<is_ad> & effective_inelastic_strain_increment);
+
+  /**
+   * Advance this model's intermediate porosity after one successful local constitutive substep.
+   * Derived models that solve porosity as an explicit local unknown may override this hook.
+   */
+  virtual void
+  advanceSubstepPorosity(const GenericRankTwoTensor<is_ad> & inelastic_strain_increment);
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
   /// Estimate local substeps from an explicitly supplied hydrostatic driving stress and porosity.
@@ -238,7 +245,8 @@ protected:
                                                const GenericReal<is_ad> & porosity);
   /// Estimate adaptive substeps from the previous accepted global-step effective inelastic rate.
   unsigned int estimateAdaptiveNumberSubstepsFromHistory() const;
-  /// Store the converged current global-step effective inelastic rate for use after timestep acceptance.
+  /// Store the converged current global-step effective inelastic rate for use after timestep
+  /// acceptance.
   void recordEffectiveInelasticStrainRate(
       const GenericReal<is_ad> & effective_inelastic_strain_increment);
   /**
