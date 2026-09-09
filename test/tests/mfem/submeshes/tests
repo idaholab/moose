@@ -98,6 +98,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    min_slots = 2
   []
   [MFEMDomainSubMeshBoundary]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
