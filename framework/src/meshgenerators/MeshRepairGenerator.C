@@ -130,14 +130,14 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name")),
     _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
-    _fix_sliver_elements(getParam<bool>("fix_degenerate_elements")),
-    _sliver_area_tol(getParam<Real>("zero_area_fraction")),
-    _sliver_flap_tol(getParam<Real>("flatness_tol")),
-    _sliver_volume_tol(getParam<Real>("zero_volume_fraction")),
+    _fix_degenerate_elements(getParam<bool>("fix_degenerate_elements")),
+    _zero_area_tol(getParam<Real>("zero_area_fraction")),
+    _flatness_tol(getParam<Real>("flatness_tol")),
+    _zero_volume_tol(getParam<Real>("zero_volume_fraction")),
     _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge && !_fix_sliver_elements && !getParam<bool>("renumber_contiguously") &&
+      !_boundary_id_merge && !_fix_degenerate_elements && !getParam<bool>("renumber_contiguously") &&
       !_split_nonconvex_polygons)
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
@@ -159,22 +159,22 @@ MeshRepairGenerator::generate()
   if (_fix_overlapping_nodes)
     fixOverlappingNodes(mesh);
 
-  if (_fix_sliver_elements)
+  if (_fix_degenerate_elements)
   {
     // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
     repair2DSlivers(mesh);
 
     // Repair sliver TET4 elements by edge collapse
-    repairTetSlivers(mesh);
+    repairDegenerateTets(mesh);
 
     // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
-    repairPyramidSlivers(mesh);
+    repairPyramidPancakes(mesh);
 
     // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
-    repairWedgeSlivers(mesh);
+    repairDegenerateWedges(mesh);
 
     // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
-    repairHexSlivers(mesh);
+    repairHexPancakes(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -571,7 +571,7 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
   const Point ext = bbox.max() - bbox.min();
   const Real surface_scale =
       std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2));
-  const Real area_thresh = std::max(surface_scale, Real(1e-30)) * _sliver_area_tol;
+  const Real area_thresh = std::max(surface_scale, Real(1e-30)) * _zero_area_tol;
 
   // Index of the longest edge (between vertices lng and lng+1) of a 2D element
   auto longestEdge = [](const Elem & e)
@@ -620,12 +620,12 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
     const Point & B = e.point((lng + 1) % nv);
     if ((B - A).norm() == 0)
       return false;
-    if (_sliver_area_tol > 0 && elemArea(e) < area_thresh)
+    if (_zero_area_tol > 0 && elemArea(e) < area_thresh)
       return true;
-    if (_sliver_flap_tol > 0)
+    if (_flatness_tol > 0)
     {
       for (const auto k : make_range(nv))
-        if (k != lng && k != (lng + 1) % nv && !nearEdge(e.point(k), A, B, _sliver_flap_tol))
+        if (k != lng && k != (lng + 1) % nv && !nearEdge(e.point(k), A, B, _flatness_tol))
           return false;
       return true;
     }
@@ -824,13 +824,13 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
 }
 
 void
-MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) const
 {
   // Bounding-box volume scale (3D analog of the 2D surface_scale) and derived thresholds
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
-  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  const Real vol_thresh = vol_scale * _zero_volume_tol;
   // A reshaped tet must keep |volume| above this floor (10x to avoid creating a new sliver)
   const Real invert_floor = 10.0 * vol_scale * _tet_collapse_volume_floor;
 
@@ -877,9 +877,9 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
   {
     if (e.type() != TET4)
       return false;
-    if (_sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh)
+    if (_zero_volume_tol > 0 && std::abs(e.volume()) < vol_thresh)
       return true;
-    if (_sliver_flap_tol > 0)
+    if (_flatness_tol > 0)
     {
       unsigned int apex_local;
       const auto [area, side] = largestFace(e, apex_local);
@@ -888,7 +888,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
         const auto ns = e.nodes_on_side(side);
         const Real d = std::sqrt(geom_utils::pointTriangleDistanceSq(
             e.point(apex_local), e.point(ns[0]), e.point(ns[1]), e.point(ns[2])));
-        if (d < _sliver_flap_tol * std::sqrt(area))
+        if (d < _flatness_tol * std::sqrt(area))
           return true;
       }
     }
@@ -1479,13 +1479,13 @@ MeshRepairGenerator::collapseByFaceMerge(
 }
 
 void
-MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const
 {
   // Bounding-box volume scale, used by the volume-based sliver test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
-  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  const Real vol_thresh = vol_scale * _zero_volume_tol;
 
   // Sorted node-id key of a quad face (the 4-node analog of faceKey)
   auto quadKey = [](dof_id_type a, dof_id_type b, dof_id_type c, dof_id_type d)
@@ -1500,9 +1500,9 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
   {
     if (e.type() != PYRAMID5)
       return false;
-    if (_sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh)
+    if (_zero_volume_tol > 0 && std::abs(e.volume()) < vol_thresh)
       return true;
-    if (_sliver_flap_tol > 0)
+    if (_flatness_tol > 0)
     {
       const auto bn = e.nodes_on_side(4); // the quad base (4 vertices)
       const Point & apex = e.point(4);
@@ -1516,7 +1516,7 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
       {
         const Real d = std::sqrt(std::min(geom_utils::pointTriangleDistanceSq(apex, b0, b1, b2),
                                           geom_utils::pointTriangleDistanceSq(apex, b0, b2, b3)));
-        if (d < _sliver_flap_tol * std::sqrt(area))
+        if (d < _flatness_tol * std::sqrt(area))
           return true;
       }
     }
@@ -1651,13 +1651,13 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
 }
 
 void
-MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const
 {
   // Bounding-box volume scale, used by the volume-based sliver test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
-  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  const Real vol_thresh = vol_scale * _zero_volume_tol;
 
   auto quadKey = [](dof_id_type a, dof_id_type b, dof_id_type c, dof_id_type d)
   {
@@ -1684,19 +1684,19 @@ MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
     const Real e20 = (b0 - e.point(2)).norm();
     const Real lmax = std::max({e01, e12, e20});
 
-    const bool small_vol = _sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
+    const bool small_vol = _zero_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
     bool flat = false;
-    if (_sliver_flap_tol > 0 && twoA > 0)
+    if (_flatness_tol > 0 && twoA > 0)
     {
       const Point un = cross / twoA; // unit normal of the bottom triangle
       const Real h = std::max({std::abs((e.point(3) - b0) * un),
                                std::abs((e.point(4) - b0) * un),
                                std::abs((e.point(5) - b0) * un)});
-      flat = h < _sliver_flap_tol * std::sqrt(0.5 * twoA);
+      flat = h < _flatness_tol * std::sqrt(0.5 * twoA);
     }
     // thin: the vertex opposite the longest edge is within flap_tol * (longest edge) of that edge,
     // i.e. (2*area)/lmax < flap_tol*lmax  <=>  twoA < flap_tol*lmax^2
-    const bool thin = _sliver_flap_tol > 0 && lmax > 0 && twoA < _sliver_flap_tol * lmax * lmax;
+    const bool thin = _flatness_tol > 0 && lmax > 0 && twoA < _flatness_tol * lmax * lmax;
 
     if (!small_vol && !flat && !thin)
       return 0;
@@ -1850,13 +1850,13 @@ MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
 }
 
 void
-MeshRepairGenerator::repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
 {
   // Bounding-box volume scale and floors
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
-  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  const Real vol_thresh = vol_scale * _zero_volume_tol;
   const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
 
   auto quadKey = [](dof_id_type a, dof_id_type b, dof_id_type c, dof_id_type d)
@@ -1905,9 +1905,9 @@ MeshRepairGenerator::repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const
     const auto & c = hex_pairs[best].corr;
     const Point a0 = e.point(c[0]), a1 = e.point(c[2]), a2 = e.point(c[4]), a3 = e.point(c[6]);
     const Real area = 0.5 * ((a1 - a0).cross(a2 - a0).norm() + (a2 - a0).cross(a3 - a0).norm());
-    const bool small_vol = _sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
+    const bool small_vol = _zero_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
     const bool flat =
-        _sliver_flap_tol > 0 && area > 0 && best_sep < _sliver_flap_tol * std::sqrt(area);
+        _flatness_tol > 0 && area > 0 && best_sep < _flatness_tol * std::sqrt(area);
     return (flat || small_vol) ? best : -1;
   };
 

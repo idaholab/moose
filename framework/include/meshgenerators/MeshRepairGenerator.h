@@ -50,17 +50,18 @@ private:
   /// Whether to split non-convex polygons
   const bool _split_nonconvex_polygons;
 
-  /// whether to repair sliver (near-degenerate) first-order 2D elements
-  const bool _fix_sliver_elements;
-  /// a 2D element is a sliver if its area is below this fraction of the mesh area (0 disables)
-  const Real _sliver_area_tol;
-  /// a 2D element is a sliver if every non-longest-edge vertex is within this fraction of the
-  /// longest-edge length from that edge (0 disables)
-  const Real _sliver_flap_tol;
-  /// a TET4 is a sliver if its volume is below this fraction of the mesh bounding-box volume
-  /// (0 disables)
-  const Real _sliver_volume_tol;
-  /// relative floor below which a collapse-reshaped tet is rejected as inverting / re-slivering
+  /// whether to repair degenerate (near-zero-quality) elements: zero-volume, slivers, and pancakes
+  const bool _fix_degenerate_elements;
+  /// a 2D element is treated as degenerate (a zero-area element) if its area is below this fraction
+  /// of the mesh surface-area scale (0 disables)
+  const Real _zero_area_tol;
+  /// flatness (flap) test tolerance: flags a flat pancake (or, in 2D, a sliver) when every
+  /// off-feature vertex is within this fraction of the feature size from that feature (0 disables)
+  const Real _flatness_tol;
+  /// a 3D element is treated as degenerate (a zero-volume element) if its volume is below this
+  /// fraction of the mesh bounding-box volume (0 disables)
+  const Real _zero_volume_tol;
+  /// relative floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
   const Real _tet_collapse_volume_floor;
 
   /// @brief Removes the elements with an volume value below the user threshold
@@ -95,7 +96,7 @@ private:
   ///        configuration, and does not distort the mesh boundary; otherwise the sliver is left in
   ///        place. Repairs run in node-disjoint passes.
   /// @param mesh the mesh to modify
-  void repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const;
+  void repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair sliver (near-degenerate, flat) PYRAMID5 elements by absorbing each into the
   ///        element sharing its quad base. The shared quad face is dissolved and the neighbor (a
@@ -104,7 +105,7 @@ private:
   ///        so the surrounding elements stay conformal. A pyramid is left in place if it has no
   ///        element across its quad base or the resulting polyhedron would be invalid.
   /// @param mesh the mesh to modify
-  void repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const;
+  void repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair sliver (near-degenerate) PRISM6 (wedge) elements. A flat (axially squashed)
   ///        wedge is repaired by collapsing its top triangle onto its bottom triangle so the
@@ -113,7 +114,7 @@ private:
   ///        in place if no valid repair exists (the collapse would invert/degenerate a neighbor or
   ///        distort the boundary, or the absorbed union would be an invalid cell).
   /// @param mesh the mesh to modify
-  void repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const;
+  void repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Absorb a sliver element into the neighbor sharing the face with sorted node-id key
   ///        @p shared_key, by replacing both with a single C0Polyhedron whose faces are both
@@ -148,5 +149,5 @@ private:
   ///        place if no pair is sufficiently squashed, a connecting side face is shared, or the
   ///        collapse would invert/degenerate a neighbor.
   /// @param mesh the mesh to modify
-  void repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const;
+  void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
 };
