@@ -95,13 +95,6 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))
       mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
-
-  // 'normalize_c' and node-based scaling both divide by the node's covered measure, so combining
-  // them double-counts coverage; Popp's scaling assumes the raw weighted gap.
-  if (_normalize_c && _weighted_gap_uo.usesNodalScaling())
-    paramError("normalize_c",
-               "'normalize_c = true' cannot be combined with node-based scaling "
-               "('use_nodal_scaling = true' on the weighted gap user object).");
 }
 
 ADReal
@@ -192,7 +185,11 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+  // normalizeCDivisor() returns *_normalization_ptr unchanged unless node-based scaling is active,
+  // in which case it substitutes a coverage-independent (full-element) integral so the two
+  // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
+  const Real c =
+      _normalize_c ? _c / _weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr) : _c;
 
   // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
   // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j

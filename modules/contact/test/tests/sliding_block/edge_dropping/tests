@@ -107,18 +107,22 @@
     issues = '#18853'
     allow_test_objects = true
   []
-  [nodal-scaling-rejects-normalize-c]
-    type = 'RunException'
+  [frictionless-slide-2d-nodal-scaling-normalize-c]
+    type = 'CSVDiff'
     input = 'two_equal_blocks_slide_2d.i'
+    csvdiff = 'two_equal_blocks_slide_2d_nodal_scaling_normalize_c_out.csv'
     cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
-               'Constraints/normal_lm/normalize_c=true'
-    expect_err = 'cannot be combined with node-based scaling'
-    requirement = 'The system shall report an error when node-based mortar scaling is combined with '
-                  'normalization of the constraint coefficient.'
+               'Constraints/normal_lm/normalize_c=true '
+               'Outputs/file_base="two_equal_blocks_slide_2d_nodal_scaling_normalize_c_out"'
+    requirement = 'The system shall permit combining `normalize_c` with the node-based Lagrange '
+                  'multiplier scaling of Popp et al. (2013) on a partially covered (edge-dropping) '
+                  'mortar contact interface without double-counting the coverage fraction, '
+                  'recovering the same displacements as the node-based-scaling-only formulation.'
     design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
              'userobjects/LMWeightedGapUserObject.md'
     issues = '#18853'
     allow_test_objects = true
+    capabilities = 'ad_size>=100'
   []
   [nodal-scaling-requires-first-order]
     type = 'RunException'

@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 template <typename>
@@ -48,6 +49,13 @@ public:
     return findValue(_dof_to_nodal_scale, dof, Real(1));
   }
   virtual bool usesNodalScaling() const override { return _use_nodal_scaling; }
+
+  virtual Real normalizeCDivisor(const DofObject * const dof,
+                                 const Real covered_normalization) const override
+  {
+    return _use_nodal_scaling ? findValue(_dof_to_full_normalization, dof, covered_normalization)
+                              : covered_normalization;
+  }
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -107,6 +115,18 @@ protected:
   /// Cache of the per-node full integrals int_e N_j (see fullNodalIntegrals()), keyed by element id;
   /// cleared each evaluation since the displaced geometry changes
   std::unordered_map<dof_id_type, std::vector<Real>> _elem_to_full_nodal_integral;
+
+  /// Per-node sum, over each distinct adjacent secondary element, of the full-element integral
+  /// int_e N_j (see fullNodalIntegrals()); the coverage-independent divisor for `normalize_c` when
+  /// node-based scaling is active (see normalizeCDivisor()), reduces exactly to the covered-region
+  /// `normalization` (WeightedGapUserObject::computeQpIProperties()) at full coverage, since
+  /// int_e Phi_j = int_e N_j for the dual basis by construction. Not from Popp (2013); a PR-review
+  /// proposal for composing `normalize_c` with node-based scaling.
+  std::unordered_map<const DofObject *, Real> _dof_to_full_normalization;
+
+  /// Elements already folded into _dof_to_full_normalization for a given node, to avoid double
+  /// counting when multiple mortar segments cover the same element
+  std::unordered_map<const DofObject *, std::unordered_set<dof_id_type>> _full_normalization_elems;
 
   /// Finite element and quadrature rule used to evaluate fullNodalIntegrals()
   std::unique_ptr<libMesh::FEBase> _nodal_scaling_fe;

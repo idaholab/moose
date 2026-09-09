@@ -16,7 +16,7 @@ pair must use the same mapping mode.
 
 For the `mortar` formulation, [!param](/Contact/ContactAction/use_nodal_scaling) is forwarded to the
 generated Lagrange-multiplier user object to improve the conditioning of partially covered
-(edge-dropping) interfaces; it requires
+(secondary edge dropping) interfaces; it requires
 [!param](/Contact/ContactAction/correct_edge_dropping) and is described in
 [ComputeWeightedGapLMMechanicalContact.md#node-based-scaling-for-edge-dropping].
 

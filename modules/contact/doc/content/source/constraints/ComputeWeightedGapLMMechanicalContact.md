@@ -62,24 +62,28 @@ pressures. It requires `correct_edge_dropping = true`.
 The Lagrange multiplier stored in the solution vector is the scaled multiplier $\hat{z}_j$, not the
 physical pressure, so plotting the Lagrange multiplier variable directly shows the scaled quantity.
 The physical pressure is recovered internally for the mortar force coupling, and to output it use
-[MortarUserObjectAux](/MortarUserObjectAux.md) with `contact_quantity = normal_pressure`. Any object
-that instead consumes the Lagrange multiplier variable itself, such as the `contact_pressure`
-argument of [MortarFrictionalStateAux](/MortarFrictionalStateAux.md), receives the scaled multiplier.
+[MortarUserObjectAux](/MortarUserObjectAux.md) with `contact_quantity = normal_pressure`. The
+`contact_pressure` argument of [MortarFrictionalStateAux](/MortarFrictionalStateAux.md) is a plain
+coupled variable: it receives the scaled multiplier if given the Lagrange multiplier variable
+itself, or the physical pressure if given a [MortarUserObjectAux](/MortarUserObjectAux.md)
+`normal_pressure` auxiliary variable.
 Because the stored quantity depends on whether scaling is enabled, do not restart a simulation with a
 different `use_nodal_scaling` setting than the one that wrote the restart data.
 
 Use [!param](/UserObjects/LMWeightedGapUserObject/use_nodal_scaling) when the ill-conditioning caused
 by partially covered elements is the problem; use `normalize_c` when the gap and the contact pressure
-in the complementarity function are on different scales. The two are mutually exclusive: both divide
-by a measure of the node's covered area, so combining them makes the gap term grow without bound as
-the coverage vanishes instead of settling at $O(1)$.
+in the complementarity function are on different scales. The two may be combined: `normalize_c`'s
+divisor, which is otherwise a measure of the node's covered area, is replaced by a
+coverage-independent (full-element) measure whenever node-based scaling is active, so combining them
+does not double-count coverage. This composition is not addressed by [!citep](popp2013improved) and
+is a MOOSE-specific design choice.
 
 !alert warning title=Limited support
 Node-based scaling is implemented for Lagrange multiplier contact
 ([LMWeightedGapUserObject](/LMWeightedGapUserObject.md) and
 [LMWeightedVelocitiesUserObject](/LMWeightedVelocitiesUserObject.md)) using a first-order Lagrange
 multiplier and first-order displacements. An error is reported for a second-order Lagrange
-multiplier or displacement, `correct_edge_dropping = false`, or `normalize_c = true`. Second order is
+multiplier or displacement, or `correct_edge_dropping = false`. Second order is
 excluded because the normalization $\int_e N_j$ is zero at TRI6 and TET10 vertices and negative at
 QUAD8 and HEX20 corners, which makes $\kappa_j$ undefined or negative. The consistent linearization of
 $\kappa_j$ (its dependence on displacement) is omitted because the mortar segment geometry is carried

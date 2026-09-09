@@ -154,6 +154,8 @@ LMWeightedGapUserObject::initializeNodalScaling()
   _dof_to_covered_fraction_sum.clear();
   _dof_to_nodal_scale.clear();
   _elem_to_full_nodal_integral.clear();
+  _dof_to_full_normalization.clear();
+  _full_normalization_elems.clear();
 }
 
 void
@@ -168,8 +170,14 @@ LMWeightedGapUserObject::computeQpINodalScaling()
   // over adjacent elements. Both use the standard N_j (fePhiLower), not the dual test, so kappa_j
   // is 1 at full coverage in every coordinate system.
   const auto & std_phi = _assembly.fePhiLower<Real>(_disp_x_var->feType());
-  _dof_to_covered_fraction_sum[dof] +=
-      std_phi[_i][_qp] * _qp_factor / fullNodalIntegrals(_lower_secondary_elem)[_i];
+  const auto & full_integrals = fullNodalIntegrals(_lower_secondary_elem);
+  _dof_to_covered_fraction_sum[dof] += std_phi[_i][_qp] * _qp_factor / full_integrals[_i];
+
+  // Coverage-independent divisor for `normalize_c` (see normalizeCDivisor()): sum the full-element
+  // integral int_e N_j once per distinct adjacent element, not once per quadrature point, since it
+  // does not depend on qp and multiple mortar segments may cover the same element.
+  if (_full_normalization_elems[dof].insert(_lower_secondary_elem->id()).second)
+    _dof_to_full_normalization[dof] += full_integrals[_i];
 }
 
 void
@@ -181,6 +189,13 @@ LMWeightedGapUserObject::finalizeNodalScaling()
   // Reduce the processor-local numerators (the thread sums only rank-owned elements).
   // send_data_back = true: non-owner ranks also need kappa_j for the primary-side coupling.
   Moose::Mortar::Contact::communicateRealObject(_dof_to_covered_fraction_sum,
+                                                _subproblem.mesh(),
+                                                _nodal,
+                                                _communicator,
+                                                /*send_data_back=*/true);
+
+  // Same reduction for the normalize_c divisor sum; also needed on non-owner ranks.
+  Moose::Mortar::Contact::communicateRealObject(_dof_to_full_normalization,
                                                 _subproblem.mesh(),
                                                 _nodal,
                                                 _communicator,
