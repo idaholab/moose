@@ -112,12 +112,14 @@ private:
   /// @param mesh the mesh to modify
   void repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const;
 
-  /// @brief Repair sliver (near-degenerate) PRISM6 (wedge) elements. A flat (axially squashed)
-  ///        wedge is repaired by collapsing its top triangle onto its bottom triangle so the
-  ///        elements above and below it meet; a thin-cross-section (blade) wedge is absorbed into
-  ///        the element across its longest quad side, which becomes a C0Polyhedron. A wedge is left
-  ///        in place if no valid repair exists (the collapse would invert/degenerate a neighbor or
-  ///        distort the boundary, or the absorbed union would be an invalid cell).
+  /// @brief Repair degenerate PRISM6 (wedge) elements. A flat (axially squashed) wedge - a pancake
+  ///        - is repaired by collapsing its top triangle onto its bottom triangle so the elements
+  ///        above and below it meet; a thin-cross-section (blade) wedge - a sliver - is absorbed
+  ///        into the element across its longest quad side, which becomes a C0Polyhedron. A wedge is
+  ///        left in place if no valid repair exists (the collapse would invert/degenerate a neighbor
+  ///        or distort the boundary, or the absorbed union would be an invalid cell). Does not
+  ///        handle a wedge collapsed to a lower topology (short-edge degeneracy); not yet
+  ///        implemented.
   /// @param mesh the mesh to modify
   void repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const;
 

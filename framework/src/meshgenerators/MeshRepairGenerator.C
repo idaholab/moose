@@ -170,7 +170,7 @@ MeshRepairGenerator::generate()
     // Repair flat pancake PYRAMID5 elements by absorbing them into their quad-base neighbor
     repairPyramidPancakes(mesh);
 
-    // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
+    // Repair degenerate PRISM6 (wedge) elements: collapse a flat pancake or absorb a thin blade sliver
     repairDegenerateWedges(mesh);
 
     // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
@@ -1663,7 +1663,7 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
 void
 MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const
 {
-  // Bounding-box volume scale, used by the volume-based sliver test
+  // Bounding-box volume scale, used by the volume-based (zero-volume) degeneracy test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
@@ -1676,11 +1676,11 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
     return f;
   };
 
-  // Floor below which a collapse-reshaped neighbor is rejected as inverting / re-slivering
+  // Floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
   const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
 
-  // Classify a PRISM6: 0 = not a sliver or not a prism6, 1 = flat (top triangle squashed onto the
-  // bottom), 2 = thin (the triangular cross-section is a sliver, i.e. a blade). PRISM6 nodes: 0,1,2
+  // Classify a PRISM6: 0 = not degenerate or not a prism6, 1 = flat pancake (top triangle squashed onto the
+  // bottom), 2 = thin blade sliver (the triangular cross-section is a sliver). PRISM6 nodes: 0,1,2
   // bottom triangle, 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
   auto wedgeMode = [&](const Elem & e) -> int
   {
@@ -1729,7 +1729,7 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
     // tell whether a flat wedge's quad side is shared); node -> incident elements (collapse star)
     std::map<std::array<dof_id_type, 4>, std::vector<dof_id_type>> quad_to_elems;
     std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
-    std::vector<dof_id_type> sliver_ids;
+    std::vector<dof_id_type> degenerate_ids;
     for (const auto & elem : mesh->active_element_ptr_range())
     {
       for (const auto n : make_range(elem->n_nodes()))
@@ -1746,7 +1746,7 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
                 .push_back(elem->id());
         }
       if (wedgeMode(*elem))
-        sliver_ids.push_back(elem->id());
+        degenerate_ids.push_back(elem->id());
     }
 
     std::unordered_set<dof_id_type> touched_nodes;
@@ -1758,7 +1758,7 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
       return false;
     };
 
-    for (const auto sid : sliver_ids)
+    for (const auto sid : degenerate_ids)
     {
       Elem * w = mesh->query_elem_ptr(sid);
       if (!w || w->type() != PRISM6 || touches_repaired(*w))
@@ -1828,7 +1828,7 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
 
         // Collapse the top triangle (3,4,5) onto the bottom (0,1,2). Because the wedge is flat, the
         // top nodes are within flap_tol of the bottom plane, so this is a sub-tolerance move and
-        // cannot distort the boundary by more than the sliver's own (negligible) thickness; the
+        // cannot distort the boundary by more than the wedge's own (negligible) thickness; the
         // bottom triangle and any element below it are left untouched. Capture the gone->kept node
         // pairs before the merge (the wedge is in its own star, so its slots get overwritten).
         std::vector<std::pair<Node *, Node *>> gone_kept{{w->node_ptr(3), w->node_ptr(0)},
@@ -1843,7 +1843,7 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
     }
   }
 
-  // Count any wedge slivers that remain (no valid repair found)
+  // Count any degenerate wedges that remain (no valid repair found)
   for (const auto & elem : mesh->active_element_ptr_range())
     if (elem->type() == PRISM6 && wedgeMode(*elem))
       ++num_skipped;
@@ -1852,9 +1852,9 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of wedge sliver elements repaired: " << num_repaired << std::endl;
+    _console << "Number of degenerate wedge elements repaired: " << num_repaired << std::endl;
     if (num_skipped)
-      _console << "Number of wedge slivers that could not be repaired (left in place): "
+      _console << "Number of degenerate wedges that could not be repaired (left in place): "
                << num_skipped << std::endl;
   }
 }
