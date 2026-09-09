@@ -30,8 +30,10 @@ LinearFVGradientStateTest::validParams()
   params.addParam<unsigned int>("component", 0, "Spatial gradient component to read.");
   params.addParam<MooseEnum>(
       "iteration_type", MooseEnum("time nonlinear", "time"), "Iteration type of the read state.");
-  params.addParam<bool>("face", false, "Read the first internal face instead of an element.");
-  params.addParam<dof_id_type>("element_id", 0, "Element ID used for element reads.");
+  params.addParam<bool>("face", false, "Read a selected element face instead of the element.");
+  params.addParam<dof_id_type>(
+      "element_id", 0, "Element ID used for element reads and adjacent-face selection.");
+  params.addParam<unsigned int>("face_side", 0, "Side of the selected element used for face reads.");
   params.addParam<unsigned int>("late_oldest_gradient_state",
                                 "Optional gradient depth to request during initial setup.");
   params.addClassDescription("Tests optional time-state storage for linear FV gradients.");
@@ -47,7 +49,8 @@ LinearFVGradientStateTest::LinearFVGradientStateTest(const InputParameters & par
     _component(getParam<unsigned int>("component")),
     _iteration_type(getParam<MooseEnum>("iteration_type")),
     _face(getParam<bool>("face")),
-    _element_id(getParam<dof_id_type>("element_id"))
+    _element_id(getParam<dof_id_type>("element_id")),
+    _face_side(getParam<unsigned int>("face_side"))
 {
   if (!_variable)
     paramError("variable", "The supplied variable must be a scalar linear FV variable.");
@@ -63,26 +66,56 @@ LinearFVGradientStateTest::initialSetup()
   GeneralPostprocessor::initialSetup();
   if (isParamValid("late_oldest_gradient_state"))
     _variable->requestCellGradients(getParam<unsigned int>("late_oldest_gradient_state"));
+
+  auto & mesh = _fe_problem.mesh();
+  _element = mesh.getMesh().query_elem_ptr(_element_id);
+
+  bool found = _element;
+  if (_face)
+  {
+    found = false;
+    if (_element && _element->processor_id() == processor_id())
+    {
+      _face_info = mesh.faceInfo(_element, _face_side);
+      found = _face_info && _face_info->neighborPtr();
+    }
+  }
+
+  _communicator.max(found);
+  if (!found)
+    paramError("element_id",
+               _face ? "The selected element side is not an internal face."
+                     : "The selected element does not exist in the mesh.");
+}
+
+void
+LinearFVGradientStateTest::initialize()
+{
+  _value = 0;
 }
 
 void
 LinearFVGradientStateTest::execute()
 {
+  if (!_element || _element->processor_id() != processor_id())
+    return;
+
   const auto iteration_type = _iteration_type == "time" ? Moose::SolutionIterationType::Time
                                                         : Moose::SolutionIterationType::Nonlinear;
   const Moose::StateArg state(_state, iteration_type);
 
   if (_face)
   {
-    for (const auto & face_info : _fe_problem.mesh().faceInfo())
-      if (face_info->neighborPtr())
-      {
-        _value = _reader->gradient(*face_info, state)(_component);
-        return;
-      }
-
-    mooseError("LinearFVGradientStateTest could not find an internal face.");
+    mooseAssert(_face_info, "An adjacent internal face must be selected during initial setup.");
+    _value = _reader->gradient(*_face_info, state)(_component);
+    return;
   }
 
   _value = _reader->component(_fe_problem.mesh().elemInfo(_element_id), _component, state);
+}
+
+void
+LinearFVGradientStateTest::finalize()
+{
+  gatherSum(_value);
 }

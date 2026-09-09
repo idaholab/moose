@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseFunctorArguments.h"
 #include "MooseTypes.h"
 
 #include <string>

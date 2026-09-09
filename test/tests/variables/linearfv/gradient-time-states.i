@@ -2,7 +2,8 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 4
+    # Keep the sampled element and face away from physical and two-rank partition boundaries.
+    nx = 8
   []
 []
 
@@ -130,6 +131,8 @@
     oldest_gradient_state = 1
     state = 0
     face = true
+    element_id = 1
+    face_side = 1 # Right side of element 1.
     execute_on = TIMESTEP_END
   []
   [u_face_old]
@@ -138,6 +141,8 @@
     oldest_gradient_state = 1
     state = 1
     face = true
+    element_id = 1
+    face_side = 1 # Right side of element 1.
     execute_on = TIMESTEP_END
   []
   [aux_current]

@@ -11,8 +11,14 @@
 #include "GeneralPostprocessor.h"
 
 class LinearFVGradientReader;
+class FaceInfo;
 template <typename>
 class MooseLinearVariableFV;
+
+namespace libMesh
+{
+class Elem;
+}
 
 /**
  * Reads a requested linear FV gradient state through the public variable and reader APIs.
@@ -25,8 +31,9 @@ public:
   LinearFVGradientStateTest(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void execute() override;
+  virtual void finalize() override;
   virtual PostprocessorValue getValue() const override { return _value; }
 
 private:
@@ -50,6 +57,15 @@ private:
 
   /// Element ID selected for element reads.
   const dof_id_type _element_id;
+
+  /// Side of the selected element used for face reads.
+  const unsigned int _face_side;
+
+  /// Selected element when it is stored on this process.
+  const libMesh::Elem * _element = nullptr;
+
+  /// Internal face adjacent to the selected element on its owning process.
+  const FaceInfo * _face_info = nullptr;
 
   /// Most recently read gradient value.
   PostprocessorValue _value = 0;
