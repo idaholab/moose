@@ -33,21 +33,20 @@
                  'GlobalParams/order=SECOND Mesh/gmg/nx=5 Mesh/gmg/ny=5'
   []
   [error]
-    requirement = 'The system shall report an error'
+    type = 'RunException'
+    input = 'names.i'
+    cli_args = 'Mesh/lower_d_block/sidesets=invalid --mesh-only'
+    requirement = 'The system shall report an error if a non-existing sideset is specified as the sideset to create a lower-dimensional block from.'
     issues = '#24638 #22117'
-    [dont_refine_before]
-      type = 'RunException'
-      input = 'refine-error.i'
-      cli_args = '--mesh-only'
-      detail = 'if refinement generators are executed before lower dimensional elements are added,'
-      expect_err = 'Make sure that LowerDBlockFromSidesetGenerators are run before any refinement generators'
-    []
-    [invalid_sideset]
-      type = 'RunException'
-      input = 'names.i'
-      cli_args = 'Mesh/lower_d_block/sidesets=invalid --mesh-only'
-      detail = 'if a non-existing sideset is specified as the sideset to create a lower-dimensional block from.'
-      expect_err = 'The sideset \'invalid\' was not found within the mesh'
-    []
+    expect_err = 'The sideset \'invalid\' was not found within the mesh'
+  []
+  [refine_before]
+    type = 'Exodiff'
+    input = 'refine-before-lower-d.i'
+    exodiff = 'refine-before-lower-d_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    requirement = 'The system shall support creating lower dimensional elements from a sideset that has been refined by preceding refinement generators.'
+    issues = '#24638 #22117'
   []
 []
