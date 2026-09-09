@@ -196,9 +196,16 @@ QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
 
     for (unsigned int j = 0; j < num_dofs; ++j)
     {
-      // A column the level holds fixed carries an entry all the same, so that the assembled matrix
-      // reproduces the operator action on any vector, and the fixed rows of the hierarchy's vectors
-      // are what keep those columns from acting during a cycle
+      auto col = _level.getElemLocalDofIndex(elem, j, var);
+
+      // Skipping a fixed column as well as a fixed row makes the assembled matrix symmetric
+      // whenever the fine linearization is, which the matrix-free apply() above does not need to
+      // do: every vector this operator legitimately acts on is already zero on a fixed row (the
+      // hierarchy carries only corrections that vanish there), so the entries this omits never
+      // act in a real cycle
+      if (_level.isConstrained(col))
+        continue;
+
       Real entry = 0;
 
       for (unsigned int qp = 0; qp < num_qps; ++qp)
