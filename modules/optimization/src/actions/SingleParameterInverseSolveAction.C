@@ -68,6 +68,11 @@ SingleParameterInverseSolveAction::validParams()
       "result_postprocessor",
       "inverse_parameter",
       "Name of the created postprocessor holding the converged parameter (output to CSV).");
+  params.addParam<bool>(
+      "verbose",
+      false,
+      "Forwarded to the generated convergence: if true, it prints per-iteration convergence "
+      "information, including the accept-on-max decision when accept_on_max_iterations is set.");
 
   return params;
 }
@@ -91,6 +96,8 @@ SingleParameterInverseSolveAction::act()
   {
     auto ps = _factory.getValidParams("TransientMultiApp");
     ps.set<std::vector<FileName>>("input_files") = {getParam<FileName>("forward_input")};
+    // Load-bearing: the sub-app must re-solve on every fixed-point iteration (each begins a
+    // TIMESTEP_BEGIN), so the control sees a fresh forward output for each trial parameter.
     ps.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN};
     _problem->addMultiApp("TransientMultiApp", p + "_forward", ps);
   }
@@ -118,13 +125,11 @@ SingleParameterInverseSolveAction::act()
     // Working parameter guess (transferred to the sub-app, read and written by the control).
     auto pp = _factory.getValidParams("Receiver");
     pp.set<Real>("default") = getParam<Real>("initial_parameter");
-    pp.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
     pp.set<std::vector<OutputName>>("outputs") = none;
     _problem->addPostprocessor("Receiver", p + "_param", pp);
 
     // Sub-app output (filled by the FROM transfer).
     auto po = _factory.getValidParams("Receiver");
-    po.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
     po.set<std::vector<OutputName>>("outputs") = none;
     _problem->addPostprocessor("Receiver", p + "_output", po);
 
@@ -137,7 +142,6 @@ SingleParameterInverseSolveAction::act()
     // declared at a fixed tolerance of 1). Large default so a step is never "converged" pre-solve.
     auto pres = _factory.getValidParams("Receiver");
     pres.set<Real>("default") = 1e30;
-    pres.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
     pres.set<std::vector<OutputName>>("outputs") = none;
     _problem->addPostprocessor("Receiver", residual, pres);
   }
@@ -148,6 +152,7 @@ SingleParameterInverseSolveAction::act()
     pc.set<Real>("tolerance") = 1.0;
     pc.set<unsigned int>("max_iterations") = getParam<unsigned int>("max_iterations");
     pc.set<bool>("converge_at_max_iterations") = getParam<bool>("accept_on_max_iterations");
+    pc.set<bool>("verbose") = getParam<bool>("verbose");
     _problem->addConvergence("PostprocessorConvergence", p + "_convergence", pc);
   }
   else if (_current_task == "add_control")

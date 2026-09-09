@@ -39,7 +39,11 @@ Convergence object must allow roughly twice the number of Newton steps.
 When accept-on-max is enabled and the iteration cap falls on a perturbed iteration (which happens
 whenever `max_iterations` is even), the accepted solution is the parameter from the last base
 iteration -- the most recent value actually solved and residual-measured -- rather than the
-un-evaluated Newton extrapolation computed on the perturbed iteration.
+un-evaluated Newton extrapolation computed on the perturbed iteration. Note, however, that the
+reported parameter and the committed sub-application state can disagree in this case: the executioner
+commits whatever sub-application state exists when the loop stops, which is the *perturbed*
+($p_{base} + \delta p$) solve, not the base solve whose parameter is reported. Prefer an odd
+`max_iterations` so the cap falls on a base iteration and the two agree.
 
 ## Example Input Syntax
 

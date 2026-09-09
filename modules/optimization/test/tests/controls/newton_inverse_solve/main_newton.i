@@ -66,13 +66,11 @@
   [p]
     type = Receiver
     default = -3.0
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   # Sub-app output, filled by the FROM transfer.
   [output]
     type = Receiver
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   # Convergence residual written by the Control (|y_base - target| on base iterations,
@@ -80,7 +78,6 @@
   [residual]
     type = Receiver
     default = 1e30
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   # Published converged parameter (the inverse-problem solution). This is the CSV output.

@@ -63,18 +63,15 @@
   [p]
     type = Receiver
     default = -3.0
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   [output]
     type = Receiver
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   [residual]
     type = Receiver
     default = 1e30
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
     outputs = none
   []
   [param_value]

@@ -25,8 +25,12 @@
     # avoiding a collision with the action_secant test.
     cli_args = 'SingleParameterInverseSolve/max_iterations=1 '
                'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'SingleParameterInverseSolve/verbose=true '
                'Outputs/file_base=action_accept_on_max_out'
     csvdiff = action_accept_on_max_out.csv
+    # verbose=true forwards to the generated convergence; matching its announcement confirms the
+    # generated workflow actually took the accept-on-max branch.
+    expect_out = 'Converged due to iterations \(1\) >= max iterations \(1\)'
     requirement = "The system shall, when the single-parameter inverse-solve block reaches the "
                   "maximum number of fixed-point iterations and accept-on-max is enabled, accept "
                   "the best estimate and continue without error."

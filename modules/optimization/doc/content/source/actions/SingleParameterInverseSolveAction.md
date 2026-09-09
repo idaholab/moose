@@ -48,6 +48,13 @@ action creates:
   [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/target_function) and
   [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/perturbation)).
 
+!alert note title=Generated objects are not user-configurable
+The action exposes only the parameters listed on this page. The generated `TransientMultiApp`,
+`Transfers`, `Postprocessors`, `Convergence`, and `Control` are created with fixed settings, so
+`TransientMultiApp` options such as `sub_cycling`, `max_procs_per_app`, `cli_args`, `catch_up`, and
+`keep_solution_during_restore` cannot be reached through this block. A workflow that needs them
+should be written out as explicit blocks rather than generated here.
+
 ### Required Executioner Parameter
 
 Because the fixed-point loop is enabled when the executioner is constructed (before actions run),

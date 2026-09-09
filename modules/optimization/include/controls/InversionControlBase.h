@@ -81,6 +81,9 @@ protected:
    * |y - targetValue()| / max(absolute_tolerance, relative_tolerance*|targetValue()|).
    * A value <= 1 means the absolute OR relative criterion is satisfied. The denominator is always
    * positive because absolute_tolerance is range-checked > 0, so no divide guard is needed.
+   * When targetValue() is 0 the relative term vanishes and the criterion collapses to the purely
+   * absolute test |y| <= absolute_tolerance; choose absolute_tolerance accordingly for targets that
+   * cross or sit at zero, where a relative tolerance carries no meaning.
    */
   Real normalizedResidual(Real y) const;
 

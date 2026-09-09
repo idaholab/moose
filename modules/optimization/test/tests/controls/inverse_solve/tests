@@ -24,7 +24,11 @@
     input = main.i
     cli_args = 'Convergence/inv_conv/max_iterations=1 '
                'Convergence/inv_conv/converge_at_max_iterations=true '
+               'Convergence/inv_conv/verbose=true '
                'Outputs/csv=false'
+    # verbose=true makes the Convergence announce the accept-on-max decision; matching it confirms the
+    # run actually took the accept-on-max branch rather than merely exiting without error.
+    expect_out = 'Converged due to iterations \(1\) >= max iterations \(1\)'
     # Reuses main.i, so its recover checkpoint would collide with the inverse_solve recover test.
     recover = false
     requirement = "The system shall, when the fixed-point iteration reaches the maximum number of "
