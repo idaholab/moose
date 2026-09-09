@@ -76,6 +76,13 @@ protected:
   const MooseArray<Real> & _coord_msm;
 
 private:
+  /**
+   * (Re)builds the material containers required by this mortar auxiliary kernel for the mortar
+   * segment mesh currently reported by amg(). Called from initialSetup() and, if the
+   * interior-parent subdomain set has since changed, from compute() as well.
+   */
+  void setupMortarMaterials();
+
   // These are invalid for use because they are only meant for working with the higher-dimensional
   // elements
   using AuxKernelTempl<ComputeValueType>::_coord;

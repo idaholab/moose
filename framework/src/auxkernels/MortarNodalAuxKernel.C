@@ -70,6 +70,13 @@ MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
 {
   AuxKernelTempl<ComputeValueType>::initialSetup();
 
+  setupMortarMaterials();
+}
+
+template <typename ComputeValueType>
+void
+MortarNodalAuxKernelTempl<ComputeValueType>::setupMortarMaterials()
+{
   std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   Moose::Mortar::setupMortarMaterials(consumers,
@@ -87,6 +94,13 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
   if (!_var.isNodalDefined())
     return;
+
+  // Unlike ComputeMortarFunctor, this object is never notified when the mesh changes, so this is
+  // the only place we can catch a mortar segment mesh that has grown new interior-parent subdomains
+  // since our material containers were last built. See mortarMaterialsNeedSetup() for why a missing
+  // subdomain key would otherwise be fatal.
+  if (mortarMaterialsNeedSetup(amg()))
+    setupMortarMaterials();
 
   ComputeValueType value(0);
   Real total_volume = 0;

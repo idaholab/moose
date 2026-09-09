@@ -12,10 +12,12 @@
 #include "MooseTypes.h"
 #include <map>
 #include <deque>
+#include <set>
 
 class FEProblemBase;
 class MortarInterfaceWarehouse;
 class MaterialBase;
+class AutomaticMortarGeneration;
 
 /**
  * Interface for notifications that the mortar mesh has been setup
@@ -26,6 +28,25 @@ public:
   MortarExecutorInterface() = default;
 
 protected:
+  /**
+   * @return Whether \p _secondary_ip_sub_to_mats or \p _primary_ip_sub_to_mats is missing an entry
+   * for a subdomain that \p amg currently reports via \p secondaryIPSubIDs() / \p
+   * primaryIPSubIDs(). The mortar segment mesh is rebuilt whenever the (possibly displaced) mesh
+   * moves, and a segment only registers its interior-parent subdomain once it has found a valid
+   * primary projection
+   * (\p AutomaticMortarGeneration::buildMortarSegmentMesh()); an interface whose surfaces do not
+   * yet project onto each other therefore registers nothing until relative motion brings it into
+   * projection range. If that happens after these maps were last built, \p
+   * Moose::Mortar::loopOverMortarSegments will \p libmesh_map_find a subdomain key that was never
+   * inserted. That lookup is checked and throws rather than inserting or returning an empty result,
+   * so the throw propagates out of residual/Jacobian assembly (e.g.
+   * \p FEProblemBase::computeResidualTags) as \p "map_find() error: key ... not found". There is no
+   * meaningful way to tolerate a missing key on the spot: the missing deque is precisely the list
+   * of face/neighbor materials that must be reinit'd before the consumer's quadrature-point
+   * evaluation.
+   */
+  bool mortarMaterialsNeedSetup(const AutomaticMortarGeneration & amg) const;
+
   /**
    * @name Materials for Mortar
    * These containers hold the materials whose properties are required by a given set of consumers.
