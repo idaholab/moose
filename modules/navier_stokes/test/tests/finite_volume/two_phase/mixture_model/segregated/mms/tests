@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#22637 #29175'
+  design = 'LinearWCNSFV2PMomentumDriftFlux.md LinearFVScalarAdvection.md'
+
+  # Every term of the model runs at once here, with every density moving in time and every
+  # transient in the conservative form the kernel assembles by default, so what is verified is the
+  # configuration an input gets without asking for anything. A study holding the densities constant
+  # could not see the transient operators at all: where the multiplier does not move, every form of
+  # the time derivative is the same operator.
+  #
+  # Mesh and time step are refined together with dt proportional to h. A pure time refinement on a
+  # fixed mesh plateaus once the temporal error falls below the spatial one, so the measured slope
+  # would stop being the temporal order; refining both keeps the total error O(h^2) + O(dt^2).
+  [all_terms_bdf2]
+    type = MMSTest
+    input = test.py
+    test_case = TestAllTermsBDF2
+    requirement = 'The system shall obtain second order convergence in space and time together, in the velocity, the phase fraction and the temperature alike, for the two phase drift flux model with every term of the model active and the transient of every equation assembled in conservative form.'
+    max_threads = 1 # see libmesh issue #3808
+    # Four minutes here for the three levels, so the default five minute cap is too close to be
+    # comfortable on a slower machine.
+    max_time = 900
+    heavy = true
+  []
+[]
