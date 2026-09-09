@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'discontinuous_value_solution_uo_p1.i'
     exodiff = 'discontinuous_value_solution_uo_p1.e'
-
+    max_parallel = 1 # Preserve deterministic element IDs used by the dependent weighting test
     requirement = 'The system shall be capable of writing out a solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
   []
   [discontinuous_value_solution_uo_p2]
