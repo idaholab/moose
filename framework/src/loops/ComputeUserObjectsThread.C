@@ -169,6 +169,8 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
   if (!inserted)
     return cache;
 
+  // SideUserObjects are boundary-restricted, not block-restricted. The current subdomain is
+  // accounted for below when selecting the active face materials.
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
 
@@ -184,54 +186,8 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
 
   add_material_consumers(userobjs);
   add_material_consumers(_domain_objs);
-
-  std::unordered_set<unsigned int> needed_face_props;
-  for (const auto * const consumer : material_consumers)
-  {
-    const auto & dependencies = consumer->getMatPropDependencies();
-    needed_face_props.insert(dependencies.begin(), dependencies.end());
-  }
-
-  const auto & materials = _fe_problem.getRegularMaterialsWarehouse();
-
-  // Resolve boundary materials first. A boundary material can depend on a property supplied by a
-  // face material, while a property supplied by the boundary-material chain does not also need a
-  // face producer.
-  if (!material_consumers.empty() && materials.hasActiveBoundaryObjects(bnd_id, _tid))
-    cache.boundary_materials = MaterialBase::buildRequiredMaterials(
-        material_consumers, materials.getActiveBoundaryObjects(bnd_id, _tid), true);
-
-  for (const auto * const material : cache.boundary_materials)
-  {
-    const auto & dependencies = material->getMatPropDependencies();
-    needed_face_props.insert(dependencies.begin(), dependencies.end());
-  }
-
-  // The boundary-material chain has already satisfied these properties. Removing them prevents a
-  // face material that happens to declare the same property from being selected unnecessarily.
-  for (const auto * const material : cache.boundary_materials)
-    for (const auto supplied_prop : material->getSuppliedPropIDs())
-      needed_face_props.erase(supplied_prop);
-
-  struct MaterialDependencyConsumer
-  {
-    const std::unordered_set<unsigned int> & dependencies;
-
-    const std::unordered_set<unsigned int> & getMatPropDependencies() const { return dependencies; }
-  };
-
-  if (!needed_face_props.empty())
-  {
-    const auto & face_materials = materials[Moose::FACE_MATERIAL_DATA];
-    if (face_materials.hasActiveBlockObjects(subdomain_id, _tid))
-    {
-      const MaterialDependencyConsumer face_consumer{needed_face_props};
-      const std::vector<const MaterialDependencyConsumer *> face_consumers{&face_consumer};
-      cache.face_materials = MaterialBase::buildRequiredMaterials(
-          face_consumers, face_materials.getActiveBlockObjects(subdomain_id, _tid), true);
-    }
-  }
-
+  getRequiredBoundaryMaterials(
+      material_consumers, bnd_id, subdomain_id, cache.face_materials, cache.boundary_materials);
   return cache;
 }
 
@@ -258,7 +214,8 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
-  // Preserve the stateful material-data swapping used by the previous unrestricted reinit calls.
+  // TODO: Explore whether stateful material property data needs to be swapped in user object
+  // loops by changing swap_stateful=false in the following calls.
   _fe_problem.reinitMaterialsFaceOnBoundary(
       bnd_id, elem->subdomain_id(), _tid, true, &required_mats.face_materials);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid, true, &required_mats.boundary_materials);
