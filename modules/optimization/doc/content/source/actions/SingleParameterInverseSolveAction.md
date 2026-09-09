@@ -19,7 +19,8 @@ The `method` parameter selects the update rule:
 `Executioner` or `Mesh`. It drives the executioner's single
 `multiapp_fixed_point_convergence`, so a single input runs exactly one single-parameter inverse
 solve. To invert for a full parameter vector, use the module's
-[OptimizationReporter](OptimizationReporter.md) / [Optimize](Optimize.md) machinery instead.
+[OptimizationReporter](syntax/OptimizationReporter/index.md) / [Optimize](Optimize.md) machinery
+instead.
 
 ### Action Behavior
 
@@ -27,10 +28,25 @@ The generated objects are named with a snake_case prefix derived from the block 
 `SingleParameterInverseSolve` block yields the prefix `single_parameter_inverse_solve`). The
 action creates:
 
-- a `TransientMultiApp` (`single_parameter_inverse_solve_forward`) running the `forward_input` file; 
-- two [MultiAppPostprocessorTransfer](MultiAppPostprocessorTransfer.md)s carryin the parameter down and the output back;
-- the working `Receiver` postprocessors (`single_parameter_inverse_solve_param`, `single_parameter_inverse_solve_output`) and a result `Receiver` (named by `result_postprocessor`, default `inverse_parameter`, output to CSV);
-- a [PostprocessorConvergence](PostprocessorConvergence.md) (`single_parameter_inverse_solve_convergence`) on the output residual; and the selected inversion [Control](syntax/Controls/index.md).
+- a `TransientMultiApp` (`single_parameter_inverse_solve_forward`) running the
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/forward_input) file;
+- two [MultiAppPostprocessorTransfer](MultiAppPostprocessorTransfer.md)s passing the parameter down
+  (to the sub-app's
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/sub_parameter_postprocessor))
+  and the output back (from the sub-app's
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/sub_output_postprocessor));
+- the working `Receiver` postprocessors (`single_parameter_inverse_solve_param`, seeded from
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/initial_parameter), and
+  `single_parameter_inverse_solve_output`) and a result `Receiver` (named by
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/result_postprocessor),
+  default `inverse_parameter`, output to CSV);
+- a [PostprocessorConvergence](PostprocessorConvergence.md)
+  (`single_parameter_inverse_solve_convergence`) driven by
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/max_iterations) and
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/accept_on_max_iterations);
+  and the selected inversion [Control](syntax/Controls/index.md) (using
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/target_function) and
+  [!param](/SingleParameterInverseSolve/SingleParameterInverseSolveAction/perturbation)).
 
 ### Required Executioner Parameter
 

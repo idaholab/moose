@@ -15,7 +15,7 @@ transferred to a sub-application) so that a sub-application output postprocessor
 A `Control` cannot safely drive its own perturbed sub-application solve: the fixed-point executioner
 owns the sub-application's single backup slot and restores it between iterations, so an extra
 control-driven `backup()`/`solveStep()` would corrupt that state. Instead, the local finite-
-difference derivative is formed over **two consecutive fixed-point iterations**, both of which the
+difference derivative is formed over +two consecutive fixed-point iterations+, both of which the
 framework starts from the same start-of-step state:
 
 - +Base iteration+ (parameter $p_{base}$): record the output $y_{base}$, publish $p_{base}$ as the
@@ -23,9 +23,11 @@ framework starts from the same start-of-step state:
   $p_{base} + \delta p$ for the next solve.
 - +Perturbed iteration+ (parameter $p_{base} + \delta p$): form
   $df/dp = (y - y_{base}) / (p - p_{base})$ and take one Newton step
-  $p_{next} = p_{base} - (y_{base} - y_{target}) / (df/dp)$. A large `nonconverged_residual` sentinel is
-  written so convergence is only ever declared on a base iteration, guaranteeing the recorded
-  solution is an un-perturbed parameter that actually produced the converged output.
+  $p_{next} = p_{base} - (y_{base} - y_{target}) / (df/dp)$. On a perturbed iteration the control
+  writes a deliberately huge residual (`nonconverged_residual`, default 1e30) instead of the real
+  one, so the `Convergence` object (tolerance 1) can never declare convergence on a perturbed
+  parameter -- guaranteeing the recorded solution is an un-perturbed parameter that actually produced
+  the converged output.
 
 The outer iteration count, convergence test, and time-step cutting are owned by the
 [Executioner](Executioner/index.md) and the [Convergence](Convergence/index.md) system (a
