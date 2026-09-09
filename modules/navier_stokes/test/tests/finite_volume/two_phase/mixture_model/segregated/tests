@@ -43,6 +43,15 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [slip_closure_verification]
+    type = CSVDiff
+    input = 'slip-closure-verification.i'
+    csvdiff = 'slip-closure-verification_out.csv'
+    design = 'LinearWCNSFV2PSlipVelocityFunctorMaterial.md'
+    requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture, the diffusion velocity derived from it, and the slip velocity obtained by solving the drag correlation together with the force balance, in agreement with their analytic values. It shall do so on every branch of the drag model: the rigid sphere law solved iteratively, the deformed bubble law whose terminal velocity is independent of the particle size, which is checked by instantiating it at two diameters a factor of two apart and requiring the same speed exactly, and the automatic selection, which shall return the more resistive of the two and is checked against the rigid sphere result it must reproduce at these conditions. It shall also evaluate the Ishii and Zuber multi-bubble relation, which predicts the relative velocity directly, in agreement with its closed form at zero frictional pressure gradient.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [errors]
     requirement = "The system shall return an error if"
     [skewness]
