@@ -25,5 +25,5 @@ MortarExecutorInterface::mortarMaterialsNeedSetup(const AutomaticMortarGeneratio
   };
 
   return !keysCover(_secondary_ip_sub_to_mats, amg.secondaryIPSubIDs()) ||
-        !keysCover(_primary_ip_sub_to_mats, amg.primaryIPSubIDs());
+         !keysCover(_primary_ip_sub_to_mats, amg.primaryIPSubIDs());
 }
