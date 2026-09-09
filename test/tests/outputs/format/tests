@@ -227,4 +227,15 @@
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'
   []
+
+  [hit_search_lowercase_option_docs]
+    type = 'PythonUnitTest'
+    input = 'test_hit_output.py'
+    test_case = 'TestLowerCaseOptionDocs'
+    max_buffer_size = -1
+    min_slots = 2 # memory heavy
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md MooseApp.md'
+    requirement = 'The system shall dump lower-case enum option documentation in a subset of input file (HIT) syntax.'
+  []
 []
