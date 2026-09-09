@@ -4,10 +4,33 @@
 
 ## Overview
 
-The `SingleParameterInverseSolve` action generates a complete fixed-point inverse-solve workflow from a
-single time-dependent scalar parameter, so users do not have to hand-write the coupled `MultiApps`, `Transfers`,
-`Postprocessors`, `Convergence`, and `Controls` blocks. It finds the scalar parameter `p(t)` such
-that a forward-model sub-application output matches a target [Function](Functions/index.md).
+The `SingleParameterInverseSolve` action generates a complete fixed-point inverse-solve workflow
+from a single block, so users do not have to hand-write the coupled `MultiApps`, `Transfers`,
+`Postprocessors`, `Convergence`, and `Controls` blocks.
+
+It recovers a single time-dependent scalar parameter $p(t)$ that drives a transient forward model to
+match a target [Function](Functions/index.md) of time. The parameter is genuinely time-dependent,
+but it can only be recovered at the time steps actually taken: at each step the workflow performs one
+independent scalar root find for the value $p(t_n)$ that makes the forward output match the target at
+that step, starting from the previous step's converged value. The recovered history is therefore the
+sequence of samples $p(t_1), p(t_2), \ldots$, and it depends on the time discretization -- because
+the forward model carries state from one step to the next, refining `dt` changes the recovered
+values.
+
+The forward model runs as a transient sub-application (a `TransientMultiApp`): the matched quantity
+evolves in time and each step builds on the previous one, so the model must advance step by step and
+be re-solved for each trial parameter inside the fixed-point (Picard) iteration. The main
+application drives that loop -- it holds the parameter, transfers it down, reads the output back, and
+updates the parameter through the inversion `Control`. It may also run its own physics, but need
+not; the minimal setup only requires a non-empty nonlinear system on the main application.
+
+This is deliberately not framed as an [Optimize](Optimize.md) solve. `Optimize` derives from
+`Steady`: one objective evaluation runs the entire transient, and the full parameter history is
+recovered simultaneously as a single optimization problem. `SingleParameterInverseSolve` instead
+performs one independent one-dimensional root find per time step, nested in the executioner's
+existing fixed-point (Picard) loop, and needs no additional application instances. The step-by-step
+approach is applicable whenever the parameter can be recovered one step at a time, which holds when
+the forward model advances step by step and each step depends only on the parameter at that step.
 
 The `method` parameter selects the update rule:
 
