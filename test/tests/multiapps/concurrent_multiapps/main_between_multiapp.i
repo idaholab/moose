@@ -26,7 +26,6 @@
     type = TransientMultiApp
     input_files = sub_between_diffusion2.i
     output_in_position = true
-    max_procs_per_app = 2
   []
 []
 

@@ -5,11 +5,12 @@
   [concurrent]
     type = CSVDiff
     input = 'main_between_multiapp.i'
-    cli_args = '--mpi-thread-type=multiple'
     csvdiff = 'main_between_multiapp_out_ma10.csv main_between_multiapp_out_ma20.csv'
-    requirement = "The system shall be able to execute multiapps."
+    requirement = "The system shall be able to execute the multiapps of an execution group "
+                  "concurrently, each on its own subset of the processors."
     # Transfers execute_on don't match the MultiApps
     allow_warnings = true
-    min_parallel = 4
+    # Two concurrent multiapps need at least one rank each to be partitioned onto
+    min_parallel = 2
   []
 []
