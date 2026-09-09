@@ -152,10 +152,12 @@ private:
       std::unordered_set<dof_id_type> & touched_nodes,
       Real invert_floor) const;
 
-  /// @brief Repair sliver (near-degenerate, flat-slab) HEX8 elements by collapsing the squashed
-  ///        pair of opposite faces together so the elements on either side meet. A hex is left in
-  ///        place if no pair is sufficiently squashed, a connecting side face is shared, or the
-  ///        collapse would invert/degenerate a neighbor.
+  /// @brief Repair flat-slab pancake HEX8 elements by collapsing the squashed pair of opposite
+  ///        faces together so the elements on either side meet. A hex is left in place if no pair
+  ///        is sufficiently squashed (a hex thin in more than one direction - a sliver/column - or
+  ///        of near-zero volume is flagged but not collapsed here), a connecting side face is
+  ///        shared, or the collapse would invert/degenerate a neighbor. Does not handle a HEX8
+  ///        collapsed to a PRISM6 by an edge collapse; that is not yet implemented.
   /// @param mesh the mesh to modify
   void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
 };

@@ -173,7 +173,7 @@ MeshRepairGenerator::generate()
     // Repair degenerate PRISM6 (wedge) elements: collapse a flat pancake or absorb a thin blade sliver
     repairDegenerateWedges(mesh);
 
-    // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
+    // Repair flat-slab pancake HEX8 elements by collapsing their squashed pair of opposite faces
     repairHexPancakes(mesh);
   }
 
@@ -1891,7 +1891,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
       {{{1, 0, 2, 3, 6, 7, 5, 4}}, {{0, 1, 3, 5}}}, // sides 2 & 4
   }};
 
-  // Index of the most-squashed opposite-face pair if the hex is a flat-slab sliver, else -1
+  // Index of the most-squashed opposite-face pair if the hex is a flat-slab pancake, else -1
   auto squashedPair = [&](const Elem & e) -> int
   {
     if (e.type() != HEX8)
@@ -1933,7 +1933,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
     // node -> incident elements (the collapse star)
     std::map<std::array<dof_id_type, 4>, std::vector<dof_id_type>> quad_to_elems;
     std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
-    std::vector<dof_id_type> sliver_ids;
+    std::vector<dof_id_type> degenerate_ids;
     for (const auto & elem : mesh->active_element_ptr_range())
     {
       for (const auto n : make_range(elem->n_nodes()))
@@ -1950,7 +1950,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
                 .push_back(elem->id());
         }
       if (squashedPair(*elem) >= 0)
-        sliver_ids.push_back(elem->id());
+        degenerate_ids.push_back(elem->id());
     }
 
     std::unordered_set<dof_id_type> touched_nodes;
@@ -1962,7 +1962,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
       return false;
     };
 
-    for (const auto sid : sliver_ids)
+    for (const auto sid : degenerate_ids)
     {
       Elem * h = mesh->query_elem_ptr(sid);
       if (!h || h->type() != HEX8 || touches_repaired(*h))
@@ -1988,7 +1988,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
         continue;
 
       // Collapse cap A onto cap B; the move is sub-flap-tolerance (the slab thickness), so it
-      // cannot distort the boundary by more than the sliver's own thickness. Capture the gone->kept
+      // cannot distort the boundary by more than the pancake's own thickness. Capture the gone->kept
       // node pairs before the merge (the hex is in its own star, so its slots get overwritten).
       std::vector<std::pair<Node *, Node *>> gone_kept;
       for (const auto i : make_range(4u))
@@ -2001,7 +2001,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
     }
   }
 
-  // Count any hexahedral slivers that remain (no sufficiently squashed pair with a valid collapse)
+  // Count any hexahedral pancakes that remain (no sufficiently squashed pair with a valid collapse)
   for (const auto & elem : mesh->active_element_ptr_range())
     if (elem->type() == HEX8 && squashedPair(*elem) >= 0)
       ++num_skipped;
@@ -2010,9 +2010,9 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of hexahedral sliver elements repaired: " << num_repaired << std::endl;
+    _console << "Number of hexahedral pancakes repaired: " << num_repaired << std::endl;
     if (num_skipped)
-      _console << "Number of hexahedral slivers that could not be repaired (left in place): "
+      _console << "Number of hexahedral pancakes that could not be repaired (left in place): "
                << num_skipped << std::endl;
   }
 }

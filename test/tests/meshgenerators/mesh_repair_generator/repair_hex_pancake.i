@@ -1,4 +1,4 @@
-# A flat (z-squashed) HEX8 sliver: its top face is 0.01 above the bottom, sandwiched between two
+# A flat (z-squashed) HEX8 pancake: its top face is 0.01 above the bottom, sandwiched between two
 # HEX8s that share its top and bottom faces, with its four lateral faces on the boundary. The repair
 # collapses the squashed pair of opposite faces so the two hexes meet, keeping a valid conformal
 # mesh.
