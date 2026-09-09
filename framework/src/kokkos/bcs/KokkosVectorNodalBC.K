@@ -56,7 +56,7 @@ VectorNodalBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
+    _thread.resize(sys.getFieldCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
 
     Policy policy(0, _thread.size());
 

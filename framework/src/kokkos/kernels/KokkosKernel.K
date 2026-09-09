@@ -64,7 +64,7 @@ Kernel::computeJacobian()
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
     _thread.resize(_num_local_jacobian_threads,
-                   sys.getCoupling(_kokkos_var.var()).size(),
+                   sys.getFieldCoupling(_kokkos_var.var()).size(),
                    numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
@@ -73,6 +73,21 @@ Kernel::computeJacobian()
       _offdiag_jacobian_dispatcher = DispatcherRegistry::build<OffDiagJacobianLoop>(this, type());
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
+  }
+
+  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianScalarLoop>(type()))
+  {
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+
+    _thread.resize(sys.getScalarCoupling().size(), numKokkosBlockElements());
+
+    Policy policy(0, _thread.size());
+
+    if (!_offdiag_jacobian_scalar_dispatcher)
+      _offdiag_jacobian_scalar_dispatcher =
+          DispatcherRegistry::build<OffDiagJacobianScalarLoop>(this, type());
+
+    _offdiag_jacobian_scalar_dispatcher->parallelFor(policy);
   }
 }
 

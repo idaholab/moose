@@ -34,6 +34,9 @@ public:
   /// Whether this object's hooks factor out the test function
   static constexpr bool use_precompute_hooks = false;
 
+  /// Whether this object has computeQpOffDiagJacobianScalar() hook
+  static constexpr bool support_scalar_jacobian = false;
+
   /**
    * Constructor
    * @param field_type The MOOSE variable field type
@@ -58,6 +61,9 @@ public:
   {
   };
   struct OffDiagJacobianLoop
+  {
+  };
+  struct OffDiagJacobianScalarLoop
   {
   };
   ///@}
@@ -94,6 +100,7 @@ protected:
   std::unique_ptr<DispatcherBase> _residual_dispatcher;
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
+  std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
   ///@}
 
   /**
@@ -339,7 +346,8 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
-  auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
+  auto col = sys.isScalarVariable(jvar) ? sys.getScalarGlobalDofIndex(j, jvar)
+                                        : sys.getElemGlobalDofIndex(elem, j, jvar);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
