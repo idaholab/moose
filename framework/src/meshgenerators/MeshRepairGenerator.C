@@ -566,7 +566,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
 void
 MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
 {
-  // Surface-area scale of the whole mesh, used by the area-based sliver test
+  // Surface-area scale of the whole mesh, used by the area-based (zero-area) degeneracy test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real surface_scale =
@@ -610,9 +610,13 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
     const Real t = std::max(Real(0), std::min(Real(1), ((P - A) * AB) / elen_sq));
     return (P - (A + t * AB)).norm() < tol * std::sqrt(elen_sq);
   };
-  // A 2D element is a sliver if, against its longest edge, every other vertex is nearly on that
-  // edge (flap test) or the element area is negligible (area test). Either test can be disabled by
-  // setting its tolerance to 0.
+  // A 2D element is flagged if, against its longest edge, every other vertex is nearly on that edge
+  // (flatness/flap test: a thin/flat 2D sliver, collapsing toward a line) or its area is negligible
+  // (area test: a zero-area, i.e. zero-volume, element). Either test can be disabled by setting its
+  // tolerance to 0. NOTE: this does not flag the fourth degeneracy kind, an element collapsed to a
+  // lower topology by a short edge or an in-plane vertex (e.g. a QUAD4 whose short edge or colinear
+  // vertex makes it an effective TRI3 while keeping a healthy area); repairing that is not yet
+  // implemented.
   auto isSliver = [&](const Elem & e, const unsigned int lng)
   {
     const auto nv = e.n_vertices();
