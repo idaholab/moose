@@ -35,7 +35,7 @@ MFEMHypreAME::ConstructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreAME>(getMFEMProblem().getComm());
 
-  _eigensolver->SetNumModes(_num_modes);
+  _eigensolver->SetNumModes(numComputedModes());
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));

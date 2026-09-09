@@ -44,9 +44,14 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     std::string name = "__DefaultWeakFormProblemComposer";
     InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
 
+    const bool is_complex = _mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX;
+
     if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      _mfem_problem.addMFEMProblemComposer("MFEMEigenWeakFormProblemComposer", name, params);
-    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
+      _mfem_problem.addMFEMProblemComposer(is_complex ? "MFEMComplexEigenWeakFormProblemComposer"
+                                                      : "MFEMEigenWeakFormProblemComposer",
+                                           name,
+                                           params);
+    else if (is_complex)
       _mfem_problem.addMFEMProblemComposer("MFEMComplexWeakFormProblemComposer", name, params);
     else
       _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, params);

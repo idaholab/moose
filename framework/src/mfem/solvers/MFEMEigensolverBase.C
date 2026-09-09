@@ -30,7 +30,9 @@ EigensolverBase::validParams()
 }
 
 EigensolverBase::EigensolverBase(const InputParameters & parameters)
-  : LinearSolverBase(parameters), _num_modes(getMFEMProblem().getParam<int>("num_modes"))
+  : LinearSolverBase(parameters),
+    _num_modes(getMFEMProblem().getParam<int>("num_modes")),
+    _mode_stride(getMFEMProblem().getNumericType() == MFEMProblem::NumericType::COMPLEX ? 2 : 1)
 {
 }
 }
