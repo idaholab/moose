@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#4215'
+  design = 'syntax/Outputs/index.md'
+
+  [collision_error]
+    type = RunException
+    input = common_file_base_names.i
+    expect_err = "MOOSE will not silently rename an output to resolve this collision"
+    recover = false
+
+    requirement = "The system shall error, rather than silently choose a filename, when two or "
+                  "more outputs that do not set their own 'file_base' would write to the same "
+                  "file under a common 'file_base' set in the [Outputs] block, unless the user "
+                  "has explicitly set 'append_object_name' on the colliding outputs."
+  []
+
+  [collision_resolved]
+    type = CheckFiles
+    input = common_file_base_names.i
+    cli_args = 'Outputs/exodus_a/append_object_name=true Outputs/exodus_b/append_object_name=true'
+    check_files = 'common_file_base_names_exodus_a.e common_file_base_names_exodus_b.e '
+                  'common_file_base_names.csv'
+    recover = false
+
+    requirement = "The system shall append the object name to a common 'file_base' for outputs "
+                  "that would otherwise collide when the user explicitly opts in with "
+                  "'append_object_name = true', while leaving the file base of a non-colliding "
+                  "output that shares the same common 'file_base' unchanged."
+  []
+[]

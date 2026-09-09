@@ -9688,6 +9688,13 @@ FEProblemBase::addOutput(const std::string & object_type,
       parameters.get<bool>("output_screen"))
     parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
+  // Record whether this object's own block set 'file_base' itself before a common 'file_base'
+  // from the [Outputs] block, if any, is copied down onto it below -- that copy makes
+  // 'file_base' look valid and user-set on this object even when only the common block set it
+  // (see #4215), so this must be captured first.
+  if (parameters.isParamDefined("_file_base_set_by_own_block"))
+    parameters.set<bool>("_file_base_set_by_own_block") = parameters.isParamSetByUser("file_base");
+
   // Apply only user-set parameters from the common [Outputs] block so that
   // each output type's own defaults are not overridden by common defaults.
   const InputParameters * common = output_warehouse.getCommonParameters();
