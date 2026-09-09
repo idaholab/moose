@@ -50,8 +50,9 @@ protected:
   };
 
   /**
-   * Compute this iteration's update from the current sample: the 1-based fixed-point iteration \c it and
-   * the (parameter, output) pair (\c p_used, \c y) that produced it, against target \c y_target.
+   * Compute this iteration's update from the current sample: the 1-based fixed-point iteration \c
+   * it and the (parameter, output) pair (\c p_used, \c y) that produced it, against target \c
+   * y_target.
    */
   virtual IterationUpdate computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) = 0;
 
