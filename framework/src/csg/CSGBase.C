@@ -1209,8 +1209,8 @@ CSGBase::checkUniverseLinking() const
   std::set<std::string> linked_cell_names;
   std::set<std::string> linked_surf_names;
 
-  // Recursively figure out which universe names are linked to root universe
-  getLinkedUniverses(
+  // Recursively figure out which CSG objects are linked to root universe
+  getLinkedCSGObjects(
       getRootUniverse(), linked_universe_names, linked_cell_names, linked_surf_names);
 
   // Iterate through all universes in universe list and check that they exist in universes linked
@@ -1233,10 +1233,10 @@ CSGBase::checkUniverseLinking() const
 }
 
 bool
-CSGBase::areUniversesLinked() const
+CSGBase::areCSGObjectsLinked() const
 {
   std::set<std::string> linked_univs, linked_cells, linked_surfs;
-  getLinkedUniverses(getRootUniverse(), linked_univs, linked_cells, linked_surfs);
+  getLinkedCSGObjects(getRootUniverse(), linked_univs, linked_cells, linked_surfs);
 
   for (const CSGUniverse & univ : getAllUniverses())
     if (linked_univs.find(univ.getName()) == linked_univs.end())
@@ -1254,10 +1254,10 @@ CSGBase::areUniversesLinked() const
 }
 
 void
-CSGBase::getLinkedUniverses(const CSGUniverse & univ,
-                            std::set<std::string> & linked_universe_names,
-                            std::set<std::string> & linked_cell_names,
-                            std::set<std::string> & linked_surface_names) const
+CSGBase::getLinkedCSGObjects(const CSGUniverse & univ,
+                             std::set<std::string> & linked_universe_names,
+                             std::set<std::string> & linked_cell_names,
+                             std::set<std::string> & linked_surface_names) const
 {
   linked_universe_names.insert(univ.getName());
   const auto & univ_cells = univ.getAllCells();
@@ -1268,7 +1268,7 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
       linked_surface_names.insert(cell_surf.getName());
 
     if (cell.getFillType() == "UNIVERSE")
-      getLinkedUniverses(
+      getLinkedCSGObjects(
           cell.getFillUniverse(), linked_universe_names, linked_cell_names, linked_surface_names);
     else if (cell.getFillType() == "LATTICE")
     {
@@ -1277,14 +1277,14 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
         for (const auto & univ_ref : univ_list)
         {
           const CSGUniverse & lattice_univ = univ_ref.get();
-          getLinkedUniverses(
+          getLinkedCSGObjects(
               lattice_univ, linked_universe_names, linked_cell_names, linked_surface_names);
         }
 
       if (lattice.getOuterType() == "UNIVERSE")
       {
         const CSGUniverse & outer_univ = lattice.getOuterUniverse();
-        getLinkedUniverses(
+        getLinkedCSGObjects(
             outer_univ, linked_universe_names, linked_cell_names, linked_surface_names);
       }
     }

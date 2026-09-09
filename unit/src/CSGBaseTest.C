@@ -3079,7 +3079,7 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalUniverses)
   ASSERT_EQ(base1->getAllUniverses().size(), 2);
 }
 
-/// test CSGBase::checkUniverseLinking / getLinkedUniverses
+/// test CSGBase::checkUniverseLinking / getLinkedCSGObjects
 TEST(CSGBaseTest, testUniverseLinking)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();

@@ -715,12 +715,12 @@ public:
   void expandAllEngUnits();
 
   /**
-   * @brief Check whether all universes and cells in this CSGBase are reachable from the root
-   * universe through the cell/fill hierarchy.
+   * @brief Check whether all universes, cells, and surfaces in this CSGBase are reachable from the
+   * root universe through the cell/fill hierarchy.
    *
-   * @return true if all are linked, false if any universe or cell is orphaned
+   * @return true if all are linked, false if any universe, cell, or surface is orphaned
    */
-  bool areUniversesLinked() const;
+  bool areCSGObjectsLinked() const;
 
   /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
@@ -951,17 +951,18 @@ private:
   void checkUniverseLinking() const;
 
   /**
-   * @brief Recursive method to retrieve all universes and cells linked to current universe
+   * @brief Recursive method to retrieve all universes, cells, and surfaces linked to current
+   * universe
    *
    * @param univ Reference to universe under consideration
    * @param linked_universe_names List of universe names linked to current universe
    * @param linked_cell_names List of cell names linked to current universe
    * @param linked_surface_names List of surface names linked to current universe
    */
-  void getLinkedUniverses(const CSGUniverse & univ,
-                          std::set<std::string> & linked_universe_names,
-                          std::set<std::string> & linked_cell_names,
-                          std::set<std::string> & linked_surface_names) const;
+  void getLinkedCSGObjects(const CSGUniverse & univ,
+                           std::set<std::string> & linked_universe_names,
+                           std::set<std::string> & linked_cell_names,
+                           std::set<std::string> & linked_surface_names) const;
 
   /**
    * @brief Get a const reference to the CSGSurfaceList object
