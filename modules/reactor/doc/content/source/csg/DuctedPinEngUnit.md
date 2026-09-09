@@ -11,7 +11,7 @@ The constructor requires a unique name, the geometry type ("Hex" or "Square"), t
 
 The duct apothems and ring radii should be provided in ascending order. For a pin with `R` rings and `D` ducts, `R` + `D` + 1 region names should be provided radially, where the final name is used to fill the region outside of the outermost radial boundary.  Axially, the plane levels should also be provided in ascending order. For a pin with `A` axial levels, `A` + 1 region names should be provided axially, where the first axial region represents the negative halspace of the bottom-most axial level, and the last axial region represents the positive halfspace of the top-most axial level. The axial plane names provided to the `DuctedPinEngUnit` constructor are used to set the names of the CSGPlane objects representing each axial plane in the ducted pin.
 
-!listing PinMeshGenerator.C start=Define pin engineering unit and add it to CSGBase end=addEngUnit include-end=true
+!listing reactor/src/meshgenerators/PinMeshGenerator.C start=Define pin engineering unit and add it to CSGBase end=addEngUnit include-end=true
 
 ## Attributes
 
