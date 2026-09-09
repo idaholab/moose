@@ -103,6 +103,7 @@ protected:
   /// Friction coefficient
   const Real _mu;
 
-  /// Minimum value of contact pressure that will trigger frictional enforcement
+  /// Minimum value of contact pressure that will trigger including tangential forces in the
+  /// contact residual calculation
   const Real _epsilon;
 };

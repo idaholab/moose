@@ -224,6 +224,8 @@ dotProduct(const W<T> & a, const W2<T2> & b)
  * same \p MooseUtils::Has_size trait as \p MooseUtils::isZero, and into rank 1 and rank 2 tensors
  * component by component. Composed entirely of sums and products, this is safe to call
  * unconditionally on dual number types, including at zero.
+ * @param value The scalar, container, or rank 1/2 tensor to take the squared norm of
+ * @return The squared Euclidean norm of \p value
  */
 template <typename T>
 auto
@@ -263,6 +265,8 @@ normSquared(const T & value)
  * For dual number types, differentiating \p std::sqrt at a zero argument produces a NaN
  * derivative (d(sqrt(x))/dx = 1 / (2 * sqrt(x))), so this short-circuits to a literal zero
  * whenever \p value is (fuzzy) zero.
+ * @param value The scalar, container, or rank 1/2 tensor to take the norm of
+ * @return The Euclidean norm of \p value
  */
 template <typename T>
 auto

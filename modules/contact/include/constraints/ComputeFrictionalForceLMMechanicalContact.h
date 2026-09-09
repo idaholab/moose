@@ -132,7 +132,8 @@ protected:
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
 
-  /// Minimum value of contact pressure that will trigger frictional enforcement
+  /// Minimum value of contact pressure that will trigger including tangential forces in the
+  /// contact residual calculation
   const Real _epsilon;
 
   /// Friction coefficient

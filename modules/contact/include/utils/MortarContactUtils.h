@@ -65,7 +65,13 @@ enum class FrictionProjectionDegree
   TWO
 };
 
-/** Return the augmented normal pressure p_n - C_n g_bar. */
+/**
+ * Return the augmented normal pressure p_n - C_n g_bar.
+ * @param normal_pressure The normal contact pressure p_n
+ * @param scaled_normal_gap The normal gap g_bar scaled by a factor C_n, intended to bring it onto
+ * the order of the contact pressure for a well-conditioned complementarity function
+ * @return The augmented normal pressure
+ */
 template <typename T>
 T
 augmentedNormalPressure(const T & normal_pressure, const T & scaled_normal_gap)
@@ -73,7 +79,12 @@ augmentedNormalPressure(const T & normal_pressure, const T & scaled_normal_gap)
   return normal_pressure - scaled_normal_gap;
 }
 
-/** Return the nonnegative Coulomb-ball radius. */
+/**
+ * Return the nonnegative Coulomb friction radius.
+ * @param friction_coefficient The Coulomb friction coefficient
+ * @param augmented_normal_pressure The augmented normal pressure (see \p augmentedNormalPressure)
+ * @return The Coulomb friction radius, clamped to be nonnegative
+ */
 template <typename T>
 T
 coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal_pressure)
@@ -81,10 +92,16 @@ coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal
   return friction_coefficient * std::max(T(0), augmented_normal_pressure);
 }
 
-/** Project a tangential contact vector onto the closed ball of radius \p radius. */
+/**
+ * Project \p vector onto a closed sphere centered at the origin with radius \p radius.
+ * @param vector The vector to project
+ * @param radius The radius of the closed sphere to project onto
+ * @return \p vector unchanged if its norm is already within \p radius, otherwise \p vector scaled
+ * down to have norm \p radius
+ */
 template <typename T, std::size_t N>
 std::array<T, N>
-projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
+projectToClosedSphere(const std::array<T, N> & vector, const T & radius)
 {
   const T norm = MathUtils::norm(vector);
   if (norm <= radius)
@@ -99,6 +116,11 @@ projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
 /**
  * Return the degree-one Alart-Curnier friction residual
  * p_t - Proj_{B_radius}(q_t).
+ * @param tangential_pressure The tangential contact pressure p_t
+ * @param augmented_tangential_pressure The velocity-augmented tangential pressure q_t (see \p
+ * frictionalContactResidual)
+ * @param radius The Coulomb friction radius (see \p coulombFrictionRadius)
+ * @return The degree-one Alart-Curnier friction residual
  */
 template <typename T, std::size_t N>
 std::array<T, N>
@@ -106,7 +128,7 @@ alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
                              const std::array<T, N> & augmented_tangential_pressure,
                              const T & radius)
 {
-  const auto projection = projectToFrictionBall(augmented_tangential_pressure, radius);
+  const auto projection = projectToClosedSphere(augmented_tangential_pressure, radius);
   std::array<T, N> residual;
   for (const auto i : index_range(residual))
     residual[i] = tangential_pressure[i] - projection[i];
@@ -119,6 +141,13 @@ alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
  * \p normal_pressure falls below \p epsilon, mirroring the epsilon-gated
  * \p hueberStadlerWohlmuthFrictionResidual overload below so both friction-residual degrees
  * apply the same active-set transition guard.
+ * @param tangential_pressure The tangential contact pressure p_t
+ * @param augmented_tangential_pressure The velocity-augmented tangential pressure q_t (see \p
+ * frictionalContactResidual)
+ * @param radius The Coulomb friction radius (see \p coulombFrictionRadius)
+ * @param normal_pressure The raw, unaugmented normal contact pressure
+ * @param epsilon The minimum normal contact pressure required to enable frictional enforcement
+ * @return The epsilon-gated, degree-one Alart-Curnier friction residual
  */
 template <typename T, std::size_t N>
 std::array<T, N>
@@ -140,6 +169,11 @@ alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
  *
  * At radius = ||q_t|| = 0 the degree-two expression vanishes for every p_t. Returning p_t in
  * that state preserves the Coulomb solution set during separation.
+ * @param tangential_pressure The tangential contact pressure p_t
+ * @param augmented_tangential_pressure The velocity-augmented tangential pressure q_t (see \p
+ * frictionalContactResidual)
+ * @param radius The Coulomb friction radius (see \p coulombFrictionRadius)
+ * @return The degree-two Hueber-Stadler-Wohlmuth friction residual
  */
 template <typename T, std::size_t N>
 std::array<T, N>
@@ -165,8 +199,8 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
  *
  * The pure weight == 0 condition in the three-argument overload is an exact mathematical
  * criterion, but it is a poor numerical proxy for "this dof is separated" during Newton
- * iteration: \p augmented_tangential_pressure includes a tangential penalty term that is
- * essentially never exactly zero in floating point, so the full weight/radius expression
+ * iteration: \p augmented_tangential_pressure includes a c_t-scaled tangential velocity term
+ * that is essentially never exactly zero in floating point, so the full weight/radius expression
  * stays active even for dofs whose normal contact state is still swinging between contact
  * and separation as the active set settles. Because that expression is only piecewise smooth
  * across the active-set boundary, evaluating it on a dof that has not yet settled can inject a
@@ -175,6 +209,13 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
  * it forces such transitioning dofs onto the trivial identity residual (a well-conditioned,
  * constant-derivative Jacobian row) until the normal contact state has clearly resolved,
  * trading a small amount of formulation fidelity for solver robustness during that transient.
+ * @param tangential_pressure The tangential contact pressure p_t
+ * @param augmented_tangential_pressure The velocity-augmented tangential pressure q_t (see \p
+ * frictionalContactResidual)
+ * @param radius The Coulomb friction radius (see \p coulombFrictionRadius)
+ * @param normal_pressure The raw, unaugmented normal contact pressure
+ * @param epsilon The minimum normal contact pressure required to enable frictional enforcement
+ * @return The epsilon-gated, degree-two Hueber-Stadler-Wohlmuth friction residual
  */
 template <typename T, std::size_t N>
 std::array<T, N>
@@ -192,13 +233,25 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
 }
 
 /**
- * Compute the epsilon-gated frictional residual for a mortar contact dof. This composes the
+ * Compute the epsilon-gated frictional residual for a mortar contact node. This composes the
  * tangential pressure augmentation \p tangential_pressure + c_t * tangential_velocity * dt with
  * \p augmentedNormalPressure, \p coulombFrictionRadius, and the epsilon-gated, degree-selected
  * (\p projection_degree) friction residual (\p alartCurnierFrictionResidual for
  * FrictionProjectionDegree::ONE, \p hueberStadlerWohlmuthFrictionResidual for
  * FrictionProjectionDegree::TWO), the composition shared by the normal, dynamic, and Cartesian
  * mortar frictional contact constraints.
+ * @param tangential_pressure The tangential contact pressure p_t
+ * @param tangential_velocity The relative (slip) velocity between the secondary and primary
+ * surfaces, resolved into the local tangential direction(s) at this node
+ * @param c_t Numerical factor used in the tangential constraints for convergence purposes
+ * @param dt The current time step size
+ * @param normal_pressure The raw, unaugmented normal contact pressure
+ * @param scaled_normal_gap The normal gap g_bar scaled by a factor C_n, intended to bring it onto
+ * the order of the contact pressure for a well-conditioned complementarity function
+ * @param friction_coefficient The Coulomb friction coefficient
+ * @param epsilon The minimum normal contact pressure required to enable frictional enforcement
+ * @param projection_degree Which friction-residual projection degree to use
+ * @return The epsilon-gated frictional residual
  */
 template <typename T, std::size_t N>
 std::array<T, N>

@@ -75,7 +75,7 @@ TYPED_TEST(FrictionProjectionTest, ThreeDimensionalProjection)
   using T = TypeParam;
 
   const std::array<T, 2> augmented_pressure = {3.0, 4.0};
-  const auto projection = ContactUtils::projectToFrictionBall(augmented_pressure, T(2.0));
+  const auto projection = ContactUtils::projectToClosedSphere(augmented_pressure, T(2.0));
   EXPECT_DOUBLE_EQ(raw_value(projection[0]), 1.2);
   EXPECT_DOUBLE_EQ(raw_value(projection[1]), 1.6);
   EXPECT_DOUBLE_EQ(raw_value(MathUtils::norm(projection)), 2.0);
