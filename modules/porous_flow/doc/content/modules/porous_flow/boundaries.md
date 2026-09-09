@@ -2,7 +2,65 @@
 
 MOOSE's Dirichlet and Neumann boundary conditions enable simulation of simple scenarios.
 The Porous Flow module includes flexible boundary conditions that allow many different
-scenarios to be modelled. There are two classes of boundary conditions:
+scenarios to be modelled.
+
+The type of boundary conditions you use depends on your conceptual model.  Almost always, the boundary condition originates from one of the following.
+
+1. There is an external reservoir, which acts in one of two ways.
+
+   - The reservoir supplies or withdraws fluid or heat at a specified rate.  For instance, time-dependent rainfall from the atmosphere (which is the reservoir) will add water to the model at the specified rate.  Typically, [PorousFlowSink](PorousFlowSink.md) is used, with rates that can vary spatially and temporally.  If the rate is a function of pressure or temperature, you will use [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md).
+   - The reservoir is at a set pressure and/or temperature and/or saturation and/or concentration, which supplies and withdraws fluid or heat to fix, or approximately fix, those values on your model's boundary.  Or, the boundary is conceptualised as a one-way valve, so the reservoir supplies or withdraws, but not both.  For example, in the case of evaporation from the model, fluid cannot enter the model from the atmosphere (the reservoir), but may exit the model if the porepressure and/or temperature is high.  Usually you will use [DirichletBC](DirichletBC.md) or [FunctionDirichletBC](FunctionDirichletBC.md) and/or [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) and/or [PorousFlowAquiferBC](PorousFlowAquiferBC.md).
+
+2. You are modelling only a small part of a large domain.  The domain outside your model can supply or withdraw fluid, depending on the porepressure and/or temperature gradient at your model's boundary.  For instance, if at some time in the simulation the pore pressure is high within the model but low on the boundary, such that the pressure gradient is directed towards the boundary, fluid will exit the model into the surrounding unmodelled domain.  Usually you will use [PorousFlowOutflowBC](PorousFlowOutflowBC.md).
+
+3. The boundary is impermeable to fluid or heat.  This is the default in MOOSE.  Do not use any BC on this boundary.
+
+The finite-volume BCs are under development.  Here we focus on finite-element versions.
+
+### Finite-element examples of case 1a.
+
+In the following, $r$ is a flux measured in kg.m$^{-2}$.s$^{-1}$:
+
+| My problem | BC to use |
+|-----------|-----------|
+| Withdraw water at rate r: single-phase model | Use [PorousFlowSink](PorousFlowSink.md) with `variable` = porepressure, and `flux_function = r`. |
+| Inject water at rate r: single-phase model | Use [PorousFlowSink](PorousFlowSink.md) with `variable` = porepressure, and `flux_function = -r`. |
+| Withdraw water and its heat energy at rate r: single-phase anisothermal model  | Use 2 [PorousFlowSinks](PorousFlowSink.md).  One with `variable` = porepressure, and `flux_function = r`.  The other with `variable` = temperature, `flux_function = r`, `fluid_phase = 0`, `use_enthalpy = true`. Example: [ates.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/ates/ates.i) |
+| Inject water and solutes at total rate r: single-phase, N-component model | Use N [PorousFlowSinks](PorousFlowSink.md).  All have `flux_function = -r`.  One has `variable` = porepressure, and `mass_fraction_component` = N - 1.  The others have `variable = frac_i` and `mass_fraction_component = i` (i varies from 0 to N-2). |
+
+### Finite-element examples of case 1b
+
+In the following, the variable $L$ appears in the `flux_function` parameter.  This is a suitable length scale for your problem, which is usually small, and may be thought of as the distance between the boundary and the external reservoir.  For instance, if your mesh size is 10m near the boundary, you might choose $L = 1$ (which is a good initial choice in most models). If $L$ is chosen very small, numerical convergence will be difficult, but PorousFlow will extract or add fluid aggressively to ensure the boundary condition is respected. If $L$ is too large, the PorousFlow will extract or fluid slowly, so the boundary condition will be respected only weakly.
+
+| My problem | BC to use |
+|-----------|-----------|
+| Fix porepressure = P0 in single-phase model | Use a [DirichletBC](DirichletBC.md) or [FunctionDirichletBC](FunctionDirichletBC.md).  Alternatively, add or remove fluid to maintain the porepressure, by using a [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `pt_vals = '-1E9 1E9'`, `multipliers = '-1E9 1E9'`, `flux_function` = 1/L. In addition, for models with unsaturated physics, use `use_relperm = true`.  Example: [PorousFlowPiecewiseLinearSink_BC_eg1.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i) |
+| Fix porepressure and mass-fractions in a single-phase, N-component model | Use [DirichletBCs](DirichletBC.md) or [FunctionDirichletBCs](FunctionDirichletBC.md) |
+| Fix porepressure, temperature and mass-fractions in a single-phase, anisothermal, N-component model | Use [DirichletBCs](DirichletBC.md) or [FunctionDirichletBCs](FunctionDirichletBC.md) |
+| Porepressure in reservoir varies with elevation: single-phase model | Use [PorousFlowAquiferBC](PorousFlowAquiferBC.md) with `variable` = porepressure,  `fluid_phase = 0`, `gravity = '0 0 -9.81'`, `aquifer_pressure_at_datum` = P0, `datum_elevation` = z0, `aquifer_distance` = distance from boundary to the reservoir. |
+| Evapotranspiration in a groundwater model | Use [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md).  See the Baseflow, ET, recharge section of [groundwater_models.md](groundwater_models.md#baseflow-et-recharge-unsaturated-flow-impact-of-groundwater-abstraction-on-baseflow-to-a-river) |
+| Remove fluid if porepressure exceeds P0.  That is enforce porepressure <= P0.  Example: baseflow in groundwater modelling.  Single-phase model | Use [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`, `flux_function` = 1/L.  Extra note: for models with unsaturated physics, use `use_relperm = true`. If you suspect poor nonlinear convergence is due to MOOSE oscillating around P0, experiment with a [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) with `center = P0`, `cutoff` = small negative value of porepressure (eg, `cutoff = -1000` Pa), `max` = large value of fluid flux (in kg.m$^{-2}$.s$^{-1}$).  Example: [ex02_abstraction.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/groundwater/ex02_abstraction.i) |
+| Remove fluid and its heat energy if porepressure exceeds P0.  That is enforce porepressure <= P0 in a single-phase, anisothermal model | As in the previous problem, but also use a [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = temperature, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `use_enthalpy = true`, `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`, `flux_function` = 1/L.  Extra note: for models with unsaturated physics, use `use_relperm = true`.
+| Remove fluid if porepressure exceeds P0.  That is, enforce porepressure <= P0.  Single-phase, N-component model | Use [PorousFlowPiecewiseLinearSinks](PorousFlowPiecewiseLinearSink.md).  Remove water to maintain P0: use [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `mass_fraction_component = N-1`, `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`, `flux_function` = 1/L.  In addition, remove the solutes so the mass fractions do not increase when the water is removed: use N-1 [PorousFlowPiecewiseLinearSinks](PorousFlowPiecewiseLinearSink.md) with `variable` = massfrac_i, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `mass_fraction_component = i`, `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`, `flux_function` = 1/L (here `i` varies from 0 to N-2).   Extra note: for models with unsaturated physics, use `use_relperm = true` in all these BCs.   Examples: [pressure_pulse_1d_adaptivity.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_adaptivity.i), [fully_saturated_action.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/numerical_diffusion/fully_saturated_action.i) . |
+| Add fluid if porepressure drops below P0.  That is, enforce porepressure >= P0.  Single-phase model | Use [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `pt_vals = '-1E9 0'`, `multipliers = '-1E9 0'`, `flux_function` = 1/L. In addition, for models with unsaturated physics, use `use_relperm = true`. |
+
+These examples are for single-phase models.  Readers must be aware that using [DirichletBC](DirichletBC.md) in multi-phase models is almost always physically incorrect and leads to poor convergence and/or strange results.  The reason is that few reservoirs fix saturation --- mostly they only fix liquid or gas porepressure --- so careful thought is needed concerning what BCs should be used.  Most models use an appropriate combination [PorousFlowPiecewiseLinearSinks](PorousFlowPiecewiseLinearSink.md).  The documented examples and tests provide a variety of options, and more comments may be found below.
+
+
+### Finite-element examples of case 2
+
+| My problem | BC to use |
+|-----------|-----------|
+| Water may enter or exit the model naturally: single-phase | Use [PorousFlowOutflowBC](PorousFlowOutflowBC.md) with `variable` = porepressure.  If the model is fully saturated, use `include_relperm = false`.  Example: [s14.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/sinks/s14.i) |
+| Water and solutes may enter or exit the model naturally: single-phase, N-components | Use N [PorousFlowOutflowBCs](PorousFlowOutflowBC.md).  The first, with `variable` = porepressure, and `mass_fraction_component = N - 1`.  The others, with i varying from 0 to N-2 have `variable` = frac_i, and `mass_fraction_component = i` (here `i` varies from 0 to N-2).  If the model is fully saturated, use `include_relperm = false` in all these BCs. |
+| Water, heat and solutes may enter or exit the model naturally:  single-phase, anisothermal N-component model | Use a [PorousFlowOutflowBC](PorousFlowOutflowBC.md) with `variable` = porepressure, and `mass_fraction_component = N - 1`.  Use N-1 [PorousFlowOutflowBCs](PorousFlowOutflowBC.md) with `variable` = frac_i, and `mass_fraction_component = i` (here `i` varies from 0 to N-2).   Use a [PorousFlowOutflowBC](PorousFlowOutflowBC.md) with `variable` = temperature, and `flux_type = heat`.  If the model is fully saturated, use `include_relperm = false`.  Example: [outflowbc03.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/jacobian/outflowbc03.i) |
+| Porepressure is fixed at the model's boundary, but solutes are allowed to enter or exit the model naturally: single-phase, N-component model | Use [DirichletBC](DirichletBC.md) for the porepressure.  Use N-1 [PorousFlowOutflowBCs](PorousFlowOutflowBC.md) to allow components to enter/exit the model, each has appropriate `variable` = frac_i, and `mass_fraction_component = i` (`i` varies from 0 to N-2). If the model is fully saturated, use `include_relperm = false` in these BCs.  Example: [s13.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/sinks/s13.i) |
+
+Two-phase examples may be found below.
+
+## General remarks
+
+PorousFlow offers two classes of boundary conditions:
 
 1. Those based on [PorousFlowSink](PorousFlowSink.md).  These are typically used to add or remove fluid or heat-energy through the boundary.  The basic sink adds/removes a fixed flux, but more elaborate sources/sinks add time-dependent fluxes, or fluxes dependent on fluid pressure or temperature, fluid mobility, enthalpy, etc.  These boundary conditions may also be used to control porepressure, temperature, or mass fractions on the boundary by adding/removing fluid or heat through interaction with an external environment.  It is often physically more correct and numerically advantageous to use these boundary conditions instead of [DirichletBC](DirichletBC.md).
 2. Those based on [PorousFlowOutflowBC](PorousFlowOutflowBC.md), which is an "outflow" boundary condition that removes fluid components or heat energy as they flow to the boundary.  This models a "free" boundary that is "invisible" to the simulation.  Please see below for more description and warnings.
