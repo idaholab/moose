@@ -1,12 +1,15 @@
 [Tests]
   issues = "#31300"
-  design = "ADPhaseFieldTwoPhaseSurfaceTension.md ADPhaseFieldTwoPhaseMaterial.md"
+  design = "ADPhaseFieldContactAngleBC.md ObtainAvgContactAngle.md"
   [contactangle_150]
     type = CSVDiff
     input = contact_angle_verification.i
     cli_args = 'contactangle=2.61799 Outputs/file_base=contactangle_150'
     csvdiff = contactangle_150.csv
+    # The refined interface mesh and its direct factorization need more memory than one
+    # slot is allowed, and the TestHarness measures that allowance per slot.
     min_parallel = 8
+    capabilities = 'mumps'
     max_time = 600
     requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
   []
@@ -15,7 +18,10 @@
     input = contact_angle_verification.i
     cli_args = 'contactangle=0.523599 Outputs/file_base=contactangle_30'
     csvdiff = contactangle_30.csv
+    # The refined interface mesh and its direct factorization need more memory than one
+    # slot is allowed, and the TestHarness measures that allowance per slot.
     min_parallel = 8
+    capabilities = 'mumps'
     max_time = 600
     requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
   []
@@ -24,7 +30,10 @@
     input = contact_angle_verification.i
     cli_args = 'contactangle=1.0472 Outputs/file_base=contactangle_60'
     csvdiff = contactangle_60.csv
+    # The refined interface mesh and its direct factorization need more memory than one
+    # slot is allowed, and the TestHarness measures that allowance per slot.
     min_parallel = 8
+    capabilities = 'mumps'
     max_time = 600
     requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
   []

@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+#include <algorithm>
+
 registerMooseObject("PhaseFieldApp", ObtainAvgContactAngle);
 
 InputParameters
@@ -23,7 +25,12 @@ ObtainAvgContactAngle::validParams()
 }
 
 ObtainAvgContactAngle::ObtainAvgContactAngle(const InputParameters & parameters)
-  : SidePostprocessor(parameters), _pf(coupledValue("pf")), _grad_pf(coupledGradient("pf"))
+  : SidePostprocessor(parameters),
+    _pf(coupledValue("pf")),
+    _grad_pf(coupledGradient("pf")),
+    _contact_angle(0.0),
+    _cos_theta_val(0.0),
+    _total_weight(0.0)
 {
 }
 
@@ -37,17 +44,20 @@ ObtainAvgContactAngle::initialize()
 void
 ObtainAvgContactAngle::execute()
 {
-
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+  // The pointwise angle cos(theta) = grad(pf).n/|grad(pf)| is only defined where the interface
+  // meets the boundary; in the bulk phases grad(pf) vanishes and the interface normal with it.
+  // Weighting by |grad(pf)| removes the pointwise division, and the double well factor (1 - pf^2)
+  // -- the same interface localization the contact angle boundary condition uses -- suppresses the
+  // bulk, whose share of the boundary otherwise biases the average toward 90 degrees. Both factors
+  // are smooth in pf, so the reported angle varies smoothly with the solution.
+  for (const auto qp : make_range(_qrule->n_points()))
   {
-    if (std::abs(_pf[qp]) < 0.5) // Operating only within the interface
-    {
-      // Real tol_val = libMesh::TOLERANCE * libMesh::TOLERANCE;
-      const Real weight = _grad_pf[qp].norm();
-      _cos_theta_val +=
-          _grad_pf[qp] * _normals[qp]; // weight * (_grad_pf[qp]/_grad_pf[qp].norm()) * _normals[qp]
-      _total_weight += weight;
-    }
+    // pf can overshoot |pf| = 1 slightly; holding the weight at zero there keeps it non-negative,
+    // which is what bounds the averaged cosine below by -1 and above by 1.
+    const Real localization = std::max(0.0, 1.0 - _pf[qp] * _pf[qp]);
+    const Real w = _JxW[qp] * _coord[qp] * localization;
+    _cos_theta_val += w * (_grad_pf[qp] * _normals[qp]);
+    _total_weight += w * _grad_pf[qp].norm();
   }
 }
 
@@ -70,5 +80,14 @@ ObtainAvgContactAngle::finalize()
 {
   gatherSum(_cos_theta_val);
   gatherSum(_total_weight);
-  _contact_angle = std::acos(_cos_theta_val / _total_weight) * 180 / libMesh::pi;
+
+  // With the interface fully detached from the boundary there is no angle to report, so hold the
+  // last value instead of dividing by zero.
+  if (_total_weight == 0.0)
+    return;
+
+  // |grad(pf).n| <= |grad(pf)| holds pointwise, so the ratio of the integrals lies in [-1, 1] up
+  // to roundoff; clamp it so that a ratio a few epsilon outside the range cannot produce a NaN.
+  const Real cos_theta = std::clamp(_cos_theta_val / _total_weight, -1.0, 1.0);
+  _contact_angle = std::acos(cos_theta) * 180 / libMesh::pi;
 }
