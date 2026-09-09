@@ -13,7 +13,7 @@
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 
 registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 

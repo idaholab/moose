@@ -134,7 +134,7 @@ Gradients are computed only when requested. A `MooseLinearVariableFV` does not a
 every possible form of its gradient. Instead, a consumer requests a gradient
 using `requestCellGradients()`, optionally specifying the gradient method that
 should produce it. The variable registers that (variable, method) combination with
-the `LinearFVGradientInterface` implemented by its owning linear or
+the `LinearFVGradientManager` implemented by its owning linear or
 auxiliary system and receives a read-only `LinearFVGradientReader`.
 
 Gradient storage is grouped by gradient method. Consequently, multiple variables using
@@ -143,7 +143,12 @@ have gradients produced by different methods when different consumers require th
 Adding a new gradient algorithm therefore does not require adding a new set
 of dedicated gradient containers to the system.
 
-Gradient time states are optional. The no-argument `requestCellGradients()` API requests only
+### Gradient history handling
+
+Some solvers might require access to older gradient states. This is supported in time (soring and accessing)
+older gradient states through the `requestCellGradients()` API. However, we don't support accessing
+older gradient states within the outer Picard iteration.
+The no-argument `requestCellGradients()` API requests only
 the current gradient and retains the default memory cost of one published field plus one scratch
 field. A consumer that needs history passes the oldest required time-state index during setup.
 Requesting state `n` allocates states `0` through `n`, where state `0` is current, state `1` is

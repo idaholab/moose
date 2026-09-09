@@ -14,7 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -105,7 +105,8 @@ public:
 
   /**
    * Register the configured default gradient method with time-state storage.
-   * @param oldest_state Oldest time state that consumers need to read. (0 is the current sate only)
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current state
+   * only)
    */
   const LinearFVGradientReader & requestCellGradients(unsigned int oldest_state = 0);
 

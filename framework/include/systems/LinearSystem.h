@@ -10,7 +10,7 @@
 #pragma once
 
 #include "SolverSystem.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "PerfGraphInterface.h"
 
 #include <set>
@@ -44,9 +44,7 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem,
-                     public PerfGraphInterface,
-                     public LinearFVGradientInterface
+class LinearSystem : public SolverSystem, public PerfGraphInterface, public LinearFVGradientManager
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
@@ -165,9 +163,9 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  using LinearFVGradientInterface::computeGradients;
-  using LinearFVGradientInterface::registerFVGradient;
-  using LinearFVGradientInterface::updateFVGradient;
+  using LinearFVGradientManager::computeGradients;
+  using LinearFVGradientManager::registerFVGradient;
+  using LinearFVGradientManager::updateFVGradient;
 
   virtual void compute(ExecFlagType type) override;
 

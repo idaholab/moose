@@ -77,7 +77,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
-    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
@@ -117,7 +117,7 @@ void
 LinearSystem::initSolutionState()
 {
   SolverSystem::initSolutionState();
-  LinearFVGradientInterface::initializeLinearFVGradientHistoryStorage();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
 }
 
 void
@@ -125,7 +125,7 @@ LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
   _current_solution = system().current_local_solution.get();
-  LinearFVGradientInterface::initializeLinearFVGradientStorage();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -183,21 +183,20 @@ void
 LinearSystem::reinit()
 {
   _current_solution = system().current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
 }
 
 void
 LinearSystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
                                            const bool skip_current_to_old)
 {
-  if (iteration_type == Moose::SolutionIterationType::Time)
-    LinearFVGradientInterface::copyPreviousGradientStates(skip_current_to_old);
+  LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
 }
 
 void
 LinearSystem::restoreAdditionalStates()
 {
-  LinearFVGradientInterface::restoreGradientStates();
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void

@@ -86,7 +86,7 @@
     type = RunException
     input = 'gradient-time-states.i'
     cli_args = 'Postprocessors/u_current/state=4 Outputs/file_base=unavailable-gradient-state'
-    expect_err = "Linear FV gradient state 4 with iteration type 'time'.*maximum allocated state is 3"
+    expect_err = "Linear FV gradient state 4 with iteration type 'time' was requested for variable 'u'.*maximum allocated state is 3"
     design = 'linear_fv_design.md MooseLinearVariableFV.md'
     issues = '#33662'
     requirement = 'The system shall report an error when a consumer reads an unallocated linear finite volume gradient state.'
@@ -96,7 +96,7 @@
     type = RunException
     input = 'gradient-time-states.i'
     cli_args = 'Postprocessors/u_old/iteration_type=nonlinear Outputs/file_base=unsupported-gradient-iteration-state'
-    expect_err = "Linear FV gradient state 1 with iteration type 'nonlinear'.*Only time iteration states are supported"
+    expect_err = "Linear FV gradient state 1 with iteration type 'nonlinear' was requested for variable 'u'.*Only time iteration states are supported"
     design = 'linear_fv_design.md MooseLinearVariableFV.md'
     issues = '#33662'
     requirement = 'The system shall report an error when a consumer reads non-current linear finite volume gradient history for a non-time iteration type.'

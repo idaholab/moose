@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 
 #include "FEProblemBase.h"
 #include "FVGradientMethod.h"
@@ -49,7 +49,7 @@ copyGradient(const LinearFVGradientReader::GradientContainer & source,
 }
 
 const FVGradientMethod &
-LinearFVGradientInterface::resolveFVGradientMethod(const GradientMethodName & method_name)
+LinearFVGradientManager::resolveFVGradientMethod(const GradientMethodName & method_name)
 {
   auto & fe_problem = _sys.feProblem();
 
@@ -75,9 +75,9 @@ LinearFVGradientInterface::resolveFVGradientMethod(const GradientMethodName & me
 }
 
 LinearFVGradientReader
-LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number,
-                                              const FVGradientMethod & method,
-                                              const unsigned int oldest_state)
+LinearFVGradientManager::registerFVGradient(const unsigned int variable_number,
+                                            const FVGradientMethod & method,
+                                            const unsigned int oldest_state)
 {
   auto * const variable =
       dynamic_cast<MooseVariableFieldBase *>(_sys.variableWarehouse().getVariable(variable_number));
@@ -107,14 +107,14 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
 }
 
 void
-LinearFVGradientInterface::computeGradients()
+LinearFVGradientManager::computeGradients()
 {
   if (_linear_fv_gradient_container_by_method.empty() || !_sys.solutionStatesInitialized())
     return;
 
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
   mooseAssert(perf_graph_interface,
-              "LinearFVGradientInterface requires its owning system to implement "
+              "LinearFVGradientManager requires its owning system to implement "
               "PerfGraphInterface.");
   const auto perf_id = perf_graph_interface->registerTimedSection("LinearVariableFV_Gradients", 3);
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
@@ -132,7 +132,7 @@ LinearFVGradientInterface::computeGradients()
 }
 
 void
-LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reader)
+LinearFVGradientManager::updateFVGradient(const LinearFVGradientReader & reader)
 {
   if (&reader.system() != &_sys)
     mooseError("Requested update for a linear FV gradient field from a different system than '",
@@ -144,7 +144,7 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reade
   {
     auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
     mooseAssert(perf_graph_interface,
-                "LinearFVGradientInterface requires its owning system to implement "
+                "LinearFVGradientManager requires its owning system to implement "
                 "PerfGraphInterface.");
     const auto perf_id =
         perf_graph_interface->registerTimedSection("LinearVariableFV_Gradients", 3);
@@ -162,13 +162,13 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reade
 }
 
 bool
-LinearFVGradientInterface::hasLinearFVGradients() const
+LinearFVGradientManager::hasLinearFVGradients() const
 {
   return !_linear_fv_gradient_container_by_method.empty();
 }
 
 void
-LinearFVGradientInterface::initializeContainer(OwnedGradientContainer & container) const
+LinearFVGradientManager::initializeContainer(OwnedGradientContainer & container) const
 {
   container.clear();
   const auto & current_solution = _sys.system().current_local_solution;
@@ -180,8 +180,8 @@ LinearFVGradientInterface::initializeContainer(OwnedGradientContainer & containe
 }
 
 void
-LinearFVGradientInterface::resizeGradientStateStorage(LinearFVGradientContainer & container,
-                                                      const unsigned int oldest_state)
+LinearFVGradientManager::resizeGradientStateStorage(LinearFVGradientContainer & container,
+                                                    const unsigned int oldest_state)
 {
   const auto required_states = static_cast<std::size_t>(oldest_state) + 1;
   const auto old_size = container.state_values.size();
@@ -198,7 +198,7 @@ LinearFVGradientInterface::resizeGradientStateStorage(LinearFVGradientContainer 
 }
 
 void
-LinearFVGradientInterface::initializeLinearFVGradientHistoryStorage()
+LinearFVGradientManager::initializeLinearFVGradientHistoryStorage()
 {
   for (auto & [method, container] : _linear_fv_gradient_container_by_method)
     for (const auto state : make_range(std::size_t(1), container.state_values.size()))
@@ -213,7 +213,7 @@ LinearFVGradientInterface::initializeLinearFVGradientHistoryStorage()
 }
 
 void
-LinearFVGradientInterface::setCurrentGradientState(LinearFVGradientContainer & container) const
+LinearFVGradientManager::setCurrentGradientState(LinearFVGradientContainer & container) const
 {
   mooseAssert(!container.state_values.empty(),
               "Gradient state storage must contain a current state.");
@@ -225,17 +225,17 @@ LinearFVGradientInterface::setCurrentGradientState(LinearFVGradientContainer & c
 }
 
 std::string
-LinearFVGradientInterface::gradientStateVectorName(const FVGradientMethod & method,
-                                                   const unsigned int state,
-                                                   const unsigned int component)
+LinearFVGradientManager::gradientStateVectorName(const FVGradientMethod & method,
+                                                 const unsigned int state,
+                                                 const unsigned int component)
 {
   return "linear_fv_gradient_" + method.name() + "_state_" + std::to_string(state) + "_component_" +
          std::to_string(component);
 }
 
 void
-LinearFVGradientInterface::checkRestartedGradientHistory(const FVGradientMethod & method,
-                                                         LinearFVGradientContainer & container)
+LinearFVGradientManager::checkRestartedGradientHistory(const FVGradientMethod & method,
+                                                       LinearFVGradientContainer & container)
 {
   if (container.has_checked_restart_history)
     return;
@@ -275,8 +275,8 @@ LinearFVGradientInterface::checkRestartedGradientHistory(const FVGradientMethod 
   container.has_initialized_history = true;
 }
 
-LinearFVGradientInterface::LinearFVGradientContainer &
-LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMethod & method)
+LinearFVGradientManager::LinearFVGradientContainer &
+LinearFVGradientManager::computeLinearFVGradientContainer(const FVGradientMethod & method)
 {
   // Gradient requests can be registered before the current solution vector exists, so the current
   // and replacement fields cannot always be created when the request is recorded. These fields
@@ -302,7 +302,7 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
 }
 
 void
-LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientContainer & container)
+LinearFVGradientManager::finalizeLinearFVGradientContainer(LinearFVGradientContainer & container)
 {
   mooseAssert(!container.state_values.empty(),
               "Gradient state storage must contain a current state.");
@@ -322,7 +322,7 @@ LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientCon
 }
 
 void
-LinearFVGradientInterface::initializeLinearFVGradientStorage()
+LinearFVGradientManager::initializeLinearFVGradientStorage()
 {
   for (auto & [method, container] : _linear_fv_gradient_container_by_method)
   {
@@ -336,7 +336,7 @@ LinearFVGradientInterface::initializeLinearFVGradientStorage()
 }
 
 void
-LinearFVGradientInterface::rebuildLinearFVGradientStorage()
+LinearFVGradientManager::rebuildLinearFVGradientStorage()
 {
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
   {
@@ -349,7 +349,7 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 }
 
 void
-LinearFVGradientInterface::initializeGradientStatesForTimeAdvance()
+LinearFVGradientManager::initializeGradientStatesForTimeAdvance()
 {
   for (auto & [method, container] : _linear_fv_gradient_container_by_method)
     if (container.state_values.size() > 1 && !container.has_computed_gradient)
@@ -361,8 +361,12 @@ LinearFVGradientInterface::initializeGradientStatesForTimeAdvance()
 }
 
 void
-LinearFVGradientInterface::copyPreviousGradientStates(const bool skip_current_to_old)
+LinearFVGradientManager::copyPreviousGradientStates(
+    const Moose::SolutionIterationType iteration_type, const bool skip_current_to_old)
 {
+  if (iteration_type != Moose::SolutionIterationType::Time)
+    return;
+
   mooseAssert(!Threads::in_threads, "Linear FV gradient state copying is not thread-safe.");
   initializeGradientStatesForTimeAdvance();
 
@@ -383,7 +387,7 @@ LinearFVGradientInterface::copyPreviousGradientStates(const bool skip_current_to
 }
 
 void
-LinearFVGradientInterface::restoreGradientStates()
+LinearFVGradientManager::restoreGradientStates()
 {
   mooseAssert(!Threads::in_threads, "Linear FV gradient state copying is not thread-safe.");
   for (auto & [_, container] : _linear_fv_gradient_container_by_method)

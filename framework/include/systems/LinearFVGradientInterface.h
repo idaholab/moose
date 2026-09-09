@@ -35,13 +35,13 @@ class NumericVector;
  * Registration, update, and allocation logic for linear finite-volume cell gradients. This
  * interface should be inherited by system classes that may own linear finite-volume variables
  */
-class LinearFVGradientInterface
+class LinearFVGradientManager
 {
 public:
   /**
    * @param sys System that owns registered linear finite-volume gradient fields.
    */
-  LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
+  LinearFVGradientManager(SystemBase & sys) : _sys(sys) {}
 
   /**
    * Resolve a named gradient method, constructing a built-in method when needed.
@@ -84,8 +84,8 @@ protected:
    * Initialize private current and replacement gradient storage.
    *
    * This must run after the current local solution has been created and initialized, and after
-   * restart or recovery data has been loaded. At that point, it also validates any restored
-   * historical gradient storage.
+   * restart or recovery data has been loaded. At that point, it also checks if the restored
+   * historical gradient storage is set up correctly.
    */
   void initializeLinearFVGradientStorage();
 
@@ -104,11 +104,14 @@ protected:
   void rebuildLinearFVGradientStorage();
 
   /**
-   * Copy published gradient values into requested older time states.
+   * Copy published gradient values into requested older states.
+   * Non-time histories are ignored because only time gradient states are currently stored.
+   * @param iteration_type Type of solution history being advanced.
    * @param skip_current_to_old Whether state zero should not overwrite state one while deeper
    * states still shift, matching the owning system's solution-state advancement.
    */
-  void copyPreviousGradientStates(bool skip_current_to_old);
+  void copyPreviousGradientStates(Moose::SolutionIterationType iteration_type,
+                                  bool skip_current_to_old);
 
   /// Restore current gradients from state one after a failed timestep.
   void restoreGradientStates();

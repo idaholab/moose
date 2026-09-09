@@ -11,7 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 
 registerMooseObject("MooseApp", LinearFVAnisotropicDiffusion);
 

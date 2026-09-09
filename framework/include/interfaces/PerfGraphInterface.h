@@ -50,7 +50,7 @@
 
 class MooseApp;
 class InputParameters;
-class LinearFVGradientInterface;
+class LinearFVGradientManager;
 class MooseObject;
 
 /**
@@ -98,7 +98,7 @@ public:
    */
   PerfGraph & perfGraph();
 
-  friend class LinearFVGradientInterface;
+  friend class LinearFVGradientManager;
 
 protected:
   /**
