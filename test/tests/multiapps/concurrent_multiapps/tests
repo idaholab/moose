@@ -1,6 +1,6 @@
 [Tests]
   issues = '#32186'
-  design = 'MultiAppTransfer.md'
+  design = 'MultiApps/index.md'
 
   [concurrent]
     type = CSVDiff
