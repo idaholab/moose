@@ -916,7 +916,6 @@ CoreMeshGenerator::generateCSG()
   // These universes and their cells will be discarded, so that only the infinite assembly
   // universes are retained.
   std::unordered_map<unsigned int, std::string> univ_id_names;
-  std::vector<std::string> univs_to_discard;
   for (const auto i : index_range(_inputs))
   {
     if (_inputs[i] == _empty_key)
@@ -924,21 +923,29 @@ CoreMeshGenerator::generateCSG()
     else
     {
       const auto input_univ_name_discard = _inputs[i] + "_root_univ";
-      const auto input_univ_name = _inputs[i] + "_univ";
       csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
-      univs_to_discard.push_back(input_univ_name_discard);
-      univ_id_names[i] = input_univ_name;
-    }
-  }
 
-  // Discard root universes of the input assemblies and their cells
-  for (const auto & univ_name : univs_to_discard)
-  {
-    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
-    const auto cells_to_delete = universe_to_delete.getAllCells();
-    csg_obj->deleteUniverse(universe_to_delete);
-    for (const auto & cell : cells_to_delete)
-      csg_obj->deleteCell(cell.get());
+      const auto & universe_to_delete = csg_obj->getUniverseByName(input_univ_name_discard);
+      const auto cells_to_delete = universe_to_delete.getAllCells();
+      csg_obj->deleteUniverse(universe_to_delete);
+
+      // Store universe fill of cell that will be deleted. This will be the universe
+      // that gets populated into the assembly lattice
+      for (const auto & cell : cells_to_delete)
+      {
+        const auto & cell_to_delete = cell.get();
+        const auto & fill_univ_name = cell_to_delete.getFillUniverse().getName();
+        // Store surfaces use to define cell region. The radial surfaces will be deleted
+        // as they are no longer used in CSGBase instance after cell deletion.
+        const auto & surfs_to_delete = cell_to_delete.getRegion().getSurfaces();
+        csg_obj->deleteCell(cell_to_delete);
+        univ_id_names[i] = fill_univ_name;
+        for (const auto & surf : surfs_to_delete)
+          // Only delete those surfaces that aren't used as axial planes
+          if (surf.get().getName().find(RGMB::CSG_AXIAL_PLANE_PREFIX) == std::string::npos)
+            csg_obj->deleteSurface(surf);
+      }
+    }
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
@@ -982,7 +989,7 @@ CoreMeshGenerator::generateCSG()
                            : (_geom_type == "Hex")
                                ? (universe_pattern.size() + 2) / 2. * assembly_pitch
                                : universe_pattern.size() / 2. * sqrt(2.) * assembly_pitch;
-  const auto ring_surf_name = name() + "_radial_ring";
+  const auto ring_surf_name = name() + "_radial_boundary";
   std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
       std::make_unique<CSG::CSGZCylinder>(ring_surf_name, 0, 0, ring_radius);
   const auto & ring_surf = csg_obj->addSurface(std::move(ring_surf_ptr));
@@ -990,7 +997,7 @@ CoreMeshGenerator::generateCSG()
 
   if (_mesh_dimensions == 3)
   {
-    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj, true);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     lat_cell_region = lat_cell_region & +lowest_axial_surf & -highest_axial_surf;

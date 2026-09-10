@@ -40,7 +40,7 @@ CSGCellEngUnit::getExpandedCell() const
                cells.size(),
                ").");
   // Check that all universes and cells in _internal_base are reachable from root.
-  if (!_internal_base->areUniversesLinked())
+  if (!_internal_base->areCSGObjectsLinked())
     mooseError("CSGCellEngUnit '",
                getName(),
                "' of type '",
