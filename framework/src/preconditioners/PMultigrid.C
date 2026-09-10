@@ -20,12 +20,6 @@
 
 namespace
 {
-/**
- * Fixed number of Krylov iterations the coarsest level is solved with, chosen so that the coarse
- * solve is a fixed linear operator rather than one whose work depends on its right-hand side
- */
-constexpr PetscInt COARSE_ITERATIONS = 20;
-
 PetscErrorCode
 finePCSetUp(PC pc)
 {
@@ -62,19 +56,20 @@ PMultigrid::validParams()
       "The polynomial order of each coarse level, ascending. The fine level is the solver system's "
       "own order and is not listed.");
 
-  MooseEnum smoother("point_jacobi entity_block", "point_jacobi");
+  MooseEnum smoother("point_jacobi entity_block", "entity_block");
 
   params.addParam<MooseEnum>(
       "smoother",
       smoother,
-      "The smoother applied on each level that is smoothed rather than solved. 'point_jacobi' "
-      "reads "
-      "the operator diagonal alone, which at high order ignores the coupling among the many basis "
-      "functions an element carries. 'entity_block' inverts the block of degrees of freedom each "
-      "mesh entity carries -- an element's interior modes, and each shared face, edge and vertex "
-      "-- "
-      "which is what reaches the modes a point smoother cannot damp and the coarse spaces do not "
-      "represent.");
+      "The smoother applied on each level that is smoothed rather than solved. 'entity_block', the "
+      "default, inverts the block of degrees of freedom each mesh entity carries -- an element's "
+      "interior modes, and each shared face, edge and vertex -- which reaches the modes a point "
+      "smoother cannot damp and the coarse spaces do not represent. 'point_jacobi' reads the "
+      "operator "
+      "diagonal alone, which at high order ignores the coupling among the many basis functions one "
+      "entity carries, and on a modal basis divides by diagonal entries that fall by orders of "
+      "magnitude per polynomial order. The block smoother costs about a tenth more per application "
+      "and is the faster of the two in time to solution from order four upward.");
 
   params.addParam<bool>(
       "verify_level_operators",
@@ -299,27 +294,26 @@ PMultigrid::setupSolver()
     }
     else
     {
-      // Iterate the coarse level rather than applying one multigrid cycle to it. A single cycle
-      // leaves a coarse-grid correction the outer Krylov method then has to repair on every
-      // subsequent iteration, which costs iteration counts that grow with the fine order: on a 4x4
-      // mesh at order 8 over levels 1, 2 and 4, one cycle needs 144 iterations to reach a linear
-      // tolerance of 1e-8 where an iterated coarse solve needs 88. CG is the accelerator because
-      // the coarsest level's assembled operator is symmetric, which verifyKokkosLevelMatrices()
-      // measures.
+      // Factor the coarsest level directly. A multigrid preconditioner has to be a fixed linear
+      // operator, because the outer Krylov method builds its space from repeated applications and
+      // relates its recurrence residual to the true one on the assumption that the operator does
+      // not change between them. A direct factorization is such an operator exactly, and it is
+      // affordable because this is the coarsest level of a p-hierarchy: order one on the fine mesh.
       //
-      // The iteration count is fixed and the convergence test disabled, which is what PCMG does to
-      // its own smoothers. Stopping on a tolerance instead would make the work depend on the
-      // right-hand side, and a cycle that is not a fixed linear operator is not a valid
-      // preconditioner for a Krylov method that assumes one, symmetric methods above all. Twenty
-      // iterations reach the same fine iteration counts that a converged solve and a direct
-      // factorization of this level both reach, and unlike a direct solve they need no external
-      // factorization package in parallel.
-      LibmeshPetscCall(KSPSetType(smoother, KSPCG));
-      LibmeshPetscCall(KSPSetNormType(smoother, KSP_NORM_NONE));
-      LibmeshPetscCall(KSPSetConvergenceTest(smoother, KSPConvergedSkip, nullptr, nullptr));
-      LibmeshPetscCall(KSPSetTolerances(
-          smoother, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, COARSE_ITERATIONS));
-      LibmeshPetscCall(PCSetType(smoother_pc, PCGAMG));
+      // Neither of the two obvious alternatives qualifies. Iterating this level to a relative
+      // tolerance makes its work depend on its right-hand side. Iterating it for a fixed number of
+      // steps fixes the work but not the operator: a Krylov method builds its polynomial from the
+      // Krylov space of the right-hand side it is given, so it is a nonlinear function of that
+      // vector however many steps it runs. That alternative was configured here before, as twenty
+      // iterations of CG, and it corrupts the outer solve whenever the coarse level is large enough
+      // that twenty iterations do not converge it: with a single coarse level of order five under
+      // an order-eight fine space, the outer GMRES reported a relative residual of 3e-10 while its
+      // true residual stood at 6e-4, and Newton needed three steps to solve a linear problem. It
+      // went unnoticed because a coarsest level of order one is solved to roundoff in twenty
+      // iterations, which makes the map linear in all but name.
+      LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
+      LibmeshPetscCall(PCSetType(smoother_pc, PCLU));
+      LibmeshPetscCall(PCFactorSetMatSolverType(smoother_pc, MATSOLVERMUMPS));
     }
 
     // Read the level's own options last, so that everything set above is a default a user can
