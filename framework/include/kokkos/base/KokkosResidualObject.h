@@ -32,10 +32,10 @@ public:
   static InputParameters validParams();
 
   /// Whether this object's hooks factor out the test function
-  static constexpr bool use_precompute_hooks = false;
+  static constexpr bool uses_precompute_hooks = false;
 
   /// Whether this object has computeQpOffDiagJacobianScalar() hook
-  static constexpr bool support_scalar_jacobian = false;
+  static constexpr bool supports_scalar_jacobian = false;
 
   /**
    * Constructor

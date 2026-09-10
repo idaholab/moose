@@ -204,7 +204,7 @@ ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
   if (!_sc_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  const auto tag_name = _sc_parameters.get<TagName>(tag_param_name);
+  const auto & tag_name = _sc_parameters.get<TagName>(tag_param_name);
 
   if (!_sc_fe_problem.vectorTagExists(tag_name))
     mooseError("Attempting to couple to vector tag scalar with name ",
@@ -232,7 +232,7 @@ ScalarCoupleable::coupledMatrixTagScalarValue(const std::string & var_name,
   if (!_sc_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  const auto tag_name = _sc_parameters.get<TagName>(tag_param_name);
+  const auto & tag_name = _sc_parameters.get<TagName>(tag_param_name);
 
   if (!_sc_fe_problem.matrixTagExists(tag_name))
     mooseError("Attempting to couple to matrx tag scalar with name ",

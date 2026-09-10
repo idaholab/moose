@@ -449,7 +449,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
   DispatcherRegistry::addDispatcher<typename Object::JacobianLoop, Object>(objectname);
   DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
 
-  if constexpr (Object::use_precompute_hooks)
+  if constexpr (Object::uses_precompute_hooks)
   {
     DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(
         objectname,
@@ -471,7 +471,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
             Object::template defaultOffDiagJacobian<Object>());
   }
 
-  if constexpr (Object::support_scalar_jacobian)
+  if constexpr (Object::supports_scalar_jacobian)
   {
     DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianScalarLoop, Object>(
         objectname);

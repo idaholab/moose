@@ -45,7 +45,7 @@ public:
   static InputParameters validParams();
 
   /// KernelGrad hooks factor out the test-function gradient
-  static constexpr bool use_precompute_hooks = true;
+  static constexpr bool uses_precompute_hooks = true;
 
   /**
    * Constructor

@@ -250,7 +250,7 @@ public:
                                                     unsigned int i,
                                                     unsigned int var) const
   {
-    return _local_to_global_dof_index[_local_elem_dof_index[var](i, elem)];
+    return _local_to_global_dof_index[getElemLocalDofIndex(elem, i, var)];
   }
 
   /**
@@ -261,7 +261,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getScalarGlobalDofIndex(unsigned int i, unsigned int var) const
   {
-    return _local_to_global_dof_index[_scalar_dof_index[var][i]];
+    return _local_to_global_dof_index[getScalarLocalDofIndex(i, var)];
   }
 
   /**

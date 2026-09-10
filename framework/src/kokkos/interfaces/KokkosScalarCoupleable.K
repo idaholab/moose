@@ -63,7 +63,7 @@ ScalarCoupleable::kokkosCoupledVectorTagScalarValue(const std::string & var_name
   if (!_sc_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _sc_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _sc_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagScalarValueByName(var_name, tag_name, comp);
 }

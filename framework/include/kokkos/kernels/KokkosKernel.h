@@ -42,7 +42,7 @@ public:
   static InputParameters validParams();
 
   // This object supports computeQpOffDiagJacobianScalar()
-  static constexpr bool support_scalar_jacobian = true;
+  static constexpr bool supports_scalar_jacobian = true;
 
   /**
    * Constructor
