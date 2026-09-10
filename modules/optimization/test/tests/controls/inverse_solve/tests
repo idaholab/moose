@@ -166,18 +166,33 @@
                   "accept-on-max is enabled, accept the last base estimate and continue without "
                   "error."
   []
-  [action_missing_convergence]
+  [action_wrong_convergence]
     type = RunException
     input = action.i
-    # Points the executioner at a convergence the action did not generate, which is the same
-    # misconfiguration as omitting the line: without it the fixed-point loop is not driven by the
-    # generated convergence and the inverse solve would silently not run.
+    # Points the executioner at a convergence the action did not generate. Distinct from
+    # action_missing_convergence below: here the user explicitly named a (wrong) convergence,
+    # rather than omitting the line, so the error must report the name they actually wrote.
     cli_args = 'Executioner/multiapp_fixed_point_convergence=not_the_generated_convergence '
                'Outputs/csv=false '
-               'Outputs/file_base=action_missing_convergence_out'
-    expect_err = "requires the executioner to use its generated convergence"
+               'Outputs/file_base=action_wrong_convergence_out'
+    expect_err = "currently set to 'not_the_generated_convergence'"
     design = 'SingleParameterInverseSolveAction.md'
-    requirement = "The system shall report a helpful error when the single-parameter inverse-solve "
+    requirement = "The system shall report a helpful error, naming the convergence the user "
+                  "actually assigned, when the single-parameter inverse-solve block's generated "
+                  "convergence is not assigned to the executioner's multiapp_fixed_point_convergence."
+  []
+  [action_missing_convergence]
+    type = RunException
+    input = action_no_convergence.i
+    # Omits the executioner line entirely, rather than assigning a wrong name (see
+    # action_wrong_convergence above): MOOSE then silently creates and assigns a default
+    # convergence, so the error must say the line was never given rather than naming that default
+    # as if the user had written it.
+    cli_args = 'Outputs/csv=false Outputs/file_base=action_missing_convergence_out'
+    expect_err = "No 'multiapp_fixed_point_convergence' was given, so MOOSE created a default one"
+    design = 'SingleParameterInverseSolveAction.md'
+    requirement = "The system shall report a helpful error, distinguishing MOOSE's own default "
+                  "convergence from a user-assigned one, when the single-parameter inverse-solve "
                   "block's generated convergence is not assigned to the executioner's "
                   "multiapp_fixed_point_convergence."
   []

@@ -164,16 +164,33 @@ SingleParameterInverseSolveAction::act()
     const std::string conv_name = p + "_convergence";
     if (!_problem->hasSetMultiAppFixedPointConvergenceName() ||
         _problem->getMultiAppFixedPointConvergenceName() != conv_name)
+    {
+      // Distinguish three states for the error, since "set" alone conflates two very different
+      // user experiences: hasSetMultiAppFixedPointConvergenceName() is also true when the user
+      // wrote nothing and MOOSE silently defaulted the name (needToAddDefaultMultiAppFixedPointConvergence()
+      // is how that default path is told apart from the user actually naming a convergence). Each
+      // branch supplies its own complete trailing sentence, since the three cases do not share a
+      // sentence structure.
+      std::string current;
+      if (!_problem->hasSetMultiAppFixedPointConvergenceName())
+        // Reachable when the executioner never builds a FixedPointSolve at all (e.g. an
+        // Executor-based executioner), so no name -- default or otherwise -- was ever assigned.
+        current = "It is currently not set.";
+      else if (_problem->needToAddDefaultMultiAppFixedPointConvergence())
+        current = "No 'multiapp_fixed_point_convergence' was given, so MOOSE created a default "
+                  "one instead.";
+      else
+        current =
+            "It is currently set to '" + _problem->getMultiAppFixedPointConvergenceName() + "'.";
+
       mooseError("[",
                  p,
                  "] requires the executioner to use its generated convergence to enable and drive "
                  "the fixed-point loop. Add\n\n    multiapp_fixed_point_convergence = ",
                  conv_name,
-                 "\n\nto the [Executioner] block. It is currently ",
-                 _problem->hasSetMultiAppFixedPointConvergenceName()
-                     ? "set to '" + _problem->getMultiAppFixedPointConvergenceName() + "'"
-                     : "not set",
-                 ".");
+                 "\n\nto the [Executioner] block. ",
+                 current);
+    }
 
     const std::string ctype = newton ? "NewtonInversionControl" : "SecantInversionControl";
     auto pctl = _factory.getValidParams(ctype);
