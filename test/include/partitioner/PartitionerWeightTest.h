@@ -27,7 +27,7 @@ public:
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
-  virtual dof_id_type computeElementWeight(Elem & elm) override;
+  virtual dof_id_type computeElementWeight(Elem & elm) const override;
 
-  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side) override;
+  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side) const override;
 };

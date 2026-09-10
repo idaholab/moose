@@ -145,6 +145,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 2
       []
     []
     [ComplexFromSubToParent]

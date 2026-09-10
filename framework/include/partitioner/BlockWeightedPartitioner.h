@@ -26,7 +26,7 @@ public:
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
-  virtual dof_id_type computeElementWeight(Elem & elm) override;
+  virtual dof_id_type computeElementWeight(Elem & elm) const override;
 
   /**
    * Fills _blocks_to_weights before performing the partition
