@@ -78,6 +78,11 @@ QpJacobianOperator::applyBlocks(const EntityBlocks & blocks, const TagID r_tag, 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, BlockApplyLoop> policy(
       0, blocks.numBlocks());
   ::Kokkos::parallel_for(policy, *this);
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, BlockIdentityLoop> identity(
+      0, blocks.getNumLocalDofs());
+  ::Kokkos::parallel_for(identity, *this);
+
   ::Kokkos::fence();
 }
 
@@ -349,6 +354,15 @@ QpJacobianOperator::operator()(BlockApplyLoop, const dof_id_type block) const
 
   for (unsigned int i = 0; i < size; ++i)
     _level.getDofValue(_blocks.blockDof(block, i), _y_tag) = correction[i];
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(BlockIdentityLoop, const dof_id_type dof) const
+{
+  // A row no block covers is a row the level holds fixed, and the level's operator carries the
+  // identity there, so the smoother reproduces it rather than leaving the row unset
+  if (!_blocks.isBlocked(dof))
+    _level.getDofValue(dof, _y_tag) = _level.getDofValue(dof, _x_tag);
 }
 
 } // namespace Moose::Kokkos

@@ -18,6 +18,27 @@
 
 #include "libmesh/petsc_nonlinear_solver.h"
 
+namespace
+{
+PetscErrorCode
+finePCSetUp(PC pc)
+{
+  void * ctx;
+  LibmeshPetscCallQ(PCShellGetContext(pc, &ctx));
+  static_cast<NonlinearSystemBase *>(ctx)->setupKokkosEntityBlockSmoother();
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
+finePCApply(PC pc, Vec r, Vec x)
+{
+  void * ctx;
+  LibmeshPetscCallQ(PCShellGetContext(pc, &ctx));
+  static_cast<NonlinearSystemBase *>(ctx)->applyKokkosEntityBlockSmoother(r, x);
+  return LIBMESH_PETSC_SUCCESS;
+}
+} // namespace
+
 registerMooseObjectAliased("MooseApp", PMultigrid, "PMG");
 
 InputParameters
@@ -161,6 +182,14 @@ PMultigrid::initialSetup()
                  << " entity blocks, largest " << _levels[i]->maxEntityBlockSize() << " dofs\n";
       }
 
+  if (_entity_block_smoother)
+  {
+    _nl.initKokkosEntityBlockSmoother();
+
+    _console << "  fine: " << _nl.numKokkosEntityBlocks() << " entity blocks, largest "
+             << _nl.maxKokkosEntityBlockSize() << " dofs\n";
+  }
+
   _console << "  fine: " << _nl.system().n_dofs() << " dofs\n" << std::endl;
 
   // A transfer indexes the DOF layout of both of its sides, so the transfers are built once every
@@ -251,7 +280,19 @@ PMultigrid::setupSolver()
   LibmeshPetscCall(KSPSetType(fine_smoother, KSPCHEBYSHEV));
   PC fine_smoother_pc;
   LibmeshPetscCall(KSPGetPC(fine_smoother, &fine_smoother_pc));
-  LibmeshPetscCall(PCSetType(fine_smoother_pc, PCJACOBI));
+
+  // The finest level is the solver system itself, so its blocks and its residual come from the
+  // system rather than from a level of the hierarchy
+  if (_entity_block_smoother)
+  {
+    LibmeshPetscCall(PCSetType(fine_smoother_pc, PCSHELL));
+    LibmeshPetscCall(PCShellSetContext(fine_smoother_pc, &_nl));
+    LibmeshPetscCall(PCShellSetName(fine_smoother_pc, "entity-block Schwarz"));
+    LibmeshPetscCall(PCShellSetSetUp(fine_smoother_pc, finePCSetUp));
+    LibmeshPetscCall(PCShellSetApply(fine_smoother_pc, finePCApply));
+  }
+  else
+    LibmeshPetscCall(PCSetType(fine_smoother_pc, PCJACOBI));
 }
 
 #endif

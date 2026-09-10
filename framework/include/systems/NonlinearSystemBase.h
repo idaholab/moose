@@ -406,6 +406,38 @@ public:
   void computeKokkosJacobianVectorProduct(Vec x, Vec y);
 
   /**
+   * Build the entity-block decomposition of this system's matrix-free operator, which the finest
+   * level of a p-multigrid hierarchy smooths with in place of the operator diagonal
+   */
+  void initKokkosEntityBlockSmoother();
+
+  /**
+   * Get the number of entity blocks this process holds for the smoother
+   * @returns The number of blocks
+   */
+  dof_id_type numKokkosEntityBlocks();
+
+  /**
+   * Get the size of the largest entity block this process holds for the smoother
+   * @returns The largest block size
+   */
+  unsigned int maxKokkosEntityBlockSize();
+
+  /**
+   * Rebuild and refactor the entity blocks from the linearization the quadrature-point Jacobian
+   * cache holds, which is the setup of the smoother's shell preconditioner
+   */
+  void setupKokkosEntityBlockSmoother();
+
+  /**
+   * Apply the inverse of every entity block to a residual, which is the application of the
+   * smoother's shell preconditioner
+   * @param r The residual
+   * @param x The correction
+   */
+  void applyKokkosEntityBlockSmoother(Vec r, Vec x);
+
+  /**
    * Compute the diagonal of the (unassembled) Kokkos Jacobian, using the partial-assembly
    * Jacobian diagonal hooks on active Kokkos kernels. This is the MatGetDiagonal callback for the
    * Kokkos matrix-free shell installed as the system matrix by

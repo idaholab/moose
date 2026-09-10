@@ -570,11 +570,6 @@ PLevelSpace::applyBlockSmoother(Vec r, Vec x)
   libMesh::PetscVector<Number> residual(r, _sys.comm());
   libMesh::PetscVector<Number> correction(x, _sys.comm());
 
-  // A row no block covers is a row the level holds fixed, where the operator carries the identity,
-  // so seeding the correction with the residual is what makes the smoother carry it there too. Every
-  // other row is overwritten by its block's solve below.
-  correction = residual;
-
   // PETSc hands the preconditioner its input locked against write access, and wrapping a vector for
   // device access takes a writable array of it, so the residual is read through the level's own work
   // vector, as an operator application reads its input
