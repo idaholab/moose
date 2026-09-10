@@ -134,7 +134,8 @@ void
 AuxiliarySystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
                                               const bool skip_current_to_old)
 {
-  LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
 }
 
 void

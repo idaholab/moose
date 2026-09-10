@@ -364,6 +364,8 @@ void
 LinearFVGradientManager::copyPreviousGradientStates(
     const Moose::SolutionIterationType iteration_type, const bool skip_current_to_old)
 {
+  mooseAssert(iteration_type != Moose::SolutionIterationType::Nonlinear,
+              "Linear FV gradient storage does not support nonlinear iteration states.");
   if (iteration_type != Moose::SolutionIterationType::Time)
     return;
 
