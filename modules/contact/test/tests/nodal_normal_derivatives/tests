@@ -111,6 +111,10 @@
     difference_tol = 3.1
     capabilities = 'ad_size>=200'
     max_parallel = 1
+    # Measured ~50 s locally on an unloaded machine, but CIVET's oversubscribed parallel recipe has
+    # been observed to exceed the 300 s default here even though the job itself finishes; raised to
+    # match the tri7_penalty_jacobian case below.
+    max_time = 600
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     requirement = 'Three-dimensional mortar-penalty contact shall compute a Jacobian that agrees '
                   'with a finite-difference approximation on a second-order TET10 mesh with TRI6 '

@@ -8,8 +8,15 @@ GLOBAL VARIABLES relative 1.e-6 floor 1e-6
 	num_nl   # min:               4 @ t1	max:               6 @ t5
 
 NODAL VARIABLES relative 1.e-6 floor 1e-6
-	contact_normal_lm  # min:               0 @ t1,n1	max:       13778.582 @ t13,n224
-	# The observed maximum relative displacement drifts are 1.35e-6 and 3.85e-6.
-	disp_x relative 2e-6 # min:               0 @ t1,n137	max:     0.059671401 @ t9,n220
-	disp_y relative 5e-6 # min:               0 @ t1,n137	max:              15 @ t15,n221
+	# Observed maximum relative drift is 3.01e-5, from the nodal-normal-derivative residual
+	# reformulation; rounded up to leave margin.
+	contact_normal_lm relative 3.5e-5 # min:               0 @ t1,n1	max:       13778.582 @ t13,n224
+	# The nodal-normal-derivative residual reformulation perturbs disp_x/disp_y by a tiny, uniform
+	# absolute amount across every node and timestep (observed max |diff| 6.45e-7 and 3.60e-6), but at
+	# the many near-zero secondary-side nodes that shows up as a huge relative percentage against the
+	# old relative+floor 1e-6 check. Switch to an absolute tolerance, rounded up from the observed
+	# max, since it is the absolute displacement change that is actually small here, not the relative
+	# one.
+	disp_x absolute 1e-6 # min:               0 @ t1,n137	max:     0.059671401 @ t9,n220
+	disp_y absolute 5e-6 # min:               0 @ t1,n137	max:              15 @ t15,n221
 

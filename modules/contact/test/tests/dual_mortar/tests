@@ -112,4 +112,26 @@
       mesh_mode = REPLICATED
     []
   []
+
+  [force_balance_friction]
+    design = 'ContactAction.md NormalMortarMechanicalContact.md'
+    issues = '#33378'
+    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
+                  'curved, frictional interface, using'
+    # Same oracle and same abs_zero rationale as 'force_balance' above; friction adds a genuine
+    # tangential force to balance on top of the curvature-coupled normal force. Only the penalty
+    # formulation is exercised -- see dm_mechanical_contact_force_balance_friction.i for why the
+    # Lagrange-multiplier formulations are not.
+    [penalty]
+      type = 'CSVDiff'
+      input = 'dm_mechanical_contact_force_balance_friction.i'
+      csvdiff = 'penalty_mortar_force_balance_friction.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
+                 'Contact/leftright/penalty_friction=1e5 '
+                 'Outputs/file_base=penalty_mortar_force_balance_friction'
+      detail = 'a penalty formulation.'
+      mesh_mode = REPLICATED
+    []
+  []
 []
