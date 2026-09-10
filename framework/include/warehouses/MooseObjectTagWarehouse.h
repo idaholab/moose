@@ -27,7 +27,7 @@ public:
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
    */
-  MooseObjectTagWarehouse(bool threaded = true);
+  MooseObjectTagWarehouse(bool threaded = true, THREAD_ID num_threads = libMesh::n_threads());
 
   /**
    * Update the active status of Kernels
@@ -90,9 +90,10 @@ protected:
 };
 
 template <typename T>
-MooseObjectTagWarehouse<T>::MooseObjectTagWarehouse(bool threaded /*=true*/)
-  : MooseObjectWarehouse<T>(threaded),
-    _num_threads(threaded ? libMesh::n_threads() : 1),
+MooseObjectTagWarehouse<T>::MooseObjectTagWarehouse(bool threaded /*=true*/,
+                                                    THREAD_ID num_threads /*=libMesh::n_threads()*/)
+  : MooseObjectWarehouse<T>(threaded, num_threads),
+    _num_threads(threaded ? num_threads : 1),
     _vector_tag_to_object_warehouse(_num_threads),
     _vector_tags_to_object_warehouse(_num_threads),
     _matrix_tag_to_object_warehouse(_num_threads),

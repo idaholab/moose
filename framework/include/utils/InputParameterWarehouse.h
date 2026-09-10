@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor
    */
-  InputParameterWarehouse();
+  InputParameterWarehouse(THREAD_ID num_threads = libMesh::n_threads());
 
   /**
    * Destruction
@@ -148,6 +148,9 @@ public:
   removeInputParameters(const MooseObject & moose_object, THREAD_ID tid, const AddRemoveParamsKey);
 
 private:
+  /// The number of threads this warehouse stores per-thread data for (see MooseApp::n_threads())
+  const THREAD_ID _num_threads;
+
   /// Storage for the InputParameters objects
   /// TODO: Remove multimap
   std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;

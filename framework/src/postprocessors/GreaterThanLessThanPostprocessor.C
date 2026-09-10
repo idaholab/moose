@@ -71,13 +71,13 @@ GreaterThanLessThanPostprocessor::execute()
     ConstElemRange range(_mesh.active_local_subdomain_elements_begin(_subdomain_id),
                          _mesh.active_local_subdomain_elements_end(_subdomain_id));
 
-    Threads::parallel_reduce(range, aldit);
+    Threads::parallel_reduce(range, aldit, getMooseApp().n_threads());
   }
   else
   {
     ConstElemRange range(_mesh.active_local_elements_begin(), _mesh.active_local_elements_end());
 
-    Threads::parallel_reduce(range, aldit);
+    Threads::parallel_reduce(range, aldit, getMooseApp().n_threads());
   }
 
   const auto & solution = _fe_problem.getNonlinearSystemBase(_sys.number()).solution();
