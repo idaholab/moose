@@ -77,6 +77,12 @@ public:
   bool verifyPreconditionerSymmetry() const { return _verify_preconditioner_symmetry; }
 
   /**
+   * Get whether the conditioning of the solver system's operator is to be reported
+   * @returns Whether the conditioning is reported
+   */
+  bool verifyOperatorConditioning() const { return _verify_operator_conditioning; }
+
+  /**
    * Get whether the solver system's own matrix-free operator is to be checked for symmetry
    * @returns Whether to check
    */
@@ -107,6 +113,9 @@ protected:
 
   /// Whether the cycle this preconditioner applies is to be checked for symmetry
   const bool _verify_preconditioner_symmetry;
+
+  /// Whether the conditioning of the solver system's operator is to be reported
+  const bool _verify_operator_conditioning;
 
   /// Whether the solver system's own matrix-free operator is to be checked for symmetry
   const bool _verify_operator_symmetry;

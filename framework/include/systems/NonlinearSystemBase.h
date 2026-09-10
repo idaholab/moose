@@ -425,6 +425,12 @@ public:
   void verifyKokkosPreconditionerSymmetry();
 
   /**
+   * Report the conditioning of this system's matrix-free operator: its norm, the norm of its
+   * inverse, and their product
+   */
+  void verifyKokkosOperatorConditioning();
+
+  /**
    * Get the number of entity blocks this process holds for the smoother
    * @returns The number of blocks
    */
