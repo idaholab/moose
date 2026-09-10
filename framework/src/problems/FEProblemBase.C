@@ -6133,6 +6133,23 @@ FEProblemBase::partitionConcurrentMultiApps()
     if (multi_app->usingPositions())
       groups[multi_app->getParam<unsigned int>("execution_order_group")].push_back(multi_app);
 
+  // For the MultiApps that are using samplers, their partitioning is already handled there
+  // so we just skipped them. But if they were to share an execution_order_group, we would crash
+  // if using concurrent multiapps. So let's error.
+  // For any other MultiApps that are not using positions, we would just need them to know
+  // numGlobalApps() to benefit from this concurrent partitioning. We can allow them here in the
+  // future.
+  std::map<unsigned int, std::vector<std::shared_ptr<MultiApp>>> check_groups;
+  for (const auto & multi_app : _multi_apps.getActiveObjects())
+    check_groups[multi_app->getParam<unsigned int>("execution_order_group")].push_back(multi_app);
+  for (const auto & [group_id, group] : check_groups)
+    for (const auto & multi_app : group)
+      if (group.size() > 1 && !multi_app->usingPositions())
+        multi_app->paramError(
+            "execution_order_group",
+            "This MultiApp must be placed in its own execution order group as concurrent execution "
+            "has not been implemented for this type of app at this time");
+
   const auto n_procs = n_processors();
   const auto my_rank = processor_id();
 
