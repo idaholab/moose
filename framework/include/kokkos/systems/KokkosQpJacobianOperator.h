@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "KokkosEntityBlocks.h"
 #include "KokkosQpJacobianLevel.h"
 #include "KokkosQpJacobianCache.h"
 #include "KokkosLevelBasisTable.h"
@@ -64,6 +65,12 @@ public:
   struct MatrixLoop
   {
   };
+  struct BlockLoop
+  {
+  };
+  struct BlockApplyLoop
+  {
+  };
   ///@}
 
   /**
@@ -85,9 +92,33 @@ public:
    */
   void assemble(Matrix & matrix);
 
+  /**
+   * Accumulate the operator's entity-diagonal blocks into an entity-block decomposition, which is
+   * the same contraction the assembly performs, restricted to the pairs of degrees of freedom that
+   * share a mesh entity
+   * @param blocks The decomposition, which must already be built and zeroed
+   */
+  void assembleBlocks(const EntityBlocks & blocks);
+
+  /**
+   * Apply the inverse of every entity block to a residual vector, which is the entity-block
+   * smoother
+   *
+   * Only the rows that belong to a block are written, so a caller wanting the identity on the rest
+   * places it there itself before the call. The blocks are disjoint, so the applications are
+   * independent and the result is the additive smoother over the decomposition.
+   *
+   * @param blocks The decomposition, whose blocks must already be factored
+   * @param r_tag The vector tag of the residual on the level
+   * @param x_tag The vector tag of the correction on the level
+   */
+  void applyBlocks(const EntityBlocks & blocks, TagID r_tag, TagID x_tag);
+
   KOKKOS_FUNCTION void operator()(ApplyLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(BlockLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(BlockApplyLoop, const dof_id_type block) const;
 
 private:
   /**
@@ -117,6 +148,11 @@ private:
    * The matrix of the assembly loop, over the level's DOF layout
    */
   Matrix _matrix;
+
+  /**
+   * The entity-block decomposition of the block loops, over the level's DOF layout
+   */
+  EntityBlocks _blocks;
 };
 
 #endif

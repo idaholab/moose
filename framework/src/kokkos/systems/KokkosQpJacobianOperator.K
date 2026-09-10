@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosQpJacobianOperator.h"
+#include "KokkosUtils.h"
 
 namespace Moose::Kokkos
 {
@@ -52,6 +53,30 @@ QpJacobianOperator::assemble(Matrix & matrix)
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, MatrixLoop> policy(
       0, _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
+QpJacobianOperator::assembleBlocks(const EntityBlocks & blocks)
+{
+  _blocks = blocks;
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, BlockLoop> policy(0,
+                                                                                    _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
+QpJacobianOperator::applyBlocks(const EntityBlocks & blocks, const TagID r_tag, const TagID x_tag)
+{
+  _blocks = blocks;
+  _x_tag = r_tag;
+  _y_tag = x_tag;
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, BlockApplyLoop> policy(
+      0, blocks.numBlocks());
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
@@ -235,6 +260,95 @@ QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
       ::Kokkos::atomic_add(&_matrix(row, _level.getElemGlobalDofIndex(elem, j, var)), entry);
     }
   }
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(BlockLoop, const ThreadID tid) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
+
+  const auto num_dofs = basis.numDofs();
+
+  // The decomposition holds no fixed row and no row this process does not own, so the pair tests
+  // below are what confine the contraction to the entries of a block this process is building. An
+  // entity's block gathers a contribution from every element that carries the entity, which for an
+  // interior block is one element and for a shared edge or face is each element on it.
+  for (unsigned int i = 0; i < num_dofs; ++i)
+  {
+    const auto row = _level.getElemLocalDofIndex(elem, i, var);
+
+    if (!_blocks.isBlocked(row))
+      continue;
+
+    const auto block = _blocks.blockOfDof(row);
+    const auto row_pos = _blocks.posOfDof(row);
+
+    for (unsigned int j = 0; j < num_dofs; ++j)
+    {
+      const auto col = _level.getElemLocalDofIndex(elem, j, var);
+
+      if (!_blocks.isBlocked(col) || _blocks.blockOfDof(col) != block)
+        continue;
+
+      Real entry = 0;
+
+      for (unsigned int qp = 0; qp < num_qps; ++qp)
+      {
+        const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+
+        Real value_i, value_j;
+        Real3 grad_i, grad_j;
+
+        basis.basis(i, qp, value_i, grad_i);
+        basis.basis(j, qp, value_j, grad_j);
+
+        entry += value_i * (tensor.vv * value_j + tensor.vg * grad_j) +
+                 grad_i * (tensor.gv * value_j + tensor.gg * grad_j);
+      }
+
+      ::Kokkos::atomic_add(&_blocks.entry(block, row_pos, _blocks.posOfDof(col)), entry);
+    }
+  }
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(BlockApplyLoop, const dof_id_type block) const
+{
+  const auto size = _blocks.blockSize(block);
+
+  Real residual[MAX_BLOCK_DOF];
+  Real correction[MAX_BLOCK_DOF];
+
+  for (unsigned int i = 0; i < size; ++i)
+    residual[i] = _level.getDofValue(_blocks.blockDof(block, i), _x_tag);
+
+  if (_blocks.isFactored(block))
+    Utils::choleskySubstitute(_blocks.blockEntries(block), correction, residual, size);
+  else
+    // A block that carries no factor is applied as its diagonal, which is the point smoother on
+    // those rows. A zero diagonal leaves the row uncorrected rather than dividing by it.
+    for (unsigned int i = 0; i < size; ++i)
+    {
+      const auto diagonal = _blocks.entry(block, i, i);
+
+      correction[i] = diagonal ? residual[i] / diagonal : residual[i];
+    }
+
+  for (unsigned int i = 0; i < size; ++i)
+    _level.getDofValue(_blocks.blockDof(block, i), _y_tag) = correction[i];
 }
 
 } // namespace Moose::Kokkos
