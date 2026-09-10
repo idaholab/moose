@@ -5940,7 +5940,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
   logAdd("MultiApp", name, multi_app_name, parameters);
-  multi_app->setupPositions();
+  multi_app->possiblyCreateChildApplications();
 
   _multi_apps.addObject(multi_app);
 

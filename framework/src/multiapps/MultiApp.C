@@ -283,6 +283,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
+    _create_child_apps_on_initial_setup(!_use_positions ||
+                                        _fe_problem.numConcurrentMultiApps() > 1),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
@@ -378,18 +380,25 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
 }
 
 void
-MultiApp::setupPositions()
+MultiApp::possiblyCreateChildApplications()
 {
+  // We need to count the apps to be able to partition them, either here in init(),
+  // or in the FEProblem before calling initialSetup()
   if (_use_positions)
   {
     fillPositions();
+    // This counts the apps and partitions them. The partitioning can be changed
+    // if the apps are not created straight away
     init(_positions.size());
-    // When multiapps are run concurrently, sub-app creation is deferred to initialSetup() so it
-    // happens after FEProblemBase::partitionConcurrentMultiApps() has (re)initialized this
-    // multiapp on the disjoint subset of ranks it will actually run on.
-    if (_fe_problem.numConcurrentMultiApps() <= 1)
-      createApps();
   }
+
+  if (_create_child_apps_on_initial_setup)
+    return;
+
+  mooseAssert(_use_positions,
+              "The number of apps is currently determined by the positions when creating child "
+              "apps immediately after multiapp construction");
+  createApps();
 }
 
 void
@@ -445,9 +454,11 @@ MultiApp::createLocalApp(const unsigned int i)
 void
 MultiApp::initialSetup()
 {
-  // Sub-apps are created here (rather than in setupPositions) when we are not using positions, or
-  // when concurrent execution deferred creation until the rank partitioning was assigned.
-  if (!_use_positions || _fe_problem.numConcurrentMultiApps() > 1)
+  // Sub-apps are created here (rather than right after constructing the MultiApp) when:
+  // - using concurrent multiapps as the partitioning is only assigned after all
+  //   MultiApps have been constructed and child apps have been counted
+  // - using sampler-type multiapps as the partitioning is also handled by the sampler
+  if (_create_child_apps_on_initial_setup)
     createApps();
 }
 

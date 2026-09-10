@@ -24,8 +24,11 @@ SamplerFullSolveMultiApp::validParams()
   params += ReporterInterface::validParams();
   params.addClassDescription(
       "Creates a full-solve type sub-application for each row of each Sampler matrix.");
-  params.addRequiredParam<SamplerName>("sampler",
-                                       "The Sampler object to utilize for creating MultiApps.");
+  params.addRequiredParam<SamplerName>(
+      "sampler",
+      "The Sampler object to utilize for creating the child applications of this MultiApp.");
+
+  // The number of applications is handled by the sampler
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<bool>("output_in_position");
   params.suppressParameter<std::vector<FileName>>("positions_file");
