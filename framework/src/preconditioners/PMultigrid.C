@@ -67,9 +67,14 @@ PMultigrid::validParams()
       "smoother cannot damp and the coarse spaces do not represent. 'point_jacobi' reads the "
       "operator "
       "diagonal alone, which at high order ignores the coupling among the many basis functions one "
-      "entity carries, and on a modal basis divides by diagonal entries that fall by orders of "
-      "magnitude per polynomial order. The block smoother costs about a tenth more per application "
-      "and is the faster of the two in time to solution from order four upward.");
+      "entity carries. The block smoother costs between a tenth and a quarter more per "
+      "application, "
+      "and is the faster of the two in time to solution from order four upward: on a 16 by 16 mesh "
+      "of "
+      "biquadratic elements it takes about a quarter of the time at order four and a fortieth of "
+      "it at "
+      "order eight, against a fifth more time at orders two and three, where a hierarchic entity "
+      "carries a single mode and the two smoothers coincide.");
 
   params.addParam<bool>(
       "verify_level_operators",
@@ -307,8 +312,8 @@ PMultigrid::setupSolver()
       // vector however many steps it runs. That alternative was configured here before, as twenty
       // iterations of CG, and it corrupts the outer solve whenever the coarse level is large enough
       // that twenty iterations do not converge it: with a single coarse level of order five under
-      // an order-eight fine space, the outer GMRES reported a relative residual of 3e-10 while its
-      // true residual stood at 6e-4, and Newton needed three steps to solve a linear problem. It
+      // an order-eight fine space, the outer GMRES reported a relative residual of 2e-10 while its
+      // true residual stood at 4e-4, and Newton needed three steps to solve a linear problem. It
       // went unnoticed because a coarsest level of order one is solved to roundoff in twenty
       // iterations, which makes the map linear in all but name.
       LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));

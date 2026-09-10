@@ -35,8 +35,8 @@
 
   [entity_block_smoother]
     type = RunApp
-    # Order eight over a hierarchy of 1, 2 and 4 is the configuration the point smoother needs 88
-    # linear iterations for, against 14 here; the cap is above the latter and far below the former,
+    # Order eight over a hierarchy of 1, 2 and 4 is the configuration the point smoother needs 1090
+    # linear iterations for, against 20 here; the cap is above the latter and far below the former,
     # so the test fails rather than merely slowing if the block smoother stops reaching the modes
     # interior to an element
     cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
