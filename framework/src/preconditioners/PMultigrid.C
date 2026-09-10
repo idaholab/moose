@@ -280,6 +280,12 @@ PMultigrid::setupSolver()
       LibmeshPetscCall(PCSetType(smoother_pc, PCGAMG));
     }
 
+    // Read the level's own options last, so that everything set above is a default a user can
+    // override. PCMG gives each level's solver its own options prefix -- mg_coarse_ for the
+    // coarsest, mg_levels_<level>_ for the rest, and mg_levels_ for all of them at once -- and
+    // without this call those prefixes are accepted on the command line and silently ignored.
+    LibmeshPetscCall(KSPSetFromOptions(smoother));
+
     // The interpolation from level i to the next finer level (i + 1, or the solver system if i is
     // the finest of _levels) is this level's own transfer, per PCMGSetInterpolation's convention
     LibmeshPetscCall(PCMGSetInterpolation(pc, i + 1, _levels[i]->interpolationMat()));
@@ -303,6 +309,8 @@ PMultigrid::setupSolver()
   }
   else
     LibmeshPetscCall(PCSetType(fine_smoother_pc, PCJACOBI));
+
+  LibmeshPetscCall(KSPSetFromOptions(fine_smoother));
 }
 
 #endif
