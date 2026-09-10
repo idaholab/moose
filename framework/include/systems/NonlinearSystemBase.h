@@ -387,6 +387,16 @@ public:
   void verifyKokkosLevelMatrices();
 
   /**
+   * Check that this system's own matrix-free Jacobian action, the shell serving as SNES's Amat, is
+   * symmetric, by materializing it one column at a time and measuring it against its transpose.
+   * Symmetry is what makes CG a valid outer Krylov accelerator over the operator, and it holds only
+   * because a Dirichlet-constrained DOF is left out of both the residual a free row evaluates and
+   * the direction the operator gathers, so that the constrained row's identity action has nothing
+   * to match in the transposed position. Runs after a linearization and errors out on a mismatch.
+   */
+  void verifyKokkosMatrixFreeSymmetry();
+
+  /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
    * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
    * This is the MatMult callback for the Kokkos matrix-free Amat shell.

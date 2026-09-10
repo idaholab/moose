@@ -172,6 +172,31 @@ public:
   void setupConstraintOperator();
 
   /**
+   * Eliminate every Dirichlet-constrained DOF from this system's equations entirely: reinit()
+   * writes each one's constrained value into the solution it caches quadrature-point values from,
+   * and the matrix-free operator leaves it out of the trial space it gathers. Together those make a
+   * free row's equation a function of the constrained values as data, and so make the operator
+   * symmetric whenever the linearization is.
+   *
+   * Only valid once it is established that no residual contribution reads a constrained DOF outside
+   * the solution reinit() enforces -- notably that there is no solution time derivative, which a
+   * time integrator forms on the host from the raw solution.
+   */
+  void eliminateConstrainedColumns() { _eliminate_constrained_columns = true; }
+
+  /**
+   * Get whether a Dirichlet-constrained DOF is eliminated from this system's equations
+   * @returns Whether the columns are eliminated
+   */
+  bool eliminatesConstrainedColumns() const { return _eliminate_constrained_columns; }
+
+  /**
+   * Get the number of DOFs the constraint operator constrains, on this process
+   * @returns The number of constrained DOFs
+   */
+  dof_id_type numConstrainedDofs() const { return _constraint_operator.numConstrainedDofs(); }
+
+  /**
    * Set every row the constraint operator presets, in a tagged vector, to the value libMesh's
    * constraint machinery reports for it
    * @param tag The vector tag to preset
@@ -527,6 +552,21 @@ private:
    * built and refreshed by setupConstraintOperator()
    */
   ConstraintOperator _constraint_operator;
+
+  /**
+   * Vector tag of the solution reinit() enforces the DOF constraints on before caching
+   * quadrature-point values from it, or INVALID_TAG_ID when this system has no constraints
+   */
+  TagID _constrained_solution_tag = Moose::INVALID_TAG_ID;
+
+  /**
+   * Whether a Dirichlet-constrained DOF is eliminated from the system's equations entirely: left
+   * out of the solution the quadrature-point cache is built from, and out of the trial space the
+   * matrix-free operator gathers. Set by NonlinearSystemBase::setupKokkosMatrixFreeJacobian(),
+   * which is what establishes that no residual contribution reads a constrained DOF outside that
+   * solution.
+   */
+  bool _eliminate_constrained_columns = false;
 
   /**
    * The quadrature-point Jacobian cache, and whether it is in use for this system

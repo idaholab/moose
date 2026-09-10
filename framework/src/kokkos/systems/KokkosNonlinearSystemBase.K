@@ -377,6 +377,19 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
   check_non_kokkos(_nodal_bcs, "non-Kokkos nodal boundary conditions");
   check_non_kokkos(_constraints, "constraints");
 
+  // With the whole residual coming from the objects audited above, a Dirichlet-constrained DOF
+  // reaches a free row only through the solution the quadrature-point cache is built from, so
+  // enforcing the constraints on that solution removes the dependence entirely and the operator can
+  // eliminate the matching column, making it symmetric.
+  //
+  // A transient is the exception: the time integrator forms the solution time derivative on the
+  // host out of the raw solution, so a free row's mass contribution keeps reading a constrained
+  // DOF's own iterate value no matter what the cache is built from. Eliminating the column there
+  // would leave the operator disagreeing with the residual it linearizes, so a transient keeps the
+  // constrained columns and the asymmetric operator that comes with them.
+  if (!_fe_problem.isTransient())
+    fe_system.eliminateConstrainedColumns();
+
   // The system matrix installed by setupKokkosMatrixFreeSystemMatrix() is already both Amat and
   // Pmat, so all that remains is registering the two PETSc operations the solve calls: MatMult for
   // the operator action, and MatGetDiagonal for the partially assembled diagonal a Jacobi or
@@ -797,11 +810,15 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     system.clearActiveSolutionTags();
   }
 
-  // The Galerkin check applies this system's matrix-free operator, which manages the tags it needs
-  // itself, so it runs once the Jacobian sweep has released the tags it held: the state here is the
-  // state an operator application sees when the solve asks for one
+  // Both checks apply this system's matrix-free operator, which manages the tags it needs itself,
+  // so they run once the Jacobian sweep has released the tags it held: the state here is the state
+  // an operator application sees when the solve asks for one
   if (_kokkos_mf_enabled)
+  {
     verifyKokkosLevelGalerkin();
+
+    verifyKokkosMatrixFreeSymmetry();
+  }
 }
 
 void
@@ -968,11 +985,15 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveSolutionTags();
   }
 
-  // The Galerkin check applies this system's matrix-free operator, which manages the tags it needs
-  // itself, so it runs once the Jacobian sweep has released the tags it held: the state here is the
-  // state an operator application sees when the solve asks for one
+  // Both checks apply this system's matrix-free operator, which manages the tags it needs itself,
+  // so they run once the Jacobian sweep has released the tags it held: the state here is the state
+  // an operator application sees when the solve asks for one
   if (_kokkos_mf_enabled)
+  {
     verifyKokkosLevelGalerkin();
+
+    verifyKokkosMatrixFreeSymmetry();
+  }
 }
 
 void
@@ -1124,10 +1145,10 @@ NonlinearSystemBase::verifyKokkosLevelMatrices()
 
     Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level_sys);
 
-    // The assembled operator holds a fixed row and column to the identity, while the matrix-free
-    // operator only holds the row fixed and still couples a fixed column into its free rows; the
-    // two agree only on a vector that is already zero at every fixed DOF, which is what the
-    // hierarchy ever applies either operator to during a real cycle
+    // Both operators eliminate a fixed row and column, but the assembled one carries a literal
+    // identity on the fixed row where the matrix-free one contributes nothing, so the two agree
+    // only on a vector that is already zero at every fixed DOF -- which is what the hierarchy ever
+    // applies either operator to during a real cycle
     level->zeroConstrained(*x);
 
     level->apply(cache, *x, *matrix_free);
@@ -1154,10 +1175,9 @@ NonlinearSystemBase::verifyKokkosLevelMatrices()
     PetscBool is_symmetric;
     LibmeshPetscCallA(
         comm().get(),
-        MatIsSymmetric(
-            libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(level->matrix()).mat(),
-            1e-10,
-            &is_symmetric));
+        MatIsSymmetric(libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(level->matrix()).mat(),
+                       1e-10,
+                       &is_symmetric));
 
     _console << "p-multigrid level p = " << level->order() << ": assembled operator is "
              << (is_symmetric ? "symmetric" : "NOT symmetric") << " (measured, tolerance 1e-10)"
@@ -1211,8 +1231,7 @@ NonlinearSystemBase::verifyKokkosLevelGalerkin()
 
     // The hierarchy carries only corrections that vanish on the DOFs a level holds fixed, and the
     // transfers leave those DOFs out of both directions, so the comparison is made on a vector of
-    // that space. A level's operator couples a fixed column into its free rows, which a transfer
-    // does not, and the two sides would part ways on a vector outside it.
+    // that space.
     level.zeroConstrained(*x);
 
     level.apply(cache, *x, *direct);
@@ -1256,6 +1275,77 @@ NonlinearSystemBase::verifyKokkosLevelGalerkin()
                  "contribution made outside that cache reaches the fine operator and no coarse "
                  "level, and surfaces here.");
   }
+}
+
+void
+NonlinearSystemBase::verifyKokkosMatrixFreeSymmetry()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyOperatorSymmetry())
+    return;
+
+  TIME_SECTION("verifyKokkosMatrixFreeSymmetry", 1);
+
+  const auto & fe_system = _fe_problem.getKokkosFESystems()[number()];
+
+  // Refuse to measure what the operator is not built to satisfy, rather than reporting the
+  // asymmetry a transient keeps by design as a tolerance failure
+  if (!fe_system.eliminatesConstrainedColumns() && fe_system.numConstrainedDofs())
+    mooseError(
+        "Verification of the symmetry of the Kokkos matrix-free operator was requested for system "
+        "'",
+        name(),
+        "', which is transient and has Dirichlet-constrained degrees of freedom. A transient's "
+        "time integrator forms the solution time derivative from the raw solution, so a free row's "
+        "residual reads a constrained degree of freedom's own iterate value, and the operator has "
+        "to keep the matching column to remain the linearization of that residual. The operator is "
+        "therefore asymmetric by design here, and a Krylov method requiring symmetry, such as CG, "
+        "is not available for a transient Kokkos matrix-free system.");
+
+  // The shell registered as this system's own matrix, which PetscNonlinearSolver hands SNES as both
+  // Amat and Pmat, and whose MatMult is computeKokkosJacobianVectorProduct()
+  auto & shell = libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(*_matrix_free_operator);
+
+  // One application per column, which is why this is gated behind a verification flag
+  Mat assembled;
+  LibmeshPetscCallA(comm().get(), MatComputeOperator(shell.mat(), MATAIJ, &assembled));
+
+  Mat asymmetry;
+  LibmeshPetscCallA(comm().get(), MatTranspose(assembled, MAT_INITIAL_MATRIX, &asymmetry));
+  LibmeshPetscCallA(comm().get(), MatAXPY(asymmetry, -1.0, assembled, DIFFERENT_NONZERO_PATTERN));
+
+  PetscReal asymmetry_norm, operator_norm;
+  LibmeshPetscCallA(comm().get(), MatNorm(asymmetry, NORM_INFINITY, &asymmetry_norm));
+  LibmeshPetscCallA(comm().get(), MatNorm(assembled, NORM_INFINITY, &operator_norm));
+
+  LibmeshPetscCallA(comm().get(), MatDestroy(&asymmetry));
+  LibmeshPetscCallA(comm().get(), MatDestroy(&assembled));
+
+  const auto error = static_cast<Real>(asymmetry_norm);
+  const auto scale = static_cast<Real>(operator_norm);
+
+  // The two sides of the transpose are the same quadrature-point contraction with the test and
+  // trial basis functions exchanged, so they agree to the roundoff of that contraction; the margin
+  // over the unit roundoff of double precision covers the element and quadrature-point sums
+  const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
+  _console << "Kokkos matrix-free operator of system '" << name()
+           << "': differs from its transpose by " << error << " (tolerance " << tolerance << ")"
+           << std::endl;
+
+  if (error > tolerance)
+    mooseError(
+        "The Kokkos matrix-free Jacobian action of system '",
+        name(),
+        "' differs from its transpose by ",
+        error,
+        ", which exceeds a tolerance of ",
+        tolerance,
+        ". A Krylov method that requires a symmetric operator, such as CG, is not valid on "
+        "it. A Dirichlet-constrained degree of freedom left in a free row's residual or in "
+        "the operator's trial-space gather is the usual cause, since the constrained row's "
+        "own action is the identity and so has nothing to match in the transposed position.");
 }
 
 void

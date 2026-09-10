@@ -68,6 +68,15 @@ PMultigrid::validParams()
       "operator the level applies without a matrix, after every linearization. The check costs one "
       "application of each of the two, per assembled level per linearization.");
 
+  params.addParam<bool>(
+      "verify_operator_symmetry",
+      false,
+      "Whether to check that the solver system's own matrix-free operator, which serves as SNES's "
+      "Amat, is symmetric after every linearization. This is what makes CG a valid outer Krylov "
+      "accelerator over the hierarchy, so a solve that asks for CG should also ask for this check. "
+      "It costs one operator application per degree of freedom of the solver system, so it is a "
+      "verification aid for small inputs.");
+
   return params;
 }
 
@@ -77,7 +86,8 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     _verify_level_operators(getParam<bool>("verify_level_operators")),
     _verify_level_transfers(getParam<bool>("verify_level_transfers")),
     _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
-    _verify_level_matrices(getParam<bool>("verify_level_matrices"))
+    _verify_level_matrices(getParam<bool>("verify_level_matrices")),
+    _verify_operator_symmetry(getParam<bool>("verify_operator_symmetry"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");

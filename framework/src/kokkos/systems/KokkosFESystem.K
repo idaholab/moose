@@ -257,6 +257,8 @@ FESystem::setupConstraintOperator()
       libMesh::cast_ptr<PetscVector<Number> *>(_system.system().current_local_solution.get());
 
   _constraint_operator.setup(dof_map, *solution, _num_local_dofs + _num_ghost_dofs, preset_dofs);
+
+  _constrained_solution_tag = _system.subproblem().getVectorTagID(Moose::SOLUTION_TAG);
 }
 
 void
@@ -284,7 +286,11 @@ FESystem::clearQpJacobianCache()
 QpJacobianLevel
 FESystem::fineLevel(const TagID matrix_tag) const
 {
-  return QpJacobianLevel(*this, _var_fe_types, _vectors, _nbc_matrix_tag_dof[matrix_tag]);
+  return QpJacobianLevel(*this,
+                         _var_fe_types,
+                         _vectors,
+                         _nbc_matrix_tag_dof[matrix_tag],
+                         _eliminate_constrained_columns);
 }
 
 void
@@ -302,6 +308,27 @@ FESystem::computeQpJacobianDiagonal(const TagID diag_tag, const TagID matrix_tag
 void
 FESystem::reinit()
 {
+  // The quadrature-point values kernels and materials read, and the quadrature-point Jacobian cache
+  // the matrix-free operator contracts, are both cached from the tagged solution vectors below.
+  // Writing each constrained DOF's own constrained value into the solution first is what keeps a
+  // free row's equation a function of those values as data rather than of the constrained DOFs as
+  // unknowns, which is the residual half of the elimination the operator makes in its trial-space
+  // gather; see ConstraintOperator::enforceConstraints(). The two are enabled together, since an
+  // operator that eliminates a column the residual still reads would not be its linearization.
+  //
+  // Only the device-side copy is written: System::sync(DEVICE_TO_HOST) restores a solution vector
+  // rather than copying it back, so a constrained row's own residual u_i - g_i still reads the raw
+  // iterate when the nodal boundary condition pass evaluates it later. Were that to stop holding,
+  // the constrained rows of kokkos/kernels/ad_nonlinear's PetscJacobianTester specs would no longer
+  // match their finite difference, since that residual would lose its dependence on its own DOF.
+  if (_eliminate_constrained_columns && _constrained_solution_tag != Moose::INVALID_TAG_ID)
+    for (const auto tag : _active_solution_tags)
+      if (tag == _constrained_solution_tag)
+      {
+        _constraint_operator.enforceConstraints(getVector(tag));
+        break;
+      }
+
   for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
