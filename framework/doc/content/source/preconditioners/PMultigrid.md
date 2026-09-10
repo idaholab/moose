@@ -56,23 +56,23 @@ element's interior modes together, then each shared face, edge and vertex. The d
 off the degree-of-freedom map rather than constructed, so it follows whatever family and order the
 level holds.
 
-`point_jacobi` reads the operator diagonal alone. It is the cheaper application and the weaker
-smoother, and the gap between them widens with polynomial order for two reasons that compound: a
-modal basis puts several modes on one entity whose coupling a diagonal cannot represent, and the
-diagonal entries of the high-order modes of an unnormalized modal basis fall by orders of magnitude
-per order, so dividing by them is division by a nearly singular diagonal. On a hierarchic diffusion
-problem over a 16-by-16 mesh of biquadratic elements, with the coarse levels each input lists:
+`point_jacobi` reads the operator diagonal alone. It is the cheaper application and the much weaker
+smoother, because a modal basis puts several modes on one entity and a diagonal cannot represent the
+coupling among them. The gap between the two widens with polynomial order, since the number of modes an
+entity carries grows with it. On a hierarchic diffusion problem over a 16-by-16 mesh of biquadratic
+elements, solved to a linear tolerance of 1e-8, with the coarse levels each row lists:
 
 | fine order | coarse levels | `point_jacobi` | `entity_block` |
 | - | - | - | - |
 | 2 | 1 | 12 iterations | 12 iterations |
 | 3 | 1 | 11 iterations | 11 iterations |
-| 4 | 1, 2 | 76 iterations | 14 iterations |
-| 8 | 1, 2, 4 | 223 iterations | 15 iterations |
+| 4 | 1, 2 | 79 iterations | 15 iterations |
+| 8 | 1, 2, 4 | 819 iterations | 21 iterations |
 
-The block smoother costs about a tenth more per application, so those counts carry over to time to
-solution: the two are within a fifth of one another at orders two and three, and the block smoother is
-roughly five times faster at order four and fourteen times faster at order eight. That is why it is
+The block smoother costs between a tenth and a quarter more per application, so those counts carry over
+to time to solution: the two are within a fifth of one another at orders two and three, where a
+hierarchic entity carries a single mode and the two smoothers coincide, while the block smoother is
+about four times faster at order four and thirty-seven times faster at order eight. That is why it is
 the default, and `point_jacobi` is worth selecting only for a low-order hierarchy where the counts
 agree.
 
