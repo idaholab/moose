@@ -61,15 +61,18 @@ find(const T & target, const T * const begin, const T * const end)
 }
 
 /**
- * Perform an in-place linear solve using Cholesky decomposition
- * Matrix and right-hand-side vector are modified after this call
- * @param A The row-major matrix
- * @param x The solution vector
- * @param b The right-hand-side vector
+ * Compute the Cholesky decomposition of a matrix in place
+ *
+ * The lower triangle is overwritten by the factor. A matrix that is not positive definite yields a
+ * non-positive pivot, which the return value reports rather than propagating a division by zero, so
+ * that a caller factoring many matrices can fall back for the ones that fail.
+ *
+ * @param A The row-major matrix, overwritten by its factor
  * @param n The system size
+ * @returns Whether the matrix factored, which is to say every pivot was positive
  */
-KOKKOS_INLINE_FUNCTION void
-choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int n)
+KOKKOS_INLINE_FUNCTION bool
+choleskyFactor(Real * const A, const unsigned int n)
 {
   for (unsigned int i = 0; i < n; ++i)
   {
@@ -81,12 +84,34 @@ choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int
         sum -= A[k + n * i] * A[k + n * j];
 
       if (i == j)
+      {
+        if (sum <= 0)
+          return false;
+
         A[j + n * i] = ::Kokkos::sqrt(sum);
+      }
       else
         A[j + n * i] = sum / A[j + n * j];
     }
   }
 
+  return true;
+}
+
+/**
+ * Solve with an already computed Cholesky factor by forward and back substitution
+ *
+ * The factor is read and left intact, so one factorization serves any number of right-hand sides,
+ * which is what lets a factorization be reused across the applications of a preconditioner.
+ *
+ * @param A The row-major Cholesky factor, as choleskyFactor() leaves it
+ * @param x The solution vector
+ * @param b The right-hand-side vector, modified after this call
+ * @param n The system size
+ */
+KOKKOS_INLINE_FUNCTION void
+choleskySubstitute(const Real * const A, Real * const x, Real * const b, const unsigned int n)
+{
   for (unsigned int i = 0; i < n; ++i)
   {
     Real sum = b[i];
@@ -106,6 +131,21 @@ choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int
 
     x[i] = sum / A[i + n * i];
   }
+}
+
+/**
+ * Perform an in-place linear solve using Cholesky decomposition
+ * Matrix and right-hand-side vector are modified after this call
+ * @param A The row-major matrix
+ * @param x The solution vector
+ * @param b The right-hand-side vector
+ * @param n The system size
+ */
+KOKKOS_INLINE_FUNCTION void
+choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int n)
+{
+  choleskyFactor(A, n);
+  choleskySubstitute(A, x, b, n);
 }
 
 } // namespace Utils
