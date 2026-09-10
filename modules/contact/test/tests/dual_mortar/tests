@@ -132,6 +132,7 @@
                  'Outputs/file_base=penalty_mortar_force_balance_friction'
       detail = 'a penalty formulation.'
       mesh_mode = REPLICATED
+      restep = false # Issue #31054: frictional penalty history is not restored on a rejected step
     []
   []
 []
