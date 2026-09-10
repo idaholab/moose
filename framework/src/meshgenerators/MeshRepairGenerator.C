@@ -59,7 +59,7 @@ MeshRepairGenerator::validParams()
   params.addParam<bool>(
       "fix_degenerate_elements",
       false,
-      "Whether to repair degenerate (near-zero-quality) elements. Degeneracy is classified as: a "
+      "Whether to repair degenerate (near-zero-quality) elements. Degeneracy includes: a "
       "zero-volume element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
       "needle tetrahedron, or in 2D a thin triangle, quadrilateral, or polygon); a pancake (thin "
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
@@ -149,8 +149,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge && !_fix_degenerate_elements && !getParam<bool>("renumber_contiguously") &&
-      !_split_nonconvex_polygons)
+      !_boundary_id_merge && !_fix_degenerate_elements &&
+      !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
@@ -189,7 +189,8 @@ MeshRepairGenerator::generate()
     // Repair flat pancake PYRAMID5 elements by absorbing them into their quad-base neighbor
     repairPyramidPancakes(mesh);
 
-    // Repair degenerate PRISM6 (wedge) elements: collapse a flat pancake or absorb a thin blade sliver
+    // Repair degenerate PRISM6 (wedge) elements: collapse a flat pancake or absorb a thin blade
+    // sliver
     repairDegenerateWedges(mesh);
 
     // Repair flat-slab pancake HEX8 elements by collapsing their squashed pair of opposite faces
@@ -599,8 +600,9 @@ MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) 
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
-  const Real surface_scale = std::max(
-      std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)), Real(1e-30));
+  const Real surface_scale =
+      std::max(std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)),
+               Real(1e-30));
 
   // A first-order 2D/3D element is a zero-volume (point-collapse) element when it is small in
   // *every* dimension, i.e. its diameter hmax() (the maximum vertex separation) is below the
@@ -700,7 +702,8 @@ MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) 
   }
 
   // Count any point-collapsed elements that remain: a merge that would corrupt a neighbor, or a
-  // degenerate cluster (a point-collapse sharing a face/edge with another element), is left in place
+  // degenerate cluster (a point-collapse sharing a face/edge with another element), is left in
+  // place
   for (const auto & elem : mesh->active_element_ptr_range())
     if (isPointCollapsed(*elem))
       ++num_skipped;
@@ -1622,7 +1625,8 @@ MeshRepairGenerator::collapseByFaceMerge(
       catch (const std::exception &)
       {
       }
-    return false; // collapse would invert/degenerate a neighbor: leave the degenerate element in place
+    return false; // collapse would invert/degenerate a neighbor: leave the degenerate element in
+                  // place
   }
 
   // Commit: the degenerate element is now collapsed (each gone node coincides with its kept node);
@@ -1658,7 +1662,8 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
     return f;
   };
 
-  // A PYRAMID5 is degenerate if its volume is negligible (zero-volume) or its apex is flat against its quad base (a pancake)
+  // A PYRAMID5 is degenerate if its volume is negligible (zero-volume) or its apex is flat against
+  // its quad base (a pancake)
   auto isDegeneratePyramid = [&](const Elem & e)
   {
     if (e.type() != PYRAMID5)
@@ -1934,9 +1939,9 @@ MeshRepairGenerator::repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) co
   // Floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
   const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
 
-  // Classify a PRISM6: 0 = not degenerate or not a prism6, 1 = flat pancake (top triangle squashed onto the
-  // bottom), 2 = thin blade sliver (the triangular cross-section is a sliver). PRISM6 nodes: 0,1,2
-  // bottom triangle, 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
+  // Classify a PRISM6: 0 = not degenerate or not a prism6, 1 = flat pancake (top triangle squashed
+  // onto the bottom), 2 = thin blade sliver (the triangular cross-section is a sliver). PRISM6
+  // nodes: 0,1,2 bottom triangle, 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
   auto wedgeMode = [&](const Elem & e) -> int
   {
     if (e.type() != PRISM6)
@@ -2249,8 +2254,9 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
         continue;
 
       // Collapse cap A onto cap B; the move is sub-flap-tolerance (the slab thickness), so it
-      // cannot distort the boundary by more than the pancake's own thickness. Capture the gone->kept
-      // node pairs before the merge (the hex is in its own star, so its slots get overwritten).
+      // cannot distort the boundary by more than the pancake's own thickness. Capture the
+      // gone->kept node pairs before the merge (the hex is in its own star, so its slots get
+      // overwritten).
       std::vector<std::pair<Node *, Node *>> gone_kept;
       for (const auto i : make_range(4u))
         gone_kept.emplace_back(h->node_ptr(hp.corr[2 * i]), h->node_ptr(hp.corr[2 * i + 1]));
@@ -2352,7 +2358,8 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
   {
     // Vertical edges are (0,3), (1,4), (2,5) (top node k+3 above bottom node k). Only a vertical
     // edge collapse yields a pyramid: the merged node becomes the apex and the opposite lateral
-    // quad becomes the base. Expects the bottom node kept (apex below the base) for a positive cell.
+    // quad becomes the base. Expects the bottom node kept (apex below the base) for a positive
+    // cell.
     const auto mm = std::minmax(lv, lk);
     int k = -1;
     if (mm.first == 0 && mm.second == 3)
@@ -2370,7 +2377,8 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
     pyr->set_node(1, const_cast<Node *>(e.node_ptr(nb + 3)));
     pyr->set_node(2, const_cast<Node *>(e.node_ptr(pb + 3)));
     pyr->set_node(3, const_cast<Node *>(e.node_ptr(pb)));
-    pyr->set_node(4, const_cast<Node *>(e.node_ptr(cast_int<unsigned int>(lk)))); // apex = kept node
+    pyr->set_node(4,
+                  const_cast<Node *>(e.node_ptr(cast_int<unsigned int>(lk)))); // apex = kept node
     pyr->subdomain_id() = e.subdomain_id();
     return pyr;
   }
@@ -2380,10 +2388,11 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
 }
 
 void
-MeshRepairGenerator::replaceReducedElement(std::unique_ptr<MeshBase> & mesh,
-                                           Elem * old_elem,
-                                           std::unique_ptr<Elem> replacement,
-                                           const std::map<dof_id_type, dof_id_type> & node_sub) const
+MeshRepairGenerator::replaceReducedElement(
+    std::unique_ptr<MeshBase> & mesh,
+    Elem * old_elem,
+    std::unique_ptr<Elem> replacement,
+    const std::map<dof_id_type, dof_id_type> & node_sub) const
 {
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   auto subKey = [&](dof_id_type id)
@@ -2583,8 +2592,9 @@ MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
   // Area scale for the collapse floor (reject a reduction/move that would invert or degenerate)
   const auto bbox = MeshTools::create_bounding_box(*mesh);
   const Point ext = bbox.max() - bbox.min();
-  const Real surface_scale = std::max(
-      std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)), Real(1e-30));
+  const Real surface_scale =
+      std::max(std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)),
+               Real(1e-30));
   const Real invert_floor = surface_scale * _tet_collapse_volume_floor;
 
   // Local index of a redundant vertex of a QUAD4: a vertex within flatness_tol*|a-b| of the segment
@@ -2920,8 +2930,8 @@ MeshRepairGenerator::repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const
       const Real db = (*v - *b).norm();
 
       // Short base edge: merge onto the near base endpoint (a null move). Colinear base vertex:
-      // merge onto a base endpoint; collapseRedundantVertex only allows this when no element sharing
-      // v would be distorted (see its coincident handling).
+      // merge onto a base endpoint; collapseRedundantVertex only allows this when no element
+      // sharing v would be distorted (see its coincident handling).
       Node * keep = nullptr;
       bool coincident = false;
       if (da < _flatness_tol * ab)
@@ -3013,8 +3023,8 @@ MeshRepairGenerator::repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) cons
       const int k = shortVerticalEdge(*w);
       if (k < 0)
         continue;
-      // Merge the top node onto the bottom node of the pinched vertical edge (a sub-tolerance move),
-      // so the surviving bottom node becomes the pyramid apex
+      // Merge the top node onto the bottom node of the pinched vertical edge (a sub-tolerance
+      // move), so the surviving bottom node becomes the pyramid apex
       Node * keep = w->node_ptr(cast_int<unsigned int>(k));
       Node * v = w->node_ptr(cast_int<unsigned int>(k) + 3);
       if (collapseRedundantVertex(
@@ -3065,8 +3075,7 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
     for (const auto f : make_range(4u))
     {
       const unsigned int g = (f + 1) % 4;
-      if ((e.point(f) - e.point(g)).norm() < tol &&
-          (e.point(f + 4) - e.point(g + 4)).norm() < tol)
+      if ((e.point(f) - e.point(g)).norm() < tol && (e.point(f + 4) - e.point(g + 4)).norm() < tol)
       {
         ++count;
         found = cast_int<int>(f);
@@ -3117,10 +3126,10 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
         for (const auto eid : libmesh_map_find(node_to_elems, g->id()))
           star.insert(eid);
 
-      // Only the hex itself may lose an edge here. If another element contains a full collapsed edge
-      // (both endpoints of gb-kb or gt-kt), reducing the hex would force it to change type too, which
-      // this routine does not handle; leave the hex in place. Elements that merely touch a gone node
-      // (a coincident, null move) are movers. Also stay node-disjoint within a pass.
+      // Only the hex itself may lose an edge here. If another element contains a full collapsed
+      // edge (both endpoints of gb-kb or gt-kt), reducing the hex would force it to change type
+      // too, which this routine does not handle; leave the hex in place. Elements that merely touch
+      // a gone node (a coincident, null move) are movers. Also stay node-disjoint within a pass.
       bool ok = true;
       std::vector<dof_id_type> mover_ids;
       for (const auto eid : star)
@@ -3167,7 +3176,8 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
       if (prism->volume() <= invert_floor)
         continue;
 
-      // Apply the two coincident (null) merges to the movers, saving originals for rollback; validate
+      // Apply the two coincident (null) merges to the movers, saving originals for rollback;
+      // validate
       std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
       for (const auto eid : mover_ids)
       {
