@@ -64,7 +64,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
     _name(name),
-    _vars(libMesh::n_threads()),
+    _vars(_app.n_threads()),
     _var_map(),
     _max_var_number(0),
     _u_dot(nullptr),
@@ -84,6 +84,9 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _skip_next_solution_to_old_copy(false)
 {
 }
+
+THREAD_ID
+SystemBase::n_threads() const { return _app.n_threads(); }
 
 MooseVariableFieldBase &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name) const
@@ -186,7 +189,7 @@ SystemBase::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_subproblem, {var_name});
   const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  Threads::parallel_reduce(elem_range, aldit);
+  Threads::parallel_reduce(elem_range, aldit, n_threads());
 
   // Gather the dof indices across procs to get all the dof indices for var_name
   aldit.dofIndicesSetUnion();
@@ -208,7 +211,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 
     AllLocalDofIndicesThread aldit(*problem, vars_to_be_zeroed, true);
     const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    Threads::parallel_reduce(elem_range, aldit, n_threads());
 
     const auto & dof_indices_to_zero = aldit.getDofIndices();
 
@@ -718,7 +721,7 @@ SystemBase::addVariable(const std::string & var_type,
                         const std::string & name,
                         InputParameters & parameters)
 {
-  _numbered_vars.resize(libMesh::n_threads());
+  _numbered_vars.resize(n_threads());
 
   const auto components = parameters.get<unsigned int>("components");
 
@@ -797,7 +800,7 @@ SystemBase::addVariable(const std::string & var_type,
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("tid") = tid;
     std::shared_ptr<MooseVariableBase> var =
@@ -1569,42 +1572,42 @@ SystemBase::computingScalingJacobian() const
 void
 SystemBase::initialSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].initialSetup();
 }
 
 void
 SystemBase::timestepSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].timestepSetup();
 }
 
 void
 SystemBase::customSetup(const ExecFlagType & exec_type)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].customSetup(exec_type);
 }
 
 void
 SystemBase::subdomainSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].subdomainSetup();
 }
 
 void
 SystemBase::residualSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].residualSetup();
 }
 
 void
 SystemBase::jacobianSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
     _vars[tid].jacobianSetup();
 }
 

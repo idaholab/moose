@@ -417,6 +417,16 @@ public:
   processor_id_type processor_id() const { return _comm->rank(); }
 
   /**
+   * Returns the number of threads this application uses.
+   *
+   * This is capped at the process-wide thread count (libMesh::n_threads(), set once at launch by
+   * --n-threads); a per-application value can only cap it down, never exceed it. Set from the
+   * [Application] block's num_threads parameter, and defaults to the process-wide count when that
+   * is not given.
+   */
+  THREAD_ID n_threads() const { return _num_threads; }
+
+  /**
    * Get the command line
    * @return The reference to the command line object
    * Setup options based on InputParameters.
@@ -1342,6 +1352,9 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
+  /// The number of threads this application uses, capped at libMesh::n_threads() (see n_threads())
+  const THREAD_ID _num_threads;
+
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
 
@@ -1475,6 +1488,20 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * @return the raw num_threads value requested in the [Application] input block, read directly
+   * from the parser (the block is not applied to the app's InputParameters), or std::nullopt if
+   * unset. May be out of range; determineNumThreads() clamps it.
+   */
+  std::optional<int> requestedNumThreads() const;
+
+  /**
+   * Determines the number of threads this application should use from the [Application] block's
+   * num_threads parameter, capped at the process-wide libMesh::n_threads(). Used to initialize
+   * _num_threads. An over-request is warned about in setupOptions(). See n_threads().
+   */
+  THREAD_ID determineNumThreads() const;
+
   /**
    * Internal function used to recursively create the executor objects.
    *

@@ -127,7 +127,7 @@ LinearSystem::initialSetup()
   LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   // Calling initial setup for the linear kernels
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < n_threads(); tid++)
   {
     std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
     _fe_problem.theWarehouse()
@@ -259,14 +259,14 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 
     ComputeLinearFVElementalThread elem_thread(
         _fe_problem, this->number(), vector_tags, matrix_tags);
-    Threads::parallel_reduce(elem_info_range, elem_thread);
+    Threads::parallel_reduce(elem_info_range, elem_thread, this->n_threads());
 
     ComputeLinearFVFaceThread face_thread(_fe_problem,
                                           this->number(),
                                           Moose::FV::LinearFVComputationMode::FullSystem,
                                           vector_tags,
                                           matrix_tags);
-    Threads::parallel_reduce(face_info_range, face_thread);
+    Threads::parallel_reduce(face_info_range, face_thread, this->n_threads());
   }
   PARALLEL_CATCH;
 
