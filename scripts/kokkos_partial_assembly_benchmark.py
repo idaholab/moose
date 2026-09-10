@@ -178,7 +178,9 @@ def run_convergence(executable, input_file, order, refine, args, extra):
     ]
 
     if args.eisenstat_walker:
-        command.append("-snes_ksp_ew")
+        # Spelled with its value rather than bare, because the trailing arguments follow it and PETSc
+        # would otherwise read the first of them as this option's value
+        command += ["-snes_ksp_ew", "true"]
 
     return execute(command + extra, order)
 
