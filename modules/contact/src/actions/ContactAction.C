@@ -255,6 +255,12 @@ ContactAction::validParams()
       "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
       "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
       "contributions will be set (strongly) to 0.");
+  params.addParam<bool>(
+      "use_nodal_scaling",
+      false,
+      "Whether to apply the node-based Lagrange-multiplier scaling of Popp et al. (2013) to "
+      "improve the conditioning of the linear system when secondary elements are only partially "
+      "covered (edge dropping). See the documentation for the current limitations.");
   params += MortarConsumerInterface::triangulationParams();
   params.addParam<bool>(
       "generate_mortar_mesh",
@@ -329,6 +335,7 @@ ContactAction::validParams()
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
                               "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
+                              "use_nodal_scaling "
                               "generate_mortar_mesh segment_quadrature minimum_projection_angle "
                               "mortar_3d_subpatch_plane mortar_3d_qp_mapping wear_depth debug_mesh",
                               "Mortar");
@@ -456,6 +463,10 @@ ContactAction::ContactAction(const InputParameters & params)
           "correct_edge_dropping",
           "The 'correct_edge_dropping' option can only be used with the 'mortar' formulation "
           "(weighted)");
+    else if (params.isParamSetByUser("use_nodal_scaling"))
+      paramError("use_nodal_scaling",
+                 "The 'use_nodal_scaling' option can only be used with the 'mortar' formulation "
+                 "(weighted)");
     else if (params.isParamSetByUser("triangulation") &&
              _formulation != ContactFormulation::MORTAR_PENALTY)
       paramError("triangulation",
@@ -1047,6 +1058,7 @@ ContactAction::addMortarContact()
       uo_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
       uo_params.applySpecificParameters(parameters(),
                                         {"correct_edge_dropping",
+                                         "use_nodal_scaling",
                                          "triangulation",
                                          "triangulate_triangles",
                                          "minimum_projection_angle",
@@ -1084,6 +1096,7 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
       uo_params.applySpecificParameters(parameters(),
                                         {"correct_edge_dropping",
+                                         "use_nodal_scaling",
                                          "triangulation",
                                          "triangulate_triangles",
                                          "minimum_projection_angle",

@@ -29,7 +29,14 @@ public:
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
+  /// This class inherits WeightedGapUserObject through both of its bases, each of which overrides
+  /// these methods, so they have to be resolved explicitly here.
+  virtual void initialize() override;
+  virtual void finalize() override;
+
 protected:
+  virtual void computeQpIProperties() override;
+
   /// The Lagrange multiplier variables representing the tangential contact pressure
   const MooseVariableFE<Real> * const _lm_variable_tangential_one;
   const MooseVariableFE<Real> * const _lm_variable_tangential_two;

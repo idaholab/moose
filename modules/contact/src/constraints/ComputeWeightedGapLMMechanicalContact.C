@@ -185,13 +185,22 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+  // normalizeCDivisor() returns *_normalization_ptr unchanged unless node-based scaling is active,
+  // in which case it substitutes a coverage-independent (full-element) integral so the two
+  // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
+  const Real c =
+      _normalize_c ? _c / _weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr) : _c;
+
+  // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
+  // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j
+  // lambda_j.
+  const Real kappa = _weighted_gap_uo.nodalScale(dof);
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  const ADReal dof_residual = std::min(lm_value, weighted_gap * c / kappa);
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
