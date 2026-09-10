@@ -32,6 +32,50 @@ element basis function in the finer element basis, so a transfer depends on the 
 bases alone and is built once at initial setup. Setting `verify_level_transfers` checks the transpose
 relationship of each transfer there, at the cost of one application of each direction.
 
+## The coarsest level
+
+The coarsest level is the only one that assembles a sparse matrix, and it is factored directly, by LU
+through MUMPS so that the same configuration serves in parallel. A multigrid preconditioner has to be a
+fixed linear operator: the outer Krylov method builds its space from repeated applications of it, and
+relates the residual its recurrence tracks to the true residual on the assumption that the operator does
+not change between applications. A direct factorization is such an operator exactly, and it is
+affordable because the coarsest level of a p-hierarchy is a low-order space on the fine mesh.
+
+Iterating that level instead fails whichever way the iteration is stopped. Stopping on a relative
+tolerance makes the work, and so the operator, depend on the right-hand side. Stopping after a fixed
+number of iterations fixes the work but not the operator, because a Krylov method builds its polynomial
+from the Krylov space of the vector it is given: it is a nonlinear function of that vector however many
+steps it runs. The symptom, when it happens, is an outer solve that reports convergence it has not
+achieved, and a linear problem that takes several Newton steps.
+
+## The smoother on each level
+
+`smoother` selects what is applied on every level the hierarchy smooths rather than solves. The
+default, `entity_block`, inverts the block of degrees of freedom each mesh entity carries: an
+element's interior modes together, then each shared face, edge and vertex. The decomposition is read
+off the degree-of-freedom map rather than constructed, so it follows whatever family and order the
+level holds.
+
+`point_jacobi` reads the operator diagonal alone. It is the cheaper application and the weaker
+smoother, and the gap between them widens with polynomial order for two reasons that compound: a
+modal basis puts several modes on one entity whose coupling a diagonal cannot represent, and the
+diagonal entries of the high-order modes of an unnormalized modal basis fall by orders of magnitude
+per order, so dividing by them is division by a nearly singular diagonal. On a hierarchic diffusion
+problem over a 16-by-16 mesh of biquadratic elements, with the coarse levels each input lists:
+
+| fine order | coarse levels | `point_jacobi` | `entity_block` |
+| - | - | - | - |
+| 2 | 1 | 12 iterations | 12 iterations |
+| 3 | 1 | 11 iterations | 11 iterations |
+| 4 | 1, 2 | 76 iterations | 14 iterations |
+| 8 | 1, 2, 4 | 223 iterations | 15 iterations |
+
+The block smoother costs about a tenth more per application, so those counts carry over to time to
+solution: the two are within a fifth of one another at orders two and three, and the block smoother is
+roughly five times faster at order four and fourteen times faster at order eight. That is why it is
+the default, and `point_jacobi` is worth selecting only for a low-order hierarchy where the counts
+agree.
+
 ## Symmetry and the outer Krylov method
 
 For a steady system the operator is symmetric whenever the linearization it contracts is, which makes
