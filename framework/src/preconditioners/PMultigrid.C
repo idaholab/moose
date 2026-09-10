@@ -20,6 +20,12 @@
 
 namespace
 {
+/**
+ * Fixed number of Krylov iterations the coarsest level is solved with, chosen so that the coarse
+ * solve is a fixed linear operator rather than one whose work depends on its right-hand side
+ */
+constexpr PetscInt COARSE_ITERATIONS = 20;
+
 PetscErrorCode
 finePCSetUp(PC pc)
 {
@@ -293,15 +299,26 @@ PMultigrid::setupSolver()
     }
     else
     {
-      // Iterate the coarse level to convergence rather than applying one multigrid cycle to it. A
-      // single cycle leaves a coarse-grid correction the outer Krylov method then has to repair on
-      // every subsequent iteration, which costs iteration counts that grow with the fine order: on
-      // a 4x4 mesh at order 8 over levels 1, 2 and 4, one cycle needs 144 iterations to reach a
-      // linear tolerance of 1e-8 where a converged coarse solve needs 88, matching what a direct
-      // factorization of that level achieves. CG is the accelerator here because the coarsest
-      // level's assembled operator is symmetric, which verifyKokkosLevelMatrices() measures.
+      // Iterate the coarse level rather than applying one multigrid cycle to it. A single cycle
+      // leaves a coarse-grid correction the outer Krylov method then has to repair on every
+      // subsequent iteration, which costs iteration counts that grow with the fine order: on a 4x4
+      // mesh at order 8 over levels 1, 2 and 4, one cycle needs 144 iterations to reach a linear
+      // tolerance of 1e-8 where an iterated coarse solve needs 88. CG is the accelerator because
+      // the coarsest level's assembled operator is symmetric, which verifyKokkosLevelMatrices()
+      // measures.
+      //
+      // The iteration count is fixed and the convergence test disabled, which is what PCMG does to
+      // its own smoothers. Stopping on a tolerance instead would make the work depend on the
+      // right-hand side, and a cycle that is not a fixed linear operator is not a valid
+      // preconditioner for a Krylov method that assumes one, symmetric methods above all. Twenty
+      // iterations reach the same fine iteration counts that a converged solve and a direct
+      // factorization of this level both reach, and unlike a direct solve they need no external
+      // factorization package in parallel.
       LibmeshPetscCall(KSPSetType(smoother, KSPCG));
-      LibmeshPetscCall(KSPSetTolerances(smoother, 1e-10, PETSC_DEFAULT, PETSC_DEFAULT, 200));
+      LibmeshPetscCall(KSPSetNormType(smoother, KSP_NORM_NONE));
+      LibmeshPetscCall(KSPSetConvergenceTest(smoother, KSPConvergedSkip, nullptr, nullptr));
+      LibmeshPetscCall(KSPSetTolerances(
+          smoother, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, COARSE_ITERATIONS));
       LibmeshPetscCall(PCSetType(smoother_pc, PCGAMG));
     }
 

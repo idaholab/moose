@@ -55,8 +55,9 @@
   [level_operators]
     type = RunApp
     input = 'pmultigrid.i'
-    cli_args = 'Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND '
-               'Preconditioning/pmg/verify_level_operators=true'
+    cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
+               "Preconditioning/pmg/level_orders='1' "
+               "Preconditioning/pmg/verify_level_operators=true"
     expect_out = 'p-multigrid level p = 1: operator agrees with its diagonal'
     requirement = 'The p-multigrid preconditioner shall apply each coarse level operator and compute '
                   'the diagonal of that operator from the same quadrature-point linearization, in '
@@ -68,8 +69,9 @@
   [level_transfers]
     type = RunApp
     input = 'pmultigrid.i'
-    cli_args = 'Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND '
-               'Preconditioning/pmg/verify_level_transfers=true'
+    cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
+               "Preconditioning/pmg/level_orders='1' "
+               "Preconditioning/pmg/verify_level_transfers=true"
     expect_out = 'p = 1: restriction is the transpose of prolongation'
     requirement = 'The p-multigrid preconditioner shall transfer vectors between consecutive levels '
                   'of the hierarchy by an embedding of the coarser element basis in the finer one, '
@@ -110,7 +112,8 @@
   [level_order_not_coarser]
     type = RunException
     input = 'pmultigrid.i'
-    cli_args = 'Outputs/exodus=false Preconditioning/pmg/level_orders=3'
+    cli_args = 'Outputs/exodus=false Variables/u/order=THIRD '
+               'Preconditioning/pmg/level_orders=3'
     expect_err = "Variable 'u' is of order 3, so a level of order 3 would not coarsen it"
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -127,8 +130,7 @@
     # demand a second Newton step makes the test spend its whole linear iteration budget without
     # covering anything further. The loosened value still requires the v-cycle to converge the solve,
     # which is what this test asserts.
-    cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
-               "Preconditioning/pmg/level_orders='1 2 4' Executioner/nl_rel_tol=1e-4 -ksp_view"
+    cli_args = 'Outputs/exodus=false -ksp_view'
     expect_out = 'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
     requirement = 'The p-multigrid preconditioner shall configure a PETSc multigrid hierarchy over '
                   'its levels and the solver system, which converges the nonlinear solve it '
