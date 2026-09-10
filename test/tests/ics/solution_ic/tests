@@ -38,11 +38,12 @@
     []
 
     [missing_weighting]
-      type = RunException
+      type = RunApp
       input = 'solution_ic_weighting_no_weight.i'
-      expect_err = "A weighting policy must be specified when the imported variable 'source_value' is spatially discontinuous"
+      expect_out = "A weighting policy should be specified when the imported variable 'source_value' is spatially discontinuous"
+      allow_warnings = true
       prereq = weighting/source
-      detail = "requiring an explicit weighting policy for spatially discontinuous point lookup."
+      detail = "warning when no explicit weighting policy is provided for spatially discontinuous point lookup."
     []
   []
   [errors]

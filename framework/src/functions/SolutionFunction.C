@@ -98,13 +98,15 @@ SolutionFunction::initialSetup()
         _solution_object_var_name,
         "' is vector-valued, but SolutionFunction supports only scalar-valued imported variables.");
 
-  // Require an explicit weighting policy for spatially discontinuous imported variables
+  // Warn when no explicit weighting policy is provided for a spatially discontinuous variable
   if (_solution_object_ptr->isVariableADiscontinuousScalarField(_solution_object_var_name) &&
       !_weighting_type)
-    paramError("weighting_type",
-               "A weighting policy must be specified when the imported variable '",
-               _solution_object_var_name,
-               "' is spatially discontinuous.");
+    paramWarning(
+        "weighting_type",
+        "A weighting policy should be specified when the imported variable '",
+        _solution_object_var_name,
+        "' is spatially discontinuous. Values evaluated on element interfaces may depend on "
+        "source element ordering.");
 }
 
 Real

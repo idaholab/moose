@@ -105,12 +105,15 @@ SolutionAux::validateVariable()
         _var_name,
         "' is vector-valued, but SolutionAux supports only scalar-valued imported variables.");
 
+  // Warn when no explicit weighting policy is provided for a spatially discontinuous variable
   if (!_direct && _solution_object.isVariableADiscontinuousScalarField(_var_name) &&
       !_weighting_type)
-    paramError("weighting_type",
-               "A weighting policy must be specified when the imported variable '",
-               _var_name,
-               "' is spatially discontinuous.");
+    paramWarning(
+        "weighting_type",
+        "A weighting policy should be specified when the imported variable '",
+        _var_name,
+        "' is spatially discontinuous. Values evaluated on element interfaces may depend on "
+        "source element ordering.");
 
   _variable_is_validated = true;
 }
