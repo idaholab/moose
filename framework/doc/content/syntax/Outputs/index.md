@@ -53,11 +53,12 @@ For example, if the input file (input.i) contained the following `[Outputs]` blo
 
 Note, the use of "file_base" anywhere in the `[Outputs]` block disables all default naming behavior.
 
-### file_base resolution order
+### Rules for the output file name
 
-Each output object resolves its `file_base` from one of three sources, in order of priority:
+For output objects that write an output file, each resolves its output file name from one of
+three sources, in order of priority:
 
-1. **Its own `file_base`.** An output sub-block that sets `file_base` within its own block always
+1. **Its own `file_base` parameter.** An output sub-block that sets `file_base` within its own block always
    uses that value, regardless of anything set at the top level of `[Outputs]`.
 2. **The common `file_base`.** An output that does *not* set its own `file_base` inherits, verbatim,
    the `file_base` set at the top level of the `[Outputs]` block, if one is set. Short-cut syntax
