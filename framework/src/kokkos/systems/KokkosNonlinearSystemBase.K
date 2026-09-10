@@ -1349,6 +1349,103 @@ NonlinearSystemBase::verifyKokkosMatrixFreeSymmetry()
 }
 
 void
+NonlinearSystemBase::initKokkosEntityBlockSmoother()
+{
+  _fe_problem.getKokkosFESystems()[number()].initEntityBlocks(systemMatrixTag());
+}
+
+dof_id_type
+NonlinearSystemBase::numKokkosEntityBlocks()
+{
+  // A block belongs to the process owning its entity's DOFs, so the count over all processes is the
+  // number of blocks the smoother holds
+  auto blocks = _fe_problem.getKokkosFESystems()[number()].numEntityBlocks();
+
+  comm().sum(blocks);
+
+  return blocks;
+}
+
+unsigned int
+NonlinearSystemBase::maxKokkosEntityBlockSize()
+{
+  auto size = _fe_problem.getKokkosFESystems()[number()].maxEntityBlockSize();
+
+  comm().max(size);
+
+  return size;
+}
+
+void
+NonlinearSystemBase::setupKokkosEntityBlockSmoother()
+{
+  TIME_SECTION("setupKokkosEntityBlockSmoother", 1);
+
+  auto & systems = _fe_problem.getKokkosFESystems();
+
+  if (!systems[number()].qpJacobianCacheValid())
+    mooseError("The Kokkos quadrature-point Jacobian cache does not hold a linearization. The "
+               "entity-block smoother must be set up only after a Jacobian evaluation at the "
+               "solution state its blocks are to reflect.");
+
+  systems.copyToDevice();
+
+  systems[number()].updateEntityBlocks(systemMatrixTag());
+}
+
+void
+NonlinearSystemBase::applyKokkosEntityBlockSmoother(Vec r, Vec x)
+{
+  TIME_SECTION("applyKokkosEntityBlockSmoother", 1);
+
+  // The residual arrives locked against writes, and wrapping a vector for device access takes a
+  // writable array of it, so it is read through the persistent ghosted vector an operator
+  // application reads its input through
+  {
+    libMesh::PetscVector<Number> r_wrap(r, comm());
+    *_kokkos_mf_x = r_wrap;
+  }
+
+  auto * const petsc_r = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_x);
+  LibmeshPetscCallA(comm().get(),
+                    VecGhostUpdateBegin(petsc_r->vec(), INSERT_VALUES, SCATTER_FORWARD));
+  LibmeshPetscCallA(comm().get(),
+                    VecGhostUpdateEnd(petsc_r->vec(), INSERT_VALUES, SCATTER_FORWARD));
+
+  // Every row is written by the smoother, a row belonging to no block taking the residual, so the
+  // correction needs no initial value
+  LibmeshPetscCallA(comm().get(), VecZeroEntries(x));
+
+  libMesh::PetscVector<Number> x_wrap(x, comm());
+  associateVectorToTag(x_wrap, _kokkos_mf_y_tag);
+
+  auto & systems = _fe_problem.getKokkosFESystems();
+
+  systems[number()].setActiveSolutionTags({_kokkos_mf_x_tag});
+  systems[number()].setActiveResidualTags({_kokkos_mf_y_tag});
+
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+
+  systems.copyToDevice();
+
+  systems[number()].applyEntityBlocks(_kokkos_mf_x_tag, _kokkos_mf_y_tag, systemMatrixTag());
+
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+
+  systems[number()].clearActiveResidualTags();
+
+  for (auto & system : systems.constructedEntries())
+    system.clearActiveSolutionTags();
+
+  disassociateVectorFromTag(x_wrap, _kokkos_mf_y_tag);
+
+  LibmeshPetscCallA(comm().get(), VecAssemblyBegin(x));
+  LibmeshPetscCallA(comm().get(), VecAssemblyEnd(x));
+}
+
+void
 NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 {
   TIME_SECTION("computeKokkosJacobianVectorProduct", 1);

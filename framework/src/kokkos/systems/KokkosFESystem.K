@@ -306,6 +306,30 @@ FESystem::computeQpJacobianDiagonal(const TagID diag_tag, const TagID matrix_tag
 }
 
 void
+FESystem::initEntityBlocks(const TagID matrix_tag)
+{
+  _entity_blocks.init(*this, _mesh.getMesh(), _nbc_matrix_tag_dof[matrix_tag]);
+}
+
+void
+FESystem::updateEntityBlocks(const TagID matrix_tag)
+{
+  _entity_blocks.zero();
+
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag))
+      .assembleBlocks(_entity_blocks);
+
+  _entity_blocks.factor();
+}
+
+void
+FESystem::applyEntityBlocks(const TagID r_tag, const TagID x_tag, const TagID matrix_tag)
+{
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag))
+      .applyBlocks(_entity_blocks, r_tag, x_tag);
+}
+
+void
 FESystem::reinit()
 {
   // The quadrature-point values kernels and materials read, and the quadrature-point Jacobian cache

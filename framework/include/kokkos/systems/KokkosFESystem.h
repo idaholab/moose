@@ -13,6 +13,7 @@
 #include "KokkosAssembly.h"
 #include "KokkosConstraintOperator.h"
 #include "KokkosQpJacobianCache.h"
+#include "KokkosEntityBlocks.h"
 #include "KokkosQpJacobianLevel.h"
 
 class MooseMesh;
@@ -122,6 +123,41 @@ public:
    * @param matrix_tag The matrix tag whose nodal BC rows are skipped
    */
   void computeQpJacobianDiagonal(TagID diag_tag, TagID matrix_tag);
+
+  /**
+   * Build the fine level's entity-block decomposition, which a smoother inverts in place of the
+   * operator diagonal. Must be called once this system's DOFs are distributed.
+   * @param matrix_tag The matrix tag whose fixed rows are left out of the blocks
+   */
+  void initEntityBlocks(TagID matrix_tag);
+
+  /**
+   * Get the number of entity blocks this process holds
+   * @returns The number of blocks
+   */
+  dof_id_type numEntityBlocks() const { return _entity_blocks.numBlocks(); }
+
+  /**
+   * Get the size of the largest entity block this process holds
+   * @returns The largest block size
+   */
+  unsigned int maxEntityBlockSize() const { return _entity_blocks.maxBlockSize(); }
+
+  /**
+   * Rebuild and refactor the entity blocks from the linearization the quadrature-point Jacobian
+   * cache holds
+   * @param matrix_tag The matrix tag the blocks are built for
+   */
+  void updateEntityBlocks(TagID matrix_tag);
+
+  /**
+   * Apply the inverse of every entity block to a residual, which is the entity-block smoother. Only
+   * the rows belonging to a block are written.
+   * @param r_tag The vector tag of the residual
+   * @param x_tag The vector tag of the correction
+   * @param matrix_tag The matrix tag the blocks were built for
+   */
+  void applyEntityBlocks(TagID r_tag, TagID x_tag, TagID matrix_tag);
 
   /**
    * Get the quadrature-point Jacobian tensor of a variable
@@ -611,6 +647,11 @@ private:
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
+
+  /**
+   * The fine level's entity-block decomposition, built only when a smoother inverts the blocks
+   */
+  EntityBlocks _entity_blocks;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
