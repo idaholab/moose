@@ -8,9 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
 #include "ViscoplasticityStressUpdateBase.h"
 #include "SingleVariableReturnMappingSolution.h"
+
+#include <array>
+#include <vector>
 
 template <bool is_ad>
 class PorousViscoplasticityStressUpdateTempl
@@ -37,7 +39,6 @@ public:
       const RankTwoTensor & elastic_strain_old,
       bool compute_full_tangent_operator = false,
       RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
-
   virtual void updateStateSubstep(
       GenericRankTwoTensor<is_ad> & strain_increment,
       GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
@@ -88,20 +89,6 @@ protected:
     GenericReal<is_ad> F_pf = 0.0;
   };
 
-  /** Side-effect-free response of one LPS creep mechanism. */
-  struct LpsMechanismResponse
-  {
-    bool active = false;
-    GenericReal<is_ad> coefficient = 0.0;
-    GenericReal<is_ad> gauge_stress = 0.0;
-    GenericReal<is_ad> creep_rate = 0.0;
-    GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
-    GenericReal<is_ad> F_lambda = 0.0;
-    std::array<GenericReal<is_ad>, 3> dgauge_dx{};
-    GenericRankTwoTensor<is_ad> inelastic_strain_increment;
-    std::array<GenericRankTwoTensor<is_ad>, 3> dinelastic_dx;
-  };
-
   /**
    * Summed LPS response and its partial derivatives with respect to effective hydrostatic stress,
    * equivalent stress, and explicit porosity, in that order.
@@ -110,15 +97,8 @@ protected:
   {
     GenericRankTwoTensor<is_ad> inelastic_strain_increment;
     GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
-    GenericReal<is_ad> primary_gauge_stress = 0.0;
     std::array<GenericRankTwoTensor<is_ad>, 3> dinelastic_dx;
   };
-
-  /** Number of independently evaluated Norton creep mechanisms. */
-  std::size_t creepLawCount() const { return _creep_laws.size(); }
-
-  /** Access one creep mechanism. */
-  const CreepLaw & creepLaw(const std::size_t index) const { return _creep_laws[index]; }
 
   /** Return one finite, nonnegative Norton coefficient. */
   GenericReal<is_ad> creepCoefficient(std::size_t law_index) const;
@@ -139,7 +119,7 @@ protected:
   initialGuess(const GenericReal<is_ad> & effective_trial_stress) override;
 
   virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
-                                             const GenericReal<is_ad> & scalar) override;
+                                              const GenericReal<is_ad> & scalar) override;
   virtual GenericReal<is_ad>
   computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
                     const GenericReal<is_ad> & /*scalar*/) override
@@ -173,11 +153,10 @@ protected:
                                        const GenericReal<is_ad> & porosity);
 
   /// Compute the gauge stress for a specific creep mechanism.
-  void computeGaugeStress(GenericReal<is_ad> & gauge_stress,
-                          const GenericReal<is_ad> & equiv_stress,
-                          const GenericReal<is_ad> & effective_hydro_stress,
-                          const GenericReal<is_ad> & porosity,
-                          const CreepLaw & law);
+  GenericReal<is_ad> computeGaugeStress(const GenericReal<is_ad> & equiv_stress,
+                                        const GenericReal<is_ad> & effective_hydro_stress,
+                                        const GenericReal<is_ad> & porosity,
+                                        const CreepLaw & law);
 
   /// Store one converged per-law gauge stress.
   void setGaugeStress(std::size_t law_index, const GenericReal<is_ad> & gauge_stress);
@@ -192,17 +171,9 @@ protected:
    * tensor derivatives are partial derivatives with respect to p_eff, q, and f.
    */
   LpsCreepResponse evaluateLpsCreepResponse(const GenericReal<is_ad> & effective_hydro_stress,
-                                            const GenericReal<is_ad> & equiv_stress,
-                                            const GenericRankTwoTensor<is_ad> & dev_direction,
-                                            const GenericReal<is_ad> & porosity);
-
-  /** Evaluate one LPS mechanism and exact p_eff-q-f partial derivatives without side effects. */
-  LpsMechanismResponse
-  evaluateLpsMechanismResponse(std::size_t law_index,
-                               const GenericReal<is_ad> & effective_hydro_stress,
-                               const GenericReal<is_ad> & equiv_stress,
-                               const GenericRankTwoTensor<is_ad> & dev_direction,
-                               const GenericReal<is_ad> & porosity);
+                                             const GenericReal<is_ad> & equiv_stress,
+                                             const GenericRankTwoTensor<is_ad> & dev_direction,
+                                             const GenericReal<is_ad> & porosity);
 
   /// Analytical first and second partial derivatives of one LPS gauge residual.
   LpsDerivatives computeLpsDerivatives(const GenericReal<is_ad> & gauge_stress,
@@ -243,6 +214,8 @@ protected:
   unsigned int estimateNumberSubstepsFromState(const GenericRankTwoTensor<is_ad> & stress,
                                                const GenericReal<is_ad> & effective_hydro_stress,
                                                const GenericReal<is_ad> & porosity);
+  /// Convert a predicted full-step effective inelastic increment to a local substep count.
+  unsigned int computeRequiredSubsteps(Real effective_inelastic_strain_increment) const;
   /// Estimate adaptive substeps from the previous accepted global-step effective inelastic rate.
   unsigned int estimateAdaptiveNumberSubstepsFromHistory() const;
   /// Store the converged current global-step effective inelastic rate for use after timestep
@@ -259,23 +232,52 @@ protected:
                              unsigned int substep_index);
 
   /// Integrate a prescribed number of local constitutive substeps.
-  void updateStateSubstepInternal(
-      GenericRankTwoTensor<is_ad> & strain_increment,
-      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & rotation_increment,
-      GenericRankTwoTensor<is_ad> & stress_new,
-      const RankTwoTensor & stress_old,
-      const GenericRankFourTensor<is_ad> & elasticity_tensor,
-      const RankTwoTensor & elastic_strain_old,
-      unsigned int total_number_substeps,
-      bool compute_full_tangent_operator = false,
-      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
+  void updateStateSubstepInternal(GenericRankTwoTensor<is_ad> & strain_increment,
+                                  GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                  GenericRankTwoTensor<is_ad> & stress_new,
+                                  const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  unsigned int total_number_substeps);
 
-  /// Enum to choose which viscoplastic model to use
-  const enum class ViscoplasticityModel { LPS, GTN } _model;
+private:
+  /** Caller-owned and material state restored when one constitutive attempt is rejected. */
+  struct ConstitutiveStateSnapshot
+  {
+    GenericRankTwoTensor<is_ad> strain_increment;
+    GenericRankTwoTensor<is_ad> inelastic_strain_increment;
+    GenericRankTwoTensor<is_ad> stress;
+    GenericReal<is_ad> intermediate_porosity = 0.0;
+    GenericReal<is_ad> hydro_stress = 0.0;
+    GenericReal<is_ad> gauge_stress = 0.0;
+    std::vector<GenericReal<is_ad>> gauge_stresses;
+  };
 
-  /// Enum to choose which pore shape model to use
-  const enum class PoreShapeModel { SPHERICAL, CYLINDRICAL } _pore_shape;
+  ConstitutiveStateSnapshot captureConstitutiveState(
+      const GenericRankTwoTensor<is_ad> & strain_increment,
+      const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & stress) const;
+  void restoreConstitutiveState(const ConstitutiveStateSnapshot & snapshot,
+                                GenericRankTwoTensor<is_ad> & strain_increment,
+                                GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                GenericRankTwoTensor<is_ad> & stress);
+
+protected:
+  /// Equivalent von Mises stress of one deviatoric stress tensor.
+  static GenericReal<is_ad> equivalentStress(const GenericRankTwoTensor<is_ad> & dev_stress);
+
+  enum class ViscoplasticityModel
+  {
+    LPS,
+    GTN
+  };
+  const ViscoplasticityModel _model;
+
+  enum class PoreShapeModel
+  {
+    SPHERICAL,
+    CYLINDRICAL
+  };
+  const PoreShapeModel _pore_shape;
 
   /// Pore shape factor depending on pore shape model
   const Real _pore_shape_factor;
@@ -319,9 +321,6 @@ protected:
   /// A-posteriori number of substeps suggested by the last failed increment check.
   unsigned int _suggested_number_substeps;
 
-  /// Effective inelastic increment from the last successful one-step update.
-  Real _last_effective_inelastic_strain_increment;
-
   /// Container for matrix hydrostatic stress
   GenericReal<is_ad> _hydro_stress;
   /**
@@ -335,7 +334,8 @@ protected:
     GenericReal<is_ad> effective_hydro_stress = 0.0;
     GenericReal<is_ad> porosity = 0.0;
     const CreepLaw * law = nullptr;
-  } _gauge_solve_state;
+  };
+  GaugeSolveState _gauge_solve_state;
   /// Rank two identity tensor
   const RankTwoTensor _identity_two;
 
@@ -348,5 +348,5 @@ protected:
   usingViscoplasticityStressUpdateBaseMembers;
 };
 
-typedef PorousViscoplasticityStressUpdateTempl<false> PorousViscoplasticityStressUpdate;
-typedef PorousViscoplasticityStressUpdateTempl<true> ADPorousViscoplasticityStressUpdate;
+using PorousViscoplasticityStressUpdate = PorousViscoplasticityStressUpdateTempl<false>;
+using ADPorousViscoplasticityStressUpdate = PorousViscoplasticityStressUpdateTempl<true>;

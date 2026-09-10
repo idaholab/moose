@@ -83,12 +83,12 @@ protected:
   ///@}
 
   /// Max increment for inelastic strain
-  Real _max_inelastic_increment;
+  const Real _max_inelastic_increment;
 
   /// Model-local integration timestep. This never aliases or modifies FEProblem::dt().
   Real _constitutive_time_step;
 
-  /// Container for the porosity calculated from all other intelastic models except the current model
+  /// Porosity including inelastic increments from earlier stress updates, but not this update.
   GenericReal<is_ad> _intermediate_porosity;
 
   /// Material property for the old porosity
@@ -135,5 +135,5 @@ protected:
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain_old;                        \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old
 
-typedef ViscoplasticityStressUpdateBaseTempl<false> ViscoplasticityStressUpdateBase;
-typedef ViscoplasticityStressUpdateBaseTempl<true> ADViscoplasticityStressUpdateBase;
+using ViscoplasticityStressUpdateBase = ViscoplasticityStressUpdateBaseTempl<false>;
+using ADViscoplasticityStressUpdateBase = ViscoplasticityStressUpdateBaseTempl<true>;
