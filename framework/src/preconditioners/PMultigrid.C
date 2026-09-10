@@ -104,6 +104,15 @@ PMultigrid::validParams()
       "application of each of the two, per assembled level per linearization.");
 
   params.addParam<bool>(
+      "verify_entity_blocks",
+      false,
+      "Whether to check the entity blocks of each level that assembles its operator against that "
+      "assembled operator, entry by entry, after every linearization. A block on a partition "
+      "boundary gathers only the contributions of its own process's elements, so the check is "
+      "exact "
+      "on one process and reports that difference on more.");
+
+  params.addParam<bool>(
       "verify_operator_symmetry",
       false,
       "Whether to check that the solver system's own matrix-free operator, which serves as SNES's "
@@ -123,6 +132,7 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     _verify_level_transfers(getParam<bool>("verify_level_transfers")),
     _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
     _verify_level_matrices(getParam<bool>("verify_level_matrices")),
+    _verify_entity_blocks(getParam<bool>("verify_entity_blocks")),
     _verify_operator_symmetry(getParam<bool>("verify_operator_symmetry"))
 {
   if (_level_orders.empty())

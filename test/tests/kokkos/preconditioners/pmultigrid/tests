@@ -15,6 +15,43 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [entity_blocks]
+    type = RunApp
+    # A coarsest level of order five carries interior blocks of sixteen modes, so the check covers
+    # the placement of a block spanning many degrees of freedom rather than only the one-mode blocks
+    # a low order gives
+    cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
+               "Preconditioning/pmg/level_orders='5' "
+               "Preconditioning/pmg/verify_entity_blocks=true Executioner/nl_rel_tol=1e-4"
+    input = 'pmultigrid.i'
+    expect_out = 'p = 5: entity blocks agree with the assembled operator to 0'
+    requirement = 'The p-multigrid preconditioner shall gather the block of each mesh entity of a '
+                  'level operator from the same quadrature-point linearization its assembled '
+                  'operator is gathered from, in agreement with that operator.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [entity_block_smoother]
+    type = RunApp
+    # Order eight over a hierarchy of 1, 2 and 4 is the configuration the point smoother needs 88
+    # linear iterations for, against 14 here; the cap is above the latter and far below the former,
+    # so the test fails rather than merely slowing if the block smoother stops reaching the modes
+    # interior to an element
+    cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
+               "Preconditioning/pmg/level_orders='1 2 4' "
+               "Preconditioning/pmg/smoother=entity_block Executioner/nl_rel_tol=1e-6 "
+               "-ksp_rtol 1e-8 -ksp_max_it 40 -ksp_converged_reason"
+    input = 'pmultigrid.i'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL'
+    requirement = 'The p-multigrid preconditioner shall smooth each level by inverting the block of '
+                  'degrees of freedom each mesh entity carries, which shall converge the linear '
+                  'solve of a high-order fine space in an iteration count a smoother reading the '
+                  'operator diagonal alone does not reach.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_operators]
     type = RunApp
     input = 'pmultigrid.i'

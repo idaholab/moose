@@ -210,6 +210,13 @@ public:
   unsigned int maxEntityBlockSize() const { return _max_entity_block_size; }
 
   /**
+   * Check the level's entity blocks against its assembled operator, entry by entry, and report the
+   * agreement. Only a level that assembles its operator has a matrix to check against.
+   * @param console The stream the agreement is reported on
+   */
+  void verifyEntityBlocks(const ConsoleStream & console);
+
+  /**
    * Install the level's entity-block smoother on a preconditioner, as a shell whose setup rebuilds
    * the blocks from the current linearization and whose application inverts them
    * @param pc The preconditioner of the level's smoother

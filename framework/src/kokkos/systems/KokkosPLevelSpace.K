@@ -539,6 +539,59 @@ PLevelSpace::initEntityBlocks()
 }
 
 void
+PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
+{
+  mooseAssert(_assemble, "Only a level that assembles its operator can check its entity blocks.");
+
+  // The check reads this level's own assembled operator, which is the same contraction taken entry
+  // by entry and is itself checked against the matrix-free action by verify_level_matrices, so the
+  // blocks are compared against something already established rather than against a second guess.
+  // They are built here whether or not this level is one that smooths with them.
+  if (!_blocks.isBuilt())
+    initEntityBlocks();
+
+  _blocks.zero();
+
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+
+  op.assembleBlocks(_blocks);
+
+  // Read before factoring, which overwrites the entries with their factor
+  _blocks.copyEntriesToHost();
+
+  const auto first_dof = _sys.get_dof_map().first_dof();
+
+  Real error = 0;
+  Real scale = 0;
+
+  for (const auto block : make_range(_blocks.numBlocks()))
+    for (const auto i : make_range(_blocks.blockSize(block)))
+    {
+      const auto row = first_dof + _blocks.blockDof(block, i);
+
+      for (const auto j : make_range(_blocks.blockSize(block)))
+      {
+        const auto col = first_dof + _blocks.blockDof(block, j);
+        const auto assembled = (*_matrix_object)(row, col);
+
+        error = std::max(error, std::abs(_blocks.entry(block, i, j) - assembled));
+        scale = std::max(scale, std::abs(assembled));
+      }
+    }
+
+  _sys.comm().max(error);
+  _sys.comm().max(scale);
+
+  // The two paths contract the same cache against the same basis tables in a different loop order,
+  // so they agree to the roundoff of that contraction, with margin for the element and
+  // quadrature-point sums
+  const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
+  console << "  p = " << _order << ": entity blocks agree with the assembled operator to " << error
+          << " (tolerance " << tolerance << ")\n";
+}
+
+void
 PLevelSpace::setupBlockSmootherPC(const PC pc)
 {
   mooseAssert(_blocks.isBuilt(), "This p-multigrid level has no entity-block decomposition.");
