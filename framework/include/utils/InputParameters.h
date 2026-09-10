@@ -467,6 +467,16 @@ public:
   void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
 
   /**
+   * This method moves a single parameter to the specified group, overriding any group it may
+   * have already been assigned to. Use this when intentionally re-grouping a parameter that is
+   * already assigned a group (for example, in a derived class), as opposed to
+   * addParamNamesToGroup(), which errors on such a re-assignment to the same group.
+   * @param name name of the parameter to move
+   * @param group_name name of the group to move the parameter to
+   */
+  void moveParamToGroup(const std::string & name, const std::string & group_name);
+
+  /**
    * This method renames a parameter group
    * @param old_name previous name of the parameter group
    * @param new_name new name of the parameter group

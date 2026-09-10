@@ -156,15 +156,23 @@ TEST(InputParametersTest, addParamNamesToGroup)
   ASSERT_EQ(params.getGroupName("a"), "Group1");
 }
 
-TEST(InputParametersTest, addParamNamesToGroupDuplicateError)
+TEST(InputParametersTest, addParamNamesToGroupDifferentGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  params.addParamNamesToGroup("a", "Group2");
+  ASSERT_EQ(params.getGroupName("a"), "Group2");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupSameGroupError)
 {
   InputParameters params = emptyInputParameters();
   params.addParam<Real>("a", "A parameter");
   params.addParamNamesToGroup("a", "Group1");
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.addParamNamesToGroup("a", "Group2"); },
-      "The parameter 'a' has already been added to the group 'Group1' and cannot be added to "
-      "the group 'Group2' again.");
+      [&params]() { params.addParamNamesToGroup("a", "Group1"); },
+      "The parameter 'a' has already been added to the group 'Group1'.");
 }
 
 TEST(InputParametersTest, addParamNamesToGroupDuplicateWithinCallError)
@@ -173,8 +181,24 @@ TEST(InputParametersTest, addParamNamesToGroupDuplicateWithinCallError)
   params.addParam<Real>("a", "A parameter");
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
       [&params]() { params.addParamNamesToGroup("a a", "Group1"); },
-      "The parameter 'a' has already been added to the group 'Group1' and cannot be added to "
-      "the group 'Group1' again.");
+      "The parameter 'a' has already been added to the group 'Group1'.");
+}
+
+TEST(InputParametersTest, moveParamToGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  params.moveParamToGroup("a", "Group2");
+  ASSERT_EQ(params.getGroupName("a"), "Group2");
+}
+
+TEST(InputParametersTest, moveParamToGroupMissingParamError)
+{
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.moveParamToGroup("a", "Group1"); },
+      "Unable to find a parameter with name: a when moving to group Group1.");
 }
 
 TEST(InputParametersTest, setCoupledVar)
