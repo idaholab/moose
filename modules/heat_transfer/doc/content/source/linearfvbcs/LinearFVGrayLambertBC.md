@@ -9,7 +9,7 @@ the difference is that `LinearFVGrayLambertBC` contributes to a linear finite-vo
 system.
 
 This boundary condition is intended for heat-conduction or energy equations using a
-[MooseLinearVariableFVReal.md] variable and a [LinearFVDiffusion.md] kernel. It does not
+[MooseLinearVariableFV.md] variable and a [LinearFVDiffusion.md] kernel. It does not
 compute view factors or solve the enclosure radiosity equations itself. Those tasks
 remain the responsibility of a surface-radiation user object such as
 [ConstantViewFactorSurfaceRadiation.md] or
