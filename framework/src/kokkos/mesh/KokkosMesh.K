@@ -58,7 +58,7 @@ Mesh::initMap()
   _maps->subdomain_node_ids.clear();
   _maps->boundary_node_ids.clear();
 
-  std::unordered_set<ElemType> elem_types;
+  std::set<std::pair<ElemType, unsigned int>> elem_types;
   std::unordered_set<Node *> ghost_nodes;
 
   for (const auto subdomain : _mesh.meshSubdomains())
@@ -71,7 +71,7 @@ Mesh::initMap()
 
     for (auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(subdomain))
     {
-      elem_types.insert(elem->type());
+      elem_types.emplace(elem->type(), elem->p_level());
 
       eid = _num_local_elems;
       elem->set_extra_integer(_elem_id_integer, _num_local_elems++);
@@ -106,13 +106,13 @@ Mesh::initMap()
             !_maps->ghost_elem_id_mapping.count(neighbor))
         {
           _maps->ghost_elem_id_mapping[neighbor] = _num_local_elems + _num_ghost_elems++;
-          elem_types.insert(neighbor->type());
+          elem_types.emplace(neighbor->type(), neighbor->p_level());
         }
       }
 
   // Setup node maps
 
-  for (const auto type : elem_types)
+  for (const auto & type : elem_types)
     _maps->elem_type_id_mapping[type] = _maps->elem_type_id_mapping.size();
 
   _maps->local_nodes.insert(
@@ -151,8 +151,9 @@ Mesh::initElement()
   _num_side_nodes.create(num_elem_types);
   _local_side_node.create(num_elem_types);
 
-  for (auto & [elem_type, elem_type_id] : getElementTypeMap())
+  for (auto & [elem_type_and_p_level, elem_type_id] : getElementTypeMap())
   {
+    const auto [elem_type, _] = elem_type_and_p_level;
     auto elem = &libMesh::ReferenceElem::get(elem_type);
 
     _num_sides[elem_type_id] = elem->n_sides();
@@ -273,7 +274,8 @@ Mesh::getElementTypeID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
-  return libmesh_map_find(_maps->elem_type_id_mapping, elem->type());
+  return libmesh_map_find(_maps->elem_type_id_mapping,
+                          std::make_pair(elem->type(), elem->p_level()));
 }
 
 ContiguousElementID
