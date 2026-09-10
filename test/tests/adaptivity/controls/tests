@@ -5,6 +5,6 @@
     type = 'CSVDiff'
     input = 'control.i'
     csvdiff = 'control_out.csv'
-    requirement = "The Adaptivity system shall allow whether or not adaptivity is performed to be controllable"
+    requirement = "The system shall be able to turn on or off adaptivity using control logic."
   [../]
 []

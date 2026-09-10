@@ -62,15 +62,9 @@
   marker = marker
   control_tags = 'adapt_tag'
 
-  [Indicators/indicator]
-    type = GradientJumpIndicator
-    variable = u
-  []
   [Markers/marker]
-    type = ErrorFractionMarker
-    indicator = indicator
-    coarsen = 0.1
-    refine = 0.7
+    type = UniformMarker
+    mark = 'REFINE'
   []
 []
 
