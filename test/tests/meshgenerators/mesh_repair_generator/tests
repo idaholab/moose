@@ -398,6 +398,22 @@
     requirement = "The system shall leave a hexahedron in place when reducing it to a prism would require a neighbor sharing its collapsed edge to change type."
     mesh_mode = 'replicated'
   []
+  [repair_hex_sliver]
+    type = RunApp
+    input = repair_hex_sliver.i
+    expect_out = 'hexahedral slivers repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a hexahedral sliver (a column thin in two dimensions) by collapsing its thin cross-sections onto its long axis and removing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_sliver_skip]
+    type = RunApp
+    input = repair_hex_sliver_skip.i
+    expect_out = 'hexahedral slivers that could not be repaired \(left in place\): 2'
+    issues = '#33566'
+    requirement = "The system shall leave hexahedral slivers in place when collapsing one would degenerate a neighbor sharing its cross-section, as in a stacked cluster."
+    mesh_mode = 'replicated'
+  []
 
   [errors]
     type = RunException

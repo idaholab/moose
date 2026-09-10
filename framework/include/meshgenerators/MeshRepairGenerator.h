@@ -160,12 +160,20 @@ private:
 
   /// @brief Repair flat-slab pancake HEX8 elements by collapsing the squashed pair of opposite
   ///        faces together so the elements on either side meet. A hex is left in place if no pair
-  ///        is sufficiently squashed (a hex thin in more than one direction - a sliver/column - or
-  ///        of near-zero volume is flagged but not collapsed here), a connecting side face is
-  ///        shared, or the collapse would invert/degenerate a neighbor. (A HEX8 pinched to a PRISM6
-  ///        by a collapsed lateral face is handled separately by repairHexToPrism.)
+  ///        is sufficiently squashed, a connecting side face is shared, or the collapse would
+  ///        invert/degenerate a neighbor. A hex thin in two dimensions (a sliver/column) is handled
+  ///        by repairHexSlivers, and a HEX8 pinched to a PRISM6 by a collapsed lateral face by
+  ///        repairHexToPrism.
   /// @param mesh the mesh to modify
   void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair HEX8 sliver elements (thin in two dimensions, a needle/column) by collapsing
+  ///        their two thin cross-sections onto the long axis, removing the hex so the elements
+  ///        around it meet. Committed only if the collapse leaves every neighbor non-degenerate and
+  ///        non-inverted (so it mainly resolves an isolated/boundary column); otherwise the hex is
+  ///        left in place and reported.
+  /// @param mesh the mesh to modify
+  void repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Build the lower-order element that results from collapsing the edge (@p v_id, @p keep_id)
   ///        of @p e (merging v_id onto keep_id), for a supported topology reduction: QUAD4 -> TRI3,

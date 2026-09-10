@@ -90,8 +90,12 @@ The operations currently implemented are:
     sqrt(face area) (a flat slab **pancake**, thin in one axis direction). It is repaired by **collapsing that squashed
     pair of opposite faces together** so the elements on either side of the slab meet; like the wedge collapse this is a
     sub-tolerance move, committed only if the four connecting side faces are unshared and it inverts or degenerates no
-    neighbor, otherwise the hexahedron is left in place. (A hexahedron thin in more than one direction, or whose collapse
-    would distort a shared side, is left in place and reported.)
+    neighbor, otherwise the hexahedron is left in place. A **sliver** hexahedron thin in *two* dimensions (a
+    needle/column, two of its three opposite-face-pair separations below
+    [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the largest) is instead collapsed onto its long axis - its
+    two thin cross-sections are each merged to a point - removing it so the elements around it meet; this is committed
+    only when it leaves every neighbor valid (mainly an isolated or boundary column), otherwise it is left in place and
+    reported.
 
   - topology collapse - `QUAD4` -> `TRI3`: a quadrilateral collapsed to a triangle by a **short edge**
     (two adjacent vertices within [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the opposite span) or a

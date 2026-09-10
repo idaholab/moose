@@ -75,7 +75,8 @@ MeshRepairGenerator::validParams()
       "its quad base, which becomes a polyhedron. A PRISM6 (wedge) is collapsed onto its opposite "
       "triangular face (flat pancake) or absorbed into the element across its longest quad side "
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
-      "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
+      "of opposite faces, and a HEX8 sliver (thin in two dimensions, a column) is collapsed onto "
+      "its long axis. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
       "colinear vertex is reduced to that lower type: QUAD4 to TRI3, PYRAMID5 to TET4, PRISM6 to "
       "PYRAMID5, and (for a lateral face pinched to an edge) HEX8 to PRISM6.");
@@ -186,6 +187,9 @@ MeshRepairGenerator::generate()
 
     // Repair flat-slab pancake HEX8 elements by collapsing their squashed pair of opposite faces
     repairHexPancakes(mesh);
+
+    // Repair sliver (thin in two dimensions) HEX8 columns by collapsing onto their long axis
+    repairHexSlivers(mesh);
 
     // Topology collapses: reduce an element to a lower type by collapsing a short/colinear edge
     repairQuadToTri(mesh);
@@ -2032,33 +2036,39 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
       {{{1, 0, 2, 3, 6, 7, 5, 4}}, {{0, 1, 3, 5}}}, // sides 2 & 4
   }};
 
-  // Index of the most-squashed opposite-face pair if the hex is a flat-slab pancake, else -1
+  // Index of the most-squashed opposite-face pair if the hex is a flat-slab pancake (thin in one
+  // dimension), else -1. A hex thin in two dimensions (a sliver/column, two squashed pairs) or
+  // three (a point) is deferred to repairHexSlivers / the zero-volume pass and returns -1 here.
   auto squashedPair = [&](const Elem & e) -> int
   {
     if (e.type() != HEX8)
       return -1;
-    int best = 0;
-    Real best_sep = std::numeric_limits<Real>::max();
+    std::array<Real, 3> sep;
     for (const auto p : index_range(hex_pairs))
     {
       const auto & c = hex_pairs[p].corr;
-      Real sep = 0;
+      Real s = 0;
       for (const auto i : make_range(4u))
-        sep += (e.point(c[2 * i + 1]) - e.point(c[2 * i])).norm();
-      sep *= 0.25;
-      if (sep < best_sep)
-      {
-        best_sep = sep;
-        best = cast_int<int>(p);
-      }
+        s += (e.point(c[2 * i + 1]) - e.point(c[2 * i])).norm();
+      sep[p] = 0.25 * s;
+    }
+    const int best = cast_int<int>(std::min_element(sep.begin(), sep.end()) - sep.begin());
+    const Real max_sep = *std::max_element(sep.begin(), sep.end());
+    if (_flatness_tol > 0)
+    {
+      unsigned int thin = 0;
+      for (const auto p : make_range(3u))
+        if (sep[p] < _flatness_tol * max_sep)
+          ++thin;
+      if (thin >= 2)
+        return -1; // thin in two or three dimensions: not a pancake
     }
     // Cap-A area scale (the four corr[2i] nodes), via two triangles
     const auto & c = hex_pairs[best].corr;
     const Point a0 = e.point(c[0]), a1 = e.point(c[2]), a2 = e.point(c[4]), a3 = e.point(c[6]);
     const Real area = 0.5 * ((a1 - a0).cross(a2 - a0).norm() + (a2 - a0).cross(a3 - a0).norm());
     const bool small_vol = _zero_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
-    const bool flat =
-        _flatness_tol > 0 && area > 0 && best_sep < _flatness_tol * std::sqrt(area);
+    const bool flat = _flatness_tol > 0 && area > 0 && sep[best] < _flatness_tol * std::sqrt(area);
     return (flat || small_vol) ? best : -1;
   };
 
@@ -2776,14 +2786,21 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
     if (e.type() != HEX8)
       return -1;
     const Real tol = _flatness_tol * e.hmax();
+    int found = -1;
+    unsigned int count = 0;
     for (const auto f : make_range(4u))
     {
       const unsigned int g = (f + 1) % 4;
       if ((e.point(f) - e.point(g)).norm() < tol &&
           (e.point(f + 4) - e.point(g + 4)).norm() < tol)
-        return cast_int<int>(f);
+      {
+        ++count;
+        found = cast_int<int>(f);
+      }
     }
-    return -1;
+    // Exactly one pinched lateral face reduces to a prism; two or more means the hex is a sliver
+    // (thin in two dimensions) or a point, which repairHexSlivers / the zero-volume pass handle.
+    return (count == 1) ? found : -1;
   };
 
   std::size_t num_repaired = 0;
@@ -2941,6 +2958,113 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
     _console << "Number of hexahedra reduced to wedges: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of hexahedra that could not be reduced to wedges (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // The three opposite-face pairs of a HEX8, each as four (cap-A local node, cap-B local node)
+  // correspondences flattened as a0,b0,a1,b1,...; the two caps are the faces of that pair.
+  static const std::array<std::array<unsigned int, 8>, 3> hex_pairs = {{
+      {{0, 4, 1, 5, 2, 6, 3, 7}}, // sides 0 & 5
+      {{0, 3, 1, 2, 5, 6, 4, 7}}, // sides 1 & 3
+      {{1, 0, 2, 3, 6, 7, 5, 4}}, // sides 2 & 4
+  }};
+
+  // A HEX8 is a sliver (thin in two dimensions - a needle/column) when two of its three
+  // opposite-face-pair separations are below flatness_tol times the largest. Returns the index of
+  // the long-axis pair (the largest separation, whose two faces are the thin cross-sections to
+  // collapse), or -1.
+  auto sliverLongAxis = [&](const Elem & e) -> int
+  {
+    if (e.type() != HEX8)
+      return -1;
+    std::array<Real, 3> sep;
+    for (const auto p : make_range(3u))
+    {
+      const auto & c = hex_pairs[p];
+      Real s = 0;
+      for (const auto i : make_range(4u))
+        s += (e.point(c[2 * i + 1]) - e.point(c[2 * i])).norm();
+      sep[p] = 0.25 * s;
+    }
+    const int lng = cast_int<int>(std::max_element(sep.begin(), sep.end()) - sep.begin());
+    unsigned int thin = 0;
+    for (const auto p : make_range(3u))
+      if (sep[p] < _flatness_tol * sep[lng])
+        ++thin;
+    return (thin >= 2) ? lng : -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> hex_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (sliverLongAxis(*elem) >= 0)
+        hex_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto hid : hex_ids)
+    {
+      Elem * h = mesh->query_elem_ptr(hid);
+      if (!h || h->type() != HEX8)
+        continue;
+      const int lng = sliverLongAxis(*h);
+      if (lng < 0)
+        continue;
+      const auto & c = hex_pairs[lng];
+
+      // Collapse each thin cross-section (cap A = c[0,2,4,6], cap B = c[1,3,5,7]) onto its first
+      // node, a sub-tolerance move, so the hex degenerates to its long axis and is removed while
+      // the elements around it meet.
+      Node * a0 = h->node_ptr(c[0]);
+      Node * b0 = h->node_ptr(c[1]);
+      std::vector<std::pair<Node *, Node *>> gone_kept;
+      for (const auto i : make_range(1u, 4u))
+      {
+        gone_kept.emplace_back(h->node_ptr(c[2 * i]), a0);
+        gone_kept.emplace_back(h->node_ptr(c[2 * i + 1]), b0);
+      }
+      if (collapseByFaceMerge(mesh, h, gone_kept, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (sliverLongAxis(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of hexahedral slivers repaired: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of hexahedral slivers that could not be repaired (left in place): "
                << num_skipped << std::endl;
   }
 }
