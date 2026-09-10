@@ -1,0 +1,16 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalCopperProperties
+      file_base=copper
+      T_min=4.0
+      T_max=300.0"
+    csvdiff = 'copper_vpp_0000.csv'
+    mesh_mode = 'replicated'
+    requirement = "The system shall compute thermal properties for OFHC copper."
+    design = 'ThermalCopperProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#33677'
+  []
+[]
