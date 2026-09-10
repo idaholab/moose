@@ -100,6 +100,42 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [operator_symmetry]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # A conjugate gradient accelerator is only valid on a symmetric operator, so the measured
+    # symmetry of the operator and a CG solve that actually converges over it are two halves of one
+    # requirement. The diagonal preconditioner is trivially symmetric positive definite, which leaves
+    # the operator itself as the only thing the CG half can be failing on.
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_operator_symmetry=true '
+               '-ksp_type cg -pc_type jacobi'
+    expect_out = 'matrix-free operator of system .nl0.: differs from its transpose by.*'
+                 'Solve Converged'
+    issues = '#8681'
+    requirement = 'The Kokkos matrix-free Jacobian action shall be symmetric whenever the '
+                  'linearization it contracts is, holding the degrees of freedom a Dirichlet '
+                  'boundary condition pins out of both a free row equation and the direction the '
+                  'operator gathers, so that a conjugate gradient accelerator converges the solve.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [operator_symmetry_transient_error]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_operator_symmetry=true '
+               'Executioner/type=Transient Executioner/num_steps=1 Executioner/dt=0.1 '
+               'Kernels/time/type=KokkosTimeDerivative Kernels/time/variable=u'
+    expect_err = 'time integrator forms the solution time derivative from the raw solution'
+    issues = '#8681'
+    requirement = 'The Kokkos matrix-free Jacobian action shall report an error when symmetry is '
+                  'requested of a transient system with Dirichlet-constrained degrees of freedom, '
+                  'whose solution time derivative a time integrator forms from the raw solution and '
+                  'which therefore keeps the constrained columns its linearization requires.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [requires_matrix_free]
     type = RunException
     input = 'pmultigrid.i'

@@ -39,12 +39,20 @@ public:
    * @param vectors The level's tagged vectors
    * @param constrained_dof Local-plus-ghost mask of the rows the level holds fixed, which may be
    * unallocated when the level constrains no row
+   * @param eliminate_constrained_columns Whether a fixed row is left out of the trial space as well
+   * as out of the test space, which the level's action may only do when the residual it linearizes
+   * carries no dependence on a fixed row either
    */
   QpJacobianLevel(const DofSpace & dof_space,
                   const Array<unsigned int> & fe_types,
                   const Array<Vector> & vectors,
-                  const Array<bool> & constrained_dof)
-    : DofSpace(dof_space), _fe_types(fe_types), _vectors(vectors), _constrained_dof(constrained_dof)
+                  const Array<bool> & constrained_dof,
+                  const bool eliminate_constrained_columns)
+    : DofSpace(dof_space),
+      _fe_types(fe_types),
+      _vectors(vectors),
+      _constrained_dof(constrained_dof),
+      _eliminate_constrained_columns(eliminate_constrained_columns)
   {
   }
 
@@ -76,6 +84,18 @@ public:
   {
     return _constrained_dof.isAlloc() && _constrained_dof[dof];
   }
+
+  /**
+   * Get whether the operator leaves a row out of the trial space it gathers, as well as out of the
+   * test space it accumulates into, which is what makes its action symmetric whenever the
+   * linearization it contracts is
+   * @param dof The local DOF index
+   * @returns Whether the column is eliminated
+   */
+  KOKKOS_FUNCTION bool isEliminatedColumn(const dof_id_type dof) const
+  {
+    return _eliminate_constrained_columns && isConstrained(dof);
+  }
 #endif
 
 private:
@@ -93,6 +113,11 @@ private:
    * Local-plus-ghost mask of the rows the level holds fixed
    */
   Array<bool> _constrained_dof;
+
+  /**
+   * Whether a fixed row is left out of the trial space as well as out of the test space
+   */
+  bool _eliminate_constrained_columns;
 };
 
 } // namespace Moose::Kokkos

@@ -93,6 +93,27 @@ public:
   void presetSolution(Vector & solution);
 
   /**
+   * Set every row this operator constrains, in a tagged vector, to the value libMesh's constraint
+   * machinery reports for it, whether or not the row is preset.
+   *
+   * This is applied to the solution the quadrature-point cache is built from, ahead of every
+   * linearization, so that no kernel ever contracts a constrained DOF's raw iterate value: a free
+   * row's equation is a function of the free DOFs and of the constrained values as data, never of
+   * the constrained DOFs as unknowns. That is what makes a free row's derivative with respect to a
+   * constrained DOF zero, which in turn is what makes the matrix-free action symmetric whenever the
+   * physics is -- the constrained row's own action is already the identity, so the transposed entry
+   * it would have to match is zero.
+   *
+   * Consistency between the residual and its derivative is the reason this belongs on the gathered
+   * solution rather than on the constrained rows of the action alone: a finite difference of the
+   * residual with respect to a constrained DOF only comes out zero, matching the action, if the
+   * residual genuinely does not read that DOF.
+   *
+   * @param solution The vector to write the constrained values into
+   */
+  void enforceConstraints(Vector & solution);
+
+  /**
    * Finalize the residual vector at every row this operator constrains, after the ordinary kernel
    * and boundary condition residual sweep has run, to its own constraint equation,
    * u_i - g_i - sum_j c_ij u_j -- the same row-replacement form NodalBC's own per-node dispatch
@@ -111,9 +132,10 @@ public:
    * Finalize the Kokkos matrix-free action vector at every row this operator constrains, after the
    * ordinary operator/kernel action has run: the row's action becomes its own constraint
    * equation's directional derivative, x_i - sum_j c_ij x_j, with no distinction between a preset
-   * and a non-preset row. A kernel's own coupling of a boundary DOF's direction into a neighboring
-   * free row's action is legitimate physics regardless of preset and is left alone; only this row's
-   * own action is replaced.
+   * and a non-preset row. Only this row's own action is replaced; a free row's action is already
+   * free of this DOF's direction, because the operator leaves a constrained DOF out of its
+   * trial-space gather (see QpJacobianOperator's ApplyLoop) exactly as enforceConstraints() leaves
+   * it out of the residual, which is what makes the two sides of the transpose agree at zero.
    * @param y The action vector to finalize
    * @param x The direction vector
    */
@@ -132,7 +154,7 @@ public:
    * Kokkos function tags for the loops over this operator's constrained rows
    */
   ///@{
-  struct PresetLoop
+  struct ConstrainLoop
   {
   };
   struct ResidualLoop
@@ -146,13 +168,22 @@ public:
   };
   ///@}
 
-  KOKKOS_FUNCTION void operator()(PresetLoop, ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(ConstrainLoop, ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(ResidualLoop, ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(JVPLoop, ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, ThreadID tid) const;
 #endif
 
 private:
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Write the constrained value of every row _preset_only admits into a tagged vector, the shared
+   * body of presetSolution() and enforceConstraints()
+   * @param solution The vector to write the constrained values into
+   */
+  void constrainSolution(Vector & solution);
+#endif
+
   /**
    * Local DOF index of each constrained row
    */
@@ -182,6 +213,11 @@ private:
    * Local-plus-ghost mask of the rows this operator constrains
    */
   Array<bool> _constrained_mask;
+  /**
+   * Whether ConstrainLoop is to write only the rows _row_preset marks, which is what distinguishes
+   * presetSolution() from enforceConstraints()
+   */
+  bool _preset_only = false;
   /**
    * Vectors and scalar the loop being dispatched acts on
    */

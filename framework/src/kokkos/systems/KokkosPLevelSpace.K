@@ -329,8 +329,11 @@ QpJacobianLevel
 PLevelSpace::level() const
 {
   // The hierarchy operates on the homogenized linearized problem, so the level holds fixed the rows
-  // a nodal boundary condition of the fine system pins
-  return QpJacobianLevel(dofSpace(), _fe_types, _vectors, _constrained_dof);
+  // a nodal boundary condition of the fine system pins, and the vectors it carries are corrections
+  // that vanish on those rows. Eliminating the matching columns therefore changes nothing the
+  // hierarchy computes, and keeps the level's action equal to the matrix it assembles from the same
+  // quadrature-point cache.
+  return QpJacobianLevel(dofSpace(), _fe_types, _vectors, _constrained_dof, true);
 }
 
 void
