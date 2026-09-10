@@ -119,14 +119,14 @@ template <bool is_ad>
 Real
 ViscoplasticityStressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
-  const Real scalar_inelastic_strain_incr =
+  const auto scalar_inelastic_strain_incr =
       std::abs(MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
                _effective_inelastic_strain_old[_qp]);
 
   if (!std::isfinite(scalar_inelastic_strain_incr))
     mooseException("In ", _name, ": effective inelastic strain increment is nonfinite.");
 
-  if (!scalar_inelastic_strain_incr)
+  if (scalar_inelastic_strain_incr == 0.0)
     return std::numeric_limits<Real>::max();
 
   return globalTimeStep() * _max_inelastic_increment / scalar_inelastic_strain_incr;
@@ -137,10 +137,8 @@ void
 ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
     const GenericRankTwoTensor<is_ad> & elastic_strain_increment)
 {
-  // Subtract elastic strain from strain increment to find all inelastic strain increments
-  // calculated so far except the one that we're about to calculate. Then calculate intermediate
-  // porosity from all inelastic strain increments calculated so far except the one that we're about
-  // to calculate
+  // Include inelastic increments already computed by earlier stress updates, but not this update's
+  // upcoming increment.
   _intermediate_porosity =
       (1.0 - _porosity_old[_qp]) * (_strain_increment[_qp] - elastic_strain_increment).trace() +
       _porosity_old[_qp];
@@ -153,14 +151,17 @@ void
 ViscoplasticityStressUpdateBaseTempl<is_ad>::enforceIntermediatePorosityBounds()
 {
   if (_intermediate_porosity < 0.0)
-  {
-    if (_negative_behavior == NegativeBehavior::ZERO)
-      _intermediate_porosity = 0.0;
-    if (_negative_behavior == NegativeBehavior::INITIAL_CONDITION)
-      _intermediate_porosity = _initial_porosity;
-    if (_negative_behavior == NegativeBehavior::EXCEPTION)
-      mooseException("In ", _name, ": porosity is negative.");
-  }
+    switch (_negative_behavior)
+    {
+      case NegativeBehavior::ZERO:
+        _intermediate_porosity = 0.0;
+        break;
+      case NegativeBehavior::INITIAL_CONDITION:
+        _intermediate_porosity = _initial_porosity;
+        break;
+      case NegativeBehavior::EXCEPTION:
+        mooseException("In ", _name, ": porosity is negative.");
+    }
 
   const auto porosity_raw = MetaPhysicL::raw_value(_intermediate_porosity);
   if (!std::isfinite(porosity_raw))
