@@ -145,9 +145,9 @@ of dedicated gradient containers to the system.
 
 ### Gradient history handling
 
-Some solvers might require access to older gradient states. This is supported in time (soring and accessing)
+Some solvers might require access to older gradient states. This is supported in time (storing and accessing)
 older gradient states through the `requestCellGradients()` API. However, we don't support accessing
-older gradient states within the outer Picard iteration.
+older gradient states within any outer fixed-point iteration (whether multiapp or multi-system).
 The no-argument `requestCellGradients()` API requests only
 the current gradient and retains the default memory cost of one published field plus one scratch
 field. A consumer that needs history passes the oldest required time-state index during setup.

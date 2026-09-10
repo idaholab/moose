@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    # Keep the sampled element and face away from physical and two-rank partition boundaries.
+    # Use enough cells for the sampled element side to be an internal face.
     nx = 8
   []
 []

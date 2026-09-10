@@ -30,8 +30,6 @@
     design = 'linear_fv_design.md MooseLinearVariableFV.md'
     issues = '#33662'
     requirement = 'The system shall optionally preserve arbitrary linear finite volume gradient time-state depth for linear and auxiliary systems, including shared methods and face reads.'
-    min_parallel = 2
-    max_parallel = 2
     max_threads = 1
   []
   [gradient_time_states_restart_part1]
@@ -42,8 +40,6 @@
     design = 'linear_fv_design.md MooseLinearVariableFV.md'
     issues = '#33662'
     requirement = 'The system shall write requested linear finite volume gradient history to a checkpoint for an explicit restart.'
-    min_parallel = 2
-    max_parallel = 2
     max_threads = 1
   []
   [gradient_time_states_restart]
@@ -56,8 +52,6 @@
     design = 'linear_fv_design.md MooseLinearVariableFV.md'
     issues = '#33662'
     requirement = 'The system shall restore requested linear finite volume gradient history during an explicit restart.'
-    min_parallel = 2
-    max_parallel = 2
     max_threads = 1
   []
   [gradient_time_states_missing_part1]
