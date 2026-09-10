@@ -160,6 +160,9 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  # Until t = 1.0 only part of the secondary face is covered by a mortar segment, so lambda is
+  # singular on the uncovered part (zero row and column); the shift below is what makes that
+  # part of the system factorizable at all, not a convergence nicety.
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-15'
   dt = 0.1
@@ -170,17 +173,21 @@
 []
 
 [Postprocessors]
-  [max_lambda]
-    type = NodalExtremeValue
-    variable = lambda
-    value_type = max
-    block = '10'
+  # The mortar constraint's observable effect: with no surviving segments the two blocks are
+  # decoupled, so T is 0 on the secondary face and 1 on the primary face; once segments appear
+  # the weak equality pulls them together. Deliberately NOT postprocessing lambda: until t = 1.0
+  # only part of the secondary face is covered by segments, and the lambda nodes outside that
+  # part get their value from -pc_factor_shift_amount above rather than from the solve, so they
+  # are neither physical nor partition-reproducible.
+  [T_secondary]
+    type = SideAverageValue
+    variable = T
+    boundary = lb_right
   []
-  [min_lambda]
-    type = NodalExtremeValue
-    variable = lambda
-    value_type = min
-    block = '10'
+  [T_primary]
+    type = SideAverageValue
+    variable = T
+    boundary = rb_left
   []
 []
 
