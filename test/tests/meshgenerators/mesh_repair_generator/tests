@@ -342,6 +342,30 @@
     requirement = "The system shall leave a quadrilateral in place when collapsing its colinear vertex would leave a hanging node in an element that genuinely uses that vertex."
     mesh_mode = 'replicated'
   []
+  [repair_pyramid_to_tet]
+    type = RunApp
+    input = repair_pyramid_to_tet.i
+    expect_out = 'pyramids reduced to tetrahedra: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a pyramid collapsed to a tetrahedron by a short base edge to a tetrahedron."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet_colinear]
+    type = RunApp
+    input = repair_pyramid_to_tet_colinear.i
+    expect_out = 'pyramids reduced to tetrahedra: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a pyramid with a colinear base vertex to a tetrahedron when that vertex is redundant in every element sharing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet_skip]
+    type = RunApp
+    input = repair_pyramid_to_tet_skip.i
+    expect_out = 'could not be reduced to tetrahedra \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a pyramid in place when reducing it to a tetrahedron would require an unreducible neighbor across its base to change type."
+    mesh_mode = 'replicated'
+  []
 
   [errors]
     type = RunException

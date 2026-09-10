@@ -183,12 +183,17 @@ private:
   ///        map to a supported lower type (via reducedElement) with positive measure above
   ///        @p invert_floor, and each moved element must stay non-degenerate and above the floor;
   ///        otherwise the mesh is left unchanged. Subdomain and side/edge boundary ids are carried
-  ///        onto the reduced elements, and @p v is deleted. Returns true and records the affected
-  ///        nodes in @p touched_nodes on commit.
+  ///        onto the reduced elements, and @p v is deleted. When @p coincident is false (a colinear
+  ///        vertex, i.e. @p v is not ~at @p keep, so the merge slides @p v along the edge) the
+  ///        collapse is additionally rejected if any incident element contains @p v but not @p keep
+  ///        (a "mover" that the slide would distort); a coincident (short-edge) merge is a null move
+  ///        and imposes no such restriction. Returns true and records the affected nodes in
+  ///        @p touched_nodes on commit.
   bool collapseRedundantVertex(
       std::unique_ptr<MeshBase> & mesh,
       Node * v,
       Node * keep,
+      bool coincident,
       const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
       std::unordered_set<dof_id_type> & touched_nodes,
       Real invert_floor) const;
@@ -199,4 +204,11 @@ private:
   ///        redundant in every element sharing it (which would create a hanging node).
   /// @param mesh the mesh to modify
   void repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair PYRAMID5 elements collapsed to a tetrahedron by a short or colinear base edge, by
+  ///        collapsing the redundant base vertex (PYRAMID5 -> TET4). A pyramid is left in place if a
+  ///        co-edge neighbor cannot reduce, the result would invert, or (for a colinear base vertex)
+  ///        an element sharing the vertex would be distorted.
+  /// @param mesh the mesh to modify
+  void repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const;
 };

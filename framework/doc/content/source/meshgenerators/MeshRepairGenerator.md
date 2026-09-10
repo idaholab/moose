@@ -101,8 +101,14 @@ The operations currently implemented are:
     inverted, and a colinear vertex is only removed when it is redundant in every element that uses it (so no hanging
     node is created), otherwise the quadrilateral is left in place and reported.
 
-  Topology-collapse repairs for the 3D types (`PYRAMID5` -> `TET4`, `PRISM6` -> `PYRAMID5`,
-  `HEX8` -> `PRISM6`) are not yet implemented.
+  - topology collapse - `PYRAMID5` -> `TET4`: a pyramid whose quad base has a redundant vertex (a short
+    base edge or a colinear base vertex) is reduced to a tetrahedron by collapsing that base vertex, so the base
+    becomes a triangle. As with the other collapses every element sharing the collapsed edge must reduce to a valid
+    type, so a pyramid whose base is shared with an element that cannot reduce (for example a hexahedron) is left in
+    place and reported.
+
+  Topology-collapse repairs for the remaining 3D types (`PRISM6` -> `PYRAMID5`, `HEX8` -> `PRISM6`) are not yet
+  implemented.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 

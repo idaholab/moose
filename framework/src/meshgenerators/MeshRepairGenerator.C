@@ -21,6 +21,7 @@
 #include "libmesh/face_polygon.h"
 #include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/cell_polyhedron.h"
+#include "libmesh/cell_tet4.h"
 
 #include <array>
 #include <cmath>
@@ -74,8 +75,8 @@ MeshRepairGenerator::validParams()
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
       "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
-      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3; the 3D reductions "
-      "PYRAMID5 to TET4, PRISM6 to PYRAMID5, and HEX8 to PRISM6 are not yet implemented).");
+      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3 and PYRAMID5 to TET4; "
+      "the reductions PRISM6 to PYRAMID5 and HEX8 to PRISM6 are not yet implemented).");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
       1e-10,
@@ -186,6 +187,7 @@ MeshRepairGenerator::generate()
 
     // Topology collapses: reduce an element to a lower type by collapsing a short/colinear edge
     repairQuadToTri(mesh);
+    repairPyramidToTet(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -2183,7 +2185,26 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
     return tri;
   }
 
-  // PYRAMID5 -> TET4 and PRISM6 -> PYRAMID5 are added in later commits.
+  if (e.type() == PYRAMID5)
+  {
+    // Base nodes 0-3 (quad), apex 4. Only a base-edge collapse yields a valid tet: drop the base
+    // vertex, keep the other three base nodes in cyclic order plus the apex.
+    if (lv > 3 || lk > 3)
+      return nullptr; // an apex (lateral) edge does not reduce to a tet
+    const int d = std::abs(lv - lk);
+    if (d != 1 && d != 3)
+      return nullptr; // diagonal base pair, not an edge
+    auto tet = std::make_unique<Tet4>();
+    unsigned int j = 0;
+    for (const auto i : make_range(4u))
+      if (cast_int<int>(i) != lv)
+        tet->set_node(j++, const_cast<Node *>(e.node_ptr(i)));
+    tet->set_node(3, const_cast<Node *>(e.node_ptr(4))); // apex
+    tet->subdomain_id() = e.subdomain_id();
+    return tet;
+  }
+
+  // PRISM6 -> PYRAMID5 is added in a later commit.
   return nullptr;
 }
 
@@ -2192,6 +2213,7 @@ MeshRepairGenerator::collapseRedundantVertex(
     std::unique_ptr<MeshBase> & mesh,
     Node * v,
     Node * keep,
+    const bool coincident,
     const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
     std::unordered_set<dof_id_type> & touched_nodes,
     const Real invert_floor) const
@@ -2240,6 +2262,11 @@ MeshRepairGenerator::collapseRedundantVertex(
     else
       mover_ids.push_back(eid);
   }
+
+  // A colinear (non-coincident) merge slides v along the edge to keep, which would distort any
+  // element that contains v but not keep. Only proceed with such a merge when there are none.
+  if (!coincident && !mover_ids.empty())
+    return false;
 
   // Apply v -> keep to the movers, saving originals for rollback, and validate each stays
   // non-degenerate and above the floor (this rejects a genuine-corner element that v would distort)
@@ -2438,10 +2465,17 @@ MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
       // its sole element-neighbors across the whole mesh (otherwise it is a genuine junction and
       // dropping it would leave a hanging node) - so require that and merge onto a.
       Node * keep = nullptr;
+      bool coincident = false;
       if (da < _flatness_tol * ab)
+      {
         keep = a;
+        coincident = true;
+      }
       else if (db < _flatness_tol * ab)
+      {
         keep = b;
+        coincident = true;
+      }
       else
       {
         std::set<dof_id_type> nbrs;
@@ -2465,7 +2499,8 @@ MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
           continue; // genuine junction: leave the quad in place
       }
 
-      if (collapseRedundantVertex(mesh, v, keep, node_to_elems, touched_nodes, invert_floor))
+      if (collapseRedundantVertex(
+              mesh, v, keep, coincident, node_to_elems, touched_nodes, invert_floor))
       {
         ++num_repaired;
         repaired_in_pass = true;
@@ -2487,6 +2522,115 @@ MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
     if (num_skipped)
       _console << "Number of quadrilaterals that could not be collapsed to triangles (left in "
                   "place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // Local index (0-3) of a redundant base vertex of a PYRAMID5: a base vertex within
+  // flatness_tol*|a-b| of the segment between its two base-cyclic neighbors a,b (a short base edge
+  // if near an endpoint, a colinear base vertex if on the interior), or -1 if none. Only the quad
+  // base can reduce a pyramid to a tetrahedron.
+  auto redundantBaseVertex = [&](const Elem & e) -> int
+  {
+    if (e.type() != PYRAMID5)
+      return -1;
+    for (const auto i : make_range(4u))
+    {
+      const Point & vp = e.point(i);
+      const Point & ap = e.point((i + 3) % 4);
+      const Point & bp = e.point((i + 1) % 4);
+      const Real ab = (bp - ap).norm();
+      const Real tol = _flatness_tol * ab;
+      if (ab > 0 && geom_utils::pointSegmentDistanceSq(vp, ap, bp) < tol * tol)
+        return cast_int<int>(i);
+    }
+    return -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> pyramid_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (redundantBaseVertex(*elem) >= 0)
+        pyramid_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto pid : pyramid_ids)
+    {
+      Elem * p = mesh->query_elem_ptr(pid);
+      if (!p || p->type() != PYRAMID5)
+        continue;
+      const int lv = redundantBaseVertex(*p);
+      if (lv < 0)
+        continue;
+      const unsigned int i = cast_int<unsigned int>(lv);
+      Node * v = p->node_ptr(i);
+      Node * a = p->node_ptr((i + 3) % 4);
+      Node * b = p->node_ptr((i + 1) % 4);
+      const Real ab = (*b - *a).norm();
+      const Real da = (*v - *a).norm();
+      const Real db = (*v - *b).norm();
+
+      // Short base edge: merge onto the near base endpoint (a null move). Colinear base vertex:
+      // merge onto a base endpoint; collapseRedundantVertex only allows this when no element sharing
+      // v would be distorted (see its coincident handling).
+      Node * keep = nullptr;
+      bool coincident = false;
+      if (da < _flatness_tol * ab)
+      {
+        keep = a;
+        coincident = true;
+      }
+      else if (db < _flatness_tol * ab)
+      {
+        keep = b;
+        coincident = true;
+      }
+      else
+        keep = a;
+
+      if (collapseRedundantVertex(
+              mesh, v, keep, coincident, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (redundantBaseVertex(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of pyramids reduced to tetrahedra: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of pyramids that could not be reduced to tetrahedra (left in place): "
                << num_skipped << std::endl;
   }
 }
