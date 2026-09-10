@@ -50,6 +50,15 @@ mooseKokkosPreconditionerShellMult(Mat shell, Vec x, Vec y)
 }
 
 PetscErrorCode
+mooseKokkosInverseShellMult(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  LibmeshPetscCallQ(KSPSolve(static_cast<KSP>(ctx), x, y));
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
 mooseKokkosMatShellGetDiagonal(Mat shell, Vec diag)
 {
   void * ctx;
@@ -831,6 +840,8 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     verifyKokkosMatrixFreeSymmetry();
 
     verifyKokkosPreconditionerSymmetry();
+
+    verifyKokkosOperatorConditioning();
   }
 }
 
@@ -1010,6 +1021,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     verifyKokkosMatrixFreeSymmetry();
 
     verifyKokkosPreconditionerSymmetry();
+
+    verifyKokkosOperatorConditioning();
   }
 }
 
@@ -1311,6 +1324,92 @@ NonlinearSystemBase::verifyKokkosLevelGalerkin()
                  "contribution made outside that cache reaches the fine operator and no coarse "
                  "level, and surfaces here.");
   }
+}
+
+void
+NonlinearSystemBase::verifyKokkosOperatorConditioning()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyOperatorConditioning())
+    return;
+
+  TIME_SECTION("verifyKokkosOperatorConditioning", 1);
+
+  auto & operator_shell = libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(*_matrix_free_operator);
+
+  // One application per column
+  Mat assembled;
+  LibmeshPetscCallA(comm().get(), MatComputeOperator(operator_shell.mat(), MATAIJ, &assembled));
+
+  // The operator is symmetric, so it factors by Cholesky. A factorization that fails is itself the
+  // answer, so it is reported rather than treated as an error.
+  KSP inverse;
+  LibmeshPetscCallA(comm().get(), KSPCreate(comm().get(), &inverse));
+  LibmeshPetscCallA(comm().get(), KSPSetOperators(inverse, assembled, assembled));
+  LibmeshPetscCallA(comm().get(), KSPSetType(inverse, KSPPREONLY));
+  PC inverse_pc;
+  LibmeshPetscCallA(comm().get(), KSPGetPC(inverse, &inverse_pc));
+  LibmeshPetscCallA(comm().get(), PCSetType(inverse_pc, PCCHOLESKY));
+  LibmeshPetscCallA(comm().get(), KSPSetErrorIfNotConverged(inverse, PETSC_FALSE));
+
+  PetscErrorCode factored = KSPSetUp(inverse);
+
+  PetscReal operator_norm, inverse_norm = -1;
+
+  LibmeshPetscCallA(comm().get(), MatNorm(assembled, NORM_INFINITY, &operator_norm));
+
+  // The spread of the diagonal locates where the conditioning comes from: the norm above is a row
+  // sum, dominated by whichever mode carries the largest entries, while the smallest diagonal bounds
+  // the smallest eigenvalue and so bounds the norm of the inverse from below
+  Vec diagonal;
+  LibmeshPetscCallA(comm().get(), MatCreateVecs(assembled, nullptr, &diagonal));
+  LibmeshPetscCallA(comm().get(), MatGetDiagonal(assembled, diagonal));
+
+  PetscReal min_diagonal, max_diagonal;
+  PetscInt where;
+  LibmeshPetscCallA(comm().get(), VecMin(diagonal, &where, &min_diagonal));
+  LibmeshPetscCallA(comm().get(), VecMax(diagonal, &where, &max_diagonal));
+  LibmeshPetscCallA(comm().get(), VecDestroy(&diagonal));
+
+  if (!factored)
+  {
+    PetscInt local_rows, local_cols, rows, cols;
+    LibmeshPetscCallA(comm().get(), MatGetLocalSize(assembled, &local_rows, &local_cols));
+    LibmeshPetscCallA(comm().get(), MatGetSize(assembled, &rows, &cols));
+
+    // The inverse is formed column by column exactly as the cycle is, so its norm is taken over the
+    // same quantity and the two are comparable
+    Mat inverse_shell;
+    LibmeshPetscCallA(comm().get(),
+                      MatCreateShell(
+                          comm().get(), local_rows, local_cols, rows, cols, inverse, &inverse_shell));
+    LibmeshPetscCallA(
+        comm().get(),
+        MatShellSetOperation(inverse_shell, MATOP_MULT, (void (*)(void))mooseKokkosInverseShellMult));
+
+    Mat formed_inverse;
+    LibmeshPetscCallA(comm().get(), MatComputeOperator(inverse_shell, MATAIJ, &formed_inverse));
+    LibmeshPetscCallA(comm().get(), MatNorm(formed_inverse, NORM_INFINITY, &inverse_norm));
+
+    LibmeshPetscCallA(comm().get(), MatDestroy(&formed_inverse));
+    LibmeshPetscCallA(comm().get(), MatDestroy(&inverse_shell));
+  }
+
+  LibmeshPetscCallA(comm().get(), KSPDestroy(&inverse));
+  LibmeshPetscCallA(comm().get(), MatDestroy(&assembled));
+
+  _console << "Kokkos matrix-free operator of system '" << name() << "': norm "
+           << static_cast<Real>(operator_norm) << ", diagonal from "
+           << static_cast<Real>(min_diagonal) << " to " << static_cast<Real>(max_diagonal);
+
+  if (inverse_norm < 0)
+    _console << ", inverse could not be factored by Cholesky, so the operator is numerically "
+                "singular at this order"
+             << std::endl;
+  else
+    _console << ", inverse norm " << static_cast<Real>(inverse_norm) << ", product "
+             << static_cast<Real>(operator_norm) * static_cast<Real>(inverse_norm) << std::endl;
 }
 
 void
