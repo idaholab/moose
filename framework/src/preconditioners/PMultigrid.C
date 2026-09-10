@@ -104,6 +104,16 @@ PMultigrid::validParams()
       "application of each of the two, per assembled level per linearization.");
 
   params.addParam<bool>(
+      "verify_preconditioner_symmetry",
+      false,
+      "Whether to check that the p-multigrid cycle this preconditioner applies is symmetric, which "
+      "is what CG requires of it, by forming it explicitly and comparing it against its transpose. "
+      "The result is reported rather than enforced, because whether the cycle is symmetric is "
+      "presently an open question. It costs one application of the whole cycle per degree of "
+      "freedom "
+      "of the solver system, so it is a verification aid for small inputs.");
+
+  params.addParam<bool>(
       "verify_entity_blocks",
       false,
       "Whether to check the entity blocks of each level that assembles its operator against that "
@@ -133,6 +143,7 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
     _verify_level_matrices(getParam<bool>("verify_level_matrices")),
     _verify_entity_blocks(getParam<bool>("verify_entity_blocks")),
+    _verify_preconditioner_symmetry(getParam<bool>("verify_preconditioner_symmetry")),
     _verify_operator_symmetry(getParam<bool>("verify_operator_symmetry"))
 {
   if (_level_orders.empty())

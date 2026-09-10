@@ -71,6 +71,12 @@ public:
   bool verifyEntityBlocks() const { return _verify_entity_blocks; }
 
   /**
+   * Get whether the cycle this preconditioner applies is to be checked for symmetry
+   * @returns Whether the cycle is checked
+   */
+  bool verifyPreconditionerSymmetry() const { return _verify_preconditioner_symmetry; }
+
+  /**
    * Get whether the solver system's own matrix-free operator is to be checked for symmetry
    * @returns Whether to check
    */
@@ -98,6 +104,9 @@ protected:
 
   /// Whether each level's entity blocks are to be checked against its assembled operator
   const bool _verify_entity_blocks;
+
+  /// Whether the cycle this preconditioner applies is to be checked for symmetry
+  const bool _verify_preconditioner_symmetry;
 
   /// Whether the solver system's own matrix-free operator is to be checked for symmetry
   const bool _verify_operator_symmetry;
