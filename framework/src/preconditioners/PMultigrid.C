@@ -104,6 +104,19 @@ PMultigrid::validParams()
       "application of each of the two, per assembled level per linearization.");
 
   params.addParam<bool>(
+      "verify_operator_conditioning",
+      false,
+      "Whether to report the conditioning of the solver system's matrix-free operator: its norm, "
+      "the "
+      "norm of its inverse, and their product. The inverse is formed from a Cholesky factorization "
+      "of the explicitly assembled operator and its norm is taken the same way the cycle's norm "
+      "is, "
+      "so the two are directly comparable and answer whether a large cycle norm reflects the "
+      "operator it inverts. It costs one operator application and one triangular solve per degree "
+      "of "
+      "freedom, so it is a verification aid for small inputs.");
+
+  params.addParam<bool>(
       "verify_preconditioner_symmetry",
       false,
       "Whether to check that the p-multigrid cycle this preconditioner applies is symmetric, which "
@@ -144,6 +157,7 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     _verify_level_matrices(getParam<bool>("verify_level_matrices")),
     _verify_entity_blocks(getParam<bool>("verify_entity_blocks")),
     _verify_preconditioner_symmetry(getParam<bool>("verify_preconditioner_symmetry")),
+    _verify_operator_conditioning(getParam<bool>("verify_operator_conditioning")),
     _verify_operator_symmetry(getParam<bool>("verify_operator_symmetry"))
 {
   if (_level_orders.empty())
