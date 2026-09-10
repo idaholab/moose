@@ -31,7 +31,7 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
   const VariableValue & _mc;
   size_t _n_temps;
   std::vector<const VariableValue *> _T;

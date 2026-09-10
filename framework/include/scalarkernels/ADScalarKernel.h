@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() = 0;
+  virtual Real computeQpJacobian() { mooseError("Should not be called"); };
 
   /// The current solution
   const ADVariableValue & _u;

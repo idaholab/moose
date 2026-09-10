@@ -31,7 +31,7 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
   const SinglePhaseFluidProperties & _fp;
   const VariableValue & _m;
   const VariableValue & _Tup;
