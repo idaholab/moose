@@ -382,6 +382,22 @@
     requirement = "The system shall leave a wedge in place when reducing it to a pyramid would require an unreducible neighbor sharing its collapsed edge to change type."
     mesh_mode = 'replicated'
   []
+  [repair_hex_to_prism]
+    type = RunApp
+    input = repair_hex_to_prism.i
+    expect_out = 'hexahedra reduced to wedges: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a hexahedron pinched to a prism by a collapsed lateral face to a prism (wedge)."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_to_prism_skip]
+    type = RunApp
+    input = repair_hex_to_prism_skip.i
+    expect_out = 'could not be reduced to wedges \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a hexahedron in place when reducing it to a prism would require a neighbor sharing its collapsed edge to change type."
+    mesh_mode = 'replicated'
+  []
 
   [errors]
     type = RunException

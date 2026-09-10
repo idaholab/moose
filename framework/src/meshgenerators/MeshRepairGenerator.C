@@ -23,6 +23,7 @@
 #include "libmesh/cell_polyhedron.h"
 #include "libmesh/cell_tet4.h"
 #include "libmesh/cell_pyramid5.h"
+#include "libmesh/cell_prism6.h"
 
 #include <array>
 #include <cmath>
@@ -76,8 +77,8 @@ MeshRepairGenerator::validParams()
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
       "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
-      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3, PYRAMID5 to TET4, and "
-      "PRISM6 to PYRAMID5; the reduction HEX8 to PRISM6 is not yet implemented).");
+      "colinear vertex is reduced to that lower type: QUAD4 to TRI3, PYRAMID5 to TET4, PRISM6 to "
+      "PYRAMID5, and (for a lateral face pinched to an edge) HEX8 to PRISM6.");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
       1e-10,
@@ -190,6 +191,7 @@ MeshRepairGenerator::generate()
     repairQuadToTri(mesh);
     repairPyramidToTet(mesh);
     repairPrismToPyramid(mesh);
+    repairHexToPrism(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -2233,8 +2235,93 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
     return pyr;
   }
 
-  // HEX8 -> PRISM6 is added in a later commit.
+  // HEX8 -> PRISM6 is a two-edge (pinched face) collapse handled directly in repairHexToPrism.
   return nullptr;
+}
+
+void
+MeshRepairGenerator::replaceReducedElement(std::unique_ptr<MeshBase> & mesh,
+                                           Elem * old_elem,
+                                           std::unique_ptr<Elem> replacement,
+                                           const std::map<dof_id_type, dof_id_type> & node_sub) const
+{
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  auto subKey = [&](dof_id_type id)
+  {
+    auto it = node_sub.find(id);
+    return it == node_sub.end() ? id : it->second;
+  };
+
+  // Capture side boundary ids keyed by the sorted post-merge node ids (a side that collapsed onto a
+  // merged edge, i.e. now has a repeated node, is dropped).
+  std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> side_bcs;
+  std::vector<boundary_id_type> ids;
+  for (const auto s : make_range(old_elem->n_sides()))
+  {
+    boundary_info.boundary_ids(old_elem, cast_int<unsigned short>(s), ids);
+    if (ids.empty())
+      continue;
+    const auto ns = old_elem->nodes_on_side(s);
+    std::vector<dof_id_type> key;
+    for (const auto i : index_range(ns))
+      key.push_back(subKey(old_elem->node_id(ns[i])));
+    std::sort(key.begin(), key.end());
+    if (std::adjacent_find(key.begin(), key.end()) != key.end())
+      continue;
+    side_bcs[key].insert(ids.begin(), ids.end());
+  }
+
+  // Capture edge (edgeset) boundary ids for 3D elements, keyed by the sorted post-merge node pair
+  std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
+  if (old_elem->dim() == 3)
+  {
+    std::vector<boundary_id_type> eids;
+    for (const auto ed : make_range(old_elem->n_edges()))
+    {
+      boundary_info.edge_boundary_ids(old_elem, cast_int<unsigned short>(ed), eids);
+      if (eids.empty())
+        continue;
+      const auto en = old_elem->nodes_on_edge(ed);
+      auto a = subKey(old_elem->node_id(en[0]));
+      auto b = subKey(old_elem->node_id(en[1]));
+      if (a == b)
+        continue;
+      if (a > b)
+        std::swap(a, b);
+      edge_bcs[{a, b}].insert(eids.begin(), eids.end());
+    }
+  }
+
+  boundary_info.remove(old_elem);
+  Elem * added = mesh->add_elem(std::move(replacement));
+
+  if (!side_bcs.empty())
+    for (const auto s : make_range(added->n_sides()))
+    {
+      const auto ns = added->nodes_on_side(s);
+      std::vector<dof_id_type> key;
+      for (const auto i : index_range(ns))
+        key.push_back(added->node_id(ns[i]));
+      std::sort(key.begin(), key.end());
+      auto it = side_bcs.find(key);
+      if (it != side_bcs.end())
+        for (const auto bid : it->second)
+          boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
+    }
+  if (!edge_bcs.empty())
+    for (const auto ed : make_range(added->n_edges()))
+    {
+      const auto en = added->nodes_on_edge(ed);
+      auto a = added->node_id(en[0]);
+      auto b = added->node_id(en[1]);
+      if (a > b)
+        std::swap(a, b);
+      auto it = edge_bcs.find({a, b});
+      if (it != edge_bcs.end())
+        for (const auto bid : it->second)
+          boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
+    }
+  mesh->delete_elem(old_elem);
 }
 
 bool
@@ -2247,8 +2334,6 @@ MeshRepairGenerator::collapseRedundantVertex(
     std::unordered_set<dof_id_type> & touched_nodes,
     const Real invert_floor) const
 {
-  BoundaryInfo & boundary_info = mesh->get_boundary_info();
-
   // Collapse star: all elements incident to v
   std::set<dof_id_type> star;
   for (const auto eid : libmesh_map_find(node_to_elems, v->id()))
@@ -2339,83 +2424,11 @@ MeshRepairGenerator::collapseRedundantVertex(
   }
   touched_nodes.insert(keep->id());
 
-  // Commit each reducer: capture its side (and, in 3D, edge) boundary ids keyed by node ids with
-  // v->keep applied, add the reduced element, restore the ids onto matching sides/edges, delete old.
-  auto subKey = [&](dof_id_type id) { return id == v->id() ? keep->id() : id; };
+  // Commit each reducer: replace it with its reduced element, carrying subdomain and boundary ids
+  // across the v->keep merge.
+  const std::map<dof_id_type, dof_id_type> node_sub{{v->id(), keep->id()}};
   for (const auto eid : reducer_ids)
-  {
-    Elem * old_elem = mesh->query_elem_ptr(eid);
-    const bool is_3d = old_elem->dim() == 3;
-
-    std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> side_bcs;
-    std::vector<boundary_id_type> ids;
-    for (const auto s : make_range(old_elem->n_sides()))
-    {
-      boundary_info.boundary_ids(old_elem, cast_int<unsigned short>(s), ids);
-      if (ids.empty())
-        continue;
-      const auto ns = old_elem->nodes_on_side(s);
-      std::vector<dof_id_type> key;
-      for (const auto i : index_range(ns))
-        key.push_back(subKey(old_elem->node_id(ns[i])));
-      std::sort(key.begin(), key.end());
-      // a side that collapsed onto the merged edge (now has a repeated node) vanishes; skip it
-      if (std::adjacent_find(key.begin(), key.end()) != key.end())
-        continue;
-      side_bcs[key].insert(ids.begin(), ids.end());
-    }
-
-    std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
-    if (is_3d)
-    {
-      std::vector<boundary_id_type> eids;
-      for (const auto ed : make_range(old_elem->n_edges()))
-      {
-        boundary_info.edge_boundary_ids(old_elem, cast_int<unsigned short>(ed), eids);
-        if (eids.empty())
-          continue;
-        const auto en = old_elem->nodes_on_edge(ed);
-        auto a = subKey(old_elem->node_id(en[0]));
-        auto b = subKey(old_elem->node_id(en[1]));
-        if (a == b)
-          continue;
-        if (a > b)
-          std::swap(a, b);
-        edge_bcs[{a, b}].insert(eids.begin(), eids.end());
-      }
-    }
-
-    boundary_info.remove(old_elem);
-    Elem * added = mesh->add_elem(std::move(candidates[eid]));
-
-    if (!side_bcs.empty())
-      for (const auto s : make_range(added->n_sides()))
-      {
-        const auto ns = added->nodes_on_side(s);
-        std::vector<dof_id_type> key;
-        for (const auto i : index_range(ns))
-          key.push_back(added->node_id(ns[i]));
-        std::sort(key.begin(), key.end());
-        auto it = side_bcs.find(key);
-        if (it != side_bcs.end())
-          for (const auto bid : it->second)
-            boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
-      }
-    if (!edge_bcs.empty())
-      for (const auto ed : make_range(added->n_edges()))
-      {
-        const auto en = added->nodes_on_edge(ed);
-        auto a = added->node_id(en[0]);
-        auto b = added->node_id(en[1]);
-        if (a > b)
-          std::swap(a, b);
-        auto it = edge_bcs.find({a, b});
-        if (it != edge_bcs.end())
-          for (const auto bid : it->second)
-            boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
-      }
-    mesh->delete_elem(old_elem);
-  }
+    replaceReducedElement(mesh, mesh->query_elem_ptr(eid), std::move(candidates[eid]), node_sub);
 
   mesh->delete_node(v);
   return true;
@@ -2740,6 +2753,194 @@ MeshRepairGenerator::repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) cons
     _console << "Number of wedges reduced to pyramids: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of wedges that could not be reduced to pyramids (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // A HEX8 lateral face f is "pinched" to a vertical edge when both its horizontal edges are short:
+  // the bottom edge (f, (f+1)%4) and the top edge (f+4, (f+1)%4+4), each below flatness_tol times
+  // the element diameter. Collapsing them reduces the hex to a prism. Returns f (0-3) or -1.
+  auto pinchedFace = [&](const Elem & e) -> int
+  {
+    if (e.type() != HEX8)
+      return -1;
+    const Real tol = _flatness_tol * e.hmax();
+    for (const auto f : make_range(4u))
+    {
+      const unsigned int g = (f + 1) % 4;
+      if ((e.point(f) - e.point(g)).norm() < tol &&
+          (e.point(f + 4) - e.point(g + 4)).norm() < tol)
+        return cast_int<int>(f);
+    }
+    return -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> hex_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (pinchedFace(*elem) >= 0)
+        hex_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto hid : hex_ids)
+    {
+      Elem * h = mesh->query_elem_ptr(hid);
+      if (!h || h->type() != HEX8)
+        continue;
+      const int f = pinchedFace(*h);
+      if (f < 0)
+        continue;
+      const unsigned int keep_b = cast_int<unsigned int>(f);
+      const unsigned int gone_b = (keep_b + 1) % 4;
+      Node * kb = h->node_ptr(keep_b);
+      Node * gb = h->node_ptr(gone_b);
+      Node * kt = h->node_ptr(keep_b + 4);
+      Node * gt = h->node_ptr(gone_b + 4);
+
+      // Star: elements incident to either gone node
+      std::set<dof_id_type> star;
+      for (Node * g : {gb, gt})
+        for (const auto eid : libmesh_map_find(node_to_elems, g->id()))
+          star.insert(eid);
+
+      // Only the hex itself may lose an edge here. If another element contains a full collapsed edge
+      // (both endpoints of gb-kb or gt-kt), reducing the hex would force it to change type too, which
+      // this routine does not handle; leave the hex in place. Elements that merely touch a gone node
+      // (a coincident, null move) are movers. Also stay node-disjoint within a pass.
+      bool ok = true;
+      std::vector<dof_id_type> mover_ids;
+      for (const auto eid : star)
+      {
+        const Elem * e = mesh->query_elem_ptr(eid);
+        if (!e)
+          continue;
+        for (const auto i : make_range(e->n_nodes()))
+          if (touched_nodes.count(e->node_id(i)))
+            ok = false;
+        if (e == h)
+          continue;
+        bool has_gb = false, has_kb = false, has_gt = false, has_kt = false;
+        for (const auto i : make_range(e->n_nodes()))
+        {
+          const auto id = e->node_id(i);
+          has_gb |= (id == gb->id());
+          has_kb |= (id == kb->id());
+          has_gt |= (id == gt->id());
+          has_kt |= (id == kt->id());
+        }
+        if ((has_gb && has_kb) || (has_gt && has_kt))
+          ok = false; // a neighbor shares a collapsed edge
+        else
+          mover_ids.push_back(eid);
+      }
+      if (!ok)
+        continue;
+
+      // Build the hex's prism: bottom triangle = the bottom nodes except gone_b (cyclic order), top
+      // triangle = the nodes above them
+      auto prism = std::make_unique<Prism6>();
+      {
+        unsigned int j = 0;
+        for (const auto i : make_range(4u))
+          if (i != gone_b)
+          {
+            prism->set_node(j, const_cast<Node *>(h->node_ptr(i)));
+            prism->set_node(j + 3, const_cast<Node *>(h->node_ptr(i + 4)));
+            ++j;
+          }
+        prism->subdomain_id() = h->subdomain_id();
+      }
+      if (prism->volume() <= invert_floor)
+        continue;
+
+      // Apply the two coincident (null) merges to the movers, saving originals for rollback; validate
+      std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
+      for (const auto eid : mover_ids)
+      {
+        Elem * e = mesh->query_elem_ptr(eid);
+        if (!e)
+          continue;
+        for (const auto n : make_range(e->n_nodes()))
+        {
+          if (e->node_id(n) == gb->id())
+          {
+            saved.emplace_back(e, n, e->node_ptr(n));
+            e->set_node(n, kb);
+          }
+          else if (e->node_id(n) == gt->id())
+          {
+            saved.emplace_back(e, n, e->node_ptr(n));
+            e->set_node(n, kt);
+          }
+        }
+        std::set<dof_id_type> distinct;
+        for (const auto n : make_range(e->n_nodes()))
+          distinct.insert(e->node_id(n));
+        if (distinct.size() != e->n_nodes() || e->volume() <= invert_floor)
+        {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok)
+      {
+        for (auto & [e, n, orig] : saved)
+          e->set_node(n, orig);
+        continue;
+      }
+
+      for (const auto eid : star)
+      {
+        const Elem * e = mesh->query_elem_ptr(eid);
+        if (!e)
+          continue;
+        for (const auto i : make_range(e->n_nodes()))
+          touched_nodes.insert(e->node_id(i));
+      }
+
+      replaceReducedElement(
+          mesh, h, std::move(prism), {{gb->id(), kb->id()}, {gt->id(), kt->id()}});
+      mesh->delete_node(gb);
+      mesh->delete_node(gt);
+      ++num_repaired;
+      repaired_in_pass = true;
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (pinchedFace(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of hexahedra reduced to wedges: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of hexahedra that could not be reduced to wedges (left in place): "
                << num_skipped << std::endl;
   }
 }

@@ -112,7 +112,10 @@ The operations currently implemented are:
     to a pyramid by collapsing that vertical edge - the merged corner becomes the apex and the opposite lateral quad
     becomes the base - subject to the same co-edge-reducibility condition.
 
-  Topology-collapse repair for `HEX8` -> `PRISM6` is not yet implemented.
+  - topology collapse - `HEX8` -> `PRISM6`: a hexahedron with a lateral face pinched to a vertical edge (both of that
+    face's horizontal edges short) is reduced to a prism by collapsing those two edges together, so each squashed
+    bottom/top face becomes a triangle. This is committed only when the pinch is local (no other element shares a
+    collapsed edge and would have to change type), otherwise the hexahedron is left in place and reported.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 

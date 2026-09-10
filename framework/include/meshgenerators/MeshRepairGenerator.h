@@ -162,8 +162,8 @@ private:
   ///        faces together so the elements on either side meet. A hex is left in place if no pair
   ///        is sufficiently squashed (a hex thin in more than one direction - a sliver/column - or
   ///        of near-zero volume is flagged but not collapsed here), a connecting side face is
-  ///        shared, or the collapse would invert/degenerate a neighbor. Does not handle a HEX8
-  ///        collapsed to a PRISM6 by an edge collapse; that is not yet implemented.
+  ///        shared, or the collapse would invert/degenerate a neighbor. (A HEX8 pinched to a PRISM6
+  ///        by a collapsed lateral face is handled separately by repairHexToPrism.)
   /// @param mesh the mesh to modify
   void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
 
@@ -175,6 +175,16 @@ private:
   ///        to a supported lower type (e.g. the two nodes are not an edge of @p e, or a pyramid
   ///        lateral edge / prism triangle edge).
   std::unique_ptr<Elem> reducedElement(const Elem & e, dof_id_type v_id, dof_id_type keep_id) const;
+
+  /// @brief Replace @p old_elem with the lower-order @p replacement (whose nodes already use the
+  ///        merged ids), carrying @p old_elem's subdomain and its side and edge boundary ids onto
+  ///        the matching sides/edges of the replacement. @p node_sub maps a gone node id to the node
+  ///        id it merged onto (identity for all others), so boundary ids can be re-keyed; a side or
+  ///        edge that collapsed onto a merged edge is dropped. @p old_elem is deleted.
+  void replaceReducedElement(std::unique_ptr<MeshBase> & mesh,
+                             Elem * old_elem,
+                             std::unique_ptr<Elem> replacement,
+                             const std::map<dof_id_type, dof_id_type> & node_sub) const;
 
   /// @brief Collapse a redundant vertex @p v onto an adjacent vertex @p keep (a short edge, or a
   ///        colinear "not sticking out" vertex), reducing every incident element that contained both
@@ -218,4 +228,12 @@ private:
   ///        cannot reduce or the result would invert.
   /// @param mesh the mesh to modify
   void repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair HEX8 elements pinched to a prism by a collapsed lateral face, by collapsing the
+  ///        two short horizontal edges of that face together (HEX8 -> PRISM6): the pinched face
+  ///        becomes a vertical edge, each squashed bottom/top face becomes a triangle. A hex is left
+  ///        in place if a neighbor sharing a collapsed edge cannot reduce, the pinch is shared with
+  ///        another pinched cell, or the result would invert.
+  /// @param mesh the mesh to modify
+  void repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const;
 };
