@@ -107,8 +107,12 @@ The operations currently implemented are:
     type, so a pyramid whose base is shared with an element that cannot reduce (for example a hexahedron) is left in
     place and reported.
 
-  Topology-collapse repairs for the remaining 3D types (`PRISM6` -> `PYRAMID5`, `HEX8` -> `PRISM6`) are not yet
-  implemented.
+  - topology collapse - `PRISM6` -> `PYRAMID5`: a wedge pinched at one corner (a short vertical edge, its top node
+    within [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the element diameter of the bottom node) is reduced
+    to a pyramid by collapsing that vertical edge - the merged corner becomes the apex and the opposite lateral quad
+    becomes the base - subject to the same co-edge-reducibility condition.
+
+  Topology-collapse repair for `HEX8` -> `PRISM6` is not yet implemented.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 

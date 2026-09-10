@@ -211,4 +211,11 @@ private:
   ///        an element sharing the vertex would be distorted.
   /// @param mesh the mesh to modify
   void repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair PRISM6 (wedge) elements pinched to a pyramid by a short vertical edge, by
+  ///        collapsing that edge (PRISM6 -> PYRAMID5): the merged node becomes the apex and the
+  ///        opposite lateral quad becomes the base. A wedge is left in place if a co-edge neighbor
+  ///        cannot reduce or the result would invert.
+  /// @param mesh the mesh to modify
+  void repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) const;
 };

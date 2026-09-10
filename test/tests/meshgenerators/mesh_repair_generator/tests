@@ -366,6 +366,22 @@
     requirement = "The system shall leave a pyramid in place when reducing it to a tetrahedron would require an unreducible neighbor across its base to change type."
     mesh_mode = 'replicated'
   []
+  [repair_prism_to_pyramid]
+    type = RunApp
+    input = repair_prism_to_pyramid.i
+    expect_out = 'wedges reduced to pyramids: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a wedge pinched to a pyramid by a short vertical edge to a pyramid."
+    mesh_mode = 'replicated'
+  []
+  [repair_prism_to_pyramid_skip]
+    type = RunApp
+    input = repair_prism_to_pyramid_skip.i
+    expect_out = 'could not be reduced to pyramids \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a wedge in place when reducing it to a pyramid would require an unreducible neighbor sharing its collapsed edge to change type."
+    mesh_mode = 'replicated'
+  []
 
   [errors]
     type = RunException

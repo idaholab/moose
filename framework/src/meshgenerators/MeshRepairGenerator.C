@@ -22,6 +22,7 @@
 #include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/cell_polyhedron.h"
 #include "libmesh/cell_tet4.h"
+#include "libmesh/cell_pyramid5.h"
 
 #include <array>
 #include <cmath>
@@ -75,8 +76,8 @@ MeshRepairGenerator::validParams()
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
       "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
-      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3 and PYRAMID5 to TET4; "
-      "the reductions PRISM6 to PYRAMID5 and HEX8 to PRISM6 are not yet implemented).");
+      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3, PYRAMID5 to TET4, and "
+      "PRISM6 to PYRAMID5; the reduction HEX8 to PRISM6 is not yet implemented).");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
       1e-10,
@@ -188,6 +189,7 @@ MeshRepairGenerator::generate()
     // Topology collapses: reduce an element to a lower type by collapsing a short/colinear edge
     repairQuadToTri(mesh);
     repairPyramidToTet(mesh);
+    repairPrismToPyramid(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -2204,7 +2206,34 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
     return tet;
   }
 
-  // PRISM6 -> PYRAMID5 is added in a later commit.
+  if (e.type() == PRISM6)
+  {
+    // Vertical edges are (0,3), (1,4), (2,5) (top node k+3 above bottom node k). Only a vertical
+    // edge collapse yields a pyramid: the merged node becomes the apex and the opposite lateral
+    // quad becomes the base. Expects the bottom node kept (apex below the base) for a positive cell.
+    const auto mm = std::minmax(lv, lk);
+    int k = -1;
+    if (mm.first == 0 && mm.second == 3)
+      k = 0;
+    else if (mm.first == 1 && mm.second == 4)
+      k = 1;
+    else if (mm.first == 2 && mm.second == 5)
+      k = 2;
+    if (k < 0)
+      return nullptr; // not a vertical edge (a triangle edge does not reduce to a pyramid)
+    const unsigned int nb = (k + 1) % 3; // next bottom node
+    const unsigned int pb = (k + 2) % 3; // previous bottom node
+    auto pyr = std::make_unique<Pyramid5>();
+    pyr->set_node(0, const_cast<Node *>(e.node_ptr(nb)));
+    pyr->set_node(1, const_cast<Node *>(e.node_ptr(nb + 3)));
+    pyr->set_node(2, const_cast<Node *>(e.node_ptr(pb + 3)));
+    pyr->set_node(3, const_cast<Node *>(e.node_ptr(pb)));
+    pyr->set_node(4, const_cast<Node *>(e.node_ptr(cast_int<unsigned int>(lk)))); // apex = kept node
+    pyr->subdomain_id() = e.subdomain_id();
+    return pyr;
+  }
+
+  // HEX8 -> PRISM6 is added in a later commit.
   return nullptr;
 }
 
@@ -2631,6 +2660,86 @@ MeshRepairGenerator::repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const
     _console << "Number of pyramids reduced to tetrahedra: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of pyramids that could not be reduced to tetrahedra (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // Index (0-2) of a short vertical edge (k, k+3) of a PRISM6 - one whose length is below
+  // flatness_tol times the element diameter, i.e. a corner pinched top-to-bottom - or -1 if none.
+  // Collapsing it reduces the wedge to a pyramid.
+  auto shortVerticalEdge = [&](const Elem & e) -> int
+  {
+    if (e.type() != PRISM6)
+      return -1;
+    const Real tol = _flatness_tol * e.hmax();
+    for (const auto k : make_range(3u))
+      if ((e.point(k) - e.point(k + 3)).norm() < tol)
+        return cast_int<int>(k);
+    return -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> prism_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (shortVerticalEdge(*elem) >= 0)
+        prism_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto wid : prism_ids)
+    {
+      Elem * w = mesh->query_elem_ptr(wid);
+      if (!w || w->type() != PRISM6)
+        continue;
+      const int k = shortVerticalEdge(*w);
+      if (k < 0)
+        continue;
+      // Merge the top node onto the bottom node of the pinched vertical edge (a sub-tolerance move),
+      // so the surviving bottom node becomes the pyramid apex
+      Node * keep = w->node_ptr(cast_int<unsigned int>(k));
+      Node * v = w->node_ptr(cast_int<unsigned int>(k) + 3);
+      if (collapseRedundantVertex(
+              mesh, v, keep, /*coincident=*/true, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (shortVerticalEdge(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of wedges reduced to pyramids: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of wedges that could not be reduced to pyramids (left in place): "
                << num_skipped << std::endl;
   }
 }
