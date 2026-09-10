@@ -167,10 +167,10 @@ SingleParameterInverseSolveAction::act()
     {
       // Distinguish three states for the error, since "set" alone conflates two very different
       // user experiences: hasSetMultiAppFixedPointConvergenceName() is also true when the user
-      // wrote nothing and MOOSE silently defaulted the name (needToAddDefaultMultiAppFixedPointConvergence()
-      // is how that default path is told apart from the user actually naming a convergence). Each
-      // branch supplies its own complete trailing sentence, since the three cases do not share a
-      // sentence structure.
+      // wrote nothing and MOOSE silently defaulted the name
+      // (needToAddDefaultMultiAppFixedPointConvergence() is how that default path is told apart
+      // from the user actually naming a convergence). Each branch supplies its own complete
+      // trailing sentence, since the three cases do not share a sentence structure.
       std::string current;
       if (!_problem->hasSetMultiAppFixedPointConvergenceName())
         // Reachable when the executioner never builds a FixedPointSolve at all (e.g. an
