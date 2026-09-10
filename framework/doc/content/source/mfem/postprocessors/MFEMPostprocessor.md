@@ -27,7 +27,7 @@ on the same execution flag as the postprocessor is executed on is therefore not 
 and will see the value from the previous execution. Where the two would otherwise coincide, execute
 the supplying postprocessor on an earlier flag, as in the example below:
 
-!listing test/tests/mfem/functions/postprocessor_coefficient.i block=Postprocessors Kernels
+!listing test/tests/mfem/auxkernels/scaledvector.i block=Postprocessors AuxKernels
 
 `MFEMPostprocessor` is a purely virtual base class. Derived classes
 should override the `execute` and `getValue` methods.
