@@ -31,14 +31,18 @@ commonAdaptivityParams()
       "max_h_level",
       0,
       "Maximum number of times a single element can be refined. If 0 then infinite.");
-  params.addDeprecatedParam<Real>("start_time",
-                                  -std::numeric_limits<Real>::max(),
-                                  "The time that adaptivity will be active after.",
-                                  "'start_time' will be deprecated in the future. You can get identical behavior by using the Controls system to set 'enable'.");
-  params.addDeprecatedParam<Real>("stop_time",
-                                  std::numeric_limits<Real>::max(),
-                                  "The time after which adaptivity will no longer be active.",
-                                  "'stop_time' will be deprecated in the future. You can get identical behavior by using the Controls system to set 'enable'.");
+  params.addDeprecatedParam<Real>(
+      "start_time",
+      -std::numeric_limits<Real>::max(),
+      "The time that adaptivity will be active after.",
+      "'start_time' will be deprecated in the future. You can get identical behavior by using the "
+      "Controls system to set 'enable'.");
+  params.addDeprecatedParam<Real>(
+      "stop_time",
+      std::numeric_limits<Real>::max(),
+      "The time after which adaptivity will no longer be active.",
+      "'stop_time' will be deprecated in the future. You can get identical behavior by using the "
+      "Controls system to set 'enable'.");
   params.addParam<bool>("enable", true, "Whether adaptivity should be enabled.");
   params.declareControllable("enable");
   params.addParam<unsigned int>(

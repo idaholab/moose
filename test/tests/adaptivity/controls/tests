@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#33708'
+  design = 'syntax/Adaptivity/index.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'control.i'
+    csvdiff = 'control_out.csv'
+    requirement = "The Adaptivity system shall allow whether or not adaptivity is performed to be controllable"
+  [../]
+[]

@@ -427,7 +427,8 @@ Adaptivity::updateErrorVectors()
 bool
 Adaptivity::isAdaptivityDue()
 {
-  bool adapt_due = _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+  bool adapt_due =
+      _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
   if (_controls_allow_adaptivity)
     adapt_due &= *_controls_allow_adaptivity;
   return adapt_due;
