@@ -8,9 +8,9 @@
     csvdiff = 'main_between_multiapp_out_ma10.csv main_between_multiapp_out_ma20.csv'
     requirement = "The system shall be able to execute the multiapps of an execution group "
                   "concurrently, each on its own subset of the processors."
-    # Transfers execute_on don't match the MultiApps
-    allow_warnings = true
     # Two concurrent multiapps need at least one rank each to be partitioned onto
     min_parallel = 2
+    # Check that the transfer still occurs
+    expect_out = "Transfers on TIMESTEP_BEGIN Between MultiApps from app 'ma1'"
   []
 []

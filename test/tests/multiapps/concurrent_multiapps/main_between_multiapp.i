@@ -36,7 +36,10 @@
     to_multi_app = ma2
     from_postprocessor = 'time_app1'
     to_postprocessor = 'time_in_app1'
+    # does not matter since they are in the same group
+    # but we make sure it still occurs
     execute_after_from_multiapp = true
+    check_multiapp_execute_on = false
   []
   [pp_2_to_1]
     type = MultiAppPostprocessorTransfer
@@ -44,6 +47,7 @@
     to_multi_app = ma1
     from_postprocessor = 'time_app2'
     to_postprocessor = 'time_in_app2'
+    execute_after_from_multiapp = false
   []
 []
 
