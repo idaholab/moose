@@ -220,6 +220,14 @@
     requirement = "The system shall leave a pancake pyramid in place, rather than corrupting the mesh, when no element shares its quad base and there is nothing to absorb it into."
     mesh_mode = 'replicated'
   []
+  [repair_pyramid_sliver]
+    type = RunApp
+    input = repair_pyramid_sliver.i
+    expect_out = 'pyramid slivers removed by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a pyramid sliver (a needle thin in two dimensions) by collapsing its shortest edge and removing it."
+    mesh_mode = 'replicated'
+  []
   [repair_wedge_pancake]
     type = RunApp
     input = repair_wedge_pancake.i

@@ -118,6 +118,15 @@ private:
   /// @param mesh the mesh to modify
   void repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const;
 
+  /// @brief Repair PYRAMID5 sliver elements (thin in two dimensions, a needle/spike): a pyramid of
+  ///        negligible volume that is not flat (its apex is not near its base plane, so its base is
+  ///        the degenerate part). It is removed by collapsing its shortest edge, so the surrounding
+  ///        elements meet, committed only if that leaves every neighbor valid. A flat pancake
+  ///        (handled by repairPyramidPancakes) and a healthy pyramid with a short base edge (reduced
+  ///        to a tet by repairPyramidToTet) are left for those routines.
+  /// @param mesh the mesh to modify
+  void repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
   /// @brief Repair degenerate PRISM6 (wedge) elements. A flat (axially squashed) wedge - a pancake
   ///        - is repaired by collapsing its top triangle onto its bottom triangle so the elements
   ///        above and below it meet; a thin-cross-section (blade) wedge - a sliver - is absorbed

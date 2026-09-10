@@ -65,21 +65,24 @@ MeshRepairGenerator::validParams()
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
       "or hexahedral slab); or an element collapsed to a lower topology by one or more short edges "
       "or in-plane vertices (a quadrilateral becoming a triangle, a pyramid a tetrahedron, or a "
-      "hexahedron a prism). A zero-volume element collapsed toward a point is removed by merging its "
+      "hexahedron a prism). A zero-volume element collapsed toward a point is removed by merging "
+      "its "
       "coincident vertices onto a single node. A 2D sliver (TRI3, QUAD4, polygon) is absorbed into "
       "its longest-edge "
       "neighbor: a triangle sliver against a triangle neighbor splits that neighbor into two "
       "triangles (the mesh stays all-triangle), otherwise the neighbor absorbs the sliver's "
       "vertices and is promoted to a polygon. A TET4 is removed by edge collapse, keeping a valid "
       "all-tetrahedral conformal mesh. A flat PYRAMID5 pancake is absorbed into the element across "
-      "its quad base, which becomes a polyhedron. A PRISM6 (wedge) is collapsed onto its opposite "
+      "its quad base, which becomes a polyhedron, while a PYRAMID5 sliver (a needle, thin in two "
+      "dimensions) is removed by edge collapse. A PRISM6 (wedge) is collapsed onto its opposite "
       "triangular face (flat pancake) or absorbed into the element across its longest quad side "
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
       "of opposite faces, and a HEX8 sliver (thin in two dimensions, a column) is collapsed onto "
       "its long axis. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
       "colinear vertex is reduced to that lower type: QUAD4 to TRI3, a C0POLYGON to an (n-1)-sided "
-      "polygon (only onto other polygons), PYRAMID5 to TET4, PRISM6 to PYRAMID5, and (for a lateral "
+      "polygon (only onto other polygons), PYRAMID5 to TET4, PRISM6 to PYRAMID5, and (for a "
+      "lateral "
       "face pinched to an edge) HEX8 to PRISM6.");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
@@ -179,6 +182,9 @@ MeshRepairGenerator::generate()
 
     // Repair degenerate TET4 elements (flat pancakes, needle slivers, zero-volume) by edge collapse
     repairDegenerateTets(mesh);
+
+    // Repair sliver (needle, thin in two dimensions) PYRAMID5 elements by collapsing them away
+    repairPyramidSlivers(mesh);
 
     // Repair flat pancake PYRAMID5 elements by absorbing them into their quad-base neighbor
     repairPyramidPancakes(mesh);
@@ -1803,6 +1809,108 @@ MeshRepairGenerator::repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) con
              << std::endl;
     if (num_skipped)
       _console << "Number of degenerate pyramids that could not be absorbed (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0 || _zero_volume_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real vol_thresh = vol_scale * _zero_volume_tol;
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // A PYRAMID5 is a sliver/needle (thin in two dimensions) when its volume is negligible but it is
+  // NOT flat: its apex is not near its base plane, so the base is the degenerate part and the
+  // pyramid is a spike. A small-volume pyramid that IS flat is a pancake (repairPyramidPancakes).
+  auto isPyramidNeedle = [&](const Elem & e)
+  {
+    if (e.type() != PYRAMID5 || std::abs(e.volume()) >= vol_thresh)
+      return false;
+    const auto bn = e.nodes_on_side(4); // quad base
+    const Point & apex = e.point(4);
+    const Point & b0 = e.point(bn[0]);
+    const Point & b1 = e.point(bn[1]);
+    const Point & b2 = e.point(bn[2]);
+    const Point & b3 = e.point(bn[3]);
+    const Real area = 0.5 * ((b1 - b0).cross(b2 - b0).norm() + (b2 - b0).cross(b3 - b0).norm());
+    if (area <= 0)
+      return true; // degenerate base -> needle
+    const Real d = std::sqrt(std::min(geom_utils::pointTriangleDistanceSq(apex, b0, b1, b2),
+                                      geom_utils::pointTriangleDistanceSq(apex, b0, b2, b3)));
+    return d >= _flatness_tol * std::sqrt(area); // apex not near the base plane -> not flat
+  };
+
+  // Local nodes of the shortest edge of e (the collapsed cross-section direction of a needle)
+  auto shortestEdge = [](const Elem & e)
+  {
+    std::pair<unsigned int, unsigned int> best{0, 1};
+    Real best_len = std::numeric_limits<Real>::max();
+    for (const auto ed : make_range(e.n_edges()))
+    {
+      const auto en = e.nodes_on_edge(ed);
+      const Real len = (e.point(en[0]) - e.point(en[1])).norm();
+      if (len < best_len)
+      {
+        best_len = len;
+        best = {cast_int<unsigned int>(en[0]), cast_int<unsigned int>(en[1])};
+      }
+    }
+    return best;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> pyramid_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (isPyramidNeedle(*elem))
+        pyramid_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto pid : pyramid_ids)
+    {
+      Elem * p = mesh->query_elem_ptr(pid);
+      if (!p || p->type() != PYRAMID5 || !isPyramidNeedle(*p))
+        continue;
+      const auto [lp, lq] = shortestEdge(*p);
+      // Remove the needle by collapsing its shortest edge (a sub-tolerance move); the pyramid is
+      // deleted and the elements around it meet.
+      std::vector<std::pair<Node *, Node *>> gone_kept{{p->node_ptr(lq), p->node_ptr(lp)}};
+      if (collapseByFaceMerge(mesh, p, gone_kept, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (isPyramidNeedle(*elem))
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of pyramid slivers removed by edge collapse: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of pyramid slivers that could not be removed (left in place): "
                << num_skipped << std::endl;
   }
 }

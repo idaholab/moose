@@ -71,7 +71,9 @@ The operations currently implemented are:
     elements stay conformal. Here the union *is* convex (a neighbor capped by a shallow pyramid lid), so polyhedron
     absorption is valid. The absorption is committed only if the apex projects inside the quad-base footprint and the
     resulting polyhedron is a sound cell (positive volume, invertible mapping); a pyramid with no element across its quad
-    base, or for which the union would be invalid, is left in place and reported.
+    base, or for which the union would be invalid, is left in place and reported. A pyramid **sliver** - a needle thin in
+    two dimensions, of negligible volume but *not* flat (its apex far from a degenerate base) - is instead removed by
+    collapsing its shortest edge, so the surrounding elements meet, when that leaves every neighbor valid.
 
   - `PRISM6` (wedge) elements: a wedge is flagged if its volume is below
     [!param](/Mesh/MeshRepairGenerator/zero_volume_fraction) times the mesh bounding-box volume, or by the
