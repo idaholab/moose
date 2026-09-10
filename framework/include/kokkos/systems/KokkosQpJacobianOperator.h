@@ -71,6 +71,9 @@ public:
   struct BlockApplyLoop
   {
   };
+  struct BlockIdentityLoop
+  {
+  };
   ///@}
 
   /**
@@ -104,9 +107,10 @@ public:
    * Apply the inverse of every entity block to a residual vector, which is the entity-block
    * smoother
    *
-   * Only the rows that belong to a block are written, so a caller wanting the identity on the rest
-   * places it there itself before the call. The blocks are disjoint, so the applications are
-   * independent and the result is the additive smoother over the decomposition.
+   * A row belonging to no block is a row the level holds fixed, where the operator carries the
+   * identity, so the residual is copied to those rows and the smoother carries the identity too.
+   * The blocks are disjoint, so their applications are independent and the result is the additive
+   * smoother over the decomposition.
    *
    * @param blocks The decomposition, whose blocks must already be factored
    * @param r_tag The vector tag of the residual on the level
@@ -119,6 +123,7 @@ public:
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(BlockLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(BlockApplyLoop, const dof_id_type block) const;
+  KOKKOS_FUNCTION void operator()(BlockIdentityLoop, const dof_id_type dof) const;
 
 private:
   /**
