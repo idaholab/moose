@@ -23,6 +23,7 @@
 #include "libmesh/cell_polyhedron.h"
 
 #include <array>
+#include <cmath>
 #include <limits>
 
 registerMooseObject("MooseApp", MeshRepairGenerator);
@@ -61,7 +62,9 @@ MeshRepairGenerator::validParams()
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
       "or hexahedral slab); or an element collapsed to a lower topology by one or more short edges "
       "or in-plane vertices (a quadrilateral becoming a triangle, a pyramid a tetrahedron, or a "
-      "hexahedron a prism). A 2D sliver (TRI3, QUAD4, polygon) is absorbed into its longest-edge "
+      "hexahedron a prism). A zero-volume element collapsed toward a point is removed by merging its "
+      "coincident vertices onto a single node. A 2D sliver (TRI3, QUAD4, polygon) is absorbed into "
+      "its longest-edge "
       "neighbor: a triangle sliver against a triangle neighbor splits that neighbor into two "
       "triangles (the mesh stays all-triangle), otherwise the neighbor absorbs the sliver's "
       "vertices and is promoted to a polygon. A TET4 is removed by edge collapse, keeping a valid "
@@ -161,6 +164,10 @@ MeshRepairGenerator::generate()
 
   if (_fix_degenerate_elements)
   {
+    // Remove zero-volume elements (collapsed toward a point) first, so the sliver/pancake passes
+    // below only see elements that are thin in one or two dimensions
+    repairZeroVolumeElements(mesh);
+
     // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
     repair2DSlivers(mesh);
 
@@ -561,6 +568,130 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
              << ", using heuristic: " << num_nonconvex - num_triangulated << std::endl;
   if (!num_polygons)
     mooseWarning("No C0 polygons in mesh: the polyon convexity fix did nothing");
+}
+
+void
+MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) const
+{
+  // Mesh scales for the diameter (all-dimensions-thin) test and the collapse floor
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real surface_scale = std::max(
+      std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)), Real(1e-30));
+
+  // A first-order 2D/3D element is a zero-volume (point-collapse) element when it is small in
+  // *every* dimension, i.e. its diameter hmax() (the maximum vertex separation) is below the
+  // isotropic length equivalent of the zero-volume/area fraction: cbrt(fraction)*cbrt(volume) in
+  // 3D, sqrt(fraction)*sqrt(area) in 2D. This diameter test is what separates a point-collapse
+  // from a sliver (thin in two dimensions) or a pancake (thin in one dimension), whose diameter
+  // stays full-sized. Either test is disabled by setting its fraction to 0. Only first-order
+  // elements are handled (like the other repairs), so every node is a vertex.
+  auto isPointCollapsed = [&](const Elem & e)
+  {
+    if (e.n_nodes() != e.n_vertices())
+      return false;
+    if (e.dim() == 3 && _zero_volume_tol > 0)
+      return e.hmax() < std::cbrt(_zero_volume_tol) * std::cbrt(vol_scale);
+    if (e.dim() == 2 && _zero_area_tol > 0)
+      return e.hmax() < std::sqrt(_zero_area_tol) * std::sqrt(surface_scale);
+    return false;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  // Repair in node-disjoint passes (like the other routines): a merge whose star overlaps a merge
+  // already committed this pass is deferred to the next pass. Removals never create new
+  // point-collapses, so this terminates.
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    // node id -> ids of all incident elements (the collapse star), and the current point-collapsed
+    // elements
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> collapsed_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (isPointCollapsed(*elem))
+        collapsed_ids.push_back(elem->id());
+    }
+
+    BoundaryInfo & boundary_info = mesh->get_boundary_info();
+    std::unordered_set<dof_id_type> touched_nodes;
+
+    for (const auto cid : collapsed_ids)
+    {
+      Elem * e = mesh->query_elem_ptr(cid);
+      if (!e || !isPointCollapsed(*e))
+        continue;
+
+      // Representative kept node: the element's lowest-id vertex. Every other vertex is merged onto
+      // it; since all vertices are ~coincident this moves nodes only sub-tolerance. The mesh
+      // boundary is preserved without extra work: a neighbor's boundary side stays attached to that
+      // neighbor and is simply re-keyed onto the kept node.
+      Node * kept = e->node_ptr(0);
+      for (const auto i : make_range(e->n_vertices()))
+        if (e->node_ptr(i)->id() < kept->id())
+          kept = e->node_ptr(i);
+
+      // The distinct other vertices, each paired with the kept node
+      std::vector<std::pair<Node *, Node *>> gone_kept;
+      std::set<dof_id_type> seen{kept->id()};
+      for (const auto i : make_range(e->n_vertices()))
+      {
+        Node * v = e->node_ptr(i);
+        if (seen.insert(v->id()).second)
+          gone_kept.emplace_back(v, kept);
+      }
+      if (gone_kept.empty())
+        continue; // element already references a single node; leave it for orphan cleanup
+
+      // Capture the gone vertices' nodeset ids so they can be carried onto the kept node after a
+      // successful merge (collapseByFaceMerge deletes the gone nodes)
+      std::set<boundary_id_type> gone_node_bcs;
+      std::vector<boundary_id_type> nids;
+      for (const auto & [g, k] : gone_kept)
+      {
+        libmesh_ignore(k);
+        boundary_info.boundary_ids(g, nids);
+        gone_node_bcs.insert(nids.begin(), nids.end());
+      }
+
+      // A reshaped neighbor is rejected below this volume/area floor; use the scale matching the
+      // element's dimension
+      const Real invert_floor =
+          (e->dim() == 3 ? vol_scale : surface_scale) * _tet_collapse_volume_floor;
+
+      if (collapseByFaceMerge(mesh, e, gone_kept, node_to_elems, touched_nodes, invert_floor))
+      {
+        for (const auto bid : gone_node_bcs)
+          boundary_info.add_node(kept, bid);
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  // Count any point-collapsed elements that remain: a merge that would corrupt a neighbor, or a
+  // degenerate cluster (a point-collapse sharing a face/edge with another element), is left in place
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (isPointCollapsed(*elem))
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of zero-volume elements removed: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of zero-volume elements that could not be removed (left in place): "
+               << num_skipped << std::endl;
+  }
 }
 
 void

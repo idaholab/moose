@@ -64,9 +64,15 @@ private:
   /// relative floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
   const Real _tet_collapse_volume_floor;
 
-  /// @brief Removes the elements with an volume value below the user threshold
+  /// @brief Repair zero-volume elements: first-order 2D/3D elements collapsed toward a point
+  ///        (small in every dimension, i.e. a tiny diameter hmax()). Each is removed by merging
+  ///        all of its vertices onto one representative node - a sub-tolerance move - and deleting
+  ///        it, reusing collapseByFaceMerge so the merge is committed only if every neighbor stays
+  ///        non-degenerate and non-inverted; otherwise the element is left in place. Runs in
+  ///        node-disjoint passes. A point-collapse that shares a face/edge with another element (a
+  ///        degenerate cluster) is left in place - cluster removal is not yet implemented.
   /// @param mesh the mesh to modify
-  void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
+  void repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Removes nodes that overlap
   /// @param mesh the mesh to modify

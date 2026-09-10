@@ -29,6 +29,15 @@ The operations currently implemented are:
   [!param](/Mesh/MeshRepairGenerator/flatness_tol) flags pancakes and slivers by shape; either the shape test or the
   measure test can be disabled by setting its tolerance to 0. The repairs currently implemented, by element type, are:
 
+  - **zero-volume** (point-collapse) elements: a first-order element small in *every* dimension - its diameter (maximum
+    vertex separation) below the isotropic length equivalent of
+    [!param](/Mesh/MeshRepairGenerator/zero_volume_fraction) (3D) or
+    [!param](/Mesh/MeshRepairGenerator/zero_area_fraction) (2D) - is removed by merging all of its vertices onto a
+    single representative node (a sub-tolerance move) and deleting it. The merge is committed only if every neighbor
+    stays non-degenerate and non-inverted; otherwise the element is left in place. This handles an isolated
+    point-collapse; a point-collapse that shares a face or edge with another element (a degenerate cluster) is left in
+    place, as is line-collapse (a sliver) and plane-collapse (a pancake), which the routines below handle instead.
+
   - first-order 2D elements (`TRI3`, `QUAD4`, polygons): a 2D **sliver** is flagged if its area is below
     [!param](/Mesh/MeshRepairGenerator/zero_area_fraction) times the mesh surface-area scale, or if every vertex other
     than the two ends of its longest edge lies within [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the

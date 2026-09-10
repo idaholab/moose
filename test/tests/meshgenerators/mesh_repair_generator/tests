@@ -285,6 +285,39 @@
     mesh_mode = 'replicated'
   []
 
+  [repair_zero_volume_tet]
+    type = RunApp
+    input = repair_zero_volume_tet.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume tetrahedron collapsed toward a point by merging its vertices onto a single node, keeping the surrounding mesh valid and conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_hex]
+    type = RunApp
+    input = repair_zero_volume_hex.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume hexahedron collapsed toward a point by merging its eight vertices onto a single node."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_2d]
+    type = RunApp
+    input = repair_zero_volume_2d.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume 2D element collapsed toward a point, which the sliver repair cannot absorb because its longest edge has zero length."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_skip]
+    type = RunApp
+    input = repair_zero_volume_skip.i
+    expect_out = 'zero-volume elements that could not be removed \(left in place\): 2'
+    issues = '#33566'
+    requirement = "The system shall leave a degenerate cluster of point-collapsed elements in place, rather than corrupting a neighbor, and report them."
+    mesh_mode = 'replicated'
+  []
+
   [errors]
     type = RunException
     input = 'flip_element.i'
