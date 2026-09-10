@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MooseVariableFE.h"
+#include "TransformedDualBasis.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -173,6 +174,35 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  // Petrov-Galerkin weights the multiplier with the standard basis, whose per-node normalization is
+  // the same non-positive quantity (zero at a TRI6 vertex, -1/3 at a QUAD8 corner) that the
+  // transformed dual repairs, so the two cannot be combined on such a face; detect one and error
+  // out. Lifting the restriction would need a strictly positive weighting for the gap, e.g. the
+  // piecewise linear sub-element scheme of Carvalho et al., Comput. Mech. (2022),
+  // doi:10.1007/s00466-022-02226-2, Sec. 4.3. The scan stops at the first match; the collective max
+  // keeps the decision consistent across ranks.
+  if (_use_petrov_galerkin && _use_dual)
+  {
+    bool higher_order_secondary = false;
+    for (const auto * const lower_elem :
+         _mci_mesh.getMesh().active_subdomain_elements_ptr_range(secondarySubdomain()))
+      if (Moose::Mortar::transformedDualBasisSupported(lower_elem->type()))
+      {
+        higher_order_secondary = true;
+        break;
+      }
+    comm().max(higher_order_secondary);
+    if (higher_order_secondary)
+      paramError(
+          "use_petrov_galerkin",
+          "The Petrov-Galerkin dual mortar approach is not supported on QUAD8/TRI6 secondary "
+          "faces. The transformed dual basis that makes the standard dual well posed on such "
+          "faces cannot be combined with Petrov-Galerkin, which weights the multiplier with a "
+          "standard (non-positive) basis. Use a first-order secondary face, or unset "
+          "`use_petrov_galerkin` to use the default transformed dual basis.");
+  }
+
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 
