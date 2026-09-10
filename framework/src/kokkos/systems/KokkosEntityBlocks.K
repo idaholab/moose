@@ -159,6 +159,12 @@ EntityBlocks::zero()
 }
 
 void
+EntityBlocks::copyEntriesToHost()
+{
+  _entries.copyToHost();
+}
+
+void
 EntityBlocks::factor()
 {
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, FactorLoop> policy(

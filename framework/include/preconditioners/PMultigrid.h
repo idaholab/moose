@@ -65,6 +65,12 @@ public:
   bool verifyLevelMatrices() const { return _verify_level_matrices; }
 
   /**
+   * Get whether each level's entity blocks are to be checked against its assembled operator
+   * @returns Whether the blocks are checked
+   */
+  bool verifyEntityBlocks() const { return _verify_entity_blocks; }
+
+  /**
    * Get whether the solver system's own matrix-free operator is to be checked for symmetry
    * @returns Whether to check
    */
@@ -89,6 +95,9 @@ protected:
 
   /// Whether each assembled level operator is to be checked against the matrix-free operator
   const bool _verify_level_matrices;
+
+  /// Whether each level's entity blocks are to be checked against its assembled operator
+  const bool _verify_entity_blocks;
 
   /// Whether the solver system's own matrix-free operator is to be checked for symmetry
   const bool _verify_operator_symmetry;

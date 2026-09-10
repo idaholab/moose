@@ -104,6 +104,12 @@ public:
    */
   dof_id_type numUnfactoredBlocks() const;
 
+  /**
+   * Copy the block entries back to host, so that a host-side check can read them. Meaningful only
+   * before the blocks are factored, which overwrites the entries with their factor.
+   */
+  void copyEntriesToHost();
+
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Kokkos function tags for the loops over blocks

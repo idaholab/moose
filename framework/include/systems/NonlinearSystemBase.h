@@ -412,6 +412,12 @@ public:
   void initKokkosEntityBlockSmoother();
 
   /**
+   * Check the entity blocks of every p-multigrid level that assembles its operator against that
+   * assembled operator, and report the agreement
+   */
+  void verifyKokkosEntityBlocks();
+
+  /**
    * Get the number of entity blocks this process holds for the smoother
    * @returns The number of blocks
    */

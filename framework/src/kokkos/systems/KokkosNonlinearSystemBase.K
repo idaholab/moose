@@ -788,6 +788,8 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
       updateKokkosLevelOperators();
 
       verifyKokkosLevelMatrices();
+
+      verifyKokkosEntityBlocks();
     }
   }
 
@@ -962,6 +964,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
       updateKokkosLevelOperators();
 
       verifyKokkosLevelMatrices();
+
+      verifyKokkosEntityBlocks();
     }
   }
 
@@ -1118,6 +1122,25 @@ NonlinearSystemBase::updateKokkosLevelOperators()
 
   for (const auto & level : pmg->levels())
     level->updateOperator(cache);
+}
+
+void
+NonlinearSystemBase::verifyKokkosEntityBlocks()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyEntityBlocks())
+    return;
+
+  TIME_SECTION("verifyKokkosEntityBlocks", 1);
+
+  _console << "p-multigrid entity blocks for system '" << name() << "':\n";
+
+  for (const auto & level : pmg->levels())
+    if (level->assembles())
+      level->verifyEntityBlocks(_console);
+
+  _console << std::endl;
 }
 
 void
