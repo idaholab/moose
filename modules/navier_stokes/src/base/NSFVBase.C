@@ -320,7 +320,7 @@ NSFVBase::commonScalarFieldAdvectionParams()
       ps_inlet_types,
       "Types for the inlet boundaries for the passive scalar equation.");
 
-  params.addParamNamesToGroup("passive_scalar_diffusivity "
+  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
                               "passive_scalar_source passive_scalar_coupled_source "
                               "passive_scalar_coupled_source_coeff",
                               "Passive scalar control");
@@ -476,7 +476,6 @@ NSFVBase::validParams()
    * Parameters describing the handling of advected scalar fields
    */
   params += NSFVBase::commonScalarFieldAdvectionParams();
-  params.addParamNamesToGroup("passive_scalar_names", "Passive scalar control");
 
   /**
    * Parameters describing the handling of turbulence

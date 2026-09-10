@@ -21,6 +21,7 @@ ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::validParams()
                         1.0,
                         "Scaling factor on the thermal expansion strain. This input parameter can "
                         "be used to perform sensitivity analysis on thermal expansion.");
+  params.addParamNamesToGroup("thermal_expansion_scale_factor", "Advanced");
 
   return params;
 }
