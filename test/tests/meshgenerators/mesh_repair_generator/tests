@@ -318,6 +318,31 @@
     mesh_mode = 'replicated'
   []
 
+  [repair_quad_to_tri]
+    type = RunApp
+    input = repair_quad_to_tri.i
+    expect_out = 'quadrilaterals collapsed to triangles: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a quadrilateral collapsed to a triangle by a short edge to a triangle, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_quad_to_tri_colinear]
+    type = RunApp
+    input = repair_quad_to_tri_colinear.i
+    expect_out = 'quadrilaterals collapsed to triangles: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a quadrilateral with a colinear vertex to a triangle when that vertex is redundant in every element sharing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_quad_to_tri_skip]
+    type = RunApp
+    input = repair_quad_to_tri_skip.i
+    expect_out = 'could not be collapsed to triangles \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a quadrilateral in place when collapsing its colinear vertex would leave a hanging node in an element that genuinely uses that vertex."
+    mesh_mode = 'replicated'
+  []
+
   [errors]
     type = RunException
     input = 'flip_element.i'

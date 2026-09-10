@@ -73,8 +73,9 @@ MeshRepairGenerator::validParams()
       "triangular face (flat pancake) or absorbed into the element across its longest quad side "
       "(thin-cross-section sliver). A flat-slab HEX8 pancake is collapsed along its squashed pair "
       "of opposite faces. Each repair keeps the mesh conformal, or leaves the element in place if "
-      "no valid repair exists. Repairs for elements collapsed to a lower topology (short-edge / "
-      "in-plane-vertex degeneracy) are not yet implemented.");
+      "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
+      "colinear vertex is reduced to that lower type (currently QUAD4 to TRI3; the 3D reductions "
+      "PYRAMID5 to TET4, PRISM6 to PYRAMID5, and HEX8 to PRISM6 are not yet implemented).");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
       1e-10,
@@ -182,6 +183,9 @@ MeshRepairGenerator::generate()
 
     // Repair flat-slab pancake HEX8 elements by collapsing their squashed pair of opposite faces
     repairHexPancakes(mesh);
+
+    // Topology collapses: reduce an element to a lower type by collapsing a short/colinear edge
+    repairQuadToTri(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -745,9 +749,9 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
   // (flatness/flap test: a thin/flat 2D sliver, collapsing toward a line) or its area is negligible
   // (area test: a zero-area, i.e. zero-volume, element). Either test can be disabled by setting its
   // tolerance to 0. NOTE: this does not flag the fourth degeneracy kind, an element collapsed to a
-  // lower topology by a short edge or an in-plane vertex (e.g. a QUAD4 whose short edge or colinear
-  // vertex makes it an effective TRI3 while keeping a healthy area); repairing that is not yet
-  // implemented.
+  // lower topology by a short edge or a colinear vertex (e.g. a QUAD4 whose short edge or colinear
+  // vertex makes it an effective TRI3 while keeping a healthy area); that is handled by
+  // repairQuadToTri.
   auto isSliver = [&](const Elem & e, const unsigned int lng)
   {
     const auto nv = e.n_vertices();
@@ -2144,6 +2148,345 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
     _console << "Number of hexahedral pancakes repaired: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of hexahedral pancakes that could not be repaired (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+std::unique_ptr<Elem>
+MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_type keep_id) const
+{
+  // Local indices of the merged (v) and kept vertices within e
+  int lv = -1, lk = -1;
+  for (const auto i : make_range(e.n_vertices()))
+  {
+    if (e.node_id(i) == v_id)
+      lv = cast_int<int>(i);
+    if (e.node_id(i) == keep_id)
+      lk = cast_int<int>(i);
+  }
+  if (lv < 0 || lk < 0)
+    return nullptr;
+
+  if (e.type() == QUAD4)
+  {
+    // v and keep must be an edge (cyclically adjacent); dropping v keeps the other three vertices
+    // in their cyclic order, giving a positively-oriented TRI3
+    const int d = std::abs(lv - lk);
+    if (d != 1 && d != 3)
+      return nullptr;
+    auto tri = std::make_unique<Tri3>();
+    unsigned int j = 0;
+    for (const auto i : make_range(4u))
+      if (cast_int<int>(i) != lv)
+        tri->set_node(j++, const_cast<Node *>(e.node_ptr(i)));
+    tri->subdomain_id() = e.subdomain_id();
+    return tri;
+  }
+
+  // PYRAMID5 -> TET4 and PRISM6 -> PYRAMID5 are added in later commits.
+  return nullptr;
+}
+
+bool
+MeshRepairGenerator::collapseRedundantVertex(
+    std::unique_ptr<MeshBase> & mesh,
+    Node * v,
+    Node * keep,
+    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+    std::unordered_set<dof_id_type> & touched_nodes,
+    const Real invert_floor) const
+{
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
+  // Collapse star: all elements incident to v
+  std::set<dof_id_type> star;
+  for (const auto eid : libmesh_map_find(node_to_elems, v->id()))
+    star.insert(eid);
+
+  // Keep repairs node-disjoint within a pass
+  for (const auto eid : star)
+  {
+    const Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    for (const auto i : make_range(e->n_nodes()))
+      if (touched_nodes.count(e->node_id(i)))
+        return false;
+  }
+
+  // Partition the star: a "reducer" contains both v and keep (it loses that edge and drops to a
+  // lower type); a "mover" contains only v (v is replaced by keep in place). Build each reducer's
+  // candidate lower-order element up front and bail if any reducer cannot reduce to a supported,
+  // non-degenerate type.
+  std::vector<dof_id_type> reducer_ids, mover_ids;
+  std::map<dof_id_type, std::unique_ptr<Elem>> candidates;
+  for (const auto eid : star)
+  {
+    Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    bool has_keep = false;
+    for (const auto i : make_range(e->n_nodes()))
+      if (e->node_id(i) == keep->id())
+        has_keep = true;
+    if (has_keep)
+    {
+      auto reduced = reducedElement(*e, v->id(), keep->id());
+      if (!reduced || reduced->volume() <= invert_floor)
+        return false; // unsupported or degenerate reduction: decline, mesh unchanged
+      candidates[eid] = std::move(reduced);
+      reducer_ids.push_back(eid);
+    }
+    else
+      mover_ids.push_back(eid);
+  }
+
+  // Apply v -> keep to the movers, saving originals for rollback, and validate each stays
+  // non-degenerate and above the floor (this rejects a genuine-corner element that v would distort)
+  std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
+  bool ok = true;
+  for (const auto eid : mover_ids)
+  {
+    Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    for (const auto n : make_range(e->n_nodes()))
+      if (e->node_id(n) == v->id())
+      {
+        saved.emplace_back(e, n, e->node_ptr(n));
+        e->set_node(n, keep);
+      }
+    std::set<dof_id_type> distinct;
+    for (const auto n : make_range(e->n_nodes()))
+      distinct.insert(e->node_id(n));
+    if (distinct.size() != e->n_nodes() || e->volume() <= invert_floor)
+    {
+      ok = false;
+      break;
+    }
+  }
+  if (!ok)
+  {
+    for (auto & [e, n, orig] : saved)
+      e->set_node(n, orig);
+    return false;
+  }
+
+  // Record the star's nodes as touched (before mutating connectivity) so this pass stays disjoint
+  for (const auto eid : star)
+  {
+    const Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    for (const auto i : make_range(e->n_nodes()))
+      touched_nodes.insert(e->node_id(i));
+  }
+  touched_nodes.insert(keep->id());
+
+  // Commit each reducer: capture its side (and, in 3D, edge) boundary ids keyed by node ids with
+  // v->keep applied, add the reduced element, restore the ids onto matching sides/edges, delete old.
+  auto subKey = [&](dof_id_type id) { return id == v->id() ? keep->id() : id; };
+  for (const auto eid : reducer_ids)
+  {
+    Elem * old_elem = mesh->query_elem_ptr(eid);
+    const bool is_3d = old_elem->dim() == 3;
+
+    std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> side_bcs;
+    std::vector<boundary_id_type> ids;
+    for (const auto s : make_range(old_elem->n_sides()))
+    {
+      boundary_info.boundary_ids(old_elem, cast_int<unsigned short>(s), ids);
+      if (ids.empty())
+        continue;
+      const auto ns = old_elem->nodes_on_side(s);
+      std::vector<dof_id_type> key;
+      for (const auto i : index_range(ns))
+        key.push_back(subKey(old_elem->node_id(ns[i])));
+      std::sort(key.begin(), key.end());
+      // a side that collapsed onto the merged edge (now has a repeated node) vanishes; skip it
+      if (std::adjacent_find(key.begin(), key.end()) != key.end())
+        continue;
+      side_bcs[key].insert(ids.begin(), ids.end());
+    }
+
+    std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
+    if (is_3d)
+    {
+      std::vector<boundary_id_type> eids;
+      for (const auto ed : make_range(old_elem->n_edges()))
+      {
+        boundary_info.edge_boundary_ids(old_elem, cast_int<unsigned short>(ed), eids);
+        if (eids.empty())
+          continue;
+        const auto en = old_elem->nodes_on_edge(ed);
+        auto a = subKey(old_elem->node_id(en[0]));
+        auto b = subKey(old_elem->node_id(en[1]));
+        if (a == b)
+          continue;
+        if (a > b)
+          std::swap(a, b);
+        edge_bcs[{a, b}].insert(eids.begin(), eids.end());
+      }
+    }
+
+    boundary_info.remove(old_elem);
+    Elem * added = mesh->add_elem(std::move(candidates[eid]));
+
+    if (!side_bcs.empty())
+      for (const auto s : make_range(added->n_sides()))
+      {
+        const auto ns = added->nodes_on_side(s);
+        std::vector<dof_id_type> key;
+        for (const auto i : index_range(ns))
+          key.push_back(added->node_id(ns[i]));
+        std::sort(key.begin(), key.end());
+        auto it = side_bcs.find(key);
+        if (it != side_bcs.end())
+          for (const auto bid : it->second)
+            boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
+      }
+    if (!edge_bcs.empty())
+      for (const auto ed : make_range(added->n_edges()))
+      {
+        const auto en = added->nodes_on_edge(ed);
+        auto a = added->node_id(en[0]);
+        auto b = added->node_id(en[1]);
+        if (a > b)
+          std::swap(a, b);
+        auto it = edge_bcs.find({a, b});
+        if (it != edge_bcs.end())
+          for (const auto bid : it->second)
+            boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
+      }
+    mesh->delete_elem(old_elem);
+  }
+
+  mesh->delete_node(v);
+  return true;
+}
+
+void
+MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  // Area scale for the collapse floor (reject a reduction/move that would invert or degenerate)
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real surface_scale = std::max(
+      std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = surface_scale * _tet_collapse_volume_floor;
+
+  // Local index of a redundant vertex of a QUAD4: a vertex within flatness_tol*|a-b| of the segment
+  // between its two cyclic neighbors a,b (a short edge if it sits near an endpoint, a colinear
+  // vertex if on the interior), or -1 if none.
+  auto redundantVertex = [&](const Elem & e) -> int
+  {
+    if (e.type() != QUAD4)
+      return -1;
+    for (const auto i : make_range(4u))
+    {
+      const Point & vp = e.point(i);
+      const Point & ap = e.point((i + 3) % 4);
+      const Point & bp = e.point((i + 1) % 4);
+      const Real ab = (bp - ap).norm();
+      const Real tol = _flatness_tol * ab;
+      if (ab > 0 && geom_utils::pointSegmentDistanceSq(vp, ap, bp) < tol * tol)
+        return cast_int<int>(i);
+    }
+    return -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> quad_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (redundantVertex(*elem) >= 0)
+        quad_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto qid : quad_ids)
+    {
+      Elem * q = mesh->query_elem_ptr(qid);
+      if (!q || q->type() != QUAD4)
+        continue;
+      const int lv = redundantVertex(*q);
+      if (lv < 0)
+        continue;
+      const unsigned int i = cast_int<unsigned int>(lv);
+      Node * v = q->node_ptr(i);
+      Node * a = q->node_ptr((i + 3) % 4);
+      Node * b = q->node_ptr((i + 1) % 4);
+      const Real ab = (*b - *a).norm();
+      const Real da = (*v - *a).norm();
+      const Real db = (*v - *b).norm();
+
+      // Choose the kept node. For a short edge, merge onto the near endpoint (a sub-tolerance move,
+      // always safe). For a colinear interior vertex, removing it is conformal only if a and b are
+      // its sole element-neighbors across the whole mesh (otherwise it is a genuine junction and
+      // dropping it would leave a hanging node) - so require that and merge onto a.
+      Node * keep = nullptr;
+      if (da < _flatness_tol * ab)
+        keep = a;
+      else if (db < _flatness_tol * ab)
+        keep = b;
+      else
+      {
+        std::set<dof_id_type> nbrs;
+        for (const auto eid : libmesh_map_find(node_to_elems, v->id()))
+        {
+          const Elem * e = mesh->query_elem_ptr(eid);
+          if (!e)
+            continue;
+          const auto nv = e->n_vertices();
+          for (const auto k : make_range(nv))
+            if (e->node_id(k) == v->id())
+            {
+              nbrs.insert(e->node_id((k + 1) % nv));
+              nbrs.insert(e->node_id((k + nv - 1) % nv));
+            }
+        }
+        nbrs.erase(v->id());
+        if (nbrs.size() == 2 && nbrs.count(a->id()) && nbrs.count(b->id()))
+          keep = a;
+        else
+          continue; // genuine junction: leave the quad in place
+      }
+
+      if (collapseRedundantVertex(mesh, v, keep, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  // Count any quads that still have a redundant vertex (collapse rejected: a co-edge neighbor could
+  // not reduce, or a colinear vertex was a genuine junction)
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (redundantVertex(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of quadrilaterals collapsed to triangles: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of quadrilaterals that could not be collapsed to triangles (left in "
+                  "place): "
                << num_skipped << std::endl;
   }
 }

@@ -92,8 +92,8 @@ private:
   ///        longest-edge neighbor, keeping the surface conformal (no holes or hanging nodes). A
   ///        triangle sliver against a triangle neighbor splits that neighbor into two triangles;
   ///        otherwise the neighbor absorbs the sliver's vertices and is promoted to a quad or
-  ///        polygon. Does not handle a 2D element collapsed to a lower topology by a short edge or
-  ///        an in-plane vertex (a QUAD4 or polygon becoming an effective TRI3); not yet implemented.
+  ///        polygon. A 2D element collapsed to a lower topology by a short edge or a colinear vertex
+  ///        (a QUAD4 becoming an effective TRI3) is handled separately by repairQuadToTri.
   /// @param mesh the mesh to modify
   void repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const;
 
@@ -166,4 +166,37 @@ private:
   ///        collapsed to a PRISM6 by an edge collapse; that is not yet implemented.
   /// @param mesh the mesh to modify
   void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Build the lower-order element that results from collapsing the edge (@p v_id, @p keep_id)
+  ///        of @p e (merging v_id onto keep_id), for a supported topology reduction: QUAD4 -> TRI3,
+  ///        PYRAMID5 -> TET4 (base edge only), PRISM6 -> PYRAMID5 (vertical edge only). The returned
+  ///        element has keep_id in place of v_id, its nodes in a positively-oriented order, and the
+  ///        subdomain id of @p e. Returns nullptr if @p e's type or the collapsed edge does not map
+  ///        to a supported lower type (e.g. the two nodes are not an edge of @p e, or a pyramid
+  ///        lateral edge / prism triangle edge).
+  std::unique_ptr<Elem> reducedElement(const Elem & e, dof_id_type v_id, dof_id_type keep_id) const;
+
+  /// @brief Collapse a redundant vertex @p v onto an adjacent vertex @p keep (a short edge, or a
+  ///        colinear "not sticking out" vertex), reducing every incident element that contained both
+  ///        to a lower topology and leaving elements that contained only @p v with @p keep in its
+  ///        place. Committed only if every incident element stays valid: each reducing element must
+  ///        map to a supported lower type (via reducedElement) with positive measure above
+  ///        @p invert_floor, and each moved element must stay non-degenerate and above the floor;
+  ///        otherwise the mesh is left unchanged. Subdomain and side/edge boundary ids are carried
+  ///        onto the reduced elements, and @p v is deleted. Returns true and records the affected
+  ///        nodes in @p touched_nodes on commit.
+  bool collapseRedundantVertex(
+      std::unique_ptr<MeshBase> & mesh,
+      Node * v,
+      Node * keep,
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+      std::unordered_set<dof_id_type> & touched_nodes,
+      Real invert_floor) const;
+
+  /// @brief Repair QUAD4 elements collapsed to a triangle by a short edge or a colinear vertex, by
+  ///        collapsing the redundant vertex (QUAD4 -> TRI3). A quad is left in place if the collapse
+  ///        would leave a co-edge neighbor unreducible or inverted, or if a colinear vertex is not
+  ///        redundant in every element sharing it (which would create a hanging node).
+  /// @param mesh the mesh to modify
+  void repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const;
 };

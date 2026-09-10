@@ -93,8 +93,16 @@ The operations currently implemented are:
     neighbor, otherwise the hexahedron is left in place. (A hexahedron thin in more than one direction, or whose collapse
     would distort a shared side, is left in place and reported.)
 
-  Repairs for the fourth kind - elements collapsed to a lower topology through short edges or in-plane vertices
-  (`QUAD4` to `TRI3`, `PYRAMID5` to `TET4`, `HEX8` to `PRISM6`) - are not yet implemented.
+  - topology collapse - `QUAD4` -> `TRI3`: a quadrilateral collapsed to a triangle by a **short edge**
+    (two adjacent vertices within [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the opposite span) or a
+    **colinear vertex** (a vertex lying on the segment between its two neighbors, "not sticking out") is reduced to a
+    triangle by collapsing the redundant vertex onto a neighbor. Every element sharing the collapsed edge is retyped
+    consistently; the collapse is committed only if each such element reduces to a valid type and no element is
+    inverted, and a colinear vertex is only removed when it is redundant in every element that uses it (so no hanging
+    node is created), otherwise the quadrilateral is left in place and reported.
+
+  Topology-collapse repairs for the 3D types (`PYRAMID5` -> `TET4`, `PRISM6` -> `PYRAMID5`,
+  `HEX8` -> `PRISM6`) are not yet implemented.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 
