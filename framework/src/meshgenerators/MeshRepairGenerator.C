@@ -964,7 +964,7 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
   {
     // neighbors were invalidated
     mesh->prepare_for_use();
-    _console << "Number of sliver elements repaired: " << num_repaired << std::endl;
+    _console << "Number of 2D sliver elements repaired: " << num_repaired << std::endl;
   }
 }
 
