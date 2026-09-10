@@ -41,6 +41,15 @@ mooseKokkosMatShellMult(Mat shell, Vec x, Vec y)
 }
 
 PetscErrorCode
+mooseKokkosPreconditionerShellMult(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  LibmeshPetscCallQ(PCApply(static_cast<PC>(ctx), x, y));
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
 mooseKokkosMatShellGetDiagonal(Mat shell, Vec diag)
 {
   void * ctx;
@@ -820,6 +829,8 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     verifyKokkosLevelGalerkin();
 
     verifyKokkosMatrixFreeSymmetry();
+
+    verifyKokkosPreconditionerSymmetry();
   }
 }
 
@@ -997,6 +1008,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     verifyKokkosLevelGalerkin();
 
     verifyKokkosMatrixFreeSymmetry();
+
+    verifyKokkosPreconditionerSymmetry();
   }
 }
 
@@ -1298,6 +1311,65 @@ NonlinearSystemBase::verifyKokkosLevelGalerkin()
                  "contribution made outside that cache reaches the fine operator and no coarse "
                  "level, and surfaces here.");
   }
+}
+
+void
+NonlinearSystemBase::verifyKokkosPreconditionerSymmetry()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyPreconditionerSymmetry())
+    return;
+
+  TIME_SECTION("verifyKokkosPreconditionerSymmetry", 1);
+
+  KSP ksp;
+  LibmeshPetscCallA(comm().get(), SNESGetKSP(getSNES(), &ksp));
+  PC pc;
+  LibmeshPetscCallA(comm().get(), KSPGetPC(ksp, &pc));
+
+  // A preconditioner has to be built before it can be applied. The levels' operators are up to date
+  // by this point, so what is measured is the cycle the solve about to run will apply.
+  LibmeshPetscCallA(comm().get(), PCSetUp(pc));
+
+  // The cycle is a linear operator over the same layout the system's own operator is over
+  auto & operator_shell = libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(*_matrix_free_operator);
+
+  PetscInt local_rows, local_cols, rows, cols;
+  LibmeshPetscCallA(comm().get(), MatGetLocalSize(operator_shell.mat(), &local_rows, &local_cols));
+  LibmeshPetscCallA(comm().get(), MatGetSize(operator_shell.mat(), &rows, &cols));
+
+  Mat cycle;
+  LibmeshPetscCallA(
+      comm().get(), MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, pc, &cycle));
+  LibmeshPetscCallA(
+      comm().get(),
+      MatShellSetOperation(cycle, MATOP_MULT, (void (*)(void))mooseKokkosPreconditionerShellMult));
+
+  // One application of the whole cycle per column, which is why this is gated behind a flag
+  Mat assembled;
+  LibmeshPetscCallA(comm().get(), MatComputeOperator(cycle, MATAIJ, &assembled));
+
+  Mat asymmetry;
+  LibmeshPetscCallA(comm().get(), MatTranspose(assembled, MAT_INITIAL_MATRIX, &asymmetry));
+  LibmeshPetscCallA(comm().get(), MatAXPY(asymmetry, -1.0, assembled, DIFFERENT_NONZERO_PATTERN));
+
+  PetscReal asymmetry_norm, cycle_norm;
+  LibmeshPetscCallA(comm().get(), MatNorm(asymmetry, NORM_INFINITY, &asymmetry_norm));
+  LibmeshPetscCallA(comm().get(), MatNorm(assembled, NORM_INFINITY, &cycle_norm));
+
+  LibmeshPetscCallA(comm().get(), MatDestroy(&asymmetry));
+  LibmeshPetscCallA(comm().get(), MatDestroy(&assembled));
+  LibmeshPetscCallA(comm().get(), MatDestroy(&cycle));
+
+  const auto error = static_cast<Real>(asymmetry_norm);
+  const auto scale = static_cast<Real>(cycle_norm);
+
+  // Reported rather than enforced: whether this cycle is symmetric is the question the check exists
+  // to answer, so a nonzero result here is a measurement and not a failure
+  _console << "Kokkos p-multigrid cycle of system '" << name()
+           << "': differs from its transpose by " << error << " absolute, "
+           << error / std::max(scale, TOLERANCE) << " relative to its norm of " << scale << std::endl;
 }
 
 void

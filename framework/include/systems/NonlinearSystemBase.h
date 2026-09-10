@@ -418,6 +418,13 @@ public:
   void verifyKokkosEntityBlocks();
 
   /**
+   * Check that the cycle the p-multigrid preconditioner applies is symmetric, which is what CG
+   * requires of it, by forming it explicitly and comparing it against its transpose, and report the
+   * result
+   */
+  void verifyKokkosPreconditionerSymmetry();
+
+  /**
    * Get the number of entity blocks this process holds for the smoother
    * @returns The number of blocks
    */
