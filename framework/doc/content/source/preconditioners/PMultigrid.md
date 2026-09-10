@@ -32,6 +32,24 @@ element basis function in the finer element basis, so a transfer depends on the 
 bases alone and is built once at initial setup. Setting `verify_level_transfers` checks the transpose
 relationship of each transfer there, at the cost of one application of each direction.
 
+## Symmetry and the outer Krylov method
+
+For a steady system the operator is symmetric whenever the linearization it contracts is, which makes
+CG a valid outer Krylov accelerator over the hierarchy. Symmetry follows from eliminating each degree
+of freedom a Dirichlet boundary condition pins: its own row carries the identity, and its prescribed
+value reaches every other row as data rather than as an unknown, so the matching column carries
+nothing for the identity row to have to match. Setting `verify_operator_symmetry` measures the solver
+system's own matrix-free operator against its transpose after every linearization, at the cost of one
+operator application per degree of freedom, which makes it a verification aid for small inputs. A
+solve that asks for CG should ask for this check alongside it.
+
+A transient system carries the constrained columns, and with them an asymmetric operator. Its time
+integrator forms the solution time derivative from the solution as the solver hands it over, so the
+mass contribution to every row reads the pinned degree of freedom's own iterate value, and the
+operator carries the matching column to remain the linearization of that residual. Requesting
+`verify_operator_symmetry` for a transient system with Dirichlet-constrained degrees of freedom
+reports an error; such a system is preconditioned with GMRES as the outer Krylov method.
+
 ## Example Input File Syntax
 
 !listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid.i block=Preconditioning

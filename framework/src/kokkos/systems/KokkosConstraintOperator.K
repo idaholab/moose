@@ -73,13 +73,30 @@ ConstraintOperator::setup(const libMesh::DofMap & dof_map,
 void
 ConstraintOperator::presetSolution(Vector & solution)
 {
+  _preset_only = true;
+
+  constrainSolution(solution);
+}
+
+void
+ConstraintOperator::enforceConstraints(Vector & solution)
+{
+  _preset_only = false;
+
+  constrainSolution(solution);
+}
+
+void
+ConstraintOperator::constrainSolution(Vector & solution)
+{
   if (!_rows.size())
     return;
 
   _vector = solution;
 
   ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, PresetLoop>(0, _rows.size()),
+      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ConstrainLoop>(0,
+                                                                                     _rows.size()),
       *this);
   ::Kokkos::fence();
 }
@@ -94,7 +111,8 @@ ConstraintOperator::finalizeResidual(Vector & residual, const Vector & solution)
   _vector2 = solution;
 
   ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ResidualLoop>(0, _rows.size()),
+      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ResidualLoop>(0,
+                                                                                    _rows.size()),
       *this);
   ::Kokkos::fence();
 }
@@ -124,23 +142,24 @@ ConstraintOperator::finalizeDiagonal(Vector & diagonal, const Real value)
   _value = value;
 
   ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, DiagonalLoop>(0, _rows.size()),
+      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, DiagonalLoop>(0,
+                                                                                    _rows.size()),
       *this);
   ::Kokkos::fence();
 }
 
 KOKKOS_FUNCTION void
-ConstraintOperator::operator()(PresetLoop, const ThreadID tid) const
+ConstraintOperator::operator()(ConstrainLoop, const ThreadID tid) const
 {
-  const auto row = _rows[tid];
+  if (_preset_only && !_row_preset[tid])
+    return;
 
   Real v = _inhomogeneity[tid];
 
   for (auto k = _row_offsets[tid]; k < _row_offsets[tid + 1]; ++k)
     v += _coeffs[k] * _vector[_cols[k]];
 
-  if (_row_preset[tid])
-    _vector[row] = v;
+  _vector[_rows[tid]] = v;
 }
 
 KOKKOS_FUNCTION void
@@ -162,9 +181,9 @@ KOKKOS_FUNCTION void
 ConstraintOperator::operator()(JVPLoop, const ThreadID tid) const
 {
   // The row's own constraint equation's directional derivative, x_i - sum_j c_ij x_j, with no
-  // distinction between a preset and a non-preset row: a kernel's own coupling of this DOF's
-  // direction into a neighboring free row's action is legitimate physics regardless of preset, and
-  // is untouched by this loop, which only replaces this row's own action.
+  // distinction between a preset and a non-preset row. This loop only replaces this row's own
+  // action; a free row's action never carried this DOF's direction in the first place, since the
+  // operator leaves a constrained DOF out of its trial-space gather.
   Real v = _vector2[_rows[tid]];
 
   for (auto k = _row_offsets[tid]; k < _row_offsets[tid + 1]; ++k)

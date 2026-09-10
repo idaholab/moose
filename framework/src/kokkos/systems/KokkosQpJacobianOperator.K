@@ -78,8 +78,18 @@ QpJacobianOperator::operator()(ApplyLoop, const ThreadID tid) const
 
   const auto num_dofs = basis.numDofs();
 
-  const auto gather = [&](const unsigned int j)
-  { return _level.getDofValue(_level.getElemLocalDofIndex(elem, j, var), _x_tag); };
+  // Where the level eliminates a fixed column, that row's value is not an unknown of the
+  // linearization and its direction is zero, so leaving it out of the trial-space gather is what
+  // makes the action this loop applies symmetric whenever the linearization it contracts is, and
+  // makes this loop and the MatrixLoop below the same operator. Where the level does not, the
+  // residual being linearized still reads that row, and dropping it here would make the action
+  // disagree with the residual instead.
+  const auto gather = [&](const unsigned int j) -> Real
+  {
+    const auto dof = _level.getElemLocalDofIndex(elem, j, var);
+
+    return _level.isEliminatedColumn(dof) ? 0.0 : _level.getDofValue(dof, _x_tag);
+  };
 
   Real local_y[MAX_CACHED_DOF];
 
@@ -199,10 +209,10 @@ QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
       auto col = _level.getElemLocalDofIndex(elem, j, var);
 
       // Skipping a fixed column as well as a fixed row makes the assembled matrix symmetric
-      // whenever the fine linearization is, which the matrix-free apply() above does not need to
-      // do: every vector this operator legitimately acts on is already zero on a fixed row (the
-      // hierarchy carries only corrections that vanish there), so the entries this omits never
-      // act in a real cycle
+      // whenever the linearization it contracts is. Only a p-multigrid level assembles a matrix,
+      // and a level always eliminates its fixed columns, so this is the same elimination apply()
+      // above makes in its trial-space gather and the two are one operator in assembled and
+      // matrix-free form.
       if (_level.isConstrained(col))
         continue;
 
