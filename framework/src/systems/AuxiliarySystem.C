@@ -43,22 +43,22 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _aux_scalar_storage(_app.getExecuteOnEnum()),
-    _nodal_aux_storage(_app.getExecuteOnEnum()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_array_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum())
+    _aux_scalar_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _elemental_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _nodal_array_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _elemental_array_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads())
 #ifdef MOOSE_KOKKOS_ENABLED
     ,
-    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum()),
-    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum())
+    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
+    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads())
 #endif
 {
-  _nodal_vars.resize(libMesh::n_threads());
-  _elem_vars.resize(libMesh::n_threads());
+  _nodal_vars.resize(this->n_threads());
+  _elem_vars.resize(this->n_threads());
 
   if (!_fe_problem.defaultGhosting())
   {
@@ -86,7 +86,7 @@ AuxiliarySystem::initialSetup()
   _current_solution = _sys.current_local_solution.get();
   LinearFVGradientManager::initializeLinearFVGradientStorage();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
     _aux_scalar_storage.initialSetup(tid);
@@ -148,7 +148,7 @@ AuxiliarySystem::timestepSetup()
 {
   SystemBase::timestepSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
     _nodal_aux_storage.timestepSetup(tid);
@@ -171,7 +171,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
 {
   SystemBase::customSetup(exec_type);
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.customSetup(exec_type, tid);
     _nodal_aux_storage.customSetup(exec_type, tid);
@@ -194,7 +194,7 @@ AuxiliarySystem::subdomainSetup()
 {
   SystemBase::subdomainSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
     _nodal_aux_storage.subdomainSetup(tid);
@@ -212,7 +212,7 @@ AuxiliarySystem::jacobianSetup()
 {
   SystemBase::jacobianSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
     _nodal_aux_storage.jacobianSetup(tid);
@@ -235,7 +235,7 @@ AuxiliarySystem::residualSetup()
 {
   SystemBase::residualSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->n_threads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
     _nodal_aux_storage.residualSetup(tid);
@@ -286,7 +286,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
   if (var_type == "MooseVariableScalar")
     return;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
   {
     if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
     {
@@ -332,7 +332,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
   {
     const auto & base = parameters.getBase();
     if (base == "AuxKernel" || base == "Bounds")
@@ -389,7 +389,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
   {
     std::shared_ptr<AuxScalarKernel> kernel =
         _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
@@ -830,7 +830,7 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           {
             ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
                 _fe_problem, mortar_nodal_warehouse, bnd_id, index);
-            Threads::parallel_reduce(bnd_nodes, mnabt);
+            Threads::parallel_reduce(bnd_nodes, mnabt, this->n_threads());
           }
           catch (MooseException & e)
           {
@@ -943,7 +943,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, true);
       try
       {
-        Threads::parallel_reduce(range, eavt);
+        Threads::parallel_reduce(range, eavt, this->n_threads());
       }
       catch (MooseException & e)
       {
@@ -971,7 +971,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, warehouse, true);
       try
       {
-        Threads::parallel_reduce(bnd_elems, eabt);
+        Threads::parallel_reduce(bnd_elems, eabt, this->n_threads());
       }
       catch (MooseException & e)
       {
@@ -1000,7 +1000,7 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       ComputeNodalAuxVarsThread<AuxKernelType> navt(_fe_problem, warehouse);
-      Threads::parallel_reduce(range, navt);
+      Threads::parallel_reduce(range, navt, this->n_threads());
 
       solution().close();
       _sys.update();
@@ -1017,7 +1017,7 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
       ComputeNodalAuxBcsThread<AuxKernelType> nabt(_fe_problem, warehouse);
-      Threads::parallel_reduce(bnd_nodes, nabt);
+      Threads::parallel_reduce(bnd_nodes, nabt, this->n_threads());
 
       solution().close();
       _sys.update();

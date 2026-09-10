@@ -34,7 +34,9 @@ public:
    * Constructor.
    * @param threaded True enables threaded object storage (default).
    */
-  ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, bool threaded = true);
+  ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags,
+                              bool threaded = true,
+                              THREAD_ID num_threads = libMesh::n_threads());
 
   virtual ~ExecuteMooseObjectWarehouse();
 
@@ -103,12 +105,13 @@ protected:
 
 template <typename T>
 ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags,
-                                                            bool threaded)
-  : MooseObjectWarehouse<T>(threaded)
+                                                            bool threaded,
+                                                            THREAD_ID num_threads)
+  : MooseObjectWarehouse<T>(threaded, num_threads)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
   for (const auto & flag : flags.items())
-    _execute_objects.insert(std::make_pair(flag, MooseObjectWarehouse<T>(threaded)));
+    _execute_objects.insert(std::make_pair(flag, MooseObjectWarehouse<T>(threaded, num_threads)));
 }
 
 template <typename T>

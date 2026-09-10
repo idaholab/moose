@@ -61,7 +61,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _show_chain_control_data(false),
     _typed_vector_tags(2)
 {
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = this->n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
 
@@ -76,6 +76,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
 }
 
 SubProblem::~SubProblem() {}
+
+THREAD_ID
+SubProblem::n_threads() const { return getMooseApp().n_threads(); }
 
 TagID
 SubProblem::addVectorTag(const TagName & tag_name,
@@ -1174,7 +1177,7 @@ SubProblem::automaticScaling() const
 void
 SubProblem::hasScalingVector(const unsigned int nl_sys_num)
 {
-  for (const THREAD_ID tid : make_range(libMesh::n_threads()))
+  for (const THREAD_ID tid : make_range(n_threads()))
     assembly(tid, nl_sys_num).hasScalingVector();
 }
 
@@ -1340,7 +1343,7 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 void
 SubProblem::preparePRefinement()
 {
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(n_threads()))
     for (const auto s : make_range(numNonlinearSystems()))
       assembly(tid, s).preparePRefinement();
 }
