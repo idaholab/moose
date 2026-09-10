@@ -187,10 +187,10 @@ PMultigrid::setupSolver()
     PC smoother_pc;
     LibmeshPetscCall(KSPGetPC(smoother, &smoother_pc));
 
-    // The coarsest level is solved directly; every other level (including the finest, set below)
-    // is smoothed. None of these operators carry matrix entries except the assembled coarsest
-    // one, so the smoother and coarse solver defaults below are the ones that apply to a shell:
-    // Jacobi rather than SOR, and algebraic multigrid rather than a direct factorization.
+    // The coarsest level is solved; every other level (including the finest, set below) is
+    // smoothed. None of these operators carry matrix entries except the assembled coarsest one, so
+    // the defaults below are the ones that apply to a shell: Jacobi rather than SOR, and algebraic
+    // multigrid rather than a direct factorization.
     if (i)
     {
       LibmeshPetscCall(KSPSetType(smoother, KSPCHEBYSHEV));
@@ -198,7 +198,15 @@ PMultigrid::setupSolver()
     }
     else
     {
-      LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
+      // Iterate the coarse level to convergence rather than applying one multigrid cycle to it. A
+      // single cycle leaves a coarse-grid correction the outer Krylov method then has to repair on
+      // every subsequent iteration, which costs iteration counts that grow with the fine order: on
+      // a 4x4 mesh at order 8 over levels 1, 2 and 4, one cycle needs 144 iterations to reach a
+      // linear tolerance of 1e-8 where a converged coarse solve needs 88, matching what a direct
+      // factorization of that level achieves. CG is the accelerator here because the coarsest
+      // level's assembled operator is symmetric, which verifyKokkosLevelMatrices() measures.
+      LibmeshPetscCall(KSPSetType(smoother, KSPCG));
+      LibmeshPetscCall(KSPSetTolerances(smoother, 1e-10, PETSC_DEFAULT, PETSC_DEFAULT, 200));
       LibmeshPetscCall(PCSetType(smoother_pc, PCGAMG));
     }
 
