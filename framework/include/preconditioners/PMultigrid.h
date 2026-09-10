@@ -74,6 +74,9 @@ protected:
   /// The polynomial order of each coarse level, ascending; the fine level is not listed
   const std::vector<unsigned int> _level_orders;
 
+  /// Whether a smoothed level inverts its entity blocks rather than the operator diagonal
+  const bool _entity_block_smoother;
+
   /// Whether each level's operator is to be checked against its diagonal
   const bool _verify_level_operators;
 

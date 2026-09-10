@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDofSpace.h"
+#include "KokkosEntityBlocks.h"
 #include "KokkosMatrix.h"
 #include "KokkosVector.h"
 
@@ -191,6 +192,41 @@ public:
   void zeroConstrained(libMesh::NumericVector<Number> & x);
 
   /**
+   * Build the level's entity-block decomposition, which its smoother inverts in place of the
+   * operator diagonal. Must be called once the level's DOF layout exists.
+   */
+  void initEntityBlocks();
+
+  /**
+   * Get the number of entity blocks the level carries, over all processes
+   * @returns The number of blocks
+   */
+  dof_id_type numEntityBlocks() const { return _num_entity_blocks; }
+
+  /**
+   * Get the size of the largest entity block the level carries, over all processes
+   * @returns The largest block size
+   */
+  unsigned int maxEntityBlockSize() const { return _max_entity_block_size; }
+
+  /**
+   * Install the level's entity-block smoother on a preconditioner, as a shell whose setup rebuilds
+   * the blocks from the current linearization and whose application inverts them
+   * @param pc The preconditioner of the level's smoother
+   */
+  void setupBlockSmootherPC(PC pc);
+
+  /**
+   * Entry points of the level's entity-block smoother shell
+   */
+  ///@{
+  /// Rebuild and refactor the blocks from the linearization the cache holds
+  void setupBlockSmoother();
+  /// Apply the inverse of every block to a residual
+  void applyBlockSmoother(Vec r, Vec x);
+  ///@}
+
+  /**
    * Get the level's device DOF layout
    * @returns The DOF layout
    */
@@ -306,6 +342,15 @@ private:
 
   /// The number of DOFs the level holds fixed, over all processes
   dof_id_type _num_constrained_dofs = 0;
+
+  /// The level's entity-block decomposition, built only when its smoother inverts the blocks
+  EntityBlocks _blocks;
+
+  /// The number of entity blocks the level carries, over all processes
+  dof_id_type _num_entity_blocks = 0;
+
+  /// The size of the largest entity block the level carries, over all processes
+  unsigned int _max_entity_block_size = 0;
 
   /// The level's assembled operator, which only a level that assembles carries
   libMesh::SparseMatrix<Number> * _matrix_object = nullptr;

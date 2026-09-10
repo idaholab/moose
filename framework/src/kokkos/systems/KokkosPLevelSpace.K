@@ -50,6 +50,24 @@ levelMatGetDiagonal(Mat shell, Vec diagonal)
 }
 
 PetscErrorCode
+levelPCSetUp(PC pc)
+{
+  void * ctx;
+  LibmeshPetscCallQ(PCShellGetContext(pc, &ctx));
+  static_cast<PLevelSpace *>(ctx)->setupBlockSmoother();
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
+levelPCApply(PC pc, Vec r, Vec x)
+{
+  void * ctx;
+  LibmeshPetscCallQ(PCShellGetContext(pc, &ctx));
+  static_cast<PLevelSpace *>(ctx)->applyBlockSmoother(r, x);
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
 levelMatInterpolate(Mat shell, Vec x, Vec y)
 {
   void * ctx;
@@ -506,6 +524,76 @@ PLevelSpace::diagonalToVec(Vec diagonal)
   libMesh::PetscVector<Number> diagonal_wrap(diagonal, _sys.comm());
 
   this->diagonal(cache(), diagonal_wrap);
+}
+
+void
+PLevelSpace::initEntityBlocks()
+{
+  _blocks.init(dofSpace(), _sys.get_mesh(), _constrained_dof);
+
+  _num_entity_blocks = _blocks.numBlocks();
+  _max_entity_block_size = _blocks.maxBlockSize();
+
+  _sys.comm().sum(_num_entity_blocks);
+  _sys.comm().max(_max_entity_block_size);
+}
+
+void
+PLevelSpace::setupBlockSmootherPC(const PC pc)
+{
+  mooseAssert(_blocks.isBuilt(), "This p-multigrid level has no entity-block decomposition.");
+
+  LibmeshPetscCallA(_sys.comm().get(), PCSetType(pc, PCSHELL));
+  LibmeshPetscCallA(_sys.comm().get(), PCShellSetContext(pc, this));
+  LibmeshPetscCallA(_sys.comm().get(), PCShellSetName(pc, "entity-block Schwarz"));
+  LibmeshPetscCallA(_sys.comm().get(), PCShellSetSetUp(pc, levelPCSetUp));
+  LibmeshPetscCallA(_sys.comm().get(), PCShellSetApply(pc, levelPCApply));
+}
+
+void
+PLevelSpace::setupBlockSmoother()
+{
+  // The blocks hold entries rather than reading the cache when they are applied, so they are rebuilt
+  // here, which PETSc calls whenever the operator this preconditioner is built on has changed
+  _blocks.zero();
+
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+
+  op.assembleBlocks(_blocks);
+
+  _blocks.factor();
+}
+
+void
+PLevelSpace::applyBlockSmoother(Vec r, Vec x)
+{
+  libMesh::PetscVector<Number> residual(r, _sys.comm());
+  libMesh::PetscVector<Number> correction(x, _sys.comm());
+
+  // A row no block covers is a row the level holds fixed, where the operator carries the identity,
+  // so seeding the correction with the residual is what makes the smoother carry it there too. Every
+  // other row is overwritten by its block's solve below.
+  correction = residual;
+
+  // PETSc hands the preconditioner its input locked against write access, and wrapping a vector for
+  // device access takes a writable array of it, so the residual is read through the level's own work
+  // vector, as an operator application reads its input
+  *_x = residual;
+
+  _vectors[X].create(*_x, dofSpace(), false);
+  _vectors[X].copyToDevice();
+  _vectors[Y].create(correction, dofSpace(), false);
+  _vectors[Y].copyToDevice();
+
+  _vectors.copyToDevice();
+
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+
+  op.applyBlocks(_blocks, X, Y);
+
+  _vectors[Y].copyToHost();
+  _vectors[Y].restore();
+  _vectors[X].restore();
 }
 
 void

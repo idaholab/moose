@@ -56,21 +56,22 @@ class EntityBlocks
 {
 public:
   /**
-   * Build the decomposition. The system's DOFs must already be distributed.
-   * @param dof_space The device DOF layout the blocks are indexed by
-   * @param system The libMesh system whose DOF map associates DOFs with mesh entities
+   * Build the decomposition. The DOFs of the layout's system must already be distributed.
+   * @param dof_space The device DOF layout the blocks are indexed by, whose DOF map associates each
+   * DOF with the mesh entity carrying it
+   * @param mesh The mesh whose entities are walked
    * @param constrained_dof Local-plus-ghost mask of the rows the level holds fixed, which may be
    * unallocated when the level constrains no row
    */
   void init(const DofSpace & dof_space,
-            const libMesh::System & system,
+            const libMesh::MeshBase & mesh,
             const Array<bool> & constrained_dof);
 
   /**
    * Get whether the decomposition has been built
    * @returns Whether the decomposition has been built
    */
-  bool isAlloc() const { return _block_size.isAlloc(); }
+  bool isBuilt() const { return _built; }
 
   /**
    * Get the number of blocks this process holds
@@ -199,6 +200,11 @@ public:
 #endif
 
 private:
+  /**
+   * Whether the decomposition has been built
+   */
+  bool _built = false;
+
   /**
    * Number of blocks this process holds
    */
