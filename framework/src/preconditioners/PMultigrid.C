@@ -35,6 +35,20 @@ PMultigrid::validParams()
       "The polynomial order of each coarse level, ascending. The fine level is the solver system's "
       "own order and is not listed.");
 
+  MooseEnum smoother("point_jacobi entity_block", "point_jacobi");
+
+  params.addParam<MooseEnum>(
+      "smoother",
+      smoother,
+      "The smoother applied on each level that is smoothed rather than solved. 'point_jacobi' "
+      "reads "
+      "the operator diagonal alone, which at high order ignores the coupling among the many basis "
+      "functions an element carries. 'entity_block' inverts the block of degrees of freedom each "
+      "mesh entity carries -- an element's interior modes, and each shared face, edge and vertex "
+      "-- "
+      "which is what reaches the modes a point smoother cannot damp and the coarse spaces do not "
+      "represent.");
+
   params.addParam<bool>(
       "verify_level_operators",
       false,
@@ -83,6 +97,7 @@ PMultigrid::validParams()
 PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
+    _entity_block_smoother(getParam<MooseEnum>("smoother") == "entity_block"),
     _verify_level_operators(getParam<bool>("verify_level_operators")),
     _verify_level_transfers(getParam<bool>("verify_level_transfers")),
     _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
@@ -133,6 +148,18 @@ PMultigrid::initialSetup()
     _console << "  p = " << level->order() << ": " << level->system().n_dofs() << " dofs, "
              << level->numConstrainedDofs() << " constrained by nodal boundary conditions\n";
   }
+
+  // The coarsest level is solved rather than smoothed, so it needs no blocks; the orders ascend, so
+  // that is the first
+  if (_entity_block_smoother)
+    for (const auto i : index_range(_levels))
+      if (i)
+      {
+        _levels[i]->initEntityBlocks();
+
+        _console << "  p = " << _levels[i]->order() << ": " << _levels[i]->numEntityBlocks()
+                 << " entity blocks, largest " << _levels[i]->maxEntityBlockSize() << " dofs\n";
+      }
 
   _console << "  fine: " << _nl.system().n_dofs() << " dofs\n" << std::endl;
 
@@ -194,7 +221,11 @@ PMultigrid::setupSolver()
     if (i)
     {
       LibmeshPetscCall(KSPSetType(smoother, KSPCHEBYSHEV));
-      LibmeshPetscCall(PCSetType(smoother_pc, PCJACOBI));
+
+      if (_entity_block_smoother)
+        _levels[i]->setupBlockSmootherPC(smoother_pc);
+      else
+        LibmeshPetscCall(PCSetType(smoother_pc, PCJACOBI));
     }
     else
     {

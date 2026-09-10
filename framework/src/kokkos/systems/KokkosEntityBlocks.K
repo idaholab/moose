@@ -26,11 +26,11 @@ namespace Moose::Kokkos
 
 void
 EntityBlocks::init(const DofSpace & dof_space,
-                   const libMesh::System & system,
+                   const libMesh::MeshBase & mesh,
                    const Array<bool> & constrained_dof)
 {
-  const auto & dof_map = system.get_dof_map();
-  const auto sys_num = system.number();
+  const auto & dof_map = dof_space.getDofMap();
+  const auto sys_num = dof_map.sys_number();
   const auto first_dof = dof_map.first_dof();
   const auto end_dof = dof_map.end_dof();
   const auto num_vars = dof_space.getNumVars();
@@ -77,7 +77,7 @@ EntityBlocks::init(const DofSpace & dof_space,
   // node is shared between elements, so it is taken the first time it is reached.
   std::set<dof_id_type> visited;
 
-  for (const auto * const elem : system.get_mesh().active_local_element_ptr_range())
+  for (const auto * const elem : mesh.active_local_element_ptr_range())
   {
     for (const auto var : make_range(num_vars))
       add_entity(*elem, var);
@@ -147,6 +147,8 @@ EntityBlocks::init(const DofSpace & dof_space,
   _block_dofs.copyToDevice();
   _block_of_dof.copyToDevice();
   _pos_of_dof.copyToDevice();
+
+  _built = true;
 }
 
 void
