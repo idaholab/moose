@@ -20,13 +20,19 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["mathtext.fontset"] = "dejavuserif"
 ###############################################
 
-EXP_high = np.genfromtxt(os.path.join(DATA, "T_EXP_HIGH.csv"), skip_header=0, delimiter=",")
-EXP_low = np.genfromtxt(os.path.join(DATA, "T_EXP_LOW.csv"), skip_header=0, delimiter=",")
+EXP_high = np.genfromtxt(
+    os.path.join(DATA, "T_EXP_HIGH.csv"), skip_header=0, delimiter=","
+)
+EXP_low = np.genfromtxt(
+    os.path.join(DATA, "T_EXP_LOW.csv"), skip_header=0, delimiter=","
+)
 SCM_hign = (
-    np.genfromtxt(output_path("FFM-5B_high_out.csv"), skip_header=2, delimiter=",") - 273.15
+    np.genfromtxt(output_path("FFM-5B_high_out.csv"), skip_header=2, delimiter=",")
+    - 273.15
 )
 SCM_low = (
-    np.genfromtxt(output_path("FFM-5B_low_out.csv"), skip_header=2, delimiter=",") - 273.15
+    np.genfromtxt(output_path("FFM-5B_low_out.csv"), skip_header=2, delimiter=",")
+    - 273.15
 )
 
 plt.figure()

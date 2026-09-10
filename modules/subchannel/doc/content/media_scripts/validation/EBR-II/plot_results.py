@@ -20,23 +20,37 @@ def output_path(name):
 
 
 EXP = np.genfromtxt(os.path.join(DATA, "TTC-31_EXP.csv"), skip_header=1, delimiter=",")
-EXP45 = np.genfromtxt(os.path.join(DATA, "TTC-31_EXP45.csv"), skip_header=1, delimiter=",")
+EXP45 = np.genfromtxt(
+    os.path.join(DATA, "TTC-31_EXP45.csv"), skip_header=1, delimiter=","
+)
 TTC_EXP = np.genfromtxt(os.path.join(DATA, "TTC_EXP.csv"), skip_header=1, delimiter=",")
-TTC_EXP45 = np.genfromtxt(os.path.join(DATA, "TTC_EXP45.csv"), skip_header=1, delimiter=",")
-TTC_DASSH = np.genfromtxt(os.path.join(DATA, "TTC_DASSH.csv"), skip_header=1, delimiter=",")
-NETFLOW = np.genfromtxt(os.path.join(DATA, "TTC-31_NETFLOW.csv"), skip_header=1, delimiter=",")
+TTC_EXP45 = np.genfromtxt(
+    os.path.join(DATA, "TTC_EXP45.csv"), skip_header=1, delimiter=","
+)
+TTC_DASSH = np.genfromtxt(
+    os.path.join(DATA, "TTC_DASSH.csv"), skip_header=1, delimiter=","
+)
+NETFLOW = np.genfromtxt(
+    os.path.join(DATA, "TTC-31_NETFLOW.csv"), skip_header=1, delimiter=","
+)
 NETFLOW45 = np.genfromtxt(
     os.path.join(DATA, "TTC-31_NETFLOW45.csv"), skip_header=1, delimiter=","
 )
-TTC31_TR17 = np.genfromtxt(output_path("XX09_SCM_TR17_out.csv"), skip_header=2, delimiter=",")
+TTC31_TR17 = np.genfromtxt(
+    output_path("XX09_SCM_TR17_out.csv"), skip_header=2, delimiter=","
+)
 TTC31_TR45R = np.genfromtxt(
     output_path("XX09_SCM_TR45R_out.csv"), skip_header=2, delimiter=","
 )
-TTC17 = np.genfromtxt(output_path("XX09_SCM_SS17_out.csv"), skip_header=2, delimiter=",")
+TTC17 = np.genfromtxt(
+    output_path("XX09_SCM_SS17_out.csv"), skip_header=2, delimiter=","
+)
 TTC17_corrected = np.genfromtxt(
     output_path("XX09_SCM_SS17_corrected_out.csv"), skip_header=2, delimiter=","
 )
-TTC45R = np.genfromtxt(output_path("XX09_SCM_SS45R_out.csv"), skip_header=2, delimiter=",")
+TTC45R = np.genfromtxt(
+    output_path("XX09_SCM_SS45R_out.csv"), skip_header=2, delimiter=","
+)
 TTC45R_corrected = np.genfromtxt(
     output_path("XX09_SCM_SS45R_corrected_out.csv"), skip_header=2, delimiter=","
 )

@@ -87,10 +87,6 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
   Real k1T, k2T, k3T, CfT;
   // Transient range parameters
   Real CbL1, CbL2, CbT1, CbT2;
-  // wire sweep coefficient parameters
-  Real a, b;
-  // wire Drag coefficient parameters
-  Real CwT1, CwT2, CwT3, CwT4;
   // Ratio of laminar over turbulent drag and sweep coefficients
   Real CwL1, CwL2;
   // interpolation exponent
@@ -202,10 +198,11 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
         std::acos(wire_lead_length /
                   std::sqrt(Utility::pow<2>(wire_lead_length) +
                             Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
-    CwT1 = 19.56;
-    CwT2 = -98.71;
-    CwT3 = 303.47;
-    CwT4 = -0.541;
+    // wire Drag coefficient parameters
+    const Real CwT1 = 19.56;
+    const Real CwT2 = -98.71;
+    const Real CwT3 = 303.47;
+    const Real CwT4 = -0.541;
     CwL1 = 1.4;
     CwL2 = 1.0;
     // Drag coefficient
@@ -213,8 +210,9 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
                       CwT3 * Utility::pow<2>((wire_diameter / pin_diameter))) *
                      std::pow((wire_lead_length / pin_diameter), CwT4);
     const auto WdL = CwL1 * WdT;
-    a = -11;
-    b = 19;
+    // wire sweep coefficient parameters
+    const Real a = -11;
+    const Real b = 19;
     // Sweep coefficient
     const auto WsT = a * std::log10(wire_lead_length / pin_diameter) + b;
     const auto WsL = CwL2 * WsT;
