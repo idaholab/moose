@@ -342,6 +342,14 @@
     requirement = "The system shall leave a quadrilateral in place when collapsing its colinear vertex would leave a hanging node in an element that genuinely uses that vertex."
     mesh_mode = 'replicated'
   []
+  [repair_polygon_collapse]
+    type = RunApp
+    input = repair_polygon_collapse.i
+    expect_out = 'redundant polygon vertices collapsed: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce polygons sharing a redundant vertex to lower-sided polygons by collapsing that vertex, when every element sharing it is a polygon."
+    mesh_mode = 'replicated'
+  []
   [repair_pyramid_to_tet]
     type = RunApp
     input = repair_pyramid_to_tet.i

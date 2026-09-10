@@ -103,7 +103,9 @@ The operations currently implemented are:
     triangle by collapsing the redundant vertex onto a neighbor. Every element sharing the collapsed edge is retyped
     consistently; the collapse is committed only if each such element reduces to a valid type and no element is
     inverted, and a colinear vertex is only removed when it is redundant in every element that uses it (so no hanging
-    node is created), otherwise the quadrilateral is left in place and reported.
+    node is created), otherwise the quadrilateral is left in place and reported. A `C0POLYGON` with a redundant
+    vertex is likewise reduced to an `(n-1)`-sided polygon, but only when every element sharing that vertex is itself a
+    polygon, so all reduce onto polygons together.
 
   - topology collapse - `PYRAMID5` -> `TET4`: a pyramid whose quad base has a redundant vertex (a short
     base edge or a colinear base vertex) is reduced to a tetrahedron by collapsing that base vertex, so the base

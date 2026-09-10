@@ -78,8 +78,9 @@ MeshRepairGenerator::validParams()
       "of opposite faces, and a HEX8 sliver (thin in two dimensions, a column) is collapsed onto "
       "its long axis. Each repair keeps the mesh conformal, or leaves the element in place if "
       "no valid repair exists. An element collapsed to a lower topology by a short edge or a "
-      "colinear vertex is reduced to that lower type: QUAD4 to TRI3, PYRAMID5 to TET4, PRISM6 to "
-      "PYRAMID5, and (for a lateral face pinched to an edge) HEX8 to PRISM6.");
+      "colinear vertex is reduced to that lower type: QUAD4 to TRI3, a C0POLYGON to an (n-1)-sided "
+      "polygon (only onto other polygons), PYRAMID5 to TET4, PRISM6 to PYRAMID5, and (for a lateral "
+      "face pinched to an edge) HEX8 to PRISM6.");
   params.addRangeCheckedParam<Real>(
       "zero_area_fraction",
       1e-10,
@@ -193,6 +194,7 @@ MeshRepairGenerator::generate()
 
     // Topology collapses: reduce an element to a lower type by collapsing a short/colinear edge
     repairQuadToTri(mesh);
+    repairPolygonCollapse(mesh);
     repairPyramidToTet(mesh);
     repairPrismToPyramid(mesh);
     repairHexToPrism(mesh);
@@ -2199,6 +2201,26 @@ MeshRepairGenerator::reducedElement(const Elem & e, dof_id_type v_id, dof_id_typ
     return tri;
   }
 
+  if (e.type() == libMesh::C0POLYGON)
+  {
+    // Drop the redundant vertex, keeping the other n-1 vertices in cyclic order -> an (n-1)-sided
+    // polygon. v and keep must be an edge (cyclically adjacent), and the result must still have at
+    // least three sides.
+    const int n = cast_int<int>(e.n_vertices());
+    if (n < 4)
+      return nullptr;
+    const int d = std::abs(lv - lk);
+    if (d != 1 && d != n - 1)
+      return nullptr;
+    auto poly = std::make_unique<libMesh::C0Polygon>(n - 1);
+    unsigned int j = 0;
+    for (const auto i : make_range(cast_int<unsigned int>(n)))
+      if (cast_int<int>(i) != lv)
+        poly->set_node(j++, const_cast<Node *>(e.node_ptr(i)));
+    poly->subdomain_id() = e.subdomain_id();
+    return poly;
+  }
+
   if (e.type() == PYRAMID5)
   {
     // Base nodes 0-3 (quad), apex 4. Only a base-edge collapse yields a valid tet: drop the base
@@ -2575,6 +2597,150 @@ MeshRepairGenerator::repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const
       _console << "Number of quadrilaterals that could not be collapsed to triangles (left in "
                   "place): "
                << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairPolygonCollapse(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real surface_scale =
+      std::max(std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)),
+               Real(1e-30));
+  const Real invert_floor = surface_scale * _tet_collapse_volume_floor;
+
+  // Local index of a redundant vertex of a C0POLYGON (within flatness_tol*|a-b| of the segment
+  // between its two cyclic neighbors a,b: a short edge near an endpoint, or a colinear vertex on
+  // the interior), or -1. Only a polygon with more than three sides can lose a vertex and remain a
+  // polygon.
+  auto redundantVertex = [&](const Elem & e) -> int
+  {
+    if (e.type() != libMesh::C0POLYGON || e.n_vertices() < 4)
+      return -1;
+    const auto n = e.n_vertices();
+    for (const auto i : make_range(n))
+    {
+      const Point & vp = e.point(i);
+      const Point & ap = e.point((i + n - 1) % n);
+      const Point & bp = e.point((i + 1) % n);
+      const Real ab = (bp - ap).norm();
+      const Real tol = _flatness_tol * ab;
+      if (ab > 0 && geom_utils::pointSegmentDistanceSq(vp, ap, bp) < tol * tol)
+        return cast_int<int>(i);
+    }
+    return -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> poly_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (redundantVertex(*elem) >= 0)
+        poly_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto pid : poly_ids)
+    {
+      Elem * p = mesh->query_elem_ptr(pid);
+      if (!p || p->type() != libMesh::C0POLYGON)
+        continue;
+      const int lv = redundantVertex(*p);
+      if (lv < 0)
+        continue;
+      const auto n = p->n_vertices();
+      const unsigned int i = cast_int<unsigned int>(lv);
+      Node * v = p->node_ptr(i);
+      Node * a = p->node_ptr((i + n - 1) % n);
+      Node * b = p->node_ptr((i + 1) % n);
+
+      // Only reduce onto other polygons: every element sharing the redundant vertex must be a
+      // C0POLYGON, so they all reduce to (n-1)-gons together (no quad/triangle neighbor is
+      // retyped).
+      bool all_polygons = true;
+      for (const auto eid : libmesh_map_find(node_to_elems, v->id()))
+      {
+        const Elem * e = mesh->query_elem_ptr(eid);
+        if (e && e->type() != libMesh::C0POLYGON)
+          all_polygons = false;
+      }
+      if (!all_polygons)
+        continue;
+
+      const Real ab = (*b - *a).norm();
+      const Real da = (*v - *a).norm();
+      const Real db = (*v - *b).norm();
+      Node * keep = nullptr;
+      bool coincident = false;
+      if (da < _flatness_tol * ab)
+      {
+        keep = a;
+        coincident = true;
+      }
+      else if (db < _flatness_tol * ab)
+      {
+        keep = b;
+        coincident = true;
+      }
+      else
+      {
+        // Colinear interior vertex: removable only if a and b are its sole neighbors everywhere
+        std::set<dof_id_type> nbrs;
+        for (const auto eid : libmesh_map_find(node_to_elems, v->id()))
+        {
+          const Elem * e = mesh->query_elem_ptr(eid);
+          if (!e)
+            continue;
+          const auto nv = e->n_vertices();
+          for (const auto k : make_range(nv))
+            if (e->node_id(k) == v->id())
+            {
+              nbrs.insert(e->node_id((k + 1) % nv));
+              nbrs.insert(e->node_id((k + nv - 1) % nv));
+            }
+        }
+        nbrs.erase(v->id());
+        if (nbrs.size() == 2 && nbrs.count(a->id()) && nbrs.count(b->id()))
+          keep = a;
+        else
+          continue; // genuine junction: leave the polygon in place
+      }
+
+      if (collapseRedundantVertex(
+              mesh, v, keep, coincident, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (redundantVertex(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of redundant polygon vertices collapsed: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of polygons with a redundant vertex left in place: " << num_skipped
+               << std::endl;
   }
 }
 

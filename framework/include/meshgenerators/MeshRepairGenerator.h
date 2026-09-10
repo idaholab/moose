@@ -223,6 +223,14 @@ private:
   /// @param mesh the mesh to modify
   void repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const;
 
+  /// @brief Repair C0POLYGON elements with a redundant vertex (a short edge or a colinear vertex) by
+  ///        collapsing it, reducing an n-sided polygon to an (n-1)-sided one. Only performed when
+  ///        every element sharing the redundant vertex is itself a polygon (so all reduce cleanly
+  ///        onto polygons); otherwise, or if the collapse would invert a neighbor, the polygon is
+  ///        left in place.
+  /// @param mesh the mesh to modify
+  void repairPolygonCollapse(std::unique_ptr<MeshBase> & mesh) const;
+
   /// @brief Repair PYRAMID5 elements collapsed to a tetrahedron by a short or colinear base edge, by
   ///        collapsing the redundant base vertex (PYRAMID5 -> TET4). A pyramid is left in place if a
   ///        co-edge neighbor cannot reduce, the result would invert, or (for a colinear base vertex)
