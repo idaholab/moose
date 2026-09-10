@@ -313,6 +313,5 @@ area2 = ${fparse 3.14159* ${R2}^2}
   [out]
     type = CSV
     execute_on = 'FINAL'
-    file_base = 'heat'
   []
 []

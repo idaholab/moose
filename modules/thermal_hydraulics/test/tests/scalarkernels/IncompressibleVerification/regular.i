@@ -125,6 +125,5 @@ area = ${fparse 3.14159* ${R}^2}
   [out]
     type = CSV
     execute_on = 'FINAL'
-    file_base = 'friction_only'
   []
 []
