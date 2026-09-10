@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "CacheChangedListsThread.h"
+#include "CacheInfoThread.h"
+#include "CacheSubdomainInfoThread.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "RelationshipManager.h"
@@ -1412,79 +1414,32 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
-  _sub_to_data.clear();
-  _neighbor_subdomain_boundary_ids.clear();
-  _block_node_list.clear();
-  _higher_d_elem_side_to_lower_d_elem.clear();
-  _lower_d_elem_to_higher_d_elem_side.clear();
-  _lower_d_interior_blocks.clear();
-  _lower_d_boundary_blocks.clear();
-
   const auto & mesh = getMesh();
 
-  // Cache higher and lowerD element information
-  for (const auto & elem : mesh.element_ptr_range())
-  {
-    const Elem * ip_elem = elem->interior_parent();
+  ConstElemRange all_elems(mesh.elements_begin(), mesh.elements_end(), 1);
+  CacheInfoThread lower_d(*this);
+  Threads::parallel_reduce(all_elems, lower_d);
 
-    if (ip_elem)
-    {
-      unsigned int ip_side = ip_elem->which_side_am_i(elem);
+  ConstElemRange local_elems(
+      mesh.active_local_elements_begin(), mesh.active_local_elements_end(), 1);
+  CacheSubdomainInfoThread neighbors(*this);
+  Threads::parallel_reduce(local_elems, neighbors);
 
-      // For some grid sequencing tests: ip_side == libMesh::invalid_uint
-      if (ip_side != libMesh::invalid_uint)
-      {
-        auto pair = std::make_pair(ip_elem, ip_side);
-        _higher_d_elem_side_to_lower_d_elem.insert(
-            std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
-        _lower_d_elem_to_higher_d_elem_side.insert(
-            std::pair<const Elem *, unsigned short int>(elem, ip_side));
+  _block_node_list = std::move(lower_d._block_node_list);
+  _higher_d_elem_side_to_lower_d_elem = std::move(lower_d._higher_d_elem_side_to_lower_d_elem);
+  _lower_d_elem_to_higher_d_elem_side = std::move(lower_d._lower_d_elem_to_higher_d_elem_side);
+  _lower_d_interior_blocks = std::move(lower_d._lower_d_interior_blocks);
+  _lower_d_boundary_blocks = std::move(lower_d._lower_d_boundary_blocks);
+  _neighbor_subdomain_boundary_ids = std::move(neighbors._neighbor_subdomain_boundary_ids);
 
-        auto id = elem->subdomain_id();
-        if (ip_elem->neighbor_ptr(ip_side))
-        {
-          if (mesh.subdomain_name(id).find("INTERNAL_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
-            _lower_d_interior_blocks.insert(id);
-        }
-        else
-        {
-          if (mesh.subdomain_name(id).find("BOUNDARY_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
-            _lower_d_boundary_blocks.insert(id);
-        }
-      }
-    }
+  _sub_to_data.clear();
+  for (auto & [id, subs] : neighbors._neighbor_subs)
+    _sub_to_data[id].neighbor_subs = std::move(subs);
+  for (auto & [id, bids] : neighbors._sub_boundary_ids)
+    _sub_to_data[id].boundary_ids = std::move(bids);
 
-    for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-    {
-      const Node & node = *elem->node_ptr(nd);
-      _block_node_list[node.id()].insert(elem->subdomain_id());
-    }
-  }
   _communicator.set_union(_lower_d_interior_blocks);
   _communicator.set_union(_lower_d_boundary_blocks);
-
-  // Cache the boundaries next to each subdomain
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    SubdomainID subdomain_id = elem->subdomain_id();
-    auto & sub_data = _sub_to_data[subdomain_id];
-    const auto elem_boundary_ids = getBoundaryIDs(elem);
-    for (unsigned int side = 0; side < elem->n_sides(); side++)
-    {
-      const auto & boundary_ids = elem_boundary_ids[side];
-      sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
-
-      const Elem * neig = elem->neighbor_ptr(side);
-      if (neig)
-      {
-        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
-                                                                      boundary_ids.end());
-        SubdomainID neighbor_subdomain_id = neig->subdomain_id();
-        if (neighbor_subdomain_id != subdomain_id)
-          sub_data.neighbor_subs.insert(neighbor_subdomain_id);
-      }
-    }
-  }
 
   for (const auto blk_id : _mesh_subdomains)
   {
