@@ -9,6 +9,7 @@
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
     max_threads = 1
+    mesh_mode = REPLICATED
   []
 
   [parallel_plates_csv]
