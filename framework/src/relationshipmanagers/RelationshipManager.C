@@ -10,8 +10,6 @@
 #include "RelationshipManager.h"
 #include "MooseApp.h"
 
-using namespace libMesh;
-
 InputParameters
 RelationshipManager::validParams()
 {
@@ -156,7 +154,7 @@ RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
 void
 RelationshipManager::init(MooseMesh & moose_mesh,
                           const MeshBase & mesh,
-                          const DofMap * const dof_map)
+                          const libMesh::DofMap * const dof_map)
 {
   mooseAssert(_dof_map ? dof_map == _dof_map : true,
               "Trying to initialize with a different dof map");

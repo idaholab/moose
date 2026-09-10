@@ -16,12 +16,11 @@
 #include "NodalBCBase.h"
 #include "Executioner.h"
 
+#include "libmesh/dof_map.h"
 #include "libmesh/fuzzy_equals.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
 #include "petscmat.h"
-
-using namespace libMesh;
 
 InputParameters
 AdjointSolve::validParams()
@@ -123,6 +122,11 @@ AdjointSolve::solve()
   // For scaling of the forward problem we need to apply correction factor
   solution *= _nl_forward.getVector("scaling_factors");
 
+  // Hanging-node (and other DofMap) constraints are not applied by the raw transpose solve above,
+  // which leaves constrained dofs at zero, so back-substitute them here. The vector being
+  // constrained belongs to the adjoint system, not the forward system that owns the matrix.
+  _nl_adjoint.system().get_dof_map().enforce_constraints_exactly(_nl_adjoint.system(), &solution);
+
   _nl_adjoint.update();
   if (solver.get_converged_reason() < 0)
   {
@@ -186,7 +190,7 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
     if (petsc_matrix && petsc_solution && petsc_rhs)
       LibmeshPetscCall(MatZeroRowsColumns(petsc_matrix->mat(),
                                           cast_int<PetscInt>(nbc_dofs.size()),
-                                          numeric_petsc_cast(nbc_dofs.data()),
+                                          libMesh::numeric_petsc_cast(nbc_dofs.data()),
                                           1.0,
                                           petsc_solution->vec(),
                                           petsc_rhs->vec()));
@@ -203,7 +207,7 @@ AdjointSolve::checkIntegrity()
   for (const auto & adj_var : adj_vars)
     // If the user supplies any scaling factors for individual variables the
     // adjoint system won't be consistent.
-    if (!absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
+    if (!libMesh::absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
       mooseError(
           "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
           "automatically by the forward system.");

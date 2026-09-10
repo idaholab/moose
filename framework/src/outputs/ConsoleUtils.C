@@ -32,8 +32,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/simple_range.h"
 
-using namespace libMesh;
-
 namespace ConsoleUtils
 {
 
@@ -222,7 +220,7 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
     oss << std::setw(console_field_width) << "  Variables: ";
     for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      const VariableGroup & vg_description(system.variable_group(vg));
+      const libMesh::VariableGroup & vg_description(system.variable_group(vg));
 
       if (vg_description.n_variables() > 1)
         oss << "{ ";

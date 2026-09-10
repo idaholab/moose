@@ -41,7 +41,6 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/mesh.h"
 
-using namespace libMesh;
 using namespace TraceRayTools;
 
 TraceRay::TraceRay(RayTracingStudy & study, const THREAD_ID tid)
@@ -61,7 +60,7 @@ void
 TraceRay::preExecute()
 {
   _current_subdomain_id = Elem::invalid_subdomain_id;
-  _current_elem_type = INVALID_ELEM;
+  _current_elem_type = libMesh::INVALID_ELEM;
 
   // Zero out all results
   for (auto & val : _results)

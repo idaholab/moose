@@ -29,8 +29,6 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 namespace GeneralFieldTransfer
 {
 Number OutOfMeshValue = std::numeric_limits<Real>::infinity();
@@ -1476,7 +1474,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     {
       // We may need to use existing data values in places where the
       // from app domain doesn't overlap
-      MeshFunction to_func(es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
+      libMesh::MeshFunction to_func(
+          es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
       to_func.init();
 
       GeneralFieldTransfer::CachedData<Number> f(

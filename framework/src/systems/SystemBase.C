@@ -33,8 +33,6 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/static_condensation.h"
 
-using namespace libMesh;
-
 /// Free function used for a libMesh callback
 void
 extraSendList(std::vector<dof_id_type> & send_list, void * context)
@@ -45,7 +43,7 @@ extraSendList(std::vector<dof_id_type> & send_list, void * context)
 
 /// Free function used for a libMesh callback
 void
-extraSparsity(SparsityPattern::Graph & sparsity,
+extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
               std::vector<dof_id_type> & n_nz,
               std::vector<dof_id_type> & n_oz,
               void * context)
@@ -359,7 +357,7 @@ SystemBase::reinitElem(const Elem * const elem, THREAD_ID tid)
     for (auto & [tag, matrix] : _active_tagged_matrices)
     {
       libmesh_ignore(tag);
-      cast_ptr<StaticCondensation *>(matrix)->set_current_elem(*elem);
+      cast_ptr<libMesh::StaticCondensation *>(matrix)->set_current_elem(*elem);
     }
 }
 
@@ -487,7 +485,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
         // Have to get each variable's dofs
         for (unsigned int v = 0; v < n_vars; v++)
         {
-          const Variable & var = sys.variable(v);
+          const libMesh::Variable & var = sys.variable(v);
           unsigned int var_num = var.number();
           unsigned int n_comp = var.n_components();
 
@@ -604,7 +602,9 @@ SystemBase::removeMatrix(TagID tag_id)
 }
 
 NumericVector<Number> &
-SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+SystemBase::addVector(const std::string & vector_name,
+                      const bool project,
+                      const libMesh::ParallelType type)
 {
   if (hasVector(vector_name))
     return getVector(vector_name);
@@ -614,7 +614,7 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
 }
 
 NumericVector<Number> &
-SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
+SystemBase::addVector(TagID tag, const bool project, const libMesh::ParallelType type)
 {
   if (!_subproblem.vectorTagExists(tag))
     mooseError("Cannot add tagged vector with TagID ",
@@ -627,7 +627,7 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
   {
     auto & vec = getVector(tag);
 
-    if (type != ParallelType::AUTOMATIC && vec.type() != type)
+    if (type != AUTOMATIC && vec.type() != type)
       mooseError("Cannot add tagged vector '",
                  _subproblem.vectorTagName(tag),
                  "', in system '",
@@ -741,7 +741,7 @@ SystemBase::addVariable(const std::string & var_type,
 
   if (var_type == "ArrayMooseVariable")
   {
-    if (fe_field_type == TYPE_VECTOR)
+    if (fe_field_type == libMesh::TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
     std::vector<std::string> array_var_component_names;
@@ -1556,7 +1556,7 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 void
 SystemBase::addScalingVector()
 {
-  addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
+  addVector("scaling_factors", /*project=*/false, GHOSTED);
   _subproblem.hasScalingVector(number());
 }
 

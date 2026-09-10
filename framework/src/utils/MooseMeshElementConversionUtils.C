@@ -25,8 +25,6 @@
 #include "libmesh/cell_pyramid5.h"
 #include "libmesh/cell_c0polyhedron.h"
 
-using namespace libMesh;
-
 namespace MooseMeshElementConversionUtils
 {
 void
@@ -238,10 +236,10 @@ polyhedronElemSplitter(MeshBase & mesh,
     exist_extra_ids[j] = elem->get_extra_integer(j);
 
   // Split the polygon using its tetrahedralization
-  const auto poly = dynamic_cast<C0Polyhedron *>(elem);
+  const auto poly = dynamic_cast<libMesh::C0Polyhedron *>(elem);
   Node * v_avg_node = nullptr;
   // Currently the only extra node ever use to tetrahedralize
-  if (dynamic_cast<C0Polyhedron *>(elem))
+  if (dynamic_cast<libMesh::C0Polyhedron *>(elem))
     v_avg_node =
         mesh.add_point(elem->vertex_average(), mesh.max_node_id() + elem_id, elem->processor_id());
 

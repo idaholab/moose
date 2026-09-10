@@ -91,8 +91,6 @@
 #include <thread>
 #include <filesystem>
 
-using namespace libMesh;
-
 namespace
 {
 /**
@@ -189,7 +187,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
 
   const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);
   {
-    CheckpointIO io(app.feProblem().mesh().getMesh(), false);
+    libMesh::CheckpointIO io(app.feProblem().mesh().getMesh(), false);
     io.write(mesh_path.string());
   }
 
@@ -233,7 +231,7 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
   mesh_base.clear();
 
   {
-    CheckpointIO io(mesh_base, false);
+    libMesh::CheckpointIO io(mesh_base, false);
     io.read(mesh_path.string());
   }
 
@@ -2592,7 +2590,7 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
                                  bool lib_load_deps)
 {
 #ifdef LIBMESH_HAVE_DLOPEN
-  Parameters params;
+  libMesh::Parameters params;
   params.set<std::string>("app_name") = app_name;
   params.set<RegistrationType>("reg_type") = APPLICATION;
   params.set<std::string>("registration_method") = app_name + "__registerApps";
@@ -2651,7 +2649,7 @@ MooseApp::dynamicAllRegistration(const std::string & app_name,
                                  const std::string & library_name)
 {
 #ifdef LIBMESH_HAVE_DLOPEN
-  Parameters params;
+  libMesh::Parameters params;
   params.set<std::string>("app_name") = app_name;
   params.set<RegistrationType>("reg_type") = REGALL;
   params.set<std::string>("registration_method") = app_name + "__registerAll";
@@ -2672,7 +2670,7 @@ MooseApp::dynamicAllRegistration(const std::string & app_name,
 }
 
 void
-MooseApp::dynamicRegistration(const Parameters & params)
+MooseApp::dynamicRegistration(const libMesh::Parameters & params)
 {
   const auto paths = getLibrarySearchPaths(params.get<std::string>("library_path"));
   const auto library_name = params.get<std::string>("library_name");
@@ -2686,7 +2684,7 @@ MooseApp::dynamicRegistration(const Parameters & params)
 
 void
 MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
-                                     const Parameters & params,
+                                     const libMesh::Parameters & params,
                                      const bool load_dependencies)
 {
   std::string line;

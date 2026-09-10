@@ -19,8 +19,6 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
-using namespace libMesh;
-
 InputParameters
 SampledOutput::validParams()
 {
@@ -146,7 +144,7 @@ SampledOutput::initSample()
   // Perform the mesh refinement
   if (_refinements > 0)
   {
-    MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
+    libMesh::MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
 
     // We want original and refined partitioning to match so we can
     // query from one to the other safely on distributed meshes.
@@ -340,7 +338,7 @@ SampledOutput::updateSample()
         // it for re-initialization
         // TODO: inherit from MeshChangedInterface and rebuild mesh functions on meshChanged()
         if (!_mesh_functions[sys_num][var_num] || _sampling_mesh_changed)
-          _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
+          _mesh_functions[sys_num][var_num] = std::make_unique<libMesh::MeshFunction>(
               source_es,
               _serialize ? *_serialized_solution : *source_sys.solution,
               source_sys.get_dof_map(),

@@ -23,10 +23,6 @@ class Elem;
 // C++ includes
 #include <utility>
 
-// Using statements
-using libMesh::Elem;
-using libMesh::Real;
-
 enum class MortarSegmentTriangulationMode : unsigned char
 {
   Delaunay,

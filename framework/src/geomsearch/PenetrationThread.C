@@ -21,8 +21,6 @@
 
 #include <algorithm>
 
-using namespace libMesh;
-
 // Anonymous namespace for helper functions that ought to be moved
 // into libMesh
 namespace

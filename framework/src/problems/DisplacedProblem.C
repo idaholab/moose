@@ -26,8 +26,6 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/explicit_system.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", DisplacedProblem);
 
 InputParameters
@@ -1125,7 +1123,7 @@ DisplacedProblem::meshChanged(const bool contract_mesh, const bool clean_refinem
   {
     // Finally clean refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clean flags they won't run into trouble
-    MeshRefinement refinement(_mesh.getMesh());
+    libMesh::MeshRefinement refinement(_mesh.getMesh());
     refinement.clean_refinement_flags();
   }
 

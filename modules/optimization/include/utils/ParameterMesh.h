@@ -30,8 +30,6 @@ class System;
 class DofMap;
 }
 
-using libMesh::RealGradient;
-
 /**
  * Utility class to use an Exodus mesh to define controllable parameters for optimization problems
  * This class will:

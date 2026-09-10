@@ -26,8 +26,6 @@
 
 #include "libmesh/fe_interface.h"
 
-using namespace libMesh;
-
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams
 // function.
@@ -458,7 +456,7 @@ AdvancedOutput::initAvailableLists()
         if (type.order == CONSTANT && !_problem_ptr->havePRefinement() &&
             type.family != MONOMIAL_VEC)
           _execute_data["elemental"].available.insert(vname);
-        else if (FEInterface::field_type(type) == TYPE_VECTOR)
+        else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
           const auto geom_type = ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) &&
                                   !_problem_ptr->havePRefinement())
@@ -546,7 +544,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].show.insert(vname);
-        else if (FEInterface::field_type(type) == TYPE_VECTOR)
+        else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
           const auto geom_type =
               ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
@@ -600,7 +598,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].hide.insert(vname);
-        else if (FEInterface::field_type(type) == TYPE_VECTOR)
+        else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
         {
           switch (_es_ptr->get_mesh().spatial_dimension())
           {

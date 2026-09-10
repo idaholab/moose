@@ -21,8 +21,6 @@
 #include "libmesh/exodusII_io_helper.h"
 #include "libmesh/checkpoint_io.h"
 
-using namespace libMesh;
-
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
 InputParameters
@@ -212,7 +210,7 @@ MeshOnlyAction::act()
   {
     TIME_SECTION("act", 1, "Writing Checkpoint");
 
-    CheckpointIO io(mesh_ptr->getMesh(), false);
+    libMesh::CheckpointIO io(mesh_ptr->getMesh(), false);
     io.write(mesh_file);
 
     // Write mesh metadata

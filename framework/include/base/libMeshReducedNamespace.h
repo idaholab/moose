@@ -65,6 +65,7 @@ class Pyramid;
 class Pyramid5;
 class Pyramid13;
 class Pyramid14;
+class Pyramid18;
 class Quad;
 class Quad4;
 class Quad8;
@@ -80,6 +81,7 @@ class Tri7;
 class RemoteElem;
 }
 
+using libMesh::C0POLYGON;
 using libMesh::Edge;
 using libMesh::Edge2;
 using libMesh::EDGE2;
@@ -110,6 +112,8 @@ using libMesh::Pyramid13;
 using libMesh::PYRAMID13;
 using libMesh::Pyramid14;
 using libMesh::PYRAMID14;
+using libMesh::Pyramid18;
+using libMesh::PYRAMID18;
 using libMesh::Pyramid5;
 using libMesh::PYRAMID5;
 using libMesh::Quad;
@@ -245,12 +249,17 @@ using libMesh::TypeVector;
 using libMesh::VectorValue;
 
 // Common FE families
+using libMesh::HERMITE;
 using libMesh::HIERARCHIC;
 using libMesh::L2_HIERARCHIC;
 using libMesh::L2_LAGRANGE;
+using libMesh::L2_RAVIART_THOMAS;
 using libMesh::LAGRANGE;
 using libMesh::LAGRANGE_VEC;
 using libMesh::MONOMIAL;
+using libMesh::MONOMIAL_VEC;
+using libMesh::NEDELEC_ONE;
+using libMesh::RAVIART_THOMAS;
 using libMesh::SCALAR;
 
 // Counting from 0 to 20

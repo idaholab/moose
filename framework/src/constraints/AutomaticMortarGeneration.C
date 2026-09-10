@@ -53,7 +53,6 @@
 #include <cmath>
 #include <limits>
 
-using namespace libMesh;
 using MetaPhysicL::DualNumber;
 
 // Make newer nanoflann API spelling compatible with older nanoflann
@@ -1783,9 +1782,9 @@ std::vector<AutomaticMortarGeneration::MsmSubdomainStats>
 AutomaticMortarGeneration::computeMsmStatistics()
 {
   std::vector<MsmSubdomainStats> result;
-  StatisticsVector<Real> primary;
-  StatisticsVector<Real> secondary;
-  StatisticsVector<Real> msm;
+  libMesh::StatisticsVector<Real> primary;
+  libMesh::StatisticsVector<Real> secondary;
+  libMesh::StatisticsVector<Real> msm;
   std::unordered_map<dof_id_type, Real> primary_elems_to_volume;
 
   for (const auto & [primary_subd_id, secondary_subd_id] : _primary_secondary_subdomain_id_pairs)
@@ -2137,7 +2136,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
               "AutomaticMortarGeneration::computeNodalGeometry() is only valid for "
               "mortar constraints on 2D or 3D meshes.");
   // A nodal lower-dimensional nodal quadrature rule to be used on faces.
-  QNodal qface(dim - 1);
+  libMesh::QNodal qface(dim - 1);
 
   // A map from the node id to the attached elemental normals/weights evaluated at the node. Th
   // length of the vector will correspond to the number of elements attached to the node. If it is a

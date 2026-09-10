@@ -11,14 +11,6 @@
 
 #include "RankFourTensorForward.h"
 
-namespace libMesh
-{
-template <typename>
-class VectorValue;
-typedef VectorValue<Real> RealGradient;
-}
-using libMesh::RealGradient;
-
 namespace ElasticityTensorTools
 {
 

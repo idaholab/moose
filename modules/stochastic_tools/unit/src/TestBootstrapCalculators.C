@@ -17,7 +17,6 @@
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 
-using namespace libMesh;
 using namespace StochasticTools;
 
 /**
@@ -92,7 +91,7 @@ TEST(BootstrapCalculators, Percentile)
 
   // Parallel object to give to calculators
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
   MultiMooseEnum calc("mean stddev", "mean stddev", true);
@@ -136,7 +135,7 @@ TEST(BootstrapCalculators, BiasCorrectedAccelerated)
 
   // Parallel object to give to calculators
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
   MultiMooseEnum calc("mean stddev", "mean stddev", true);
@@ -182,7 +181,7 @@ TEST(BootstrapCalculators, Percentile_Vec)
 
   // Parallel object to give to calculators
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
   MultiMooseEnum calc("mean stddev", "mean stddev", true);
@@ -233,7 +232,7 @@ TEST(BootstrapCalculators, BiasCorrectedAccelerated_Vec)
 
   // Parallel object to give to calculators
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
   MultiMooseEnum calc("mean stddev", "mean stddev", true);

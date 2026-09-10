@@ -11,8 +11,6 @@
 
 #include "RelationshipManager.h"
 
-using libMesh::processor_id_type;
-
 /**
  * Relationship manager to add ghosting between elements
  *
