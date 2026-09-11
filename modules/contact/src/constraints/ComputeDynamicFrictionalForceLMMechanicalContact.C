@@ -47,6 +47,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
+  MooseEnum friction_projection_degree("ONE TWO", "TWO");
+  friction_projection_degree.addDocumentation(
+      "ONE", "Use the degree-one Alart-Curnier friction residual.");
+  friction_projection_degree.addDocumentation(
+      "TWO", "Use the degree-two Hueber-Stadler-Wohlmuth friction residual.");
+  params.addParam<MooseEnum>(
+      "friction_projection_degree",
+      friction_projection_degree,
+      "Degree of the friction-residual projection; see MortarContactUtils.h.");
   return params;
 }
 
@@ -54,6 +63,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
     const InputParameters & parameters)
   : ComputeDynamicWeightedGapLMMechanicalContact(parameters),
     _c_t(getParam<Real>("c_t")),
+    _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
+                                    .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -247,8 +258,6 @@ void
 ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     const DofObject * const dof)
 {
-  using std::max, std::sqrt;
-
   // Get normal LM
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
@@ -279,41 +288,20 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
                                       _dof_to_old_real_tangential_velocity[dof][0],
                                       _dof_to_old_real_tangential_velocity[dof][1]);
 
-  ADReal dof_residual;
-  ADReal dof_residual_dir;
+  const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
-  // Primal-dual active set strategy (PDASS)
-  if (contact_pressure < _epsilon)
-  {
-    dof_residual = friction_lm_values[0];
-    dof_residual_dir = friction_lm_values[1];
-  }
-  else
-  {
-    const Real epsilon_sqrt = 1.0e-48;
-
-    const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
-    std::array<ADReal, 2> lambda_t_plus_ctu;
-    lambda_t_plus_ctu[0] = friction_lm_values[0] + c_t * *tangential_vel[0] * _dt;
-    lambda_t_plus_ctu[1] = friction_lm_values[1] + c_t * *tangential_vel[1] * _dt;
-
-    const auto term_1_x = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[0];
-
-    const auto term_1_y = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[1];
-
-    const auto term_2_x = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
-
-    const auto term_2_y = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
-
-    dof_residual = term_1_x - term_2_x;
-    dof_residual_dir = term_1_y - term_2_y;
-  }
+  const auto residual =
+      Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
+                                                        tangential_velocity,
+                                                        ADReal(c_t),
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon),
+                                                        _friction_projection_degree);
+  const ADReal dof_residual = residual[0];
+  const ADReal dof_residual_dir = residual[1];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
@@ -329,8 +317,6 @@ void
 ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
-  using std::max, std::abs;
-
   // Get friction LM
   const auto friction_dof_index = dof->dof_number(_sys.number(), _friction_vars[0]->number(), 0);
   const ADReal & tangential_vel = *_tangential_vel_ptr[0];
@@ -353,20 +339,19 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   ADReal mu_ad =
       computeFrictionValue(contact_pressure_old, _dof_to_old_real_tangential_velocity[dof][0], 0.0);
 
-  ADReal dof_residual;
-  // Primal-dual active set strategy (PDASS)
-  if (contact_pressure < _epsilon)
-    dof_residual = friction_lm_value;
-  else
-  {
-    const auto term_1 = max(mu_ad * (contact_pressure + c * weighted_gap),
-                            abs(friction_lm_value + c_t * tangential_vel * _dt)) *
-                        friction_lm_value;
-    const auto term_2 = mu_ad * max(0.0, contact_pressure + c * weighted_gap) *
-                        (friction_lm_value + c_t * tangential_vel * _dt);
+  const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
+  const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
 
-    dof_residual = term_1 - term_2;
-  }
+  const ADReal dof_residual =
+      Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                        tangential_velocity,
+                                                        ADReal(c_t),
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon),
+                                                        _friction_projection_degree)[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

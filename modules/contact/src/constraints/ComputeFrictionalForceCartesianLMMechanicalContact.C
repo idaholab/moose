@@ -55,6 +55,15 @@ ComputeFrictionalForceCartesianLMMechanicalContact::validParams()
       "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
+  MooseEnum friction_projection_degree("ONE TWO", "TWO");
+  friction_projection_degree.addDocumentation(
+      "ONE", "Use the degree-one Alart-Curnier friction residual.");
+  friction_projection_degree.addDocumentation(
+      "TWO", "Use the degree-two Hueber-Stadler-Wohlmuth friction residual.");
+  params.addParam<MooseEnum>(
+      "friction_projection_degree",
+      friction_projection_degree,
+      "Degree of the friction-residual projection; see MortarContactUtils.h.");
   return params;
 }
 
@@ -62,6 +71,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
     ComputeFrictionalForceCartesianLMMechanicalContact(const InputParameters & parameters)
   : ComputeWeightedGapCartesianLMMechanicalContact(assignVarsInParamsFriction(parameters)),
     _c_t(getParam<Real>("c_t")),
+    _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
+                                    .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),
     _secondary_x_dot(adCoupledDot("disp_x")),
     _primary_x_dot(adCoupledNeighborValueDot("disp_x")),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -205,7 +216,7 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
-  using std::abs, std::sqrt, std::max, std::min;
+  using std::abs, std::sqrt, std::min;
 
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
@@ -253,58 +264,41 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   ADReal tangential_dof_residual;
   ADReal tangential_dof_residual_dir;
 
-  const ADReal & tangential_vel = *_tangential_vel_ptr[0];
-
-  // Primal-dual active set strategy (PDASS)
   if (!_has_disp_z)
   {
-    if (normal_pressure_value.value() < _epsilon)
-      tangential_dof_residual = tangential_pressure_value;
-    else
-    {
-      const auto term_1 = max(_mu * (normal_pressure_value + c * weighted_gap),
-                              abs(tangential_pressure_value + c_t * tangential_vel * _dt)) *
-                          tangential_pressure_value;
-      const auto term_2 = _mu * max(0.0, normal_pressure_value + c * weighted_gap) *
-                          (tangential_pressure_value + c_t * tangential_vel * _dt);
+    const std::array<ADReal, 1> tangential_pressure{{tangential_pressure_value}};
+    const std::array<ADReal, 1> tangential_velocity{{*_tangential_vel_ptr[0]}};
 
-      tangential_dof_residual = term_1 - term_2;
-    }
+    tangential_dof_residual =
+        Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                          tangential_velocity,
+                                                          ADReal(c_t),
+                                                          ADReal(_dt),
+                                                          normal_pressure_value,
+                                                          c * weighted_gap,
+                                                          ADReal(_mu),
+                                                          ADReal(_epsilon),
+                                                          _friction_projection_degree)[0];
   }
   else
   {
-    if (normal_pressure_value.value() < _epsilon)
-    {
-      tangential_dof_residual = tangential_pressure_value;
-      tangential_dof_residual_dir = tangential_pressure_value_dir;
-    }
-    else
-    {
-      const Real epsilon_sqrt = 1.0e-48;
+    const std::array<ADReal, 2> tangential_pressure{
+        {tangential_pressure_value, tangential_pressure_value_dir}};
+    const std::array<ADReal, 2> tangential_velocity{
+        {*_tangential_vel_ptr[0], *_tangential_vel_ptr[1]}};
 
-      const auto lamdba_plus_cg = normal_pressure_value + c * weighted_gap;
-
-      std::array<ADReal, 2> lambda_t_plus_ctu;
-      lambda_t_plus_ctu[0] = tangential_pressure_value + c_t * (*_tangential_vel_ptr[0]) * _dt;
-      lambda_t_plus_ctu[1] = tangential_pressure_value_dir + c_t * (*_tangential_vel_ptr[1]) * _dt;
-
-      const auto term_1_x = max(_mu * lamdba_plus_cg,
-                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                            tangential_pressure_value;
-
-      const auto term_1_y = max(_mu * lamdba_plus_cg,
-                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                            tangential_pressure_value_dir;
-
-      const auto term_2_x = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
-
-      const auto term_2_y = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
-
-      tangential_dof_residual = term_1_x - term_2_x;
-      tangential_dof_residual_dir = term_1_y - term_2_y;
-    }
+    const auto residual =
+        Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                          tangential_velocity,
+                                                          ADReal(c_t),
+                                                          ADReal(_dt),
+                                                          normal_pressure_value,
+                                                          c * weighted_gap,
+                                                          ADReal(_mu),
+                                                          ADReal(_epsilon),
+                                                          _friction_projection_degree);
+    tangential_dof_residual = residual[0];
+    tangential_dof_residual_dir = residual[1];
   }
 
   // Compute the friction coefficient (constant or function)
