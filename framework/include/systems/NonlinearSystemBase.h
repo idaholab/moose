@@ -1086,8 +1086,8 @@ protected:
   /// BoundaryCondition Warhouses
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
-  MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  /// Nodal BCs that prescribe their values ahead of the solve, of every family that does so
+  MooseObjectWarehouse<NodalBCBase> _preset_nodal_bcs;
   ///@}
 
   /// Essential boundary conditions imposed through libMesh's DofMap. libMesh's DirichletBoundary
