@@ -35,6 +35,7 @@ class IntegratedBCBase;
 class NodalBCBase;
 class DirichletBCBase;
 class ADDirichletBCBase;
+class LibmeshDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernelBase;
@@ -308,6 +309,45 @@ public:
   void zeroVectorForResidual(const std::string & vector_name);
 
   void setInitialSolution();
+
+  /**
+   * Sync libMesh's notion of the current time on this system from MOOSE's.
+   *
+   * libMesh sources a Dirichlet constraint's prescribed value by calling its value functor at
+   * libMesh::System::time, which nothing else in MOOSE maintains. Call this ahead of anything that
+   * triggers a constraint sweep, so a time-dependent prescribed value is projected at the time
+   * MOOSE is actually solving at.
+   */
+  void syncLibmeshTime();
+
+  /**
+   * Recompute libMesh's own DOF constraints on this system, at MOOSE's current time.
+   */
+  void reinitConstraints();
+
+  /**
+   * Recompute the prescribed values of every active LibmeshDirichletBCBase on this system.
+   *
+   * Each boundary condition is registered as a libMesh DirichletBoundary, whose constraint sweep
+   * projects the prescribed value onto the variable's boundary trace space, and the resulting
+   * values are copied out. The boundaries are then unregistered and the sweep repeated, leaving
+   * this system's DofMap holding exactly the constraints it held before, so that nothing else that
+   * reads it -- Assembly's element-matrix condensation, sparsity construction, and libMesh's own
+   * constraint enforcement, which would otherwise fight MOOSE for these rows -- sees any change.
+   *
+   * Runs once per solve, so that a prescribed value depending on time is projected at the time the
+   * solve is being taken at.
+   */
+  void refreshLibmeshDirichletValues();
+
+  /**
+   * Get the prescribed value libMesh's Dirichlet constraint machinery projected for each degree of
+   * freedom a LibmeshDirichletBCBase on this system pins, keyed on global degree of freedom index
+   */
+  const std::unordered_map<dof_id_type, Real> & libmeshDirichletValues() const
+  {
+    return _libmesh_dirichlet_values;
+  }
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
@@ -1124,7 +1164,11 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  MooseObjectWarehouse<LibmeshDirichletBCBase> _libmesh_dirichlet_bcs;
   ///@}
+
+  /// Prescribed values projected by libMesh for the degrees of freedom _libmesh_dirichlet_bcs pins
+  std::unordered_map<dof_id_type, Real> _libmesh_dirichlet_values;
 
 #ifdef MOOSE_KOKKOS_ENABLED
   ///@{
