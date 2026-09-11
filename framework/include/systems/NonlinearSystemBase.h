@@ -334,9 +334,14 @@ public:
    * this system's DofMap holding exactly the constraints it held before, so that nothing else that
    * reads it -- Assembly's element-matrix condensation, sparsity construction, and libMesh's own
    * constraint enforcement, which would otherwise fight MOOSE for these rows -- sees any change.
+   * The second sweep is how the DofMap is restored: libMesh reports its constraints read-only and
+   * offers no way to drop just the rows a Dirichlet sweep added, so the state before the projection
+   * has to be rebuilt rather than edited back.
    *
    * Runs once per solve, so that a prescribed value depending on time is projected at the time the
-   * solve is being taken at.
+   * solve is being taken at. Caching the projection across solves is not safe: mesh adaptation
+   * renumbers the degrees of freedom these values are keyed on, and it reaches a solve through mesh
+   * change paths that do not all notify this system.
    */
   void refreshLibmeshDirichletValues();
 
