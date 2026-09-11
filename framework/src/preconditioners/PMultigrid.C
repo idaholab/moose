@@ -126,18 +126,11 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     if (i && _level_orders[i] <= _level_orders[i - 1])
       paramError("level_orders", "The level orders must be strictly ascending.");
 
-  auto & solver_params = _fe_problem.solverParams(_nl_sys_num);
-
-  if (!solver_params._kokkos_matrix_free)
+  if (!_fe_problem.solverParams(_nl_sys_num)._kokkos_matrix_free)
     mooseError(
         "The p-multigrid preconditioner's operators are the quadrature-point Jacobian cache "
         "contracted against each level's basis, so the solver system must be run in Kokkos "
         "matrix-free mode. Set 'use_kokkos_matrix_free_jacobian = true' in the Executioner.");
-
-  // A p-multigrid preconditioner configures the solve's PETSc preconditioner itself, so the
-  // matrix-free default that would otherwise apply (a bare Jacobi over the fine shell) is left to
-  // that configuration
-  solver_params._kokkos_p_multigrid = true;
 
   // The levels' systems have to exist before the equation systems are initialized, and their FE
   // types have to be registered before the Kokkos assembly caches reference shape data; the
