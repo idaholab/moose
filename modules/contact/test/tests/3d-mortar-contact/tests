@@ -278,10 +278,15 @@
       capabilities = 'ad_size>=150 & method!=dbg'
       exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
       # Allow three contact-line-search cuts to damp overlap changes while preserving the debug mesh.
+      # The Delaunay triangulation subdivides the interface into far more, smaller mortar segments
+      # than the default centroid triangulation, which raises the achievable residual floor to
+      # ~1e-9; loosen nl_abs_tol so Newton can report convergence at that floor instead of
+      # exhausting nl_max_its just short of the default 1e-12.
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Executioner/line_search=contact '
                  'Executioner/contact_line_search_allowed_lambda_cuts=3 '
+                 'Executioner/nl_abs_tol=1e-8 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-delaunay '
                  'Contact/mortar/c_normal=1'
@@ -379,9 +384,14 @@
       capabilities = 'ad_size>=150'
       exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
       # Allow three contact-line-search cuts to damp overlap changes while preserving the debug mesh.
+      # The Delaunay triangulation subdivides the interface into far more, smaller mortar segments
+      # than the default centroid triangulation, which raises the achievable residual floor to
+      # ~1e-9; loosen nl_abs_tol so Newton can report convergence at that floor instead of
+      # exhausting nl_max_its just short of the default 1e-12.
       cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Executioner/line_search=contact '
                  'Executioner/contact_line_search_allowed_lambda_cuts=3 '
+                 'Executioner/nl_abs_tol=1e-8 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-direct-delaunay '
                  'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
