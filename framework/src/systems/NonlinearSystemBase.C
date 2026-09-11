@@ -3794,6 +3794,10 @@ NonlinearSystemBase::setPreconditioner(std::shared_ptr<MoosePreconditioner> pc)
     mooseError("More than one active Preconditioner detected");
 
   _preconditioner = pc;
+
+  // Asked here rather than announced by the preconditioner, so that a preconditioner reaching PETSc
+  // directly answers a question about itself instead of writing to this system's solver parameters
+  _fe_problem.solverParams(number())._preconditioner_sets_pc_type = pc->setsPetscPCType();
 }
 
 MoosePreconditioner const *

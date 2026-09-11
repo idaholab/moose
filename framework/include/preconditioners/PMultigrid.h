@@ -35,6 +35,9 @@ public:
 
   virtual void setupSolver() override;
 
+  /// setupSolver() sets the type to PCMG, so a matrix-free system's own default is not wanted
+  virtual bool setsPetscPCType() const override { return true; }
+
   virtual void postLinearization() override;
 
   virtual void postJacobianAssembly() override;
