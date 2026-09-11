@@ -305,20 +305,20 @@ PMultigrid::setupSolver()
       // not change between them. A direct factorization is such an operator exactly, and it is
       // affordable because this is the coarsest level of a p-hierarchy: order one on the fine mesh.
       //
-      // Neither of the two obvious alternatives qualifies. Iterating this level to a relative
-      // tolerance makes its work depend on its right-hand side. Iterating it for a fixed number of
-      // steps fixes the work but not the operator: a Krylov method builds its polynomial from the
-      // Krylov space of the right-hand side it is given, so it is a nonlinear function of that
-      // vector however many steps it runs. That alternative was configured here before, as twenty
-      // iterations of CG, and it corrupts the outer solve whenever the coarse level is large enough
-      // that twenty iterations do not converge it: with a single coarse level of order five under
-      // an order-eight fine space, the outer GMRES reported a relative residual of 2e-10 while its
-      // true residual stood at 4e-4, and Newton needed three steps to solve a linear problem. It
-      // went unnoticed because a coarsest level of order one is solved to roundoff in twenty
-      // iterations, which makes the map linear in all but name.
+      // Iterating this level instead fails whichever way the iteration is stopped, which is why the
+      // obvious cheaper alternatives are rejected here. Stopping on a relative tolerance makes the
+      // work, and so the operator, depend on the right-hand side. Stopping after a fixed number of
+      // iterations fixes the work but not the operator, because a Krylov method builds its
+      // polynomial from the Krylov space of the vector it is given and so remains a nonlinear
+      // function of that vector however many steps it runs. Either way the outer Krylov method
+      // reports a recurrence residual its true residual does not match, and a linear problem takes
+      // several Newton steps.
+      //
+      // No solver package is named, so PETSc selects one: in parallel that is whichever
+      // distributed factorization the build provides, and on one process its own LU.
+      // '-mg_coarse_pc_factor_mat_solver_type' overrides the choice.
       LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
       LibmeshPetscCall(PCSetType(smoother_pc, PCLU));
-      LibmeshPetscCall(PCFactorSetMatSolverType(smoother_pc, MATSOLVERMUMPS));
     }
 
     // Read the level's own options last, so that everything set above is a default a user can
