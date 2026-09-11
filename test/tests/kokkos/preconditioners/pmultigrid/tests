@@ -11,7 +11,7 @@
                   'coarse polynomial order, holding the fine system variables on the fine mesh, and '
                   'shall hold fixed the degrees of freedom of that space which a nodal boundary '
                   'condition of the solver system pins.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -25,11 +25,15 @@
                "Preconditioning/pmg/verify_entity_blocks=true"
     input = 'pmultigrid.i'
     expect_out = 'p = 5: entity blocks agree with the assembled operator to 0'
+    # A block on a partition boundary gathers only its own process's elements, so exact agreement with
+    # the assembled operator is a single-process statement; on more processes the check reports the
+    # difference instead of zero
+    max_parallel = 1
     requirement = 'The p-multigrid preconditioner shall build, for each mesh entity of a level, the '
                   'dense block of that level operator holding the degrees of freedom the entity '
                   'carries, with every entry of every such block equal to the corresponding entry of '
                   'that level assembled operator.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -49,7 +53,7 @@
                   'degrees of freedom each mesh entity carries, which shall converge the linear '
                   'solve of a high-order fine space in an iteration count a smoother reading the '
                   'operator diagonal alone does not reach.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -71,7 +75,7 @@
     requirement = 'The p-multigrid preconditioner shall smooth each level with the reciprocal of the '
                   'operator diagonal when asked for that smoother, preconditioning a two-level '
                   'v-cycle over a basis whose mesh entities carry a single mode each.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -85,7 +89,7 @@
     requirement = 'The p-multigrid preconditioner shall apply each coarse level operator and compute '
                   'the diagonal of that operator from the same quadrature-point linearization, in '
                   'agreement with one another.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -99,7 +103,7 @@
     requirement = 'The p-multigrid preconditioner shall transfer vectors between consecutive levels '
                   'of the hierarchy by an embedding of the coarser element basis in the finer one, '
                   'restricting by the transpose of the way it prolongs.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -115,7 +119,7 @@
     requirement = 'The p-multigrid preconditioner shall realize on each coarse level the Galerkin '
                   'operator of the fine linearization, applying that operator in agreement with the '
                   'next finer level operator carried through the level transfer.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -128,7 +132,7 @@
     requirement = 'The p-multigrid preconditioner shall assemble the operator of its coarsest level '
                   'into a sparse matrix, which a coarse solver can be applied to, agreeing with the '
                   'operator that level applies without a matrix.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -138,7 +142,7 @@
     cli_args = 'Outputs/exodus=false Variables/u/order=THIRD '
                'Preconditioning/pmg/level_orders=3'
     expect_err = "Variable 'u' is of order 3, so a level of order 3 would not coarsen it"
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
     requirement = 'The p-multigrid preconditioner shall report an error when a requested level '
                   'order does not coarsen every variable of the solver system.'
@@ -158,7 +162,7 @@
                  'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
     requirement = 'The system shall be able to apply an 8-4-2-1 hierarchic basis polynomial order '
                   'multigrid v-cycle and efficiently precondition a Newton-Krylov method.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -178,7 +182,7 @@
                   'linearization it contracts is, holding the degrees of freedom a Dirichlet '
                   'boundary condition pins out of both a free row equation and the direction the '
                   'operator gathers, so that a conjugate gradient accelerator converges the solve.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -194,7 +198,7 @@
                   'requested of a transient system with Dirichlet-constrained degrees of freedom, '
                   'whose solution time derivative a time integrator forms from the raw solution and '
                   'which therefore keeps the constrained columns its linearization requires.'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
@@ -203,7 +207,7 @@
     input = 'pmultigrid.i'
     cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=false'
     expect_err = 'the solver system must be run in Kokkos matrix-free mode'
-    capabilities = 'kokkos & mumps'
+    capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
     requirement = 'The p-multigrid preconditioner shall report an error when the solver system does '
                   'not compute its Jacobian action from the quadrature-point linearization the '
