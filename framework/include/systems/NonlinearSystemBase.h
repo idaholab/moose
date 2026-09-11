@@ -474,13 +474,13 @@ public:
    * Get the number of entity blocks this process holds for the smoother
    * @returns The number of blocks
    */
-  dof_id_type numKokkosEntityBlocks();
+  dof_id_type numKokkosEntityBlocks() const;
 
   /**
    * Get the size of the largest entity block this process holds for the smoother
    * @returns The largest block size
    */
-  unsigned int maxKokkosEntityBlockSize();
+  unsigned int maxKokkosEntityBlockSize() const;
 
   /**
    * Rebuild and refactor the entity blocks from the linearization the quadrature-point Jacobian
