@@ -51,8 +51,8 @@ P_out = 2.0e5 # Pa
   crossflow_relaxation = 0.8
   implicit = true
   segregated = false
-  duct_HTC_closure = 'Dittus-Boelter'
-  pin_HTC_closure = 'Dittus-Boelter'
+  duct_HTC_closure = 'gnielinski'
+  pin_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
   mixing_closure = 'cheng_todreas'
 []
