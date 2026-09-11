@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#33726 #8681'
+  design = 'bcs/LibmeshDirichletBC.md bcs/FunctionLibmeshDirichletBC.md'
+  [constant]
+    requirement = "The system shall impose an essential boundary condition whose prescribed value is "
+                  "projected onto the variable's boundary trace space, reproducing a solution that "
+                  "lies in the vertex subspace exactly"
+    [hierarchic_second]
+      type = 'CSVDiff'
+      input = 'libmesh_dirichlet_bc.i'
+      cli_args = 'Outputs/file_base=hierarchic_second'
+      csvdiff = 'hierarchic_second.csv'
+      detail = 'for a hierarchic basis whose degrees of freedom at a node are edge modes rather than '
+               'point values of the solution,'
+    []
+    [hierarchic_third]
+      type = 'CSVDiff'
+      input = 'libmesh_dirichlet_bc.i'
+      cli_args = 'Variables/u/order=THIRD Outputs/file_base=hierarchic_third'
+      csvdiff = 'hierarchic_third.csv'
+      detail = 'for a hierarchic basis whose nodes each carry more than one such mode, and'
+    []
+    [lagrange_second]
+      type = 'CSVDiff'
+      input = 'libmesh_dirichlet_bc.i'
+      cli_args = 'Variables/u/family=LAGRANGE Outputs/file_base=lagrange_second'
+      csvdiff = 'lagrange_second.csv'
+      detail = 'for an interpolatory basis, where the projected value and the nodal value agree.'
+    []
+  []
+  [function]
+    type = 'CSVDiff'
+    input = 'function_libmesh_dirichlet_bc.i'
+    csvdiff = 'function_libmesh_dirichlet_bc_out.csv'
+    requirement = "The system shall reproject an essential boundary condition given by a function "
+                  "onto the variable's boundary trace space once per solve, so that a prescribed "
+                  "value depending on time is imposed at the time the solve is taken at."
+  []
+[]
