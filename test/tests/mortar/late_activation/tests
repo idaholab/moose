@@ -25,10 +25,5 @@
                   '[Constraints] block rather than an action, on an interface that had no mortar '
                   'segments at initialization, once relative motion brings the secondary and primary '
                   'surfaces into projection range.'
-    # Between t=0.6 and t=1.0 the interface is only partially covered by mortar segments, and
-    # which segments form depends on partition topology (verified: t=1.0, full coverage, is
-    # partition-invariant at -p1..5; t=0.7/0.8, partial coverage, are not). Cap parallelism until
-    # that partition dependence is understood.
-    max_parallel = 2
   []
 []

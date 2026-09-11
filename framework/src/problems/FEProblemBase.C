@@ -7931,6 +7931,14 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       for (const auto & it : _random_data_objects)
         it.second->updateSeeds(EXEC_LINEAR);
 
+      // This is itself a residual evaluation (distinct from the combined residual/Jacobian path
+      // above, which sets this before its own updateMortarMesh() call): mark it so that
+      // updateMortarMesh() below knows not to reinit the equation systems mid-evaluation. Reset by
+      // resetState() at the bottom of this function.
+      setCurrentlyComputingResidual(true);
+      if (_displaced_problem)
+        _displaced_problem->setCurrentlyComputingResidual(true);
+
       execMultiApps(EXEC_LINEAR);
 
       for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -8543,7 +8551,16 @@ FEProblemBase::updateMortarMesh()
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
-  _mortar_data->update();
+  // If any mortar interface's coverage changed, the DoF ghosting and sparsity that
+  // AugmentSparsityOnInterface computed from the previous coverage are stale (see
+  // reinitBecauseOfGhostingOrNewGeomObjects()'s mortar_changed parameter); refresh them now rather
+  // than leaving that to the caller, since this may be called mid-solve where no other reinit
+  // follows. Guard on _initialized: this is also called from init() itself, before es().init() has
+  // run for the first time, and reinit()ing an EquationSystems that has never been init()ed is not
+  // meaningful (init() immediately after will pick up whatever _mortar_data->update() just built).
+  if (_mortar_data->update() && _initialized && !currentlyComputingResidual() &&
+      !currentlyComputingJacobian())
+    reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 }
 
 void
