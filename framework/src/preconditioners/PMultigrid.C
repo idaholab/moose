@@ -127,10 +127,8 @@ PMultigrid::validParams()
       false,
       "Whether to check that the p-multigrid cycle this preconditioner applies is symmetric, which "
       "is what CG requires of it, by forming it explicitly and comparing it against its transpose. "
-      "The result is reported rather than enforced, because whether the cycle is symmetric is "
-      "presently an open question. It costs one application of the whole cycle per degree of "
-      "freedom "
-      "of the solver system, so it is a verification aid for small inputs.");
+      "It costs one application of the whole cycle per degree of freedom of the solver system, so "
+      "it is a verification aid for small inputs.");
 
   params.addParam<bool>(
       "verify_entity_blocks",

@@ -186,6 +186,26 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [cycle_symmetry]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The two halves of one requirement, as in operator_symmetry: the cycle is measured against its
+    # transpose, and CG is asked to converge over it. Here the operator is the trivially symmetric
+    # half, which leaves the cycle as the only thing the CG half can be failing on. The check errors
+    # out on a mismatch, so the measurement half is asserted by the run completing.
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_preconditioner_symmetry=true '
+               'Preconditioning/pmg/verify_operator_symmetry=true '
+               '-ksp_type cg -ksp_max_it 40 -ksp_converged_reason'
+    expect_out = 'p-multigrid cycle of system .nl0.: differs from its transpose by.*'
+                 'Linear solve converged due to CONVERGED_RTOL.*Solve Converged'
+    issues = '#8681'
+    requirement = 'The p-multigrid cycle shall be symmetric, its smoothers, coarse factorization and '
+                  'transfers each being so, such that a conjugate gradient accelerator is valid over '
+                  'the hierarchy and converges the solve.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [operator_symmetry_transient_error]
     type = RunException
     input = 'pmultigrid.i'

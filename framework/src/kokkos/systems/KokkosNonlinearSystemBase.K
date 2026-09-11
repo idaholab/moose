@@ -1360,8 +1360,8 @@ NonlinearSystemBase::verifyKokkosOperatorConditioning()
   LibmeshPetscCallA(comm().get(), MatNorm(assembled, NORM_INFINITY, &operator_norm));
 
   // The spread of the diagonal locates where the conditioning comes from: the norm above is a row
-  // sum, dominated by whichever mode carries the largest entries, while the smallest diagonal bounds
-  // the smallest eigenvalue and so bounds the norm of the inverse from below
+  // sum, dominated by whichever mode carries the largest entries, while the smallest diagonal
+  // bounds the smallest eigenvalue and so bounds the norm of the inverse from below
   Vec diagonal;
   LibmeshPetscCallA(comm().get(), MatCreateVecs(assembled, nullptr, &diagonal));
   LibmeshPetscCallA(comm().get(), MatGetDiagonal(assembled, diagonal));
@@ -1381,12 +1381,12 @@ NonlinearSystemBase::verifyKokkosOperatorConditioning()
     // The inverse is formed column by column exactly as the cycle is, so its norm is taken over the
     // same quantity and the two are comparable
     Mat inverse_shell;
-    LibmeshPetscCallA(comm().get(),
-                      MatCreateShell(
-                          comm().get(), local_rows, local_cols, rows, cols, inverse, &inverse_shell));
     LibmeshPetscCallA(
         comm().get(),
-        MatShellSetOperation(inverse_shell, MATOP_MULT, (void (*)(void))mooseKokkosInverseShellMult));
+        MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, inverse, &inverse_shell));
+    LibmeshPetscCallA(comm().get(),
+                      MatShellSetOperation(
+                          inverse_shell, MATOP_MULT, (void (*)(void))mooseKokkosInverseShellMult));
 
     Mat formed_inverse;
     LibmeshPetscCallA(comm().get(), MatComputeOperator(inverse_shell, MATAIJ, &formed_inverse));
@@ -1439,8 +1439,8 @@ NonlinearSystemBase::verifyKokkosPreconditionerSymmetry()
   LibmeshPetscCallA(comm().get(), MatGetSize(operator_shell.mat(), &rows, &cols));
 
   Mat cycle;
-  LibmeshPetscCallA(
-      comm().get(), MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, pc, &cycle));
+  LibmeshPetscCallA(comm().get(),
+                    MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, pc, &cycle));
   LibmeshPetscCallA(
       comm().get(),
       MatShellSetOperation(cycle, MATOP_MULT, (void (*)(void))mooseKokkosPreconditionerShellMult));
@@ -1464,11 +1464,28 @@ NonlinearSystemBase::verifyKokkosPreconditionerSymmetry()
   const auto error = static_cast<Real>(asymmetry_norm);
   const auto scale = static_cast<Real>(cycle_norm);
 
-  // Reported rather than enforced: whether this cycle is symmetric is the question the check exists
-  // to answer, so a nonzero result here is a measurement and not a failure
+  // A v-cycle is symmetric when each of its parts is: the smoothers are symmetric, the coarse solve
+  // is a symmetric factorization, and restriction is the transpose of prolongation. What remains is
+  // the roundoff of the sweeps, transfers and triangular solves the cycle performs, which scales
+  // with the norm of the cycle itself, so the margin is relative to that norm and matches the one
+  // the operator's own symmetry is held to.
+  const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
   _console << "Kokkos p-multigrid cycle of system '" << name()
-           << "': differs from its transpose by " << error << " absolute, "
-           << error / std::max(scale, TOLERANCE) << " relative to its norm of " << scale << std::endl;
+           << "': differs from its transpose by " << error << " (tolerance " << tolerance
+           << ", cycle norm " << scale << ")" << std::endl;
+
+  if (error > tolerance)
+    mooseError("The p-multigrid cycle of system '",
+               name(),
+               "' differs from its transpose by ",
+               error,
+               ", which exceeds a tolerance of ",
+               tolerance,
+               ". A Krylov method that requires a symmetric preconditioner, such as CG, is not "
+               "valid over it. An asymmetric smoother, a coarse level solved by an iteration "
+               "rather than a factorization, or a restriction that is not the transpose of the "
+               "prolongation are the causes to check.");
 }
 
 void
