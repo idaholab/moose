@@ -1121,6 +1121,11 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 {
   TIME_SECTION("computeKokkosJacobianVectorProduct", 1);
 
+  // y is a caller-owned work vector holding whatever it last held, and the accumulation below adds
+  // into it, so it is zeroed ahead of the early return as well: an operator with nothing to
+  // contribute still owes its caller the zero action rather than that stale content
+  LibmeshPetscCallA(comm().get(), VecZeroEntries(y));
+
   if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
     return;
 
@@ -1139,8 +1144,6 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 
   // Wrap the raw output vector for the duration of this call only; the caller owns it and must
   // see the accumulated result once we return
-  LibmeshPetscCallA(comm().get(), VecZeroEntries(y));
-
   libMesh::PetscVector<Number> y_wrap(y, comm());
   associateVectorToTag(y_wrap, _kokkos_mf_y_tag);
 
