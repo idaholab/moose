@@ -22,7 +22,7 @@
     # a low order gives
     cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
                "Preconditioning/pmg/level_orders='5' "
-               "Preconditioning/pmg/verify_entity_blocks=true"
+               "Preconditioning/pmg/verify=entity_blocks"
     input = 'pmultigrid.i'
     expect_out = 'p = 5: entity blocks agree with the assembled operator to 0'
     # A block on a partition boundary gathers only its own process's elements, so exact agreement with
@@ -84,7 +84,7 @@
     input = 'pmultigrid.i'
     cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
                "Preconditioning/pmg/level_orders='1' "
-               "Preconditioning/pmg/verify_level_operators=true"
+               "Preconditioning/pmg/verify=level_operators"
     expect_out = 'p-multigrid level p = 1: operator agrees with its diagonal'
     requirement = 'The p-multigrid preconditioner shall apply each coarse level operator and compute '
                   'the diagonal of that operator from the same quadrature-point linearization, in '
@@ -98,7 +98,7 @@
     input = 'pmultigrid.i'
     cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
                "Preconditioning/pmg/level_orders='1' "
-               "Preconditioning/pmg/verify_level_transfers=true"
+               "Preconditioning/pmg/verify=level_transfers"
     expect_out = 'p = 1: restriction is the transpose of prolongation'
     requirement = 'The p-multigrid preconditioner shall transfer vectors between consecutive levels '
                   'of the hierarchy by an embedding of the coarser element basis in the finer one, '
@@ -113,7 +113,7 @@
     # Two coarse levels put a coarse level on both sides of a transfer as well as against the solver
     # system, and the check errors out on a mismatch at either pair
     cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
-               "Preconditioning/pmg/verify_level_galerkin=true"
+               "Preconditioning/pmg/verify=level_galerkin"
     expect_out = 'p = 2: operator agrees with the operator of the next finer level carried through '
                  'the transfer'
     requirement = 'The p-multigrid preconditioner shall realize on each coarse level the Galerkin '
@@ -127,7 +127,7 @@
     type = RunApp
     input = 'pmultigrid.i'
     cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
-               "Preconditioning/pmg/verify_level_matrices=true"
+               "Preconditioning/pmg/verify=level_matrices"
     expect_out = 'p = 1: assembled operator agrees with the matrix-free operator'
     requirement = 'The p-multigrid preconditioner shall assemble the operator of its coarsest level '
                   'into a sparse matrix, which a coarse solver can be applied to, agreeing with the '
@@ -173,7 +173,7 @@
     # symmetry of the operator and a CG solve that actually converges over it are two halves of one
     # requirement. The diagonal preconditioner is trivially symmetric positive definite, which leaves
     # the operator itself as the only thing the CG half can be failing on.
-    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_operator_symmetry=true '
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify=operator_symmetry '
                '-ksp_type cg -pc_type jacobi'
     expect_out = 'matrix-free operator of system .nl0.: differs from its transpose by.*'
                  'Solve Converged'
@@ -193,9 +193,9 @@
     # transpose, and CG is asked to converge over it. Here the operator is the trivially symmetric
     # half, which leaves the cycle as the only thing the CG half can be failing on. The check errors
     # out on a mismatch, so the measurement half is asserted by the run completing.
-    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_preconditioner_symmetry=true '
-               'Preconditioning/pmg/verify_operator_symmetry=true '
-               '-ksp_type cg -ksp_max_it 40 -ksp_converged_reason'
+    cli_args = "Outputs/exodus=false "
+               "Preconditioning/pmg/verify='cycle_symmetry operator_symmetry' "
+               "-ksp_type cg -ksp_max_it 40 -ksp_converged_reason"
     expect_out = 'p-multigrid cycle of system .nl0.: differs from its transpose by.*'
                  'Linear solve converged due to CONVERGED_RTOL.*Solve Converged'
     issues = '#8681'
@@ -225,7 +225,7 @@
   [operator_symmetry_transient_error]
     type = RunException
     input = 'pmultigrid.i'
-    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify_operator_symmetry=true '
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify=operator_symmetry '
                'Executioner/type=Transient Executioner/num_steps=1 Executioner/dt=0.1 '
                'Kernels/time/type=KokkosTimeDerivative Kernels/time/variable=u'
     expect_err = 'time integrator forms the solution time derivative from the raw solution'

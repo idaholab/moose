@@ -66,6 +66,22 @@ public:
    */
   virtual void setupSolver() {}
 
+  /**
+   * Called once a linearization of the solver system is available, and while the Jacobian
+   * evaluation still holds the tags it gathered that linearization under. A preconditioner whose
+   * operators are built from the linearization rather than from an assembled matrix builds or
+   * checks them here. The default does nothing.
+   */
+  virtual void postLinearization() {}
+
+  /**
+   * Called once a Jacobian evaluation has released the tags it held, which is the earliest point at
+   * which the solver system's own operator may be applied, since an application manages the tags it
+   * needs itself. A preconditioner that measures that operator does so here. The default does
+   * nothing.
+   */
+  virtual void postJacobianAssembly() {}
+
 protected:
   /// Setup the coupling matrix on the finite element problem
   void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);
