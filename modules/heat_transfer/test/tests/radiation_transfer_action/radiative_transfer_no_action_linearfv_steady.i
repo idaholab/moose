@@ -184,9 +184,6 @@
   petsc_options_value = 'hypre boomeramg 0.8'
   l_abs_tol = 1e-10
   l_tol = 1e-10
-  nl_abs_tol = 1e-10
-  nl_forced_its = 200
-  nl_rel_tol = 1e-10
   multi_system_fixed_point=true
   multi_system_fixed_point_convergence=linear
   multi_system_fixed_point_relaxation_factor = 0.5
