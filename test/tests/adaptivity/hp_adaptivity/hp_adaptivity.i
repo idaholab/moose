@@ -87,6 +87,14 @@
     refine_fraction = 0.7
     coarsen_fraction = 0.05
     max_h_level = 3
+    # Estimate the error from v alone, which is what lets this case exercise p elevation as well as
+    # h refinement. The hp selector elevates p only on an element that is smoother than average and
+    # whose p error per added degree of freedom beats its h error. u's singularity at x = 0 dominates
+    # the estimate whenever u carries any weight at all, so every flagged element is a rough one that
+    # wants h; v is analytic across the whole domain, so an estimate weighted onto it flags smooth
+    # elements that want p.
+    weight_names = 'u v'
+    weight_values = '0 1'
   []
 []
 
