@@ -9,7 +9,7 @@
     min_threads = 3
     max_threads = 3
     expect_out = 'Num Threads:\s+2'
-    requirement = 'The system shall allow an application to use fewer threads than the process-wide thread pool via a num_threads parameter in the [Application] input block.'
+    requirement = 'The system shall allow an application to use fewer threads than the process-wide thread pool via a num_threads parameter in the Application input block.'
   []
   [over_request]
     type = RunApp
@@ -20,6 +20,6 @@
     cli_args = 'Application/num_threads=4'
     allow_warnings = true
     expect_out = 'exceeds the process-wide thread count'
-    requirement = 'The system shall cap an application to the process-wide thread pool and warn when a larger [Application] num_threads is requested.'
+    requirement = 'The system shall cap an application to the process-wide thread pool and warn when a larger num_threads is requested in the Application input block.'
   []
 []
