@@ -1,6 +1,6 @@
 # A QUAD4 collapsed to a point: its four nodes lie within 1e-6 of one corner, sharing that corner
 # with a healthy unit quadrilateral. repair2DSlivers cannot absorb it (its longest edge has ~zero
-# length), so the zero-volume repair removes it by merging its vertices onto a single node.
+# length), so the point-collapse repair removes it by merging its vertices onto a single node.
 [Mesh]
   [healthy]
     type = ElementGenerator

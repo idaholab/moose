@@ -1,6 +1,6 @@
 # A TET4 collapsed to a point: its four nodes lie within 1e-6 of the origin, sharing that corner
 # with a healthy unit tetrahedron via 'fix_node_overlap'. The element is small in every dimension
-# (tiny diameter), so the zero-volume repair merges its vertices onto a single node and deletes it,
+# (tiny diameter), so the point-collapse repair merges its vertices onto a single node and deletes it,
 # leaving the healthy tetrahedron intact and conformal (validated by MeshDiagnosticsGenerator).
 [Mesh]
   [healthy]

@@ -20,7 +20,7 @@ The operations currently implemented are:
 
 - repairing degenerate (near-zero-quality) elements, gated by
   [!param](/Mesh/MeshRepairGenerator/fix_degenerate_elements). Degeneracy is classified into four kinds: a
-  **zero-volume** element (thin in all dimensions), flagged by
+  **point-collapse** element (thin in all dimensions), flagged by
   [!param](/Mesh/MeshRepairGenerator/zero_volume_fraction) (or [!param](/Mesh/MeshRepairGenerator/zero_area_fraction) in
   2D); a **sliver** (thin in two dimensions, e.g. a needle tetrahedron, or in 2D a thin triangle, quadrilateral, or
   polygon); a **pancake** (thin in one dimension, i.e. a flat or squashed element); and an element **collapsed to a
@@ -29,7 +29,7 @@ The operations currently implemented are:
   [!param](/Mesh/MeshRepairGenerator/flatness_tol) flags pancakes and slivers by shape; either the shape test or the
   measure test can be disabled by setting its tolerance to 0. The repairs currently implemented, by element type, are:
 
-  - **zero-volume** (point-collapse) elements: a first-order element small in *every* dimension - its diameter (maximum
+  - **point-collapse** elements: a first-order element small in *every* dimension - its diameter (maximum
     vertex separation) below the isotropic length equivalent of
     [!param](/Mesh/MeshRepairGenerator/zero_volume_fraction) (3D) or
     [!param](/Mesh/MeshRepairGenerator/zero_area_fraction) (2D) - is removed by merging all of its vertices onto a

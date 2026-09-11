@@ -1,5 +1,5 @@
 # A HEX8 collapsed to a point: its eight nodes lie within 1e-6 of one corner, sharing that corner
-# with a healthy unit hexahedron via 'fix_node_overlap'. The zero-volume repair merges its eight
+# with a healthy unit hexahedron via 'fix_node_overlap'. The point-collapse repair merges its eight
 # vertices onto a single node and deletes it, leaving the healthy hexahedron intact.
 [Mesh]
   [healthy]

@@ -60,13 +60,13 @@ MeshRepairGenerator::validParams()
       "fix_degenerate_elements",
       false,
       "Whether to repair degenerate (near-zero-quality) elements. Degeneracy includes: a "
-      "zero-volume element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
+      "point-collapse element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
       "needle tetrahedron, or in 2D a thin triangle, quadrilateral, or polygon); a pancake (thin "
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
       "or hexahedral slab); or an element collapsed to a lower topology by one or more short edges "
       "or in-plane vertices (a quadrilateral becoming a triangle, a pyramid a tetrahedron, or a "
-      "hexahedron a prism). A zero-volume element collapsed toward a point is removed by merging "
-      "its "
+      "hexahedron a prism). A point-collapse element (collapsed toward a point) is removed by "
+      "merging its "
       "coincident vertices onto a single node. A 2D sliver (TRI3, QUAD4, polygon) is absorbed into "
       "its longest-edge "
       "neighbor: a triangle sliver against a triangle neighbor splits that neighbor into two "
@@ -173,9 +173,9 @@ MeshRepairGenerator::generate()
 
   if (_fix_degenerate_elements)
   {
-    // Remove zero-volume elements (collapsed toward a point) first, so the sliver/pancake passes
+    // Remove point-collapse elements (collapsed toward a point) first, so the sliver/pancake passes
     // below only see elements that are thin in one or two dimensions
-    repairZeroVolumeElements(mesh);
+    repairPointCollapse(mesh);
 
     // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
     repair2DSlivers(mesh);
@@ -594,7 +594,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
 }
 
 void
-MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
 {
   // Mesh scales for the diameter (all-dimensions-thin) test and the collapse floor
   const auto bbox = MeshTools::create_bounding_box(*mesh);
@@ -604,7 +604,7 @@ MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) 
       std::max(std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)),
                Real(1e-30));
 
-  // A first-order 2D/3D element is a zero-volume (point-collapse) element when it is small in
+  // A first-order 2D/3D element is a point-collapse element when it is small in
   // *every* dimension, i.e. its diameter hmax() (the maximum vertex separation) is below the
   // isotropic length equivalent of the zero-volume/area fraction: cbrt(fraction)*cbrt(volume) in
   // 3D, sqrt(fraction)*sqrt(area) in 2D. This diameter test is what separates a point-collapse
@@ -712,9 +712,9 @@ MeshRepairGenerator::repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) 
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of zero-volume elements removed: " << num_repaired << std::endl;
+    _console << "Number of point-collapse elements removed: " << num_repaired << std::endl;
     if (num_skipped)
-      _console << "Number of zero-volume elements that could not be removed (left in place): "
+      _console << "Number of point-collapse elements that could not be removed (left in place): "
                << num_skipped << std::endl;
   }
 }
@@ -2162,7 +2162,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
 
   // Index of the most-squashed opposite-face pair if the hex is a flat-slab pancake (thin in one
   // dimension), else -1. A hex thin in two dimensions (a sliver/column, two squashed pairs) or
-  // three (a point) is deferred to repairHexSlivers / the zero-volume pass and returns -1 here.
+  // three (a point) is deferred to repairHexSlivers / the point-collapse pass and returns -1 here.
   auto squashedPair = [&](const Elem & e) -> int
   {
     if (e.type() != HEX8)
@@ -3091,7 +3091,7 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
       }
     }
     // Exactly one pinched lateral face reduces to a prism; two or more means the hex is a sliver
-    // (thin in two dimensions) or a point, which repairHexSlivers / the zero-volume pass handle.
+    // (thin in two dimensions) or a point, which repairHexSlivers / the point-collapse pass handle.
     return (count == 1) ? found : -1;
   };
 
