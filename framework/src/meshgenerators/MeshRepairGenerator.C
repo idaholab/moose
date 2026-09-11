@@ -1448,9 +1448,18 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
     return false;
   }
   poly_elem->subdomain_id() = sub;
+  // The union cell inherits the neighbor's partition. A freshly constructed Elem/Node defaults to
+  // invalid_processor_id; the interior mid-node in particular sits on no side, so the side-based
+  // node partitioning cannot reach it and it would stay unpartitioned. Set both explicitly (as the
+  // extruder does for its polyhedra) so no unpartitioned entity is emitted.
+  const processor_id_type pid = neighbor->processor_id();
+  poly_elem->processor_id() = pid;
   libMesh::Node * mid_ptr = mid_node.get();
   if (mid_node)
+  {
+    mid_node->processor_id() = pid;
     mesh->add_node(std::move(mid_node));
+  }
   Elem * added = mesh->add_elem(std::move(poly_elem));
   // The mid-element node now has a valid id, so volume() is well defined. Reject a degenerate
   // (non-positive volume) union and, in optimized builds where the constructor does not assert on
