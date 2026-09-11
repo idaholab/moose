@@ -206,6 +206,22 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [petsc_options]
+    type = RunApp
+    input = 'pmultigrid_petsc_options.i'
+    # The same hierarchy and the same physics as [solve], with the solver spelled as PETSc options
+    # rather than left to what PMG configures. Asserting the same convergence behavior under both
+    # spellings is what keeps the documented option set from drifting away from the built-in defaults.
+    cli_args = 'Outputs/exodus=false -ksp_max_it 40 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall accept the configuration it applies as PETSc '
+                  'command-line options, reading each level solver options after setting its own '
+                  'defaults, and shall precondition the solve identically either way.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [operator_symmetry_transient_error]
     type = RunException
     input = 'pmultigrid.i'
