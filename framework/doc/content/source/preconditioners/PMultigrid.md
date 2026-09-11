@@ -91,6 +91,16 @@ system's own matrix-free operator against its transpose after every linearizatio
 operator application per degree of freedom, which makes it a verification aid for small inputs. A
 solve that asks for CG should ask for this check alongside it.
 
+The cycle is symmetric as well, each of its parts being so: the smoothers are symmetric, the coarse
+level is solved by a symmetric factorization, and restriction is the transpose of prolongation. CG is
+therefore a valid outer accelerator over the whole hierarchy, and so is MINRES; both need a fixed
+number of vectors where GMRES needs one per iteration, which favors them at larger scale. Setting
+`verify_preconditioner_symmetry` forms the cycle explicitly and measures it against its transpose,
+erroring out on a mismatch, at the cost of one application of the whole cycle per degree of freedom.
+The three methods minimize different functionals once preconditioned, so compare them in the true
+residual rather than in what each reports: MOOSE requests an unpreconditioned convergence norm, which
+PETSc supports for GMRES only with right preconditioning.
+
 A transient system carries the constrained columns, and with them an asymmetric operator. Its time
 integrator forms the solution time derivative from the solution as the solver hands it over, so the
 mass contribution to every row reads the pinned degree of freedom's own iterate value, and the
