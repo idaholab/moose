@@ -44,7 +44,8 @@ ElementEmbedding::prolong()
   ::Kokkos::fence();
 }
 
-void ElementEmbedding::restrict()
+void
+ElementEmbedding::restrictTo()
 {
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, RestrictLoop> policy(
       0, _thread.size());
@@ -382,8 +383,9 @@ ElementEmbeddingTransfer::prolong(const libMesh::NumericVector<Number> & x,
   y.pointwise_mult(y, _inverse_multiplicity);
 }
 
-void ElementEmbeddingTransfer::restrict(const libMesh::NumericVector<Number> & x,
-                                        libMesh::NumericVector<Number> & y)
+void
+ElementEmbeddingTransfer::restrictTo(const libMesh::NumericVector<Number> & x,
+                                     libMesh::NumericVector<Number> & y)
 {
   // Prolongation weights an element-wise scatter after the fact, so the transpose weights the fine
   // vector ahead of the element-wise gather
@@ -397,7 +399,7 @@ void ElementEmbeddingTransfer::restrict(const libMesh::NumericVector<Number> & x
   _vectors[EMBEDDING_FINE].copyToDevice();
   _vectors.copyToDevice();
 
-  loops().restrict();
+  loops().restrictTo();
 
   _vectors[EMBEDDING_COARSE].close();
   _vectors[EMBEDDING_FINE].restore();

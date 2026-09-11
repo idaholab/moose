@@ -85,7 +85,7 @@ public:
   /**
    * Accumulate the transpose of the embedding of the fine vector onto the coarse vector
    */
-  void restrict();
+  void restrictTo();
 
   /**
    * Accumulate the number of elements each fine DOF belongs to onto the fine vector
@@ -182,8 +182,8 @@ public:
   virtual void prolong(const libMesh::NumericVector<Number> & x,
                        libMesh::NumericVector<Number> & y) override;
 
-  virtual void restrict(const libMesh::NumericVector<Number> & x,
-                        libMesh::NumericVector<Number> & y) override;
+  virtual void restrictTo(const libMesh::NumericVector<Number> & x,
+                          libMesh::NumericVector<Number> & y) override;
 
 private:
   /**

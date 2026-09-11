@@ -46,7 +46,7 @@ LevelTransfer::verify(const ConsoleStream & console)
   fillVerificationPattern(*fine, _fine.sys);
 
   prolong(*coarse, *prolonged);
-  restrict(*fine, *restricted);
+  restrictTo(*fine, *restricted);
 
   // The transpose relationship in inner-product form: (f, P c) = (P^T f, c) for every pair of
   // vectors, which is what a Galerkin coarse operator rests on

@@ -84,8 +84,8 @@ public:
    * @param x The fine vector
    * @param y The coarse vector
    */
-  virtual void restrict(const libMesh::NumericVector<Number> & x,
-                        libMesh::NumericVector<Number> & y) = 0;
+  virtual void restrictTo(const libMesh::NumericVector<Number> & x,
+                          libMesh::NumericVector<Number> & y) = 0;
 
   /**
    * Check that restriction is the transpose of prolongation, which is what makes the operator the

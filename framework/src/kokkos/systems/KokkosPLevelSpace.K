@@ -320,12 +320,13 @@ PLevelSpace::prolong(const libMesh::NumericVector<Number> & x, libMesh::NumericV
   _prolongation->prolong(x, y);
 }
 
-void PLevelSpace::restrict(const libMesh::NumericVector<Number> & x,
-                           libMesh::NumericVector<Number> & y)
+void
+PLevelSpace::restrictTo(const libMesh::NumericVector<Number> & x,
+                        libMesh::NumericVector<Number> & y)
 {
   mooseAssert(_prolongation, "The p-multigrid level transfer has not been built yet.");
 
-  _prolongation->restrict(x, y);
+  _prolongation->restrictTo(x, y);
 }
 
 void
@@ -611,8 +612,9 @@ PLevelSpace::setupBlockSmootherPC(const PC pc)
 void
 PLevelSpace::setupBlockSmoother()
 {
-  // The blocks hold entries rather than reading the cache when they are applied, so they are rebuilt
-  // here, which PETSc calls whenever the operator this preconditioner is built on has changed
+  // The blocks hold entries rather than reading the cache when they are applied, so they are
+  // rebuilt here, which PETSc calls whenever the operator this preconditioner is built on has
+  // changed
   _blocks.zero();
 
   QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
@@ -629,8 +631,8 @@ PLevelSpace::applyBlockSmoother(Vec r, Vec x)
   libMesh::PetscVector<Number> correction(x, _sys.comm());
 
   // PETSc hands the preconditioner its input locked against write access, and wrapping a vector for
-  // device access takes a writable array of it, so the residual is read through the level's own work
-  // vector, as an operator application reads its input
+  // device access takes a writable array of it, so the residual is read through the level's own
+  // work vector, as an operator application reads its input
   *_x = residual;
 
   _vectors[X].create(*_x, dofSpace(), false);
@@ -664,7 +666,7 @@ PLevelSpace::restrictToVec(Vec x, Vec y)
   libMesh::PetscVector<Number> x_wrap(x, _sys.comm());
   libMesh::PetscVector<Number> y_wrap(y, _sys.comm());
 
-  restrict(x_wrap, y_wrap);
+  restrictTo(x_wrap, y_wrap);
 }
 
 const DofSpace &
