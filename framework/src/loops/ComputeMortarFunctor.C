@@ -34,7 +34,8 @@ ComputeMortarFunctor::ComputeMortarFunctor(
     FEProblemBase & fe_problem,
     bool displaced,
     Assembly & assembly)
-  : _amg(amg),
+  : MortarExecutorInterface(fe_problem),
+    _amg(amg),
     _subproblem(subproblem),
     _fe_problem(fe_problem),
     _displaced(displaced),
@@ -44,13 +45,16 @@ ComputeMortarFunctor::ComputeMortarFunctor(
   for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
 
-  Moose::Mortar::setupMortarMaterials(_mortar_constraints,
-                                      _fe_problem,
-                                      _amg,
-                                      0,
-                                      _secondary_ip_sub_to_mats,
-                                      _primary_ip_sub_to_mats,
-                                      _secondary_boundary_mats);
+  setupMortarMaterials();
+}
+
+void
+ComputeMortarFunctor::mortarSetup(const AutomaticMortarGeneration & amg)
+{
+  // We may be registered with a warehouse that owns multiple interfaces; only react to the one
+  // we actually consume.
+  if (&amg == &_amg)
+    setupMortarMaterials();
 }
 
 void
@@ -157,12 +161,6 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
       }
     }
   };
-
-  // The mortar segment mesh is rebuilt whenever the displaced mesh moves, so it can acquire
-  // interior-parent subdomains that it did not have before; see mortarMaterialsNeedSetup() for why
-  // a missing subdomain key here is fatal rather than something we can skip.
-  if (mortarMaterialsNeedSetup(_amg))
-    setupMortarMaterials();
 
   PARALLEL_TRY
   {

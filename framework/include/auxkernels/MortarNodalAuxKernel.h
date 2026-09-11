@@ -33,6 +33,8 @@ public:
 
   void initialSetup() override;
 
+  void mortarSetup(const AutomaticMortarGeneration & amg) override;
+
 protected:
   void precalculateValue() override final;
 
@@ -78,8 +80,8 @@ protected:
 private:
   /**
    * (Re)builds the material containers required by this mortar auxiliary kernel for the mortar
-   * segment mesh currently reported by amg(). Called from initialSetup() and, if the
-   * interior-parent subdomain set has since changed, from compute() as well.
+   * segment mesh currently reported by amg(). Called from initialSetup() and from mortarSetup()
+   * whenever the interior-parent subdomain coverage changes.
    */
   void setupMortarMaterials();
 

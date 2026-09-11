@@ -50,6 +50,8 @@ template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
+    MortarExecutorInterface(
+        *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -90,17 +92,20 @@ MortarNodalAuxKernelTempl<ComputeValueType>::setupMortarMaterials()
 
 template <typename ComputeValueType>
 void
+MortarNodalAuxKernelTempl<ComputeValueType>::mortarSetup(const AutomaticMortarGeneration & amg_in)
+{
+  // We may be registered with a warehouse that owns multiple interfaces; only react to the one
+  // we actually consume.
+  if (&amg_in == &amg())
+    setupMortarMaterials();
+}
+
+template <typename ComputeValueType>
+void
 MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
   if (!_var.isNodalDefined())
     return;
-
-  // Unlike ComputeMortarFunctor, this object is never notified when the mesh changes, so this is
-  // the only place we can catch a mortar segment mesh that has grown new interior-parent subdomains
-  // since our material containers were last built. See mortarMaterialsNeedSetup() for why a missing
-  // subdomain key would otherwise be fatal.
-  if (mortarMaterialsNeedSetup(amg()))
-    setupMortarMaterials();
 
   ComputeValueType value(0);
   Real total_volume = 0;

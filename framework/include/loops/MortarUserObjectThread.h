@@ -31,9 +31,19 @@ public:
                          Assembly & assembly);
 
   /**
+   * Unlike MortarExecutorInterface's other implementers, this object is stack-constructed fresh
+   * for a single execution and destroyed well before the FEProblemBase that owns the warehouse we
+   * registered with, so (unlike the base class default) it is always safe -- and necessary, to
+   * avoid leaving a dangling entry behind -- to deregister here.
+   */
+  ~MortarUserObjectThread() override;
+
+  /**
    * Loops over the mortar segment mesh and executes the user objects
    */
   void operator()();
+
+  void mortarSetup(const AutomaticMortarGeneration & amg) override;
 
 private:
   /// The mortar user objects to loop over when on each mortar segment element

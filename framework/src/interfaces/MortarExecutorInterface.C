@@ -8,22 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MortarExecutorInterface.h"
-#include "AutomaticMortarGeneration.h"
+#include "FEProblemBase.h"
+#include "MortarInterfaceWarehouse.h"
 
-bool
-MortarExecutorInterface::mortarMaterialsNeedSetup(const AutomaticMortarGeneration & amg) const
+MortarExecutorInterface::MortarExecutorInterface(FEProblemBase & fe_problem)
+  : _mortar_warehouse(fe_problem.mortarData())
 {
-  // We use .count() here instead of libmesh_map_find because this is a coverage check, not a
-  // lookup: a missing key is the expected "needs setup" outcome, not an error to throw on.
-  auto keysCover = [](const std::map<SubdomainID, std::deque<MaterialBase *>> & mats,
-                      const std::set<SubdomainID> & sub_ids)
-  {
-    for (const auto sub_id : sub_ids)
-      if (!mats.count(sub_id))
-        return false;
-    return true;
-  };
+  _mortar_warehouse.notifyWhenMortarSetup(this);
+}
 
-  return !keysCover(_secondary_ip_sub_to_mats, amg.secondaryIPSubIDs()) ||
-         !keysCover(_primary_ip_sub_to_mats, amg.primaryIPSubIDs());
+MortarExecutorInterface::MortarExecutorInterface(MortarExecutorInterface && other)
+  : _mortar_warehouse(other._mortar_warehouse),
+    _secondary_ip_sub_to_mats(std::move(other._secondary_ip_sub_to_mats)),
+    _primary_ip_sub_to_mats(std::move(other._primary_ip_sub_to_mats)),
+    _secondary_boundary_mats(std::move(other._secondary_boundary_mats))
+{
+  // Swap which object the warehouse calls back into; the moved-from object is about to be
+  // destroyed and must not receive further mortarSetup() notifications.
+  _mortar_warehouse.dontNotifyWhenMortarSetup(&other);
+  _mortar_warehouse.notifyWhenMortarSetup(this);
 }
