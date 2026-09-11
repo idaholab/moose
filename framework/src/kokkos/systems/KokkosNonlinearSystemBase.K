@@ -1566,7 +1566,7 @@ NonlinearSystemBase::initKokkosEntityBlockSmoother()
 }
 
 dof_id_type
-NonlinearSystemBase::numKokkosEntityBlocks()
+NonlinearSystemBase::numKokkosEntityBlocks() const
 {
   // A block belongs to the process owning its entity's DOFs, so the count over all processes is the
   // number of blocks the smoother holds
@@ -1578,7 +1578,7 @@ NonlinearSystemBase::numKokkosEntityBlocks()
 }
 
 unsigned int
-NonlinearSystemBase::maxKokkosEntityBlockSize()
+NonlinearSystemBase::maxKokkosEntityBlockSize() const
 {
   auto size = _fe_problem.getKokkosFESystems()[number()].maxEntityBlockSize();
 
