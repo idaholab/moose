@@ -47,7 +47,7 @@
     type = ParsedVectorFunction
     expression_x = '0'
     expression_y = '0'
-    expression_z = 'sin(kappa * x) * (1 - 3 * (kappa^4) * (cos(kappa * x)^2) )'
+    expression_z = '(kappa^2) * sin(kappa * x) * (1 + 3 * (kappa^2) * (cos(kappa * x)^2) )'
 
     symbol_names = kappa
     symbol_values = 3.1415926535
@@ -55,7 +55,7 @@
 
   [k]
     type = MFEMParsedFunction
-    expression = 'j^2'
+    expression = '1 + j^2'
     symbol_names = 'j'
     symbol_values = 'h_field_curl_mag'
   []
@@ -88,6 +88,9 @@
   [curlcurl]
     type = MFEMNLCurlCurlKernel
     variable = h_field
+    k_coefficient = k
+    curlu_dk_dcurlu_coefficient = j_dk_dj
+    dk_dcurl_u_coefficient = dk_ds_s
   []
   [mass]
     type = MFEMVectorFEMassKernel
@@ -103,6 +106,8 @@
 [Solvers]
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
+    inner_pi_iterations = 0
+    inner_g_iterations = 0
   []
   [lin]
     type = MFEMGMRESSolver
@@ -111,7 +116,7 @@
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver
-    max_its = 10
+    max_its = 100
     abs_tol = 1.0e-15
     rel_tol = 1.0e-15
   []

@@ -417,6 +417,13 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
+    // With partial assembly, Mult() applies whatever AssemblePA stored at the last Setup(), and
+    // unlike AssembleGradPA (re-run by every GetGradient call) nothing refreshes it. Integrators
+    // whose PA data depends on the solution, e.g. NLCurlCurlIntegrator through k(|curl u|), must
+    // be re-assembled at the current state, which the grid functions hold as of the
+    // SetTrialVariablesFromTrueVectors call above. This is a no-op for legacy assembly and for
+    // forms without integrators, since the underlying NonlinearForm::ext will be a nullptr
+    nlf->Setup();
     nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
