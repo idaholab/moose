@@ -110,7 +110,15 @@ reports an error; such a system is preconditioned with GMRES as the outer Krylov
 
 ## Example Input File Syntax
 
-!listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid.i block=Preconditioning
+!listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid_base.i block=Preconditioning
+
+Nothing more is required: `PMG` configures the solve's PETSc preconditioner itself. Every setting it
+makes is applied before each level's own options are read, so any of them can be overridden from the
+command line or from `petsc_options_iname`. The following input states the whole configuration that
+way, and documents what each option does and which ones a parameter of the `Preconditioning` block
+already owns:
+
+!listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid_petsc_options.i block=Executioner
 
 !syntax parameters /Preconditioning/PMG
 

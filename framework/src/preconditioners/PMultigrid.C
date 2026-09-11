@@ -65,16 +65,11 @@ PMultigrid::validParams()
       "default, inverts the block of degrees of freedom each mesh entity carries -- an element's "
       "interior modes, and each shared face, edge and vertex -- which reaches the modes a point "
       "smoother cannot damp and the coarse spaces do not represent. 'point_jacobi' reads the "
-      "operator "
-      "diagonal alone, which at high order ignores the coupling among the many basis functions one "
-      "entity carries. The block smoother costs between a tenth and a quarter more per "
-      "application, "
-      "and is the faster of the two in time to solution from order four upward: on a 16 by 16 mesh "
-      "of "
-      "biquadratic elements it takes about a quarter of the time at order four and a fortieth of "
-      "it at "
-      "order eight, against a fifth more time at orders two and three, where a hierarchic entity "
-      "carries a single mode and the two smoothers coincide.");
+      "operator diagonal alone, which at high order ignores the coupling among the many basis "
+      "functions one entity carries. The block smoother is modestly more expensive per application "
+      "and converges in far fewer iterations from order four upward, which is why it is the "
+      "default; the two coincide at orders two and three, where a hierarchic entity carries a "
+      "single mode. See PMultigrid.md for measured iteration counts.");
 
   params.addParam<bool>(
       "verify_level_operators",
