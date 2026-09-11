@@ -25,13 +25,18 @@
 #include <algorithm>
 #include <cstdlib>
 
-std::string
-FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+hit::EvalResult
+FuncParseEvaler::eval(hit::Field * n,
+                      const std::vector<std::string> & args,
+                      hit::BraceExpander & exp)
 {
   std::string func_text;
   for (auto & s : args)
     func_text += s;
   auto n_errs = exp.errors.size();
+
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::Float;
 
   FunctionParser fp;
   fp.AddConstant("pi", libMesh::pi);
@@ -40,84 +45,83 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
   if (ret != -1)
   {
-    exp.errors.emplace_back(
-        "fparse error: " + std::string(fp.ErrorMsg()) + " in '" + n->fullpath() + "'", n);
-    return n->val();
+    exp.errors.push_back(exp.currentExpressionErrorMessage(
+        n, "fparse error: " + std::string(fp.ErrorMsg()) + " in '" + n->fullpath() + "'"));
+    result.value = n->val();
+    return result;
   }
 
   std::vector<double> var_vals;
   for (auto & var : var_names)
   {
-    // recursively check all parent scopes for the needed variables
-    hit::Node * curr = n;
-    while ((curr = curr->parent()))
+    std::string used_path;
+    if (auto src = exp.findReferencedField(n, var, &used_path))
     {
-      auto src = curr->find(var);
-      if (src && src != n && src->type() == hit::NodeType::Field)
-      {
-        exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
-        var_vals.push_back(curr->param<double>(var));
-        break;
-      }
+      result.used.push_back(used_path);
+      const auto & resolved = exp.resolve(src);
+      var_vals.push_back(MooseUtils::convert<double>(resolved.value));
     }
-
-    if (curr == nullptr)
-      exp.errors.emplace_back("no variable '" + var +
-                                  "' found for use in function parser expression in '" +
-                                  n->fullpath() + "'",
-                              n);
+    else
+      exp.errors.push_back(exp.currentExpressionErrorMessage(
+          n,
+          "no variable '" + var + "' found for use in function parser expression in '" +
+              n->fullpath() + "'"));
   }
 
   if (exp.errors.size() != n_errs)
-    return n->val();
+  {
+    result.value = n->val();
+    return result;
+  }
 
   std::stringstream ss;
   ss << std::setprecision(17) << fp.Eval(var_vals.data());
-
-  // change kind only (not val)
-  n->setVal(n->val(), hit::Field::Kind::Float);
-  return ss.str();
+  result.value = ss.str();
+  return result;
 }
 
-std::string
+hit::EvalResult
 UnitsConversionEvaler::eval(hit::Field * n,
-                            const std::list<std::string> & args,
+                            const std::vector<std::string> & args,
                             hit::BraceExpander & exp)
 {
-  std::vector<std::string> argv;
-  argv.insert(argv.begin(), args.begin(), args.end());
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::Float;
 
   // no conversion, the expression currently only documents the units and passes through the value
-  if (argv.size() == 2)
+  if (args.size() == 2)
   {
-    n->setVal(n->val(), hit::Field::Kind::Float);
-    return argv[0];
+    result.value = args[0];
+    return result;
   }
 
   // conversion
-  if (argv.size() != 4 || (argv.size() >= 3 && argv[2] != "->"))
+  if (args.size() != 4 || (args.size() >= 3 && args[2] != "->"))
   {
-    exp.errors.emplace_back("units error: Expected 4 arguments ${units number from_unit -> "
-                            "to_unit} or 2 arguments ${units number unit} in '" +
-                                n->fullpath() + "'",
-                            n);
-    return n->val();
+    exp.errors.push_back(exp.currentExpressionErrorMessage(
+        n,
+        "units error: Expected 4 arguments ${units number from_unit -> to_unit} or 2 arguments "
+        "${units number unit} in '" +
+            n->fullpath() + "'"));
+    result.value = n->val();
+    return result;
   }
 
   // get and check units
-  auto from_unit = MooseUnits(argv[1]);
-  auto to_unit = MooseUnits(argv[3]);
+  auto from_unit = MooseUnits(args[1]);
+  auto to_unit = MooseUnits(args[3]);
   if (!from_unit.conformsTo(to_unit))
   {
     std::ostringstream err;
-    err << "units error: " << argv[1] << " (" << from_unit << ") does not convert to " << argv[3]
+    err << "units error: " << args[1] << " (" << from_unit << ") does not convert to " << args[3]
         << " (" << to_unit << ") in '" << n->fullpath() << "'";
-    exp.errors.emplace_back(err.str(), n);
-    return n->val();
+    exp.errors.push_back(exp.currentExpressionErrorMessage(n, err.str()));
+    result.value = n->val();
+    return result;
   }
 
   // parse number
-  Real num = MooseUtils::convert<Real>(argv[0]);
+  Real num = MooseUtils::convert<Real>(args[0]);
 
   // convert units
   std::stringstream ss;
@@ -128,88 +132,85 @@ UnitsConversionEvaler::eval(hit::Field * n,
                         Moose::stringify(n->column()) + ": Unit conversion ",
                     num,
                     ' ',
-                    argv[1],
+                    args[1],
                     " -> ",
                     ss.str(),
                     ' ',
-                    argv[3]);
+                    args[3]);
 #endif
 
-  // change kind only (not val)
-  n->setVal(n->val(), hit::Field::Kind::Float);
-  return ss.str();
+  result.value = ss.str();
+  return result;
 }
 
-std::string
-EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+hit::EvalResult
+EnumerateEvaler::eval(hit::Field * n,
+                      const std::vector<std::string> & args,
+                      hit::BraceExpander & exp)
 {
-  std::vector<std::string> argv;
-  argv.insert(argv.begin(), args.begin(), args.end());
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::String;
 
-  if (argv.size() != 3)
+  auto fail = [&](const std::string & message) -> hit::EvalResult
   {
-    exp.errors.emplace_back(
-        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
-            n->fullpath() + "'",
-        n);
-    return n->val();
-  }
+    exp.errors.push_back(exp.currentExpressionErrorMessage(n, message));
+    result.value = n->val();
+    return result;
+  };
 
-  const auto & prefix = argv[0];
+  if (args.size() != 3)
+    return fail(
+        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
+        n->fullpath() + "'");
+
+  const auto & prefix = args[0];
   std::array<int, 2> index;
   for (const auto i : make_range(2))
   {
-    const auto & arg = argv[i + 1];
-    if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
-    {
-      exp.errors.emplace_back("enumerate error: index '" + arg +
-                                  "' is not a non-negative integer in '" + n->fullpath() + "'",
-                              n);
-      return n->val();
-    }
+    const auto & arg = args[i + 1];
+    if (arg.empty() || !MooseUtils::isDigits(arg))
+      return fail("enumerate error: index '" + arg + "' is not a non-negative integer in '" +
+                  n->fullpath() + "'");
     index[i] = MooseUtils::convert<int>(arg);
   }
 
   if (index[1] < index[0])
-  {
-    exp.errors.emplace_back("enumerate error: last index " + argv[2] +
-                                " is smaller than first index " + argv[1] + " in '" +
-                                n->fullpath() + "'",
-                            n);
-    return n->val();
-  }
+    return fail("enumerate error: last index " + args[2] + " is smaller than first index " +
+                args[1] + " in '" + n->fullpath() + "'");
 
   std::vector<std::string> names;
   for (const auto i : make_range(index[0], index[1] + 1))
     names.push_back(prefix + std::to_string(i));
 
-  return MooseUtils::stringJoin(names);
+  result.value = MooseUtils::stringJoin(names);
+  return result;
 }
 
-std::string
-RepeatEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+hit::EvalResult
+RepeatEvaler::eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp)
 {
-  std::vector<std::string> argv;
-  argv.insert(argv.begin(), args.begin(), args.end());
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::String;
 
-  if (argv.size() != 2)
+  auto fail = [&](const std::string & message) -> hit::EvalResult
   {
-    exp.errors.emplace_back(
-        "repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() + "'", n);
-    return n->val();
-  }
+    exp.errors.push_back(exp.currentExpressionErrorMessage(n, message));
+    result.value = n->val();
+    return result;
+  };
 
-  const auto & count_arg = argv[1];
-  if (count_arg.empty() || count_arg.find_first_not_of("0123456789") != std::string::npos)
-  {
-    exp.errors.emplace_back("repeat error: count '" + count_arg +
-                                "' is not a non-negative integer in '" + n->fullpath() + "'",
-                            n);
-    return n->val();
-  }
+  if (args.size() != 2)
+    return fail("repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() +
+                "'");
 
-  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), argv[0]);
-  return MooseUtils::stringJoin(values);
+  const auto & count_arg = args[1];
+  if (count_arg.empty() || !MooseUtils::isDigits(count_arg))
+    return fail("repeat error: count '" + count_arg + "' is not a non-negative integer in '" +
+                n->fullpath() + "'");
+
+  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), args[0]);
+  result.value = MooseUtils::stringJoin(values);
+  return result;
 }
 
 Parser::Parser(const std::vector<std::string> & input_filenames,
