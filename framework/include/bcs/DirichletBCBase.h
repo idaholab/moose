@@ -24,7 +24,7 @@ public:
   /**
    * Method to preset the nodal value if applicable
    */
-  void computeValue(NumericVector<Number> & current_solution);
+  virtual void computeValue(NumericVector<Number> & current_solution) override;
 
   bool preset() const { return _preset; }
 

@@ -157,7 +157,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
-    _ad_preset_nodal_bcs(/*threaded=*/false),
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels(/*threaded=*/false),
     _kokkos_integrated_bcs(/*threaded=*/false),
@@ -364,7 +363,6 @@ NonlinearSystemBase::initialSetup()
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
     _preset_nodal_bcs.residualSetup();
-    _ad_preset_nodal_bcs.residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels.initialSetup();
@@ -447,7 +445,6 @@ NonlinearSystemBase::timestepSetup()
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
   _preset_nodal_bcs.timestepSetup();
-  _ad_preset_nodal_bcs.timestepSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.timestepSetup();
@@ -483,7 +480,6 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
   _preset_nodal_bcs.customSetup(exec_type);
-  _ad_preset_nodal_bcs.customSetup(exec_type);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.customSetup(exec_type);
@@ -632,13 +628,18 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
     std::shared_ptr<ADDirichletBCBase> addbc = std::dynamic_pointer_cast<ADDirichletBCBase>(bc);
     if (addbc && addbc->preset())
-      _ad_preset_nodal_bcs.addObject(addbc);
+      _preset_nodal_bcs.addObject(addbc);
 
-    // Dirichlet BCs whose prescribed values libMesh's constraint machinery projects
+    // Dirichlet BCs whose prescribed values libMesh projects. These preset like the two families
+    // above, and are additionally kept on their own, since refreshLibmeshDirichletValues() walks
+    // them to build the boundaries it hands libMesh.
     std::shared_ptr<LibmeshDirichletBCBase> ldbc =
         std::dynamic_pointer_cast<LibmeshDirichletBCBase>(bc);
     if (ldbc)
+    {
+      _preset_nodal_bcs.addObject(ldbc);
       _libmesh_dirichlet_bcs.addObject(ldbc);
+    }
   }
 
   // IntegratedBCBase
@@ -1036,32 +1037,13 @@ NonlinearSystemBase::setInitialSolution()
 
       if (node->processor_id() == processor_id())
       {
-        bool has_preset_nodal_bcs = _preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
-        bool has_ad_preset_nodal_bcs = _ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
-        bool has_libmesh_dirichlet_bcs =
-            _libmesh_dirichlet_bcs.hasActiveBoundaryObjects(boundary_id);
-
-        // reinit variables in nodes
-        if (has_preset_nodal_bcs || has_ad_preset_nodal_bcs || has_libmesh_dirichlet_bcs)
+        if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+        {
+          // reinit variables in nodes
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        if (has_preset_nodal_bcs)
-        {
-          const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs)
+          for (const auto & preset_bc : _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id))
             preset_bc->computeValue(initial_solution);
-        }
-        if (has_ad_preset_nodal_bcs)
-        {
-          const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs_res)
-            preset_bc->computeValue(initial_solution);
-        }
-        if (has_libmesh_dirichlet_bcs)
-        {
-          const auto & dirichlet_bcs = _libmesh_dirichlet_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & dirichlet_bc : dirichlet_bcs)
-            dirichlet_bc->computeValue(initial_solution);
         }
       }
     }
@@ -1819,7 +1801,6 @@ NonlinearSystemBase::residualSetup()
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
   _preset_nodal_bcs.residualSetup();
-  _ad_preset_nodal_bcs.residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.residualSetup();
@@ -3081,7 +3062,6 @@ NonlinearSystemBase::jacobianSetup()
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
   _preset_nodal_bcs.jacobianSetup();
-  _ad_preset_nodal_bcs.jacobianSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.jacobianSetup();
@@ -3516,7 +3496,6 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _general_dampers.updateActive();
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
-    _ad_preset_nodal_bcs.updateActive();
     _splits.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();
