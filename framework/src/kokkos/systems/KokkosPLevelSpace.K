@@ -251,8 +251,11 @@ PLevelSpace::setupConstrainedDofs()
   // which row is preset is a solve-time distinction this level's operator does not make.
   ConstraintOperator constraint_operator;
 
-  constraint_operator.setup(
-      dof_map, *solution, dofSpace().getNumLocalDofs() + dofSpace().getNumGhostDofs(), {});
+  constraint_operator.setup(dof_map,
+                            *solution,
+                            dofSpace().getNumLocalDofs(),
+                            dofSpace().getNumLocalDofs() + dofSpace().getNumGhostDofs(),
+                            {});
 
   _constrained_dof = constraint_operator.constrainedMask();
 
