@@ -1,7 +1,42 @@
 mu = 2.6
-rho = 1.1
-advected_interp_method='average'
-pressure_gradient_method = 'green-gauss'
+rho = 1.0
+advected_interp_method = 'average'
+
+[Mesh]
+  [flow]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '0.15 0.15'
+    dy = '0.3'
+    ix = '3 3'
+    iy = '3'
+    subdomain_id = '0 1'
+  []
+  [outside]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 1
+    ny = 1
+    xmin = 2
+    xmax = 3
+    ymin = 2
+    ymax = 3
+  []
+  [outside_block]
+    type = SubdomainIDGenerator
+    input = outside
+    subdomain_id = 2
+  []
+  [mesh]
+    type = MeshCollectionGenerator
+    inputs = 'flow outside_block'
+  []
+[]
+
+[Problem]
+  linear_sys_names = 'u_system v_system pressure_system'
+  previous_nl_solution_required = true
+[]
 
 [UserObjects]
   [rc]
@@ -11,23 +46,8 @@ pressure_gradient_method = 'green-gauss'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    block = '0 1'
   []
-[]
-
-[Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '0.3'
-    dy = '0.3'
-    ix = '3'
-    iy = '3'
-  []
-[]
-
-[Problem]
-  linear_sys_names = 'u_system v_system pressure_system'
-  previous_nl_solution_required = true
 []
 
 [Variables]
@@ -45,15 +65,12 @@ pressure_gradient_method = 'green-gauss'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
-    gradient_method = ${pressure_gradient_method}
   []
 []
 
 [FVGradientMethods]
-  [reconstructed]
-    type = FVReconstructedPressureGradient
-    base_gradient_method = green-gauss
-    gradient_relaxation = 0.1
+  [gg2]
+    type = FVGreenGaussGradient
   []
 []
 
@@ -86,17 +103,33 @@ pressure_gradient_method = 'green-gauss'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
   []
-  [u_pressure]
+  [u_pressure_left]
     type = LinearFVMomentumPressure
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    block = '0 2'
   []
-  [v_pressure]
+  [u_pressure_right]
+    type = LinearFVMomentumPressure
+    variable = vel_x
+    pressure = pressure
+    momentum_component = 'x'
+    block = '1 2'
+  []
+  [v_pressure_left]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    block = '0 2'
+  []
+  [v_pressure_right]
+    type = LinearFVMomentumPressure
+    variable = vel_y
+    pressure = pressure
+    momentum_component = 'y'
+    block = '1 2'
   []
   [p_diffusion]
     type = LinearFVPressureCorrectionDiffusion
@@ -176,29 +209,4 @@ pressure_gradient_method = 'green-gauss'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
-[]
-
-[Postprocessors]
-  [inlet_mass]
-    type = VolumetricFlowRate
-    boundary = left
-    rhie_chow_user_object = rc
-    advected_quantity = ${rho}
-    vel_x = vel_x
-    vel_y = vel_y
-    subtract_mesh_velocity = false
-  []
-  [outlet_mass]
-    type = VolumetricFlowRate
-    boundary = right
-    rhie_chow_user_object = rc
-    advected_quantity = ${rho}
-    vel_x = vel_x
-    vel_y = vel_y
-    subtract_mesh_velocity = false
-  []
-[]
-
-[Outputs]
-  csv = true
 []

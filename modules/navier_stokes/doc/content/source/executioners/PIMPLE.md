@@ -71,6 +71,12 @@ pressure, and energy solves:
 []
 ```
 
+When [FVReconstructedPressureGradient.md] is used for momentum-pressure coupling, its
+relaxed feedback field always restarts from the base pressure gradient at the beginning of
+the recovered time step rather than being restored from the checkpoint, so freezing
+`should_solve_pressure` does not need to special-case it; see
+[FVReconstructedPressureGradient.md#time-step-lifecycle].
+
 !syntax parameters /Executioner/PIMPLE
 
 !syntax inputs /Executioner/PIMPLE

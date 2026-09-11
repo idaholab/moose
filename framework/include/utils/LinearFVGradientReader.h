@@ -52,8 +52,14 @@ public:
   /// System whose DOF map indexes the stored values.
   const SystemBase & system() const { return _sys; }
 
+  /// System number used when mapping variable DOFs.
+  unsigned int systemNumber() const { return _system_number; }
+
   /// Method object that produces the stored values.
   const FVGradientMethod & method() const { return _method; }
+
+  /// Variable number whose gradient this object reads.
+  unsigned int variableNumber() const { return _variable_number; }
 
   /**
    * Read one gradient component at an element.

@@ -53,6 +53,11 @@ pressure_gradient_method = 'green-gauss'
   [gg]
     type = FVGreenGaussGradient
   []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+  []
 []
 
 [FVInterpolationMethods]

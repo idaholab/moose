@@ -4,6 +4,7 @@ advected_interp_method = 'average'
 cp = 300
 k = 10
 alpha_b = 1e-4
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
   [mesh]
@@ -47,11 +48,23 @@ alpha_b = 1e-4
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
   []
   [T]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
     initial_condition = 300
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 
@@ -239,6 +252,21 @@ alpha_b = 1e-4
   []
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = LineValueSampler
+    # Sampled at the cell-center x-locations of the row of cells at mid-channel height (dx=1/ix=10
+    # -> 0.1-wide cells; dy=0.2/iy=5 -> 0.04-tall cells, so y=0.1 is a cell-center row) to avoid
+    # sampling a piecewise-constant FV variable exactly on a face.
+    start_point = '0.05 0.1 0'
+    end_point = '0.95 0.1 0'
+    num_points = 10
+    sort_by = x
+    variable = 'vel_x vel_y pressure T'
+    execute_on = FINAL
+  []
+[]
+
 [Executioner]
   type = PIMPLE
   momentum_l_abs_tol = 1e-12
@@ -274,4 +302,8 @@ alpha_b = 1e-4
 
 [Outputs]
   exodus = true
+  [csv]
+    type = CSV
+    execute_on = final
+  []
 []
