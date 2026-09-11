@@ -1,12 +1,12 @@
 [Tests]
-  issues = '#13918 #15843 #16954'
+  issues = '#13918 #15843 #16954 #33217'
   design = 'RadiationTransferAction.md'
 
   [radiative_transfer_action_analytical]
     type = 'Exodiff'
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out.e'
-    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method for cavities with unobstructed, planar faces.'
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method for cavities with unobstructed, planar faces, including enforcement of specified fixed temperatures on designated boundaries.'
     mesh_mode = REPLICATED
     cli_args = 'GrayDiffuseRadiation/cavity/view_factor_calculator=analytical'
   []
