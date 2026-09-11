@@ -26,6 +26,8 @@ class MaterialBase;
 class MaterialWarehouse : public MooseObjectWarehouse<MaterialBase>
 {
 public:
+  MaterialWarehouse(bool threaded = true, THREAD_ID num_threads = libMesh::n_threads());
+
   const MooseObjectWarehouse<MaterialBase> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{

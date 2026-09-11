@@ -29,8 +29,8 @@ MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & regi
     _restart_in_place(false),
     _recovering(false)
 {
-  _material_data.reserve(libMesh::n_threads());
-  for (const auto tid : make_range(libMesh::n_threads()))
+  _material_data.reserve(_problem.n_threads());
+  for (const auto tid : make_range(_problem.n_threads()))
     _material_data.emplace_back(*this, tid);
 }
 

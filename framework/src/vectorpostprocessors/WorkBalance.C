@@ -307,7 +307,7 @@ WorkBalance::execute()
   // Get all of the Elem info first
   WBElementLoop wb_el(mesh, _system, _rank_map);
 
-  Threads::parallel_reduce(*mesh.getActiveLocalElementRange(), wb_el);
+  Threads::parallel_reduce(*mesh.getActiveLocalElementRange(), wb_el, getMooseApp().n_threads());
 
   _local_num_elems = wb_el._local_num_elems;
   _local_num_dofs = wb_el._local_num_dofs;
@@ -319,7 +319,7 @@ WorkBalance::execute()
   // Now Node info
   WBNodeLoop wb_nl(_fe_problem, _system);
 
-  Threads::parallel_reduce(*mesh.getLocalNodeRange(), wb_nl);
+  Threads::parallel_reduce(*mesh.getLocalNodeRange(), wb_nl, getMooseApp().n_threads());
 
   _local_num_nodes = wb_nl._local_num_nodes;
   _local_num_dofs += wb_nl._local_num_dofs;

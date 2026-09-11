@@ -135,7 +135,7 @@ NearestNodeLocator::findNodes()
     SecondaryNeighborhoodThread snt(
         _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
-    Threads::parallel_reduce(trial_secondary_node_range, snt);
+    Threads::parallel_reduce(trial_secondary_node_range, snt, _subproblem.n_threads());
 
     _secondary_nodes = snt._secondary_nodes;
     _neighbor_nodes = snt._neighbor_nodes;
@@ -150,7 +150,7 @@ NearestNodeLocator::findNodes()
       SecondaryNeighborhoodThread snt_ghosting(
           _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
-      Threads::parallel_reduce(trial_secondary_node_range, snt_ghosting);
+      Threads::parallel_reduce(trial_secondary_node_range, snt_ghosting, _subproblem.n_threads());
 
       for (const auto & dof : snt_ghosting._ghosted_elems)
         _subproblem.addGhostedElem(dof);
@@ -170,7 +170,7 @@ NearestNodeLocator::findNodes()
 
   NearestNodeThread nnt(_mesh, _neighbor_nodes);
 
-  Threads::parallel_reduce(*_secondary_node_range, nnt);
+  Threads::parallel_reduce(*_secondary_node_range, nnt, _subproblem.n_threads());
 
   _max_patch_percentage = nnt._max_patch_percentage;
 
@@ -302,13 +302,13 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
   SecondaryNeighborhoodThread snt(
       _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
-  Threads::parallel_reduce(secondary_node_range, snt);
+  Threads::parallel_reduce(secondary_node_range, snt, _subproblem.n_threads());
 
   // Calculate new ghosting patch for the secondary_node_range
   SecondaryNeighborhoodThread snt_ghosting(
       _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
-  Threads::parallel_reduce(secondary_node_range, snt_ghosting);
+  Threads::parallel_reduce(secondary_node_range, snt_ghosting, _subproblem.n_threads());
 
   // Add the new set of elements that need to be ghosted into _new_ghosted_elems
   for (const auto & dof : snt_ghosting._ghosted_elems)
@@ -325,7 +325,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
 
   NearestNodeThread nnt(_mesh, snt._neighbor_nodes);
 
-  Threads::parallel_reduce(tracked_secondary_node_range, nnt);
+  Threads::parallel_reduce(tracked_secondary_node_range, nnt, _subproblem.n_threads());
 
   _max_patch_percentage = nnt._max_patch_percentage;
 
