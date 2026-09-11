@@ -219,6 +219,15 @@
     design = 'PorousFlowPeacemanBorehole.md'
     issues = '#33700'
   []
+  [bh_except21]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    cli_args = "DiracKernels/bh/unit_weight_fp=simple_fluid DiracKernels/bh/unit_weight_temperature=300 DiracKernels/bh/unit_weight_gravity='0 0 -9.81'"
+    expect_err = "'unit_weight_temperature' must be a nonlinear or auxiliary variable, not a constant value"
+    requirement = 'PorousFlowPeacemanBorehole shall throw an error if unit_weight_temperature is supplied as a constant value rather than as a variable, since there is then no temperature profile to sample along the borehole'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
+  []
 
   [pls01_00]
     type = 'CSVDiff'

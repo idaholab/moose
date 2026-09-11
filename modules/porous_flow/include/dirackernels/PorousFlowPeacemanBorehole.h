@@ -12,6 +12,7 @@
 #include "PorousFlowLineSink.h"
 
 class SinglePhaseFluidProperties;
+class MooseVariableFieldBase;
 
 namespace libMesh
 {
@@ -65,9 +66,14 @@ protected:
   /// _use_density_from_temperature
   const SinglePhaseFluidProperties * const _fp;
 
-  /// The libMesh system holding unit_weight_temperature.  nullptr unless
+  /// The coupled unit_weight_temperature variable.  nullptr unless
   /// _use_density_from_temperature
-  libMesh::System * const _temperature_system;
+  const MooseVariableFieldBase * const _temperature_var;
+
+  /// The libMesh system holding _temperature_var, used to sample that variable at borehole
+  /// points that may lie outside this processor's mesh partition.  nullptr unless
+  /// _use_density_from_temperature
+  const libMesh::System * const _temperature_system;
 
   /// Variable number of unit_weight_temperature within _temperature_system
   const unsigned int _temperature_var_number;

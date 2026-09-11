@@ -11,6 +11,8 @@
 #include "RotationMatrix.h"
 #include "Function.h"
 #include "SinglePhaseFluidProperties.h"
+#include "MooseVariableFieldBase.h"
+#include "SystemBase.h"
 #include "libmesh/system.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
@@ -59,13 +61,13 @@ PorousFlowPeacemanBorehole::validParams()
       "input file that sets 'gravity' or 'fp' in [GlobalParams] for unrelated Darcy kernels or "
       "fluid materials would otherwise silently activate, or fail to validate, this mode on "
       "every PorousFlowPeacemanBorehole in the input.)");
-  params.addParam<VariableName>(
+  params.addCoupledVar(
       "unit_weight_temperature",
-      "The name of the (nonlinear or auxiliary) variable holding temperature, sampled at each "
-      "borehole point to compute the in-well fluid density used to build the wellbore pressure "
-      "profile.  This is unrelated to function_of=temperature (which instead selects whether "
-      "the *outflow* driving this DiracKernel is a function of porepressure or temperature).  "
-      "Only used, and required, if 'unit_weight_fp' is given.");
+      "The (nonlinear or auxiliary) variable holding temperature, sampled at each borehole point "
+      "to compute the in-well fluid density used to build the wellbore pressure profile.  Must "
+      "be a variable, not a constant value.  This is unrelated to function_of=temperature "
+      "(which instead selects whether the *outflow* driving this DiracKernel is a function of "
+      "porepressure or temperature).  Only used, and required, if 'unit_weight_fp' is given.");
   params.addParam<RealVectorValue>(
       "unit_weight_gravity",
       "Gravitational acceleration, pointing downwards, in the units used elsewhere in this "
@@ -132,19 +134,11 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
     _use_density_from_temperature(isParamValid("unit_weight_fp")),
     _fp(_use_density_from_temperature ? &getUserObject<SinglePhaseFluidProperties>("unit_weight_fp")
                                       : nullptr),
-    _temperature_system(
-        (_use_density_from_temperature && isParamValid("unit_weight_temperature"))
-            ? &_subproblem.getSystem(getParam<VariableName>("unit_weight_temperature"))
-            : nullptr),
-    _temperature_var_number(
-        (_use_density_from_temperature && isParamValid("unit_weight_temperature"))
-            ? _subproblem
-                  .getVariable(_tid,
-                               getParam<VariableName>("unit_weight_temperature"),
-                               Moose::VarKindType::VAR_ANY,
-                               Moose::VarFieldType::VAR_FIELD_STANDARD)
-                  .number()
-            : libMesh::invalid_uint),
+    _temperature_var(_use_density_from_temperature && isCoupled("unit_weight_temperature")
+                         ? getFieldVar("unit_weight_temperature", 0)
+                         : nullptr),
+    _temperature_system(_temperature_var ? &_temperature_var->sys().system() : nullptr),
+    _temperature_var_number(_temperature_var ? _temperature_var->number() : libMesh::invalid_uint),
     _gravity(isParamValid("unit_weight_gravity") ? getParam<RealVectorValue>("unit_weight_gravity")
                                                  : RealVectorValue()),
     _density_reference_pressure(
@@ -208,6 +202,13 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
       paramError("unit_weight_temperature",
                  "PorousFlowPeacemanBorehole: 'unit_weight_temperature' must be supplied when "
                  "'unit_weight_fp' is supplied");
+    if (!isCoupled("unit_weight_temperature"))
+      paramError("unit_weight_temperature",
+                 "PorousFlowPeacemanBorehole: 'unit_weight_temperature' must be a nonlinear or "
+                 "auxiliary variable, not a constant value.  The wellbore pressure profile is "
+                 "built by sampling this variable at each borehole point, so a spatially "
+                 "constant temperature has no profile to sample: use 'unit_weight' instead if "
+                 "the in-well fluid density really is constant");
     if (!isParamValid("unit_weight_gravity"))
       paramError("unit_weight_gravity",
                  "PorousFlowPeacemanBorehole: 'unit_weight_gravity' must be supplied when "
