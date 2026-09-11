@@ -161,6 +161,12 @@ ComputeDynamicFrictionalForceLMMechanicalContact::timestepSetup()
 
   ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup();
 
+  // The base class sets _repeated_timestep to indicate whether this call is for a retried
+  // timestep (e.g. --test-restep or a rejected step); if so, the history below has already been
+  // advanced from the accepted state and must not be advanced again.
+  if (_repeated_timestep)
+    return;
+
   _dof_to_old_real_tangential_velocity.clear();
 
   for (auto & map_pr : _dof_to_real_tangential_velocity)

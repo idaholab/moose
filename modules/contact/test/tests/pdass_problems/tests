@@ -137,7 +137,6 @@
     input = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-2
-    restep = false # Issue #31054
     requirement = "The contact module shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action and use the hypre algebraic multigrid "
@@ -147,6 +146,15 @@
                   "penalty values, respectively."
     capabilities = 'method!=dbg'
     recover = false # Only doing one timestep
+    # Under --test-restep, the discarded attempt's SNES/hypre BoomerAMG linear solve leaves the
+    # retried attempt's first Newton correction differing from the non-restepped run by a tiny
+    # relative amount; this floating-point divergence compounds through the augmented Lagrange
+    # (Uzawa) loop and flips isAugmentedLagrangianConverged() one iteration earlier, producing a
+    # converged Lagrange multiplier that fails this test's tight rel_err=1.0e-4 csvdiff check. The
+    # failure reproduces identically whether or not _dof_to_lagrange_multiplier is restored to its
+    # pre-attempt value on the retry, so this is a PETSc/SNES/hypre solver-level effect, not a
+    # modules/contact bookkeeping bug.
+    restep = false # Issue #31054
   []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'

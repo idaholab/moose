@@ -82,7 +82,8 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
     _adaptivity_friction(
         getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
-    _epsilon_tolerance(1.0e-40)
+    _epsilon_tolerance(1.0e-40),
+    _t_step_old_friction(declareRestartableData<int>("t_step_old_friction", 0))
 
 {
   if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
@@ -127,24 +128,33 @@ PenaltyFrictionUserObject::timestepSetup()
     step_slip = {0.0, 0.0};
   }
 
-  // save off accumulated slip from the last timestep
-  for (auto & map_pr : _dof_to_accumulated_slip)
-  {
-    auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-    old_accumulated_slip = accumulated_slip;
-  }
+  // timestepSetup() runs once per solve attempt, so on a retried timestep (e.g. --test-restep or
+  // a rejected step) the accumulated slip and tangential traction history have already been
+  // advanced from the accepted state; advancing them again would overwrite that history with the
+  // discarded attempt's last values.
+  const bool repeated_timestep = _fe_problem.timeStep() == _t_step_old_friction;
+  _t_step_old_friction = _fe_problem.timeStep();
+
+  if (!repeated_timestep)
+    // save off accumulated slip from the last timestep
+    for (auto & map_pr : _dof_to_accumulated_slip)
+    {
+      auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
+      old_accumulated_slip = accumulated_slip;
+    }
 
   for (auto & dof_lp : _dof_to_local_penalty_friction)
     dof_lp.second = _penalty_friction;
 
-  // save off tangential traction from the last timestep
-  for (auto & map_pr : _dof_to_tangential_traction)
-  {
-    auto & [tangential_traction, old_tangential_traction] = map_pr.second;
-    old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
-                               MetaPhysicL::raw_value(tangential_traction(1))};
-    tangential_traction = {0.0, 0.0};
-  }
+  if (!repeated_timestep)
+    // save off tangential traction from the last timestep
+    for (auto & map_pr : _dof_to_tangential_traction)
+    {
+      auto & [tangential_traction, old_tangential_traction] = map_pr.second;
+      old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                                 MetaPhysicL::raw_value(tangential_traction(1))};
+      tangential_traction = {0.0, 0.0};
+    }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
     delta_tangential_lm.setZero();
