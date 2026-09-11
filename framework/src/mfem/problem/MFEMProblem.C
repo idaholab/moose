@@ -82,6 +82,9 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 #ifdef LIBMESH_HAVE_OPENMP
   omp_set_num_threads(1);
 #endif
+  // Also reduce this application's thread count so MOOSE-side consumers (which read
+  // MooseApp::n_threads()) run single-threaded to match.
+  getMooseApp().setNumThreads(1);
   setMesh();
 }
 

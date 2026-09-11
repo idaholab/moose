@@ -419,12 +419,19 @@ public:
   /**
    * Returns the number of threads this application uses.
    *
-   * This is capped at the process-wide thread count (libMesh::n_threads(), set once at launch by
-   * --n-threads); a per-application value can only cap it down, never exceed it. Set from the
-   * [Application] block's num_threads parameter, and defaults to the process-wide count when that
-   * is not given.
+   * This is the [Application] num_threads value (or the process-wide count when unset), capped at
+   * the process-wide libMesh::n_threads(). An FE backend that does not support MOOSE threading
+   * (e.g. MFEM) reduces it to 1 via setNumThreads().
    */
   THREAD_ID n_threads() const { return _num_threads; }
+
+  /**
+   * Sets the number of threads this application uses, capped to [1, libMesh::n_threads()].
+   *
+   * Intended for FE backends that do not support MOOSE threading and reduce the count once their
+   * problem is set up (e.g. MFEM reduces it to 1). See n_threads().
+   */
+  void setNumThreads(THREAD_ID num_threads);
 
   /**
    * Get the command line
@@ -1352,8 +1359,9 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
-  /// The number of threads this application uses, capped at libMesh::n_threads() (see n_threads())
-  const THREAD_ID _num_threads;
+  /// The number of threads this application uses, capped at libMesh::n_threads(). Not const: an FE
+  /// backend that does not support MOOSE threading reduces it via setNumThreads() (see n_threads()).
+  THREAD_ID _num_threads;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
