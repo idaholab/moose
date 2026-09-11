@@ -81,10 +81,14 @@ ObtainAvgContactAngle::finalize()
   gatherSum(_cos_theta_val);
   gatherSum(_total_weight);
 
-  // With the interface fully detached from the boundary there is no angle to report, so hold the
-  // last value instead of dividing by zero.
+  // With the interface fully detached from the boundary there is no angle to report; error rather
+  // than silently holding the last computed value, which would misrepresent the current state.
   if (_total_weight == 0.0)
-    return;
+    mooseError("'",
+               name(),
+               "' found no interface intersecting boundary '",
+               Moose::stringify(boundaryNames()),
+               "', so no contact angle can be computed.");
 
   // |grad(pf).n| <= |grad(pf)| holds pointwise, so the ratio of the integrals lies in [-1, 1] up
   // to roundoff; clamp it so that a ratio a few epsilon outside the range cannot produce a NaN.

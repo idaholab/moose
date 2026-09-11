@@ -411,8 +411,10 @@ MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & va
   mooseAssert(_count == 1, "Vector-valued variables cannot be array variables");
   mooseAssert(
       _var.feType().family == LAGRANGE_VEC ||
-          (_var.feType().family == MONOMIAL_VEC && _var.feType().order == CONSTANT),
-      "setNodalValue only makes sense for LAGRANGE_VEC or CONSTANT MONOMIAL_VEC vector variables");
+          (_var.feType().family == MONOMIAL_VEC && _var.feType().order == CONSTANT &&
+           (!_var.feType().p_refinement || !_subproblem.doingPRefinement())),
+      "setNodalValue only makes sense for LAGRANGE_VEC or non-p-refined CONSTANT MONOMIAL_VEC "
+      "vector variables");
   mooseAssert(_dof_indices.size() <= _var.sys().mesh().getMesh().mesh_dimension(),
               "The number of dof indices for a vector variable should be at most the mesh manifold "
               "dimension. We cannot use an exact equality because it's possible the vector "

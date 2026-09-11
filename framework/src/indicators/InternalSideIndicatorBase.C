@@ -73,6 +73,8 @@ InternalSideIndicatorBase::InternalSideIndicatorBase(const InputParameters & par
   // Access into the solution vector assumes constant monomial
   if (_field_var.feType().order != CONSTANT || _field_var.feType().family != MONOMIAL)
     mooseError("Only constant monomial variables for the internal side indicator are supported");
+  if (_field_var.feType().p_refinement && _subproblem.doingPRefinement())
+    mooseError("p_refinement can push the MONOMIAL order above CONSTANT, which is not supported");
 }
 
 void

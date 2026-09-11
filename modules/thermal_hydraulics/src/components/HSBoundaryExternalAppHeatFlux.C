@@ -79,7 +79,7 @@ HSBoundaryExternalAppHeatFlux::addVariables()
 
   const auto fe_type = getParam<bool>("heat_flux_is_monomial")
                            ? libMesh::FEType(CONSTANT, MONOMIAL).set_p_refinement(false)
-                           : libMesh::FEType(FIRST, LAGRANGE);
+                           : libMesh::FEType(FIRST, LAGRANGE).set_p_refinement(false);
   getTHMProblem().addSimVariable(false, _heat_flux_name, fe_type, subdomain_names);
 }
 
