@@ -34,8 +34,12 @@ relationship of each transfer there, at the cost of one application of each dire
 
 ## The coarsest level
 
-The coarsest level is the only one that assembles a sparse matrix, and it is factored directly, by LU
-through MUMPS so that the same configuration serves in parallel. A multigrid preconditioner has to be a
+The coarsest level is the only one that assembles a sparse matrix, and it is factored directly, by LU.
+No solver package is named, so PETSc selects one: whichever distributed factorization the build
+provides when the solve is parallel, and PETSc's own LU on a single process. Naming one explicitly is
+a matter of setting `-mg_coarse_pc_factor_mat_solver_type`.
+
+A multigrid preconditioner has to be a
 fixed linear operator: the outer Krylov method builds its space from repeated applications of it, and
 relates the residual its recurrence tracks to the true residual on the assumption that the operator does
 not change between applications. A direct factorization is such an operator exactly, and it is
