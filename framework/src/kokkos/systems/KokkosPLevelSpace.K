@@ -188,7 +188,12 @@ PLevelSpace::init()
   }
 
   if (has_dirichlet_bc)
+  {
+    // Match the fine system's time, which NonlinearSystemBase keeps synced from MOOSE's, so that a
+    // time-dependent prescribed value projects onto this level at the same time it does there
+    _sys.time = _fine.system().time;
     _sys.reinit_constraints();
+  }
 
   setupConstrainedDofs();
 

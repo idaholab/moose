@@ -253,7 +253,7 @@ NonlinearSystemBase::setupKokkosDirichletConstraints()
 void
 NonlinearSystemBase::refreshKokkosDirichletConstraints()
 {
-  _sys.reinit_constraints();
+  reinitConstraints();
 
   _fe_problem.getKokkosFESystems()[number()].setupConstraintOperator();
 }

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#31109'
+  issues = '#31109 #33726'
   design = "Adaptivity.md"
   [test]
     requirement = "MOOSE shall support hp adaptivity"

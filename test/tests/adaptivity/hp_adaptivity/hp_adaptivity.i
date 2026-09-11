@@ -46,13 +46,13 @@
 
 [BCs]
   [all]
-    type = FunctionDirichletBC
+    type = FunctionLibmeshDirichletBC
     boundary = 'left right top bottom'
     function = 'exact_u'
     variable = u
   []
   [all_v]
-    type = FunctionDirichletBC
+    type = FunctionLibmeshDirichletBC
     boundary = 'left right top bottom'
     function = 'exact_v'
     variable = v
