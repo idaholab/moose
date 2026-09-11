@@ -8,6 +8,7 @@
 
 #include "LinearFVGradientStateTest.h"
 
+#include "FaceInfo.h"
 #include "LinearFVGradientReader.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseMesh.h"
@@ -69,17 +70,32 @@ LinearFVGradientStateTest::initialSetup()
     _variable->requestCellGradients(getParam<unsigned int>("late_oldest_gradient_state"));
 
   auto & mesh = _fe_problem.mesh();
-  _element = mesh.getMesh().query_elem_ptr(_element_id);
-
-  bool found = _element;
+  bool found = false;
   if (_face)
   {
-    found = false;
-    if (_element && _element->processor_id() == processor_id())
+    for (auto it = mesh.ownedFaceInfoBegin(); it != mesh.ownedFaceInfoEnd(); ++it)
     {
-      _face_info = mesh.faceInfo(_element, _face_side);
-      found = _face_info && _face_info->neighborPtr();
+      const auto * const face_info = *it;
+      if (!face_info->neighborPtr())
+        continue;
+
+      const bool selected_elem_side =
+          face_info->elem().id() == _element_id && face_info->elemSideID() == _face_side;
+      const bool selected_neighbor_side =
+          face_info->neighbor().id() == _element_id && face_info->neighborSideID() == _face_side;
+
+      if (selected_elem_side || selected_neighbor_side)
+      {
+        _face_info = face_info;
+        found = true;
+        break;
+      }
     }
+  }
+  else
+  {
+    _element = mesh.getMesh().query_elem_ptr(_element_id);
+    found = _element;
   }
 
   _communicator.max(found);
@@ -98,19 +114,21 @@ LinearFVGradientStateTest::initialize()
 void
 LinearFVGradientStateTest::execute()
 {
-  if (!_element || _element->processor_id() != processor_id())
-    return;
-
   const auto iteration_type = _iteration_type == "time" ? Moose::SolutionIterationType::Time
                                                         : Moose::SolutionIterationType::Nonlinear;
   const Moose::StateArg state(_state, iteration_type);
 
   if (_face)
   {
-    mooseAssert(_face_info, "An adjacent internal face must be selected during initial setup.");
+    if (!_face_info)
+      return;
+
     _value = _reader->gradient(*_face_info, state)(_component);
     return;
   }
+
+  if (!_element || _element->processor_id() != processor_id())
+    return;
 
   _value = _reader->component(_fe_problem.mesh().elemInfo(_element_id), _component, state);
 }

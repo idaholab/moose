@@ -1,4 +1,5 @@
 [Mesh]
+  allow_renumbering = false # Keep the sampled element ID independent of MPI partitioning.
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
