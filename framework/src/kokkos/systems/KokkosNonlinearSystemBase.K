@@ -1294,7 +1294,7 @@ NonlinearSystemBase::verifyKokkosLevelGalerkin()
           libMesh::cast_ptr<libMesh::PetscVector<Number> *>(prolonged.get())->vec(),
           libMesh::cast_ptr<libMesh::PetscVector<Number> *>(applied.get())->vec());
 
-    level.restrict(*applied, *galerkin);
+    level.restrictTo(*applied, *galerkin);
 
     galerkin->add(-1.0, *direct);
 
