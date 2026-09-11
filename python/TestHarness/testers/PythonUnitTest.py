@@ -36,9 +36,12 @@ class PythonUnitTest(RunApp):
         params["capture_perf_graph"] = False
         params["restep"] = False
 
-        # Force the use of a single slot by default; the -p and --n-threads
-        # options aren't currently passed to the unit test so if the user
-        # really wants threads they better force it
+        # Force the use of a single MPI slot by default; -p isn't currently
+        # passed to the unit test so if the user really wants multiple ranks
+        # they better force it via min_parallel. --n-threads *is* passed
+        # through (see augmentEnvironment below), but is still forced to a
+        # single thread here by default; subclasses that make use of it
+        # (e.g. MMSTest) can raise this default back up.
         params["max_parallel"] = 1
         params["max_threads"] = 1
 
@@ -47,28 +50,27 @@ class PythonUnitTest(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-        # Because the unittest doesn't actually use -p or --n-threads from
-        # the test harness, it should run with exactly one parallel and one
-        # thread option. For example, if your unittest manually runs with
-        # mpiexec -n 2, this job shouldn't ever take up more than 2 slots
-        # as there isn't a way for the unittest to get those slots
-        for suffix in ["parallel", "threads"]:
-            min_name = f"min_{suffix}"
-            max_name = f"max_{suffix}"
-            min_value = params[min_name]
-            max_value = params[max_name]
+        # Because the unittest doesn't actually use -p from the test harness,
+        # it should run with exactly one parallel option. For example, if
+        # your unittest manually runs with mpiexec -n 2, this job shouldn't
+        # ever take up more than 2 slots as there isn't a way for the
+        # unittest to get those slots. This doesn't apply to threads, which
+        # are passed through via MOOSE_PYTHONUNITTEST_NTHREADS below, so
+        # min_threads/max_threads can differ like any other tester.
+        min_value = params["min_parallel"]
+        max_value = params["max_parallel"]
 
-            # If the user sets min but not max, enforce max to be the min
-            if min_value != 1 and max_value == 1:
-                params[max_name] = min_value
-                self.addCaveats(f"{max_name}={min_value}")
-            # Same for if they set the max but not the min
-            elif max_value != 1 and min_value == 1:
-                params[min_name] = max_value
-                self.addCaveats(f"{min_name}={max_value}")
-            # Otherwise, just require that they are equal (if they set both)
-            elif max_value != min_value:
-                raise ValueError(f"{min_name} and {max_name} must be equal")
+        # If the user sets min but not max, enforce max to be the min
+        if min_value != 1 and max_value == 1:
+            params["max_parallel"] = min_value
+            self.addCaveats(f"max_parallel={min_value}")
+        # Same for if they set the max but not the min
+        elif max_value != 1 and min_value == 1:
+            params["min_parallel"] = max_value
+            self.addCaveats(f"min_parallel={max_value}")
+        # Otherwise, just require that they are equal (if they set both)
+        elif max_value != min_value:
+            raise ValueError("min_parallel and max_parallel must be equal")
 
     def getCommand(self, options):
         """
@@ -130,6 +132,11 @@ class PythonUnitTest(RunApp):
         available in the event that the unit test needs to use it. A
         common use case for this is MMS tests, which use a python
         unittest to run the moose executable.
+
+        MOOSE_PYTHONUNITTEST_NTHREADS is added when this tester is
+        requesting more than one thread (see getThreads), so that a unit
+        test invoking the moose executable can pass it along via
+        --n-threads. A common use case for this is MMS tests.
         """
         environment = super().augmentEnvironment(options)
 
@@ -137,5 +144,9 @@ class PythonUnitTest(RunApp):
             executable = self.specs["executable"]
             assert executable, "Executable is not set"
             environment["MOOSE_PYTHONUNITTEST_EXECUTABLE"] = executable
+
+        nthreads = self.getThreads(options)
+        if nthreads > 1:
+            environment["MOOSE_PYTHONUNITTEST_NTHREADS"] = str(nthreads)
 
         return environment
