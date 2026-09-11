@@ -1,0 +1,35 @@
+[Tests]
+  design = '/TriToQuadConverter.md'
+  issues = '#33522'
+
+  [rectangle_scores_one]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.rectangleScoresOne
+    requirement = 'The system shall assign a quadrilateral quality score of one to a rectangle of any aspect ratio, since the score depends on the internal angles alone.'
+  []
+  [non_convex_scores_zero]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.nonConvexScoresZero
+    requirement = 'The system shall assign a quadrilateral quality score of zero to a counter-clockwise quadrilateral with a reflex internal angle.'
+  []
+  [rhombus_scores_two_thirds]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.rhombusScoresTwoThirds
+    requirement = 'The system shall assign a quadrilateral quality score of two thirds to a rhombus with internal angles of 60 and 120 degrees, each a sixth of a turn away from a right angle.'
+  []
+  [matching_rejects_below_eta_min]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.matchingRejectsBelowEtaMin
+    requirement = 'The system shall exclude from the greedy triangle pair matching every pair whose quality score falls below the user-provided minimum and include a pair that scores exactly that minimum.'
+  []
+  [matching_consumes_each_triangle_once]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.matchingConsumesEachTriangleOnce
+    requirement = 'The system shall select triangle pairs in decreasing order of quality score and skip every later pair that needs a triangle already merged.'
+  []
+  [matching_breaks_ties_by_element_id]
+    type = GoogleTest
+    unit_test = TriToQuadScoringTest.matchingBreaksTiesByElementId
+    requirement = 'The system shall resolve equal quality scores in the greedy triangle pair matching by increasing element id, so that the same pairs are merged from one run to the next.'
+  []
+[]

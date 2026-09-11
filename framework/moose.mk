@@ -41,6 +41,7 @@ moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/minijson/src/minijson
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/tinyhttp/src/tinyhttp
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/predicates
 
 #
 # pcre
@@ -615,6 +616,7 @@ sa: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/tinyhttp/src/tinyhttp/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/minijson/src/minijson/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/predicates/src/*.d)
 
 #
 # exodiff
