@@ -67,6 +67,14 @@ public:
   virtual void setupSolver() {}
 
   /**
+   * Whether this preconditioner sets the PETSc preconditioner type itself, in setupSolver(), rather
+   * than reaching PETSc only through the options database. A solver system asks this when it is
+   * attached, so that a default preconditioner type it would otherwise impose is left alone.
+   * @returns Whether the type is set by this object
+   */
+  virtual bool setsPetscPCType() const { return false; }
+
+  /**
    * Called once a linearization of the solver system is available, and while the Jacobian
    * evaluation still holds the tags it gathered that linearization under. A preconditioner whose
    * operators are built from the linearization rather than from an assembled matrix builds or
