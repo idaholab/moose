@@ -656,6 +656,14 @@ MooseApp::determineNumThreads() const
   return static_cast<THREAD_ID>(*requested);
 }
 
+void
+MooseApp::setNumThreads(THREAD_ID num_threads)
+{
+  const THREAD_ID max_threads = libMesh::n_threads();
+  // Clamp to a valid range: at least one thread, and never more than the process-wide pool.
+  _num_threads = num_threads < 1 ? 1 : (num_threads > max_threads ? max_threads : num_threads);
+}
+
 MooseApp::MooseApp(const InputParameters & parameters)
   : PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
