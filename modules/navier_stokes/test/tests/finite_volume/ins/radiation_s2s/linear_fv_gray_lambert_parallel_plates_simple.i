@@ -21,7 +21,7 @@
     type = CartesianMeshGenerator
     dim = 2
     dx = '0.1 0.1 0.1'
-    ix = '20 1 20'
+    ix = '10 1 10'
     dy = '1.0'
     iy = '1'
     subdomain_id = '1 5 2'
@@ -163,6 +163,10 @@
 []
 
 [Postprocessors]
+  [h]
+    type = AverageElementSize
+    outputs = csv
+  []
   [T_left_rad]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
@@ -218,17 +222,17 @@
 
 [Executioner]
   type = SIMPLE
-  num_iterations = 1000
+  num_iterations = 2000
 
   should_solve_momentum = false
   should_solve_pressure = false
 
   energy_system = 'energy_system'
-  energy_l_abs_tol = 1e-14
-  energy_l_tol = 1e-14
+  energy_l_abs_tol = 1e-12
+  energy_l_tol = 0
   energy_equation_relaxation = 0.99
   energy_field_relaxation = 0.99
-  energy_absolute_tolerance = 1e-14
+  energy_absolute_tolerance = 1e-8
   energy_petsc_options_iname = '-pc_type'
   energy_petsc_options_value = 'lu'
 
