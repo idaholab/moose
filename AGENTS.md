@@ -65,7 +65,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Use `make_range` for integer range-based for loops (e.g. `for (const auto i :
   make_range(n))`) instead of raw index loops. Use `index_range(container)`
-  when iterating over the indices of a container.
+  when iterating over the indices of a container. But don't use `make_range`
+  in Kokkos functions or any other device functons.
 - Use `libmesh_map_find` for map lookups instead of `.at()`.
 - MOOSE requires C++17, so modern C++ constructs up through that standard are
   encouraged where they increase code readability. Along those lines, when a member
