@@ -1,6 +1,7 @@
-# Same flat-apex PYRAMID5 pancake on a HEX8, but one triangular cap face is shared with a
-# PRISM6 (the other three with TET4s): the cap face stays conformal against the prism after
-# the pyramid is absorbed into the hex.
+# A flat-apex PYRAMID5 pancake on a HEX8, with one triangular cap face shared with a PRISM6 (the
+# prism is extruded straight up from that cap face; the other three cap faces are external). The
+# repair dissolves the pyramid's quad base and absorbs it into the hex (-> a C0Polyhedron); the
+# shared cap face stays conformal against the prism.
 [Mesh]
   [hex]
     type = ElementGenerator
@@ -22,30 +23,9 @@
     element_connectivity = '0 1 2 3 4 5'
     elem_type = PRISM6
   []
-  [tet1]
-    type = ElementGenerator
-    input = prism0
-    nodal_positions = '0.5  0.5  1.01  1  0  1  1  1  1  0.5  0.5  2'
-    element_connectivity = '0 1 2 3'
-    elem_type = TET4
-  []
-  [tet2]
-    type = ElementGenerator
-    input = tet1
-    nodal_positions = '0.5  0.5  1.01  1  1  1  0  1  1  0.5  0.5  2'
-    element_connectivity = '0 1 2 3'
-    elem_type = TET4
-  []
-  [tet3]
-    type = ElementGenerator
-    input = tet2
-    nodal_positions = '0.5  0.5  1.01  0  1  1  0  0  1  0.5  0.5  2'
-    element_connectivity = '0 1 2 3'
-    elem_type = TET4
-  []
   [repair]
     type = MeshRepairGenerator
-    input = tet3
+    input = prism0
     fix_node_overlap = true
     fix_degenerate_elements = true
   []
