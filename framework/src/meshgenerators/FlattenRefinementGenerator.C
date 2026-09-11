@@ -52,8 +52,8 @@ FlattenRefinementGenerator::generate()
   if (_first_order)
     mesh->all_first_order();
 
-  // The mesh has been rebuilt, so let the rest of the setup re-prepare it
-  mesh->unset_is_prepared();
+  // Both flatten and all_first_order currently leave the mesh prepared.
+  mooseAssert(mesh->is_prepared(), "Mesh should already be prepared after flattening");
 
   return mesh;
 }

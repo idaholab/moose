@@ -17,8 +17,8 @@ is additionally converted to first order, equivalent to a `FIRST_ORDER` conversi
 !alert note
 Flattening only makes sense for a mesh that has been refined. Because the refinement tree is
 discarded, a locally (adaptively) refined mesh will retain the hanging nodes it had at its finest
-level, producing a non-conforming mesh. This generator is therefore most useful for uniformly
-refined meshes.
+level, producing a non-conforming mesh, and null interior neighbor links. This generator is
+therefore only safe for uniformly refined meshes and/or meshes that happen to be conformal post-flattening.
 
 ## Example Input Syntax
 
