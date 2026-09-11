@@ -65,6 +65,22 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [transient_matrix_free_jacobian_non_preset]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_transient_test.i'
+    # The non-preset path differs from the preset one in the solve rather than in the linearization:
+    # a preset row's own residual, u_i - g_i, is zero at every iterate because presetSolution() put
+    # g_i there, while a non-preset row carries that residual and the solve has to drive it to zero.
+    # This covers that option on a transient matrix-free system, which nothing else does.
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true BCs/left/preset=false'
+    recover = false
+    requirement = 'The Kokkos system shall linearize the residual of a Dirichlet-constrained row '
+                  'consistently with the matrix-free Jacobian-vector product on a transient system '
+                  'whose boundary values are not preset, and so whose constrained rows carry a '
+                  'nonzero residual of their own.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [transient_matrix_free_lumped_error]
     type = RunException
     input = 'kokkos_ad_nonlinear_transient_test.i'

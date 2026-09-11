@@ -631,7 +631,13 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
     // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
     // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition
-    // residual above only reaches a boundary's mesh nodes
+    // residual above only reaches a boundary's mesh nodes.
+    //
+    // The row's whole equation goes into each tag being computed, which is safe because this pass
+    // runs after a time integrator's postResidual() has already summed the tagged vectors into the
+    // residual the solver is handed, and because the write replaces the row rather than adding to
+    // it. Both halves matter: were this pass to run before that summation, a transient computing a
+    // time and a non-time tag together would count the row's equation once per tag.
     const auto solution_tag = _fe_problem.getVectorTagID(Moose::SOLUTION_TAG);
 
     for (auto tag : tags)
