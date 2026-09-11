@@ -71,77 +71,36 @@ PMultigrid::validParams()
       "default; the two coincide at orders two and three, where a hierarchic entity carries a "
       "single mode. See PMultigrid.md for measured iteration counts.");
 
-  params.addParam<bool>(
-      "verify_level_operators",
-      false,
-      "Whether to check each level's operator against its diagonal after every linearization, by "
-      "applying the operator to a unit vector per degree of freedom. This costs one operator "
-      "application per degree of freedom of every level, so it is a verification aid for small "
-      "inputs.");
+  MultiMooseEnum verify("level_operators level_transfers level_galerkin level_matrices "
+                        "entity_blocks operator_symmetry cycle_symmetry operator_conditioning");
 
-  params.addParam<bool>(
-      "verify_level_transfers",
-      false,
-      "Whether to check that each level transfer restricts by the transpose of its prolongation, "
-      "which is what makes the operator the hierarchy realizes on a coarse level the Galerkin "
-      "operator of the fine linearization. The check costs one application of each direction of "
-      "each transfer, at initial setup only.");
-
-  params.addParam<bool>(
-      "verify_level_galerkin",
-      false,
-      "Whether to check each level's operator against P^T A P after every linearization, where A "
-      "is the operator of the next finer level and P is the transfer between the two. At the "
-      "finest pair A is the matrix-free Jacobian of the solver system, so the check chains down "
-      "the hierarchy and establishes that every level is consistent with the fine linearization. "
-      "It costs one application of the next finer level's operator and one of each direction of "
-      "the transfer, per level per linearization.");
-
-  params.addParam<bool>(
-      "verify_level_matrices",
-      false,
-      "Whether to check the assembled operator of each level that assembles one against the "
-      "operator the level applies without a matrix, after every linearization. The check costs one "
-      "application of each of the two, per assembled level per linearization.");
-
-  params.addParam<bool>(
-      "verify_operator_conditioning",
-      false,
-      "Whether to report the conditioning of the solver system's matrix-free operator: its norm, "
-      "the "
-      "norm of its inverse, and their product. The inverse is formed from a Cholesky factorization "
-      "of the explicitly assembled operator and its norm is taken the same way the cycle's norm "
-      "is, "
-      "so the two are directly comparable and answer whether a large cycle norm reflects the "
-      "operator it inverts. It costs one operator application and one triangular solve per degree "
+  params.addParam<MultiMooseEnum>(
+      "verify",
+      verify,
+      "Checks to run on the hierarchy, none by default. Each costs at least one operator "
+      "application per degree of freedom, so these are verification aids for small inputs rather "
+      "than something a production solve carries. 'level_operators' checks each level's operator "
+      "against the diagonal the level computes, by applying the operator to one unit vector per "
+      "degree of freedom. 'level_transfers' checks that each transfer restricts by the transpose "
       "of "
-      "freedom, so it is a verification aid for small inputs.");
-
-  params.addParam<bool>(
-      "verify_preconditioner_symmetry",
-      false,
-      "Whether to check that the p-multigrid cycle this preconditioner applies is symmetric, which "
-      "is what CG requires of it, by forming it explicitly and comparing it against its transpose. "
-      "It costs one application of the whole cycle per degree of freedom of the solver system, so "
-      "it is a verification aid for small inputs.");
-
-  params.addParam<bool>(
-      "verify_entity_blocks",
-      false,
-      "Whether to check the entity blocks of each level that assembles its operator against that "
-      "assembled operator, entry by entry, after every linearization. A block on a partition "
-      "boundary gathers only the contributions of its own process's elements, so the check is "
-      "exact "
-      "on one process and reports that difference on more.");
-
-  params.addParam<bool>(
-      "verify_operator_symmetry",
-      false,
-      "Whether to check that the solver system's own matrix-free operator, which serves as SNES's "
-      "Amat, is symmetric after every linearization. This is what makes CG a valid outer Krylov "
-      "accelerator over the hierarchy, so a solve that asks for CG should also ask for this check. "
-      "It costs one operator application per degree of freedom of the solver system, so it is a "
-      "verification aid for small inputs.");
+      "its prolongation, which is what makes the operator the hierarchy realizes on a coarse level "
+      "the Galerkin operator of the fine linearization; this one runs at initial setup only. "
+      "'level_galerkin' checks each level's operator against P^T A P, where A is the operator of "
+      "the next finer level and P the transfer between the two; at the finest pair A is the solver "
+      "system's matrix-free Jacobian, so the check chains down the hierarchy and establishes that "
+      "every level is consistent with the fine linearization. 'level_matrices' checks the "
+      "assembled "
+      "operator of each level that assembles one against the operator that level applies without a "
+      "matrix. 'entity_blocks' checks each level's entity blocks against its assembled operator "
+      "entry by entry; a block on a partition boundary gathers only its own process's elements, so "
+      "the check is exact on one process and reports the difference on more. 'operator_symmetry' "
+      "checks the solver system's own matrix-free operator, which serves as SNES's Amat, against "
+      "its transpose, which is what makes CG a valid outer accelerator, so a solve asking for CG "
+      "should ask for this alongside it. 'cycle_symmetry' does the same for the cycle this "
+      "preconditioner applies, which is what CG requires of the preconditioner. "
+      "'operator_conditioning' reports the norm of the solver system's operator, the norm of its "
+      "inverse, and their product, the inverse being formed from a Cholesky factorization of the "
+      "explicitly assembled operator so that its norm is comparable with the cycle's.");
 
   return params;
 }
@@ -150,14 +109,15 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
     _entity_block_smoother(getParam<MooseEnum>("smoother") == "entity_block"),
-    _verify_level_operators(getParam<bool>("verify_level_operators")),
-    _verify_level_transfers(getParam<bool>("verify_level_transfers")),
-    _verify_level_galerkin(getParam<bool>("verify_level_galerkin")),
-    _verify_level_matrices(getParam<bool>("verify_level_matrices")),
-    _verify_entity_blocks(getParam<bool>("verify_entity_blocks")),
-    _verify_preconditioner_symmetry(getParam<bool>("verify_preconditioner_symmetry")),
-    _verify_operator_conditioning(getParam<bool>("verify_operator_conditioning")),
-    _verify_operator_symmetry(getParam<bool>("verify_operator_symmetry"))
+    _verify_level_operators(getParam<MultiMooseEnum>("verify").contains("level_operators")),
+    _verify_level_transfers(getParam<MultiMooseEnum>("verify").contains("level_transfers")),
+    _verify_level_galerkin(getParam<MultiMooseEnum>("verify").contains("level_galerkin")),
+    _verify_level_matrices(getParam<MultiMooseEnum>("verify").contains("level_matrices")),
+    _verify_entity_blocks(getParam<MultiMooseEnum>("verify").contains("entity_blocks")),
+    _verify_cycle_symmetry(getParam<MultiMooseEnum>("verify").contains("cycle_symmetry")),
+    _verify_operator_conditioning(
+        getParam<MultiMooseEnum>("verify").contains("operator_conditioning")),
+    _verify_operator_symmetry(getParam<MultiMooseEnum>("verify").contains("operator_symmetry"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");

@@ -35,90 +35,58 @@ public:
 
   virtual void setupSolver() override;
 
-  /**
-   * Get the coarse levels' function spaces, ascending in order
-   * @returns The levels
-   */
-  const std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> & levels() const
-  {
-    return _levels;
-  }
+  virtual void postLinearization() override;
 
-  /**
-   * Get whether each level's operator is to be checked against its diagonal
-   * @returns Whether to check
-   */
-  bool verifyLevelOperators() const { return _verify_level_operators; }
-
-  /**
-   * Get whether each level's operator is to be checked against the operator of the next finer level
-   * carried through the level transfer
-   * @returns Whether to check
-   */
-  bool verifyLevelGalerkin() const { return _verify_level_galerkin; }
-
-  /**
-   * Get whether the assembled operator of each level that assembles one is to be checked against
-   * the operator the level applies without a matrix
-   * @returns Whether to check
-   */
-  bool verifyLevelMatrices() const { return _verify_level_matrices; }
-
-  /**
-   * Get whether each level's entity blocks are to be checked against its assembled operator
-   * @returns Whether the blocks are checked
-   */
-  bool verifyEntityBlocks() const { return _verify_entity_blocks; }
-
-  /**
-   * Get whether the cycle this preconditioner applies is to be checked for symmetry
-   * @returns Whether the cycle is checked
-   */
-  bool verifyPreconditionerSymmetry() const { return _verify_preconditioner_symmetry; }
-
-  /**
-   * Get whether the conditioning of the solver system's operator is to be reported
-   * @returns Whether the conditioning is reported
-   */
-  bool verifyOperatorConditioning() const { return _verify_operator_conditioning; }
-
-  /**
-   * Get whether the solver system's own matrix-free operator is to be checked for symmetry
-   * @returns Whether to check
-   */
-  bool verifyOperatorSymmetry() const { return _verify_operator_symmetry; }
+  virtual void postJacobianAssembly() override;
 
 protected:
+  /**
+   * Update the operator of every level for the current linearization: a level that carries a matrix
+   * reassembles it, and a level that applies its operator as a shell has its PETSc object state
+   * bumped instead, so PETSc's PCMG treats the level, and its smoother, as changed.
+   */
+  void updateLevelOperators();
+
+  ///@{
+  /**
+   * Checks the 'verify' parameter selects, each a no-op unless it was named. Every one of them
+   * costs at least one operator application per degree of freedom, so they are verification aids
+   * for small inputs rather than something a production solve carries.
+   */
+  /// Check each level's operator against the diagonal the level computes
+  void verifyLevelOperators();
+  /// Check each level's operator against P^T A P, A being the next finer level's operator
+  void verifyLevelGalerkin();
+  /// Check each assembled level operator against the operator the level applies without a matrix
+  void verifyLevelMatrices();
+  /// Check each level's entity blocks against its assembled operator
+  void verifyEntityBlocks();
+  /// Check the solver system's own matrix-free operator against its transpose
+  void verifyOperatorSymmetry();
+  /// Check the cycle this preconditioner applies against its transpose
+  void verifyCycleSymmetry();
+  /// Report the norm of the solver system's operator, of its inverse, and their product
+  void verifyOperatorConditioning();
+  ///@}
+
   /// The polynomial order of each coarse level, ascending; the fine level is not listed
   const std::vector<unsigned int> _level_orders;
 
   /// Whether a smoothed level inverts its entity blocks rather than the operator diagonal
   const bool _entity_block_smoother;
 
-  /// Whether each level's operator is to be checked against its diagonal
+  ///@{
+  /// Which checks the 'verify' parameter named, read once so that each check site is a named member
+  /// rather than a string lookup
   const bool _verify_level_operators;
-
-  /// Whether each level transfer is to be checked for the transpose relationship
   const bool _verify_level_transfers;
-
-  /// Whether each level's operator is to be checked against the operator of the next finer level
-  /// carried through the level transfer
   const bool _verify_level_galerkin;
-
-  /// Whether each assembled level operator is to be checked against the matrix-free operator
   const bool _verify_level_matrices;
-
-  /// Whether each level's entity blocks are to be checked against its assembled operator
   const bool _verify_entity_blocks;
-
-  /// Whether the cycle this preconditioner applies is to be checked for symmetry
-  const bool _verify_preconditioner_symmetry;
-
-  /// Whether the conditioning of the solver system's operator is to be reported
+  const bool _verify_cycle_symmetry;
   const bool _verify_operator_conditioning;
-
-  /// Whether the solver system's own matrix-free operator is to be checked for symmetry
   const bool _verify_operator_symmetry;
+  ///@}
 
   /// The coarse levels' function spaces, ascending in order
   std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> _levels;
