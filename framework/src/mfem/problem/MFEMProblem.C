@@ -77,12 +77,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
-  // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
-  libMesh::libMeshPrivateData::_n_threads = 1;
-#ifdef LIBMESH_HAVE_OPENMP
-  omp_set_num_threads(1);
-#endif
-  // Also reduce this application's thread count so MOOSE-side consumers (which read
+  // Reduce this application's thread count so MOOSE-side consumers (which read
   // MooseApp::n_threads()) run single-threaded to match.
   getMooseApp().setNumThreads(1);
   setMesh();
