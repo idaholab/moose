@@ -484,11 +484,18 @@ private:
 KOKKOS_FUNCTION inline Real
 RPNEvaluator::eval(const Real t, const Real3 p, const unsigned int qp, Datum * datum) const
 {
-  // init() has not run yet, e.g. because a consumer evaluated the function before the owning
-  // object's initialSetup() built the RPN sequence -- this can happen when libMesh's own
-  // constraint machinery evaluates a Kokkos function's host value during EquationSystems::init(),
-  // ahead of every object's initialSetup(). Nothing meaningful can be returned yet; a caller in
-  // that position recomputes the real value once the evaluator is built.
+  // init() has not run yet, so the RPN sequence this would walk does not exist. Exactly one
+  // consumer reaches an evaluator this early: libMesh's constraint machinery evaluates a Kokkos
+  // function's host value during EquationSystems::init(), which runs ahead of every object's
+  // initialSetup(). The zero read here is not kept -- that sweep's prescribed values are recomputed
+  // once the evaluator is built, by NonlinearSystemBase::refreshKokkosDirichletConstraints() -- so
+  // a placeholder is the whole requirement.
+  //
+  // Every other consumer evaluates a function during a residual, Jacobian or material calculation,
+  // each of which runs after initialSetup(), which is what makes returning zero to all callers
+  // equivalent to returning it to that one. Were a consumer added that could evaluate a function
+  // early and keep the answer, this would hand it a zero indistinguishable from a value, and would
+  // want narrowing to the constraint sweep rather than covering every caller.
   if (!_rpn.isAlloc())
     return 0;
 
