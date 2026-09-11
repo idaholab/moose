@@ -1,0 +1,10 @@
+# The debug segment mesh is rewritten on every mortar rebuild, so the gold is the mesh from the
+# final residual evaluation, i.e. whichever iterate Newton stops on. At nl_abs_tol = 1e-8 (see the
+# "delaunay" cli_args comment in ../tests for why that floor is needed) that iterate's nodal
+# coordinates can disagree between platforms by ~1e-6, marginally above exodiff's fixed 1e-6
+# absolute coordinate tolerance (ED_SystemInterface.h's default coord_tol). That tolerance governs
+# node matching and the post-mapping coordinate check; neither rel_err nor abs_zero can reach it,
+# since those only feed variable comparisons -- only a COORDINATES line in a custom_cmp file can.
+# These segment-mesh files carry zero variables and zero time steps, so a COORDINATES-only cmp
+# loses no other comparison.
+COORDINATES absolute 1.e-5
