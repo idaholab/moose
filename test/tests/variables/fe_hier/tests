@@ -66,10 +66,7 @@
       type = 'Exodiff'
       input = 'hier-3-3d.i'
       exodiff = 'hier-3-3d_out.e'
-      # The compared quantities are error norms of a solution this space represents exactly, so they
-      # measure where the linear solve stopped rather than the discretization: tightening the linear
-      # tolerance takes them from 5e-8 to 3e-10. The threshold has to sit above that stopping point
-      abs_zero = 1e-06
+      abs_zero = 1e-08
       detail = "second-order on 3D elements, and"
     []
 
