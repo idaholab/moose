@@ -58,6 +58,8 @@ public:
    * @param dof_map The libMesh DOF map whose constraints this operator mirrors
    * @param solution A vector over the same DofMap, used to map a global DOF id to the local(+ghost)
    * index the Kokkos DOF layout indexes by
+   * @param num_local The size of the locally owned DOF index space, which separates the rows this
+   * process owns from the ones it only ghosts
    * @param num_local_plus_ghost The size of the local-plus-ghost DOF index space, which sizes the
    * dense constrained-row mask
    * @param preset_dofs Map from a global DOF id a registered Dirichlet-type boundary condition
@@ -67,6 +69,7 @@ public:
    */
   void setup(const libMesh::DofMap & dof_map,
              libMesh::NumericVector<Number> & solution,
+             dof_id_type num_local,
              dof_id_type num_local_plus_ghost,
              const std::unordered_map<dof_id_type, bool> & preset_dofs);
 
@@ -185,9 +188,14 @@ private:
 #endif
 
   /**
-   * Local DOF index of each constrained row
+   * Local DOF index of each constrained row, this process's own rows and the ones it ghosts alike.
+   * A row past _num_local_dofs is ghosted, which the local index space orders after the owned ones.
    */
   Array<dof_id_type> _rows;
+  /**
+   * Size of the locally owned DOF index space, which tells a ghosted row in _rows from an owned one
+   */
+  dof_id_type _num_local_dofs = 0;
   /**
    * CSR row pointer into _cols/_coeffs, size _rows.size() + 1
    */

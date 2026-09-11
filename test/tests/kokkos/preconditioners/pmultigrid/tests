@@ -206,6 +206,23 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [parallel_invariance]
+    type = CSVDiff
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Outputs/csv=true Outputs/file_base=parallel_invariance'
+    csvdiff = 'parallel_invariance.csv'
+    # Four processes is the smallest count that puts a Dirichlet-constrained degree of freedom of this
+    # mesh on a partition boundary, which is what the invariance is asserted against. The gold is the
+    # single-process value, so the comparison is between the two partitionings.
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The Kokkos matrix-free residual shall be independent of how the mesh is '
+                  'partitioned, each Dirichlet-constrained row being contributed by the process that '
+                  'owns it and not additionally by every process that ghosts it.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [petsc_options]
     type = RunApp
     input = 'pmultigrid_petsc_options.i'

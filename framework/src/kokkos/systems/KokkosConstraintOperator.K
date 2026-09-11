@@ -18,9 +18,12 @@ namespace Moose::Kokkos
 void
 ConstraintOperator::setup(const libMesh::DofMap & dof_map,
                           libMesh::NumericVector<Number> & solution_vector,
+                          const dof_id_type num_local,
                           const dof_id_type num_local_plus_ghost,
                           const std::unordered_map<dof_id_type, bool> & preset_dofs)
 {
+  _num_local_dofs = num_local;
+
   auto * const solution = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(&solution_vector);
 
   const auto & constraints = dof_map.get_dof_constraints();
@@ -165,6 +168,11 @@ ConstraintOperator::operator()(ConstrainLoop, const ThreadID tid) const
 KOKKOS_FUNCTION void
 ConstraintOperator::operator()(ResidualLoop, const ThreadID tid) const
 {
+  // A ghosted row's owner writes this row itself, and these vectors are assembled, so writing it
+  // here too would add a second copy to the owner's value on close()
+  if (_rows[tid] >= _num_local_dofs)
+    return;
+
   // The row's own equation, u_i - g_i - sum_j c_ij u_j, evaluated at the current solution. A preset
   // row's solution already satisfies this exactly (presetSolution() put it there), so this comes
   // out zero without needing to special-case it; a non-preset row's value is the real, nonzero
@@ -180,6 +188,11 @@ ConstraintOperator::operator()(ResidualLoop, const ThreadID tid) const
 KOKKOS_FUNCTION void
 ConstraintOperator::operator()(JVPLoop, const ThreadID tid) const
 {
+  // A ghosted row's owner writes this row itself, and these vectors are assembled, so writing it
+  // here too would add a second copy to the owner's value on close()
+  if (_rows[tid] >= _num_local_dofs)
+    return;
+
   // The row's own constraint equation's directional derivative, x_i - sum_j c_ij x_j, with no
   // distinction between a preset and a non-preset row. This loop only replaces this row's own
   // action; a free row's action never carried this DOF's direction in the first place, since the
@@ -195,6 +208,11 @@ ConstraintOperator::operator()(JVPLoop, const ThreadID tid) const
 KOKKOS_FUNCTION void
 ConstraintOperator::operator()(DiagonalLoop, const ThreadID tid) const
 {
+  // A ghosted row's owner writes this row itself, and these vectors are assembled, so writing it
+  // here too would add a second copy to the owner's value on close()
+  if (_rows[tid] >= _num_local_dofs)
+    return;
+
   _vector[_rows[tid]] = _value;
 }
 

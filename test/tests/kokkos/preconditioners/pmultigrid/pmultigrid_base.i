@@ -61,6 +61,19 @@
   []
 []
 
+[Postprocessors]
+  # The residual norm of the initial guess. Nothing about it depends on how the mesh is partitioned,
+  # which makes it a check on the constrained rows being written by their owner alone: a row written
+  # once by its owner and again by every process that ghosts it lands in the norm several times over,
+  # and does so only at the rank counts that put a constrained degree of freedom on a partition
+  # boundary.
+  [initial_residual]
+    type = Residual
+    residual_type = INITIAL
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Outputs]
   exodus = true
 []

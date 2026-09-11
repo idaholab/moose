@@ -256,7 +256,8 @@ FESystem::setupConstraintOperator()
   auto * const solution =
       libMesh::cast_ptr<PetscVector<Number> *>(_system.system().current_local_solution.get());
 
-  _constraint_operator.setup(dof_map, *solution, _num_local_dofs + _num_ghost_dofs, preset_dofs);
+  _constraint_operator.setup(
+      dof_map, *solution, _num_local_dofs, _num_local_dofs + _num_ghost_dofs, preset_dofs);
 
   _constrained_solution_tag = _system.subproblem().getVectorTagID(Moose::SOLUTION_TAG);
 }
