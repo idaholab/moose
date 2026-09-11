@@ -1,7 +1,7 @@
 # Package Extension
 
 !package! code
-/path/to/gcc-__GCC__
+/usr/bin/python__PYTHON_DEFAULT__
 !package-end!
 
-This is a sentence with gcc-[!package!gcc].
+This is a sentence with python version [!package!python_default].

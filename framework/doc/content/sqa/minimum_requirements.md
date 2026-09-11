@@ -18,8 +18,7 @@ MacOS releases.
 
 | Libraries | Version / Information |
 | :- | :- |
-| GCC | [!package!minimum_gcc] - [!package!maximum_gcc] |
-| LLVM/Clang | [!package!minimum_clang] - [!package!maximum_clang] |
-| Intel (ICC/ICX) | Not supported at this time |
-| Python | [!package!minimum_python] - [!package!maximum_python] |
+| GCC | [!package!gcc_apptainer_min] - [!package!gcc_conda] |
+| LLVM/Clang | [!package!clang_conda] - [!package!clang_apptainer] |
+| Python | [!package!python_all] |
 | Python Packages | [!package!python_packages] |

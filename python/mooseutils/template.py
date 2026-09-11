@@ -16,6 +16,14 @@ def apply_template_arguments(content, **template_args):
     if not isinstance(content, (str, str)):
         return content
 
+    # Convert floats to strings in template arguments
+    for k, v in template_args.items():
+        if isinstance(v, float):
+            if v.is_integer():  # integer params get converted to float
+                template_args[k] = str(int(v))
+            else:
+                template_args[k] = str(v)
+
     content = re.sub(r"{{(?P<key>.*?)}}", lambda m: _sub(m, template_args), content)
     return content
 

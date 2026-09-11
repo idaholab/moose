@@ -53,15 +53,22 @@ class TestTemplate(MooseDocsTestCase):
         """Test [!versioner!version package=<package>]
 
         This pulls from the Versioner meta in:
-        Versioner().get_packages(...)[<package>].full_version"""
-        self._testRender("version", ["full_version"])
+        Versioner().get_packages(...)[<package>]['version']"""
+        self._testRender("version", ["version"])
 
-    def testCondaVersionRender(self):
-        """Test [!versioner!conda_version package=<package>],
+    def testFullVersionRender(self):
+        """Test [!versioner!full-version package=<package>]
 
         This pulls from the Versioner meta in:
-        Versioner().get_packages(...)[<package>].conda.install"""
-        self._testRender("conda_version", ["conda", "install"], conda=True)
+        Versioner().get_packages(...)[<package>]['full_version']"""
+        self._testRender("full-version", ["full_version"])
+
+    def testCondaVersionRender(self):
+        """Test [!versioner!conda-version package=<package>],
+
+        This pulls from the Versioner meta in:
+        Versioner().get_packages(...)[<package>]['conda']['install']"""
+        self._testRender("conda-version", ["conda", "install"], conda=True)
 
     def testCodeRender(self):
         """Test inline replacement within code blocks"""
