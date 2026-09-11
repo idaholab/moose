@@ -27,7 +27,10 @@ public:
   virtual unsigned int getNumCutNodes() const = 0;
   virtual std::set<EFANode *> getAllNodes() const = 0;
   virtual bool isConnected(EFAFragment * other_fragment) const = 0;
-  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes) = 0;
+  /// Identify invalid embedded nodes, removing fragment-local references when possible and
+  /// appending nodes that require element-global cleanup to invalid_emb_out.
+  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                          std::vector<EFANode *> & invalid_emb_out) = 0;
 
   // common methods
   std::vector<EFANode *> getCommonNodes(EFAFragment * other) const;
