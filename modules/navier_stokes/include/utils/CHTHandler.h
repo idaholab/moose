@@ -8,14 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
 #include "MooseObject.h"
+#include "UserObjectInterface.h"
 #include "FaceCenteredMapFunctor.h"
 #include "SystemBase.h"
 #include "NS.h"
 
+#include <set>
+
 class LinearFVFluxKernel;
 class LinearFVBoundaryCondition;
+class GrayLambertSurfaceRadiationBase;
 
 namespace NS
 {
@@ -26,14 +29,13 @@ namespace FV
  * This class provides an interface for managing  conjugate heat transfer (CHT)
  * between fluid and solid domains.
  */
-class CHTHandler : public MooseObject
+class CHTHandler : public MooseObject, public UserObjectInterface
 {
 public:
   /// Constructor with initialization parameters
   CHTHandler(const InputParameters & parameters);
 
   static InputParameters validParams();
-
   /// Link energy systems
   void linkEnergySystems(SystemBase * solid_energy_system,
                          SystemBase * fluid_energy_system,
@@ -45,7 +47,6 @@ public:
 
   /// Run error checks and make sure everything works
   void deduceCHTBoundaryCoupling();
-
   /// Update the coupling fields for \param side
   void updateCHTBoundaryCouplingFields(const NS::CHTSide side);
 
@@ -60,7 +61,6 @@ public:
 
   /// Increment CHT iterators in the loop
   void incrementCHTIterators();
-
   /// Sum the integrated fluxes over all processors
   void sumIntegratedFluxes();
 
@@ -82,7 +82,6 @@ protected:
 
   /// The energy system
   SystemBase * _energy_system;
-
   /// The solid energy system
   SystemBase * _solid_energy_system;
 
@@ -101,6 +100,12 @@ protected:
   /// Tolerance for heat flux at the CHT interfaces
   const Real _cht_heat_flux_tolerance;
 
+  /// Optional surface-to-surface radiation model supplying net outward wall heat fluxes.
+  const GrayLambertSurfaceRadiationBase * _surface_radiation_uo;
+
+  /// Boundaries represented by the surface-to-surface radiation model.
+  std::set<BoundaryID> _surface_radiation_boundary_ids;
+
   /// The relaxation factors for flux fields for the CHT boundaries
   /// first index is solid/fluid second is the interface
   std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
@@ -111,7 +116,6 @@ protected:
 
   /// The solid (0) and fluid (1) system numbers.
   std::vector<unsigned int> _cht_system_numbers;
-
   /// The participating media radiation system numbers.
   std::vector<unsigned int> _cht_pm_radiation_system_numbers;
 
@@ -120,7 +124,6 @@ protected:
 
   /// The conduction kernels from the solid/fluid domains. Can't be const, considering we are updating the inner structures for every face.
   std::vector<LinearFVFluxKernel *> _cht_conduction_kernels;
-
   /// The conduction radiation kernels from the fluid domains.
   std::vector<LinearFVFluxKernel *> _cht_pm_radiation_kernels;
 
@@ -129,14 +132,16 @@ protected:
 
   /// Vector of boundary conditions that describe the radiation pm bcs from each side.
   std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_pm_radiation_boundary_conditions;
-
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
   std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_heat_flux;
 
-  /// Integrated flux for the boundaries, first index is the boundary second is solid/fluid.
+  /// Integrated source-domain flux for each boundary and solid/fluid transfer direction.
   std::vector<std::vector<Real>> _integrated_boundary_heat_flux;
+
+  /// Integrated net outward surface-radiation flux, kept separate for the CHT energy balance.
+  std::vector<Real> _integrated_boundary_surface_radiation_heat_flux;
 
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
@@ -159,7 +164,6 @@ CHTHandler::resetCHTConvergence()
 {
   _fpi_it = 0;
 }
-
 inline void
 CHTHandler::incrementCHTIterators()
 {
