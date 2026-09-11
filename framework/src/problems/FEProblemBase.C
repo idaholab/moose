@@ -8906,10 +8906,10 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   if (_displaced_problem)
   {
     // Mesh contraction is necessary when a displaced problem is used.
-    if (allowMeshContractionAfterMeshChanged())
-      mooseError("Mesh contraction is required when a displaced problem is used. Please ensure the "
-                 "problem does not overload allowMeshContractionAfterMeshChanged() to return false "
-                 "when running a displaced problem.");
+    if (!allowMeshContractionAfterMeshChanged())
+      mooseError("Disabling mesh contraction is not implemented when a displaced problem is used. "
+                 "Please contact a "
+                 "developer of this application to discuss the combination of these features.");
 
     _displaced_problem->meshChanged(should_contract, clean_refinement_flags);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
