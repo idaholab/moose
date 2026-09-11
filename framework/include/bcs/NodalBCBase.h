@@ -36,6 +36,17 @@ public:
    */
   virtual bool checkNodalVar() const { return true; }
 
+  /**
+   * Write the values this boundary condition prescribes at the current node directly into a
+   * solution vector, ahead of the solve, rather than leaving them to the residual.
+   *
+   * Only a boundary condition that presets implements this, and only such an object is placed in
+   * the warehouse that calls it, so the default is an error rather than a no-op: reaching it means
+   * an object was registered as presetting without being able to preset.
+   * @param current_solution The solution vector to write into
+   */
+  virtual void computeValue(NumericVector<Number> & current_solution);
+
 protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
