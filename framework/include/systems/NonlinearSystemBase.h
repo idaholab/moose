@@ -399,47 +399,12 @@ public:
   void reportKokkosMatrixFreeCoverage();
 
   /**
-   * Check every p-multigrid level's operator against its diagonal, by applying the operator to one
-   * unit vector per degree of freedom of the level and comparing the entry the application lands on
-   * with the diagonal the level computes. Runs after a linearization, when the quadrature-point
-   * Jacobian cache the levels contract holds it, and errors out on the first mismatch.
+   * Get the matrix-free operator installed as this system's system matrix, which the PETSc solver
+   * takes as both Amat and Pmat. A preconditioner built on the operator action rather than on
+   * matrix entries needs it to apply, or to measure, what the solve will be handed.
+   * @returns The operator
    */
-  void verifyKokkosLevelOperators();
-
-  /**
-   * Check every p-multigrid level's operator against P^T A P, where A is the operator of the next
-   * finer level and P is the transfer between the two, by applying both to the same vector of the
-   * level. The finest pair's A is this system's matrix-free Jacobian, so agreement at every pair
-   * establishes that each level is the Galerkin operator of the fine linearization on its own
-   * space. Runs after a linearization and errors out on the first mismatch.
-   */
-  void verifyKokkosLevelGalerkin();
-
-  /**
-   * Update the operator of every p-multigrid level for the current linearization: a level that
-   * carries a matrix reassembles it, and a level that applies its operator as a shell has its
-   * PETSc object state bumped instead, so PETSc's PCMG treats the level (and its smoother) as
-   * changed. Runs after a linearization, when the quadrature-point Jacobian cache the levels
-   * contract holds it.
-   */
-  void updateKokkosLevelOperators();
-
-  /**
-   * Check the assembled operator of every p-multigrid level that carries a matrix against the
-   * operator the level applies without a matrix, by applying both to the same vector of the level.
-   * Runs after a linearization and errors out on the first mismatch.
-   */
-  void verifyKokkosLevelMatrices();
-
-  /**
-   * Check that this system's own matrix-free Jacobian action, the shell serving as SNES's Amat, is
-   * symmetric, by materializing it one column at a time and measuring it against its transpose.
-   * Symmetry is what makes CG a valid outer Krylov accelerator over the operator, and it holds only
-   * because a Dirichlet-constrained DOF is left out of both the residual a free row evaluates and
-   * the direction the operator gathers, so that the constrained row's identity action has nothing
-   * to match in the transposed position. Runs after a linearization and errors out on a mismatch.
-   */
-  void verifyKokkosMatrixFreeSymmetry();
+  libMesh::SparseMatrix<Number> & kokkosMatrixFreeOperator() const;
 
   /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
@@ -455,25 +420,6 @@ public:
    * level of a p-multigrid hierarchy smooths with in place of the operator diagonal
    */
   void initKokkosEntityBlockSmoother();
-
-  /**
-   * Check the entity blocks of every p-multigrid level that assembles its operator against that
-   * assembled operator, and report the agreement
-   */
-  void verifyKokkosEntityBlocks();
-
-  /**
-   * Check that the cycle the p-multigrid preconditioner applies is symmetric, which is what CG
-   * requires of it, by forming it explicitly and comparing it against its transpose, and report the
-   * result
-   */
-  void verifyKokkosPreconditionerSymmetry();
-
-  /**
-   * Report the conditioning of this system's matrix-free operator: its norm, the norm of its
-   * inverse, and their product
-   */
-  void verifyKokkosOperatorConditioning();
 
   /**
    * Get the number of entity blocks this process holds for the smoother
