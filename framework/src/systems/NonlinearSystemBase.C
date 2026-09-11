@@ -266,17 +266,7 @@ NonlinearSystemBase::refreshLibmeshDirichletValues()
   if (!_libmesh_dirichlet_bcs.hasObjects())
     return;
 
-  auto & dof_map = _sys.get_dof_map();
-
-  // What libMesh constrains on its own -- adaptivity hanging nodes, periodic partners, and the
-  // modes a neighbor's lower p level suppresses -- recorded so that the constraints the sweep below
-  // adds can be told apart from it. Those are all homogeneous, which is what libMesh's own
-  // constraint enforcement carries, so this system leaves them to it.
-  std::set<dof_id_type> preexisting_constraints;
-  for (const auto & [dof, _] : dof_map.get_dof_constraints())
-    preexisting_constraints.insert(dof);
-
-  std::vector<libMesh::DirichletBoundary> boundaries;
+  libMesh::DirichletBoundaries boundaries;
 
   for (const auto & bc : _libmesh_dirichlet_bcs.getObjects())
   {
@@ -285,36 +275,25 @@ NonlinearSystemBase::refreshLibmeshDirichletValues()
     // libMesh::FunctionBase for it)
     if (libMesh::FEInterface::get_continuity(bc->variable().feType()) == libMesh::C_ONE)
       bc->mooseError("This boundary condition sources its prescribed values from libMesh's "
-                     "Dirichlet constraint machinery, which projects them onto variable '",
+                     "Dirichlet projection, which is applied to variable '",
                      bc->variable().name(),
                      "', whose finite element family has C1 continuity. This is not supported.");
 
-    boundaries.push_back(libMesh::DirichletBoundary(
-        bc->boundaryIDs(), {bc->variable().number()}, LibmeshDirichletValueFunction(*bc)));
-    dof_map.add_dirichlet_boundary(boundaries.back());
+    boundaries.push_back(std::make_unique<libMesh::DirichletBoundary>(
+        bc->boundaryIDs(),
+        std::vector<unsigned int>{bc->variable().number()},
+        LibmeshDirichletValueFunction(*bc)));
   }
 
-  reinitConstraints();
+  libMesh::DofConstraintValueMap values;
 
-  // A Dirichlet constraint prescribes its degree of freedom outright, so its row couples to
-  // nothing. libMesh stores no value for a row whose prescribed value is zero, so an absent value
-  // is that zero rather than a missing constraint.
+  _sys.get_dof_map().compute_dirichlet_values(
+      boundaries, _fe_problem.mesh().getMesh(), _fe_problem.time(), values);
+
   _libmesh_dirichlet_values.clear();
 
-  const auto & values = dof_map.get_primal_constraint_values();
-
-  for (const auto & [dof, row] : dof_map.get_dof_constraints())
-    if (row.empty() && !preexisting_constraints.count(dof))
-    {
-      const auto it = values.find(dof);
-      _libmesh_dirichlet_values[dof] = it == values.end() ? 0.0 : it->second;
-    }
-
-  // Put the DofMap back the way it was found, now that the values are copied out
-  for (const auto & boundary : boundaries)
-    dof_map.remove_dirichlet_boundary(boundary);
-
-  reinitConstraints();
+  for (const auto & [dof, value] : values)
+    _libmesh_dirichlet_values[dof] = libMesh::libmesh_real(value);
 }
 
 void

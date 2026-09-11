@@ -328,20 +328,19 @@ public:
   /**
    * Recompute the prescribed values of every active LibmeshDirichletBCBase on this system.
    *
-   * Each boundary condition is registered as a libMesh DirichletBoundary, whose constraint sweep
-   * projects the prescribed value onto the variable's boundary trace space, and the resulting
-   * values are copied out. The boundaries are then unregistered and the sweep repeated, leaving
-   * this system's DofMap holding exactly the constraints it held before, so that nothing else that
-   * reads it -- Assembly's element-matrix condensation, sparsity construction, and libMesh's own
-   * constraint enforcement, which would otherwise fight MOOSE for these rows -- sees any change.
-   * The second sweep is how the DofMap is restored: libMesh reports its constraints read-only and
-   * offers no way to drop just the rows a Dirichlet sweep added, so the state before the projection
-   * has to be rebuilt rather than edited back.
+   * Each boundary condition becomes a libMesh DirichletBoundary, and
+   * DofMap::compute_dirichlet_values() projects its prescribed value onto the variable's boundary
+   * trace space and reports the resulting coefficients. Nothing is constrained: this system's
+   * DofMap is left exactly as it was, so everything else that reads it -- Assembly's element-matrix
+   * condensation, sparsity construction, and libMesh's own constraint enforcement, which would
+   * otherwise fight MOOSE for these rows -- sees no Dirichlet constraint at all. Enforcement stays
+   * with MOOSE, which writes the residual and Jacobian rows itself.
    *
    * Runs once per solve, so that a prescribed value depending on time is projected at the time the
-   * solve is being taken at. Caching the projection across solves is not safe: mesh adaptation
-   * renumbers the degrees of freedom these values are keyed on, and it reaches a solve through mesh
-   * change paths that do not all notify this system.
+   * solve is being taken at. The result is not cached across solves: its inputs include whatever
+   * the value functors read, which a MOOSE Function may draw from a postprocessor or a coupled
+   * application that updates between fixed-point iterations at unchanged time, so validity is not
+   * decidable from the mesh and the time alone.
    */
   void refreshLibmeshDirichletValues();
 
