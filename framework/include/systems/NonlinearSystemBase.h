@@ -1112,8 +1112,9 @@ protected:
   /// BoundaryCondition Warhouses
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
-  MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  /// Nodal BCs that prescribe their values ahead of the solve, of every family that does so
+  MooseObjectWarehouse<NodalBCBase> _preset_nodal_bcs;
+  /// The subset whose values libMesh projects, which refreshLibmeshDirichletValues() also walks
   MooseObjectWarehouse<LibmeshDirichletBCBase> _libmesh_dirichlet_bcs;
   ///@}
 

@@ -53,7 +53,7 @@ public:
   virtual Real value(const libMesh::Point & p, Real time) const = 0;
 
   /// Write the prescribed values of the current node into the given solution vector
-  void computeValue(NumericVector<Number> & current_solution);
+  virtual void computeValue(NumericVector<Number> & current_solution) override;
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
