@@ -160,7 +160,6 @@ NodalBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 
   Real local_ke = bc.template computeQpJacobian<Derived>(0, datum);
 
-  // This initializes the row to zero except the diagonal
   accumulateTaggedNodalMatrix(false, local_ke, node, _kokkos_var.var());
 }
 
@@ -179,7 +178,7 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
 
   Real local_ke = bc.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
-  accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
+  accumulateTaggedNodalMatrix(false, local_ke, node, jvar);
 }
 
 } // namespace Moose::Kokkos

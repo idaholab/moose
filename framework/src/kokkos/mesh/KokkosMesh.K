@@ -21,6 +21,8 @@ namespace Moose::Kokkos
 void
 Mesh::update()
 {
+  _dimension = _mesh.dimension();
+
   initMap();
   initElement();
 

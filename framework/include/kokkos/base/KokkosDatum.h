@@ -497,7 +497,7 @@ Datum::J(const unsigned int qp)
   if (!isNodal())
     reinitTransform(qp);
   else
-    _J.identity(_assembly.getDimension());
+    _J.identity(_mesh.getDimension());
 
   return _J;
 }

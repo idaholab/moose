@@ -63,15 +63,6 @@ public:
   void close();
 
   /**
-   * Zero a row
-   * @param i The row index local to this process to be zeroed
-   */
-  KOKKOS_FUNCTION void zero(PetscInt i)
-  {
-    for (PetscInt j = _row_ptr[i]; j < _row_ptr[i + 1]; ++j)
-      _val[j] = 0;
-  }
-  /**
    * Get an entry with given row and column indices
    * @param i The row index local to this process
    * @param j The global column index
