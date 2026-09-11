@@ -115,9 +115,10 @@ private:
   Array<bool> _constrained_dof;
 
   /**
-   * Whether a fixed row is left out of the trial space as well as out of the test space
+   * Whether a fixed row is left out of the trial space as well as out of the test space. Read only
+   * from device code, so a host-only translation unit including this header never touches it.
    */
-  bool _eliminate_constrained_columns;
+  [[maybe_unused]] bool _eliminate_constrained_columns;
 };
 
 } // namespace Moose::Kokkos
