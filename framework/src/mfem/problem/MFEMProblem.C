@@ -582,7 +582,11 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "GeneralizedCircumference",
                                                "PiecewiseFunction",
                                                "TimeRampFunction"},
-                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"};
+                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"},
+                               MFEM_FUNCS = {"MFEMParsedFunction",
+                                             "MFEMCoordinateTransformations",
+                                             "MFEMScalarQuadratureFunction",
+                                             "MFEMVectorQuadratureFunction"};
 
 void
 MFEMProblem::addFunction(const std::string & type,
@@ -616,13 +620,11 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type &&
-           "MFEMScalarQuadratureFunction" != type && "MFEMVectorQuadratureFunction" != type)
+  else if (std::find(MFEM_FUNCS.begin(), MFEM_FUNCS.end(), type) != MFEM_FUNCS.end())
   {
-    mooseWarning("Could not identify whether function ",
-                 type,
-                 " is scalar or vector; no MFEM coefficient object created.");
   }
+  else
+    mooseWarning("Could not identify function ", type, "; no MFEM coefficient object created.");
 }
 
 void
