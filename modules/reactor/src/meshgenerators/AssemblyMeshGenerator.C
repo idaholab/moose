@@ -14,6 +14,7 @@
 #include "Factory.h"
 #include "libmesh/elem.h"
 #include "MooseMeshUtils.h"
+#include "CSGNPolygonUnit.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGUtils.h"
@@ -653,24 +654,34 @@ AssemblyMeshGenerator::generateCSG()
   // inputs are renamed to a new universe name. These universes and their
   // cells will be discarded, so that only the infinite pin universe is retained
   std::unordered_map<unsigned int, std::string> univ_id_names;
-  std::vector<std::string> univs_to_discard;
   for (const auto i : index_range(_inputs))
   {
     const auto input_univ_name_discard = _inputs[i] + "_root_univ";
-    const auto input_univ_name = _inputs[i] + "_univ";
     csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
-    univs_to_discard.push_back(input_univ_name_discard);
-    univ_id_names[i] = input_univ_name;
-  }
 
-  // Discard root universes of the input pins and their cells
-  for (const auto & univ_name : univs_to_discard)
-  {
-    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
+    const auto & universe_to_delete = csg_obj->getUniverseByName(input_univ_name_discard);
     const auto cells_to_delete = universe_to_delete.getAllCells();
     csg_obj->deleteUniverse(universe_to_delete);
+
+    // Store universe fill of cell that will be deleted. This will be the universe
+    // that gets populated into the assembly lattice
     for (const auto & cell : cells_to_delete)
-      csg_obj->deleteCell(cell.get());
+    {
+      const auto & cell_to_delete = cell.get();
+      const auto & fill_univ_name = cell_to_delete.getFillUniverse().getName();
+      // Store surfaces use to define cell region. The radial surfaces will be deleted
+      // as they are no longer used in CSGBase instance after cell deletion.
+      const auto & surfs_to_delete = cell_to_delete.getRegion().getSurfaces();
+      csg_obj->deleteCell(cell_to_delete);
+      univ_id_names[i] = fill_univ_name;
+      for (const auto & surf : surfs_to_delete)
+      {
+        const auto & surf_name = surf.get().getName();
+        // Only delete those surfaces that aren't used as axial planes
+        if (surf_name.find(RGMB::CSG_AXIAL_PLANE_PREFIX) == std::string::npos)
+          csg_obj->deleteSurface(csg_obj->getSurfaceByName(surf_name));
+      }
+    }
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
@@ -686,13 +697,15 @@ AssemblyMeshGenerator::generateCSG()
     universe_pattern.push_back(universe_row);
   }
 
-  // Define axial boundaries for problem
+  // Get axial boundaries for problem
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
   CSG::CSGRegion axial_extent;
   const auto extruded_assembly = _mesh_dimensions == 3;
   if (extruded_assembly)
   {
-    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    // Skip intermediate plane generation if background regions do not exist in assembly
+    const bool skip_intermediate_plane_generation = _background_region_id.size() == 0;
+    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj, skip_intermediate_plane_generation);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     axial_extent = +lowest_axial_surf & -highest_axial_surf;
@@ -704,6 +717,7 @@ AssemblyMeshGenerator::generateCSG()
   duct_boundaries.push_back(getReactorParam<Real>(RGMB::assembly_pitch) / 2.);
   CSG::CSGRegion inner_region;
   const auto & assembly_univ = csg_obj->createUniverse(name() + "_univ");
+  const auto n_sides = (_geom_type == "Hex") ? 6 : 4;
   for (const auto i : index_range(duct_boundaries))
   {
     bool is_last_radial_region = i == duct_boundaries.size() - 1;
@@ -718,9 +732,11 @@ AssemblyMeshGenerator::generateCSG()
       std::string lat_cell_name = name() + "_lattice_cell";
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces =
-            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
-        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        const auto unit_name = name() + "_radial_duct_" + std::to_string(i);
+        std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+            std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries[i]);
+        auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+        inner_region = -duct_unit;
       }
       if (_geom_type == "Hex")
       {
@@ -736,9 +752,11 @@ AssemblyMeshGenerator::generateCSG()
       CSG::CSGRegion radial_region = ~inner_region;
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces =
-            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
-        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        const auto unit_name = name() + "_radial_duct_" + std::to_string(i);
+        std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+            std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries[i]);
+        auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+        inner_region = -duct_unit;
         radial_region &= inner_region;
       }
 
@@ -766,12 +784,17 @@ AssemblyMeshGenerator::generateCSG()
 
   // Create new cell to bound universe based on assembly outer boundaries, and add this cell
   // to the root universe
-  const auto & duct_surfaces = getOuterRadialSurfacesForUnitCell(
-      duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
-  auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+  const auto unit_name = name() + "_radial_boundary";
+  std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+      std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries.back());
+  auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+  auto assembly_region = -duct_unit;
   if (extruded_assembly)
     assembly_region &= axial_extent;
   csg_obj->createCell(name() + "_root_cell", assembly_univ, assembly_region);
+
+  if (getReactorParam<bool>(RGMB::expand_units))
+    csg_obj->expandAllEngUnits();
 
   return csg_obj;
 }

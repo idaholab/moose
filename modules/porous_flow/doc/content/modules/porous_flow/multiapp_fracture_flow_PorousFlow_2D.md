@@ -38,7 +38,7 @@ The heat transfer between the fracture and matrix is encoded in the usual way (s
 
 The boundary conditions correspond to injection of 100$^{\circ}$C water at a rate of 10$\,$kg.s$^{-1}$ at the left side of the model, and withdrawal of water at the same rate (and whatever temperature it is extracted at) at the right side:
 
-!listing single_fracture_heat_transfer/fracture_app.i start=left_injection end=[]
+!listing single_fracture_heat_transfer/fracture_app.i block=left_injection
 
 !listing single_fracture_heat_transfer/fracture_app.i block=BCs
 

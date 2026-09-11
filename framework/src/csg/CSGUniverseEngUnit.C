@@ -30,7 +30,7 @@ CSGUniverseEngUnit::getExpandedUniverse() const
                "is not implemented correctly.");
 
   // Check that all universes and cells created in _internal_base are reachable from the root.
-  if (!_internal_base->areUniversesLinked())
+  if (!_internal_base->areCSGObjectsLinked())
     mooseError("CSGUniverseEngUnit '",
                getName(),
                "' of type '",

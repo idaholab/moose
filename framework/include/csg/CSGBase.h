@@ -68,8 +68,13 @@ public:
    */
   ~CSGBase();
 
-  /// Create a deep copy of this CSGBase instance
-  std::unique_ptr<CSGBase> clone() const { return std::make_unique<CSGBase>(*this); }
+  /**
+   * Create a deep copy of this CSGBase instance. This method calls
+   * std::make_unique to create the deep copy. However, the surface references
+   * of all cloned cells are updated manually to make sure they point to the surfaces
+   * of the cloned object and not the original CSGBase instance.
+   */
+  std::unique_ptr<CSGBase> clone() const;
 
   /**
    * @brief add a unique surface pointer to this base instance
@@ -710,12 +715,12 @@ public:
   void expandAllEngUnits();
 
   /**
-   * @brief Check whether all universes and cells in this CSGBase are reachable from the root
-   * universe through the cell/fill hierarchy.
+   * @brief Check whether all universes, cells, and surfaces in this CSGBase are reachable from the
+   * root universe through the cell/fill hierarchy.
    *
-   * @return true if all are linked, false if any universe or cell is orphaned
+   * @return true if all are linked, false if any universe, cell, or surface is orphaned
    */
-  bool areUniversesLinked() const;
+  bool areCSGObjectsLinked() const;
 
   /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
@@ -946,15 +951,18 @@ private:
   void checkUniverseLinking() const;
 
   /**
-   * @brief Recursive method to retrieve all universes and cells linked to current universe
+   * @brief Recursive method to retrieve all universes, cells, and surfaces linked to current
+   * universe
    *
    * @param univ Reference to universe under consideration
    * @param linked_universe_names List of universe names linked to current universe
    * @param linked_cell_names List of cell names linked to current universe
+   * @param linked_surface_names List of surface names linked to current universe
    */
-  void getLinkedUniverses(const CSGUniverse & univ,
-                          std::vector<std::string> & linked_universe_names,
-                          std::vector<std::string> & linked_cell_names) const;
+  void getLinkedCSGObjects(const CSGUniverse & univ,
+                           std::set<std::string> & linked_universe_names,
+                           std::set<std::string> & linked_cell_names,
+                           std::set<std::string> & linked_surface_names) const;
 
   /**
    * @brief Get a const reference to the CSGSurfaceList object

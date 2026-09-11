@@ -116,6 +116,11 @@ public:
   const InputParameters * getCommonParameters() const;
 
   /**
+   * Whether the common [Outputs] block set file_base from input parsing
+   */
+  bool commonFileBaseSet() const;
+
+  /**
    * Return the sync times for all objects
    */
   std::set<Real> & getSyncTimes();

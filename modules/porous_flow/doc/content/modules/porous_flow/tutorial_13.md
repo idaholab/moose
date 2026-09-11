@@ -31,11 +31,11 @@ Some of these equilibrium constants have been chosen rather arbitrarily.
 
 The primary species are represented as PorousFlow variables:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[Variables] end=[AuxVariables]
+!listing modules/porous_flow/examples/tutorial/13.i block=Variables
 
 The equilibrium reactions are encoded into this Material:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[equilibrium_massfrac] end=[kinetic]
+!listing modules/porous_flow/examples/tutorial/13.i block=equilibrium_massfrac
 
 
 
@@ -58,7 +58,7 @@ with the following parameters:
 
 Some of these quantities have been chosen rather arbitrarily.  This kinetic system is encoded in the input file as:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[kinetic] end=[dolomite_conc]
+!listing modules/porous_flow/examples/tutorial/13.i block=kinetic
 
 
 
@@ -66,7 +66,7 @@ Some of these quantities have been chosen rather arbitrarily.  This kinetic syst
 
 The model is just a 1D line, extending between $x=0$ and $x=1$.
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[Mesh] end=[Variables]
+!listing modules/porous_flow/examples/tutorial/13.i block=Mesh
 
 ## The initial and boundary conditions
 
@@ -74,13 +74,13 @@ The model is just a 1D line, extending between $x=0$ and $x=1$.
 
 Each of the primary variables are initialised to have concentration $10^{-6}\,$m$^{3}$(species)/m$^{3}$(solution) everywhere in the domain except for at the left-hand side ($x=0$) where they have concentration $0.05$.  The boundary conditions are to fix these values at the left and right sides of the domain.  For instance:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[h+_ic] end=[hco3_ic]
+!listing modules/porous_flow/examples/tutorial/13.i block=h+_ic
 
 and
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[h+_left] end=[ca2+_left]
+!listing modules/porous_flow/examples/tutorial/13.i block=h+_left
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[h+_right] end=[ca2+_right]
+!listing modules/porous_flow/examples/tutorial/13.i block=h+_right
 
 *Please remember* that boundary conditions in PorousFlow are usually more complicated than setting Dirichlet or Preset boundary conditions: see [boundary conditions](boundaries.md).  Looking at the results below you can clearly see the effect of the naive boundary conditions placed on the right-hand side.
 
@@ -88,11 +88,11 @@ and
 
 The initial condition for dolomite is $10^{-7}\,$m$^{3}$(precipitate)/m$^{3}$(porous material).  This is implemented in the Auxiliary system by
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[AuxVariables] end=[GlobalParams]
+!listing modules/porous_flow/examples/tutorial/13.i block=AuxVariables
 
 and the Material:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[dolomite_conc] end=[simple_fluid]
+!listing modules/porous_flow/examples/tutorial/13.i block=dolomite_conc
 
 Given the above equilibrium constant and concentrations of the primary species, the dolomite immediately begins to dissolve into solution.
 
@@ -100,7 +100,7 @@ Given the above equilibrium constant and concentrations of the primary species, 
 
 The porepressure is fixed to have gradient $dP/dx = 10^{6}\,$Pa/m.
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[pressure_ic] end=[h+_ic]
+!listing modules/porous_flow/examples/tutorial/13.i block=pressure_ic
 
 With a permeability of $10^{-7}\,$m$^{2}$ and a fluid viscosity of $10^{-3}\,$Pa.s, the Darcy velocity is $0.1\,$m/s.  The porosity is held fixed at 0.2.
 
