@@ -1355,6 +1355,113 @@ MeshRepairGenerator::repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) cons
   }
 }
 
+// Construct a C0Polyhedron from the given polygon faces and add it to the mesh with the given
+// subdomain and processor ids, applying the captured side/edge boundary ids onto its matching
+// faces/edges. Returns the added element, or nullptr (mesh unchanged) if the union is not a sound,
+// convex cell. Shared by absorbAcrossSharedFace and the edge-collapse repairs that rebuild a
+// neighbor that would otherwise change type. face_bcs is keyed by a face's sorted node ids,
+// edge_bcs by a sorted endpoint-node pair.
+static Elem *
+addPolyhedronFromFaces(
+    std::unique_ptr<MeshBase> & mesh,
+    const std::vector<std::shared_ptr<libMesh::Polygon>> & faces,
+    const subdomain_id_type sub,
+    const processor_id_type pid,
+    const std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> & face_bcs,
+    const std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> & edge_bcs)
+{
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
+  // Construct the union polyhedron. The C0Polyhedron constructor tetrahedralizes the faces and
+  // throws if the union is non-convex or has a flat sub-tet, so the construction is wrapped: any
+  // failure returns nullptr with the mesh unchanged.
+  std::unique_ptr<libMesh::Node> mid_node;
+  std::unique_ptr<libMesh::C0Polyhedron> poly_elem;
+  try
+  {
+    poly_elem = std::make_unique<libMesh::C0Polyhedron>(faces, mid_node);
+  }
+  catch (const std::exception &)
+  {
+    // Non-convex / non-tetrahedralizable union: decline. NOTE: in optimized libMesh builds this
+    // reject path can leak the constructor's interior node (the C0Polyhedron constructor is not
+    // exception-safe on its fallback tetrahedralization); valid (convex) unions are unaffected.
+    // This should be fixed upstream in libMesh.
+    if (mid_node)
+      mid_node.release();
+    return nullptr;
+  }
+  poly_elem->subdomain_id() = sub;
+  // The cell inherits the caller's partition. A freshly constructed Elem/Node defaults to
+  // invalid_processor_id; the interior mid-node in particular sits on no side, so the side-based
+  // node partitioning cannot reach it and it would stay unpartitioned. Set both explicitly (as the
+  // extruder does for its polyhedra) so no unpartitioned entity is emitted.
+  poly_elem->processor_id() = pid;
+  libMesh::Node * mid_ptr = mid_node.get();
+  if (mid_node)
+  {
+    mid_node->processor_id() = pid;
+    mesh->add_node(std::move(mid_node));
+  }
+  Elem * added = mesh->add_elem(std::move(poly_elem));
+  // The mid-element node now has a valid id, so volume() is well defined. Reject a degenerate
+  // (non-positive volume) union and, in optimized builds where the constructor does not assert on
+  // non-convexity, a non-convex result (which would self-overlap). convex() is the real geometric
+  // check; volume()>0 alone always holds for a successfully built polyhedron.
+  bool valid = added->volume() > 0;
+  if (valid)
+  {
+    auto * poly = dynamic_cast<libMesh::Polyhedron *>(added);
+    try
+    {
+      valid = poly && poly->convex();
+    }
+    catch (const std::exception &)
+    {
+      valid = false;
+    }
+  }
+  if (!valid)
+  {
+    mesh->delete_elem(added);
+    if (mid_ptr)
+      mesh->delete_node(mid_ptr);
+    return nullptr; // invalid/non-convex union: leave the mesh unchanged
+  }
+
+  // Apply captured side boundary ids onto the matching faces of the polyhedron (matched by sorted
+  // node ids)
+  for (const auto s : make_range(added->n_sides()))
+  {
+    const auto ns = added->nodes_on_side(s);
+    std::vector<dof_id_type> key;
+    for (const auto i : index_range(ns))
+      key.push_back(added->node_id(ns[i]));
+    std::sort(key.begin(), key.end());
+    auto it = face_bcs.find(key);
+    if (it != face_bcs.end())
+      for (const auto bid : it->second)
+        boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
+  }
+
+  // Apply captured edge boundary ids onto the matching edges of the polyhedron
+  if (!edge_bcs.empty())
+    for (const auto ed : make_range(added->n_edges()))
+    {
+      const auto en = added->nodes_on_edge(ed);
+      auto a = added->node_id(en[0]);
+      auto b = added->node_id(en[1]);
+      if (a > b)
+        std::swap(a, b);
+      auto it = edge_bcs.find({a, b});
+      if (it != edge_bcs.end())
+        for (const auto bid : it->second)
+          boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
+    }
+
+  return added;
+}
+
 bool
 MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
                                             Elem * degenerate,
@@ -1426,97 +1533,19 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
   capture_edges(neighbor);
   capture_edges(degenerate);
 
-  // Construct the union polyhedron and accept it only if it is a sound, convex cell. The
-  // C0Polyhedron constructor tetrahedralizes the faces and throws if the union is non-convex or has
-  // a flat sub-tet, so the construction is wrapped: any failure leaves the mesh unchanged. Both old
-  // elements still exist here, so declining restores the original state exactly.
-  const subdomain_id_type sub = neighbor->subdomain_id();
-  std::unique_ptr<libMesh::Node> mid_node;
-  std::unique_ptr<libMesh::C0Polyhedron> poly_elem;
-  try
-  {
-    poly_elem = std::make_unique<libMesh::C0Polyhedron>(faces, mid_node);
-  }
-  catch (const std::exception &)
-  {
-    // Non-convex / non-tetrahedralizable union: decline. NOTE: in optimized libMesh builds this
-    // reject path can leak the constructor's interior node (the C0Polyhedron constructor is not
-    // exception-safe on its fallback tetrahedralization); valid (convex) unions are unaffected.
-    // This should be fixed upstream in libMesh.
-    if (mid_node)
-      mid_node.release();
+  // Construct the union polyhedron (subdomain and partition inherited from the neighbor) and accept
+  // it only if it is a sound, convex cell; the captured side/edge boundary ids are applied to its
+  // faces/edges. On failure the mesh is unchanged and both old elements still exist, so declining
+  // restores the original state exactly.
+  Elem * added = addPolyhedronFromFaces(
+      mesh, faces, neighbor->subdomain_id(), neighbor->processor_id(), face_bcs, edge_bcs);
+  if (!added)
     return false;
-  }
-  poly_elem->subdomain_id() = sub;
-  // The union cell inherits the neighbor's partition. A freshly constructed Elem/Node defaults to
-  // invalid_processor_id; the interior mid-node in particular sits on no side, so the side-based
-  // node partitioning cannot reach it and it would stay unpartitioned. Set both explicitly (as the
-  // extruder does for its polyhedra) so no unpartitioned entity is emitted.
-  const processor_id_type pid = neighbor->processor_id();
-  poly_elem->processor_id() = pid;
-  libMesh::Node * mid_ptr = mid_node.get();
-  if (mid_node)
-  {
-    mid_node->processor_id() = pid;
-    mesh->add_node(std::move(mid_node));
-  }
-  Elem * added = mesh->add_elem(std::move(poly_elem));
-  // The mid-element node now has a valid id, so volume() is well defined. Reject a degenerate
-  // (non-positive volume) union and, in optimized builds where the constructor does not assert on
-  // non-convexity, a non-convex result (which would self-overlap). convex() is the real geometric
-  // check; volume()>0 alone always holds for a successfully built polyhedron.
-  bool valid = added->volume() > 0;
-  if (valid)
-  {
-    auto * poly = dynamic_cast<libMesh::Polyhedron *>(added);
-    try
-    {
-      valid = poly && poly->convex();
-    }
-    catch (const std::exception &)
-    {
-      valid = false;
-    }
-  }
-  if (!valid)
-  {
-    mesh->delete_elem(added);
-    if (mid_ptr)
-      mesh->delete_node(mid_ptr);
-    return false; // invalid/non-convex union: leave the mesh unchanged
-  }
 
-  // Move side boundary ids from the old elements onto the matching faces of the polyhedron
+  // Dissolve the two old elements into the union: their boundary ids were already applied to the
+  // polyhedron above (a different element, so removing them here does not disturb it).
   boundary_info.remove(degenerate);
   boundary_info.remove(neighbor);
-  for (const auto s : make_range(added->n_sides()))
-  {
-    const auto ns = added->nodes_on_side(s);
-    std::vector<dof_id_type> key;
-    for (const auto i : index_range(ns))
-      key.push_back(added->node_id(ns[i]));
-    std::sort(key.begin(), key.end());
-    auto it = face_bcs.find(key);
-    if (it != face_bcs.end())
-      for (const auto bid : it->second)
-        boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
-  }
-
-  // Move edge boundary ids onto the matching edges of the polyhedron
-  if (!edge_bcs.empty())
-    for (const auto ed : make_range(added->n_edges()))
-    {
-      const auto en = added->nodes_on_edge(ed);
-      auto a = added->node_id(en[0]);
-      auto b = added->node_id(en[1]);
-      if (a > b)
-        std::swap(a, b);
-      auto it = edge_bcs.find({a, b});
-      if (it != edge_bcs.end())
-        for (const auto bid : it->second)
-          boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
-    }
-
   for (const auto i : make_range(degenerate->n_nodes()))
     touched_nodes.insert(degenerate->node_id(i));
   for (const auto i : make_range(neighbor->n_nodes()))
