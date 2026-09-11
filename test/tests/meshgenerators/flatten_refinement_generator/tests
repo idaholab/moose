@@ -1,0 +1,13 @@
+[Tests]
+  design = 'meshgenerators/FlattenRefinementGenerator.md'
+  issues = '#33728'
+  [flatten]
+    type = 'Exodiff'
+    input = 'flatten_refinement.i'
+    exodiff = 'flatten.e'
+    cli_args = '--mesh-only flatten.e'
+    requirement = 'The system shall be able to remove the refinement tree of an h-refined mesh, '
+                  'keeping only the finest elements as unrefined elements.'
+    recover = false
+  []
+[]
