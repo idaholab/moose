@@ -386,6 +386,20 @@ public:
   void setAppOutputFileBase();
 
 protected:
+  /**
+   * Temporarily use a sub-app's informational message suppression setting.
+   */
+  class ScopedAppInfoSuppression
+  {
+  public:
+    ScopedAppInfoSuppression(const MooseApp & app);
+    ~ScopedAppInfoSuppression();
+
+  private:
+    const bool _original_suppress_info;
+    const bool _changed_suppress_info;
+  };
+
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const;
 
