@@ -206,12 +206,17 @@ private:
 
   /// @brief Collapse a redundant vertex @p v onto an adjacent vertex @p keep (a short edge, or a
   ///        colinear "not sticking out" vertex), reducing every incident element that contained both
-  ///        to a lower topology and leaving elements that contained only @p v with @p keep in its
-  ///        place. Committed only if every incident element stays valid: each reducing element must
-  ///        map to a supported lower type (via reducedElement) with positive measure above
-  ///        @p invert_floor, and each moved element must stay non-degenerate and above the floor;
-  ///        otherwise the mesh is left unchanged. Subdomain and side/edge boundary ids are carried
-  ///        onto the reduced elements, and @p v is deleted. When @p coincident is false (a colinear
+  ///        and leaving elements that contained only @p v with @p keep in its place. Each reducing
+  ///        element (one containing both @p v and @p keep) becomes, in order of preference: a
+  ///        supported standard lower type (via reducedElement, QUAD4->TRI3 etc.); otherwise, if it
+  ///        stays 3D, a C0Polyhedron rebuilt from its post-collapse faces (so a hexahedron or other
+  ///        cell that shares the collapsed edge is fixed rather than blocking the repair); otherwise
+  ///        it is deleted, having dropped below its own dimension (e.g. a tetrahedron collapsing to a
+  ///        triangle - it shared the short edge, so it was itself degenerate). The collapse is still
+  ///        declined (mesh left unchanged) if a reduced element has non-positive measure below
+  ///        @p invert_floor, a polyhedron rebuild is not a sound convex cell, or a moved element
+  ///        would invert/degenerate. Subdomain and side/edge boundary ids are carried onto the
+  ///        replacement elements, and @p v is deleted. When @p coincident is false (a colinear
   ///        vertex, i.e. @p v is not ~at @p keep, so the merge slides @p v along the edge) the
   ///        collapse is additionally rejected if any incident element contains @p v but not @p keep
   ///        (a "mover" that the slide would distort); a coincident (short-edge) merge is a null move
@@ -242,24 +247,27 @@ private:
   void repairPolygonCollapse(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair PYRAMID5 elements collapsed to a tetrahedron by a short or colinear base edge, by
-  ///        collapsing the redundant base vertex (PYRAMID5 -> TET4). A pyramid is left in place if a
-  ///        co-edge neighbor cannot reduce, the result would invert, or (for a colinear base vertex)
-  ///        an element sharing the vertex would be distorted.
+  ///        collapsing the redundant base vertex (PYRAMID5 -> TET4). A co-edge neighbor with no
+  ///        standard lower type is rebuilt as a polyhedron via collapseRedundantVertex; the pyramid
+  ///        is left in place only if the result would invert, that polyhedron would be invalid, or
+  ///        (for a colinear base vertex) an element sharing the vertex would be distorted.
   /// @param mesh the mesh to modify
   void repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair PRISM6 (wedge) elements pinched to a pyramid by a short vertical edge, by
   ///        collapsing that edge (PRISM6 -> PYRAMID5): the merged node becomes the apex and the
-  ///        opposite lateral quad becomes the base. A wedge is left in place if a co-edge neighbor
-  ///        cannot reduce or the result would invert.
+  ///        opposite lateral quad becomes the base. A co-edge neighbor with no standard lower type is
+  ///        rebuilt as a polyhedron; the wedge is left in place only if the result would invert or
+  ///        that polyhedron would be invalid.
   /// @param mesh the mesh to modify
   void repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair HEX8 elements pinched to a prism by a collapsed lateral face, by collapsing the
   ///        two short horizontal edges of that face together (HEX8 -> PRISM6): the pinched face
-  ///        becomes a vertical edge, each squashed bottom/top face becomes a triangle. A hex is left
-  ///        in place if a neighbor sharing a collapsed edge cannot reduce, the pinch is shared with
-  ///        another pinched cell, or the result would invert.
+  ///        becomes a vertical edge, each squashed bottom/top face becomes a triangle. A co-edge
+  ///        neighbor with no standard lower type is rebuilt as a polyhedron; the hex is left in place
+  ///        only if the pinch is shared with another pinched cell, the result would invert, or that
+  ///        polyhedron would be invalid.
   /// @param mesh the mesh to modify
   void repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const;
 };

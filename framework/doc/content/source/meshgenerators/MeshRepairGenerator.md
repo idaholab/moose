@@ -109,21 +109,28 @@ The operations currently implemented are:
     vertex is likewise reduced to an `(n-1)`-sided polygon, but only when every element sharing that vertex is itself a
     polygon, so all reduce onto polygons together.
 
+  In every 3D topology collapse, an element that shares the collapsed edge is reduced along with the target: to a
+  supported standard lower type where one exists, otherwise - since in 3D an element that loses an edge can always be
+  represented as a polyhedron - it is rebuilt as a `C0Polyhedron` from its post-collapse faces (a hexahedron sharing a
+  single collapsed edge, for example, becomes a seven-node polyhedron). A neighbor that instead drops below three
+  dimensions (e.g. a tetrahedron collapsing to a triangle) shared the near-zero edge and so was itself a needle/sliver;
+  it is deleted. The collapse is declined, leaving the target in place, only if a reduced neighbor would invert or a
+  rebuilt polyhedron would not be a sound convex cell. (A `C0Polyhedron` has no reference element, so a mesh containing
+  one cannot be examined by the PointLocator-based diagnostics.)
+
   - topology collapse - `PYRAMID5` -> `TET4`: a pyramid whose quad base has a redundant vertex (a short
     base edge or a colinear base vertex) is reduced to a tetrahedron by collapsing that base vertex, so the base
-    becomes a triangle. As with the other collapses every element sharing the collapsed edge must reduce to a valid
-    type, so a pyramid whose base is shared with an element that cannot reduce (for example a hexahedron) is left in
-    place and reported.
+    becomes a triangle.
 
   - topology collapse - `PRISM6` -> `PYRAMID5`: a wedge pinched at one corner (a short vertical edge, its top node
     within [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the element diameter of the bottom node) is reduced
     to a pyramid by collapsing that vertical edge - the merged corner becomes the apex and the opposite lateral quad
-    becomes the base - subject to the same co-edge-reducibility condition.
+    becomes the base.
 
   - topology collapse - `HEX8` -> `PRISM6`: a hexahedron with a lateral face pinched to a vertical edge (both of that
     face's horizontal edges short) is reduced to a prism by collapsing those two edges together, so each squashed
-    bottom/top face becomes a triangle. This is committed only when the pinch is local (no other element shares a
-    collapsed edge and would have to change type), otherwise the hexahedron is left in place and reported.
+    bottom/top face becomes a triangle. A hexahedron is left in place only if the pinch is shared with another pinched
+    cell.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 
