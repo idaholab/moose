@@ -18,6 +18,51 @@
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []
+  [c_integral_analytical_serd]
+    type = CSVDiff
+    input = c_integral_analytical_serd.i
+    cli_args = 'DomainIntegral/output_vpp=false Outputs/exodus=false Outputs/checkpoint=false Executioner/dt=0.005 Executioner/end_time=0.1 Executioner/num_steps=20'
+    csvdiff = c_integral_analytical_serd_out.csv
+    issues = '#30466'
+    requirement = 'The domain integral action shall compute an analytical strain energy rate density for power-law creep.'
+    capabilities = 'method!=dbg'
+  []
+  [c_integral_gaussian_serd]
+    type = CSVDiff
+    input = c_integral_gaussian_serd.i
+    cli_args = 'Materials/powerlawcrp/type=PowerLawCreepTest Materials/powerlawcrp/failure_step=1000000000 DomainIntegral/output_vpp=false Outputs/exodus=false Outputs/checkpoint=false Executioner/dt=0.005 Executioner/end_time=0.1 Executioner/num_steps=20'
+    csvdiff = c_integral_gaussian_serd_out.csv
+    rel_err = 1e-5
+    allow_test_objects = true
+    issues = '#30466'
+    requirement = 'The domain integral action shall use a strain energy rate density computed with Gaussian quadrature.'
+    capabilities = 'method!=dbg'
+  []
+  [c_integral_incremental_serd]
+    type = CSVDiff
+    input = c_integral_incremental_serd.i
+    cli_args = "DomainIntegral/inelastic_models='' DomainIntegral/use_incremental_serd=true DomainIntegral/output_vpp=false Outputs/exodus=false Outputs/checkpoint=false Executioner/dt=0.005 Executioner/end_time=0.1 Executioner/num_steps=20"
+    csvdiff = c_integral_incremental_serd_out.csv
+    issues = '#30466'
+    requirement = 'The domain integral action shall compute strain energy rate density using incremental trapezoidal integration.'
+    capabilities = 'method!=dbg'
+  []
+  [c_integral_serd_source_error]
+    type = RunException
+    input = c_integral_2d.i
+    cli_args = "DomainIntegral/use_incremental_serd=true"
+    expect_err = 'CIntegral requires exactly one of inelastic_models, use_existing_serd=true, or use_incremental_serd=true.'
+    issues = '#30466'
+    requirement = 'The domain integral action shall require exactly one strain energy rate density source for the C integral.'
+  []
+  [serd_option_without_c_integral_error]
+    type = RunException
+    input = c_integral_2d.i
+    cli_args = "DomainIntegral/integrals=JIntegral DomainIntegral/use_existing_serd=true"
+    expect_err = 'SERD calculation options are only used when CIntegral is requested.'
+    issues = '#30466'
+    requirement = 'The domain integral action shall reject strain energy rate density source options when the C integral is not requested.'
+  []
   [test_iithermal]
     type = 'CSVDiff'
     input = 'interaction_integral_2d.i'

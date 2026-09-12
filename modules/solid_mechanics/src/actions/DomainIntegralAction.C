@@ -127,6 +127,13 @@ DomainIntegralAction::validParams()
   params.addParam<std::vector<MaterialName>>(
       "inelastic_models",
       "The material objects to use to calculate the strain energy rate density.");
+  params.addParam<bool>(
+      "use_existing_serd",
+      false,
+      "Use an existing strain_energy_rate_density material property for the C integral.");
+  params.addParam<bool>("use_incremental_serd",
+                        false,
+                        "Use the trapezoidal incremental strain energy rate density calculation.");
   params.addParam<MaterialPropertyName>("eigenstrain_gradient",
                                         "Material defining gradient of eigenstrain tensor");
   params.addParam<MaterialPropertyName>("body_force", "Material defining body force");
@@ -282,6 +289,24 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
       (_integrals.count(C_INTEGRAL) != 0 && _integrals.count(K_FROM_J_INTEGRAL) != 0))
     paramError("integrals",
                "JIntegral, CIntegral, and KFromJIntegral options are mutually exclusive");
+
+  if (_integrals.count(C_INTEGRAL) != 0)
+  {
+    const bool has_inelastic_models =
+        isParamValid("inelastic_models") &&
+        !getParam<std::vector<MaterialName>>("inelastic_models").empty();
+    const bool use_existing_serd = getParam<bool>("use_existing_serd");
+    const bool use_incremental_serd = getParam<bool>("use_incremental_serd");
+    const unsigned int serd_sources =
+        has_inelastic_models + use_existing_serd + use_incremental_serd;
+    if (serd_sources != 1)
+      paramError("inelastic_models",
+                 "CIntegral requires exactly one of inelastic_models, use_existing_serd=true, or "
+                 "use_incremental_serd=true.");
+  }
+  else if (getParam<bool>("use_existing_serd") || getParam<bool>("use_incremental_serd"))
+    paramError("use_existing_serd",
+               "SERD calculation options are only used when CIntegral is requested.");
 
   // Acommodate deprecated parameter convert_J_to_K
   if (_convert_J_to_K && _integrals.count(K_FROM_J_INTEGRAL) != 0)
@@ -987,7 +1012,7 @@ DomainIntegralAction::act()
         _problem->addMaterial(mater_type_name, mater_name, params);
       }
       // Strain energy rate density needed for C(t)/C* integral
-      if (have_c_integral)
+      if (have_c_integral && !getParam<bool>("use_existing_serd"))
       {
         std::string mater_name;
         const std::string mater_type_name(ad_prepend + "StrainEnergyRateDensity");
@@ -995,8 +1020,11 @@ DomainIntegralAction::act()
 
         InputParameters params = _factory.getValidParams(mater_type_name);
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
-        params.set<std::vector<MaterialName>>("inelastic_models") =
-            getParam<std::vector<MaterialName>>("inelastic_models");
+        const bool use_incremental_serd = getParam<bool>("use_incremental_serd");
+        params.set<bool>("use_incremental_serd") = use_incremental_serd;
+        if (!use_incremental_serd)
+          params.set<std::vector<MaterialName>>("inelastic_models") =
+              getParam<std::vector<MaterialName>>("inelastic_models");
 
         _problem->addMaterial(mater_type_name, mater_name, params);
       }
