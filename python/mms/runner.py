@@ -68,6 +68,9 @@ def _runner(input_files, num_refinements, *args, **kwargs):
     if testharness_executable := os.environ.get("MOOSE_PYTHONUNITTEST_EXECUTABLE"):
         executable = testharness_executable
 
+    # Get the thread count from unit tests, if the test harness requested more than one
+    nthreads = os.environ.get("MOOSE_PYTHONUNITTEST_NTHREADS")
+
     # Locate the executable
     if executable is None:
         executable = mooseutils.find_moose_executable_recursive(os.getcwd())
@@ -81,6 +84,8 @@ def _runner(input_files, num_refinements, *args, **kwargs):
 
     # Build custom arguments
     cli_args = ["-i"] + input_files
+    if nthreads:
+        cli_args += [f"--n-threads={nthreads}"]
     cli_args += args
 
     # Run input file and build up output
