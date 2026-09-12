@@ -355,7 +355,7 @@ BlockRestrictable::getBlockCoordSystem()
 }
 
 void
-BlockRestrictable::checkVariable(const MooseVariableFieldBase & variable) const
+BlockRestrictable::checkVariable(const MooseVariableBase & variable) const
 {
   // a variable defined on all internal sides does not need this check because
   // it can be coupled with other variables in DG kernels
