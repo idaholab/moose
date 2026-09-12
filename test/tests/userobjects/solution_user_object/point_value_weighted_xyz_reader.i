@@ -1,0 +1,45 @@
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+  []
+[]
+
+[Problem]
+  kernel_coverage_check = false
+  skip_nl_system_check = true
+  solve = false
+[]
+
+[UserObjects]
+  [solution]
+    type = SolutionUserObject
+    system = aux0
+    mesh = point_value_source_0001_mesh.xda
+    es = point_value_source_0001.xda
+    system_variables = source_xyz
+    # Multivalued point evaluation requires the discontinuous source mesh
+    # to be available on every processor.
+    force_replicated_source_mesh = true
+  []
+[]
+
+[Postprocessors]
+  [xyz_average]
+    type = TestSolutionPointValueWeighted
+    variable = source_xyz
+    point = '0.5 0.5 0'
+    weighting_type = average
+    solution = solution
+    execute_on = INITIAL
+  []
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Outputs]
+  csv = true
+  execute_on = INITIAL
+[]

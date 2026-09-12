@@ -30,6 +30,7 @@
     variable = heat_source
     solution = soln
     from_variable = heat_source
+    weighting_type = average
     execute_on = 'INITIAL'
   []
 []

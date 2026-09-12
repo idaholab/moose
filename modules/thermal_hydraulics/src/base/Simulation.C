@@ -712,6 +712,9 @@ Simulation::setupInitialConditionsFromFile()
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
+      if (_thm_pars.isParamSetByUser("initial_from_file_weighting_type"))
+        params.set<MooseEnum>("weighting_type") =
+            _thm_pars.get<MooseEnum>("initial_from_file_weighting_type");
       if (vi._params.isParamValid("block"))
         params.set<std::vector<SubdomainName>>("block") =
             vi._params.get<std::vector<SubdomainName>>("block");

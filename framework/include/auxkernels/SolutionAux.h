@@ -10,8 +10,8 @@
 #pragma once
 
 #include "AuxKernel.h"
-
-class SolutionUserObjectBase;
+#include "SolutionUserObjectBase.h"
+#include <optional>
 
 /**
  * AuxKernel for reading a solution from file.
@@ -31,7 +31,17 @@ public:
    */
   virtual void initialSetup() override;
 
+  /**
+   * Validates the imported variable once before computing values.
+   */
+  virtual void compute() override;
+
 protected:
+  /**
+   * Validates that the selected imported variable is compatible with this AuxKernel.
+   */
+  void validateVariable();
+
   /**
    * Computes a value for a node or element depending on the type of kernel,
    * it also uses the 'direct' flag to extract values based on the dof if the
@@ -45,6 +55,12 @@ protected:
 
   /// The variable name of interest
   std::string _var_name;
+
+  /// Whether the imported variable has been validated
+  bool _variable_is_validated = false;
+
+  /// Policy used when the imported solution is multivalued at the query point
+  const std::optional<SolutionUserObjectBase::WeightingType> _weighting_type;
 
   /// Flag for directly grabbing the data based on the dof
   bool _direct;

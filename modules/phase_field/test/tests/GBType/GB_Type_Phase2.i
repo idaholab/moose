@@ -165,6 +165,7 @@
     variable = EBSD_grain
     solution = initial_grains
     from_variable = ebsd_numbers
+    weighting_type = average
   [../]
   [./gb_type]
     type = SolutionAux
@@ -172,6 +173,7 @@
     variable = gb_type
     solution = initial_grains
     from_variable = gb_type
+    weighting_type = average
   [../]
   [./bnds_aux]
     # AuxKernel that calculates the GB term
@@ -187,6 +189,7 @@
     solution = initial_grains
     from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
+    weighting_type = smallest_element_id
   [../]
   [./bnds_HAGB]
     # Calculate the bnds for specific GB type
@@ -196,6 +199,7 @@
     solution = initial_grains
     from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
+    weighting_type = smallest_element_id
   [../]
 []
 
