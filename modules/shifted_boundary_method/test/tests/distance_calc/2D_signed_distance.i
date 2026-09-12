@@ -46,7 +46,7 @@ n_seg = 64
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = shift_boundary_mesh
+    interface_mesh = shift_boundary_mesh
   []
   [signed_distance_to_surface]
     type = ShortestDistanceToSurface

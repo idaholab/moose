@@ -17,7 +17,7 @@
 #include <memory>
 
 /**
- * Owns a saved boundary (surface) mesh and the SurfaceElementSet wrapping it.
+ * Owns a saved boundary mesh and the SurfaceElementSet wrapping it.
  *
  * This is the single object allowed to retrieve a saved mesh via
  * MeshGeneratorSystem::getSavedMesh(): that retrieval std::move()s the mesh out
@@ -72,8 +72,8 @@ protected:
   /// The whole-mesh SurfaceElementSet, lazily cached on first use.
   mutable std::unique_ptr<SurfaceElementSet> _set;
 
-  /// The name of a mesh saved via a MeshGenerator's `save_mesh_as` parameter.
-  const std::string _bnd_mesh_name;
+  /// The name of a mesh saved via a MeshGenerator's `save_with_name` parameter.
+  const MeshGeneratorName _bnd_mesh_name;
 
   /// Whether to check watertightness of the mesh (informational only).
   const bool _check_watertightness;

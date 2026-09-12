@@ -84,14 +84,19 @@ template <bool is_ad>
 void
 CZMComputeDisplacementJumpBase<is_ad>::computeQpProperties()
 {
-  // computing the displacement jump
+  computeGlobalDisplacementJump();
+  computeRotationMatrices();
+  computeLocalDisplacementJump();
+}
+
+template <bool is_ad>
+void
+CZMComputeDisplacementJumpBase<is_ad>::computeGlobalDisplacementJump()
+{
   for (unsigned int i = 0; i < _ndisp; i++)
     _displacement_jump_global[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
   for (unsigned int i = _ndisp; i < 3; i++)
     _displacement_jump_global[_qp](i) = 0;
-
-  computeRotationMatrices();
-  computeLocalDisplacementJump();
 }
 
 template <bool is_ad>

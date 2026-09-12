@@ -22,6 +22,7 @@ application.
 - [Ray Tracing](modules/ray_tracing/index.md)
 - [Reactor](modules/reactor/index.md)
 - [Reconstructed Discontinuous Galerkin](modules/rdg/index.md)
+- [Shifted Boundary Method](modules/shifted_boundary_method/index.md)
 - [Solid Mechanics](modules/solid_mechanics/index.md)
 - [Solid Properties](modules/solid_properties/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
