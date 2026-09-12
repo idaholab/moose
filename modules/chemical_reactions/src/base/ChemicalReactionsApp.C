@@ -49,6 +49,33 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
+  registerSyntax("ThermochimicaPhaseOutputAction", "ChemicalComposition/*/Outputs/Phases/*");
+  registerSyntax("ThermochimicaSpeciesOutputAction", "ChemicalComposition/*/Outputs/Species/*");
+  registerSyntax("ThermochimicaElementPotentialOutputAction",
+                 "ChemicalComposition/*/Outputs/ElementPotentials/*");
+  registerSyntax("ThermochimicaVaporPressureOutputAction",
+                 "ChemicalComposition/*/Outputs/VaporPressures/*");
+  registerSyntax("ThermochimicaElementDistributionOutputAction",
+                 "ChemicalComposition/*/Outputs/ElementDistribution/*");
+  registerSyntax("ThermochimicaChemicalPotentialOutputAction",
+                 "ChemicalComposition/*/Outputs/ChemicalPotentials/*");
+  registerSyntax("ThermochimicaPhaseGibbsEnergyOutputAction",
+                 "ChemicalComposition/*/Outputs/PhaseGibbsEnergies/*");
+  registerSyntax("ThermochimicaPhaseDrivingForceOutputAction",
+                 "ChemicalComposition/*/Outputs/PhaseDrivingForces/*");
+  registerSyntax("ThermochimicaSystemGibbsEnergyOutputAction",
+                 "ChemicalComposition/*/Outputs/SystemGibbsEnergies/*");
+  registerSyntax("ThermochimicaSystemPropertyOutputAction",
+                 "ChemicalComposition/*/Outputs/SystemProperties/*");
+  registerSyntax("ThermochimicaConstituentFractionOutputAction",
+                 "ChemicalComposition/*/Outputs/ConstituentFractions/*");
+  registerTask("setup_chemical_composition", false);
+  addTaskDependency("setup_chemical_composition", "meta_action");
+  addTaskDependency("add_variable", "setup_chemical_composition");
+  addTaskDependency("add_aux_variable", "setup_chemical_composition");
+  addTaskDependency("add_ic", "setup_chemical_composition");
+  addTaskDependency("add_user_object", "setup_chemical_composition");
+  addTaskDependency("add_aux_kernel", "setup_chemical_composition");
 
   // Physics syntax
   registerSyntax("AqueousReactionsEquilibriumPhysics", "Physics/AqueousReactionsEquilibrium/*");
