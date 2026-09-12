@@ -10,57 +10,78 @@
 #include "ComputeVariableEigenstrain.h"
 
 registerMooseObject("SolidMechanicsApp", ComputeVariableEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeVariableEigenstrain);
 
+template <bool is_ad>
 InputParameters
-ComputeVariableEigenstrain::validParams()
+ComputeVariableEigenstrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeEigenstrain::validParams();
-  params.addClassDescription("Computes an Eigenstrain and its derivatives that is a function of "
-                             "multiple variables, where the prefactor is defined in a derivative "
-                             "material");
-  params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");
+  InputParameters params = ComputeEigenstrainTempl<is_ad>::validParams();
+  params.addClassDescription(
+      "Computes an eigenstrain whose scalar prefactor is supplied by a material property. The AD "
+      "specialization obtains derivatives through the AD material property; the non-AD "
+      "specialization uses derivative material properties to publish first and second derivatives "
+      "of elastic_strain.");
+  params.addRequiredCoupledVar("args",
+                               "Variables on which the prefactor material property depends");
   return params;
 }
 
-ComputeVariableEigenstrain::ComputeVariableEigenstrain(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ComputeEigenstrain>(parameters),
-    _num_args(coupledComponents("args")),
+template <bool is_ad>
+ComputeVariableEigenstrainTempl<is_ad>::ComputeVariableEigenstrainTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<ComputeEigenstrainTempl<is_ad>>(parameters),
+    _num_args(this->coupledComponents("args")),
+    _arg_names(_num_args),
     _dprefactor(_num_args),
     _d2prefactor(_num_args),
     _delastic_strain(_num_args),
     _d2elastic_strain(_num_args)
 {
-  // fetch prerequisite derivatives and build elastic_strain derivatives and cross-derivatives
   for (unsigned int i = 0; i < _num_args; ++i)
   {
-    const VariableName & iname = coupledName("args", i);
-    _dprefactor[i] = &getMaterialPropertyDerivative<Real>("prefactor", iname);
-    _delastic_strain[i] =
-        &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname);
+    _arg_names[i] = this->coupledName("args", i);
 
-    _d2prefactor[i].resize(_num_args);
-    _d2elastic_strain[i].resize(_num_args);
-
-    for (unsigned int j = i; j < _num_args; ++j)
+    if constexpr (!is_ad)
     {
-      const VariableName & jname = coupledName("args", j);
-      _d2prefactor[i][j] = &getMaterialPropertyDerivative<Real>("prefactor", iname, jname);
-      _d2elastic_strain[i][j] =
-          &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", iname, jname);
+      _dprefactor[i] =
+          &this->template getMaterialPropertyDerivative<Real>("prefactor", _arg_names[i]);
+      _delastic_strain[i] = &this->template declarePropertyDerivative<RankTwoTensor>(
+          this->_base_name + "elastic_strain", _arg_names[i]);
+
+      _d2prefactor[i].resize(_num_args);
+      _d2elastic_strain[i].resize(_num_args);
+
+      for (unsigned int j = i; j < _num_args; ++j)
+      {
+        _d2prefactor[i][j] = &this->template getMaterialPropertyDerivative<Real>(
+            "prefactor", _arg_names[i], _arg_names[j]);
+        _d2elastic_strain[i][j] = &this->template declarePropertyDerivative<RankTwoTensor>(
+            this->_base_name + "elastic_strain", _arg_names[i], _arg_names[j]);
+      }
     }
   }
 }
 
+template <bool is_ad>
 void
-ComputeVariableEigenstrain::computeQpEigenstrain()
+ComputeVariableEigenstrainTempl<is_ad>::computeQpEigenstrain()
 {
-  ComputeEigenstrain::computeQpEigenstrain();
+  // Compute eigenstrain = eigen_base * prefactor. ComputeEigenstrainTempl retrieves prefactor as
+  // GenericMaterialProperty<Real, is_ad>, so the AD specialization retains its derivative data.
+  ComputeEigenstrainTempl<is_ad>::computeQpEigenstrain();
 
-  // Define derivatives of the elastic strain
-  for (unsigned int i = 0; i < _num_args; ++i)
-  {
-    (*_delastic_strain[i])[_qp] = -_eigen_base_tensor * (*_dprefactor[i])[_qp];
-    for (unsigned int j = i; j < _num_args; ++j)
-      (*_d2elastic_strain[i][j])[_qp] = -_eigen_base_tensor * (*_d2prefactor[i][j])[_qp];
-  }
+  if constexpr (!is_ad)
+    for (unsigned int i = 0; i < _num_args; ++i)
+    {
+      // elastic_strain = mechanical_strain - eigenstrain
+      (*_delastic_strain[i])[this->_qp] = -this->_eigen_base_tensor * (*_dprefactor[i])[this->_qp];
+
+      for (unsigned int j = i; j < _num_args; ++j)
+        (*_d2elastic_strain[i][j])[this->_qp] =
+            -this->_eigen_base_tensor * (*_d2prefactor[i][j])[this->_qp];
+    }
 }
+
+template class ComputeVariableEigenstrainTempl<false>;
+template class ComputeVariableEigenstrainTempl<true>;
