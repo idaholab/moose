@@ -14,15 +14,15 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that calculates the friction factor based on the updated Cheng & Todreas correlations
+ * Class that calculates the friction factor based on the upgraded Cheng & Todreas correlations
  * (Cheng et all 2018). It is used for both quad and tri lattices.
  */
-class SCMFrictionUpdatedChengTodreas : public SCMFrictionClosureBase
+class SCMFrictionUpgradedChengTodreas : public SCMFrictionClosureBase
 {
 public:
   static InputParameters validParams();
 
-  SCMFrictionUpdatedChengTodreas(const InputParameters & parameters);
+  SCMFrictionUpgradedChengTodreas(const InputParameters & parameters);
 
   virtual Real computeFrictionFactor(const FrictionStruct & friction_info) const override;
 

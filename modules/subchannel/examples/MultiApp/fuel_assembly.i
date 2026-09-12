@@ -104,7 +104,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [SCMClosures]
   [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
