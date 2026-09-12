@@ -28,7 +28,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
       "the heat transport equation physics and other physics");
   params.addParamNamesToGroup("check_bc_compatibility", "Advanced");
 
-  params.addParamNamesToGroup("energy_face_interpolation energy_scaling", "Numerical scheme");
+  params.addParamNamesToGroup("energy_scaling", "Numerical scheme");
   return params;
 }
 

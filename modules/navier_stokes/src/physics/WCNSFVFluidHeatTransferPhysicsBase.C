@@ -48,8 +48,7 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
-  params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
-                              "use_external_enthalpy_material",
+  params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks",
                               "Material properties");
   params.addParamNamesToGroup("energy_advection_interpolation energy_face_interpolation "
                               "energy_two_term_bc_expansion",
