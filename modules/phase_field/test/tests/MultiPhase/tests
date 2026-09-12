@@ -122,4 +122,27 @@
     design = 'BarrierFunctionMaterial.md'
     issues = '#9301'
   [../]
+  [ADBarrierFunctionMaterial]
+    type = 'Exodiff'
+    input = 'ADBarrierFunctionMaterial.i'
+    exodiff = 'ADBarrierFunctionMaterial_out.e'
+    requirement = 'The system shall provide polynomials for HIGH, LOW, and SIMPLE as defined by the design document.'
+    design = 'ADBarrierFunctionMaterial.md'
+    issues = '#33647'
+  []
+  [ADOrderParameterFunctionMaterial]
+    type = 'Exodiff'
+    input = 'ADOrderParameterFunctionMaterial.i'
+    exodiff = 'ADOrderParameterFunctionMaterial_out.e'
+    requirement = 'The system shall provide a materials to generate barrier and switching function in a WBM multiphase model'
+    issues = '#33647'
+  []
+  [ADSwitchingFunctionConstraint]
+    type = 'Exodiff'
+    input = 'ADSwitchingFunctionConstraint.i'
+    exodiff = 'ADSwitchingFunctionConstraint_out.e'
+    requirement = 'The system shall provide a lagrange multiplier based constraint for keeping the sum of all phase order parameters equal to one'
+    design = 'ADSwitchingFunctionConstraintLagrange.md ADSwitchingFunctionConstraintEta.md'
+    issues = '#33647'
+  []
 []

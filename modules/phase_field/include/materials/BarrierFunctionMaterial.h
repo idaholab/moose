@@ -20,15 +20,16 @@
  * \see KKSPhaseChemicalPotential
  * \see KKSCHBulk
  */
-class BarrierFunctionMaterial : public OrderParameterFunctionMaterial
+template <bool is_ad>
+class BarrierFunctionMaterialTempl : public OrderParameterFunctionMaterialTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  BarrierFunctionMaterial(const InputParameters & parameters);
+  BarrierFunctionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// Polynomial order of the switching function \f$ g(\eta) \f$
   MooseEnum _g_order;
@@ -36,3 +37,6 @@ protected:
   /// zero out g contribution in the eta interval [0:1]
   bool _well_only;
 };
+
+typedef BarrierFunctionMaterialTempl<false> BarrierFunctionMaterial;
+typedef BarrierFunctionMaterialTempl<true> ADBarrierFunctionMaterial;
