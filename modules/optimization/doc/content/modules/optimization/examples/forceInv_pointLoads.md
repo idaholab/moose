@@ -147,7 +147,7 @@ The locations where the simulation values are compared to the measurement data i
 
 ## Adjoint Sub-Application Input
 
-The adjoint problem sub-app computes the adjoint solution of the forward problem for a point load applied at the measurement locations.  The adjoint sub-app input file is given in [adjoint_app]. The adjoint variable is used to compute the gradient needed by TAO.  The magnitude of the point loads for the adjoint problem are the misfit given by the difference of the measurement and simulation data, as shown by [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The misfit is computed by the [OptimizationReporter.md] on the main-app and is transferred into the adjoint-app `[OptimizationData]` object using the main-app `[toAdjoint]` transfer.  The [ReporterPointSource.md] consumes the `OptimizationData` and applies the point loads at the measurement points.
+The adjoint problem sub-app computes the adjoint solution of the forward problem for a point load applied at the measurement locations.  The adjoint sub-app input file is given in [adjoint_app]. The adjoint variable is used to compute the gradient needed by TAO.  The magnitude of the point loads for the adjoint problem are the misfit given by the difference of the measurement and simulation data, as shown by [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The misfit is computed by the [OptimizationData.md] on the main-app and is transferred into the adjoint-app `[OptimizationData]` object using the main-app `[toAdjoint]` transfer.  The [ReporterPointSource.md] consumes the `OptimizationData` and applies the point loads at the measurement points.
 
 !listing test/tests/optimizationreporter/point_loads/adjoint.i
          id=adjoint_app
