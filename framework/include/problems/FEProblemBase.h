@@ -571,6 +571,13 @@ public:
 
   virtual Real & time() const { return _time; }
   virtual Real & timeOld() const { return _time_old; }
+  /**
+   * The time two steps back. The solution keeps this state, so a multi-step integrator can ask for
+   * it, and a functor evaluated alongside that solution has to be able to ask for the time it
+   * belongs to. Only meaningful once two steps have been taken; before that it holds the start
+   * time, which is what timeOld() does at the first step too.
+   */
+  virtual Real & timeOlder() const { return _time_older; }
   virtual int & timeStep() const { return _t_step; }
   virtual Real & dt() const { return _dt; }
   virtual Real & dtOld() const { return _dt_old; }
@@ -3140,6 +3147,7 @@ protected:
   bool _transient;
   Real & _time;
   Real & _time_old;
+  Real & _time_older;
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
