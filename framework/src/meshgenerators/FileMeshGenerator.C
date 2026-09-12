@@ -16,6 +16,7 @@
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/exodusII_io_helper.h"
 
 registerMooseObject("MooseApp", FileMeshGenerator);
 
@@ -28,6 +29,9 @@ FileMeshGenerator::validParams()
   params.addParam<std::vector<std::string>>(
       "exodus_extra_element_integers",
       "The variable names in the mesh file for loading extra element integers");
+  params.addParam<std::vector<std::string>>(
+      "exodus_node_displacement_vars",
+      "Displacement variables in the Exodus mesh file to modify the node positions");
   params.addParam<bool>("use_for_exodus_restart",
                         false,
                         "True to indicate that the mesh file this generator is reading can be used "
@@ -134,6 +138,32 @@ FileMeshGenerator::generate()
       }
       libMesh::MeshCommunication().broadcast(*mesh);
     }
+
+    if (isParamValid("exodus_node_displacement_vars"))
+    {
+      auto disps = getParam<std::vector<std::string>>("exodus_node_displacement_vars");
+      if (disps.size() != mesh->mesh_dimension())
+        paramError("exodus_node_displacement_vars",
+                   "Number of displacement variables (",
+                   disps.size(),
+                   ") must be equal to the mesh spatial dimension (",
+                   mesh->mesh_dimension(),
+                   ")");
+      for (unsigned int d = 0; d < mesh->mesh_dimension(); ++d)
+      {
+        auto & exhelper = exreader->get_exio_helper();
+        const auto last_step = exreader->get_num_time_steps();
+        exhelper.read_nodal_var_values(disps[d], last_step);
+        const auto & node_var_value_map = exhelper.nodal_var_values;
+        for (auto it = mesh->active_nodes_begin(); it != mesh->active_nodes_end(); ++it)
+        {
+          auto itt = node_var_value_map.find((*it)->id());
+          if (itt != node_var_value_map.end())
+            (*(*it))(d) += itt->second;
+        }
+      }
+    }
+
     // Skip partitioning if the user requested it
     if (_skip_partitioning)
       mesh->skip_partitioning(true);
@@ -146,6 +176,8 @@ FileMeshGenerator::generate()
       mooseError("\"exodus_extra_element_integers\" should be given only for Exodus mesh files");
     if (_pars.isParamSetByUser("use_for_exodus_restart"))
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
+    if (_pars.isParamValid("exodus_node_displacement_vars"))
+      mooseError("\"exodus_node_displacement_vars\" should be given only for Exodus mesh files");
 
     const auto file_name = deduceCheckpointPath(*this, _file_name);
     MooseUtils::checkFileReadable(file_name);

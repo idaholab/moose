@@ -22,6 +22,28 @@
     issues = '#14916'
   [../]
 
+  [./exodus_displacement_generation_test]
+    type = 'Exodiff'
+    input = 'mesh_with_displacements.i'
+    exodiff = 'mesh_with_displacements_out.e'
+    recover = false
+
+    requirement = 'The system shall have the ability to generate an Exodus mesh file with node displacements variables in the mesh file.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#33735'
+  [../]
+  [./exodus_displacement_test]
+    type = 'Exodiff'
+    input = 'exodus_file_mesh_with_displacements.i'
+    exodiff = 'exodus_file_mesh_with_displacements_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = 'The system shall have the ability to displace the nodes with displacments variables in an Exodus mesh file.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#33735'
+  [../]
+
   [./exodus_iga_test]
     type = XMLDiff
     input = '2d_diffusion_iga.i'
