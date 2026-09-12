@@ -264,13 +264,21 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
+  auto constraints = sys.getLocalConstraints(dof);
 
   for (unsigned int t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
     if (sys.isResidualTagActive(tag))
-      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
+    {
+      if (constraints.size())
+        for (unsigned int c = 0; c < constraints.size(); ++c)
+          ::Kokkos::atomic_add(&sys.getVectorDofValue(constraints[c].first, tag),
+                               constraints[c].second * local_re);
+      else
+        ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
+    }
   }
 }
 
@@ -340,13 +348,26 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
   auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
+  auto row_constraints = sys.getLocalConstraints(row);
+  auto col_constraints = sys.getGlobalConstraints(col);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
     if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
-      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke);
+    {
+      for (unsigned int rc = 0; rc < ::Kokkos::max(1u, row_constraints.size()); ++rc)
+        for (unsigned int cc = 0; cc < ::Kokkos::max(1u, col_constraints.size()); ++cc)
+        {
+          auto r = row_constraints.size() ? row_constraints[rc].first : row;
+          auto c = col_constraints.size() ? col_constraints[cc].first : col;
+          auto w = (row_constraints.size() ? row_constraints[rc].second : 1.0) *
+                   (col_constraints.size() ? col_constraints[cc].second : 1.0);
+
+          ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), w * local_ke);
+        }
+    }
   }
 }
 
