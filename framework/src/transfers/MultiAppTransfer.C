@@ -351,23 +351,55 @@ MultiAppTransfer::getAppInfo()
       _from_meshes.push_back(&_from_problems[i]->mesh());
   }
 
+  // The coordinate transform data of a multiapp is read from its app 0 and broadcast to all ranks.
+  // App 0 does not necessarily live on the main-app's rank 0: when multiapps are executed
+  // concurrently they are partitioned onto disjoint subsets of ranks, so a child's app 0 may sit
+  // on any rank. Read the data on whichever rank owns app 0 and broadcast from there. The parent
+  // app problem, by contrast, is always available on rank 0.
+  auto app0_root = [this](MultiApp & multiapp)
+  {
+    processor_id_type root = 0;
+    if (multiapp.hasLocalApp(0) && multiapp.isRootProcessor())
+      root = _communicator.rank();
+    _communicator.max(root);
+    return root;
+  };
+
   MooseAppCoordTransform::MinimalData from_app_transform_construction_data{};
-  if (_communicator.rank() == 0)
-    from_app_transform_construction_data =
-        _current_direction == TO_MULTIAPP
-            ? _to_multi_app->problemBase().coordTransform().minimalDataDescription()
-            : _from_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
-  _communicator.broadcast(from_app_transform_construction_data);
+  if (_current_direction == TO_MULTIAPP)
+  {
+    if (_communicator.rank() == 0)
+      from_app_transform_construction_data =
+          _to_multi_app->problemBase().coordTransform().minimalDataDescription();
+    _communicator.broadcast(from_app_transform_construction_data);
+  }
+  else
+  {
+    const auto root = app0_root(*_from_multi_app);
+    if (_communicator.rank() == root)
+      from_app_transform_construction_data =
+          _from_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
+    _communicator.broadcast(from_app_transform_construction_data, root);
+  }
   _from_moose_app_transform =
       std::make_unique<MooseAppCoordTransform>(from_app_transform_construction_data);
 
   MooseAppCoordTransform::MinimalData to_app_transform_construction_data{};
-  if (_communicator.rank() == 0)
-    to_app_transform_construction_data =
-        _current_direction == FROM_MULTIAPP
-            ? _from_multi_app->problemBase().coordTransform().minimalDataDescription()
-            : _to_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
-  _communicator.broadcast(to_app_transform_construction_data);
+  if (_current_direction == FROM_MULTIAPP)
+  {
+    if (_communicator.rank() == 0)
+      to_app_transform_construction_data =
+          _from_multi_app->problemBase().coordTransform().minimalDataDescription();
+    _communicator.broadcast(to_app_transform_construction_data);
+  }
+  else
+  {
+    const auto root = app0_root(*_to_multi_app);
+    if (_communicator.rank() == root)
+      to_app_transform_construction_data =
+          _to_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
+    _communicator.broadcast(to_app_transform_construction_data, root);
+  }
   _to_moose_app_transform =
       std::make_unique<MooseAppCoordTransform>(to_app_transform_construction_data);
 

@@ -282,6 +282,14 @@ FEProblemBase::validParams()
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
                         "(default: false)");
+  params.addParam<unsigned int>(
+      "num_concurrent_multiapps",
+      1,
+      "Set greater than 1 to solve the multiapps sharing an 'execution_order_group' "
+      "concurrently. Each such multiapp is assigned a disjoint subset of the MPI ranks "
+      "(partitioned using their 'min_procs_per_app'/'max_procs_per_app', otherwise evenly), so "
+      "they solve at the same time on different ranks. The specific value only acts as an "
+      "on/off switch; the number that run at once is set by the ranks available.");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -470,6 +478,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _num_concurrent_multiapps(getParam<unsigned int>("num_concurrent_multiapps")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -1404,6 +1413,9 @@ FEProblemBase::initialSetup()
   if (_multi_apps.hasObjects())
   {
     TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps", false);
+    // Assign concurrent multiapps their disjoint rank partitions before the sub-apps are created
+    // so that each is created on the communicator it will actually run on
+    partitionConcurrentMultiApps();
     _multi_apps.initialSetup();
   }
 
@@ -5928,7 +5940,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
   logAdd("MultiApp", name, multi_app_name, parameters);
-  multi_app->setupPositions();
+  multi_app->possiblyCreateChildApplications();
 
   _multi_apps.addObject(multi_app);
 
@@ -6108,6 +6120,108 @@ FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
     return _between_multi_app_transfers;
 }
 
+void
+FEProblemBase::partitionConcurrentMultiApps()
+{
+  if (_num_concurrent_multiapps <= 1)
+    return;
+
+  // Group the multiapps by execution order group. Only position-based multiapps are partitioned
+  // here; sampler-style (non-positions) multiapps assign their own rank configuration.
+  std::map<unsigned int, std::vector<std::shared_ptr<MultiApp>>> groups;
+  for (const auto & multi_app : _multi_apps.getActiveObjects())
+    if (multi_app->usingPositions())
+      groups[multi_app->getParam<unsigned int>("execution_order_group")].push_back(multi_app);
+
+  // For the MultiApps that are using samplers, their partitioning is already handled there
+  // so we just skipped them. But if they were to share an execution_order_group, we would crash
+  // if using concurrent multiapps. So let's error.
+  // For any other MultiApps that are not using positions, we would just need them to know
+  // numGlobalApps() to benefit from this concurrent partitioning. We can allow them here in the
+  // future.
+  std::map<unsigned int, std::vector<std::shared_ptr<MultiApp>>> check_groups;
+  for (const auto & multi_app : _multi_apps.getActiveObjects())
+    check_groups[multi_app->getParam<unsigned int>("execution_order_group")].push_back(multi_app);
+  for (const auto & [group_id, group] : check_groups)
+    for (const auto & multi_app : group)
+      if (group.size() > 1 && !multi_app->usingPositions())
+        multi_app->paramError(
+            "execution_order_group",
+            "This MultiApp must be placed in its own execution order group as concurrent execution "
+            "has not been implemented for this type of app at this time");
+
+  const auto n_procs = n_processors();
+  const auto my_rank = processor_id();
+
+  for (const auto & [group_id, group] : groups)
+  {
+    // Nothing to run concurrently unless the group has more than one multiapp
+    if (group.size() < 2)
+      continue;
+
+    // Number of ranks handed to each multiapp. Start each at its per-app minimum (at least one
+    // rank), then distribute the rest; caps prevent giving a multiapp more ranks than it could
+    // spread its apps over at 'max_procs_per_app'. With the defaults (min 1, max unbounded) this
+    // is just an even split.
+    std::vector<processor_id_type> count(group.size());
+    std::vector<processor_id_type> caps(group.size());
+    std::vector<processor_id_type> mins(group.size());
+    std::vector<processor_id_type> maxs(group.size());
+    processor_id_type min_total = 0;
+    for (const auto m : index_range(group))
+    {
+      // Each multiapp needs at least one rank, so a 'min_procs_per_app' of 0 is treated as 1
+      mins[m] = group[m]->getParam<processor_id_type>("min_procs_per_app");
+      maxs[m] = group[m]->getParam<processor_id_type>("max_procs_per_app");
+      const auto n_apps_m = cast_int<processor_id_type>(group[m]->numGlobalApps());
+      caps[m] = (maxs[m] >= n_procs) ? n_procs : std::min(n_procs, n_apps_m * maxs[m]);
+      count[m] = mins[m];
+      min_total += mins[m];
+    }
+
+    if (min_total > n_procs)
+      mooseError("Not enough MPI ranks to run the ",
+                 group.size(),
+                 " multiapps of 'execution_order_group' ",
+                 group_id,
+                 " concurrently: they need at least ",
+                 min_total,
+                 " ranks (from 'min_procs_per_app') but only ",
+                 n_procs,
+                 " are available. Reduce the number of concurrent multiapps, lower "
+                 "'min_procs_per_app', or run with more processors.");
+
+    // Hand out the remaining ranks round-robin to multiapps still below their cap
+    processor_id_type remaining = n_procs - min_total;
+    bool progress = true;
+    while (remaining > 0 && progress)
+    {
+      progress = false;
+      for (const auto m : index_range(group))
+        if (remaining > 0 && count[m] < caps[m])
+        {
+          count[m]++;
+          remaining--;
+          progress = true;
+        }
+    }
+    // Any leftover ranks (all multiapps already at their cap) simply run no app in this group.
+
+    // Assign each multiapp a contiguous, disjoint rank range and (re)initialize it on that range.
+    // This is collective: every rank calls init() (hence buildComm's split) for every multiapp.
+    processor_id_type offset = 0;
+    for (const auto m : index_range(group))
+    {
+      LocalRankConfig cfg{0, 0, 0, 0, false, 0};
+      if (my_rank >= offset && my_rank < offset + count[m])
+        cfg = rankConfig(
+            my_rank - offset, count[m], group[m]->numGlobalApps(), mins[m], maxs[m], false);
+      group[m]->init(group[m]->numGlobalApps(), cfg);
+      offset += count[m];
+    }
+  }
+}
+
 bool
 FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 {
@@ -6136,6 +6250,21 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
     ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
         multi_app);
 
+  // Check that concurrent multiapps will even be used
+  if (multi_apps.size() && _num_concurrent_multiapps > 1)
+  {
+    bool has_concurrent_apps = false;
+    for (const auto & [group, multi_app_group] : ordered_multi_apps)
+      if (multi_app_group.size() > 1)
+        has_concurrent_apps = true;
+    if (!has_concurrent_apps)
+      paramInfo(
+          "num_concurrent_multiapps",
+          "Due to the specified multiapp execution groups, or differences in execution schedules, "
+          "concurrent multiapps are not actually used on " +
+              Moose::stringify(exec_on));
+  }
+
   // Execute MultiApps
   if (multi_apps.size())
   {
@@ -6147,18 +6276,41 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     bool success = true;
 
-    for (const auto & [group, multi_app_group] : ordered_multi_apps)
+    for (const auto & [group_id, multi_app_group] : ordered_multi_apps)
     {
+      bool group_success = true;
       if (_verbose_multiapps && ordered_multi_apps.size() > 1)
-        _console << COLOR_CYAN << "\nExecuting MultiApps from group " << group << COLOR_DEFAULT
-                 << std::endl;
+        _console << COLOR_CYAN << "\nExecuting MultiApps group " << Moose::stringify(group_id)
+                 << COLOR_DEFAULT << std::endl;
 
-      for (const auto & multi_app : multi_app_group)
+      if (_verbose_multiapps && multi_app_group.size() > 1)
       {
-        success = multi_app->solveStep(_dt, _time, auto_advance);
-        // no need to finish executing the subapps if one fails
-        if (!success)
-          break;
+        // Let the user know about concurrent multiapp use (new option: help them set it up)
+        _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
+        for (const auto & multi_app : multi_app_group)
+          _console << multi_app->name() << " ";
+        _console << COLOR_DEFAULT << std::endl;
+      }
+
+      // With concurrent multiapps, the multiapps in a group have each been assigned a disjoint
+      // subset of the ranks (see partitionConcurrentMultiApps()), so solveStep() does real work
+      // only on those ranks and returns early on the others. Looping here therefore lets different
+      // ranks advance different multiapps at the same time - the concurrency comes from the rank
+      // partition. This notably avoids racing PETSc's process-global state (communicator and
+      // options database).
+      for (const auto & multi_app : multi_app_group)
+        if (!multi_app->solveStep(_dt, _time, auto_advance))
+          group_success = false;
+
+      // Whether to move on to the next group must be a collective decision so that every rank
+      // leaves the group loop together and stays aligned for the following collectives.
+      _communicator.min(group_success);
+
+      // No need to solve the other groups if this group failed
+      if (!group_success)
+      {
+        success = false;
+        break;
       }
 
       // Execute Transfers _between_ MultiApps after each app executes
