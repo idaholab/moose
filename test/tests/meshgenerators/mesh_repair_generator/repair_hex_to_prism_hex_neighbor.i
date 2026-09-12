@@ -1,7 +1,9 @@
 # A HEX8 pinched at its front face, stacked under a second (healthy, un-pinched) hexahedron that
 # shares the pinched hex's top face - and therefore its short top edge. Reducing the pinched hex to
-# a prism would force that neighbor (which shares the collapsed edge) to change type too, which is
-# not handled, so the repair conservatively leaves the pinched hex in place and reports it.
+# a prism collapses that shared edge, so the neighbor loses it too; having no standard lower type it
+# is rebuilt as a C0Polyhedron (a hexahedron minus one edge). A polyhedron has no reference element,
+# so PointLocator-based diagnostics (non-conformality, element overlap) cannot run on a mesh
+# containing one; only the element-volume diagnostic is applied here.
 [Mesh]
   [hex_pinched]
     type = ElementGenerator
@@ -21,6 +23,11 @@
     input = hex_above
     fix_node_overlap = true
     fix_degenerate_elements = true
+  []
+  [diagnostics]
+    type = MeshDiagnosticsGenerator
+    input = repair
+    examine_element_volumes = ERROR
   []
 []
 

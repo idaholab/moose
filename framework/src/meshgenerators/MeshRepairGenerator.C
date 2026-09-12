@@ -1462,24 +1462,28 @@ addPolyhedronFromFaces(
   return added;
 }
 
-// Build element e's faces (as C0Polygons) and its side/edge boundary-id maps after merging node
-// v_id onto keep, for rebuilding e as a polyhedron. Within each face, v is replaced by keep and
-// resulting consecutive (cyclic) duplicate nodes are dropped, so a face that lost the collapsed edge
-// becomes an (n-1)-gon; a face that collapsed to a line or point is skipped entirely. Returns the
-// number of distinct vertices e has after the merge, so the caller can tell a cell that stays 3D
-// from one that dropped a dimension. face_bcs is keyed by a face's sorted post-merge node ids,
-// edge_bcs by a sorted post-merge endpoint pair (the collapsed edge itself is dropped).
+// Build element e's faces (as C0Polygons) and its side/edge boundary-id maps after applying the
+// node merges in @p subs (each gone-node id -> the kept Node* it merges onto), for rebuilding e as
+// a polyhedron. Within each face the merged nodes are substituted and resulting consecutive
+// (cyclic) duplicate nodes are dropped, so a face that lost a collapsed edge becomes an (n-1)-gon;
+// a face that collapsed to a line or point is skipped entirely. Returns the number of distinct
+// vertices e has after the merges, so the caller can tell a cell that stays 3D from one that
+// dropped a dimension. face_bcs is keyed by a face's sorted post-merge node ids, edge_bcs by a
+// sorted post-merge endpoint pair (a collapsed edge itself is dropped).
 static unsigned int
 collapsedElementFaces(
     Elem & e,
-    const dof_id_type v_id,
-    Node * keep,
+    const std::map<dof_id_type, Node *> & subs,
     const BoundaryInfo & boundary_info,
     std::vector<std::shared_ptr<libMesh::Polygon>> & faces,
     std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> & face_bcs,
     std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> & edge_bcs)
 {
-  auto sub = [&](Node * n) -> Node * { return n->id() == v_id ? keep : n; };
+  auto sub = [&](Node * n) -> Node *
+  {
+    auto it = subs.find(n->id());
+    return it == subs.end() ? n : it->second;
+  };
 
   std::vector<boundary_id_type> ids;
   for (const auto s : make_range(e.n_sides()))
@@ -2658,8 +2662,9 @@ MeshRepairGenerator::collapseRedundantVertex(
     PolyPrep prep;
     prep.sub = e->subdomain_id();
     prep.pid = e->processor_id();
-    const unsigned int nd = collapsedElementFaces(
-        *e, v->id(), keep, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
+    const std::map<dof_id_type, Node *> subs{{v->id(), keep}};
+    const unsigned int nd =
+        collapsedElementFaces(*e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
     if (e->dim() == 3 && nd >= 4)
       poly_preps[eid] = std::move(prep); // rebuild as a polyhedron at commit
     else if (nd < e->dim() + 1 && coincident)
@@ -3239,6 +3244,7 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
   const Point ext = bbox.max() - bbox.min();
   const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
   const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // A HEX8 lateral face f is "pinched" to a vertical edge when both its horizontal edges are short:
   // the bottom edge (f, (f+1)%4) and the top edge (f+4, (f+1)%4+4), each below flatness_tol times
@@ -3304,15 +3310,28 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
         for (const auto eid : libmesh_map_find(node_to_elems, g->id()))
           star.insert(eid);
 
-      // Only the hex itself may lose an edge here. If another element contains a full collapsed
-      // edge (both endpoints of gb-kb or gt-kt), reducing the hex would force it to change type
-      // too, which this routine does not handle; leave the hex in place. Elements that merely touch
-      // a gone node (a coincident, null move) are movers. Also stay node-disjoint within a pass.
+      // The collapse merges gb->kb and gt->kt. Partition the star (besides h): a "reducer" contains
+      // a full collapsed edge (both endpoints of gb-kb or gt-kt) and so must change type - it is
+      // rebuilt as a polyhedron if it stays 3D, or deleted if it drops below 3D (it shared the
+      // near-zero edge, so it was a needle/sliver). A "mover" only touches a gone node (a
+      // coincident, null move). All decided without mutating the mesh. Also stay node-disjoint
+      // within a pass.
+      const std::map<dof_id_type, Node *> subs{{gb->id(), kb}, {gt->id(), kt}};
+      struct PolyPrep
+      {
+        std::vector<std::shared_ptr<libMesh::Polygon>> faces;
+        std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> face_bcs;
+        std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
+        subdomain_id_type sub;
+        processor_id_type pid;
+      };
       bool ok = true;
       std::vector<dof_id_type> mover_ids;
+      std::map<dof_id_type, PolyPrep> poly_preps;
+      std::set<dof_id_type> delete_ids;
       for (const auto eid : star)
       {
-        const Elem * e = mesh->query_elem_ptr(eid);
+        Elem * e = mesh->query_elem_ptr(eid);
         if (!e)
           continue;
         for (const auto i : make_range(e->n_nodes()))
@@ -3329,10 +3348,25 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
           has_gt |= (id == gt->id());
           has_kt |= (id == kt->id());
         }
-        if ((has_gb && has_kb) || (has_gt && has_kt))
-          ok = false; // a neighbor shares a collapsed edge
-        else
+        if (!((has_gb && has_kb) || (has_gt && has_kt)))
+        {
           mover_ids.push_back(eid);
+          continue;
+        }
+        PolyPrep prep;
+        prep.sub = e->subdomain_id();
+        prep.pid = e->processor_id();
+        const unsigned int nd = collapsedElementFaces(
+            *e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
+        if (e->dim() == 3 && nd >= 4)
+          poly_preps[eid] = std::move(prep);
+        else if (nd < e->dim() + 1)
+          delete_ids.insert(eid); // the merges are coincident, so a sub-3D reducer was a needle
+        else
+        {
+          ok = false; // an unsupported same-dimension reduction: decline
+          break;
+        }
       }
       if (!ok)
         continue;
@@ -3391,6 +3425,30 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
         continue;
       }
 
+      // Rebuild each reducer as a polyhedron (mutates the mesh); if any fails, delete the polyhedra
+      // made so far, undo the movers, and leave the hex in place.
+      std::map<dof_id_type, Elem *> poly_replacements;
+      bool poly_ok = true;
+      for (auto & [eid, prep] : poly_preps)
+      {
+        Elem * poly = addPolyhedronFromFaces(
+            mesh, prep.faces, prep.sub, prep.pid, prep.face_bcs, prep.edge_bcs);
+        if (!poly)
+        {
+          poly_ok = false;
+          break;
+        }
+        poly_replacements[eid] = poly;
+      }
+      if (!poly_ok)
+      {
+        for (const auto & kv : poly_replacements)
+          mesh->delete_elem(kv.second);
+        for (auto & [e, n, orig] : saved)
+          e->set_node(n, orig);
+        continue;
+      }
+
       for (const auto eid : star)
       {
         const Elem * e = mesh->query_elem_ptr(eid);
@@ -3402,6 +3460,18 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
 
       replaceReducedElement(
           mesh, h, std::move(prism), {{gb->id(), kb->id()}, {gt->id(), kt->id()}});
+      for (const auto & kv : poly_replacements)
+      {
+        Elem * old = mesh->query_elem_ptr(kv.first);
+        boundary_info.remove(old);
+        mesh->delete_elem(old);
+      }
+      for (const auto eid : delete_ids)
+      {
+        Elem * old = mesh->query_elem_ptr(eid);
+        boundary_info.remove(old);
+        mesh->delete_elem(old);
+      }
       mesh->delete_node(gb);
       mesh->delete_node(gt);
       ++num_repaired;

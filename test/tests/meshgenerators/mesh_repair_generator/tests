@@ -406,12 +406,12 @@
     requirement = "The system shall reduce a hexahedron pinched to a prism by a collapsed lateral face to a prism (wedge)."
     mesh_mode = 'replicated'
   []
-  [repair_hex_to_prism_skip]
+  [repair_hex_to_prism_hex_neighbor]
     type = RunApp
-    input = repair_hex_to_prism_skip.i
-    expect_out = 'could not be reduced to wedges \(left in place\): 1'
+    input = repair_hex_to_prism_hex_neighbor.i
+    expect_out = 'hexahedra reduced to wedges: 1'
     issues = '#33566'
-    requirement = "The system shall leave a hexahedron in place when reducing it to a prism would require a neighbor sharing its collapsed edge to change type."
+    requirement = "The system shall reduce a hexahedron to a prism by collapsing its pinched lateral face, rebuilding a neighbor that shares the collapsed edge as a polyhedron rather than leaving the hexahedron in place."
     mesh_mode = 'replicated'
   []
   [repair_hex_sliver]
