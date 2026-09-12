@@ -93,4 +93,9 @@ protected:
 
   /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
   const Real _epsilon_tolerance;
+
+  /// The timestep index at which the accumulated slip and tangential traction history were last
+  /// advanced. Used to detect a repeated timestep (e.g. from --test-restep or a rejected step),
+  /// since timestepSetup() runs once per solve attempt rather than once per accepted step.
+  int & _t_step_old_friction;
 };
