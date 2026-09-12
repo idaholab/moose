@@ -74,6 +74,18 @@ prefactor_psi = ${fparse -epsilon*epsilon}
     variable = pf
   []
 
+  [phasefield_advection]
+    type = ADPhaseFieldAdvection
+    velocity = velocity
+    variable = pf
+  []
+
+  [phasefield_advection_supg]
+    type = ADPhaseFieldAdvectionSUPG
+    velocity = velocity
+    variable = pf
+  []
+
   [phasefield_laplacian]
     type=ADPrefactorLaplacianSplit
     variable = pf
@@ -184,25 +196,33 @@ prefactor_psi = ${fparse -epsilon*epsilon}
   type = Transient
   solve_type = NEWTON
   start_time = 0
-  num_steps = 5
-  dtmax = 0.25
+  # A prescribed sequence keeps the reported times independent of the nonlinear iteration counts,
+  # which an adaptive time stepper would otherwise fold into every output time.
   [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1e-10
-    iteration_window = 2
-    optimal_iterations = 10
-    growth_factor = 2
-    cutback_factor = 0.5
+    type = TimeSequenceStepper
+    time_sequence = '1e-10 3e-10 7e-10 1.5e-9 3.1e-9'
+    use_last_t_for_end_time = true
   []
-  # petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount'
-  # petsc_options_value = 'lu       50                  superlu_dist              NONZERO               1e-15'
-  petsc_options_iname = '-pc_type        -pc_factor_shift_type     -pc_factor_shift_amount'
-  petsc_options_value = 'lu    NONZERO               1e-15  '
+  # MUMPS is used for its row and column equilibration: the assembled Jacobian entries span many
+  # orders of magnitude, and a factorization without equilibration hits a zero pivot here.
+  # ICNTL(14) raises the percentage of extra working space MUMPS allocates over its own estimate,
+  # which the fill-in of this system exceeds at the default setting.
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -mat_mumps_icntl_14'
+  petsc_options_value = 'lu       mumps                      300'
+  # A full Newton step here transits a large intermediate residual before descending, so a
+  # backtracking line search stalls on the way through.
   line_search = 'none'
-  nl_rel_tol = 1e-6
+  # The interface width of 1e-6 in a 2e-4 domain makes every element integral tiny, which puts the
+  # unscaled residual near 1e-12 -- close enough to the roundoff floor of the assembled residual
+  # that no absolute tolerance can separate a converged solve from an untouched initial condition.
+  # Jacobian-diagonal scaling leaves that magnitude in place, so scale each equation by the
+  # magnitude of its own residual instead, which restores an O(1) residual and lets the tolerances
+  # below measure convergence rather than the units of the equations.
+  automatic_scaling = true
+  resid_vs_jac_scaling_param = 1
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
-  nl_max_its = 20
-  nl_forced_its = 3
+  nl_max_its = 30
   l_tol = 1e-6
   l_max_its = 20
 []

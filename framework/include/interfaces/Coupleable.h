@@ -544,7 +544,7 @@ protected:
 
   /**
    * Returns a *writable* MooseVariable object for a nodal or elemental variable. Use
-   * var.setNodalValue(val[, idx]) in both cases (!) to set the solution DOF values. Only one
+   * var.setNodalValue(val) in both cases (!) to set the solution DOF values. Only one
    * object can obtain a writable reference in a simulation. Note that the written values will
    * not ba available in the same system loop! E.g. values written using this API by a nodal
    * AuxKernel will not be updated for other nodal AuxKernels during the same iteration over all

@@ -48,7 +48,7 @@ MeshAlignmentVariableTransferMaterial::MeshAlignmentVariableTransferMaterial(
             .number()),
     _mesh_alignment(*getParam<MeshAlignment *>("_mesh_alignment")),
     _prop(declareADProperty<Real>(getParam<MaterialPropertyName>("property_name"))),
-    _phi(_assembly.fePhi<Real>(FEType(FIRST, LAGRANGE)))
+    _phi(_assembly.fePhi<Real>(FEType(FIRST, LAGRANGE).set_p_refinement(false)))
 {
 }
 
