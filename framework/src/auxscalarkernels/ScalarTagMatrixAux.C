@@ -17,7 +17,7 @@ ScalarTagMatrixAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxScalarKernel>::validParams();
 
-  params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
+  params.addParam<TagName>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
   params.addClassDescription("Couple a tag matrix, and return its nodal value");
@@ -26,8 +26,7 @@ ScalarTagMatrixAux::validParams()
 
 ScalarTagMatrixAux::ScalarTagMatrixAux(const InputParameters & parameters)
   : TagAuxBase<AuxScalarKernel>(parameters),
-    _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
-    _v(coupledMatrixTagScalarValue("v", _tag_id)),
+    _v(coupledMatrixTagScalarValue("v", "matrix_tag")),
     _v_var(*getScalarVar("v", 0))
 {
 }

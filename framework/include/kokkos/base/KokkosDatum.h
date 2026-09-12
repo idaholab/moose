@@ -582,10 +582,11 @@ public:
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
-      _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
-      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar)),
+      _ife(systems[_sys].getFETypeID(_ivar)),
+      _jfe(systems[_sys].getFETypeID(_jvar)),
       _n_idofs(assembly.getNumDofs(_elem.type, _ife)),
-      _n_jdofs(assembly.getNumDofs(_elem.type, _jfe))
+      _n_jdofs(systems[_sys].isScalarVariable(_jvar) ? systems[_sys].getNumScalarDofs(_jvar)
+                                                     : assembly.getNumDofs(_elem.type, _jfe))
   {
   }
   /**

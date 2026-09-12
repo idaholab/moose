@@ -24,7 +24,7 @@ public:
   static InputParameters validParams();
 
   /// VectorIntegratedBCValue hooks factor out the test function
-  static constexpr bool use_precompute_hooks = true;
+  static constexpr bool uses_precompute_hooks = true;
 
   /**
    * Constructor

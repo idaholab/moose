@@ -41,6 +41,9 @@ class Kernel : public KernelBase
 public:
   static InputParameters validParams();
 
+  // This object supports computeQpOffDiagJacobianScalar()
+  static constexpr bool supports_scalar_jacobian = true;
+
   /**
    * Constructor
    */
@@ -103,6 +106,29 @@ public:
 
     return 0;
   }
+  /**
+   * Compute scalar off-diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
+   * @param i The test function DOF index
+   * @param j The scalar trial function DOF index
+   * @param jvar The scalar variable number for column
+   * @param qp The local quadrature point index
+   * @param datum The AssemblyDatum object of the current thread
+   * @returns The scalar off-diagonal Jacobian contribution
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobianScalar(const unsigned int /* i */,
+                                                      const unsigned int /* j */,
+                                                      const unsigned int /* jvar */,
+                                                      const unsigned int /* qp */,
+                                                      AssemblyDatum & /* datum */) const
+  {
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobianScalar() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+
+    return 0;
+  }
   ///@}
 
   /**
@@ -121,6 +147,11 @@ public:
   {
     return &Kernel::computeQpOffDiagJacobian<Derived>;
   }
+  template <typename Derived>
+  static auto defaultOffDiagJacobianScalar()
+  {
+    return &Kernel::computeQpOffDiagJacobianScalar<Derived>;
+  }
   ///@}
 
   /**
@@ -134,6 +165,9 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(OffDiagJacobianScalarLoop, const ThreadID tid, const Derived & kernel) const;
   ///@}
 
   /**
@@ -164,6 +198,14 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
                                                       AssemblyDatum & datum) const;
+  /**
+   * Compute scalar off-diagonal Jacobian
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeOffDiagJacobianScalarInternal(const Derived & kernel,
+                                                            AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -236,7 +278,7 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
   auto elem = kokkosBlockElementID(_thread(tid, 2));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 1)];
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 1)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
@@ -247,6 +289,21 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   kernel.computeOffDiagJacobianInternal(kernel, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::operator()(OffDiagJacobianScalarLoop, const ThreadID tid, const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
+
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto jvar = sys.getScalarCoupling()[_thread(tid, 0)];
+
+  AssemblyDatum datum(
+      elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+
+  kernel.computeOffDiagJacobianScalarInternal(kernel, datum);
 }
 
 template <typename Derived>
@@ -289,6 +346,21 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
+                                               i, j, datum.jvar(), qp, datum);
+      });
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::computeOffDiagJacobianScalarInternal(const Derived & kernel, AssemblyDatum & datum) const
+{
+  ResidualObject::computeJacobianInternal(
+      datum,
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobianScalar<Derived>(
                                                i, j, datum.jvar(), qp, datum);
       });
 }
