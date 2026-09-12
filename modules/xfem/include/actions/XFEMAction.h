@@ -30,6 +30,7 @@ protected:
   bool _xfem_use_crack_growth_increment;
   Real _xfem_crack_growth_increment;
   bool _use_crack_tip_enrichment;
+  bool _use_AD;
   UserObjectName _crack_front_definition;
   std::vector<VariableName> _enrich_displacements;
   std::vector<VariableName> _displacements;
