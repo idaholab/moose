@@ -2165,6 +2165,13 @@ public:
   virtual bool updateMeshXFEM();
 
   /**
+   * Whether meshChanged() should allow the mesh to be contracted (deletes children of coarsened
+   * elements and renumbers nodes and elements). This should be overriden with care as disabling
+   * contraction may result in a substantial increase in the memory footprint of the mesh.
+   */
+  virtual bool allowMeshContractionAfterMeshChanged() const { return true; }
+
+  /**
    * Update data after a mesh change.
    * Iff intermediate_change is true, only perform updates as
    * necessary to prepare for another mesh change
@@ -2176,7 +2183,9 @@ public:
    * due to mesh refinement. \p contract_mesh deletes children of coarsened elements and renumbers
    * nodes and elements. \p clean_refinement_flags resets refinement flags such that any subsequent
    * calls to \p System::restrict_vectors or \p System::prolong_vectors before another AMR step do
-   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method
+   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method.
+   * The value of \p contract_mesh is ignored when
+   * \p FEProblemBase::allowMeshContractionAfterMeshChanged is set to false.
    */
   virtual void
   meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
