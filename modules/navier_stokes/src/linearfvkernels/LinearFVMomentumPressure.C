@@ -12,7 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 

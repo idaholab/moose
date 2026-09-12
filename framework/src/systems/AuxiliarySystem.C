@@ -39,7 +39,7 @@
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
@@ -70,13 +70,20 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -118,7 +125,21 @@ void
 AuxiliarySystem::reinit()
 {
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
+}
+
+void
+AuxiliarySystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
+                                              const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+}
+
+void
+AuxiliarySystem::restoreAdditionalStates()
+{
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void

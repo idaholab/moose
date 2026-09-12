@@ -10,7 +10,7 @@
 #pragma once
 
 #include "SolverSystem.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "PerfGraphInterface.h"
 
 #include <set>
@@ -44,9 +44,7 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem,
-                     public PerfGraphInterface,
-                     public LinearFVGradientInterface
+class LinearSystem : public SolverSystem, public PerfGraphInterface, public LinearFVGradientManager
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
@@ -62,6 +60,7 @@ public:
    */
   virtual bool converged() override { return _converged; }
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
 
@@ -164,13 +163,17 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  using LinearFVGradientInterface::computeGradients;
-  using LinearFVGradientInterface::registerFVGradient;
-  using LinearFVGradientInterface::updateFVGradient;
+  using LinearFVGradientManager::computeGradients;
+  using LinearFVGradientManager::registerFVGradient;
+  using LinearFVGradientManager::updateFVGradient;
 
   virtual void compute(ExecFlagType type) override;
 
 protected:
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   /**
    * Compute the right hand side and system matrix for given tags
    * @param vector_tags The tags of kernels for which the right hand side is to be computed.

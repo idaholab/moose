@@ -134,7 +134,7 @@ Gradients are computed only when requested. A `MooseLinearVariableFV` does not a
 every possible form of its gradient. Instead, a consumer requests a gradient
 using `requestCellGradients()`, optionally specifying the gradient method that
 should produce it. The variable registers that (variable, method) combination with
-the `LinearFVGradientInterface` implemented by its owning linear or
+the `LinearFVGradientManager` implemented by its owning linear or
 auxiliary system and receives a read-only `LinearFVGradientReader`.
 
 Gradient storage is grouped by gradient method. Consequently, multiple variables using
@@ -142,6 +142,31 @@ the same method can be updated together, while the same variable may simultaneou
 have gradients produced by different methods when different consumers require them.
 Adding a new gradient algorithm therefore does not require adding a new set
 of dedicated gradient containers to the system.
+
+### Gradient history handling
+
+Some solvers might require access to older gradient states. This is supported in time (storing and accessing)
+older gradient states through the `requestCellGradients()` API. However, we don't support accessing
+older gradient states within any outer fixed-point iteration (whether multiapp or multi-system).
+The no-argument `requestCellGradients()` API requests only
+the current gradient and retains the default memory cost of one published field plus one scratch
+field. A consumer that needs history passes the oldest required time-state index during setup.
+Requesting state `n` allocates states `0` through `n`, where state `0` is current, state `1` is
+the most recently accepted timestep, and subsequent indices are older accepted timesteps. State
+requests are cumulative, and because storage is grouped by gradient method, the deepest request
+applies to every variable registered with that method.
+
+The published time states and the scratch field have different purposes. Within-step gradient
+recomputation writes the scratch field and swaps it only with state `0`; it never advances history.
+Gradient history advances with the owning system's solution states, and timestep rejection restores
+state `0` from state `1`. Initial historical states are seeded from the initial current gradient.
+
+Historical state depth must be requested before solution-state initialization because an accurate
+old state cannot be created later. State `0` and the scratch field use private working vectors.
+States `1` and older use named system vectors that are included in checkpoints and updated when the
+mesh changes. A restart must use the same gradient method names and request no more history than the
+checkpoint contains. MOOSE reports an error when a requested gradient state is missing from the
+restart data rather than initializing it with an incorrect value.
 
 ## Boundary Conditions
 
@@ -191,7 +216,6 @@ To create a new boundary condition the following functions need to be overridden
   Continuing with the example above, we add the remaining part of the expression ($-\frac{u_b}{|d_Cf|}$)
   with the opposite sign to the right hand side. The additional multipliers, e.g. the diffusion coefficient
   and the surface area, are factored in at the kernel level.
-
 
 
 

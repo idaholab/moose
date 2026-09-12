@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "SystemBase.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "PerfGraphInterface.h"
 
@@ -40,14 +40,13 @@ class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemBase,
-                        public PerfGraphInterface,
-                        public LinearFVGradientInterface
+class AuxiliarySystem : public SystemBase, public PerfGraphInterface, public LinearFVGradientManager
 {
 public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
   virtual void timestepSetup() override;
@@ -136,8 +135,8 @@ public:
   virtual libMesh::System & system() override { return _sys; }
   virtual const libMesh::System & system() const override { return _sys; }
 
-  using LinearFVGradientInterface::registerFVGradient;
-  using LinearFVGradientInterface::updateFVGradient;
+  using LinearFVGradientManager::registerFVGradient;
+  using LinearFVGradientManager::updateFVGradient;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();
@@ -165,6 +164,10 @@ public:
   void variableWiseRelativeSolutionDifferenceNorm(std::vector<Number> & var_diffs) const;
 
 protected:
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeMortarNodalVars(ExecFlagType type);

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVTurbulentAdvection.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "MooseLinearVariableFV.h"
 #include "NavierStokesMethods.h"
 #include "NS.h"
