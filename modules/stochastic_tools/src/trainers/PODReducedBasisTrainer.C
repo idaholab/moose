@@ -108,6 +108,9 @@ PODReducedBasisTrainer::execute()
   // operators.
   if (!_base_completed)
   {
+    if (_snapshots.empty() || getSnapsSize(0) == 0)
+      return;
+
     computeCorrelationMatrix();
     computeEigenDecomposition();
     computeBasisVectors();

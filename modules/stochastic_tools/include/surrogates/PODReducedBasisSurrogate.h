@@ -30,6 +30,9 @@ public:
   /// Get a reference to the approximate solutions.
   const std::vector<DenseVector<Real>> & getApproximateSolution() const { return _approx_solution; }
 
+  /// Whether the basis vectors and reduced operators are ready for evaluation.
+  bool isReady() const;
+
   /// Get the nodal QoI of the reconstructed solution for a given variable.
   Real getNodalQoI(std::string var_name, unsigned int qoi_type) const;
 
