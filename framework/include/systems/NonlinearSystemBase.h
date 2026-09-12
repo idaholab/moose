@@ -35,6 +35,7 @@ class IntegratedBCBase;
 class NodalBCBase;
 class DirichletBCBase;
 class ADDirichletBCBase;
+class LibmeshDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernelBase;
@@ -59,6 +60,10 @@ class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
 class DofMapBase;
+#ifdef MOOSE_KOKKOS_ENABLED
+template <typename T>
+class PetscMatrixShellMatrix;
+#endif
 } // namespace libMesh
 
 /**
@@ -305,8 +310,150 @@ public:
 
   void setInitialSolution();
 
+  /**
+   * Sync libMesh's notion of the current time on this system from MOOSE's.
+   *
+   * libMesh sources a Dirichlet constraint's prescribed value by calling its value functor at
+   * libMesh::System::time, which nothing else in MOOSE maintains. Call this ahead of anything that
+   * triggers a constraint sweep, so a time-dependent prescribed value is projected at the time
+   * MOOSE is actually solving at.
+   */
+  void syncLibmeshTime();
+
+  /**
+   * Recompute libMesh's own DOF constraints on this system, at MOOSE's current time.
+   */
+  void reinitConstraints();
+
+  /**
+   * Recompute the prescribed values of every active LibmeshDirichletBCBase on this system.
+   *
+   * Each boundary condition becomes a libMesh DirichletBoundary, and
+   * DofMap::compute_dirichlet_values() projects its prescribed value onto the variable's boundary
+   * trace space and reports the resulting coefficients. Nothing is constrained: this system's
+   * DofMap is left exactly as it was, so everything else that reads it -- Assembly's element-matrix
+   * condensation, sparsity construction, and libMesh's own constraint enforcement, which would
+   * otherwise fight MOOSE for these rows -- sees no Dirichlet constraint at all. Enforcement stays
+   * with MOOSE, which writes the residual and Jacobian rows itself.
+   *
+   * Runs once per solve, so that a prescribed value depending on time is projected at the time the
+   * solve is being taken at. The result is not cached across solves: its inputs include whatever
+   * the value functors read, which a MOOSE Function may draw from a postprocessor or a coupled
+   * application that updates between fixed-point iterations at unchanged time, so validity is not
+   * decidable from the mesh and the time alone.
+   */
+  void refreshLibmeshDirichletValues();
+
+  /**
+   * Get the prescribed value libMesh's Dirichlet constraint machinery projected for each degree of
+   * freedom a LibmeshDirichletBCBase on this system pins, keyed on global degree of freedom index
+   */
+  const std::unordered_map<dof_id_type, Real> & libmeshDirichletValues() const
+  {
+    return _libmesh_dirichlet_values;
+  }
+
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
+
+  /**
+   * Install a shell matrix as this system's libMesh system matrix, so that the PETSc solver takes
+   * it for both Amat and Pmat and no assembled matrix is ever allocated. Must run before
+   * EquationSystems::init(). Only called when matrix-free mode is enabled.
+   */
+  void setupKokkosMatrixFreeSystemMatrix();
+
+  /**
+   * Register each active Kokkos Dirichlet-type nodal boundary condition on this system as a
+   * libMesh DirichletBoundary, so that the automatic constraint sweep EquationSystems::init()
+   * triggers computes a prescribed value for every degree of freedom the boundary condition's own
+   * variable has on the boundary, including a HIERARCHIC edge/face mode that the Kokkos
+   * device-side dispatch, keyed on boundary nodes, cannot itself reach. Must run before
+   * EquationSystems::init(). Only called when matrix-free mode is enabled.
+   */
+  void setupKokkosDirichletConstraints();
+
+  /**
+   * Recompute libMesh's own DOF constraints on this system and the Kokkos Dirichlet boundary
+   * conditions' cached prescribed values sourced from them, once per timestep, so a
+   * time-dependent Dirichlet Function's value on a degree of freedom libMesh's constraint
+   * machinery reports beyond a mesh node (e.g. a HIERARCHIC edge/face mode) stays current. Only
+   * called when matrix-free mode is enabled.
+   */
+  void refreshKokkosDirichletConstraints();
+
+  /**
+   * Set up the persistent direction vector and vector tags used by the Kokkos matrix-free
+   * Jacobian-vector product, propagate the tags to every active Kokkos kernel/nodal BC, and
+   * register the shell operations the solve and its preconditioner call. Only called when
+   * matrix-free mode is enabled.
+   */
+  void setupKokkosMatrixFreeJacobian();
+
+  /**
+   * Print, once per run, which active Kokkos kernels the quadrature-point Jacobian cache covers and
+   * how much storage the cache occupies. The cache is sized from the quadrature rule, so its
+   * storage is only known once the first fill has allocated it.
+   */
+  void reportKokkosMatrixFreeCoverage();
+
+  /**
+   * Get the matrix-free operator installed as this system's system matrix, which the PETSc solver
+   * takes as both Amat and Pmat. A preconditioner built on the operator action rather than on
+   * matrix entries needs it to apply, or to measure, what the solve will be handed.
+   * @returns The operator
+   */
+  libMesh::SparseMatrix<Number> & kokkosMatrixFreeOperator() const;
+
+  /**
+   * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
+   * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
+   * This is the MatMult callback for the Kokkos matrix-free Amat shell.
+   * @param x The direction vector (owned by the caller, e.g. a PETSc KSP work vector)
+   * @param y The action vector (owned by the caller); zeroed and filled by this call
+   */
+  void computeKokkosJacobianVectorProduct(Vec x, Vec y);
+
+  /**
+   * Build the entity-block decomposition of this system's matrix-free operator, which the finest
+   * level of a p-multigrid hierarchy smooths with in place of the operator diagonal
+   */
+  void initKokkosEntityBlockSmoother();
+
+  /**
+   * Get the number of entity blocks this process holds for the smoother
+   * @returns The number of blocks
+   */
+  dof_id_type numKokkosEntityBlocks() const;
+
+  /**
+   * Get the size of the largest entity block this process holds for the smoother
+   * @returns The largest block size
+   */
+  unsigned int maxKokkosEntityBlockSize() const;
+
+  /**
+   * Rebuild and refactor the entity blocks from the linearization the quadrature-point Jacobian
+   * cache holds, which is the setup of the smoother's shell preconditioner
+   */
+  void setupKokkosEntityBlockSmoother();
+
+  /**
+   * Apply the inverse of every entity block to a residual, which is the application of the
+   * smoother's shell preconditioner
+   * @param r The residual
+   * @param x The correction
+   */
+  void applyKokkosEntityBlockSmoother(Vec r, Vec x);
+
+  /**
+   * Compute the diagonal of the (unassembled) Kokkos Jacobian, using the partial-assembly
+   * Jacobian diagonal hooks on active Kokkos kernels. This is the MatGetDiagonal callback for the
+   * Kokkos matrix-free shell installed as the system matrix by
+   * setupKokkosMatrixFreeSystemMatrix(), and is what a Jacobi or Chebyshev preconditioner reads.
+   * @param diag The diagonal vector (owned by the caller); zeroed and filled by this call
+   */
+  void computeKokkosJacobianDiagonal(Vec diag);
 #endif
 
   /**
@@ -761,6 +908,13 @@ public:
    */
   void setupDM();
 
+  /**
+   * Configure the solve's PETSc preconditioner, when a preconditioner is attached. Called once per
+   * solve, after setupDM(), so that a preconditioner that reaches the SNES/KSP/PC directly sees the
+   * objects the nonlinear solver has just (re)created for this solve.
+   */
+  void setupPreconditionerSolver();
+
   using SystemBase::reinitNodeFace;
 
   /**
@@ -958,9 +1112,14 @@ protected:
   /// BoundaryCondition Warhouses
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
-  MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  /// Nodal BCs that prescribe their values ahead of the solve, of every family that does so
+  MooseObjectWarehouse<NodalBCBase> _preset_nodal_bcs;
+  /// The subset whose values libMesh projects, which refreshLibmeshDirichletValues() also walks
+  MooseObjectWarehouse<LibmeshDirichletBCBase> _libmesh_dirichlet_bcs;
   ///@}
+
+  /// Prescribed values projected by libMesh for the degrees of freedom _libmesh_dirichlet_bcs pins
+  std::unordered_map<dof_id_type, Real> _libmesh_dirichlet_values;
 
 #ifdef MOOSE_KOKKOS_ENABLED
   ///@{
@@ -970,6 +1129,17 @@ protected:
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
   MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
+  ///@}
+
+  ///@{
+  /// Kokkos matrix-free Jacobian-vector product state; only populated when matrix-free mode is
+  /// enabled (setupKokkosMatrixFreeJacobian())
+  bool _kokkos_mf_enabled = false;
+  bool _kokkos_mf_reported = false;
+  TagID _kokkos_mf_x_tag = 0;
+  TagID _kokkos_mf_y_tag = 0;
+  TagID _kokkos_mf_diag_tag = 0;
+  NumericVector<Number> * _kokkos_mf_x = nullptr;
   ///@}
 #endif
 

@@ -20,7 +20,7 @@
 namespace Moose::Kokkos
 {
 
-class System;
+class DofSpace;
 
 /**
  * The Kokkos wrapper class for PETSc matrix
@@ -54,9 +54,9 @@ public:
   /**
    * Create the matrix from a libMesh PetscMatrix
    * @param matrix The libMesh PetscMatrix
-   * @param system The Kokkos system
+   * @param dof_space The DOF layout whose sparsity pattern the matrix follows
    */
-  void create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system);
+  void create(libMesh::SparseMatrix<PetscScalar> & matrix, const DofSpace & dof_space);
   /**
    * Assemble the underlying PETSc matrix
    */

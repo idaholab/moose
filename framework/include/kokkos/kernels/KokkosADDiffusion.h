@@ -9,25 +9,28 @@
 
 #pragma once
 
-#include "KokkosADKernel.h"
+#include "KokkosADKernelGrad.h"
 
-class KokkosADDiffusion : public Moose::Kokkos::ADKernel
+class KokkosADDiffusion : public Moose::Kokkos::ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
   KokkosADDiffusion(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::ADReal
-  computeQpResidual(const unsigned int i, const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename T>
+  KOKKOS_FUNCTION Moose::Kokkos::Vector3<T> computeQpFlux(const T & u,
+                                                          const Moose::Kokkos::Vector3<T> & grad_u,
+                                                          const unsigned int qp,
+                                                          AssemblyDatum & datum) const;
 };
 
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal
-KokkosADDiffusion::computeQpResidual(const unsigned int i,
-                                     const unsigned int qp,
-                                     AssemblyDatum & datum) const
+template <typename T>
+KOKKOS_FUNCTION Moose::Kokkos::Vector3<T>
+KokkosADDiffusion::computeQpFlux(const T & /* u */,
+                                 const Moose::Kokkos::Vector3<T> & grad_u,
+                                 const unsigned int /* qp */,
+                                 AssemblyDatum & /* datum */) const
 {
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return grad_u;
 }

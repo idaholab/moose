@@ -4,8 +4,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "2026.08.18_0772c3d" %}
+{% set build = 0 %}
+{% set version = "2026.09.11_ebe2b58" %}
 
 package:
   name: moose-libmesh

@@ -9,45 +9,66 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosKernelGrad.h"
 
 /**
  * This kernel implements the Laplacian operator:
  * $\nabla u \cdot \nabla \phi_i$
  */
-class KokkosDiffusion : public Moose::Kokkos::Kernel
+class KokkosDiffusion : public Moose::Kokkos::KernelGrad
 {
+  using Real3 = Moose::Kokkos::Real3;
+  using Real33 = Moose::Kokkos::Real33;
+  using QpJacobianBlockAccessor = Moose::Kokkos::QpJacobianBlockAccessor;
+
 public:
   static InputParameters validParams();
 
   KokkosDiffusion(const InputParameters & parameters);
 
+  virtual unsigned int qpJacobianBlocks() const override
+  {
+    return Moose::Kokkos::QP_JACOBIAN_GRADIENT_GRADIENT;
+  }
+
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeQpJacobianTensor(QpJacobianBlockAccessor & blocks,
+                                               const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpJacobian(const unsigned int i,
-                                   const unsigned int j,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpJacobian(const unsigned int j,
+                                      const unsigned int qp,
+                                      AssemblyDatum & datum) const
 {
-  return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return _grad_phi(datum, j, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosDiffusion::computeQpJacobianTensor(QpJacobianBlockAccessor & blocks,
+                                         const unsigned int /* qp */,
+                                         AssemblyDatum & /* datum */) const
+{
+  // The flux is the solution gradient itself, so its derivative with respect to that gradient is
+  // the identity and every other block vanishes
+  Real33 flux_gradient;
+  flux_gradient.identity(_dimension);
+
+  blocks.addFluxGradient(flux_gradient);
 }

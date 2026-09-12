@@ -40,3 +40,10 @@ NodalBCBase::NodalBCBase(const InputParameters & parameters)
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
 }
+
+void
+NodalBCBase::computeValue(NumericVector<Number> &)
+{
+  mooseError("This boundary condition does not prescribe its values ahead of the solve, so it has "
+             "no value to preset. Only a Dirichlet-type boundary condition asked to preset does.");
+}

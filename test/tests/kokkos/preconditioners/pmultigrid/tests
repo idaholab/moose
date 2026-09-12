@@ -1,0 +1,269 @@
+[Tests]
+  issues = '#33644'
+  design = 'PMultigrid.md'
+
+  [levels]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false'
+    expect_out = 'p = 1: 25 dofs, 10 constrained by nodal boundary conditions'
+    requirement = 'The p-multigrid preconditioner shall build a function space for each requested '
+                  'coarse polynomial order, holding the fine system variables on the fine mesh, and '
+                  'shall hold fixed the degrees of freedom of that space which a nodal boundary '
+                  'condition of the solver system pins.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [entity_blocks]
+    type = RunApp
+    # A coarsest level of order five carries interior blocks of sixteen modes, so the check covers
+    # the placement of a block spanning many degrees of freedom rather than only the one-mode blocks
+    # a low order gives
+    cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
+               "Preconditioning/pmg/level_orders='5' "
+               "Preconditioning/pmg/verify=entity_blocks"
+    input = 'pmultigrid.i'
+    expect_out = 'p = 5: entity blocks agree with the assembled operator to 0'
+    # A block on a partition boundary gathers only its own process's elements, so exact agreement with
+    # the assembled operator is a single-process statement; on more processes the check reports the
+    # difference instead of zero
+    max_parallel = 1
+    requirement = 'The p-multigrid preconditioner shall build, for each mesh entity of a level, the '
+                  'dense block of that level operator holding the degrees of freedom the entity '
+                  'carries, with every entry of every such block equal to the corresponding entry of '
+                  'that level assembled operator.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [entity_block_smoother]
+    type = RunApp
+    # Order eight over a hierarchy of 1, 2 and 4 is the configuration the point smoother needs 1090
+    # linear iterations for, against 20 here; the cap is above the latter and far below the former,
+    # so the test fails rather than merely slowing if the block smoother stops reaching the modes
+    # interior to an element
+    cli_args = "Outputs/exodus=false Variables/u/order=EIGHTH "
+               "Preconditioning/pmg/level_orders='1 2 4' "
+               "Preconditioning/pmg/smoother=entity_block Executioner/nl_rel_tol=1e-6 "
+               "-ksp_rtol 1e-8 -ksp_max_it 40 -ksp_converged_reason"
+    input = 'pmultigrid.i'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL'
+    requirement = 'The p-multigrid preconditioner shall smooth each level by inverting the block of '
+                  'degrees of freedom each mesh entity carries, which shall converge the linear '
+                  'solve of a high-order fine space in an iteration count a smoother reading the '
+                  'operator diagonal alone does not reach.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [point_jacobi_smoother]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # A 2-1 v-cycle is where the diagonal smoother is the reasonable choice, and so where it is
+    # covered: a biquadratic hierarchic space carries one mode on each edge and one in the interior, so
+    # an entity block is a single degree of freedom and the two smoothers coincide, needing the same ten
+    # iterations. The block smoother is the default, which leaves this as the only exercise of the
+    # diagonal one. As in the four-level test, the cap and the linear convergence reason together are
+    # what assert that the cycle preconditions rather than merely permits the solve.
+    cli_args = "Outputs/exodus=false Variables/u/order=SECOND "
+               "Preconditioning/pmg/level_orders='1' "
+               "Preconditioning/pmg/smoother=point_jacobi -ksp_max_it 20 "
+               "-ksp_converged_reason -ksp_view"
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type is MULTIPLICATIVE, levels=2 cycles=v.*Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall smooth each level with the reciprocal of the '
+                  'operator diagonal when asked for that smoother, preconditioning a two-level '
+                  'v-cycle over a basis whose mesh entities carry a single mode each.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_operators]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
+               "Preconditioning/pmg/level_orders='1' "
+               "Preconditioning/pmg/verify=level_operators"
+    expect_out = 'p-multigrid level p = 1: operator agrees with its diagonal'
+    requirement = 'The p-multigrid preconditioner shall apply each coarse level operator and compute '
+                  'the diagonal of that operator from the same quadrature-point linearization, in '
+                  'agreement with one another.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_transfers]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = "Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND "
+               "Preconditioning/pmg/level_orders='1' "
+               "Preconditioning/pmg/verify=level_transfers"
+    expect_out = 'p = 1: restriction is the transpose of prolongation'
+    requirement = 'The p-multigrid preconditioner shall transfer vectors between consecutive levels '
+                  'of the hierarchy by an embedding of the coarser element basis in the finer one, '
+                  'restricting by the transpose of the way it prolongs.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_galerkin]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # Two coarse levels put a coarse level on both sides of a transfer as well as against the solver
+    # system, and the check errors out on a mismatch at either pair
+    cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
+               "Preconditioning/pmg/verify=level_galerkin"
+    expect_out = 'p = 2: operator agrees with the operator of the next finer level carried through '
+                 'the transfer'
+    requirement = 'The p-multigrid preconditioner shall realize on each coarse level the Galerkin '
+                  'operator of the fine linearization, applying that operator in agreement with the '
+                  'next finer level operator carried through the level transfer.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_matrix]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
+               "Preconditioning/pmg/verify=level_matrices"
+    expect_out = 'p = 1: assembled operator agrees with the matrix-free operator'
+    requirement = 'The p-multigrid preconditioner shall assemble the operator of its coarsest level '
+                  'into a sparse matrix, which a coarse solver can be applied to, agreeing with the '
+                  'operator that level applies without a matrix.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_order_not_coarser]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Variables/u/order=THIRD '
+               'Preconditioning/pmg/level_orders=3'
+    expect_err = "Variable 'u' is of order 3, so a level of order 3 would not coarsen it"
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    requirement = 'The p-multigrid preconditioner shall report an error when a requested level '
+                  'order does not coarsen every variable of the solver system.'
+  []
+
+  [solve]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The input's own configuration, unmodified: the four-level 8-4-2-1 v-cycle under the default
+    # entity-block smoother. The iteration cap, at not quite twice what this cycle needs, together with
+    # the linear convergence reason is what makes the efficiency half of the requirement checkable
+    # rather than implied. The reason is the necessary half of that pair: Newton takes a further step
+    # when a linear solve stops on its iteration limit, and reaches the nonlinear tolerance anyway, so
+    # the cap alone would still leave a converged solve to assert.
+    cli_args = 'Outputs/exodus=false -ksp_max_it 40 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
+    requirement = 'The system shall be able to apply an 8-4-2-1 hierarchic basis polynomial order '
+                  'multigrid v-cycle and efficiently precondition a Newton-Krylov method.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [operator_symmetry]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # A conjugate gradient accelerator is only valid on a symmetric operator, so the measured
+    # symmetry of the operator and a CG solve that actually converges over it are two halves of one
+    # requirement. The diagonal preconditioner is trivially symmetric positive definite, which leaves
+    # the operator itself as the only thing the CG half can be failing on.
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify=operator_symmetry '
+               '-ksp_type cg -pc_type jacobi'
+    expect_out = 'matrix-free operator of system .nl0.: differs from its transpose by.*'
+                 'Solve Converged'
+    issues = '#8681'
+    requirement = 'The Kokkos matrix-free Jacobian action shall be symmetric whenever the '
+                  'linearization it contracts is, holding the degrees of freedom a Dirichlet '
+                  'boundary condition pins out of both a free row equation and the direction the '
+                  'operator gathers, so that a conjugate gradient accelerator converges the solve.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [cycle_symmetry]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The two halves of one requirement, as in operator_symmetry: the cycle is measured against its
+    # transpose, and CG is asked to converge over it. Here the operator is the trivially symmetric
+    # half, which leaves the cycle as the only thing the CG half can be failing on. The check errors
+    # out on a mismatch, so the measurement half is asserted by the run completing.
+    cli_args = "Outputs/exodus=false "
+               "Preconditioning/pmg/verify='cycle_symmetry operator_symmetry' "
+               "-ksp_type cg -ksp_max_it 40 -ksp_converged_reason"
+    expect_out = 'p-multigrid cycle of system .nl0.: differs from its transpose by.*'
+                 'Linear solve converged due to CONVERGED_RTOL.*Solve Converged'
+    issues = '#8681'
+    requirement = 'The p-multigrid cycle shall be symmetric, its smoothers, coarse factorization and '
+                  'transfers each being so, such that a conjugate gradient accelerator is valid over '
+                  'the hierarchy and converges the solve.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [parallel_invariance]
+    type = CSVDiff
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Outputs/csv=true Outputs/file_base=parallel_invariance'
+    csvdiff = 'parallel_invariance.csv'
+    # Four processes is the smallest count that puts a Dirichlet-constrained degree of freedom of this
+    # mesh on a partition boundary, which is what the invariance is asserted against. The gold is the
+    # single-process value, so the comparison is between the two partitionings.
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The Kokkos matrix-free residual shall be independent of how the mesh is '
+                  'partitioned, each Dirichlet-constrained row being contributed by the process that '
+                  'owns it and not additionally by every process that ghosts it.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [petsc_options]
+    type = RunApp
+    input = 'pmultigrid_petsc_options.i'
+    # The same hierarchy and the same physics as [solve], with the solver spelled as PETSc options
+    # rather than left to what PMG configures. Asserting the same convergence behavior under both
+    # spellings is what keeps the documented option set from drifting away from the built-in defaults.
+    cli_args = 'Outputs/exodus=false -ksp_max_it 40 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall accept the configuration it applies as PETSc '
+                  'command-line options, reading each level solver options after setting its own '
+                  'defaults, and shall precondition the solve identically either way.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [operator_symmetry_transient_error]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify=operator_symmetry '
+               'Executioner/type=Transient Executioner/num_steps=1 Executioner/dt=0.1 '
+               'Kernels/time/type=KokkosTimeDerivative Kernels/time/variable=u'
+    expect_err = 'time integrator forms the solution time derivative from the raw solution'
+    issues = '#8681'
+    requirement = 'The Kokkos matrix-free Jacobian action shall report an error when symmetry is '
+                  'requested of a transient system with Dirichlet-constrained degrees of freedom, '
+                  'whose solution time derivative a time integrator forms from the raw solution and '
+                  'which therefore keeps the constrained columns its linearization requires.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [requires_matrix_free]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=false'
+    expect_err = 'the solver system must be run in Kokkos matrix-free mode'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    requirement = 'The p-multigrid preconditioner shall report an error when the solver system does '
+                  'not compute its Jacobian action from the quadrature-point linearization the '
+                  'levels contract.'
+  []
+[]

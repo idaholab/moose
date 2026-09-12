@@ -76,4 +76,57 @@ Kernel::computeJacobian()
   }
 }
 
+void
+Kernel::computeJacobianVectorProduct()
+{
+  if (!DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
+    return;
+
+  _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_jvp_dispatcher)
+    _jvp_dispatcher = DispatcherRegistry::build<JacobianVectorProductLoop>(this, type());
+
+  _jvp_dispatcher->parallelFor(policy);
+}
+
+void
+Kernel::computeJacobianDiagonal()
+{
+  if (!DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
+    return;
+
+  _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_jacobian_diagonal_dispatcher)
+    _jacobian_diagonal_dispatcher = DispatcherRegistry::build<JacobianDiagonalLoop>(this, type());
+
+  _jacobian_diagonal_dispatcher->parallelFor(policy);
+}
+
+bool
+Kernel::usesQpJacobianCache() const
+{
+  return DispatcherRegistry::hasUserMethod<QpJacobianCacheLoop>(type());
+}
+
+void
+Kernel::computeQpJacobianCache()
+{
+  // One thread per (element, quadrature point) so that each cache entry is written by a single
+  // thread of the dispatch
+  _thread.resize(kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_qp_jacobian_cache_dispatcher)
+    _qp_jacobian_cache_dispatcher = DispatcherRegistry::build<QpJacobianCacheLoop>(this, type());
+
+  _qp_jacobian_cache_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos

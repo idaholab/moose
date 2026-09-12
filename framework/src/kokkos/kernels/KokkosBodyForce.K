@@ -16,18 +16,20 @@ KokkosBodyForce::validParams()
 {
   InputParameters params = KernelValue::validParams();
   params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
+  params.addParam<FunctionName>("function", "1", "A function that describes the body force");
   params.addParam<PostprocessorName>(
       "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
   params.declareControllable("value");
-  params.addClassDescription("Demonstrates the two ways that scalar values can be introduced "
-                             "into kernels, e.g. (controllable) constants and postprocessors. "
-                             "Implements the weak form $(\\psi_i, -f)$.");
+  params.addClassDescription("Demonstrates the ways that scalar values can be introduced "
+                             "into kernels, e.g. (controllable) constants, functions, and "
+                             "postprocessors. Implements the weak form $(\\psi_i, -f)$.");
   return params;
 }
 
 KokkosBodyForce::KokkosBodyForce(const InputParameters & parameters)
   : KernelValue(parameters),
     _scale(getParam<Real>("value")),
+    _function(getKokkosFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }

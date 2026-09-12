@@ -237,6 +237,15 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
     mooseError("Did not setup finite difference preconditioner, and please add a preconditioning "
                "block with type = fdp");
 
+  // Both finite difference types below hand the system matrix to a SNES routine that writes
+  // difference quotients into its entries, so the matrix has to be one that stores entries
+  if (!dynamic_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix()))
+    mooseError("Finite difference preconditioning fills the entries of an assembled system "
+               "matrix. System '",
+               name(),
+               "' has a matrix-free system matrix, which computes its action on a vector and "
+               "holds no entries to difference.");
+
   if (fdp->finiteDifferenceType() == "coloring")
   {
     _use_coloring_finite_difference = true;

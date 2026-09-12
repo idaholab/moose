@@ -152,6 +152,13 @@
   type = Steady
 
   solve_type = 'PJFNK'
+
+  # This space represents the manufactured solution exactly, so the error norms this test compares
+  # are algebraic error rather than discretization error: they record where the linear solve stopped.
+  # A tolerance well below the compared quantities' own threshold keeps them a measure of the
+  # discretization, so that the comparison stays sensitive to a change in the basis itself.
+  l_tol = 1e-12
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]

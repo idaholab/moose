@@ -1,6 +1,14 @@
 [Tests]
-  issues = '#31109'
+  issues = '#31109 #33726'
   design = "Adaptivity.md"
+  # Both cases impose their essential boundary condition with FunctionLibmeshDirichletBC rather than
+  # FunctionDirichletBC. p elevation puts the variables on a HIERARCHIC basis above first order, where
+  # a degree of freedom at a node is a bubble coefficient rather than a point value of the solution,
+  # and a node may carry several of them. A nodal boundary condition assigns the prescribed value to
+  # one degree of freedom per node as though it were a point value, which is wrong on that basis; the
+  # projected form constrains every degree of freedom the boundary reaches. The gold values reflect
+  # that: the average of the analytic variable now holds to seven digits across the refinement
+  # sequence, where before it drifted by a third.
   [test]
     requirement = "MOOSE shall support hp adaptivity"
     [libmesh]

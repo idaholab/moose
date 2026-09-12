@@ -44,6 +44,12 @@ public:
   virtual void presetSolution(TagID tag) override;
 
   /**
+   * Get whether this is a Dirichlet-type boundary condition
+   * @returns Always true
+   */
+  virtual bool isDirichletBC() const override { return true; }
+
+  /**
    * Function tag for preset loop
    */
   struct PresetLoop
@@ -51,7 +57,11 @@ public:
   };
 
   /**
-   * The preset function called by Kokkos
+   * The preset function called by Kokkos. Reaches only the mesh nodes getContiguousNodes()
+   * reports; a DOF libMesh's own constraint machinery additionally reports beyond a mesh node
+   * (e.g. a HIERARCHIC edge/face mode) is instead preset by the system-wide
+   * Moose::Kokkos::ConstraintOperator, which owns every DOF a registered Dirichlet-type boundary
+   * condition pins, vertices included, and runs after this dispatch.
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(PresetLoop, const ThreadID tid, const Derived & bc) const;
