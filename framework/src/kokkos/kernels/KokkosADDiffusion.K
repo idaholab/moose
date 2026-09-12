@@ -20,4 +20,6 @@ KokkosADDiffusion::validParams()
   return params;
 }
 
-KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters) : ADKernelGrad(parameters) {}
+KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters) : ADKernelGrad(parameters)
+{
+}
