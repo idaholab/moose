@@ -1702,8 +1702,11 @@ public:
 
   /**
    * Assign each multiapp that shares an 'execution_order_group' with others a disjoint subset of
-   * the ranks so that they can be solved concurrently (one multiapp per rank at a time). Only does
-   * anything when 'num_concurrent_multiapps' > 1. Must be called before the sub-apps are created.
+   * the ranks so that they can be solved concurrently (at most one child app per rank at a time).
+   * Note that each MultiApp may have multiple child applications, and each child app may use more
+   * than one rank.
+   * - Only does anything when 'num_concurrent_multiapps' > 1.
+   * - Must be called before the sub-apps are created.
    */
   void partitionConcurrentMultiApps();
 

@@ -132,7 +132,7 @@ multiple sub-apps.  All sub-apps of a given `MultiApp` are run simultaneously in
 
 ### Concurrent execution
 
-Concurrent execution of child apps of each `MultiApps` is the default behavior. If also specifying in the
+Concurrent execution of child apps of each `MultiApp` is the default behavior. If also specifying in the
 `Problem` block that
 [!param](/Problem/FEProblem/num_concurrent_multiapps) `> 1` then several `MultiApps` will execute concurrently
 as well, meanining the child apps from both `MultiApps` will execute together. The groups of concurrent `MultiApps`
