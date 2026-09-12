@@ -6171,8 +6171,7 @@ FEProblemBase::partitionConcurrentMultiApps()
     for (const auto m : index_range(group))
     {
       // Each multiapp needs at least one rank, so a 'min_procs_per_app' of 0 is treated as 1
-      mins[m] = std::max(group[m]->getParam<processor_id_type>("min_procs_per_app"),
-                         cast_int<processor_id_type>(1));
+      mins[m] = group[m]->getParam<processor_id_type>("min_procs_per_app");
       maxs[m] = group[m]->getParam<processor_id_type>("max_procs_per_app");
       const auto n_apps_m = cast_int<processor_id_type>(group[m]->numGlobalApps());
       caps[m] = (maxs[m] >= n_procs) ? n_procs : std::min(n_procs, n_apps_m * maxs[m]);
@@ -6297,8 +6296,8 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       // subset of the ranks (see partitionConcurrentMultiApps()), so solveStep() does real work
       // only on those ranks and returns early on the others. Looping here therefore lets different
       // ranks advance different multiapps at the same time - the concurrency comes from the rank
-      // partition, not from threads, which keeps each rank single-threaded through the solve and
-      // avoids racing PETSc's process-global state (communicator and options database).
+      // partition. This notably avoids racing PETSc's process-global state (communicator and
+      // options database).
       for (const auto & multi_app : multi_app_group)
         if (!multi_app->solveStep(_dt, _time, auto_advance))
           group_success = false;
@@ -6314,7 +6313,7 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
         break;
       }
 
-      // Execute Transfers _between_ Multiapps after each app executes
+      // Execute Transfers _between_ MultiApps after each app executes
       for (const auto & multi_app : multi_app_group)
         execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
