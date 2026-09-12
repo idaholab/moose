@@ -168,6 +168,16 @@ RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
                  "If 'add_heat_flux_aux' is true, then this parameter must be provided.");
   }
 
+  const auto & fixed_temperature_boundaries =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
+  const auto & fixed_boundary_temperatures =
+      getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
+
+  if (fixed_temperature_boundaries.size() != fixed_boundary_temperatures.size())
+    paramError("fixed_boundary_temperatures",
+               "The number of entries must match the number of entries in "
+               "'fixed_temperature_boundary'.");
+
   checkBoundaryParameterIsSubset("adiabatic_boundary");
   checkBoundaryParameterIsSubset("fixed_temperature_boundary");
 }
@@ -193,7 +203,10 @@ RadiationTransferAction::act()
     addViewFactorObject();
   }
   else if (_current_task == "add_bc")
+  {
     addRadiationBCs();
+    addFixedTemperatureBCs();
+  }
   else if (_current_task == "add_ray_boundary_condition")
     addRayBCs();
   else if (_current_task == "add_aux_variable" && _add_heat_flux_aux)
@@ -223,6 +236,29 @@ RadiationTransferAction::addRadiationBCs() const
   params.set<UserObjectName>("surface_radiation_object_name") = radiationObjectName();
 
   _problem->addBoundaryCondition("GrayLambertNeumannBC", "gray_lamber_neumann_bc_" + _name, params);
+}
+
+void
+RadiationTransferAction::addFixedTemperatureBCs() const
+{
+  const auto & fixed_temperature_boundaries =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
+  const auto & fixed_boundary_temperatures =
+      getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
+  const auto & temperature = getParam<VariableName>("temperature");
+
+  for (unsigned int i = 0; i < fixed_temperature_boundaries.size(); ++i)
+  {
+    InputParameters params = _factory.getValidParams("FunctionDirichletBC");
+    params.set<FunctionName>("function") = fixed_boundary_temperatures[i];
+    params.set<NonlinearVariableName>("variable") = temperature;
+    params.set<std::vector<BoundaryName>>("boundary") = {fixed_temperature_boundaries[i]};
+
+    _problem->addBoundaryCondition("FunctionDirichletBC",
+                                   "fixed_temperature_bc_" + _name + "_" +
+                                       fixed_temperature_boundaries[i],
+                                   params);
+  }
 }
 
 void
@@ -363,23 +399,13 @@ RadiationTransferAction::addRadiationObject() const
   if (isParamValid("adiabatic_boundary"))
     params.set<std::vector<BoundaryName>>("adiabatic_boundary") = adiabaticPatchBoundaryNames();
 
+  const auto & fixed_T_boundary_names =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
+
   // add isothermal sidesets if required
-  if (isParamValid("fixed_temperature_boundary"))
+  if (!fixed_T_boundary_names.empty())
   {
-    if (!isParamValid("fixed_boundary_temperatures"))
-      mooseError("fixed_temperature_boundary is provided so fixed_boundary_temperatures must be "
-                 "provided too");
-
-    std::vector<BoundaryName> fixed_T_boundary_names =
-        getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
-
-    std::vector<FunctionName> fixed_T_funcs =
-        getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
-
-    // check length of fixed_boundary_temperatures
-    if (fixed_T_funcs.size() != fixed_T_boundary_names.size())
-      mooseError("Size of parameter fixed_boundary_temperatures and fixed_temperature_boundary "
-                 "must be equal.");
+    const auto & fixed_T_funcs = getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
 
     std::vector<BoundaryName> fixed_T_patch_names;
     std::vector<FunctionName> fixed_T_function_names;
