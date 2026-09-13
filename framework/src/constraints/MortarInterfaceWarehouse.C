@@ -185,15 +185,19 @@ MortarInterfaceWarehouse::getMortarInterface(
           boundary_key, subdomain_key, on_displaced));
 }
 
-void
+bool
 MortarInterfaceWarehouse::update()
 {
+  bool coverage_changed = false;
+
   for (auto & mortar_pair : _mortar_interfaces)
-    update(*mortar_pair.second.amg);
+    coverage_changed |= update(*mortar_pair.second.amg);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    update(*mortar_pair.second.amg);
+    coverage_changed |= update(*mortar_pair.second.amg);
 
   _mortar_initd = true;
+
+  return coverage_changed;
 }
 
 void
@@ -206,9 +210,17 @@ MortarInterfaceWarehouse::meshChanged()
   update();
 }
 
-void
+bool
 MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 {
+  // Snapshot the interior-parent subdomain coverage before clearing so we can tell afterward
+  // whether this rebuild changed which subdomains the mortar segment mesh touches. Consumers
+  // registered via notifyWhenMortarSetup() rebuild material dependency lists keyed off exactly
+  // these sets (see Moose::Mortar::setupMortarMaterials), so a change here is what they need to
+  // be notified of.
+  const auto secondary_ip_sub_ids_before = amg.secondaryIPSubIDs();
+  const auto primary_ip_sub_ids_before = amg.primaryIPSubIDs();
+
   // Clear exiting data
   amg.clear();
 
@@ -242,6 +254,20 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 
   amg.computeInactiveLMNodes();
   amg.computeInactiveLMElems();
+
+  // Fire on the first build unconditionally (nothing to compare against yet), and otherwise only
+  // when coverage actually changed: setupMortarMaterials() rebuilds three containers via
+  // MaterialBase::buildRequiredMaterials dependency resolution, which we do not want to redo on
+  // every residual/Jacobian evaluation.
+  const bool coverage_changed = !_mortar_initd ||
+                                secondary_ip_sub_ids_before != amg.secondaryIPSubIDs() ||
+                                primary_ip_sub_ids_before != amg.primaryIPSubIDs();
+
+  if (coverage_changed)
+    for (const auto mei : _mei_objs)
+      mei->mortarSetup(amg);
+
+  return coverage_changed;
 }
 
 const std::set<SubdomainID> &

@@ -1,0 +1,17 @@
+# The two blocks are laterally offset so that every mortar segment is pruned for lack of a primary
+# projection at initialization, which leaves the subdomain-keyed mortar material map empty. The right
+# block then slides into alignment. A permanent gap normal to the interface holds the multiplier at
+# zero throughout, so this exercises assembly once segments appear rather than contact tractions.
+
+[Tests]
+  issues = '#33658'
+  design = 'syntax/Contact/index.md'
+  [late_activation]
+    type = CSVDiff
+    input = 'mortar_late_activation.i'
+    csvdiff = 'mortar_late_activation_out.csv'
+    requirement = 'The system shall assemble a mortar constraint on an interface that had no mortar '
+                  'segments at initialization, once relative motion brings the secondary and primary '
+                  'surfaces into projection range.'
+  []
+[]
