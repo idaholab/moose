@@ -24,9 +24,6 @@
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
 
-// C++
-#include <cstring> // for "Jacobian" exception test
-
 ComputeMortarFunctor::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,
@@ -184,12 +181,8 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
     {
       moose::translateMetaPhysicLError(e);
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap & e)
     {
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-          !strstr(e.what(), "det != 0"))
-        throw;
-
       _fe_problem.setException(
           "We caught a libMesh degeneracy exception in ComputeMortarFunctor:\n" +
           std::string(e.what()));

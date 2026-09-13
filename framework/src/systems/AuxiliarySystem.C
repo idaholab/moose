@@ -31,9 +31,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
-// C++
-#include <cstring> // for "Jacobian" exception test
-
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
@@ -821,14 +818,8 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           {
             moose::translateMetaPhysicLError(e);
           }
-          catch (std::exception & e)
+          catch (libMesh::DegenerateMap & e)
           {
-            // Continue if we find a libMesh degenerate map exception, but
-            // just re-throw for any real error
-            if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-                !strstr(e.what(), "det != 0"))
-              throw;
-
             _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
                                      "nodal Auxiliary variable computation:\n" +
                                      std::string(e.what()));
