@@ -79,14 +79,19 @@ function python_test()
 {
     print_sep
     printf "Python Sanity Checks\n\n"
+    local error_cnt=0
     my_version="$(/usr/bin/env python3 --version || printf 'NONE')"
     if [[ "${my_version}" != 'NONE' ]]; then
+        if ! /usr/bin/env python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; then
+            print_red "FAIL: "
+            printf 'MOOSE requires Python 3.10 or newer; found %s\n\n' "${my_version}"
+            (( error_cnt+=1 ))
+        fi
         printf '%s (reporting as: %s) matches\n%s\n\n' \
         "$(print_bold "/usr/bin/env python3 --version");" \
         "${my_version}" \
         "$(print_bold "which python3 python");"
         which_pythons=('python3' 'python')
-        local error_cnt=0
         for which_python in "${which_pythons[@]}"; do
             local my_python
             my_python="$(which "${which_python}")"
