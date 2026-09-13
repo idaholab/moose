@@ -538,7 +538,7 @@ PLevelSpace::diagonalToVec(Vec diagonal)
 void
 PLevelSpace::initEntityBlocks()
 {
-  _blocks.init(dofSpace(), _sys.get_mesh(), _constrained_dof);
+  _blocks.init(dofSpace(), _sys.get_mesh(), *_sys.current_local_solution, _constrained_dof);
 
   _num_entity_blocks = _blocks.numBlocks();
   _max_entity_block_size = _blocks.maxBlockSize();
@@ -564,6 +564,8 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
   QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
 
   op.assembleBlocks(_blocks);
+
+  _blocks.reduce();
 
   // Read before factoring, which overwrites the entries with their factor
   _blocks.copyEntriesToHost();
@@ -623,6 +625,8 @@ PLevelSpace::setupBlockSmoother()
   QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
 
   op.assembleBlocks(_blocks);
+
+  _blocks.reduce();
 
   _blocks.factor();
 }
