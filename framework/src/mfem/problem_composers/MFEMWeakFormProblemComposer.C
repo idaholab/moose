@@ -11,11 +11,12 @@
 
 #include "MFEMWeakFormProblemComposer.h"
 #include "EquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMWeakFormProblemComposer);
 
 MFEMWeakFormProblemComposer::MFEMWeakFormProblemComposer(const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 
@@ -25,8 +26,8 @@ MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
   if (mfem_problem.getNumericType() != MFEMProblem::NumericType::REAL)
     mooseError("Wrong numeric type. Please set the Problem numeric type to 'real'.");
 
-  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-  return std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem,
+                                                                      _weak_form_name);
 }
 
 #endif

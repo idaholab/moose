@@ -11,12 +11,10 @@
 
 #pragma once
 
-#include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
-#include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
 
-class MFEMTransient : public TransientBase, public Moose::MFEM::ProblemOperatorInterface
+class MFEMTransient : public TransientBase
 {
 public:
   static InputParameters validParams();
@@ -47,7 +45,6 @@ public:
 
 private:
   MFEMProblem & _mfem_problem;
-  MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
 };
 

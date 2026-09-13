@@ -11,10 +11,6 @@
 
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
-#include "MFEMEigenproblem.h"
-#include "EigenproblemEquationSystem.h"
-#include "EquationSystemProblemOperator.h"
-#include "EigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -31,27 +27,14 @@ MFEMSteady::validParams()
 MFEMSteady::MFEMSteady(const InputParameters & params)
   : Executioner(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(*this, getProblemOperators()),
+    _mfem_problem_solve(*this, _mfem_problem.getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
-  // If no ProblemOperators have been added by the user, add a default
-  if (!_mfem_problem.getProblemComposer())
-  {
-    std::string name = "__DefaultWeakFormProblemComposer";
-    InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
-
-    if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      _mfem_problem.addMFEMProblemComposer("MFEMEigenWeakFormProblemComposer", name, params);
-    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-      _mfem_problem.addMFEMProblemComposer("MFEMComplexWeakFormProblemComposer", name, params);
-    else
-      _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, params);
-  }
-  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
+  _mfem_problem.setDefaultAssemblyLevel(
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 }
 
 void
@@ -59,27 +42,6 @@ MFEMSteady::init()
 {
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
-
-  if (_mfem_problem_data.eqn_system)
-  {
-    if (_mfem_problem_data.nonlinear_solver)
-      _mfem_problem_data.eqn_system->SetGradientRequired(
-          _mfem_problem_data.nonlinear_solver->RequiresGradient());
-
-    _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
-
-    // Set up initial conditions
-    _mfem_problem_data.eqn_system->Init(
-        _mfem_problem_data.gridfunctions,
-        _mfem_problem_data.cmplx_gridfunctions,
-        getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-  }
-
-  for (const auto & problem_operator : getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.true_solution);
-  }
 }
 
 void

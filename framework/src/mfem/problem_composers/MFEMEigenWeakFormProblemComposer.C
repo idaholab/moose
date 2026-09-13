@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
 
 MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 
@@ -26,9 +26,8 @@ MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_probl
   if (!dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
     mooseError("Not an eigenvalue problem. ");
 
-  mfem_problem.getProblemData().eqn_system =
-      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-  return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem,
+                                                                      _weak_form_name);
 }
 
 #endif

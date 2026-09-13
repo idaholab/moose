@@ -12,6 +12,7 @@
 #include "MFEMEigenproblem.h"
 #include "MFEMVariable.h"
 #include "MFEMEigensolverBase.h"
+#include "EigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblem);
 
@@ -89,6 +90,27 @@ MFEMEigenproblem::resolveMFEMSolvers()
     mooseError("The selected solver '",
                getProblemData().jacobian_solver->name(),
                "' is not an eigensolver, but the problem is marked as an eigenproblem.");
+}
+
+std::shared_ptr<MFEMWeakFormBase>
+MFEMEigenproblem::addDefaultWeakForm()
+{
+  if (getNumericType() != MFEMProblem::NumericType::REAL)
+    mooseError("Complex MFEM eigenproblems are not currently supported. Please set the Problem "
+               "numeric type to 'real'.");
+
+  InputParameters parameters = _factory.getValidParams("MFEMEigenproblemWeakForm");
+  return addObject<MFEMWeakFormBase>("MFEMEigenproblemWeakForm", "__DefaultWeakForm", parameters)
+      .front();
+}
+
+std::shared_ptr<MFEMProblemComposer>
+MFEMEigenproblem::addDefaultProblemComposer()
+{
+  InputParameters params = _factory.getValidParams("MFEMEigenWeakFormProblemComposer");
+  return addObject<MFEMProblemComposer>(
+             "MFEMEigenWeakFormProblemComposer", "__DefaultWeakFormProblemComposer", params)
+      .front();
 }
 
 #endif
