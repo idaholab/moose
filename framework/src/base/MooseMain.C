@@ -47,6 +47,7 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
             "': overriding the application type for MultiApps via command line is not allowed.");
   }
   const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
+  const auto & remove_params = command_line_params.get<std::vector<std::string>>("remove_params");
 
   // Parse command line arguments so that we can get the "--app" entry (if any) and the HIT
   // command line arguments for the Parser
@@ -58,6 +59,7 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   auto parser = std::make_unique<Parser>(input_filenames);
   parser->setAppType(default_app_type);
   parser->setCommandLineParams(command_line->buildHitParams());
+  parser->setRemoveParams(remove_params);
   parser->parse();
 
   // Search the command line for either --app or Application/type and let the last one win
