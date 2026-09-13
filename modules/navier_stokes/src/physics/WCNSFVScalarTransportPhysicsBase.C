@@ -73,8 +73,11 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
-    _passive_scalar_sources_coef(
-        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
+    _passive_scalar_coupled_sources_coef(
+        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
+    _passive_scalar_coupled_sources_blocks(
+        getParam<std::vector<std::vector<std::vector<SubdomainName>>>>(
+            "passive_scalar_coupled_source_blocks"))
 {
   if (_has_scalar_equation)
     for (const auto & scalar_name : _passive_scalar_names)
@@ -101,9 +104,12 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
         "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
 
-  if (_passive_scalar_sources_coef.size())
+  if (_passive_scalar_coupled_sources_coef.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
                                                             "passive_scalar_coupled_source_coeff");
+  if (_passive_scalar_coupled_sources_blocks.size())
+    checkTwoDVectorParamsSameLength<MooseFunctorName, std::vector<SubdomainName>>(
+        "passive_scalar_coupled_source", "passive_scalar_coupled_source_blocks");
 
   addRequiredPhysicsTask("get_turbulence_physics");
   addRequiredPhysicsTask("add_variables_physics");

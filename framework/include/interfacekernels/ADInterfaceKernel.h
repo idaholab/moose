@@ -125,6 +125,10 @@ protected:
   /// This variable is temporarily reserved for RattleSnake
   DenseMatrix<Number> _local_kxx;
 
+  /// Whether the variable and the neighbor variables are part of the same system
+  /// (whether from two different nonlinear systems or a nonlinear and an auxiliary system)
+  const bool _same_system;
+
 private:
   Moose::DGResidualType resid_type;
 };
