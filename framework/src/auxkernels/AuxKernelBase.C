@@ -32,6 +32,7 @@ AuxKernelBase::validParams()
   params += SetupInterface::validParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
+  exec_enum.addAvailableFlags(EXEC_ARC_LENGTH_INCREMENT);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
 

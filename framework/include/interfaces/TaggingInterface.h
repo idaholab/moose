@@ -77,6 +77,7 @@ public:
   class VectorTagsKey
   {
     friend class AttribVectorTags;
+    friend class ArcLengthNonlinearSystem;
     friend class NonlinearEigenSystem;
     friend class LinearSystemContributionObject;
     template <typename>
@@ -98,6 +99,7 @@ public:
   class MatrixTagsKey
   {
     friend class AttribMatrixTags;
+    friend class ArcLengthNonlinearSystem;
     friend class NonlinearEigenSystem;
     friend class LinearSystemContributionObject;
     template <typename>
