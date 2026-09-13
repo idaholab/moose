@@ -10,6 +10,9 @@
 #include "KokkosDofSpace.h"
 
 #include "MooseMesh.h"
+#include "MooseError.h"
+
+#include "libmesh/int_range.h"
 
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
@@ -37,11 +40,30 @@ DofSpace::setupDofs(libMesh::System & system)
 
   _local_elem_dof_index.create(_num_vars);
   _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
+  _local_to_global_dof_index = libMesh::DofObject::invalid_id;
 
   _max_dofs_per_elem.create(_num_vars);
   _max_dofs_per_elem = 0;
 
   auto solution = dynamic_cast<libMesh::PetscVector<Number> *>(system.current_local_solution.get());
+
+  // The ghosted solution's index space is this process's own DOFs followed by one entry per DOF of
+  // the DofMap's send list, and that send list holds no DOF this process owns, so every index of
+  // the map below carries exactly one global DOF. Filling it from those two sources is what makes
+  // it dense: an element walk reaches only the send list DOFs lying on an element this process has,
+  // and a DOF the DofMap sends because a constraint depends on it need not lie on one.
+  for (const auto local : make_range(_num_local_dofs))
+    _local_to_global_dof_index[local] = _dof_map.first_dof() + local;
+
+  for (const auto global : _dof_map.get_send_list())
+    _local_to_global_dof_index[solution->map_global_to_local_index(global)] = global;
+
+#ifndef NDEBUG
+  for (const auto local : make_range(_num_local_dofs + _num_ghost_dofs))
+    mooseAssert(_local_to_global_dof_index[local] != libMesh::DofObject::invalid_id,
+                "Local DOF index " << local << " of " << _num_local_dofs + _num_ghost_dofs
+                                   << " carries no global DOF index.");
+#endif
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
   // Kokkos array thinks OpenMP clause is device code when using OpenMP backend
@@ -71,7 +93,6 @@ DofSpace::setupDofs(libMesh::System & system)
       for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
       {
         _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
       }
     }
 
@@ -82,9 +103,8 @@ DofSpace::setupDofs(libMesh::System & system)
       _dof_map.dof_indices(ghost_elem, dof_indices, var);
       for (const auto dof : index_range(dof_indices))
       {
-        const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
-        _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        _local_elem_dof_index[var](dof, ghost_id) =
+            solution->map_global_to_local_index(dof_indices[dof]);
       }
     }
   }
