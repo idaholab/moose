@@ -29,6 +29,18 @@ protected:
 
   virtual void propagateQpStatefulProperties() override;
 
+  /** Return the current global timestep from the immutable time interval. */
+  Real globalTimeStep() const;
+
+  /** Return the timestep used by the current constitutive integration call. */
+  Real constitutiveTimeStep() const { return _constitutive_time_step; }
+
+  /** Set a model-local constitutive timestep without modifying the FEProblem timestep. */
+  void setConstitutiveTimeStep(Real time_step);
+
+  /** Reset the model-local constitutive timestep to the current global timestep. */
+  void resetConstitutiveTimeStep();
+
   /**
    * Perform any necessary initialization before return mapping iterations
    * @param effective_trial_stress Effective trial stress
@@ -48,7 +60,11 @@ protected:
   {
   }
 
-  void updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
+  virtual void
+  updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
+
+  /** Apply configured bounds handling and finite checks to _intermediate_porosity. */
+  void enforceIntermediatePorosityBounds();
 
   /// String designating the base name of the total strain
   const std::string _total_strain_base_name;
@@ -68,6 +84,9 @@ protected:
 
   /// Max increment for inelastic strain
   Real _max_inelastic_increment;
+
+  /// Model-local integration timestep. This never aliases or modifies FEProblem::dt().
+  Real _constitutive_time_step;
 
   /// Container for the porosity calculated from all other intelastic models except the current model
   GenericReal<is_ad> _intermediate_porosity;
@@ -102,22 +121,19 @@ protected:
   usingTransientInterfaceMembers;                                                                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_name;                                        \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_qp;                                          \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::isParamValid;                                 \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramError;                                   \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramWarning;                                 \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateState;                                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_console;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_q_point;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_verbose;                                     \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::globalTimeStep;                               \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::constitutiveTimeStep;                         \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::setConstitutiveTimeStep;                      \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::resetConstitutiveTimeStep;                    \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_intermediate_porosity;                       \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain;                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;              \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain;                            \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain_old;                        \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old;                                \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity;                   \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressFinalize;                        \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressInitialize
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old
 
 typedef ViscoplasticityStressUpdateBaseTempl<false> ViscoplasticityStressUpdateBase;
 typedef ViscoplasticityStressUpdateBaseTempl<true> ADViscoplasticityStressUpdateBase;

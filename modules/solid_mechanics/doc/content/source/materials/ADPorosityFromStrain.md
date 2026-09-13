@@ -9,7 +9,7 @@
   f = (1.0 - f^{old}) * ({\epsilon}_{in} - {\epsilon}_{in}^{old}).\text{tr} + f^{old};
 \end{equation}
 
-Here, $\epsilon_{in}$ is typically computed by [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md) using [ADViscoplasticityStressUpdate](ADViscoplasticityStressUpdate.md) methods.
+Here, $\epsilon_{in}$ is typically computed by [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md) using [PorousViscoplasticityStressUpdate](PorousViscoplasticityStressUpdate.md) methods.
 
 ## Example Input Files
 

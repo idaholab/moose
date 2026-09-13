@@ -15,7 +15,7 @@ updated by,
 \begin{equation}
   \dot{f} = [1.0 - f] * \dot{\epsilon}_{in}.\text{tr}()
 \end{equation}
-The porosity can then in turn be used by [viscoplasticity methods](ADViscoplasticityStressUpdate.md)
+The porosity can then in turn be used by [viscoplasticity methods](PorousViscoplasticityStressUpdate.md)
 or other porosity dependent materials
 
 Refer to [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md) for the remainder of
@@ -26,7 +26,7 @@ the details of how `ADComputeMultiplePorousInelasticStress` computes stress.
 `ADComputeMultiplePorousInelasticStress` can take individual or combinations of different inelastic
 material models that inherit from `ADStressUpdateBase`.
 
-!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
+!listing modules/solid_mechanics/test/tests/porous_viscoplasticity_stress_update/lps_single.i block=Materials
 
 !syntax parameters /Materials/ADComputeMultiplePorousInelasticStress
 
