@@ -227,6 +227,13 @@ private:
    */
   bool _preset_only = false;
   /**
+   * Whether the vector ConstrainLoop is writing has storage for a ghosted row, read from that
+   * vector when the loop is dispatched. The rows this operator carries are indexed over the local
+   * plus ghost space of the system solution, so a vector holding the locally owned degrees of
+   * freedom alone admits only the rows this process owns.
+   */
+  bool _vector_addresses_ghosts = false;
+  /**
    * Vectors and scalar the loop being dispatched acts on
    */
   ///@{

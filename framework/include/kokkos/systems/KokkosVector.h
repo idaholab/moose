@@ -88,6 +88,14 @@ public:
     return i < _local.size() ? _local[i] : _ghost(i);
   }
   /**
+   * Whether an index past the locally owned degrees of freedom resolves in this vector. An
+   * assembled vector holds the ghost degrees of freedom in a separate offset array, and a ghosted
+   * vector holds them alongside the local ones; a vector that is neither has storage for the
+   * locally owned degrees of freedom alone.
+   * @returns Whether a ghost index resolves
+   */
+  bool addressesGhostDofs() const { return _assemble || _is_ghosted; }
+  /**
    * Assign a scalar value uniformly
    * @param scalar The scalar value to be assigned
    */
