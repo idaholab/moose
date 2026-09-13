@@ -598,8 +598,12 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
   // quadrature-point sums
   const auto tolerance = 1e-10 * std::max(scale, 1.0);
 
+  // Flushed rather than left in this object's console buffer, which is written on an output event.
+  // The error below ends the run before the next one, and the measurement is what names the level
+  // and the size of the disagreement, so buffering it loses exactly the diagnostic wanted.
   console << "  p = " << _order << ": entity blocks agree with the assembled operator to " << error
-          << " (tolerance " << tolerance << ")\n";
+          << " (tolerance " << tolerance << ")\n"
+          << std::flush;
 
   // Both sides of the comparison are reduced across the processes above, so every process reaches
   // this with the same value and raises the error together
