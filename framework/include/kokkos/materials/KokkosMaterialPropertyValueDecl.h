@@ -67,7 +67,8 @@ protected:
 };
 
 template <typename T, unsigned int dimension>
-class MaterialPropertyValue : public MaterialPropertyValueBase<T, dimension>
+class MaterialPropertyValue : public MaterialPropertyValueBase<T, dimension>,
+                              public ArrayView<MaterialPropertyValue<T, dimension>, dimension>
 {
   usingKokkosMaterialPropertyValueBaseMembers(T, dimension);
 
