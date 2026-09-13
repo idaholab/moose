@@ -96,6 +96,7 @@ ConstraintOperator::constrainSolution(Vector & solution)
     return;
 
   _vector = solution;
+  _vector_addresses_ghosts = solution.addressesGhostDofs();
 
   ::Kokkos::parallel_for(
       ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ConstrainLoop>(0,
@@ -154,6 +155,13 @@ ConstraintOperator::finalizeDiagonal(Vector & diagonal, const Real value)
 KOKKOS_FUNCTION void
 ConstraintOperator::operator()(ConstrainLoop, const ThreadID tid) const
 {
+  // A vector holding the locally owned degrees of freedom alone has no entry for a ghosted row.
+  // The process owning that row writes it, and the scatter into a ghosted vector carries the value
+  // here. A vector that does hold the ghost degrees of freedom has this row written directly,
+  // which is what the trial-space gather of the operator action reads.
+  if (!_vector_addresses_ghosts && _rows[tid] >= _num_local_dofs)
+    return;
+
   if (_preset_only && !_row_preset[tid])
     return;
 
