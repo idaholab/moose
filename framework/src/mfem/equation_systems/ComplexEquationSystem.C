@@ -39,6 +39,10 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_bc_map,
+                                             "an essential boundary condition");
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_constraint_map,
+                                             "an essential constraint");
 
   // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to
   // forming the jacobian
@@ -71,8 +75,8 @@ ComplexEquationSystem::BuildLinearForms()
     clf->Assemble();
   }
 
-  // Apply boundary conditions
-  ApplyEssentialBCs();
+  // Apply essential constraints on strongly constrained DoFs
+  ApplyEssentialConstraints();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
@@ -143,10 +147,12 @@ ComplexEquationSystem::BuildMixedBilinearForms()
 }
 
 void
-ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
-                                               mfem::ParComplexGridFunction & trial_gf,
-                                               mfem::Array<int> & global_ess_markers)
+ComplexEquationSystem::ApplyComplexEssentialConstraint(const std::string & var_name,
+                                                       mfem::ParComplexGridFunction & trial_gf,
+                                                       mfem::Array<int> & global_bdr_markers,
+                                                       mfem::Array<int> & global_ess_tdofs)
 {
+  global_bdr_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
   if (_cmplx_essential_bc_map.Has(var_name))
     for (auto & bc : _cmplx_essential_bc_map.GetRef(var_name))
     {
@@ -156,12 +162,27 @@ ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
       for (const auto i : make_range(ess_bdrs.Size()))
-        global_ess_markers[i] |= ess_bdrs[i];
+        global_bdr_markers[i] |= ess_bdrs[i];
     }
+  trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
+
+  if (_cmplx_essential_constraint_map.Has(var_name))
+    for (auto & constraint : _cmplx_essential_constraint_map.GetRef(var_name))
+    {
+      // Set strongly constrained DoF values on real and imaginary components
+      mfem::Array<int> ess_tdofs;
+      constraint->ApplyConstraint(trial_gf, ess_tdofs);
+      global_ess_tdofs.Append(ess_tdofs);
+    }
+  // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
+  // list must be sorted first; a constraint whose block touches an essential
+  // boundary reports tdofs already present from GetEssentialTrueDofs.
+  global_ess_tdofs.Sort();
+  global_ess_tdofs.Unique();
 }
 
 void
-ComplexEquationSystem::ApplyEssentialBCs()
+ComplexEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
   _ess_markers.resize(_trial_var_names.size());
@@ -176,11 +197,9 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     cast_ref<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
-    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
-    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the _ess_markers array
-    ApplyComplexEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
+    // Set strongly constrained DoFs of trial_gf and set essential bdr markers
+    ApplyComplexEssentialConstraint(
+        trial_var_name, trial_gf, _ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
@@ -233,15 +252,33 @@ ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegra
 void
 ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc)
 {
-  const auto & test_var_name = bc->getTestVariableName();
-  AddTestVariableNameIfMissing(test_var_name);
-  // Register new complex essential bc map if not present for the test variable
-  if (!_cmplx_essential_bc_map.Has(test_var_name))
+  // Essential BCs act on a trial gridfunction and are applied while iterating the
+  // trial variables, so they are keyed by trial variable name. The variable's
+  // equation is established by its kernels; a BC does not create one, and Init
+  // checks that one exists.
+  const auto & trial_var_name = bc->getTrialVariableName();
+  // Register new complex essential bc map if not present for the trial variable
+  if (!_cmplx_essential_bc_map.Has(trial_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>();
-    _cmplx_essential_bc_map.Register(test_var_name, std::move(bcs));
+    _cmplx_essential_bc_map.Register(trial_var_name, std::move(bcs));
   }
-  _cmplx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+  _cmplx_essential_bc_map.GetRef(trial_var_name).push_back(std::move(bc));
+}
+
+void
+ComplexEquationSystem::AddComplexEssentialConstraint(
+    std::shared_ptr<MFEMComplexEssentialConstraint> constraint)
+{
+  const auto & trial_var_name = constraint->getTrialVariableName();
+  // Register new complex essential constraint map if not present for the trial variable
+  if (!_cmplx_essential_constraint_map.Has(trial_var_name))
+  {
+    auto constraints =
+        std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialConstraint>>>();
+    _cmplx_essential_constraint_map.Register(trial_var_name, std::move(constraints));
+  }
+  _cmplx_essential_constraint_map.GetRef(trial_var_name).push_back(std::move(constraint));
 }
 
 void
