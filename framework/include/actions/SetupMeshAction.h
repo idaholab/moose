@@ -26,6 +26,21 @@ private:
   void setupMesh(MooseMesh * mesh);
 
   /**
+   * Gets the checkpoint restart file base requested in the Problem block, if any.
+   */
+  std::string checkpointRestartFileBase() const;
+
+  /**
+   * Switches restart state and mesh type to load the checkpoint restart mesh.
+   */
+  void useCheckpointRestartMesh(const std::string & restart_file_base);
+
+  /**
+   * Adds the mesh generator that loads the checkpoint restart mesh.
+   */
+  void addCheckpointRestartMeshGenerator(const std::string & restart_file_base);
+
+  /**
    * Modifies the MooseObject's parameters to build the right type of Mesh when using splits.
    * @return The new type of object that will be built.
    */
