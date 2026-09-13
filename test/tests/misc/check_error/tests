@@ -569,7 +569,7 @@
   [missing_var_parameter_test]
     type = 'RunException'
     input = 'missing_var_parameter_test.i'
-    expect_err = "Did you forget to set 'variable'"
+    expect_err = "missing required parameter 'Kernels/diff/variable'"
     requirement = 'The system shall report an error when the variable parameter is missing from a residual object'
     issues = '#1405'
   []
