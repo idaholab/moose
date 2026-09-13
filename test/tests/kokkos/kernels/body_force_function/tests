@@ -6,8 +6,6 @@
     requirement = 'The Kokkos body force kernel shall drive a finite element residual with a '
                   'spatially varying function, reproducing a manufactured solution to the accuracy '
                   'of the discretization for a basis of'
-    capabilities = 'kokkos'
-    compute_devices = 'cpu cuda xpu'
 
     [first_order]
       type = CSVDiff
@@ -16,6 +14,8 @@
       csvdiff = 'first_order.csv'
 
       detail = 'first order and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
     []
 
     [second_order]
@@ -25,6 +25,8 @@
       csvdiff = 'second_order.csv'
 
       detail = 'second order.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []
