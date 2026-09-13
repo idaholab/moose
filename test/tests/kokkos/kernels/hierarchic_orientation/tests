@@ -6,8 +6,6 @@
     requirement = 'The Kokkos reference shape tables shall account for the orientation of the '
                   'edges and faces of an element, so that a hierarchic basis of order three on a '
                   'triangular mesh converges through'
-    capabilities = 'kokkos'
-    compute_devices = 'cpu cuda xpu'
 
     [assembled]
       type = CSVDiff
@@ -15,6 +13,8 @@
       csvdiff = 'hierarchic_orientation.csv'
 
       detail = 'the assembled framework kernels, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
     []
 
     [kokkos]
@@ -26,6 +26,8 @@
       detail = 'the Kokkos matrix-free kernels, each against its own converged error, since the '
                'Kokkos path additionally pins the HIERARCHIC edge modes the assembled path does '
                'not yet.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []
