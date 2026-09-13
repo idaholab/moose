@@ -1,6 +1,6 @@
 [Tests]
   design = 'MultiApps/index.md'
-  issues = '#24345'
+  issues = '#24345 #33738'
 
   [clone]
     requirement = 'The system shall be able to clone the mesh created in parent application into its sub-application(s) for geometries in'
@@ -21,5 +21,14 @@
       cli_args = 'Mesh/coord_type=RSPHERICAL Mesh/gmg/dim=1 BCs/dirichlet/boundary=right sub:BCs/dirichlet/boundary=right Outputs/file_base=main_rs'
       detail = 'R-spherical coordinates.'
     []
+  []
+
+  [clone_with_generator_params]
+    type = RunApp
+    input = main.i
+    cli_args = 'MultiApps/sub/input_files=sub_data_driven.i'
+    requirement = 'The system shall not report Mesh-generator-only parameters (e.g. '
+                  '"data_driven_generator") as unused on a sub-application whose mesh is cloned '
+                  'from the parent application instead of being built from its own Mesh Generators.'
   []
 []
