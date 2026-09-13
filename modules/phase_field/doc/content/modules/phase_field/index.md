@@ -28,7 +28,7 @@ this module is found below:
 MOOSE provides capabilities that enable the easy development of multiphase field model. A free energy expression has to be provided for each individual phase. Different systems exist to combine those _phase free energies_ into a _global free energy_.
 
 - [phase_field/MultiPhase/WBMTwoPhase.md]: Two phases, one phase order parameter
-- [phase_field/MultiPhase/KKS.md]: per-phase concentrations, two phases
+- [phase_field/MultiPhase/KKS.md]: per-phase concentrations, multiple phases and components
 - [phase_field/MultiPhase/SLKKS.md]: per-phase concentrations, per-sublattice concentrations, multiple phases
 - [phase_field/MultiPhase/WBM.md]: $N$ phases, $N$ phase order parameters
 - [phase_field/MultiPhase/GrandPotentialMultiphase.md]: solving a Legendre transform of the phase field equations, where the independent variable is the chemical potential
