@@ -43,11 +43,11 @@ MFEMFESpace::buildFEC() const
       mfem::FiniteElementCollection::New(getFECName().c_str()));
 }
 
-void
+std::shared_ptr<mfem::ParFiniteElementSpace>
 MFEMFESpace::buildFESpace() const
 {
-  _fespace =
-      std::make_shared<mfem::ParFiniteElementSpace>(&_pmesh, getFEC().get(), getVDim(), _ordering);
+  return std::make_shared<mfem::ParFiniteElementSpace>(
+      &_pmesh, getFEC().get(), getVDim(), _ordering);
 }
 
 #endif
