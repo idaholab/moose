@@ -200,6 +200,8 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type localToGlobalDofIndex(dof_id_type dof) const
   {
+    KOKKOS_ASSERT(_local_to_global_dof_index[dof] != libMesh::DofObject::invalid_id);
+
     return _local_to_global_dof_index[dof];
   }
 #endif
