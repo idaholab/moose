@@ -100,12 +100,11 @@ class SubprocessRunner(Runner):
             "shell": use_shell,
             "cwd": tester.getTestDir(),
         }
-        # On Windows, there is an issue with path translation when the command is passed in
-        # as a list.
+        # So that we can os.killpg to kill the entire process group
         if platform.system() == "Windows":
             process_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
         else:
-            process_kwargs["preexec_fn"] = os.setsid
+            process_kwargs["process_group"] = 0
 
         # Augment the environment if needed
         process_env = tester.augmentEnvironment(self.options)
