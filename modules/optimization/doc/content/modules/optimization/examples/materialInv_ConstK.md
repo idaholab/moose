@@ -9,6 +9,7 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Example 1: Convective Boundary Conditions](materialInv_ConvectiveBC.md)
 - [Example 2: Constant Thermal Conductivity](materialInv_ConstK.md)
 - [Example 3: Transient Solve with Automatic Adjoint](material_transient.md)
+- [Example 4: NEML2 Viscoplastic Parameter Inversion](invOptNEML2Viscoplastic.md)
 - [debuggingHelp.md]
 - [TaoGradientTester.md]
 

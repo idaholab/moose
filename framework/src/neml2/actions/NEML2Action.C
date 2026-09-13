@@ -166,6 +166,7 @@ NEML2Action::act()
     setupOutputMappings(*_model);
     setupDerivativeMappings(*_model);
     setupParameterDerivativeMappings(*_model);
+    setupParameterVJPMappings(*_model);
 
     printSummary();
 
@@ -184,6 +185,17 @@ NEML2Action::act()
       obj_params.set<std::string>("to_neml2") = neml2_name;
       obj_params.set<MooseEnum>("quantity_type").assign(static_cast<int>(moose_type));
       obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      // The gatherers must run on the same schedule as the executor that reads their buffers.
+      // This matters for the cotangent gatherer, whose material property is only meaningful after
+      // the adjoint solve, i.e. on an execution flag outside the forward solve.
+      if (isParamSetByUser("execute_on"))
+        obj_params.set<ExecFlagEnum>("execute_on") = getParam<ExecFlagEnum>("execute_on");
+      // The gatherers must also share the executor's execution order group. Groups run in
+      // ascending order and that ordering takes precedence over user object dependency
+      // resolution, so a gatherer left in another group would be read before it has filled its
+      // buffer, and the model would evaluate on an empty batch.
+      if (isParamSetByUser("execution_order_group"))
+        obj_params.set<int>("execution_order_group") = getParam<int>("execution_order_group");
       _problem->addUserObject(obj_type, obj_name, obj_params);
       return obj_name;
     };
@@ -216,6 +228,20 @@ NEML2Action::act()
       param_gatherers.push_back(
           addGatherer(param.name, param.name, param.moose_type, param.neml2_type, ""));
 
+    // MOOSEToNEML2 cotangent gatherer. Its NEML2 name is the output variable the cotangent is
+    // paired with, which is how the executor keys its cotangent lookup.
+    std::vector<UserObjectName> cotangent_gatherers;
+    if (!_param_vjps.empty())
+    {
+      const auto & y = getParam<std::string>("parameter_vjp_variable");
+      cotangent_gatherers.push_back(
+          addGatherer(getParam<MaterialPropertyName>("parameter_vjp_cotangent"),
+                      y,
+                      NEML2Utils::MOOSEIOType::MATERIAL,
+                      _model->output_variable(y).type(),
+                      "cotangent"));
+    }
+
     // The index generator UO
     {
       auto type = "NEML2BatchIndexGenerator";
@@ -232,6 +258,12 @@ NEML2Action::act()
       params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
       params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
       params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
+      params.set<std::vector<UserObjectName>>("cotangent_gatherers") = cotangent_gatherers;
+      // applyParameters above cannot carry execute_on over, because NEML2ModelExecutor sets its
+      // own default with set() rather than addParam(), which makes the local value count as
+      // already set and blocks the common value from being applied.
+      if (isParamSetByUser("execute_on"))
+        params.set<ExecFlagEnum>("execute_on") = getParam<ExecFlagEnum>("execute_on");
       _problem->addUserObject(type, _executor_name, params);
     }
   }
@@ -311,6 +343,16 @@ NEML2Action::act()
                    [&](InputParameters & p)
                    { p.set<std::string>("neml2_parameter_derivative") = param_deriv.x; });
     }
+
+    // NEML2ToMOOSE parameter derivative vector-Jacobian product retrievers. The contraction of the
+    // cotangent with the derivative is a scalar per quadrature point regardless of the tensor type
+    // of the output variable and the model parameter.
+    for (const auto & param_vjp : _param_vjps)
+      addRetriever(param_vjp.name,
+                   param_vjp.y,
+                   neml2::TensorType::kScalar,
+                   [&](InputParameters & p)
+                   { p.set<std::string>("neml2_parameter_vjp") = param_vjp.x; });
   }
 }
 
@@ -516,6 +558,39 @@ NEML2Action::setupParameterDerivativeMappings(const neml2::Model & model)
 }
 
 void
+NEML2Action::setupParameterVJPMappings(const neml2::Model & model)
+{
+  const auto vjp_params = getParam<std::vector<std::string>>("parameter_vjp_parameters");
+
+  if (vjp_params.empty())
+    return;
+
+  if (!isParamValid("parameter_vjp_variable"))
+    paramError("parameter_vjp_variable",
+               "parameter_vjp_variable must be specified when parameter_vjp_parameters is not "
+               "empty.");
+  if (!isParamValid("parameter_vjp_cotangent"))
+    paramError("parameter_vjp_cotangent",
+               "parameter_vjp_cotangent must be specified when parameter_vjp_parameters is not "
+               "empty.");
+
+  const auto & y = getParam<std::string>("parameter_vjp_variable");
+  if (model.output_variables().count(y) == 0)
+    paramError("parameter_vjp_variable", "The NEML2 output variable ", y, " does not exist.");
+
+  for (auto i : index_range(vjp_params))
+  {
+    if (model.named_parameters().count(vjp_params[i]) == 0)
+      paramError(
+          "parameter_vjp_parameters", "The NEML2 parameter ", vjp_params[i], " does not exist.");
+
+    // Deliberately not the d<y>/d<x> name used by parameter_derivatives: the two paths may be
+    // requested in the same run, and this one yields a scalar rather than the full derivative.
+    _param_vjps.push_back({"vjp_" + y + "_" + vjp_params[i], y, vjp_params[i]});
+  }
+}
+
+void
 NEML2Action::printSummary() const
 {
   if (!_app.parameters().have_parameter<bool>("parse_neml2_only"))
@@ -573,6 +648,10 @@ NEML2Action::printSummary() const
     // List parameter derivative transfer, NEML2 -> MOOSE
     for (const auto & param_deriv : _param_derivs)
       _console << "  - " << param_deriv.name << std::endl;
+
+    // List parameter derivative VJP transfer, NEML2 -> MOOSE
+    for (const auto & param_vjp : _param_vjps)
+      _console << "  - " << param_vjp.name << std::endl;
   }
 
   _console << COLOR_CYAN << std::setw(width) << std::setfill('*') << std::left
