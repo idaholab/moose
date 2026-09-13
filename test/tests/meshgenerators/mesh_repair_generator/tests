@@ -43,4 +43,401 @@
     # parallel packing not implemented for polys
     mesh_mode = 'replicated'
   []
+  [repair_slivers]
+    type = Exodiff
+    input = repair_slivers.i
+    cli_args = '--mesh-only'
+    exodiff = 'repair_slivers_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+    issues = '#33566'
+    requirement = "The system shall be able to repair sliver elements, flagged by the longest-edge flap test, by removing each sliver and absorbing it into its longest-edge neighbor, splitting a triangle neighbor into two triangles."
+    mesh_mode = 'replicated'
+  []
+  [repair_slivers_by_area]
+    type = Exodiff
+    input = repair_slivers.i
+    cli_args = 'Mesh/repair/flatness_tol=0 Mesh/repair/zero_area_fraction=0.01 --mesh-only repair_slivers_area_in.e'
+    exodiff = 'repair_slivers_area_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+    issues = '#33566'
+    requirement = "The system shall be able to repair sliver elements flagged by the relative-area test."
+    mesh_mode = 'replicated'
+  []
+  [repair_quad_slivers]
+    type = RunApp
+    input = repair_quad_slivers.i
+    expect_out = 'Number of 2D sliver elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall be able to repair a quadrilateral sliver element by absorbing it into a neighbor, promoting the neighbor to a polygon while keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_sliver_combinations]
+    type = RunApp
+    input = repair_sliver_combinations.i
+    expect_out = 'Number of 2D sliver elements repaired: 4'
+    issues = '#33566'
+    requirement = "The system shall be able to repair quadrilateral and polygon sliver elements against triangle, quadrilateral, and polygon neighbors, promoting each neighbor to a quadrilateral or polygon while keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_interior_sliver]
+    type = RunApp
+    input = repair_interior_sliver.i
+    expect_out = 'Number of 2D sliver elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall keep the mesh conformal when repairing an interior sliver whose non-absorbed edge is shared with another element."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate]
+    type = Exodiff
+    input = repair_tet_degenerate.i
+    cli_args = '--mesh-only'
+    exodiff = 'repair_tet_degenerate_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+    issues = '#33566'
+    requirement = "The system shall be able to repair an interior degenerate tetrahedron by edge collapse, producing a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_skip]
+    type = RunApp
+    input = repair_tet_degenerate_skip.i
+    expect_out = 'could not be collapsed \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a degenerate tetrahedron in place, rather than distorting the boundary, when it has no interior node that can be collapsed."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_needle]
+    type = RunApp
+    input = repair_tet_degenerate_needle.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair high-valence needle sliver tetrahedra (two nearly-adjacent nodes / a short shared edge) by edge collapse, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_apex_outside]
+    type = RunApp
+    input = repair_tet_degenerate_apex_outside.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat (pancake) tetrahedron whose apex projects outside its opposite face (caught by the volume test, not the flap test), keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_cluster]
+    type = RunApp
+    input = repair_tet_degenerate_cluster.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a cluster of adjacent degenerate tetrahedra sharing nodes via node-disjoint passes, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_high_valence]
+    type = RunApp
+    input = repair_tet_degenerate_high_valence.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat (pancake) tetrahedron at a high-valence interior node, keeping the surrounding neighborhood valid and conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_octahedron]
+    type = RunApp
+    input = repair_tet_degenerate_octahedron.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall, when repairing a degenerate tetrahedron at an interior node where some candidate edge collapses would invert a neighbor, reject those and commit a valid collapse."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_degenerate_hybrid]
+    type = RunApp
+    input = repair_tet_degenerate_hybrid.i
+    expect_out = 'could not be collapsed \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a degenerate tetrahedron in place when its collapse star includes a non-tetrahedral element, rather than corrupting the mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake]
+    type = RunApp
+    input = repair_pyramid_pancake.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat pancake pyramid by absorbing it into the hexahedron across its quad base, producing a valid conformal polyhedron and keeping its triangular cap faces conformal with their neighbors."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_polyhedron]
+    type = RunApp
+    input = repair_pyramid_pancake_polyhedron.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat pancake pyramid whose quad base is shared with a polyhedron, absorbing it into that polyhedron neighbor while keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_prism]
+    type = RunApp
+    input = repair_pyramid_pancake_prism.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat pancake pyramid while keeping a triangular cap face conformal with a prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_basenode]
+    type = RunApp
+    input = repair_pyramid_pancake_basenode.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair an asymmetric flat pancake pyramid, whose apex projects inside the quad base but offset toward a corner, by absorbing it into the element across its base."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_basenode_polyhedron]
+    type = RunApp
+    input = repair_pyramid_pancake_basenode_polyhedron.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair an asymmetric flat pancake pyramid sharing its quad base with a polyhedron neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_basenode_prism]
+    type = RunApp
+    input = repair_pyramid_pancake_basenode_prism.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair an asymmetric flat pancake pyramid while keeping a triangular cap face conformal with a prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_thin_base]
+    type = RunApp
+    input = repair_pyramid_pancake_thin_base.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat pancake pyramid resting on a thin, near-aligned quad base by absorbing it into the thin hexahedron across that base."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_pancake_skip]
+    type = RunApp
+    input = repair_pyramid_pancake_skip.i
+    expect_out = 'could not be absorbed \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a pancake pyramid in place, rather than corrupting the mesh, when no element shares its quad base and there is nothing to absorb it into."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver]
+    type = RunApp
+    input = repair_pyramid_sliver.i
+    expect_out = 'pyramid slivers removed by edge collapse: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a pyramid sliver (a needle thin in two dimensions) by collapsing its shortest edge and removing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_pancake]
+    type = RunApp
+    input = repair_wedge_pancake.i
+    expect_out = 'degenerate wedge elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat (axially squashed) pancake wedge by collapsing its top triangle onto its bottom, so the elements above and below it meet, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_pancake_prisms]
+    type = RunApp
+    input = repair_wedge_pancake_prisms.i
+    expect_out = 'degenerate wedge elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat pancake wedge sandwiched between two prisms, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_blade]
+    type = RunApp
+    input = repair_wedge_sliver_blade.i
+    expect_out = 'degenerate wedge elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a thin-cross-section (blade) sliver wedge by absorbing it into the hexahedron across its longest quad side, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_blade_prism]
+    type = RunApp
+    input = repair_wedge_sliver_blade_prism.i
+    expect_out = 'degenerate wedge elements repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a blade sliver wedge whose longest quad side is shared with a prism, absorbing it into that prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_skip]
+    type = RunApp
+    input = repair_wedge_sliver_skip.i
+    expect_out = 'could not be repaired \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a sliver wedge in place, rather than corrupting the mesh, when no valid repair exists (no element across its longest quad side)."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_pancake]
+    type = RunApp
+    input = repair_hex_pancake.i
+    expect_out = 'hexahedral pancakes repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat-slab pancake hexahedron by collapsing its squashed pair of opposite faces together, so the elements on either side meet, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_pancake_xsquashed]
+    type = RunApp
+    input = repair_hex_pancake_xsquashed.i
+    expect_out = 'hexahedral pancakes repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall identify which of a hexahedron's three opposite-face pairs is squashed and collapse that pair, for a slab thin in any axis direction."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_pancake_pyramids]
+    type = RunApp
+    input = repair_hex_pancake_pyramids.i
+    expect_out = 'hexahedral pancakes repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a flat-slab pancake hexahedron whose squashed faces are shared with non-hexahedral (pyramid) neighbors, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+
+  [repair_zero_volume_tet]
+    type = RunApp
+    input = repair_zero_volume_tet.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume tetrahedron collapsed toward a point by merging its vertices onto a single node, keeping the surrounding mesh valid and conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_hex]
+    type = RunApp
+    input = repair_zero_volume_hex.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume hexahedron collapsed toward a point by merging its eight vertices onto a single node."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_2d]
+    type = RunApp
+    input = repair_zero_volume_2d.i
+    expect_out = 'zero-volume elements removed: 1'
+    issues = '#33566'
+    requirement = "The system shall remove a zero-volume 2D element collapsed toward a point, which the sliver repair cannot absorb because its longest edge has zero length."
+    mesh_mode = 'replicated'
+  []
+  [repair_zero_volume_skip]
+    type = RunApp
+    input = repair_zero_volume_skip.i
+    expect_out = 'zero-volume elements that could not be removed \(left in place\): 2'
+    issues = '#33566'
+    requirement = "The system shall leave a degenerate cluster of point-collapsed elements in place, rather than corrupting a neighbor, and report them."
+    mesh_mode = 'replicated'
+  []
+
+  [repair_quad_to_tri]
+    type = RunApp
+    input = repair_quad_to_tri.i
+    expect_out = 'quadrilaterals collapsed to triangles: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a quadrilateral collapsed to a triangle by a short edge to a triangle, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_quad_to_tri_colinear]
+    type = RunApp
+    input = repair_quad_to_tri_colinear.i
+    expect_out = 'quadrilaterals collapsed to triangles: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a quadrilateral with a colinear vertex to a triangle when that vertex is redundant in every element sharing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_quad_to_tri_skip]
+    type = RunApp
+    input = repair_quad_to_tri_skip.i
+    expect_out = 'could not be collapsed to triangles \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a quadrilateral in place when collapsing its colinear vertex would leave a hanging node in an element that genuinely uses that vertex."
+    mesh_mode = 'replicated'
+  []
+  [repair_polygon_collapse]
+    type = RunApp
+    input = repair_polygon_collapse.i
+    expect_out = 'redundant polygon vertices collapsed: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce polygons sharing a redundant vertex to lower-sided polygons by collapsing that vertex, when every element sharing it is a polygon."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet]
+    type = RunApp
+    input = repair_pyramid_to_tet.i
+    expect_out = 'pyramids reduced to tetrahedra: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a pyramid collapsed to a tetrahedron by a short base edge to a tetrahedron."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet_colinear]
+    type = RunApp
+    input = repair_pyramid_to_tet_colinear.i
+    expect_out = 'pyramids reduced to tetrahedra: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a pyramid with a colinear base vertex to a tetrahedron when that vertex is redundant in every element sharing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet_skip]
+    type = RunApp
+    input = repair_pyramid_to_tet_skip.i
+    expect_out = 'could not be reduced to tetrahedra \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a pyramid in place when reducing it to a tetrahedron would require an unreducible neighbor across its base to change type."
+    mesh_mode = 'replicated'
+  []
+  [repair_prism_to_pyramid]
+    type = RunApp
+    input = repair_prism_to_pyramid.i
+    expect_out = 'wedges reduced to pyramids: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a wedge pinched to a pyramid by a short vertical edge to a pyramid."
+    mesh_mode = 'replicated'
+  []
+  [repair_prism_to_pyramid_skip]
+    type = RunApp
+    input = repair_prism_to_pyramid_skip.i
+    expect_out = 'could not be reduced to pyramids \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a wedge in place when reducing it to a pyramid would require an unreducible neighbor sharing its collapsed edge to change type."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_to_prism]
+    type = RunApp
+    input = repair_hex_to_prism.i
+    expect_out = 'hexahedra reduced to wedges: 1'
+    issues = '#33566'
+    requirement = "The system shall reduce a hexahedron pinched to a prism by a collapsed lateral face to a prism (wedge)."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_to_prism_skip]
+    type = RunApp
+    input = repair_hex_to_prism_skip.i
+    expect_out = 'could not be reduced to wedges \(left in place\): 1'
+    issues = '#33566'
+    requirement = "The system shall leave a hexahedron in place when reducing it to a prism would require a neighbor sharing its collapsed edge to change type."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_sliver]
+    type = RunApp
+    input = repair_hex_sliver.i
+    expect_out = 'hexahedral slivers repaired: 1'
+    issues = '#33566'
+    requirement = "The system shall repair a hexahedral sliver (a column thin in two dimensions) by collapsing its thin cross-sections onto its long axis and removing it."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_sliver_skip]
+    type = RunApp
+    input = repair_hex_sliver_skip.i
+    expect_out = 'hexahedral slivers that could not be repaired \(left in place\): 2'
+    issues = '#33566'
+    requirement = "The system shall leave hexahedral slivers in place when collapsing one would degenerate a neighbor sharing its cross-section, as in a stacked cluster."
+    mesh_mode = 'replicated'
+  []
+
+  [errors]
+    type = RunException
+    input = 'flip_element.i'
+    cli_args = 'Mesh/flip/fix_elements_orientation=false'
+    expect_err = 'No specific item to fix. Are any of the parameters misspelled'
+    issues = '#25107'
+    requirement = 'The system shall return an error if a repair generator is used but no specific repair actions have been requested.'
+    mesh_mode = 'replicated'
+  []
 []

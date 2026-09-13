@@ -12,6 +12,11 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 /**
  * Mesh generator to perform various improvement / fixing operations on an input mesh
  */
@@ -45,9 +50,29 @@ private:
   /// Whether to split non-convex polygons
   const bool _split_nonconvex_polygons;
 
-  /// @brief Removes the elements with an volume value below the user threshold
+  /// whether to repair degenerate (near-zero-quality) elements: zero-volume, slivers, and pancakes
+  const bool _fix_degenerate_elements;
+  /// a 2D element is treated as degenerate (a zero-area element) if its area is below this fraction
+  /// of the mesh surface-area scale (0 disables)
+  const Real _zero_area_tol;
+  /// flatness (flap) test tolerance: flags a flat pancake (or, in 2D, a sliver) when every
+  /// off-feature vertex is within this fraction of the feature size from that feature (0 disables)
+  const Real _flatness_tol;
+  /// a 3D element is treated as degenerate (a zero-volume element) if its volume is below this
+  /// fraction of the mesh bounding-box volume (0 disables)
+  const Real _zero_volume_tol;
+  /// relative floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
+  const Real _tet_collapse_volume_floor;
+
+  /// @brief Repair zero-volume elements: first-order 2D/3D elements collapsed toward a point
+  ///        (small in every dimension, i.e. a tiny diameter hmax()). Each is removed by merging
+  ///        all of its vertices onto one representative node - a sub-tolerance move - and deleting
+  ///        it, reusing collapseByFaceMerge so the merge is committed only if every neighbor stays
+  ///        non-degenerate and non-inverted; otherwise the element is left in place. Runs in
+  ///        node-disjoint passes. A point-collapse that shares a face/edge with another element (a
+  ///        degenerate cluster) is left in place - cluster removal is not yet implemented.
   /// @param mesh the mesh to modify
-  void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
+  void repairZeroVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Removes nodes that overlap
   /// @param mesh the mesh to modify
@@ -61,4 +86,179 @@ private:
   /// @brief Splits non-convex polygonal elements to keep only convex elements
   /// @param mesh the mesh to modify
   void splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair 2D first-order slivers (TRI3, QUAD4, polygons): thin/flat elements (flatness
+  ///        test) and zero-area elements (area test). Each is removed and absorbed into its
+  ///        longest-edge neighbor, keeping the surface conformal (no holes or hanging nodes). A
+  ///        triangle sliver against a triangle neighbor splits that neighbor into two triangles;
+  ///        otherwise the neighbor absorbs the sliver's vertices and is promoted to a quad or
+  ///        polygon. A 2D element collapsed to a lower topology by a short edge or a colinear vertex
+  ///        (a QUAD4 becoming an effective TRI3) is handled separately by repairQuadToTri.
+  /// @param mesh the mesh to modify
+  void repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair degenerate TET4 elements by edge collapse: flat pancakes (apex flat against the
+  ///        largest face), needle slivers, and zero-volume tets are all flagged and removed the
+  ///        same way. Each is removed by collapsing one of its edges (merging a node onto another
+  ///        existing node), keeping a valid all-tetrahedral, conformal, manifold mesh. A candidate
+  ///        collapse is committed only if it does not invert/degenerate any neighbor, does not
+  ///        create a non-manifold configuration, and does not distort the mesh boundary; otherwise
+  ///        the element is left in place. Repairs run in node-disjoint passes.
+  /// @param mesh the mesh to modify
+  void repairDegenerateTets(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair flat pancake PYRAMID5 elements by absorbing each into the element sharing its
+  ///        quad base. The shared quad face is dissolved and the neighbor (a hex, prism, polyhedron,
+  ///        or another pyramid) is replaced by a C0Polyhedron made of its remaining faces plus the
+  ///        pancake pyramid's four triangular side faces. No node is moved, so the surrounding
+  ///        elements stay conformal. A pyramid is left in place if it has no element across its quad
+  ///        base or the resulting polyhedron would be invalid (a needle/zero-volume pyramid whose
+  ///        apex projects outside the base is flagged but not absorbed). Does not handle a PYRAMID5
+  ///        collapsed to a TET4 by a base-edge collapse; that is not yet implemented.
+  /// @param mesh the mesh to modify
+  void repairPyramidPancakes(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair PYRAMID5 sliver elements (thin in two dimensions, a needle/spike): a pyramid of
+  ///        negligible volume that is not flat (its apex is not near its base plane, so its base is
+  ///        the degenerate part). It is removed by collapsing its shortest edge, so the surrounding
+  ///        elements meet, committed only if that leaves every neighbor valid. A flat pancake
+  ///        (handled by repairPyramidPancakes) and a healthy pyramid with a short base edge (reduced
+  ///        to a tet by repairPyramidToTet) are left for those routines.
+  /// @param mesh the mesh to modify
+  void repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair degenerate PRISM6 (wedge) elements. A flat (axially squashed) wedge - a pancake
+  ///        - is repaired by collapsing its top triangle onto its bottom triangle so the elements
+  ///        above and below it meet; a thin-cross-section (blade) wedge - a sliver - is absorbed
+  ///        into the element across its longest quad side, which becomes a C0Polyhedron. A wedge is
+  ///        left in place if no valid repair exists (the collapse would invert/degenerate a neighbor
+  ///        or distort the boundary, or the absorbed union would be an invalid cell). Does not
+  ///        handle a wedge collapsed to a lower topology (short-edge degeneracy); not yet
+  ///        implemented.
+  /// @param mesh the mesh to modify
+  void repairDegenerateWedges(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Absorb a degenerate element into the neighbor sharing the face with sorted node-id key
+  ///        @p shared_key, by replacing both with a single C0Polyhedron whose faces are both
+  ///        elements' faces except the shared one. Side and edge boundary ids and the neighbor's
+  ///        subdomain are carried onto the polyhedron. On success the polyhedron is added, both
+  ///        elements are deleted, their nodes are recorded in @p touched_nodes, and true is
+  ///        returned; if the union is not a valid convex cell the mesh is left unchanged and false
+  ///        is returned.
+  bool absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
+                              Elem * degenerate,
+                              Elem * neighbor,
+                              const std::vector<dof_id_type> & shared_key,
+                              std::unordered_set<dof_id_type> & touched_nodes) const;
+
+  /// @brief Collapse a degenerate element by merging each @p gone_kept node pair (moving the first
+  ///        node onto the second), e.g. one flat cap face of a wedge or hexahedron onto its
+  ///        opposite. The element is deleted and its neighbors stay valid: the merge is committed
+  ///        only if it
+  ///        leaves every other element in the collapse star non-degenerate and non-inverted (volume
+  ///        above @p invert_floor), otherwise the mesh is left unchanged. The caller is responsible
+  ///        for capturing the gone node pointers up front and for ensuring the connecting side faces
+  ///        are unshared. Returns true and records the affected nodes in @p touched_nodes on commit.
+  bool collapseByFaceMerge(
+      std::unique_ptr<MeshBase> & mesh,
+      Elem * degenerate,
+      const std::vector<std::pair<Node *, Node *>> & gone_kept,
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+      std::unordered_set<dof_id_type> & touched_nodes,
+      Real invert_floor) const;
+
+  /// @brief Repair flat-slab pancake HEX8 elements by collapsing the squashed pair of opposite
+  ///        faces together so the elements on either side meet. A hex is left in place if no pair
+  ///        is sufficiently squashed, a connecting side face is shared, or the collapse would
+  ///        invert/degenerate a neighbor. A hex thin in two dimensions (a sliver/column) is handled
+  ///        by repairHexSlivers, and a HEX8 pinched to a PRISM6 by a collapsed lateral face by
+  ///        repairHexToPrism.
+  /// @param mesh the mesh to modify
+  void repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair HEX8 sliver elements (thin in two dimensions, a needle/column) by collapsing
+  ///        their two thin cross-sections onto the long axis, removing the hex so the elements
+  ///        around it meet. Committed only if the collapse leaves every neighbor non-degenerate and
+  ///        non-inverted (so it mainly resolves an isolated/boundary column); otherwise the hex is
+  ///        left in place and reported.
+  /// @param mesh the mesh to modify
+  void repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Build the lower-order element that results from collapsing the edge (@p v_id, @p keep_id)
+  ///        of @p e (merging v_id onto keep_id), for a supported topology reduction: QUAD4 -> TRI3,
+  ///        PYRAMID5 -> TET4 (base edge only), PRISM6 -> PYRAMID5 (vertical edge only). The returned
+  ///        element has keep_id in place of v_id, its nodes in a positively-oriented order, and the
+  ///        subdomain id of @p e. Returns nullptr if @p e's type or the collapsed edge does not map
+  ///        to a supported lower type (e.g. the two nodes are not an edge of @p e, or a pyramid
+  ///        lateral edge / prism triangle edge).
+  std::unique_ptr<Elem> reducedElement(const Elem & e, dof_id_type v_id, dof_id_type keep_id) const;
+
+  /// @brief Replace @p old_elem with the lower-order @p replacement (whose nodes already use the
+  ///        merged ids), carrying @p old_elem's subdomain and its side and edge boundary ids onto
+  ///        the matching sides/edges of the replacement. @p node_sub maps a gone node id to the node
+  ///        id it merged onto (identity for all others), so boundary ids can be re-keyed; a side or
+  ///        edge that collapsed onto a merged edge is dropped. @p old_elem is deleted.
+  void replaceReducedElement(std::unique_ptr<MeshBase> & mesh,
+                             Elem * old_elem,
+                             std::unique_ptr<Elem> replacement,
+                             const std::map<dof_id_type, dof_id_type> & node_sub) const;
+
+  /// @brief Collapse a redundant vertex @p v onto an adjacent vertex @p keep (a short edge, or a
+  ///        colinear "not sticking out" vertex), reducing every incident element that contained both
+  ///        to a lower topology and leaving elements that contained only @p v with @p keep in its
+  ///        place. Committed only if every incident element stays valid: each reducing element must
+  ///        map to a supported lower type (via reducedElement) with positive measure above
+  ///        @p invert_floor, and each moved element must stay non-degenerate and above the floor;
+  ///        otherwise the mesh is left unchanged. Subdomain and side/edge boundary ids are carried
+  ///        onto the reduced elements, and @p v is deleted. When @p coincident is false (a colinear
+  ///        vertex, i.e. @p v is not ~at @p keep, so the merge slides @p v along the edge) the
+  ///        collapse is additionally rejected if any incident element contains @p v but not @p keep
+  ///        (a "mover" that the slide would distort); a coincident (short-edge) merge is a null move
+  ///        and imposes no such restriction. Returns true and records the affected nodes in
+  ///        @p touched_nodes on commit.
+  bool collapseRedundantVertex(
+      std::unique_ptr<MeshBase> & mesh,
+      Node * v,
+      Node * keep,
+      bool coincident,
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+      std::unordered_set<dof_id_type> & touched_nodes,
+      Real invert_floor) const;
+
+  /// @brief Repair QUAD4 elements collapsed to a triangle by a short edge or a colinear vertex, by
+  ///        collapsing the redundant vertex (QUAD4 -> TRI3). A quad is left in place if the collapse
+  ///        would leave a co-edge neighbor unreducible or inverted, or if a colinear vertex is not
+  ///        redundant in every element sharing it (which would create a hanging node).
+  /// @param mesh the mesh to modify
+  void repairQuadToTri(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair C0POLYGON elements with a redundant vertex (a short edge or a colinear vertex) by
+  ///        collapsing it, reducing an n-sided polygon to an (n-1)-sided one. Only performed when
+  ///        every element sharing the redundant vertex is itself a polygon (so all reduce cleanly
+  ///        onto polygons); otherwise, or if the collapse would invert a neighbor, the polygon is
+  ///        left in place.
+  /// @param mesh the mesh to modify
+  void repairPolygonCollapse(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair PYRAMID5 elements collapsed to a tetrahedron by a short or colinear base edge, by
+  ///        collapsing the redundant base vertex (PYRAMID5 -> TET4). A pyramid is left in place if a
+  ///        co-edge neighbor cannot reduce, the result would invert, or (for a colinear base vertex)
+  ///        an element sharing the vertex would be distorted.
+  /// @param mesh the mesh to modify
+  void repairPyramidToTet(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair PRISM6 (wedge) elements pinched to a pyramid by a short vertical edge, by
+  ///        collapsing that edge (PRISM6 -> PYRAMID5): the merged node becomes the apex and the
+  ///        opposite lateral quad becomes the base. A wedge is left in place if a co-edge neighbor
+  ///        cannot reduce or the result would invert.
+  /// @param mesh the mesh to modify
+  void repairPrismToPyramid(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair HEX8 elements pinched to a prism by a collapsed lateral face, by collapsing the
+  ///        two short horizontal edges of that face together (HEX8 -> PRISM6): the pinched face
+  ///        becomes a vertical edge, each squashed bottom/top face becomes a triangle. A hex is left
+  ///        in place if a neighbor sharing a collapsed edge cannot reduce, the pinch is shared with
+  ///        another pinched cell, or the result would invert.
+  /// @param mesh the mesh to modify
+  void repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const;
 };
