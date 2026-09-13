@@ -36,8 +36,9 @@
 []
 
 [NEML2]
+  eager = true
   input = 'models/custom_model.i'
-  verbose = true
+  load = 'models/test_models.py'
   device = 'cpu'
   [A]
     model = 'model_A_non_ad'

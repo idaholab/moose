@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseConstantFromCSV.h"
+#include "Assembly.h"
 
 registerMooseObject("MooseApp", PiecewiseConstantFromCSV);
 
@@ -43,7 +44,8 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
   : Function(parameters),
     _read_prop_user_object(nullptr),
     _column_number(getParam<unsigned int>("column_number")),
-    _read_type(getParam<MooseEnum>("read_type").getEnum<PropertyReadFile::ReadTypeEnum>())
+    _read_type(getParam<MooseEnum>("read_type").getEnum<PropertyReadFile::ReadTypeEnum>()),
+    _tid(isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0)
 {
   if (_column_number < _ti_feproblem.mesh().dimension() &&
       _read_type == PropertyReadFile::ReadTypeEnum::VORONOI)
@@ -74,11 +76,29 @@ PiecewiseConstantFromCSV::initialSetup()
 Real
 PiecewiseConstantFromCSV::value(Real, const Point & p) const
 {
+  if (_read_type == PropertyReadFile::ReadTypeEnum::BLOCK)
+  {
+    // Block-sorted data is keyed by subdomain. A constant_on = SUBDOMAIN material is computed
+    // during subdomainSetup, where the element loop has already advanced currentSubdomainID to the
+    // new subdomain (in preElement) but has NOT yet reinitialized the current element (that happens
+    // later in onElement). So assembly.elem() still points at the previously processed element and
+    // the point p handed in is that element's stale q-point -- point-locating it lands in the
+    // previous subdomain (or fails outright). Detect this by the subdomain mismatch and answer
+    // directly from the subdomain being processed. Otherwise (elem() is consistent with
+    // currentSubdomainID) p is a genuine location -- a material quadrature point, or a nodal
+    // initial condition -- so fall through to point-location, which also resolves nodes shared
+    // between blocks deterministically (lowest element id).
+    const Assembly & assembly = _ti_feproblem.assembly(_tid, /*nl_sys=*/0);
+    const SubdomainID current_subdomain = assembly.currentSubdomainID();
+    const Elem * const current_elem = assembly.elem();
+    if (!current_elem || current_elem->subdomain_id() != current_subdomain)
+      return _read_prop_user_object->getBlockData(current_subdomain, _column_number);
+  }
+
   if (_read_type == PropertyReadFile::ReadTypeEnum::ELEMENT ||
       _read_type == PropertyReadFile::ReadTypeEnum::BLOCK)
   {
-    // This is somewhat inefficient, but it allows us to retrieve the data in the
-    // CSV by element or by block.
+    // Genuine per-location lookup: find the element containing the point.
     std::set<const Elem *> candidate_elements;
     (*_point_locator)(p, candidate_elements);
 
@@ -94,6 +114,8 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
                    p,
                    ". Lowest ID element will be used for reading CSV data.");
 
+    if (_read_type == PropertyReadFile::ReadTypeEnum::BLOCK)
+      return _read_prop_user_object->getBlockData(min_id_elem, _column_number);
     return _read_prop_user_object->getData(min_id_elem, _column_number);
   }
   else if (_read_type == PropertyReadFile::ReadTypeEnum::NODE)

@@ -39,7 +39,7 @@ By the time this action "acts", the NEML2 input file must have already been pars
 
 ## NEML2 model introspection
 
-If [!param](/NEML2/verbose) is set to `true`, a high-level summary of the NEML2 model is print to the console, including model name, evaluation device, as well as a table summarizing the model's variables, parameters, and buffers.
+A high-level summary of the NEML2 model is printed to the console, including model name, evaluation device, as well as a table summarizing the model's variables, parameters, and buffers.
 
 NEML2 model allows introspection, i.e., variable and parameter names, tensor types, and storage sizes can be inferred after the model is loaded. Five maps are set up upon introspection of the NEML2 model:
 
@@ -64,6 +64,30 @@ Next, a [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md) and a [NEML2Mode
 ## Creating NEML2ToMOOSE retrievers
 
 The last step is creating the `NEML2ToMOOSE` retrievers to retrieve NEML2 model outputs (and their derivatives) back to MOOSE. This step is similar to [creating MOOSEToNEML2 gatherers](NEML2Action.md#gatherer).
+
+## Debugging a failed constitutive update id=dump
+
+A NEML2 constitutive update can fail to converge for some elements -- a *recoverable* return-map failure (a Newton divergence or max-iterations in the material solve). MOOSE then cuts the time step and retries, so the exact inputs that triggered the failure are normally lost by the time the run ends. Set [!param](/NEML2/dump_inputs_on_failure) to `true` to capture them: on each failed update the executor serializes the whole local batch of NEML2 input tensors (strains, temperature, old state, model parameters, ...) to a per-rank TorchScript file `<model>_count<c>_rank<r>.pt`.
+
+The counter `<c>` is advanced collectively, so it is identical on every rank for a given failed update; since MOOSE streams only rank 0 to the console, the reported message names the `<model>_count<c>_rank_*.pt` glob (one file per failing rank) along with the time step, `execute_on` flag, and nonlinear iteration for context.
+
+Each file can be loaded offline with `torch.jit.load` -- its buffers are the model's input variables (characters that are invalid in identifiers, such as the `~` in old-state lag names, are replaced by `_`) -- so the model can be re-evaluated on exactly the failing batch and the divergence diagnosed independently of MOOSE. This is a debugging aid; leave it off (the default) for production runs.
+
+To make that diagnosis near-zero-boilerplate, NEML2 can attach a *failure context* to the recoverable `ConvergenceError` a non-converged constitutive update raises. Set the `NEML2_CAPTURE_SOLVE_FAILURE` environment variable before the failing solve and the exception carries two extra attributes:
+
+- `converged_mask` -- a per-batch-entry boolean tensor, `True` where that quadrature point converged. Isolating *which* points diverged is then a single `(~e.converged_mask).nonzero()`, rather than re-running each entry as its own size-1 batch.
+- `unknowns` -- a `{unknown-variable name -> best-effort iterate}` map: the state the Newton solve got stuck at, ready to inspect. Each value is a NEML2-typed tensor when replaying an eager model, or a plain `torch.Tensor` for a compiled one; both carry the dynamic-batch leading dim.
+
+The capture is identical whether you load the eager model `.i` or the `<model>_aoti.i` compiled stub, and identical to what MOOSE sees at runtime. It is off by default because it costs an extra masked re-solve on each failure; the boilerplate below turns it on at import time.
+
+The following boilerplate (1) loads a dumped file and maps its buffers back onto the model's inputs, and (2) re-runs the model on the whole failing batch to reproduce the failure and read the failing entries + stuck state off the exception (export `NEML2_LOGS="newton=info"` to additionally print the per-iteration residual history):
+
+!listing test/tests/neml2/debug_dumped_inputs.py
+         start=import os
+         end=class DumpedInputReplayTest
+         include-end=False
+         language=python
+         caption=Re-evaluate a NEML2 model on a dumped failing batch and read the failure context (from [!param](/NEML2/dump_inputs_on_failure) with `NEML2_CAPTURE_SOLVE_FAILURE`).
 
 !syntax parameters /NEML2/NEML2ActionCommon
 

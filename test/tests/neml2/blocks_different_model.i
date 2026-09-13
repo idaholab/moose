@@ -24,8 +24,9 @@
 []
 
 [NEML2]
+  eager = true
   input = 'models/custom_model.i'
-  verbose = true
+  load = 'models/test_models.py'
   device = 'cpu'
 
   # request derivatives (must be pairs of two)

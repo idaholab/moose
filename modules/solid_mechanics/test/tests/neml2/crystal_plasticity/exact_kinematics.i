@@ -29,10 +29,10 @@ N = 2
 []
 
 [NEML2]
+  eager = true
   input = 'exact_kinematics_neml2.i'
   [all]
     model = 'model'
-    verbose = true
     device = 'cpu'
     derivatives = 'neml2_stress deformation_gradient'
     initialize_outputs = 'plastic_deformation_gradient'

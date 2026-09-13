@@ -19,14 +19,14 @@
     tensor = 'over_stress'
     invariant = 'effective_stress'
   []
-  [yield]
+  [yield_surface]
     type = YieldFunction
     yield_stress = 5
     isotropic_hardening = 'isotropic_hardening'
   []
   [flow]
     type = ComposedModel
-    models = 'overstress vonmises yield'
+    models = 'overstress vonmises yield_surface'
   []
   [normality]
     type = Normality
@@ -85,7 +85,7 @@
   [surface]
     type = ComposedModel
     models = 'isoharden mandel_stress overstress vonmises
-              yield normality eprate Xrate Eprate
+              yield_surface normality eprate Xrate Eprate
               strain_rate elastic_strain_rate elasticity
               consistency integrate_ep integrate_X integrate_S'
   []

@@ -19,13 +19,13 @@
     tensor = 'over_stress'
     invariant = 'effective_stress'
   []
-  [yield]
+  [yield_surface]
     type = YieldFunction
     yield_stress = 5
   []
   [flow]
     type = ComposedModel
-    models = 'overstress vonmises yield'
+    models = 'overstress vonmises yield_surface'
   []
   [normality]
     type = Normality
@@ -73,7 +73,7 @@
   []
   [implicit_rate]
     type = ComposedModel
-    models = 'kinharden mandel_stress overstress vonmises yield normality flow_rate Eprate Kprate Erate Eerate elasticity integrate_stress integrate_Kp'
+    models = 'kinharden mandel_stress overstress vonmises yield_surface normality flow_rate Eprate Kprate Erate Eerate elasticity integrate_stress integrate_Kp'
   []
 []
 
