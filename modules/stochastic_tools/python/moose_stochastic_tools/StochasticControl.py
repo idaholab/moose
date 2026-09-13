@@ -694,14 +694,15 @@ class StochasticRunner:
             ...     from scipy.optimize import shgo
             ...     res = shgo(objective, bounds, workers=runner.parallelWorker)
         """
-        x = np.array([xi for xi in x_iter])
+        x_list = list(x_iter)
+        x = np.array(x_list)
         if self._result_cache is None:
-            self.configCache(len(x_iter))
+            self.configCache(len(x_list))
         elif self._result_cache.maxsize < x.shape[0]:
             self._result_cache.maxsize = x.shape[0]
 
         self(x)
-        for xi in x_iter:
+        for xi in x_list:
             yield func(xi)
 
     def configCache(self, maxsize: int = 10000, tol: float = 1e-14):
