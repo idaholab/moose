@@ -15,6 +15,8 @@
 #include "NonlinearSystemBase.h"
 #include "KokkosLevelTransfer.h"
 
+#include "libmesh/petsc_matrix_base.h"
+
 namespace
 {
 PetscErrorCode
@@ -325,7 +327,7 @@ PMultigrid::verifyOperatorConditioning()
   TIME_SECTION("verifyOperatorConditioning", 1);
 
   auto & operator_shell =
-      libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(_nl.kokkosMatrixFreeOperator());
+      libMesh::cast_ref<libMesh::PetscMatrixBase<Number> &>(_nl.kokkosMatrixFreeOperator());
 
   // One application per column
   Mat assembled;
@@ -420,7 +422,7 @@ PMultigrid::verifyCycleSymmetry()
 
   // The cycle is a linear operator over the same layout the system's own operator is over
   auto & operator_shell =
-      libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(_nl.kokkosMatrixFreeOperator());
+      libMesh::cast_ref<libMesh::PetscMatrixBase<Number> &>(_nl.kokkosMatrixFreeOperator());
 
   PetscInt local_rows, local_cols, rows, cols;
   LibmeshPetscCallA(comm().get(), MatGetLocalSize(operator_shell.mat(), &local_rows, &local_cols));
@@ -501,8 +503,11 @@ PMultigrid::verifyOperatorSymmetry()
         "is not available for a transient Kokkos matrix-free system.");
 
   // The shell registered as this system's own matrix, which PetscNonlinearSolver hands SNES as both
-  // Amat and Pmat, and whose MatMult is _nl.computeKokkosJacobianVectorProduct()
-  auto & shell = libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(_nl.kokkosMatrixFreeOperator());
+  // Amat and Pmat, and whose MatMult is _nl.computeKokkosJacobianVectorProduct().
+  // PetscMatrixBase is the class that owns the underlying Mat, and it is what a shell operator
+  // derives from, so it is the cast target here and at every other site reaching this operator.
+  auto & shell =
+      libMesh::cast_ref<libMesh::PetscMatrixBase<Number> &>(_nl.kokkosMatrixFreeOperator());
 
   // One application per column, which is why this is gated behind a verification flag
   Mat assembled;
