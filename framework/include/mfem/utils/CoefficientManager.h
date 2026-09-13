@@ -152,12 +152,12 @@ public:
   }
 
   /// Return a scalar coefficient with the given name or, if that
-  /// doesn't exists, try interpreting the name as a number with which
+  /// doesn't exist, try interpreting the name as a number with which
   /// to build a new constant coefficient.
   mfem::Coefficient & getScalarCoefficient(const std::string & name);
 
   /// Return a vector coefficient with the given name or, if that
-  /// doesn't exists, try interpreting the name as a vector of number with which
+  /// doesn't exist, try interpreting the name as a vector of number with which
   /// to build a new constant vector coefficient.
   mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
 

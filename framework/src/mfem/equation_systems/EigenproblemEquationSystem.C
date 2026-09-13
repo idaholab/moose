@@ -22,11 +22,39 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   _ess_tdof_lists.resize(1);
   _ess_markers.resize(1);
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
+  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+  _ess_markers.at(0) = 0;
   trial_gf.Update();
-  trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
-  trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_ess_markers.at(0));
-  trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+  static_cast<mfem::Vector &>(trial_gf) = _gfuncs->GetRef(_trial_var_names.at(0));
+  // Set constrained DoF values on user-declared essential boundaries and collect their markers
+  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
+  trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+  CheckProblemIsHomogeneous();
+}
+
+void
+EigenproblemEquationSystem::CheckProblemIsHomogeneous()
+{
+  // Reject nonzero Dirichlet BCs.
+  mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
+  mfem::Vector ess_values;
+  trial_gf.GetTrueDofs(ess_values);
+  ess_values.SetSubVectorComplement(_ess_tdof_lists.at(0), 0.0);
+  mfem::real_t max_ess_value = ess_values.Normlinf();
+  MPI_Allreduce(MPI_IN_PLACE,
+                &max_ess_value,
+                1,
+                mfem::MPITypeMap<mfem::real_t>::mpi_type,
+                MPI_MAX,
+                trial_gf.ParFESpace()->GetComm());
+  // Roundoff guard. Zero coefficients project to exactly zero.
+  if (max_ess_value > 10 * std::numeric_limits<mfem::real_t>::epsilon())
+    mooseError("Essential boundary conditions on variable '",
+               _trial_var_names.at(0),
+               "' prescribe a nonzero value. "
+               "An eigenproblem is homogeneous so only zero-valued essential boundary conditions "
+               "are meaningful. Set the "
+               "boundary coefficient to zero.");
 }
 
 void
@@ -41,16 +69,21 @@ EigenproblemEquationSystem::FormEigenproblemMatrix()
 }
 
 void
-EigenproblemEquationSystem::FormMassMatrix()
+EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
 {
-  mfem::ConstantCoefficient one(1.0);
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-    m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  {
+    if (std::holds_alternative<mfem::MatrixCoefficient *>(rhs_coefficient))
+      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
+    m->AddDomainIntegrator(
+        new mfem::MassIntegrator(*std::get<mfem::Coefficient *>(rhs_coefficient)));
+  }
   else
-    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
+    m->AddDomainIntegrator(std::visit(
+        [](auto * coef) { return new mfem::VectorFEMassIntegrator(*coef); }, rhs_coefficient));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
@@ -62,7 +95,8 @@ EigenproblemEquationSystem::FormMassMatrix()
 }
 
 void
-EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX)
+EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
+                                                      EigenRHSCoefficient rhs_coefficient)
 {
   mooseAssert(_test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) &&
                   (_test_var_names.at(0) == _trial_var_names.at(0)),
@@ -72,7 +106,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX)
   width = trueX.Size();
   ApplyEssentialBCs();
   FormEigenproblemMatrix();
-  FormMassMatrix();
+  FormMassMatrix(rhs_coefficient);
 }
 
 void
