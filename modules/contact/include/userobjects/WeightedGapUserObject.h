@@ -37,6 +37,28 @@ public:
   virtual const ADVariableValue & contactPressure() const = 0;
 
   /**
+   * @param node Secondary node of the current secondary lower-dimensional element
+   * @return The nodal normal contact pressure at that node, carrying its derivatives
+   *
+   * Consumers interpolate this together with the node's own normal to build the contact traction
+   * vector \f$\sum_j \Phi_j z_{n,j} \mathbf{n}_j\f$. Interpolating the nodal traction vector, and
+   * not a scalar pressure scaled by one row's normal, is what makes the discrete contact force the
+   * transpose of the weighted gap so that the two sides of the interface are in equilibrium; see
+   * Popp et al., Comput Methods Appl Mech Eng 264 (2013) 67, Eq. (11).
+   */
+  virtual ADReal nodalContactPressure(const Node & /*node*/) const
+  {
+    mooseError("Not available in base class.");
+  }
+
+  /**
+   * @return The basis that interpolates the contact traction. This is not necessarily \p test():
+   * under the Petrov-Galerkin approach the weighted gap uses an auxiliary standard basis while the
+   * traction stays on the dual basis.
+   */
+  virtual const VariableTestValue & tractionBasis() const { return *_test; }
+
+  /**
    * @param node Node pointer
    * @return The normal contact pressure at the node
    */
@@ -47,6 +69,21 @@ public:
    * @return The normal gap at the node
    */
   virtual Real getNormalGap(const Node * const /*node*/) const;
+
+  /// Whether this user object includes derivatives of the secondary nodal normals
+  bool usesNodalNormalDerivatives() const;
+
+  /// Enable derivatives during construction of a supported quasistatic contact constraint.
+  /// Other contact formulations intentionally leave this disabled.
+  void includeNodalNormalDerivatives();
+
+  /**
+   * Return the cached contact normal for the supplied lower-dimensional secondary element node.
+   * The raw value is the stored normalized secondary nodal normal. Coordinate derivatives are
+   * included while this object's formulation and the current assembly mode require them.
+   */
+  const ADRealVectorValue & contactNormal(const Elem & lower_secondary_elem,
+                                          unsigned int nodal_index) const;
 
   /**
    * Compute physical gap from integration gap quantity
@@ -151,6 +188,11 @@ protected:
     return it->second;
   }
 
+  /**
+   * Add displacement derivatives to the coordinate used for the stored mortar nodal geometry.
+   */
+  ADPoint nodalCoordinate(const Node & node, const Point & geometry_coordinate) const;
+
   /// The base finite element problem
   FEProblemBase & _fe_problem;
 
@@ -207,6 +249,15 @@ protected:
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
   const VariableTestValue * _test = nullptr;
+
+  /// AD nodal normals, each averaged over the secondary faces containing that node
+  mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;
+
+  /// Whether this concrete user object supports nodal-normal derivatives
+  const bool _allow_nodal_normal_derivatives;
+
+  /// Set once while supported contact constraints are constructed, before user object execution
+  bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
   /// Lagrange multiplier). We have this member so that we don't do virtual calls during inner

@@ -20,6 +20,37 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.set<bool>("allow_nodal_normal_derivatives") = true;
+  params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.suppressParameter<bool>("ghost_point_neighbors");
+  // Penalty contact has no LM constraint to contribute the nodal-normal point-neighbor coupling
+  // to the matrix graph, so its weighted-gap object supplies the coupling relationship manager
+  // directly.
+  const auto configure_point_neighbors =
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+  {
+    rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+    rm_params.set<BoundaryName>("secondary_boundary") =
+        obj_params.get<BoundaryName>("secondary_boundary");
+    rm_params.set<BoundaryName>("primary_boundary") =
+        obj_params.get<BoundaryName>("primary_boundary");
+    rm_params.set<SubdomainName>("secondary_subdomain") =
+        obj_params.get<SubdomainName>("secondary_subdomain");
+    rm_params.set<SubdomainName>("primary_subdomain") =
+        obj_params.get<SubdomainName>("primary_subdomain");
+    // penetration_tolerance is required exactly for augmented-Lagrange contact, which uses
+    // frozen-normal geometry.
+    rm_params.set<bool>("ghost_point_neighbors") =
+        obj_params.get<bool>("use_nodal_normal_derivatives") &&
+        !obj_params.isParamValid("penetration_tolerance");
+  };
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC,
+                                configure_point_neighbors);
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                configure_point_neighbors);
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -196,6 +227,15 @@ PenaltyWeightedGapUserObject::reinit()
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_pressure[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
   }
+}
+
+ADReal
+PenaltyWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  // A node only enters this map once it has received a weighted-gap contribution, so a node on a
+  // partially integrated element may be absent. Absent means no contact pressure, matching how the
+  // interpolated pressure in reinit() treats it.
+  return findValue(_dof_to_normal_pressure, static_cast<const DofObject *>(&node), ADReal(0));
 }
 
 void

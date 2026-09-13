@@ -28,6 +28,7 @@ public:
 
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
+  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const override;
 
   /// This class inherits WeightedGapUserObject through both of its bases, each of which overrides
   /// these methods, so they have to be resolved explicitly here.

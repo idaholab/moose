@@ -65,7 +65,13 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
 ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
-    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")),
+    // This constraint configures the user object before execution, but UserObjectInterface hands
+    // out only const references. FEProblemBase::getUserObject would give a mutable one, except that
+    // it resolves the type through TheWarehouse's static_cast, which cannot downcast to
+    // WeightedVelocitiesUserObject across its virtual WeightedGapUserObject base. Only the
+    // dynamic_cast behind UserObjectInterface can, so cast the constness away here.
+    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
+        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))),
     _c_t(getParam<Real>("c_t")),
     _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
                                     .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),
@@ -84,6 +90,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  _weighted_velocities_uo.includeNodalNormalDerivatives();
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",

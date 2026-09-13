@@ -210,6 +210,15 @@ PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * con
     return 0.0;
 }
 
+ADReal
+PenaltyFrictionUserObject::nodalTangentialPressure(const Node & node,
+                                                   const unsigned int direction) const
+{
+  mooseAssert(direction < 2, "There are at most two tangent directions.");
+  return libmesh_map_find(_dof_to_tangential_traction, static_cast<const DofObject *>(&node))
+      .first(direction);
+}
+
 void
 PenaltyFrictionUserObject::reinit()
 {

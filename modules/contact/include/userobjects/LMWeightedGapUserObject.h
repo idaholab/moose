@@ -38,8 +38,13 @@ public:
   LMWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactPressure() const override;
-  virtual void reinit() override;
+  virtual void reinit() override {}
   virtual Real getNormalContactPressure(const Node * const /*node*/) const override;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
+
+  /// The traction stays on the Lagrange multiplier's own basis, which is the basis adSlnLower()
+  /// uses. Under Petrov-Galerkin test() is the auxiliary standard basis carrying the weighted gap.
+  virtual const VariableTestValue & tractionBasis() const override;
 
   virtual void initialize() override;
   virtual void finalize() override;
@@ -96,10 +101,6 @@ protected:
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
-
-  /// Physical contact pressure sum_j Phi_j (zhat_j / kappa_j) at the segment quadrature points when
-  /// node-based scaling is active; recomputed once per segment in reinit() (see contactPressure()).
-  ADVariableValue _scaled_contact_pressure;
 
   /// Whether to apply the Popp et al. (2013) node-based Lagrange-multiplier scaling (kappa_j) for
   /// improved conditioning of partially covered (edge-dropping) secondary elements

@@ -1,0 +1,12 @@
+[Tests]
+  design = 'AutomaticMortarGeneration.md'
+  issues = '#33378'
+  [weighted_normal_and_householder_tangents]
+    type = GoogleTest
+    unit_test = MortarNodalGeometryTest.weightedNormalAndHouseholderTangents
+    requirement = 'The system shall compute the automatic differentiation derivatives of a mortar '
+                  'secondary-node normal and its Householder-reflected tangent basis that agree with '
+                  'a finite-difference approximation, keep the tangents mutually orthogonal and unit '
+                  'norm, and return zero tangent derivatives for a degenerate, axis-aligned normal.'
+  []
+[]
