@@ -7,9 +7,7 @@
 - [I can't build my application or moose.](help/troubleshooting.md#buildissues)
 - [I get a 'gethostbyname' failure.](help/troubleshooting.md#failingtests)
 - [Some or all of my tests fail.](help/troubleshooting.md#failingtests)
-- [How do I build my own libMesh?](faq/faq_build_libmesh.md)
-- [How do I build my own libMesh with VTK?](faq/faq_build_libmesh-vtk.md)
-- [How do I build my own PETSc?](faq/faq_build_petsc.md)
+- [How do I build/use my own libMesh or PETSc?](help/faq/faq_custom_libmesh_petsc.md)
 
 ## Simulations
 
