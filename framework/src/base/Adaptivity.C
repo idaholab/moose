@@ -44,6 +44,7 @@ Adaptivity::Adaptivity(FEProblemBase & fe_problem)
     _interval(1),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
+    _controls_allow_adaptivity(nullptr),
     _cycles_per_step(1),
     _use_new_system(false),
     _adaptivity_type(AdaptivityType::H),
@@ -369,6 +370,13 @@ Adaptivity::setTimeActive(Real start_time, Real stop_time)
 }
 
 void
+Adaptivity::setAdaptivityControlFlag(const bool * adapt_control_flag)
+{
+  mooseAssert(adapt_control_flag, "adapt_control_flag was null");
+  _controls_allow_adaptivity = adapt_control_flag;
+}
+
+void
 Adaptivity::setUseNewSystem()
 {
   _use_new_system = true;
@@ -419,7 +427,11 @@ Adaptivity::updateErrorVectors()
 bool
 Adaptivity::isAdaptivityDue()
 {
-  return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+  bool adapt_due =
+      _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+  if (_controls_allow_adaptivity)
+    adapt_due &= *_controls_allow_adaptivity;
+  return adapt_due;
 }
 
 #endif // LIBMESH_ENABLE_AMR

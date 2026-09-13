@@ -187,6 +187,7 @@ AdaptivityAction::act()
     }
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setAdaptivityControlFlag(&getParam<bool>("enable"));
     adapt.setInterval(getParam<unsigned int>("interval"));
   }
 }

@@ -11,6 +11,7 @@
 
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
+#include "MaterialBase.h"
 #include "ThreadedElementLoopBase.h"
 #include "ConsoleUtils.h"
 #include "SwapBackSentinel.h"
@@ -58,7 +59,13 @@ public:
 protected:
   void prepareElement(const Elem * elem);
   void clearVarsAndMaterials();
-
+  /// Determine the face and boundary materials required by material property consumers.
+  void getRequiredBoundaryMaterials(
+      const std::vector<const MaterialPropertyInterface *> & material_consumers,
+      BoundaryID bnd_id,
+      SubdomainID subdomain_id,
+      std::deque<MaterialBase *> & required_face_materials,
+      std::deque<MaterialBase *> & required_boundary_materials) const;
   FEProblemBase & _fe_problem;
 
   /**
@@ -196,4 +203,59 @@ ThreadedElementLoop<RangeType>::clearVarsAndMaterials()
 {
   _fe_problem.clearActiveElementalMooseVariables(this->_tid);
   _fe_problem.clearActiveMaterialProperties(this->_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::getRequiredBoundaryMaterials(
+    const std::vector<const MaterialPropertyInterface *> & material_consumers,
+    const BoundaryID bnd_id,
+    const SubdomainID subdomain_id,
+    std::deque<MaterialBase *> & required_face_materials,
+    std::deque<MaterialBase *> & required_boundary_materials) const
+{
+  required_face_materials.clear();
+  required_boundary_materials.clear();
+
+  std::unordered_set<unsigned int> needed_face_props;
+  for (const auto * const consumer : material_consumers)
+  {
+    const auto & dependencies = consumer->getMatPropDependencies();
+    needed_face_props.insert(dependencies.begin(), dependencies.end());
+  }
+
+  const auto & materials = _fe_problem.getRegularMaterialsWarehouse();
+  // Resolve boundary materials first. A boundary material can depend on a property supplied by a
+  // face material, while a property supplied by the boundary-material chain does not also need a
+  // face producer.
+  if (!material_consumers.empty() && materials.hasActiveBoundaryObjects(bnd_id, this->_tid))
+    required_boundary_materials = MaterialBase::buildRequiredMaterials(
+        material_consumers, materials.getActiveBoundaryObjects(bnd_id, this->_tid), true);
+  for (const auto * const material : required_boundary_materials)
+  {
+    const auto & dependencies = material->getMatPropDependencies();
+    needed_face_props.insert(dependencies.begin(), dependencies.end());
+  }
+  // The boundary-material chain has already satisfied these properties. Removing them prevents a
+  // face material that happens to declare the same property from being selected unnecessarily.
+  for (const auto * const material : required_boundary_materials)
+    for (const auto supplied_prop : material->getSuppliedPropIDs())
+      needed_face_props.erase(supplied_prop);
+
+  struct MaterialDependencyConsumer
+  {
+    const std::unordered_set<unsigned int> & dependencies;
+    const std::unordered_set<unsigned int> & getMatPropDependencies() const { return dependencies; }
+  };
+  if (!needed_face_props.empty())
+  {
+    const auto & face_materials = materials[Moose::FACE_MATERIAL_DATA];
+    if (face_materials.hasActiveBlockObjects(subdomain_id, this->_tid))
+    {
+      const MaterialDependencyConsumer face_consumer{needed_face_props};
+      const std::vector<const MaterialDependencyConsumer *> face_consumers{&face_consumer};
+      required_face_materials = MaterialBase::buildRequiredMaterials(
+          face_consumers, face_materials.getActiveBlockObjects(subdomain_id, this->_tid), true);
+    }
+  }
 }

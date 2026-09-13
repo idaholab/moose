@@ -158,6 +158,39 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   }
 }
 
+const ComputeUserObjectsThread::BoundaryMaterialReinitCache &
+ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id,
+                                                         const SubdomainID subdomain_id)
+{
+  const auto cache_key = std::make_pair(bnd_id, subdomain_id);
+  auto [cache_it, inserted] = _boundary_material_reinit_cache.try_emplace(cache_key);
+  auto & cache = cache_it->second;
+
+  if (!inserted)
+    return cache;
+
+  // SideUserObjects are boundary-restricted, not block-restricted. The current subdomain is
+  // accounted for below when selecting the active face materials.
+  std::vector<UserObject *> userobjs;
+  queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
+
+  std::vector<const MaterialPropertyInterface *> material_consumers;
+  material_consumers.reserve(userobjs.size() + _domain_objs.size());
+
+  const auto add_material_consumers = [&material_consumers](const auto & objects)
+  {
+    for (const auto * const object : objects)
+      if (const auto * const consumer = dynamic_cast<const MaterialPropertyInterface *>(object))
+        material_consumers.push_back(consumer);
+  };
+
+  add_material_consumers(userobjs);
+  add_material_consumers(_domain_objs);
+  getRequiredBoundaryMaterials(
+      material_consumers, bnd_id, subdomain_id, cache.face_materials, cache.boundary_materials);
+  return cache;
+}
+
 void
 ComputeUserObjectsThread::onBoundary(const Elem * elem,
                                      unsigned int side,
@@ -175,11 +208,17 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   if (lower_d_elem)
     _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
+  const auto & required_mats = getBoundaryMaterialReinitCache(bnd_id, elem->subdomain_id());
+
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-  _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+
+  // TODO: Explore whether stateful material property data needs to be swapped in user object
+  // loops by changing swap_stateful=false in the following calls.
+  _fe_problem.reinitMaterialsFaceOnBoundary(
+      bnd_id, elem->subdomain_id(), _tid, true, &required_mats.face_materials);
+  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid, true, &required_mats.boundary_materials);
 
   for (const auto & uo : userobjs)
     uo->execute();

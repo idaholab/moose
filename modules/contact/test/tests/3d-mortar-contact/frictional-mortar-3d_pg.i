@@ -213,24 +213,13 @@ offset = 0.00
 [Materials]
   [tensor]
     type = ComputeIsotropicElasticityTensor
-    block = '1'
-    youngs_modulus = 1.0e4
+    block = '1 2'
+    youngs_modulus = 1.0
     poissons_ratio = 0.0
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
-    block = '1'
-  []
-
-  [tensor_1000]
-    type = ComputeIsotropicElasticityTensor
-    block = '2'
-    youngs_modulus = 1e5
-    poissons_ratio = 0.0
-  []
-  [stress_1000]
-    type = ComputeFiniteStrainElasticStress
-    block = '2'
+    block = '1 2'
   []
 []
 
@@ -266,12 +255,13 @@ offset = 0.00
     disp_z = disp_z
     use_displaced_mesh = true
     mu = 0.4
-    c = 1e4
-    c_t = 1.0e4
+    c = 1
+    c_t = 1
     friction_lm = mortar_tangential_lm
     friction_lm_dir = mortar_tangential_3d_lm
     weighted_gap_uo = weighted_vel_uo
     weighted_velocities_uo = weighted_vel_uo
+    friction_projection_degree = ONE
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -439,10 +429,10 @@ offset = 0.00
   end_time = .025
   dt = .025
   dtmin = .001
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-14                  1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       mumps                      NONZERO'
   l_max_its = 15
   nl_max_its = 30
   nl_rel_tol = 1e-11

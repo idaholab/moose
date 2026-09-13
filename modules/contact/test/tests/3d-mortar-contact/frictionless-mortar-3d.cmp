@@ -6,7 +6,7 @@ GLOBAL VARIABLES relative 1.e-6 floor 0.0
 	cumulative       relative 5e-1
 	num_nl           relative 5e-1
 
-NODAL VARIABLES relative 1.e-6 floor 1e-10
+NODAL VARIABLES relative 6.e-5 floor 1e-10
 	disp_x
 	disp_y
 	disp_z

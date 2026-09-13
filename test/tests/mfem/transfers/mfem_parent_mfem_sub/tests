@@ -23,6 +23,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]
@@ -122,6 +123,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ToSubFromParent]
@@ -145,6 +147,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]

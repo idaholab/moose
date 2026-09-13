@@ -21,3 +21,18 @@ the time, folks will want to use optimized methods:
 - `export METHODS=opt`
 
 !alert-end!
+
+!alert! tip title=Building with compiler optimizations
+The build scripts forward any extra arguments to each package's configuration, so you can tune
+the stack to the machine you are building on by passing optimization flags. For example, to
+build with `-O3 -march=native`:
+
+- PETSc: add `COPTFLAGS="-O3 -march=native" CXXOPTFLAGS="-O3 -march=native" FOPTFLAGS="-O3 -march=native"`
+  to the `update_and_rebuild_petsc.sh` line. These are also applied to the packages PETSc builds
+  (hypre, MUMPS, SuperLU_DIST, etc.).
+- libMesh: add `libmesh_CFLAGS="-O3 -march=native" libmesh_CXXFLAGS="-O3 -march=native"` to the
+  `update_and_rebuild_libmesh.sh` line. Use these rather than `CXXFLAGS`, since they are what
+  libMesh exports for applications to compile against.
+
+MOOSE then inherits these flags from libMesh automatically.
+!alert-end!

@@ -56,6 +56,30 @@ public:
     return MetaPhysicL::raw_value(gap.first) / gap.second;
   }
 
+  /**
+   * Node-based Lagrange-multiplier scaling factor kappa_j of Popp et al. (2013), implemented by
+   * LMWeightedGapUserObject. The unit default recovers the unscaled formulation.
+   */
+  virtual Real nodalScale(const DofObject * const /*dof*/) const { return 1; }
+
+  /// @return Whether node-based Lagrange-multiplier scaling is active
+  virtual bool usesNodalScaling() const { return false; }
+
+  /**
+   * @param dof Node/element dof object
+   * @param covered_normalization The covered-region normalization for this dof (the second entry
+   * of dofToWeightedGap()'s value)
+   * @return The divisor to use for `normalize_c`. Defaults to the covered-region normalization
+   * passed in, so `normalize_c` alone is unaffected; overridden by LMWeightedGapUserObject to
+   * return a coverage-independent (full-element) integral instead when node-based scaling is
+   * active, so the two mechanisms do not double-count coverage.
+   */
+  virtual Real normalizeCDivisor(const DofObject * const /*dof*/,
+                                 const Real covered_normalization) const
+  {
+    return covered_normalization;
+  }
+
   ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
 
   /**
