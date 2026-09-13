@@ -600,6 +600,19 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
 
   console << "  p = " << _order << ": entity blocks agree with the assembled operator to " << error
           << " (tolerance " << tolerance << ")\n";
+
+  // Both sides of the comparison are reduced across the processes above, so every process reaches
+  // this with the same value and raises the error together
+  if (error > tolerance)
+    mooseError("The entity blocks of the p-multigrid level of order ",
+               _order,
+               " disagree with that level's assembled operator by ",
+               error,
+               ", which exceeds a tolerance of ",
+               tolerance,
+               ". A block gathers a contribution from every element carrying its entity, so a "
+               "block whose entity sits on a partition boundary and is missing what another "
+               "process's elements contribute to it is the usual cause.");
 }
 
 void
