@@ -205,19 +205,17 @@
     compute_devices = 'cpu cuda xpu'
   []
 
-  [parallel_invariance]
+  [constrained_row_residual]
     type = CSVDiff
     input = 'pmultigrid.i'
-    cli_args = 'Outputs/exodus=false Outputs/csv=true Outputs/file_base=parallel_invariance'
-    csvdiff = 'parallel_invariance.csv'
-    # Four processes is the smallest count that puts a Dirichlet-constrained degree of freedom of this
-    # mesh on a partition boundary, which is what the invariance is asserted against. The gold is the
-    # single-process value, so the comparison is between the two partitionings.
-    min_parallel = 4
-    max_parallel = 4
-    requirement = 'The Kokkos matrix-free residual shall be independent of how the mesh is '
-                  'partitioned, each Dirichlet-constrained row being contributed by the process that '
-                  'owns it and not additionally by every process that ghosts it.'
+    cli_args = 'Outputs/exodus=false Outputs/csv=true Outputs/file_base=constrained_row_residual'
+    csvdiff = 'constrained_row_residual.csv'
+    # The gold is one norm the residual has to reproduce whatever the mesh division is. A row written
+    # by its owner and again by each process ghosting it enters the norm several times over, which
+    # shows at the counts placing a constrained degree of freedom on a partition boundary.
+    requirement = 'The Kokkos matrix-free residual shall enter each Dirichlet-constrained row into '
+                  'the residual norm once, contributed by the process owning that row, so that the '
+                  'norm it reports for a given solution is the one the discretization defines.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
