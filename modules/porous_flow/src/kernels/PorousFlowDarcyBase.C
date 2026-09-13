@@ -183,7 +183,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeResidual()
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_RESIDUAL, 0);
+    computeResidualOrJacobian(JacRes::CALCULATE_RESIDUAL, 0);
   else
   {
     adComputeProtoFlux(false);
@@ -213,7 +213,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeJacobian()
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
+    computeResidualOrJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
   else
     // Block-diagonal (e.g. PJFNK) assembly path: this is the only Jacobian call we get.
     adComputeJacobian();
@@ -252,7 +252,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeOffDiagJacobian(const unsigned int jvar)
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
+    computeResidualOrJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
   else
   {
     libmesh_ignore(jvar);
@@ -375,7 +375,7 @@ PorousFlowDarcyBaseTempl<is_ad>::adComputeProtoFlux(bool do_counting)
 
 template <bool is_ad>
 void
-PorousFlowDarcyBaseTempl<is_ad>::computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar)
+PorousFlowDarcyBaseTempl<is_ad>::computeResidualOrJacobian(JacRes res_or_jac, unsigned int jvar)
 {
   if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) && _dictator.notPorousFlowVariable(jvar))
     return;

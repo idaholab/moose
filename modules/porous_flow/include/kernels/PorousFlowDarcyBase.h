@@ -67,10 +67,8 @@ protected:
     CALCULATE_JACOBIAN = 1
   };
 
-  using ResidualObject::computeResidualAndJacobian;
-
   /**
-   * Computation of the residual and Jacobian (non-AD path only).
+   * Computation of the residual or the Jacobian, depending on res_or_jac (non-AD path only).
    *
    * If res_or_jac=CALCULATE_JACOBIAN then the residual
    * gets calculated anyway (becuase we have to know which
@@ -84,7 +82,7 @@ protected:
    * @param res_or_jac Whether to calculate the residual or the jacobian.
    * @param jvar PorousFlow variable to take derivatives wrt to
    */
-  void computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar);
+  void computeResidualOrJacobian(JacRes res_or_jac, unsigned int jvar);
 
   /// Permeability of porous material
   const GenericMaterialProperty<RealTensorValue, is_ad> & _permeability;
