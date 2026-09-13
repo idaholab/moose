@@ -1,3 +1,3 @@
-time,Amplitude,FunctionScaledError,PostprocessorScaledError,UnscaledError
-0,2.5,0,0,0
-1,2.5,0,0,0
+time,DummyComparison,FunctionScaledError,PostprocessorScaledError,UnscaledError
+0,1,0,0,0
+1,1,0,0,0

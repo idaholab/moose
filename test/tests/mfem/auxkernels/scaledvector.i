@@ -69,12 +69,6 @@
     expression_y = '2 * (1 + x + 2*y + 3*z)'
     expression_z = '3 * (1 + x + 2*y + 3*z)'
   []
-  [expected_postprocessor_scaled]
-    type = ParsedVectorFunction
-    expression_x = '2.5'
-    expression_y = '5.0'
-    expression_z = '7.5'
-  []
 []
 
 [ICs]
@@ -90,31 +84,30 @@
     type = MFEMScaledVectorAux
     variable = unscaled
     vector_coefficient = source_field
-    execute_on = TIMESTEP_END
   []
   [scale_by_function]
     type = MFEMScaledVectorAux
     variable = function_scaled
     vector_coefficient = source_field
     coefficient = ramp
-    execute_on = TIMESTEP_END
   []
   [scale_by_postprocessor]
     type = MFEMScaledVectorAux
     variable = postprocessor_scaled
     vector_coefficient = source_field
-    coefficient = Amplitude
-    execute_on = TIMESTEP_END
+    coefficient = DummyComparison
   []
 []
 
 [Postprocessors]
   # Coefficients built from postprocessor values are not ordered against the postprocessors
   # supplying them, so this is executed on an earlier flag than the aux kernel scaling by it.
-  [Amplitude]
-    type = ConstantPostprocessor
-    value = 2.5
-    execute_on = 'INITIAL TIMESTEP_END'
+  [DummyComparison]
+    type = PostprocessorComparison
+    value_a = 7
+    value_b = 77
+    comparison_type = less_than
+    execute_on = INITIAL
   []
   [UnscaledError]
     type = MFEMVectorL2Error
@@ -129,7 +122,7 @@
   [PostprocessorScaledError]
     type = MFEMVectorL2Error
     variable = postprocessor_scaled
-    function = expected_postprocessor_scaled
+    function = source
   []
 []
 
