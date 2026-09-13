@@ -13,6 +13,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #include "libmesh/utility.h"
 
@@ -127,8 +128,35 @@ public:
   const std::filesystem::path & path() const { return _path; }
 
 private:
-  static std::filesystem::path generatePath();
+  const std::filesystem::path _path;
+};
 
+/**
+ * Run a unit test from a unique temporary working directory.
+ *
+ * The provided inputs are copied into the temporary directory using their file names. The original
+ * working directory is restored and the temporary directory is removed upon destruction.
+ */
+class ScopedTestDirectory
+{
+public:
+  explicit ScopedTestDirectory(const std::vector<std::filesystem::path> & inputs);
+  ~ScopedTestDirectory();
+
+  ScopedTestDirectory(const ScopedTestDirectory &) = delete;
+  ScopedTestDirectory & operator=(const ScopedTestDirectory &) = delete;
+
+  /**
+   * @return The path to the temporary working directory.
+   */
+  const std::filesystem::path & path() const { return _path; }
+
+private:
+  static std::filesystem::path createPath();
+
+  /// Working directory to restore upon destruction
+  const std::filesystem::path _original_path;
+  /// Unique temporary working directory
   const std::filesystem::path _path;
 };
 
