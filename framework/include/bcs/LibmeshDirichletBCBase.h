@@ -42,6 +42,7 @@ public:
 
   LibmeshDirichletBCBase(const InputParameters & parameters);
 
+  using NodalBC::value;
   /**
    * Evaluate the prescribed value at a point, at a given time. libMesh's constraint machinery calls
    * this to build the boundary data it projects, so it has to be evaluable anywhere on the boundary

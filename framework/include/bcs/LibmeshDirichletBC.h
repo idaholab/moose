@@ -21,6 +21,7 @@ public:
 
   LibmeshDirichletBC(const InputParameters & parameters);
 
+  using LibmeshDirichletBCBase::value;
   virtual Real value(const libMesh::Point & p, Real time) const override;
 
 protected:
