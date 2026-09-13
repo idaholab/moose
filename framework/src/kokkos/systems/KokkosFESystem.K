@@ -309,7 +309,10 @@ FESystem::computeQpJacobianDiagonal(const TagID diag_tag, const TagID matrix_tag
 void
 FESystem::initEntityBlocks(const TagID matrix_tag)
 {
-  _entity_blocks.init(*this, _mesh.getMesh(), _nbc_matrix_tag_dof[matrix_tag]);
+  _entity_blocks.init(*this,
+                      _mesh.getMesh(),
+                      *_system.system().current_local_solution,
+                      _nbc_matrix_tag_dof[matrix_tag]);
 }
 
 void
@@ -319,6 +322,8 @@ FESystem::updateEntityBlocks(const TagID matrix_tag)
 
   QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag))
       .assembleBlocks(_entity_blocks);
+
+  _entity_blocks.reduce();
 
   _entity_blocks.factor();
 }

@@ -46,11 +46,13 @@ constexpr unsigned int MAX_BLOCK_DOF = 64;
  * basis every entity carries one mode per variable, so the decomposition degenerates to the point
  * smoother it generalizes.
  *
- * A block is built and held by the process that owns the entity's degrees of freedom, and gathers
- * only the contributions of the elements that process has, so a block on a partition boundary
- * carries the contributions of its local elements alone. That makes the smoother's strength depend
- * mildly on the partitioning, in the way any Schwarz smoother assembled from process-local data
- * does, and keeps the blocks free of communication.
+ * A block is held by the process that owns the entity's degrees of freedom, and its entries gather
+ * a contribution from every element carrying that entity. The block loop reaches only the elements
+ * a process has, so a process also fills a block for each entity its elements carry that another
+ * process owns, and reduce() sums those into the owner once the loop has run. The decomposition is
+ * therefore by entity rather than by process, and the operator the smoother applies is the same one
+ * whatever the partitioning: an iteration count that grows with the process count means a block is
+ * missing a contribution rather than that the smoother has weakened.
  */
 class EntityBlocks
 {
@@ -60,11 +62,14 @@ public:
    * @param dof_space The device DOF layout the blocks are indexed by, whose DOF map associates each
    * DOF with the mesh entity carrying it
    * @param mesh The mesh whose entities are walked
+   * @param solution_vector The ghosted system solution, which maps a global DOF index to the local
+   * index the block loop and the level's vectors are indexed by
    * @param constrained_dof Local-plus-ghost mask of the rows the level holds fixed, which may be
    * unallocated when the level constrains no row
    */
   void init(const DofSpace & dof_space,
             const libMesh::MeshBase & mesh,
+            libMesh::NumericVector<Number> & solution_vector,
             const Array<bool> & constrained_dof);
 
   /**
@@ -89,6 +94,15 @@ public:
    * Zero the block entries, which the operator's block loop then accumulates into
    */
   void zero();
+
+  /**
+   * Sum each block this process fills for an entity it does not own into the block the owning
+   * process holds for that entity. An entity's block gathers a contribution from every element
+   * carrying the entity, and the block loop reaches only this process's own elements, so a block on
+   * a partition boundary is complete only once the processes sharing the entity have added theirs.
+   * Called once the block loop has accumulated, and before the blocks are factored or read.
+   */
+  void reduce();
 
   /**
    * Factor every block in place, so that one factorization serves the many applications a smoother
@@ -127,14 +141,15 @@ public:
   KOKKOS_FUNCTION dof_id_type getNumLocalDofs() const { return _num_local_dofs; }
 
   /**
-   * Get whether a DOF belongs to a block this process holds, which a DOF this process does not own
-   * and a DOF the level holds fixed do not
+   * Get whether a DOF belongs to a block this process fills. A DOF this process owns belongs to one
+   * of the blocks it holds, and a ghosted DOF to one of the blocks it fills for the owning process
+   * and reduces into it; a DOF the level holds fixed belongs to none.
    * @param dof The local DOF index
    * @returns Whether the DOF belongs to a block
    */
   KOKKOS_FUNCTION bool isBlocked(const dof_id_type dof) const
   {
-    return dof < _num_local_dofs && _block_of_dof[dof] != libMesh::DofObject::invalid_id;
+    return dof < _num_dofs && _block_of_dof[dof] != libMesh::DofObject::invalid_id;
   }
 
   /**
@@ -212,14 +227,51 @@ private:
   bool _built = false;
 
   /**
-   * Number of blocks this process holds
+   * Number of blocks this process holds, which are the blocks of the entities it owns and the ones
+   * the smoother applies and factors. They come first in every per-block array.
    */
   dof_id_type _num_blocks = 0;
+
+  /**
+   * Number of blocks the block loop fills, the blocks this process holds followed by one for each
+   * entity its own elements carry but another process owns. A trailing block is summed into its
+   * owner by reduce() and is never applied here.
+   */
+  dof_id_type _num_all_blocks = 0;
 
   /**
    * Number of local DOFs the decomposition covers
    */
   dof_id_type _num_local_dofs = 0;
+
+  /**
+   * Number of local plus ghost DOFs, which is the index space the block loop reaches and so the
+   * extent of the per-DOF arrays below
+   */
+  dof_id_type _num_dofs = 0;
+
+  /**
+   * Communicator the reduction of the trailing blocks is carried out over
+   */
+  const libMesh::Parallel::Communicator * _comm = nullptr;
+
+  /**
+   * Global index of the first DOF of each block this process holds, which names the block to the
+   * processes that reduce into it. Both sides build a block's members from the same entity in
+   * component order, so the first member identifies the block on either side.
+   */
+  Array<dof_id_type> _owned_block_key;
+
+  /**
+   * Global index of the first DOF of each block this process fills for another process, ordered as
+   * those blocks are
+   */
+  Array<dof_id_type> _ghost_block_key;
+
+  /**
+   * Process owning each block this process fills for another process
+   */
+  Array<libMesh::processor_id_type> _ghost_block_owner;
 
   /**
    * Size of the largest block this process holds
