@@ -24,11 +24,10 @@
                "Preconditioning/pmg/level_orders='5' "
                "Preconditioning/pmg/verify=entity_blocks"
     input = 'pmultigrid.i'
-    expect_out = 'p = 5: entity blocks agree with the assembled operator to 0'
-    # A block on a partition boundary gathers only its own process's elements, so exact agreement with
-    # the assembled operator is a single-process statement; on more processes the check reports the
-    # difference instead of zero
-    max_parallel = 1
+    expect_out = 'p = 5: entity blocks agree with the assembled operator to 0 \(tolerance'
+    # A block on a partition boundary is summed into its owner from every process whose elements
+    # carry the entity, so the agreement is exact at any process count. The difference this reports
+    # is what a block losing one of those contributions would show up in.
     requirement = 'The p-multigrid preconditioner shall build, for each mesh entity of a level, the '
                   'dense block of that level operator holding the degrees of freedom the entity '
                   'carries, with every entry of every such block equal to the corresponding entry of '
