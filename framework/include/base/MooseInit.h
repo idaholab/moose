@@ -15,12 +15,21 @@
 #include "libmesh/libmesh.h"
 
 /**
+ * Initialize GPU runtime
+ */
+class MooseDeviceInit
+{
+public:
+  MooseDeviceInit();
+};
+
+/**
  * Initialization object for any MOOSE-based application
  *
  * This object must be created in the main() of any MOOSE-based application so
  * everything is properly initialized and finalized.
  */
-class MooseInit : public libMesh::LibMeshInit
+class MooseInit : public MooseDeviceInit, public libMesh::LibMeshInit
 {
 public:
   MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN = MPI_COMM_WORLD);
