@@ -72,7 +72,6 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _current_side_volume(_assembly.sideElemVolume()),
 
     _current_node(_assembly.node()),
-    _current_boundary_id(_assembly.currentBoundaryID()),
     _solution(_aux_sys.solution()),
 
     _current_lower_d_elem(_assembly.lowerDElem())
@@ -316,6 +315,15 @@ AuxKernelTempl<ComputeValueType>::uOlder() const
                "Make sure to call uOlder() within the object constructor.");
 
   return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
+}
+
+template <typename ComputeValueType>
+BoundaryID
+AuxKernelTempl<ComputeValueType>::currentBoundaryID() const
+{
+  if (isNodal())
+    mooseError("currentBoundaryID() may not be called if the variable is nodal.");
+  return _assembly.currentBoundaryID();
 }
 
 template <typename ComputeValueType>
