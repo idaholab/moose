@@ -10,6 +10,11 @@ This model is suitable for simulations of geological storage of CO$_2$ in saline
 
 For more details, see the documentation of the [brine and CO$_2$](brineco2.md) equation of state.
 
+The `compute_enthalpy` and `compute_internal_energy` parameters allow the enthalpy and internal
+energy of each phase to be skipped. This is useful in isothermal simulations with no energy
+equation, where these properties are not needed but would otherwise be computed at every
+residual and Jacobian evaluation.
+
 !syntax parameters /UserObjects/PorousFlowBrineCO2
 
 !syntax inputs /UserObjects/PorousFlowBrineCO2

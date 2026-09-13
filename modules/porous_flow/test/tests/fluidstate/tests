@@ -25,6 +25,15 @@
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
   []
+  [waterncg_no_enthalpy]
+    type = 'CSVDiff'
+    input = 'waterncg.i'
+    csvdiff = 'waterncg_no_enthalpy.csv'
+    cli_args = 'UserObjects/fs/compute_enthalpy=false UserObjects/fs/compute_internal_energy=false Outputs/exodus=false Outputs/csv=true Outputs/file_base=waterncg_no_enthalpy'
+    requirement = 'The system shall not compute the enthalpy or internal energy of the phases in a water and NCG system when they are not required.'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#33348'
+  []
   [theis]
     type = 'CSVDiff'
     input = 'theis.i'
@@ -76,6 +85,16 @@
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system using FV variables.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #21275'
+  []
+  [brineco2_no_enthalpy]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2_no_enthalpy.csv'
+    prereq = brineco2
+    cli_args = 'UserObjects/fs/compute_enthalpy=false UserObjects/fs/compute_internal_energy=false Outputs/file_base=brineco2_no_enthalpy'
+    requirement = 'The system shall not compute the enthalpy or internal energy of the phases in a brine and CO2 system when they are not required.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#33348'
   []
   [brineco2_2]
     type = 'CSVDiff'
