@@ -7311,7 +7311,10 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Print the message
       if (_communicator.rank() == 0 && print_message)
       {
-        _console << "\n" << _exception_message << "\n";
+        // Flushed rather than left in the console buffer, which is written on an output event. The
+        // solve is stopped just below, so a buffered message reaches the console after the notices
+        // reporting the failure it explains, and after an abort it does not reach it at all.
+        _console << "\n" << _exception_message << "\n" << std::flush;
         if (isTransient())
           _console
               << "To recover, the solution will fail and then be re-attempted with a reduced time "
