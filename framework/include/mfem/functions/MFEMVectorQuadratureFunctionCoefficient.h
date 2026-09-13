@@ -13,12 +13,6 @@
 
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
-// The class derives from mfem::VectorQuadratureFunctionCoefficient, so the complete type is
-// required.
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 /**
  * Vector coefficient holding precomputed values of a source vector coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
@@ -29,14 +23,19 @@ class MFEMVectorQuadratureFunctionCoefficient : public mfem::VectorQuadratureFun
                                                 public MFEMQuadratureFunctionCoefficientBase
 {
 public:
-  MFEMVectorQuadratureFunctionCoefficient(mfem::VectorCoefficient & source,
-                                          mfem::QuadratureFunction & qf,
+  MFEMVectorQuadratureFunctionCoefficient(mfem::QuadratureFunction & qf,
                                           UpdatePolicy update_policy,
                                           const std::string & name);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.
   void SetTime(mfem::real_t t) override;
+
+  /// Set the source vector coefficient and reset vdim.
+  void SetSourceVectorCoefficient(mfem::VectorCoefficient * coeff)
+  {
+    _qf.SetVDim(vdim = (_source = coeff)->GetVDim());
+  }
 
   using mfem::VectorQuadratureFunctionCoefficient::Eval;
   /// Return the stored values at @a ip, re-projecting the source first if invalidated.
@@ -52,7 +51,7 @@ private:
   void Refresh();
 
   /// Source coefficient the stored values are projected from.
-  mfem::VectorCoefficient & _source;
+  mfem::VectorCoefficient * _source;
   /// Storage for the projected values, shared with the owning MOOSE object.
   mfem::QuadratureFunction & _qf;
 };
