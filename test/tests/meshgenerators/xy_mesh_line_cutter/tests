@@ -81,6 +81,17 @@
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 --mesh-only multi_block_cut_node.e'
   []
+  [simple_cut_poly]
+    type = 'Exodiff'
+    input = 'simple_cut_poly.i'
+    exodiff = 'simple_cut_poly.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to cut a 2D mesh using the C0POLYGON element clipping method, then convert the polygons to TRI3 for output.'
+    allow_warnings = true
+    cli_args = '--mesh-only simple_cut_poly.e'
+  []
   [multi_block_cut_node_other_boundaries]
     type = 'Exodiff'
     input = 'multi_block_cut.i'
