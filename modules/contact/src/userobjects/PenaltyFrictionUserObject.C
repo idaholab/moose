@@ -128,14 +128,14 @@ PenaltyFrictionUserObject::timestepSetup()
     step_slip = {0.0, 0.0};
   }
 
-  // timestepSetup() runs once per solve attempt, so on a retried timestep (e.g. --test-restep or
-  // a rejected step) the accumulated slip and tangential traction history have already been
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the accumulated slip and tangential traction history have already been
   // advanced from the accepted state; advancing them again would overwrite that history with the
   // discarded attempt's last values.
-  const bool repeated_timestep = _fe_problem.timeStep() == _t_step_old_friction;
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_friction;
   _t_step_old_friction = _fe_problem.timeStep();
 
-  if (!repeated_timestep)
+  if (!retried_timestep)
     // save off accumulated slip from the last timestep
     for (auto & map_pr : _dof_to_accumulated_slip)
     {
@@ -146,7 +146,7 @@ PenaltyFrictionUserObject::timestepSetup()
   for (auto & dof_lp : _dof_to_local_penalty_friction)
     dof_lp.second = _penalty_friction;
 
-  if (!repeated_timestep)
+  if (!retried_timestep)
     // save off tangential traction from the last timestep
     for (auto & map_pr : _dof_to_tangential_traction)
     {

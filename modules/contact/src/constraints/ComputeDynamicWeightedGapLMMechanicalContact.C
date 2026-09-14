@@ -108,7 +108,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma")),
     _t_step_old(declareRestartableData<int>("t_step_old", 0)),
-    _repeated_timestep(false)
+    _retried_timestep(false)
 {
   if (!useDual())
     mooseError("Dynamic mortar contact constraints requires the use of Lagrange multipliers dual "
@@ -229,12 +229,12 @@ ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
   if (_app.isRecovering())
     mooseError("This object does not support recovering");
 
-  // timestepSetup() runs once per solve attempt, so on a retried timestep (e.g. --test-restep or
-  // a rejected step) the history below has already been advanced from the accepted state;
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the history below has already been advanced from the accepted state;
   // advancing it again would overwrite that history with the discarded attempt's last values.
-  _repeated_timestep = _t_step == _t_step_old;
+  _retried_timestep = _t_step == _t_step_old;
   _t_step_old = _t_step;
-  if (_repeated_timestep)
+  if (_retried_timestep)
     return;
 
   _dof_to_old_weighted_gap.clear();
