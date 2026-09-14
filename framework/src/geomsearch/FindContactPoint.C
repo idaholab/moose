@@ -205,7 +205,7 @@ findContactPoint(PenetrationInfo & p_info,
       }
       // libMesh raises this if the mapping it inverts here is degenerate, which this loop backs
       // away from; every other exception is an error and propagates
-      catch (libMesh::DegenerateMap &)
+      catch (libMesh::DegenerateMap & e)
       {
         ref_point(0) -= mult * update(0);
         if (dim - 1 == 2)
@@ -216,6 +216,8 @@ findContactPoint(PenetrationInfo & p_info,
         {
 #ifndef NDEBUG
           mooseWarning("We could not solve for the contact point.", e.what());
+#else
+          libmesh_ignore(e);
 #endif
           update_size = update.l2_norm();
           d = (secondary_point - phys_point[0]) * mult;
