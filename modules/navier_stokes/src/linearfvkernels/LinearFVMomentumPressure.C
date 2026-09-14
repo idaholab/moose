@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
+#include "FVReconstructedPressureGradient.h"
 #include "LinearFVGradientManager.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
@@ -59,10 +60,15 @@ LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
 const LinearFVGradientReader &
 LinearFVMomentumPressure::registerPressureGradientField()
 {
-  if (!isParamValid("gradient_method"))
-    return _pressure_var.requestCellGradients();
+  const auto & reader =
+      isParamValid("gradient_method")
+          ? _pressure_var.requestCellGradients(getParam<GradientMethodName>("gradient_method"))
+          : _pressure_var.requestCellGradients();
 
-  return _pressure_var.requestCellGradients(getParam<GradientMethodName>("gradient_method"));
+  if (dynamic_cast<const FVReconstructedPressureGradient *>(&reader.method()))
+    return _pressure_var.requestCellGradients(reader.method(), 1);
+
+  return reader;
 }
 
 Real

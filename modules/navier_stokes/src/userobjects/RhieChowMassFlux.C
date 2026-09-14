@@ -17,7 +17,7 @@
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
@@ -399,11 +399,8 @@ RhieChowMassFlux::timestepSetup()
   if (!usingReconstructedPressureGradientMethod())
     return;
 
-  // The reconstructed coupling gradient's candidate/generation state is solver-iteration state,
-  // not an independent physical solution: discard it so this time step's momentum predictor starts
-  // from the base pressure gradient regardless of whether the preceding step ran continuously, was
-  // recovered from a checkpoint, or is a retry after a rejected step (see the class-level comment
-  // on the declaration for why this hook fires exactly once per attempt).
+  // Seed the next attempt from the most recently accepted coupling gradient. The linear FV
+  // gradient manager restores that state after rejection and checkpoints it for restart/recovery.
   reconstructedGradientMethod().resetForTimeStep(*this);
 
   // This counter is otherwise self-refreshing every SIMPLE/PISO iteration, but resetting it here
@@ -532,9 +529,9 @@ RhieChowMassFlux::setupMeshInformation()
       _flow_face_info.push_back(fi);
 }
 
+template <typename GradientComponent>
 void
-RhieChowMassFlux::updateCellVelocity(
-    const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient)
+RhieChowMassFlux::updateCellVelocity(const std::vector<GradientComponent> & pressure_gradient)
 {
   // u_C = -(H/A)_C - (1/A)_C * grad(p)_C.
   for (const auto system_i : index_range(_momentum_implicit_systems))
@@ -685,7 +682,7 @@ RhieChowMassFlux::AinvComponents() const
   return _Ainv_raw;
 }
 
-const std::vector<std::unique_ptr<NumericVector<Number>>> &
+const std::vector<NumericVector<Number> *> &
 RhieChowMassFlux::basePressureGradientComponents() const
 {
   return basePressureGradientField().components();
@@ -1116,34 +1113,6 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     _console << "DONE Computing HbyA " << std::endl;
     _console << "************************************" << std::endl;
   }
-}
-
-std::vector<std::unique_ptr<NumericVector<Number>>> &
-RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
-{
-  // The pressure-gradient field removed while constructing H/A must be the same
-  // coupling field used by the LinearFVMomentumPressure kernels. In reconstructed
-  // mode, this is the reconstructed gradient, not the base gradient.
-  const auto & coupling_pressure_gradient_components = pressureGradientComponents();
-
-  // The snapshot is only (re-)taken when updated_pressure is true, i.e. on the first PISO
-  // corrector of a sequence. Later correctors in the same sequence reuse it unchanged, even
-  // though the reconstructed feedback gradient keeps changing corrector to corrector: the
-  // momentum matrix/RHS built for this sequence already has that first-corrector gradient baked
-  // into its pressure source, so computeHbyA() must keep subtracting the same gradient it used
-  // originally until the next momentum predictor rebuilds the matrix from scratch.
-  if (updated_pressure)
-  {
-    _grad_p_current.clear();
-    for (const auto & component : coupling_pressure_gradient_components)
-      _grad_p_current.push_back(component->clone());
-  }
-
-  if (_grad_p_current.empty())
-    for (const auto & component : coupling_pressure_gradient_components)
-      _grad_p_current.push_back(component->clone());
-
-  return _grad_p_current;
 }
 
 const std::vector<NumericVector<Number> *> &

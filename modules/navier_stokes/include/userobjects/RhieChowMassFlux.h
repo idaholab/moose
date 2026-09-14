@@ -53,7 +53,7 @@ public:
   const LinearFVGradientReader & basePressureGradientField() const;
 
   /// Get the base-pressure gradient component vectors used to seed reconstructed updates.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & basePressureGradientComponents() const;
+  const std::vector<NumericVector<Number> *> & basePressureGradientComponents() const;
 
   /// Get the momentum-layout H/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
@@ -148,13 +148,9 @@ public:
   virtual void initialSetup() override;
 
   /**
-   * Reset reconstructed-gradient feedback state once per attempted time step. This is called by
-   * FEProblemBase::timestepSetup(), which TransientBase::takeStep() invokes once before the
-   * segregated solve for every attempt (including retries after a rejected/cut-back step), and
-   * which SteadyBase::execute() invokes exactly once before the entire outer SIMPLE iteration
-   * sequence. That distinction is what keeps steady solves from losing their accumulated feedback
-   * every SIMPLE iteration while still making transient time steps (continuous, recovered, or
-   * retried) start the momentum predictor from the same state.
+   * Prepare reconstructed-gradient state once per attempted time step. Accepted coupling feedback
+   * is retained for the next time step and restored when an attempt is retried, while candidate
+   * fields and sequencing counters are reset for every attempt.
    */
   virtual void timestepSetup() override;
 
@@ -177,8 +173,8 @@ public:
 
 protected:
   /// Update cell velocity from the supplied momentum-coupling pressure gradient.
-  void updateCellVelocity(
-      const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient);
+  template <typename GradientComponent>
+  void updateCellVelocity(const std::vector<GradientComponent> & pressure_gradient);
 
   /// Get the registered pressure gradient component vectors.
   const std::vector<NumericVector<Number> *> & pressureGradientComponents() const;

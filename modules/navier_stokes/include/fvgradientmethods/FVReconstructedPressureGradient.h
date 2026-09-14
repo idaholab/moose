@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVGradientMethod.h"
+#include "LinearFVGradientReader.h"
 #include "MeshChangedInterface.h"
 
 #include "libmesh/numeric_vector.h"
@@ -18,7 +19,6 @@
 
 class ElemInfo;
 class FaceInfo;
-class LinearFVGradientReader;
 class RhieChowMassFlux;
 
 /**
@@ -30,6 +30,7 @@ class FVReconstructedPressureGradient : public FVGradientMethod, public MeshChan
 {
 public:
   using GradientContainer = FVGradientMethod::GradientContainer;
+  using GradientView = LinearFVGradientReader::GradientContainer;
 
   static InputParameters validParams();
 
@@ -42,7 +43,7 @@ public:
   /// Name of the gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
-  /// Reset solver-iteration state once per attempted time step.
+  /// Prepare solver-iteration state for a new time-step attempt.
   void resetForTimeStep(const RhieChowMassFlux & rc) const;
 
   /// Capture the lagged cell velocity gradient used by the reconstruction.
@@ -56,7 +57,7 @@ public:
 
   /// Relax and publish the current candidate as the coupling pressure gradient.
   void publishCouplingPressureGradient(const RhieChowMassFlux & rc,
-                                       const GradientContainer & base_gradient) const;
+                                       const GradientView & base_gradient) const;
 
   virtual void meshChanged() override;
 
@@ -72,8 +73,14 @@ private:
   /// Check that a stateful operation is requested by the bound Rhie-Chow object.
   void checkFlowSystem(const RhieChowMassFlux & rc) const;
 
+  /// Copy gradient values while reusing compatible destination storage.
+  void copyGradient(const GradientView & source, GradientContainer & destination) const;
+
+  /// Reset state that is local to one time-step attempt.
+  void resetAttemptState() const;
+
   /// Blend a reconstructed candidate into the persistent coupling pressure gradient.
-  void updateCouplingPressureGradient(const GradientContainer & base_gradient,
+  void updateCouplingPressureGradient(const GradientView & base_gradient,
                                       const GradientContainer & reconstructed_candidate) const;
 
   /// Interpolate a lagged velocity-component gradient to a face.

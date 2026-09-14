@@ -189,9 +189,12 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   if (!_pressure_system)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' must be bound to one RhieChow flow system before it computes gradients.");
+  {
+    if (!_base_gradient_method)
+      _base_gradient_method = &resolveBaseGradientMethod(system);
+    _base_gradient_method->computeGradient(system, gradient, variable_numbers);
+    return;
+  }
 
   if (_pressure_system != &system)
     mooseError("FVReconstructedPressureGradient '",
@@ -228,19 +231,46 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   }
 
   for (const auto component : index_range(gradient))
-    *gradient[component] = *_coupling_pressure_gradient[component];
+    if (gradient[component]->type() == GHOSTED)
+      _coupling_pressure_gradient[component]->localize(*gradient[component],
+                                                       system.dofMap().get_send_list());
+    else
+      *gradient[component] = *_coupling_pressure_gradient[component];
+}
+
+void
+FVReconstructedPressureGradient::copyGradient(const GradientView & source,
+                                              GradientContainer & destination) const
+{
+  destination.resize(source.size());
+  for (const auto component : index_range(source))
+    if (!destination[component] || source[component]->size() != destination[component]->size() ||
+        source[component]->local_size() != destination[component]->local_size() ||
+        source[component]->first_local_index() != destination[component]->first_local_index() ||
+        source[component]->last_local_index() != destination[component]->last_local_index())
+      destination[component] = source[component]->clone();
+    else
+      *destination[component] = *source[component];
+}
+
+void
+FVReconstructedPressureGradient::resetAttemptState() const
+{
+  _lagged_velocity_gradient_available = false;
+  _lagged_velocity_gradient_generation = 0;
+  _reconstructed_candidate_generation = 0;
+  _reconstructed_candidate_face_flux_generation = 0;
+  _published_candidate_generation = 0;
 }
 
 void
 FVReconstructedPressureGradient::resetForTimeStep(const RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
-  _coupling_pressure_gradient_initialized = false;
-  _lagged_velocity_gradient_available = false;
-  _lagged_velocity_gradient_generation = 0;
-  _reconstructed_candidate_generation = 0;
-  _reconstructed_candidate_face_flux_generation = 0;
-  _published_candidate_generation = 0;
+  copyGradient(rc.pressureGradientField().components(Moose::oldState()),
+               _coupling_pressure_gradient);
+  _coupling_pressure_gradient_initialized = true;
+  resetAttemptState();
 }
 
 void
@@ -251,8 +281,8 @@ FVReconstructedPressureGradient::meshChanged()
   _lagged_reconstruction_velocity_gradient.clear();
   _reconstructed_pressure_gradient.clear();
   _coupling_pressure_gradient.clear();
-  if (_rhie_chow)
-    resetForTimeStep(*_rhie_chow);
+  _coupling_pressure_gradient_initialized = false;
+  resetAttemptState();
 }
 
 void
@@ -486,8 +516,7 @@ FVReconstructedPressureGradient::reconstructedCandidate(const RhieChowMassFlux &
 
 void
 FVReconstructedPressureGradient::updateCouplingPressureGradient(
-    const GradientContainer & base_gradient,
-    const GradientContainer & reconstructed_candidate) const
+    const GradientView & base_gradient, const GradientContainer & reconstructed_candidate) const
 {
   const auto num_components = base_gradient.size();
   if (num_components == 0 || reconstructed_candidate.size() != num_components)
@@ -516,11 +545,7 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
       }
 
   if (!storage_matches)
-  {
-    _coupling_pressure_gradient.clear();
-    for (const auto component : index_range(base_gradient))
-      _coupling_pressure_gradient.push_back(base_gradient[component]->clone());
-  }
+    copyGradient(base_gradient, _coupling_pressure_gradient);
 
   if (!storage_matches || !_coupling_pressure_gradient_initialized)
   {
@@ -544,7 +569,7 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
 
 void
 FVReconstructedPressureGradient::publishCouplingPressureGradient(
-    const RhieChowMassFlux & rc, const GradientContainer & base_gradient) const
+    const RhieChowMassFlux & rc, const GradientView & base_gradient) const
 {
   checkFlowSystem(rc);
   mooseAssert(_reconstructed_candidate_generation == _published_candidate_generation + 1,

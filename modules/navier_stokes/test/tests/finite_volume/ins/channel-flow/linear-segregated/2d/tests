@@ -71,6 +71,22 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-transient-steady]
+    type = 'RunApp'
+    input = reconstructed-gradient-transient-steady.i
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/type=PIMPLE '
+               'Executioner/num_iterations=400 Executioner/dt=1 Executioner/num_steps=2 '
+               'Outputs/exodus=false'
+    expect_out = 'Time Step 2[\s\S]*?Iteration 1 Initial residual norms:[\s\S]*?Momentum equation: Component 1 [^\n]* Linear its: 0[\s\S]*?Momentum equation: Component 2 [^\n]* Linear its: 0'
+    requirement = "The system shall retain an accepted reconstructed pressure-coupling gradient "
+                  "between transient time steps so an unchanged steady momentum system begins the "
+                  "next time step without Krylov iterations caused by a base-gradient reset."
+    recover = false # PIMPLE recovery is not generally supported yet
+    restep = false # This test specifically checks the first solve of the second accepted time step
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md PIMPLE.md'
+    issues = '#32995'
+  []
   [reconstructed-gradient-wrong-variable]
     type = 'RunException'
     input = reconstructed-gradient-wrong-variable.i
@@ -274,6 +290,10 @@
     input = 2d-boussinesq-transient.i
     csvdiff = 2d-boussinesq-transient-reconstructed-pimple_out_line_sample_0007.csv
     cli_args = "pressure_gradient_method=reconstructed Outputs/file_base=2d-boussinesq-transient-reconstructed-pimple_out"
+    override_columns = 'vel_y'
+    override_rel_err = '5.5e-6'
+    # Recovery changes a 1.1e-9 transverse velocity by less than 1e-13 through operation ordering.
+    override_abs_zero = '2e-9'
     requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PIMPLE algorithm and reconstructed pressure gradients using the linear finite volume system."
     max_threads = 1 # see libmesh issue #3808
     design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
