@@ -116,11 +116,6 @@ public:
     return _gfuncs->GetRef(trial_var_name);
   }
 
-  /**
-   * @returns Whether nonlinear integrators are present
-   */
-  bool Nonlinear() const { return _non_linear; }
-
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
 
