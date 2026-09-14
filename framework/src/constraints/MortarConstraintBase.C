@@ -251,6 +251,15 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   {
     for (const auto node : inactive_lm_nodes)
     {
+      // inactive_lm_nodes is a globally-consistent set: every processor that shares a node with
+      // the mortar interface learns whether that node is inactive, regardless of which processor
+      // owns it (see AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes /
+      // computeInactiveLMNodes). Without this ownership check, a node shared across a partition
+      // boundary would have its Jacobian/residual contribution added once per processor that
+      // sees it, over-constraining the dof.
+      if (node->processor_id() != _subproblem.processor_id())
+        continue;
+
       // Allow mixed Lagrange orders between primal and LM
       if (!node->n_comp(sn, vn))
         continue;
