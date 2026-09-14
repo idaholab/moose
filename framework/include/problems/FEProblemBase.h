@@ -3969,12 +3969,17 @@ FEProblemBase::getKokkosFunction(const std::string & name)
     std::istringstream ss(name);
     Real real_value;
 
-    // First see if it's just a constant. If it is, build a ConstantFunction
+    // See if it's just a constant. If it is, build a KokkosParsedFunction whose expression is that
+    // constant. A Kokkos consumer holds its function in the function's own concrete type, since
+    // the abstract Moose::Kokkos::Function dispatches through a device vtable unsupported on GPU,
+    // so a default has to be built in the type consumers ask for. Any numeric literal is a valid
+    // parsed expression, which makes KokkosParsedFunction the one type able to serve as a default
+    // for all of them.
     if (ss >> real_value && ss.eof())
     {
-      InputParameters params = _factory.getValidParams("KokkosConstantFunction");
-      params.set<Real>("value") = real_value;
-      addKokkosFunction("KokkosConstantFunction", ss.str(), params);
+      InputParameters params = _factory.getValidParams("KokkosParsedFunction");
+      params.set<std::string>("expression") = ss.str();
+      addKokkosFunction("KokkosParsedFunction", ss.str(), params);
     }
 
     // Try once more
