@@ -311,10 +311,9 @@ public:
   void rebalanceMesh(mfem::ParMesh & pmesh);
 
   /**
-   * Returns optional reference to the displacement GridFunction to apply to nodes.
+   * Returns reference to the displacement GridFunction to apply to nodes.
    */
-  std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
-  getMeshDisplacementGridFunction();
+  const mfem::ParGridFunction & getMeshDisplacementGridFunction();
 
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
