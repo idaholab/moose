@@ -343,7 +343,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *_var_ess_constraints.at(j),
-                                          aux_lf = 0,
+                                          aux_lf = 0.,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
