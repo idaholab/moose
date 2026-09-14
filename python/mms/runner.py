@@ -86,7 +86,10 @@ def _runner(input_files, num_refinements, *args, **kwargs):
     cli_args = ["-i"] + input_files
     if nthreads:
         cli_args += [f"--n-threads={nthreads}"]
-    cli_args += args
+    # Drop empty strings some callers pass as a no-op "no extra args"; harmless before
+    # --n-threads was inserted here, but a bare empty arg right after it is a CommandLine
+    # parse error (it's not a HIT parameter and has nothing to attach to).
+    cli_args += [a for a in args if a]
 
     # Run input file and build up output
     x = []
