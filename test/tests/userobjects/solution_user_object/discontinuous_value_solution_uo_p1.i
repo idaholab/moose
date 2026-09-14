@@ -1,5 +1,6 @@
 [Mesh]
   type = GeneratedMesh
+  allow_renumbering = false
   dim = 2
   xmin = 0
   xmax = 1
