@@ -20,7 +20,6 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/elem.h"
-#include "libmesh/libmesh_exceptions.h"
 
 #include <cmath>
 
@@ -450,6 +449,153 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 }
 
 void
+FVReconstructedPressureGradient::faceReconstructionError(const ElemInfo & elem_info,
+                                                         const FaceInfo & fi,
+                                                         const char * const problem) const
+{
+  mooseError("FVReconstructedPressureGradient '",
+             name(),
+             "' ",
+             problem,
+             " while reconstructing cell ID ",
+             elem_info.elem()->id(),
+             " from face ID ",
+             fi.id(),
+             ".");
+}
+
+void
+FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux & rc,
+                                                        const ElemInfo & elem_info,
+                                                        const FaceInfo * const fi,
+                                                        const Point & surface_vector,
+                                                        const bool elem_has_info,
+                                                        DenseMatrix<Real> & matrix,
+                                                        DenseVector<Real> & projection_rhs,
+                                                        std::vector<dof_id_type> & face_ids) const
+{
+  mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
+
+  face_ids.push_back(fi->id());
+
+  const Real surface_area = surface_vector.norm();
+  const auto face_normal = surface_vector / surface_area;
+  // RhieChow stores the scalar flux relative to FaceInfo::normal(). Flip that orientation when the
+  // current cell is on the opposite side so q_f is outward from this cell.
+  const Point flux_normal =
+      rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
+  const Real face_flux = rc.getVolumetricFaceFlux(*fi);
+  if (!std::isfinite(face_flux))
+    faceReconstructionError(elem_info, *fi, "found a non-finite corrected face flux");
+  const Real normal_alignment = flux_normal * face_normal;
+  Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
+
+  // First-order expansion at the face gives
+  //   u_f.n_f = u_P.n_f + ((grad u)_f d_Pf).n_f.
+  // Subtract the lagged Taylor term to obtain one face equation for the unknown cell velocity:
+  //   u_P.n_f ~= u_f.n_f - ((grad u)_f d_Pf).n_f.
+  const Point d_pf = fi->faceCentroid() - elem_info.centroid();
+  Real gradient_flux_correction = 0.0;
+  for (const auto component : make_range(rc.dimension()))
+  {
+    const auto velocity_gradient =
+        reconstructionVelocityGradient(rc, elem_info, *fi, elem_has_info, component);
+    for (const auto direction : make_range(rc.dimension()))
+      if (!std::isfinite(velocity_gradient(direction)))
+        faceReconstructionError(elem_info, *fi, "found a non-finite lagged velocity gradient");
+
+    gradient_flux_correction += (velocity_gradient * d_pf) * surface_vector(component);
+  }
+
+  face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
+
+  // Assemble the area-weighted least-squares projection of the corrected face equations:
+  //   [sum_f |S_f| n_f n_f^T] u_P = sum_f |S_f| qhat_f n_f,
+  // where qhat_f is face_normal_reconstructed_quantity and S_f = |S_f| n_f.
+  for (const auto i : make_range(rc.dimension()))
+  {
+    projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
+    for (const auto j : make_range(rc.dimension()))
+      matrix(i, j) += surface_vector(i) * surface_vector(j) / surface_area;
+  }
+}
+
+DenseVector<Real>
+FVReconstructedPressureGradient::solveFaceProjection(const DenseMatrix<Real> & matrix,
+                                                     const DenseVector<Real> & projection_rhs) const
+{
+  const auto dimension = projection_rhs.size();
+  DenseVector<Real> reconstructed_quantity(dimension);
+  if (dimension == 1)
+    reconstructed_quantity(0) = projection_rhs(0) / matrix(0, 0);
+  else
+  {
+    // A valid cell has face normals that span the spatial dimension, making this normal-equation
+    // matrix symmetric positive definite.
+    DenseMatrix<Real> solve_matrix(matrix);
+    solve_matrix.cholesky_solve(projection_rhs, reconstructed_quantity);
+  }
+
+  return reconstructed_quantity;
+}
+
+Real
+FVReconstructedPressureGradient::reconstructPressureGradient(
+    const RhieChowMassFlux & rc,
+    const ElemInfo & elem_info,
+    const unsigned int component,
+    const Real reconstructed_velocity,
+    const std::vector<dof_id_type> & face_ids) const
+{
+  const Elem & elem = *elem_info.elem();
+  if (!std::isfinite(reconstructed_velocity))
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' computed a non-finite reconstructed velocity component ",
+               component,
+               " for cell ID ",
+               elem.id(),
+               " using face IDs ",
+               Moose::stringify(face_ids),
+               ".");
+
+  const auto momentum_dof = elem_info.dofIndices()[rc.momentumSystem(component).number()][0];
+  const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
+  const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
+  if (!std::isfinite(HbyA) || !std::isfinite(Ainv) || Ainv == 0.0)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' found invalid momentum-coupling data for component ",
+               component,
+               " of cell ID ",
+               elem.id(),
+               " using face IDs ",
+               Moose::stringify(face_ids),
+               ": H/A = ",
+               HbyA,
+               " and 1/A = ",
+               Ainv,
+               ".");
+
+  // Invert the same diagonal momentum relation used by Rhie-Chow,
+  //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
+  // so the reconstructed pressure gradient produces the projected, flux-consistent u_P.
+  const Real reconstructed_gradient = (-reconstructed_velocity - HbyA) / Ainv;
+  if (!std::isfinite(reconstructed_gradient))
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' computed a non-finite pressure-gradient component ",
+               component,
+               " for cell ID ",
+               elem.id(),
+               " using face IDs ",
+               Moose::stringify(face_ids),
+               ".");
+
+  return reconstructed_gradient;
+}
+
+void
 FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc)
 {
   checkFlowSystem(rc);
@@ -458,6 +604,14 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
   const auto dimension = rc.dimension();
   const auto & base_pressure_gradient = rc.basePressureGradientComponents();
   const auto face_flux_iteration = rc.faceMassFluxGeneration();
+
+  if (face_flux_iteration == _last_reconstructed_face_flux_iteration)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' cannot reuse corrected face-flux iteration ",
+               face_flux_iteration,
+               " for reconstruction. The current pressure corrector must produce a new face "
+               "flux before reconstruction.");
 
   if (_reconstructed_pressure_gradient.empty())
     for (const auto component : make_range(dimension))
@@ -483,7 +637,6 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     matrix.zero();
     projection_rhs.zero();
 
-    // For every face, estimate the cell-centered normal velocity from the corrected face flux.
     // The coordinate-system-aware surface vector S_f supplied by loopOverElemFaceInfo is outward
     // from this cell, including the appropriate Cartesian or axisymmetric geometric weighting.
     auto act = [&](const Elem &,
@@ -493,242 +646,21 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    const Real,
                    const bool elem_has_info)
     {
-      if (!fi)
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' encountered missing face information while reconstructing cell ID ",
-                   elem.id(),
-                   ".");
-
-      face_ids.push_back(fi->id());
-
-      if (face_flux_iteration == _last_reconstructed_face_flux_iteration)
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' cannot reconstruct cell ID ",
-                   elem.id(),
-                   " from face ID ",
-                   fi->id(),
-                   ": corrected face-flux iteration ",
-                   face_flux_iteration,
-                   " was already used for reconstruction. The current pressure corrector must "
-                   "produce a new face flux before reconstruction.");
-
-      const Real surface_area = surface_vector.norm();
-      if (!std::isfinite(surface_area) || surface_area <= 0.0)
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' found invalid surface area ",
-                   surface_area,
-                   " while reconstructing cell ID ",
-                   elem.id(),
-                   " from face ID ",
-                   fi->id(),
-                   ".");
-
-      for (const auto component : make_range(dimension))
-        if (!std::isfinite(surface_vector(component)))
-          mooseError("FVReconstructedPressureGradient '",
-                     name(),
-                     "' found a non-finite surface-vector component while reconstructing cell ID ",
-                     elem.id(),
-                     " from face ID ",
-                     fi->id(),
-                     ".");
-
-      const auto face_normal = surface_vector / surface_area;
-      // RhieChow stores the scalar flux relative to FaceInfo::normal(). Flip that orientation when
-      // the current cell is on the opposite side so q_f is outward from this cell.
-      const Point flux_normal =
-          rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
-      const Real face_flux = rc.getVolumetricFaceFlux(*fi);
-      const Real normal_alignment = flux_normal * face_normal;
-      if (!std::isfinite(face_flux) || !std::isfinite(normal_alignment))
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' found non-finite face-flux projection data while reconstructing cell ID ",
-                   elem.id(),
-                   " from face ID ",
-                   fi->id(),
-                   ".");
-      Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
-
-      // First-order expansion at the face gives
-      //   u_f.n_f = u_P.n_f + ((grad u)_f d_Pf).n_f.
-      // Subtract the lagged Taylor term to obtain one face equation for the unknown cell velocity:
-      //   u_P.n_f ~= u_f.n_f - ((grad u)_f d_Pf).n_f.
-      const Point d_pf = fi->faceCentroid() - elem_info->centroid();
-      Real gradient_flux_correction = 0.0;
-      for (const auto component : make_range(dimension))
-      {
-        const auto velocity_gradient =
-            reconstructionVelocityGradient(rc, *elem_info, *fi, elem_has_info, component);
-        for (const auto direction : make_range(dimension))
-          if (!std::isfinite(velocity_gradient(direction)) || !std::isfinite(d_pf(direction)))
-            mooseError("FVReconstructedPressureGradient '",
-                       name(),
-                       "' found non-finite velocity-gradient or face-displacement data while "
-                       "reconstructing cell ID ",
-                       elem.id(),
-                       " from face ID ",
-                       fi->id(),
-                       ".");
-
-        gradient_flux_correction +=
-            (velocity_gradient * d_pf) * surface_vector(component);
-      }
-
-      if (!std::isfinite(gradient_flux_correction))
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' computed a non-finite velocity-gradient correction while reconstructing "
-                   "cell ID ",
-                   elem.id(),
-                   " from face ID ",
-                   fi->id(),
-                   ".");
-
-      face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
-      if (!std::isfinite(face_normal_reconstructed_quantity))
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' computed a non-finite corrected face quantity while reconstructing cell ID ",
-                   elem.id(),
-                   " from face ID ",
-                   fi->id(),
-                   ".");
-
-      // Assemble the area-weighted least-squares projection of the corrected face equations:
-      //   [sum_f |S_f| n_f n_f^T] u_P = sum_f |S_f| qhat_f n_f,
-      // where qhat_f is face_normal_reconstructed_quantity and S_f = |S_f| n_f.
-      for (const auto i : make_range(dimension))
-      {
-        projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
-        for (const auto j : make_range(dimension))
-        {
-          matrix(i, j) += surface_vector(i) * surface_vector(j) / surface_area;
-          if (!std::isfinite(matrix(i, j)))
-            mooseError("FVReconstructedPressureGradient '",
-                       name(),
-                       "' assembled a non-finite projection matrix while reconstructing cell ID ",
-                       elem.id(),
-                       " from face ID ",
-                       fi->id(),
-                       ".");
-        }
-
-        if (!std::isfinite(projection_rhs(i)))
-          mooseError("FVReconstructedPressureGradient '",
-                     name(),
-                     "' assembled a non-finite projection right-hand side while reconstructing "
-                     "cell ID ",
-                     elem.id(),
-                     " from face ID ",
-                     fi->id(),
-                     ".");
-      }
+      assembleFaceProjection(
+          rc, *elem_info, fi, surface_vector, elem_has_info, matrix, projection_rhs, face_ids);
     };
 
     Moose::FV::loopOverElemFaceInfo(
         elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
 
-    if (face_ids.empty())
-      mooseError("FVReconstructedPressureGradient '",
-                 name(),
-                 "' found no corrected faces while reconstructing cell ID ",
-                 elem.id(),
-                 ".");
+    const auto reconstructed_quantity = solveFaceProjection(matrix, projection_rhs);
 
-    DenseVector<Real> reconstructed_quantity(dimension);
-    if (dimension == 1)
-    {
-      const Real denominator = matrix(0, 0);
-      if (!std::isfinite(denominator) || denominator <= 0.0)
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' could not factor the face-projection matrix for cell ID ",
-                   elem.id(),
-                   " using face IDs ",
-                   Moose::stringify(face_ids),
-                   ": the one-dimensional matrix entry is ",
-                   denominator,
-                   ".");
-      reconstructed_quantity(0) = projection_rhs(0) / denominator;
-    }
-    else
-    {
-      // The normal-equation matrix is symmetric positive definite when the cell face normals span
-      // the spatial dimension. Cholesky failure therefore identifies degenerate reconstruction
-      // geometry rather than a pressure-solver failure.
-      DenseMatrix<Real> solve_matrix(matrix);
-      try
-      {
-        solve_matrix.cholesky_solve(projection_rhs, reconstructed_quantity);
-      }
-      catch (const libMesh::LogicError & error)
-      {
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' could not factor the face-projection matrix for cell ID ",
-                   elem.id(),
-                   " using face IDs ",
-                   Moose::stringify(face_ids),
-                   ". The corrected face geometry does not span the reconstruction space. "
-                   "libMesh reported: ",
-                   error.what());
-      }
-    }
-
+    const auto pressure_dof =
+        elem_info->dofIndices()[rc.pressureSystem().number()][rc.pressureVariableNumber()];
     for (const auto component : make_range(dimension))
     {
-      if (!std::isfinite(reconstructed_quantity(component)))
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' computed a non-finite reconstructed velocity component ",
-                   component,
-                   " for cell ID ",
-                   elem.id(),
-                   " using face IDs ",
-                   Moose::stringify(face_ids),
-                   ".");
-
-      const auto momentum_dof =
-          elem_info->dofIndices()[rc.momentumSystem(component).number()][0];
-      const auto pressure_dof = elem_info->dofIndices()[rc.pressureSystem().number()]
-                                                      [rc.pressureVariableNumber()];
-
-      const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
-      const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
-      if (!std::isfinite(HbyA) || !std::isfinite(Ainv) || Ainv == 0.0)
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' found invalid momentum-coupling data for component ",
-                   component,
-                   " of cell ID ",
-                   elem.id(),
-                   " using face IDs ",
-                   Moose::stringify(face_ids),
-                   ": H/A = ",
-                   HbyA,
-                   " and 1/A = ",
-                   Ainv,
-                   ".");
-
-      // Invert the same diagonal momentum relation used by Rhie-Chow,
-      //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
-      // so the reconstructed pressure gradient produces the projected, flux-consistent u_P.
-      const Real reconstructed_gradient = (-reconstructed_quantity(component) - HbyA) / Ainv;
-      if (!std::isfinite(reconstructed_gradient))
-        mooseError("FVReconstructedPressureGradient '",
-                   name(),
-                   "' computed a non-finite pressure-gradient component ",
-                   component,
-                   " for cell ID ",
-                   elem.id(),
-                   " using face IDs ",
-                   Moose::stringify(face_ids),
-                   ".");
-
+      const auto reconstructed_gradient = reconstructPressureGradient(
+          rc, *elem_info, component, reconstructed_quantity(component), face_ids);
       _reconstructed_pressure_gradient[component]->set(pressure_dof, reconstructed_gradient);
     }
   }
