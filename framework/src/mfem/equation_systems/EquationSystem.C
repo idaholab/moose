@@ -383,14 +383,14 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
   _linear_operator->Mult(sol, residual);
 
-  if (_non_linear)
+  if (IsNonlinear())
     ComputeNonlinearResidual(sol, residual);
 }
 
 void
 EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  mooseAssert(_non_linear, "Should not be calling this method if our forms are not nonlinear");
+  mooseAssert(IsNonlinear(), "Should not be calling this method if our forms are not nonlinear");
 
   const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
   SetTrialVariablesFromTrueVectors(block_solution);
@@ -441,7 +441,7 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   _linearization_point = &u;
 
-  if (_non_linear)
+  if (IsNonlinear())
   {
     if (_assembly_level != mfem::AssemblyLevel::LEGACY)
       mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
