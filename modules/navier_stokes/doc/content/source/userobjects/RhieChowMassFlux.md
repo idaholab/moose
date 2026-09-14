@@ -70,9 +70,10 @@ variable and uses that selection for the pressure variable:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/reconstructed-force-channel.i block=Variables/pressure FVGradientMethods/reconstructed
 
-All [LinearFVMomentumPressure.md] kernels associated with this `RhieChowMassFlux` must use the same
-reconstructed pressure-gradient definition on the blocks where the object operates. Other equations
-and diagnostic quantities should continue to use an ordinary gradient method.
+Use the same reconstructed pressure-gradient definition for every [LinearFVMomentumPressure.md]
+component coupled to this pressure equation. Mixing gradient definitions among velocity components
+would make the reconstructed cell velocity inconsistent with the coupled momentum balance. Other
+equations and diagnostic quantities should continue to use an ordinary gradient method.
 
 ### Pressure Diffusion Interpolation
 
