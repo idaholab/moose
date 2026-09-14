@@ -31,38 +31,50 @@ such as those with high Reynolds numbers, complex geometries, viscous flows in n
 multiphase flows, problems with rapidly varying thermophysical properties, and,
 in general, when using high-resolution grids.
 
-The pressure-gradient term used by [LinearFVMomentumPressure.md] kernels comes from the kernel's
-configured gradient method. [FVReconstructedPressureGradient.md] owns the Aguerre reconstruction
-and its relaxed coupling pressure gradient: it removes the face-flux contribution from the previous
-velocity gradient, reconstructs a cell velocity from the corrected total conservative face flux,
-and then recovers the pressure gradient from the momentum balance. Rhie-Chow supplies H/A, 1/A, the
-base pressure gradient, the conservative face flux, and momentum/pressure system metadata, and
-drives the gradient method's prepare/finalize lifecycle.
+### Reconstructed Pressure Gradient
 
-The reconstructed gradient is available after the first pressure correction; until then the gradient
-method falls back to its base gradient method. Immediately before each momentum predictor,
-Rhie-Chow snapshots both the previous corrected velocity gradient and the published coupling pressure
-gradient. Momentum assembly and the subsequent H/A computation therefore read the same coupling
-gradient snapshot. Additional PISO correctors retain that snapshot while refreshing only the lagged
-velocity gradient used by the next reconstructed candidate.
+The `reconstructed` pressure-gradient option uses the Aguerre reconstruction
+([!cite](aguerre2018oscillation)) implemented by [FVReconstructedPressureGradient.md]. It is useful
+when the conservative Rhie-Chow face flux is smooth, but the cell-centered velocity still exhibits
+oscillations because its pressure gradient is not fully consistent with that face flux.
 
-The published coupling gradient is retained between accepted time steps. Consequently, an unchanged
-steady solution assembles the same momentum pressure source on the next time step instead of acquiring
-an artificial residual from the base gradient. Linear FV gradient history restores the accepted
-coupling gradient after a rejected attempt and preserves it in restart data.
+After a pressure correction, the method reconstructs a cell velocity that is compatible with the
+corrected conservative face flux and then determines the pressure gradient required by the cell
+momentum balance. The newly reconstructed gradient corrects the velocity immediately so that the
+cell velocity and continuity-preserving face flux remain consistent. A relaxed version of that
+gradient is used by the next momentum predictor to avoid introducing an abrupt change into the
+pressure-velocity coupling. The accepted gradient is carried between time steps and is preserved
+through time-step retries and restarts.
 
-After each pressure solve, Rhie-Chow first forms the candidate from the unrelaxed pressure gradient
-and conservative corrected face flux, and updates the cell velocity from that candidate. The pressure
-solution is then relaxed, ordinary pressure gradients are refreshed, and the candidate is blended
-into the published coupling gradient with
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once per
-corrector. This keeps the immediate velocity correction compatible with continuity while providing
-the relaxed coupling pressure gradient to the next momentum predictor.
-Rhie-Chow automatically discovers the [LinearFVMomentumPressure.md] kernel(s) attached to each
-momentum system so it uses the same pressure gradient field as the momentum predictor while
-constructing H/A. Multiple kernels are allowed per momentum system as long as they partition the
-Rhie-Chow object's blocks without overlapping there and all read from the same registered gradient
-field. Kernel overlap outside the Rhie-Chow object's blocks is ignored by this validation.
+The following options control the reconstruction:
+
+- [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) controls how
+  strongly the newly reconstructed gradient changes the gradient used by the next momentum solve.
+  The default value of `0.1` is deliberately conservative. Smaller values provide more damping and
+  can improve robustness, but usually require more outer iterations. Values closer to `1` respond
+  more quickly to the latest pressure correction, but can strengthen pressure-velocity oscillations.
+- [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method) selects the
+  ordinary pressure-gradient method used before the first reconstructed gradient is available. The
+  default is `green-gauss`. This method also supplies the alternative boundary-cell gradient when
+  `base_gradient` is selected below.
+- [!param](/FVGradientMethods/FVReconstructedPressureGradient/reconstructed_pressure_gradient_boundary_cells)
+  controls cells next to a boundary. The default, `reconstructed`, applies the reconstruction
+  throughout the domain. The `base_gradient` option keeps the ordinary pressure gradient in
+  boundary-adjacent cells, which can be helpful when a boundary condition or limited surrounding
+  face information makes the reconstructed boundary-cell gradient less robust.
+
+For example, the following tested input selects the reconstructed method through an input-file
+variable and uses that selection for the pressure variable:
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/reconstructed-force-channel.i line=pressure_gradient_method
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/reconstructed-force-channel.i block=Variables/pressure FVGradientMethods/reconstructed
+
+All [LinearFVMomentumPressure.md] kernels associated with this `RhieChowMassFlux` must use the same
+reconstructed pressure-gradient definition on the blocks where the object operates. Other equations
+and diagnostic quantities should continue to use an ordinary gradient method.
+
+### Pressure Diffusion Interpolation
 
 The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
 whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,
