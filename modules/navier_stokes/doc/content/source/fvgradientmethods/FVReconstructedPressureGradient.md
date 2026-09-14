@@ -57,6 +57,10 @@ The pressure variable and its `RhieChowMassFlux` object must have identical bloc
 Pressure fields on independent flow regions should use separate pressure variables and Rhie-Chow
 objects, or one Rhie-Chow object must span the complete pressure domain.
 
+Mesh quality is outside this gradient method's responsibility. When diagnosing reconstruction on a
+new mesh, use [MeshDiagnosticsGenerator.md] with `check_local_jacobian = ERROR` and
+`examine_element_volumes = ERROR` to detect degenerate element and side geometry.
+
 !syntax parameters /FVGradientMethods/FVReconstructedPressureGradient
 
 !syntax inputs /FVGradientMethods/FVReconstructedPressureGradient

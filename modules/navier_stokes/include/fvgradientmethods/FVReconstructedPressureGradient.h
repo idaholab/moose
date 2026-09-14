@@ -14,6 +14,8 @@
 #include "MeshChangedInterface.h"
 
 #include "libmesh/numeric_vector.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
 
 #include <unordered_set>
 
@@ -116,6 +118,32 @@ private:
                                                  const FaceInfo & fi,
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
+
+  /// Report invalid data associated with one face equation.
+  [[noreturn]] void faceReconstructionError(const ElemInfo & elem_info,
+                                            const FaceInfo & fi,
+                                            const char * problem) const;
+
+  /// Add one corrected face equation to a cell's velocity-projection system.
+  void assembleFaceProjection(const RhieChowMassFlux & rc,
+                              const ElemInfo & elem_info,
+                              const FaceInfo * fi,
+                              const Point & surface_vector,
+                              bool elem_has_info,
+                              DenseMatrix<Real> & matrix,
+                              DenseVector<Real> & projection_rhs,
+                              std::vector<dof_id_type> & face_ids) const;
+
+  /// Solve a cell's velocity-projection system.
+  DenseVector<Real> solveFaceProjection(const DenseMatrix<Real> & matrix,
+                                        const DenseVector<Real> & projection_rhs) const;
+
+  /// Invert one diagonal momentum equation to recover a pressure-gradient component.
+  Real reconstructPressureGradient(const RhieChowMassFlux & rc,
+                                   const ElemInfo & elem_info,
+                                   unsigned int component,
+                                   Real reconstructed_velocity,
+                                   const std::vector<dof_id_type> & face_ids) const;
 
   /// Gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName _base_gradient_method_name;
