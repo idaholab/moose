@@ -719,6 +719,14 @@ MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase
   // For each external (no-neighbor) face, we probe a point just outside it, along the outward
   // direction from the element centroid. If the point locator finds another element there, the
   // face borders material but matched no neighbor face, so the interface is non-conforming.
+  //
+  // Exception: libMesh's find_neighbors() does not build neighbor links across C0Polyhedron faces,
+  // so a perfectly conforming polyhedron interface (the polyhedron face and the abutting element's
+  // face share the exact same nodes) also has a null neighbor. To avoid that false positive, a
+  // no-neighbor face is treated as conforming when an element found just outside it has a side with
+  // the identical node set. The intended target -- a face only partially covered by smaller faces,
+  // such as a HEX8 quad abutting two TET4 triangles -- has no such identical-node side (the
+  // triangles share only three of the quad's four nodes), so it is still reported.
   auto pl = mesh->sub_point_locator();
   pl->enable_out_of_mesh_mode();
   unsigned int num_nonconforming_faces = 0;
@@ -732,18 +740,45 @@ MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase
         continue;
       const auto side = elem->side_ptr(s);
       const Point side_center = side->vertex_average();
+      // Sorted global node ids of this face, used to recognize an identical-node matching side.
+      const auto face_local = elem->nodes_on_side(s);
+      std::set<dof_id_type> face_nodes;
+      for (const auto i : index_range(face_local))
+        face_nodes.insert(elem->node_id(face_local[i]));
+      // True if 'other' has a side made of exactly this face's nodes (a conforming interface that
+      // find_neighbors failed to link, e.g. across a C0Polyhedron face).
+      auto has_matching_side = [&](const Elem * other)
+      {
+        for (const auto os : other->side_index_range())
+        {
+          const auto other_local = other->nodes_on_side(os);
+          if (other_local.size() != face_nodes.size())
+            continue;
+          std::set<dof_id_type> other_nodes;
+          for (const auto i : index_range(other_local))
+            other_nodes.insert(other->node_id(other_local[i]));
+          if (other_nodes == face_nodes)
+            return true;
+        }
+        return false;
+      };
       // Just outside the face (1% of the centroid-to-face distance beyond it).
       const Point probe = side_center + 0.01 * (side_center - elem_center);
       std::set<const Elem *> found;
       (*pl)(probe, found);
       bool material_outside = false;
+      bool conforming_interface = false;
       for (const auto other : found)
         if (other != elem && other->active())
         {
           material_outside = true;
-          break;
+          if (has_matching_side(other))
+          {
+            conforming_interface = true;
+            break;
+          }
         }
-      if (material_outside)
+      if (material_outside && !conforming_interface)
       {
         if (num_nonconforming_faces < _num_outputs)
           _console << "Non-conforming element face (borders another cell but matches no neighbor "
