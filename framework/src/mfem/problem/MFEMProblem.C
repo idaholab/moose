@@ -726,24 +726,15 @@ MFEMProblem::displaceMesh()
   // Displace mesh
   if (mesh().shouldDisplace())
   {
-    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    mesh().displace(cast_ref<mfem::GridFunction const &>(getMeshDisplacementGridFunction()));
     // TODO: update FESpaces GridFunctions etc for transient solves
   }
 }
 
-std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+const mfem::ParGridFunction &
 MFEMProblem::getMeshDisplacementGridFunction()
 {
-  // If C++23 transform were available this would be easier
-  auto const displacement_variable = mesh().getMeshDisplacementVariable();
-  if (displacement_variable)
-  {
-    return *_problem_data.gridfunctions.Get(displacement_variable.value());
-  }
-  else
-  {
-    return std::nullopt;
-  }
+  return *getGridFunction(mesh().getMeshDisplacementVariable());
 }
 
 void
