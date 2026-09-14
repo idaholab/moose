@@ -23,6 +23,30 @@ SHAS = [
 
 
 class Test(unittest.TestCase):
+    def testProcessResultsFormats(self):
+        """
+        Non-network regression test for TEST_RE/_process_results against both the
+        legacy TestHarness console format ("tpnsc") and the current one ("tmpnsc",
+        which adds a memory field; see #27479) that civet's run_tests invocation produces.
+        """
+        job = cr.Job(1, "results_1_recipe.tar.gz", cr.JobFileStatus.LOCAL, None)
+
+        content_old = "[0.530s]       OK  kernels/simple_diffusion.test [recover]\n"
+        database = collections.defaultdict(lambda: collections.defaultdict(list))
+        cr._process_results(database, job, "06_Test_-p_3", content_old, None)
+        tests = database["kernels/simple_diffusion.test"][1]
+        self.assertEqual(len(tests), 1)
+        self.assertEqual(tests[0].status, "OK")
+        self.assertEqual(tests[0].caveats, ["recover"])
+
+        content_new = "[0.530s] [ 123MB]       OK  kernels/simple_diffusion.test [recover]\n"
+        database = collections.defaultdict(lambda: collections.defaultdict(list))
+        cr._process_results(database, job, "06_Test_-p_3", content_new, None)
+        tests = database["kernels/simple_diffusion.test"][1]
+        self.assertEqual(len(tests), 1)
+        self.assertEqual(tests[0].status, "OK")
+        self.assertEqual(tests[0].caveats, ["recover"])
+
     def testGetCivetJobs(self):
         jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
         self.assertEqual(len(jobs), 67)
