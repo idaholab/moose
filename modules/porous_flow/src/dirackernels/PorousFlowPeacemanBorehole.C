@@ -21,6 +21,13 @@ InputParameters
 PorousFlowPeacemanBorehole::validParams()
 {
   InputParameters params = PorousFlowLineSink::validParams();
+  // A borehole point that the point locator cannot place in the mesh must not be silently
+  // dropped: computeWellborePressures() samples every borehole point's temperature directly
+  // (not just the ones that ended up with a Dirac source), and a missing element there corrupts
+  // the trapezoidal pressure integral for every other point up the well, not just the missing
+  // one.  DiracKernelBase's own default of IGNORE would let that happen silently, so raise it to
+  // ERROR here.
+  params.set<MooseEnum>("point_not_found_behavior") = "ERROR";
   params.addRequiredParam<FunctionName>(
       "character",
       "If zero then borehole does nothing.  If positive the borehole acts as a sink "
