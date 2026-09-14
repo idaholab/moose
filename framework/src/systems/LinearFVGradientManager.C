@@ -27,8 +27,6 @@
 
 #include <algorithm>
 
-using namespace libMesh;
-
 namespace
 {
 template <typename DestinationContainer>
