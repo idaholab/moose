@@ -1,0 +1,149 @@
+[Tests]
+  design = 'source/kernels/DisplacementRegularization.md source/kernels/ADDisplacementRegularization.md'
+  issues = '#32970'
+
+  [huhu]
+    type = CSVDiff
+    input = 'displacement_regularization.i'
+    csvdiff = 'displacement_regularization_huhu_out.csv'
+    cli_args = 'regularization_type=huhu Outputs/csv=true Outputs/file_base=displacement_regularization_huhu_out'
+    requirement = 'The system shall provide a solid mechanics displacement regularization kernel with a HuHu Hessian contraction in a diffusion-stabilized test problem.'
+  []
+  [lulu]
+    type = CSVDiff
+    input = 'displacement_regularization.i'
+    csvdiff = 'displacement_regularization_lulu_out.csv'
+    cli_args = 'regularization_type=lulu Outputs/csv=true Outputs/file_base=displacement_regularization_lulu_out'
+    requirement = 'The system shall provide a solid mechanics displacement regularization kernel with a positive LuLu Laplacian contraction in a diffusion-stabilized test problem.'
+  []
+  [huhu_lulu_default_factor]
+    type = CSVDiff
+    input = 'displacement_regularization_default_factor.i'
+    csvdiff = 'displacement_regularization_default_factor_out.csv'
+    cli_args = 'Outputs/csv=true Outputs/file_base=displacement_regularization_default_factor_out'
+    requirement = 'The system shall default the HuHu-LuLu correction factor to one over the mesh dimension in a diffusion-stabilized test problem.'
+  []
+  [huhu_lulu_manual_factor]
+    type = CSVDiff
+    input = 'displacement_regularization.i'
+    csvdiff = 'displacement_regularization_huhu_lulu_factor_out.csv'
+    cli_args = 'regularization_type=huhu_lulu lulu_factor=0.25 forcing_scale=0.75 Outputs/csv=true Outputs/file_base=displacement_regularization_huhu_lulu_factor_out'
+    requirement = 'The system shall allow users to set the LuLu correction factor for HuHu-LuLu regularization in a diffusion-stabilized test problem.'
+  []
+  [huhu_lulu_default_factor_3d]
+    type = CSVDiff
+    input = 'displacement_regularization_default_factor_3d.i'
+    csvdiff = 'displacement_regularization_default_factor_3d_out.csv'
+    cli_args = 'Outputs/csv=true Outputs/file_base=displacement_regularization_default_factor_3d_out'
+    requirement = 'The system shall default the HuHu-LuLu correction factor to one over the mesh dimension in a three-dimensional diffusion-stabilized test problem.'
+  []
+  [ad_huhu_lulu]
+    type = CSVDiff
+    input = 'ad_displacement_regularization_default_factor.i'
+    csvdiff = 'ad_displacement_regularization_default_factor_out.csv'
+    cli_args = 'Outputs/csv=true Outputs/file_base=ad_displacement_regularization_default_factor_out'
+    requirement = 'The system shall provide an automatic-differentiation version of the HuHu-LuLu displacement regularization kernel in a diffusion-stabilized test problem.'
+  []
+  [ad_huhu]
+    type = CSVDiff
+    input = 'ad_displacement_regularization_default_factor.i'
+    csvdiff = 'ad_displacement_regularization_huhu_out.csv'
+    cli_args = 'regularization_type=huhu forcing_scale=1.0 Outputs/csv=true Outputs/file_base=ad_displacement_regularization_huhu_out'
+    requirement = 'The system shall provide an automatic-differentiation version of the HuHu displacement regularization kernel in a diffusion-stabilized test problem.'
+  []
+  [ad_lulu]
+    type = CSVDiff
+    input = 'ad_displacement_regularization_default_factor.i'
+    csvdiff = 'ad_displacement_regularization_lulu_out.csv'
+    cli_args = 'regularization_type=lulu forcing_scale=1.0 Outputs/csv=true Outputs/file_base=ad_displacement_regularization_lulu_out'
+    requirement = 'The system shall provide an automatic-differentiation version of the LuLu displacement regularization kernel in a diffusion-stabilized test problem.'
+  []
+  [huhu_jacobian]
+    type = PetscJacobianTester
+    input = 'displacement_regularization.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "regularization_type=huhu Outputs/active=''"
+    prereq = huhu
+    requirement = 'The system shall compute the correct Jacobian for HuHu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [lulu_jacobian]
+    type = PetscJacobianTester
+    input = 'displacement_regularization.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "regularization_type=lulu Outputs/active=''"
+    prereq = lulu
+    requirement = 'The system shall compute the correct Jacobian for LuLu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [huhu_lulu_jacobian]
+    type = PetscJacobianTester
+    input = 'displacement_regularization_default_factor.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "Outputs/active=''"
+    prereq = huhu_lulu_default_factor
+    requirement = 'The system shall compute the correct Jacobian for HuHu-LuLu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [ad_huhu_lulu_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_displacement_regularization_default_factor.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "Outputs/active=''"
+    prereq = ad_huhu_lulu
+    requirement = 'The system shall compute the correct automatic-differentiation Jacobian for HuHu-LuLu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [ad_huhu_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_displacement_regularization_default_factor.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "regularization_type=huhu forcing_scale=1.0 Outputs/active=''"
+    prereq = ad_huhu
+    requirement = 'The system shall compute the correct automatic-differentiation Jacobian for HuHu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [ad_lulu_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_displacement_regularization_default_factor.i'
+    ratio_tol = 1e-7
+    difference_tol = 1
+    run_sim = True
+    cli_args = "regularization_type=lulu forcing_scale=1.0 Outputs/active=''"
+    prereq = ad_lulu
+    requirement = 'The system shall compute the correct automatic-differentiation Jacobian for LuLu displacement regularization in a diffusion-stabilized test problem.'
+  []
+  [large_lulu_factor_warning]
+    type = RunException
+    input = 'displacement_regularization.i'
+    cli_args = "--error Problem/solve=false Kernels/regularization/regularization=huhu_lulu Kernels/regularization/lulu_factor=0.75"
+    expect_err = "The 'lulu_factor' parameter is larger than 1 / dim"
+    requirement = 'The system shall warn when the LuLu correction factor is larger than one over the mesh dimension.'
+  []
+  [ad_large_lulu_factor_warning]
+    type = RunException
+    input = 'ad_displacement_regularization_default_factor.i'
+    cli_args = "--error Problem/solve=false Kernels/regularization/lulu_factor=0.75"
+    expect_err = "The 'lulu_factor' parameter is larger than 1 / dim"
+    requirement = 'The system shall warn when the LuLu correction factor is larger than one over the mesh dimension for AD regularization.'
+  []
+  [huhu_lulu_1d_error]
+    type = RunException
+    input = 'displacement_regularization_1d.i'
+    cli_args = '--error Problem/solve=false'
+    expect_err = "The 'huhu_lulu' regularization is not supported in 1D"
+    requirement = 'The system shall reject HuHu-LuLu displacement regularization in one dimension.'
+  []
+  [ad_huhu_lulu_1d_error]
+    type = RunException
+    input = 'displacement_regularization_1d.i'
+    cli_args = '--error Problem/solve=false reg_kernel=ADDisplacementRegularization'
+    expect_err = "The 'huhu_lulu' regularization is not supported in 1D"
+    requirement = 'The system shall reject AD HuHu-LuLu displacement regularization in one dimension.'
+  []
+[]
