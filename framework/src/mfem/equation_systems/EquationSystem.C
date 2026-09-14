@@ -381,26 +381,16 @@ EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRH
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  if (_non_linear)
-  {
-    ComputeNonlinearResidual(sol, residual);
-    _linear_operator->AddMult(sol, residual);
-  }
-  else
-  {
-    residual = 0.0;
-    _linear_operator->Mult(sol, residual);
-  }
+  _linear_operator->Mult(sol, residual);
 
-  sol.HostRead();
-  residual.HostRead();
+  if (_non_linear)
+    ComputeNonlinearResidual(sol, residual);
 }
 
 void
 EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector & residual) const
 {
   mooseAssert(_non_linear, "Should not be calling this method if our forms are not nonlinear");
-  residual = 0.0;
 
   const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
   SetTrialVariablesFromTrueVectors(block_solution);
@@ -410,7 +400,7 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    nlf->AddMult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
 }
