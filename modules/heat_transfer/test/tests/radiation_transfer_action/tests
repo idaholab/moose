@@ -74,4 +74,13 @@
     requirement = 'The system shall provide a way to output the radiative heat flux from the radiation heat transfer action.'
     issues = '#33213'
   []
+
+  [radiation_s2s_linearfv_noaction_steady]
+    type = Exodiff
+    input = 'radiative_transfer_no_action_linearfv_steady.i'
+    exodiff = 'radiative_transfer_no_action_linearfv_steady_out.e'
+    requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and Steady Newton solver.'
+    issues = '#33641'
+    max_threads=1
+  []
 []
