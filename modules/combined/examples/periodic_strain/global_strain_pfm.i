@@ -308,7 +308,7 @@
   # elastic free energies
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
+    property_name = Fe
     coupled_variables = 'c'
     outputs = exodus
     output_properties = Fe

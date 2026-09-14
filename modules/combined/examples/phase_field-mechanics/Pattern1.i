@@ -370,21 +370,21 @@
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
     base_name = phase1
-    f_name = Fe1
+    property_name = Fe1
     derivative_order = 2
     coupled_variables = 'c' # should be empty
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
     base_name = phase2
-    f_name = Fe2
+    property_name = Fe2
     derivative_order = 2
     coupled_variables = 'c' # should be empty
   [../]
   [./elastic_free_energy_3]
     type = ElasticEnergyMaterial
     base_name = phase3
-    f_name = Fe3
+    property_name = Fe3
     derivative_order = 2
     coupled_variables = 'c' # should be empty
   [../]
@@ -415,7 +415,7 @@
   # global free energy
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
