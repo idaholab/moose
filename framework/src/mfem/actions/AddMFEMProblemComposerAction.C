@@ -31,7 +31,7 @@ void
 AddMFEMProblemComposerAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addMFEMProblemComposer(_type, _name, _moose_object_pars);
+    cast_ref<MFEMProblem &>(*_problem).addMFEMProblemComposer(_type, _name, _moose_object_pars);
 }
 
 #endif

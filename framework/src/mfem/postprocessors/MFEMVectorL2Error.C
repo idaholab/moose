@@ -35,16 +35,6 @@ MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
 {
 }
 
-void
-MFEMVectorL2Error::initialize()
-{
-}
-
-void
-MFEMVectorL2Error::execute()
-{
-}
-
 PostprocessorValue
 MFEMVectorL2Error::getValue() const
 {

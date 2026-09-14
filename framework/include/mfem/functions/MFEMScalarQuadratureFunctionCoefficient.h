@@ -13,11 +13,6 @@
 
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
-// The class derives from mfem::QuadratureFunctionCoefficient, so the complete type is required.
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 /**
  * Scalar coefficient holding precomputed values of a source coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
@@ -28,14 +23,16 @@ class MFEMScalarQuadratureFunctionCoefficient : public mfem::QuadratureFunctionC
                                                 public MFEMQuadratureFunctionCoefficientBase
 {
 public:
-  MFEMScalarQuadratureFunctionCoefficient(mfem::Coefficient & source,
-                                          mfem::QuadratureFunction & qf,
+  MFEMScalarQuadratureFunctionCoefficient(mfem::QuadratureFunction & qf,
                                           UpdatePolicy update_policy,
                                           const std::string & name);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.
   void SetTime(mfem::real_t t) override;
+
+  /// Set the source coefficient.
+  void SetSourceCoefficient(mfem::Coefficient * coeff) { _source = coeff; }
 
   /// Return the stored value at @a ip, re-projecting the source first if invalidated.
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
@@ -48,7 +45,7 @@ private:
   void Refresh();
 
   /// Source coefficient the stored values are projected from.
-  mfem::Coefficient & _source;
+  mfem::Coefficient * _source;
   /// Storage for the projected values, shared with the owning MOOSE object.
   mfem::QuadratureFunction & _qf;
 };
