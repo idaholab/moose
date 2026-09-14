@@ -422,6 +422,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _transient(false),
     _time(declareRestartableData<Real>("time")),
     _time_old(declareRestartableData<Real>("time_old")),
+    _time_older(declareRestartableData<Real>("time_older")),
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
@@ -616,6 +617,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _time = 0.0;
   _time_old = 0.0;
+  _time_older = 0.0;
   _t_step = 0;
   _dt = 0;
   _dt_old = _dt;
@@ -1049,9 +1051,12 @@ FEProblemBase::initialSetup()
     if (_app.isRestarting())
     {
       if (_app.hasStartTime())
-        _time = _time_old = _app.getStartTime();
+        _time = _time_old = _time_older = _app.getStartTime();
       else
+      {
+        _time_older = _time_old;
         _time_old = _time;
+      }
     }
   }
   else
@@ -7478,6 +7483,9 @@ FEProblemBase::getTimeFromStateArg(const Moose::StateArg & state) const
 
     case 1:
       return timeOld();
+
+    case 2:
+      return timeOlder();
 
     default:
       mooseError("Unhandled state ", state.state, " in FEProblemBase::getTimeFromStateArg");

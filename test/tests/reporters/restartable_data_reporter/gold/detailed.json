@@ -35,6 +35,14 @@
                         "stored": false,
                         "type": "double",
                         "value": 0.0
+                    },
+                    "FEProblemBase/MOOSE Problem/time_older": {
+                        "declared": true,
+                        "has_context": false,
+                        "loaded": false,
+                        "stored": false,
+                        "type": "double",
+                        "value": 0.0
                     }
                 }
             },
@@ -59,6 +67,14 @@
                         "stored": false,
                         "type": "double",
                         "value": 1.0
+                    },
+                    "FEProblemBase/MOOSE Problem/time_older": {
+                        "declared": true,
+                        "has_context": false,
+                        "loaded": false,
+                        "stored": false,
+                        "type": "double",
+                        "value": 0.0
                     }
                 }
             },

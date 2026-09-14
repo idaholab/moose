@@ -37,4 +37,18 @@
       test_case = TestLinearFV
     []
   []
+
+  [linear_fv_varying_factor]
+    type = MMSTest
+    input = test.py
+    test_case = TestLinearFVVaryingFactor
+    design = 'LinearFVTimeDerivative.md'
+    requirement = 'The system shall be able to show second order temporal accuracy for a linear finite volume time derivative with a multiplier that varies in time, which requires each multiplier to be paired with the solution state it multiplies.'
+    max_threads = 1 # MMSTest drives its own runs through mms.run_temporal
+    # Four refinement levels of a 32x32 transient run to about seven seconds, well past the
+    # couple of seconds a framework test wants. The pairing it checks is exercised for
+    # coverage by the ordinary linearfv cases alongside it; what this adds is the temporal
+    # order, which needs the levels.
+    heavy = true
+  []
 []
