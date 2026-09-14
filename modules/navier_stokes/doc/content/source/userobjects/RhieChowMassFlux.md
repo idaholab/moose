@@ -46,6 +46,11 @@ gradient. Momentum assembly and the subsequent H/A computation therefore read th
 gradient snapshot. Additional PISO correctors retain that snapshot while refreshing only the lagged
 velocity gradient used by the next reconstructed candidate.
 
+The published coupling gradient is retained between accepted time steps. Consequently, an unchanged
+steady solution assembles the same momentum pressure source on the next time step instead of acquiring
+an artificial residual from the base gradient. Linear FV gradient history restores the accepted
+coupling gradient after a rejected attempt and preserves it in restart data.
+
 After each pressure solve, Rhie-Chow first forms the candidate from the unrelaxed pressure gradient
 and conservative corrected face flux, and updates the cell velocity from that candidate. The pressure
 solution is then relaxed, ordinary pressure gradients are refreshed, and the candidate is blended
