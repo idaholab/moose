@@ -29,7 +29,7 @@ KokkosBodyForce::validParams()
 KokkosBodyForce::KokkosBodyForce(const InputParameters & parameters)
   : KernelValue(parameters),
     _scale(getParam<Real>("value")),
-    _function(getKokkosFunction("function")),
+    _function(getKokkosFunction<KokkosParsedFunction>("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }
