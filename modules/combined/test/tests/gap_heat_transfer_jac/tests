@@ -3,9 +3,14 @@
     type = Exodiff
     input = two_blocks.i
     exodiff = two_blocks_out.e
-    restep = false # Issue #31054
     issues = '#14626'
     requirement = 'The system shall provide Jacobian entries coupling the primary-side temperature and displacement with the secondary side temperatures for thermal contact such that problems with significant gap heat transfer may have a non-linear solve that converges'
     design = 'GapHeatTransfer.md'
+    # Under --test-restep the quadrature-based PenetrationLocator owned by GapHeatTransfer
+    # (modules/heat_transfer/src/bcs/GapHeatTransfer.C) reseeds its projection-search state from
+    # the discarded solve attempt with no convergence-aware guard, causing the retried nonlinear
+    # solve to diverge (DIVERGED_MAX_IT). This is a framework-level PenetrationLocator issue, not
+    # a modules/contact bug; see Issue #31054.
+    restep = false # Issue #31054
   []
 []
