@@ -1167,8 +1167,10 @@ RhieChowMassFlux::reconstructedGradientMethod() const
 FVReconstructedPressureGradient &
 RhieChowMassFlux::reconstructedGradientMethod()
 {
-  return const_cast<FVReconstructedPressureGradient &>(
-      static_cast<const RhieChowMassFlux &>(*this).reconstructedGradientMethod());
+  auto & method = _fe_problem.getFVGradientMethod(pressureGradientField().method().name(), _tid);
+  mooseAssert(&method == &pressureGradientField().method(),
+              "The registered writable gradient method must match the pressure-gradient reader.");
+  return dynamic_cast<FVReconstructedPressureGradient &>(method);
 }
 
 void
