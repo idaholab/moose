@@ -55,13 +55,7 @@ The following options control the reconstruction:
   more quickly to the latest pressure correction, but can strengthen pressure-velocity oscillations.
 - [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method) selects the
   ordinary pressure-gradient method used before the first reconstructed gradient is available. The
-  default is `green-gauss`. This method also supplies the alternative boundary-cell gradient when
-  `base_gradient` is selected below.
-- [!param](/FVGradientMethods/FVReconstructedPressureGradient/reconstructed_pressure_gradient_boundary_cells)
-  controls cells next to a boundary. The default, `reconstructed`, applies the reconstruction
-  throughout the domain. The `base_gradient` option keeps the ordinary pressure gradient in
-  boundary-adjacent cells, which can be helpful when a boundary condition or limited surrounding
-  face information makes the reconstructed boundary-cell gradient less robust.
+  default is `green-gauss`.
 
 For example, the following tested input selects the reconstructed method through an input-file
 variable and uses that selection for the pressure variable:

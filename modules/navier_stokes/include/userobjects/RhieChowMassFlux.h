@@ -23,7 +23,7 @@ class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;
 class FVReconstructedPressureGradient;
-class LinearFVAnisotropicDiffusion;
+class LinearFVPressureCorrectionDiffusion;
 namespace libMesh
 {
 class Elem;
@@ -218,7 +218,7 @@ protected:
   std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
-  LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
+  LinearFVPressureCorrectionDiffusion * _p_diffusion_kernel;
 
   /**
    * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
