@@ -19,9 +19,7 @@ class TestGrayLambertParallelPlates(unittest.TestCase):
             file_base="linear_fv_gray_lambert_parallel_plates_simple",
         )
 
-        fig = mms.ConvergencePlot(
-            xlabel="Element Size ($h$)", ylabel="Relative Error"
-        )
+        fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="Relative Error")
         fig.plot(
             df,
             label=labels,

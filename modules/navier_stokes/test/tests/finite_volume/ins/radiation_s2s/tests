@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVGrayLambert.md'
+  design = 'LinearFVGrayLambertBC.md'
   issues = '#33641'
 
   [radiation_s2s_linearfv_noaction_simple]
@@ -9,6 +9,8 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
+    max_threads = 1 # Linear FV doesn't support threading at the moment
+    recover = false # We don't support recover for SIMPLE at the moment
   []
 
   [parallel_plates_convergence]
@@ -16,5 +18,8 @@
     input = mms_spatial.py
     test_case = TestGrayLambertParallelPlates
     requirement = 'The system shall demonstrate first-order spatial convergence of the surface temperatures and radiative heat fluxes for two conducting slabs exchanging gray diffuse radiation when solved with SIMPLE.'
+    max_threads = 1 # Linear FV doesn't support threading at the moment
+    recover = false # We don't support recover for SIMPLE at the moment
+    heavy = true
   []
 []
