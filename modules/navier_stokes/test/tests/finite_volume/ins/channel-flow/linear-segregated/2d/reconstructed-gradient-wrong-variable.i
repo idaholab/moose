@@ -8,4 +8,3 @@
     gradient_method=reconstructed
   []
 []
-
