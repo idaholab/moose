@@ -25,7 +25,6 @@
 #include "LinearFVPressureFluxBC.h"
 #include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
-#include "LinearFVAnisotropicDiffusion.h"
 #include "MooseUtils.h"
 
 // libMesh includes
@@ -33,6 +32,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/petsc_matrix.h"
+
+#include <cmath>
 
 registerMooseObject("NavierStokesApp", RhieChowMassFlux);
 
@@ -258,7 +259,7 @@ RhieChowMassFlux::linkMomentumPressureSystems(
 
     if (const auto * const reconstructed_method =
             dynamic_cast<const FVReconstructedPressureGradient *>(&reader.method()))
-      reconstructed_method->bindFlowSystem(*this, reader);
+      reconstructed_method->linkFlowSystem(*this, reader);
 
     if (&reader.system() != &coupling_reader.system() ||
         reader.systemNumber() != coupling_reader.systemNumber())
@@ -418,7 +419,7 @@ RhieChowMassFlux::prepareMomentumPredictor()
   const auto next_predictor_generation = _momentum_predictor_generation + 1;
 
   if (usingReconstructedPressureGradientMethod())
-    reconstructedGradientMethod().captureLaggedVelocityGradient(*this);
+    reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 
   mooseAssert(_coupling_pressure_gradient_snapshot_generation != next_predictor_generation,
               "The coupling pressure gradient must be captured exactly once per momentum "
@@ -442,7 +443,7 @@ RhieChowMassFlux::preparePISOCorrector()
   mooseAssert(_coupling_pressure_gradient_snapshot_generation == _momentum_predictor_generation,
               "A PISO corrector must retain the current momentum predictor's coupling pressure "
               "gradient snapshot.");
-  reconstructedGradientMethod().captureLaggedVelocityGradient(*this);
+  reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 }
 
 void
@@ -635,6 +636,33 @@ RhieChowMassFlux::getMassFlux(const FaceInfo & fi) const
 Real
 RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
 {
+  const std::string neighbor_cell_id =
+      fi.neighborPtr() ? std::to_string(fi.neighborPtr()->id()) : "none";
+  const auto face_flux = _face_mass_flux.find(fi.id());
+  if (face_flux == _face_mass_flux.end())
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' has no corrected mass flux for face ID ",
+               fi.id(),
+               " adjacent to cell ID ",
+               fi.elem().id(),
+               " and neighbor cell ID ",
+               neighbor_cell_id,
+               ".");
+
+  if (!std::isfinite(face_flux->second))
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' has non-finite corrected mass flux ",
+               face_flux->second,
+               " on face ID ",
+               fi.id(),
+               " adjacent to cell ID ",
+               fi.elem().id(),
+               " and neighbor cell ID ",
+               neighbor_cell_id,
+               ".");
+
   const Moose::FaceArg face_arg{&fi,
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
                                 /*elem_is_upwind=*/true,
@@ -642,7 +670,35 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                                 &fi.elem(),
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
-  return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
+  if (!std::isfinite(face_rho) || face_rho <= 0.0)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires finite, positive density for corrected face flux reconstruction, but "
+               "density is ",
+               face_rho,
+               " on face ID ",
+               fi.id(),
+               " adjacent to cell ID ",
+               fi.elem().id(),
+               " and neighbor cell ID ",
+               neighbor_cell_id,
+               ".");
+
+  const Real volumetric_flux = face_flux->second / face_rho;
+  if (!std::isfinite(volumetric_flux))
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' computed non-finite volumetric flux ",
+               volumetric_flux,
+               " on face ID ",
+               fi.id(),
+               " adjacent to cell ID ",
+               fi.elem().id(),
+               " and neighbor cell ID ",
+               neighbor_cell_id,
+               ".");
+
+  return volumetric_flux;
 }
 
 const LinearFVGradientReader &
@@ -1140,8 +1196,22 @@ RhieChowMassFlux::reconstructedGradientMethod() const
 void
 RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
 {
-  mooseAssert(_pressure_system,
-              "The pressure system should be linked before compatibility checks.");
+  if (!_pressure_system || !_pressure_gradient_field || !_base_pressure_gradient_field ||
+      !_p_diffusion_kernel)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' is missing a required pressure system, pressure-gradient field, base-gradient "
+               "field, or pressure-correction diffusion kernel for reconstructed pressure "
+               "gradients.");
+
+  reconstructedGradientMethod().validateSetup(*this);
+
+  if (_momentum_systems.size() != _dim || _momentum_implicit_systems.size() != _dim ||
+      _global_momentum_system_numbers.size() != _dim)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires one linked momentum system per spatial component for reconstructed "
+               "pressure gradients.");
 
   if (_pressure_system->nVariables() != 1)
     mooseError(
@@ -1155,7 +1225,12 @@ RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
   for (const auto system_i : index_range(_momentum_systems))
   {
     const auto * const momentum_system = _momentum_systems[system_i];
-    mooseAssert(momentum_system, "Momentum system pointer should not be null.");
+    if (!momentum_system || !_momentum_implicit_systems[system_i])
+      mooseError("RhieChowMassFlux '",
+                 name(),
+                 "' has an invalid momentum-system layout for component ",
+                 system_i,
+                 ".");
 
     if (momentum_system->nVariables() != 1)
       mooseError("FVReconstructedPressureGradient assumes the pressure and momentum systems each "
@@ -1165,4 +1240,24 @@ RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
                  "' has variables: ",
                  Moose::stringify(momentum_system->getVariableNames()));
   }
+
+  const auto & pressure_gradient = pressureGradientField().components();
+  const auto & base_pressure_gradient = basePressureGradientField().components();
+  if (pressure_gradient.size() != _dim || base_pressure_gradient.size() != _dim)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires reconstructed and base pressure gradients with one component per "
+               "spatial dimension.");
+
+  for (const auto component : make_range(_dim))
+    if (!pressure_gradient[component] || !base_pressure_gradient[component] ||
+        pressure_gradient[component]->size() != base_pressure_gradient[component]->size() ||
+        pressure_gradient[component]->local_size() !=
+            base_pressure_gradient[component]->local_size())
+      mooseError("RhieChowMassFlux '",
+                 name(),
+                 "' has incompatible reconstructed and base pressure-gradient layouts for "
+                 "component ",
+                 component,
+                 ".");
 }

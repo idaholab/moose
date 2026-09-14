@@ -20,6 +20,9 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/elem.h"
+#include "libmesh/libmesh_exceptions.h"
+
+#include <cmath>
 
 using namespace libMesh;
 
@@ -37,10 +40,6 @@ FVReconstructedPressureGradient::validParams()
       "base_gradient_method",
       "green-gauss",
       "Gradient method used before Rhie-Chow has computed reconstructed gradients.");
-  params.addParam<MooseEnum>(
-      "reconstructed_pressure_gradient_boundary_cells",
-      MooseEnum("reconstructed base_gradient", "reconstructed"),
-      "Which pressure gradient is retained on cells touching a boundary face.");
   params.addRangeCheckedParam<Real>(
       "gradient_relaxation",
       0.1,
@@ -53,14 +52,12 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
   : FVGradientMethod(params),
     MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
-    _reconstructed_pressure_gradient_boundary_cells(
-        getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells")),
     _gradient_relaxation(getParam<Real>("gradient_relaxation"))
 {
 }
 
 void
-FVReconstructedPressureGradient::bindFlowSystem(
+FVReconstructedPressureGradient::linkFlowSystem(
     RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient) const
 {
   if (&pressure_gradient.system() != &rc.pressureSystem())
@@ -151,6 +148,52 @@ FVReconstructedPressureGradient::checkFlowSystem(const RhieChowMassFlux & rc) co
                "' and cannot be used by RhieChowMassFlux '",
                rc.name(),
                "'.");
+}
+
+void
+FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) const
+{
+  checkFlowSystem(rc);
+
+  if (_pressure_system != &rc.pressureSystem() ||
+      _pressure_variable_number != rc.pressureVariableNumber())
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' is not linked to the pressure field owned by RhieChowMassFlux '",
+               rc.name(),
+               "'.");
+
+  if (_momentum_systems.size() != rc.dimension() ||
+      _velocity_gradient_fields.size() != rc.dimension())
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' requires one momentum system and velocity-gradient field per spatial component "
+               "for RhieChowMassFlux '",
+               rc.name(),
+               "'.");
+
+  for (const auto component : make_range(rc.dimension()))
+  {
+    if (_momentum_systems[component] != &rc.momentumSystem(component))
+      mooseError("FVReconstructedPressureGradient '",
+                 name(),
+                 "' is linked to an incompatible momentum system for component ",
+                 component,
+                 " of RhieChowMassFlux '",
+                 rc.name(),
+                 "'.");
+
+    const auto * const velocity_gradient = _velocity_gradient_fields[component];
+    if (!velocity_gradient || &velocity_gradient->system() != &rc.momentumSystem(component) ||
+        velocity_gradient->variableNumber() != rc.velocityVariable(component).number())
+      mooseError("FVReconstructedPressureGradient '",
+                 name(),
+                 "' is missing the velocity-gradient field for momentum component ",
+                 component,
+                 " of RhieChowMassFlux '",
+                 rc.name(),
+                 "'.");
+  }
 }
 
 const FVGradientMethod &
@@ -276,8 +319,6 @@ FVReconstructedPressureGradient::resetForTimeStep(const RhieChowMassFlux & rc) c
 void
 FVReconstructedPressureGradient::meshChanged()
 {
-  _boundary_cell_cache_built = false;
-  _boundary_cell_ids.clear();
   _lagged_reconstruction_velocity_gradient.clear();
   _reconstructed_pressure_gradient.clear();
   _coupling_pressure_gradient.clear();
@@ -286,23 +327,7 @@ FVReconstructedPressureGradient::meshChanged()
 }
 
 void
-FVReconstructedPressureGradient::buildBoundaryCellCache(const RhieChowMassFlux & rc) const
-{
-  _boundary_cell_ids.clear();
-  for (const auto & fi : rc.pressureSystem().feProblem().mesh().faceInfo())
-    if (!fi->boundaryIDs().empty())
-    {
-      if (fi->elemPtr() && rc.hasBlocks(fi->elemPtr()->subdomain_id()))
-        _boundary_cell_ids.insert(fi->elemPtr()->id());
-      if (fi->neighborPtr() && rc.hasBlocks(fi->neighborPtr()->subdomain_id()))
-        _boundary_cell_ids.insert(fi->neighborPtr()->id());
-    }
-
-  _boundary_cell_cache_built = true;
-}
-
-void
-FVReconstructedPressureGradient::captureLaggedVelocityGradient(
+FVReconstructedPressureGradient::saveLaggedVelocityGradient(
     RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
@@ -379,34 +404,27 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(
     const RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
-  mooseAssert(rc.momentumPredictorGeneration(),
-              "A momentum predictor must be prepared before updating a reconstructed "
-              "pressure-gradient candidate.");
-  mooseAssert(_lagged_velocity_gradient_available,
-              "A lagged velocity-gradient snapshot must exist before updating a reconstructed "
-              "pressure-gradient candidate.");
+  if (!rc.momentumPredictorGeneration())
+    mooseError("A momentum predictor must be prepared before updating a reconstructed "
+               "pressure-gradient candidate.");
+  if (!_lagged_velocity_gradient_available)
+    mooseError("A lagged velocity-gradient snapshot must exist before updating a reconstructed "
+               "pressure-gradient candidate.");
 
   const auto next_candidate_generation = _reconstructed_candidate_generation + 1;
-  mooseAssert(_lagged_velocity_gradient_generation >= next_candidate_generation,
-              "The lagged velocity-gradient snapshot must be captured before forming a "
-              "reconstructed pressure-gradient candidate.");
-  mooseAssert(_lagged_velocity_gradient_generation == next_candidate_generation,
-              "Each reconstructed pressure-gradient candidate must consume exactly one lagged "
-              "velocity-gradient snapshot.");
-  _reconstructed_candidate_generation = next_candidate_generation;
-
-  mooseAssert(rc.faceMassFluxGeneration() != _reconstructed_candidate_face_flux_generation,
-              "Each reconstructed pressure-gradient candidate must consume a face mass flux "
-              "computed by the current pressure corrector.");
-  _reconstructed_candidate_face_flux_generation = rc.faceMassFluxGeneration();
-
-  if (!_boundary_cell_cache_built)
-    buildBoundaryCellCache(rc);
+  if (_lagged_velocity_gradient_generation != next_candidate_generation)
+    mooseError("Reconstructed pressure-gradient candidate generation ",
+               next_candidate_generation,
+               " requires lagged velocity-gradient generation ",
+               next_candidate_generation,
+               ", but generation ",
+               _lagged_velocity_gradient_generation,
+               " is available.");
 
   const auto dimension = rc.dimension();
-  const bool use_base_gradient_on_boundary =
-      _reconstructed_pressure_gradient_boundary_cells == "base_gradient";
   const auto & base_pressure_gradient = rc.basePressureGradientComponents();
+  const auto face_flux_generation = rc.faceMassFluxGeneration();
+  const auto expected_face_flux_generation = _reconstructed_candidate_face_flux_generation + 1;
 
   if (_reconstructed_pressure_gradient.empty())
     for (const auto component : make_range(dimension))
@@ -423,13 +441,13 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(
     if (!rc.hasBlocks(elem_info->subdomain_id()))
       continue;
 
-    const bool boundary_cell = _boundary_cell_ids.count(elem_info->elem()->id());
+    const Elem & elem = *elem_info->elem();
+    std::vector<dof_id_type> face_ids;
     DenseMatrix<Real> matrix(dimension, dimension);
     DenseVector<Real> projection_rhs(dimension);
     matrix.zero();
     projection_rhs.zero();
 
-    const Elem & elem = *elem_info->elem();
     auto act = [&](const Elem &,
                    const Elem * const,
                    const FaceInfo * const fi,
@@ -437,51 +455,195 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(
                    const Real,
                    const bool elem_has_info)
     {
+      if (!fi)
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' encountered missing face information while reconstructing cell ID ",
+                   elem.id(),
+                   ".");
+
+      face_ids.push_back(fi->id());
+
+      if (face_flux_generation != expected_face_flux_generation)
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' cannot reconstruct cell ID ",
+                   elem.id(),
+                   " from face ID ",
+                   fi->id(),
+                   ": expected corrected face-flux generation ",
+                   expected_face_flux_generation,
+                   " but found generation ",
+                   face_flux_generation,
+                   ". The face flux is stale or was not produced by the current pressure "
+                   "corrector.");
+
       const Real surface_area = surface_vector.norm();
-      if (surface_area == 0.0)
-        return;
+      if (!std::isfinite(surface_area) || surface_area <= 0.0)
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' found invalid surface area ",
+                   surface_area,
+                   " while reconstructing cell ID ",
+                   elem.id(),
+                   " from face ID ",
+                   fi->id(),
+                   ".");
+
+      for (const auto component : make_range(dimension))
+        if (!std::isfinite(surface_vector(component)))
+          mooseError("FVReconstructedPressureGradient '",
+                     name(),
+                     "' found a non-finite surface-vector component while reconstructing cell ID ",
+                     elem.id(),
+                     " from face ID ",
+                     fi->id(),
+                     ".");
 
       const auto face_normal = surface_vector / surface_area;
       const Point flux_normal =
           rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
-      Real face_normal_reconstructed_quantity =
-          rc.getVolumetricFaceFlux(*fi) * (flux_normal * face_normal);
+      const Real face_flux = rc.getVolumetricFaceFlux(*fi);
+      const Real normal_alignment = flux_normal * face_normal;
+      if (!std::isfinite(face_flux) || !std::isfinite(normal_alignment))
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' found non-finite face-flux projection data while reconstructing cell ID ",
+                   elem.id(),
+                   " from face ID ",
+                   fi->id(),
+                   ".");
+      Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 
       const Point d_pf = fi->faceCentroid() - elem_info->centroid();
       Real gradient_flux_correction = 0.0;
       for (const auto component : make_range(dimension))
+      {
+        const auto velocity_gradient =
+            reconstructionVelocityGradient(rc, *elem_info, *fi, elem_has_info, component);
+        for (const auto direction : make_range(dimension))
+          if (!std::isfinite(velocity_gradient(direction)) || !std::isfinite(d_pf(direction)))
+            mooseError("FVReconstructedPressureGradient '",
+                       name(),
+                       "' found non-finite velocity-gradient or face-displacement data while "
+                       "reconstructing cell ID ",
+                       elem.id(),
+                       " from face ID ",
+                       fi->id(),
+                       ".");
+
         gradient_flux_correction +=
-            (reconstructionVelocityGradient(rc, *elem_info, *fi, elem_has_info, component) * d_pf) *
-            surface_vector(component);
+            (velocity_gradient * d_pf) * surface_vector(component);
+      }
+
+      if (!std::isfinite(gradient_flux_correction))
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' computed a non-finite velocity-gradient correction while reconstructing "
+                   "cell ID ",
+                   elem.id(),
+                   " from face ID ",
+                   fi->id(),
+                   ".");
 
       face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
+      if (!std::isfinite(face_normal_reconstructed_quantity))
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' computed a non-finite corrected face quantity while reconstructing cell ID ",
+                   elem.id(),
+                   " from face ID ",
+                   fi->id(),
+                   ".");
 
       for (const auto i : make_range(dimension))
       {
         projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
         for (const auto j : make_range(dimension))
+        {
           matrix(i, j) += surface_vector(i) * surface_vector(j) / surface_area;
+          if (!std::isfinite(matrix(i, j)))
+            mooseError("FVReconstructedPressureGradient '",
+                       name(),
+                       "' assembled a non-finite projection matrix while reconstructing cell ID ",
+                       elem.id(),
+                       " from face ID ",
+                       fi->id(),
+                       ".");
+        }
+
+        if (!std::isfinite(projection_rhs(i)))
+          mooseError("FVReconstructedPressureGradient '",
+                     name(),
+                     "' assembled a non-finite projection right-hand side while reconstructing "
+                     "cell ID ",
+                     elem.id(),
+                     " from face ID ",
+                     fi->id(),
+                     ".");
       }
     };
 
     Moose::FV::loopOverElemFaceInfo(
         elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
 
+    if (face_ids.empty())
+      mooseError("FVReconstructedPressureGradient '",
+                 name(),
+                 "' found no corrected faces while reconstructing cell ID ",
+                 elem.id(),
+                 ".");
+
     DenseVector<Real> reconstructed_quantity(dimension);
     if (dimension == 1)
     {
       const Real denominator = matrix(0, 0);
-      reconstructed_quantity(0) =
-          denominator != 0.0 ? projection_rhs(0) / denominator : 0.0;
+      if (!std::isfinite(denominator) || denominator <= 0.0)
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' could not factor the face-projection matrix for cell ID ",
+                   elem.id(),
+                   " using face IDs ",
+                   Moose::stringify(face_ids),
+                   ": the one-dimensional matrix entry is ",
+                   denominator,
+                   ".");
+      reconstructed_quantity(0) = projection_rhs(0) / denominator;
     }
     else
     {
       DenseMatrix<Real> solve_matrix(matrix);
-      solve_matrix.cholesky_solve(projection_rhs, reconstructed_quantity);
+      try
+      {
+        solve_matrix.cholesky_solve(projection_rhs, reconstructed_quantity);
+      }
+      catch (const libMesh::LogicError & error)
+      {
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' could not factor the face-projection matrix for cell ID ",
+                   elem.id(),
+                   " using face IDs ",
+                   Moose::stringify(face_ids),
+                   ". The corrected face geometry does not span the reconstruction space. "
+                   "libMesh reported: ",
+                   error.what());
+      }
     }
 
     for (const auto component : make_range(dimension))
     {
+      if (!std::isfinite(reconstructed_quantity(component)))
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' computed a non-finite reconstructed velocity component ",
+                   component,
+                   " for cell ID ",
+                   elem.id(),
+                   " using face IDs ",
+                   Moose::stringify(face_ids),
+                   ".");
+
       const auto momentum_dof =
           elem_info->dofIndices()[rc.momentumSystem(component).number()][0];
       const auto pressure_dof = elem_info->dofIndices()[rc.pressureSystem().number()]
@@ -489,19 +651,42 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(
 
       const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
       const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
-      const Real base_gradient = (*base_pressure_gradient[component])(pressure_dof);
-      const Real reconstructed_gradient =
-          Ainv != 0.0 ? (-reconstructed_quantity(component) - HbyA) / Ainv : base_gradient;
-      const Real stored_gradient =
-          use_base_gradient_on_boundary && boundary_cell ? base_gradient : reconstructed_gradient;
+      if (!std::isfinite(HbyA) || !std::isfinite(Ainv) || Ainv == 0.0)
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' found invalid momentum-coupling data for component ",
+                   component,
+                   " of cell ID ",
+                   elem.id(),
+                   " using face IDs ",
+                   Moose::stringify(face_ids),
+                   ": H/A = ",
+                   HbyA,
+                   " and 1/A = ",
+                   Ainv,
+                   ".");
 
-      _reconstructed_pressure_gradient[component]->set(pressure_dof, stored_gradient);
+      const Real reconstructed_gradient = (-reconstructed_quantity(component) - HbyA) / Ainv;
+      if (!std::isfinite(reconstructed_gradient))
+        mooseError("FVReconstructedPressureGradient '",
+                   name(),
+                   "' computed a non-finite pressure-gradient component ",
+                   component,
+                   " for cell ID ",
+                   elem.id(),
+                   " using face IDs ",
+                   Moose::stringify(face_ids),
+                   ".");
+
+      _reconstructed_pressure_gradient[component]->set(pressure_dof, reconstructed_gradient);
     }
   }
 
   for (auto & pressure_gradient : _reconstructed_pressure_gradient)
     pressure_gradient->close();
 
+  _reconstructed_candidate_generation = next_candidate_generation;
+  _reconstructed_candidate_face_flux_generation = face_flux_generation;
 }
 
 const FVReconstructedPressureGradient::GradientContainer &

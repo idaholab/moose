@@ -43,7 +43,7 @@ gradient becomes the starting point for the next time step. A rejected time-step
 the last accepted gradient, and restart data preserves the same accepted state. This avoids creating
 an artificial momentum imbalance merely by advancing, retrying, or restarting a converged solution.
 
-The relaxation and boundary-cell choices are described in
+The relaxation and initialization choices are described in
 [RhieChowMassFlux.md#reconstructed-pressure-gradient].
 
 ## Intended Use

@@ -59,8 +59,11 @@
     # all) does not converge within a reasonable iteration count with this problem's default
     # momentum_equation_relaxation/pressure_variable_relaxation - stabilizing it further would
     # need those under-relaxation factors tuned too, which is a separate numerics investigation.
+    # Tighter linear tolerances keep inner-solve error below the outer SIMPLE convergence target;
+    # otherwise this strongly coupled case stalls at the linear-solver accuracy floor.
     exodiff = 2d-velocity-pressure-reconstructed-gradient-high-relaxation_out.e
     cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 '
+               'Executioner/momentum_l_abs_tol=1e-12 Executioner/pressure_l_abs_tol=1e-12 '
                'FVGradientMethods/reconstructed/gradient_relaxation=0.9 '
                'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient-high-relaxation_out'
     requirement = "The system shall converge to the same steady-state Navier-Stokes solution in a "
@@ -216,7 +219,7 @@
                "UserObjects/sequence_test/rhie_chow_user_object=rc "
                "UserObjects/sequence_test/operation=update_candidate "
                "UserObjects/sequence_test/execute_on=TIMESTEP_BEGIN"
-    expect_assert = "A momentum predictor must be prepared before updating a reconstructed pressure-gradient candidate"
+    expect_err = "A momentum predictor must be prepared before updating a reconstructed pressure-gradient candidate"
     allow_test_objects = true
     requirement = "The system shall report an internal sequencing error when a reconstructed "
                   "pressure-gradient candidate is updated without a prepared momentum predictor."
@@ -232,10 +235,21 @@
                "UserObjects/sequence_test/operation=reuse_face_flux "
                "UserObjects/sequence_test/execute_on=TIMESTEP_END "
                "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
-    expect_assert = "Each reconstructed pressure-gradient candidate must consume a face mass flux computed by the current pressure corrector"
+    expect_err = "cannot reconstruct cell ID [0-9]+ from face ID [0-9]+: expected corrected face-flux generation 2 but found generation 1"
     allow_test_objects = true
-    requirement = "The system shall report an internal sequencing error when two reconstructed "
-                  "pressure-gradient candidates consume the same corrected face-flux generation."
+    requirement = "The system shall identify the cell and face when a reconstructed pressure "
+                  "gradient attempts to reuse stale corrected face flux."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-invalid-density]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed rho=0 Executioner/num_iterations=1"
+    expect_err = "requires finite, positive density.*face ID [0-9]+ adjacent to cell ID [0-9]+"
+    requirement = "The system shall identify the face and adjacent cell when reconstructed "
+                  "pressure gradients encounter non-positive density while converting corrected "
+                  "mass flux to volumetric flux."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []

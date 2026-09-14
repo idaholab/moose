@@ -36,9 +36,12 @@ public:
 
   FVReconstructedPressureGradient(const InputParameters & params);
 
-  /// Bind this stateful method to one Rhie-Chow flow-system configuration.
-  void bindFlowSystem(RhieChowMassFlux & rc,
+  /// Link this stateful method to one Rhie-Chow flow-system configuration.
+  void linkFlowSystem(RhieChowMassFlux & rc,
                       const LinearFVGradientReader & pressure_gradient) const;
+
+  /// Validate the one-time Rhie-Chow linkage and field layouts required by reconstruction.
+  void validateSetup(const RhieChowMassFlux & rc) const;
 
   /// Name of the gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
@@ -46,8 +49,8 @@ public:
   /// Prepare solver-iteration state for a new time-step attempt.
   void resetForTimeStep(const RhieChowMassFlux & rc) const;
 
-  /// Capture the lagged cell velocity gradient used by the reconstruction.
-  void captureLaggedVelocityGradient(RhieChowMassFlux & rc) const;
+  /// Save the lagged cell velocity gradient used by the reconstruction.
+  void saveLaggedVelocityGradient(RhieChowMassFlux & rc) const;
 
   /// Reconstruct the conservative pressure-gradient candidate from the corrected face flux.
   void computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
@@ -90,14 +93,8 @@ private:
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
 
-  /// Build the set of Rhie-Chow cells touching boundary faces.
-  void buildBoundaryCellCache(const RhieChowMassFlux & rc) const;
-
   /// Gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName _base_gradient_method_name;
-
-  /// Which pressure gradient is retained on cells touching a boundary face.
-  const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
 
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
@@ -119,12 +116,6 @@ private:
 
   /// Cached base gradient method.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;
-
-  /// Whether the boundary-cell cache has been built since the last mesh change.
-  mutable bool _boundary_cell_cache_built = false;
-
-  /// Rhie-Chow element ids touching a boundary face.
-  mutable std::unordered_set<dof_id_type> _boundary_cell_ids;
 
   /// Lagged velocity gradients indexed by velocity component and spatial direction.
   mutable std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
