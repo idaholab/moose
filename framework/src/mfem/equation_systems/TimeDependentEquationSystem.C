@@ -176,6 +176,14 @@ TimeDependentEquationSystem::BuildNonlinearForms()
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, _dt);
+
+    // these two are necessary for nonstandard assembly levels, but are also unsafe
+    // if there are no integrators. So guard this part
+    if (nlf->GetDNFI()->Size() or nlf->GetBNFI()->Size())
+    {
+      nlf->SetAssemblyLevel(_assembly_level);
+      nlf->Setup();
+    }
   }
 }
 

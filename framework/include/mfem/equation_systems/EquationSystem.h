@@ -21,10 +21,15 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 #include "NLScaleIntegrator.h"
+#include "SumOperatorExtension.h"
 
 namespace Moose::MFEM
 {
 class CoefficientManager;
+
+// We need another operator, which is a small extension to the SumOperator.
+// We forward declare it here
+class SumOperatorExtension;
 
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
@@ -329,6 +334,13 @@ protected:
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
+
+  // We need a SumOperator to handle some crazy stuff
+  mutable std::unique_ptr<SumOperatorExtension> _sumOperator;
+
+  // Store the op that comes out of FormLinearSystem
+  mfem::OperatorHandle * _system_operator;
+
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;
