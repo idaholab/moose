@@ -443,8 +443,8 @@ RhieChowMassFlux::finalizePressureCorrector()
 
   if (usingReconstructedPressureGradientMethod())
   {
-    reconstructedGradientMethod().publishCouplingPressureGradient(*this,
-                                                                  basePressureGradientComponents());
+    reconstructedGradientMethod().finalizeCouplingPressureGradient(*this,
+                                                                   basePressureGradientComponents());
     _pressure_system->updateFVGradient(pressureGradientField());
   }
   else

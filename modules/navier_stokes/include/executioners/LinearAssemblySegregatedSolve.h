@@ -45,12 +45,9 @@ protected:
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
 
   /// Computes new velocity field based on computed pressure gradients
-  /// @param subtract_updated_pressure If we need to subtract the updated
-  /// pressure gradient from the right hand side of the system
   /// @param recompute_face_mass_flux If we want to recompute the face flux too
   /// @param solver_params Dummy solver parameter object for the linear solve
-  virtual std::pair<unsigned int, Real> correctVelocity(const bool subtract_updated_pressure,
-                                                        const bool recompute_face_mass_flux,
+  virtual std::pair<unsigned int, Real> correctVelocity(const bool recompute_face_mass_flux,
                                                         const SolverParams & solver_params);
 
   /// Solve an equation which contains an advection term that depends

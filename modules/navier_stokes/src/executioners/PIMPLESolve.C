@@ -31,8 +31,7 @@ PIMPLESolve::PIMPLESolve(Executioner & ex)
 }
 
 std::pair<unsigned int, Real>
-PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
-                             const bool /*recompute_face_mass_flux*/,
+PIMPLESolve::correctVelocity(const bool /*recompute_face_mass_flux*/,
                              const SolverParams & solver_params)
 {
   std::pair<unsigned int, Real> residual;
@@ -40,7 +39,6 @@ PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
   const bool reconstructed = _rc_uo && _rc_uo->usingReconstructedPressureGradientMethod();
   while (piso_iteration_counter <= _num_piso_iterations)
   {
-    const bool first_piso_corrector = piso_iteration_counter == 0;
     const bool last_piso_corrector = piso_iteration_counter == _num_piso_iterations;
 
     // Reconstructed candidates always need the face flux produced by their own pressure
@@ -49,8 +47,7 @@ PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
     // iteration/time step.
     const bool recompute_flux = reconstructed || last_piso_corrector;
 
-    residual = LinearAssemblySegregatedSolve::correctVelocity(
-        first_piso_corrector, recompute_flux, solver_params);
+    residual = LinearAssemblySegregatedSolve::correctVelocity(recompute_flux, solver_params);
 
     // After each PISO corrector except the last, refresh only the lagged velocity gradient. H/A
     // continues using the coupling-gradient snapshot associated with the existing momentum system.
