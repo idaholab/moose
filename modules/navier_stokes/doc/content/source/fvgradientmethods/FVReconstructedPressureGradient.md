@@ -3,40 +3,55 @@
 ## Description
 
 `FVReconstructedPressureGradient` implements the Aguerre face-flux reconstruction
-([!cite](aguerre2018oscillation)) used by the linear finite-volume segregated solver. It owns the
-lagged velocity-gradient snapshot, reconstructed pressure-gradient candidate, and relaxed coupling
-pressure gradient used by the momentum predictor.
-The snapshot is copied from each velocity variable's ordinary configured gradient field after the
-previous pressure corrector, so this object does not implement a separate velocity-gradient
-algorithm.
+([!cite](aguerre2018oscillation)) for the linear finite-volume segregated solver. On a collocated
+mesh, the pressure correction enforces continuity through conservative face fluxes, while the
+momentum equations are solved for cell-centered velocities. If the cell pressure gradient is not
+consistent with the corrected face flux, the face flux can be smooth and conservative while the
+cell velocity remains oscillatory. The reconstruction reduces this mismatch by finding the cell
+pressure gradient implied by the corrected face flux and the discrete momentum balance.
 
-After each pressure corrector, [RhieChowMassFlux.md] supplies the corrected conservative face flux,
-$\mathbf{H}/\mathbf{A}$, $\mathbf{A}^{-1}$, and momentum/pressure system metadata. The method removes
-the lagged Taylor contribution from the face flux and solves a local face-to-cell projection for a
-compatible cell velocity. It then recovers the pressure gradient satisfying
+## Reconstruction Algorithm
+
+After each pressure corrector, [RhieChowMassFlux.md] provides the corrected conservative face flux,
+$\mathbf{H}/\mathbf{A}$, and $\mathbf{A}^{-1}$. The reconstruction proceeds as follows:
+
+1. The velocity gradient from the previous correction estimates how velocity varies from each cell
+   center to its faces.
+2. That variation is removed from the corrected face-normal volumetric fluxes, and the remaining
+   face information is projected back to a cell-centered velocity.
+3. The pressure gradient is calculated so that the reconstructed cell velocity satisfies the same
+   discrete momentum balance used by the momentum predictor,
 
 \begin{equation}
 \mathbf{u}_P = -\left(\frac{\mathbf{H}}{\mathbf{A}}\right)_P
                -\mathbf{A}^{-1}_P\left(\nabla p\right)_P.
 \end{equation}
 
-The candidate is formed before pressure relaxation from the unrelaxed pressure gradient and its
-conservative corrected face flux. It is used directly for the immediate cell-velocity correction,
-so that correction remains compatible with the face flux. After the relaxed pressure solution is
-installed, the reconstructed candidate is blended into the published coupling field using
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation). Before the first
-candidate of the simulation is available, the method publishes
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), such as
-[FVGreenGaussGradient.md]. Because the method retains flow-system state, each instance can be used
-by only one `RhieChowMassFlux`, pressure system, pressure variable, and set of momentum systems. The
-coupling pressure gradient is retained between accepted time steps so a steady solution does not
-acquire an artificial momentum residual from switching back to the base gradient. The accepted
-field is stored as the old linear FV gradient state, which restores it when a time step is retried
-and includes it in restart data. Candidate fields and generation counters are reset once per
-attempt, while allocated vector storage is reused when its layout remains valid.
+The pressure gradient associated with the current corrected face flux is used immediately to update
+the cell velocity. This preserves consistency between the velocity reported at cell centers and the
+flux that satisfies continuity at faces. A relaxed blend of the reconstructed gradient and the
+previous coupling gradient is then used in the next momentum predictor. The relaxation controls the
+strength of this pressure-velocity feedback without changing the conservative face flux from the
+current pressure correction.
+
+## Initial and Transient Behavior
+
+Before the first pressure correction, no reconstructed gradient exists, so the momentum predictor
+uses [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), which
+defaults to [FVGreenGaussGradient.md]. After a time step is accepted, its relaxed reconstructed
+gradient becomes the starting point for the next time step. A rejected time-step attempt restores
+the last accepted gradient, and restart data preserves the same accepted state. This avoids creating
+an artificial momentum imbalance merely by advancing, retrying, or restarting a converged solution.
+
+The relaxation and boundary-cell choices are described in
+[RhieChowMassFlux.md#reconstructed-pressure-gradient].
+
+## Intended Use
 
 This method is intended specifically for momentum-pressure coupling. Diffusion corrections,
-diagnostics, and unrelated equations should continue to use an ordinary gradient method.
+diagnostics, and unrelated equations should continue to use an ordinary gradient method. Use the
+same reconstructed pressure-gradient definition for every momentum component coupled to one
+pressure equation; independent flow systems should use separate definitions.
 
 !syntax parameters /FVGradientMethods/FVReconstructedPressureGradient
 

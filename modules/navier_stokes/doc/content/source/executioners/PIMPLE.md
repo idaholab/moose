@@ -33,6 +33,14 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    and return to (1) until the maximum number of iterations is reached which can be set
    using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter.
 
+When [FVReconstructedPressureGradient.md] is used, each PISO pressure correction produces a new
+conservative face flux and therefore a new compatible cell-velocity reconstruction. The momentum
+matrix and its $H/A$ field remain fixed during the PISO sequence, while the corrected velocity
+gradient from one pressure correction is used in the next reconstruction. The relaxed reconstructed
+pressure gradient enters the next momentum predictor. This keeps every cell-velocity correction
+consistent with the latest continuity-preserving face flux without requiring another momentum solve
+inside the PISO sequence.
+
 ## Example Input Syntax
 
 The problem setup is exactly the same as discussed for [SIMPLE.md], only the executioner
@@ -70,12 +78,6 @@ pressure, and energy solves:
   should_solve_energy = false
 []
 ```
-
-When [FVReconstructedPressureGradient.md] is used for momentum-pressure coupling, its
-relaxed feedback field always restarts from the base pressure gradient at the beginning of
-the recovered time step rather than being restored from the checkpoint, so freezing
-`should_solve_pressure` does not need to special-case it; see
-[FVReconstructedPressureGradient.md#time-step-lifecycle].
 
 !syntax parameters /Executioner/PIMPLE
 
