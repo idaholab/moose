@@ -118,7 +118,14 @@ private:
    * Whether a fixed row is left out of the trial space as well as out of the test space. Read only
    * from device code, so a host-only translation unit including this header never touches it.
    */
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 12
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
   [[maybe_unused]] bool _eliminate_constrained_columns;
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 12
+#pragma GCC diagnostic pop
+#endif
 };
 
 } // namespace Moose::Kokkos
