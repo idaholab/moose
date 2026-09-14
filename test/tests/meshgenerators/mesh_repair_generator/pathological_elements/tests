@@ -307,6 +307,14 @@
     requirement = "The system shall leave a quadrilateral in place when collapsing its colinear vertex would leave a hanging node in an element that genuinely uses that vertex."
     mesh_mode = 'replicated'
   []
+  [repair_quad_to_tri_cluster]
+    type = RunApp
+    input = repair_quad_to_tri_cluster.i
+    expect_out = 'collapsed to triangles: [1-9]'
+    issues = '#33566'
+    requirement = "The system shall reduce a cluster of quadrilaterals sharing a single short edge to triangles in one collapse, reshaping the other quadrilaterals incident to the collapsed node and keeping the surrounding quadrilaterals conformal."
+    mesh_mode = 'replicated'
+  []
   [repair_polygon_collapse]
     type = RunApp
     input = repair_polygon_collapse.i
