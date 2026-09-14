@@ -453,6 +453,31 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#33700'
   []
+  [bh_well_constants]
+    type = 'CSVDiff'
+    input = 'bh_well_constants.i'
+    csvdiff = 'bh_well_constants.csv bh_well_constants_point_fluxes_0001.csv'
+    requirement = 'PorousFlowPeacemanBorehole shall accept a well_constants vector giving each borehole point its own well constant, producing the analytically-expected flux at each point, distinct from a single well-wide well_constant'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md PorousFlowPointFluxQuantity.md PorousFlowPlotPointFluxQuantity.md'
+    issues = '#TODO'
+  []
+  [bh_well_constants_variable_unit_weight]
+    type = 'CSVDiff'
+    input = 'bh_well_constants_variable_unit_weight.i'
+    csvdiff = 'bh_well_constants_variable_unit_weight.csv bh_well_constants_variable_unit_weight_point_fluxes_0001.csv'
+    requirement = 'PorousFlowPeacemanBorehole shall correctly combine a per-point well_constants override with a temperature-dependent wellbore pressure profile (unit_weight_fp), giving each point its own well constant while still building the wellbore pressure from the cumulative integral over the whole well'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#TODO'
+  []
+  [bh_except21]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    cli_args = "DiracKernels/bh/unit_weight='0 0 0' DiracKernels/bh/well_constants='1E-12'"
+    expect_err = "'well_constants' has 1 entries, but this well has a point at index 1"
+    requirement = 'PorousFlowPeacemanBorehole shall throw an error if well_constants does not have exactly one entry per point in point_file'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#TODO'
+  []
   [bh07]
     type = 'CSVDiff'
     input = 'bh07.i'
