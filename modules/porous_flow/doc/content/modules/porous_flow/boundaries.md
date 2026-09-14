@@ -25,8 +25,9 @@ In the following, $r$ is a flux measured in kg.m$^{-2}$.s$^{-1}$:
 |-----------|-----------|
 | Withdraw water at rate r: single-phase model | Use [PorousFlowSink](PorousFlowSink.md) with `variable` = porepressure, and `flux_function = r`. |
 | Inject water at rate r: single-phase model | Use [PorousFlowSink](PorousFlowSink.md) with `variable` = porepressure, and `flux_function = -r`. |
-| Withdraw water and its heat energy at rate r: single-phase anisothermal model  | Use 2 [PorousFlowSinks](PorousFlowSink.md).  One with `variable` = porepressure, and `flux_function = r`.  The other with `variable` = temperature, `flux_function = r`, `fluid_phase = 0`, `use_enthalpy = true`. Example: [ates.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/ates/ates.i) |
-| Inject water and solutes at total rate r: single-phase, N-component model | Use N [PorousFlowSinks](PorousFlowSink.md).  All have `flux_function = -r`.  One has `variable` = porepressure, and `mass_fraction_component` = N - 1.  The others have `variable = frac_i` and `mass_fraction_component = i` (i varies from 0 to N-2). |
+| Withdraw water and its heat energy at rate r: single-phase anisothermal model  | Use 2 [PorousFlowSinks](PorousFlowSink.md).  One with `variable` = porepressure, and `flux_function = r`.  The other with `variable` = temperature, `flux_function = r`, `fluid_phase = 0`, `use_enthalpy = true`. Example: [ates.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/ates/ates.i). |
+| Inject water at rate r and temperature T: single-phase anisothermal model | Use [PorousFlowSinkBC](PorousFlowSinkBC.md) with `flux_function = -r`, `T_in` = T, `fp` = your water FluidProperties object. Set either  `porepressure_var` = AuxVariable or `phase = 0` as appropriate. |
+| Inject component i at rate r: single-phase, N-component model | Use a [PorousFlowSink](PorousFlowSink.md) with `flux_function = -r`.  If i = N - 1 (the final component), then `variable` = porepressure, otherwise `variable = frac_i`. |
 
 ### Finite-element examples of case 1b
 
@@ -35,8 +36,7 @@ In the following, the variable $L$ appears in the `flux_function` parameter.  Th
 | My problem | BC to use |
 |-----------|-----------|
 | Fix porepressure = P0 in single-phase model | Use a [DirichletBC](DirichletBC.md) or [FunctionDirichletBC](FunctionDirichletBC.md).  Alternatively, add or remove fluid to maintain the porepressure, by using a [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `pt_vals = '-1E9 1E9'`, `multipliers = '-1E9 1E9'`, `flux_function` = 1/L. In addition, for models with unsaturated physics, use `use_relperm = true`.  Example: [PorousFlowPiecewiseLinearSink_BC_eg1.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i) |
-| Fix porepressure and mass-fractions in a single-phase, N-component model | Use [DirichletBCs](DirichletBC.md) or [FunctionDirichletBCs](FunctionDirichletBC.md) |
-| Fix porepressure, temperature and mass-fractions in a single-phase, anisothermal, N-component model | Use [DirichletBCs](DirichletBC.md) or [FunctionDirichletBCs](FunctionDirichletBC.md) |
+| Fix porepressure, temperature and mass-fractions in a single-phase, anisothermal, N-component model | Use [DirichletBCs](DirichletBC.md) or [FunctionDirichletBCs](FunctionDirichletBC.md).  Consider carefully whether the reservoir does indeed fix these variables, or whether a number of [PorousFlowPiecewiseLinearSinks](PorousFlowPiecewiseLinearSink.md) would be appropriate  |
 | Porepressure in reservoir varies with elevation: single-phase model | Use [PorousFlowAquiferBC](PorousFlowAquiferBC.md) with `variable` = porepressure,  `fluid_phase = 0`, `gravity = '0 0 -9.81'`, `aquifer_pressure_at_datum` = P0, `datum_elevation` = z0, `aquifer_distance` = distance from boundary to the reservoir. |
 | Evapotranspiration in a groundwater model | Use [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md).  See the Baseflow, ET, recharge section of [groundwater_models.md](groundwater_models.md#baseflow-et-recharge-unsaturated-flow-impact-of-groundwater-abstraction-on-baseflow-to-a-river) |
 | Remove fluid if porepressure exceeds P0.  That is enforce porepressure <= P0.  Example: baseflow in groundwater modelling.  Single-phase model | Use [PorousFlowPiecewiseLinearSink](PorousFlowPiecewiseLinearSink.md) with `variable` = porepressure, `PT_shift = P0`, `fluid_phase = 0`, `use_mobility = true`, `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`, `flux_function` = 1/L.  Extra note: for models with unsaturated physics, use `use_relperm = true`. If you suspect poor nonlinear convergence is due to MOOSE oscillating around P0, experiment with a [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) with `center = P0`, `cutoff` = small negative value of porepressure (eg, `cutoff = -1000` Pa), `max` = large value of fluid flux (in kg.m$^{-2}$.s$^{-1}$).  Example: [ex02_abstraction.i](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/groundwater/ex02_abstraction.i) |
@@ -259,10 +259,7 @@ An example using the pressure-at-datum formulation with computed conductance:
 
 ## Class 1: Injection of fluid at a fixed temperature
 
-A boundary condition corresponding to injection of fluid at a fixed temperature
-could involve: (1) using a Dirichlet condition for temperature; (2) using $f=-1$ without any
-multiplicative factors. More complicated examples with heat and fluid injection and production
-are detailed in the test suite documentation.
+A boundary condition corresponding to injection of fluid at a fixed temperature in a single-phase model involves [`PorousFlowSinkBC`](PorousFlowSinkBC.md) with $f<0$.  Multi-phase or multi-component models must employ pairs of [`PorousFlowSink`](PorousFlowSink.md) and [`PorousFlowEnthalpySink`](PorousFlowEnthalpySink.md).  Users might also like to use a Dirichlet condition for temperature and a [`PorousFlowSink`](PorousFlowSink.md) for the fluid, however, this instantaneously heats the volume associated with all boundary nodes to that fixed temperature, and maintains that temperature, which may be undesirable.
 
 ## Class 1: Fluids that both enter and exit the boundary
 
