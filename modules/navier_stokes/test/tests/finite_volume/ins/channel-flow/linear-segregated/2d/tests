@@ -110,10 +110,9 @@
     cli_args = "pressure_gradient_method=reconstructed "
                "Problem/linear_sys_names='u_system v_system pressure_system wrong_pressure_system' "
                "LinearFVKernels/u_pressure/pressure=wrong_pressure"
-    expect_err = "can only be used with pressure system 'pressure_system' owned by RhieChowMassFlux"
-    requirement = "The system shall report an error when one reconstructed pressure gradient "
-                  "method is reused for a pressure system other than the one owned by its "
-                  "Rhie-Chow user object."
+    expect_err = "must use pressure gradients from the same system"
+    requirement = "The system shall report an error when momentum components obtain their "
+                  "reconstructed coupling gradients from different pressure systems."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
@@ -130,8 +129,9 @@
     type = 'RunException'
     input = reconstructed-gradient-wrong-variable.i
     cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/v_pressure/pressure=wrong_pressure'
-    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
-    requirement = "The system shall report an error when different momentum components use different pressure variables for the reconstructed coupling gradient."
+    expect_err = "must use the same pressure variable"
+    requirement = "The system shall report an error when different momentum components use "
+                  "different pressure variables for the reconstructed coupling gradient."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
@@ -214,7 +214,7 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
-  [reconstructed-candidate-without-prepared-predictor]
+  [reconstructed-candidate-without-lagged-gradient]
     type = 'RunException'
     input = 2d-velocity-pressure.i
     cli_args = "pressure_gradient_method=reconstructed "
@@ -222,10 +222,10 @@
                "UserObjects/sequence_test/rhie_chow_user_object=rc "
                "UserObjects/sequence_test/operation=update_candidate "
                "UserObjects/sequence_test/execute_on=TIMESTEP_BEGIN"
-    expect_err = "A momentum predictor must be prepared before updating a reconstructed pressure-gradient candidate"
+    expect_err = "cannot reconstruct a pressure-gradient candidate while its reconstruction state is NeedLaggedGradient; expected NeedCandidate"
     allow_test_objects = true
-    requirement = "The system shall report an internal sequencing error when a reconstructed "
-                  "pressure-gradient candidate is updated without a prepared momentum predictor."
+    requirement = "The system shall report a sequencing error when pressure-gradient "
+                  "reconstruction is attempted before saving the lagged velocity gradient."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
@@ -238,10 +238,27 @@
                "UserObjects/sequence_test/operation=reuse_face_flux "
                "UserObjects/sequence_test/execute_on=TIMESTEP_END "
                "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
-    expect_err = "cannot reconstruct cell ID [0-9]+ from face ID [0-9]+: expected corrected face-flux generation 2 but found generation 1"
+    expect_err = "cannot reconstruct cell ID [0-9]+ from face ID [0-9]+: corrected face-flux iteration [0-9]+ was already used for reconstruction"
     allow_test_objects = true
     requirement = "The system shall identify the cell and face when a reconstructed pressure "
                   "gradient attempts to reuse stale corrected face flux."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-candidate-skips-face-flux-iteration]
+    type = 'RunApp'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=skip_face_flux_iteration "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_END "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true "
+               "Outputs/exodus=false"
+    allow_test_objects = true
+    requirement = "The system shall reconstruct from the latest corrected face-flux iteration "
+                  "when it differs from the previous reconstruction, without requiring "
+                  "consecutive iterations."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []

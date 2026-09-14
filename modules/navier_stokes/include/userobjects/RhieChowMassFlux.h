@@ -98,9 +98,6 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
-  /// Generation of the most recently prepared momentum predictor.
-  dof_id_type momentumPredictorGeneration() const { return _momentum_predictor_generation; }
-
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -117,7 +114,7 @@ public:
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
 
-  /// Snapshot the fields read by the next momentum predictor and advance its generation.
+  /// Snapshot the fields read by the next momentum predictor.
   void prepareMomentumPredictor();
 
   /// Capture the lagged velocity gradient for another corrector using the current predictor.
@@ -178,6 +175,9 @@ protected:
 
   /// Get the registered pressure gradient component vectors.
   const std::vector<NumericVector<Number> *> & pressureGradientComponents() const;
+
+  /// Access the reconstructed gradient method when it is selected.
+  FVReconstructedPressureGradient & reconstructedGradientMethod();
 
   /// Access the reconstructed gradient method when it is selected.
   const FVReconstructedPressureGradient & reconstructedGradientMethod() const;
@@ -255,12 +255,6 @@ protected:
 
   /// Coupling pressure gradient captured before the current momentum predictor is assembled.
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
-
-  /// Generation of the most recently prepared momentum predictor.
-  dof_id_type _momentum_predictor_generation = 0;
-
-  /// Predictor generation to which the coupling pressure-gradient snapshot belongs.
-  dof_id_type _coupling_pressure_gradient_snapshot_generation = 0;
 
   /**
    * Producer counter for the conservative face mass flux: incremented every time

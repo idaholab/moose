@@ -12,7 +12,7 @@
 
 class RhieChowMassFlux;
 
-/// Exercises invalid Rhie-Chow sequencing for validation tests.
+/// Exercises Rhie-Chow reconstruction sequencing for validation tests.
 class TestRhieChowMassFluxSequence : public GeneralUserObject
 {
 public:
