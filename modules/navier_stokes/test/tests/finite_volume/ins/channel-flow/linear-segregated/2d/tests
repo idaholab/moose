@@ -37,10 +37,12 @@
     issues = '#32999'
   []
   [momentum-pressure-reconstructed-gradient]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 2d-velocity-pressure.i
-    exodiff = 2d-velocity-pressure-reconstructed-gradient_out.e
-    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out'
+    csvdiff = 2d-velocity-pressure-reconstructed-gradient_out_solution_0001.csv
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 '
+               'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out '
+               'Outputs/exodus=false Outputs/csv=true'
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
                   "channel using the SIMPLE algorithm with reconstructed pressure gradients in "
                   "the linear finite volume momentum predictor."
@@ -49,23 +51,24 @@
     issues = '#32995'
   []
   [momentum-pressure-reconstructed-gradient-high-relaxation]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 2d-velocity-pressure.i
     # No new gold: gradient_relaxation only changes the SIMPLE iteration path, not the converged
     # physical solution, so a much higher relaxation (0.9, vs. the default 0.1 used by
     # momentum-pressure-reconstructed-gradient above) should converge to the same result. This
-    # reuses that test's gold via the symlinked exodiff name (same pattern as
+    # reuses that test's gold via the symlinked CSV name (same pattern as
     # momentum-pressure-gradient-method's gold below). gradient_relaxation=1 (no relaxation at
     # all) does not converge within a reasonable iteration count with this problem's default
     # momentum_equation_relaxation/pressure_variable_relaxation - stabilizing it further would
     # need those under-relaxation factors tuned too, which is a separate numerics investigation.
     # Tighter linear tolerances keep inner-solve error below the outer SIMPLE convergence target;
     # otherwise this strongly coupled case stalls at the linear-solver accuracy floor.
-    exodiff = 2d-velocity-pressure-reconstructed-gradient-high-relaxation_out.e
+    csvdiff = 2d-velocity-pressure-reconstructed-gradient-high-relaxation_out_solution_0001.csv
     cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 '
                'Executioner/momentum_l_abs_tol=1e-12 Executioner/pressure_l_abs_tol=1e-12 '
                'FVGradientMethods/reconstructed/gradient_relaxation=0.9 '
-               'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient-high-relaxation_out'
+               'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient-high-relaxation_out '
+               'Outputs/exodus=false Outputs/csv=true'
     requirement = "The system shall converge to the same steady-state Navier-Stokes solution in a "
                   "2D channel using the SIMPLE algorithm with reconstructed pressure gradients in "
                   "the linear finite volume momentum predictor regardless of the relaxation factor "

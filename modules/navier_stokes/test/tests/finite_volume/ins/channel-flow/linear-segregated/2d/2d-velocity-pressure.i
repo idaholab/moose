@@ -172,6 +172,15 @@ pressure_gradient_method = 'green-gauss'
   []
 []
 
+[VectorPostprocessors]
+  [solution]
+    type = ElementValueSampler
+    variable = 'vel_x vel_y pressure'
+    sort_by = id
+    execute_on = TIMESTEP_END
+  []
+[]
+
 [Executioner]
   type = SIMPLE
   momentum_l_abs_tol = 1e-10
