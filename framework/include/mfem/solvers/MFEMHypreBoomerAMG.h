@@ -32,17 +32,17 @@ protected:
 
 private:
   /// How BoomerAMG treats the components of a vector unknown
-  enum class SystemType
+  enum class VectorTreatment
   {
     AUTO,
     SCALAR,
-    SYSTEMS,
-    ELASTICITY
+    BY_COMPONENT,
+    RIGID_BODY_MODES
   };
 
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
-  /// The system type in use, with AUTO resolved
-  SystemType _system_type;
+  /// The vector treatment in use, with AUTO resolved
+  VectorTreatment _vector_treatment;
 };
 
 #endif

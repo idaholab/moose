@@ -26,21 +26,23 @@ MFEMHypreBoomerAMG::validParams()
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<MFEMFESpaceName>(
       "fespace",
-      "Vector H1 FESpace of the unknown, required by system_type = systems and elasticity.");
-  MooseEnum system_type("auto scalar systems elasticity", "auto");
+      "Vector H1 FESpace of the unknown, required when vector_treatment is 'by_component' or "
+      "'rigid_body_modes'.");
+  MooseEnum vector_treatment("auto scalar by_component rigid_body_modes", "auto");
   params.addParam<MooseEnum>(
-      "system_type",
-      system_type,
+      "vector_treatment",
+      vector_treatment,
       "How BoomerAMG treats the components of a vector unknown. 'scalar' coarsens all degrees of "
-      "freedom together as one unknown. 'systems' coarsens each component separately and does "
-      "not interpolate between them (the 'unknown' approach). 'elasticity' adds the rigid body "
-      "modes of the fespace to the interpolation (the GM/LN approach), and is only applied on "
-      "the CPU. 'auto' is 'elasticity' if fespace is set and 'scalar' otherwise.");
+      "freedom together as one unknown. 'by_component' coarsens each component separately and "
+      "does not interpolate between them (hypre's 'unknown' approach, SetSystemsOptions). "
+      "'rigid_body_modes' also adds the rigid body modes of the fespace to the interpolation "
+      "(hypre's GM/LN approach, SetElasticityOptions), and is only applied on the CPU. 'auto' is "
+      "'rigid_body_modes' if fespace is set and 'scalar' otherwise.");
   params.addParam<mfem::real_t>(
       "strength_threshold",
       0.25,
-      "HypreBoomerAMG strong threshold. Defaults to 0.25, or to 0.5 when system_type is "
-      "'systems' or 'elasticity'.");
+      "HypreBoomerAMG strong threshold. Defaults to 0.25, or to 0.5 when vector_treatment is "
+      "'by_component' or 'rigid_body_modes'.");
   MooseEnum errmode("ignore=0 warn=1 abort=2", "abort");
   params.addParam<MooseEnum>("error_mode", errmode, "Set the behavior for treating hypre errors.");
   return params;
@@ -55,24 +57,28 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
                   .getFESpace()
             : nullptr)
 {
-  _system_type = getParam<MooseEnum>("system_type").getEnum<SystemType>();
-  if (_system_type == SystemType::AUTO)
-    _system_type = _mfem_fespace ? SystemType::ELASTICITY : SystemType::SCALAR;
+  _vector_treatment = getParam<MooseEnum>("vector_treatment").getEnum<VectorTreatment>();
+  if (_vector_treatment == VectorTreatment::AUTO)
+    _vector_treatment = _mfem_fespace ? VectorTreatment::RIGID_BODY_MODES : VectorTreatment::SCALAR;
 
-  if (_system_type == SystemType::SCALAR && _mfem_fespace)
-    paramError("fespace", "is only used when system_type is 'systems' or 'elasticity'.");
-  if (_system_type != SystemType::SCALAR)
+  if (_vector_treatment == VectorTreatment::SCALAR && _mfem_fespace)
+    paramError("fespace",
+               "is only used when vector_treatment is 'by_component' or 'rigid_body_modes'.");
+  if (_vector_treatment != VectorTreatment::SCALAR)
   {
     if (!_mfem_fespace)
-      paramError("system_type", "'systems' and 'elasticity' require fespace to be set.");
+      paramError("vector_treatment",
+                 "'by_component' and 'rigid_body_modes' require fespace to be set.");
     if (_mfem_fespace->GetVDim() < 2)
       paramError("fespace",
-                 "must be a vector space when system_type is 'systems' or 'elasticity'.");
+                 "must be a vector space when vector_treatment is 'by_component' or "
+                 "'rigid_body_modes'.");
     // mfem::HypreBoomerAMG builds the component map of a byNODES space from the size of its
     // operator, which a preconditioner does not have when these options are applied.
     if (_mfem_fespace->GetOrdering() != mfem::Ordering::byVDIM)
       paramError("fespace",
-                 "must have ordering = VDIM when system_type is 'systems' or 'elasticity'.");
+                 "must have ordering = VDIM when vector_treatment is 'by_component' or "
+                 "'rigid_body_modes'.");
   }
 
   ConstructSolver();
@@ -97,12 +103,12 @@ MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
   solver.SetPrintLevel(getParam<int>("print_level"));
   solver.SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
 
-  switch (_system_type)
+  switch (_vector_treatment)
   {
-    case SystemType::SYSTEMS:
+    case VectorTreatment::BY_COMPONENT:
       solver.SetSystemsOptions(_mfem_fespace->GetVDim(), /*order_bynodes=*/false);
       break;
-    case SystemType::ELASTICITY:
+    case VectorTreatment::RIGID_BODY_MODES:
       if (!mfem::HypreUsingGPU())
         solver.SetElasticityOptions(_mfem_fespace.get());
       break;

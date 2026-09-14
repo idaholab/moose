@@ -261,14 +261,14 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
-  [MFEMLinearElasticitySystemsAMG]
+  [MFEMLinearElasticityByComponentAMG]
     type = CSVDiff
     input = linearelasticity.i
-    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/system_type=systems '
+    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=by_component '
                'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
                'Outputs/ParaViewDataCollection/enable=false '
-               'Outputs/CSV/file_base=OutputData/LinearElasticitySystemsAMG'
-    csvdiff = 'OutputData/LinearElasticitySystemsAMG.csv'
+               'Outputs/CSV/file_base=OutputData/LinearElasticityByComponentAMG'
+    csvdiff = 'OutputData/LinearElasticityByComponentAMG.csv'
     requirement = 'The system shall have the ability to solve a linear elasticity problem using '
                   'MFEM with a BoomerAMG preconditioner that treats each displacement component '
                   'as a separate unknown.'
@@ -276,14 +276,14 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMLinearElasticityElasticityAMG]
+  [MFEMLinearElasticityRigidBodyModesAMG]
     type = CSVDiff
     input = linearelasticity.i
-    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/system_type=elasticity '
+    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=rigid_body_modes '
                'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
                'Outputs/ParaViewDataCollection/enable=false '
-               'Outputs/CSV/file_base=OutputData/LinearElasticityElasticityAMG'
-    csvdiff = 'OutputData/LinearElasticityElasticityAMG.csv'
+               'Outputs/CSV/file_base=OutputData/LinearElasticityRigidBodyModesAMG'
+    csvdiff = 'OutputData/LinearElasticityRigidBodyModesAMG.csv'
     requirement = 'The system shall have the ability to solve a linear elasticity problem using '
                   'MFEM with a BoomerAMG preconditioner that uses the rigid body modes of the '
                   'displacement space.'
@@ -291,14 +291,14 @@
     compute_devices = 'cpu'
     recover = false
   []
-  [MFEMBoomerAMGSystemTypeErrors]
-    requirement = 'The system shall report an error when a BoomerAMG system type for vector '
+  [MFEMBoomerAMGVectorTreatmentErrors]
+    requirement = 'The system shall report an error when a BoomerAMG treatment for vector '
                   'unknowns is requested'
     [no_fespace]
       type = RunException
       input = linearelasticity.i
-      cli_args = 'Solvers/boomeramg/system_type=systems'
-      expect_err = "'systems' and 'elasticity' require fespace to be set."
+      cli_args = 'Solvers/boomeramg/vector_treatment=by_component'
+      expect_err = "'by_component' and 'rigid_body_modes' require fespace to be set."
       detail = 'without the space of the unknown,'
       capabilities = 'mfem'
     []
@@ -306,16 +306,17 @@
       type = RunException
       input = linearelasticity.i
       cli_args = 'FESpaces/H1FESpace/ordering=NODES Solvers/boomeramg/fespace=H1FESpace '
-                 'Solvers/boomeramg/system_type=systems'
-      expect_err = "must have ordering = VDIM when system_type is 'systems' or 'elasticity'."
+                 'Solvers/boomeramg/vector_treatment=by_component'
+      expect_err = "must have ordering = VDIM when vector_treatment is 'by_component' or "
+                   "'rigid_body_modes'."
       detail = 'on a space ordered by nodes, and'
       capabilities = 'mfem'
     []
     [unused_fespace]
       type = RunException
       input = linearelasticity.i
-      cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/system_type=scalar'
-      expect_err = "is only used when system_type is 'systems' or 'elasticity'."
+      cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=scalar'
+      expect_err = "is only used when vector_treatment is 'by_component' or 'rigid_body_modes'."
       detail = 'when a space is given that a scalar treatment would not use.'
       capabilities = 'mfem'
     []
