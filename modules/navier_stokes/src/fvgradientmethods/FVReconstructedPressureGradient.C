@@ -163,6 +163,21 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
                rc.name(),
                "'.");
 
+  const auto & pressure_variable =
+      rc.pressureSystem().getVariable(0, _pressure_variable_number);
+  if (pressure_variable.blockIDs() != rc.blockIDs())
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' requires pressure variable '",
+               pressure_variable.name(),
+               "' and RhieChowMassFlux '",
+               rc.name(),
+               "' to have identical block restrictions. Pressure blocks: ",
+               Moose::stringify(pressure_variable.blockIDs()),
+               "; Rhie-Chow blocks: ",
+               Moose::stringify(rc.blockIDs()),
+               ".");
+
   if (_momentum_systems.size() != rc.dimension() ||
       _velocity_gradient_fields.size() != rc.dimension())
     mooseError("FVReconstructedPressureGradient '",
@@ -253,6 +268,8 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
 
   if (!_coupling_pressure_gradient_initialized)
   {
+    // No flux-consistent pressure gradient exists before the first pressure corrector. Use the
+    // ordinary gradient for the initial momentum predictor instead of inventing coupling data.
     resolveBaseGradientMethod(system).computeGradient(system, gradient, variable_numbers);
     return;
   }
@@ -263,6 +280,8 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   {
     mooseAssert(gradient[component]->type() == GHOSTED,
                 "Linear FV gradient storage must be ghosted.");
+    // localize() copies owned entries and refreshes ghosts needed by face interpolation on this
+    // processor; NumericVector assignment alone does not guarantee updated ghost entries.
     _coupling_pressure_gradient[component]->localize(*gradient[component],
                                                      system.dofMap().get_send_list());
   }
@@ -347,6 +366,8 @@ void
 FVReconstructedPressureGradient::resetForTimeStep(const RhieChowMassFlux & rc)
 {
   checkFlowSystem(rc);
+  // A new time-step attempt starts from the last accepted coupling field. This keeps a converged
+  // momentum balance unchanged across time-step acceptance, rejection, restart, and recovery.
   copyGradient(rc.pressureGradientField().components(Moose::oldState()),
                _coupling_pressure_gradient);
   _coupling_pressure_gradient_initialized = true;
@@ -376,6 +397,9 @@ FVReconstructedPressureGradient::saveLaggedVelocityGradient(RhieChowMassFlux & r
   for (const auto component : make_range(dimension))
     rc.momentumSystem(component).updateFVGradient(*_velocity_gradient_fields[component]);
 
+  // Freeze grad(u) before the pressure corrector changes the flux. The lagged field linearizes the
+  // Taylor correction from each cell center P to its face f without coupling reconstruction back
+  // to the velocity that it is currently computing.
   if (_lagged_reconstruction_velocity_gradient.empty())
     _lagged_reconstruction_velocity_gradient.resize(dimension);
 
@@ -403,6 +427,8 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
             elem_info.dofIndices()[system_number][velocity.number()]);
 
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
+  // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
+  // gradient. Otherwise interpolate the two lagged cell gradients to the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
     return elem_gradient;
 
@@ -437,6 +463,8 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     for (const auto component : make_range(dimension))
       _reconstructed_pressure_gradient.push_back(base_pressure_gradient[component]->zero_clone());
 
+  // Zero the candidate so pressure DOFs not visited during this corrector cannot retain stale
+  // reconstructed values from an earlier cycle.
   for (auto & pressure_gradient : _reconstructed_pressure_gradient)
     pressure_gradient->zero();
 
@@ -455,6 +483,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     matrix.zero();
     projection_rhs.zero();
 
+    // For every face, estimate the cell-centered normal velocity from the corrected face flux.
+    // The coordinate-system-aware surface vector S_f supplied by loopOverElemFaceInfo is outward
+    // from this cell, including the appropriate Cartesian or axisymmetric geometric weighting.
     auto act = [&](const Elem &,
                    const Elem * const,
                    const FaceInfo * const fi,
@@ -506,6 +537,8 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                      ".");
 
       const auto face_normal = surface_vector / surface_area;
+      // RhieChow stores the scalar flux relative to FaceInfo::normal(). Flip that orientation when
+      // the current cell is on the opposite side so q_f is outward from this cell.
       const Point flux_normal =
           rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
       const Real face_flux = rc.getVolumetricFaceFlux(*fi);
@@ -520,6 +553,10 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    ".");
       Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 
+      // First-order expansion at the face gives
+      //   u_f.n_f = u_P.n_f + ((grad u)_f d_Pf).n_f.
+      // Subtract the lagged Taylor term to obtain one face equation for the unknown cell velocity:
+      //   u_P.n_f ~= u_f.n_f - ((grad u)_f d_Pf).n_f.
       const Point d_pf = fi->faceCentroid() - elem_info->centroid();
       Real gradient_flux_correction = 0.0;
       for (const auto component : make_range(dimension))
@@ -561,6 +598,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    fi->id(),
                    ".");
 
+      // Assemble the area-weighted least-squares projection of the corrected face equations:
+      //   [sum_f |S_f| n_f n_f^T] u_P = sum_f |S_f| qhat_f n_f,
+      // where qhat_f is face_normal_reconstructed_quantity and S_f = |S_f| n_f.
       for (const auto i : make_range(dimension))
       {
         projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
@@ -617,6 +657,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     }
     else
     {
+      // The normal-equation matrix is symmetric positive definite when the cell face normals span
+      // the spatial dimension. Cholesky failure therefore identifies degenerate reconstruction
+      // geometry rather than a pressure-solver failure.
       DenseMatrix<Real> solve_matrix(matrix);
       try
       {
@@ -671,6 +714,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    Ainv,
                    ".");
 
+      // Invert the same diagonal momentum relation used by Rhie-Chow,
+      //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
+      // so the reconstructed pressure gradient produces the projected, flux-consistent u_P.
       const Real reconstructed_gradient = (-reconstructed_quantity(component) - HbyA) / Ainv;
       if (!std::isfinite(reconstructed_gradient))
         mooseError("FVReconstructedPressureGradient '",
@@ -722,23 +768,21 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
 
   const auto & mesh = rc.pressureSystem().feProblem().mesh();
   const auto pressure_system_number = rc.pressureSystem().number();
-  const auto & pressure_variable =
-      rc.pressureSystem().getVariable(0, _pressure_variable_number);
   for (const auto component : index_range(_coupling_pressure_gradient))
   {
     for (const auto & elem_info : mesh.elemInfoVector())
     {
-      if (!pressure_variable.hasBlocks(elem_info->subdomain_id()))
+      if (!rc.hasBlocks(elem_info->subdomain_id()))
         continue;
 
       const auto pressure_dof =
           elem_info->dofIndices()[pressure_system_number][_pressure_variable_number];
+      // Under-relax feedback to the next momentum predictor:
+      //   g_coupling^{k+1} = (1-alpha) g_coupling^k + alpha g_reconstructed^k.
       const auto updated_gradient =
-          rc.hasBlocks(elem_info->subdomain_id())
-              ? (1.0 - _gradient_relaxation) *
-                        (*_coupling_pressure_gradient[component])(pressure_dof) +
-                    _gradient_relaxation * (*reconstructed_candidate[component])(pressure_dof)
-              : (*base_gradient[component])(pressure_dof);
+          (1.0 - _gradient_relaxation) *
+              (*_coupling_pressure_gradient[component])(pressure_dof) +
+          _gradient_relaxation * (*reconstructed_candidate[component])(pressure_dof);
       _coupling_pressure_gradient[component]->set(pressure_dof, updated_gradient);
     }
     _coupling_pressure_gradient[component]->close();

@@ -53,6 +53,10 @@ diagnostics, and unrelated equations should continue to use an ordinary gradient
 same reconstructed pressure-gradient definition for every momentum component coupled to one
 pressure equation; independent flow systems should use separate definitions.
 
+The pressure variable and its `RhieChowMassFlux` object must have identical block restrictions.
+Pressure fields on independent flow regions should use separate pressure variables and Rhie-Chow
+objects, or one Rhie-Chow object must span the complete pressure domain.
+
 !syntax parameters /FVGradientMethods/FVReconstructedPressureGradient
 
 !syntax inputs /FVGradientMethods/FVReconstructedPressureGradient
