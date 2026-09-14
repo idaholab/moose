@@ -5,7 +5,9 @@
 This is the Kokkos version of [BodyForce](BodyForce.md). See the original document for details.
 
 !alert note
-Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/Kernels/BodyForce/function) is not available.
+[!param](/Kernels/KokkosBodyForce/function) must name a [KokkosParsedFunction](KokkosParsedFunction.md), which is
+also what a numeric value given to that parameter is built as. Kokkos-MOOSE retrieves a function in its own concrete
+type, so a function of another type cannot be substituted here.
 
 ## Example Input Syntax
 

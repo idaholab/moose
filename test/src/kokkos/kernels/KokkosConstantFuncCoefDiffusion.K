@@ -15,7 +15,9 @@ InputParameters
 KokkosConstantFuncCoefDiffusion::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addParam<FunctionName>("coef", "1", "The function for conductivity");
+  // A numeric function name is built on demand as a KokkosParsedFunction, so a numeric default
+  // cannot serve a kernel that asks for its function in a different concrete type
+  params.addRequiredParam<FunctionName>("coef", "The function for conductivity");
   return params;
 }
 
