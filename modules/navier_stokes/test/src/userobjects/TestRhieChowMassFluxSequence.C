@@ -17,7 +17,9 @@ TestRhieChowMassFluxSequence::validParams()
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The Rhie-Chow user object.");
   params.addRequiredParam<MooseEnum>(
-      "operation", MooseEnum("update_candidate reuse_face_flux"), "The invalid sequence to test.");
+      "operation",
+      MooseEnum("update_candidate reuse_face_flux skip_face_flux_iteration"),
+      "The reconstruction sequence to test.");
   return params;
 }
 
@@ -32,8 +34,14 @@ TestRhieChowMassFluxSequence::TestRhieChowMassFluxSequence(const InputParameters
 void
 TestRhieChowMassFluxSequence::execute()
 {
-  if (_operation == "reuse_face_flux")
+  if (_operation == "reuse_face_flux" || _operation == "skip_face_flux_iteration")
     _rhie_chow.preparePISOCorrector();
+
+  if (_operation == "skip_face_flux_iteration")
+  {
+    _rhie_chow.computeFaceMassFlux();
+    _rhie_chow.computeFaceMassFlux();
+  }
 
   _rhie_chow.preparePressureRelaxation();
 }

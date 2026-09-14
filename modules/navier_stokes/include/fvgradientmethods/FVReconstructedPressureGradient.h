@@ -37,8 +37,7 @@ public:
   FVReconstructedPressureGradient(const InputParameters & params);
 
   /// Link this stateful method to one Rhie-Chow flow-system configuration.
-  void linkFlowSystem(RhieChowMassFlux & rc,
-                      const LinearFVGradientReader & pressure_gradient) const;
+  void linkFlowSystem(RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient);
 
   /// Validate the one-time Rhie-Chow linkage and field layouts required by reconstruction.
   void validateSetup(const RhieChowMassFlux & rc) const;
@@ -47,24 +46,39 @@ public:
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
   /// Prepare solver-iteration state for a new time-step attempt.
-  void resetForTimeStep(const RhieChowMassFlux & rc) const;
+  void resetForTimeStep(const RhieChowMassFlux & rc);
 
   /// Save the lagged cell velocity gradient used by the reconstruction.
-  void saveLaggedVelocityGradient(RhieChowMassFlux & rc) const;
+  void saveLaggedVelocityGradient(RhieChowMassFlux & rc);
 
   /// Reconstruct the conservative pressure-gradient candidate from the corrected face flux.
-  void computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
+  void computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc);
 
   /// Get the conservative candidate produced by the current pressure corrector.
   const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
 
   /// Relax and publish the current candidate as the coupling pressure gradient.
   void publishCouplingPressureGradient(const RhieChowMassFlux & rc,
-                                       const GradientView & base_gradient) const;
+                                       const GradientView & base_gradient);
 
   virtual void meshChanged() override;
 
 private:
+  enum class ReconstructionState
+  {
+    NeedLaggedGradient,
+    NeedCandidate,
+    CandidateReady
+  };
+
+  enum class ReconstructionEvent
+  {
+    Reset,
+    SaveLaggedGradient,
+    ReconstructCandidate,
+    PublishCandidate
+  };
+
   void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & gradient,
@@ -77,14 +91,14 @@ private:
   void checkFlowSystem(const RhieChowMassFlux & rc) const;
 
   /// Copy gradient values while reusing compatible destination storage.
-  void copyGradient(const GradientView & source, GradientContainer & destination) const;
+  void copyGradient(const GradientView & source, GradientContainer & destination);
 
-  /// Reset state that is local to one time-step attempt.
-  void resetAttemptState() const;
+  /// Apply and validate one reconstruction-cycle transition.
+  void transition(ReconstructionEvent event);
 
   /// Blend a reconstructed candidate into the persistent coupling pressure gradient.
   void updateCouplingPressureGradient(const GradientView & base_gradient,
-                                      const GradientContainer & reconstructed_candidate) const;
+                                      const GradientContainer & reconstructed_candidate);
 
   /// Interpolate a lagged velocity-component gradient to a face.
   RealVectorValue reconstructionVelocityGradient(const RhieChowMassFlux & rc,
@@ -100,48 +114,36 @@ private:
   const Real _gradient_relaxation;
 
   /// Rhie-Chow object that owns this stateful reconstruction method.
-  mutable const RhieChowMassFlux * _rhie_chow = nullptr;
+  const RhieChowMassFlux * _rhie_chow = nullptr;
 
   /// Pressure system that owns the reconstructed pressure variable.
-  mutable const SystemBase * _pressure_system = nullptr;
+  const SystemBase * _pressure_system = nullptr;
 
   /// Pressure variable reconstructed by this method.
-  mutable unsigned int _pressure_variable_number = libMesh::invalid_uint;
+  unsigned int _pressure_variable_number = libMesh::invalid_uint;
 
   /// Momentum systems coupled through the owning Rhie-Chow object.
-  mutable std::vector<const SystemBase *> _momentum_systems;
+  std::vector<const SystemBase *> _momentum_systems;
 
   /// Ordinary gradient fields for the velocity components.
-  mutable std::vector<const LinearFVGradientReader *> _velocity_gradient_fields;
-
-  /// Cached base gradient method.
-  mutable const FVGradientMethod * _base_gradient_method = nullptr;
+  std::vector<const LinearFVGradientReader *> _velocity_gradient_fields;
 
   /// Lagged velocity gradients indexed by velocity component and spatial direction.
-  mutable std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
       _lagged_reconstruction_velocity_gradient;
 
-  /// Whether a lagged velocity-gradient snapshot is available.
-  mutable bool _lagged_velocity_gradient_available = false;
+  /// Current position in the pressure-gradient reconstruction cycle.
+  ReconstructionState _reconstruction_state = ReconstructionState::NeedLaggedGradient;
 
-  /// Producer generation for lagged velocity-gradient snapshots.
-  mutable dof_id_type _lagged_velocity_gradient_generation = 0;
-
-  /// Lagged velocity-gradient generation consumed by the current candidate.
-  mutable dof_id_type _reconstructed_candidate_generation = 0;
-
-  /// Face-flux generation consumed by the current candidate.
-  mutable dof_id_type _reconstructed_candidate_face_flux_generation = 0;
-
-  /// Candidate generation consumed by the published coupling pressure gradient.
-  mutable dof_id_type _published_candidate_generation = 0;
+  /// Corrected face-flux iteration used by the previous reconstruction.
+  dof_id_type _last_reconstructed_face_flux_iteration = 0;
 
   /// Reconstructed pressure-gradient candidate.
-  mutable GradientContainer _reconstructed_pressure_gradient;
+  GradientContainer _reconstructed_pressure_gradient;
 
   /// Persistent coupling pressure gradient.
-  mutable GradientContainer _coupling_pressure_gradient;
+  GradientContainer _coupling_pressure_gradient;
 
   /// Whether the coupling pressure gradient has been initialized.
-  mutable bool _coupling_pressure_gradient_initialized = false;
+  bool _coupling_pressure_gradient_initialized = false;
 };

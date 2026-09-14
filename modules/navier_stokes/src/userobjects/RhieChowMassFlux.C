@@ -257,10 +257,6 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   {
     const auto & reader = kernel->pressureGradientField();
 
-    if (const auto * const reconstructed_method =
-            dynamic_cast<const FVReconstructedPressureGradient *>(&reader.method()))
-      reconstructed_method->linkFlowSystem(*this, reader);
-
     if (&reader.system() != &coupling_reader.system() ||
         reader.systemNumber() != coupling_reader.systemNumber())
       mooseError("RhieChowMassFlux '",
@@ -311,6 +307,7 @@ RhieChowMassFlux::linkMomentumPressureSystems(
 
   if (usingReconstructedPressureGradientMethod())
   {
+    reconstructedGradientMethod().linkFlowSystem(*this, coupling_reader);
     const auto & base_reader =
         pressure_var->requestCellGradients(reconstructedGradientMethod().baseGradientMethodName());
     _base_pressure_gradient_field = &base_reader;
@@ -379,9 +376,6 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_mass_flux.clear();
   _grad_p_current.clear();
-  _face_mass_flux_generation = 0;
-  _momentum_predictor_generation = 0;
-  _coupling_pressure_gradient_snapshot_generation = 0;
   setupMeshInformation();
 }
 
@@ -394,8 +388,6 @@ RhieChowMassFlux::timestepSetup()
     return;
 
   _grad_p_current.clear();
-  _momentum_predictor_generation = 0;
-  _coupling_pressure_gradient_snapshot_generation = 0;
 
   if (!usingReconstructedPressureGradientMethod())
     return;
@@ -403,11 +395,6 @@ RhieChowMassFlux::timestepSetup()
   // Seed the next attempt from the most recently accepted coupling gradient. The linear FV
   // gradient manager restores that state after rejection and checkpoints it for restart/recovery.
   reconstructedGradientMethod().resetForTimeStep(*this);
-
-  // This counter is otherwise self-refreshing every SIMPLE/PISO iteration, but resetting it here
-  // avoids any accidental cross-time-step coupling and keeps the reconstructed gradient's paired
-  // safety-assertion counter meaningful within a single time step.
-  _face_mass_flux_generation = 0;
 }
 
 void
@@ -416,20 +403,12 @@ RhieChowMassFlux::prepareMomentumPredictor()
   mooseAssert(_pressure_gradient_field,
               "The pressure gradient field must be linked before preparing momentum.");
 
-  const auto next_predictor_generation = _momentum_predictor_generation + 1;
-
   if (usingReconstructedPressureGradientMethod())
     reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 
-  mooseAssert(_coupling_pressure_gradient_snapshot_generation != next_predictor_generation,
-              "The coupling pressure gradient must be captured exactly once per momentum "
-              "predictor.");
   _grad_p_current.clear();
   for (const auto & component : pressureGradientComponents())
     _grad_p_current.push_back(component->clone());
-
-  _coupling_pressure_gradient_snapshot_generation = next_predictor_generation;
-  _momentum_predictor_generation = next_predictor_generation;
 }
 
 void
@@ -438,11 +417,8 @@ RhieChowMassFlux::preparePISOCorrector()
   if (!usingReconstructedPressureGradientMethod())
     return;
 
-  mooseAssert(_momentum_predictor_generation,
+  mooseAssert(!_grad_p_current.empty(),
               "A momentum predictor must be prepared before another PISO corrector.");
-  mooseAssert(_coupling_pressure_gradient_snapshot_generation == _momentum_predictor_generation,
-              "A PISO corrector must retain the current momentum predictor's coupling pressure "
-              "gradient snapshot.");
   reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 }
 
@@ -976,13 +952,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
-  mooseAssert(_momentum_predictor_generation,
-              "A momentum predictor must be prepared before computing H/A.");
   mooseAssert(!_grad_p_current.empty(),
               "A coupling pressure-gradient snapshot must exist before computing H/A.");
-  mooseAssert(_coupling_pressure_gradient_snapshot_generation == _momentum_predictor_generation,
-              "The coupling pressure-gradient snapshot must belong to the current momentum "
-              "predictor generation.");
   mooseAssert(_grad_p_current.size() == _momentum_implicit_systems.size(),
               "The coupling pressure-gradient snapshot must have one component per momentum "
               "system.");
@@ -1191,6 +1162,13 @@ RhieChowMassFlux::reconstructedGradientMethod() const
               "pressure gradients are active.");
 
   return dynamic_cast<const FVReconstructedPressureGradient &>(pressureGradientField().method());
+}
+
+FVReconstructedPressureGradient &
+RhieChowMassFlux::reconstructedGradientMethod()
+{
+  return const_cast<FVReconstructedPressureGradient &>(
+      static_cast<const RhieChowMassFlux &>(*this).reconstructedGradientMethod());
 }
 
 void
