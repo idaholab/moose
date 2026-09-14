@@ -118,6 +118,21 @@ PorousFlowPeacemanBorehole::validParams()
                         "However, if this parameter is given as a positive number then this "
                         "number is used instead of the internal calculation.  This speeds up "
                         "computation marginally.  re_constant becomes irrelevant");
+  params.addParam<std::vector<Real>>(
+      "well_constants",
+      "One well_constant value per point in point_file, overriding both 'well_constant' and "
+      "the internal per-point calculation at whichever points have a positive entry here (a "
+      "non-positive or absent entry falls back to 'well_constant', then to the internal "
+      "calculation, for that point only).  Must have exactly as many entries as there are "
+      "points in 'point_file' if given.  Use this - rather than a single well-wide "
+      "'well_constant' - when one well's points are geometrically heterogeneous enough (for "
+      "example, several points on the same well each crossing a distinct 2D fracture element "
+      "with its own aperture and permeability) that neither the internal calculation nor a "
+      "single constant gives a defensible well index at every point.  In particular, the "
+      "internal calculation's effective radius is derived from the local element's own "
+      "in-plane node extents, which is not guaranteed to be independent of mesh resolution for "
+      "a point confined to a lower-dimensional (2D) mesh block, such as a discrete fracture "
+      "element; see sinks.md for the derivation and a worked mesh-refinement comparison.");
   params.addClassDescription(
       "Approximates a borehole in the mesh using the Peaceman approach, ie "
       "using a number of point sinks with given radii whose positions are "
@@ -154,6 +169,7 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
     _t_c2k(getParam<MooseEnum>("unit_weight_temperature_unit") == 0 ? 0.0 : 273.15),
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
+    _well_constants(getParam<std::vector<Real>>("well_constants")),
     _has_permeability(
         hasMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp") &&
         hasMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
@@ -320,9 +336,22 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
                                          const RealTensorValue & rot,
                                          const Real & half_len,
                                          const Elem * ele,
-                                         const Real & rad) const
+                                         const Real & rad,
+                                         unsigned current_dirac_ptid) const
 // Peaceman's form for the borehole well constant
 {
+  if (!_well_constants.empty())
+  {
+    if (current_dirac_ptid >= _well_constants.size())
+      mooseError("PorousFlowPeacemanBorehole: 'well_constants' has ",
+                 _well_constants.size(),
+                 " entries, but this well has a point at index ",
+                 current_dirac_ptid,
+                 ".  'well_constants' must have exactly one entry per point in 'point_file'.");
+    if (_well_constants[current_dirac_ptid] > 0)
+      return _well_constants[current_dirac_ptid];
+  }
+
   if (_well_constant > 0)
     return _well_constant;
 
@@ -443,7 +472,8 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
                                    _rot_matrix[current_dirac_ptid - 1],
                                    _half_seg_len[current_dirac_ptid - 1],
                                    _current_elem,
-                                   _weight->at(current_dirac_ptid));
+                                   _weight->at(current_dirac_ptid),
+                                   current_dirac_ptid);
       outflow += wc * (pp - bh_pressure);
     }
   }
@@ -458,7 +488,8 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
                                    _rot_matrix[current_dirac_ptid],
                                    _half_seg_len[current_dirac_ptid],
                                    _current_elem,
-                                   _weight->at(current_dirac_ptid));
+                                   _weight->at(current_dirac_ptid),
+                                   current_dirac_ptid);
       outflow += wc * (pp - bh_pressure);
     }
   }
@@ -507,7 +538,8 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
                                    _rot_matrix[current_dirac_ptid - 1],
                                    _half_seg_len[current_dirac_ptid - 1],
                                    _current_elem,
-                                   _weight->at(current_dirac_ptid));
+                                   _weight->at(current_dirac_ptid),
+                                   current_dirac_ptid);
       outflowp += wc * pp_prime;
       outflow += wc * (pp - bh_pressure);
     }
@@ -523,7 +555,8 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
                                    _rot_matrix[current_dirac_ptid],
                                    _half_seg_len[current_dirac_ptid],
                                    _current_elem,
-                                   _weight->at(current_dirac_ptid));
+                                   _weight->at(current_dirac_ptid),
+                                   current_dirac_ptid);
       outflowp += wc * pp_prime;
       outflow += wc * (pp - bh_pressure);
     }

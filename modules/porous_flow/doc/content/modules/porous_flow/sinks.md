@@ -219,6 +219,7 @@ significant thermal gradient along its length, such as a geothermal well.  For t
 pressure is built by integrating a temperature-dependent fluid density along the well, instead
 of using a constant `unit_weight`:
 \begin{equation}
+\label{eq:well_bh_pressure_general}
 P_{\mathrm{wellbore}}(x_{N-1}) = P_{\mathrm{bot}}, \qquad
 P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{wellbore}}(x_{i+1}) +
 \tfrac{1}{2}\left(\rho_{i} + \rho_{i+1}\right)\, \mathbf{g}\cdot\left(x_{i} - x_{i+1}\right) \ ,
@@ -367,6 +368,65 @@ Note that the 0.113 is substantially different to Peaceman's 0.2, demonstrating 
 introducing wellbores dependent on the geometry.  The user may specify this quantity via the
 `re_constant` input parameter (which defaults to Peaceman's 0.28).
 
+### A well constant that varies along the well
+
+Every formula for $r_{e}$ above is derived for a well passing through a *stack* of similarly-sized
+grid cells or finite elements: $L_{x}$, $L_{y}$, or $L$ is a length scale of the local element, and
+the derivation implicitly assumes that scale is a well-behaved, mesh-resolution-independent
+property of the geometry the well is embedded in.  This assumption can fail for a well point that
+is confined to a lower-dimensional (for example, 2D) mesh block, such as a discrete-fracture
+element in an embedded-fracture model: the "element size" seen by [!param](/DiracKernels/PorousFlowPeacemanBorehole/re_constant)'s
+formula is then the *local* fracture element's own in-plane node extents at that specific point,
+rather than a length scale tied to the overall fracture (or reservoir) geometry.  Numerical
+experiments (mesh-refinement studies on a single fracture-crossing well point, at $2\times$ and
+$4\times$ refinement) found the resulting $W$ growing without settling &mdash; a $+121\%$ change
+in $W$ across a $4\times$ refinement in one such study &mdash; rather than converging, as $W$ does
+for a well passing through ordinary 3D elements.  No error or warning is raised in this
+situation: the well constant is simply wrong, silently, and by an amount that grows with mesh
+refinement rather than shrinking.
+
+For a single well-wide `well_constant` override, this is already handled: setting
+[!param](/DiracKernels/PorousFlowPeacemanBorehole/well_constant) to a positive, externally
+computed value bypasses the geometry-dependent calculation for the *entire* well, and was found
+to reduce the mesh-dependence above to under $0.01\%$ across the same $4\times$ refinement, in
+the same numerical experiment.  However, a single well may cross several fracture elements, each
+with its own aperture $h_{i}$ and permeability $k_{i}$, at points $x_{0},\ldots,x_{N-1}$ &mdash;
+in which case one $W$ for the whole well is itself too coarse an approximation.
+[!param](/DiracKernels/PorousFlowPeacemanBorehole/well_constants) (plural) generalises the
+single-value override to one value per point:
+\begin{equation}
+\label{eq:well_constants_override}
+W_{i} =
+\begin{cases}
+w_{i} & \text{if } w_{i} > 0 \\
+W^{\mathrm{(scalar)}} & \text{if } w_{i} \le 0 \text{ (or unset), and } W^{\mathrm{(scalar)}} > 0 \\
+\text{[the geometric calculation above, evaluated at } x_{i} \text{]} & \text{otherwise,}
+\end{cases}
+\end{equation}
+where $w_{i}$ is the $i^{\mathrm{th}}$ entry of `well_constants` and $W^{\mathrm{(scalar)}}$ is
+`well_constant`.  A natural choice of $w_{i}$, for a point sitting on a fracture of aperture
+$h_{i}$ and (in-plane, isotropic) permeability $k_{i}$, draining a disc of radius $r_{e,i}$ down
+to the borehole radius $r_{\mathrm{bh}}$, is the areal-flow analogue of Peaceman's formula:
+\begin{equation}
+\label{eq:well_constants_areal}
+w_{i} = \frac{2\pi k_{i} h_{i}}{\ln(r_{e,i}/r_{\mathrm{bh}})} \ ,
+\end{equation}
+which is exactly $W$ from [eq:peaceman_f]'s surrounding formula, specialised to $\kappa_{xx} =
+\kappa_{yy} = k_{i}$ and $L_{z} = h_{i}$ (the fracture aperture standing in for the "well
+length" $L_z$, since flow to the well within a thin fracture is areal, not along a 3D borehole
+segment).  $r_{e,i}$ is chosen independently of the mesh (for example, from the physical extent
+of that fracture, or a characteristic drainage radius), which is precisely what removes the
+mesh-resolution dependence described above.
+
+Using [eq:well_constants_override] together with `unit_weight_fp` (above) lets a single
+multi-point `PorousFlowPeacemanBorehole` correctly do two things simultaneously that otherwise
+pull in opposite directions: give each point its own, geometrically-appropriate well constant
+(this section), while still building the wellbore pressure profile $P_{\mathrm{wellbore}}(x_i)$
+as the genuine cumulative integral from the bottom of the *whole* well (previous section) &mdash;
+something a well artificially split into one single-point `PorousFlowPeacemanBorehole` per point
+cannot do, since for a single point $x_{i}^{\mathrm{bot}} = x_{i}$ trivially, collapsing
+[eq:well_bh_pressure_general] to $P_{\mathrm{wellbore}}(x_i) = P_{\mathrm{bot}}$ with no
+integration at all.
 
 ### Simple examples
 

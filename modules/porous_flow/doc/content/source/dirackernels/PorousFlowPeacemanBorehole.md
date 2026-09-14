@@ -26,6 +26,20 @@ used by unrelated Darcy kernels or fluid-properties materials; an input file tha
 or `fp` at the `[GlobalParams]` level would otherwise silently activate, or fail to validate,
 this mode on every `PorousFlowPeacemanBorehole` in the input.
 
+!alert note
+[!param](/DiracKernels/PorousFlowPeacemanBorehole/well_constant) overrides the geometry-dependent
+well-constant calculation with a single positive value for the *entire* well.
+[!param](/DiracKernels/PorousFlowPeacemanBorehole/well_constants) (plural) generalises this to
+one value per point in [!param](/DiracKernels/PorousFlowPeacemanBorehole/point_file), for a well
+whose points are not geometrically similar enough for a single well constant to be appropriate
+&mdash; for example, several points on the same well, each crossing a distinct 2D fracture
+element with its own aperture and permeability.  See [sinks](sinks.md) for the formula and the
+motivating mesh-refinement study.  Combining `well_constants` with `unit_weight_fp` (above) is
+the only way to give each point its own well constant while still building the wellbore pressure
+profile from the true cumulative integral over the whole well: splitting a well into one
+single-point `PorousFlowPeacemanBorehole` per point (to give each an independent `well_constant`)
+would make that integral trivial, since a single point is always its own well bottom.
+
 To report the flow rate at each individual borehole point (rather than only the well-wide total
 available via [!param](/DiracKernels/PorousFlowPeacemanBorehole/SumQuantityUO)), set
 [!param](/DiracKernels/PorousFlowPeacemanBorehole/PointFluxUO) to a
