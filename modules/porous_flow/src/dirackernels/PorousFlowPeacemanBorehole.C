@@ -120,6 +120,7 @@ PorousFlowPeacemanBorehole::validParams()
                         "computation marginally.  re_constant becomes irrelevant");
   params.addParam<std::vector<Real>>(
       "well_constants",
+      std::vector<Real>(),
       "One well_constant value per point in point_file, overriding both 'well_constant' and "
       "the internal per-point calculation at whichever points have a positive entry here (a "
       "non-positive or absent entry falls back to 'well_constant', then to the internal "
