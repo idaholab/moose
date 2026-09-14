@@ -83,6 +83,8 @@
       jsondiff = 'clone_serial.json'
       skip_keys = 'part number_of_parts'
       max_parallel = 1
+      # observed OOM in recover
+      min_slots = 2
 
       detail = 'in serial and'
     []
