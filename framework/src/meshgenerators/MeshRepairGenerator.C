@@ -205,6 +205,11 @@ MeshRepairGenerator::generate()
     repairPyramidToTet(mesh);
     repairPrismToPyramid(mesh);
     repairHexToPrism(mesh);
+
+    // Resolve any remaining single-short-edge cluster the per-type passes left in place: collapse
+    // the short edge, reducing every incident element (to a lower standard type where one fits,
+    // otherwise a polyhedron, otherwise deleting a needle) so the whole cluster is fixed at once
+    repairShortEdges(mesh);
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -2677,10 +2682,13 @@ MeshRepairGenerator::collapseRedundantVertex(
                     // genuine element below its dimension: decline
   }
 
-  // A colinear (non-coincident) merge slides v along the edge to keep, which would distort any
-  // element that contains v but not keep. Only proceed with such a merge when there are none.
-  if (!coincident && !mover_ids.empty())
-    return false;
+  // Collapse the vertex (merge v -> keep) and let every incident element adapt: reducers reduce (a
+  // supported lower type, else a polyhedron, else deletion, decided above) and movers - elements
+  // that contain v but not keep - are reshaped by substituting v -> keep. The merge is a node
+  // identification, so the mesh stays conformal; a colinear (non-coincident) merge slides v along
+  // the edge to keep, which is validated per element below (reject only if a mover would actually
+  // invert or degenerate). This adapts the surrounding cluster rather than refusing whenever a
+  // mover exists.
 
   // Apply v -> keep to the movers, saving originals for rollback, and validate each stays
   // non-degenerate and above the floor (this rejects a genuine-corner element that v would distort)
@@ -3597,6 +3605,112 @@ MeshRepairGenerator::repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const
     _console << "Number of hexahedral slivers repaired: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of hexahedral slivers that could not be repaired (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairShortEdges(std::unique_ptr<MeshBase> & mesh) const
+{
+  if (_flatness_tol <= 0)
+    return;
+
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // Collect the "lone" short edges: an edge whose length is below flatness_tol times the longest
+  // edge of any element incident to it, and where no incident element has a second short edge. That
+  // last condition restricts this to a single-short-edge degeneracy and leaves sliver/pancake
+  // clusters (which present several short edges together) untouched.
+  auto loneShortEdges = [&]()
+  {
+    std::unordered_map<dof_id_type, Real> elem_max; // element -> its longest edge
+    for (const auto & e : mesh->active_element_ptr_range())
+    {
+      Real m = 0;
+      for (const auto ed : make_range(e->n_edges()))
+      {
+        const auto en = e->nodes_on_edge(ed);
+        m = std::max(m, (e->point(en[0]) - e->point(en[1])).norm());
+      }
+      elem_max[e->id()] = m;
+    }
+    std::map<std::pair<dof_id_type, dof_id_type>, Real> elen; // edge -> length
+    std::map<std::pair<dof_id_type, dof_id_type>, Real> eref; // edge -> max incident longest-edge
+    std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>> eelems;
+    for (const auto & e : mesh->active_element_ptr_range())
+      for (const auto ed : make_range(e->n_edges()))
+      {
+        const auto en = e->nodes_on_edge(ed);
+        auto ka = e->node_id(en[0]), kb = e->node_id(en[1]);
+        if (ka > kb)
+          std::swap(ka, kb);
+        const auto key = std::make_pair(ka, kb);
+        elen[key] = (e->point(en[0]) - e->point(en[1])).norm();
+        eref[key] = std::max(eref[key], elem_max[e->id()]);
+        eelems[key].push_back(e->id());
+      }
+    std::unordered_map<dof_id_type, unsigned int> scount; // element -> number of short edges
+    std::vector<std::pair<dof_id_type, dof_id_type>> shorts;
+    for (const auto & [key, len] : elen)
+      if (eref[key] > 0 && len < _flatness_tol * eref[key])
+      {
+        shorts.push_back(key);
+        for (const auto eid : eelems[key])
+          ++scount[eid];
+      }
+    std::vector<std::pair<dof_id_type, dof_id_type>> lone;
+    for (const auto & key : shorts)
+    {
+      bool ok = true;
+      for (const auto eid : eelems[key])
+        if (scount[eid] > 1)
+          ok = false;
+      if (ok)
+        lone.push_back(key);
+    }
+    return lone;
+  };
+
+  std::size_t num_repaired = 0;
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    for (const auto & e : mesh->active_element_ptr_range())
+      for (const auto n : make_range(e->n_nodes()))
+        node_to_elems[e->node_id(n)].push_back(e->id());
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    for (const auto & key : loneShortEdges())
+    {
+      Node * a = mesh->query_node_ptr(key.first);
+      Node * b = mesh->query_node_ptr(key.second);
+      if (!a || !b)
+        continue;
+      // Merge b onto a. The edge is below tolerance, so treat it as coincident: an incident element
+      // that drops below its dimension shared the near-zero edge and is removed as the needle it
+      // is.
+      if (collapseRedundantVertex(mesh, b, a, true, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  const std::size_t num_skipped = loneShortEdges().size();
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of short-edge clusters collapsed: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of short edges that could not be collapsed (left in place): "
                << num_skipped << std::endl;
   }
 }

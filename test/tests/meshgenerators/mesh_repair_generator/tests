@@ -431,6 +431,39 @@
     mesh_mode = 'replicated'
   []
 
+  [repair_tet_degenerate_surrounded]
+    type = RunApp
+    input = repair_tet_degenerate_surrounded.i
+    expect_out = 'repaired by edge collapse: [1-9]'
+    issues = '#33566'
+    requirement = "The system shall remove a fan of needle tetrahedra sharing a single tiny edge - surrounded above and below by good tetrahedra on their faces and nodes - by collapsing that edge, keeping a valid conformal all-tetrahedral mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_to_tet_surrounded]
+    type = RunApp
+    input = repair_pyramid_to_tet_surrounded.i
+    expect_out = 'pyramids reduced to tetrahedra: [1-9]'
+    issues = '#33566'
+    requirement = "The system shall reduce a pyramid with a short base edge to a tetrahedron even when it is surrounded on every face and node by other pyramids, reducing each neighbor that shares the collapsed edge to a fitting lower type or a polyhedron."
+    mesh_mode = 'replicated'
+  []
+  [repair_prism_to_pyramid_surrounded]
+    type = RunApp
+    input = repair_prism_to_pyramid_surrounded.i
+    expect_out = 'wedges reduced to pyramids: [1-9]'
+    issues = '#33566'
+    requirement = "The system shall reduce a wedge with a short vertical edge to a pyramid even when it is surrounded on every face and node by other wedges sharing the collapsed edge."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_to_prism_surrounded]
+    type = RunApp
+    input = repair_hex_to_prism_surrounded.i
+    expect_out = 'hexahedra reduced to wedges: [1-9]'
+    issues = '#33566'
+    requirement = "The system shall reduce a hexahedron with a pinched lateral face to a prism even when it is surrounded on its faces and nodes by other hexahedra, rebuilding neighbors that share a collapsed edge as polyhedra."
+    mesh_mode = 'replicated'
+  []
+
   [errors]
     type = RunException
     input = 'flip_element.i'

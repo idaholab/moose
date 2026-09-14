@@ -132,6 +132,13 @@ The operations currently implemented are:
     bottom/top face becomes a triangle. A hexahedron is left in place only if the pinch is shared with another pinched
     cell.
 
+  - single short-edge cluster: after the per-type passes, any remaining edge whose length is below
+    [!param](/Mesh/MeshRepairGenerator/flatness_tol) times the largest edge of the elements incident to it - and whose
+    incident elements have no *other* short edge (so this targets a lone short edge, not a sliver or pancake cluster) -
+    is collapsed. Every element sharing that edge is reduced together: to a fitting lower standard type where one
+    exists, otherwise a `C0Polyhedron`, otherwise (an element that drops below its own dimension) it is deleted as the
+    needle it was. This resolves a whole cluster of elements meeting at one degenerate edge in a single conformal merge.
+
 - renumbering the nodes and elements to have a contiguous ordering.
 
 - splitting non-convex polygons into convex polygons

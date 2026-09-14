@@ -270,4 +270,16 @@ private:
   ///        polyhedron would be invalid.
   /// @param mesh the mesh to modify
   void repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Resolve a degenerate cluster formed by a single too-short edge: an edge whose length is
+  ///        below @c flatness_tol times the largest edge of the elements incident to it, and whose
+  ///        incident elements each have no *other* short edge (so this targets a lone short edge, not
+  ///        a sliver/pancake cluster, which are left alone). The edge is collapsed via
+  ///        collapseRedundantVertex, which reduces every incident element together - to a supported
+  ///        lower standard type where one fits, otherwise a C0Polyhedron, otherwise deleting an
+  ///        element that drops below its dimension (a needle) - so the whole cluster is repaired in
+  ///        one merge while keeping the mesh conformal. Runs after the per-type passes, catching the
+  ///        clusters they leave in place; a collapse that would invert a neighbor is skipped.
+  /// @param mesh the mesh to modify
+  void repairShortEdges(std::unique_ptr<MeshBase> & mesh) const;
 };
