@@ -151,6 +151,7 @@
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and convex disjoint surfaces of a moving interface in 2D using nodal normal based smoothing for the distance."
+    min_slots = 2
   [../]
 
   [./pl_test3qnns]
