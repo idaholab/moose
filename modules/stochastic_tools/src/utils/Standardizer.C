@@ -122,7 +122,7 @@ Standardizer::dataStore(std::ostream & stream, void * context) const
               "Standardizer has inconsistent restart state: one of _mean and _stdev is "
               "defined while the other is undefined.");
   const bool defined = _mean.defined();
-  dataStore(stream, defined, nullptr);
+  ::dataStore(stream, defined, nullptr);
   if (!defined)
     return;
 

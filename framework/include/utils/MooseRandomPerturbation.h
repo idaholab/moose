@@ -135,16 +135,16 @@ inline void
 dataStore(std::ostream & stream, MooseRandomPerturbation & v, void * context)
 {
   uint64_t seed = (static_cast<uint64_t>(v._k1) << 32) | v._k0;
-  storeHelper(stream, seed, context);
-  storeHelper(stream, v._n, context);
-  storeHelper(stream, v._rounds, context);
+  dataStore(stream, seed, context);
+  dataStore(stream, v._n, context);
+  dataStore(stream, v._rounds, context);
 }
 
 template <>
 inline void
 dataStore(std::ostream & stream, std::unique_ptr<MooseRandomPerturbation> & v, void * context)
 {
-  storeHelper(stream, *v, context);
+  dataStore(stream, *v, context);
 }
 
 template <>
@@ -153,8 +153,8 @@ dataLoad(std::istream & stream, std::unique_ptr<MooseRandomPerturbation> & v, vo
 {
   uint64_t seed;
   unsigned int n, rounds;
-  loadHelper(stream, seed, context);
-  loadHelper(stream, n, context);
-  loadHelper(stream, rounds, context);
+  dataLoad(stream, seed, context);
+  dataLoad(stream, n, context);
+  dataLoad(stream, rounds, context);
   v = std::make_unique<MooseRandomPerturbation>(seed, n, rounds);
 }
