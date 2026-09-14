@@ -4866,19 +4866,8 @@ FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD
 FVGradientMethod &
 FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid)
 {
-  std::vector<FVGradientMethod *> methods;
-  theWarehouse()
-      .query()
-      .condition<AttribSystem>("FVGradientMethod")
-      .condition<AttribThread>(tid)
-      .condition<AttribName>(name)
-      .queryInto(methods);
-
-  if (methods.empty())
-    mooseError("Unable to find FVGradientMethod with name '", name, "'");
-
-  mooseAssert(methods.size() == 1, "Expected a single FVGradientMethod per thread");
-  return *(methods[0]);
+  return const_cast<FVGradientMethod &>(
+      static_cast<const FEProblemBase &>(*this).getFVGradientMethod(name, tid));
 }
 
 bool

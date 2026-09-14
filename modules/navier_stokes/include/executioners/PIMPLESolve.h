@@ -37,8 +37,7 @@ public:
 
 protected:
   virtual std::pair<unsigned int, Real>
-  correctVelocity(const bool subtract_updated_pressure,
-                  const bool recompute_face_mass_flux,
+  correctVelocity(const bool recompute_face_mass_flux,
                   const SolverParams & solver_params) override;
 
   /// Number of H(u) and u iterations with fixed face flux.

@@ -595,8 +595,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 }
 
 std::pair<unsigned int, Real>
-LinearAssemblySegregatedSolve::correctVelocity(const bool /*subtract_updated_pressure*/,
-                                               const bool recompute_face_mass_flux,
+LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_flux,
                                                const SolverParams & solver_params)
 {
   // Compute the coupling fields between the momentum and pressure equations using the pressure
@@ -805,7 +804,7 @@ LinearAssemblySegregatedSolve::solve()
     // Now we correct the velocity, this function depends on the method, it differs for
     // SIMPLE/PIMPLE, this returns the pressure errors
     if (_should_solve_pressure)
-      ns_residuals[pressure_index] = correctVelocity(true, true, solver_params);
+      ns_residuals[pressure_index] = correctVelocity(true, solver_params);
 
     // If we have an energy equation, solve it here.We assume the material properties in the
     // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature

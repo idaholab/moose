@@ -58,24 +58,33 @@ public:
   const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
 
   /// Relax and publish the current candidate as the coupling pressure gradient.
-  void publishCouplingPressureGradient(const RhieChowMassFlux & rc,
-                                       const GradientView & base_gradient);
+  void finalizeCouplingPressureGradient(const RhieChowMassFlux & rc,
+                                        const GradientView & base_gradient);
 
   virtual void meshChanged() override;
 
 private:
+  /// Current stage of the pressure-gradient reconstruction cycle.
   enum class ReconstructionState
   {
+    /// The next reconstruction cycle requires a lagged velocity-gradient snapshot.
     NeedLaggedGradient,
+    /// The lagged velocity gradient is available and a reconstructed candidate is required.
     NeedCandidate,
+    /// The reconstructed candidate is available and ready to be published.
     CandidateReady
   };
 
+  /// Operations that advance or reset the pressure-gradient reconstruction cycle.
   enum class ReconstructionEvent
   {
+    /// Reset the cycle to require a new lagged velocity-gradient snapshot.
     Reset,
+    /// Record that the lagged velocity-gradient snapshot has been saved.
     SaveLaggedGradient,
+    /// Record that a pressure-gradient candidate has been reconstructed.
     ReconstructCandidate,
+    /// Record that the reconstructed candidate has been published.
     PublishCandidate
   };
 
