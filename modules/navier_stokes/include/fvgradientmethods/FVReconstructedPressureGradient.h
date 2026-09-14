@@ -105,7 +105,7 @@ private:
   /// Apply and validate one reconstruction-cycle transition.
   void transition(ReconstructionEvent event);
 
-  /// Blend a reconstructed candidate on Rhie-Chow blocks and preserve the base gradient elsewhere.
+  /// Blend a reconstructed candidate into the persistent coupling pressure gradient.
   void updateCouplingPressureGradient(const RhieChowMassFlux & rc,
                                       const GradientView & base_gradient,
                                       const GradientContainer & reconstructed_candidate);
