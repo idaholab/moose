@@ -54,8 +54,6 @@ protected:
   mfem::ParMesh & _mesh;
   /// GSLIB point finder used to locate and interpolate the query points.
   mfem::FindPointsGSLIB _finder;
-  /// Ordering used to store the point coordinates in the MFEM vector.
-  mfem::Ordering::Type _points_ordering;
   /// MFEM vector containing the query-point coordinates.
   mfem::Vector _points;
   /// Declared VPP output vectors for spatial coordinates ("x_0", "x_1", ...).
