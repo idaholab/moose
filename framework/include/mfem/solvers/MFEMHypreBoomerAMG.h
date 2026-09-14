@@ -31,7 +31,18 @@ protected:
   virtual void SetSolverParameters(mfem::HypreBoomerAMG & solver) override;
 
 private:
+  /// How BoomerAMG treats the components of a vector unknown
+  enum class SystemType
+  {
+    AUTO,
+    SCALAR,
+    SYSTEMS,
+    ELASTICITY
+  };
+
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
+  /// The system type in use, with AUTO resolved
+  SystemType _system_type;
 };
 
 #endif
