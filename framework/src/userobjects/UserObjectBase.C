@@ -25,6 +25,7 @@ UserObjectBase::validParams()
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_TRANSFER);
+  exec_enum.addAvailableFlags(EXEC_ARC_LENGTH_INCREMENT);
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
