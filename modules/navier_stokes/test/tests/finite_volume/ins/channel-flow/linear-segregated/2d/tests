@@ -50,6 +50,26 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-refreshes-other-readers]
+    type = 'CSVDiff'
+    input = reconstructed-gradient-extra-reader.i
+    csvdiff = reconstructed-gradient-extra-reader_out_solution_0001.csv
+    # The pressure-flux BC registers the default gg reader while momentum uses reconstructed.
+    cli_args = "pressure_gradient_method=gg "
+               "LinearFVKernels/u_pressure/gradient_method=reconstructed "
+               "LinearFVKernels/v_pressure/gradient_method=reconstructed "
+               "LinearFVBCs/inactive='' "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true "
+               "VectorPostprocessors/solution/variable=ordinary_pressure_gradient_x "
+               "Outputs/exodus=false Outputs/csv=true"
+    requirement = "The SIMPLE pressure corrector shall refresh an additional ordinary pressure "
+                  "gradient reader after installing the relaxed pressure solution when the "
+                  "momentum coupling uses reconstructed pressure gradients."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
   [momentum-pressure-reconstructed-gradient-high-relaxation]
     type = 'CSVDiff'
     input = 2d-velocity-pressure.i

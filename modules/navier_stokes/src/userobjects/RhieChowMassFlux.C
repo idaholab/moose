@@ -438,8 +438,8 @@ RhieChowMassFlux::preparePressureRelaxation()
 void
 RhieChowMassFlux::finalizePressureCorrector()
 {
-  // Refresh the ordinary base gradient from the relaxed pressure solution.
-  _pressure_system->updateFVGradient(basePressureGradientField());
+  // Refresh every registered gradient from the relaxed pressure solution.
+  _pressure_system->computeGradients();
 
   if (usingReconstructedPressureGradientMethod())
   {
