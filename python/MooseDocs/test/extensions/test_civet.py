@@ -10,6 +10,7 @@
 import os
 import unittest
 import logging
+from mooseutils import civet_results
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, civet
 from MooseDocs.tree import pages
@@ -18,7 +19,6 @@ from MooseDocs import base
 logging.basicConfig()
 
 
-@unittest.skip("Disabled to avoid excessive network access")
 class CivetTestCase(MooseDocsTestCase):
     def assertURL(self, node):
         url = node["url"]
@@ -58,6 +58,7 @@ class TestInlineCivet(CivetTestCase):
         self.assertURL(ast(0, 0))
 
 
+@unittest.skip("Disabled to avoid excessive network access")
 class TestInlineCivetWithConfig(CivetTestCase):
     EXTENSIONS = [core, command, civet]
     RESULTS = "[!civet!results](Results)"
@@ -147,6 +148,43 @@ class TestInlineCivetWithConfig(CivetTestCase):
         self.assertHTMLTag(res(0), "div", size=1, class_="moose-civet-test-report")
         self.assertHTMLTag(res(0, 0), "table")
         self.assertGreater(len(res(0, 0)), 1)
+
+
+class TestBadgesNoNetwork(MooseDocsTestCase):
+    """
+    Test civet badge rendering with an injected, in-memory result database instead of
+    "remotes" pointing at a real CIVET site, so this exercises the badge rendering path
+    without any network access. The token is built via tokenize() and then has "prefix"
+    set directly (as MooseDocs.extensions.sqa does: CivetTestBadges(item, prefix=req.prefix,
+    tests=req.names)) since the markdown command itself doesn't expose "prefix".
+    """
+
+    EXTENSIONS = [core, command, civet]
+    BADGES = "[!civet!badges tests=simple_diffusion.test]"
+
+    def testBadgesMaterialize(self):
+        # Setup and tokenize in one call so the CivetExtension instance patched below is
+        # the same one used by render() (a later tokenize/render call with args/kwargs would
+        # rebuild the translator, and the extensions with it, from scratch).
+        ast = self.tokenize(self.BADGES, renderer=base.MaterializeRenderer())
+        ast(0, 0)["prefix"] = "kernels"
+
+        ext = next(e for e in self.translator.extensions if e.name == "civet")
+        fake_test = civet_results.Test(
+            "06_Test_-p_3", "OK", ["recover"], "", 0.53, "https://civet.inl.gov"
+        )
+        ext.results = lambda name: (
+            {12345: [fake_test]} if name == "kernels.simple_diffusion.test" else None
+        )
+
+        res = self.render(ast)
+        self.assertHTMLTag(res, "div", class_="moose-content")
+        self.assertHTMLTag(res(0), "p", size=1)
+        self.assertHTMLTag(res(0, 0), "div", size=1, class_="moose-civet-badges")
+        self.assertHTMLTag(res(0, 0, 0), "span", size=1)
+        self.assertHTMLTag(res(0, 0, 0, 0), "span", class_="new badge", string="1")
+        self.assertEqual(res(0, 0, 0, 0)["data-badge-caption"], "OK")
+        self.assertEqual(res(0, 0, 0, 0)["data-status"], "ok")
 
 
 if __name__ == "__main__":

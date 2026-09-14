@@ -37,6 +37,11 @@ class MooseDocsTestCase(unittest.TestCase):
         self.__translator = None
         self.__text = pages.Text(mutable=True)
 
+    @property
+    def translator(self):
+        """Return the Translator created by setup (None until tokenize/render is called)."""
+        return self.__translator
+
     def __setup(self, reader=None, renderer=None, extensions=None, executioner=None):
         """Helper method for setting up MOOSEDocs objects. This is called automatically."""
 
