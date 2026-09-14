@@ -98,9 +98,10 @@ transfer `[toForward]` is used by TAO to control the parameter being optimized.
 In this case, `[toForward]` controls the 'value' reporter in a
 [ConstantVectorPostprocessor.md] on the forward-app which is then consumed by
 the [ReporterPointSource.md] dirac kernel to apply the point source loading.
-The third transfer, `[fromForward]` returns the simulation values at the
-measurement points from the forward-app to the main-app `main` Reporter which computes
-a new objective function for TAO.
+The third transfer, `[fromForward]` returns the objective value and the misfit
+values computed by the forward-app [OptimizationData.md].  The objective value
+goes into the main-app `OptimizationReporter` for TAO, and the misfit values go
+into the main-app `main` Reporter.
 
 !listing test/tests/optimizationreporter/point_loads/main.i
           block=Transfers
@@ -143,11 +144,11 @@ The forward problem sub-app input file for the point load simulation shown in [f
          id=forward_app
          caption=Complete input file for executing the forward problem sub-app.
 
-The locations where the simulation values are compared to the measurement data is transferred from the main-app `[toForward_measurement]` transfer into the forward-app [OptimizationData.md] reporter.  By specifying the [!param](/Reporters/OptimizationData/variable), the reporter will evaluate the simulated temperature at the measurement locations.  The main-app `[fromForward]` transfer then gets the temperature values sampled by `OptimizationData` back to Tao and the objective function can then be computed.
+The locations where the simulation values are compared to the measurement data is transferred from the main-app `[toForward_measurement]` transfer into the forward-app [OptimizationData.md] reporter.  By specifying the [!param](/Reporters/OptimizationData/variable), the reporter will evaluate the simulated temperature at the measurement locations.  It then computes the misfit from those values and, because [!param](/Reporters/OptimizationData/objective_name) is set, the objective.  The main-app `[fromForward]` transfer returns the objective and the misfit to the main-app for Tao.
 
 ## Adjoint Sub-Application Input
 
-The adjoint problem sub-app computes the adjoint solution of the forward problem for a point load applied at the measurement locations.  The adjoint sub-app input file is given in [adjoint_app]. The adjoint variable is used to compute the gradient needed by TAO.  The magnitude of the point loads for the adjoint problem are the misfit given by the difference of the measurement and simulation data, as shown by [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The misfit is computed by the [OptimizationData.md] on the main-app and is transferred into the adjoint-app `[OptimizationData]` object using the main-app `[toAdjoint]` transfer.  The [ReporterPointSource.md] consumes the `OptimizationData` and applies the point loads at the measurement points.
+The adjoint problem sub-app computes the adjoint solution of the forward problem for a point load applied at the measurement locations.  The adjoint sub-app input file is given in [adjoint_app]. The adjoint variable is used to compute the gradient needed by TAO.  The magnitude of the point loads for the adjoint problem are the misfit given by the difference of the measurement and simulation data, as shown by [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The misfit is computed by the [OptimizationData.md] reporter in the forward sub-app.  The main-app `[fromForward]` transfer returns it into the main-app `main` reporter, and the main-app `[toAdjoint]` transfer sends it into the adjoint-app `[OptimizationData]` object.  The [ReporterPointSource.md] consumes the `OptimizationData` and applies the point loads at the measurement points.
 
 !listing test/tests/optimizationreporter/point_loads/adjoint.i
          id=adjoint_app
