@@ -28,7 +28,12 @@ def check_vortex_convergence(
     pressure_labels = ["L2p"]
     labels = velocity_labels + pressure_labels
     df1 = run_spatial(
-        "2d-vortex.i", num_refinements, cli_args, y_pp=labels, mpi=4, file_base=file_base
+        "2d-vortex.i",
+        num_refinements,
+        cli_args,
+        y_pp=labels,
+        mpi=4,
+        file_base=file_base,
     )
 
     fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")

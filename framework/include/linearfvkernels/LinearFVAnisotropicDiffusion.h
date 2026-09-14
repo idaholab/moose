@@ -45,7 +45,7 @@ public:
 
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
 
-  /// If nonorthogona lcorrection was requested on this kernel
+  /// If nonorthogonal correction was requested on this kernel
   bool useNonorthogonalCorrection() const { return _use_nonorthogonal_correction; }
 
 protected:

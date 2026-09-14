@@ -33,7 +33,7 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    and return to (1) until the maximum number of iterations is reached which can be set
    using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter.
 
-When [FVReconstructedPressureGradient.md] is used, each PISO pressure correction produces a new
+When a [FVReconstructedPressureGradient.md] is used, each PISO pressure correction produces a new
 conservative face flux and therefore a new compatible cell-velocity reconstruction. The momentum
 matrix and its $H/A$ field remain fixed during the PISO sequence, while the corrected velocity
 gradient from one pressure correction is used in the next reconstruction. The relaxed reconstructed
