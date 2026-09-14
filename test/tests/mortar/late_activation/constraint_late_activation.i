@@ -160,11 +160,8 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  # Until t = 1.0 only part of the secondary face is covered by a mortar segment, so lambda is
-  # singular on the uncovered part (zero row and column); the shift below is what makes that
-  # part of the system factorizable at all, not a convergence nicety.
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-15'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   dt = 0.1
   dtmin = 0.1
   end_time = 1.0
