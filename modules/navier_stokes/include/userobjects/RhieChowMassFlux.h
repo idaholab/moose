@@ -128,9 +128,9 @@ public:
   void preparePressureRelaxation();
 
   /**
-   * After pressure relaxation, refresh the base pressure gradient and publish relaxed
-   * reconstructed feedback for the next momentum predictor. Ordinary methods also update the
-   * cell velocity here, preserving their existing relaxed-pressure behavior.
+   * After pressure relaxation, refresh every registered pressure gradient and publish relaxed
+   * reconstructed feedback for the next momentum predictor. Ordinary methods also update the cell
+   * velocity here, preserving their existing relaxed-pressure behavior.
    */
   void finalizePressureCorrector();
 
