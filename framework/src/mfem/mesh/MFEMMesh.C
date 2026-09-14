@@ -66,7 +66,7 @@ MFEMMesh::init()
     _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), input);
 
     if (isParamSetByUser("displacement"))
-      _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+      _mesh_displacement_variable = getParam<std::string>("displacement");
   }
 }
 
@@ -109,7 +109,7 @@ MFEMMesh::buildMesh()
   uniformRefinement(*_mfem_par_mesh, getParam<unsigned int>("parallel_refine"));
 
   if (isParamSetByUser("displacement"))
-    _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+    _mesh_displacement_variable = getParam<std::string>("displacement");
 
   // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
   buildDummyMooseMesh();
