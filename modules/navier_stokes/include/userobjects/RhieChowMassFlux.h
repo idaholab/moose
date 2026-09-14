@@ -68,10 +68,7 @@ public:
   unsigned int dimension() const { return _dim; }
 
   /// Velocity variable for one spatial component.
-  MooseLinearVariableFVReal & velocityVariable(unsigned int component)
-  {
-    return *_vel[component];
-  }
+  MooseLinearVariableFVReal & velocityVariable(unsigned int component) { return *_vel[component]; }
 
   /// Velocity variable for one spatial component.
   const MooseLinearVariableFVReal & velocityVariable(unsigned int component) const

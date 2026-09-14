@@ -162,8 +162,7 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
                rc.name(),
                "'.");
 
-  const auto & pressure_variable =
-      rc.pressureSystem().getVariable(0, _pressure_variable_number);
+  const auto & pressure_variable = rc.pressureSystem().getVariable(0, _pressure_variable_number);
   if (pressure_variable.blockIDs() != rc.blockIDs())
     mooseError("FVReconstructedPressureGradient '",
                name(),
@@ -712,8 +711,7 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
       // Under-relax feedback to the next momentum predictor:
       //   g_coupling^{k+1} = (1-alpha) g_coupling^k + alpha g_reconstructed^k.
       const auto updated_gradient =
-          (1.0 - _gradient_relaxation) *
-              (*_coupling_pressure_gradient[component])(pressure_dof) +
+          (1.0 - _gradient_relaxation) * (*_coupling_pressure_gradient[component])(pressure_dof) +
           _gradient_relaxation * (*reconstructed_candidate[component])(pressure_dof);
       _coupling_pressure_gradient[component]->set(pressure_dof, updated_gradient);
     }
@@ -722,8 +720,8 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
 }
 
 void
-FVReconstructedPressureGradient::finalizeCouplingPressureGradient(const RhieChowMassFlux & rc,
-                                                                  const GradientView & base_gradient)
+FVReconstructedPressureGradient::finalizeCouplingPressureGradient(
+    const RhieChowMassFlux & rc, const GradientView & base_gradient)
 {
   checkFlowSystem(rc);
   transition(ReconstructionEvent::PublishCandidate);
