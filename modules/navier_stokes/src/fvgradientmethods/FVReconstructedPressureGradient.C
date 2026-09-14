@@ -722,7 +722,9 @@ FVReconstructedPressureGradient::reconstructedCandidate(const RhieChowMassFlux &
 
 void
 FVReconstructedPressureGradient::updateCouplingPressureGradient(
-    const GradientView & base_gradient, const GradientContainer & reconstructed_candidate)
+    const RhieChowMassFlux & rc,
+    const GradientView & base_gradient,
+    const GradientContainer & reconstructed_candidate)
 {
   const auto num_components = base_gradient.size();
   if (num_components == 0 || reconstructed_candidate.size() != num_components)
@@ -763,14 +765,29 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
     _coupling_pressure_gradient_initialized = true;
   }
 
+  const auto & mesh = rc.pressureSystem().feProblem().mesh();
+  const auto pressure_system_number = rc.pressureSystem().number();
+  const auto & pressure_variable =
+      rc.pressureSystem().getVariable(0, _pressure_variable_number);
   for (const auto component : index_range(_coupling_pressure_gradient))
   {
-    _coupling_pressure_gradient[component]->scale(1.0 - _gradient_relaxation);
-    _coupling_pressure_gradient[component]->add(_gradient_relaxation,
-                                                *reconstructed_candidate[component]);
+    for (const auto & elem_info : mesh.elemInfoVector())
+    {
+      if (!pressure_variable.hasBlocks(elem_info->subdomain_id()))
+        continue;
+
+      const auto pressure_dof =
+          elem_info->dofIndices()[pressure_system_number][_pressure_variable_number];
+      const auto updated_gradient =
+          rc.hasBlocks(elem_info->subdomain_id())
+              ? (1.0 - _gradient_relaxation) *
+                        (*_coupling_pressure_gradient[component])(pressure_dof) +
+                    _gradient_relaxation * (*reconstructed_candidate[component])(pressure_dof)
+              : (*base_gradient[component])(pressure_dof);
+      _coupling_pressure_gradient[component]->set(pressure_dof, updated_gradient);
+    }
     _coupling_pressure_gradient[component]->close();
   }
-
 }
 
 void
@@ -779,5 +796,5 @@ FVReconstructedPressureGradient::publishCouplingPressureGradient(const RhieChowM
 {
   checkFlowSystem(rc);
   transition(ReconstructionEvent::PublishCandidate);
-  updateCouplingPressureGradient(base_gradient, _reconstructed_pressure_gradient);
+  updateCouplingPressureGradient(rc, base_gradient, _reconstructed_pressure_gradient);
 }

@@ -169,6 +169,28 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-preserves-partial-blocks]
+    type = 'CSVDiff'
+    input = reconstructed-gradient-partial-blocks.i
+    csvdiff = reconstructed-gradient-partial-blocks_out_outside_gradient_0001.csv
+    cli_args = "Variables/pressure/gradient_method=reconstructed "
+               "LinearFVKernels/u_advection_stress/block='0 1' "
+               "LinearFVKernels/v_advection_stress/block='0 1' "
+               "LinearFVKernels/u_pressure_left/block=0 "
+               "LinearFVKernels/u_pressure_right/block=1 "
+               "LinearFVKernels/v_pressure_left/block=0 "
+               "LinearFVKernels/v_pressure_right/block=1 "
+               "LinearFVKernels/p_diffusion/block='0 1' "
+               "LinearFVKernels/HbyA_divergence/block='0 1' "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
+    requirement = "The reconstructed pressure-gradient method shall preserve the ordinary base "
+                  "gradient on pressure-variable blocks outside the blocks handled by its "
+                  "Rhie-Chow object."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
   [momentum-pressure-overlap-on-rc-block]
     type = 'RunException'
     input = momentum-pressure-block-restricted.i
