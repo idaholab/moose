@@ -293,7 +293,7 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
     for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
       oss << "\""
-          << libMesh::Utility::enum_to_string<InfMapType>(
+          << libMesh::Utility::enum_to_string<libMesh::InfMapType>(
                  system.get_dof_map().variable_group(vg).type().inf_map)
           << "\" ";
       curr_string_pos = oss.tellp();
