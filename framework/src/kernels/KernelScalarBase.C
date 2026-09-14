@@ -10,6 +10,7 @@
 #include "KernelScalarBase.h"
 
 #include "Assembly.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
@@ -249,7 +250,9 @@ KernelScalarBase::computeResidualAndJacobian()
 {
   Kernel::computeResidualAndJacobian(); // compute and assemble regular variable contributions
 
+  // only if this coupling is being used by the preconditioner (otherwise the value is zero)
   if (_is_implicit)
     for (const auto * jvar : getCoupledMooseScalarVars())
-      computeOffDiagJacobianScalar(jvar->number());
+      if (_fe_problem.areCoupled(_var.number(), jvar->number(), _sys.number()))
+        computeOffDiagJacobianScalar(jvar->number());
 }

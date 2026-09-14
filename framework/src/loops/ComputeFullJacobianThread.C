@@ -119,9 +119,12 @@ ComputeFullJacobianThread::computeOnElement()
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
             const auto & coupled_scalar_vars = kernel->getCoupledMooseScalarVars();
 
-            // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+            // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones), and
+            // only if this coupling is being used by the preconditioner (otherwise the value is
+            // zero)
             for (const auto & jvariable : coupled_scalar_vars)
-              if (_nl.hasScalarVariable(jvariable->name()))
+              if (_nl.hasScalarVariable(jvariable->name()) &&
+                  _fe_problem.areCoupled(ivariable->number(), jvariable->number(), _nl.number()))
                 kernel->computeOffDiagJacobianScalar(jvariable->number());
           }
       }
@@ -232,9 +235,12 @@ ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * low
             const std::vector<MooseVariableScalar *> coupled_scalar_vars =
                 bc->getCoupledMooseScalarVars();
 
-            // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+            // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones), and
+            // only if this coupling is being used by the preconditioner (otherwise the value is
+            // zero)
             for (const auto & jvar : coupled_scalar_vars)
-              if (_nl.hasScalarVariable(jvar->name()))
+              if (_nl.hasScalarVariable(jvar->name()) &&
+                  _fe_problem.areCoupled(ivar->number(), jvar->number(), _nl.number()))
                 bc->computeOffDiagJacobianScalar(jvar->number());
           }
       }

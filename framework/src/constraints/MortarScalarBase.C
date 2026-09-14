@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "FEProblemBase.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
@@ -70,20 +71,25 @@ MortarScalarBase::computeJacobian()
 
   // Handle ALL d-_var-residual / d-scalar columns like computeOffDiagJacobianScalar
   if (_compute_primal_residuals)
-    // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+    // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones), and only if
+    // this coupling is being used by the preconditioner (otherwise the value is zero)
     for (const auto & svariable : coupled_scalar_vars)
       if (_sys.hasScalarVariable(svariable->name()))
       {
         // Compute the jacobian for the secondary interior primal dofs
-        computeOffDiagJacobianScalar(Moose::MortarType::Secondary, svariable->number());
+        if (_fe_problem.areCoupled(_secondary_var.number(), svariable->number(), _sys.number()))
+          computeOffDiagJacobianScalar(Moose::MortarType::Secondary, svariable->number());
         // Compute the jacobian for the primary interior primal dofs.
-        computeOffDiagJacobianScalar(Moose::MortarType::Primary, svariable->number());
+        if (_fe_problem.areCoupled(_primary_var.number(), svariable->number(), _sys.number()))
+          computeOffDiagJacobianScalar(Moose::MortarType::Primary, svariable->number());
       }
 
   if (_compute_lm_residuals)
-    // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+    // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones), and only if
+    // this coupling is being used by the preconditioner (otherwise the value is zero)
     for (const auto & svariable : coupled_scalar_vars)
-      if (_sys.hasScalarVariable(svariable->name()))
+      if (_sys.hasScalarVariable(svariable->name()) && _var &&
+          _fe_problem.areCoupled(_var->number(), svariable->number(), _sys.number()))
         // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
         computeOffDiagJacobianScalar(Moose::MortarType::Lower, svariable->number());
 
@@ -93,7 +99,8 @@ MortarScalarBase::computeJacobian()
     computeScalarOffDiagJacobian();
 
     // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar,
-    // only want to process only nl-variables (not aux ones)
+    // only want to process only nl-variables (not aux ones), and only if this coupling is being
+    // used by the preconditioner (otherwise the value is zero)
     for (const auto & svariable : coupled_scalar_vars)
     {
       if (_sys.hasScalarVariable(svariable->name()))
@@ -101,7 +108,7 @@ MortarScalarBase::computeJacobian()
         const unsigned int svar_num = svariable->number();
         if (svar_num == _kappa_var)
           computeScalarJacobian(); // d-_kappa-residual / d-_kappa
-        else
+        else if (_fe_problem.areCoupled(_kappa_var, svar_num, _sys.number()))
           computeScalarOffDiagJacobianScalar(svar_num); // d-_kappa-residual / d-svar
       }
     }

@@ -2276,9 +2276,12 @@ NonlinearSystemBase::computeNodalBCsJacobian(const std::set<TagID> & tags)
               bc->computeOffDiagJacobian(jvar);
           }
 
+          // only if this coupling is being used by the preconditioner (otherwise the value is
+          // zero)
           const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();
           for (const auto & jvariable : coupled_scalar_vars)
-            if (hasScalarVariable(jvariable->name()))
+            if (hasScalarVariable(jvariable->name()) &&
+                _fe_problem.areCoupled(bc->variable().number(), jvariable->number(), number()))
               bc->computeOffDiagJacobianScalar(jvariable->number());
         }
       }
