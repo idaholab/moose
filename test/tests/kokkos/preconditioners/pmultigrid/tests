@@ -174,7 +174,11 @@
     # symmetry of the operator and a CG solve that actually converges over it are two halves of one
     # requirement. The diagonal preconditioner is trivially symmetric positive definite, which leaves
     # the operator itself as the only thing the CG half can be failing on.
-    cli_args = 'Outputs/exodus=false Preconditioning/pmg/verify=operator_symmetry '
+    # A coarser mesh than the shared input's: both the symmetry measurement and the CG solve
+    # over it scale with the fine-space dof count, and the property under test needs only
+    # enough elements to carry interior and boundary entities, not a resolved discretization
+    cli_args = 'Outputs/exodus=false Mesh/square/nx=2 Mesh/square/ny=2 '
+               'Preconditioning/pmg/verify=operator_symmetry '
                '-ksp_type cg -pc_type jacobi'
     expect_out = 'matrix-free operator of system .nl0.: differs from its transpose by.*'
                  'Solve Converged'
@@ -194,7 +198,10 @@
     # transpose, and CG is asked to converge over it. Here the operator is the trivially symmetric
     # half, which leaves the cycle as the only thing the CG half can be failing on. The check errors
     # out on a mismatch, so the measurement half is asserted by the run completing.
-    cli_args = "Outputs/exodus=false "
+    # A coarser mesh than the shared input's: both the symmetry measurement and the CG solve
+    # over it scale with the fine-space dof count, and the property under test needs only
+    # enough elements to carry interior and boundary entities, not a resolved discretization
+    cli_args = "Outputs/exodus=false Mesh/square/nx=2 Mesh/square/ny=2 "
                "Preconditioning/pmg/verify='cycle_symmetry operator_symmetry' "
                "-ksp_type cg -ksp_max_it 40 -ksp_converged_reason"
     expect_out = 'p-multigrid cycle of system .nl0.: differs from its transpose by.*'
