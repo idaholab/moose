@@ -57,6 +57,39 @@ public:
    */
   virtual void initialSetup();
 
+  /**
+   * Configure the solve's PETSc preconditioner. Called once per solve, after the nonlinear solver
+   * has (re)created its SNES, KSP and PC, which is why this is not done at initialSetup(): libMesh
+   * destroys those objects at the end of every solve, so a preconditioner that reaches them
+   * directly has to be reconfigured on the next one. The default does nothing, which is correct for
+   * a preconditioner that reaches PETSc only through the options database.
+   */
+  virtual void setupSolver() {}
+
+  /**
+   * Whether this preconditioner sets the PETSc preconditioner type itself, in setupSolver(), rather
+   * than reaching PETSc only through the options database. A solver system asks this when it is
+   * attached, so that a default preconditioner type it would otherwise impose is left alone.
+   * @returns Whether the type is set by this object
+   */
+  virtual bool setsPetscPCType() const { return false; }
+
+  /**
+   * Called once a linearization of the solver system is available, and while the Jacobian
+   * evaluation still holds the tags it gathered that linearization under. A preconditioner whose
+   * operators are built from the linearization rather than from an assembled matrix builds or
+   * checks them here. The default does nothing.
+   */
+  virtual void postLinearization() {}
+
+  /**
+   * Called once a Jacobian evaluation has released the tags it held, which is the earliest point at
+   * which the solver system's own operator may be applied, since an application manages the tags it
+   * needs itself. A preconditioner that measures that operator does so here. The default does
+   * nothing.
+   */
+  virtual void postJacobianAssembly() {}
+
 protected:
   /// Setup the coupling matrix on the finite element problem
   void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);

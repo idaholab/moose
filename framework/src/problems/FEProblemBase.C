@@ -141,9 +141,6 @@
 
 #include "metaphysicl/dualnumber.h"
 
-// C++
-#include <cstring> // for "Jacobian" exception test
-
 // Anonymous namespace for helper function
 namespace
 {
@@ -7271,6 +7268,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Do not worry, DM setup is very cheap
   _current_nl_sys->setupDM();
 
+  // A preconditioner that configures the PETSc PC directly (p-multigrid, for instance) needs the
+  // same per-solve treatment as the DM above, for the same reason
+  _current_nl_sys->setupPreconditionerSolver();
+
   possiblyRebuildGeomSearchPatches();
 
   // reset flag so that residual evaluation does not get skipped
@@ -7324,7 +7325,10 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Print the message
       if (_communicator.rank() == 0 && print_message)
       {
-        _console << "\n" << _exception_message << "\n";
+        // Flushed rather than left in the console buffer, which is written on an output event. The
+        // solve is stopped just below, so a buffered message reaches the console after the notices
+        // reporting the failure it explains, and after an abort it does not reach it at all.
+        _console << "\n" << _exception_message << "\n" << std::flush;
         if (isTransient())
           _console
               << "To recover, the solution will fail and then be re-attempted with a reduced time "
@@ -8051,20 +8055,19 @@ FEProblemBase::handleException(const std::string & calling_method)
     // produce a non-zero exit code
     mooseError(create_exception_message("libMesh::PetscSolverException", e));
   }
+  catch (const libMesh::DegenerateMap & e)
+  {
+    // libMesh raises this from a mapping it found degenerate, so the solve can be stopped and
+    // re-attempted rather than the run ending
+    setException(create_exception_message("libMesh DegenerateMap", e));
+  }
   catch (const std::exception & e)
   {
-    // This might be libMesh detecting a degenerate Jacobian or matrix
-    if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular") ||
-        strstr(e.what(), "det != 0"))
-      setException(create_exception_message("libMesh DegenerateMap", e));
+    const auto message = create_exception_message("std::exception", e);
+    if (_regard_general_exceptions_as_errors)
+      mooseError(message);
     else
-    {
-      const auto message = create_exception_message("std::exception", e);
-      if (_regard_general_exceptions_as_errors)
-        mooseError(message);
-      else
-        setException(message);
-    }
+      setException(message);
   }
 
   checkExceptionAndStopSolve();

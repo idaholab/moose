@@ -1077,6 +1077,13 @@ SystemBase::associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag)
   if (!_subproblem.matrixTagExists(tag))
     mooseError("Cannot associate matrix to tag ", tag, " because that tag does not exist");
 
+  // A matrix-free operator has no entries to assemble into, so it is never registered as an
+  // assembly target. Leaving the tag empty is what makes the assembly-side code paths -- matrix
+  // zeroing, element and boundary condition contributions, row zeroing for constrained dofs, and
+  // closing -- skip it through the hasMatrix() guards they already carry.
+  if (&matrix == _matrix_free_operator)
+    return;
+
   if (_tagged_matrices.size() < tag + 1)
     _tagged_matrices.resize(tag + 1);
 

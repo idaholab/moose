@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md'
+
+  [convergence]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestHierarchicDirichletMMS
+    requirement = 'The Kokkos matrix-free Jacobian shall converge a HIERARCHIC finite element '
+                  'solution to a manufactured solution, whose Dirichlet boundary condition is a '
+                  'non-constant, non-preset Function value, at a rate consistent with increasing '
+                  'the polynomial order of the basis.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    max_threads = 1
+  []
+
+  [high_order_exact]
+    type = CSVDiff
+    input = 'hierarchic_exact_high_order.i'
+    csvdiff = 'hierarchic_exact_high_order_out.csv'
+    # The compared error is algebraic rather than discretization error, since the basis represents the
+    # solution exactly, so the threshold sits above where the solve stops and below any error a
+    # mistaken high-order mode would produce
+    abs_zero = 1e-10
+    requirement = 'The Kokkos matrix-free Jacobian shall reproduce a manufactured solution of degree '
+                  'eight to solver tolerance on an order-eight HIERARCHIC basis, which spans that '
+                  'solution exactly, resolving every edge and interior mode the basis carries and '
+                  'the projected Dirichlet value on each of them.'
+    design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md PMultigrid.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [high_order_exact_gll]
+    type = CSVDiff
+    input = 'hierarchic_exact_high_order.i'
+    # The same manufactured solution and the same statement as high_order_exact, over a nodal basis
+    # on the Gauss-Lobatto points rather than a hierarchic one. Only the family differs, so the input
+    # is shared: the solution, its forcing and its boundary trace say nothing about which basis spans
+    # them.
+    cli_args = 'Variables/u/family=LAGRANGE_GLL '
+               'Outputs/file_base=lagrange_gll_exact_high_order_out'
+    csvdiff = 'lagrange_gll_exact_high_order_out.csv'
+    abs_zero = 1e-10
+    # What this reaches that the orientation tests do not is the count of degrees of freedom an
+    # entity owns at this order: seven on each edge and forty-nine in each interior, against the two
+    # and four of an order-three basis. A degree of freedom placed at the wrong interpolation point,
+    # or an edge walked from the wrong end by one element of a pair, leaves an L2 error far above the
+    # algebraic floor, and at this order there are enough of them for such a mistake to exist at all.
+    requirement = 'The Kokkos matrix-free Jacobian shall reproduce a manufactured solution of degree '
+                  'eight to solver tolerance on an order-eight nodal basis on the Gauss-Lobatto '
+                  'points, which spans that solution exactly, resolving the interpolation point each '
+                  'degree of freedom of every edge and interior carries and the projected Dirichlet '
+                  'value on each of them.'
+    design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md PMultigrid.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

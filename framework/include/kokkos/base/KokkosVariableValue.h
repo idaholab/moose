@@ -54,8 +54,9 @@ public:
     auto fe = is_test ? datum.ife() : datum.jfe();
 
     return side == libMesh::invalid_uint
-               ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+               ? datum.assembly().getPhi(elem.subdomain, elem.type, fe, elem.orientation)(i, qp)
+               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe, elem.orientation)(side)(
+                     i, qp);
   }
 };
 
@@ -97,8 +98,9 @@ VariableShapeGradient<is_test>::reference(AssemblyDatum & datum,
   auto fe = is_test ? datum.ife() : datum.jfe();
 
   return side == libMesh::invalid_uint
-             ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-             : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+             ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe, elem.orientation)(i, qp)
+             : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe, elem.orientation)(
+                   side)(i, qp);
 }
 
 using VariablePhiValue = VariableShapeValue<false>;
@@ -128,8 +130,10 @@ public:
     auto fe = is_test ? datum.ife() : datum.jfe();
 
     return side == libMesh::invalid_uint
-               ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getVectorPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+               ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe, elem.orientation)(i,
+                                                                                                qp)
+               : datum.assembly().getVectorPhiFace(elem.subdomain, elem.type, fe, elem.orientation)(
+                     side)(i, qp);
   }
 };
 
@@ -171,8 +175,10 @@ VectorVariableShapeGradient<is_test>::reference(AssemblyDatum & datum,
   auto fe = is_test ? datum.ife() : datum.jfe();
 
   return side == libMesh::invalid_uint
-             ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-             : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+             ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe, elem.orientation)(
+                   i, qp)
+             : datum.assembly().getVectorGradPhiFace(
+                   elem.subdomain, elem.type, fe, elem.orientation)(side)(i, qp);
 }
 
 template <bool is_test>
@@ -192,10 +198,11 @@ public:
     auto side = datum.side();
     auto fe = is_test ? datum.ife() : datum.jfe();
 
-    auto grad =
-        side == libMesh::invalid_uint
-            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+    auto grad = side == libMesh::invalid_uint
+                    ? datum.assembly().getVectorGradPhi(
+                          elem.subdomain, elem.type, fe, elem.orientation)(i, qp)
+                    : datum.assembly().getVectorGradPhiFace(
+                          elem.subdomain, elem.type, fe, elem.orientation)(side)(i, qp);
 
     return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
   }
@@ -914,7 +921,8 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
     {
       auto fe = sys.getFETypeID(var);
       auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
-      auto & grad_phi = datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
+      const auto grad_phi = datum.assembly().getVectorGradPhiFace(
+          elem.subdomain, elem.type, fe, elem.orientation)(side);
       auto jacobian = datum.J(qp);
       auto jacobian_transpose = jacobian.transpose();
       Real33 grad = 0;

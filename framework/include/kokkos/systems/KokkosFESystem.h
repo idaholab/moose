@@ -11,6 +11,10 @@
 
 #include "KokkosSystem.h"
 #include "KokkosAssembly.h"
+#include "KokkosConstraintOperator.h"
+#include "KokkosQpJacobianCache.h"
+#include "KokkosEntityBlocks.h"
+#include "KokkosQpJacobianLevel.h"
 
 class MooseMesh;
 class SystemBase;
@@ -49,6 +53,126 @@ public:
   void reinit();
 
   /**
+   * Put the quadrature-point Jacobian cache into use for this system. Allocates the cache's
+   * per-(subdomain, variable) structures; the tensors themselves are sized by reinit().
+   */
+  void enableQpJacobianCache();
+
+  /**
+   * Record which blocks of the quadrature-point linearization a kernel active on a subdomain can
+   * populate. The union over kernels bounds the work the cache's consumers must do, and a
+   * (subdomain, variable) pair with no declared blocks is skipped by them entirely.
+   * @param subdomain The subdomain ID
+   * @param var The variable number
+   * @param blocks The kernel's QpJacobianBlock mask
+   */
+  void addQpJacobianBlocks(SubdomainID subdomain, unsigned int var, unsigned int blocks);
+
+  /**
+   * Zero the quadrature-point Jacobian cache and mark it as no longer holding a linearization,
+   * in preparation for the kernels refilling it
+   */
+  void clearQpJacobianCache();
+
+  /**
+   * Mark the quadrature-point Jacobian cache as holding the linearization of the solution state
+   * the Jacobian sweep that just filled it was evaluated at
+   */
+  void validateQpJacobianCache() { _qp_jacobian.validate(); }
+
+  /**
+   * Get whether the quadrature-point Jacobian cache holds a usable linearization
+   * @returns Whether the cache is valid
+   */
+  bool qpJacobianCacheValid() const { return _qp_jacobian.valid(); }
+
+  /**
+   * Get the storage occupied by the quadrature-point Jacobian cache owned by this process
+   * @returns The storage in bytes
+   */
+  std::size_t qpJacobianCacheBytes() const { return _qp_jacobian.localBytes(); }
+
+  /**
+   * Get the quadrature-point Jacobian cache, which every level of a p-multigrid hierarchy contracts
+   * against its own basis tables
+   * @returns The cache
+   */
+  const QpJacobianCache & qpJacobianCache() const { return _qp_jacobian; }
+
+  /**
+   * Build the level context of the fine level: this system's own DOF layout, FE types and tagged
+   * vectors, with the rows a nodal BC constrains for a matrix tag held fixed
+   * @param matrix_tag The matrix tag whose nodal BC rows the level holds fixed
+   * @returns The level context
+   */
+  QpJacobianLevel fineLevel(TagID matrix_tag) const;
+
+  /**
+   * Contract the cached quadrature-point Jacobian on the fine level with a tagged direction vector
+   * and accumulate the result into a tagged action vector
+   * @param x_tag The vector tag of the direction vector
+   * @param y_tag The vector tag of the action vector
+   * @param matrix_tag The matrix tag whose nodal BC rows are skipped
+   */
+  void applyQpJacobian(TagID x_tag, TagID y_tag, TagID matrix_tag);
+
+  /**
+   * Accumulate the diagonal of the cached quadrature-point Jacobian on the fine level into a
+   * tagged vector
+   * @param diag_tag The vector tag of the diagonal
+   * @param matrix_tag The matrix tag whose nodal BC rows are skipped
+   */
+  void computeQpJacobianDiagonal(TagID diag_tag, TagID matrix_tag);
+
+  /**
+   * Build the fine level's entity-block decomposition, which a smoother inverts in place of the
+   * operator diagonal. Must be called once this system's DOFs are distributed.
+   * @param matrix_tag The matrix tag whose fixed rows are left out of the blocks
+   */
+  void initEntityBlocks(TagID matrix_tag);
+
+  /**
+   * Get the number of entity blocks this process holds
+   * @returns The number of blocks
+   */
+  dof_id_type numEntityBlocks() const { return _entity_blocks.numBlocks(); }
+
+  /**
+   * Get the size of the largest entity block this process holds
+   * @returns The largest block size
+   */
+  unsigned int maxEntityBlockSize() const { return _entity_blocks.maxBlockSize(); }
+
+  /**
+   * Rebuild and refactor the entity blocks from the linearization the quadrature-point Jacobian
+   * cache holds
+   * @param matrix_tag The matrix tag the blocks are built for
+   */
+  void updateEntityBlocks(TagID matrix_tag);
+
+  /**
+   * Apply the inverse of every entity block to a residual, which is the entity-block smoother. Only
+   * the rows belonging to a block are written.
+   * @param r_tag The vector tag of the residual
+   * @param x_tag The vector tag of the correction
+   * @param matrix_tag The matrix tag the blocks were built for
+   */
+  void applyEntityBlocks(TagID r_tag, TagID x_tag, TagID matrix_tag);
+
+  /**
+   * Get the quadrature-point Jacobian tensor of a variable
+   * @param info The element information object
+   * @param qp The subdomain-local flattened quadrature point index
+   * @param var The variable number
+   * @returns The tensor
+   */
+  KOKKOS_FUNCTION QpJacobianTensor &
+  getQpJacobianTensor(const ElementInfo info, const dof_id_type qp, const unsigned int var) const
+  {
+    return _qp_jacobian.getTensor(info.subdomain, var, qp);
+  }
+
+  /**
    * Get the list of off-diagonal coupled variable numbers of a variable
    * @param var The variable number
    * @returns The list of off-diagonal coupled variable numbers
@@ -67,11 +191,100 @@ public:
   }
 
   /**
+   * Get the mask of local DOF indices a nodal BC covers for a matrix tag, which is unallocated when
+   * no nodal BC contributes to that tag
+   * @param tag The matrix tag
+   * @returns The mask, indexed by local DOF index
+   */
+  const Array<bool> & getNodalBCMatrixTagDofs(TagID tag) const { return _nbc_matrix_tag_dof[tag]; }
+
+  /**
+   * (Re)build the device-resident mirror of every Dirichlet-type nodal boundary condition's DOF
+   * constraints libMesh's own constraint machinery currently reports. Called once when this
+   * system's nodal boundary conditions are first set up, and again once per timestep by
+   * NonlinearSystemBase::refreshKokkosDirichletConstraints() so a time-dependent Dirichlet
+   * Function's prescribed value stays current.
+   */
+  void setupConstraintOperator();
+
+  /**
+   * Eliminate every Dirichlet-constrained DOF from this system's equations entirely: reinit()
+   * writes each one's constrained value into the solution it caches quadrature-point values from,
+   * and the matrix-free operator leaves it out of the trial space it gathers. Together those make a
+   * free row's equation a function of the constrained values as data, and so make the operator
+   * symmetric whenever the linearization is.
+   *
+   * Only valid once it is established that no residual contribution reads a constrained DOF outside
+   * the solution reinit() enforces -- notably that there is no solution time derivative, which a
+   * time integrator forms on the host from the raw solution.
+   */
+  void eliminateConstrainedColumns() { _eliminate_constrained_columns = true; }
+
+  /**
+   * Get whether a Dirichlet-constrained DOF is eliminated from this system's equations
+   * @returns Whether the columns are eliminated
+   */
+  bool eliminatesConstrainedColumns() const { return _eliminate_constrained_columns; }
+
+  /**
+   * Get the number of DOFs the constraint operator constrains, on this process
+   * @returns The number of constrained DOFs
+   */
+  dof_id_type numConstrainedDofs() const { return _constraint_operator.numConstrainedDofs(); }
+
+  /**
+   * Set every row the constraint operator presets, in a tagged vector, to the value libMesh's
+   * constraint machinery reports for it
+   * @param tag The vector tag to preset
+   */
+  void presetConstrainedSolution(TagID tag) { _constraint_operator.presetSolution(getVector(tag)); }
+
+  /**
+   * Finalize the Kokkos matrix-free action vector at every row the constraint operator
+   * constrains, after the ordinary operator/kernel action has run
+   * @param y_tag The vector tag of the action vector
+   * @param x_tag The vector tag of the direction vector
+   */
+  void finalizeConstrainedJacobianVectorProduct(TagID y_tag, TagID x_tag)
+  {
+    _constraint_operator.finalizeJacobianVectorProduct(getVector(y_tag), getVector(x_tag));
+  }
+
+  /**
+   * Finalize a residual vector at every row the constraint operator constrains, after the
+   * ordinary kernel and boundary condition residual sweep has run
+   * @param residual_tag The vector tag of the residual vector
+   * @param solution_tag The vector tag of the current solution vector the row's own equation reads
+   */
+  void finalizeConstrainedResidual(TagID residual_tag, TagID solution_tag)
+  {
+    _constraint_operator.finalizeResidual(getVector(residual_tag), getVector(solution_tag));
+  }
+
+  /**
+   * Finalize the Kokkos matrix-free diagonal vector at every row the constraint operator
+   * constrains, after the ordinary operator/kernel diagonal sweep has run
+   * @param diag_tag The vector tag of the diagonal vector
+   * @param value The constrained-row diagonal value for the tag being computed
+   */
+  void finalizeConstrainedDiagonal(TagID diag_tag, Real value)
+  {
+    _constraint_operator.finalizeDiagonal(getVector(diag_tag), value);
+  }
+
+  /**
    * Get the FE type ID of a variable
    * @param var The variable number
    * @returns The FE type ID
    */
   KOKKOS_FUNCTION unsigned int getFETypeID(unsigned int var) const { return _var_fe_types[var]; }
+
+  /**
+   * Get the FE type ID of every variable, which is what a consumer that indexes the assembly's
+   * cached reference shape data by variable number needs
+   * @returns The FE type IDs, indexed by variable number
+   */
+  const Array<unsigned int> & feTypes() const { return _var_fe_types; }
 
   /**
    * Get the local DOF index of a variable for a node
@@ -371,6 +584,35 @@ private:
   Thread<> _thread;
 
   /**
+   * Device-resident mirror of every Dirichlet-type nodal boundary condition's DOF constraints,
+   * built and refreshed by setupConstraintOperator()
+   */
+  ConstraintOperator _constraint_operator;
+
+  /**
+   * Vector tag of the solution reinit() enforces the DOF constraints on before caching
+   * quadrature-point values from it, or INVALID_TAG_ID when this system has no constraints
+   */
+  TagID _constrained_solution_tag = Moose::INVALID_TAG_ID;
+
+  /**
+   * Whether a Dirichlet-constrained DOF is eliminated from the system's equations entirely: left
+   * out of the solution the quadrature-point cache is built from, and out of the trial space the
+   * matrix-free operator gathers. Set by NonlinearSystemBase::setupKokkosMatrixFreeJacobian(),
+   * which is what establishes that no residual contribution reads a constrained DOF outside that
+   * solution.
+   */
+  bool _eliminate_constrained_columns = false;
+
+  /**
+   * The quadrature-point Jacobian cache, and whether it is in use for this system
+   */
+  ///@{
+  QpJacobianCache _qp_jacobian;
+  bool _qp_jacobian_enabled = false;
+  ///@}
+
+  /**
    * Cached elemental quadrature values and gradients
    */
   ///@{
@@ -405,6 +647,11 @@ private:
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
+
+  /**
+   * The fine level's entity-block decomposition, built only when a smoother inverts the blocks
+   */
+  EntityBlocks _entity_blocks;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -436,7 +683,7 @@ FESystem::getVectorQpADValue(const ElementInfo info,
   {
     auto fe = _var_fe_types[var];
     auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-    auto & phi = kokkosAssembly().getPhi(info.subdomain, info.type, fe);
+    const auto phi = kokkosAssembly().getPhi(info.subdomain, info.type, fe, info.orientation);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       value += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * phi(i, qp);
@@ -462,7 +709,8 @@ FESystem::getVectorQpADGrad(const ElementInfo info,
   {
     auto fe = _var_fe_types[var];
     auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-    auto & grad_phi = kokkosAssembly().getGradPhi(info.subdomain, info.type, fe);
+    const auto grad_phi =
+        kokkosAssembly().getGradPhi(info.subdomain, info.type, fe, info.orientation);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       grad +=
@@ -483,7 +731,8 @@ FESystem::getVectorQpValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
+  const auto phi =
+      kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real value = 0;
 
@@ -502,7 +751,8 @@ FESystem::getVectorQpVectorValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getVectorPhiFace(info.subdomain, info.type, fe)(side);
+  const auto phi =
+      kokkosAssembly().getVectorPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real3 value = 0;
 
@@ -522,7 +772,8 @@ FESystem::getVectorQpADValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
+  const auto phi =
+      kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   ADReal value = 0;
 
@@ -542,7 +793,8 @@ FESystem::getVectorQpGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
+  const auto grad_phi =
+      kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real3 grad = 0;
 
@@ -564,7 +816,8 @@ FESystem::getVectorQpVectorGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi = kokkosAssembly().getVectorGradPhiFace(info.subdomain, info.type, fe)(side);
+  const auto grad_phi =
+      kokkosAssembly().getVectorGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real33 grad = 0;
 
@@ -587,7 +840,8 @@ FESystem::getVectorQpADGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
+  const auto grad_phi =
+      kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   ADReal3 grad = ADReal(0);
 

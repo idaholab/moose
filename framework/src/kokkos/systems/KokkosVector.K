@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosVector.h"
-#include "KokkosFESystem.h"
+#include "KokkosDofSpace.h"
 
 // #define DEVICE_ASSEMBLY
 
@@ -61,7 +61,9 @@ Vector::operator()(UnpackBuffer, const PetscCount tid) const
 #endif
 
 void
-Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble)
+Vector::create(libMesh::NumericVector<PetscScalar> & vector,
+               const DofSpace & dof_space,
+               bool assemble)
 {
   auto petsc_vector = dynamic_cast<libMesh::PetscVector<PetscScalar> *>(&vector);
 
@@ -85,7 +87,7 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
 
   _global_vector = petsc_vector->vec();
   _array = array;
-  _system = &system;
+  _dof_space = &dof_space;
   _assemble = assemble;
   _is_host = is_host;
   _is_ghosted = is_ghosted;
@@ -108,27 +110,27 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
     if (realloc)
     {
 #ifdef DEVICE_ASSEMBLY
-      _comm = &_system->getComm();
-      _send.create(_system->getGhostCommList());
-      _recv.create(_system->getLocalCommList());
-      _ghost.createDevice(_system->getNumGhostDofs());
+      _comm = &_dof_space->getComm();
+      _send.create(_dof_space->getGhostCommList());
+      _recv.create(_dof_space->getLocalCommList());
+      _ghost.createDevice(_dof_space->getNumGhostDofs());
 #else
-      _ghost.create(_system->getNumGhostDofs());
+      _ghost.create(_dof_space->getNumGhostDofs());
 #endif
-      _ghost.offset(_system->getNumLocalDofs());
+      _ghost.offset(_dof_space->getNumLocalDofs());
     }
 
     if (!_is_host)
     {
       if (realloc)
-        _local.init(_system->getNumLocalDofs());
+        _local.init(_dof_space->getNumLocalDofs());
 
       _local.aliasDevice(_array);
     }
     else
     {
       if (realloc)
-        _local.createDevice(_system->getNumLocalDofs());
+        _local.createDevice(_dof_space->getNumLocalDofs());
 
       _local.aliasHost(_array);
     }
@@ -138,16 +140,17 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
     if (!_is_host)
     {
       if (realloc)
-        _local.init(_is_ghosted ? _system->getNumLocalDofs() + _system->getNumGhostDofs()
-                                : _system->getNumLocalDofs());
+        _local.init(_is_ghosted ? _dof_space->getNumLocalDofs() + _dof_space->getNumGhostDofs()
+                                : _dof_space->getNumLocalDofs());
 
       _local.aliasDevice(_array);
     }
     else
     {
       if (realloc)
-        _local.createDevice(_is_ghosted ? _system->getNumLocalDofs() + _system->getNumGhostDofs()
-                                        : _system->getNumLocalDofs());
+        _local.createDevice(_is_ghosted
+                                ? _dof_space->getNumLocalDofs() + _dof_space->getNumGhostDofs()
+                                : _dof_space->getNumLocalDofs());
 
       _local.aliasHost(_array);
     }
@@ -165,7 +168,7 @@ Vector::destroy()
   _global_vector = PETSC_NULLPTR;
   _local_vector = PETSC_NULLPTR;
   _array = PETSC_NULLPTR;
-  _system = nullptr;
+  _dof_space = nullptr;
   _comm = nullptr;
 
 #ifdef DEVICE_ASSEMBLY
@@ -270,12 +273,12 @@ Vector::close()
 
   _ghost.copyToHost();
 
-  LibmeshPetscCallQ(
-      VecSetValues(_global_vector,
-                   _system->getNumGhostDofs(),
-                   reinterpret_cast<const PetscInt *>(_system->getDofMap().get_send_list().data()),
-                   _ghost.data(),
-                   ADD_VALUES));
+  LibmeshPetscCallQ(VecSetValues(
+      _global_vector,
+      _dof_space->getNumGhostDofs(),
+      reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data()),
+      _ghost.data(),
+      ADD_VALUES));
 
 #endif
 }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosKernelBase.h"
+#include "KokkosQpJacobianTensor.h"
 
 namespace Moose::Kokkos
 {
@@ -54,6 +55,27 @@ public:
    * Dispatch diagonal and off-diagonal Jacobian calculation
    */
   virtual void computeJacobian() override;
+  /**
+   * Dispatch Kokkos matrix-free Jacobian-vector product calculation
+   */
+  virtual void computeJacobianVectorProduct() override;
+  /**
+   * Dispatch Kokkos matrix-free Jacobian diagonal calculation
+   */
+  virtual void computeJacobianDiagonal() override;
+  /**
+   * Dispatch accumulation of this kernel's linearization into the quadrature-point Jacobian cache
+   */
+  virtual void computeQpJacobianCache() override;
+
+  virtual bool usesQpJacobianCache() const override;
+
+  /**
+   * Kokkos function tag for accumulating into the quadrature-point Jacobian cache
+   */
+  struct QpJacobianCacheLoop
+  {
+  };
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -103,6 +125,25 @@ public:
 
     return 0;
   }
+  /**
+   * Accumulate the linearization of this kernel's weak form at a quadrature point, in value/flux
+   * form and in physical space. A kernel that defines this method has its linearization gathered
+   * once per linearization into the system's quadrature-point Jacobian cache, which then supplies
+   * the operator action and diagonal for every basis it is contracted against.
+   * @tparam Derived The object type
+   * @param blocks The accessor the linearization blocks are accumulated into
+   * @param qp The local quadrature point index
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeQpJacobianTensor(QpJacobianBlockAccessor & /* blocks */,
+                                               const unsigned int /* qp */,
+                                               AssemblyDatum & /* datum */) const
+  {
+    ::Kokkos::abort(
+        "Default computeQpJacobianTensor() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+  }
   ///@}
 
   /**
@@ -115,6 +156,11 @@ public:
   static auto defaultJacobian()
   {
     return &Kernel::computeQpJacobian<Derived>;
+  }
+  template <typename Derived>
+  static auto defaultQpJacobianTensor()
+  {
+    return &Kernel::computeQpJacobianTensor<Derived>;
   }
   template <typename Derived>
   static auto defaultOffDiagJacobian()
@@ -134,6 +180,15 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianDiagonalLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(QpJacobianCacheLoop, const ThreadID tid, const Derived & kernel) const;
   ///@}
 
   /**
@@ -164,6 +219,39 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
                                                       AssemblyDatum & datum) const;
+  /**
+   * Compute the action of the Jacobian on the Kokkos matrix-free direction vector. The base
+   * implementation always aborts: plain (non-factored) kernels admit no partial-assembly
+   * decomposition and are unsupported for the Kokkos matrix-free Jacobian-vector product;
+   * factored kernel bases (e.g. KernelGrad) hide this with a real implementation.
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianVectorProductInternal(const Derived & kernel,
+                                                            AssemblyDatum & datum) const;
+  /**
+   * Compute the Kokkos matrix-free Jacobian diagonal. The base implementation always aborts: plain
+   * (non-factored) kernels admit no partial-assembly decomposition and are unsupported for the
+   * Kokkos matrix-free Jacobian diagonal; factored kernel bases (e.g. KernelGrad) hide this with a
+   * real implementation.
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianDiagonalInternal(const Derived & kernel,
+                                                       AssemblyDatum & datum) const;
+  /**
+   * Accumulate this kernel's linearization at one quadrature point into the system's
+   * quadrature-point Jacobian cache, folding in the element mapping and the quadrature weight
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeQpJacobianCacheInternal(const Derived & kernel,
+                                                      AssemblyDatum & datum,
+                                                      unsigned int qp) const;
   ///@}
 
 protected:
@@ -251,6 +339,80 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
 
 template <typename Derived>
 KOKKOS_FUNCTION void
+Kernel::operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
+
+  AssemblyDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
+
+  kernel.computeJacobianVectorProductInternal(kernel, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::operator()(JacobianDiagonalLoop, const ThreadID tid, const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
+
+  AssemblyDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
+
+  kernel.computeJacobianDiagonalInternal(kernel, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::operator()(QpJacobianCacheLoop, const ThreadID tid, const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
+
+  AssemblyDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
+
+  auto qp = _thread(tid, 0);
+
+  if (qp >= datum.n_qps())
+    return;
+
+  kernel.computeQpJacobianCacheInternal(kernel, datum, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::computeQpJacobianCacheInternal(const Derived & kernel,
+                                       AssemblyDatum & datum,
+                                       const unsigned int qp) const
+{
+  QpJacobianBlockAccessor blocks;
+
+  kernel.template computeQpJacobianTensor<Derived>(blocks, qp, datum);
+
+  // Each quadrature point of each element is visited by exactly one thread of this dispatch, so
+  // the accumulation across the kernels active here needs no atomics
+  kokkosSystem(_kokkos_var.sys())
+      .getQpJacobianTensor(datum.elem(), datum.qpOffset() + qp, _kokkos_var.var()) +=
+      blocks.fold(datum.J(qp), datum.JxW(qp));
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
 Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
@@ -291,6 +453,24 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
             local_ke[i] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
                                                i, j, datum.jvar(), qp, datum);
       });
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::computeJacobianVectorProductInternal(const Derived & /* kernel */,
+                                             AssemblyDatum & /* datum */) const
+{
+  ::Kokkos::abort("The Kokkos matrix-free Jacobian-vector product is not supported for plain "
+                  "(non-factored) kernels. Derive from KernelGrad or KernelValue instead.");
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::computeJacobianDiagonalInternal(const Derived & /* kernel */,
+                                        AssemblyDatum & /* datum */) const
+{
+  ::Kokkos::abort("The Kokkos matrix-free Jacobian diagonal is not supported for plain "
+                  "(non-factored) kernels. Derive from KernelGrad or KernelValue instead.");
 }
 
 } // namespace Moose::Kokkos

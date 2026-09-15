@@ -139,12 +139,65 @@ Mesh::initMap()
       _maps->boundary_node_ids[bnd_node->_bnd_id].insert(getContiguousNodeID(bnd_node->_node));
 }
 
+uint64_t
+Mesh::orientationSignature(const libMesh::Elem & elem)
+{
+  // libMesh orders the vertices of an edge or a face by their coordinates, comparing the points
+  // lexicographically, so an element's orientation follows from its geometry and neighbouring
+  // elements agree on the orientation of an entity they share.
+  //
+  // An edge mode of a basis depends on the one bit that orients its edge. A face mode depends on
+  // the whole orientation of its face, which runs over the eight symmetries of a quadrilateral
+  // face, so three bits per face carry it. The twelve edges and six faces of a hexahedron are the
+  // largest an element type reports, bounding the signature at thirty bits.
+  uint64_t signature = 0;
+  unsigned int bit = 0;
+
+  for (const auto edge : make_range(elem.n_edges()))
+    signature |= uint64_t(elem.edge_orientation(edge)) << bit++;
+
+  for (const auto face : make_range(elem.n_faces()))
+  {
+    signature |= uint64_t(elem.face_orientation(face)) << bit;
+    bit += 3;
+  }
+
+  return signature;
+}
+
+unsigned int
+Mesh::getOrientationID(const libMesh::Elem & elem, const unsigned int elem_type)
+{
+  auto & ids = _orientation_ids[elem_type];
+
+  const auto [entry, inserted] = ids.emplace(orientationSignature(elem), ids.size());
+
+  if (inserted)
+    _orientation_elems[elem_type].push_back(&elem);
+
+  return entry->second;
+}
+
+unsigned int
+Mesh::getMaxNumOrientations() const
+{
+  unsigned int num_orientations = 0;
+
+  for (const auto & elems : _orientation_elems)
+    num_orientations = std::max(num_orientations, static_cast<unsigned int>(elems.size()));
+
+  return num_orientations;
+}
+
 void
 Mesh::initElement()
 {
   // Cache reference element data
 
   const auto num_elem_types = getNumLocalElementTypes();
+
+  _orientation_ids.assign(num_elem_types, {});
+  _orientation_elems.assign(num_elem_types, {});
 
   _num_sides.create(num_elem_types);
   _num_nodes.create(num_elem_types);
@@ -207,6 +260,7 @@ Mesh::initElement()
       _elem_info[eid].type = elem_type;
       _elem_info[eid].id = eid;
       _elem_info[eid].subdomain = sid;
+      _elem_info[eid].orientation = getOrientationID(*elem, elem_type);
 
       for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
         _extra_elem_ids(eid, i) = elem->get_extra_integer(i);
@@ -219,9 +273,12 @@ Mesh::initElement()
   // off-process neighbor element subdomains.
   for (const auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
   {
-    _elem_info[ghost_eid].type = getElementTypeID(ghost_elem);
+    const auto elem_type = getElementTypeID(ghost_elem);
+
+    _elem_info[ghost_eid].type = elem_type;
     _elem_info[ghost_eid].id = ghost_eid;
     _elem_info[ghost_eid].subdomain = getContiguousSubdomainID(ghost_elem->subdomain_id());
+    _elem_info[ghost_eid].orientation = getOrientationID(*ghost_elem, elem_type);
   }
 
   _elem_info.moveToDevice();

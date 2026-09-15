@@ -197,7 +197,7 @@ private:
    */
   const Object & _function_host;
   /**
-   * Copy of the function on host
+   * Copy of the function on host, used for device dispatch preparation only (see copyFunction())
    */
   std::unique_ptr<Object> _function_copy;
   /**
