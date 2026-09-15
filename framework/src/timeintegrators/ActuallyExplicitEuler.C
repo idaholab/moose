@@ -81,9 +81,10 @@ ActuallyExplicitEuler::solve()
   // Move the residual to the RHS
   *_explicit_residual *= -1.0;
 
-  // Compute the mass matrix
+  // Compute the mass matrix. The cached matrix is not checkpointed, so it must also be
+  // rebuilt after a --recover even though _t_step itself resumes past 1 in that case.
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-  if (!_constant_mass || (_constant_mass && _t_step == 1))
+  if (!_constant_mass || (_constant_mass && (_t_step == 1 || _app.isRecovering())))
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
