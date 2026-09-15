@@ -267,13 +267,13 @@ python/MooseDocs/test/output
 !**/doc/content/**/*.woff
 !**/doc/content/**/*.woff2
 
-# Images generated on-the-fly by media_scripts/*.py scripts should not be
-# committed (see #33307, #33446)
-**/media_scripts/**/*.png
-**/media_scripts/**/*.jpg
-**/media_scripts/**/*.jpeg
-**/media_scripts/**/*.svg
-**/media_scripts/**/*.gif
+# Images generated on-the-fly by modules should not be committed
+# SCM
+modules/subchannel/doc/content/media_scripts/**/*.png
+modules/subchannel/doc/content/media_scripts/**/*.jpg
+modules/subchannel/doc/content/media_scripts/**/*.jpeg
+modules/subchannel/doc/content/media_scripts/**/*.svg
+modules/subchannel/doc/content/media_scripts/**/*.gif
 
 !python/MooseDocs/test/gold/**/*.json
 !python/MooseDocs/test/gold/**/*.html
