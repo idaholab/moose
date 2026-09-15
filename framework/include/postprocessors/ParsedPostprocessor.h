@@ -34,6 +34,9 @@ private:
   /// values of the postprocessors part of the parsed expression
   std::vector<const PostprocessorValue *> _pp_values;
 
+  /// previous expression saved as a string for recognizing controller intervention
+  std::string _oldexp;
+
   /// whether time is part of the parsed expression
   const bool _use_t;
 
