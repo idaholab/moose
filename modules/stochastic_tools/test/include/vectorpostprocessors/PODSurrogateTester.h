@@ -35,6 +35,9 @@ protected:
   /// Where or not to output all the samples used
   const bool _output_samples;
 
+  /// Whether the model is expected to be ready for evaluation; if false, evaluation is silently skipped until the model is ready.
+  const bool _expect_model_ready;
+
   /// Vector containing all the sample points for each parameter
   std::vector<VectorPostprocessorValue *> _sample_vector;
 

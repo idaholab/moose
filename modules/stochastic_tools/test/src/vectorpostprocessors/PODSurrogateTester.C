@@ -28,6 +28,10 @@ PODSurrogateTester::validParams()
       "output_samples",
       false,
       "True to output value of parameter values from samples (this may be VERY large).");
+  params.addParam<bool>("expect_model_ready",
+                        false,
+                        "Whether the model is expected to be ready for evaluation; if false, "
+                        "evaluation is silently skipped until the model is ready.");
   params.addRequiredParam<std::string>(
       "variable_name", "The name of the variable this prostprocessor is supposed to operate on.");
   MultiMooseEnum pptype("nodal_max=0 nodal_min=1 nodal_l1=2 nodal_l2=3 nodal_linf=4");
@@ -41,6 +45,7 @@ PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples")),
+    _expect_model_ready(getParam<bool>("expect_model_ready")),
     _variable_name(getParam<std::string>("variable_name")),
     _to_compute(getParam<MultiMooseEnum>("to_compute"))
 {
@@ -83,9 +88,10 @@ PODSurrogateTester::execute()
   unsigned int n_models = _model.size();
   unsigned int n_pp = _to_compute.size();
 
-  for (const auto model : _model)
-    if (!model->isReady())
-      return;
+  if (!_expect_model_ready)
+    for (const auto model : _model)
+      if (!model->isReady())
+        return;
 
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
