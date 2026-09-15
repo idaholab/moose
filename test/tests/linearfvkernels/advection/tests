@@ -56,6 +56,9 @@
     test_case = TestAdvection2DLinear
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
+    # The convergence study holds several refinement levels at once and peaks
+    # above one slot's memory allowance, so it is given two
+    min_slots = 2
   []
   [mms-2d-muscl-deferred]
     type = PythonUnitTest
