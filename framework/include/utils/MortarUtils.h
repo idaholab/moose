@@ -204,9 +204,13 @@ loopOverMortarSegments(
         }
       }
 
-      // If edge dropping case we need JxW on the msm to compute dual shape functions
+      // If edge dropping case we need the mortar integration weights to compute dual shape functions
       if (assembly.needDual())
-        std::copy(std::begin(JxW_msm), std::end(JxW_msm), std::back_inserter(JxW));
+      {
+        const auto & coord_msm = assembly.mortarCoordTransformation();
+        for (const auto qp : make_range(qrule_msm->n_points()))
+          JxW.push_back(JxW_msm[qp] * coord_msm[qp]);
+      }
 
 #ifndef NDEBUG
       // Verify that the expected number of quadrature points have been inserted
