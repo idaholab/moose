@@ -1,3 +1,7 @@
+# One-dimensional conjugate heat-transfer validation with an area-normalized
+# interface thermal resistance. The four mms.run_spatial levels refine the
+# initial 10 + 10 element mesh to a final 80 + 80 element mesh.
+
 rho_salt = 2000
 cp_salt = 2000
 k_salt = 0.6
@@ -13,8 +17,8 @@ R_interface = 0.1
 
 L_solid = 0.5
 L_salt = 0.5
-nx_solid = 80
-nx_salt = 80
+nx_solid = 10
+nx_salt = 10
 
 # Exact 1D steady conduction solution for comparison.
 q_exact = ${fparse (T_hot - T_cold) / (L_solid / k_solid + R_interface + L_salt / k_salt)}
@@ -234,6 +238,10 @@ T_salt_interface_exact = ${fparse T_solid_interface_exact + q_exact * R_interfac
 []
 
 [Postprocessors]
+  [h]
+    type = AverageElementSize
+    outputs = csv
+  []
   # Numerical interface quantities
   [q]
     type = SideAverageFunctorPostprocessor
@@ -329,23 +337,15 @@ T_salt_interface_exact = ${fparse T_solid_interface_exact + q_exact * R_interfac
   cht_interfaces = interface
   thermal_resistance = ${R_interface}
 
-  cht_solid_flux_relaxation = 0.2
-  cht_fluid_flux_relaxation = 0.2
-  cht_solid_temperature_relaxation = 0.2
-  cht_fluid_temperature_relaxation = 0.2
-  cht_heat_flux_tolerance = 1e-8
-  max_cht_fpi = 50
+  cht_solid_flux_relaxation = 0.3
+  cht_fluid_flux_relaxation = 0.3
+  cht_solid_temperature_relaxation = 0.3
+  cht_fluid_temperature_relaxation = 0.3
+  cht_heat_flux_tolerance = 1e-10
+  max_cht_fpi = 500
 []
 
 [Outputs]
-  console = true
-  [validation]
-    type = CSV
-    execute_on = TIMESTEP_END
-    show = 'q q_analytical q_relative_error
-            t_solid t_solid_analytical t_solid_relative_error
-            t_fluid t_fluid_analytical t_fluid_relative_error'
-    precision = 14
-    scientific_notation = true
-  []
+  execute_on = TIMESTEP_END
+  csv = true
 []
