@@ -85,7 +85,7 @@ outputFrameworkInformation(const MooseApp & app)
       << std::setw(console_field_width)
       << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width)
-      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << std::endl;
+      << "  Num Threads: " << static_cast<std::size_t>(app.n_threads()) << std::endl;
 
   return oss.str();
 }

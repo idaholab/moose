@@ -56,7 +56,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _eq.disable_refine_in_reinit();
 
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = this->n_threads();
 
   _assembly.resize(n_threads);
   for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
@@ -121,7 +121,7 @@ DisplacedProblem::createQRules(QuadratureType type,
                                SubdomainID block,
                                const bool allow_negative_qweights)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
     for (const auto sys_num : index_range(_assembly[tid]))
       _assembly[tid][sys_num]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
@@ -130,7 +130,7 @@ DisplacedProblem::createQRules(QuadratureType type,
 void
 DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpVolumeQRuleOrder(order, block);
 }
@@ -138,7 +138,7 @@ DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpAllQRuleOrder(order, block);
 }
@@ -146,7 +146,7 @@ DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::init()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
   {
     for (const auto nl_sys_num : index_range(_displaced_solver_systems))
       _assembly[tid][nl_sys_num]->init(_mproblem.couplingMatrix(nl_sys_num));
@@ -295,7 +295,7 @@ DisplacedProblem::updateMesh(bool mesh_changing)
                        _mesh.getMesh().nodes_end(),
                        /*grainsize=*/1);
 
-  Threads::parallel_reduce(node_range, udmt);
+  Threads::parallel_reduce(node_range, udmt, this->n_threads());
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
 
@@ -353,7 +353,7 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
                        _mesh.getMesh().nodes_end(),
                        /*grainsize=*/1);
 
-  Threads::parallel_reduce(node_range, udmt);
+  Threads::parallel_reduce(node_range, udmt, this->n_threads());
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -1219,7 +1219,7 @@ DisplacedProblem::undisplaceMesh()
   ResetDisplacedMeshThread rdmt(_mproblem, *this);
 
   // Undisplace the mesh using threads.
-  Threads::parallel_reduce(node_range, rdmt);
+  Threads::parallel_reduce(node_range, rdmt, this->n_threads());
 }
 
 LineSearch *
@@ -1485,7 +1485,7 @@ DisplacedProblem::UpdateDisplacedMeshThread::init()
     auto & sys = es.get_system(sys_num);
     AllNodesSendListThread send_list(
         this->_fe_problem, _ref_mesh, var_num_and_direction.first, sys);
-    Threads::parallel_reduce(node_range, send_list);
+    Threads::parallel_reduce(node_range, send_list, this->_fe_problem.n_threads());
     send_list.unique();
     auto & [soln, ghost_soln] = libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num);
     ghost_soln->init(
