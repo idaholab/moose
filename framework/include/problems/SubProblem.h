@@ -1030,6 +1030,11 @@ public:
   void markFamilyPRefinement(const InputParameters & params);
 
   /**
+   * @returns whether p-refinement is disabled for a variable family
+   */
+  bool isPRefinementDisabled(FEFamily family) const;
+
+  /**
    * Set the current lower dimensional element. This can be null
    */
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);

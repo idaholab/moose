@@ -1395,6 +1395,14 @@ SubProblem::markFamilyPRefinement(const InputParameters & params)
     mooseError("'disable_p_refinement' not set consistently for variables in ", family);
 }
 
+bool
+SubProblem::isPRefinementDisabled(const FEFamily family) const
+{
+  const auto it = _family_for_p_refinement.find(family);
+  return it == _family_for_p_refinement.end() ? _default_families_without_p_refinement.count(family)
+                                              : it->second;
+}
+
 void
 SubProblem::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid)
 {

@@ -468,9 +468,9 @@ private:
      */
     std::unordered_map<BoundaryID, ContiguousBoundaryID> boundary_id_mapping;
     /**
-     * Map from the MOOSE element type to the element type ID
+     * Map from the MOOSE element type and p-refinement level to the element type ID
      */
-    std::unordered_map<ElemType, unsigned int> elem_type_id_mapping;
+    std::map<std::pair<ElemType, unsigned int>, unsigned int> elem_type_id_mapping;
     /**
      * List of local nodes including semi-local nodes
      */
