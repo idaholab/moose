@@ -21,7 +21,11 @@ SolutionAux::validParams()
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_variable",
                                "The name of the variable to extract from the file");
-
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued and "
+      "direct is false.");
   params.addParam<bool>(
       "direct",
       false,
@@ -40,6 +44,10 @@ SolutionAux::validParams()
 SolutionAux::SolutionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution")),
+    _weighting_type(isParamSetByUser("weighting_type")
+                        ? std::make_optional(getParam<MooseEnum>("weighting_type")
+                                                 .getEnum<SolutionUserObjectBase::WeightingType>())
+                        : std::nullopt),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
@@ -69,6 +77,45 @@ SolutionAux::initialSetup()
     // Define the variable
     _var_name = vars[0];
   }
+
+  if (_solution_object.initialized())
+    validateVariable();
+}
+
+void
+SolutionAux::compute()
+{
+  if (!_variable_is_validated)
+    validateVariable();
+
+  AuxKernel::compute();
+}
+
+void
+SolutionAux::validateVariable()
+{
+  mooseAssert(
+      _solution_object.initialized(),
+      "The SolutionUserObject must be initialized before validating its imported variable.");
+
+  if (!_solution_object.isVariableScalarValued(_var_name))
+    paramError(
+        "from_variable",
+        "The imported variable '",
+        _var_name,
+        "' is vector-valued, but SolutionAux supports only scalar-valued imported variables.");
+
+  // Warn when no explicit weighting policy is provided for a spatially discontinuous variable
+  if (!_direct && _solution_object.isVariableADiscontinuousScalarField(_var_name) &&
+      !_weighting_type)
+    paramWarning(
+        "weighting_type",
+        "A weighting policy should be specified when the imported variable '",
+        _var_name,
+        "' is spatially discontinuous. Values evaluated on element interfaces may depend on "
+        "source element ordering.");
+
+  _variable_is_validated = true;
 }
 
 Real
@@ -90,11 +137,12 @@ SolutionAux::computeValue()
   // _direct=false, extract the values using time and point
   else
   {
-    if (isNodal())
-      output = _solution_object.pointValue(_t, *_current_node, _var_name);
+    const Point p = isNodal() ? Point(*_current_node) : _current_elem->vertex_average();
 
+    if (_weighting_type)
+      output = _solution_object.pointValue(_t, p, _var_name, *_weighting_type);
     else
-      output = _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
+      output = _solution_object.pointValue(_t, p, _var_name);
   }
 
   // Apply factors and return the value
