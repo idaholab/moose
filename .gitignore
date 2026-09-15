@@ -266,6 +266,15 @@ python/MooseDocs/test/output
 !**/doc/content/**/*.bib
 !**/doc/content/**/*.woff
 !**/doc/content/**/*.woff2
+
+# Images generated on-the-fly by media_scripts/*.py scripts should not be
+# committed (see #33307, #33446)
+**/media_scripts/**/*.png
+**/media_scripts/**/*.jpg
+**/media_scripts/**/*.jpeg
+**/media_scripts/**/*.svg
+**/media_scripts/**/*.gif
+
 !python/MooseDocs/test/gold/**/*.json
 !python/MooseDocs/test/gold/**/*.html
 !python/MooseDocs/test/gold/**/*.tex
