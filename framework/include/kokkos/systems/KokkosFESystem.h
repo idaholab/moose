@@ -18,8 +18,6 @@ class SystemBase;
 namespace Moose::Kokkos
 {
 
-class NodalBCBase;
-
 /**
  * The Kokkos FE system class. Each system in MOOSE with FE variables has a corresponding Kokkos FE
  * system.
@@ -41,7 +39,6 @@ public:
   FESystem(System & base, SystemBase & system);
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  ///@}
   /**
    * Allocate the quadrature point vectors for active variable and tags and cache
    * quadrature point values
@@ -56,15 +53,11 @@ public:
   KOKKOS_FUNCTION const auto & getCoupling(unsigned int var) const { return _coupling[var]; }
 
   /**
-   * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
-   * @param dof The local DOF index
-   * @param tag The extra matrix tag
-   * @returns Whether the local DOF index is covered by a nodal BC
+   * Check wheteher a variable is a vector variable
+   * @param var The variable number
+   * @returns Whether the variable is a vector variable
    */
-  KOKKOS_FUNCTION bool hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
-  {
-    return _nbc_matrix_tag_dof[tag].isAlloc() && _nbc_matrix_tag_dof[tag][dof];
-  }
+  KOKKOS_FUNCTION bool isVectorVariable(unsigned int var) const { return _var_is_vector[var]; }
 
   /**
    * Get the FE type ID of a variable
@@ -98,7 +91,8 @@ public:
                                                     unsigned int i,
                                                     unsigned int var) const
   {
-    return _local_to_global_dof_index[getNodeLocalDofIndex(node, i, var)];
+    auto idx = getNodeLocalDofIndex(node, i, var);
+    return idx == libMesh::DofObject::invalid_id ? idx : _local_to_global_dof_index[idx];
   }
 
   /**
@@ -354,18 +348,6 @@ private:
   void setupCoupling();
 
   /**
-   * Mark the DOFs covered by nodal BCs
-   */
-  void setupNodalBCDofs();
-
-  /**
-   * Get the list of DOFs covered by a nodal BC
-   * @param nbc The Kokkos nodal BC object
-   * @param dofs Local-plus-ghost DOF mask; entries are set true for DOFs covered by the nodal BC
-   */
-  void getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs);
-
-  /**
    * Kokkos thread object
    */
   Thread<> _thread;
@@ -400,15 +382,9 @@ private:
    * Off-diagonal coupled variable numbers of each variable
    */
   Array<Array<unsigned int>> _coupling;
-
-  /**
-   * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
-   */
-  Array<Array<bool>> _nbc_matrix_tag_dof;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
-
 KOKKOS_FUNCTION inline ADReal
 FESystem::getVectorDofADValue(const dof_id_type dof, TagID tag, const Real seed) const
 {

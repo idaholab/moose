@@ -197,7 +197,7 @@ public:
             ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
             : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
 
-    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.mesh().getDimension());
   }
 };
 
@@ -828,7 +828,7 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
 
     if (_dof)
     {
-      auto dimension = datum.assembly().getDimension();
+      auto dimension = datum.mesh().getDimension();
 
       if (datum.isNodal())
       {
@@ -923,7 +923,7 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
         grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
                 (grad_phi(i, qp) * jacobian_transpose);
 
-      curl = curlFromVectorGradient(grad, datum.assembly().getDimension());
+      curl = curlFromVectorGradient(grad, datum.mesh().getDimension());
     }
   }
 
