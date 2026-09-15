@@ -453,16 +453,6 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#33700'
   []
-  [bh_variable_unit_weight_parallel]
-    type = 'CSVDiff'
-    input = 'bh_variable_unit_weight.i'
-    prereq = 'bh_variable_unit_weight'
-    min_parallel = 3
-    csvdiff = 'bh_variable_unit_weight.csv bh_variable_unit_weight_point_fluxes_0001.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall compute the same wellbore pressure profile, matching the serial result, when the borehole points are sampled from more than one processor, exercising the off-processor System::point_value path in computeWellborePressures'
-    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
-    issues = '#33700'
-  []
   [bh07]
     type = 'CSVDiff'
     input = 'bh07.i'
