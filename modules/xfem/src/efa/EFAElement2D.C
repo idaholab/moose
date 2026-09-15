@@ -812,9 +812,14 @@ EFAElement2D::isFinalCut() const
 }
 
 void
-EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
-                              std::map<unsigned int, EFANode *> & EmbeddedNodes)
+EFAElement2D::prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                       std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                       std::vector<EFANode *> & invalid_emb_out)
 {
+  // See the matching note on EFAElement3D::prepareForFragmentUpdate.
+  // For 2D, removeInvalidEmbeddedNodes still cleans in-place because the 2D
+  // case has no inter-element propagation; invalid_emb_out goes unused.
+
   // combine the crack-tip edges in a fragment to a single intersected edge
   std::set<EFAElement *>::iterator sit;
   sit = CrackTipElements.find(this);
@@ -829,7 +834,22 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
   // if a fragment only has 1 intersection which is in an interior edge
   // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
   if (_fragments.size() == 1)
-    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes);
+    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes, invalid_emb_out);
+}
+
+void
+EFAElement2D::purgeEmbeddedNodeReferences(EFANode * /*emb_node*/)
+{
+  // 2D nodes are not subject to the global purge (their cleanup is local
+  // and completes inside removeInvalidEmbeddedNodes); nothing to do here.
+}
+
+void
+EFAElement2D::updateFragments(const std::set<EFAElement *> & /*CrackTipElements*/,
+                              std::map<unsigned int, EFANode *> & EmbeddedNodes)
+{
+  // Cleanup half (combineTipEdges + removeInvalidEmbeddedNodes) has already run
+  // for every element in the prior prepareForFragmentUpdate() pass.
 
   // for an element with no fragment, create one fragment identical to the element
   if (_fragments.size() == 0)

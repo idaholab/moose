@@ -347,11 +347,13 @@ private:
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
-  /// Data structure for storing information about all 2D elements to be cut by geometry
-  std::map<const Elem *, std::vector<Xfem::GeomMarkedElemInfo2D>> _geom_marked_elems_2d;
+  /// Data structure for storing information about all 2D elements to be cut by geometry.
+  /// Keyed by element id (not Elem *) so that iteration order is deterministic across MPI
+  /// ranks (each rank's Elem * has a different address on the replicated mesh).
+  std::map<dof_id_type, std::vector<Xfem::GeomMarkedElemInfo2D>> _geom_marked_elems_2d;
 
-  /// Data structure for storing information about all 3D elements to be cut by geometry
-  std::map<const Elem *, std::vector<Xfem::GeomMarkedElemInfo3D>> _geom_marked_elems_3d;
+  /// Same as _geom_marked_elems_2d but for 3D elements.
+  std::map<dof_id_type, std::vector<Xfem::GeomMarkedElemInfo3D>> _geom_marked_elems_3d;
 
   /// Data structure for storing the elements cut by specific geometric cutters
   std::map<unsigned int, std::set<unsigned int>> _geom_marker_id_elems;
