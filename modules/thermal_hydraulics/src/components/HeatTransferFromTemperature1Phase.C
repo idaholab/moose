@@ -26,7 +26,7 @@ HeatTransferFromTemperature1Phase::HeatTransferFromTemperature1Phase(
     const InputParameters & parameters)
   : HeatTransfer1PhaseBase(parameters),
     _fe_type(getParam<MooseEnum>("var_type") == 0
-                 ? libMesh::FEType(FIRST, LAGRANGE)
+                 ? libMesh::FEType(FIRST, LAGRANGE).set_p_refinement(false)
                  : libMesh::FEType(CONSTANT, MONOMIAL).set_p_refinement(false))
 {
 }

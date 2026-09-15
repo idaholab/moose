@@ -40,6 +40,9 @@ AuxRayKernel::AuxRayKernel(const InputParameters & params)
 {
   if (_var.feType().order != CONSTANT || _var.feType().family != MONOMIAL)
     paramError("variable", "Only CONSTANT MONOMIAL variables are supported");
+  if (_var.feType().p_refinement && _fe_problem.doingPRefinement())
+    paramError("variable",
+               "p_refinement can push the MONOMIAL order above CONSTANT, which is not supported");
 
   addMooseVariableDependency(mooseVariable());
 }

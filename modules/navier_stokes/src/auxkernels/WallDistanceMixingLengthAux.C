@@ -49,6 +49,9 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
                "centroid; only a single dof is required to hold this value. Consequently users "
                "should always use a constant monomial finite element type (this is what finite "
                "volume variables implicitly use) for the auxiliary variables.");
+  if (_var.feType().p_refinement && _subproblem.doingPRefinement())
+    paramError("variable",
+               "p_refinement can push the MONOMIAL order above CONSTANT, which is not supported");
 }
 
 Real
