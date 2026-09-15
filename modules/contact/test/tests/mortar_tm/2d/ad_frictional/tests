@@ -17,7 +17,19 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'finite_short.csv'
-      cli_args = 'name=finite_short Executioner/num_steps=10 Executioner/nl_abs_tol=1.0e-5'
+      # At the original dt=0.12, time step 3 (t=0.36) lands on a near-degenerate element
+      # distortion where ComputeFiniteStrain's Rashid C1 approximation takes the square root of a
+      # slightly negative number; this triggers a recoverable mooseException whose sign flips with
+      # partition (clean serially, fails at -p2) because the two partitions accumulate the same
+      # residual in different floating-point orders. Halving dt keeps both partitions clear of
+      # that distortion (verified: no exception at n=1, -p2, -p2 --distributed-mesh or
+      # --n-threads=2, all four producing identical output), which is why the gold below has twice
+      # as many rows at half the spacing. dtmin is set well below the new dt purely as a fallback
+      # so any other untested parallel decomposition that still hits the exception recovers via a
+      # cutback instead of hard-aborting; finite.i's own dt=dtmin=0.12 would otherwise disable
+      # cutback entirely once dt is overridden below it.
+      cli_args = 'name=finite_short Executioner/dt=0.06 Executioner/num_steps=20 '
+                 'Executioner/nl_abs_tol=1.0e-5 Executioner/dtmin=0.01'
       valgrind = 'heavy'
       capabilities = 'method!=dbg'
     []

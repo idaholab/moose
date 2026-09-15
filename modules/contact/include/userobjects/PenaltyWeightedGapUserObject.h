@@ -31,6 +31,8 @@ public:
   virtual void timestepSetup() override;
 
   virtual const ADVariableValue & contactPressure() const override;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
+  virtual const VariableTestValue & tractionBasis() const override;
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void reinit() override;

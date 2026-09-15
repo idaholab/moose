@@ -1,0 +1,26 @@
+# This PR's traction-vector reformulation (#33657) shifts the converged displacement state, which
+# moves every mortar-segment vertex by ~2.3e-5 -- above exodiff's fixed 1e-6 absolute coordinate
+# tolerance (framework/contrib/exodiff/ED_SystemInterface.h's default coord_tol), which neither
+# rel_err nor abs_zero can reach: those feed only variable comparisons. Only a COORDINATES line
+# here can.
+#
+# That same vertex shift is also what makes this comparison toolchain-sensitive. For the delaunay
+# mode, the diagonal chosen on these near-cocircular overlap quads is decided by poly2tri's
+# non-robust predicates (MortarSegmentHelper::pointInCircumcircleHelper()'s length^4 determinant,
+# ~1e-9 for these polygons, which can never clear libMesh's absolute TOLERANCE = 1e-6, so MOOSE's
+# own flip pass cannot normalize the tie). With this PR's ~2.3e-5 shift applied, this specific
+# overlap configuration lands on that tie, and which side poly2tri's predicates land on is not
+# reproducible across toolchains: it has been observed to differ across multiple independent
+# Linux CIVET builders (not just macOS), each of which fails with "couldn't match element 19 from
+# block 10001" against the checked-in gold's connectivity while sharing that gold's node
+# coordinates exactly. Both triangulations are geometrically valid decompositions of the same
+# overlap polygon -- the quad's corner nodes are shared by both diagonals, poly2tri only decides
+# which one to draw -- so the fix is a comparison that tolerates the tie rather than a gold chosen
+# for one toolchain. The `tests` file's delaunay sub-tests therefore set `map = false` and
+# `partial = true`: exodiff's partial matching (framework/contrib/exodiff/map.C's
+# Compute_Partial_Maps) skips an element it cannot geometrically match instead of hard-erroring, so
+# the handful of elements straddling the tied diagonal in either file are silently excluded while
+# every other element and all 256 node coordinates are still compared under the tolerance below.
+# These segment-mesh files carry zero variables and zero time steps, so this COORDINATES-only cmp
+# loses no other comparison.
+COORDINATES absolute 1.e-4
