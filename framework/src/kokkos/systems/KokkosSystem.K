@@ -67,10 +67,14 @@ System::setupDofs()
   _matrices.create(MAX_TAG);
 
   _local_elem_dof_index.create(_num_vars);
+  _scalar_dof_index.create(_num_vars);
   _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
 
   _max_dofs_per_elem.create(_num_vars);
   _max_dofs_per_elem = 0;
+
+  _var_is_scalar.create(_num_vars);
+  _var_is_scalar = false;
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
@@ -80,50 +84,73 @@ System::setupDofs()
 #endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    _var_is_scalar[var] = sys.variable_type(var).family == libMesh::FEFamily::SCALAR;
+
     std::vector<dof_id_type> dof_indices;
 
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+    if (!_var_is_scalar[var])
     {
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      _max_dofs_per_elem[var] =
-          std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
-    }
-
-    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
-    _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
-
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
-    {
-      const auto id = kokkosMesh().getContiguousElementID(elem);
-
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
       {
-        _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        _max_dofs_per_elem[var] =
+            std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
+      }
+
+      _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
+      _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
+
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+      {
+        const auto id = kokkosMesh().getContiguousElementID(elem);
+
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
+      }
+
+      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+      {
+        if (!_dof_map.is_evaluable(*ghost_elem, var))
+          continue;
+
+        _dof_map.dof_indices(ghost_elem, dof_indices, var);
+
+        for (const auto dof : index_range(dof_indices))
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
       }
     }
-
-    for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+    else
     {
-      if (!_dof_map.is_evaluable(*ghost_elem, var))
-        continue;
-      _dof_map.dof_indices(ghost_elem, dof_indices, var);
+      _dof_map.SCALAR_dof_indices(dof_indices, var);
+      _scalar_dof_index[var].create(dof_indices.size());
+
       for (const auto dof : index_range(dof_indices))
       {
         const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+        _scalar_dof_index[var][dof] = local_idx;
         _local_to_global_dof_index[local_idx] = dof_indices[dof];
       }
     }
   }
 
   _local_elem_dof_index.copyToDeviceNested();
+  _scalar_dof_index.copyToDeviceNested();
   _local_to_global_dof_index.copyToDevice();
 
   _max_dofs_per_elem.copyToDevice();
+
+  _var_is_scalar.copyToDevice();
 
   // Setup DOF communication maps
 

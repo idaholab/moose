@@ -7033,6 +7033,12 @@ FEProblemBase::nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int n
   return _assembly[tid][nl_sys]->nonlocalCouplingEntries();
 }
 
+const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
+FEProblemBase::fieldScalarCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys) const
+{
+  return _assembly[tid][nl_sys]->fieldScalarCouplingEntries();
+}
+
 void
 FEProblemBase::init()
 {

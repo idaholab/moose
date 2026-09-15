@@ -194,19 +194,26 @@ ScalarCoupleable::getADDefaultValue(const std::string & var_name) const
 
 const VariableValue &
 ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
-                                              TagID tag,
+                                              const std::string & tag_param_name,
                                               const unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
-  if (!_sc_fe_problem.vectorTagExists(tag))
-    mooseError("Attempting to couple to vector tag scalar with ID ",
-               tag,
+  if (!_sc_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  const auto & tag_name = _sc_parameters.get<TagName>(tag_param_name);
+
+  if (!_sc_fe_problem.vectorTagExists(tag_name))
+    mooseError("Attempting to couple to vector tag scalar with name ",
+               tag_name,
                "in ",
                _sc_name,
-               ", but a vector tag with that ID does not exist");
+               ", but a vector tag with that name does not exist");
+
+  const auto tag = _sc_fe_problem.getVectorTagID(tag_name);
 
   _sc_coupleable_vector_tags.insert(tag);
 
@@ -215,12 +222,26 @@ ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
 
 const VariableValue &
 ScalarCoupleable::coupledMatrixTagScalarValue(const std::string & var_name,
-                                              TagID tag,
+                                              const std::string & tag_param_name,
                                               const unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
+
+  if (!_sc_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  const auto & tag_name = _sc_parameters.get<TagName>(tag_param_name);
+
+  if (!_sc_fe_problem.matrixTagExists(tag_name))
+    mooseError("Attempting to couple to matrx tag scalar with name ",
+               tag_name,
+               "in ",
+               _sc_name,
+               ", but a matrx tag with that name does not exist");
+
+  const auto tag = _sc_fe_problem.getMatrixTagID(tag_name);
 
   _sc_coupleable_matrix_tags.insert(tag);
 

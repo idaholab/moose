@@ -16,20 +16,18 @@ namespace Moose::Kokkos
 {
 
 void
-Variable::init(const MooseVariableFieldBase & variable, const TagName & tag_name)
+Variable::init(const MooseVariableBase & variable, const TagID tag)
 {
-  init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
-}
+  auto field_variable = dynamic_cast<const MooseVariableFieldBase *>(&variable);
+  auto scalar_variable = dynamic_cast<const MooseVariableScalar *>(&variable);
 
-void
-Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
-{
   _initialized = true;
   _coupled = true;
-  _nodal = variable.isNodal();
+  _nodal = field_variable ? field_variable->isNodal() : false;
+  _scalar = scalar_variable ? true : false;
   _components = variable.count();
   _tag = tag;
-  _vector = variable.isVector();
+  _vector = field_variable ? field_variable->isVector() : false;
 
   _moose_var.createHost(_components);
   _var.create(_components);
@@ -58,37 +56,21 @@ Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
 }
 
 void
-Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagName & tag_name)
-{
-  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()),
-       variables[0]->sys().feProblem().getVectorTagID(tag_name));
-}
-
-void
-Variable::init(const std::vector<const MooseVariableFieldBase *> & variables,
-               const TagName & tag_name)
-{
-  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
-}
-
-void
-Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
-{
-  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()), tag);
-}
-
-void
-Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
+Variable::init(const std::vector<const MooseVariableBase *> & variables, const TagID tag)
 {
   if (variables.empty())
     mooseError("Cannot initialize a Kokkos variable with zero components.");
 
+  auto field_variable = dynamic_cast<const MooseVariableFieldBase *>(variables[0]);
+  auto scalar_variable = dynamic_cast<const MooseVariableScalar *>(variables[0]);
+
   _initialized = true;
   _coupled = true;
   _nodal = true;
+  _scalar = scalar_variable ? true : false;
   _components = variables.size();
   _tag = tag;
-  _vector = variables[0]->isVector();
+  _vector = field_variable ? field_variable->isVector() : false;
 
   _moose_var.createHost(_components);
   _var.create(_components);
@@ -96,10 +78,15 @@ Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, co
 
   for (unsigned int comp = 0; comp < _components; ++comp)
   {
-    _nodal = _nodal && variables[comp]->isNodal();
+    auto field_variable = dynamic_cast<const MooseVariableFieldBase *>(variables[comp]);
 
-    if (variables[comp]->isVector() != _vector)
+    if (field_variable && _scalar)
+      mooseError("Cannot initialize a Kokkos variable with mixed scalar and field variables.");
+
+    if (field_variable && field_variable->isVector() != _vector)
       mooseError("Cannot initialize a Kokkos variable with mixed scalar and vector components.");
+
+    _nodal = _nodal && (field_variable ? field_variable->isNodal() : false);
 
     _moose_var[comp] = variables[comp];
     _var[comp] = variables[comp]->number();
@@ -133,6 +120,18 @@ Variable::init(const std::vector<Real> & values, CoupleableKey)
 }
 
 void
+Variable::init(const std::vector<Real> & values, ScalarCoupleableKey)
+{
+  _initialized = true;
+  _coupled = false;
+  _nodal = false;
+  _scalar = true;
+  _components = 1;
+
+  _default_value = values;
+}
+
+void
 Variable::init(const std::vector<Real3> & values, CoupleableKey)
 {
   _initialized = true;
@@ -142,6 +141,49 @@ Variable::init(const std::vector<Real3> & values, CoupleableKey)
   _vector = true;
 
   _default_vector_value = values;
+}
+
+void
+Variable::init(const MooseVariableBase & variable, const TagName & tag_name)
+{
+  init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<const MooseVariableBase *> & variables, const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<MooseVariableBase *> & variables, const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<const MooseVariableFieldBase *> & variables,
+               const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<const MooseVariableScalar *> & variables, const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<MooseVariableScalar *> & variables, const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
 }
 
 } // namespace Moose::Kokkos

@@ -1,0 +1,46 @@
+[Tests]
+  design = 'Coupleable.md syntax/Kokkos/index.md'
+
+  [field_variable_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.FieldVariableAPIs
+    requirement = 'The system shall provide Kokkos coupling APIs for scalar field variable values, gradients, degrees of freedom, solution states, vector tags, and time derivatives.'
+    issues = '#30655'
+  []
+  [vector_variable_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.VectorVariableAPIs
+    requirement = 'The system shall provide Kokkos coupling APIs for vector field variable values, gradients, degrees of freedom, solution states, vector tags, and time derivatives.'
+    issues = '#33099'
+  []
+  [ad_field_variable_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.ADFieldVariableAPIs
+    requirement = 'The system shall provide automatic-differentiation Kokkos coupling APIs for scalar field variable values, gradients, degrees of freedom, solution states, vector tags, and time derivatives.'
+    issues = '#32699'
+  []
+  [coupled_values_on_device]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.CoupledValuesOnDevice
+    requirement = 'The system shall evaluate the expected elemental, nodal, vector, scalar, and automatic-differentiation coupled values and derivatives on a Kokkos execution device.'
+    issues = '#30655 #33709 #33099 #32699'
+  []
+  [default_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.DefaultAPIs
+    requirement = 'The system shall provide configured default values and zero values for uncoupled Kokkos scalar field, vector field, and scalar variable coupling APIs.'
+    issues = '#30655 #33709 #33099'
+  []
+  [scalar_variable_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.ScalarVariableAPIs
+    requirement = 'The system shall provide Kokkos scalar-variable coupling APIs for values, solution states, vector tags, and time derivatives.'
+    issues = '#33709'
+  []
+  [validation_errors]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.ValidationErrors
+    requirement = 'The system shall reject invalid Kokkos field, vector field, and scalar variable coupling API requests.'
+    issues = '#30655 #33709 #33099'
+  []
+[]

@@ -1798,7 +1798,7 @@ InputParameters::getCheckedPointerParam(const std::string & name_in,
   // template type to this method
   if (!param)
     mooseError("Parameter ", name, " is NULL.\n", error_string);
-  return this->get<T>(name);
+  return param;
 }
 
 template <typename T>
