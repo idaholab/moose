@@ -363,6 +363,14 @@ CoarsenSurfaceMeshAlongSidesetGenerator::coarsenAlongSidesets(
   mesh->unset_has_cached_elem_data();
   mesh->unset_has_boundary_id_sets();
 
+  // We don't just have unset neighbor pointers now, we have
+  // *dangling* neighbor pointers to deleted elements.  libMesh may
+  // not like those.
+  for (Elem * e : mesh->element_ptr_range())
+    for (auto s : e->side_index_range())
+      if (e->neighbor_ptr(s) != remote_elem)
+        e->set_neighbor(s, nullptr);
+
   // Orphaned nodes (the collapsed ones) are removed while preparing the mesh for use
   mesh->contract();
 
