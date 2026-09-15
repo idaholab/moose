@@ -23,6 +23,10 @@ SHAS = [
 
 
 class Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
+
     def testProcessResultsFormats(self):
         """
         Non-network regression test for TEST_RE/_process_results against both the
@@ -48,14 +52,14 @@ class Test(unittest.TestCase):
         self.assertEqual(tests[0].caveats, ["recover"])
 
     def testGetCivetJobs(self):
-        jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
+        jobs = self.jobs
         self.assertEqual(len(jobs), 67)
         self.assertEqual(jobs[0].number, 443457)
         self.assertTrue(jobs[0].filename.endswith("results_443457.tar.gz"))
         self.assertEqual(jobs[0].url, SITE)
 
     def testUpdateDatabaseFromJob(self):
-        jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
+        jobs = self.jobs
         database = collections.defaultdict(lambda: collections.defaultdict(list))
         cr._update_database_from_job(jobs[42], database, None)
 
