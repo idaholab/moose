@@ -13,6 +13,7 @@
 
 #ifdef MOOSE_KOKKOS_SCOPE
 #include "KokkosMaterialPropertyValueDecl.h"
+#include "KokkosDatumDecl.h"
 #endif
 
 #include "KokkosAssembly.h"
@@ -158,6 +159,15 @@ KOKKOS_FUNCTION MaterialPropertyValue<T, dimension>
 MaterialProperty<T, dimension>::operator()(const Datum & datum, const unsigned int qp) const
 {
   return MaterialPropertyValue<T, dimension>(*this, datum, qp);
+}
+
+template <typename T, unsigned int dimension>
+template <unsigned int D, std::enable_if_t<D == dimension && (D == 1 || D == 2), int>>
+KOKKOS_FUNCTION auto
+MaterialProperty<T, dimension>::array(const AssemblyDatum & datum, const unsigned int qp) const
+{
+  return ArrayContextView<MaterialPropertyValue<T, dimension>, dimension, true>((*this)(datum, qp),
+                                                                                datum.comp());
 }
 #endif
 
