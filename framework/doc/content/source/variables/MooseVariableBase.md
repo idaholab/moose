@@ -75,7 +75,7 @@ similar methods of `MooseVariableFE<Real>`.
 There are a myriad of ways to access Moose variables from user interfaces. We'll
 outline a few below.
 
-## Restart
+## Restart id=restart
 
 Variables can be restarted/initialized from variable values in a file on disk by
 setting the parameter `initial_from_file_var = source_var_name` in the variable
@@ -83,6 +83,27 @@ sub-block, where `source_var_name` is the name of the source variable in the
 file. Note that the user will also have to set parameters in the `[Mesh]` block
 in order for this to work, as described for example in the documentation of the
 [FileMeshGenerator.md].
+
+The source file can be either an `Exodus` file or a MOOSE `Checkpoint` file:
+
+- `Exodus`: the mesh is read from the `Exodus` file (`initial_from_file_timestep`
+  selects the time step, or `LATEST`). This path does not support distributed
+  meshes or high-order elemental variables.
+- `Checkpoint`: the mesh is read from a `Checkpoint` file (see the
+  [FileMeshGenerator.md] and [FileMesh.md] documentation). The requested variables
+  are copied from that checkpoint's stored solution. This is enabled automatically
+  when the `[Mesh]` file is a checkpoint and at least one variable sets
+  `initial_from_file_var`; no additional parameter is required. Because a checkpoint
+  holds a single state, `initial_from_file_timestep` must be `LATEST` (its default);
+  the state is selected by the mesh file path itself (e.g. `foo_cp/LATEST` or
+  `foo_cp/0010`).
+
+  Restarting variables from a checkpoint supports distributed meshes and high-order
+  elemental (as well as nodal and scalar) variables, which the `Exodus` path does
+  not. As with a full checkpoint restart, it requires the run to use the same number
+  of MPI processes and threads as the run that wrote the checkpoint, and the source
+  and target variables must share the same finite element type. Array variables are
+  not yet supported for checkpoint restart.
 
 ### SystemBase
 

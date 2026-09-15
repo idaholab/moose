@@ -130,6 +130,12 @@ FileMesh::buildMesh()
       // and renumbering, at least at first.
       bool restarting = _file_name.rfind(".cpa.gz") < _file_name.size();
 
+      // Variables request an initial condition from this checkpoint file. We must keep the mesh
+      // numbering and partitioning identical to the file (not just for the read) so that the
+      // stored solution lines up with the mesh when it is copied in after the equation systems
+      // are initialized.
+      const bool restart_vars_from_checkpoint = restarting && _app.getExodusFileRestart();
+
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();
 
@@ -147,10 +153,14 @@ FileMesh::buildMesh()
 
       _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
 
+      if (restart_vars_from_checkpoint)
+        _app.setCheckpointFileBaseForRestart(
+            FileMeshGenerator::deduceCheckpointBase(_app, _file_name));
+
       if (restarting)
       {
-        getMesh().allow_renumbering(allow_renumbering_later);
-        getMesh().skip_partitioning(skip_partitioning_later);
+        getMesh().allow_renumbering(restart_vars_from_checkpoint ? false : allow_renumbering_later);
+        getMesh().skip_partitioning(restart_vars_from_checkpoint ? true : skip_partitioning_later);
       }
     }
   }
