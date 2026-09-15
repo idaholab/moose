@@ -59,10 +59,14 @@ public:
   }
 
   /**
-   * Get the list of off-diagonal coupled scalar variable numbers
+   * Get the list of off-diagonal coupled scalar variable numbers of a variable
+   * @param var The variable number
    * @returns The list of off-diagonal coupled scalar variable numbers
    */
-  KOKKOS_FUNCTION const Array<unsigned int> & getScalarCoupling() const { return _scalar_coupling; }
+  KOKKOS_FUNCTION const Array<unsigned int> & getScalarCoupling(unsigned int var) const
+  {
+    return _scalar_coupling[var];
+  }
 
   /**
    * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
@@ -410,7 +414,7 @@ private:
    */
   ///@{
   Array<Array<unsigned int>> _field_coupling;
-  Array<unsigned int> _scalar_coupling;
+  Array<Array<unsigned int>> _scalar_coupling;
   ///@}
 
   /**

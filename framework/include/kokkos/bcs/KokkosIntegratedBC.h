@@ -289,7 +289,10 @@ IntegratedBC::operator()(OffDiagJacobianScalarLoop, const ThreadID tid, const De
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getScalarCoupling()[_thread(tid, 0)];
+  auto jvar = sys.getScalarCoupling(_kokkos_var.var())[_thread(tid, 0)];
+
+  if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
+    return;
 
   AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 

@@ -79,7 +79,7 @@ IntegratedBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(sys.getScalarCoupling().size(), numKokkosBoundarySides());
+    _thread.resize(sys.getScalarCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides());
 
     Policy policy(0, _thread.size());
 

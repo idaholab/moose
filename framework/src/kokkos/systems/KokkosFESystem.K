@@ -81,25 +81,30 @@ FESystem::setupCoupling()
   if (auto * const nl_system = dynamic_cast<NonlinearSystemBase *>(&_system))
   {
     _field_coupling.create(_num_vars);
+    _scalar_coupling.create(_num_vars);
 
     std::map<unsigned int, std::vector<unsigned int>> field_coupling;
-    std::vector<unsigned int> scalar_coupling;
+    std::map<unsigned int, std::vector<unsigned int>> scalar_coupling;
 
     auto & ce = _system.feProblem().couplingEntries(0, nl_system->number());
+    auto & fsce = _system.feProblem().fieldScalarCouplingEntries(0, nl_system->number());
 
     for (const auto & [ivar, jvar] : ce)
-      if (!_var_is_scalar[ivar->number()] && !_var_is_scalar[jvar->number()])
-        if (ivar->number() != jvar->number())
-          field_coupling[ivar->number()].push_back(jvar->number());
+      if (ivar->number() != jvar->number())
+        field_coupling[ivar->number()].push_back(jvar->number());
+
+    for (const auto & [ivar, jvar] : fsce)
+      scalar_coupling[ivar->number()].push_back(jvar->number());
 
     for (const auto var : make_range(_num_vars))
       if (!_var_is_scalar[var])
+      {
         _field_coupling[var] = field_coupling[var];
-      else
-        scalar_coupling.push_back(var);
+        _scalar_coupling[var] = scalar_coupling[var];
+      }
 
     _field_coupling.copyToDevice();
-    _scalar_coupling = scalar_coupling;
+    _scalar_coupling.copyToDevice();
   }
 }
 
