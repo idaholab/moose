@@ -430,9 +430,7 @@ class TestSQARecordsTemplate(MooseDocsTestCase):
                     )
                 ),
                 reports=dict(
-                    Documents=dict(
-                        software_requirements_specification="general_srs.md"
-                    )
+                    Documents=dict(software_requirements_specification="general_srs.md")
                 ),
             )
         elif ext == template:
@@ -448,7 +446,9 @@ class TestSQARecordsTemplate(MooseDocsTestCase):
         return common.get_content(config, ".md")
 
     def testRecordsDefaultToLoadCategory(self):
-        text = "!template load file=sqa/app_index.md.template category=Demo app=Demo App"
+        text = (
+            "!template load file=sqa/app_index.md.template category=Demo app=Demo App"
+        )
         ast = self.tokenize(text)
 
         records = ast(0, 1)
@@ -458,7 +458,9 @@ class TestSQARecordsTemplate(MooseDocsTestCase):
         ul = records(1)
         self.assertToken(ul, "UnorderedList")
         srs_items = [
-            li for li in ul.children if li(0).name == "AutoLink" and li(0)["page"] == "demo_srs.md"
+            li
+            for li in ul.children
+            if li(0).name == "AutoLink" and li(0)["page"] == "demo_srs.md"
         ]
         self.assertEqual(len(srs_items), 1)
 
