@@ -15,6 +15,7 @@
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_type.h"
 
 // system includes
 #include <iomanip>
@@ -377,6 +378,16 @@ stringify(libMesh::FEFamily f)
 
 // Turn the warnings back on
 #include "libmesh/restore_warnings.h"
+
+std::string
+stringify(const libMesh::FEType & t)
+{
+  auto msg = stringify(t.family) + " of order " + stringify(t.order);
+  // A scalar variable has no spatial basis, so p-refinement carries no meaning for it
+  if (t.family != libMesh::SCALAR)
+    msg += t.p_refinement ? " with p-refinement" : " without p-refinement";
+  return msg;
+}
 
 std::string
 stringify(const SolveType & t)
