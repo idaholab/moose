@@ -14,4 +14,13 @@
     requirement = 'The system shall have an example of a 2D indentation test with frictionless mortar contact.'
     design = 'TwoDimensionalSphericalIndenterMortar.md'
   []
+  [indenter_rz_fine_precontact]
+    type = CSVDiff
+    input = indenter_rz_fine_precontact.i
+    csvdiff = indenter_rz_fine_precontact.csv
+    requirement = 'The system shall produce zero contact pressure and stress before axisymmetric '
+                  'frictionless mortar contact occurs.'
+    design = 'TwoDimensionalSphericalIndenterMortar.md'
+    issues = '#28980'
+  []
 []
