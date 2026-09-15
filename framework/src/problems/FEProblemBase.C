@@ -2989,27 +2989,15 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
 
       // variable type
       if (var.type() != type)
-      {
-        const bool only_p_refinement_diff =
-            var.type().family == type.family && var.type().order == type.order;
-        const auto stringifyType = [only_p_refinement_diff](FEType t)
-        {
-          auto msg = Moose::stringify(t.family) + " of order " + Moose::stringify(t.order);
-          if (only_p_refinement_diff)
-            msg += t.p_refinement ? " with p-refinement" : " without p-refinement";
-          return msg;
-        };
-
         mooseError("Mismatching types are specified for ",
                    error_prefix,
                    "variable with name '",
                    var_name,
                    "': '",
-                   stringifyType(var.type()),
+                   Moose::stringify(var.type()),
                    "' and '",
-                   stringifyType(type),
+                   Moose::stringify(type),
                    "'");
-      }
 
       // block-restriction
       if (!(active_subdomains->size() == 0 && var.active_subdomains().size() == 0))

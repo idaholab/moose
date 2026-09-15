@@ -34,7 +34,7 @@
   [add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
-    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'MONOMIAL of order 0'"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3 with p-refinement' and 'MONOMIAL of order 0 without p-refinement'"
 
     requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting types.'
     issues = '#1222'
@@ -44,7 +44,7 @@
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
     cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
-    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'SCALAR of order 0'"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3 with p-refinement' and 'SCALAR of order 0'"
 
     requirement = 'The system shall report an error when multiple Scalar AuxVariables are added to the system with conflicting types.'
     issues = '#9313'
