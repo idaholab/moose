@@ -37,7 +37,11 @@ MooseVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
+  // A finite volume variable is always a CONSTANT MONOMIAL, whose basis has no p-refined
+  // counterpart, so the p-refinement parameters are fixed here and hidden from the user
   params.set<bool>("p_refinement") = false;
+  params.suppressParameter<bool>("p_refinement");
+  params.suppressParameter<bool>("disable_p_refinement");
   params.template addParam<bool>(
       "two_term_boundary_expansion",
       true,

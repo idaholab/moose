@@ -48,7 +48,11 @@ MooseLinearVariableFV<OutputType>::validParams()
       "Default gradient computation method to register when a consumer requests gradients from "
       "this variable. This may be a built-in method name like 'green-gauss' or "
       "'green-gauss-venkatakrishnan', or the name of an object in [FVGradientMethods].");
+  // A finite volume variable is always a CONSTANT MONOMIAL, whose basis has no p-refined
+  // counterpart, so the p-refinement parameters are fixed here and hidden from the user
   params.set<bool>("p_refinement") = false;
+  params.suppressParameter<bool>("p_refinement");
+  params.suppressParameter<bool>("disable_p_refinement");
   return params;
 }
 
