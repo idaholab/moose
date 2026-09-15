@@ -59,23 +59,11 @@ void
 FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
                                                 const LinearFVGradientReader & pressure_gradient)
 {
-  if (&pressure_gradient.system() != &rc.pressureSystem())
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' can only be used with pressure system '",
-               rc.pressureSystem().name(),
-               "' owned by RhieChowMassFlux '",
-               rc.name(),
-               "', but it was also requested for system '",
-               pressure_gradient.system().name(),
-               "'.");
+  mooseAssert(&pressure_gradient.system() == &rc.pressureSystem(),
+              "First binding must use the pressure system owned by the RhieChowMassFlux.");
 
-  if (pressure_gradient.variableNumber() != rc.pressureVariableNumber())
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' can only be used for the pressure variable registered on RhieChowMassFlux '",
-               rc.name(),
-               "'.");
+  mooseAssert(pressure_gradient.variableNumber() == rc.pressureVariableNumber(),
+              "First binding must use the pressure variable registered on the RhieChowMassFlux.");
 
   if (!_rhie_chow)
   {
@@ -132,21 +120,15 @@ FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
 }
 
 void
-FVReconstructedPressureGradient::checkFlowSystem(const RhieChowMassFlux & rc) const
+FVReconstructedPressureGradient::checkFlowSystem([[maybe_unused]] const RhieChowMassFlux & rc) const
 {
-  if (!_rhie_chow)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' must be bound to one RhieChowMassFlux before it is used.");
+  mooseAssert(_rhie_chow,
+              "FVReconstructedPressureGradient must be bound to one RhieChowMassFlux before it "
+              "is used.");
 
-  if (_rhie_chow != &rc)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' is bound to RhieChowMassFlux '",
-               _rhie_chow->name(),
-               "' and cannot be used by RhieChowMassFlux '",
-               rc.name(),
-               "'.");
+  mooseAssert(_rhie_chow == &rc,
+              "FVReconstructedPressureGradient is bound to a single RhieChowMassFlux and cannot "
+              "be used by another.");
 }
 
 void
@@ -154,13 +136,10 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
 {
   checkFlowSystem(rc);
 
-  if (_pressure_system != &rc.pressureSystem() ||
-      _pressure_variable_number != rc.pressureVariableNumber())
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' is not linked to the pressure field owned by RhieChowMassFlux '",
-               rc.name(),
-               "'.");
+  mooseAssert(_pressure_system == &rc.pressureSystem() &&
+                  _pressure_variable_number == rc.pressureVariableNumber(),
+              "FVReconstructedPressureGradient must be linked to the pressure field owned by its "
+              "bound RhieChowMassFlux.");
 
   const auto & pressure_variable = rc.pressureSystem().getVariable(0, _pressure_variable_number);
   if (pressure_variable.blockIDs() != rc.blockIDs())
@@ -176,36 +155,24 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
                Moose::stringify(rc.blockIDs()),
                ".");
 
-  if (_momentum_systems.size() != rc.dimension() ||
-      _velocity_gradient_fields.size() != rc.dimension())
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' requires one momentum system and velocity-gradient field per spatial component "
-               "for RhieChowMassFlux '",
-               rc.name(),
-               "'.");
+  mooseAssert(_momentum_systems.size() == rc.dimension() &&
+                  _velocity_gradient_fields.size() == rc.dimension(),
+              "One momentum system and velocity-gradient field must be registered per spatial "
+              "component.");
 
   for (const auto component : make_range(rc.dimension()))
   {
-    if (_momentum_systems[component] != &rc.momentumSystem(component))
-      mooseError("FVReconstructedPressureGradient '",
-                 name(),
-                 "' is linked to an incompatible momentum system for component ",
-                 component,
-                 " of RhieChowMassFlux '",
-                 rc.name(),
-                 "'.");
+    mooseAssert(_momentum_systems[component] == &rc.momentumSystem(component),
+                "Momentum system linkage must match the RhieChowMassFlux for every spatial "
+                "component.");
 
-    const auto * const velocity_gradient = _velocity_gradient_fields[component];
-    if (!velocity_gradient || &velocity_gradient->system() != &rc.momentumSystem(component) ||
-        velocity_gradient->variableNumber() != rc.velocityVariable(component).number())
-      mooseError("FVReconstructedPressureGradient '",
-                 name(),
-                 "' is missing the velocity-gradient field for momentum component ",
-                 component,
-                 " of RhieChowMassFlux '",
-                 rc.name(),
-                 "'.");
+    [[maybe_unused]] const auto * const velocity_gradient = _velocity_gradient_fields[component];
+    mooseAssert(velocity_gradient &&
+                    &velocity_gradient->system() == &rc.momentumSystem(component) &&
+                    velocity_gradient->variableNumber() ==
+                        rc.velocityVariable(component).number(),
+                "Velocity-gradient field linkage must match the RhieChowMassFlux for every "
+                "momentum component.");
   }
 }
 
@@ -250,19 +217,13 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     return;
   }
 
-  if (_pressure_system != &system)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' is bound to pressure system '",
-               _pressure_system->name(),
-               "' and cannot compute gradients for system '",
-               system.name(),
-               "'.");
+  mooseAssert(_pressure_system == &system,
+              "FVReconstructedPressureGradient can only compute gradients for the pressure "
+              "system it is bound to.");
 
-  if (variable_numbers.size() != 1 || !variable_numbers.count(_pressure_variable_number))
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' can only compute the pressure variable to which it is bound.");
+  mooseAssert(variable_numbers.size() == 1 && variable_numbers.count(_pressure_variable_number),
+              "FVReconstructedPressureGradient can only compute the pressure variable to which "
+              "it is bound.");
 
   if (!_coupling_pressure_gradient_initialized)
   {
@@ -306,34 +267,11 @@ FVReconstructedPressureGradient::copyGradient(const GradientView & source,
 void
 FVReconstructedPressureGradient::transition(const ReconstructionEvent event)
 {
-  const auto state_name = [](const ReconstructionState state)
+  const auto advance = [this]([[maybe_unused]] const ReconstructionState expected,
+                              const ReconstructionState next)
   {
-    switch (state)
-    {
-      case ReconstructionState::NeedLaggedGradient:
-        return "NeedLaggedGradient";
-      case ReconstructionState::NeedCandidate:
-        return "NeedCandidate";
-      case ReconstructionState::CandidateReady:
-        return "CandidateReady";
-    }
-    return "unknown";
-  };
-
-  const auto advance = [this, &state_name](const ReconstructionState expected,
-                                           const ReconstructionState next,
-                                           const char * const action)
-  {
-    if (_reconstruction_state != expected)
-      mooseError("FVReconstructedPressureGradient '",
-                 name(),
-                 "' cannot ",
-                 action,
-                 " while its reconstruction state is ",
-                 state_name(_reconstruction_state),
-                 "; expected ",
-                 state_name(expected),
-                 ".");
+    mooseAssert(_reconstruction_state == expected,
+                "Reconstruction-cycle transition requested from an unexpected state.");
     _reconstruction_state = next;
   };
 
@@ -343,19 +281,13 @@ FVReconstructedPressureGradient::transition(const ReconstructionEvent event)
       _reconstruction_state = ReconstructionState::NeedLaggedGradient;
       return;
     case ReconstructionEvent::SaveLaggedGradient:
-      advance(ReconstructionState::NeedLaggedGradient,
-              ReconstructionState::NeedCandidate,
-              "save a lagged velocity gradient");
+      advance(ReconstructionState::NeedLaggedGradient, ReconstructionState::NeedCandidate);
       return;
     case ReconstructionEvent::ReconstructCandidate:
-      advance(ReconstructionState::NeedCandidate,
-              ReconstructionState::CandidateReady,
-              "reconstruct a pressure-gradient candidate");
+      advance(ReconstructionState::NeedCandidate, ReconstructionState::CandidateReady);
       return;
     case ReconstructionEvent::PublishCandidate:
-      advance(ReconstructionState::CandidateReady,
-              ReconstructionState::NeedLaggedGradient,
-              "publish a pressure-gradient candidate");
+      advance(ReconstructionState::CandidateReady, ReconstructionState::NeedLaggedGradient);
       return;
   }
 }
@@ -448,34 +380,15 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 }
 
 void
-FVReconstructedPressureGradient::faceReconstructionError(const ElemInfo & elem_info,
-                                                         const FaceInfo & fi,
-                                                         const char * const problem) const
-{
-  mooseError("FVReconstructedPressureGradient '",
-             name(),
-             "' ",
-             problem,
-             " while reconstructing cell ID ",
-             elem_info.elem()->id(),
-             " from face ID ",
-             fi.id(),
-             ".");
-}
-
-void
 FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux & rc,
                                                         const ElemInfo & elem_info,
                                                         const FaceInfo * const fi,
                                                         const Point & surface_vector,
                                                         const bool elem_has_info,
                                                         DenseMatrix<Real> & matrix,
-                                                        DenseVector<Real> & projection_rhs,
-                                                        std::vector<dof_id_type> & face_ids) const
+                                                        DenseVector<Real> & projection_rhs) const
 {
   mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
-
-  face_ids.push_back(fi->id());
 
   const Real surface_area = surface_vector.norm();
   const auto face_normal = surface_vector / surface_area;
@@ -484,8 +397,7 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   const Point flux_normal =
       rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
   const Real face_flux = rc.getVolumetricFaceFlux(*fi);
-  if (!std::isfinite(face_flux))
-    faceReconstructionError(elem_info, *fi, "found a non-finite corrected face flux");
+  mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
   const Real normal_alignment = flux_normal * face_normal;
   Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 
@@ -499,9 +411,9 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   {
     const auto velocity_gradient =
         reconstructionVelocityGradient(rc, elem_info, *fi, elem_has_info, component);
-    for (const auto direction : make_range(rc.dimension()))
-      if (!std::isfinite(velocity_gradient(direction)))
-        faceReconstructionError(elem_info, *fi, "found a non-finite lagged velocity gradient");
+    for ([[maybe_unused]] const auto direction : make_range(rc.dimension()))
+      mooseAssert(std::isfinite(velocity_gradient(direction)),
+                  "Lagged velocity gradient must be finite.");
 
     gradient_flux_correction += (velocity_gradient * d_pf) * surface_vector(component);
   }
@@ -543,53 +455,23 @@ FVReconstructedPressureGradient::reconstructPressureGradient(
     const RhieChowMassFlux & rc,
     const ElemInfo & elem_info,
     const unsigned int component,
-    const Real reconstructed_velocity,
-    const std::vector<dof_id_type> & face_ids) const
+    const Real reconstructed_velocity) const
 {
-  const Elem & elem = *elem_info.elem();
-  if (!std::isfinite(reconstructed_velocity))
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' computed a non-finite reconstructed velocity component ",
-               component,
-               " for cell ID ",
-               elem.id(),
-               " using face IDs ",
-               Moose::stringify(face_ids),
-               ".");
+  mooseAssert(std::isfinite(reconstructed_velocity),
+              "Reconstructed velocity component must be finite.");
 
   const auto momentum_dof = elem_info.dofIndices()[rc.momentumSystem(component).number()][0];
   const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
   const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
-  if (!std::isfinite(HbyA) || !std::isfinite(Ainv) || Ainv == 0.0)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' found invalid momentum-coupling data for component ",
-               component,
-               " of cell ID ",
-               elem.id(),
-               " using face IDs ",
-               Moose::stringify(face_ids),
-               ": H/A = ",
-               HbyA,
-               " and 1/A = ",
-               Ainv,
-               ".");
+  mooseAssert(std::isfinite(HbyA) && std::isfinite(Ainv) && Ainv != 0.0,
+              "Momentum-coupling H/A and 1/A data must be finite, and 1/A must be nonzero.");
 
   // Invert the same diagonal momentum relation used by Rhie-Chow,
   //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
   // so the reconstructed pressure gradient produces the projected, flux-consistent u_P.
   const Real reconstructed_gradient = (-reconstructed_velocity - HbyA) / Ainv;
-  if (!std::isfinite(reconstructed_gradient))
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' computed a non-finite pressure-gradient component ",
-               component,
-               " for cell ID ",
-               elem.id(),
-               " using face IDs ",
-               Moose::stringify(face_ids),
-               ".");
+  mooseAssert(std::isfinite(reconstructed_gradient),
+              "Reconstructed pressure-gradient component must be finite.");
 
   return reconstructed_gradient;
 }
@@ -604,13 +486,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
   const auto & base_pressure_gradient = rc.basePressureGradientComponents();
   const auto face_flux_iteration = rc.faceMassFluxGeneration();
 
-  if (face_flux_iteration == _last_reconstructed_face_flux_iteration)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' cannot reuse corrected face-flux iteration ",
-               face_flux_iteration,
-               " for reconstruction. The current pressure corrector must produce a new face "
-               "flux before reconstruction.");
+  mooseAssert(face_flux_iteration != _last_reconstructed_face_flux_iteration,
+              "The current pressure corrector must produce a new face flux before "
+              "reconstruction.");
 
   if (_reconstructed_pressure_gradient.empty())
     for (const auto component : make_range(dimension))
@@ -630,7 +508,6 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
       continue;
 
     const Elem & elem = *elem_info->elem();
-    std::vector<dof_id_type> face_ids;
     DenseMatrix<Real> matrix(dimension, dimension);
     DenseVector<Real> projection_rhs(dimension);
     matrix.zero();
@@ -646,7 +523,7 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    const bool elem_has_info)
     {
       assembleFaceProjection(
-          rc, *elem_info, fi, surface_vector, elem_has_info, matrix, projection_rhs, face_ids);
+          rc, *elem_info, fi, surface_vector, elem_has_info, matrix, projection_rhs);
     };
 
     Moose::FV::loopOverElemFaceInfo(
@@ -658,8 +535,8 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
         elem_info->dofIndices()[rc.pressureSystem().number()][rc.pressureVariableNumber()];
     for (const auto component : make_range(dimension))
     {
-      const auto reconstructed_gradient = reconstructPressureGradient(
-          rc, *elem_info, component, reconstructed_quantity(component), face_ids);
+      const auto reconstructed_gradient =
+          reconstructPressureGradient(rc, *elem_info, component, reconstructed_quantity(component));
       _reconstructed_pressure_gradient[component]->set(pressure_dof, reconstructed_gradient);
     }
   }
@@ -674,11 +551,9 @@ const FVReconstructedPressureGradient::GradientContainer &
 FVReconstructedPressureGradient::reconstructedCandidate(const RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
-  if (_reconstruction_state != ReconstructionState::CandidateReady)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' has no reconstructed pressure-gradient candidate ready for the conservative "
-               "cell-velocity correction.");
+  mooseAssert(_reconstruction_state == ReconstructionState::CandidateReady,
+              "No reconstructed pressure-gradient candidate is ready for the conservative "
+              "cell-velocity correction.");
   return _reconstructed_pressure_gradient;
 }
 

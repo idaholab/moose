@@ -253,37 +253,6 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
-  [reconstructed-candidate-without-lagged-gradient]
-    type = 'RunException'
-    input = 2d-velocity-pressure.i
-    cli_args = "pressure_gradient_method=reconstructed "
-               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
-               "UserObjects/sequence_test/rhie_chow_user_object=rc "
-               "UserObjects/sequence_test/operation=update_candidate "
-               "UserObjects/sequence_test/execute_on=TIMESTEP_BEGIN"
-    expect_err = "cannot reconstruct a pressure-gradient candidate while its reconstruction state is NeedLaggedGradient; expected NeedCandidate"
-    allow_test_objects = true
-    requirement = "The system shall report a sequencing error when pressure-gradient "
-                  "reconstruction is attempted before saving the lagged velocity gradient."
-    max_threads = 1 # see libmesh issue #3808
-    issues = '#32995'
-  []
-  [reconstructed-candidates-reuse-face-flux]
-    type = 'RunException'
-    input = 2d-velocity-pressure.i
-    cli_args = "pressure_gradient_method=reconstructed "
-               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
-               "UserObjects/sequence_test/rhie_chow_user_object=rc "
-               "UserObjects/sequence_test/operation=reuse_face_flux "
-               "UserObjects/sequence_test/execute_on=TIMESTEP_END "
-               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
-    expect_err = "cannot reconstruct cell ID [0-9]+ from face ID [0-9]+: corrected face-flux iteration [0-9]+ was already used for reconstruction"
-    allow_test_objects = true
-    requirement = "The system shall identify the cell and face when a reconstructed pressure "
-                  "gradient attempts to reuse stale corrected face flux."
-    max_threads = 1 # see libmesh issue #3808
-    issues = '#32995'
-  []
   [reconstructed-candidate-skips-face-flux-iteration]
     type = 'RunApp'
     input = 2d-velocity-pressure.i

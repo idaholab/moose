@@ -24,9 +24,20 @@ class FaceInfo;
 class RhieChowMassFlux;
 
 /**
- * Reconstructs the pressure gradient used for Rhie-Chow momentum coupling from corrected face
- * fluxes and publishes a relaxed coupling pressure-gradient field to linear finite-volume
- * consumers.
+ * Gradient method that reconstructs and relaxes the pressure gradient used for Rhie-Chow
+ * momentum-pressure coupling on the linear finite-volume segregated solver. Responsibilities:
+ * - Binds to exactly one RhieChowMassFlux flow-system configuration, together with the momentum
+ *   systems and velocity-gradient fields needed to reconstruct that system's pressure gradient.
+ * - Falls back to an ordinary base gradient method (base_gradient_method) before any
+ *   flux-consistent gradient has been reconstructed, e.g. before the first pressure corrector.
+ * - Drives, once per pressure corrector, the reconstruction cycle that freezes a lagged
+ *   cell-velocity gradient, projects the corrected face fluxes back to a cell velocity in a
+ *   least-squares sense, and inverts the discrete momentum balance for the pressure-gradient
+ *   component consistent with that velocity.
+ * - Relaxes (gradient_relaxation) and publishes that reconstructed candidate as the coupling
+ *   pressure gradient supplied to the next momentum predictor.
+ * - Preserves the last accepted coupling gradient across time-step retries, restart, and
+ *   recovery, and clears all cached reconstruction state when the mesh changes.
  */
 class FVReconstructedPressureGradient : public FVGradientMethod, public MeshChangedInterface
 {
@@ -59,7 +70,13 @@ public:
   /// Get the conservative candidate produced by the current pressure corrector.
   const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
 
-  /// Relax and publish the current candidate as the coupling pressure gradient.
+  /**
+   * Relax and publish the current candidate as the coupling pressure gradient.
+   * @param rc The bound Rhie-Chow flow-system configuration whose pressure gradient is being
+   * finalized
+   * @param base_gradient The ordinary (unreconstructed) pressure gradient used to initialize the
+   * coupling gradient the first time it is published
+   */
   void finalizeCouplingPressureGradient(const RhieChowMassFlux & rc,
                                         const GradientView & base_gradient);
 
@@ -119,20 +136,35 @@ private:
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
 
-  /// Report invalid data associated with one face equation.
-  [[noreturn]] void faceReconstructionError(const ElemInfo & elem_info,
-                                            const FaceInfo & fi,
-                                            const char * problem) const;
-
-  /// Add one corrected face equation to a cell's velocity-projection system.
+  /**
+   * Add one face's contribution to the area-weighted least-squares system that reconstructs the
+   * cell velocity of elem_info from corrected face fluxes. The pressure-corrected face-normal
+   * volumetric flux at fi, with the lagged velocity-gradient Taylor correction from the cell
+   * center to the face removed, gives one linear equation for the unknown cell velocity,
+   * u_P . n_f ~= qhat_f. This face equation contributes |S_f| n_f n_f^T to matrix and
+   * |S_f| qhat_f n_f to projection_rhs; once every face of elem_info has been added, solving
+   * that system gives the cell velocity that is later substituted into the discrete momentum
+   * balance to recover the pressure-gradient component consistent with these corrected fluxes.
+   * @param rc The bound Rhie-Chow flow-system configuration supplying the corrected face flux
+   * and lagged velocity gradients
+   * @param elem_info The cell whose velocity-projection system is being assembled
+   * @param fi The face being added to the projection
+   * @param surface_vector The coordinate-system-aware area vector of this face, outward from
+   * elem_info
+   * @param elem_has_info Whether elem_info is the "elem" side of fi, as opposed to its
+   * "neighbor" side
+   * @param matrix Area-weighted normal-equation matrix accumulated over the cell's faces,
+   * updated in place with this face's contribution
+   * @param projection_rhs Area-weighted right-hand side accumulated over the cell's faces,
+   * updated in place with this face's contribution
+   */
   void assembleFaceProjection(const RhieChowMassFlux & rc,
                               const ElemInfo & elem_info,
                               const FaceInfo * fi,
                               const Point & surface_vector,
                               bool elem_has_info,
                               DenseMatrix<Real> & matrix,
-                              DenseVector<Real> & projection_rhs,
-                              std::vector<dof_id_type> & face_ids) const;
+                              DenseVector<Real> & projection_rhs) const;
 
   /// Solve a cell's velocity-projection system.
   DenseVector<Real> solveFaceProjection(const DenseMatrix<Real> & matrix,
@@ -142,8 +174,7 @@ private:
   Real reconstructPressureGradient(const RhieChowMassFlux & rc,
                                    const ElemInfo & elem_info,
                                    unsigned int component,
-                                   Real reconstructed_velocity,
-                                   const std::vector<dof_id_type> & face_ids) const;
+                                   Real reconstructed_velocity) const;
 
   /// Gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName _base_gradient_method_name;
