@@ -48,15 +48,12 @@ public:
   /**
    * Returns true if mesh displacement is required.
    */
-  bool shouldDisplace() const { return _mesh_displacement_variable.has_value(); }
+  bool shouldDisplace() const { return !_mesh_displacement_variable.empty(); }
 
   /**
    * Returns an optional reference to displacement variable name.
    */
-  std::optional<std::reference_wrapper<std::string const>> getMeshDisplacementVariable() const
-  {
-    return _mesh_displacement_variable;
-  }
+  const std::string & getMeshDisplacementVariable() const { return _mesh_displacement_variable; }
 
   /**
    * Displace the nodes of the mesh by the given displacement.
@@ -92,7 +89,7 @@ protected:
   /**
    * Holds name of variable used for mesh displacement, if set.
    */
-  std::optional<std::string> _mesh_displacement_variable;
+  std::string _mesh_displacement_variable;
 
   /**
    * Smart pointer to mfem::ParMesh object. Do not access directly.

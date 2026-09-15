@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
@@ -304,7 +313,6 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                         mfem::BlockVector & trueX,
                                         mfem::BlockVector & trueRHS)
 {
-
   // Allocate block operator
   DeleteHBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
@@ -316,6 +324,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
+
     for (const auto j : index_range(_trial_var_names))
     {
       auto trial_var_name = _trial_var_names.at(j);
@@ -323,15 +332,14 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       mfem::Vector aux_x, aux_rhs;
       mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
       std::unique_ptr<mfem::OperatorHandle> aux_a = std::make_unique<mfem::OperatorHandle>();
-      aux_lf = 0.0;
+
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
         auto slf = _slfs.Get(test_var_name);
-        auto clf = _clfs.Get(test_var_name);
         slf->FormLinearSystem(_ess_tdof_lists.at(j),
-                              *(_cmplx_var_ess_constraints.at(j)),
-                              *clf,
+                              *_cmplx_var_ess_constraints.at(j),
+                              *_clfs.Get(test_var_name),
                               *aux_a,
                               aux_x,
                               aux_rhs,
@@ -343,8 +351,8 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         auto mslf = _mslfs.Get(test_var_name)->Get(trial_var_name);
         mslf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
-                                          *(_cmplx_var_ess_constraints.at(j)),
-                                          aux_lf,
+                                          *_cmplx_var_ess_constraints.at(j),
+                                          aux_lf = 0.,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
