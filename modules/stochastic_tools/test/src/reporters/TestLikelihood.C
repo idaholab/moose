@@ -36,8 +36,7 @@ TestLikelihood::TestLikelihood(const InputParameters & parameters)
     _function(declareValue<std::vector<Real>>("function")),
     _model_pred(getReporterValue<std::vector<Real>>("model_pred", REPORTER_MODE_DISTRIBUTED)),
     _model_pred_required(declareValue<std::vector<Real>>("model_pred_required")),
-    _sampler(getSampler("sampler")),
-    _local_comm(_sampler.getLocalComm())
+    _sampler(getSampler("sampler"))
 {
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
     _likelihoods.push_back(getLikelihoodFunctionByName(name));
@@ -48,8 +47,10 @@ TestLikelihood::TestLikelihood(const InputParameters & parameters)
 void
 TestLikelihood::execute()
 {
-  _model_pred_required = _model_pred;
-  _local_comm.allgather(_model_pred_required);
+  mooseAssert(_model_pred.size() >= _sampler.getNumberOfLocalRows(), "Incorrectly sized outputs.");
+  _model_pred_required.assign(_model_pred.begin(),
+                              _model_pred.begin() + _sampler.getNumberOfLocalRows());
+  _communicator.allgather(_model_pred_required);
   for (unsigned i = 0; i < _function.size(); ++i)
     _function[i] = _likelihoods[i]->function(_model_pred_required);
 }

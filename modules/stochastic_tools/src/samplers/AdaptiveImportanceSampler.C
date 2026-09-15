@@ -61,9 +61,13 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
     _std_factor(getParam<Real>("std_factor")),
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
-    _is_sampling_completed(false),
+    _is_sampling_completed(declareRecoverableData<bool>("is_sampling_completed", false)),
     _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter")),
-    _retraining_steps(0),
+    _prev_value(declareRecoverableData<std::vector<Real>>("prev_value")),
+    _mean_sto(declareRecoverableData<std::vector<Real>>("mean_sto")),
+    _std_sto(declareRecoverableData<std::vector<Real>>("std_sto")),
+    _inputs_sto(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_sto")),
+    _retraining_steps(declareRecoverableData<int>("retraining_steps", 0)),
     _gp_flag(isParamValid("flag_sample") ? &getReporterValue<std::vector<bool>>("flag_sample")
                                          : nullptr)
 {
@@ -174,7 +178,7 @@ AdaptiveImportanceSampler::executeSetUp()
 }
 
 Real
-AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index) const
 {
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }

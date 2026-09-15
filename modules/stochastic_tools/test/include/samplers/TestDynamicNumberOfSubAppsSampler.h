@@ -19,5 +19,5 @@ public:
   void executeSetUp() override;
 
 protected:
-  dof_id_type _increment_rows = 0;
+  dof_id_type & _increment_rows;
 };

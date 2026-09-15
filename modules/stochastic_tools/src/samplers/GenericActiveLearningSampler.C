@@ -47,7 +47,9 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
-    _num_tries(getParam<unsigned int>("num_tries"))
+    _new_samples(declareRecoverableData<std::vector<std::vector<Real>>>("new_samples")),
+    _num_tries(getParam<unsigned int>("num_tries")),
+    _inputs_all(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_all"))
 {
   // Filling the `distributions` vector with the user-provided distributions.
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
@@ -84,8 +86,9 @@ GenericActiveLearningSampler::executeSetUp()
       vector[j] = _distributions[j]->quantile(getRand(rand_index++, _t_step + 1));
   };
 
-  /* If step is 1, randomly generate the samples.
-  Else, generate the samples informed by the GP from the reporter "sorted_indices" */
+  /* At the first step, fill_vector is called to advance rand_index so _inputs_all
+     gets consistent random values, then _new_samples is overridden with initial values.
+     Otherwise, use the samples informed by the GP from the reporter "sorted_indices". */
   for (const auto i : make_range(getNumberOfRows()))
   {
     if (_t_step <= 0)
@@ -93,6 +96,9 @@ GenericActiveLearningSampler::executeSetUp()
     else
       _new_samples[i] = _inputs_all[_sorted_indices[i]];
   }
+  if (_t_step <= 0)
+    for (const auto i : make_range(getNumberOfRows()))
+      _new_samples[i] = _initial_values;
 
   /* Finally, generate several new samples randomly for the GP to try and pass it to the
   reporter */
@@ -101,11 +107,7 @@ GenericActiveLearningSampler::executeSetUp()
 }
 
 Real
-GenericActiveLearningSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+GenericActiveLearningSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
-  if (_t_step < 1)
-    for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
-      _new_samples[i] = _initial_values;
-
   return _new_samples[row_index][col_index];
 }

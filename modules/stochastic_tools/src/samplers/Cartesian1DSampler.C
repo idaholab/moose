@@ -68,7 +68,7 @@ Cartesian1DSampler::Cartesian1DSampler(const InputParameters & parameters)
 }
 
 Real
-Cartesian1DSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+Cartesian1DSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   if (row_index >= _grid_range[col_index] && row_index < _grid_range[col_index + 1])
     return _grid_items[col_index][row_index - _grid_range[col_index]];

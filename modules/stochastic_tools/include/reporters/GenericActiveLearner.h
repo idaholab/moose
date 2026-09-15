@@ -136,10 +136,10 @@ protected:
   int _check_step;
 
   /// Storage for the GP re-training inputs
-  std::vector<std::vector<Real>> _gp_inputs;
+  std::vector<std::vector<Real>> & _gp_inputs;
 
   /// Storage for the GP re-training outputs
-  std::vector<Real> _gp_outputs;
+  std::vector<Real> & _gp_outputs;
 
   /// Outputs of GP model for the test samples
   std::vector<Real> _gp_outputs_test;
@@ -214,7 +214,9 @@ GenericActiveLearnerTempl<SamplerType>::GenericActiveLearnerTempl(
     _convergence_value(declareValue<Real>("convergence_value")),
     _inputs_required(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _penalize_acquisition(getParam<bool>("penalize_acquisition")),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(std::numeric_limits<int>::max()),
+    _gp_inputs(declareRecoverableData<std::vector<std::vector<Real>>>("gp_inputs")),
+    _gp_outputs(declareRecoverableData<std::vector<Real>>("gp_outputs"))
 {
   // Setting up the variable sizes to facilitate active learning.
   _gp_outputs_test.resize(_inputs_test.size());
@@ -308,14 +310,7 @@ GenericActiveLearnerTempl<SamplerType>::execute()
     return;
   }
 
-  DenseMatrix<Real> data_in(_al_sampler.getNumberOfRows(), _al_sampler.getNumberOfCols());
-  for (dof_id_type ss = _al_sampler.getLocalRowBegin(); ss < _al_sampler.getLocalRowEnd(); ++ss)
-  {
-    const auto data = _al_sampler.getNextLocalRow();
-    for (unsigned int j = 0; j < _al_sampler.getNumberOfCols(); ++j)
-      data_in(ss, j) = data[j];
-  }
-  _communicator.sum(data_in.get_values());
+  DenseMatrix<Real> data_in = _al_sampler.getGlobalSamples();
   _output_comm = _output_value;
   _communicator.allgather(_output_comm);
 

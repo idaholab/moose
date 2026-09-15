@@ -16,6 +16,7 @@
       input = sampler_data.i
       cli_args = 'VectorPostprocessors/data/sampler_method=get_local_samples'
       csvdiff = sampler_data_out_data_0001.csv
+      prereq = get_sample_types/get_global_samples
       detail = 'get local matrix;'
     []
     [get_next_local_row]
@@ -23,6 +24,7 @@
       input = sampler_data.i
       cli_args = 'VectorPostprocessors/data/sampler_method=get_next_local_row'
       csvdiff = sampler_data_out_data_0001.csv
+      prereq = get_sample_types/get_local_samples
       detail = 'get next local row;'
     []
   []
@@ -37,6 +39,7 @@
       csvdiff = 'sampler_data_out_data_0001.csv.0 sampler_data_out_data_0001.csv.1 sampler_data_out_data_0001.csv.2'
       min_parallel = 3
       max_parallel = 3
+      prereq = get_sample_types/get_next_local_row
       detail = 'get local matrix;'
     []
     [get_next_local_row]
@@ -46,6 +49,7 @@
       csvdiff = 'sampler_data_out_data_0001.csv.0 sampler_data_out_data_0001.csv.1 sampler_data_out_data_0001.csv.2'
       min_parallel = 3
       max_parallel = 3
+      prereq = parallel/get_local_samples
       detail = 'get next local row;'
     []
   []
@@ -58,6 +62,7 @@
       input = sampler_data.i
       cli_args = "Samplers/sample/distributions='dist'"
       csvdiff = sampler_data_out_data_0001.csv
+      prereq = parallel/get_next_local_row
       detail = 'one column;'
     []
     [multi]
@@ -65,6 +70,7 @@
       input = sampler_data.i
       cli_args = "Samplers/sample/distributions='dist dist dist' Outputs/file_base=multi_col"
       csvdiff = multi_col_data_0001.csv
+      prereq = cols/one
       detail = 'multiple columns;'
     []
     [lots]
@@ -78,6 +84,7 @@
                                                 "dist dist dist dist dist "
                                                 "dist dist' Outputs/file_base=lots_col"
       csvdiff = lots_col_data_0001.csv
+      prereq = cols/multi
       detail = 'large number of columns;'
     []
   []

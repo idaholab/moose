@@ -4,7 +4,7 @@ Stochastic simulations often require the use of a large number random numbers to
 desired calculation. As such it is important to be mindfull of how these numbers are generated
 in parallel. Within the stochastic tools module it is possible to generate the sample data in
 three modes: replicated, distributed, or iterative. Each [Sampler](samplers/Sampler.md)-based object
-has three methods: `getSamples`, `getLocalSamples`, and `getNextLocalRow`. The first will compute
+has three methods: `getSamples`, `getLocalSamples`, and `getSampleRow`. The first will compute
 a complete dense matrix, the second will only compute the portion of the matrix assigned to the
 current processor, and the last will compute a single row of data within an iterative loop. Sample
 data is distributed by row, with each processor being responsible for computing a portion of the
@@ -26,7 +26,7 @@ As expected, the total memory ([fig:total]) for the non-distributed case increas
 processors utilized. More importantly, for the distributed case is that, the average memory per
 process ([fig:proc]) decreases in the distributed configuration. Obviously, the iterative method performs the
 best as only a single row of data exists at any time, thus the memory impact is negligible. For
-this reason it is recommend that the `getNextLocalRow` method of sample data retrieval be used
+this reason it is recommend that the `getSampleRow` method of sample data retrieval be used
 exclusively, unless the calculation requires the matrix.
 
 !media memory_total.svg style=width:100%; id=fig:total

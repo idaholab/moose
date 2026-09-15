@@ -1,0 +1,75 @@
+[Tests]
+  design = 'Standardizer.md'
+  issues = '#30564'
+  [get_mean]
+    type = GoogleTest
+    unit_test = StochasticTools.getMean
+    requirement = 'The system shall compute and provide access to the per-column mean and standard deviation of a data set via computeSet, getMean, and getStdDev.'
+    capabilities = 'libtorch'
+  []
+  [get_standardized]
+    type = GoogleTest
+    unit_test = StochasticTools.getStandardized
+    requirement = 'The system shall center and scale a tensor using the mean and standard deviation computed by a Standardizer via getStandardized.'
+    capabilities = 'libtorch'
+  []
+  [get_destandardized]
+    type = GoogleTest
+    unit_test = StochasticTools.getDestandardized
+    requirement = 'The system shall recover the original tensor values when reversing a Standardizer getStandardized transform via getDestandardized.'
+    capabilities = 'libtorch'
+  []
+  [get_descaled]
+    type = GoogleTest
+    unit_test = StochasticTools.getDescaled
+    requirement = 'The system shall scale a tensor by a Standardizer computed standard deviation via getDescaled, without applying any mean shift.'
+    capabilities = 'libtorch'
+  []
+  [get_scaled]
+    type = GoogleTest
+    unit_test = StochasticTools.getScaled
+    requirement = 'The system shall scale a tensor by dividing it by a Standardizer computed standard deviation via getScaled, without applying any mean shift.'
+    capabilities = 'libtorch'
+  []
+  [tensor_data_store_load]
+    type = GoogleTest
+    unit_test = StochasticTools.tensorDataStoreLoad
+    requirement = 'The system shall store and load a 2-dimensional torch::Tensor as recoverable data, preserving its shape and values.'
+    design = 'DataIO.md'
+    capabilities = 'libtorch'
+  []
+  [tensor_scalar_data_store_load]
+    type = GoogleTest
+    unit_test = StochasticTools.tensorScalarDataStoreLoad
+    requirement = 'The system shall store and load a scalar (0-dimensional) torch::Tensor as recoverable data, preserving its rank and value.'
+    design = 'DataIO.md'
+    capabilities = 'libtorch'
+  []
+  [tensor_vector_data_store_load]
+    type = GoogleTest
+    unit_test = StochasticTools.tensorVectorDataStoreLoad
+    requirement = 'The system shall store and load a 1-dimensional torch::Tensor as recoverable data, preserving its shape and values.'
+    design = 'DataIO.md'
+    capabilities = 'libtorch'
+  []
+  [tensor_data_store_load_non_contiguous]
+    type = GoogleTest
+    unit_test = StochasticTools.tensorDataStoreLoadNonContiguous
+    requirement = 'The system shall store and load a non-contiguous torch::Tensor as recoverable data, preserving its shape and values.'
+    design = 'DataIO.md'
+    capabilities = 'libtorch'
+  []
+  [standardizer_data_store_load]
+    type = GoogleTest
+    unit_test = StochasticTools.standardizerDataStoreLoad
+    requirement = 'The system shall store and load a Standardizer with a computed mean and standard deviation as recoverable data, preserving both moments.'
+    capabilities = 'libtorch'
+  []
+  [empty_data_store_load]
+    type = GoogleTest
+    unit_test = StochasticTools.standardizerEmptyDataStoreLoad
+    requirement = 'The system shall support storing and loading recoverable data for a Standardizer that has not yet computed a mean/standard deviation set.'
+    issues = '#32193'
+    capabilities = 'libtorch'
+  []
+[]
