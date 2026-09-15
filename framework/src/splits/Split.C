@@ -168,9 +168,32 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
     po.pairs.emplace_back(dmprefix + "fieldsplit_names", Moose::stringify(_splitting, ","));
 
     // Finally, recursively configure the splits contained within this split.
+    std::map<NonlinearVariableName, std::string> vars_to_split;
     for (const auto & split_name : _splitting)
     {
       std::shared_ptr<Split> split = nl.getSplit(split_name);
+
+      // Make sure no two sibling splits that aren't otherwise distinguished by a block/side
+      // restriction explicitly claim the same variable, since in that case at most one of them
+      // would actually end up preconditioning it. Splits restricted to different blocks/sides
+      // may legitimately share a variable, partitioning its degrees of freedom spatially.
+      if (!split->restrictsRegion())
+        for (const auto & var : split->getVars())
+        {
+          auto it = vars_to_split.find(var);
+          if (it != vars_to_split.end())
+            mooseError("Variable '",
+                       var,
+                       "' is specified in both split '",
+                       it->second,
+                       "' and split '",
+                       split_name,
+                       "', which are both part of split '",
+                       name(),
+                       "'");
+          vars_to_split.emplace(var, split_name);
+        }
+
       std::string sprefix = prefix + "fieldsplit_" + split_name + "_";
       split->setup(nl, sprefix);
     }
