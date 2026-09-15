@@ -261,6 +261,66 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMLinearElasticityByComponentAMG]
+    type = CSVDiff
+    input = linearelasticity.i
+    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=by_component '
+               'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
+               'Outputs/ParaViewDataCollection/enable=false '
+               'Outputs/CSV/file_base=OutputData/LinearElasticityByComponentAMG'
+    csvdiff = 'OutputData/LinearElasticityByComponentAMG.csv'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem using '
+                  'MFEM with a BoomerAMG preconditioner that treats each displacement component '
+                  'as a separate unknown.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMLinearElasticityRigidBodyModesAMG]
+    type = CSVDiff
+    input = linearelasticity.i
+    cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=rigid_body_modes '
+               'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
+               'Outputs/ParaViewDataCollection/enable=false '
+               'Outputs/CSV/file_base=OutputData/LinearElasticityRigidBodyModesAMG'
+    csvdiff = 'OutputData/LinearElasticityRigidBodyModesAMG.csv'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem using '
+                  'MFEM with a BoomerAMG preconditioner that uses the rigid body modes of the '
+                  'displacement space.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMBoomerAMGVectorTreatmentErrors]
+    requirement = 'The system shall report an error when a BoomerAMG treatment for vector '
+                  'unknowns is requested'
+    [no_fespace]
+      type = RunException
+      input = linearelasticity.i
+      cli_args = 'Solvers/boomeramg/vector_treatment=by_component'
+      expect_err = "'by_component' and 'rigid_body_modes' require fespace to be set."
+      detail = 'without the space of the unknown,'
+      capabilities = 'mfem'
+    []
+    [nodes_ordering]
+      type = RunException
+      input = linearelasticity.i
+      cli_args = 'FESpaces/H1FESpace/ordering=NODES Solvers/boomeramg/fespace=H1FESpace '
+                 'Solvers/boomeramg/vector_treatment=by_component'
+      expect_err = "must have ordering = VDIM when vector_treatment is 'by_component' or "
+                   "'rigid_body_modes'."
+      detail = 'on a space ordered by nodes, and'
+      capabilities = 'mfem'
+    []
+    [unused_fespace]
+      type = RunException
+      input = linearelasticity.i
+      cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=scalar'
+      expect_err = "is only used when vector_treatment is 'by_component' or 'rigid_body_modes'."
+      detail = 'when a space is given that a scalar treatment would not use.'
+      capabilities = 'mfem'
+    []
+  []
   [MFEMGravity]
     type = XMLDiff
     input = gravity.i

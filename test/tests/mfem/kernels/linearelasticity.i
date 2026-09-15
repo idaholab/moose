@@ -87,10 +87,22 @@
   device = "cpu"
 []
 
+[Postprocessors]
+  [displacement_l2_norm]
+    type = MFEMVectorL2Error
+    variable = displacement
+    function = '0 0 0'
+  []
+[]
+
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/LinearElasticity
     vtk_format = ASCII
+  []
+  [CSV]
+    type = CSV
+    file_base = OutputData/LinearElasticity
   []
 []

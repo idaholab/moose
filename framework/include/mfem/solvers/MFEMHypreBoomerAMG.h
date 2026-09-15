@@ -31,7 +31,18 @@ protected:
   virtual void SetSolverParameters(mfem::HypreBoomerAMG & solver) override;
 
 private:
+  /// How BoomerAMG treats the components of a vector unknown
+  enum class VectorTreatment
+  {
+    AUTO,
+    SCALAR,
+    BY_COMPONENT,
+    RIGID_BODY_MODES
+  };
+
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
+  /// The vector treatment in use, with AUTO resolved
+  VectorTreatment _vector_treatment;
 };
 
 #endif
