@@ -336,47 +336,64 @@
   []
 
   [required_property]
-    requirement = 'The system shall require explicitly coupled properties to exist'
-    issues = '#18917'
+    requirement = 'The system shall require explicitly coupled non-derivative material properties to exist'
+    issues = '#18917 #32284'
     [parsed_material]
       type = RunException
       input = required_property.i
       cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names=Q'
       expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
-      detail = 'for regular properties in ParsedMaterials'
-    []
-    [parsed_material_requested_non_existing_derivative]
-      type = RunException
-      input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c,c]"'
-      expect_err = 'Material property \'d\^2S/dc\^2\', requested by \'prime\' is not defined on block 0'
-      detail = 'and error out for non-existing for explicitly requested derivatives in ParsedMaterials'
-    []
-    [parsed_material_requested_existing_derivative]
-      type = RunApp
-      input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c]"'
-      detail = 'for explicitly requested derivatives in ParsedMaterials'
-    []
-    [parsed_material_requested_optimized_out_derivative]
-      type = RunException
-      input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/material_property_names="Q:=D[S,c]"'
-      expect_err = 'Material property \'dS/dc\', requested by \'prime\' is not defined on block 0'
-      detail = 'for explicitly requested derivatives but optimized out derivatives in ParsedMaterials'
-    []
-    [allow_override]
-      type = RunApp
-      input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names="Q:=D[S,c]"'
-      detail = 'but provide for a user override to default non-existing properties to zero'
+      detail = 'in ParsedMaterials,'
     []
     [derivative_parsed_material]
       type = RunException
       input = required_property.i
       cli_args = 'Materials/prime/type=DerivativeParsedMaterial Materials/prime/material_property_names=Q'
       expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
-      detail = 'in DerivativeParsedMaterials'
+      detail = 'in DerivativeParsedMaterials,'
+    []
+    [order_independent_missing_first]
+      type = RunException
+      input = required_property.i
+      cli_args = "Materials/prime/type=ParsedMaterial Materials/prime/expression='missing+S' Materials/prime/material_property_names='missing S'"
+      expect_err = 'Material property \'missing\', requested by \'prime\' is not defined on block 0'
+      detail = 'regardless of whether the missing property is requested before existing properties,'
+    []
+    [order_independent_missing_last]
+      type = RunException
+      input = required_property.i
+      cli_args = "Materials/prime/type=ParsedMaterial Materials/prime/expression='S+missing' Materials/prime/material_property_names='S missing'"
+      expect_err = 'Material property \'missing\', requested by \'prime\' is not defined on block 0'
+      detail = 'or after them,'
+    []
+    [allow_override]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names=Q'
+      detail = 'but provide for a user override to default non-existing properties to zero.'
+    []
+  []
+
+  [optional_derivative_property]
+    requirement = 'The system shall couple explicitly requested derivative material properties in parsed materials as optional properties that default to zero when they are not defined'
+    issues = '#18917 #32284'
+    [existing]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c]"'
+      detail = 'when the requested derivative exists,'
+    []
+    [non_existing]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c,c]"'
+      detail = 'when the requested derivative does not exist,'
+    []
+    [optimized_out]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/expression=1 Materials/prime/material_property_names="Q:=D[S,c]"'
+      detail = 'and when the requested derivative is optimized out to zero.'
     []
   []
 
