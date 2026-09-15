@@ -68,7 +68,7 @@
       input = 'solution_aux_weighting.i'
       csvdiff = 'solution_aux_weighting_out.csv'
       prereq = weighting/source
-      detail = "reducing point values using selectable weighting policies, and"
+      detail = "averaging point values using an explicit weighting policy, and"
     []
 
     [missing_weighting]

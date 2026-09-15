@@ -787,30 +787,6 @@ SolutionUserObjectBase::pointValue(Real t,
         average += v.second;
       return average / Real(values.size());
     }
-    case WeightingType::SMALLEST_ELEMENT_ID:
-    {
-      dof_id_type selected_elem_id = values.begin()->first->id();
-      Real selected_value = values.begin()->second;
-      for (auto it = std::next(values.begin()); it != values.end(); ++it)
-        if (it->first->id() < selected_elem_id)
-        {
-          selected_elem_id = it->first->id();
-          selected_value = it->second;
-        }
-      return selected_value;
-    }
-    case WeightingType::LARGEST_ELEMENT_ID:
-    {
-      dof_id_type selected_elem_id = values.begin()->first->id();
-      Real selected_value = values.begin()->second;
-      for (auto it = std::next(values.begin()); it != values.end(); ++it)
-        if (it->first->id() > selected_elem_id)
-        {
-          selected_elem_id = it->first->id();
-          selected_value = it->second;
-        }
-      return selected_value;
-    }
   }
 
   mooseError("SolutionUserObjectBase::pointValue reaches line that it should not be able to "
@@ -966,30 +942,6 @@ SolutionUserObjectBase::pointValueGradient(Real t,
       for (auto & v : values)
         average += v.second;
       return average / Real(values.size());
-    }
-    case WeightingType::SMALLEST_ELEMENT_ID:
-    {
-      dof_id_type selected_elem_id = values.begin()->first->id();
-      RealGradient selected_value = values.begin()->second;
-      for (auto it = std::next(values.begin()); it != values.end(); ++it)
-        if (it->first->id() < selected_elem_id)
-        {
-          selected_elem_id = it->first->id();
-          selected_value = it->second;
-        }
-      return selected_value;
-    }
-    case WeightingType::LARGEST_ELEMENT_ID:
-    {
-      dof_id_type selected_elem_id = values.begin()->first->id();
-      RealGradient selected_value = values.begin()->second;
-      for (auto it = std::next(values.begin()); it != values.end(); ++it)
-        if (it->first->id() > selected_elem_id)
-        {
-          selected_elem_id = it->first->id();
-          selected_value = it->second;
-        }
-      return selected_value;
     }
   }
 

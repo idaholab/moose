@@ -16,14 +16,6 @@
     family = LAGRANGE
     order = FIRST
   []
-  [u_smallest]
-    family = LAGRANGE
-    order = FIRST
-  []
-  [u_largest]
-    family = LAGRANGE
-    order = FIRST
-  []
 []
 
 [UserObjects]
@@ -45,46 +37,12 @@
     direct = false
     execute_on = INITIAL
   []
-
-  [smallest]
-    type = SolutionAux
-    solution = source_solution
-    variable = u_smallest
-    from_variable = source_value
-    weighting_type = smallest_element_id
-    direct = false
-    execute_on = INITIAL
-  []
-
-  [largest]
-    type = SolutionAux
-    solution = source_solution
-    variable = u_largest
-    from_variable = source_value
-    weighting_type = largest_element_id
-    direct = false
-    execute_on = INITIAL
-  []
 []
 
 [Postprocessors]
   [average_value]
     type = PointValue
     variable = u_average
-    point = '0.5 0.5 0'
-    execute_on = INITIAL
-  []
-
-  [smallest_value]
-    type = PointValue
-    variable = u_smallest
-    point = '0.5 0.5 0'
-    execute_on = INITIAL
-  []
-
-  [largest_value]
-    type = PointValue
-    variable = u_largest
     point = '0.5 0.5 0'
     execute_on = INITIAL
   []

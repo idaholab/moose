@@ -36,7 +36,7 @@ public:
   SolutionUserObjectBase(const InputParameters & parameters);
 
   /// Policies for reducing multiple imported solution values at the same point
-  CreateMooseEnumClass(WeightingType, AVERAGE = 2, SMALLEST_ELEMENT_ID = 4, LARGEST_ELEMENT_ID = 8);
+  CreateMooseEnumClass(WeightingType, AVERAGE);
 
   /**
    * Get the time at which to sample the solution

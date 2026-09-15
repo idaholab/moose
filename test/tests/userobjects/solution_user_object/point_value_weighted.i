@@ -36,33 +36,6 @@
     execute_on = INITIAL
   []
 
-  [scalar_smallest_face]
-    type = TestSolutionPointValueWeighted
-    variable = discontinuous_variable
-    point = '0.5 0.25 0'
-    weighting_type = smallest_element_id
-    solution = soln
-    execute_on = INITIAL
-  []
-
-  [scalar_largest_face]
-    type = TestSolutionPointValueWeighted
-    variable = discontinuous_variable
-    point = '0.5 0.25 0'
-    weighting_type = largest_element_id
-    solution = soln
-    execute_on = INITIAL
-  []
-
-  [scalar_largest_elem_zero]
-    type = TestSolutionPointValueWeighted
-    variable = discontinuous_variable
-    point = '0.25 0.25 0'
-    weighting_type = largest_element_id
-    solution = soln
-    execute_on = INITIAL
-  []
-
   [gradient_average_face]
     type = TestSolutionPointValueWeighted
     variable = continuous_variable
@@ -70,39 +43,6 @@
     evaluate_gradient = true
     gradient_component = x
     weighting_type = average
-    solution = soln
-    execute_on = INITIAL
-  []
-
-  [gradient_smallest_face]
-    type = TestSolutionPointValueWeighted
-    variable = continuous_variable
-    point = '0.5 0.25 0'
-    evaluate_gradient = true
-    gradient_component = x
-    weighting_type = smallest_element_id
-    solution = soln
-    execute_on = INITIAL
-  []
-
-  [gradient_largest_face]
-    type = TestSolutionPointValueWeighted
-    variable = continuous_variable
-    point = '0.5 0.25 0'
-    evaluate_gradient = true
-    gradient_component = x
-    weighting_type = largest_element_id
-    solution = soln
-    execute_on = INITIAL
-  []
-
-  [gradient_largest_elem_zero]
-    type = TestSolutionPointValueWeighted
-    variable = continuous_variable
-    point = '0.25 0.25 0'
-    evaluate_gradient = true
-    gradient_component = x
-    weighting_type = largest_element_id
     solution = soln
     execute_on = INITIAL
   []
