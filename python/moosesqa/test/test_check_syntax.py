@@ -182,7 +182,9 @@ class TestCheckSyntax(unittest.TestCase):
 
     def testFileIsStubWholePageNonStubTemplateLoad(self):
         # Template not under "stubs/" is not a stub.
-        path = self._writeTmpMarkdown("!template load file=srs.md.template project=Framework")
+        path = self._writeTmpMarkdown(
+            "!template load file=srs.md.template project=Framework"
+        )
         self.assertFalse(TestCheckSyntax.file_is_stub(path))
 
     def testFileIsStubTemplateWithOtherContent(self):
