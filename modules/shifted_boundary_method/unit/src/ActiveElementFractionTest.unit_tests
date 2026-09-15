@@ -7,4 +7,10 @@
     unit_test = ActiveElementFractionTest.UnitSquare
     requirement = 'The system shall compute the fraction of a quadrilateral element occupied by the physical domain when the element is fully inside, fully outside, or cut in half by the true boundary.'
   []
+
+  [enclosed_domain]
+    type = GoogleTest
+    unit_test = ElementDomainOccupancyTest.DomainEnclosedWithinElement
+    requirement = 'The system shall distinguish nodal and quadrature occupancy when a physical domain is enclosed within an element or its boundary passes through the element nodes.'
+  []
 []
