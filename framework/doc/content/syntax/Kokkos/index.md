@@ -32,9 +32,9 @@ It supports multi-dimensional indexing.
 The dimension can either be specified through the second template argument with the default being one-dimension or using type aliases: for instance, a three-dimensional array of type `double` can be declared either by `Array<double, 3>` or `Array3D<double>`.
 The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
 They automatically return either CPU or GPU data depending on where they are being accessed.
-The index type template argument is set to 8-byte integer by default to accommodate large arrays.
-However, 8-byte integer computation is significantly more expensive than 4-byte integer computation.
-If your array size is small enough, consider using 4-byte indices to optimize index calculations.
+The index type template argument is set to a 4-byte unsigned integer by default.
+If your array requires an 8-byte index, configure MOOSE with `--with-kokkos-index-size=8`.
+You can also explicitly set the index type through the third template argument for individual arrays.
 If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the fourth layout template argument can be optionally set to `Moose::Kokkos::LayoutType::RIGHT` (default is `LEFT`).
 Arrays can be allocated through the following APIs: `create()`, `createHost()`, and `createDevice()`.
 `create()` allocates memories on both CPU and GPU, while `createHost()` or `createDevice()` only allocates memory on either CPU or GPU.
@@ -310,7 +310,7 @@ The wrapper automatically returns the reference on CPU and the instance on GPU, 
 
 For arithmetic values, there exists `Moose::Kokkos::Scalar` which is a derived class from `Moose::Kokkos::ReferenceWrapper` and provides arithmetic operators that can directly operate on the stored values for non-const types.
 For const types, those operators will be undefined.
-For example, a postprocessor value which is always provided as read-only can be held by `Moose::Kokkos::Scalar<const PostprocessorValue>` or its alias `Moose::Kokkos::PostprocessrValue`.
+For example, a postprocessor value which is always provided as read-only can be held by `Moose::Kokkos::Scalar<const PostprocessorValue>` or its alias `Moose::Kokkos::PostprocessorValue`.
 
 !listing framework/include/kokkos/base/KokkosReferenceWrapper.h
          id=kokkos_reference_wrapper_source
