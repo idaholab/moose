@@ -44,6 +44,9 @@ CohesiveZoneModelBase::validParams()
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
   params.setParameters("penalty", 0.0);
+  params.set<bool>("allow_nodal_normal_derivatives") = false;
+  params.set<bool>("use_nodal_normal_derivatives") = false;
+  params.set<bool>("ghost_point_neighbors") = false;
   return params;
 }
 
@@ -236,6 +239,14 @@ CohesiveZoneModelBase::initialize()
   _dof_to_czm_traction.clear();
   for (auto & map_pr : _dof_to_rotation_matrix)
     map_pr.second.setToIdentity();
+}
+
+ADReal
+CohesiveZoneModelBase::nodalTangentialPressure(const Node & node,
+                                               const unsigned int direction) const
+{
+  mooseAssert(direction < 2, "There are at most two tangent directions.");
+  return libmesh_map_find(_dof_to_tangential_traction, node.id()).first(direction);
 }
 
 void

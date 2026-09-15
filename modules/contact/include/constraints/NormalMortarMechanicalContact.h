@@ -27,5 +27,5 @@ protected:
   const MooseEnum _component;
 
   /// The weighted gap user object which supplies the contact force
-  WeightedGapUserObject & _weighted_gap_uo;
+  const WeightedGapUserObject & _weighted_gap_uo;
 };

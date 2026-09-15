@@ -872,6 +872,9 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
       _formulation == ContactFormulation::MORTAR_PENALTY)
   {
     std::string action_name = MooseUtils::shortName(name());
+    const bool augmented_penalty =
+        _formulation == ContactFormulation::MORTAR_PENALTY &&
+        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
     for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
     {
       const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
@@ -886,6 +889,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
       params.set<Real>("minimum_projection_angle") = getParam<Real>("minimum_projection_angle");
       params.set<MooseEnum>("mortar_3d_subpatch_plane") =
           getParam<MooseEnum>("mortar_3d_subpatch_plane");
+      params.set<bool>("ghost_point_neighbors") = !_mortar_dynamics && !augmented_penalty;
       addRelationshipManagers(input_rm_type, params);
     }
   }

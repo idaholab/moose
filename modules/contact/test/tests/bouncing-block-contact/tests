@@ -192,17 +192,15 @@
     requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
                   'back to any process that contributed to computing said weighted quantities. We '
                   'check against the serial numerical results.'
-    issues = '#21329'
+    issues = '#21329 #30642'
     type = 'Exodiff'
     input = frictional-penalty-weighted-vel.i
-    # this test does not converge, see #30642
-    expect_exit_code = 1
     exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
     min_parallel = 13
-    restep = false # Test is prescribed to abort on failed timestep
+    restep = false # Issue #31054: frictional penalty history is not restored on a rejected step
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
@@ -215,7 +213,7 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp_out.e'
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
-      abs_zero = 5e-9
+      custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
     [action]
       type = 'Exodiff'
