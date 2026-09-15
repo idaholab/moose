@@ -204,7 +204,8 @@ loopOverMortarSegments(
         }
       }
 
-      // If edge dropping case we need the mortar integration weights to compute dual shape functions
+      // If edge dropping case we need the mortar integration weights to compute dual shape
+      // functions
       if (assembly.needDual())
       {
         const auto & coord_msm = assembly.mortarCoordTransformation();
