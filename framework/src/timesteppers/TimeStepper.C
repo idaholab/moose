@@ -188,6 +188,7 @@ void
 TimeStepper::rejectStep()
 {
   _currently_restepping = true;
+  _fe_problem.restoreGeometricSearchState();
   _fe_problem.restoreSolutions();
 }
 

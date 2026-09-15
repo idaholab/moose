@@ -19,6 +19,8 @@
 #include "SubProblem.h"
 #include "MooseApp.h"
 
+#include <sstream>
+
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
@@ -178,6 +180,25 @@ PenetrationLocator::reinit()
   _has_penetrated.clear();
 
   detectPenetration();
+}
+
+std::string
+PenetrationLocator::backup()
+{
+  std::ostringstream stream;
+  dataStore(stream, _penetration_info, &_mesh);
+  dataStore(stream, _has_penetrated, &_mesh);
+  dataStore(stream, _update_location, &_mesh);
+  return stream.str();
+}
+
+void
+PenetrationLocator::restore(const std::string & data)
+{
+  std::istringstream stream(data);
+  dataLoad(stream, _penetration_info, &_mesh);
+  dataLoad(stream, _has_penetrated, &_mesh);
+  dataLoad(stream, _update_location, &_mesh);
 }
 
 Real

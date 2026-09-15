@@ -7519,6 +7519,26 @@ FEProblemBase::advanceState()
   if (_kokkos_neighbor_material_props.hasStatefulProperties())
     _kokkos_neighbor_material_props.shift();
 #endif
+
+  backupGeometricSearchState();
+}
+
+void
+FEProblemBase::backupGeometricSearchState()
+{
+  _geometric_search_data.backup();
+
+  if (_displaced_problem)
+    _displaced_problem->geomSearchData().backup();
+}
+
+void
+FEProblemBase::restoreGeometricSearchState()
+{
+  _geometric_search_data.restore();
+
+  if (_displaced_problem)
+    _displaced_problem->geomSearchData().restore();
 }
 
 void
