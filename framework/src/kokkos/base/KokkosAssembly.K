@@ -398,10 +398,12 @@ Assembly::initShape()
       else
       {
         if (fe_type.family != libMesh::LAGRANGE && fe_type.family != libMesh::L2_LAGRANGE &&
+            fe_type.family != libMesh::LAGRANGE_GLL &&
+            fe_type.family != libMesh::L2_LAGRANGE_GLL &&
             fe_type.family != libMesh::MONOMIAL && fe_type.family != libMesh::SCALAR &&
             fe_type.family != libMesh::HIERARCHIC)
-          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRNAGE, MONOMIAL, SCALAR, "
-                     "HIERARCHIC for scalar FE families.");
+          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRANGE, LAGRANGE_GLL, "
+                     "L2_LAGRANGE_GLL, MONOMIAL, SCALAR, HIERARCHIC for scalar FE families.");
       }
 
       fe_types.insert(fe_type);
