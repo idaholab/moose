@@ -106,9 +106,9 @@ CHTHandler::CHTHandler(const InputParameters & params)
   _thermal_resistance.reserve(_cht_boundary_names.size());
   for (const auto bd_index : index_range(_cht_boundary_names))
   {
-    const auto & thermal_resistance_name =
-        thermal_resistance_names.size() == 1 ? thermal_resistance_names[0]
-                                             : thermal_resistance_names[bd_index];
+    const auto & thermal_resistance_name = thermal_resistance_names.size() == 1
+                                               ? thermal_resistance_names[0]
+                                               : thermal_resistance_names[bd_index];
     _thermal_resistance.push_back(&getFunctorByName<Real>(thermal_resistance_name));
   }
 }
@@ -475,13 +475,8 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
                    _cht_boundary_names[bd_index],
                    "'.");
 
-      auto resistance_face_arg =
-          Moose::FaceArg{fi,
-                         Moose::FV::LimiterType::CentralDifference,
-                         true,
-                         false,
-                         nullptr,
-                         nullptr};
+      auto resistance_face_arg = Moose::FaceArg{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
       if (on_elem != on_neighbor)
         resistance_face_arg.face_side = on_elem ? fi->elemPtr() : fi->neighborPtr();
@@ -586,4 +581,3 @@ CHTHandler::converged() const
 
 } // End FV namespace
 } // End Moose namespace
-
