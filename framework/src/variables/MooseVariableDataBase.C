@@ -385,9 +385,11 @@ MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value)
   // components packed into a single OutputType value. setNodalValue writes only one shape
   // function's value, so it is only valid for a variable with a single shape function, e.g. a
   // nodal Lagrange variable or a CONSTANT-order elemental variable; a variable with more than
-  // one shape function must use setDofValues instead.
+  // one shape function must use setDofValues instead. A subparametric variable, e.g. the pressure
+  // of a Taylor-Hood pair, has nodes on its elements that carry none of its degrees of freedom;
+  // callers query isNodalDefined() to skip those nodes before reaching this method.
   mooseAssert(_dof_indices.size() == _count,
-              "setNodalValue is only valid for a variable with a single shape function");
+              "setNodalValue is only valid for a variable with one shape function per node");
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
   dof_values.resize(/*n_shapes=*/1);
   dof_values[0] = value; // update variable nodal value
