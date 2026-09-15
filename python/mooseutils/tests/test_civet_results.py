@@ -35,20 +35,14 @@ class Test(unittest.TestCase):
         job = cr.Job(1, "results_1_recipe.tar.gz", cr.JobFileStatus.LOCAL, None)
 
         content_without_memory = "[0.530s]       OK  kernels/simple_diffusion.test [recover]\n"
-        database = collections.defaultdict(lambda: collections.defaultdict(list))
-        cr._process_results(database, job, "06_Test_-p_3", content_without_memory, None)
-        tests = database["kernels/simple_diffusion.test"][1]
-        self.assertEqual(len(tests), 1)
-        self.assertEqual(tests[0].status, "OK")
-        self.assertEqual(tests[0].caveats, ["recover"])
-
         content_with_memory = "[0.530s] [ 123MB]       OK  kernels/simple_diffusion.test [recover]\n"
-        database = collections.defaultdict(lambda: collections.defaultdict(list))
-        cr._process_results(database, job, "06_Test_-p_3", content_with_memory, None)
-        tests = database["kernels/simple_diffusion.test"][1]
-        self.assertEqual(len(tests), 1)
-        self.assertEqual(tests[0].status, "OK")
-        self.assertEqual(tests[0].caveats, ["recover"])
+        for content in (content_without_memory, content_with_memory):
+            database = collections.defaultdict(lambda: collections.defaultdict(list))
+            cr._process_results(database, job, "06_Test_-p_3", content, None)
+            tests = database["kernels/simple_diffusion.test"][1]
+            self.assertEqual(len(tests), 1)
+            self.assertEqual(tests[0].status, "OK")
+            self.assertEqual(tests[0].caveats, ["recover"])
 
     def testGetCivetJobs(self):
         jobs = self.jobs
