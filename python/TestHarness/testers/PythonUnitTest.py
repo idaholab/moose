@@ -39,9 +39,10 @@ class PythonUnitTest(RunApp):
         # Force the use of a single MPI slot by default; -p isn't currently
         # passed to the unit test so if the user really wants multiple ranks
         # they better force it via min_parallel. --n-threads *is* passed
-        # through (see augmentEnvironment below), but is still forced to a
-        # single thread here by default; subclasses that make use of it
-        # (e.g. MMSTest) can raise this default back up.
+        # through (see augmentEnvironment below), but max_threads is still
+        # forced to 1 here by default; subclasses that make use of the
+        # passed-through thread count (e.g. MMSTest) can raise max_threads
+        # back up.
         params["max_parallel"] = 1
         params["max_threads"] = 1
 

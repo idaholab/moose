@@ -31,7 +31,7 @@ class MMSTest(PythonUnitTest):
         """Define valid parameters."""
         params = PythonUnitTest.validParams()
 
-        # Unlike parallel (which the MMS module hardcodes per-script and
+        # Unlike the number of parallel MPI ranks (which the MMS module hardcodes per-script and
         # does not pick up from the test harness), MMS tests do honor
         # --n-threads (see python/mms/runner.py), so restore the normal
         # RunApp threading default instead of the single-thread default
