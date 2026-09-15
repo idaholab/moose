@@ -29,23 +29,22 @@ class Test(unittest.TestCase):
 
     def testProcessResultsFormats(self):
         """
-        Non-network regression test for TEST_RE/_process_results against both the
-        legacy TestHarness console format ("tpnsc") and the current one ("tmpnsc",
-        which adds a memory field; see #27479) that civet's run_tests invocation produces.
+        Non-network regression test for TEST_RE/_process_results, covering test output
+        lines both without and with the optional memory field.
         """
         job = cr.Job(1, "results_1_recipe.tar.gz", cr.JobFileStatus.LOCAL, None)
 
-        content_old = "[0.530s]       OK  kernels/simple_diffusion.test [recover]\n"
+        content_without_memory = "[0.530s]       OK  kernels/simple_diffusion.test [recover]\n"
         database = collections.defaultdict(lambda: collections.defaultdict(list))
-        cr._process_results(database, job, "06_Test_-p_3", content_old, None)
+        cr._process_results(database, job, "06_Test_-p_3", content_without_memory, None)
         tests = database["kernels/simple_diffusion.test"][1]
         self.assertEqual(len(tests), 1)
         self.assertEqual(tests[0].status, "OK")
         self.assertEqual(tests[0].caveats, ["recover"])
 
-        content_new = "[0.530s] [ 123MB]       OK  kernels/simple_diffusion.test [recover]\n"
+        content_with_memory = "[0.530s] [ 123MB]       OK  kernels/simple_diffusion.test [recover]\n"
         database = collections.defaultdict(lambda: collections.defaultdict(list))
-        cr._process_results(database, job, "06_Test_-p_3", content_new, None)
+        cr._process_results(database, job, "06_Test_-p_3", content_with_memory, None)
         tests = database["kernels/simple_diffusion.test"][1]
         self.assertEqual(len(tests), 1)
         self.assertEqual(tests[0].status, "OK")
