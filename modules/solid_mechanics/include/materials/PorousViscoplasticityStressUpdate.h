@@ -66,10 +66,7 @@ public:
       const RankTwoTensor & elastic_strain_old,
       bool compute_full_tangent_operator = false,
       RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
-  bool substeppingCapabilityEnabled() override
-  {
-    return _use_substepping != SubsteppingType::NONE;
-  }
+  bool substeppingCapabilityEnabled() override { return _use_substepping != SubsteppingType::NONE; }
   bool substeppingCapabilityRequested() override { return substeppingCapabilityEnabled(); }
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
@@ -133,17 +130,17 @@ protected:
    * independent of the local porosity unknown. Derived models may provide a porosity-dependent
    * pressure closure and its analytical derivative.
    */
-  virtual HydrostaticStressState evaluateHydrostaticStress(
-      const GenericReal<is_ad> & matrix_hydro_stress,
-      const GenericReal<is_ad> & porosity) const;
+  virtual HydrostaticStressState
+  evaluateHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
+                            const GenericReal<is_ad> & porosity) const;
 
   /** Optional porosity waypoint used only to globalize an upward reduced solve. */
   virtual std::optional<Real> reducedPorositySearchTarget() const { return std::nullopt; }
 
   /** Hook called once after a converged local porosity state has been committed. */
-  virtual void porosityStateAccepted(
-      const GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
-      const GenericReal<is_ad> & /*porosity*/)
+  virtual void
+  porosityStateAccepted(const GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+                        const GenericReal<is_ad> & /*porosity*/)
   {
   }
 
@@ -172,7 +169,7 @@ protected:
   initialGuess(const GenericReal<is_ad> & effective_trial_stress) override;
 
   virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
-                                              const GenericReal<is_ad> & scalar) override;
+                                             const GenericReal<is_ad> & scalar) override;
   virtual GenericReal<is_ad>
   computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
                     const GenericReal<is_ad> & /*scalar*/) override
@@ -212,9 +209,9 @@ protected:
    * tensor derivatives are partial derivatives with respect to p_eff, q, and f.
    */
   LpsCreepResponse evaluateLpsCreepResponse(const GenericReal<is_ad> & effective_hydro_stress,
-                                             const GenericReal<is_ad> & equiv_stress,
-                                             const GenericRankTwoTensor<is_ad> & dev_direction,
-                                             const GenericReal<is_ad> & porosity);
+                                            const GenericReal<is_ad> & equiv_stress,
+                                            const GenericRankTwoTensor<is_ad> & dev_direction,
+                                            const GenericReal<is_ad> & porosity);
 
   /// Analytical first and second partial derivatives of one LPS gauge residual.
   LpsDerivatives computeLpsDerivatives(const GenericReal<is_ad> & gauge_stress,
@@ -287,10 +284,10 @@ private:
     std::vector<GenericReal<is_ad>> gauge_stresses;
   };
 
-  ConstitutiveStateSnapshot captureConstitutiveState(
-      const GenericRankTwoTensor<is_ad> & strain_increment,
-      const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & stress) const;
+  ConstitutiveStateSnapshot
+  captureConstitutiveState(const GenericRankTwoTensor<is_ad> & strain_increment,
+                           const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                           const GenericRankTwoTensor<is_ad> & stress) const;
   void restoreConstitutiveState(const ConstitutiveStateSnapshot & snapshot,
                                 GenericRankTwoTensor<is_ad> & strain_increment,
                                 GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
@@ -306,8 +303,7 @@ private:
 
   using LocalJacobian =
       std::array<std::array<GenericReal<is_ad>, LOCAL_SYSTEM_SIZE>, LOCAL_SYSTEM_SIZE>;
-  using ScaledLocalJacobian =
-      std::array<std::array<Real, LOCAL_SYSTEM_SIZE>, LOCAL_SYSTEM_SIZE>;
+  using ScaledLocalJacobian = std::array<std::array<Real, LOCAL_SYSTEM_SIZE>, LOCAL_SYSTEM_SIZE>;
   using LocalResidual = std::array<GenericReal<is_ad>, LOCAL_SYSTEM_SIZE>;
 
   /** Trial data, numerical scales, and tolerances shared by one local constitutive solve. */
@@ -426,7 +422,6 @@ private:
         validateFiniteValue(tensor(i, j), state_name, stage, field);
   }
 
-
   LocalPoint evaluateLocalPoint(const LocalCoordinates & coordinates,
                                 const LocalSolveContext & context,
                                 PorosityBranch porosity_branch);
@@ -443,12 +438,11 @@ private:
                                             const LocalSolveContext & context);
   RankFourTensor computeConsistentTangent(const LocalPoint & point,
                                           const LocalSolveContext & context) const;
-  std::optional<LocalPoint> backtrackingLineSearch(
-      const LocalPoint & point,
-      const LocalResidual & correction_scaled,
-      Real initial_alpha,
-      LocalResidualScope residual_scope,
-      const LocalSolveContext & context);
+  std::optional<LocalPoint> backtrackingLineSearch(const LocalPoint & point,
+                                                   const LocalResidual & correction_scaled,
+                                                   Real initial_alpha,
+                                                   LocalResidualScope residual_scope,
+                                                   const LocalSolveContext & context);
   void initializeLocalSolveScales(LocalSolveContext & context) const;
   LocalPoint solvePorosityActiveSet(const LocalSolveContext & context,
                                     bool & reduced_porosity_attempted);
@@ -458,10 +452,9 @@ private:
                         GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
                         GenericRankTwoTensor<is_ad> & stress,
                         GenericReal<is_ad> & effective_inelastic_strain_increment);
-  std::optional<LocalPoint> solveMechanicalAtFixedPorosity(
-      const LocalCoordinates & seed,
-      Real tolerance,
-      const LocalSolveContext & context);
+  std::optional<LocalPoint> solveMechanicalAtFixedPorosity(const LocalCoordinates & seed,
+                                                           Real tolerance,
+                                                           const LocalSolveContext & context);
   LocalPoint verifyConvergedPoint(const LocalPoint & point, const LocalSolveContext & context);
   LocalPoint verifyReducedConvergedPoint(const LocalSolveResult & reduced,
                                          const LocalSolveContext & context);
@@ -473,48 +466,40 @@ private:
                                               const LocalSolveContext & context,
                                               Real & best_abs_rf_scaled);
   LocalCoordinates reducedBracketMidpoint(const LocalPoint & lower, const LocalPoint & upper) const;
-  std::optional<LocalPoint> recoverReducedPorosityRootBeforeFold(
-      ReducedPorosityBracket & bracket,
-      const LocalPoint & fold_upper,
-      const LocalSolveContext & context,
-      Real & best_abs_rf_scaled);
-  std::optional<LocalPoint> discoverReducedPorosityBracket(
-      ReducedPorosityBracket & bracket,
-      const LocalSolveContext & context,
-      Real & best_abs_rf_scaled);
-  std::optional<LocalSolveResult>
-  solveReducedPorosityBracket(ReducedPorosityBracket & bracket,
-                              const LocalSolveContext & context,
-                              Real & best_abs_rf_scaled);
+  std::optional<LocalPoint> recoverReducedPorosityRootBeforeFold(ReducedPorosityBracket & bracket,
+                                                                 const LocalPoint & fold_upper,
+                                                                 const LocalSolveContext & context,
+                                                                 Real & best_abs_rf_scaled);
+  std::optional<LocalPoint> discoverReducedPorosityBracket(ReducedPorosityBracket & bracket,
+                                                           const LocalSolveContext & context,
+                                                           Real & best_abs_rf_scaled);
+  std::optional<LocalSolveResult> solveReducedPorosityBracket(ReducedPorosityBracket & bracket,
+                                                              const LocalSolveContext & context,
+                                                              Real & best_abs_rf_scaled);
   std::optional<ReducedPorosityTangent>
   computeReducedPorosityTangent(const LocalJacobian & jacobian) const;
-  std::optional<LocalSolveResult>
-  solveReducedPorosityDownward(LocalPoint upper,
-                               const LocalSolveContext & context,
-                               Real & best_abs_rf_scaled);
-  std::optional<LocalSolveResult>
-  solveReducedPorosityUpward(const LocalPoint & lower,
-                             const LocalSolveContext & context,
-                             Real & best_abs_rf_scaled);
-  std::optional<LocalSolveResult>
-  solveReducedPorosity(const LocalPoint & point,
-                        const LocalSolveContext & context,
-                        bool & reduced_porosity_attempted);
+  std::optional<LocalSolveResult> solveReducedPorosityDownward(LocalPoint upper,
+                                                               const LocalSolveContext & context,
+                                                               Real & best_abs_rf_scaled);
+  std::optional<LocalSolveResult> solveReducedPorosityUpward(const LocalPoint & lower,
+                                                             const LocalSolveContext & context,
+                                                             Real & best_abs_rf_scaled);
+  std::optional<LocalSolveResult> solveReducedPorosity(const LocalPoint & point,
+                                                       const LocalSolveContext & context,
+                                                       bool & reduced_porosity_attempted);
   LocalSolveResult solveCoupledNewton(LocalPoint point,
                                       const LocalSolveContext & context,
                                       bool & reduced_porosity_attempted);
   LocalSolveResult recoverFailedCoupledLineSearch(const LocalPoint & point,
-                                                   const LocalSolveContext & context,
-                                                   bool & reduced_porosity_attempted);
-  std::optional<LocalSolveResult> tryReducedPorosityRecovery(
-      const LocalPoint & point,
-      const LocalSolveContext & context,
-      bool & reduced_porosity_attempted);
+                                                  const LocalSolveContext & context,
+                                                  bool & reduced_porosity_attempted);
+  std::optional<LocalSolveResult> tryReducedPorosityRecovery(const LocalPoint & point,
+                                                             const LocalSolveContext & context,
+                                                             bool & reduced_porosity_attempted);
   bool adaptiveSubstepRefinementAvailable() const;
   [[noreturn]] void throwCoupledLineSearchFailure(const LocalPoint & point,
                                                   const LocalSolveContext & context,
                                                   bool reduced_porosity_attempted);
-
 
 protected:
   /// Equivalent von Mises stress of one deviatoric stress tensor.
