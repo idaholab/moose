@@ -60,12 +60,13 @@ class TestInlineCivet(CivetTestCase):
 
 @unittest.skip("Disabled to avoid excessive network access")
 class TestInlineCivetWithConfig(CivetTestCase):
+    """Only !civet mergeresults needs real network access: it resolves via
+    CivetExtension.hashes(), which is only populated by init()'s remotes-driven git lookup.
+    The results/badges/report commands are covered without network by TestInlineCivet,
+    TestBadgesNoNetwork, and TestReportNoNetwork respectively."""
+
     EXTENSIONS = [core, command, civet]
-    RESULTS = "[!civet!results](Results)"
-    RESULTS2 = "[!civet!results]"
     MERGERESULTS = "[!civet!mergeresults]"
-    BADGES = "[!civet!badges tests=kernels/simple_diffusion.test]"
-    REPORT = "!civet report tests=kernels/simple_diffusion.test"
 
     def setupExtension(self, ext):
         if ext == civet:
@@ -76,24 +77,6 @@ class TestInlineCivetWithConfig(CivetTestCase):
                     moose=dict(url="https://civet.inl.gov", repo="idaholab/moose")
                 ),
             )
-
-    def testResultsAST(self):
-        """!civet results with content; no need to render b/c it only uses core tokens"""
-        ast = self.tokenize(self.RESULTS)
-        self.assertSize(ast, 1)
-        self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(ast(0, 0), "Link", size=1)
-        self.assertToken(ast(0, 0, 0), "Word", size=0, content="Results")
-        self.assertURL(ast(0, 0))
-
-    def testResultsAST2(self):
-        """!civet results without content; no need to render b/c it only uses core tokens"""
-        ast = self.tokenize(self.RESULTS2)
-        self.assertSize(ast, 1)
-        self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(ast(0, 0), "Link", size=1)
-        self.assertToken(ast(0, 0, 0), "String", size=0)
-        self.assertURL(ast(0, 0))
 
     def testMergeResults(self):
         """!civet mergeresults; no need to render b/c it only uses core tokens"""
@@ -110,44 +93,6 @@ class TestInlineCivetWithConfig(CivetTestCase):
         self.assertToken(ast(0, 2, 0), "String", size=0)
         self.assertURL(ast(0, 2))
         self.assertToken(ast(0, 3), "LineBreak", size=0)
-
-    def testBadgesAST(self):
-        ast = self.tokenize(self.BADGES)
-        self.assertSize(ast, 1)
-        self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(
-            ast(0, 0),
-            "CivetTestBadges",
-            size=0,
-            tests=["kernels/simple_diffusion.test"],
-        )
-
-    def testBadgesMaterialize(self):
-        ast = self.tokenize(self.BADGES)
-        res = self.render(ast, renderer=base.MaterializeRenderer())
-        self.assertSize(res, 1)
-        self.assertHTMLTag(res, "div", size=1, class_="moose-content")
-        self.assertHTMLTag(res(0), "p", size=1)
-        self.assertHTMLTag(res(0, 0), "div", size=1, class_="moose-civet-badges")
-        self.assertHTMLTag(res(0, 0, 0), "span", size=1)
-        self.assertHTMLTag(res(0, 0, 0, 0), "span", size=1, class_="new badge")
-        self.assertIn("data-badge-caption", res(0, 0, 0, 0))
-        self.assertIn("data-status", res(0, 0, 0, 0))
-
-    def testReportAST(self):
-        ast = self.tokenize(self.REPORT)
-        self.assertSize(ast, 1)
-        self.assertToken(
-            ast(0), "CivetTestReport", size=0, tests=["kernels/simple_diffusion.test"]
-        )
-
-    def testReportMaterialize(self):
-        ast = self.tokenize(self.REPORT)
-        res = self.render(ast, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, "div", size=1, class_="moose-content")
-        self.assertHTMLTag(res(0), "div", size=1, class_="moose-civet-test-report")
-        self.assertHTMLTag(res(0, 0), "table")
-        self.assertGreater(len(res(0, 0)), 1)
 
 
 class TestBadgesNoNetwork(MooseDocsTestCase):
@@ -185,6 +130,36 @@ class TestBadgesNoNetwork(MooseDocsTestCase):
         self.assertHTMLTag(res(0, 0, 0, 0), "span", class_="new badge", string="1")
         self.assertEqual(res(0, 0, 0, 0)["data-badge-caption"], "OK")
         self.assertEqual(res(0, 0, 0, 0)["data-status"], "ok")
+
+
+class TestReportNoNetwork(MooseDocsTestCase):
+    """
+    Test civet test report rendering with an injected, in-memory result database instead of
+    "remotes" pointing at a real CIVET site, so this exercises the report rendering path
+    without any network access. Mirrors TestBadgesNoNetwork; "prefix" is set directly on the
+    token since the markdown command itself doesn't expose it.
+    """
+
+    EXTENSIONS = [core, command, civet]
+    REPORT = "!civet report tests=simple_diffusion.test"
+
+    def testReportMaterialize(self):
+        ast = self.tokenize(self.REPORT, renderer=base.MaterializeRenderer())
+        ast(0)["prefix"] = "kernels"
+
+        ext = next(e for e in self.translator.extensions if e.name == "civet")
+        fake_test = civet_results.Test(
+            "06_Test_-p_3", "OK", ["recover"], "", 0.53, "https://civet.inl.gov"
+        )
+        ext.results = lambda name: (
+            {12345: [fake_test]} if name == "kernels.simple_diffusion.test" else {}
+        )
+
+        res = self.render(ast)
+        self.assertHTMLTag(res, "div", class_="moose-content")
+        self.assertHTMLTag(res(0), "div", size=1, class_="moose-civet-test-report")
+        self.assertHTMLTag(res(0, 0), "table")
+        self.assertGreater(len(res(0, 0)), 1)
 
 
 if __name__ == "__main__":
