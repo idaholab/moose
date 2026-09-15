@@ -671,65 +671,105 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
     if (p.shouldIgnore(name))
       continue;
 
-    const hit::Node * param_node = nullptr;
+    // Find where this parameter is set. A parameter can be provided using its
+    // blessed name or, for a renamed/deprecated parameter, one of its aliased names (see
+    // paramAliases). We scan all of the aliases in both the given section and [GlobalParams]
+    // so that (1) a value set locally always takes precedence over one set in [GlobalParams],
+    // even when the two are set using different aliases, and (2) providing more than one alias
+    // within the same scope, e.g. both a deprecated parameter and its replacement, is flagged
+    // as a conflict rather than being silently resolved to one of them (see #32350).
+    const hit::Node * local_node = nullptr;
+    std::string local_name;
+    const hit::Node * global_node = nullptr;
+    std::string global_name;
+
+    // Records a same-scope conflict between two aliases that refer to the same parameter
+    const std::string & blessed_name = name;
+    auto add_conflict_error = [this, &blessed_name](const std::string & first,
+                                                    const std::string & second,
+                                                    const auto * node)
+    {
+      _errors.emplace_back("The parameter '" + blessed_name +
+                               "' was provided more than once using the aliased names '" + first +
+                               "' and '" + second +
+                               "', which refer to the same parameter. Please provide it only once, "
+                               "using the name '" +
+                               blessed_name + "'.",
+                           node);
+    };
 
     for (const auto & param_name : p.paramAliases(name))
     {
-      // Check for parameters under the given section, if a section
-      // node was provided
+      // Check for the parameter under the given section, if a section node was provided
       if (section_node)
-      {
         if (const auto section_param_node = section_node->find(param_name);
             section_param_node && section_param_node->type() == hit::NodeType::Field &&
             section_param_node->parent() == section_node)
-          param_node = section_param_node;
-      }
-      // No node found within the given section, check [GlobalParams]
-      if (!param_node && queryGlobalParamsNode())
-      {
-        if (const auto global_node = queryGlobalParamsNode()->find(param_name);
-            global_node && global_node->type() == hit::NodeType::Field &&
-            global_node->parent() == queryGlobalParamsNode())
         {
-          mooseAssert(isGlobal(*global_node), "Could not detect global-ness");
-          param_node = global_node;
-        }
-      }
-
-      // Found it
-      if (param_node)
-      {
-        const auto fullpath = param_node->fullpath();
-        p.setHitNode(param_name, *param_node, {});
-        p.set_attributes(param_name, false);
-        _extracted_vars.insert(fullpath);
-
-        const auto global = isGlobal(*param_node);
-
-        // Check for deprecated parameters if the parameter is not a global param
-        if (!global)
-          if (const auto deprecated_message = p.queryDeprecatedParamMessage(param_name))
+          if (local_node)
+            add_conflict_error(local_name, param_name, section_param_node);
+          else
           {
-            std::string key = "";
-            if (const auto object_type_ptr = p.queryObjectType())
-              key += *object_type_ptr + "_";
-            key += param_name;
-            _deprecated_params.emplace(key, *deprecated_message);
+            local_node = section_param_node;
+            local_name = param_name;
           }
-
-        // Private parameter, don't set
-        if (p.isPrivate(param_name))
-        {
-          // Error if it isn't global, just once
-          if (!global && std::find_if(_errors.begin(),
-                                      _errors.end(),
-                                      [&param_node](const auto & err)
-                                      { return err.node == param_node; }) == _errors.end())
-            _errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
-                                 param_node);
-          continue;
         }
 
+      // Check for the parameter in [GlobalParams]
+      if (queryGlobalParamsNode())
+        if (const auto g_node = queryGlobalParamsNode()->find(param_name);
+            g_node && g_node->type() == hit::NodeType::Field &&
+            g_node->parent() == queryGlobalParamsNode())
+        {
+          mooseAssert(isGlobal(*g_node), "Could not detect global-ness");
+          if (global_node)
+            add_conflict_error(global_name, param_name, g_node);
+          else
+          {
+            global_node = g_node;
+            global_name = param_name;
+          }
+        }
+    }
+
+    // A value set locally takes precedence over one set in [GlobalParams]
+    const hit::Node * const param_node = local_node ? local_node : global_node;
+    const std::string & param_name = local_node ? local_name : global_name;
+
+    // Found it
+    if (param_node)
+    {
+      const auto fullpath = param_node->fullpath();
+      p.setHitNode(param_name, *param_node, {});
+      p.set_attributes(param_name, false);
+      _extracted_vars.insert(fullpath);
+
+      const auto global = isGlobal(*param_node);
+
+      // Check for deprecated parameters if the parameter is not a global param
+      if (!global)
+        if (const auto deprecated_message = p.queryDeprecatedParamMessage(param_name))
+        {
+          std::string key = "";
+          if (const auto object_type_ptr = p.queryObjectType())
+            key += *object_type_ptr + "_";
+          key += param_name;
+          _deprecated_params.emplace(key, *deprecated_message);
+        }
+
+      // Private parameter, don't set
+      if (p.isPrivate(param_name))
+      {
+        // Error if it isn't global, just once
+        if (!global && std::find_if(_errors.begin(),
+                                    _errors.end(),
+                                    [&param_node](const auto & err)
+                                    { return err.node == param_node; }) == _errors.end())
+          _errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
+                               param_node);
+      }
+      else
+      {
         // Set the value, capturing errors
         const auto param_field = dynamic_cast<const hit::Field *>(param_node);
         mooseAssert(param_field, "Is not a field");
@@ -748,29 +788,25 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
           _errors.emplace_back(e.what(), param_node);
         }
 
-        // Break if we failed here and don't perform extra checks
-        if (!set_param)
-          break;
+        // Only perform the extra checks if the value was successfully set
+        if (set_param)
+        {
+          // Special setup for vector<VariableName>
+          if (auto cast_par = dynamic_cast<InputParameters::Parameter<std::vector<VariableName>> *>(
+                  par_unique_ptr.get()))
+            if (const auto error = p.setupVariableNames(cast_par->set(), *param_node, {}))
+              _errors.emplace_back(*error, param_node);
 
-        // Special setup for vector<VariableName>
-        if (auto cast_par = dynamic_cast<InputParameters::Parameter<std::vector<VariableName>> *>(
-                par_unique_ptr.get()))
-          if (const auto error = p.setupVariableNames(cast_par->set(), *param_node, {}))
-            _errors.emplace_back(*error, param_node);
-
-        // Possibly perform a range check if this parameter has one
-        if (p.isRangeChecked(param_node->path()))
-          if (const auto error = p.parameterRangeCheck(
-                  *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
-            _errors.emplace_back(error->second, param_node);
-
-        // Don't check the other alises since we've found it
-        break;
+          // Possibly perform a range check if this parameter has one
+          if (p.isRangeChecked(param_node->path()))
+            if (const auto error = p.parameterRangeCheck(
+                    *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
+              _errors.emplace_back(error->second, param_node);
+        }
       }
     }
-
     // Special casing when the parameter was not found
-    if (!param_node)
+    else
     {
       // In the case where we have OutFileName but it wasn't actually found in the input filename,
       // we will populate it with the actual parsed filename which is available here in the
