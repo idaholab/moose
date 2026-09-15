@@ -11,6 +11,8 @@
 
 #include "MeshGenerator.h"
 
+class MooseApp;
+
 /**
  * Generates a mesh by reading it from an file.
  */
@@ -39,6 +41,15 @@ public:
    */
   static std::string deduceCheckpointPath(const MooseObject & object,
                                           const std::string & file_name);
+
+  /**
+   * Helper that strips the mesh checkpoint suffix (e.g. "-mesh.cpa.gz") from a resolved
+   * checkpoint mesh file, yielding the checkpoint folder base up to the time step (e.g.
+   * "foo_cp/0010"). This base is what @ref MooseApp::restartFolderBase expects to locate the
+   * stored restartable (equation systems) data.
+   */
+  static std::string deduceCheckpointBase(const MooseApp & app,
+                                          const std::string & checkpoint_file);
 
 protected:
   /// the path/name of the file containing the mesh
