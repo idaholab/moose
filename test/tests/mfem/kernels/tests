@@ -213,6 +213,9 @@
     valgrind = none
     recover = false
     restep = false
+    # Matrix-free assembly peaks just above one slot's memory allowance, so it
+    # is given two; the matrix-free diffusion case sits just under it
+    min_slots = 2
   []
   [MFEMHeatTransfer]
     type = CSVDiff
