@@ -19,7 +19,7 @@ ParsedPostprocessor::validParams()
 
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "function expression");
-
+  params.declareControllable("expression", {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
   params.addParam<std::vector<PostprocessorName>>("pp_names", {}, "Post-processors arguments");
   params.addParam<std::vector<std::string>>(
       "pp_symbols", {}, "Symbol associated with each post-processor argument");
@@ -42,6 +42,7 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
     _n_pp(coupledPostprocessors("pp_names")),
+    _oldexp(getParam<std::string>("expression")),
     _use_t(getParam<bool>("use_t")),
     _value(0.0)
 {
@@ -96,6 +97,39 @@ ParsedPostprocessor::execute()
 void
 ParsedPostprocessor::finalize()
 {
+  if (getParam<std::string>("expression") != _oldexp)
+  {
+    _oldexp = getParam<std::string>("expression");
+    // build postprocessors argument
+    std::string postprocessors;
+
+    const std::vector<std::string> pp_symbols = getParam<std::vector<std::string>>("pp_symbols");
+    // sanity checks
+    if (!pp_symbols.empty() && (pp_symbols.size() != _n_pp))
+      paramError("pp_symbols", "pp_symbols must be the same length as pp_names.");
+
+    // coupled  postprocessors with capacity for symbol inputs
+    std::vector<PostprocessorName> pp_names = getParam<std::vector<PostprocessorName>>("pp_names");
+    if (pp_symbols.empty())
+    {
+      for (std::size_t i = 0; i < _n_pp; ++i)
+        postprocessors += (i == 0 ? "" : ",") + pp_names[i];
+    }
+    else
+      postprocessors = MooseUtils::stringJoin(pp_symbols, ",");
+
+    // add time if required
+    if (_use_t)
+      postprocessors += (postprocessors.empty() ? "" : ",") + std::string("t");
+    // Create parsed function
+    _func_F = std::make_shared<SymFunction>();
+    parsedFunctionSetup(_func_F,
+                        getParam<std::string>("expression"),
+                        postprocessors,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"),
+                        comm());
+  }
   for (unsigned int i = 0; i < _n_pp; i++)
     _func_params[i] = *_pp_values[i];
 
