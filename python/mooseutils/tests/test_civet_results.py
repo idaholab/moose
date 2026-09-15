@@ -9,8 +9,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
+import sys
 import unittest
-import platform
 import mooseutils
 import mooseutils.civet_results as cr
 
@@ -70,9 +70,7 @@ class Test(unittest.TestCase):
         database = cr.get_civet_results(hashes=SHAS, site=(SITE, REPO))
         self.assertKnownTest(database)
 
-    @unittest.skipIf(
-        platform.python_version() < "3.7.0", "Python 3.7 or greater required."
-    )
+    @unittest.skipIf(sys.version_info < (3, 7), "Python 3.7 or greater required.")
     def testGetCivetHashes(self):
 
         # Release 2021-05-18
