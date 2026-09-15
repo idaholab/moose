@@ -18,7 +18,13 @@ endif
 # remaining object files (Fortran)
 Thermochimica_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90modfiles))
 Thermochimica_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90srcfiles))
-
+# Force CPP preprocessing for Thermochimica's Fortran sources (they use #define/#ifndef)
+Thermochimica_f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90modfiles)) \
+                              $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90srcfiles))
+$(Thermochimica_f90objects): libmesh_FFLAGS += -cpp \
+	-D"OUTPUT_DIRECTORY='$(THERMOCHIMICA_DIR)/output/'" \
+    -D"DATA_DIRECTORY='$(THERMOCHIMICA_DIR)/data/'" \
+    -DTHERMOCHIMICA_DEFAULT_TOLERANCE_EPSILON=1D-14
 # dependencies (C, C++ files only)
 Thermochimica_deps := $(patsubst %.C, %.$(obj-suffix).d, $(Thermochimica_srcfiles)) \
                       $(patsubst %.c, %.$(obj-suffix).d, $(Thermochimica_csrcfiles))
