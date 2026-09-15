@@ -491,6 +491,8 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
   // along the well cannot be represented in this Jacobian.  residualSetup()/jacobianSetup()
   // still recompute bh_pressure from the current nonlinear iterate before every evaluation, so
   // the converged solution is unaffected; only the Newton convergence rate may be mildly slower.
+  // A proper fix (a relationship-managed line/segment kernel base class) is tracked separately
+  // in https://github.com/idaholab/moose/issues/33757, to be picked up after this PR merges.
   const Real bh_pressure = wellborePressure(current_dirac_ptid);
   const Real pp = ptqp();
   const Real pp_prime = dptqp(pvar) * _phi[_j][_qp];
