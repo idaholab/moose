@@ -35,4 +35,9 @@
     input = 'gradientcomponent.i'
     exodiff = 'gradientcomponent_out.e'
   [../]
+  [ADComputeVariableEigenstrain]
+    type = 'Exodiff'
+    input = 'ADComputeVariableEigenstrain.i'
+    exodiff = 'ADComputeVariableEigenstrain_out.e'
+  []
 []
