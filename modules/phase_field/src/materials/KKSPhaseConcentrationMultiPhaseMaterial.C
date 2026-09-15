@@ -31,8 +31,8 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
       "ci_names",
       "Phase concentrations. They must have the same order as Fj_names and global_cs, for "
       "example, c1, c2, b1, b2.");
-  params.addRequiredParam<std::vector<Real>>("ci_IC",
-                                             "Initial values of ci in the same order of ci_names");
+  params.addRequiredCoupledVar(
+      "ci_IC", "Initial values or auxiliary variables in the same order as ci_names");
   params.addParam<MaterialPropertyName>(
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
@@ -60,7 +60,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),
     _prop_ci(_num_c * _num_j),
     _ci_old(_num_c * _num_j),
-    _ci_IC(getParam<std::vector<Real>>("ci_IC")),
+    _ci_IC(coupledValues("ci_IC")),
     _dFidci(_num_j),
     _d2Fidcidbi(_num_j),
     _args_names(coupledNames("args")),
@@ -139,7 +139,7 @@ void
 KKSPhaseConcentrationMultiPhaseMaterial::initQpStatefulProperties()
 {
   for (const auto m : make_range(_num_c * _num_j))
-    (*_prop_ci[m])[_qp] = _ci_IC[m];
+    (*_prop_ci[m])[_qp] = (*_ci_IC[m])[_qp];
 }
 
 void
