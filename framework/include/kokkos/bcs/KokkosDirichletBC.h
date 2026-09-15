@@ -24,6 +24,11 @@ public:
     return _value;
   }
 
+  virtual Real hostValue(const libMesh::Point & /* p */, Real /* time */) const override
+  {
+    return _value;
+  }
+
 protected:
   const Moose::Kokkos::Scalar<const Real> _value;
 };

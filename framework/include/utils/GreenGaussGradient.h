@@ -17,9 +17,6 @@
 #include "ArrayComponentFunctor.h"
 #include "libmesh/elem.h"
 
-// C++
-#include <cstring> // for "Jacobian" exception test
-
 namespace Moose
 {
 namespace FV
@@ -230,21 +227,18 @@ greenGaussGradient(const ElemArg & elem_arg,
 
         A.lu_solve(b, x);
         // libMesh is generous about what it considers nonsingular. Let's check a little more
-        // strictly
+        // strictly, raising the type libMesh raises for a singular system so that the handler below
+        // treats a system it rejects and one libMesh rejects alike
         if (MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(A(sys_dim - 1, sys_dim - 1)), 0))
-          throw libMesh::LogicError("Matrix A is singular!");
+          throw libMesh::DegenerateMap("Matrix A is singular!");
         for (const auto i : make_range(Moose::dim))
           grad(i) = x(i);
       }
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap & e)
     {
-      // Don't ignore any *real* errors; we only handle matrix
-      // singularity (LogicError in older libMesh, DegenerateMap in
-      // newer) here
-      if (!strstr(e.what(), "singular"))
-        throw;
-
+      // libMesh raises this type when the least-squares system is singular, which the retry below
+      // handles; every other exception is a real error and propagates
       // Retry without two-term
       if (!two_term_boundary_expansion)
         mooseError(
@@ -498,7 +492,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 
         // Check for singularity
         if (MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(A(sys_dim - 1, sys_dim - 1)), 0))
-          throw libMesh::LogicError("Matrix A is singular!");
+          throw libMesh::DegenerateMap("Matrix A is singular!");
 
         // Extract the gradient components
         for (const auto i : make_range(Moose::dim))
@@ -510,14 +504,10 @@ greenGaussGradient(const ElemArg & elem_arg,
           "We have not yet implemented the correct translation from gradient to divergence for "
           "spherical coordinates yet.");
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap & e)
     {
-      // Don't ignore any *real* errors; we only handle matrix
-      // singularity (LogicError in older libMesh, DegenerateMap in
-      // newer) here
-      if (!strstr(e.what(), "singular"))
-        throw;
-
+      // libMesh raises this type when the least-squares system is singular, which the retry below
+      // handles; every other exception is a real error and propagates
       // Log warning and default to simple green Gauss
       mooseWarning(
           "Singular matrix encountered in least squares gradient computation. Falling back "

@@ -20,6 +20,17 @@ public:
   Moose::LineSearchType _line_search;
   Moose::MffdType _mffd_type;
 
+  /// Whether to use the Kokkos matrix-free Jacobian-vector product (an analytic partial-assembly
+  /// operator action) as both the SNES Amat and Pmat, a shell matrix whose operations are a
+  /// matrix-vector product and a diagonal, which limits preconditioning to what those two supply.
+  /// Mutually exclusive with the PETSc-native ST_PJFNK/ST_JFNK finite-difference matrix-free modes.
+  bool _kokkos_matrix_free;
+
+  /// Whether the attached preconditioner sets the solve's PETSc preconditioner type itself, rather
+  /// than reaching PETSc only through the options database. A default this system would otherwise
+  /// impose, such as the one a matrix-free system takes, is left to that configuration.
+  bool _preconditioner_sets_pc_type;
+
   // solver parameters for eigenvalue problems
   Moose::EigenSolveType _eigen_solve_type;
   Moose::EigenProblemType _eigen_problem_type;

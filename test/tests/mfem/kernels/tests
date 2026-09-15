@@ -100,6 +100,7 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     recover = false
+    min_slots = 2
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
     type = CSVDiff
@@ -213,6 +214,7 @@
     valgrind = none
     recover = false
     restep = false
+    min_slots = 2
   []
   [MFEMHeatTransfer]
     type = CSVDiff

@@ -16,9 +16,6 @@
 #include "libmesh/libmesh_exceptions.h"
 #include "libmesh/elem.h"
 
-// C++
-#include <cstring> // for "Jacobian" exception test
-
 /**
  * Base class for assembly-like calculations.
  */
@@ -309,14 +306,11 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
     {
       moose::translateMetaPhysicLError(e);
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap & e)
     {
-      // Continue if we find a libMesh degenerate map exception, but
-      // just re-throw for any real error
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-          !strstr(e.what(), "det != 0"))
-        throw; // not "throw e;" - that destroys type info!
-
+      // A degenerate element mapping is recoverable: it becomes an exception this problem records,
+      // and the solve is stopped and re-attempted rather than the run ending. libMesh raises this
+      // type from the mapping itself, so every other exception propagates as the error it is.
       mooseException("We caught a libMesh degeneracy exception in ThreadedElementLoopBase:\n",
                      e.what());
     }
