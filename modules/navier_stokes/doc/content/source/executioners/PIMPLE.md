@@ -35,7 +35,7 @@ already used in [SIMPLE.md], the PISO iteration is the following:
 
 When a [FVReconstructedPressureGradient.md] is used, each PISO pressure correction produces a new
 conservative face flux and therefore a new compatible cell-velocity reconstruction. The momentum
-matrix and its $H/A$ field remain fixed during the PISO sequence, while the corrected velocity
+matrix and its $H/A$ field remain fixed during the PIfSO sequence, while the corrected velocity
 gradient from one pressure correction is used in the next reconstruction. The relaxed reconstructed
 pressure gradient enters the next momentum predictor. This keeps every cell-velocity correction
 consistent with the latest continuity-preserving face flux without requiring another momentum solve
