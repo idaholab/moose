@@ -40,9 +40,7 @@ class TestCHTThermalResistance(unittest.TestCase):
         for label in labels:
             plot_df[label] = plot_df[label].clip(lower=sys.float_info.epsilon)
 
-        fig = mms.ConvergencePlot(
-            xlabel="Element Size ($h$)", ylabel="Relative Error"
-        )
+        fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="Relative Error")
         fig.plot(
             plot_df,
             label=labels,
