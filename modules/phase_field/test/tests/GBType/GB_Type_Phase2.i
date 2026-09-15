@@ -189,7 +189,7 @@
     solution = initial_grains
     from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
-    weighting_type = smallest_element_id
+    weighting_type = average
   [../]
   [./bnds_HAGB]
     # Calculate the bnds for specific GB type
@@ -199,7 +199,7 @@
     solution = initial_grains
     from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
-    weighting_type = smallest_element_id
+    weighting_type = average
   [../]
 []
 
