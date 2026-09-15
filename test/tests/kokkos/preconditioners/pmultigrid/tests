@@ -167,6 +167,33 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [solve_gll]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The same 8-4-2-1 v-cycle as [solve], over a nodal basis rather than a hierarchic one. What the
+    # hierarchy meets here that it does not there is that a LAGRANGE_GLL level is not a subset of the
+    # fine basis: the coarse space sits inside the fine space, but the coarse shape functions are not
+    # among the fine ones, so a transfer has to carry the coarse basis into the fine one through the
+    # embedding rather than by selecting the modes the coarse level owns. This exercises that path at
+    # every transfer of a four-level cycle, and the entity blocks the smoother inverts are the same
+    # sizes either way, one degree of freedom on a vertex and order-1 on an edge.
+    # The cap is sixteen against the nine iterations this cycle needs, which is the same margin
+    # [solve] leaves itself. It also sits below the twenty four the hierarchic cycle needs over the
+    # same mesh, hierarchy and smoother, so the cap asserts the nodal basis preconditions at least
+    # as well as the hierarchic one rather than merely converging at all. The count is the same on
+    # one, two and four processes, so the margin is headroom rather than partitioning noise.
+    cli_args = 'Outputs/exodus=false Variables/u/family=LAGRANGE_GLL '
+               '-ksp_max_it 16 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type is MULTIPLICATIVE, levels=4 cycles=v.*Solve Converged'
+    requirement = 'The system shall be able to apply an 8-4-2-1 polynomial order multigrid v-cycle '
+                  'over a nodal basis on the Gauss-Lobatto points, whose coarse levels span the '
+                  'coarse spaces without sharing the shape functions of the fine one, and '
+                  'efficiently precondition a Newton-Krylov method.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [operator_symmetry]
     type = RunApp
     input = 'pmultigrid.i'
