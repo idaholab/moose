@@ -1,0 +1,100 @@
+[Tests]
+  design = 'syntax/WeakForms/index.md syntax/ProblemComposers/index.md'
+  issues = '#33468'
+  [MFEMSteadyWeakForm]
+    type = CSVDiff
+    input = steady_weakform.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall be able to solve a mixed steady state FE problem using a weak form whose kernels and boundary conditions are specified by the user.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery.
+    recover = false
+  []
+  [MFEMNamedWeakForm]
+    type = CSVDiff
+    input = named_weakform.i
+    csvdiff = 'OutputData/DarcyNamedWeakForm.csv'
+    # darcy.i sets both output file_bases, which !include forbids re-supplying in the input.
+    cli_args = 'Outputs/DarcyErrorCSV/file_base=OutputData/DarcyNamedWeakForm '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/DarcyNamedWeakForm'
+    requirement = 'The system shall be able to solve a mixed steady state FE problem when several weak forms are present, using the weak form named by the problem composer and linear solver.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery.
+    recover = false
+  []
+  [MFEMAmbiguousWeakForm]
+    type = RunException
+    input = ambiguous_weakform.i
+    expect_err = 'equation systems, so the one to use cannot be inferred'
+    requirement = 'The system shall report an error if several weak forms are present and an object that consumes an equation system does not name the weak form supplying it.'
+    capabilities = 'mfem'
+  []
+  [MFEMUnknownWeakForm]
+    type = RunException
+    input = unknown_weakform.i
+    expect_err = 'NotAWeakForm'
+    requirement = 'The system shall report an error if an object that consumes an equation system names a weak form that has not been added to the problem.'
+    capabilities = 'mfem'
+  []
+  [MFEMUnknownKernel]
+    type = RunException
+    input = unknown_kernel.i
+    expect_err = 'NotAKernel'
+    requirement = 'The system shall report an error if a weak form names a kernel that has not been added to the problem.'
+    capabilities = 'mfem'
+  []
+  [MFEMUnknownBoundaryCondition]
+    type = RunException
+    input = unknown_bc.i
+    expect_err = 'NotABC'
+    requirement = 'The system shall report an error if a weak form names a boundary condition that has not been added to the problem.'
+    capabilities = 'mfem'
+  []
+  [MFEMTransientWeakForm]
+    type = CSVDiff
+    input = transient_weakform.i
+    csvdiff = 'OutputData/HeatTransferWeakForm.csv'
+    requirement = 'The system shall be able to solve a transient FE problem using a time dependent weak form whose kernels and boundary conditions are specified by the user.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery or restep.
+    recover = false
+    restep = false
+  []
+  [MFEMComplexWeakForm]
+    type = CSVDiff
+    input = complex_weakform.i
+    csvdiff = 'OutputData/ComplexWeakForm.csv'
+    requirement = 'The system shall be able to solve a complex-valued FE problem using a complex weak form whose kernels and boundary conditions are specified by the user.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery.
+    recover = false
+  []
+  [MFEMTwoProblemComposers]
+    type = CSVDiff
+    input = two_problem_composers.i
+    csvdiff = 'OutputData/TwoProblemComposers.csv'
+    requirement = 'The system shall be able to solve two independent equation systems sequentially in a single problem, each built by its own weak form and executed by its own problem composer.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery.
+    recover = false
+  []
+  [MFEMRealWeakFormComplexProblem]
+    type = RunException
+    input = real_weakform_complex_problem.i
+    expect_err = "Unsupported bc of name 'dbc' detected"
+    requirement = 'The system shall report an error if a real weak form is given a complex boundary condition.'
+    capabilities = 'mfem'
+  []
+  [MFEMComplexWeakFormRealProblem]
+    type = RunException
+    input = complex_weakform_real_problem.i
+    expect_err = "Unsupported bc of name 'flux_boundaries' detected"
+    requirement = 'The system shall report an error if a complex weak form is given a real boundary condition.'
+    capabilities = 'mfem'
+  []
+[]

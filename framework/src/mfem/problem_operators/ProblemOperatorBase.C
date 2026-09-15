@@ -10,8 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperatorBase.h"
-
-class MFEMProblem;
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
@@ -46,20 +45,21 @@ ProblemOperatorBase::SetGridFunctions()
 }
 
 void
-ProblemOperatorBase::Init(mfem::BlockVector & X)
+ProblemOperatorBase::Init()
 {
-  X.Update(_block_true_offsets_trial);
+  SetGridFunctions();
+  _true_solution.Update(_block_true_offsets_trial);
   for (const auto i : index_range(_trial_variables))
-    X.GetBlock(i) = _trial_variables[i]->GetTrueVector();
+    _true_solution.GetBlock(i) = _trial_variables[i]->GetTrueVector();
   // Sync the flags from the global vector with the sub-vectors (copies to global vector location)
-  X.SyncFromBlocks();
+  _true_solution.SyncFromBlocks();
 
-  // After initial assignment of X from the grid function, which may contain initial conditions,
-  // we alias the grid function to X
+  // After initial assignment of the true solution from the grid function, which may contain
+  // initial conditions, we alias the grid function to it
   for (const auto i : index_range(_trial_variables))
     _trial_variables[i]->MakeTRef(
-        _trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
-  _trial_true_vector = &X;
+        _trial_variables[i]->ParFESpace(), _true_solution, _block_true_offsets_trial[i]);
+  _trial_true_vector = &_true_solution;
 }
 
 void

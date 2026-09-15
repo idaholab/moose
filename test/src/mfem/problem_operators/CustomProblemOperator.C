@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "CustomProblemOperator.h"
+#include "MFEMProblem.h"
 
 // The custom operator constructor
 CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coef)
@@ -18,7 +19,7 @@ CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::C
 }
 
 void
-CustomProblemOperator::Init(mfem::BlockVector &)
+CustomProblemOperator::Init()
 {
   // Get the FE-space and Variable that were just built
   auto fes = _problem.getProblemData().fespaces.Get("H1");

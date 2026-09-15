@@ -11,12 +11,13 @@
 
 #include "MFEMTimeDependentWeakFormProblemComposer.h"
 #include "TimeDependentEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
 
 MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 
@@ -26,10 +27,8 @@ MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(MFEMProblem & mf
   if (!mfem_problem.isTransient())
     mooseError("Not a transient problem");
 
-  mfem_problem.getProblemData().eqn_system =
-      std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-          mfem_problem.getProblemData().time_derivative_map);
-  return std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem,
+                                                                                   _weak_form_name);
 }
 
 #endif
