@@ -49,6 +49,33 @@ public:
   void reinit();
 
   /**
+   * Reset diagonals of constrained rows
+   */
+  void applyDiagonalConstraints();
+
+  /**
+   * Get the local-indexed constraint of a local DOF
+   * @param dof The local DOF index
+   * @returns The local-indexed constraint
+   */
+  KOKKOS_FUNCTION auto getLocalConstraints(dof_id_type dof) const
+  {
+    return _local_constraints.size() ? _local_constraints[dof]
+                                     : decltype(_local_constraints[dof])(nullptr, {});
+  }
+
+  /**
+   * Get the global-indexed constraint of a global DOF
+   * @param dof The global DOF index
+   * @returns The global-indexed constraint
+   */
+  KOKKOS_FUNCTION auto getGlobalConstraints(dof_id_type dof) const
+  {
+    return _global_constraints.size() ? _global_constraints[dof]
+                                      : decltype(_global_constraints[dof])(nullptr, {});
+  }
+
+  /**
    * Get the list of off-diagonal coupled variable numbers of a variable
    * @param var The variable number
    * @returns The list of off-diagonal coupled variable numbers
@@ -405,6 +432,15 @@ private:
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
+
+  /**
+   * List of constraint DOFs and weights
+   */
+  ///@{
+  Array<PetscInt> _local_constraint_dofs;
+  JaggedArray<Pair<dof_id_type, Real>, 1, 1> _local_constraints;
+  JaggedArray<Pair<dof_id_type, Real>, 1, 1> _global_constraints;
+  ///@}
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE

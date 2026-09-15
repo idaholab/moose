@@ -75,7 +75,7 @@ public:
    * Get an entry with given row and column indices
    * @param i The row index local to this process
    * @param j The global column index
-   * @returns The reference of the element
+   * @returns The writeable reference of the entry
    */
   KOKKOS_FUNCTION PetscScalar & operator()(PetscInt i, PetscInt j) const
   {

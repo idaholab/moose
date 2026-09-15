@@ -139,6 +139,47 @@ FESystem::setupDofs()
   }
 
   _local_node_dof_index.copyToDeviceNested();
+
+  if (_dof_map.n_constrained_dofs())
+  {
+    std::vector<PetscInt> local_constraint_dofs;
+
+    _local_constraints.create(_num_local_dofs + _num_ghost_dofs);
+    _global_constraints.create(solution->size());
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        if (_dof_map.local_index(it->first))
+          local_constraint_dofs.push_back(it->first);
+
+        _local_constraints.reserve({local_dof}, {it->second.size()});
+        _global_constraints.reserve({it->first}, {it->second.size()});
+      }
+
+    _local_constraints.finalize();
+    _global_constraints.finalize();
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        unsigned int i = 0;
+        for (auto [dof, weight] : it->second)
+        {
+          _local_constraints[local_dof][i] = {solution->map_global_to_local_index(dof), weight};
+          _global_constraints[it->first][i++] = {dof, weight};
+        }
+      }
+
+    _local_constraints.copyToDevice();
+    _global_constraints.copyToDevice();
+
+    _local_constraint_dofs = local_constraint_dofs;
+  }
 }
 
 void
@@ -274,6 +315,24 @@ FESystem::reinit()
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
+}
+
+void
+FESystem::applyDiagonalConstraints()
+{
+  for (const auto tag : _active_matrix_tags)
+  {
+    auto mat = _matrices[tag].mat();
+
+    LibmeshPetscCallQ(MatSetOption(mat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
+    LibmeshPetscCallQ(MatSetOption(mat, MAT_NO_OFF_PROC_ZERO_ROWS, PETSC_TRUE));
+    LibmeshPetscCallQ(MatZeroRows(mat,
+                                  _local_constraint_dofs.size(),
+                                  _local_constraint_dofs.data(),
+                                  1,
+                                  PETSC_NULLPTR,
+                                  PETSC_NULLPTR));
+  }
 }
 
 KOKKOS_FUNCTION void

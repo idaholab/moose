@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#33678'
+  design = 'syntax/BCs/Periodic/index.md'
+
+  [periodic]
+    type = Exodiff
+    input = 'kokkos_periodic_bc_test.i'
+    exodiff = 'kokkos_periodic_bc_test_out.e'
+    abs_zero = 1e-6
+    rel_err = 1e-5
+    requirement = "The Kokkos system shall support periodic boundary conditions with transforms prescribed as a translation."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+  [periodic_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_periodic_bc_test.i'
+    run_sim = 'True'
+    cli_args = "Mesh/gmg/nx=10 Mesh/gmg/ny=10 Executioner/num_steps=1"
+    requirement = "The Jacobian with periodic boundary constraint should be perfect."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]
