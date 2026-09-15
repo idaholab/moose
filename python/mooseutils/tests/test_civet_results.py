@@ -51,26 +51,24 @@ class Test(unittest.TestCase):
         self.assertTrue(jobs[0].filename.endswith("results_443457.tar.gz"))
         self.assertEqual(jobs[0].url, SITE)
 
+    def assertKnownTest(self, database):
+        """Assert the known kernels/simple_diffusion.test entry for job 443499 is present."""
+        tests = database["kernels/simple_diffusion.test"][443499]
+        self.assertEqual(tests[1].recipe, "06_Test_-p_3")
+        self.assertEqual(tests[1].status, "OK")
+        self.assertEqual(tests[1].caveats, ["recover"])
+        self.assertEqual(tests[1].url, SITE)
+        self.assertEqual(tests[1].reason, "")
+
     def testUpdateDatabaseFromJob(self):
         jobs = self.jobs
         database = collections.defaultdict(lambda: collections.defaultdict(list))
         cr._update_database_from_job(jobs[42], database, None)
-
-        tests = database["kernels/simple_diffusion.test"][443499]
-        self.assertEqual(tests[1].recipe, "06_Test_-p_3")
-        self.assertEqual(tests[1].status, "OK")
-        self.assertEqual(tests[1].caveats, ["recover"])
-        self.assertEqual(tests[1].url, SITE)
-        self.assertEqual(tests[1].reason, "")
+        self.assertKnownTest(database)
 
     def testGetCivetResults(self):
         database = cr.get_civet_results(hashes=SHAS, site=(SITE, REPO))
-        tests = database["kernels/simple_diffusion.test"][443499]
-        self.assertEqual(tests[1].recipe, "06_Test_-p_3")
-        self.assertEqual(tests[1].status, "OK")
-        self.assertEqual(tests[1].caveats, ["recover"])
-        self.assertEqual(tests[1].url, SITE)
-        self.assertEqual(tests[1].reason, "")
+        self.assertKnownTest(database)
 
     @unittest.skipIf(
         platform.python_version() < "3.7.0", "Python 3.7 or greater required."
