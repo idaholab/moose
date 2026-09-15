@@ -14,6 +14,11 @@ recovery. It is not used directly; the concrete mesh types are [MFEMFileMesh.md]
 mesh from file, and [MFEMMeshGeneratorMesh.md], which receives the mesh produced by a chain of
 MFEM mesh generators.
 
+NURBS meshes are supported, and refining one with `uniform_refine` (equivalently,
+`serial_refine`) inserts knots, leaving the geometry it describes unchanged. MFEM is unable to
+refine a NURBS mesh once it has been partitioned, however, so `parallel_refine` cannot be used
+with such a mesh; refine it with `uniform_refine` instead.
+
 As MOOSE checks for the existence of a libMesh MOOSE mesh at various points during setup,
 `MFEMMesh` also builds a small libMesh placeholder mesh alongside the MFEM mesh. This placeholder
 is not the simulation mesh; all MFEM objects should access the `mfem::ParMesh` via the
