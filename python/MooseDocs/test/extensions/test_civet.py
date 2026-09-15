@@ -95,16 +95,33 @@ class TestInlineCivetWithConfig(CivetTestCase):
         self.assertToken(ast(0, 3), "LineBreak", size=0)
 
 
-class TestBadgesNoNetwork(MooseDocsTestCase):
+class CivetNoNetworkTestCase(MooseDocsTestCase):
     """
-    Test civet badge rendering with an injected, in-memory result database instead of
-    "remotes" pointing at a real CIVET site, so this exercises the badge rendering path
-    without any network access. The token is built via tokenize() and then has "prefix"
-    set directly (as MooseDocs.extensions.sqa does: CivetTestBadges(item, prefix=req.prefix,
-    tests=req.names)) since the markdown command itself doesn't expose "prefix".
+    Common base for testing civet rendering with an injected, in-memory result database
+    instead of "remotes" pointing at a real CIVET site, so these tests exercise the
+    rendering path without depending on network access, which can be slow on some
+    machines during local testing.
     """
 
     EXTENSIONS = [core, command, civet]
+    FAKE_TNAME = "kernels.simple_diffusion.test"
+    FAKE_TEST = civet_results.Test(
+        "06_Test_-p_3", "OK", ["recover"], "", 0.53, "https://civet.inl.gov"
+    )
+
+    def injectFakeResults(self, tname):
+        """Patch the civet extension's results() to return FAKE_TEST only for tname."""
+        ext = next(e for e in self.translator.extensions if e.name == "civet")
+        ext.results = lambda name: {12345: [self.FAKE_TEST]} if name == tname else {}
+
+
+class TestBadgesNoNetwork(CivetNoNetworkTestCase):
+    """
+    Test civet badge rendering. The token is built via tokenize() and then has "prefix" set
+    directly (as MooseDocs.extensions.sqa does: CivetTestBadges(item, prefix=req.prefix,
+    tests=req.names)) since the markdown command itself doesn't expose "prefix".
+    """
+
     BADGES = "[!civet!badges tests=simple_diffusion.test]"
 
     def testBadgesMaterialize(self):
@@ -113,14 +130,7 @@ class TestBadgesNoNetwork(MooseDocsTestCase):
         # rebuild the translator, and the extensions with it, from scratch).
         ast = self.tokenize(self.BADGES, renderer=base.MaterializeRenderer())
         ast(0, 0)["prefix"] = "kernels"
-
-        ext = next(e for e in self.translator.extensions if e.name == "civet")
-        fake_test = civet_results.Test(
-            "06_Test_-p_3", "OK", ["recover"], "", 0.53, "https://civet.inl.gov"
-        )
-        ext.results = lambda name: (
-            {12345: [fake_test]} if name == "kernels.simple_diffusion.test" else None
-        )
+        self.injectFakeResults(self.FAKE_TNAME)
 
         res = self.render(ast)
         self.assertHTMLTag(res, "div", class_="moose-content")
@@ -132,28 +142,18 @@ class TestBadgesNoNetwork(MooseDocsTestCase):
         self.assertEqual(res(0, 0, 0, 0)["data-status"], "ok")
 
 
-class TestReportNoNetwork(MooseDocsTestCase):
+class TestReportNoNetwork(CivetNoNetworkTestCase):
     """
-    Test civet test report rendering with an injected, in-memory result database instead of
-    "remotes" pointing at a real CIVET site, so this exercises the report rendering path
-    without any network access. Mirrors TestBadgesNoNetwork; "prefix" is set directly on the
-    token since the markdown command itself doesn't expose it.
+    Test civet test report rendering. Mirrors TestBadgesNoNetwork; "prefix" is set directly
+    on the token since the markdown command itself doesn't expose it.
     """
 
-    EXTENSIONS = [core, command, civet]
     REPORT = "!civet report tests=simple_diffusion.test"
 
     def testReportMaterialize(self):
         ast = self.tokenize(self.REPORT, renderer=base.MaterializeRenderer())
         ast(0)["prefix"] = "kernels"
-
-        ext = next(e for e in self.translator.extensions if e.name == "civet")
-        fake_test = civet_results.Test(
-            "06_Test_-p_3", "OK", ["recover"], "", 0.53, "https://civet.inl.gov"
-        )
-        ext.results = lambda name: (
-            {12345: [fake_test]} if name == "kernels.simple_diffusion.test" else {}
-        )
+        self.injectFakeResults(self.FAKE_TNAME)
 
         res = self.render(ast)
         self.assertHTMLTag(res, "div", class_="moose-content")
