@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
+#include "SplitMeshMetaData.h"
 
 #include <filesystem>
 
@@ -94,13 +95,14 @@ SplitMeshAction::act()
 
     // different splits will be written into subfolders with n being the folder name
     cp->write(fname);
-  }
 
-  // Write mesh metadata
-  if (processor_id() == 0)
-  {
-    const auto filenames = _app.writeRestartableMetaData(MooseApp::MESH_META_DATA, fname);
-    Moose::out << "Mesh meta data written into "
-               << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
+    // Write mesh metadata for this split configuration.
+    if (processor_id() == 0)
+    {
+      const auto split_folder = std::filesystem::path(fname) / std::to_string(n);
+      const auto filenames = SplitMeshMetaData(_app).write(split_folder);
+      Moose::out << "Mesh meta data written into "
+                 << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
+    }
   }
 }
