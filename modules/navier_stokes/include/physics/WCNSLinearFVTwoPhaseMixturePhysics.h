@@ -30,8 +30,17 @@ private:
   virtual void addMaterials() override;
   virtual void checkIntegrity() const override;
 
-  /// Adds the slip velocity parameters
+  /**
+   * Sets the velocity at which the phase fraction travels relative to the mixture. This is the
+   * diffusion (drift) velocity, not the slip velocity: see
+   * LinearWCNSFV2PSlipVelocityFunctorMaterial for the distinction. The base class calls this when
+   * building the scalar advection kernel of the phase transport equation.
+   */
   virtual void setSlipVelocityParams(InputParameters & params) const override;
+
+  /// Sets the slip velocity, u_d - u_c, on objects that consume the relative motion of the phases
+  /// directly, namely the momentum and energy diffusion flux kernels
+  void setRelativeVelocityParams(InputParameters & params) const;
 
   /**
    * Functions adding kernels for the other physics
