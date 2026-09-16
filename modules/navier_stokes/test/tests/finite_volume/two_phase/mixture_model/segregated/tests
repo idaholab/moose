@@ -52,6 +52,15 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [momentum_drift_flux_verification]
+    type = CSVDiff
+    input = 'momentum-drift-flux-verification.i'
+    csvdiff = 'momentum-drift-flux-verification_out.csv'
+    design = 'LinearWCNSFV2PMomentumDriftFlux.md'
+    requirement = 'The system shall assemble the diffusion stress of the mixture momentum equation with the sign and the coefficient beta_d beta_c / rho_m of its derivation, reproducing a solution worked out by hand to within the discretization error.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [errors]
     requirement = "The system shall return an error if"
     [skewness]

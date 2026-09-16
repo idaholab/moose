@@ -12,6 +12,7 @@
 #include "LinearFVGradientManager.h"
 #include "MooseLinearVariableFV.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", LinearFVScalarAdvection);
 
