@@ -60,6 +60,12 @@
     new_system = true
     formulation = TOTAL
     block = 1
+    # Save assembled residual per component into aux vars so the
+    # `contactor_force` postprocessor can integrate the reaction at the
+    # top BC by NodalSum.  By equilibrium of the deformable body the
+    # sum of the y-residuals on the top BC equals the total y-force
+    # applied by the contactor at the contact sideset.
+    save_in = 'saved_x saved_y saved_z'
   []
 []
 
@@ -82,6 +88,16 @@
 []
 
 [AuxVariables]
+  # Residual-save targets for the `contactor_force` reaction sum below.
+  [saved_x]
+    block = 1
+  []
+  [saved_y]
+    block = 1
+  []
+  [saved_z]
+    block = 1
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -190,6 +206,26 @@
     x = '0  1'
     y = '0 -0.01'
   []
+  # Approximate analytic Hertz total normal force for the quarter-
+  # symmetry model.  Sphere-on-sphere with R_eff = R1*R2/(R1+R2) = 1
+  # and reduced modulus E* = E / (1 - nu^2) = 1.40625e7 / 0.9375 = 1.5e7.
+  # Full-model Hertz force is F(d) = (4/3) E* sqrt(R_eff) d^(3/2); the
+  # quarter-symmetry model integrates over one quarter of the contact
+  # disk, so we scale by 1/4.  Depth `d` is taken here as the magnitude
+  # of the applied top displacement.  This *overestimates* the true
+  # Hertzian approach distance (which is smaller because the finite
+  # deformable sphere squeezes along its axis to accommodate part of
+  # the applied displacement), and the r = 2 geometry is short of the
+  # half-space Hertz assumption -- so users should expect the numerical
+  # `contactor_force` to differ from `hertz_force_analytic` by tens of
+  # percent, not the near-agreement Hertz gives on a proper half-space.
+  # The function is included as a reference curve to overlay in ParaView.
+  [hertz_force_analytic_function]
+    type = ParsedFunction
+    symbol_names  = 'E_star R_eff'
+    symbol_values = '1.5e7 1.0'
+    expression    = '0.25 * (4.0/3.0) * E_star * sqrt(R_eff) * abs(-0.01 * t)^1.5'
+  []
 []
 
 [BCs]
@@ -245,6 +281,36 @@
   [cumulative_nl]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
+  []
+  # Total y-force applied by the contactor at the contact face, obtained
+  # by summing the assembled y-residual on the top BC and equilibrium.
+  # `save_in` stores R_i = ∫ (∇φ_i : σ - φ_i·b), which is negative on a
+  # top-pushed-down node under compression (σ_yy < 0), so the raw sum is
+  # flipped to give a positive compressive force.
+  [contactor_force_raw]
+    type = NodalSum
+    variable = saved_y
+    boundary = 2
+    outputs = 'none'
+  []
+  [contactor_force]
+    type = ScalePostprocessor
+    value = contactor_force_raw
+    scaling_factor = -1.0
+  []
+  # Contactor is fixed; the "contactor displacement" reported here is
+  # the signed applied top displacement, which for a rigid half-space
+  # would equal the indenter penetration depth.  It is negative because
+  # the top is pushed in -y.
+  [contactor_displacement]
+    type = FunctionValuePostprocessor
+    function = top_disp_y
+  []
+  # Analytic Hertz total normal force at the current time; compare
+  # against `contactor_force` above.
+  [hertz_force_analytic]
+    type = FunctionValuePostprocessor
+    function = hertz_force_analytic_function
   []
 []
 

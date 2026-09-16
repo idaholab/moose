@@ -333,11 +333,16 @@
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
   []
-  [force]
+  # Force-controlled: the total contactor force IS the applied target
+  # F(t), by definition of the load-control constraint.
+  [contactor_force]
     type = FunctionValuePostprocessor
     function = applied_force
   []
-  [depth]
+  # Signed contactor position along the axis whose translation this
+  # scalar drives; load_direction is -y, so as the contactor descends
+  # into the material `indenter_y` decreases from 0.
+  [contactor_displacement]
     type = ScalarVariable
     variable = indenter_y
   []

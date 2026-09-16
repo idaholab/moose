@@ -60,6 +60,9 @@
     decomposition_method = EigenSolution  # -> kinematic_approximation = rashid_eigen on ComputeLagrangianStrain
     volumetric_locking_correction = true  # -> stabilize_strain = true
     block = 1
+    # Assembled residual per component saved to aux vars for the
+    # `contactor_force` reaction-sum postprocessor below.
+    save_in = 'saved_x saved_y saved_z'
   []
 []
 
@@ -94,6 +97,16 @@
 []
 
 [AuxVariables]
+  # Residual-save targets for the `contactor_force` reaction sum below.
+  [saved_x]
+    block = 1
+  []
+  [saved_y]
+    block = 1
+  []
+  [saved_z]
+    block = 1
+  []
   [plastic_strain_mag]
     order = CONSTANT
     family = MONOMIAL
@@ -260,7 +273,7 @@
 
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-8
-  nl_max_its = 40
+  nl_max_its = 10
   l_max_its = 200
 
   start_time = 0.0
@@ -295,6 +308,29 @@
   [cumulative_nl]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
+  []
+  # Total y-force applied by the contactor at the contact face, obtained
+  # by summing the assembled y-residual on the top BC and equilibrium.
+  # `save_in` stores R_i = ∫ (∇φ_i : σ - φ_i·b), which is negative on a
+  # top-pushed-down node under compression (σ_yy < 0), so the raw sum is
+  # flipped to give a positive compressive force.
+  [contactor_force_raw]
+    type = NodalSum
+    variable = saved_y
+    boundary = 2
+    outputs = 'none'
+  []
+  [contactor_force]
+    type = ScalePostprocessor
+    value = contactor_force_raw
+    scaling_factor = -1.0
+  []
+  # Contactor is fixed; the "contactor displacement" reported here is
+  # the signed applied top displacement (negative going down).  Same
+  # convention as the elastic Hertz example.
+  [contactor_displacement]
+    type = FunctionValuePostprocessor
+    function = top_disp_y
   []
 []
 
