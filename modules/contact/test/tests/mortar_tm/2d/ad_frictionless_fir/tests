@@ -1,6 +1,6 @@
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080 #20773'
+  issues = '#13080 #20773 #30020'
   [soft]
     requirement = 'The system shall be able to use automatic differentiation to compute a soft block '
                   'bouncing on a soft plank problem on a first order 2D mesh using tensor mechanics '
@@ -20,7 +20,6 @@
       heavy = true
     []
     [finite_combined]
-      issues = '#30020'
       detail = 'using a reduced finite strain problem with active mechanical LM mortar contact and '
                'the residual and Jacobian assembled together.'
       type = 'CSVDiff'
