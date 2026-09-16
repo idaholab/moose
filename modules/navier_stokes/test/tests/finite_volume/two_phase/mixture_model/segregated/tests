@@ -214,6 +214,25 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [interfacial_mass_transfer_closed_on_area]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-verification.i'
+    csvdiff = 'interfacial-mass-transfer-verification_out.csv'
+    abs_zero = 1e-8
+    design = 'WCNSFV2PInterfacialMassTransferFunctorMaterial.md LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall close the interfacial mass transfer rate on the transported interfacial area concentration and drive the phase, energy and interfacial area equations with that one rate. In a closed quiescent cavity whose phases have equal densities and specific heats, the transfer grows the particles present without changing their number, so xi / alpha^(2/3) is invariant. It shall hold over a sixfold growth of the phase fraction to the order of the time integrator: the drift is 4.7 per cent of the initial value at a step of 0.2 and falls to 2.4, 1.2 and 0.6 per cent as that step is halved, which is the first order rate of the implicit Euler default. The rate the Physics builds shall agree exactly with the same closure declared by hand from the same inputs.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interfacial_mass_transfer_prescribed]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-prescribed.i'
+    csvdiff = 'interfacial-mass-transfer-prescribed_out.csv'
+    abs_zero = 1e-8
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+    requirement = 'The system shall drive the phase, energy and interfacial area equations with a prescribed interfacial mass transfer rate. In a closed quiescent cavity with a constant rate the phase fraction and the temperature are linear in time, which the implicit Euler step reproduces exactly: the phase fraction shall follow alpha_0 + Gamma t / rho_d and the temperature T_0 - Gamma h t / (rho cp) to round-off, over a fivefold growth of the phase fraction.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [errors]
     requirement = "The system shall return an error if"
     [active_scalar_subcycles_without_reordering]

@@ -59,6 +59,16 @@ private:
   /// Builds d(rho_m)/dp at fixed phase fraction, the coefficient the pressure driven part of
   /// the storage term carries onto the matrix diagonal
   MooseFunctorName buildMixtureDensityPressureDerivative();
+
+  /// Adds the interfacial mass transfer source to the dispersed phase equation
+  void addInterfacialMassTransferTerm();
+
+  /// Creates the material that closes the interfacial mass transfer rate on the transported
+  /// interfacial area concentration, for the case where it was not prescribed
+  void addInterfacialMassTransferRateMaterial();
+
+  /// Adds the latent heat absorbed or released by the interfacial mass transfer
+  void addLatentHeatTransferTerm();
   void addPhaseChangeEnergySource();
   /**
    * Adds the pressure work the relative motion carries, (alpha - c_d) u_s . grad(p). The mixture
@@ -117,4 +127,11 @@ private:
   const bool _use_drift_flux;
   /// Whether to add the advection slip term to each component of the momentum equation
   const bool _use_advection_slip;
+
+  /// Whether the interfacial mass transfer rate is closed on the interfacial area rather than
+  /// prescribed
+  const bool _close_mass_transfer_on_area;
+
+  /// Name of the interfacial mass transfer rate, the single rate every equation that needs it reads
+  const MooseFunctorName _interfacial_mass_transfer;
 };
