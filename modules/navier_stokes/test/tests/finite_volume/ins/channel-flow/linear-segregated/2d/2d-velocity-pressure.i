@@ -53,6 +53,11 @@ pressure_gradient_method = 'green-gauss'
   [gg]
     type = FVGreenGaussGradient
   []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+  []
 []
 
 [FVInterpolationMethods]
@@ -164,6 +169,15 @@ pressure_gradient_method = 'green-gauss'
     variable = vel_y
     use_two_term_expansion = false
     boundary = right
+  []
+[]
+
+[VectorPostprocessors]
+  [solution]
+    type = ElementValueSampler
+    variable = 'vel_x vel_y pressure'
+    sort_by = id
+    execute_on = TIMESTEP_END
   []
 []
 

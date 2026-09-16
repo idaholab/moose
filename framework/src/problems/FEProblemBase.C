@@ -4880,6 +4880,13 @@ FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD
   return *(methods[0]);
 }
 
+FVGradientMethod &
+FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid)
+{
+  return const_cast<FVGradientMethod &>(
+      static_cast<const FEProblemBase &>(*this).getFVGradientMethod(name, tid));
+}
+
 bool
 FEProblemBase::hasFVGradientMethod(const GradientMethodName & name) const
 {
