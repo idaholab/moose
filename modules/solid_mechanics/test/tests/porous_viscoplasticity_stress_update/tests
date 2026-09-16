@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13494'
-  design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+  design = 'source/materials/PorosusViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
   parallel_scheduling = True
   [exact_spherical]
     type = CSVDiff
