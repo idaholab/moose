@@ -444,6 +444,10 @@ private:
                                                    LocalResidualScope residual_scope,
                                                    const LocalSolveContext & context);
   void initializeLocalSolveScales(LocalSolveContext & context) const;
+  bool denseLimitActive(const LocalSolveContext & context) const;
+  LocalPoint evaluateDenseLimitPoint(const GenericReal<is_ad> & q,
+                                     const LocalSolveContext & context) const;
+  LocalPoint solveDenseLimit(const LocalSolveContext & context) const;
   LocalPoint solvePorosityActiveSet(const LocalSolveContext & context,
                                     bool & reduced_porosity_attempted);
   void commitLocalPoint(const LocalPoint & point,
