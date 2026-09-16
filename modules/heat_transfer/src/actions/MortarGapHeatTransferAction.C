@@ -143,8 +143,9 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
 
   if (params.isParamSetByUser("primary_subdomain") !=
       params.isParamSetByUser("secondary_subdomain"))
-    paramError("primary_subdomain",
-               "The primary_subdomain and secondary_subdomain parameters must be provided together");
+    paramError(
+        "primary_subdomain",
+        "The primary_subdomain and secondary_subdomain parameters must be provided together");
 
   if (_user_provided_gap_flux_models)
     mooseInfo(
