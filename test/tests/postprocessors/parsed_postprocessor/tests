@@ -20,4 +20,10 @@
     expect_err = 'pp_symbols must be the same length as pp_names.'
     requirement = 'The system shall detect when the given number of input symbols does not match the number of postprocessor names and will report an error.'
   []
+  [pp_controllable]
+    type = RunCommand
+    command =' python parsed_pp_control.py'
+    required_python_packages = 'os sys importlib.util'
+    detail = 'Starting up python webservercontrol and launching a simple subapp to test controllable ParsedPostprocessor.'
+  []
 []
