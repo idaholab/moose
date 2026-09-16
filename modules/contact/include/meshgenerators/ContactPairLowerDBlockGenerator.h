@@ -36,13 +36,13 @@ protected:
 
 private:
   /// Candidate boundaries to pair
-  const std::vector<BoundaryName> _pairing_boundaries;
+  const std::vector<BoundaryName> & _pairing_boundaries;
   /// Maximum center-to-center or node-to-node distance for pairing
   const Real _pairing_distance;
   /// Pairing method: NODE or CENTROID
-  const MooseEnum _pairing_method;
+  const MooseEnum & _pairing_method;
   /// Prefix prepended to the names of generated subdomain blocks
-  const std::string _prefix;
+  const std::string & _prefix;
 
   static void removeDuplicatePairs(std::vector<std::pair<BoundaryName, BoundaryName>> & pairs);
 };

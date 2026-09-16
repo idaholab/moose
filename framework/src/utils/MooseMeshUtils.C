@@ -1027,7 +1027,7 @@ void
 createSubdomainFromSidesets(MeshBase & mesh,
                             std::vector<BoundaryName> boundary_names,
                             const SubdomainID new_subdomain_id,
-                            const SubdomainName new_subdomain_name)
+                            const SubdomainName & new_subdomain_name)
 {
   // Generate a new block id if one isn't supplied.
   SubdomainID new_block_id = new_subdomain_id;
@@ -1109,7 +1109,7 @@ createSubdomainFromSidesets(MeshBase & mesh,
 
   // Use libmesh's BoundaryInfo::add_elements to create lower-d elements with interior_parent
   // pointers and subdomain IDs set in one pass.
-  auto & unstr_mesh = dynamic_cast<UnstructuredMesh &>(mesh);
+  auto & unstr_mesh = libMesh::cast_ref<UnstructuredMesh &>(mesh);
   unstr_mesh.get_boundary_info().add_elements(sidesets, unstr_mesh, false, {new_block_id});
 
   // Assign block name, if provided

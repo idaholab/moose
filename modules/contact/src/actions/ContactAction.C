@@ -675,14 +675,14 @@ ContactAction::act()
     if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB && ndisp > 2)
     {
       std::string action_name = MooseUtils::shortName(name());
-      for (const auto & contact_pair : _boundary_pairs)
+      for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
       {
-        const std::string suffix = pairSuffix(contact_pair);
+        const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
         InputParameters params = _factory.getValidParams("MortarFrictionalPressureVectorAux");
 
-        params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
-        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+        params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
+        params.set<std::vector<BoundaryName>>("boundary") = {secondary_boundary};
         params.set<ExecFlagEnum>("execute_on", true) = {EXEC_NONLINEAR};
         params.set<std::vector<VariableName>>("tangent_one") = {action_name + "_tangential_lm" +
                                                                 suffix};
@@ -872,13 +872,13 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
       _formulation == ContactFormulation::MORTAR_PENALTY)
   {
     std::string action_name = MooseUtils::shortName(name());
-    for (const auto & contact_pair : _boundary_pairs)
+    for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
     {
-      const std::string suffix = pairSuffix(contact_pair);
+      const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
       auto params = MortarConstraintBase::validParams();
       params.set<bool>("use_displaced_mesh") = true;
-      params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-      params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+      params.set<BoundaryName>("primary_boundary") = primary_boundary;
+      params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
       params.set<SubdomainName>("primary_subdomain") = action_name + "_primary_subdomain" + suffix;
       params.set<SubdomainName>("secondary_subdomain") =
           action_name + "_secondary_subdomain" + suffix;
@@ -991,9 +991,9 @@ ContactAction::addMortarContact()
       }
       else
       {
-        for (const auto & contact_pair : _boundary_pairs)
+        for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
         {
-          const std::string suffix = pairSuffix(contact_pair);
+          const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
           const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
           const std::string secondary_subdomain_name =
               action_name + "_secondary_subdomain" + suffix;
@@ -1007,8 +1007,8 @@ ContactAction::addMortarContact()
           primary_params.set<SubdomainName>("new_block_name") = primary_subdomain_name;
           secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
 
-          primary_params.set<std::vector<BoundaryName>>("sidesets") = {contact_pair.first};
-          secondary_params.set<std::vector<BoundaryName>>("sidesets") = {contact_pair.second};
+          primary_params.set<std::vector<BoundaryName>>("sidesets") = {primary_boundary};
+          secondary_params.set<std::vector<BoundaryName>>("sidesets") = {secondary_boundary};
 
           _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
           _app.appendMeshGenerator(
@@ -1090,9 +1090,9 @@ ContactAction::addMortarContact()
                      "does not support Augmented Lagrange iterations.");
     }
 
-    for (const auto & contact_pair : _boundary_pairs)
+    for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
     {
-      const std::string suffix = pairSuffix(contact_pair);
+      const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
       const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
       const std::string secondary_subdomain_name = action_name + "_secondary_subdomain" + suffix;
       const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm" + suffix;
@@ -1117,8 +1117,8 @@ ContactAction::addMortarContact()
       {
         auto uo_params = _factory.getValidParams("LMWeightedGapUserObject");
 
-        uo_params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        uo_params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        uo_params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        uo_params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
@@ -1140,15 +1140,17 @@ ContactAction::addMortarContact()
         if (getParam<bool>("use_petrov_galerkin"))
           uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
-        _problem->addUserObject("LMWeightedGapUserObject",
-                                register_mortar_uo_name(contact_pair, "lm_weightedgap_object_"),
-                                uo_params);
+        _problem->addUserObject(
+            "LMWeightedGapUserObject",
+            register_mortar_uo_name(std::make_pair(primary_boundary, secondary_boundary),
+                                    "lm_weightedgap_object_"),
+            uo_params);
       }
       else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
       {
         auto uo_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
-        uo_params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        uo_params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        uo_params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        uo_params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
@@ -1180,7 +1182,8 @@ ContactAction::addMortarContact()
 
         _problem->addUserObject(
             "LMWeightedVelocitiesUserObject",
-            register_mortar_uo_name(contact_pair, "lm_weightedvelocities_object_"),
+            register_mortar_uo_name(std::make_pair(primary_boundary, secondary_boundary),
+                                    "lm_weightedvelocities_object_"),
             uo_params);
       }
 
@@ -1188,8 +1191,8 @@ ContactAction::addMortarContact()
       {
         auto uo_params = _factory.getValidParams("PenaltyWeightedGapUserObject");
 
-        uo_params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        uo_params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        uo_params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        uo_params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
@@ -1225,7 +1228,8 @@ ContactAction::addMortarContact()
 
         _problem->addUserObject(
             "PenaltyWeightedGapUserObject",
-            register_mortar_uo_name(contact_pair, "penalty_weightedgap_object_"),
+            register_mortar_uo_name(std::make_pair(primary_boundary, secondary_boundary),
+                                    "penalty_weightedgap_object_"),
             uo_params);
         _problem->haveADObjects(true);
       }
@@ -1233,8 +1237,8 @@ ContactAction::addMortarContact()
                _formulation == ContactFormulation::MORTAR_PENALTY)
       {
         auto uo_params = _factory.getValidParams("PenaltyFrictionUserObject");
-        uo_params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        uo_params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        uo_params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        uo_params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
@@ -1282,9 +1286,11 @@ ContactAction::addMortarContact()
                                            "penalty",
                                            "penalty_friction"});
 
-        _problem->addUserObject("PenaltyFrictionUserObject",
-                                register_mortar_uo_name(contact_pair, "penalty_friction_object_"),
-                                uo_params);
+        _problem->addUserObject(
+            "PenaltyFrictionUserObject",
+            register_mortar_uo_name(std::make_pair(primary_boundary, secondary_boundary),
+                                    "penalty_friction_object_"),
+            uo_params);
         _problem->haveADObjects(true);
       }
     }
@@ -1294,6 +1300,8 @@ ContactAction::addMortarContact()
   {
     for (const auto & contact_pair : _boundary_pairs)
     {
+      const BoundaryName & primary_boundary = contact_pair.first;
+      const BoundaryName & secondary_boundary = contact_pair.second;
       const std::string suffix = pairSuffix(contact_pair);
       const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
       const std::string secondary_subdomain_name = action_name + "_secondary_subdomain" + suffix;
@@ -1322,8 +1330,8 @@ ContactAction::addMortarContact()
           params.set<UserObjectName>("weighted_gap_uo") =
               "lm_weightedgap_object_" + name() + suffix;
 
-        params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
@@ -1376,8 +1384,8 @@ ContactAction::addMortarContact()
         }
 
         params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-        params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<bool>("use_displaced_mesh") = true;
@@ -1423,7 +1431,8 @@ ContactAction::addMortarContact()
 
       const auto addMechanicalContactConstraints =
           [this,
-           &contact_pair,
+           &primary_boundary,
+           &secondary_boundary,
            &suffix,
            &primary_subdomain_name,
            &secondary_subdomain_name,
@@ -1436,8 +1445,8 @@ ContactAction::addMortarContact()
         InputParameters params = _factory.getValidParams(constraint_type);
 
         params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-        params.set<BoundaryName>("primary_boundary") = contact_pair.first;
-        params.set<BoundaryName>("secondary_boundary") = contact_pair.second;
+        params.set<BoundaryName>("primary_boundary") = primary_boundary;
+        params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
 

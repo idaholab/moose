@@ -100,17 +100,13 @@ offset = 1e-2
   dtmin = .1
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -mat_mffd_err'
+  petsc_options_value = 'lu       NONZERO               1e-5'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = true
   nl_rel_tol = 1e-12
-[]
-
-[Debug]
-  show_var_residual_norms = true
 []
 
 [Outputs]
@@ -121,22 +117,5 @@ offset = 1e-2
   [smp]
     type = SMP
     full = true
-  []
-[]
-
-[Postprocessors]
-  active = 'num_nl cumulative contact'
-  [num_nl]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
-  [contact]
-    type = ContactDOFSetSize
-    variable = weighted_gap_normal_lm
-    subdomain = 'weighted_gap_secondary_subdomain'
-    execute_on = 'nonlinear timestep_end'
   []
 []
