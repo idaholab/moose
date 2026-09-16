@@ -103,6 +103,10 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
   for (const auto & vname : _passive_scalar_names)
   {
     params.set<LinearVariableName>("variable") = vname;
+    // In conservative form every term carries the density, the time derivative included
+    const auto density = scalarConservativeDensity(vname);
+    if (!density.empty())
+      params.set<MooseFunctorName>("factor") = density;
     if (shouldCreateTimeDerivative(vname, _blocks, /*error if already defined */ false))
       getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
   }
@@ -125,9 +129,15 @@ WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
   params.set<InterpolationMethodName>("advected_interp_method_name") = method_name;
   setSlipVelocityParams(params);
 
+  params.set<std::vector<BoundaryName>>("slip_boundaries") = slipBoundaries();
+
   for (const auto & vname : _passive_scalar_names)
   {
     params.set<LinearVariableName>("variable") = vname;
+    // In conservative form the advected flux is a mass flux, not a volumetric one
+    const auto density = scalarConservativeDensity(vname);
+    if (!density.empty())
+      params.set<MooseFunctorName>("density") = density;
     getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_advection", params);
   }
 }
@@ -148,11 +158,31 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
         getParam<bool>("use_nonorthogonal_correction");
     for (const auto name_i : index_range(_passive_scalar_names))
     {
-      params.set<LinearVariableName>("variable") = _passive_scalar_names[name_i];
-      params.set<MooseFunctorName>("diffusion_coeff") =
+      const auto & vname = _passive_scalar_names[name_i];
+      params.set<LinearVariableName>("variable") = vname;
+      auto diffusivity =
           passive_scalar_diffusivities[name_i] + (_has_turbulence_model ? "_plus_mut/Sc_t" : "");
-      getProblem().addLinearFVKernel(
-          kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+
+      // In conservative form the diffusive flux is a mass flux too, so the density multiplies the
+      // diffusivity along with every other term of the equation. Leaving it out would change the
+      // balance between diffusion and the rest by a factor of the density.
+      const auto density = scalarConservativeDensity(vname);
+      if (!density.empty())
+      {
+        const auto scaled_name = prefix() + vname + "_conservative_diffusivity";
+        auto mat_params = getFactory().getValidParams("ParsedFunctorMaterial");
+        assignBlocks(mat_params, _blocks);
+        mat_params.set<std::string>("expression") = "conservative_rho * scalar_diffusivity";
+        mat_params.set<std::vector<std::string>>("functor_names") = {density, diffusivity};
+        mat_params.set<std::vector<std::string>>("functor_symbols") = {"conservative_rho",
+                                                                       "scalar_diffusivity"};
+        mat_params.set<std::string>("property_name") = scaled_name;
+        getProblem().addMaterial("ParsedFunctorMaterial", scaled_name + "_mat", mat_params);
+        diffusivity = scaled_name;
+      }
+
+      params.set<MooseFunctorName>("diffusion_coeff") = diffusivity;
+      getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_diffusion", params);
     }
   }
 }

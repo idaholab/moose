@@ -206,3 +206,13 @@ WCNSFVScalarTransportPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
 
   return necessary_layers;
 }
+
+std::vector<BoundaryName>
+WCNSFVScalarTransportPhysicsBase::slipBoundaries() const
+{
+  mooseAssert(_flow_equations_physics, "Slip boundaries are those of the flow Physics");
+  auto slip_boundaries = _flow_equations_physics->getInletBoundaries();
+  const auto & outlet_boundaries = _flow_equations_physics->getOutletBoundaries();
+  slip_boundaries.insert(slip_boundaries.end(), outlet_boundaries.begin(), outlet_boundaries.end());
+  return slip_boundaries;
+}

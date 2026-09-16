@@ -34,6 +34,18 @@ public:
 
   /// Get the name of the fluid temperature variable
   const VariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
+  /**
+   * Name of the variable the energy equation is actually solved for. This is the temperature
+   * unless 'solve_for_enthalpy' is set, in which case it is the specific enthalpy. Anything adding
+   * a source to the energy equation has to target this rather than the temperature, since with
+   * that parameter set the temperature is not a solver variable at all.
+   */
+  const VariableName & getFluidEnergyVariableName() const
+  {
+    return _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+  }
+  /// Whether the energy equation is solved in specific enthalpy rather than temperature
+  bool solveForEnthalpy() const { return _solve_for_enthalpy; }
 
   /// Get the name of the specific heat material property
   const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
