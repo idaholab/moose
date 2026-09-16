@@ -123,19 +123,15 @@ GeometricSearchData::reinit()
 void
 GeometricSearchData::backup()
 {
-  for (const auto & pl_it : _penetration_locators)
-    _penetration_locator_backups[pl_it.first] = pl_it.second->backup();
+  for (const auto & [boundary_pair, pl] : _penetration_locators)
+    _penetration_locator_backups[boundary_pair] = pl->backup();
 }
 
 void
 GeometricSearchData::restore()
 {
-  for (const auto & pl_it : _penetration_locators)
-  {
-    const auto backup_it = _penetration_locator_backups.find(pl_it.first);
-    if (backup_it != _penetration_locator_backups.end())
-      pl_it.second->restore(backup_it->second);
-  }
+  for (const auto & [boundary_pair, pl] : _penetration_locators)
+    pl->restore(libmesh_map_find(_penetration_locator_backups, boundary_pair));
 }
 
 void

@@ -474,7 +474,7 @@
     max_parallel = 1
     # not running any time step, just examining nodal geometry
     recover = false
-    restep = false # Setup-only nodal-geometry test; no transient step is advanced
+    restep = false
   []
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'

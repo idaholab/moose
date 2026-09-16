@@ -195,6 +195,12 @@ PenetrationLocator::backup()
 void
 PenetrationLocator::restore(const std::string & data)
 {
+  // Delete the PenetrationInfo objects we own before dataLoad clears the map, or we have a
+  // memory leak: the generic std::map dataLoad clears without deleting owned pointers.
+  for (auto & it : _penetration_info)
+    delete it.second;
+  _penetration_info.clear();
+
   std::istringstream stream(data);
   dataLoad(stream, _penetration_info, &_mesh);
   dataLoad(stream, _has_penetrated, &_mesh);
