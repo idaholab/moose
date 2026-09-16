@@ -10,8 +10,8 @@
 #pragma once
 
 #include "InitialCondition.h"
-
-class SolutionUserObjectBase;
+#include "SolutionUserObjectBase.h"
+#include <optional>
 
 /**
  * Class for reading an initial condition from a solution user object
@@ -31,6 +31,9 @@ protected:
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;
+
+  /// Policy used when the imported solution is multivalued at the query point
+  const std::optional<SolutionUserObjectBase::WeightingType> _weighting_type;
 
   /// Remapped IDs from the current mesh to the ExodusII mesh
   std::set<SubdomainID> _exo_block_ids;
