@@ -13,7 +13,8 @@ Test that ParsedPostprocessor 'expression' is a controllable parameter.
 The test:
 - Starts the MOOSE input with WebServerControl.
 - Checks that parsedpostprocessor expression changes from "c + t" to "c + t < n"
-  where n increases by 2 each timestep.
+  where n increases by 2 each timestep. Will fail via asserts if expression
+  doesn't change.
 """
 
 import importlib.util
