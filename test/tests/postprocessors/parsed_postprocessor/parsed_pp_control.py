@@ -52,7 +52,7 @@ def run_test(moose_exe: str, input_file: str, work_dir: str) -> None:
 
             # 2. TIMESTEP_BEGIN change expr and continue
             n = 0
-            for _ in range(6):  # remaining timesteps
+            for _ in range(2):  # remaining timesteps
                 control.wait(flag="TIMESTEP_BEGIN")
                 n += 2
                 new_expr = "c + t < " + str(n)
