@@ -26,8 +26,8 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
   InputParameters params =
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
-  params.addClassDescription(
-      "Implements a generic momentum solve over a 1D flow path, acting on the reference pressure drop.");
+  params.addClassDescription("Implements a generic momentum solve over a 1D flow path, acting on "
+                             "the reference pressure drop.");
   // Lots of inputs so we need to be clear what is what
   // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("coupled_mass_flow_rate",

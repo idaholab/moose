@@ -10,6 +10,7 @@ This object implements the time-dependent, globally compressible, locally incomp
   A \rho c_p \frac{du}{dt} + \frac{\dot{m}}{2 L} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) c_p T_d - \frac{\dot{m}}{2 L} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) c_p T_u + \frac{|\dot{m}| c_p}{L} u = \frac{h P_w}{2} \left( 2 T_w - u - \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d - \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u \right) \,
 \end{equation}
 
+
 Takes fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
 Takes functor inputs for flow area, perimeter, and length.
 All parameters are defined as functors,
