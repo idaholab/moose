@@ -74,7 +74,7 @@ FVGradientMethod::computeGradient(SystemBase & system,
   {
     ComputeLinearFVLimitedGradientThread limited_gradient_thread(
         fe_problem, system, gradient, _limiter_type, variable_numbers);
-    Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
+    Threads::parallel_reduce(elem_info_range, limited_gradient_thread, system.n_threads());
   }
   fe_problem.checkExceptionAndStopSolve();
 

@@ -263,7 +263,7 @@ FixedPointSolve::solve()
     // Snag all of the local dof indices for all of these variables
     AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
     const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    Threads::parallel_reduce(elem_range, aldit, _problem.n_threads());
 
     transformed_dofs = aldit.getDofIndices();
   }
@@ -277,7 +277,7 @@ FixedPointSolve::solve()
       // Snag all of the local dof indices for all of these variables
       AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
       const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-      Threads::parallel_reduce(elem_range, aldit);
+      Threads::parallel_reduce(elem_range, aldit, _problem.n_threads());
 
       secondary_transformed_dofs = aldit.getDofIndices();
     }

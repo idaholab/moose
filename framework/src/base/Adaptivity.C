@@ -210,7 +210,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
       FlagElementsThread fet(
           _fe_problem, serialized_solution, _max_h_level, marker_name, !distributed_adaptivity);
-      Threads::parallel_reduce(*all_elems, fet);
+      Threads::parallel_reduce(*all_elems, fet, _fe_problem.n_threads());
       _fe_problem.getAuxiliarySystem().solution().close();
     }
   }
@@ -417,7 +417,7 @@ Adaptivity::updateErrorVectors()
 
   // Fill the vectors with the local contributions
   UpdateErrorVectorsThread uevt(_fe_problem, _indicator_field_to_error_vector);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt, _fe_problem.n_threads());
 
   // Now sum across all processors
   for (const auto & it : _indicator_field_to_error_vector)

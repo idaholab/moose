@@ -271,6 +271,7 @@
     capabilities = 'mfem & platform=linux & compiler!=clang'
     compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
+    max_threads = 1 # no threads in MFEM
     # diffs at 9e-4 with -march=x86-64-v3
     rel_err = 2e-3
     recover = false

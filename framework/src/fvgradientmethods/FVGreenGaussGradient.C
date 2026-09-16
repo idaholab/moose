@@ -45,7 +45,7 @@ FVGreenGaussGradient::computeGradientWithoutLimiter(
 
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
         fe_problem, system, gradient, variable_numbers);
-    Threads::parallel_reduce(face_info_range, gradient_face_thread);
+    Threads::parallel_reduce(face_info_range, gradient_face_thread, system.n_threads());
   }
   fe_problem.checkExceptionAndStopSolve();
 
@@ -60,7 +60,7 @@ FVGreenGaussGradient::computeGradientWithoutLimiter(
 
     ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
         fe_problem, system, gradient, variable_numbers);
-    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
+    Threads::parallel_reduce(elem_info_range, gradient_volume_thread, system.n_threads());
   }
   fe_problem.checkExceptionAndStopSolve();
 }

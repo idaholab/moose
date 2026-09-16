@@ -13,10 +13,10 @@
 #include "InitialConditionBase.h"
 #include "MooseVariableFE.h"
 
-InitialConditionWarehouse::InitialConditionWarehouse()
-  : MooseObjectWarehouseBase<InitialConditionBase>(),
-    _boundary_ics(libMesh::n_threads()),
-    _block_ics(libMesh::n_threads())
+InitialConditionWarehouse::InitialConditionWarehouse(THREAD_ID num_threads)
+  : MooseObjectWarehouseBase<InitialConditionBase>(/*threaded=*/true, num_threads),
+    _boundary_ics(num_threads),
+    _block_ics(num_threads)
 {
 }
 
