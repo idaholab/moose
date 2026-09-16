@@ -38,6 +38,10 @@ private:
    */
   virtual void setSlipVelocityParams(InputParameters & params) const override;
 
+  /// The phase transport equation is assembled as the dispersed phase mass equation, so every
+  /// term carries the dispersed phase density.
+  virtual MooseFunctorName scalarConservativeDensity(const VariableName & vname) const override;
+
   /// Sets the slip velocity, u_d - u_c, on objects that consume the relative motion of the phases
   /// directly, namely the momentum and energy diffusion flux kernels
   void setRelativeVelocityParams(InputParameters & params) const;

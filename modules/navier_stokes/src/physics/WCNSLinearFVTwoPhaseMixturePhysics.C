@@ -239,6 +239,14 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
     addAdvectionSlipTerm();
 }
 
+MooseFunctorName
+WCNSLinearFVTwoPhaseMixturePhysics::scalarConservativeDensity(const VariableName & vname) const
+{
+  // Only the phase fraction is transported as a mass. Any other scalar carried by this Physics is
+  // solved for itself.
+  return (vname == _phase_2_fraction_name) ? _phase_2_density : MooseFunctorName();
+}
+
 void
 WCNSLinearFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
 {
@@ -269,12 +277,26 @@ WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & 
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 {
-  // Recreate the phase interface term from existing kernels
+  // The phase equation is assembled in conservative form, so the exchange term is scaled by the
+  // dispersed phase density along with every other term of that equation. Built as a functor
+  // rather than folded into the coefficient so that a non-uniform density is handled correctly.
+  const auto scaled_exchange = prefix() + "phase_exchange_coeff";
+  {
+    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<std::string>("expression") = "rho_d_exchange * alpha_exchange_coeff";
+    params.set<std::vector<std::string>>("functor_names") = {
+        _phase_2_density, getParam<MooseFunctorName>(NS::alpha_exchange)};
+    params.set<std::vector<std::string>>("functor_symbols") = {"rho_d_exchange",
+                                                               "alpha_exchange_coeff"};
+    params.set<std::string>("property_name") = scaled_exchange;
+    getProblem().addMaterial("ParsedFunctorMaterial", scaled_exchange + "_mat", params);
+  }
   {
     auto params = getFactory().getValidParams("LinearFVReaction");
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _phase_2_fraction_name;
-    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>(NS::alpha_exchange);
+    params.set<MooseFunctorName>("coeff") = scaled_exchange;
     getProblem().addLinearFVKernel(
         "LinearFVReaction", prefix() + "phase_interface_reaction", params);
   }
@@ -283,7 +305,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _phase_2_fraction_name;
     params.set<MooseFunctorName>("source_density") = _phase_1_fraction_name;
-    params.set<MooseFunctorName>("scaling_factor") = getParam<MooseFunctorName>(NS::alpha_exchange);
+    params.set<MooseFunctorName>("scaling_factor") = scaled_exchange;
     getProblem().addLinearFVKernel("LinearFVSource", prefix() + "phase_interface_source", params);
   }
 }
