@@ -111,16 +111,35 @@ protected:
   {
     GenericRankTwoTensor<is_ad> inelastic_strain_increment;
     GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
+    /// Derivative with respect to the common matrix-hydrostatic coordinate.
+    /// The legacy member name is retained for source compatibility.
     GenericRankTwoTensor<is_ad> dinelastic_deffective_hydro_stress;
     GenericRankTwoTensor<is_ad> dinelastic_dequiv_stress;
     GenericRankTwoTensor<is_ad> dinelastic_dporosity;
   };
 
-  /** Effective hydrostatic driving stress and its explicit porosity derivative. */
+  static constexpr unsigned int MAX_HYDROSTATIC_STRESS_POPULATIONS = 2;
+
+  /** One pore population's share of total porosity and hydrostatic driving stress. */
+  struct HydrostaticStressPopulation
+  {
+    GenericReal<is_ad> fraction = 0.0;
+    GenericReal<is_ad> effective_hydro_stress = 0.0;
+    GenericReal<is_ad> deffective_hydro_df = 0.0;
+  };
+
+  /**
+   * Hydrostatic driving state for one or more pore populations.
+   *
+   * The first two fields retain the original single-population interface. Derived classes that
+   * need multiple pore populations set population_count and populate populations instead.
+   */
   struct HydrostaticStressState
   {
     GenericReal<is_ad> effective_hydro_stress = 0.0;
     GenericReal<is_ad> deffective_hydro_df = 0.0;
+    std::array<HydrostaticStressPopulation, MAX_HYDROSTATIC_STRESS_POPULATIONS> populations{};
+    unsigned int population_count = 0;
   };
 
   /**
@@ -133,6 +152,17 @@ protected:
   virtual HydrostaticStressState
   evaluateHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
                             const GenericReal<is_ad> & porosity) const;
+
+  /** Return the number of active pore populations, including the legacy one-population form. */
+  unsigned int hydrostaticStressPopulationCount(const HydrostaticStressState & state) const;
+
+  /** Return one active pore population, including the legacy one-population form. */
+  HydrostaticStressPopulation hydrostaticStressPopulation(const HydrostaticStressState & state,
+                                                          unsigned int index) const;
+
+  /** Validate pore-population fractions and pressure states before constitutive use. */
+  void validateHydrostaticStressState(const HydrostaticStressState & state,
+                                      const char * stage) const;
 
   /** Optional porosity waypoint used only to globalize an upward reduced solve. */
   virtual std::optional<Real> reducedPorositySearchTarget() const { return std::nullopt; }
@@ -185,14 +215,14 @@ protected:
                               const bool derivative = false) const;
   GenericReal<is_ad> computeGaugeResidual(const GenericReal<is_ad> & equiv_stress,
                                           const GenericReal<is_ad> & trial_gauge,
-                                          const GenericReal<is_ad> & effective_hydro_stress,
+                                          const HydrostaticStressState & hydrostatic_stress,
                                           const GenericReal<is_ad> & porosity,
                                           const CreepLaw & law,
                                           GenericReal<is_ad> & derivative) const;
 
   /// Compute the gauge stress for a specific creep mechanism.
   GenericReal<is_ad> computeGaugeStress(const GenericReal<is_ad> & equiv_stress,
-                                        const GenericReal<is_ad> & effective_hydro_stress,
+                                        const HydrostaticStressState & hydrostatic_stress,
                                         const GenericReal<is_ad> & porosity,
                                         const CreepLaw & law);
 
@@ -201,21 +231,21 @@ protected:
 
   /// Evaluate and store all gauge-stress diagnostics at one converged constitutive state.
   void setGaugeStresses(const GenericReal<is_ad> & equiv_stress,
-                        const GenericReal<is_ad> & effective_hydro_stress,
+                        const HydrostaticStressState & hydrostatic_stress,
                         const GenericReal<is_ad> & porosity);
 
   /**
    * Evaluate the summed LPS creep response without modifying material properties. The returned
-   * tensor derivatives are partial derivatives with respect to p_eff, q, and f.
+   * tensor derivatives are with respect to common matrix hydrostatic stress, q, and total f.
    */
-  LpsCreepResponse evaluateLpsCreepResponse(const GenericReal<is_ad> & effective_hydro_stress,
+  LpsCreepResponse evaluateLpsCreepResponse(const HydrostaticStressState & hydrostatic_stress,
                                             const GenericReal<is_ad> & equiv_stress,
                                             const GenericRankTwoTensor<is_ad> & dev_direction,
                                             const GenericReal<is_ad> & porosity);
 
   /// Analytical first and second partial derivatives of one LPS gauge residual.
   LpsDerivatives computeLpsDerivatives(const GenericReal<is_ad> & gauge_stress,
-                                       const GenericReal<is_ad> & effective_hydro_stress,
+                                       const HydrostaticStressState & hydrostatic_stress,
                                        const GenericReal<is_ad> & equiv_stress,
                                        const GenericReal<is_ad> & porosity,
                                        const CreepLaw & law) const;
@@ -227,11 +257,11 @@ protected:
   GenericReal<is_ad> effectiveHydroStress(const GenericReal<is_ad> & matrix_hydro_stress) const;
   /// True when either deviatoric or hydrostatic stress can drive the porous viscoplastic response.
   bool hasViscoplasticDrive(const GenericReal<is_ad> & equiv_stress,
-                            const GenericReal<is_ad> & effective_hydro_stress,
+                            const HydrostaticStressState & hydrostatic_stress,
                             const GenericReal<is_ad> & porosity) const;
   /// Positive stress scale used to initialize and bound the gauge-stress Newton solve.
   GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress,
-                                      const GenericReal<is_ad> & effective_hydro_stress) const;
+                                      const HydrostaticStressState & hydrostatic_stress) const;
   /// Perform one viscoplastic update over the current constitutive timestep.
   virtual void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
                                   GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
@@ -244,7 +274,7 @@ protected:
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
   /// Estimate local substeps from an explicitly supplied hydrostatic driving stress and porosity.
   unsigned int estimateNumberSubstepsFromState(const GenericRankTwoTensor<is_ad> & stress,
-                                               const GenericReal<is_ad> & effective_hydro_stress,
+                                               const HydrostaticStressState & hydrostatic_stress,
                                                const GenericReal<is_ad> & porosity);
   /// Convert a predicted full-step effective inelastic increment to a local substep count.
   unsigned int computeRequiredSubsteps(Real effective_inelastic_strain_increment) const;
@@ -558,7 +588,7 @@ protected:
    */
   struct GaugeSolveState
   {
-    GenericReal<is_ad> effective_hydro_stress = 0.0;
+    HydrostaticStressState hydrostatic_stress;
     GenericReal<is_ad> porosity = 0.0;
     const CreepLaw * law = nullptr;
   };
