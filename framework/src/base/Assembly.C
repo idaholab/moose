@@ -4444,10 +4444,9 @@ Assembly::addJacobianScalar(GlobalDataKey)
 void
 Assembly::addJacobianOffDiagScalar(unsigned int ivar, GlobalDataKey)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  MooseVariableScalar & var_i = _sys.getScalarVariable(_tid, ivar);
-  for (const auto & var_j : vars)
-    addJacobianCoupledVarPair(var_i, *var_j);
+  for (const auto & it : _cm_sf_entry)
+    if (it.first->number() == ivar)
+      addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
 void
