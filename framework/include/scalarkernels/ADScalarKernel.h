@@ -29,7 +29,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() = 0;
-  virtual Real computeQpJacobian() { mooseError("Should not be called"); };
+  virtual Real computeQpJacobian() { mooseError("Should not be called for AD scalar kernels"); };
 
   /// The current solution
   const ADVariableValue & _u;
