@@ -26,7 +26,7 @@ All parameters are defined as functors,
 which should allow versatility in accepting a variety of input arguments.
 
 Some consideration should be given to the [!param](/ScalarKernels/CoupledPressureIncompressibleMomentumSPScalarKernel/is_implicit) parameter. This term allows the user to select whether the solve
-should be done with the current or the last accepted value for the system as the beginning parameter. This may allow the system to evolve more slowly which may avoid some issues with respect to divergence of particularly unstable systems.
+should be done with the current or the previous state values of functor properties. This may allow the system to evolve more slowly which may avoid some issues with respect to divergence of particularly unstable systems.
 
 Rather than using [ParsedODEKernel.md], the scalar kernels block can be simplified.
 
