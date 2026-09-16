@@ -11,16 +11,22 @@
 
 #include "MOOSEToNEML2.h"
 #include "NEML2Utils.h"
-#include "ElementUserObject.h"
+#include "DomainUserObject.h"
 
 #include "RankTwoTensor.h"
 #include "SymmetricRankTwoTensor.h"
 
+#include <set>
+
 /**
  * Gather a MOOSE quantity for insertion into the NEML2 model.
+ *
+ * In addition to gathering data in element interiors, this object can gather data on boundaries
+ * and interfaces (see the 'interface_boundaries' parameter inherited from DomainUserObject). On
+ * interfaces, data is gathered from both the element side and the neighboring element side.
  */
 template <typename T, unsigned int state>
-class MOOSEQuantityToNEML2 : public MOOSEToNEML2, public ElementUserObject
+class MOOSEQuantityToNEML2 : public MOOSEToNEML2, public DomainUserObject
 {
 public:
   static InputParameters validParams();
@@ -29,22 +35,48 @@ public:
 
 #ifndef NEML2_ENABLED
   void initialize() override {}
-  void execute() override {}
+  void executeOnElement() override {}
+  void executeOnBoundary() override {}
+  void executeOnInterface() override {}
   void finalize() override {}
   void threadJoin(const UserObject &) override {}
 #else
   void initialize() override;
-  void execute() override;
+  void executeOnElement() override;
+  void executeOnBoundary() override;
+  void executeOnInterface() override;
   void finalize() override {}
   void threadJoin(const UserObject &) override;
 
   neml2::Tensor gatheredData() const override;
 
 protected:
-  T qpData(unsigned int) const;
+  using ElemSide = std::tuple<dof_id_type, unsigned int>;
+
+  /// Where to read the per-quadrature-point data from
+  enum class DataSource
+  {
+    Elem,         ///< element interior
+    ElemSide,     ///< current element side (face)
+    NeighborSide, ///< neighboring element side (on internal/interface sides)
+    Interface     ///< interface material data
+  };
+
+  T qpData(unsigned int, DataSource) const;
+
+  void checkMaterialProperty(const std::string & name, const unsigned int prop_state) override;
 
   /// MOOSE quantity type to read from
   const NEML2Utils::MOOSEIOType _type;
+
+  /// When true, skip element-interior gathering and gather interface sides only.
+  const bool _interface_only;
+
+  /// When true, read material properties from Moose::INTERFACE_MATERIAL_DATA.
+  const bool _from_interface_material;
+
+  /// Whether this object gathers data from interface boundaries.
+  const bool _has_interface;
 
   ///@{
   /// candidate MOOSE quantities to read data from
@@ -57,11 +89,26 @@ protected:
   const VariableValue * _var_old = nullptr;
   ///@}
 
+  ///@{
+  /// candidate MOOSE quantities to read side/neighbor data from (for boundary/interface gathering)
+  const MaterialProperty<T> * _face_mat_prop = nullptr;
+  const MaterialProperty<T> * _face_mat_prop_old = nullptr;
+  const MaterialProperty<T> * _neighbor_mat_prop = nullptr;
+  const MaterialProperty<T> * _neighbor_mat_prop_old = nullptr;
+  const MaterialProperty<T> * _interface_mat_prop = nullptr;
+  const MaterialProperty<T> * _interface_mat_prop_old = nullptr;
+  const VariableValue * _var_neighbor = nullptr;
+  const VariableValue * _var_neighbor_old = nullptr;
+  ///@}
+
   /// Whether the gathered data should be batched
   bool _batched = false;
 
   /// Intermediate data buffer, filled during the element loop
   std::vector<T> _buffer;
+
+  /// Element-side keys already gathered in this iteration
+  std::set<ElemSide> _visited_elem_sides;
 #endif
 };
 
