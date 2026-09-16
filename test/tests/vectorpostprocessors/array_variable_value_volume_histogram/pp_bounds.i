@@ -77,11 +77,13 @@
     type = ParsedPostprocessor
     expression = 't'
     use_t = true
+    force_preaux = true
   []
   [min]
     type = ParsedPostprocessor
     expression = 't - 1'
     use_t = true
+    force_preaux = true
   []
 []
 
