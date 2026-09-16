@@ -1,7 +1,5 @@
 # ContactPairLowerDBlockGenerator
 
-!syntax description /Mesh/ContactPairLowerDBlockGenerator
-
 ## Overview
 
 This mesh generator automatically detects contact surface pairs among a list of

@@ -93,16 +93,17 @@ ContactPairLowerDBlockGenerator::generate()
                Moose::stringify(_pairing_boundaries));
 
   const bool multiple_pairs = pairs.size() > 1;
-  for (const auto & pair : pairs)
+  for (const auto & [primary_boundary, secondary_boundary] : pairs)
   {
-    const std::string suffix = multiple_pairs ? "_" + pair.first + "_" + pair.second : "";
+    const std::string suffix =
+        multiple_pairs ? "_" + primary_boundary + "_" + secondary_boundary : "";
     const std::string primary_name = _prefix + "_primary_subdomain" + suffix;
     const std::string secondary_name = _prefix + "_secondary_subdomain" + suffix;
 
     MooseMeshUtils::createSubdomainFromSidesets(
-        *mesh, {pair.first}, MooseMeshUtils::getNextFreeSubdomainID(*mesh), primary_name);
+        *mesh, {primary_boundary}, MooseMeshUtils::getNextFreeSubdomainID(*mesh), primary_name);
     MooseMeshUtils::createSubdomainFromSidesets(
-        *mesh, {pair.second}, MooseMeshUtils::getNextFreeSubdomainID(*mesh), secondary_name);
+        *mesh, {secondary_boundary}, MooseMeshUtils::getNextFreeSubdomainID(*mesh), secondary_name);
   }
 
   return mesh;
@@ -153,35 +154,35 @@ ContactPairLowerDBlockGenerator::findPairsNodeProximity(
   std::vector<nanoflann::ResultItem<std::size_t, Real>> ret_matches;
   std::vector<std::pair<BoundaryName, BoundaryName>> pairs;
 
-  for (const auto & entry : node_bid_list)
+  for (const auto & [entry_node, entry_bid] : node_bid_list)
   {
     ret_matches.clear();
-    const Point search_point = *entry.first;
+    const Point search_point = *entry_node;
     kd_tree->radiusSearch(&search_point(0), distance * distance, ret_matches, search_params);
 
-    for (const auto & match_item : ret_matches)
+    for (const auto & [pair_idx, _] : ret_matches)
     {
-      const auto & match = node_bid_list[match_item.first];
+      const auto & [pair_node, pair_bid] = node_bid_list[pair_idx];
+      libmesh_ignore(pair_node);
 
       // Skip nodes on the same boundary
-      if (match.second == entry.second)
+      if (pair_bid == entry_bid)
         continue;
 
-      auto it_match = std::find(boundary_ids.begin(), boundary_ids.end(), match.second);
-      if (it_match == boundary_ids.end())
-        continue;
+      auto it_pair = std::find(boundary_ids.begin(), boundary_ids.end(), pair_bid);
+      mooseAssert(it_pair != boundary_ids.end(), "Pair boundary not in candidate list");
 
-      auto it_entry = std::find(boundary_ids.begin(), boundary_ids.end(), entry.second);
+      auto it_entry = std::find(boundary_ids.begin(), boundary_ids.end(), entry_bid);
       mooseAssert(it_entry != boundary_ids.end(), "Entry boundary not in candidate list");
 
-      const auto idx_match = cast_int<int>(it_match - boundary_ids.begin());
-      const auto idx_entry = cast_int<int>(it_entry - boundary_ids.begin());
+      const auto idx_pair = cast_int<std::size_t>(std::distance(boundary_ids.begin(), it_pair));
+      const auto idx_entry = cast_int<std::size_t>(std::distance(boundary_ids.begin(), it_entry));
 
       // Assign primary/secondary such that primary has the larger boundary id
-      if (entry.second > match.second)
-        pairs.push_back({boundaries[idx_entry], boundaries[idx_match]});
+      if (entry_bid > pair_bid)
+        pairs.push_back({boundaries[idx_entry], boundaries[idx_pair]});
       else
-        pairs.push_back({boundaries[idx_match], boundaries[idx_entry]});
+        pairs.push_back({boundaries[idx_pair], boundaries[idx_entry]});
     }
   }
 
@@ -252,16 +253,6 @@ void
 ContactPairLowerDBlockGenerator::removeDuplicatePairs(
     std::vector<std::pair<BoundaryName, BoundaryName>> & pairs)
 {
-  std::vector<std::pair<BoundaryName, BoundaryName>> unique_pairs;
-  for (const auto & [primary, secondary] : pairs)
-  {
-    auto it = std::find_if(
-        unique_pairs.begin(),
-        unique_pairs.end(),
-        [&, p = primary, s = secondary](const auto & q)
-        { return (q.first == p && q.second == s) || (q.first == s && q.second == p); });
-    if (it == unique_pairs.end())
-      unique_pairs.emplace_back(primary, secondary);
-  }
-  pairs = std::move(unique_pairs);
+  std::sort(pairs.begin(), pairs.end());
+  pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
 }
