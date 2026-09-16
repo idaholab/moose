@@ -46,22 +46,22 @@ public:
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
   /// Get a reference(!) to the requested output view
-  const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
+  const at::Tensor & getOutput(const std::string & output_name) const;
 
   /// Get a reference(!) to the requested output derivative view
-  const neml2::Tensor & getOutputDerivative(const neml2::VariableName & output_name,
-                                            const neml2::VariableName & input_name) const;
+  const at::Tensor & getOutputDerivative(const std::string & output_name,
+                                         const std::string & input_name) const;
 
-  /// Get a reference(!) to the requested output parameter derivative view
-  const neml2::Tensor & getOutputParameterDerivative(const neml2::VariableName & output_name,
-                                                     const std::string & parameter_name) const;
+  /// Get a reference(!) to the requested output-parameter-derivative view
+  const at::Tensor & getOutputParameterDerivative(const std::string & output_name,
+                                                  const std::string & parameter_name) const;
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
 
 protected:
   /// Register a NEML2 input variable gathered by a gatherer
-  virtual void addGatheredVariable(const UserObjectName &, const neml2::VariableName &);
+  virtual void addGatheredVariable(const UserObjectName &, const std::string &);
 
   /// Register a NEML2 model parameter gathered by a gatherer
   virtual void addGatheredParameter(const UserObjectName &, const std::string &);
@@ -69,17 +69,29 @@ protected:
   /// Prevent output and derivative retrieval after construction
   virtual void checkExecutionStage() const final;
 
-  /// Fill input variables and model parameters using the gatherers
+  /// Fill input variables using the gatherers
   virtual void fillInputs();
 
-  /// Perform the material update
-  virtual bool solve();
+  /// Perform the material update. Evaluates the value only, or the value and its derivatives when
+  /// \p compute_derivative is true.
+  virtual bool solve(bool compute_derivative);
 
-  /// Extract output derivatives with respect to input variables and model parameters
-  virtual void extractOutputs();
+  /// Extract outputs, and their derivatives with respect to the input variables when
+  /// \p compute_derivative is true.
+  virtual void extractOutputs(bool compute_derivative);
 
-  /// Expand tensor shapes if necessary to conformal sizes
-  virtual void expandInputs();
+  /// Build the dump-file name for a failed constitutive update: '<model>_count<count>_rank<rank>.pt'.
+  /// The count is advanced collectively so it is identical on every rank for a given failed update;
+  /// passing rank_token = "*" therefore yields the glob the console message points users to (one file
+  /// per failing rank). Step / execute-on / nonlinear-iteration context is reported in the message
+  /// instead -- with a persistent counter they are redundant for uniquely identifying the file.
+  std::string failedInputDumpName(unsigned int count, const std::string & rank_token) const;
+
+  /// Block until all asynchronous device (CUDA) work has completed. On CUDA, NEML2 kernels are
+  /// launched asynchronously, so a TIME_SECTION would otherwise attribute their time to whatever
+  /// later forces an implicit sync (e.g. the output D2H copy) rather than to the phase that
+  /// launched them. Calling this at phase boundaries makes the per-phase timings fair. No-op on CPU.
+  void deviceSynchronize();
 
   /// Save stateful variables for on-device state advance
   void advanceState();
@@ -87,54 +99,75 @@ protected:
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
-  /// Advance state on device (rather than via MOSOE material properties)
+  /// Advance state on device (rather than via MOOSE material properties)
   const bool _manage_state_advance;
 
-  /// Dump input tensor info on failure to aid debugging
-  const bool _debug_inputs_on_failure;
+  /// Dump the NEML2 input tensors to a per-rank TorchScript file on solve failure, for offline debugging
+  const bool _dump_inputs_on_failure;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
-  /// The model parameters to update (gathered from MOOSE)
-  std::map<std::string, neml2::Tensor> _model_params;
+  /// Whether the retained input-derivative tensor is consistent with the current batch. The input
+  /// Jacobian is recomputed only on Jacobian evaluations (see execute()), so a pure residual sweep
+  /// reuses the retained derivative -- which is only safe while the batch is unchanged. Anything that
+  /// resizes the batch (e.g. meshChanged() regenerating the element-to-batch-index map on element
+  /// activation) invalidates it; execute() then forces one derivative recompute before it is read, so
+  /// a retriever never indexes a stale, wrongly-sized derivative.
+  bool _derivative_valid;
 
-  /// The input variables of the material model
-  neml2::ValueMap _in;
+  /// The input variables of the material model (name -> (batch, *base_shape) tensor)
+  std::map<std::string, at::Tensor> _in;
+
+  /// Model parameter values gathered from MOOSE (qualified name -> tensor), set on the model
+  /// before each evaluation
+  std::map<std::string, at::Tensor> _model_params;
 
   /// The output variables of the material model
-  neml2::ValueMap _out;
+  std::map<std::string, at::Tensor> _out;
 
-  /// Cached variables from the last successful step (for on-device advance)
-  neml2::ValueMap _state_vars;
+  /// Cached stateful variables from the last successful step (for on-device advance)
+  std::map<std::string, at::Tensor> _state_vars;
 
-  /// The derivative of the output variables w.r.t. the input variables
-  neml2::DerivMap _dout_din;
+  /// Base-shaped zero tensors for cold-started in-place-updated unknowns (an order-0 NEML2 input
+  /// that is also a model output and is not gathered; see initialSetup). Injected into _in on every
+  /// evaluation and broadcast over the batch by NEML2 (never advanced), so the return-map initial
+  /// guess is 0 each step rather than the stale previous output value.
+  std::map<std::string, at::Tensor> _zero_seed_vars;
+
+  /// The derivative of the output variables w.r.t. the input variables: J[output][input]
+  std::map<std::string, std::map<std::string, at::Tensor>> _dout_din;
+
+  /// The derivative of the output variables w.r.t. the model parameters: P[output][parameter]
+  std::map<std::string, std::map<std::string, at::Tensor>> _dout_dparam;
 
   // set of gathered NEML2 input variables
-  std::set<neml2::VariableName> _gathered_variable_names;
+  std::set<std::string> _gathered_variable_names;
 
   // set of gathered NEML2 model parameters
   std::set<std::string> _gathered_parameter_names;
 
-  /// MOOSE data gathering user objects
+  /// MOOSE data gathering user objects (input variables)
   std::vector<const MOOSEToNEML2 *> _gatherers;
+
+  /// MOOSE data gathering user objects (model parameters)
   std::vector<const MOOSEToNEML2 *> _param_gatherers;
 
   /// set of output variables that were retrieved (by other objects)
-  mutable neml2::ValueMap _retrieved_outputs;
+  mutable std::map<std::string, at::Tensor> _retrieved_outputs;
 
   /// set of derivatives that were retrieved (by other objects)
-  mutable neml2::DerivMap _retrieved_derivatives;
+  mutable std::map<std::string, std::map<std::string, at::Tensor>> _retrieved_derivatives;
 
-  /// set of parameter derivatives that were retrieved (by other objects)
-  mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
-      _retrieved_parameter_derivatives;
+  /// set of output-parameter-derivatives that were retrieved (by other objects)
+  mutable std::map<std::string, std::map<std::string, at::Tensor>> _retrieved_parameter_derivatives;
 
 private:
   /// Whether an error was encountered
   bool _error;
   /// Error message
   std::string _error_message;
+  /// Running count of failed constitutive updates dumped on this rank (disambiguates repeated dumps)
+  unsigned int _num_failed_dumps;
 #endif
 };

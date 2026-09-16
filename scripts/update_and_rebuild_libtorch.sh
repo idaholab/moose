@@ -15,7 +15,8 @@ MOOSE_DIR="$( cd "$( dirname "${SCRIPT_DIR}" )" && pwd )"
 if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   SCRIPT_NAME=$(basename "$0")
   echo "Usage: ${SCRIPT_NAME} --help"
-  echo "Usage: ${SCRIPT_NAME} [--fast|--skip-submodule-update] [ADDITIONAL_CONFIGURE_ARG ...]"
+  echo "Usage: ${SCRIPT_NAME} [--fast|--skip-submodule-update] [--install-python-package]"
+  echo "       ${SCRIPT_NAME} [ADDITIONAL_CONFIGURE_ARG ...]"
   echo
   echo "This script makes libtorch available to the MOOSE framework. The script "
   echo "performs the following steps:"
@@ -24,6 +25,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  3. Configure libtorch"
   echo "  4. Build libtorch"
   echo "  5. Install libtorch"
+  echo "  6. Install the PyTorch Python package (only with --install-python-package)"
   echo
   echo
   echo "Influential environment variables:"
@@ -37,7 +39,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  LIBTORCH_JOBS     The number of jobs to use when building libtorch. Default to <MOOSE_JOBS>. "
   echo "                    If unset, default to 1."
   echo
-  echo "For Intel GPU support, please explicitly `export USE_XPU=1` before running the script."
+  echo 'For Intel GPU support, please explicitly `export USE_XPU=1` before running the script.'
   echo
   echo "General environment variables supported by CMake are also respected."
   echo
@@ -45,6 +47,9 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  --help                   Display this message and exit"
   echo "  --fast                   Skip the update, clean, and configure steps (steps 1-3)"
   echo "  --skip-submodule-update  Skip the update step (step 1)"
+  echo "  --install-python-package Also build and install the PyTorch Python package (step 6) into"
+  echo "                           the active Python environment. Activate the target conda"
+  echo "                           environment first; NEML2 links against the PyTorch found there."
   echo "  ADDITIONAL_CONFIGURE_ARG Additional argument(s) to pass to the libtorch cmake configure command"
   exit 0
 fi
@@ -52,11 +57,14 @@ fi
 # Handle cliargs
 FAST=false
 SKIP_SUBMODULE_UPDATE=false
+INSTALL_PYTHON_PACKAGE=false
 for ARG in "$@" ; do
   if [[ "${ARG}" == "--fast" ]]; then
     FAST=true
   elif [[ "${ARG}" == "--skip-submodule-update" ]]; then
     SKIP_SUBMODULE_UPDATE=true
+  elif [[ "${ARG}" == "--install-python-package" ]]; then
+    INSTALL_PYTHON_PACKAGE=true
   else
     EXTRA_ARGS+=("$ARG")
   fi
@@ -81,6 +89,14 @@ fi
 # Dependency: petsc
 export PETSC_DIR=${PETSC_DIR:-${MOOSE_DIR}/petsc/arch-moose}
 
+# Dependency (only when installing the Python package): the Python environment to install into
+if [[ "${INSTALL_PYTHON_PACKAGE}" == true ]]; then
+  if ! PYTHON_EXECUTABLE=$(command -v python); then
+    echo "Error: 'python' was not found on PATH. Activate the target conda environment and re-run."
+    exit 1
+  fi
+fi
+
 # Print out the configuration summary if requested
 SCRIPT_NAME=$(basename "$0")
 echo "****************************************************************************************************"
@@ -92,7 +108,11 @@ echo "  LIBTORCH_SRC_DIR:          ${LIBTORCH_SRC_DIR}"
 echo "  LIBTORCH_JOBS:             ${LIBTORCH_JOBS}"
 echo "  FAST:                      ${FAST}"
 echo "  SKIP_SUBMODULE_UPDATE:     ${SKIP_SUBMODULE_UPDATE}"
+echo "  INSTALL_PYTHON_PACKAGE:    ${INSTALL_PYTHON_PACKAGE}"
 echo "  ADDITIONAL_CONFIGURE_ARGS: ${EXTRA_ARGS[*]}"
+if [[ "${INSTALL_PYTHON_PACKAGE}" == true ]]; then
+  echo "  PYTHON_EXECUTABLE:         ${PYTHON_EXECUTABLE}"
+fi
 echo "****************************************************************************************************"
 
 
@@ -172,6 +192,26 @@ install_libtorch "${LIBTORCH_BUILD_DIR}" "${LIBTORCH_DIR}"
 if [[ $? -ne 0 ]] ; then
   echo "Error: Failed to install libtorch"
   exit 1
+fi
+
+# Step 6: Install the Python package
+if [[ "${INSTALL_PYTHON_PACKAGE}" == true ]]; then
+  echo
+  echo "****************************************************************************************************"
+  echo "Installing the PyTorch Python package into ${PYTHON_EXECUTABLE}"
+  echo "****************************************************************************************************"
+  echo
+  install_libtorch_python "${LIBTORCH_SRC_DIR}" "${PYTHON_EXECUTABLE}" "${LIBTORCH_JOBS}"
+  # shellcheck disable=SC2181
+  if [[ $? -ne 0 ]] ; then
+    echo "Error: Failed to install the PyTorch Python package"
+    exit 1
+  fi
+
+  if ! "${PYTHON_EXECUTABLE}" -c 'import torch' 2>/dev/null; then
+    echo "Error: PyTorch was installed, but 'import torch' failed in ${PYTHON_EXECUTABLE}"
+    exit 1
+  fi
 fi
 
 # shellcheck disable=SC2181

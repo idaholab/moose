@@ -38,7 +38,7 @@ public:
   void finalize() override {}
   void threadJoin(const UserObject &) override;
 
-  neml2::Tensor gatheredData() const override;
+  at::Tensor gatheredData() const override;
 
 protected:
   T qpData(unsigned int) const;

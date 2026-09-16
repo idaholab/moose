@@ -6,6 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++
+      // equivalent yet)
 
 #pragma once
 
@@ -58,3 +60,5 @@ protected:
 }
 
 #endif
+
+#endif // NEML2 v2->v3 migration: DEFERRED
