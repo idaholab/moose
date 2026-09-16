@@ -107,9 +107,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
   {
     params.set<LinearVariableName>("variable") = _fluid_temperature_name;
     params.set<MooseEnum>("advected_quantity") = "temperature";
-    if (!MooseUtils::isFloat(_specific_heat_name))
-      paramError("specific_heat", "Must be a Real number. Functors not supported at this time");
-    params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
+    params.set<MooseFunctorName>("cp") = _specific_heat_name;
   }
   else
     params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
