@@ -10,7 +10,10 @@
 #pragma once
 
 #include <vector>
+#include <set>
+#include <algorithm>
 #include "Moose.h"
+#include "FaceInfo.h"
 #include "MooseUtils.h"
 #include "libmesh/utility.h"
 #include "ADReal.h"
@@ -116,6 +119,70 @@ template <typename T>
 T findyPlus(const T & mu, const T & rho, const T & u, Real dist);
 
 using MooseUtils::isZero;
+
+/**
+ * The coefficient of the diffusion stress of the mixture model, \f$ \beta_d \beta_c / \rho_m \f$,
+ * which also weights the enthalpy the relative motion carries. The phase fraction is clamped into
+ * [0, 1], as the mixture property material clamps it. Zero where either phase is absent.
+ */
+inline Real
+diffusionStressCoefficient(Real fd, Real rho_d, Real rho_c)
+{
+  fd = std::clamp(fd, 0.0, 1.0);
+  const auto beta_d = fd * rho_d;
+  const auto beta_c = (1.0 - fd) * rho_c;
+  const auto rho_m = beta_d + beta_c;
+  return (rho_m > 0.0) ? beta_d * beta_c / rho_m : 0.0;
+}
+
+/**
+ * Whether the dispersed phase may cross a face: any internal face, and a boundary face only if one
+ * of the sidesets the face belongs to is in `slip_boundaries`. Every sideset of the face is
+ * checked, the permeable one need not be the first the mesh lists.
+ */
+inline bool
+slipAllowedOnFace(const FaceInfo & fi, const std::set<BoundaryID> & slip_boundaries)
+{
+  if (fi.neighborPtr())
+    return true;
+  const auto & ids = fi.boundaryIDs();
+  return std::any_of(ids.begin(),
+                     ids.end(),
+                     [&slip_boundaries](const auto id) { return slip_boundaries.count(id); });
+}
+
+/**
+ * Assembles the slip velocity vector of a dispersed phase from its component functors. The
+ * components a lower dimensional mesh does not carry are passed as null and read as zero.
+ */
+template <typename T, typename SpaceArg>
+libMesh::VectorValue<T>
+slipVelocityVector(const Moose::Functor<T> & u_slip,
+                   const Moose::Functor<T> * v_slip,
+                   const Moose::Functor<T> * w_slip,
+                   const SpaceArg & arg,
+                   const Moose::StateArg & state)
+{
+  libMesh::VectorValue<T> slip(u_slip(arg, state), 0.0, 0.0);
+  if (v_slip)
+    slip(1) = (*v_slip)(arg, state);
+  if (w_slip)
+    slip(2) = (*w_slip)(arg, state);
+  return slip;
+}
+
+/**
+ * Checks that a slip velocity was given a component for every dimension of the mesh, the
+ * u component being required by the parameters of every object taking one.
+ */
+inline void
+checkSlipVelocityComponents(const MooseObject & object, unsigned int dim, bool has_v, bool has_w)
+{
+  if (dim >= 2 && !has_v)
+    object.paramError("v_slip", "In two or more dimensions, the v_slip velocity must be supplied");
+  if (dim >= 3 && !has_w)
+    object.paramError("w_slip", "In three dimensions, the w_slip velocity must be supplied");
+}
 
 /**
  * Schiller and Naumann's branch of the linear drag function, valid below the transition.
