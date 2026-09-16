@@ -7,4 +7,12 @@
     issues = '#32978'
     design = 'ArrayVariableValueVolumeHistogram.md'
   []
+  [variable_bnds]
+    type = CSVDiff
+    input = pp_bounds.i
+    csvdiff = 'pp_bounds_out_histo_0002.csv'
+    requirement = "The system shall be able to change the bounds of the histogram."
+    issues = '#33787'
+    design = 'ArrayVariableValueVolumeHistogram.md'
+  []
 []
