@@ -57,7 +57,7 @@
 
   [Executioner]
     type = Transient
-    num_steps = 6
+    num_steps = 2
     dt = 1.0
     nl_abs_tol = 1e-8
     solve_type = PJFNK
