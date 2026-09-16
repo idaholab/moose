@@ -404,7 +404,12 @@ RhieChowMassFlux::prepareMomentumPredictor()
               "The pressure gradient field must be linked before preparing momentum.");
 
   if (usingReconstructedPressureGradientMethod())
+  {
+    for (const auto component : make_range(dimension()))
+      momentumSystem(component).updateFVGradient(
+          velocityVariable(component).requestCellGradients());
     reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
+  }
 
   _grad_p_current.clear();
   for (const auto & component : pressureGradientComponents())
@@ -419,6 +424,9 @@ RhieChowMassFlux::preparePISOCorrector()
 
   mooseAssert(!_grad_p_current.empty(),
               "A momentum predictor must be prepared before another PISO corrector.");
+
+  for (const auto component : make_range(dimension()))
+    momentumSystem(component).updateFVGradient(velocityVariable(component).requestCellGradients());
   reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 }
 

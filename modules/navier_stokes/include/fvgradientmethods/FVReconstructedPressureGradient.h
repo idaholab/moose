@@ -21,6 +21,7 @@
 
 class ElemInfo;
 class FaceInfo;
+class FEProblemBase;
 class RhieChowMassFlux;
 
 /**
@@ -84,10 +85,10 @@ public:
 
 private:
   /// Current stage of the pressure-gradient reconstruction cycle.
-  enum class ReconstructionState
+  enum class PressureGradientReconstructionState
   {
     /// The next reconstruction cycle requires a lagged velocity-gradient snapshot.
-    NeedLaggedGradient,
+    NeedLaggedVelocityGradient,
     /// The lagged velocity gradient is available and a reconstructed candidate is required.
     NeedCandidate,
     /// The reconstructed candidate is available and ready to be published.
@@ -95,12 +96,12 @@ private:
   };
 
   /// Operations that advance or reset the pressure-gradient reconstruction cycle.
-  enum class ReconstructionEvent
+  enum class PressureGradientReconstructionEvent
   {
     /// Reset the cycle to require a new lagged velocity-gradient snapshot.
     Reset,
     /// Record that the lagged velocity-gradient snapshot has been saved.
-    SaveLaggedGradient,
+    SaveLaggedVelocityGradient,
     /// Record that a pressure-gradient candidate has been reconstructed.
     ReconstructCandidate,
     /// Record that the reconstructed candidate has been published.
@@ -112,8 +113,7 @@ private:
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
-  /// Resolve the method used before the reconstructed coupling pressure gradient exists.
-  const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
+  void resolveGradientMethodDependencies(FEProblemBase & fe_problem) override;
 
   /// Check that a stateful operation is requested by the bound Rhie-Chow object.
   void checkFlowSystem(const RhieChowMassFlux & rc) const;
@@ -122,7 +122,7 @@ private:
   void copyGradient(const GradientView & source, GradientContainer & destination);
 
   /// Apply and validate one reconstruction-cycle transition.
-  void transition(ReconstructionEvent event);
+  void transition(PressureGradientReconstructionEvent event);
 
   /// Blend a reconstructed candidate into the persistent coupling pressure gradient.
   void updateCouplingPressureGradient(const RhieChowMassFlux & rc,
@@ -179,6 +179,9 @@ private:
   /// Gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName _base_gradient_method_name;
 
+  /// Resolved method used before the reconstructed coupling pressure gradient exists.
+  const FVGradientMethod * _base_gradient_method = nullptr;
+
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
 
@@ -202,7 +205,8 @@ private:
       _lagged_reconstruction_velocity_gradient;
 
   /// Current position in the pressure-gradient reconstruction cycle.
-  ReconstructionState _reconstruction_state = ReconstructionState::NeedLaggedGradient;
+  PressureGradientReconstructionState _reconstruction_state =
+      PressureGradientReconstructionState::NeedLaggedVelocityGradient;
 
   /// Corrected face-flux iteration used by the previous reconstruction.
   dof_id_type _last_reconstructed_face_flux_iteration = 0;

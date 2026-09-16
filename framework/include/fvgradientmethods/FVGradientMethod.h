@@ -18,6 +18,7 @@
 #include <vector>
 
 class SystemBase;
+class FEProblemBase;
 
 namespace libMesh
 {
@@ -59,6 +60,15 @@ public:
 
   /// Limiter selected for this method.
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
+
+  /**
+   * Resolve (and construct, if missing) any other FVGradientMethod objects this method depends
+   * on. Called once for every FVGradientMethod after the "add_gradient_method" task has fully
+   * completed, so every sibling gradient method is guaranteed to already exist. Default
+   * implementation does nothing.
+   * @param fe_problem Problem whose FVGradientMethod warehouse is queried/extended.
+   */
+  virtual void resolveGradientMethodDependencies(FEProblemBase & fe_problem);
 
 private:
   /**

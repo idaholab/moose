@@ -81,3 +81,8 @@ FVGradientMethod::computeGradient(SystemBase & system,
   for (auto & vec : gradient)
     vec->close();
 }
+
+void
+FVGradientMethod::resolveGradientMethodDependencies(FEProblemBase & /*fe_problem*/)
+{
+}

@@ -3346,6 +3346,9 @@ protected:
 
   void checkUserObjects();
 
+  /// Let every FVGradientMethod resolve its dependencies on other gradient methods.
+  void checkGradientMethods();
+
   /**
    * Helper method for checking Material object dependency.
    *
