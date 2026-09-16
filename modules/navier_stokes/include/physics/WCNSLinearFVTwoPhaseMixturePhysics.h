@@ -60,6 +60,11 @@ private:
   /// the storage term carries onto the matrix diagonal
   MooseFunctorName buildMixtureDensityPressureDerivative();
   void addPhaseChangeEnergySource();
+  /**
+   * Adds the pressure work the relative motion carries, (alpha - c_d) u_s . grad(p). The mixture
+   * part of the term is added by the energy Physics; this is the part peculiar to the mixture.
+   */
+  void addEnergyPressureWorkDriftTerm();
   void addPhaseDriftFluxTerm();
   /// Adds the enthalpy carried by the relative motion of the phases to the energy equation
   void addPhaseEnergyDriftFluxTerm();
