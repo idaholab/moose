@@ -73,6 +73,27 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [active_scalars_before_flow]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Executioner/solve_active_scalars_before_flow=true Outputs/file_base=active-scalars-before-flow"
+    # The gold is a link to the default ordering's gold: moving the scalars ahead of the flow
+    # changes the path to the fixed point, not the fixed point
+    csvdiff = 'active-scalars-before-flow.csv'
+    design = 'SIMPLE.md'
+    requirement = 'The system shall reach the same converged solution when the active scalar equations are solved ahead of the flow within each outer iteration as when they are solved after it.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [active_scalar_subcycling]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Executioner/solve_active_scalars_before_flow=true Executioner/active_scalar_subcycles=4 Outputs/file_base=active-scalar-subcycling"
+    csvdiff = 'active-scalar-subcycling.csv'
+    design = 'SIMPLE.md'
+    requirement = 'The system shall reach the same converged solution when the active scalar equations are subcycled within each outer iteration as when they are not.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [phase_slip_wall_conservation]
     type = CSVDiff
     input = 'phase-slip-wall-conservation.i'
@@ -82,7 +103,6 @@
     requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across impermeable boundaries, even when those boundaries constrain the phase fraction.'
     max_threads = 1 # see libmesh issue #3808
   []
-
 
   [energy_slip_wall_conservation]
     type = CSVDiff
@@ -110,6 +130,20 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [mass_density_transient]
+    type = CSVDiff
+    input = 'mass-balance-transient.i'
+    csvdiff = 'mass-balance-transient_out.csv'
+    # A restarted run rejoins the fixed point iteration on a slightly different path, which moves
+    # the imbalance by 1.2e-6 absolute and the stored mass by 4e-5 relative. Both tolerances sit
+    # above that. The assertion is unaffected: dropping the density transient takes the imbalance
+    # from 1.5e-5 to 3.5e-2, three orders of magnitude outside either one.
+    rel_err = 1e-3
+    abs_zero = 5e-6
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+    requirement = 'The system shall close the mixture mass balance in a transient in which the domain gains or loses mass, by carrying the density transient of the mixture continuity equation into the pressure equation. Without that term the pressure equation forces the mass flow in to equal the mass flow out at every instant, and the whole of the storage rate is unaccounted for; the imbalance in this case is then three per cent of the inlet mass flow rather than the six significant figures the term recovers. The test is also sensitive to the sign of the term, which doubles the imbalance rather than closing it when reversed.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [conservative_transient_energy]
     type = CSVDiff
@@ -118,25 +152,6 @@
     abs_zero = 1e-6
     design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVTimeDerivative.md'
     requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form: a factor of rho_m cp_m gives d(rho_m cp_m T)/dt, whose discrete sum telescopes, so the integral of rho_m cp_m T holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_m cp_m dT/dt, and the temperature does not move at all and the integral rises by a factor of two and two thirds, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
-
-  [active_scalars_before_flow]
-    type = CSVDiff
-    input = 'channel-drift-flux-physics.i'
-    cli_args = "Executioner/solve_active_scalars_before_flow=true Outputs/file_base=active-scalars-before-flow"
-    # The gold is a link to the default ordering's gold: moving the scalars ahead of the flow
-    # changes the path to the fixed point, not the fixed point
-    csvdiff = 'active-scalars-before-flow.csv'
-    design = 'SIMPLE.md'
-    requirement = 'The system shall reach the same converged solution when the active scalar equations are solved ahead of the flow within each outer iteration as when they are solved after it.'
-    max_threads = 1 # see libmesh issue #3808
-  []
-  [active_scalar_subcycling]
-    type = CSVDiff
-    input = 'channel-drift-flux-physics.i'
-    cli_args = "Executioner/solve_active_scalars_before_flow=true Executioner/active_scalar_subcycles=4 Outputs/file_base=active-scalar-subcycling"
-    csvdiff = 'active-scalar-subcycling.csv'
-    design = 'SIMPLE.md'
-    requirement = 'The system shall reach the same converged solution when the active scalar equations are subcycled within each outer iteration as when they are not.'
     max_threads = 1 # see libmesh issue #3808
   []
 
