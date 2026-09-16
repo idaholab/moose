@@ -51,6 +51,14 @@ private:
    * Functions adding kernels for the other physics
    */
   void addPhaseInterfaceTerm();
+
+  /// Adds d(rho_m)/dt to the pressure equation, the storage term of mixture continuity
+  void addMassDensityTransientTerm();
+  /// Builds d(rho_m)/dt once, on demand, and returns the functor name. Several equations need it.
+  MooseFunctorName buildMixtureDensityTimeDerivative();
+  /// Builds d(rho_m)/dp at fixed phase fraction, the coefficient the pressure driven part of
+  /// the storage term carries onto the matrix diagonal
+  MooseFunctorName buildMixtureDensityPressureDerivative();
   void addPhaseChangeEnergySource();
   void addPhaseDriftFluxTerm();
   /// Adds the enthalpy carried by the relative motion of the phases to the energy equation
@@ -59,6 +67,10 @@ private:
   /// Adds the mass-weighted mixture specific heat, the weighting required for rho_m cp_m T to be
   /// the mixture enthalpy density
   void addMixtureSpecificHeatMaterial();
+
+  /// Whether d(rho_m)/dt has already been constructed, so it is built at most once
+  bool _built_drho_m_dt = false;
+  bool _built_drho_m_dp = false;
 
   /// Fluid heat transfer physics
   const WCNSLinearFVFluidHeatTransferPhysics * _fluid_energy_physics;

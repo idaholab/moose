@@ -77,6 +77,46 @@ WCNSLinearFVTwoPhaseMixturePhysics::validParams()
                               "slip_single_particle_friction_pressure_gradient",
                               "Friction model");
 
+  params.addParam<MooseFunctorName>(
+      "phase_1_density_time_derivative",
+      "Time derivative of the continuous phase density. Optional counterpart of "
+      "'phase_2_density_time_derivative'. It is zero for every case reported so far, but the "
+      "formulation does not assume it.");
+  params.addParam<bool>(
+      "add_mass_density_transient",
+      false,
+      "Whether to add the storage term d(rho_m)/dt to the pressure equation. Mixture continuity is "
+      "d(rho_m)/dt + div(rho_m u_m) = 0, and the pressure equation of the segregated algorithm "
+      "realises the second term alone, which is exact in a steady state and not otherwise. Setting "
+      "this lets a cell accumulate mass rather than pass a divergence free mass flux at every "
+      "instant, which is what a compressible SIMPLE does and an incompressible one cannot. It is "
+      "the only addition mixture continuity needs: the pressure equation is assembled on the "
+      "mass flux rho_m u_m, so the dilatation the relative motion of the phases produces is "
+      "already inside its divergence.");
+  params.addParam<MooseFunctorName>(
+      "phase_2_density_time_derivative",
+      "Time derivative of the dispersed phase density, needed by the mixture density storage term "
+      "of 'add_mass_density_transient' and by nothing else. The phase equation does not need it: "
+      "its LinearFVTimeDerivative is assembled in conservative form and takes the whole of "
+      "d(rho_d alpha)/dt from the multiplier's own state history. Leaving this unset asserts that "
+      "the dispersed phase density does not change in time.");
+  params.addParam<MooseFunctorName>(
+      "phase_2_density_pressure_derivative",
+      "Partial derivative of the dispersed phase density with respect to pressure, at fixed phase "
+      "fraction. Supply this whenever 'phase_2_density_name' is read from the solved pressure. It "
+      "is what lets the pressure driven part of d(rho_m)/dt be assembled implicitly rather than "
+      "lagged. Supply the compressibility of the phase itself: for an isothermal ideal gas it is "
+      "rho_d / p_absolute. The factor of rho_c/rho_d by which the phase equation's conservative "
+      "form amplifies it is applied here rather than asked for. Without this the pressure driven "
+      "part rides on the right hand side, and the outer iteration of the segregated solve stops "
+      "contracting at high void fraction or small time step. Optional: omitted, the term is "
+      "assembled explicitly exactly as before.");
+  params.addParam<MooseFunctorName>(
+      "phase_1_density_pressure_derivative",
+      "Partial derivative of the continuous phase density with respect to pressure. Optional "
+      "counterpart of 'phase_2_density_pressure_derivative'; it is zero for every case reported "
+      "so far, the continuous phase being a liquid.");
+
   params.addParam<InterpolationMethodName>(
       "phase_drift_advection_interpolation",
       "Scheme for the drift flux in the phase transport equation. The drift is always interpolated "
@@ -235,6 +275,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
   if (_add_phase_equation && isParamSetByUser("alpha_exchange"))
     addPhaseInterfaceTerm();
 
+  if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() &&
+      getParam<bool>("add_mass_density_transient"))
+    addMassDensityTransientTerm();
+
   if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation() &&
       getParam<bool>("add_phase_change_energy_term"))
     addPhaseChangeEnergySource();
@@ -287,6 +331,187 @@ WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & 
   params.set<MooseFunctorName>("rho_d") = _phase_2_density;
   params.set<MooseFunctorName>("rho_c") = _phase_1_density;
   params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
+}
+
+MooseFunctorName
+WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityTimeDerivative()
+{
+  // Differentiating rho_m = alpha rho_d + (1 - alpha) rho_c,
+  //
+  //   d(rho_m)/dt = (rho_d - rho_c) d(alpha)/dt + alpha d(rho_d)/dt + (1 - alpha) d(rho_c)/dt ,
+  //
+  // which assumes nothing about either phase density. The phase fraction derivative comes from the
+  // variable's own dot(), which MooseLinearVariableFV builds from the time integrator's
+  // coefficients: it is therefore the same discrete operator LinearFVTimeDerivative assembles in
+  // the phase equation, so the two cannot disagree. The density derivatives are supplied by the
+  // user and default to zero.
+  const auto drho_m_dt = prefix() + "drho_m_dt";
+  if (_built_drho_m_dt)
+    return drho_m_dt;
+
+  const auto alpha_dot = prefix() + "alpha_dot";
+  {
+    auto params = getFactory().getValidParams("GenericFunctorTimeDerivativeMaterial");
+    assignBlocks(params, _blocks);
+    params.set<std::vector<std::string>>("prop_names") = {alpha_dot};
+    params.set<std::vector<MooseFunctorName>>("prop_values") = {_phase_2_fraction_name};
+    getProblem().addMaterial("GenericFunctorTimeDerivativeMaterial", alpha_dot + "_mat", params);
+  }
+  {
+    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<std::string>("expression") =
+        "(rho_d - rho_c) * alpha_dot + alpha * drho_d_dt + (1 - alpha) * drho_c_dt";
+    params.set<std::vector<std::string>>("functor_names") = {
+        _phase_2_density,
+        _phase_1_density,
+        alpha_dot,
+        _phase_2_fraction_name,
+        isParamValid("phase_2_density_time_derivative")
+            ? getParam<MooseFunctorName>("phase_2_density_time_derivative")
+            : MooseFunctorName("0"),
+        isParamValid("phase_1_density_time_derivative")
+            ? getParam<MooseFunctorName>("phase_1_density_time_derivative")
+            : MooseFunctorName("0")};
+    params.set<std::vector<std::string>>("functor_symbols") = {
+        "rho_d", "rho_c", "alpha_dot", "alpha", "drho_d_dt", "drho_c_dt"};
+    params.set<std::string>("property_name") = drho_m_dt;
+    getProblem().addMaterial("ParsedFunctorMaterial", drho_m_dt + "_mat", params);
+  }
+
+  _built_drho_m_dt = true;
+  return drho_m_dt;
+}
+
+MooseFunctorName
+WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityPressureDerivative()
+{
+  // How the mixture density responds to pressure, the coefficient the pressure driven part of the
+  // storage term carries onto the matrix diagonal. Not d(rho_m)/dp at fixed phase fraction: the
+  // phase equation is assembled in conservative form and holds the dispersed phase mass
+  // m_d = rho_d alpha, so raising the pressure compresses the dispersed phase and
+  //
+  //   d(alpha)/dp = -(alpha / rho_d) d(rho_d)/dp ,
+  //
+  // which substituted into rho_m = m_d + (1 - alpha) rho_c, the first group held fixed, leaves
+  //
+  //   d(rho_m)/dp = (alpha rho_c / rho_d) d(rho_d)/dp + (1 - alpha) d(rho_c)/dp .
+  //
+  // The ratio rho_c/rho_d is over eight hundred for air in water, so the coefficient reaches two
+  // hundred at a void fraction of a quarter. The same quantity is subtracted from the explicit
+  // source, so it cancels at convergence and cannot change the converged answer.
+  //
+  // The phase compressibilities are supplied rather than differentiated, the densities reaching
+  // this Physics as opaque functors.
+  const auto drho_m_dp = prefix() + "drho_m_dp";
+  if (_built_drho_m_dp)
+    return drho_m_dp;
+
+  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+  assignBlocks(params, _blocks);
+  params.set<std::string>("expression") =
+      "alpha * rho_c / rho_d * drho_d_dp + (1 - alpha) * drho_c_dp";
+  params.set<std::vector<std::string>>("functor_names") = {
+      _phase_2_fraction_name,
+      _phase_1_density,
+      _phase_2_density,
+      isParamValid("phase_2_density_pressure_derivative")
+          ? getParam<MooseFunctorName>("phase_2_density_pressure_derivative")
+          : MooseFunctorName("0"),
+      isParamValid("phase_1_density_pressure_derivative")
+          ? getParam<MooseFunctorName>("phase_1_density_pressure_derivative")
+          : MooseFunctorName("0")};
+  params.set<std::vector<std::string>>("functor_symbols") = {
+      "alpha", "rho_c", "rho_d", "drho_d_dp", "drho_c_dp"};
+  params.set<std::string>("property_name") = drho_m_dp;
+  getProblem().addMaterial("ParsedFunctorMaterial", drho_m_dp + "_mat", params);
+
+  _built_drho_m_dp = true;
+  return drho_m_dp;
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::addMassDensityTransientTerm()
+{
+  // Mixture continuity is d(rho_m)/dt + div(rho_m u_m) = 0. The pressure equation realises the
+  // divergence alone, so this supplies the storage term, built by
+  // buildMixtureDensityTimeDerivative().
+  const auto drho_m_dt = buildMixtureDensityTimeDerivative();
+
+  // Where the dispersed phase density is read from the solved pressure, part of d(rho_m)/dt is a
+  // function of the very unknown this equation solves for:
+  //
+  //   d(rho_m)/dt = R + (d(rho_m)/dp) dp/dt ,   R = (rho_d - rho_c) d(alpha)/dt + ... ,
+  //
+  // and a LinearFVSource contributes nothing to the matrix, so lagging that second piece one outer
+  // iteration gives the segregated loop a gain of order (d(rho_m)/dp) V / (a_P dt), which stops it
+  // contracting above unity. LinearFVTimeDerivative in its non-conservative form is c du/dt with c
+  // on the diagonal, so handing it the pressure and d(rho_m)/dp puts the coefficient on the matrix
+  // and leaves R in the explicit source. The two forms have the same fixed point, the piece removed
+  // from one being the piece added to the other.
+  //
+  // This needs a phase compressibility, which arrives as an opaque functor and cannot be inferred.
+  // Either phase's will do, though in practice it is the dispersed one that matters. With neither,
+  // the explicit assembly is kept.
+  const bool implicit_pressure_part = isParamValid("phase_2_density_pressure_derivative") ||
+                                      isParamValid("phase_1_density_pressure_derivative");
+  MooseFunctorName source_density = drho_m_dt;
+
+  if (implicit_pressure_part)
+  {
+    const auto drho_m_dp = buildMixtureDensityPressureDerivative();
+    const auto & pressure_name = _flow_equations_physics->getPressureName();
+
+    // dp/dt, built here rather than taken from the user so that the piece subtracted from the
+    // source is the same discrete operator LinearFVTimeDerivative puts on the matrix.
+    const auto p_dot = prefix() + "pressure_dot";
+    {
+      auto params = getFactory().getValidParams("GenericFunctorTimeDerivativeMaterial");
+      assignBlocks(params, _blocks);
+      params.set<std::vector<std::string>>("prop_names") = {p_dot};
+      params.set<std::vector<MooseFunctorName>>("prop_values") = {pressure_name};
+      getProblem().addMaterial("GenericFunctorTimeDerivativeMaterial", p_dot + "_mat", params);
+    }
+
+    // R = d(rho_m)/dt - (d(rho_m)/dp) dp/dt, the part that is genuinely explicit.
+    source_density = prefix() + "drho_m_dt_explicit";
+    {
+      auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+      assignBlocks(params, _blocks);
+      params.set<std::string>("expression") = "drho_m_dt - drho_m_dp * p_dot";
+      params.set<std::vector<std::string>>("functor_names") = {drho_m_dt, drho_m_dp, p_dot};
+      params.set<std::vector<std::string>>("functor_symbols") = {"drho_m_dt", "drho_m_dp", "p_dot"};
+      params.set<std::string>("property_name") = source_density;
+      getProblem().addMaterial("ParsedFunctorMaterial", source_density + "_mat", params);
+    }
+
+    // The pressure driven part, implicit. Non-conservative form: the coefficient is a partial
+    // derivative held outside the time derivative, not a density being transported, so
+    // d(coefficient p)/dt is not what is wanted here.
+    {
+      auto params = getFactory().getValidParams("LinearFVTimeDerivative");
+      assignBlocks(params, _blocks);
+      params.set<LinearVariableName>("variable") = pressure_name;
+      params.set<MooseFunctorName>("factor") = drho_m_dp;
+      params.set<bool>("conservative_form") = false;
+      getProblem().addLinearFVKernel(
+          "LinearFVTimeDerivative", prefix() + "mass_density_transient_implicit", params);
+    }
+  }
+
+  {
+    // Sign. LinearFVDivergence and LinearFVSource do not share a sign convention on the right hand
+    // side, so the factor is negative although
+    //   div(rho_m Ainv grad p) = div(rho_m HbyA) + d(rho_m)/dt
+    // suggests otherwise. A positive factor doubles the mass imbalance instead of closing it; see
+    // mass-balance-transient.i.
+    auto params = getFactory().getValidParams("LinearFVSource");
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>("source_density") = source_density;
+    params.set<MooseFunctorName>("scaling_factor") = "-1";
+    getProblem().addLinearFVKernel("LinearFVSource", prefix() + "mass_density_transient", params);
+  }
 }
 
 void
