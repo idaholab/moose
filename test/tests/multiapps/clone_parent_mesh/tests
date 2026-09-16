@@ -1,8 +1,8 @@
 [Tests]
   design = 'MultiApps/index.md'
-  issues = '#24345 #33738'
 
   [clone]
+    issues = '#24345'
     requirement = 'The system shall be able to clone the mesh created in parent application into its sub-application(s) for geometries in'
     [XY]
       type = RunApp
@@ -27,7 +27,8 @@
     type = RunApp
     input = main.i
     cli_args = 'MultiApps/sub/input_files=sub_data_driven.i'
-    requirement = 'The system shall not report Mesh-generator-only parameters (e.g. '
+    issues = '#33738'
+    requirement = 'The system shall not report Mesh-Generator-only parameters (e.g. '
                   '"data_driven_generator") as unused on a sub-application whose mesh is cloned '
                   'from the parent application instead of being built from its own Mesh Generators.'
   []

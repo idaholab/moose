@@ -243,8 +243,11 @@ MultiApp::validParams()
                                   false,
                                   "True to clone parent app mesh and use it for this MultiApp.",
                                   "clone_master_mesh is deprecated, use clone_parent_mesh instead");
-  params.addParam<bool>(
-      "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
+  params.addParam<bool>("clone_parent_mesh",
+                        false,
+                        "True to clone parent app mesh and use it for this MultiApp. In this "
+                        "situation, all MeshGenerator parameters in the 'input_files' are ignored, "
+                        "as well as nearly all parameters at the root level of the 'Mesh' block.");
 
   params.addParam<unsigned int>("execution_order_group",
                                 0,

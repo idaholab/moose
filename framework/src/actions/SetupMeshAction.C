@@ -244,8 +244,8 @@ SetupMeshAction::act()
     // If we trigger any actions that can build MeshGenerators, whether through input file
     // syntax or through custom actions, change the default type to construct. We can't yet
     // check whether there are any actual MeshGenerator objects because those are added after
-    // setup_mesh. We do this even when cloning the master mesh so that MeshGeneratorMesh-only
-    // parameters set in this [Mesh] block (e.g. "data_driven_generator") are recognized as used,
+    // setup_mesh. We do this even when cloning the parent app mesh so that MeshGeneratorMesh-only
+    // parameters set in this [Mesh] block (e.g. "data_driven_generator") are not reported unused,
     // even though the generators themselves are never built in that case.
     if (!generator_actions.empty())
     {
@@ -254,7 +254,6 @@ SetupMeshAction::act()
       if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
       {
         // Auto-select MFEMMeshGeneratorMesh when a generator carries the MFEM flag.
-        // Guarded at compile time so non-MFEM builds incur zero overhead.
         bool has_mfem_generator = false;
 #ifdef MOOSE_MFEM_ENABLED
         // We'll have to do something smarter when people add actions other than
