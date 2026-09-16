@@ -27,20 +27,7 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription(
-      "Implements a generic momentum solve over a 1D flow path, acting on the reference pressure "
-      "drop."
-      "This kernel should only be used if the system is a closed loop, and this component should "
-      "close "
-      "one or more FlowPathMomentumSCSPScalarKernels. This is because this component flips the "
-      "pressure "
-      "gradient term sign."
-      "Note: Using this kernel also requires using a CoupledODETimeDerivativeScalarKernel, at "
-      "least until "
-      "we get around to making a suitable ADCoupledTimeDerivativeScalarKernel base class for this."
-      "Flow path may be represented by N segments, must provide unique geometric, pump pressure,"
-      " and epsilon information for each segment."
-      "Assumes incompressibility locally."
-      "This version utilizes the Single Component, Single Phase fluid properties base class.");
+      "Implements a generic momentum solve over a 1D flow path, acting on the reference pressure drop.");
   // Lots of inputs so we need to be clear what is what
   // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("coupled_mass_flow_rate",

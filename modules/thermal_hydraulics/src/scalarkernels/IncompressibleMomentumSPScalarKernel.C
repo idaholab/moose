@@ -26,12 +26,7 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
   InputParameters params =
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
-  params.addClassDescription(
-      "Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate."
-      "Flow path may be represented by N segments, must provide unique geometric, pump pressure,"
-      " and epsilon information for each segment."
-      "Assumes incompressibility locally."
-      "This version utilizes the Single Component, Single Phase fluid properties base class.");
+  params.addClassDescription("Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate.");
   // Lots of inputs so we need to be clear what is what
   // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("reference_pressure_drop",

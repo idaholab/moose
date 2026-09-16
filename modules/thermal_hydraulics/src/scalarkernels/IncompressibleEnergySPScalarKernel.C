@@ -26,11 +26,7 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::validParams()
   InputParameters params =
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
-  params.addClassDescription(
-      "Implements a generic energy solve over a 1D flow path segment."
-      "Assumes incompressibility locally."
-      "Neglects axial conduction in fluid."
-      "This version utilizes the Single Component, Single Phase fluid properties base class.");
+  params.addClassDescription("Implements a generic energy solve over a 1D flow path segment.");
   // Lots of inputs so we need to be clear what is what
   // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("mass_flow_rate",
