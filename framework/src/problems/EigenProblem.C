@@ -445,20 +445,26 @@ EigenProblem::preScaleEigenVector(const std::pair<Real, Real> & eig)
 void
 EigenProblem::postScaleEigenVector()
 {
+  postScaleEigenVector(_active_eigen_index);
+}
+
+void
+EigenProblem::postScaleEigenVector(unsigned int eigen_index)
+{
   if (_has_normalization)
   {
     Real v;
     if (_normal_factor == std::numeric_limits<Real>::max())
     {
-      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+      if (eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
         mooseError("Number of converged eigenvalues ",
                    _nl_eigen->getNumConvergedEigenvalues(),
                    " but you required eigenvalue ",
-                   _active_eigen_index);
+                   eigen_index);
 
       // when normal factor is not provided, we use the inverse of the norm of
-      // the active eigenvalue for normalization
-      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
+      // the requested eigenvalue for normalization
+      auto eig = _nl_eigen->getAllConvergedEigenvalues()[eigen_index];
       v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
     }
     else
@@ -603,7 +609,10 @@ EigenProblem::solve(const unsigned int nl_sys_num)
     _current_nl_sys->update();
 
     // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
-    if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO)
+    // With the linear eigen solvers no object executes on linear during the solve, so the same is
+    // needed before the normalization postprocessor is read
+    if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO ||
+        (_has_normalization && !isNonlinearEigenvalueSolver(nl_sys_num)))
       execute(EXEC_LINEAR);
 
     // Scale eigen vector if users ask

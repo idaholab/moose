@@ -99,6 +99,14 @@ public:
   void postScaleEigenVector();
 
   /**
+   * Normalize the eigen vector currently held in the solution of the eigen system. This does not
+   * select the eigen vector.
+   * @param eigen_index Index of the converged eigenvalue whose inverse magnitude is used as the
+   * normalization factor when "normal_factor" is not provided
+   */
+  void postScaleEigenVector(unsigned int eigen_index);
+
+  /**
    * Scale eigenvector. Scaling_factor is often computed based on physics.
    */
   void scaleEigenvector(const Real scaling_factor);
