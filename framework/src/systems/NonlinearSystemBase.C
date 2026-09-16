@@ -227,7 +227,10 @@ NonlinearSystemBase::preInit()
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
+  {
     _sys.get_dof_map().full_sparsity_pattern_needed();
+    _sys.get_dof_map().ghost_constraints_needed();
+  }
 #endif
 }
 
