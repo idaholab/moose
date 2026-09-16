@@ -35,8 +35,16 @@ public:
   /// Variables this split explicitly operates on (empty implies "all variables")
   const std::vector<NonlinearVariableName> & getVars() const { return _vars; }
 
-  /// Whether this split restricts itself to a subset of the mesh via blocks/sides/unsides
-  bool restrictsRegion() const { return !_blocks.empty() || !_sides.empty() || !_unsides.empty(); }
+  /// Mesh blocks this split restricts itself to (empty implies "all blocks")
+  const std::vector<SubdomainName> & getBlocks() const { return _blocks; }
+
+  /// Whether this split restricts itself to a subset of the mesh. Subclasses with their own
+  /// region-restriction mechanism (e.g. ContactSplit's contact/uncontact surfaces) must override
+  /// this to report it too.
+  virtual bool restrictsRegion() const
+  {
+    return !_blocks.empty() || !_sides.empty() || !_unsides.empty();
+  }
 
 protected:
   /// Which splitting to use
