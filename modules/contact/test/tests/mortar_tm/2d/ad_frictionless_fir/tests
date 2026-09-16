@@ -19,6 +19,16 @@
       csvdiff = 'finite.csv'
       heavy = true
     []
+    [finite_combined]
+      issues = '#30020'
+      detail = 'using a reduced finite strain problem with active mechanical LM mortar contact and '
+               'the residual and Jacobian assembled together.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      cli_args = 'Mesh/plank/ny=10 Mesh/block/ny=2 Mesh/block/nx=1 Executioner/num_steps=3 '
+                 'Executioner/residual_and_jacobian_together=true name=finite_combined'
+      csvdiff = 'finite_combined.csv'
+    []
     [finite_scaling]
       detail = 'using the finite strain formulation with automatic scaling.'
       type = 'CSVDiff'
