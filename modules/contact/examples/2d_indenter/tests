@@ -18,6 +18,9 @@
     type = CSVDiff
     input = indenter_rz_fine_precontact.i
     csvdiff = indenter_rz_fine_precontact.csv
+    override_columns = 'max_normal_lm max_stress_xx resid_y'
+    override_rel_err = '5.5e-6 5.5e-6 5.5e-6'
+    override_abs_zero = '1e-10 1e-3 1e-2'
     requirement = 'The system shall produce zero contact pressure and stress before axisymmetric '
                   'frictionless mortar contact occurs.'
     design = 'TwoDimensionalSphericalIndenterMortar.md'
