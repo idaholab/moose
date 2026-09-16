@@ -1,6 +1,6 @@
 ---
 name: moose-markdown-documentation
-description: Write a documentation file for a MOOSE class or MOOSE object
+description: Write a documentation file for a MOOSE object
 ---
 
 # MOOSE Markdown Documentation Skill
@@ -16,6 +16,19 @@ This skill helps write MOOSE documentation using MooseDocs markdown extensions.
 
 ## Standard Object Documentation Structure
 
+The structure below is for objects registered with `registerMooseObject()`, which
+are the ones a user selects in an input file. A base class, interface or utility
+class has no input syntax path, so the `!syntax` commands have nothing to point at
+on a page for such a class.
+
+When a base class provides capability substantial enough that derived-class pages
+need to present it, give the base class its own page and link to that page from
+each derived page, the way `framework/doc/content/source/kernels/ScalarLMKernel.md`
+links to `KernelScalarBase.md` next to it. The base capability is then documented
+in one place, and each derived page covers what that class adds. The framework
+interface pages under `framework/doc/content/source/interfaces` are further
+precedent for standalone pages of this kind.
+
 ```markdown
 # ClassName
 
@@ -30,6 +43,10 @@ without spaces in the first paragraph].
 
 ## Example Input Syntax
 
+In this example, [describe what the object is doing in this particular input:
+which variable or boundary it acts on, what the parameter values mean for that
+setup, and what result the input produces]
+
 !listing path/to/test/file.i block=BlockName
 
 !syntax parameters /ObjectType/ClassName
@@ -38,6 +55,10 @@ without spaces in the first paragraph].
 
 !syntax children /ObjectType/ClassName
 ```
+
+Each `!listing` is introduced by the prose above it, which says what the object is
+doing in that particular input; existing pages open with "In this example, ...".
+When a page shows several inputs, precede each listing with its own description.
 
 For classes with AD variants, use: `# ClassName / ADClassName`
 
@@ -75,6 +96,15 @@ This corresponds to the input file syntax structure:
 - Parameter name (e.g., `variable = u`) -> `/Kernels/Diffusion/variable`
 
 **Important:** Use `[!param]()` for EVERY parameter reference in your documentation, not just the first mention.
+
+### Describing Parameters
+
+- Start from the parameter's docstring in `validParams()` and expand on it, so the
+  page and the generated parameter table agree.
+- Read the constructor for parameters that must be supplied together and for
+  parameters that are mutually exclusive, and state those relationships in the
+  text. Such couplings are usually enforced with `paramError()` calls or guarded
+  by `isParamValid()`, and the generated parameter table does not show them.
 
 ## Linking Conventions
 
@@ -188,7 +218,8 @@ Add references to appropriate `.bib` files in `doc/` directories.
 
 1. **Target end-users** - Focus on usage, not implementation
 2. **Include theory** - Explain the physics/math with equations
-3. **Show working examples** - Use `!listing` to reference test files
+3. **Show working examples** - Use `!listing` to reference test files, and precede
+   each listing with a description of what the object is doing in that input
 4. **Document limitations** - Note validity ranges and assumptions
 5. **Use consistent headings** - Only `##` for main sections (appears in sidebar)
 6. **Class name in first paragraph** - Mention the class name without spaces
@@ -245,9 +276,12 @@ where $\Omega \subset \mathbb{R}^n$ is the domain.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/dirichlet_bc/dirichlet_bc_test.i block=BCs
+In this example, the variable `u` is held at 0 on the `left` boundary and at 1 on
+the `right` boundary, driving the diffusion of `u` across the domain. The
+[!param](/BCs/DirichletBC/value) parameter sets the value imposed on the
+boundaries listed in [!param](/BCs/DirichletBC/boundary).
 
-The [!param](/BCs/DirichletBC/value) parameter sets the boundary value.
+!listing test/tests/kernels/simple_diffusion/simple_diffusion.i block=BCs
 
 !syntax parameters /BCs/DirichletBC
 
@@ -301,25 +335,3 @@ This creates template files that you can then fill in with content.
 7. **Forgetting `[!param]()` syntax** - EVERY parameter reference must use `[!param](/Path/To/parameter)`
 8. **Using shortcut `[Object]` syntax** - Use explicit `[ObjectName](ObjectName.md)` for clarity
 9. **Adding .md to display text** - Use `[ObjectName](ObjectName.md)` not `[ObjectName.md](ObjectName.md)`
-
-## Test Specification Requirements
-
-When adding new tests, include documentation metadata in the `tests` file:
-
-```
-[Tests]
-  [my_test]
-    type = 'Exodiff'
-    input = 'my_test.i'
-    exodiff = 'my_test_out.e'
-
-    requirement = "The system shall compute the diffusion equation correctly."
-    design = 'Diffusion.md'
-    issues = '#1234'
-  []
-[]
-```
-
-- `requirement`: Describes what the test verifies (complete sentence)
-- `design`: Links to relevant documentation files (partial paths OK)
-- `issues`: GitHub issue numbers associated with this feature/fix

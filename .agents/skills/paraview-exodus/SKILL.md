@@ -15,7 +15,7 @@ The entry point is `visualize_exodus.sh` in this skill's directory. It runs the
 renderer and, when the file has multiple timesteps, encodes the frames into MP4.
 
 ```bash
-# Most basic — color by the first field, default viridis colormap, white background
+# Most basic — color by the first non-ID field, default viridis colormap, white background
 ./visualize_exodus.sh path/to/result.e
 
 # Specify field and colormap
@@ -28,9 +28,12 @@ renderer and, when the file has multiple timesteps, encodes the frames into MP4.
 ./visualize_exodus.sh result.e --field disp --auto-aspect
 ```
 
-Always run it from this skill's directory (or with an absolute path to the
-script) so it can find `render_exodus.py` next to it. Outputs are written to the
-current working directory using the input's basename unless `--output` is given.
+The wrapper locates `render_exodus.py` next to itself, so it can be invoked from
+any working directory by path. Outputs are written to the current working
+directory using the input's basename unless `--output` is given.
+
+`render_exodus.py` is also usable on its own (`pvpython render_exodus.py ...`)
+for a single image or a frame series without the ffmpeg step.
 
 **Before rendering an unfamiliar file, list its fields** so you pick a real one:
 
@@ -65,7 +68,7 @@ Renderer (`render_exodus.py`), all forwarded by the wrapper:
 
 | Option | Default | Meaning |
 | - | - | - |
-| `--field NAME` | first available | Field/variable to color by |
+| `--field NAME` | first available that is not an ID | Field/variable to color by |
 | `--component C` | `Magnitude` | Vector component: `Magnitude`, `X`/`Y`/`Z`, or index |
 | `--colormap NAME` | `viridis` | Short name or any ParaView preset (see below) |
 | `--invert-colormap` | off | Reverse the colormap |

@@ -300,6 +300,27 @@ def list_arrays(reader):
     return point, cell
 
 
+# Bookkeeping arrays synthesized by the exodus/IOSS readers (block, node and
+# element ids). They hold no solution data, so they are passed over when picking
+# a default field. Compared with '_' stripped so both reader spellings match.
+ID_ARRAYS = {
+    "ids",
+    "objectid",
+    "fileid",
+    "globalnodeid",
+    "globalelementid",
+    "pedigreenodeid",
+    "pedigreeelementid",
+    "elementside",
+    "elementblockids",
+}
+
+
+def is_id_array(name):
+    """True if name is a reader-generated id array rather than a solution field."""
+    return name.lower().replace("_", "") in ID_ARRAYS
+
+
 def enable_all_variables(reader):
     """Try to switch on all available exodus variables so fields are loadable."""
     for prop in (
@@ -323,8 +344,8 @@ def main():
     p.add_argument("input", help="Path to the ExodusII file (.e, .exo, ...).")
     p.add_argument(
         "--field",
-        help="Field/variable to color by. "
-        "If omitted, the first available field is used.",
+        help="Field/variable to color by. If omitted, the first available field "
+        "that is not a reader-generated id array is used.",
     )
     p.add_argument(
         "--component",
@@ -453,12 +474,17 @@ def main():
     # Resolve the field and its association.
     field = args.field
     if field is None:
-        if point_arrays:
-            field, assoc = sorted(point_arrays)[0], "POINTS"
-        elif cell_arrays:
-            field, assoc = sorted(cell_arrays)[0], "CELLS"
-        else:
+        # Id arrays sort ahead of most solution fields alphabetically, so choose
+        # among the solution fields first and keep nodal ahead of elemental.
+        candidates = [(n, "POINTS") for n in sorted(point_arrays)] + [
+            (n, "CELLS") for n in sorted(cell_arrays)
+        ]
+        solution = [c for c in candidates if not is_id_array(c[0])]
+        if solution:
+            candidates = solution
+        if not candidates:
             sys.exit("ERROR: no point or cell fields found in %s" % args.input)
+        field, assoc = candidates[0]
         print("No --field given; using '%s' (%s)." % (field, assoc))
     elif field in point_arrays:
         assoc = "POINTS"
@@ -625,7 +651,8 @@ def main():
             ImageResolution=[w, h],
             TransparentBackground=1 if bg is None else 0,
         )
-        print("STILL %s" % out)
+        # Tab-delimited so the wrapper can recover names containing spaces.
+        print("STILL\t%s" % out)
         return
 
     # Multiple timesteps -> animation frame series.
@@ -641,7 +668,8 @@ def main():
 
     out = prefix + ".png"  # ParaView writes prefix.0000.png, prefix.0001.png, ...
     SaveAnimation(out, view, ImageResolution=[w, h], FrameWindow=[0, len(times) - 1])
-    print("ANIMATION %s frames=%d resolution=%dx%d" % (prefix, len(times), w, h))
+    # Tab-delimited so the wrapper can recover prefixes containing spaces.
+    print("ANIMATION\t%s\tframes=%d\tresolution=%dx%d" % (prefix, len(times), w, h))
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@
 #   visualize_exodus.sh INPUT.e [options]
 #
 # Options (passed through to render_exodus.py unless noted):
-#   --field NAME            field/variable to color by (default: first available)
+#   --field NAME            field/variable to color by (default: first non-ID field)
 #   --colormap NAME         viridis|coolwarm|jet|... or any ParaView preset
 #   --invert-colormap       reverse the colormap
 #   --component C           Magnitude|X|Y|Z|<index> for vector fields
@@ -57,16 +57,18 @@ echo ">> Rendering frames with pvpython..." >&2
 RENDER_OUT="$(pvpython "${RENDER_PY}" "${PASS_ARGS[@]}")"
 echo "${RENDER_OUT}"
 
-# render_exodus.py prints a status line we can act on.
+# render_exodus.py prints a tab-delimited status line we can act on:
+#   STILL <path>
+#   ANIMATION <prefix> frames=N resolution=WxH
+# Splitting on tabs keeps paths and prefixes that contain spaces intact.
 STATUS_LINE="$(echo "${RENDER_OUT}" | grep -E '^(STILL|ANIMATION)' | tail -1 || true)"
+IFS=$'\t' read -r STATUS PREFIX FRAMES RES <<<"${STATUS_LINE}"
 
-case "${STATUS_LINE}" in
-  STILL\ *)
-    echo ">> Single image written: ${STATUS_LINE#STILL }" >&2
+case "${STATUS}" in
+  STILL)
+    echo ">> Single image written: ${PREFIX}" >&2
     ;;
-  ANIMATION\ *)
-    # ANIMATION <prefix> frames=N resolution=WxH
-    read -r _ PREFIX FRAMES RES <<<"${STATUS_LINE}"
+  ANIMATION)
     RES="${RES#resolution=}"
     W="${RES%x*}"; H="${RES#*x}"
     echo ">> Encoding ${FRAMES#frames=} frames -> ${PREFIX}.mp4 at ${W}x${H}, ${FPS} fps" >&2
