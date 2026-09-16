@@ -4,6 +4,7 @@ advected_interp_method = 'average'
 pressure_gradient_method = 'green-gauss'
 
 [Mesh]
+  allow_renumbering = false # Keep IDs stable for the ID-sorted ElementValueSampler output.
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
