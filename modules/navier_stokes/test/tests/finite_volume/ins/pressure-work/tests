@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NSFVPressureWorkFunctorMaterial.md'
+  issues = '#22637 #29175'
+
+  [pressure_work]
+    type = CSVDiff
+    input = 'pressure-work-verification.i'
+    csvdiff = 'pressure-work-verification_out.csv'
+    requirement = 'The system shall compute the pressure work carried by an advecting velocity, and shall reproduce it with the transient part omitted, in agreement with their analytic values.'
+  []
+[]

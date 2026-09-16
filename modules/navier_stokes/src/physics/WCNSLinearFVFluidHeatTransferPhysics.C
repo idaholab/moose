@@ -28,6 +28,13 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       "Whether to use a non-orthogonal correction. This can potentially slow down convergence "
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
+  params.addParam<bool>(
+      "include_pressure_work",
+      false,
+      "Whether the energy equation carries the pressure work, Dp/Dt. A weakly compressible "
+      "formulation drops it, which is the default and is consistent with dropping the viscous "
+      "dissipation. Set this to true where a phase is compressible and the pressure varies enough "
+      "along the flow for the compression to do appreciable thermal work.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
   // We could split between discretization and solver here.
@@ -214,6 +221,41 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
       std::to_string(getParam<Real>("external_heat_source_coeff"));
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
+}
+
+void
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyPressureWork()
+{
+  if (!getParam<bool>("include_pressure_work"))
+    return;
+
+  const auto & velocity_names = _flow_equations_physics->getVelocityNames();
+  const auto pressure_work = prefix() + "pressure_work";
+
+  // Dp/Dt is algebraic in the pressure and the velocity, neither of which the energy equation
+  // solves for, so it is formed as a functor and handed to an ordinary source kernel rather than
+  // assembled by a kernel of its own.
+  {
+    auto params = getFactory().getValidParams("NSFVPressureWorkFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>("u") = velocity_names[0];
+    if (dimension() >= 2)
+      params.set<MooseFunctorName>("v") = velocity_names[1];
+    if (dimension() >= 3)
+      params.set<MooseFunctorName>("w") = velocity_names[2];
+    params.set<MooseFunctorName>("pressure_work_name") = pressure_work;
+    getProblem().addMaterial(
+        "NSFVPressureWorkFunctorMaterial", prefix() + "pressure_work_mat", params);
+  }
+  {
+    auto params = getFactory().getValidParams("LinearFVSource");
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") =
+        _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+    params.set<MooseFunctorName>("source_density") = pressure_work;
+    getProblem().addLinearFVKernel("LinearFVSource", prefix() + "energy_pressure_work", params);
+  }
 }
 
 void

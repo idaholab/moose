@@ -283,6 +283,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
       getParam<bool>("add_phase_change_energy_term"))
     addPhaseChangeEnergySource();
 
+  if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation() &&
+      _fluid_energy_physics->getParam<bool>("include_pressure_work"))
+    addEnergyPressureWorkDriftTerm();
+
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_drift_flux)
   {
     addPhaseDriftFluxTerm();
@@ -554,6 +558,38 @@ void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 {
   mooseError("Phase change energy source not implemented at this time for linear finite volume");
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::addEnergyPressureWorkDriftTerm()
+{
+  // The energy Physics adds dp/dt + u_m . grad(p). What remains for a mixture is
+  // (alpha - c_d) u_s . grad(p) with c_d = alpha rho_d / rho_m, the volumetric drift the slip
+  // material declares. The transient part is left to the mixture piece, so dp/dt is counted once.
+  const auto drift_velocity = "vel_volumetric_drift_";
+  const auto drift_work = prefix() + "pressure_work_drift";
+  {
+    auto params = getFactory().getValidParams("NSFVPressureWorkFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>("u") = std::string(drift_velocity) + "x";
+    if (dimension() >= 2)
+      params.set<MooseFunctorName>("v") = std::string(drift_velocity) + "y";
+    if (dimension() >= 3)
+      params.set<MooseFunctorName>("w") = std::string(drift_velocity) + "z";
+    params.set<bool>("include_time_derivative") = false;
+    params.set<MooseFunctorName>("pressure_work_name") = drift_work;
+    getProblem().addMaterial("NSFVPressureWorkFunctorMaterial", drift_work + "_mat", params);
+  }
+  {
+    auto params = getFactory().getValidParams("LinearFVSource");
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") =
+        _fluid_energy_physics->getFluidEnergyVariableName();
+    params.set<MooseFunctorName>("source_density") = drift_work;
+    getProblem().addLinearFVKernel(
+        "LinearFVSource", prefix() + "energy_pressure_work_drift", params);
+  }
 }
 
 void

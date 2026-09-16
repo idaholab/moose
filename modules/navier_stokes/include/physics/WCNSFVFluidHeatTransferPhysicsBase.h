@@ -85,6 +85,11 @@ protected:
   virtual void addEnergyAdvectionKernels() = 0;
   virtual void addEnergyAmbientConvection() = 0;
   virtual void addEnergyExternalHeatSource() = 0;
+  /**
+   * Adds the pressure work carried by the advecting velocity. A weakly compressible formulation
+   * drops it, so this does nothing unless a derived Physics implements and requests it.
+   */
+  virtual void addEnergyPressureWork() {}
 
   /// Functions adding boundary conditions for the fluid heat transfer equation.
   virtual void addEnergyInletBC() = 0;
