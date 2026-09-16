@@ -42,6 +42,18 @@
     requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization and a shorthand physics syntax.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [channel_physics_harmonic]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/density_interp_method=harmonic Outputs/file_base=channel-drift-flux-physics-harmonic"
+    # The gold is a link to the average interpolation's gold. The coefficient of the diffusion
+    # stress varies little across a face in this channel, so the two means agree to eight digits;
+    # what the test guards is that the harmonic branch assembles and converges.
+    csvdiff = 'channel-drift-flux-physics-harmonic.csv'
+    design = 'LinearWCNSFV2PMomentumDriftFlux.md'
+    requirement = 'The system shall interpolate the coefficient of the diffusion stress to the faces with a harmonic mean when asked to, reproducing the arithmetic mean result where the coefficient is nearly uniform.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [slip_closure_verification]
     type = CSVDiff
@@ -58,6 +70,16 @@
     csvdiff = 'momentum-drift-flux-verification_out.csv'
     design = 'LinearWCNSFV2PMomentumDriftFlux.md'
     requirement = 'The system shall assemble the diffusion stress of the mixture momentum equation with the sign and the coefficient beta_d beta_c / rho_m of its derivation, reproducing a solution worked out by hand to within the discretization error.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [phase_slip_wall_conservation]
+    type = CSVDiff
+    input = 'phase-slip-wall-conservation.i'
+    csvdiff = 'phase-slip-wall-conservation_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearFVScalarAdvection.md'
+    requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across impermeable boundaries, even when those boundaries constrain the phase fraction.'
     max_threads = 1 # see libmesh issue #3808
   []
 

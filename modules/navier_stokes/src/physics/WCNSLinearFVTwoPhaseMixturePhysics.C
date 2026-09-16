@@ -39,6 +39,46 @@ WCNSLinearFVTwoPhaseMixturePhysics::validParams()
                              "weakly-compressible Navier Stokes equations using the linearized "
                              "segregated finite volume discretization");
 
+  MooseEnum drag_model("schiller-naumann distorted-particle automatic ishii-zuber",
+                       "schiller-naumann");
+  params.addParam<MooseEnum>(
+      "slip_drag_model",
+      drag_model,
+      "Drag law closing the slip velocity when 'use_dispersed_phase_drag_model' is set. See "
+      "LinearWCNSFV2PSlipVelocityFunctorMaterial. The distorted particle law reproduces Ishii's "
+      "drift velocity correlation and is the appropriate one for bubbles large enough to deform.");
+  params.addParam<MooseFunctorName>(
+      "surface_tension",
+      "Surface tension between the phases, required by the distorted particle drag law.");
+  params.addParam<Real>(
+      "slip_swarm_exponent",
+      0.0,
+      "Exponent of the hindrance factor (1 - alpha)^p on the slip velocity, correcting the "
+      "single-particle drag laws for the presence of a swarm. 0.75 reproduces the swarm "
+      "dependence of Ishii's drift velocity correlation.");
+  params.addParam<MooseFunctorName>(
+      "slip_friction_pressure_gradient",
+      "0",
+      "Frictional pressure gradient of the two phase flow, used by the 'ishii-zuber' drag law to "
+      "carry the effect of wall friction on the relative velocity.");
+  params.addParam<MooseFunctorName>(
+      "slip_single_particle_friction_pressure_gradient",
+      "0",
+      "Frictional pressure gradient of the corresponding single particle system, used by the "
+      "'ishii-zuber' drag law in both its terminal velocity and its concentration factor.");
+  params.addParamNamesToGroup("slip_drag_model surface_tension slip_swarm_exponent "
+                              "slip_friction_pressure_gradient "
+                              "slip_single_particle_friction_pressure_gradient",
+                              "Friction model");
+
+  params.addParam<InterpolationMethodName>(
+      "phase_drift_advection_interpolation",
+      "Scheme for the drift flux in the phase transport equation. The drift is always interpolated "
+      "separately from the mixture flux; this chooses which scheme the drift half uses, and "
+      "defaults to 'phase_advection_interpolation'. Setting it is what allows a limiter to act on "
+      "the drift correction alone.");
+  params.addParamNamesToGroup("phase_drift_advection_interpolation", "Numerical scheme");
+
   // This is added to match a nonlinear test result. If the underlying issue is fixed, remove it
   params.addParam<bool>("add_gravity_term_in_slip_velocity",
                         true,
@@ -134,6 +174,13 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
     errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
   if (!getParam<bool>("use_dispersed_phase_drag_model"))
     errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
+  if (getParam<bool>("use_dispersed_phase_drag_model") &&
+      isParamSetByUser("slip_linear_friction_name"))
+    paramError("slip_linear_friction_name",
+               "A prescribed slip friction factor cannot be combined with "
+               "'use_dispersed_phase_drag_model'. The drag model forms its particle Reynolds "
+               "number from the slip velocity, so it is solved inside the slip closure rather "
+               "than supplied to it.");
 }
 
 void
@@ -165,6 +212,20 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
 {
   WCNSLinearFVScalarTransportPhysics::addFVKernels();
 
+  // The phase fraction equation is an advection equation whose boundedness rests on the time
+  // derivative. Solved steady, the discrete operator loses the property that each cell value is a
+  // convex combination of its neighbours wherever the dispersed phase velocity is compressive, and
+  // the phase fraction can leave [0, 1].
+  if (_add_phase_equation && !isTransient())
+    mooseInfoRepeated(
+        "The phase transport equation is being solved without a time derivative. Its boundedness "
+        "is not guaranteed in that form and the phase fraction may leave [0, 1], which in turn "
+        "drives the mixture properties and the slip closure outside their range of validity. "
+        "Whether it bites depends on how large the drift flux is: it is benign when the slip is "
+        "small, as it is without gravity, and it is not when the slip is a significant part of "
+        "the transport. Prefer a transient executioner, marching to steady state if a steady "
+        "answer is wanted.");
+
   if (_add_phase_equation && isParamSetByUser("alpha_exchange"))
     addPhaseInterfaceTerm();
 
@@ -180,6 +241,23 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
 
 void
 WCNSLinearFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
+{
+  // Only the phase advection kernel interpolates the drift separately; the momentum and energy
+  // drift terms are kernels of their own already.
+  if (isParamValid("phase_drift_advection_interpolation") &&
+      params.have_parameter<InterpolationMethodName>("slip_advected_interp_method_name"))
+    params.set<InterpolationMethodName>("slip_advected_interp_method_name") =
+        getParam<InterpolationMethodName>("phase_drift_advection_interpolation");
+
+  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
+  if (dimension() >= 2)
+    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
+  if (dimension() >= 3)
+    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & params) const
 {
   params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
   if (dimension() >= 2)
@@ -226,7 +304,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     auto params = getFactory().getValidParams(object_type);
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _flow_equations_physics->getVelocityNames()[dim];
-    setSlipVelocityParams(params);
+    setRelativeVelocityParams(params);
     params.set<MooseFunctorName>("rho_d") = _phase_2_density;
     params.set<MooseFunctorName>("rho_c") = _phase_1_density;
     params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
@@ -301,31 +379,60 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
         "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
   }
 
-  // Compute slip terms as functors, used by the drift flux kernels
-  if (_use_advection_slip || _use_drift_flux || _add_phase_equation)
+  // Compute slip terms as functors, used by the drift flux kernels. The drag model needs them too,
+  // since its particle Reynolds number is formed from the slip velocity.
+  if (_use_advection_slip || _use_drift_flux || _add_phase_equation ||
+      getParam<bool>("use_dispersed_phase_drag_model"))
   {
     mooseAssert(_flow_equations_physics, "We must have coupled to this");
     const std::vector<std::string> vel_components = {"u", "v", "w"};
     const std::vector<std::string> components = {"x", "y", "z"};
     for (const auto dim : make_range(dimension()))
     {
-      auto params = getFactory().getValidParams("WCNSFV2PSlipVelocityFunctorMaterial");
+      const auto object_type = "LinearWCNSFV2PSlipVelocityFunctorMaterial";
+      auto params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + components[dim];
       params.set<MooseEnum>("momentum_component") = components[dim];
       for (const auto j : make_range(dimension()))
-        params.set<std::vector<VariableName>>(vel_components[j]) = {
-            _flow_equations_physics->getVelocityNames()[j]};
-      params.set<MooseFunctorName>(NS::density) = _phase_1_density;
-      params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
+        params.set<SolverVariableName>(vel_components[j]) =
+            _flow_equations_physics->getVelocityNames()[j];
+      // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
+      // density, not the continuous phase density, see VTT Publications 288 equation (58)
+      params.set<MooseFunctorName>(NS::density) = "rho_mixture";
+      // The slip closure forms both the relaxation time and the particle Reynolds number
+      // from the continuous phase viscosity, not from the mixture viscosity
+      params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
       params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+      params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
+      // The phase equation is advected with the diffusion velocity, which this object derives
+      // from the slip velocity it computes
+      params.set<MooseFunctorName>("drift_velocity_name") = "vel_drift_" + components[dim];
+      params.set<MooseFunctorName>("volumetric_drift_velocity_name") =
+          "vel_volumetric_drift_" + components[dim];
       if (getParam<bool>("add_gravity_term_in_slip_velocity"))
         params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
-      if (isParamValid("slip_linear_friction_name"))
+      // The drag model is solved inside the slip closure rather than read from the drag material.
+      // The particle Reynolds number of the correlation is formed from the slip velocity, so a
+      // drag functor built the correct way depends on the slip velocity and cannot also be an
+      // input to it; solving the correlation and the force balance together breaks that loop.
+      if (getParam<bool>("use_dispersed_phase_drag_model"))
+      {
+        params.set<bool>("use_dispersed_phase_drag_model") = true;
+        params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+        params.set<MooseEnum>("drag_model") = getParam<MooseEnum>("slip_drag_model");
+        params.set<Real>("swarm_exponent") = getParam<Real>("slip_swarm_exponent");
+        params.set<MooseFunctorName>("friction_pressure_gradient") =
+            getParam<MooseFunctorName>("slip_friction_pressure_gradient");
+        params.set<MooseFunctorName>("single_particle_friction_pressure_gradient") =
+            getParam<MooseFunctorName>("slip_single_particle_friction_pressure_gradient");
+        if (isParamValid("surface_tension"))
+          params.set<MooseFunctorName>("surface_tension") =
+              getParam<MooseFunctorName>("surface_tension");
+      }
+      else if (isParamValid("slip_linear_friction_name"))
         params.set<MooseFunctorName>("linear_coef_name") =
             getParam<MooseFunctorName>("slip_linear_friction_name");
-      else if (getParam<bool>("use_dispersed_phase_drag_model"))
-        params.set<MooseFunctorName>("linear_coef_name") = "Darcy_coefficient";
       else if (_flow_equations_physics)
       {
         if (!_flow_equations_physics->getLinearFrictionCoefName().empty())
@@ -336,8 +443,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       }
       else
         paramError("slip_linear_friction_name",
-                   "WCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
-                   "field linear friction factor.");
+                   "LinearWCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a "
+                   "scalar field linear friction factor.");
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");
       if (getParam<bool>("output_all_properties"))
@@ -349,8 +456,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
                     "Slip velocity functor material output currently unsupported in Physics "
                     "in transient conditions.");
       }
-      getProblem().addMaterial(
-          "WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
+      getProblem().addMaterial(object_type, prefix() + "slip_" + components[dim], params);
     }
   }
 
@@ -358,20 +464,23 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   if (getParam<bool>("use_dispersed_phase_drag_model"))
   {
     const std::vector<std::string> vel_components = {"u", "v", "w"};
+    const std::vector<std::string> components = {"x", "y", "z"};
 
-    auto params = getFactory().getValidParams("NSFVDispersePhaseDragFunctorMaterial");
+    const auto drag_type = "NSFVDispersePhaseDragFunctorMaterial";
+    auto params = getFactory().getValidParams(drag_type);
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>("drag_coef_name") = "Darcy_coefficient";
+    // The particle Reynolds number is formed from the slip velocity and the continuous phase
+    // properties, which is its definition. The material evaluates in AD; the linear finite
+    // volume friction kernel takes the raw value through the functor wrapper.
     for (const auto j : make_range(dimension()))
-      params.set<MooseFunctorName>(vel_components[j]) = {
-          _flow_equations_physics->getVelocityNames()[j]};
-    params.set<MooseFunctorName>(NS::density) = "rho_mixture";
-    params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
+      params.set<MooseFunctorName>(vel_components[j]) = "vel_slip_" + components[j];
+    params.set<MooseFunctorName>(NS::density) = _phase_1_density;
+    params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
     params.set<MooseFunctorName>("particle_diameter") =
         getParam<MooseFunctorName>("particle_diameter");
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial(
-        "NSFVDispersePhaseDragFunctorMaterial", prefix() + "dispersed_drag", params);
+    getProblem().addMaterial(drag_type, prefix() + "dispersed_drag", params);
   }
 }
