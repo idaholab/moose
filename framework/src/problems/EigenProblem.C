@@ -445,24 +445,35 @@ EigenProblem::preScaleEigenVector(const std::pair<Real, Real> & eig)
 void
 EigenProblem::postScaleEigenVector()
 {
+  postScaleEigenVector(_active_eigen_index);
+}
+
+void
+EigenProblem::postScaleEigenVector(unsigned int eigen_index)
+{
   if (_has_normalization)
   {
     Real v;
     if (_normal_factor == std::numeric_limits<Real>::max())
     {
-      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+      if (eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
         mooseError("Number of converged eigenvalues ",
                    _nl_eigen->getNumConvergedEigenvalues(),
                    " but you required eigenvalue ",
-                   _active_eigen_index);
+                   eigen_index);
 
       // when normal factor is not provided, we use the inverse of the norm of
-      // the active eigenvalue for normalization
-      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
+      // the requested eigenvalue for normalization
+      auto eig = _nl_eigen->getAllConvergedEigenvalues()[eigen_index];
       v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
     }
     else
       v = _normal_factor;
+
+    // The normalization postprocessor has not necessarily been evaluated on the eigenvector we are
+    // about to scale. With the linear eigen solvers no object executes on linear during the solve,
+    // so refresh the linear aux variables and user objects before reading the postprocessor.
+    execute(EXEC_LINEAR);
 
     Real c = getPostprocessorValueByName(_normalization);
 
