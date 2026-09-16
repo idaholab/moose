@@ -210,6 +210,16 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
     paramError("alpha_exchange",
                "A phase exchange coefficient cannot be specified if the phase change is handled "
                "with a phase change heat loss model");
+  // The phase change term is 'coefficient * dT/dt', so it must be added to the equation that
+  // actually solves for the temperature. When the energy physics solves for enthalpy instead,
+  // the temperature is only an auxiliary variable and the term cannot be assembled as written.
+  if (_has_energy_equation && getParam<bool>("add_phase_change_energy_term") &&
+      _fluid_energy_physics->parameters().get<bool>("solve_for_enthalpy"))
+    paramError("add_phase_change_energy_term",
+               "The phase change energy term is currently only implemented for an energy equation "
+               "solved for the temperature. Physics '",
+               _fluid_energy_physics->name(),
+               "' is solving for the enthalpy instead.");
   if (_phase_1_fraction_name == _phase_2_fraction_name)
     paramError("phase_1_fraction_name",
                "First phase fraction name should be different from second phase fraction name");
@@ -555,9 +565,61 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 }
 
 void
+WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeCoefficientMaterial()
+{
+  // Reproduces the coefficient of NSFVPhaseChangeSource, which is
+  //
+  //   max(6 fl (1 - fl), 0) * L * rho_mixture / (T_liquidus - T_solidus),
+  //   fl = (T - T_sol) / (T_liq - T_sol)
+  //
+  // The 6 is the integral of x (1 - x) between 0 and 1, and the max() clamps the term outside the
+  // mushy zone. The liquid fraction is computed from the temperature, as the nonlinear kernel does
+  // rather than from its 'liquid_fraction' parameter.
+  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+  assignBlocks(params, _blocks);
+  params.set<std::string>("expression") =
+      "max(6 * ((T - T_sol) / (T_liq - T_sol)) * (1 - ((T - T_sol) / (T_liq - T_sol))), 0) * L * "
+      "rho_m / (T_liq - T_sol)";
+  params.set<std::vector<std::string>>("functor_names") = {
+      _fluid_energy_physics->getFluidTemperatureName(),
+      NS::T_solidus,
+      NS::T_liquidus,
+      NS::latent_heat,
+      "rho_mixture"};
+  params.set<std::vector<std::string>>("functor_symbols") = {"T", "T_sol", "T_liq", "L", "rho_m"};
+  params.set<std::string>("property_name") = "phase_change_coefficient";
+  if (getParam<bool>("output_all_properties"))
+    params.set<std::vector<OutputName>>("outputs") = {"all"};
+  getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_change_coefficient", params);
+}
+
+void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 {
-  mooseError("Phase change energy source not implemented at this time for linear finite volume");
+  // The nonlinear NSFVPhaseChangeSource is 'coefficient * dT/dt', which is the operator
+  // LinearFVTimeDerivative assembles when handed a 'factor', with the temporal order of the scheme
+  // preserved and the same sign on the left hand side. The coefficient is lagged to the previous
+  // fixed point iterate rather than differentiated, so the mushy zone may need tighter fixed point
+  // tolerances than the Newton implementation. Assembled against a specific enthalpy it would
+  // evaluate c dh/dt, a different quantity, so an enthalpy formulation is refused.
+  if (_fluid_energy_physics->solveForEnthalpy())
+    paramError("add_phase_change_energy_term",
+               "The phase change energy source is a coefficient multiplying the time derivative of "
+               "temperature, and the fluid heat transfer Physics is solving for specific enthalpy. "
+               "Expressing it in that variable requires the specific heat as a chain rule factor, "
+               "which is not implemented. Solve for temperature, or leave this term off.");
+
+  auto params = getFactory().getValidParams("LinearFVTimeDerivative");
+  assignBlocks(params, _blocks);
+  params.set<LinearVariableName>("variable") = _fluid_energy_physics->getFluidTemperatureName();
+  params.set<MooseFunctorName>("factor") = "phase_change_coefficient";
+  // Not the conservative form, which the kernel would otherwise take. The coefficient here is not
+  // a density being transported, so d(coefficient T)/dt is not a storage term of anything; the
+  // term this reproduces is literally the coefficient times the temperature rate, and the
+  // coefficient varies in time through the liquid fraction, so the two forms do differ.
+  params.set<bool>("conservative_form") = false;
+  getProblem().addLinearFVKernel(
+      "LinearFVTimeDerivative", prefix() + "phase_change_energy", params);
 }
 
 void
@@ -808,6 +870,11 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       getProblem().addMaterial(object_type, prefix() + "slip_" + NS::directions[dim], params);
     }
   }
+
+  // Coefficient consumed by the phase change term in the energy equation
+  if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation() &&
+      getParam<bool>("add_phase_change_energy_term"))
+    addPhaseChangeCoefficientMaterial();
 
   // Add a default drag model for a dispersed phase
   if (getParam<bool>("use_dispersed_phase_drag_model"))
