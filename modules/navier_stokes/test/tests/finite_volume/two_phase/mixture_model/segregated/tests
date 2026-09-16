@@ -83,6 +83,44 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+
+  [energy_slip_wall_conservation]
+    type = CSVDiff
+    input = 'energy-slip-wall-conservation.i'
+    csvdiff = 'energy-slip-wall-conservation_out.csv'
+    # The enthalpy integral is 1515, and the imbalance left by the segregated solve is 6e-5 of it.
+    # Declaring the walls permeable, which is the defect this guards against, moves the integral by
+    # 1.07, so this tolerance separates the two by four orders of magnitude.
+    abs_zero = 1e-3
+    design = 'LinearWCNSFV2PEnergyDriftFlux.md'
+    requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the phases move relative to one another, by not carrying enthalpy across impermeable boundaries, even when those boundaries constrain the temperature.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [energy_slip_wall_conservation_harmonic]
+    type = CSVDiff
+    input = 'energy-slip-wall-conservation.i'
+    # Three bands of phase fraction rather than two, so that the harmonic mean is exercised where
+    # the coefficient jumps between 0.7 and 0.3, and the fall back to the arithmetic mean where the
+    # phase is absent and the harmonic mean is undefined, at the 0.3 to 0 interface
+    cli_args = "LinearFVKernels/T_drift_flux/coeff_interp_method=harmonic Functions/stratified/expression='if(y>0.0625,0.7,if(y>0.025,0.3,0))' Outputs/file_base=energy-slip-wall-conservation-harmonic"
+    csvdiff = 'energy-slip-wall-conservation-harmonic.csv'
+    abs_zero = 1e-3
+    design = 'LinearWCNSFV2PEnergyDriftFlux.md'
+    requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the coefficient of the enthalpy drift flux is interpolated to the faces with a harmonic mean, including across faces on one side of which the dispersed phase is absent, where the harmonic mean is undefined and the arithmetic mean shall be used instead.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+
+  [conservative_transient_energy]
+    type = CSVDiff
+    input = 'conservative-transient-energy.i'
+    csvdiff = 'conservative-transient-energy_out.csv'
+    abs_zero = 1e-6
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form: a factor of rho_m cp_m gives d(rho_m cp_m T)/dt, whose discrete sum telescopes, so the integral of rho_m cp_m T holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_m cp_m dT/dt, and the temperature does not move at all and the integral rises by a factor of two and two thirds, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [errors]
     requirement = "The system shall return an error if"
     [skewness]

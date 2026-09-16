@@ -42,8 +42,9 @@ private:
   /// term carries the dispersed phase density.
   virtual MooseFunctorName scalarConservativeDensity(const VariableName & vname) const override;
 
-  /// Sets the slip velocity, u_d - u_c, on objects that consume the relative motion of the phases
-  /// directly, namely the momentum and energy diffusion flux kernels
+  /// Sets the slip velocity, u_d - u_c, and the phase densities and fraction that weight it, on
+  /// the kernels that consume the relative motion of the phases directly, namely the momentum and
+  /// energy diffusion flux kernels
   void setRelativeVelocityParams(InputParameters & params) const;
 
   /**
@@ -52,7 +53,12 @@ private:
   void addPhaseInterfaceTerm();
   void addPhaseChangeEnergySource();
   void addPhaseDriftFluxTerm();
+  /// Adds the enthalpy carried by the relative motion of the phases to the energy equation
+  void addPhaseEnergyDriftFluxTerm();
   void addAdvectionSlipTerm();
+  /// Adds the mass-weighted mixture specific heat, the weighting required for rho_m cp_m T to be
+  /// the mixture enthalpy density
+  void addMixtureSpecificHeatMaterial();
 
   /// Fluid heat transfer physics
   const WCNSLinearFVFluidHeatTransferPhysics * _fluid_energy_physics;

@@ -21,6 +21,12 @@ registerMooseAction("NavierStokesApp",
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "check_integrity");
 
+namespace
+{
+/// Parameter names of the velocity components on the objects that take them one by one
+const std::string velocity_components[3] = {"u", "v", "w"};
+}
+
 InputParameters
 WCNSLinearFVTwoPhaseMixturePhysics::validParams()
 {
@@ -234,7 +240,13 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
     addPhaseChangeEnergySource();
 
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_drift_flux)
+  {
     addPhaseDriftFluxTerm();
+    // The enthalpy carried by the relative motion is the energy counterpart of the diffusion
+    // stress, so it belongs wherever the diffusion stress does
+    if (_has_energy_equation)
+      addPhaseEnergyDriftFluxTerm();
+  }
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_advection_slip)
     addAdvectionSlipTerm();
 }
@@ -272,6 +284,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & 
     params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
   if (dimension() >= 3)
     params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
+  params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+  params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+  params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
 }
 
 void
@@ -319,7 +334,6 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
 {
-  const std::vector<std::string> components = {"x", "y", "z"};
   for (const auto dim : make_range(dimension()))
   {
     const auto object_type = "LinearWCNSFV2PMomentumDriftFlux";
@@ -327,14 +341,66 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _flow_equations_physics->getVelocityNames()[dim];
     setRelativeVelocityParams(params);
-    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
-    params.set<MooseFunctorName>("rho_c") = _phase_1_density;
-    params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
-    params.set<MooseEnum>("momentum_component") = components[dim];
+    params.set<MooseEnum>("momentum_component") = NS::directions[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-    getProblem().addLinearFVKernel(object_type, prefix() + "drift_flux_" + components[dim], params);
+    getProblem().addLinearFVKernel(
+        object_type, prefix() + "drift_flux_" + NS::directions[dim], params);
   }
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::addPhaseEnergyDriftFluxTerm()
+{
+  // The term is h_d - h_c = (cp_d - cp_c) T, so it is only assemblable against a temperature
+  // variable. When the energy equation solves for the enthalpy the specific heats are not
+  // available as a difference multiplying the solution variable.
+  if (_fluid_energy_physics->parameters().get<bool>("solve_for_enthalpy"))
+    paramError("add_drift_flux_momentum_terms",
+               "The enthalpy carried by the relative motion of the phases is currently only "
+               "implemented for an energy equation solved for the temperature. Physics '",
+               _fluid_energy_physics->name(),
+               "' is solving for the enthalpy instead.");
+
+  const auto object_type = "LinearWCNSFV2PEnergyDriftFlux";
+  auto params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+  params.set<LinearVariableName>("variable") = _fluid_energy_physics->getFluidTemperatureName();
+  setRelativeVelocityParams(params);
+  params.set<MooseFunctorName>("cp_d") = _phase_2_specific_heat;
+  params.set<MooseFunctorName>("cp_c") = _phase_1_specific_heat;
+  params.set<MooseEnum>("advected_interp_method") =
+      _fluid_energy_physics->parameters().get<MooseEnum>("energy_advection_interpolation");
+  // The relative motion carries enthalpy only where the dispersed phase itself may travel, which
+  // is the same set of boundaries the phase transport equation uses
+  params.set<std::vector<BoundaryName>>("slip_boundaries") = slipBoundaries();
+  getProblem().addLinearFVKernel(object_type, prefix() + "energy_drift_flux", params);
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::addMixtureSpecificHeatMaterial()
+{
+  // The mixture energy density is the sum over the phases of each phase's own enthalpy density,
+  // rho_m e_m = sum_k a_k rho_k cp_k T, so the specific heat that reproduces it when multiplied by
+  // the mixture density is the mass-weighted average, not the volume-weighted average used for the
+  // density, the viscosity and the conductivity. See Fluent Theory Guide equation 16.4-7. The
+  // phase fraction is clamped to match the mixture property material.
+  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+  assignBlocks(params, _blocks);
+  params.set<std::string>("expression") =
+      "(min(max(fd, 0), 1) * rho_d * cp_d + (1 - min(max(fd, 0), 1)) * rho_c * cp_c) / rho_m";
+  params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name,
+                                                           _phase_2_density,
+                                                           _phase_2_specific_heat,
+                                                           _phase_1_density,
+                                                           _phase_1_specific_heat,
+                                                           "rho_mixture"};
+  params.set<std::vector<std::string>>("functor_symbols") = {
+      "fd", "rho_d", "cp_d", "rho_c", "cp_c", "rho_m"};
+  params.set<std::string>("property_name") = "cp_mixture";
+  if (getParam<bool>("output_all_properties"))
+    params.set<std::vector<OutputName>>("outputs") = {"all"};
+  getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "mixture_specific_heat", params);
 }
 
 void
@@ -380,25 +446,27 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   {
     auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
     assignBlocks(params, _blocks);
+    // The specific heat is deliberately absent from this list. This object forms a volume-weighted
+    // average, which is correct for the density, the viscosity and the conductivity, but the
+    // specific heat has to be mass-weighted for rho_m cp_m T to be the mixture enthalpy density.
+    // It is added by addMixtureSpecificHeatMaterial below.
     params.set<std::vector<MooseFunctorName>>("prop_names") = {
-        "rho_mixture", "mu_mixture", "cp_mixture", "k_mixture"};
+        "rho_mixture", "mu_mixture", "k_mixture"};
     // The phase_1 and phase_2 assignments are only local to this object.
     // We use the phase 2 variable to save a functor evaluation as we expect
     // the phase 2 variable to be a nonlinear variable in the phase transport equation
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_phase_1_density,
-                                                                  _phase_1_viscosity,
-                                                                  _phase_1_specific_heat,
-                                                                  _phase_1_thermal_conductivity};
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_phase_2_density,
-                                                                  _phase_2_viscosity,
-                                                                  _phase_2_specific_heat,
-                                                                  _phase_2_thermal_conductivity};
+    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {
+        _phase_1_density, _phase_1_viscosity, _phase_1_thermal_conductivity};
+    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {
+        _phase_2_density, _phase_2_viscosity, _phase_2_thermal_conductivity};
     params.set<MooseFunctorName>("phase_1_fraction") = _phase_2_fraction_name;
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
     params.set<bool>("limit_phase_fraction") = true;
     getProblem().addMaterial(
         "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
+
+    addMixtureSpecificHeatMaterial();
   }
 
   // Compute slip terms as functors, used by the drift flux kernels. The drag model needs them too,
@@ -407,17 +475,15 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       getParam<bool>("use_dispersed_phase_drag_model"))
   {
     mooseAssert(_flow_equations_physics, "We must have coupled to this");
-    const std::vector<std::string> vel_components = {"u", "v", "w"};
-    const std::vector<std::string> components = {"x", "y", "z"};
     for (const auto dim : make_range(dimension()))
     {
       const auto object_type = "LinearWCNSFV2PSlipVelocityFunctorMaterial";
       auto params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
-      params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + components[dim];
-      params.set<MooseEnum>("momentum_component") = components[dim];
+      params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + NS::directions[dim];
+      params.set<MooseEnum>("momentum_component") = NS::directions[dim];
       for (const auto j : make_range(dimension()))
-        params.set<SolverVariableName>(vel_components[j]) =
+        params.set<SolverVariableName>(velocity_components[j]) =
             _flow_equations_physics->getVelocityNames()[j];
       // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
       // density, not the continuous phase density, see VTT Publications 288 equation (58)
@@ -429,9 +495,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
       // The phase equation is advected with the diffusion velocity, which this object derives
       // from the slip velocity it computes
-      params.set<MooseFunctorName>("drift_velocity_name") = "vel_drift_" + components[dim];
+      params.set<MooseFunctorName>("drift_velocity_name") = "vel_drift_" + NS::directions[dim];
       params.set<MooseFunctorName>("volumetric_drift_velocity_name") =
-          "vel_volumetric_drift_" + components[dim];
+          "vel_volumetric_drift_" + NS::directions[dim];
       if (getParam<bool>("add_gravity_term_in_slip_velocity"))
         params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
       // The drag model is solved inside the slip closure rather than read from the drag material.
@@ -478,16 +544,13 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
                     "Slip velocity functor material output currently unsupported in Physics "
                     "in transient conditions.");
       }
-      getProblem().addMaterial(object_type, prefix() + "slip_" + components[dim], params);
+      getProblem().addMaterial(object_type, prefix() + "slip_" + NS::directions[dim], params);
     }
   }
 
   // Add a default drag model for a dispersed phase
   if (getParam<bool>("use_dispersed_phase_drag_model"))
   {
-    const std::vector<std::string> vel_components = {"u", "v", "w"};
-    const std::vector<std::string> components = {"x", "y", "z"};
-
     const auto drag_type = "NSFVDispersePhaseDragFunctorMaterial";
     auto params = getFactory().getValidParams(drag_type);
     assignBlocks(params, _blocks);
@@ -496,7 +559,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
     // properties, which is its definition. The material evaluates in AD; the linear finite
     // volume friction kernel takes the raw value through the functor wrapper.
     for (const auto j : make_range(dimension()))
-      params.set<MooseFunctorName>(vel_components[j]) = "vel_slip_" + components[j];
+      params.set<MooseFunctorName>(velocity_components[j]) = "vel_slip_" + NS::directions[j];
     params.set<MooseFunctorName>(NS::density) = _phase_1_density;
     params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
     params.set<MooseFunctorName>("particle_diameter") =
