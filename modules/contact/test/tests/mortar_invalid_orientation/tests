@@ -1,0 +1,13 @@
+[Tests]
+  [recoverable_invalid_orientation]
+    type = RunApp
+    input = invalid_orientation.i
+    cli_args = '--error'
+    expect_out = 'Unable to determine a valid secondary-primary orientation.*primary-node projection was rejected'
+    requirement = 'The system shall report a rejected mortar primary-node projection without '
+                  'promoting the recoverable event to an error when warnings are errors.'
+    issues = '#33797'
+    recover = false
+    restep = false
+  []
+[]

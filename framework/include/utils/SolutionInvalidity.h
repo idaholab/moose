@@ -48,6 +48,12 @@ public:
   void flagInvalidSolutionInternal(const InvalidSolutionID _invalid_solution_id);
 
   /**
+   * Register and flag a solution warning for a caller that does not inherit
+   * SolutionInvalidInterface
+   */
+  void flagSolutionWarningForObject(const std::string & object_type, const std::string & message);
+
+  /**
    * Whether or not an invalid solution was encountered that was a warning.
    *
    * This must be called after a sync.
