@@ -838,6 +838,10 @@ public:
 
   /**
    * Return errors for missing required parameters.
+   *
+   * @param parsing_syntax The parsing syntax to use in the error if this object has no block
+   * @param skip_required_params Names of required parameters to skip the check for
+   * @param skip_private Whether to skip the check for private parameters
    */
   std::vector<std::string>
   missingRequiredParamErrors(const std::string & parsing_syntax,

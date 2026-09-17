@@ -86,6 +86,13 @@ public:
    * based on the contents of the passed InputParameters \p p.
    *
    * If \p section_node is not provided, only the global parameters will be checked
+   *
+   * @param section_node The section of the input to extract parameters from
+   * @param p The parameters to extract values into
+   * @param skip_required_params Names of required parameters to skip the missing-parameter check
+   * for, e.g. because an action will set them later
+   * @param skip_required_param_errors Whether to skip the missing-parameter check for all
+   * parameters, e.g. because an action may still change which parameters are required
    */
   void extractParams(const hit::Node * const section_node,
                      InputParameters & p,
