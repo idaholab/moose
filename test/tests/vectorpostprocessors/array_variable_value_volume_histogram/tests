@@ -11,7 +11,7 @@
     type = CSVDiff
     input = pp_bounds.i
     csvdiff = 'pp_bounds_out_histo_0002.csv'
-    requirement = "The system shall be able to change the bounds of the histogram."
+    requirement = "The system shall be able to change the bounds of the histogram computed for each component of an array variable."
     issues = '#33787'
     design = 'ArrayVariableValueVolumeHistogram.md'
   []
