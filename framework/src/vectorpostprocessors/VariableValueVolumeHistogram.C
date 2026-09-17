@@ -57,6 +57,10 @@ VariableValueVolumeHistogram::initialize()
   // reset the histogram
   _volume.assign(_nbins, 0.0);
 
+  if (_max_value <= _min_value)
+    mooseError("max_value is less than or equal to min_value! Please ensure the "
+               "post-processors supplied to this object yield valid bounds for a histogram.");
+
   // reset the bin centers as the postprocessors may have changed
   for (const unsigned int i : make_range(_nbins))
     _bin_center[i] = (i + 0.5) * binWidth() + _min_value;

@@ -56,7 +56,7 @@
     variable = c
     min_value = min
     max_value = max
-    execute_on = 'initial timestep_end'
+    execute_on = 'timestep_end'
   []
 []
 
