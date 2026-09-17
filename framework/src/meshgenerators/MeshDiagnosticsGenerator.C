@@ -61,7 +61,7 @@ MeshDiagnosticsGenerator::validParams()
       "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
       "the boundaries combined.");
   params.addParam<std::vector<SubdomainName>>(
-      "watertight_blocks",
+      "watertight_check_blocks",
       {},
       "Blocks whose combined volume should form a watertight region for the sideset/nodeset "
       "checks. When set, only the envelope of these blocks is examined: the mesh-exterior sides "
@@ -118,7 +118,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
     _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
     _watertight_boundary_names(getParam<std::vector<BoundaryName>>("boundaries_to_check")),
-    _watertight_block_names(getParam<std::vector<SubdomainName>>("watertight_blocks")),
+    _watertight_block_names(getParam<std::vector<SubdomainName>>("watertight_check_blocks")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -145,9 +145,9 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
-  if (isParamSetByUser("watertight_blocks") && _check_watertight_sidesets == "NO_CHECK" &&
+  if (isParamSetByUser("watertight_check_blocks") && _check_watertight_sidesets == "NO_CHECK" &&
       _check_watertight_nodesets == "NO_CHECK")
-    paramError("watertight_blocks",
+    paramError("watertight_check_blocks",
                "This parameter only applies to the watertight checks. You must turn on "
                "'check_for_watertight_sidesets' or 'check_for_watertight_nodesets' to use it");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
@@ -185,7 +185,7 @@ MeshDiagnosticsGenerator::generate()
   // check that specified blocks are valid and convert SubdomainNames to SubdomainIDs
   for (const auto & block_name : _watertight_block_names)
     if (!MooseMeshUtils::hasSubdomainName(*mesh, block_name))
-      mooseError("User specified watertight_blocks \'", block_name, "\' does not exist");
+      mooseError("User specified watertight_check_blocks \'", block_name, "\' does not exist");
   const auto watertight_block_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _watertight_block_names);
   _watertight_blocks =
       std::set<SubdomainID>(watertight_block_ids.begin(), watertight_block_ids.end());
@@ -362,10 +362,10 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
 {
   /*
   Algorithm Overview:
-  1) Loop through all elements (only those in 'watertight_blocks' if that is set)
+  1) Loop through all elements (only those in 'watertight_check_blocks' if that is set)
   2) For each element loop through all its sides
   3) A side is on the envelope of the checked region if it has no neighbor (mesh exterior) or,
-     when 'watertight_blocks' is set, if its neighbor is in a block outside that list
+     when 'watertight_check_blocks' is set, if its neighbor is in a block outside that list
   4) For each envelope side check whether it is part of a sideset
   */
   if (mesh->mesh_dimension() < 2)
@@ -376,6 +376,8 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
   // Whether the checks are restricted to the envelope of a subset of blocks
   const bool restrict_blocks = !_watertight_blocks.empty();
   const std::string side_word = (mesh->mesh_dimension() == 3) ? "face" : "edge";
+  // Indefinite article matching side_word ("a face" / "an edge")
+  const std::string side_article = (mesh->mesh_dimension() == 3) ? "a " : "an ";
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
@@ -407,9 +409,9 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
         continue;
 
       std::string message = "Element " + std::to_string(elem->id()) + " contains ";
-      message += exterior_side
-                     ? "an external " + side_word
-                     : "a " + side_word + " bordering a block outside 'watertight_blocks'";
+      message += exterior_side ? "an external " + side_word
+                               : side_article + side_word +
+                                     " bordering a block outside 'watertight_check_blocks'";
       message += " which has not been assigned to ";
       message += no_specified_ids ? "a sideset" : "one of the specified sidesets";
       if (num_faces_without_sideset < _num_outputs)
@@ -437,10 +439,10 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   /*
   Diagnostic Overview:
   1) Mesh precheck
-  2) Loop through all elements (only those in 'watertight_blocks' if that is set)
+  2) Loop through all elements (only those in 'watertight_check_blocks' if that is set)
   3) Loop through all sides of that element
   4) If the side is on the envelope of the checked region (mesh exterior, or bordering a block
-     outside 'watertight_blocks' when that is set) loop through its nodes
+     outside 'watertight_check_blocks' when that is set) loop through its nodes
   5) If node is not associated with any nodeset add to list
   6) Print out node id
   */

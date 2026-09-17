@@ -75,10 +75,10 @@ a specified list of boundaries forms the watertight envelope.
 
 ### Restricting the check to a subset of blocks
 
-The [!param](/Mesh/MeshDiagnosticsGenerator/watertight_blocks) parameter restricts the checks to the
+The [!param](/Mesh/MeshDiagnosticsGenerator/watertight_check_blocks) parameter restricts the checks to the
 *envelope* of a subset of blocks, treating their combined volume as the region of interest. This is
 motivated by flow solvers, for which the sidesets must cover the entire flow volume rather than the whole
-mesh volume. When `watertight_blocks` is set, a side is considered part of the envelope, and therefore
+mesh volume. When `watertight_check_blocks` is set, a side is considered part of the envelope, and therefore
 expected to be covered by a sideset/nodeset, if it is either:
 
 - on the mesh exterior (it has no neighbor), or

@@ -20,6 +20,6 @@
     input = split
     check_for_watertight_sidesets = INFO
     check_for_watertight_nodesets = INFO
-    watertight_blocks = '0'
+    watertight_check_blocks = '0'
   []
 []
