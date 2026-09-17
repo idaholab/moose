@@ -233,6 +233,7 @@
                   'mechanical contact problem in which the secondary side of the contact interface '
                   'is split between processes when run in parallel.'
     capabilities = 'method!=dbg'
+    min_parallel = 3
     valgrind = 'heavy'
   []
   [split_secondary_action]
