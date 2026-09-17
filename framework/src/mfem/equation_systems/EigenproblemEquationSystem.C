@@ -22,10 +22,9 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   _ess_tdof_lists.resize(1);
   _ess_markers.resize(1);
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
-  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-  _ess_markers.at(0) = 0;
   trial_gf.Update();
-  static_cast<mfem::Vector &>(trial_gf) = _gfuncs->GetRef(_trial_var_names.at(0));
+  trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
+  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
   ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
   trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
@@ -40,21 +39,15 @@ EigenproblemEquationSystem::CheckProblemIsHomogeneous()
   mfem::Vector ess_values;
   trial_gf.GetTrueDofs(ess_values);
   ess_values.SetSubVectorComplement(_ess_tdof_lists.at(0), 0.0);
-  mfem::real_t max_ess_value = ess_values.Normlinf();
-  MPI_Allreduce(MPI_IN_PLACE,
-                &max_ess_value,
-                1,
-                mfem::MPITypeMap<mfem::real_t>::mpi_type,
-                MPI_MAX,
-                trial_gf.ParFESpace()->GetComm());
+  mfem::real_t max_ess_value =
+      mfem::GlobalLpNorm(mfem::infinity(), ess_values.Normlinf(), trial_gf.ParFESpace()->GetComm());
   // Roundoff guard. Zero coefficients project to exactly zero.
   if (max_ess_value > 10 * std::numeric_limits<mfem::real_t>::epsilon())
     mooseError("Essential boundary conditions on variable '",
                _trial_var_names.at(0),
                "' prescribe a nonzero value. "
                "An eigenproblem is homogeneous so only zero-valued essential boundary conditions "
-               "are meaningful. Set the "
-               "boundary coefficient to zero.");
+               "are meaningful. Set the boundary coefficient to zero.");
 }
 
 void
@@ -88,7 +81,7 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
   // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
-  // that the eigenvaluesd associate with these DOFs are ~1/eps.
+  // that the eigenvalues associate with these DOFs are ~1/eps.
   m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::min());
   m->Finalize();
   _mass_rhs.Reset(m->ParallelAssemble());

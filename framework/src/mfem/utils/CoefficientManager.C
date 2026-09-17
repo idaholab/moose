@@ -172,8 +172,7 @@ CoefficientManager::getMatrixCoefficientPtr(const std::string & name)
         mooseError("Matrix coefficient literal '" + name + "' has rows of differing length.");
     }
   }
-  if (rows.size() &&
-      rows.size() == static_cast<std::size_t>(std::count(name.begin(), name.end(), ';')) + 1)
+  if (rows.size() == static_cast<std::size_t>(std::count(name.begin(), name.end(), ';')) + 1)
   {
     const int nrows = static_cast<int>(rows.size());
     const int ncols = static_cast<int>(rows.front().size());

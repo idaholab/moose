@@ -5,7 +5,7 @@
 ## Overview
 
 `MFEMGenericFunctorVectorMaterial` defines one or more vector material properties with values
-obtained from coefficients on one or more subdomains of the mesh, given by the [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/block) or [!param](/FunctorMaterials/MFEMGenericFunctorMatrixMaterial/boundary) parameters,
+obtained from coefficients on one or more subdomains or boundaries of the mesh, given by the [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/block) or [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/boundary) parameters,
 if provided, or applied to the entire mesh if missing. The vector material properties are named
 according to members in the [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_names) parameter, with respective coefficients used to get property
 values given by the members of
