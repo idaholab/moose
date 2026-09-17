@@ -92,6 +92,14 @@ protected:
     Real power_factor = 0.0;
   };
 
+  /** Value and first two derivatives of the LPS hydrostatic function H(M). */
+  struct LpsHDerivatives
+  {
+    GenericReal<is_ad> value = 1.0;
+    GenericReal<is_ad> first = 0.0;
+    GenericReal<is_ad> second = 0.0;
+  };
+
   /** First and second partial derivatives of one LPS gauge residual. */
   struct LpsDerivatives
   {
@@ -270,6 +278,7 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
+  LpsHDerivatives computeHDerivatives(Real n, const GenericReal<is_ad> & M) const;
   GenericReal<is_ad> computeH(const Real n,
                               const GenericReal<is_ad> & gauge_stress,
                               const bool derivative = false) const;
