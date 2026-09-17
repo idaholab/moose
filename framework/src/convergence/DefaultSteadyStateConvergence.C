@@ -65,7 +65,10 @@ DefaultSteadyStateConvergence::checkConvergence(unsigned int /*n_iter*/)
     for (auto & aux_var_diff_norm : aux_var_diff_norms)
       aux_var_diff_norm /= (_normalize_norm_by_dt ? _fe_problem.dt() : Real(1));
 
-    norm = *std::max_element(aux_var_diff_norms.begin(), aux_var_diff_norms.end());
+    // An empty aux system has no diff norms to take the max of; leave norm at its default of 0
+    // rather than dereferencing std::max_element() of an empty vector
+    if (!aux_var_diff_norms.empty())
+      norm = *std::max_element(aux_var_diff_norms.begin(), aux_var_diff_norms.end());
   }
   else
     norm = _transient_executioner->computeSolutionChangeNorm(false, _normalize_norm_by_dt);
