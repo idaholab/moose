@@ -1,18 +1,18 @@
 ---
 name: civet-ci-failures
 description: >-
-  Use when investigating why CIVET CI failed for MOOSE or a downstream app, whether the starting
+  Use when investigating why CIVET failed for MOOSE or a downstream app, whether the starting
   point is a pull request, a commit, or a single CIVET job URL: which jobs failed, which tests
   inside them, why, and how to reproduce a failure locally. Reads GitHub commit statuses and CIVET
   job logs through the gh CLI, so it works without CIVET credentials. Also covers how to read the
   result, because raw job counts and GitHub's own rollup state are both misleading.
 ---
 
-# CIVET CI failures
+# CIVET failures
 
 ## The tool
 
-`scripts/civet_pr_failures.py` in the MOOSE repo. It needs an authenticated `gh` CLI and network
+`python/civet_pr_failures/civet_pr_failures.py` in the MOOSE repo. It needs an authenticated `gh` CLI and network
 access to `civet.inl.gov`; nothing else. It combines two sources:
 
 - **GitHub commit statuses**, which CIVET posts one per job, giving job state and the CIVET job URL.
@@ -20,13 +20,13 @@ access to `civet.inl.gov`; nothing else. It combines two sources:
   recipes, which is where per-test failures and build errors actually live.
 
 ```bash
-scripts/civet_pr_failures.py                        # the current branch's PR, job level only
-scripts/civet_pr_failures.py --pr 33645             # a specific PR
-scripts/civet_pr_failures.py --pr 33645 --errors    # also read logs: build errors, failing tests
-scripts/civet_pr_failures.py --pr 33645 --errors --recipes ~/projects/civet_recipes
-scripts/civet_pr_failures.py --pr 33645 --json      # same findings as JSON; implies --errors
-scripts/civet_pr_failures.py --sha <commit>         # a commit rather than a PR
-scripts/civet_pr_failures.py --job <civet job url>  # a single job, named by its URL
+python/civet_pr_failures/civet_pr_failures.py                        # the current branch's PR, job level only
+python/civet_pr_failures/civet_pr_failures.py --pr 33645             # a specific PR
+python/civet_pr_failures/civet_pr_failures.py --pr 33645 --errors    # also read logs: build errors, failing tests
+python/civet_pr_failures/civet_pr_failures.py --pr 33645 --errors --recipes ~/projects/civet_recipes
+python/civet_pr_failures/civet_pr_failures.py --pr 33645 --json      # same findings as JSON; implies --errors
+python/civet_pr_failures/civet_pr_failures.py --sha <commit>         # a commit rather than a PR
+python/civet_pr_failures/civet_pr_failures.py --job <civet job url>  # a single job, named by its URL
 ```
 
 CIVET attaches its statuses to the commit, not to the pull request, so `--sha` is enough on its own
@@ -47,7 +47,7 @@ same per-test findings `--errors` gives, plus what the URL does not carry: the r
 the pull request, and both commits.
 
 ```bash
-scripts/civet_pr_failures.py --job https://civet.inl.gov/job/4180979/
+python/civet_pr_failures/civet_pr_failures.py --job https://civet.inl.gov/job/4180979/
 ```
 
 ```
@@ -78,9 +78,9 @@ whether the branch is implicated at all.
 Only for what the report does not cover. Start with `--list-steps` for sizes, then read one step:
 
 ```bash
-scripts/civet_pr_failures.py --job <url> --list-steps
-scripts/civet_pr_failures.py --job <url> --step 04_Test --grep 'Failed to bind' --context 5
-scripts/civet_pr_failures.py --job <url> --step 01_Build --lines 200
+python/civet_pr_failures/civet_pr_failures.py --job <url> --list-steps
+python/civet_pr_failures/civet_pr_failures.py --job <url> --step 04_Test --grep 'Failed to bind' --context 5
+python/civet_pr_failures/civet_pr_failures.py --job <url> --step 01_Build --lines 200
 ```
 
 Use `--grep`, not `--lines`, for a test failure. The TestHarness prints each failure where it
@@ -230,9 +230,9 @@ rather than waiting.
   step dumps in its header. A job whose logs are unreadable, private, or truncated before that dump
   reports them as `?`. `--job` has only been run against a pull request job; a push event to `next`
   has no `CIVET_PR_NUM`, and that path is untested.
-- `scripts/civet_pr_failures.py` has no unit tests, unlike the rest of `python/TestHarness`. Its
-  report has been checked by hand against real events; its behaviour on an event shape not seen
-  during that checking is unknown.
+- Unit tests cover the parsing, clustering, and reproduce-command logic directly; the `gh` and
+  network calls are only exercised against mocks, never a live CIVET event. A change to CIVET's
+  own output shape, or a log format this tool has not seen, can still slip past the test suite.
 
 ## When something does not fit
 
@@ -248,3 +248,7 @@ cannot settle on its own:
 
 Say what you found, what you could not determine, and what you would do next. Do not invent a cause
 for a failure you cannot read, and do not apply a remedy on a hunch.
+
+`python/doc/content/python/civet_pr_failures.md` is the user-facing page for the tool, and
+`python/civet_pr_failures/tests` holds its unit tests. A change to the script belongs with an
+update to both.
