@@ -2,7 +2,7 @@
 # rigid contactor.
 #
 # Same physics as hertz_sphere_elastic/hertz_elastic.i, but the material's
-# top surface has NO applied displacement — instead the SphereContactor
+# top surface has NO applied displacement -- instead the SphereContactor
 # translates upward by a prescribed Function of time.  This sanity-checks
 # the per-axis translation infrastructure that load-controlled contact
 # uses.  Only exercises the `disp_y_function` input (Function on axis y),
@@ -162,7 +162,7 @@
     value = 0.0
   []
   [pin_top]
-    # Material top pinned to zero — the contactor moves up into the material
+    # Material top pinned to zero -- the contactor moves up into the material
     # instead of the material moving down into the contactor.
     type = DirichletBC
     variable = disp_y

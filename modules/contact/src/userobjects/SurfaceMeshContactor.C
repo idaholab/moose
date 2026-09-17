@@ -184,7 +184,7 @@ SurfaceMeshContactor::closestSurfacePoint(const Point & x, const libMesh::Elem *
   // where the true closest triangle is not the one whose centroid is nearest
   // (possible when triangles have very different sizes or when x sits closer
   // to a neighboring triangle's edge than to hit's).  Up to 3 extra
-  // closest-point tests for Tri3 — cheap relative to the KDTree lookup.
+  // closest-point tests for Tri3 -- cheap relative to the KDTree lookup.
   for (const auto s : make_range(hit->n_sides()))
   {
     const libMesh::Elem * neigh = hit->neighbor_ptr(s);
@@ -235,10 +235,10 @@ SurfaceMeshContactor::queryAtRaw(const Point & x) const
     // surface normal at CP: v/d itself on the outside, flipped on the inside.
     q.normal = (sign / d) * v;
   else
-    // On-surface: v ≈ 0, use the pseudonormal at the closest feature.
+    // On-surface: v ~ 0, use the pseudonormal at the closest feature.
     q.normal = n_psn;
 
-  // Piecewise-flat facets ⇒ true Hessian is zero on facet interiors.
+  // Piecewise-flat facets -> true Hessian is zero on facet interiors.
   q.hessian = RealTensorValue();
   return q;
 }

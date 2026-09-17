@@ -17,20 +17,20 @@
  * analytic level-set contactor. Applied at each Lagrange-multiplier DoF
  * living on the deformable contact sideset's lower-d block.
  *
- *   R_i = min( λ_i,  c · g_LS(x_i + u_i) )
+ *   R_i = min( lambda_i,  c * g_LS(x_i + u_i) )
  *
  * Complementarity is completed by PETSc `SNESVINEWTONSSLS` + `ConstantBounds`
- * enforcing λ ≥ 0. The nodal min-NCP puts a nonzero {0, 1} on the MOOSE
+ * enforcing lambda >= 0. The nodal min-NCP puts a nonzero {0, 1} on the MOOSE
  * assembled Jacobian's LM diagonal (same structural benefit that mortar's
  * `enforceConstraintOnDof` provides). No mortar segment mesh, no dual-basis
  * integration, no AD.
  *
  * Jacobian:
- *   λ-branch  (λ ≤ c · g):  ∂R/∂λ = 1,  ∂R/∂disp_k = 0
- *   g-branch  (c · g < λ):  ∂R/∂λ = 0,  ∂R/∂disp_k = c · n_k(x + u)
+ *   lambda-branch  (lambda <= c * g):  dR/dlambda = 1,  dR/ddisp_k = 0
+ *   g-branch  (c * g < lambda):  dR/dlambda = 0,  dR/ddisp_k = c * n_k(x + u)
  *
  * Companion class: RigidBodyNormalMechanicalContact applies the
- * -λ · n · φ_test traction on the coupled displacement equations.
+ * -lambda * n * phi_test traction on the coupled displacement equations.
  */
 class RigidBodyNodalNCPKernel : public NodalKernel
 {

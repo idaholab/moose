@@ -4,8 +4,8 @@
 # (proven-convergent plain-Newton load-control setup).  Companion inputs
 # `hertz_x.i` and `hertz_z.i` build the SAME physical problem rotated by
 # 90 degrees onto the X and Z axes (via TransformGenerator).  Every
-# solution invariant recorded in the CSV — `applied_force`,
-# `indenter_translation`, `max_lm`, `cumulative_nl` — should match all
+# solution invariant recorded in the CSV -- `applied_force`,
+# `indenter_translation`, `max_lm`, `cumulative_nl` -- should match all
 # three inputs bit-for-bit up to floating-point roundoff.  Any
 # axis-dependent bug in SphereContactor / LevelSetContactor /
 # RigidBodyLoadControl / RigidBodyNormalMechanicalContact /
@@ -14,7 +14,7 @@
 #
 # We chose end_time = 0.1 (one time step) to keep the test light: three
 # 3D contact solves under CI in a few seconds each.  The physics is
-# already fully exercised at t = 0.1 — LM active-set determined,
+# already fully exercised at t = 0.1 -- LM active-set determined,
 # scalar-row Jacobian populated, PETSc contact Jacobian solved.
 
 [GlobalParams]

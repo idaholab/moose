@@ -337,8 +337,8 @@ sphere_refinement = 3
   []
   # Total y-force applied by the contactor at the contact face, obtained
   # by summing the assembled y-residual on the top BC and equilibrium.
-  # `save_in` stores R_i = ∫ (∇φ_i : σ - φ_i·b), which is negative on a
-  # top-pushed-down node under compression (σ_yy < 0), so the raw sum is
+  # `save_in` stores R_i = int (gradphi_i : sigma - phi_i*b), which is negative on a
+  # top-pushed-down node under compression (sigma_yy < 0), so the raw sum is
   # flipped to give a positive compressive force.
   [contactor_force_raw]
     type = NodalSum

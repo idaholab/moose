@@ -29,7 +29,7 @@ class Function;
  * (`disp_x_scalar`, etc.).  Displacement control drives one axis with a
  * Function; load control drives it with a Scalar variable whose value is
  * determined by a companion RigidBodyLoadControl scalar kernel.  Axes
- * with neither input default to zero — so pre-existing displacement-
+ * with neither input default to zero -- so pre-existing displacement-
  * controlled inputs that leave the contactor stationary keep working
  * unchanged.
  *
@@ -73,7 +73,7 @@ public:
   virtual void finalize() override final {}
 
 protected:
-  /// Raw geometry hooks — concrete contactors implement these; they see the
+  /// Raw geometry hooks -- concrete contactors implement these; they see the
   /// query point in the contactor's own (untranslated) frame.
   virtual Real signedDistanceRaw(const Point & x) const = 0;
   virtual RealVectorValue normalRaw(const Point & x) const = 0;

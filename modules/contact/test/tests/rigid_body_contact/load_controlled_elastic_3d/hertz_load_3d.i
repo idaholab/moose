@@ -1,4 +1,4 @@
-# 3D quarter-symmetric Hertz test with LOAD CONTROL — the rigid sphere is
+# 3D quarter-symmetric Hertz test with LOAD CONTROL -- the rigid sphere is
 # pushed upward into a top-pinned deformable body by a scalar Lagrange
 # multiplier `indenter_y`, adjusted by RigidBodyLoadControl until the
 # integrated normal contact reaction matches the target F(t).
@@ -9,7 +9,7 @@
 # `vinewtonssls` + `basic` + ConstantBounds converges to the same
 # fixed point but takes ~20x wall time because SSLS's bound projection
 # refactors LU each iteration AND cuts step size so that
-# IterationAdaptiveDT falls back to smaller dt — 5x per-iter cost x 5x
+# IterationAdaptiveDT falls back to smaller dt -- 5x per-iter cost x 5x
 # more Newton iters.  The malloc bug that was suspected of causing the
 # slowdown is closed by the [UserObjects]/contact_sparsity block, but
 # it turned out to cost < 1s of the ~500s difference; the remainder is

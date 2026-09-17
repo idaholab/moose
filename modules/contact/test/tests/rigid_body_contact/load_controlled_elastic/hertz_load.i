@@ -8,7 +8,7 @@
 #     Sum_i w_i * lambda_i * (n_i . direction) = F(t)
 #
 # so Newton finds the indenter translation `s` that produces the target
-# contact reaction F(t) — a linearly ramped force from 0 to 1e4.
+# contact reaction F(t) -- a linearly ramped force from 0 to 1e4.
 #
 # Setup:
 #   * material top pinned (disp_y = 0), same as the moving-indenter test.

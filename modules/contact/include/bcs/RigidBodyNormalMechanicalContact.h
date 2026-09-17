@@ -15,10 +15,10 @@
  * Traction on one displacement component from a rigid-body frictionless contact.
  * Companion to RigidBodyNodalNCPKernel (which handles the LM row).
  *
- *   R_{u_k}(i) += -λ · n_k(x + u) · φ_i
+ *   R_{u_k}(i) += -lambda * n_k(x + u) * phi_i
  *
- * Off-diagonal:  d R_{u_k} / d λ_j = -n_k · φ_i · φ_lambda_j.
- * With `finite_strain = true`, adds d R_{u_k} / d u_l = -λ · H_kl · φ_l_j · φ_i.
+ * Off-diagonal:  d R_{u_k} / d lambda_j = -n_k * phi_i * phi_lambda_j.
+ * With `finite_strain = true`, adds d R_{u_k} / d u_l = -lambda * H_kl * phi_l_j * phi_i.
  */
 class RigidBodyNormalMechanicalContact : public LowerDIntegratedBC
 {

@@ -1,4 +1,4 @@
-# Load-controlled Hertz test, 2D-axisym elastic — full LOAD then UNLOAD cycle.
+# Load-controlled Hertz test, 2D-axisym elastic -- full LOAD then UNLOAD cycle.
 #
 # Same physics and load-control setup as `load_controlled_elastic/hertz_load.i`,
 # but F(t) is a triangle wave: 0 -> 1e4 (t = 0 -> 1) -> 0 (t = 1 -> 2).  On
@@ -7,8 +7,8 @@
 # toward the point of first contact.
 #
 # Solver choice: plain `newtonls` (no bounds).  Complementarity is closed
-# by physics — the material can't pull on the rigid body across the
-# contact interface — so lambda remains >= 0 on its own.  Empirically
+# by physics -- the material can't pull on the rigid body across the
+# contact interface -- so lambda remains >= 0 on its own.  Empirically
 # this is the fastest AND most robust option for load-controlled contact
 # with unloading:
 #
@@ -117,7 +117,7 @@
 []
 
 [Bounds]
-  # Inactive by default — see header comment.  Plain Newton without
+  # Inactive by default -- see header comment.  Plain Newton without
   # bounds is the shipped default because vinewtonssls + bounds
   # cutback-thrashes on unload when a target force falls between
   # mesh-quantum active-set states.

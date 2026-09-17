@@ -36,7 +36,7 @@ RigidBodyLoadControl::validParams()
   // rank must see EVERY boundary node in `_node_ids` to correctly sum
   // the integrated reaction and populate the Jacobian blocks.  The
   // required GhostBoundary relationship manager is registered by the
-  // companion `RigidBodyContactSparsity` UO — it has to be there anyway
+  // companion `RigidBodyContactSparsity` UO -- it has to be there anyway
   // for the sparsity augmentation, so its GhostBoundary side effect
   // covers this kernel's parallel needs too.
   params.addRequiredParam<FunctionName>(
@@ -224,7 +224,7 @@ RigidBodyLoadControl::computeResidual()
   // The owning rank sees every boundary node in `_node_ids` (populated
   // globally in NodalScalarKernel), and by way of MOOSE's ghosting the
   // ones it does not own directly are still accessible via query_node_ptr
-  // — we still guard with a null check for robustness against unusual
+  // -- we still guard with a null check for robustness against unusual
   // partitions.  `_lambda[k]` and `_disp[k]` at those ghosted nodes carry
   // the correct up-to-date values because `NodalScalarKernel::reinit()`
   // called `_subproblem.reinitNodes(_node_ids, _tid)` beforehand.
@@ -239,7 +239,7 @@ RigidBodyLoadControl::computeResidual()
   // via reinitNodes, which pushes one entry per node in `_node_ids` that
   // is accessible AND semi-local (owned or ghosted) on this rank.  In
   // parallel the compressed count may be smaller than `_node_ids.size()`,
-  // so we can't simply index `_lambda[k]` with the full-list `k` —
+  // so we can't simply index `_lambda[k]` with the full-list `k` --
   // instead iterate a running compressed index over accessible nodes,
   // matching the order MOOSE used internally.
   std::size_t j = 0;
@@ -303,7 +303,7 @@ RigidBodyLoadControl::computeJacobian()
   //   the positive Cartesian axis of the contactor's translation, used
   //   for (lambda_row, scalar_col): dR_lambda/ds = -c * (n_j . axis_hat).
   //   The contactor's translation is s * axis_hat regardless of the sign
-  //   of `direction`, so this uses axis_hat and not direction — mixing
+  //   of `direction`, so this uses axis_hat and not direction -- mixing
   //   them up (an older bug) flips the Kls sign when the user picks a
   //   negative-axis load direction and Newton then diverges.
   std::vector<Real> n_dot_dir(N, 0.0);
@@ -328,7 +328,7 @@ RigidBodyLoadControl::computeJacobian()
   // not depend on s and the reaction depends on s only indirectly through
   // the geometric term dn/ds, which is a hessian order term we drop).
   // PETSc's sparsity still needs the entry, so assemble an explicit zero
-  // — plus an optional preconditioning shift (see `kss_stiffness` param
+  // -- plus an optional preconditioning shift (see `kss_stiffness` param
   // docstring).  The physically-motivated shift is
   //   Kss_precond = kss_stiffness * total_nodal_area * sign(direction . axis_hat)
   // The magnitude scales with total contact-patch area (a proxy for how
@@ -336,7 +336,7 @@ RigidBodyLoadControl::computeJacobian()
   // sign matches the true dR_s/ds sign: +1 when direction and axis_hat
   // agree (pushing s up increases reaction) and -1 when they oppose
   // (pushing s up decreases reaction).  Summing over ALL accessible
-  // boundary nodes — not just the currently-active-contact subset —
+  // boundary nodes -- not just the currently-active-contact subset --
   // keeps the shift constant across Newton iterations so gap/lambda-branch
   // flipping in the min-NCP does not churn the effective diagonal.
   Real kss = 0.0;
@@ -385,12 +385,12 @@ RigidBodyLoadControl::computeJacobian()
   //   dR_lambda / ds = c * grad(g_LS) . (-dt/ds)
   //                  = c * n . (-axis_hat)
   //                  = -c * (n . axis_hat).
-  // The user-supplied `direction` is not used here — it only enters the
+  // The user-supplied `direction` is not used here -- it only enters the
   // (scalar_row, lambda_col) block above.
   // Lambda-branch nodes have R_lambda = lambda (independent of s).
   //
   // MOOSE's ScalarKernel dispatch (`addJacobianOffDiagScalar`) only fills
-  // (scalar_row × field_col) blocks — it never fills (field_row × scalar_col).
+  // (scalar_row x field_col) blocks -- it never fills (field_row x scalar_col).
   // NodalKernel likewise has no scalar off-diagonal hook.  The idiomatic
   // workaround (MortarScalarBase pattern) is direct assembly via
   // TaggingInterface::addJacobian with explicit row/column DoF indices,

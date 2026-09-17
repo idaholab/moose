@@ -53,7 +53,7 @@ public:
   virtual void timestepSetup() override;
 
 protected:
-  /// Nonlinear solver — cached at construction to reach the SNES.
+  /// Nonlinear solver -- cached at construction to reach the SNES.
   libMesh::PetscNonlinearSolver<Real> * _solver;
 
   /// Armijo constant c in the sufficient-decrease test.
@@ -68,6 +68,6 @@ protected:
   /// Nonmonotone window size M (set M = 1 for classical monotone Armijo).
   const unsigned int _window;
 
-  /// Rolling window of the M most recently accepted merit values (½‖Φ‖²).
+  /// Rolling window of the M most recently accepted merit values (1/2||Phi||^2).
   std::deque<Real> _recent_meritsq;
 };

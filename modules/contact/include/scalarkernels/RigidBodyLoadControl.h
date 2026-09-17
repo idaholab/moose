@@ -31,9 +31,9 @@ class NodalArea;
  * the deformed node position.
  *
  * The Jacobian assembles:
- *  * (scalar_row, lambda_col) : -w_j * (n_j . direction)   — direct.
+ *  * (scalar_row, lambda_col) : -w_j * (n_j . direction)   -- direct.
  *  * (lambda_row, scalar_col) : -c * (n_j . axis_hat) on gap-branch nodes,
- *    0 elsewhere — transpose block that MOOSE's NodalKernel framework can't
+ *    0 elsewhere -- transpose block that MOOSE's NodalKernel framework can't
  *    fill (NodalKernel has no scalar off-diagonal hook), so this kernel
  *    fills it directly.  The `c` parameter MUST match the companion
  *    RigidBodyNodalNCPKernel's `c` for the Jacobian to be consistent.
@@ -46,8 +46,8 @@ class NodalArea;
  *    (e.g. `direction = '0 -1 0'` for a load that acts along -y), the
  *    sign of dR_lambda/ds still comes from the ACTUAL translation
  *    vector, which LevelSetContactor implements as s * axis_hat (always
- *    positive-oriented).  Using `n . direction` here — as an older
- *    version of this class did — produced a wrong Kls sign whenever the
+ *    positive-oriented).  Using `n . direction` here -- as an older
+ *    version of this class did -- produced a wrong Kls sign whenever the
  *    user supplied a negative-axis direction and made Newton fail on
  *    load-control setups where the contact geometry required it.
  */
@@ -116,7 +116,7 @@ private:
   /// nodes that were accessible and semi-local at reinit time).
   Point deformedNodePoint(const Node & node, std::size_t compressed) const;
 
-  /// True when node `_node_ids[k]` is accessible on this rank — either
+  /// True when node `_node_ids[k]` is accessible on this rank -- either
   /// locally owned or ghosted.  ScalarKernel::computeResidual /
   /// computeJacobian run only on the rank that owns the scalar DoF and
   /// see the full boundary node list, but with an unusual partition a
@@ -137,13 +137,13 @@ private:
   /// Constant variant of the effective contact stiffness (Young's-modulus
   /// scale) used to fabricate a nonzero (scalar_row, scalar_col) Jacobian
   /// entry.  The exact `dR_s/ds` is zero in this formulation (F(t) does not
-  /// depend on s, and the reaction depends on s only through Kls · Kpp^-1 ·
+  /// depend on s, and the reaction depends on s only through Kls * Kpp^-1 *
   /// Ksl, which we don't have in closed form here), so with `Kss=0` the
   /// linear solve relies on PETSc pivot shifts and Newton overshoots
   /// dramatically on flat contact patches where the true Schur-complement
-  /// Kss is O(K_material · A_contact).  This is a JACOBIAN-ONLY
+  /// Kss is O(K_material * A_contact).  This is a JACOBIAN-ONLY
   /// modification: the residual is unchanged, so the physical fixed point
-  /// (R_s = 0) is unchanged — only the intermediate Newton iterates
+  /// (R_s = 0) is unchanged -- only the intermediate Newton iterates
   /// differ.  Set to 0 (default) to preserve the original formulation
   /// exactly.  Mutually exclusive with `_kss_stiffness_function`.
   const Real _kss_stiffness_constant;
@@ -159,7 +159,7 @@ private:
   /// enforces `_direction` to be aligned with a Cartesian axis).  The
   /// contactor translates by `s * axis_hat` where `axis_hat` is the
   /// positive unit vector for this axis, independent of the sign of
-  /// `_direction` — that positive-axis translation is what enters
+  /// `_direction` -- that positive-axis translation is what enters
   /// dR_lambda/ds in computeJacobian().
   unsigned int _axis;
   const Real _c;

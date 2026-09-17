@@ -53,9 +53,9 @@ public:
   virtual bool shouldApply() override;
 
 private:
-  /// Contact sideset(s) — same as the RigidBodyNodalNCPKernel `boundary`.
+  /// Contact sideset(s) -- same as the RigidBodyNodalNCPKernel `boundary`.
   const std::vector<BoundaryName> _boundary_names;
-  /// Names of the input variables — variables do not exist yet when the
+  /// Names of the input variables -- variables do not exist yet when the
   /// Predictor is constructed (predictor action runs before variable
   /// setup), so we defer number lookup to `setupRegion()`.
   const std::string _lm_var_name;
@@ -78,16 +78,16 @@ private:
   /// Relative residual tolerance (fraction of initial sub-residual).
   const Real _sub_rel_tol;
 
-  /// Global DOF indices in the contact region — the set the sub-solve
+  /// Global DOF indices in the contact region -- the set the sub-solve
   /// updates.  Sorted, deduplicated, computed once in initialSetup.
   std::vector<libMesh::dof_id_type> _region_dofs;
   /// Subset of `_region_dofs` that are LM DOFs.  Used to enforce
   /// lambda >= 0 by simple projection after each sub-step.
   std::vector<libMesh::dof_id_type> _lm_dofs;
-  /// PETSc IS wrapping `_region_dofs` — used for MatCreateSubMatrix
+  /// PETSc IS wrapping `_region_dofs` -- used for MatCreateSubMatrix
   /// and VecGetSubVector.  Built in initialSetup, destroyed in dtor.
   IS _region_is;
-  /// Sanity flag — `apply()` bails out immediately if we never built
+  /// Sanity flag -- `apply()` bails out immediately if we never built
   /// a non-empty region (e.g. bad boundary name in serial-empty
   /// partition).
   bool _region_ready;

@@ -36,14 +36,14 @@ RigidBodyContactSparsity::validParams()
       "displacements", "Displacement variables in order (x, y[, z]).");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary",
-      "Contact sideset id(s) — same as the RigidBodyNodalNCPKernel/"
+      "Contact sideset id(s) -- same as the RigidBodyNodalNCPKernel/"
       "RigidBodyLoadControl `boundary`.  Used to mark boundary elements as "
       "semi-local on every rank so the scalar-owning rank of "
       "RigidBodyLoadControl can read `_lambda[k]` and `_disp[k]` for every "
       "node on the contact patch in parallel.");
   // Parallel: register GhostEverything so every rank sees every element
   // (owned + ghosted).  Two reasons:
-  //   1. RigidBodyLoadControl is a NodalScalarKernel — MOOSE only calls its
+  //   1. RigidBodyLoadControl is a NodalScalarKernel -- MOOSE only calls its
   //      residual/Jacobian on the rank that owns the scalar DoF (the last
   //      MPI rank), so that rank must have algebraic access to every LM
   //      DoF on the contact sideset.  GhostBoundary only ghosts higher-d
@@ -96,7 +96,7 @@ RigidBodyContactSparsity::initialSetup()
   // Force every rank to treat all elements on the contact boundary as
   // ghosted (whether it owns them or not).  MooseMesh::isSemiLocal(node)
   // returns true only for nodes on active_local_elements + explicitly
-  // ghosted elements — GhostEverything's algebraic ghost is not enough to
+  // ghosted elements -- GhostEverything's algebraic ghost is not enough to
   // populate that list.  Without this step, on a rank that owns no
   // boundary-adjacent element (e.g. the scalar-owning rank in
   // load-controlled contact) `NodalScalarKernel::reinit` skips every
@@ -144,14 +144,14 @@ RigidBodyContactSparsity::applyExtraSparsity(libMesh::SparsityPattern::Graph & s
   // Parallel note: iterating `active_element_ptr_range` (not
   // `active_local_element_ptr_range`) is required in parallel.  The
   // AugmentSparsityPattern hook runs AFTER `Build::parallel_sync` on the
-  // DofMap, so we can only write LOCAL rows of `sparsity` — non-local
+  // DofMap, so we can only write LOCAL rows of `sparsity` -- non-local
   // rows added here would be dropped.  For a lower-d element straddling a
   // partition boundary, the rank owning the LM DoF at one endpoint may
   // NOT own the lower-d element (or the disp DoF at the other endpoint).
   // Iterating including ghosts lets each rank independently see every
   // lower-d element touching its owned DoFs, and the per-row filter below
   // (r >= first_dof_on_proc, r < end_dof_on_proc) discards writes that
-  // aren't local — so the owning rank picks them up.  Reaches ghosted
+  // aren't local -- so the owning rank picks them up.  Reaches ghosted
   // elements because MOOSE registers `GhostLowerDElems` on any mesh with
   // a lower-d block.
   std::vector<libMesh::dof_id_type> all_dofs;
@@ -178,7 +178,7 @@ RigidBodyContactSparsity::applyExtraSparsity(libMesh::SparsityPattern::Graph & s
     all_dofs.clear();
     gather(elem);
     // Also gather from the interior (higher-d) parent so we capture
-    // (higher-d test) × (lower-d phi) blocks the LowerDIntegratedBC
+    // (higher-d test) x (lower-d phi) blocks the LowerDIntegratedBC
     // creates via computeLowerDOffDiagJacobian(PrimaryLower, ...).
     if (const auto * parent = elem->interior_parent())
       gather(parent);

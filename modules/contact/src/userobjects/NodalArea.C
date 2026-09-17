@@ -109,7 +109,7 @@ Real
 NodalArea::nodalArea(const Node * node) const
 {
   // Read the tributary area from the associated aux variable's ghosted
-  // solution vector — that vector is populated by `finalize()` (see
+  // solution vector -- that vector is populated by `finalize()` (see
   // above) and is properly ghosted, so this returns the correct value
   // for both locally-owned and ghosted nodes.  The prior implementation
   // read from the `_node_areas` map which only holds LOCAL
@@ -122,7 +122,7 @@ NodalArea::nodalArea(const Node * node) const
     return 0;
   const dof_id_type dof = node->dof_number(_system.number(), _variable->number(), 0);
   // Read from the GHOSTED aux solution (currentSolution), not the
-  // parallel `_aux_solution` — for a non-local dof, calling operator()
+  // parallel `_aux_solution` -- for a non-local dof, calling operator()
   // on the non-ghosted vector is undefined behaviour and can segfault
   // on the scalar-owning rank of RigidBodyLoadControl.
   const auto * cs = _system.currentSolution();

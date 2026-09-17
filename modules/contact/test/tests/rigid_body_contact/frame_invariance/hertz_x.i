@@ -21,7 +21,7 @@
   []
   # Rotate the mesh 90 degrees clockwise about z (viewed from +z):
   #   x_new = y_old,  y_new = -x_old,  z_new = z_old
-  # This puts what was the +y contact face at the +x face — sphere now
+  # This puts what was the +y contact face at the +x face -- sphere now
   # pushes in +x direction.
   [rotate]
     type = TransformGenerator

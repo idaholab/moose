@@ -1,4 +1,4 @@
-# Displacement-controlled Hertz test — full LOAD then UNLOAD cycle.
+# Displacement-controlled Hertz test -- full LOAD then UNLOAD cycle.
 #
 # The rigid contactor is prescribed to move up into the material (t = 0 -> 1)
 # then retract back to its start position (t = 1 -> 2).  Unloading is the
@@ -36,7 +36,7 @@
 
 [Functions]
   [sphere_up]
-    # Triangle wave — indent to y = -1.99 at t = 1, then release back to
+    # Triangle wave -- indent to y = -1.99 at t = 1, then release back to
     # y = -2 at t = 2.
     type = PiecewiseLinear
     x = '0  1    2'
@@ -164,7 +164,7 @@
     value = 0.0
   []
   [pin_top]
-    # Material top pinned to zero — the contactor moves up into the material
+    # Material top pinned to zero -- the contactor moves up into the material
     # instead of the material moving down into the contactor.
     type = DirichletBC
     variable = disp_y
