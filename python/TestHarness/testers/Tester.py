@@ -380,6 +380,11 @@ class Tester(MooseObject, OutputInterface):
         # Bool if test can run
         self._runnable = None
 
+        # Whether or not to delete this tester's output after it runs (see postRun()
+        # and setDeleteOutputAfterRunning()). Defaults to off; testers that produce
+        # output opt into this based on their own parameters.
+        self._delete_output_after_running = False
+
         # Set up common parameters
         self.should_execute = self.specs["should_execute"]
         self.check_input = self.specs["check_input"]
@@ -735,6 +740,16 @@ class Tester(MooseObject, OutputInterface):
         Entry point for after the tester has processed its results.
         """
         return
+
+    def setDeleteOutputAfterRunning(self, value):
+        """
+        Sets whether or not this tester's output should be deleted after it runs.
+
+        This overrides whatever this tester's own parameters would otherwise
+        set, for cases such as the TestHarness-generated recover tests where
+        the output of one part must survive into the next.
+        """
+        self._delete_output_after_running = value
 
     def processResultsCommand(self, moose_dir, options):
         """method to return the commands (list) used for processing results"""
