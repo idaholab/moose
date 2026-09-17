@@ -26,6 +26,7 @@ to the associated CIVET results for that SHA.
 
 !devel! example id=civet-results-example
                 caption=Example of the CIVET extension `results` command.
+                requires_extension=MooseDocs.extensions.civet
 
 [!civet!results]
 
@@ -49,6 +50,7 @@ from the online remote repository.
 
 !devel! example id=civet-merge-results-example
                 caption=Example of the CIVET extension `mergeresults` command.
+                requires_extension=MooseDocs.extensions.civet
 
 !civet mergeresults
 !devel-end!
@@ -71,6 +73,7 @@ badge directs the browser to a report page where individual results can be inspe
 
 !devel! example id=civet-badges-example
                 caption=Examples of the CIVET extension `badges` command.
+                requires_extension=MooseDocs.extensions.civet
 
 With one test specification:
 
@@ -97,6 +100,7 @@ The `report` command generates a table of jobs, associated CIVET recipes, and te
 
 !devel! example id=civet-report-example
                 caption=Example of the CIVET extension `report` command.
+                requires_extension=MooseDocs.extensions.civet
 
 !civet report tests=kernels/simple_diffusion.test
 
