@@ -21,9 +21,14 @@
     requirement = 'The system shall detect when the given number of input symbols does not match the number of postprocessor names and will report an error.'
   []
   [pp_controllable]
-    type = RunCommand
-    command =' python parsed_pp_control.py'
-    required_python_packages = 'os sys importlib.util'
-    detail = 'Starting up python webservercontrol and launching a simple subapp to test controllable ParsedPostprocessor.'
+    type = CSVDiff
+    input = parsed_pp_control.i
+    csvdiff = parsed_pp_control_out.csv
+    command_proxy = parsed_pp_control.py
+    required_python_packages = requests
+    recover = false
+    restep = false
+    requirement = 'The system shall be able to control a parsed postprocessor expression via a REST API.'
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 []
