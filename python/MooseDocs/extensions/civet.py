@@ -60,7 +60,7 @@ class CivetExtension(command.CommandExtension):
             "The local directory where the generated test reports will be inserted.",
         )
         config["test_results_cache"] = (
-            os.path.join(os.getenv("HOME"), ".local", "share", "civet", "jobs"),
+            os.path.join("${HOME}", ".local", "share", "civet", "jobs"),
             "Default location for downloading CIVET results.",
         )
         return config
@@ -264,13 +264,22 @@ class CivetMergeResultsCommand(CivetCommandBase):
     @staticmethod
     def defaultSettings():
         settings = CivetCommandBase.defaultSettings()
+        settings["use_current_hash"] = (
+            True,
+            "Use the hash for the current version of the documentation build, otherwise use the most up-to-date hash from the git remote.",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
         site, repo = self.getCivetInfo(settings)
-
-        rows = []
-        for sha in self.extension.hashes() or list():
+        merge_results_hashes = list()
+        if not settings["use_current_hash"]:
+            merge_results_hashes = self.extension.hashes()
+        else:
+            merge_results_hashes = mooseutils.get_civet_hashes(
+                commit=mooseutils.git_commit()
+            )
+        for sha in merge_results_hashes or list():
             url = "{}/sha_events/{}/{}".format(site, repo, sha)
             link = core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
