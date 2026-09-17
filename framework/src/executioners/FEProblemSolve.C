@@ -463,9 +463,12 @@ FEProblemSolve::solve()
     while (!converged)
     {
       if (_using_multi_sys_fp_iterations)
+      {
         _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << fp_iter << ":"
                  << COLOR_DEFAULT << "\n"
                  << std::endl;
+        _multi_sys_fp_convergence->preSolve();
+      }
 
       // Copy back systems as needed/requested
       for (auto * sys : _systems_to_copy_back_multi_sys_fp)
