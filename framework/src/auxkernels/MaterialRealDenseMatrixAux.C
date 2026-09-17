@@ -17,8 +17,9 @@ MaterialRealDenseMatrixAux::validParams()
   InputParameters params = MaterialAuxBase<>::validParams();
   params.addClassDescription(
       "Populate an auxiliary variable with an entry from a dense matrix material property.");
-  params.addParam<unsigned int>("row", 0, "The row component to consider for this kernel");
-  params.addParam<unsigned int>("column", 0, "The column component to consider for this kernel");
+  params.addRequiredParam<unsigned int>("row", "The row component to consider for this kernel");
+  params.addRequiredParam<unsigned int>("column",
+                                         "The column component to consider for this kernel");
   return params;
 }
 
