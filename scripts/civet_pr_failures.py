@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Report the CIVET failures for a pull request in a compact, bounded form.
+Report CIVET failures for a pull request, commit or job in a compact, bounded form.
 
 Reads only through the GitHub API (via the gh CLI), so it works from a
 machine that can reach github.com. Two sources are combined:
@@ -9,6 +9,12 @@ machine that can reach github.com. Two sources are combined:
     the URL of each CIVET job.
   - The machine-readable block that the test summary comment carries, which
     gives the individual failing tests and how to reproduce them.
+
+There are three ways to name what to report on. --pr covers a pull request,
+--sha covers a commit, which is what makes push events on next and devel
+reportable, and --job covers a single CIVET job named by its URL. --job reports
+the same per-test findings as the other two and additionally resolves the URL to
+the event, recipe and commits behind it, none of which the URL itself carries.
 
 The output is deliberately small. Passing tests are never reported, failures
 already present in the base are reported as a count rather than a list, and
@@ -69,6 +75,12 @@ LINE_PREFIX_RE = re.compile(r"^\[[\d.]+s\]\s*\[\s*\d+MB\]\s*")
 # frame such as "0: libMesh::print_trace" keeps its leading label.
 TEST_PREFIX_RE = re.compile(r"^[\w\-./:]*[./][\w\-./:]*:[ ]?")
 
+# The moosecontrol runners relay the application's output through Python's
+# logging, so a test driven by command_proxy carries a timestamp, logger name
+# and stream on every line. It comes off after the test-name prefix, or a
+# proxied test's output shares no lines with the same failure run directly.
+RUNNER_PREFIX_RE = re.compile(r"^\d{2}:\d{2}:\d{2}:[A-Z]+:\w+: (?:OUTPUT:[ ]?)?")
+
 # A compiler or linker diagnostic. The make failure lines that follow are
 # noise once the diagnostic itself is in hand, so they are only a fallback.
 DIAGNOSTIC_RE = re.compile(r"\berror:|\bundefined reference to\b|^ld: ")
@@ -109,6 +121,11 @@ TEST_TALLY_RE = re.compile(r"^\d+ passed, .*\bFAILED\b")
 # The container a step executed in, named once in that step's header
 CONTAINER_RE = re.compile(r"Executing \S+ in (\S+://\S+|\S*\.sif)")
 
+# An assignment in the CIVET environment that every step dumps in its header.
+# This is the only place a job URL alone can be resolved to the event, commit
+# and recipe it belongs to, none of which are in the URL.
+CIVET_ENV_RE = re.compile(r'^(CIVET_[A-Z_]+)="(.*)"$', re.MULTILINE)
+
 # The literal harness invocation a step logged, as "[time] <dir>: ./run_tests ..."
 INVOCATION_RE = re.compile(r"^\[[\d:]+\]\s+(\S+):\s+(\./run_tests\b.*)$")
 
@@ -128,6 +145,11 @@ MODE_EXCLUDE_PREFIXES = ("--max-memory-per-slot=",)
 # the message that identifies the failure
 ERROR_BLOCK_MARKER = "*** ERROR ***"
 ERROR_BOILERPLATE = ("The following occurred",)
+
+# The line immediately after the marker names the input file and the line and
+# column within it, which locates the failure without describing it. It has to
+# be skipped, or every error in a given input reads as the same signature.
+ERROR_LOCATION_RE = re.compile(r"\S+:\d+(?:\.\d+)?:$")
 
 # Errors that stand on their own line, such as those a Python tester raises
 STANDALONE_ERROR_RE = re.compile(r"^(?:[A-Za-z_]*Error|Assertion|Fatal error)[:\s]")
@@ -174,7 +196,16 @@ REMEDIATION_HINTS = (
     ),
     (
         "fatal: unable to access",
-        "a git clone or fetch failed during the build; spurious, re-run the job",
+        "a git clone or fetch failed during the build, so the remote was never "
+        "reached; check which host the URL names, as a submodule hosted outside "
+        "github.com and github.inl.gov is outside MOOSE's control and a re-run "
+        "only succeeds once that host recovers",
+    ),
+    (
+        "Could not resolve host",
+        "DNS failed for the host being cloned from; check which host the URL "
+        "names before re-running, as one outside github.com and github.inl.gov "
+        "is outside MOOSE's control",
     ),
     (
         "fatal: remote error",
@@ -200,6 +231,10 @@ DEFAULT_MAX_DIAGNOSTICS = 5
 
 # Default cap on jobs to pull logs for, since each is a tarball download
 DEFAULT_MAX_LOG_JOBS = 6
+
+# Default cap on lines printed from a single step's log. A step can be several
+# megabytes, so raw log access is always bounded.
+DEFAULT_MAX_LOG_LINES = 100
 
 
 class GitHubError(SystemExit):
@@ -399,6 +434,47 @@ def fetch_job_steps(job_url: str) -> List[tuple]:
     return steps
 
 
+def extract_job_info(steps: Sequence[tuple]) -> dict:
+    """
+    Read the CIVET environment that a job's steps dump in their headers.
+
+    A job URL says nothing on its own about what the job was testing. The
+    recipe name, the pull request and both commits live only in this dump, and
+    they are what decide whether a failure belongs to the branch under test or
+    to the base. Later steps overwrite earlier ones, which only matters for the
+    per-step entries; everything used here is a property of the job.
+    """
+    env: dict = {}
+    for _, text in steps:
+        env.update(CIVET_ENV_RE.findall(text))
+    return env
+
+
+def print_job_header(job_url: str, env: dict) -> None:
+    """Print the event, recipe and commits behind a single CIVET job."""
+    print(f"{env.get('CIVET_RECIPE_NAME') or '?'}  {job_url}")
+
+    if pr := env.get("CIVET_PR_NUM"):
+        print(f"  pull request {pr} ({env.get('CIVET_EVENT_CAUSE') or '?'})")
+    elif cause := env.get("CIVET_EVENT_CAUSE"):
+        print(f"  {cause}")
+
+    head_repo = env.get("CIVET_HEAD_REPO") or "?"
+    head_ref = env.get("CIVET_HEAD_REF") or "?"
+    head_sha = (env.get("CIVET_HEAD_SHA") or "?")[:12]
+    print(f"  head {head_repo}:{head_ref} @ {head_sha}")
+
+    base_repo = env.get("CIVET_BASE_REPO") or "?"
+    base_ref = env.get("CIVET_BASE_REF") or "?"
+    base_sha = (env.get("CIVET_BASE_SHA") or "?")[:12]
+    print(f"  base {base_repo}:{base_ref} @ {base_sha}")
+
+    # An invalidated job reran on the same commit, so its logs may predate the
+    # state the rest of the event was built from
+    if env.get("CIVET_INVALIDATED") == "True":
+        print("  this job was invalidated and rerun")
+
+
 class Failure(NamedTuple):
     """One occurrence of a failing test: where it failed and how to repeat it."""
 
@@ -535,7 +611,11 @@ def error_signatures(lines: Sequence[str]) -> "collections.Counter":
         if ERROR_BLOCK_MARKER in line:
             for candidate in lines[i + 1 : i + 8]:
                 candidate = candidate.strip()
-                if not candidate or candidate.startswith(ERROR_BOILERPLATE):
+                if (
+                    not candidate
+                    or candidate.startswith(ERROR_BOILERPLATE)
+                    or ERROR_LOCATION_RE.search(candidate)
+                ):
                     continue
                 message = candidate
                 break
@@ -599,7 +679,9 @@ def extract_step_errors(text: str, limit: int) -> dict:
     failure is one line per test plus an end-of-run tally.
     """
     lines = [
-        TEST_PREFIX_RE.sub("", LINE_PREFIX_RE.sub("", line.rstrip()))
+        RUNNER_PREFIX_RE.sub(
+            "", TEST_PREFIX_RE.sub("", LINE_PREFIX_RE.sub("", line.rstrip()))
+        )
         for line in text.splitlines()
     ]
 
@@ -710,6 +792,81 @@ def rollup_entries(rollup: dict, limit: int) -> List[dict]:
     return entries
 
 
+def collect_job_errors(
+    context: str,
+    url: str,
+    steps: Sequence[tuple],
+    rollup: dict,
+    hint_texts: set,
+    max_diagnostics: int,
+    max_signatures: int,
+) -> dict:
+    """
+    Gather what one job's step logs contain, accumulating shared findings.
+
+    The test rollup and the remediation hints span jobs, so they are passed in
+    and added to rather than returned. Splitting this out is what lets a single
+    job named by its URL and a whole event's failed jobs produce the same
+    findings from the same code.
+    """
+    entry: dict = {"context": context, "url": url, "steps": []}
+
+    failing = failing_steps(steps)
+    if not failing:
+        entry["error"] = "no step reported a nonzero return code"
+        return entry
+
+    for name, code, text in failing:
+        errors = extract_step_errors(text, max_diagnostics)
+        step = {"name": name, "exit_code": code, "kind": errors["kind"]}
+
+        container = extract_container(text)
+        step["container"] = container
+
+        if errors["kind"] == "test":
+            signatures = errors["signatures"]
+            step["tests_failed"] = errors["total"]
+            step["retry"] = retry_note(code)
+            step["signatures_total"] = len(signatures)
+            step["signatures"] = [
+                {"message": message, "count": count}
+                for message, count in signatures.most_common(max_signatures)
+            ]
+            hint_texts.update(signatures)
+
+            invocation = extract_invocation(text)
+            for line in errors["all_items"]:
+                test = test_name_of(line)
+                test_entry = rollup.setdefault(
+                    test,
+                    {
+                        "status": line.split(None, 1)[0],
+                        "failures": [],
+                        "reasons": set(),
+                    },
+                )
+                # The reason is what says how to act; the status word does
+                # not distinguish a memory kill from a genuine error
+                if reason := re.search(r"FAILED \(([^)]*)\)", line):
+                    test_entry["reasons"].add(reason.group(1))
+                test_entry["failures"].append(
+                    Failure(
+                        job=entry["context"],
+                        command=reproduce_command(invocation, test),
+                        mode=mode_identity(invocation),
+                        container=container,
+                    )
+                )
+        else:
+            step["diagnostics"] = errors["items"]
+            step["diagnostics_total"] = errors["total"]
+            hint_texts.update(errors["all_items"])
+
+        entry["steps"].append(step)
+
+    return entry
+
+
 def collect_errors(
     failed_jobs: Sequence[dict],
     max_jobs: int,
@@ -727,71 +884,26 @@ def collect_errors(
     hint_texts: set = set()
 
     for status in failed_jobs[:max_jobs]:
-        entry = {
-            "context": status.get("context") or "?",
-            "url": status.get("target_url") or "",
-            "steps": [],
-        }
-        jobs.append(entry)
-
+        context = status.get("context") or "?"
+        url = status.get("target_url") or ""
         try:
-            steps = fetch_job_steps(entry["url"])
+            steps = fetch_job_steps(url)
         except Exception as e:  # noqa: BLE001 - a log we cannot read is not fatal
-            entry["error"] = f"could not read logs: {e}"
+            jobs.append(
+                {
+                    "context": context,
+                    "url": url,
+                    "steps": [],
+                    "error": f"could not read logs: {e}",
+                }
+            )
             continue
 
-        failing = failing_steps(steps)
-        if not failing:
-            entry["error"] = "no step reported a nonzero return code"
-            continue
-
-        for name, code, text in failing:
-            errors = extract_step_errors(text, max_diagnostics)
-            step = {"name": name, "exit_code": code, "kind": errors["kind"]}
-
-            container = extract_container(text)
-            step["container"] = container
-
-            if errors["kind"] == "test":
-                signatures = errors["signatures"]
-                step["tests_failed"] = errors["total"]
-                step["retry"] = retry_note(code)
-                step["signatures_total"] = len(signatures)
-                step["signatures"] = [
-                    {"message": message, "count": count}
-                    for message, count in signatures.most_common(max_signatures)
-                ]
-                hint_texts.update(signatures)
-
-                invocation = extract_invocation(text)
-                for line in errors["all_items"]:
-                    test = test_name_of(line)
-                    test_entry = rollup.setdefault(
-                        test,
-                        {
-                            "status": line.split(None, 1)[0],
-                            "failures": [],
-                            "reasons": set(),
-                        },
-                    )
-                    # The reason is what says how to act; the status word does
-                    # not distinguish a memory kill from a genuine error
-                    if reason := re.search(r"FAILED \(([^)]*)\)", line):
-                        test_entry["reasons"].add(reason.group(1))
-                    test_entry["failures"].append(
-                        Failure(
-                            job=entry["context"],
-                            command=reproduce_command(invocation, test),
-                            mode=mode_identity(invocation),
-                            container=container,
-                        )
-                    )
-            else:
-                step["diagnostics"] = errors["items"]
-                step["diagnostics_total"] = errors["total"]
-                hint_texts.update(errors["all_items"])
-
-            entry["steps"].append(step)
+        jobs.append(
+            collect_job_errors(
+                context, url, steps, rollup, hint_texts, max_diagnostics, max_signatures
+            )
+        )
 
     return {
         "jobs": jobs,
@@ -801,8 +913,45 @@ def collect_errors(
     }
 
 
-def print_errors(collected: dict, max_failures: int) -> None:
-    """Print the collected build diagnostics, error clusters and test rollup."""
+def collect_one_job(
+    job_url: str,
+    steps: Sequence[tuple],
+    env: dict,
+    max_diagnostics: int,
+    max_signatures: int,
+) -> dict:
+    """
+    Gather the findings of a single job, in the shape print_errors expects.
+
+    Reporting on one job is the case where CIVET is reached by a job URL, which
+    carries no pull request or commit to look the event up by.
+    """
+    rollup: dict = {}
+    hint_texts: set = set()
+    entry = collect_job_errors(
+        env.get("CIVET_RECIPE_NAME") or "?",
+        job_url,
+        steps,
+        rollup,
+        hint_texts,
+        max_diagnostics,
+        max_signatures,
+    )
+    return {
+        "jobs": [entry],
+        "rollup": rollup,
+        "hints": hints_for(sorted(hint_texts)),
+        "jobs_not_read": 0,
+    }
+
+
+def print_errors(collected: dict, max_failures: int, label_jobs: bool = True) -> None:
+    """
+    Print the collected build diagnostics, error clusters and test rollup.
+
+    Pass label_jobs=False when the caller has already named the job, as the
+    single-job report does when it prints the event the job belongs to.
+    """
     for job in collected["jobs"]:
         # A test step with no recognized error signature has nothing to add
         # here; its tests are reported in the rollup below
@@ -814,7 +963,8 @@ def print_errors(collected: dict, max_failures: int) -> None:
         if not shown and "error" not in job:
             continue
 
-        print(f"\n{job['context']}  {job['url']}")
+        if label_jobs:
+            print(f"\n{job['context']}  {job['url']}")
         if error := job.get("error"):
             print(f"  {error}")
 
@@ -873,30 +1023,74 @@ def print_errors(collected: dict, max_failures: int) -> None:
         )
 
 
-def print_job_log(job_url: str, step: Optional[str], lines: int) -> None:
+def print_step_list(job_url: str, steps: Sequence[tuple]) -> None:
     """
-    Print a bounded tail of one step's log, or list the steps.
+    List a job's steps and their sizes.
 
-    Listing first keeps the caller from pulling a multi-megabyte log to find
-    out which step it wanted.
+    Sizes are what say whether a step can be printed at all, so they come
+    before any request for its contents.
     """
-    steps = fetch_job_steps(job_url)
+    print(f"steps in {job_url} (pass --step NAME to read one):")
+    for name, text in steps:
+        print(f"  {name}  ({len(text) / 1024:.0f} KB)")
 
-    if step is None:
-        print(f"steps in {job_url} (pass --step NAME for a tail):")
-        for name, text in steps:
-            print(f"  {name}  ({len(text) / 1024:.0f} KB)")
-        return
 
+def grepped_lines(body: Sequence[str], pattern: str, context: int) -> List[int]:
+    """Get the indices of the lines matching a pattern, plus their context."""
+    regex = re.compile(pattern)
+    keep: set = set()
+    for i, line in enumerate(body):
+        if regex.search(line):
+            keep.update(range(max(0, i - context), min(len(body), i + context + 1)))
+    return sorted(keep)
+
+
+def print_step_log(
+    steps: Sequence[tuple],
+    step: str,
+    lines: int,
+    pattern: Optional[str],
+    context: int,
+) -> None:
+    """
+    Print the part of one step's log that was asked for, bounded to 'lines'.
+
+    A tail is the wrong tool for a test failure: the TestHarness prints each
+    failure where it happens and keeps running thousands more tests, so the
+    detail sits in the middle of the log and no affordable tail reaches it.
+    That is what the pattern is for. Either way at most 'lines' lines are
+    printed, because a whole step can be several megabytes.
+    """
     matches = [(n, t) for n, t in steps if step in n]
     if not matches:
         available = ", ".join(n for n, _ in steps)
         raise GitHubError(f"No step matching '{step}'. Available: {available}")
 
     for name, text in matches:
-        tail = text.splitlines()[-lines:]
-        print(f"--- {name} (last {len(tail)} lines) ---")
-        print("\n".join(tail))
+        body = text.splitlines()
+
+        if not pattern:
+            tail = body[-lines:]
+            print(f"--- {name} (last {len(tail)} of {len(body)} lines) ---")
+            print("\n".join(tail))
+            continue
+
+        keep = grepped_lines(body, pattern, context)
+        shown = keep[:lines]
+        print(
+            f"--- {name} ({len(keep)} of {len(body)} lines match "
+            f"'{pattern}', showing {len(shown)}) ---"
+        )
+        previous = None
+        for i in shown:
+            # A gap in the kept indices is a jump in the log, and hiding it
+            # would make unrelated lines read as consecutive
+            if previous is not None and i != previous + 1:
+                print("...")
+            print(body[i])
+            previous = i
+        if len(keep) > len(shown):
+            print(f"... {len(keep) - len(shown)} more matching line(s); raise --lines")
 
 
 def load_recipe_graph(recipes_dir: str) -> Optional[dict]:
@@ -1143,6 +1337,13 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="Report on a commit instead of a pull request, which is what makes "
         "push events on next and devel reportable",
     )
+    target.add_argument(
+        "--job",
+        type=str,
+        metavar="JOB_URL",
+        help="Report on one CIVET job named by its URL. Reads that job's logs "
+        "and reports which event and commit it belongs to",
+    )
     parser.add_argument(
         "--repo",
         type=str,
@@ -1197,21 +1398,35 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help=f"With --errors, error signatures per step (default: {DEFAULT_MAX_SIGNATURES})",
     )
     parser.add_argument(
-        "--job-log",
-        type=str,
-        metavar="JOB_URL",
-        help="List the step logs of a CIVET job instead of reporting failures",
+        "--list-steps",
+        action="store_true",
+        help="With --job, list the job's steps and their sizes",
     )
     parser.add_argument(
         "--step",
         type=str,
-        help="With --job-log, print a tail of the step whose name contains this",
+        help="With --job, print the log of the step whose name contains this",
+    )
+    parser.add_argument(
+        "--grep",
+        type=str,
+        metavar="PATTERN",
+        help="With --step, print the lines matching this regular expression "
+        "instead of a tail, which is the only way to reach a failure in the "
+        "middle of a large log",
+    )
+    parser.add_argument(
+        "--context",
+        type=int,
+        default=0,
+        help="With --grep, lines of context to print around each match, 0 by default",
     )
     parser.add_argument(
         "--lines",
         type=int,
-        default=100,
-        help="With --step, how many trailing lines to print (default: 100)",
+        default=DEFAULT_MAX_LOG_LINES,
+        help="With --step, the most lines to print, either as a tail or as "
+        f"matches (default: {DEFAULT_MAX_LOG_LINES})",
     )
     return parser.parse_args(argv)
 
@@ -1220,8 +1435,32 @@ def main(argv: Sequence[str]) -> int:
     """Perform the main action; run from __main__."""
     args = parse_args(argv)
 
-    if args.job_log:
-        print_job_log(args.job_log, args.step, args.lines)
+    if args.job:
+        # Fetched once and reused, because a job's whole log is a single
+        # tarball download regardless of which part of it is wanted
+        try:
+            steps = fetch_job_steps(args.job)
+        except Exception as e:  # noqa: BLE001 - reported, not raised as a trace
+            raise GitHubError(
+                f"could not read the logs of {args.job}: {e}\n"
+                'A private ("controlled apps") recipe answers 403 and can only '
+                "be read in the CIVET web UI"
+            ) from e
+
+        if args.list_steps:
+            print_step_list(args.job, steps)
+        elif args.step:
+            print_step_log(steps, args.step, args.lines, args.grep, args.context)
+        else:
+            env = extract_job_info(steps)
+            print_job_header(args.job, env)
+            print_errors(
+                collect_one_job(
+                    args.job, steps, env, args.max_diagnostics, args.max_signatures
+                ),
+                args.max_failures,
+                label_jobs=False,
+            )
         return 0
 
     slug = resolve_repo(args.repo, args.upstream_remote)

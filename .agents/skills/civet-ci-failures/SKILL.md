@@ -1,14 +1,14 @@
 ---
 name: civet-ci-failures
 description: >-
-  Use when investigating why CIVET CI failed on a pull request for MOOSE or a downstream app:
-  which jobs failed, which tests inside them, why, and how to reproduce a failure locally. Reads
-  GitHub commit statuses and CIVET job logs through the gh CLI, so it works without CIVET
-  credentials. Also covers how to read the result, because raw job counts and GitHub's own
-  rollup state are both misleading.
+  Use when investigating why CIVET CI failed for MOOSE or a downstream app, whether the starting
+  point is a pull request, a commit, or a single CIVET job URL: which jobs failed, which tests
+  inside them, why, and how to reproduce a failure locally. Reads GitHub commit statuses and CIVET
+  job logs through the gh CLI, so it works without CIVET credentials. Also covers how to read the
+  result, because raw job counts and GitHub's own rollup state are both misleading.
 ---
 
-# CIVET CI failures on a pull request
+# CIVET CI failures
 
 ## The tool
 
@@ -26,6 +26,7 @@ scripts/civet_pr_failures.py --pr 33645 --errors    # also read logs: build erro
 scripts/civet_pr_failures.py --pr 33645 --errors --recipes ~/projects/civet_recipes
 scripts/civet_pr_failures.py --pr 33645 --json      # same findings as JSON; implies --errors
 scripts/civet_pr_failures.py --sha <commit>         # a commit rather than a PR
+scripts/civet_pr_failures.py --job <civet job url>  # a single job, named by its URL
 ```
 
 CIVET attaches its statuses to the commit, not to the pull request, so `--sha` is enough on its own
@@ -39,9 +40,55 @@ never rely on `gh`'s own default repository resolution.
 `--recipes` is optional and points at a `civet_recipes` checkout. Without it, a pending job that
 can never run is indistinguishable from one that is merely queued.
 
-To read a log, use `--job-log <civet job url>` for a listing of steps with sizes, then
-`--job-log <url> --step <name> --lines N` for a bounded tail. Never pipe a whole job tarball into
-context; a single step can be several megabytes.
+## Start from a job URL when that is what you were given
+
+A job URL is a complete starting point on its own. `--job` reads that job's logs and reports the
+same per-test findings `--errors` gives, plus what the URL does not carry: the recipe, the event,
+the pull request, and both commits.
+
+```bash
+scripts/civet_pr_failures.py --job https://civet.inl.gov/job/4180979/
+```
+
+```
+Parallel sweep odds (weekly extra)  https://civet.inl.gov/job/4180979/
+  pull request 32394 (Pull request alternatives)
+  head lindsayad/moose:fix-ptscotch-test @ 853397b7b989
+  base idaholab/moose:devel @ 92670c42317d
+  04_Test_-p_13 (exit 128, 1 tests failed, 1 error signature(s), no retry attempted)
+    x1  The client timed out during initialization
+
+unique failing tests: 1
+  controls/web_server_control.connect_port  [EXIT CODE 1 != 0]
+    cd test && ./run_tests -p 13 --re '^controls/web_server_control\.connect_port$'
+```
+
+Read the header before the failure. The recipe name says what the job was running, which is context
+the failure line does not carry: a sweep of odd process counts, or a weekly extra, exercises a mode
+the rest of the matrix does not. Treat that as something to suspect and then confirm. It does not
+establish that the failure is specific to that mode, because another recipe may be running a
+different mode that fails the same test.
+
+Confirming it takes the whole event, which one job cannot give you. Pass the pull request number
+from the header to `--pr` to see which other jobs failed the same test and in which modes, and
+whether the branch is implicated at all.
+
+## Reading a raw log
+
+Only for what the report does not cover. Start with `--list-steps` for sizes, then read one step:
+
+```bash
+scripts/civet_pr_failures.py --job <url> --list-steps
+scripts/civet_pr_failures.py --job <url> --step 04_Test --grep 'Failed to bind' --context 5
+scripts/civet_pr_failures.py --job <url> --step 01_Build --lines 200
+```
+
+Use `--grep`, not `--lines`, for a test failure. The TestHarness prints each failure where it
+happens and then runs thousands more tests, so the detail sits in the middle of the log and no
+affordable tail reaches it. `--lines` bounds both modes and defaults to 100, and grep output marks
+elided regions with `...`, so a printed block is contiguous only where it says it is.
+
+Never pipe a whole job tarball into context; a single step can be several megabytes.
 
 ## Reading the result correctly
 
@@ -69,6 +116,12 @@ A TestHarness failure line carries a status word and a reason: `ERROR <test> FAI
 MEMORY)`. The status word is `ERROR`; the actionable part is the reason. Reporting the status alone
 hides memory kills and timeouts behind a generic label.
 
+The signature is the message the application printed, which is not always the cause. A MOOSE error
+block reports the failure the run died of, and a failure inside a thread or a subprocess started
+earlier can be printed before that block and then subsumed by it. When a signature reads as a
+timeout, a missing connection, or anything else that is plainly a consequence, `--grep` the same
+step for what came before it rather than treating the signature as the diagnosis.
+
 Cluster before you report. A single defect surfaces in many tests: one Kokkos error
 (`Retrieving a Kokkos function as abstract type is currently not supported for GPU`) accounted for
 113 failing tests across five test steps. The number of distinct error signatures is what says how
@@ -84,11 +137,14 @@ many things went wrong; the number of failing tests does not.
   base-branch failure.
 
 Build failures only ever appear in the logs. The results database never sees them, because the job
-dies before results are stored — so `--errors` is the only route to them.
+dies before results are stored — so `--errors` (or `--job`, which always reads them) is the only
+route to them.
 
 ## Known remediations by reason
 
-The report attaches these to the test they apply to. Correct them as they prove wrong.
+The report attaches these to the test they apply to. Correct them as they prove wrong. Rows marked
+*(hypothesis)* were reasoned out rather than confirmed against a real failure, so check one before
+you act on it and rewrite the row with what you find.
 
 | Reason | What it means and what to do |
 | --- | --- |
@@ -97,9 +153,9 @@ The report attaches these to the test they apply to. Correct them as they prove 
 | `EXPECTED OUTPUT MISSING` | `RunApp`'s `expect_out` pattern did not match. Update `expect_out`, or fix the output it describes. |
 | `EXPECTED OUTPUT NOT FOUND` | Comes only from `PetscJacobianTester` and `TaoGradientTester`, which grep for a specific diagnostic line. The run usually died before PETSc/TAO printed it — look for the real error earlier in the same output. Nothing to do with gold files. |
 | `EXPECTED ERROR MISSING` | The error text a `RunException` test expects has changed. Update `expect_err`. |
-| `curl: (N)` / `FATAL:` in a container build | A download or the container build failed. Spurious; re-run. |
-| `fatal: unable to access` / `Empty reply from server` | A git clone or fetch failed during a build. Spurious; re-run. |
-| `fatal: remote error` | The ref being fetched is not on the remote, usually a submodule bumped to a commit that was never pushed upstream. Push it, then re-run. |
+| `curl: (N)` / `FATAL:` in a container build | *(hypothesis)* A download or the container build failed. Spurious; re-run. Generalized from a single upstream outage. |
+| `fatal: unable to access` / `Empty reply from server` / `Could not resolve host` | A git clone or fetch failed during a build, so the remote was never reached. Spurious as far as the branch is concerned. Check which host the failing URL names: submodules hosted outside `github.com` and `github.inl.gov` are outside MOOSE's control, and when one of those hosts is down a re-run only succeeds once it recovers. |
+| `fatal: remote error` | *(hypothesis)* The ref being fetched is not on the remote, usually a submodule bumped to a commit that was never pushed upstream. Push it, then re-run. The remedy was confirmed once in practice; the pattern itself has never been matched against real output. |
 
 Which cause the report shows is decided by precedence: a real compiler or linker diagnostic wins
 outright, then a failure of the surrounding machinery, then the build system's own complaint. Lines
@@ -118,6 +174,9 @@ synthesized from the step name. That matters: real invocations carry flags like
 `--compute-device=cuda`, `--min-parallel 7` and `--only-tests-that-require=mfem` that cannot be
 guessed. When a test failed in several modes, the simplest failing invocation is reported, and the
 mode count says whether the failure is specific to one way of running.
+
+These commands may not have been run locally to confirm they reproduce the failure they came from.
+Offer one as the invocation the step logged, not as a command known to fail.
 
 It also reports the container the step ran in, read from the step header. Containers are recorded
 per step rather than per job — a fetch step commonly runs in a base image while the steps that build
@@ -165,6 +224,15 @@ rather than waiting.
   all is invisible.
 - `--recipes` matches jobs to recipes by display name, which can appear in more than one branch of
   the recipes tree, so it errs toward reporting a job as blocked.
+- `--job` reads one job in isolation, so it cannot tell a cascade from a cause, or an isolated
+  failure from a broad one. Follow it with `--pr` on the number it reports.
+- The recipe name, pull request and commits `--job` reports come from the CIVET environment each
+  step dumps in its header. A job whose logs are unreadable, private, or truncated before that dump
+  reports them as `?`. `--job` has only been run against a pull request job; a push event to `next`
+  has no `CIVET_PR_NUM`, and that path is untested.
+- `scripts/civet_pr_failures.py` has no unit tests, unlike the rest of `python/TestHarness`. Its
+  report has been checked by hand against real events; its behaviour on an event shape not seen
+  during that checking is unknown.
 
 ## When something does not fit
 
@@ -180,43 +248,3 @@ cannot settle on its own:
 
 Say what you found, what you could not determine, and what you would do next. Do not invent a cause
 for a failure you cannot read, and do not apply a remedy on a hunch.
-
-## Confidence in what is written here
-
-This skill was written from one extended investigation of a single pull request. Parts of it are
-verified and parts are hypothesis; the difference matters if something here contradicts what you
-observe.
-
-Verified against source, or stated directly by a MOOSE developer:
-
-- The `fatal: unable to access` row and the diagnostic precedence above, both checked against a
-  container build that failed cloning a dependency.
-- Reporting on a commit with `--sha`, and the per-step container extraction, both checked against a
-  push event to `next`.
-- The three failure categories, and that MOOSE's base branch is rarely red.
-- `min_slots` as the remedy for `KILLED: OVER MEMORY`.
-- `EXPECTED OUTPUT MISSING` originating in `RunApp`'s `expect_out`, and `EXPECTED OUTPUT NOT FOUND`
-  coming only from `PetscJacobianTester` and `TaoGradientTester` — both read in
-  `python/TestHarness/testers/`.
-- That pushing to a PR cancels the in-flight event and stops its running jobs, read in the CIVET
-  server and client source.
-- The four reading traps. Each one produced a confidently wrong conclusion before being caught.
-
-Inferred, not verified. Treat as a starting hypothesis and correct it in place:
-
-- `TIMEOUT` as a slow-build artifact rather than a slow test. Drawn from which jobs one PR's
-  timeouts landed in (`-O0` coverage and `METHOD=dbg` builds), not from timing measurements.
-- `EXPECTED ERROR MISSING` mapping to `expect_err`. Symmetric with the `expect_out` case, but not
-  read in the tester source.
-- The `curl:` / `FATAL:` container-build row, generalized from a single upstream outage.
-- The `fatal: remote error` row. The remedy was confirmed once in practice — pushing the submodule
-  commit cleared the failure — but the pattern itself was never matched against real output,
-  because the job carrying it was re-run before it could be tested.
-
-Not exercised at all:
-
-- The reproduce commands are extracted from the invocation each step logged, and were never run
-  locally to confirm they reproduce the failure.
-- `scripts/civet_pr_failures.py` has no unit tests, unlike the rest of `python/TestHarness`. Its
-  report has been checked by hand against real events; its behaviour on an event shape not seen
-  during that investigation is unknown.
