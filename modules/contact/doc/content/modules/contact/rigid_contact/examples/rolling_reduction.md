@@ -75,8 +75,8 @@ direction than the shipped default would let a user re-enable VLC.
 ## Boundary conditions and load
 
 Two symmetry-plane
-[DirichletBCs](/BCs/DirichletBC.md), plus a
-[FunctionDirichletBC](/BCs/FunctionDirichletBC.md) on the back face that
+[DirichletBCs](/bcs/DirichletBC.md), plus a
+[FunctionDirichletBC](/bcs/FunctionDirichletBC.md) on the back face that
 ramps `disp_z` from $0$ to `push_distance = 4` over the run --- long
 enough to feed the plate past both rollers with margin:
 
@@ -106,15 +106,3 @@ transient contact events (plate-front first touch on each roller).
                `plastic_strain_mag` on the deformed shape rises from 0
                (dark blue) to $\sim 1.3$ (red) in two bands corresponding
                to each roller's pass.
-
-## Suggested visualization
-
-- Cutaway of the deformed plate with `plastic_strain_mag` on a
-  diametral slice, showing the accumulated shear bands under each
-  roller pass.
-- `max_lm_roll1` and `max_lm_roll2` versus time --- the two peak
-  contact-pressure histories rise as the plate front encounters each
-  roller and settle to a quasi-steady value once steady rolling is
-  established.
-- Contour of `normal_lm_roll1` / `normal_lm_roll2` on the top face to
-  visualize the elongated contact footprints along the axial direction.

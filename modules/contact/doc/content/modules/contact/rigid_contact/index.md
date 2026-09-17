@@ -28,12 +28,16 @@ contactor's geometry is available in closed form on both sides of the
 interface, the ("penetrated") branch of the NCP produces a well-defined
 Jacobian without needing to keep an explicit active set.
 
+## Force control
+
 An optional force-control layer replaces the contactor's Cartesian
 translation with a scalar unknown and drives it with an integrated reaction
 constraint (see [RigidBodyLoadControl.md]).  The same layer supports the
 Uzawa-style outer solver ([UzawaTransient.md]) and a contact-region
 warm-start predictor ([RigidBodyContactPredictor.md]) that together are
 required for the hardest force-controlled inputs.
+
+## Rigid contact syntax block
 
 The user-facing setup is almost always through a single
 [`[RigidContact]`](syntax/RigidContact/index.md) sub-block that expands

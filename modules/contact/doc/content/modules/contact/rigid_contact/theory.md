@@ -55,7 +55,7 @@ translation and rotation state:
   as MOOSE `Function`s of time or as unknowns coupled from a scalar
   variable.  The scalar-variable option is what makes force control
   possible --- see below.
-- (Placeholder for future rotation support.)
+- Similar rigid rotations could be added in the future, if required. 
 
 Three concrete contactors ship today:
 
