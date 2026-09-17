@@ -11,7 +11,7 @@
 
 #include "OptimizationData.h"
 
-class TransientSyntheticDataCreator : public OptimizationDataTempl<GeneralReporter>
+class TransientSyntheticDataCreator : public OptimizationData
 {
 public:
   static InputParameters validParams();

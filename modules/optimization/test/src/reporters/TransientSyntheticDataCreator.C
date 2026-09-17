@@ -14,7 +14,7 @@ registerMooseObject("OptimizationTestApp", TransientSyntheticDataCreator);
 InputParameters
 TransientSyntheticDataCreator::validParams()
 {
-  InputParameters params = OptimizationDataTempl<GeneralReporter>::validParams();
+  InputParameters params = OptimizationData::validParams();
 
   params.addClassDescription(
       "Fills optimization data from a forward transient simulation using "
@@ -29,7 +29,7 @@ TransientSyntheticDataCreator::validParams()
 }
 
 TransientSyntheticDataCreator::TransientSyntheticDataCreator(const InputParameters & parameters)
-  : OptimizationDataTempl<GeneralReporter>(parameters)
+  : OptimizationData(parameters)
 {
   std::vector<Real> measurement_times_for_all_points;
   if (isParamValid("measurement_times_for_all_points"))

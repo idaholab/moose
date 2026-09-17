@@ -1,7 +1,5 @@
 # OptimizationReporter
 
-!syntax description /OptimizationReporter/OptimizationReporter
-
 ## Overview
 
 The `OptimizationReporter` sets up a reporter used for communicating data between the optimization executioner and the transfers to the sub-app forward and adjoint solves.  Only one `OptimizationReporter` is allowed per main-app.
