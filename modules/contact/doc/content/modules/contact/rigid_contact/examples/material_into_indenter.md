@@ -80,13 +80,15 @@ Key knobs:
 
 !listing modules/contact/examples/rigid/complete/material_into_indenter.i
 
-## Suggested visualization
+## Results
 
-- Contour of `plastic_strain_mag` on a diametral cut through the
-  indent, showing the characteristic Vickers plastic zone shape.
-- The `depth` postprocessor (the load-control scalar $s$) versus
-  `force` --- an indentation load-depth curve.
-- Contour of `normal_lm` on the contact face, illustrating the
-  square patch produced by the Vickers pyramid.
-
-Rendered images will be added in a follow-up commit.
+!media media/contact/rigid_contact/material_into_indenter.png
+       id=fig:material_into_indenter
+       caption=Vickers indentation into the finite-strain J2 body. The
+               translucent shape above the material is the STL Vickers
+               pyramid at the current indenter position; the colored
+               top face of the deformable block shows `stress_zz` and
+               resolves the characteristic four-sided imprint left by
+               the pyramid's edges, with compressive bands under the
+               loaded faces (blue) and lateral pile-up regions (red)
+               adjacent to the edges.

@@ -47,12 +47,17 @@ rigid-contact action:
 
 !listing modules/contact/examples/rigid/ld-inelastic/hertz_inelastic_finite_3d.i
 
-## Suggested visualization
+## Results
 
-- Contour of `plastic_strain_mag` at the last time step, showing the
-  characteristic hemispherical plastic zone under the indent.
-- Contour of `normal_lm` on the contact face --- the pressure
-  distribution is qualitatively similar to Hertz early on and flattens
-  as plasticity develops.
-
-Rendered images will be added in a follow-up commit.
+!media media/contact/rigid_contact/ld_inelastic_disp.png
+       id=fig:ld_inelastic_disp
+       caption=Displacement-controlled J2 plasticity results.  Left:
+               `plastic_strain_mag` on the deformed quarter-hemisphere,
+               showing the small localized plastic zone (peak
+               $\sim 5.7\times 10^{-2}$) directly under the indenter tip
+               while the rest of the body remains elastic (dark blue).
+               Right: `contactor_force` vs `contactor_displacement`,
+               transitioning from a near-Hertzian slope at first
+               contact to a softer, roughly linear plastic branch as
+               yielding spreads.  Run at `sphere_refinement = 5`
+               (finer than the shipped default of 3).

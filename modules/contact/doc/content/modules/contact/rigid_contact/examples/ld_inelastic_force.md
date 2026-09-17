@@ -58,13 +58,20 @@ case's inner solve.
 
 !listing modules/contact/examples/rigid/ld-inelastic-force/hertz_inelastic_finite_3d_force.i
 
-## Suggested visualization
+## Results
 
-- `depth` (the load-control scalar) versus `force` --- a load-depth
-  curve that transitions from Hertzian to a hardening plastic slope.
-- Contour of `plastic_strain_mag` at a few sync times to show the
-  evolving plastic zone.
-- Contour of `normal_lm` on the contact face --- the pressure profile
-  flattens as the patch spreads and the material hardens.
-
-Rendered images will be added in a follow-up commit.
+!media media/contact/rigid_contact/ld_inelastic_force.png
+       id=fig:ld_inelastic_force
+       caption=Force-controlled J2 plasticity results.  Left:
+               `plastic_strain_mag` on the deformed quarter-hemisphere;
+               the plastic zone (peak $\sim 5.7\times 10^{-2}$, colored
+               fringe) is markedly larger than in the
+               displacement-controlled companion because the prescribed
+               reaction ramp drives the indenter well past first yield.
+               Right: `contactor_force` (the load-control scalar's
+               target) plotted against `contactor_displacement` (the
+               indenter's advance along the load axis).  The relation
+               is quasi-linear once past initial yield, reflecting
+               steady hardening at the growing plastic patch.  Run at
+               `sphere_refinement = 5` (finer than the shipped default
+               of 3).

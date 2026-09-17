@@ -51,13 +51,17 @@ executioner uses PETSc `SNESVINEWTONSSLS` to enforce $\lambda \ge 0$.
 
 !listing modules/contact/examples/rigid/elastic/hertz_elastic_3d.i
 
-## Suggested visualization
+## Results
 
-- Contour of `normal_lm` on the contact face (sideset `100`) at the last
-  time step.  This shows the disk-shaped contact patch predicted by
-  Hertz theory and the pressure falloff toward its edge.
-- Contour of the vertical stress `stress_yy` on a diametral cut.
-
-Rendered images will be added in a follow-up commit; the input as it ships
-runs in a couple of seconds on a workstation and produces both fields in
-the ExodusII output.
+!media media/contact/rigid_contact/elastic_hertz_3d.png
+       id=fig:elastic_hertz
+       caption=Elastic Hertz results at end_time = 1.  Left: `stress_zz`
+               on the deformed quarter-hemisphere, with the entire model
+               in gentle compression (dark red) and stress concentrated
+               against the rigid indenter at the bottom pole (blue).
+               Right: numerical `contactor_force` (red) plotted against
+               the analytic Hertz reference `hertz_force_analytic`
+               (green) as a function of `contactor_displacement`, showing
+               close agreement over the full load history.  Run at
+               `sphere_refinement = 5` (finer than the shipped default of
+               3) to converge the Hertz peak.
