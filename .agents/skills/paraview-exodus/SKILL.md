@@ -11,26 +11,31 @@ series into a video. Assumes `pvpython` and `ffmpeg` are on the PATH.
 
 ## How to use it
 
-The entry point is `visualize_exodus.sh` in this skill's directory. It runs the
-renderer and, when the file has multiple timesteps, encodes the frames into MP4.
+Two scripts in `python/paraview_exodus` of the MOOSE repository do the work:
+`render_exodus.py` renders the frames under `pvpython`, and `visualize_exodus.sh`
+runs the renderer and then encodes the frames into MP4 when the file has multiple
+timesteps. `visualize_exodus.sh` is the entry point, so point `V` at it, using
+`$MOOSE_DIR` or the path to the MOOSE checkout in play:
 
 ```bash
+V=$MOOSE_DIR/python/paraview_exodus/visualize_exodus.sh
+
 # Most basic — color by the first non-ID field, default viridis colormap, white background
-./visualize_exodus.sh path/to/result.e
+$V path/to/result.e
 
 # Specify field and colormap
-./visualize_exodus.sh result.e --field temperature --colormap coolwarm
+$V result.e --field temperature --colormap coolwarm
 
 # Custom background and resolution
-./visualize_exodus.sh result.e --field disp_x --background "#202020" --resolution 1280x720
+$V result.e --field disp_x --background "#202020" --resolution 1280x720
 
 # Fit the frame to the mesh shape (good for long/thin or wide domains)
-./visualize_exodus.sh result.e --field disp --auto-aspect
+$V result.e --field disp --auto-aspect
 ```
 
-The wrapper locates `render_exodus.py` next to itself, so it can be invoked from
-any working directory by path. Outputs are written to the current working
-directory using the input's basename unless `--output` is given.
+The wrapper locates `render_exodus.py` next to itself, so invoke it by path from
+whatever directory holds the exodus file. Outputs are written to the current
+working directory using the input's basename unless `--output` is given.
 
 `render_exodus.py` is also usable on its own (`pvpython render_exodus.py ...`)
 for a single image or a frame series without the ffmpeg step.
@@ -38,7 +43,7 @@ for a single image or a frame series without the ffmpeg step.
 **Before rendering an unfamiliar file, list its fields** so you pick a real one:
 
 ```bash
-./visualize_exodus.sh result.e --list-fields
+$V result.e --list-fields
 ```
 
 ## Behavior
@@ -108,3 +113,6 @@ names like `"Cool to Warm (Extended)"` or `"Black-Body Radiation"` also work.
 - To pass extra ffmpeg flags (codec, quality), append them after `--`, e.g.
   `-- -crf 18 -c:v libx264`.
 - Report the final output path(s) to the user when done.
+- `python/doc/content/python/paraview_exodus.md` is the user-facing page for
+  these scripts, and `python/paraview_exodus/tests` holds their unit tests. A
+  change to either script belongs with an update to both.

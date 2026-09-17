@@ -16,21 +16,29 @@ import argparse
 import os
 import sys
 
-from paraview.simple import (
-    OpenDataFile,
-    Show,
-    ColorBy,
-    GetActiveViewOrCreate,
-    GetColorTransferFunction,
-    GetOpacityTransferFunction,
-    GetAnimationScene,
-    SaveScreenshot,
-    SaveAnimation,
-    ResetCamera,
-    Render,
-    GetActiveCamera,
-    GetScalarBar,
-)
+# ParaView is needed for rendering, so its import is optional here: the pure
+# helpers below stay importable under a plain python interpreter, which is how
+# they are unit tested. main() reports a usable error when ParaView is absent.
+try:
+    from paraview.simple import (
+        OpenDataFile,
+        Show,
+        ColorBy,
+        GetActiveViewOrCreate,
+        GetColorTransferFunction,
+        GetOpacityTransferFunction,
+        GetAnimationScene,
+        SaveScreenshot,
+        SaveAnimation,
+        ResetCamera,
+        Render,
+        GetActiveCamera,
+        GetScalarBar,
+    )
+
+    HAVE_PARAVIEW = True
+except ImportError:
+    HAVE_PARAVIEW = False
 
 # Camera orientations as (azimuth, elevation) applied to the default front view
 # (looking along -z, up +y). 'auto' resolves to 'iso' for 3D, 'front' for 2D.
@@ -443,6 +451,11 @@ def main():
         "--list-fields", action="store_true", help="List available fields and exit."
     )
     args = p.parse_args()
+
+    if not HAVE_PARAVIEW:
+        sys.exit(
+            "ERROR: paraview.simple is unavailable. Run this script with pvpython."
+        )
 
     if not os.path.isfile(args.input):
         sys.exit("ERROR: input file not found: %s" % args.input)
