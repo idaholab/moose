@@ -2878,17 +2878,12 @@ SubChannel1PhaseProblem::externalSolve()
     V("Iteration:  " + std::to_string(P_it));
     V("Maximum iterations: " + std::to_string(_P_maxit));
   }
-  if (P_error > _P_tol)
-  {
-    _console << "Reached maximum number of pressure iterations" << std::endl;
-    _converged = false;
-  }
   // Cache only the final iteration status. Earlier outer iterations may fail their thermal
   // tolerance and subsequently recover.
   const bool pressure_converged = P_error <= _P_tol;
   if (!pressure_converged)
   {
-    _console << "Reached maximum number of axial pressure iterations" << std::endl;
+    _console << "Reached maximum number of pressure iterations" << std::endl;
   }
   _converged = pressure_converged && temperature_converged;
   // update old crossflow matrix
