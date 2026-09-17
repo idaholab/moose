@@ -472,6 +472,11 @@ private:
    */
   void buildCouplingInformation();
 
+  /**
+   * Send inactive node IDs to their owning processors so the corresponding LM DoFs can be zeroed.
+   */
+  void sendInactiveNodesToOwners(std::unordered_set<dof_id_type> & inactive_node_ids) const;
+
   /// The Moose app
   MooseApp & _app;
 
