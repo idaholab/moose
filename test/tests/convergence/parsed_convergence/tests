@@ -41,4 +41,11 @@
     expect_err = "The parameters 'symbol_names' and 'symbol_values' must have the same size"
     requirement = "ParsedConvergence objects shall report an error if the user supplies an inconsistent number of symbol names and values."
   []
+  [test_combination]
+    type = RunApp
+    input = 'test_combination.i'
+    expect_out = 'loose_conv: Converged due to absolute residual.*absolute tolerance \(0\.001\).*tight_conv: Converged due to absolute residual.*absolute tolerance \(1e-10\)'
+    requirement = 'The system shall allow multiple DefaultNonlinearConvergence objects to be combined via a ParsedConvergence for a single nonlinear system, with each object checking its own residual norm against its own configured tolerance.'
+    issues = '#33799'
+  []
 []

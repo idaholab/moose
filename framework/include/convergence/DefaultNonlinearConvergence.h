@@ -80,6 +80,10 @@ protected:
   const unsigned int _nl_max_pingpong;
   /// Current number of nonlinear ping-pong iterations for the current solve
   unsigned int _nl_current_pingpong;
+  /// Nonlinear relative step tolerance
+  const Real _nl_rel_step_tol;
+  /// Maximum number of residual (function) evaluations
+  const unsigned int _nl_max_funcs;
 
 private:
   /// Nonlinear maximum nonlinear iterations (modifiable by setMaximumIterations)
