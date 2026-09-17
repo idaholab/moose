@@ -412,8 +412,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
     // GrayLambertSurfaceRadiationBase returns one sideset-averaged net outward flux density.
     // It is therefore constant over all FaceInfo objects belonging to this CHT patch.
     const Real surface_radiation_flux =
-        _surface_radiation_uo &&
-                _surface_radiation_boundary_ids.count(_cht_boundary_ids[bd_index])
+        _surface_radiation_uo && _surface_radiation_boundary_ids.count(_cht_boundary_ids[bd_index])
             ? _surface_radiation_uo->getSurfaceHeatFluxDensity(_cht_boundary_ids[bd_index])
             : 0.0;
     const auto & bd_fi_container = _cht_face_info[bd_index];
@@ -456,8 +455,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
       // domain, so subtract the surface-to-surface radiation that bypasses the transparent fluid.
       const Real coupling_flux = source_flux - surface_radiation_flux;
       flux_container[fi->id()] =
-          flux_relaxation * coupling_flux +
-          (1 - flux_relaxation) * flux_container[fi->id()];
+          flux_relaxation * coupling_flux + (1 - flux_relaxation) * flux_container[fi->id()];
 
       // Integrate the source-domain and surface-radiation fluxes separately. This avoids counting
       // surface radiation twice when coupling fields are updated in both directions.
