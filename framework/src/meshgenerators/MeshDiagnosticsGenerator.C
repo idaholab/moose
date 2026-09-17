@@ -473,29 +473,27 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
 
       // Side is on the envelope, now check its nodes
       auto side = elem->side_ptr(i);
-      const auto & node_list = side->get_nodes();
-      for (unsigned int j = 0; j < side->n_nodes(); j++)
+      for (const auto & node : side->node_ref_range())
       {
-        const auto node = node_list[j];
-        if (checked_nodes_id.count(node->id()))
+        if (checked_nodes_id.count(node.id()))
           continue;
         // get vector of node's boundaries (in most cases it will only have one)
         std::vector<boundary_id_type> boundary_ids;
-        boundary_info.boundary_ids(node, boundary_ids);
+        boundary_info.boundary_ids(&node, boundary_ids);
         std::vector<boundary_id_type> intersection =
             findBoundaryOverlap(_watertight_boundaries, boundary_ids);
 
-        bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
+        bool no_specified_ids = boundary_info.n_boundary_ids(&node) == 0;
         bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
         if (!no_specified_ids && !specified_ids)
           continue;
 
-        std::string message = "Node " + std::to_string(node->id());
+        std::string message = "Node " + std::to_string(node.id());
         message += restrict_blocks ? " is on the boundary of the checked blocks"
                                    : " is on an external boundary of the mesh";
         message += ", but has not been assigned to ";
         message += no_specified_ids ? "a nodeset" : "one of the specified nodesets";
-        checked_nodes_id.insert(node->id());
+        checked_nodes_id.insert(node.id());
         if (num_nodes_without_nodeset < _num_outputs)
           _console << message << std::endl;
         else if (num_nodes_without_nodeset == _num_outputs)
