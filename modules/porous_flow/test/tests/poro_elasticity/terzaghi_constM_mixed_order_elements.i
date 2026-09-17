@@ -44,13 +44,14 @@
 # uz = the vertical displacement of the top (down is positive)
 # U = 1 - (8/\pi^2)\sum_{k=1}^{\infty} \frac{1}{(2k-1)^2} \exp(-(2k-1)^2 \pi^2 ct/(4 h^2))
 # A mixed-order element formulation is used in this test, second-order displacements and first-order pore pressure
+# A 3D mesh is used, with only one element in the x and y directions, and two elements in the z direction.
 
 [Mesh]
   type = GeneratedMesh
   dim = 3
   nx = 1
   ny = 1
-  nz = 10
+  nz = 2
   xmin = -1
   xmax = 1
   ymin = -1
@@ -332,7 +333,7 @@
   [dt]
     type = FunctionValuePostprocessor
     outputs = console
-    function = if(0.5*t<0.1,0.5*t,0.1)
+    function = '0.6'
   []
 []
 
@@ -340,18 +341,21 @@
   [andy]
     type = SMP
     full = true
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_package '
+    petsc_options_value = 'lu mumps'
   []
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
+  automatic_scaling = true
   start_time = 0
-  end_time = 10
+  end_time = 2.4
   [TimeStepper]
     type = PostprocessorDT
     postprocessor = dt
-    dt = 0.0001
+    dt = 0.6
   []
 []
 
