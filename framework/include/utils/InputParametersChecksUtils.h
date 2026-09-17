@@ -38,6 +38,9 @@ protected:
   /// @param param1 first parameter to check
   /// @param param2 second parameter to check
   void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
+  /// Check that only one of the parameters are set
+  /// @param params vector of parameters, only one should be set
+  void checkAtMostOneParamSetByUser(const std::vector<std::string> & params) const;
   /// Check that a parameter is set only if the first one is set to true
   /// @param param1 first parameter to check, check the second if true
   /// @param param2 second parameter to check, that should be set if first one is true
@@ -596,6 +599,34 @@ InputParametersChecksUtils<C>::checkParamsBothSetOrNotSet(const std::string & pa
     forwardParamError(param1,
                       "Parameters '" + param1 + "' and '" + param2 +
                           "' must be either both set or both not set.");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::checkAtMostOneParamSetByUser(
+    const std::vector<std::string> & params) const
+{
+  unsigned int num_set = 0;
+  for (const auto & param : params)
+    num_set += forwardIsParamSetByUser(param);
+
+  if (num_set <= 1)
+    return;
+
+  std::vector<std::string> params_set;
+  std::string first_set;
+  for (const auto & param : params)
+    if (forwardIsParamSetByUser(param))
+    {
+      params_set.push_back(param);
+      if (first_set.empty())
+        first_set = param;
+    }
+
+  forwardParamError(first_set,
+                    "Only one parameter of:\n" + Moose::stringify(params),
+                    "\nshould be set but:\n" + Moose::stringify(params_set),
+                    "\nhave been set.");
 }
 
 template <typename C>
