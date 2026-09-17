@@ -1902,6 +1902,30 @@ AutomaticMortarGeneration::msmStatistics()
   }
 }
 
+void
+AutomaticMortarGeneration::sendInactiveNodesToOwners(
+    std::unordered_set<dof_id_type> & inactive_node_ids) const
+{
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> inactive_nodes_to_send;
+  const auto my_pid = _mesh.processor_id();
+
+  for (const auto node_id : inactive_node_ids)
+  {
+    const auto owner_pid = _mesh.node_ptr(node_id)->processor_id();
+    if (owner_pid != my_pid)
+      inactive_nodes_to_send[owner_pid].push_back(node_id);
+  }
+
+  auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
+                                                   const std::vector<dof_id_type> & sent_data)
+  {
+    if (pid == _mesh.processor_id())
+      mooseError("Should not be communicating with self.");
+    inactive_node_ids.insert(sent_data.begin(), sent_data.end());
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), inactive_nodes_to_send, action_functor);
+}
+
 // The blocks marked with **** are for regressing edge dropping treatment and should be removed
 // eventually.
 //****
@@ -1995,6 +2019,9 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
     };
     TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
   }
+
+  sendInactiveNodesToOwners(inactive_node_ids);
+
   _inactive_local_lm_nodes.clear();
   for (const auto node_id : inactive_node_ids)
     _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
@@ -2074,13 +2101,19 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
   // Every proc has correct list of active local nodes, now take complement (list of inactive nodes)
   // and store to use later to zero LM DoFs on inactive nodes
-  _inactive_local_lm_nodes.clear();
+  std::unordered_set<dof_id_type> inactive_node_ids;
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(
              /*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
-          _inactive_local_lm_nodes.insert(el->node_ptr(n));
+          inactive_node_ids.insert(el->node_id(n));
+
+  sendInactiveNodesToOwners(inactive_node_ids);
+
+  _inactive_local_lm_nodes.clear();
+  for (const auto node_id : inactive_node_ids)
+    _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)
