@@ -27,6 +27,7 @@ DiffusionCG::validParams()
       true,
       "Whether to use automatic differentiation for all the terms in the equation");
   params.transferParam<MooseEnum>(MooseVariableBase::validParams(), "order", "variable_order");
+  params.addParam<MaterialPropertyName>("source_matprop", "Source term in the diffusion problem");
 
   return params;
 }
@@ -37,6 +38,7 @@ DiffusionCG::DiffusionCG(const InputParameters & parameters)
     DiffusionPhysicsBase(parameters),
     _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
+  checkAtMostOneParamSetByUser({"source_functor", "source_matprop"});
 }
 
 void
@@ -93,11 +95,15 @@ DiffusionCG::addFEKernels()
   }
 
   // Source term
-  if (isParamValid("source_functor"))
+  if (isParamValid("source_functor") || isParamValid("source_matprop"))
   {
     // Select the kernel type based on the user parameters
     std::string kernel_type;
-    const auto & source = getParam<MooseFunctorName>("source_functor");
+    std::string source =
+        isParamValid("source_functor") ? getParam<MooseFunctorName>("source_functor") : "";
+    if (isParamValid("source_matprop"))
+      source = getParam<MaterialPropertyName>("source_matprop");
+
     if (MooseUtils::parsesToReal(source) || getProblem().hasFunction(source) ||
         getProblem().hasPostprocessorValueByName(source))
       kernel_type = _use_ad ? "ADBodyForce" : "BodyForce";
@@ -108,7 +114,7 @@ DiffusionCG::addFEKernels()
     else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
       kernel_type = _use_ad ? "ADMatBodyForce" : "MatBodyForce";
     else
-      paramError("source_functor",
+      paramError(isParamValid("source_functor") ? "source_functor" : "source_matprop",
                  "No kernel defined for a source term in CG for the type of '",
                  source,
                  "'");
