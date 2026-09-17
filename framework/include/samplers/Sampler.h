@@ -29,10 +29,9 @@
  * the sample data to objects. The sampler is designed to handle any number of random number
  * generators.
  *
- * The main methods in this object is the getNextLocalRow/getSamples/getLocalSamples methods which
+ * The main methods in this object are the getSampleRow/getLocalSamples methods which
  * return the distribution samples. These methods will return the same results for each call
- * regardless of the number of calls, with getNextLocalRow being the exception because it is
- * designed be used in an iterative approach.
+ * regardless of the number of calls.
  *
  * Samplers support the use of "execute_on", which when called results in new set of random numbers,
  * thus after execute() calls to getSamples/getLocalSamples() methods will now produce a new set of
@@ -48,7 +47,8 @@ class Sampler : public MooseObject,
                 public PerfGraphInterface,
                 public SamplerInterface,
                 public VectorPostprocessorInterface,
-                public ReporterInterface
+                public ReporterInterface,
+                public Restartable
 {
 public:
   enum class SampleMode
@@ -73,30 +73,28 @@ public:
    * Return the sampled complete or distributed sample data.
    *
    * Use these with caution as they can result in a large amount of memory use, the preferred
-   * method for accessing Sampler data is the getNextLocalRow() method.
+   * method for accessing Sampler data is the getSampleRow() method.
    */
   DenseMatrix<Real> getGlobalSamples();
   DenseMatrix<Real> getLocalSamples();
   ///@}
 
   /**
-   * Return the "next" local row. This is designed to be used within a loop using the
-   * getLocalRowBegin/End methods as such:
+   * Return a single sample row by global row.
    *
-   * for (dof_id_type i = getLocalRowBegin(); i < getLocalRowEnd(); ++i)
-   *     std::vector<Real> row = getNextLocalRow();
-   *
-   * This is the preferred method for accessing Sampler data.
-   *
-   * Calls to getNextLocalRow() will continue to return the next row of data until the last local
-   * row has been reached, it will then start again at the beginning if called again. Also, calls
-   * to getNextLocalRow() can be partial, followed by call(s) to getSamples or getLocalSamples.
-   * Continued calls to getNextLocalRow() will still continue to give the next row as if the
-   * other get calls were not made. However, when this occurs calls to restore and advance the
-   * generators are made after each call to getSamples or getLocalSamples, so this generally
-   * should be avoided.
+   * @param row_index The row index of sample value to compute.
+   * @return A vector for the given row.
    */
-  std::vector<Real> getNextLocalRow();
+  std::vector<Real> getSampleRow(dof_id_type row_index) const;
+
+  /**
+   * Return a single sample value by global row and column index.
+   *
+   * @param row_index The row index of sample value to compute.
+   * @param col_index The column index of sample value to compute.
+   * @return The value for the given row and column.
+   */
+  Real getSample(dof_id_type row_index, dof_id_type col_index) const;
 
   /**
    * Return the number of samples.
@@ -132,11 +130,6 @@ public:
     mooseError("This method should be overridden in adaptive sampling classes.");
     return false;
   }
-
-  /**
-   * Return the parallel communicator
-   */
-  libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
 
 protected:
   // The following methods are the basic methods that should be utilized my most application
@@ -188,7 +181,7 @@ protected:
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const = 0;
 
   // The following methods are advanced methods that should not be needed by application developers,
   // but exist for special cases.
@@ -205,16 +198,15 @@ protected:
   virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix);
   ///@}
 
-  ///@{
   /**
    * Method to populate a complete row of sample data.
    * @param i The global row index to compute
    * @param data The correctly sized vector of sample value to poplulate
 
    * This method should not be called directly, it is automatically called by the public
-   * getGlobalSamples(), getLocalSamples(), or getNextLocalRow() methods.
+   * getGlobalSamples(), getLocalSamples(), getSampleRow(), and getSample() methods.
    */
-  virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data);
+  virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data) const;
 
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
@@ -245,9 +237,6 @@ protected:
   const dof_id_type _min_procs_per_row;
   /// The maximum number of processors that are associated with a set of rows
   const dof_id_type _max_procs_per_row;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
 
 private:
   ///@{
@@ -284,31 +273,25 @@ private:
   void advanceGeneratorsInternal(const dof_id_type count);
 
   /// Random number generators, don't give users access. Control it via the interface from this class.
-  std::vector<std::unique_ptr<MooseRandomStateless>> _generators;
+  std::vector<std::unique_ptr<MooseRandomStateless>> & _generators;
 
   /// Number of rows for this processor
-  dof_id_type _n_local_rows;
+  dof_id_type & _n_local_rows;
 
   /// Global row index for start of data for this processor
-  dof_id_type _local_row_begin;
+  dof_id_type & _local_row_begin;
 
   /// Global row index for end of data for this processor
-  dof_id_type _local_row_end;
+  dof_id_type & _local_row_end;
 
   /// Total number of rows in the sample matrix
-  dof_id_type _n_rows;
+  dof_id_type & _n_rows;
 
   /// Total number of columns in the sample matrix
-  dof_id_type _n_cols;
+  dof_id_type & _n_cols;
 
   /// Number of seeds
   std::size_t _n_seeds;
-
-  /// Iterator index for getNextLocalRow method
-  dof_id_type _next_local_row;
-
-  /// Flag for restoring state during getNextLocalRow iteration
-  bool _next_local_row_requires_state_restore;
 
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
@@ -317,7 +300,7 @@ private:
   bool _needs_reinit;
 
   /// Flag for initial execute to allow the first set of random numbers to be always be the same
-  bool _has_executed;
+  bool & _has_executed;
 
   /// Max number of entries for matrix returned by getGlobalSamples
   const dof_id_type _limit_get_global_samples;
@@ -325,12 +308,12 @@ private:
   /// Max number of entries for matrix returned by getLocalSamples
   const dof_id_type _limit_get_local_samples;
 
-  /// Max number of entries for matrix returned by getNextLocalRow
-  const dof_id_type _limit_get_next_local_row;
+  /// Max number of entries for matrix returned by getSampleRow
+  const dof_id_type _limit_get_row;
 
   /// The partitioning of the sampler matrix, built in reinit()
-  /// first is for normal mode and send is for batch mode
-  std::pair<LocalRankConfig, LocalRankConfig> _rank_config;
+  /// first is for normal mode and second is for batch mode
+  std::pair<LocalRankConfig, LocalRankConfig> & _rank_config;
 
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;

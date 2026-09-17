@@ -54,10 +54,10 @@ protected:
    * @return           A sample drawn from distributions[col_index] respecting
    *                   the LHS bin constraint for this row.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /// Distribution objects, one per column, whose quantile functions are sampled
   std::vector<Distribution const *> _distributions;
   /// Per-column pseudo-random permuters that enforce the LHS bin assignment
-  std::vector<std::unique_ptr<MooseRandomPerturbation>> _shufflers;
+  std::vector<std::unique_ptr<MooseRandomPerturbation>> & _shufflers;
 };

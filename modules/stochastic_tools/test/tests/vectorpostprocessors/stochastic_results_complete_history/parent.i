@@ -29,7 +29,6 @@
     type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sample
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
