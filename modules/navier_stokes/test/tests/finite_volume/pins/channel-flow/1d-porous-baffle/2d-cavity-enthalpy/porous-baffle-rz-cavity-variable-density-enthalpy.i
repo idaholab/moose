@@ -25,6 +25,15 @@ form_factor = 30.0
 
 advected_interp_method = 'upwind'
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+    use_velocity_gradient_taylor_correction = true
+  []
+[]
+
 [Mesh]
   coord_type = 'RZ'
   rz_coord_axis = X
@@ -84,10 +93,6 @@ advected_interp_method = 'upwind'
 
     debug_baffle = false
 
-    use_flux_velocity_reconstruction = true
-    use_reconstructed_pressure_gradient = true
-    flux_velocity_reconstruction_relaxation = 1.0
-    reconstructed_pressure_gradient_feedback_relaxation = 0.1
 
     flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
 
@@ -114,6 +119,7 @@ advected_interp_method = 'upwind'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.0
+    gradient_method = reconstructed
   []
   [h_fluid]
     type = MooseLinearVariableFVReal
@@ -150,20 +156,18 @@ advected_interp_method = 'upwind'
     use_two_point_stress_transmissibility = false
   []
   [r_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_r
     momentum_component = 'x'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [z_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_z
     momentum_component = 'y'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [r_buoyancy]
     type = LinearFVMomentumBuoyancy

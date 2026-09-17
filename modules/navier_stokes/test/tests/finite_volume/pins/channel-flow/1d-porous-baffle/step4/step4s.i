@@ -29,6 +29,15 @@ h_inlet = '${fparse cp_f * T_inlet}'
 
 advected_interp_method = 'upwind'
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 1.0
+    use_velocity_gradient_taylor_correction = true
+  []
+[]
+
 [Mesh]
   [gen]
     type = CartesianMeshGenerator
@@ -90,17 +99,12 @@ advected_interp_method = 'upwind'
 
     debug_baffle = false
 
-    use_flux_velocity_reconstruction = true #diverges if false
-    use_reconstructed_pressure_gradient = true
-    flux_velocity_reconstruction_relaxation = 1.0
-    reconstructed_pressure_gradient_feedback_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'left right'
     # flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
 
     use_interpolated_density_in_bernoulli_jump = true
     # pressure_gradient_limiter = 'baffle'
     # pressure_gradient_limiter_blend = 1.0
-    use_corrected_pressure_gradient = true
     pressure_projection_method = consistent
   []
 []
@@ -161,6 +165,7 @@ advected_interp_method = 'upwind'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = ${p_out}
+    gradient_method = reconstructed
   []
 
   [h_fluid]
@@ -205,20 +210,18 @@ advected_interp_method = 'upwind'
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [v_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_v
     momentum_component = 'y'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump

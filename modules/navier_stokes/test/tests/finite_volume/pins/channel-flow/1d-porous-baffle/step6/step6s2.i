@@ -44,6 +44,15 @@ advected_interp_method = 'upwind'
 # Use this to keep y-dependent physics aligned with the original step5 coordinates.
 axial_coordinate_shift = 1.167
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 1.0
+    use_velocity_gradient_taylor_correction = true
+  []
+[]
+
 [Mesh]
   block_id = '1 2 3 4 5 6'
   block_name = 'pebble_bed cavity bottom_reflector side_reflector bottom_plenum upper_plenum'
@@ -267,22 +276,17 @@ axial_coordinate_shift = 1.167
     # pressure_baffle_sidesets = 'baffle'
     pressure_baffle_relaxation = 0.1
 
-    reconstructed_pressure_gradient_feedback_relaxation = 1.0
     pressure_projection_method = consistent
 
     block = 'pebble_bed cavity bottom_reflector bottom_plenum upper_plenum'
 
     debug_baffle = false
 
-    use_flux_velocity_reconstruction = true
     flux_velocity_reconstruction_quantity = mass
-    use_reconstructed_pressure_gradient = true
-    flux_velocity_reconstruction_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'bed_left bed_right horizontal_walls'
     # flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
 
     use_interpolated_density_in_bernoulli_jump = true
-    use_corrected_pressure_gradient = true
   []
 []
 
@@ -343,6 +347,7 @@ axial_coordinate_shift = 1.167
     solver_sys = pressure_system
     initial_condition = ${p_out}
     block = 'pebble_bed cavity bottom_reflector bottom_plenum upper_plenum'
+    gradient_method = reconstructed
   []
 
   [h_fluid]
@@ -389,20 +394,18 @@ axial_coordinate_shift = 1.167
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [v_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_v
     momentum_component = 'y'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump

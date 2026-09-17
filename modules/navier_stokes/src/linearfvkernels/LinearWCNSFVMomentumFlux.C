@@ -79,6 +79,8 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
         _adv_interp_method.needsGradients()
             ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
             : nullptr),
+    _porosity_outside_divergence(getParam<bool>("porosity_outside_divergence")),
+    _use_two_point_stress_transmissibility(getParam<bool>("use_two_point_stress_transmissibility")),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),
@@ -243,6 +245,7 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
     if (_dim > 1 && _use_nonorthogonal_correction)
     {
       const auto state_arg = determineState();
+      const Real mu_face = faceMu(state_arg);
       mooseAssert(_gradient_field,
                   "Gradient field should be registered when gradients are needed.");
 
@@ -370,7 +373,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     const auto state_arg = determineState();
     mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
-    grad_contrib += _mu(face_arg, state_arg) * _gradient_field->gradient(*elem_info) *
+    grad_contrib += boundaryMu(state_arg) * _gradient_field->gradient(*elem_info) *
                     _boundary_normal_factor * correction_vector;
   }
 

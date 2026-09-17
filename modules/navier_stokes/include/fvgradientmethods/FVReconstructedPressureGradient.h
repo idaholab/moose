@@ -71,6 +71,9 @@ public:
   /// Get the conservative candidate produced by the current pressure corrector.
   const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
 
+  /// Whether at least one corrected-flux pressure-gradient candidate has been reconstructed.
+  bool hasReconstructedCandidate() const { return !_reconstructed_pressure_gradient.empty(); }
+
   /**
    * Relax and publish the current candidate as the coupling pressure gradient.
    * @param rc The bound Rhie-Chow flow-system configuration whose pressure gradient is being
@@ -184,6 +187,9 @@ private:
 
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
+
+  /// Whether face equations include the lagged velocity-gradient Taylor correction.
+  const bool _use_velocity_gradient_taylor_correction;
 
   /// Rhie-Chow object that owns this stateful reconstruction method.
   const RhieChowMassFlux * _rhie_chow = nullptr;

@@ -77,6 +77,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
+  /// Switch to enable/disable projected center-to-center distance in the orthogonal term
+  const bool _use_nonorthogonal_projected_distance;
+
   /// Gradient field used when nonorthogonal corrections require cell gradients.
   const LinearFVGradientReader * const _gradient_field;
 

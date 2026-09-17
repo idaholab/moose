@@ -17,6 +17,15 @@ corner_form_loss = 20
 exit_form_loss = 20
 advected_interp_method = 'upwind'
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+    use_velocity_gradient_taylor_correction = true
+  []
+[]
+
 [Mesh]
   [clean_inlet_gmg]
     type = GeneratedMeshGenerator
@@ -186,6 +195,7 @@ advected_interp_method = 'upwind'
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
+    pressure_projection_method = consistent
     pressure_baffle_sidesets = 'clean_to_porous diagonal_baffle porous_to_clean'
     # pressure_gradient_limiter = 'clean_to_porous diagonal_baffle porous_to_clean'
     baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
@@ -193,10 +203,6 @@ advected_interp_method = 'upwind'
     # pressure_gradient_limiter_blend = 0.5
     pressure_baffle_relaxation = 0.1
     debug_baffle = false
-    use_flux_velocity_reconstruction = true
-    use_reconstructed_pressure_gradient = true
-    flux_velocity_reconstruction_relaxation = 1.0
-    reconstructed_pressure_gradient_feedback_relaxation = 0.1
     # flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_porous inner_horizontal_porous right_porous inner_vertical_porous'
   []
 []
@@ -222,6 +228,7 @@ advected_interp_method = 'upwind'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.0
+    gradient_method = reconstructed
   []
 []
 
@@ -253,20 +260,18 @@ advected_interp_method = 'upwind'
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
-    rhie_chow_user_object = rc
     porosity = porosity
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [v_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_v
     momentum_component = 'y'
-    rhie_chow_user_object = rc
     porosity = porosity
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [u_friction]
     type = LinearFVMomentumPorousFriction

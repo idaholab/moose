@@ -267,23 +267,18 @@ axial_coordinate_shift = 1.167
     # pressure_baffle_sidesets = 'baffle'
     pressure_baffle_relaxation = 0.1
 
-    reconstructed_pressure_gradient_feedback_relaxation = 1.0
     pressure_projection_method = consistent
 
     block = 'pebble_bed cavity bottom_reflector bottom_plenum upper_plenum'
 
     debug_baffle = false
 
-    use_flux_velocity_reconstruction = false
-    use_reconstructed_pressure_gradient = false
-    flux_velocity_reconstruction_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'bed_left bed_right horizontal_walls'
     # flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
 
     use_interpolated_density_in_bernoulli_jump = true
     # pressure_gradient_limiter = 'baffle'
     # pressure_gradient_limiter_blend = 1.0
-    use_corrected_pressure_gradient = true
   []
 []
 
@@ -390,20 +385,18 @@ axial_coordinate_shift = 1.167
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [v_pressure]
-    type = LinearFVMomentumPressureUO
+    type = LinearFVMomentumPressure
     variable = superficial_v
     momentum_component = 'y'
-    rhie_chow_user_object = rc
     porosity = 'porosity'
-    use_corrected_gradient = true
+    pressure = pressure
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump

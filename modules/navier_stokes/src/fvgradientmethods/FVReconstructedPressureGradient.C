@@ -44,6 +44,11 @@ FVReconstructedPressureGradient::validParams()
       0.1,
       "0.0<gradient_relaxation<=1.0",
       "Relaxation factor applied when updating the reconstructed pressure-coupling gradient.");
+  params.addParam<bool>(
+      "use_velocity_gradient_taylor_correction",
+      true,
+      "Whether to subtract the lagged velocity-gradient Taylor expansion from each corrected "
+      "face velocity before reconstructing the cell velocity.");
   return params;
 }
 
@@ -51,7 +56,9 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
   : FVGradientMethod(params),
     MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
-    _gradient_relaxation(getParam<Real>("gradient_relaxation"))
+    _gradient_relaxation(getParam<Real>("gradient_relaxation")),
+    _use_velocity_gradient_taylor_correction(
+        getParam<bool>("use_velocity_gradient_taylor_correction"))
 {
 }
 
@@ -360,7 +367,8 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
   // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
   // gradient. Otherwise interpolate the two lagged cell gradients to the face.
-  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
+  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
+      rc.faceUsesOneSidedReconstruction(fi))
     return elem_gradient;
 
   RealVectorValue neighbor_gradient;
@@ -392,15 +400,14 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
 
   const Real surface_area = surface_vector.norm();
+  if (surface_area == 0.0)
+    return;
+
   const auto face_normal = surface_vector / surface_area;
-  // RhieChow stores the scalar flux relative to FaceInfo::normal(). Flip that orientation when the
-  // current cell is on the opposite side so q_f is outward from this cell.
-  const Point flux_normal =
-      rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
-  const Real face_flux = rc.getVolumetricFaceFlux(*fi);
-  mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
-  const Real normal_alignment = flux_normal * face_normal;
-  Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
+  Real face_normal_reconstructed_quantity =
+      rc.reconstructionFaceNormalVelocity(*fi, elem_info, face_normal);
+  mooseAssert(std::isfinite(face_normal_reconstructed_quantity),
+              "Corrected face-normal velocity must be finite.");
 
   // First-order expansion at the face gives
   //   u_f.n_f = u_P.n_f + ((grad u)_f d_Pf).n_f.
@@ -408,16 +415,17 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   //   u_P.n_f ~= u_f.n_f - ((grad u)_f d_Pf).n_f.
   const Point d_pf = fi->faceCentroid() - elem_info.centroid();
   Real gradient_flux_correction = 0.0;
-  for (const auto component : make_range(rc.dimension()))
-  {
-    const auto velocity_gradient =
-        reconstructionVelocityGradient(rc, elem_info, *fi, elem_has_info, component);
-    for ([[maybe_unused]] const auto direction : make_range(rc.dimension()))
-      mooseAssert(std::isfinite(velocity_gradient(direction)),
-                  "Lagged velocity gradient must be finite.");
+  if (_use_velocity_gradient_taylor_correction)
+    for (const auto component : make_range(rc.dimension()))
+    {
+      const auto velocity_gradient =
+          reconstructionVelocityGradient(rc, elem_info, *fi, elem_has_info, component);
+      for ([[maybe_unused]] const auto direction : make_range(rc.dimension()))
+        mooseAssert(std::isfinite(velocity_gradient(direction)),
+                    "Lagged velocity gradient must be finite.");
 
-    gradient_flux_correction += (velocity_gradient * d_pf) * surface_vector(component);
-  }
+      gradient_flux_correction += (velocity_gradient * d_pf) * surface_vector(component);
+    }
 
   face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
 
@@ -464,8 +472,15 @@ FVReconstructedPressureGradient::reconstructPressureGradient(
   const auto momentum_dof = elem_info.dofIndices()[rc.momentumSystem(component).number()][0];
   const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
   const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
-  mooseAssert(std::isfinite(HbyA) && std::isfinite(Ainv) && Ainv != 0.0,
-              "Momentum-coupling H/A and 1/A data must be finite, and 1/A must be nonzero.");
+  mooseAssert(std::isfinite(HbyA) && std::isfinite(Ainv),
+              "Momentum-coupling H/A and 1/A data must be finite.");
+
+  if (Ainv == 0.0)
+  {
+    const auto pressure_dof =
+        elem_info.dofIndices()[rc.pressureSystem().number()][rc.pressureVariableNumber()];
+    return (*rc.basePressureGradientComponents()[component])(pressure_dof);
+  }
 
   // Invert the same diagonal momentum relation used by Rhie-Chow,
   //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
