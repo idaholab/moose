@@ -27,8 +27,8 @@ Documents:
     software_library_list: sqa/solid_mechanics_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    user_manual: content/modules/solid_mechanics/index.md
-    theory_manual: content/modules/solid_mechanics/index.md
+    user_manual: modules/solid_mechanics/index.md
+    theory_manual: modules/solid_mechanics/index.md
 
 Requirements:
     solid_mechanics:
