@@ -28,6 +28,7 @@
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
 #include "GradientLimiterType.h"
+#include "RestartableEquationSystems.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
@@ -1234,6 +1235,43 @@ SystemBase::copyVars(ExodusII_IO & io)
 
   if (did_copy)
     solution().close();
+}
+
+void
+SystemBase::addCheckpointVariableCopyRequests(RestartableEquationSystems & res)
+{
+  for (const auto & vci : _var_to_copy)
+  {
+    // A checkpoint holds a single state; the checkpoint file itself selects it, so a specific
+    // time step cannot be requested here (unlike Exodus, which stores many time steps).
+    if (vci._timestep != "LATEST")
+      mooseError("When restarting a variable from a checkpoint file, "
+                 "\"initial_from_file_timestep\" must be \"LATEST\" (the checkpoint file selects "
+                 "the state). Received \"",
+                 vci._timestep,
+                 "\" for variable \"",
+                 vci._dest_name,
+                 "\".");
+
+    // Array variables are not yet supported for checkpoint variable restart
+    if (hasVariable(vci._dest_name) && getVariable(0, vci._dest_name).isArray())
+      mooseError("Restarting the array variable \"",
+                 vci._dest_name,
+                 "\" from a checkpoint file is not supported.");
+
+    if (!system().has_variable(vci._dest_name))
+      mooseError("Unrecognized variable ", vci._dest_name, " in variables to copy.");
+
+    const auto & to_var = system().variable(system().variable_number(vci._dest_name));
+    res.addVariableCopy(vci._source_name, system(), solution(), to_var);
+  }
+}
+
+void
+SystemBase::closeVarCopySolution()
+{
+  solution().close();
+  update();
 }
 
 void
