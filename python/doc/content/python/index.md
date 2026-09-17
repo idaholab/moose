@@ -20,6 +20,7 @@ with MOOSE and [python/source/index.md] links to the source code documentation.
 | [module_hash.md] | Tool for generating a hash suffix for our contribution modules. |
 | [MooseDocs/index.md] | Tool for creating documentation. |
 | [moosecontrol/index.md] | Tool for interacting with a [WebServerControl.md.] |
+| [paraview_exodus.md] | Tool for rendering and animating ExodusII files with ParaView. |
 
 ## Setup
 
