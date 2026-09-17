@@ -394,18 +394,19 @@ class RenderCivetTestReport(components.RenderComponent):
             html.Tag(tr, "th", string="Job")
             html.Tag(tr, "th", string="Recipe")
 
-            for job, tests in results.items():
-                for item in tests:
-                    tr = html.Tag(tbl, "tr")
-                    td = html.Tag(tr, "td", string=item.status)
-                    td["data-status"] = item.status.lower()
-                    tr_job = html.Tag(tr, "td")
-                    html.Tag(tr, "td", string=item.recipe)
+            if results:
+                for job, tests in results.items():
+                    for item in tests:
+                        tr = html.Tag(tbl, "tr")
+                        td = html.Tag(tr, "td", string=item.status)
+                        td["data-status"] = item.status.lower()
+                        tr_job = html.Tag(tr, "td")
+                        html.Tag(tr, "td", string=item.recipe)
 
-                    link = html.Tag(tr_job, "span")
-                    html.Tag(
-                        link,
-                        "a",
-                        href="{}/job/{}".format(item.url, job),
-                        string=str(job),
-                    )
+                        link = html.Tag(tr_job, "span")
+                        html.Tag(
+                            link,
+                            "a",
+                            href="{}/job/{}".format(item.url, job),
+                            string=str(job),
+                        )
