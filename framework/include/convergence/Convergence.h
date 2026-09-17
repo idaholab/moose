@@ -53,7 +53,11 @@ public:
   virtual void initialize() {}
 
   /**
-   * Method that gets called in each iteration before the solve
+   * Method that gets called before the solve that this convergence checks. What counts as
+   * "the solve" depends on the iteration type: for nonlinear (Newton) convergence, this is
+   * called once per nonlinear solve, before the Newton iteration loop begins (not before each
+   * Newton iteration); for fixed-point convergence, this is called once per fixed-point
+   * iteration, before that iteration's sub-solve(s).
    */
   virtual void preSolve() {}
 
