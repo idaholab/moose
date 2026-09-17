@@ -59,6 +59,9 @@ MortarGapHeatTransferAction::addMortarParameters(InputParameters & params)
   params.addParam<Real>("thermal_lm_scaling",
                         1.,
                         "Scaling factor to apply to the thermal Lagrange multiplier variable");
+
+  // applyParameters only sets parameters that are already registered. Selective transfer is also
+  // needed to avoid colliding with ThermalContact's boolean quadrature parameter.
   params.transferParam<bool>(constraint_params, "use_displaced_mesh");
   params.set<bool>("use_displaced_mesh") = true;
   params.transferParam<MooseEnum>(constraint_params, "segment_quadrature");
