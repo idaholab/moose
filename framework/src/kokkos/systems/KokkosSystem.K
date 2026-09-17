@@ -130,7 +130,7 @@ System::setupDofs()
         }
       }
     }
-    else
+    else if (num_total_elems)
     {
       _dof_map.SCALAR_dof_indices(dof_indices, var);
       _scalar_dof_index[var].create(dof_indices.size());
