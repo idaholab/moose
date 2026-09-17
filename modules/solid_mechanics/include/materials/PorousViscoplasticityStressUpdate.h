@@ -22,8 +22,10 @@
  * Spherical LPS porous viscoplasticity with porosity solved as a local constitutive unknown.
  *
  * Matrix hydrostatic stress p, equivalent stress q, and porosity f are advanced simultaneously
- * using an analytical local Jacobian. Derived models may specialize only the porosity-dependent
- * hydrostatic pressure closure and accepted-state bookkeeping.
+ * using an analytical local Jacobian. Derived models may optionally expose two independently
+ * evolving pore-porosity populations; that path advances (p,q,f_0,f_1) while retaining one common
+ * matrix creep response. Derived models specialize the pore-pressure closure and accepted-state
+ * bookkeeping.
  */
 template <bool is_ad>
 class PorousViscoplasticityStressUpdateTempl
@@ -119,6 +121,42 @@ protected:
   };
 
   static constexpr unsigned int MAX_HYDROSTATIC_STRESS_POPULATIONS = 2;
+  static constexpr unsigned int INDEPENDENT_LOCAL_SYSTEM_SIZE =
+      2 + MAX_HYDROSTATIC_STRESS_POPULATIONS;
+  using PorePorosityState = std::array<GenericReal<is_ad>, MAX_HYDROSTATIC_STRESS_POPULATIONS>;
+
+  /** First and second derivatives needed by the independent two-porosity LPS response. */
+  struct IndependentLpsDerivatives
+  {
+    GenericReal<is_ad> F_lambda = 0.0;
+    GenericReal<is_ad> F_p = 0.0;
+    GenericReal<is_ad> F_q = 0.0;
+    PorePorosityState F_porosity{};
+
+    GenericReal<is_ad> F_lambdalambda = 0.0;
+    GenericReal<is_ad> F_lambdap = 0.0;
+    GenericReal<is_ad> F_lambdaq = 0.0;
+    PorePorosityState F_lambdaporosity{};
+    GenericReal<is_ad> F_pp = 0.0;
+    PorePorosityState F_pporosity{};
+
+    PorePorosityState population_F_p{};
+    PorePorosityState population_F_lambdap{};
+    PorePorosityState population_F_pp{};
+    std::array<PorePorosityState, MAX_HYDROSTATIC_STRESS_POPULATIONS> population_F_pporosity{};
+  };
+
+  /** LPS response split into the volumetric increments carried by each pore population. */
+  struct IndependentLpsCreepResponse
+  {
+    GenericRankTwoTensor<is_ad> inelastic_strain_increment;
+    GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
+    PorePorosityState population_volumetric_strain_increment{};
+    std::array<GenericRankTwoTensor<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE> dinelastic_dx{};
+    std::array<std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE>,
+               MAX_HYDROSTATIC_STRESS_POPULATIONS>
+        dpopulation_volumetric_dx{};
+  };
 
   /** One pore population's share of total porosity and hydrostatic driving stress. */
   struct HydrostaticStressPopulation
@@ -126,6 +164,8 @@ protected:
     GenericReal<is_ad> fraction = 0.0;
     GenericReal<is_ad> effective_hydro_stress = 0.0;
     GenericReal<is_ad> deffective_hydro_df = 0.0;
+    /// Pressure derivatives with respect to independently evolving pore-population porosities.
+    PorePorosityState deffective_hydro_dporosity{};
   };
 
   /**
@@ -152,6 +192,26 @@ protected:
   virtual HydrostaticStressState
   evaluateHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
                             const GenericReal<is_ad> & porosity) const;
+
+  /** True when the derived model supplies two independently evolving pore-porosity states. */
+  virtual bool useIndependentPorePorosityKinematics() const { return false; }
+
+  /** Return beginning-of-substep independent pore porosities whose sum is total porosity. */
+  virtual PorePorosityState
+  independentPorePorosityState(const GenericReal<is_ad> & total_porosity) const
+  {
+    return {total_porosity, GenericReal<is_ad>(0.0)};
+  }
+
+  /** Evaluate pressure closure and pressure derivatives for independent pore porosities. */
+  virtual HydrostaticStressState
+  evaluateIndependentHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
+                                       const PorePorosityState & pore_porosity) const;
+
+  /** Commit one converged independent pore-population state. */
+  virtual void independentPorePorosityStateAccepted(
+      const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const PorePorosityState & pore_porosity);
 
   /** Return the number of active pore populations, including the legacy one-population form. */
   unsigned int hydrostaticStressPopulationCount(const HydrostaticStressState & state) const;
@@ -249,6 +309,19 @@ protected:
                                        const GenericReal<is_ad> & equiv_stress,
                                        const GenericReal<is_ad> & porosity,
                                        const CreepLaw & law) const;
+
+  IndependentLpsDerivatives
+  computeIndependentLpsDerivatives(const GenericReal<is_ad> & gauge_stress,
+                                   const HydrostaticStressState & hydrostatic_stress,
+                                   const GenericReal<is_ad> & equiv_stress,
+                                   const PorePorosityState & pore_porosity,
+                                   const CreepLaw & law) const;
+
+  IndependentLpsCreepResponse
+  evaluateIndependentLpsCreepResponse(const HydrostaticStressState & hydrostatic_stress,
+                                      const GenericReal<is_ad> & equiv_stress,
+                                      const GenericRankTwoTensor<is_ad> & dev_direction,
+                                      const PorePorosityState & pore_porosity);
 
   /// Matrix hydrostatic stress for the spherical porous formulation.
   GenericReal<is_ad> matrixHydroStress(const GenericRankTwoTensor<is_ad> & stress) const;
@@ -534,6 +607,105 @@ private:
   [[noreturn]] void throwCoupledLineSearchFailure(const LocalPoint & point,
                                                   const LocalSolveContext & context,
                                                   bool reduced_porosity_attempted);
+
+  enum IndependentLocalVariableIndex : unsigned int
+  {
+    INDEPENDENT_P_INDEX,
+    INDEPENDENT_Q_INDEX,
+    PORE_POROSITY_0_INDEX,
+    PORE_POROSITY_1_INDEX
+  };
+
+  using IndependentLocalResidual = std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE>;
+  using IndependentLocalJacobian =
+      std::array<std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE>,
+                 INDEPENDENT_LOCAL_SYSTEM_SIZE>;
+  using IndependentScaledLocalJacobian =
+      std::array<std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE>, INDEPENDENT_LOCAL_SYSTEM_SIZE>;
+
+  struct IndependentLocalCoordinates
+  {
+    GenericReal<is_ad> p = 0.0;
+    GenericReal<is_ad> q = 0.0;
+    PorePorosityState pore_porosity{};
+  };
+
+  struct IndependentLocalSolveContext
+  {
+    const GenericReal<is_ad> & p_trial;
+    const GenericRankTwoTensor<is_ad> & trial_dev_stress;
+    const GenericReal<is_ad> & trial_equiv_stress;
+    PorePorosityState pore_porosity_begin{};
+    const GenericRankTwoTensor<is_ad> & trial_elastic_strain_increment;
+    const GenericRankTwoTensor<is_ad> & elastic_strain_old;
+    const GenericRankFourTensor<is_ad> & elasticity_tensor;
+    Real p_scale = 1.0;
+    Real q_scale = 1.0;
+    std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_variable_scale{{1.0, 1.0}};
+    std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_merit_scale{{1.0, 1.0}};
+    std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_convergence_scale{{1.0, 1.0}};
+  };
+
+  struct IndependentLocalPoint
+  {
+    GenericReal<is_ad> p = 0.0;
+    GenericReal<is_ad> q = 0.0;
+    PorePorosityState pore_porosity{};
+    std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> floor_active{{false, false}};
+    IndependentLocalResidual residual{};
+    IndependentLocalJacobian jacobian{};
+    GenericRankTwoTensor<is_ad> inelastic_strain_increment;
+    GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
+    PorePorosityState raw_population_porosity_increment{};
+    HydrostaticStressState hydrostatic_stress;
+
+    IndependentLocalCoordinates coordinates() const { return {p, q, pore_porosity}; }
+  };
+
+  IndependentLocalPoint evaluateIndependentLocalPoint(
+      const IndependentLocalCoordinates & coordinates,
+      const IndependentLocalSolveContext & context,
+      const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active);
+  void initializeIndependentLocalSolveScales(IndependentLocalSolveContext & context) const;
+  IndependentLocalResidual
+  scaledIndependentResidual(const IndependentLocalResidual & residual,
+                            const IndependentLocalSolveContext & context) const;
+  Real independentConvergenceResidualNorm(const IndependentLocalResidual & residual,
+                                          const IndependentLocalSolveContext & context) const;
+  IndependentScaledLocalJacobian
+  scaledIndependentJacobian(const IndependentLocalJacobian & jacobian,
+                            const IndependentLocalSolveContext & context) const;
+  void validateFiniteIndependentLocalPoint(const IndependentLocalPoint & point,
+                                           const char * stage) const;
+  std::optional<IndependentLocalPoint>
+  independentBacktrackingLineSearch(const IndependentLocalPoint & point,
+                                    const IndependentLocalResidual & correction_scaled,
+                                    Real initial_alpha,
+                                    const IndependentLocalSolveContext & context);
+  IndependentLocalPoint solveIndependentCoupledNewton(
+      IndependentLocalPoint point,
+      const IndependentLocalSolveContext & context,
+      std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & activate_floor);
+  IndependentLocalPoint
+  solveIndependentPorosityActiveSet(const IndependentLocalSolveContext & context);
+  IndependentLocalPoint
+  reconstructIndependentImplicitSensitivity(const IndependentLocalPoint & point,
+                                            const IndependentLocalSolveContext & context);
+  RankFourTensor
+  computeIndependentConsistentTangent(const IndependentLocalPoint & point,
+                                      const IndependentLocalSolveContext & context) const;
+  void commitIndependentLocalPoint(const IndependentLocalPoint & point,
+                                   const IndependentLocalSolveContext & context,
+                                   GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+                                   GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                   GenericRankTwoTensor<is_ad> & stress,
+                                   GenericReal<is_ad> & effective_inelastic_strain_increment);
+  void updateStateOneStepIndependent(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+                                     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                     GenericRankTwoTensor<is_ad> & stress,
+                                     const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                                     const GenericRankTwoTensor<is_ad> & elastic_strain_old,
+                                     GenericReal<is_ad> & effective_inelastic_strain_increment);
 
 protected:
   /// Equivalent von Mises stress of one deviatoric stress tensor.

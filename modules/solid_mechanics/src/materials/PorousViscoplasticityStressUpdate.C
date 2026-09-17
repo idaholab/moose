@@ -28,8 +28,8 @@ using FixedVector = std::array<T, N>;
  * Solve the small fixed-size linear systems used by the local constitutive update.
  *
  * The 2x2 branch intentionally retains the determinant-based singularity check and closed-form
- * solution used by the reduced mechanical solve. The 3x3 branch retains the partial-pivot
- * Gauss-Jordan algorithm and pivot threshold used by the coupled Newton solve.
+ * solution used by the reduced mechanical solve. The 3x3 and 4x4 branches use the same
+ * partial-pivot Gauss-Jordan algorithm and pivot threshold used by the coupled Newton solves.
  */
 template <std::size_t N, typename MatrixValue, typename VectorValue>
 bool
@@ -37,7 +37,8 @@ solveLinearSystem(const FixedMatrix<MatrixValue, N> & input,
                   const FixedVector<VectorValue, N> & rhs,
                   FixedVector<VectorValue, N> & solution)
 {
-  static_assert(N == 2 || N == 3, "Only the local 2x2 and 3x3 systems are supported.");
+  static_assert(N == 2 || N == 3 || N == 4,
+                "Only the local 2x2, 3x3, and 4x4 systems are supported.");
 
   for (auto row = std::size_t{0}; row < N; ++row)
   {
@@ -589,6 +590,33 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateHydrostaticStress(
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::HydrostaticStressState
+PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentHydrostaticStress(
+    const GenericReal<is_ad> & matrix_hydro_stress, const PorePorosityState & pore_porosity) const
+{
+  const auto total_porosity = pore_porosity[0] + pore_porosity[1];
+  auto state = evaluateHydrostaticStress(matrix_hydro_stress, total_porosity);
+  const auto population_count = hydrostaticStressPopulationCount(state);
+  for (auto population_index = 0u; population_index < population_count; ++population_index)
+  {
+    auto & population =
+        state.population_count == 0 ? state.populations[0] : state.populations[population_index];
+    population.deffective_hydro_dporosity[0] = population.deffective_hydro_df;
+    population.deffective_hydro_dporosity[1] = population.deffective_hydro_df;
+  }
+  return state;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::independentPorePorosityStateAccepted(
+    const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    const PorePorosityState & pore_porosity)
+{
+  porosityStateAccepted(inelastic_strain_increment, pore_porosity[0] + pore_porosity[1]);
+}
+
+template <bool is_ad>
 unsigned int
 PorousViscoplasticityStressUpdateTempl<is_ad>::hydrostaticStressPopulationCount(
     const HydrostaticStressState & state) const
@@ -650,6 +678,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validateHydrostaticStressState(
                      ", deffective_hydro_df = ",
                      deffective_hydro_df,
                      ".");
+
+    for (const auto & derivative : population.deffective_hydro_dporosity)
+      if (!std::isfinite(MetaPhysicL::raw_value(derivative)))
+        mooseException("In ",
+                       _name,
+                       ": nonfinite independent pore-pressure derivative during ",
+                       stage,
+                       " at population ",
+                       population_index,
+                       ".");
 
     fraction_sum += fraction;
   }
@@ -3013,6 +3051,935 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
+PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
+    const IndependentLocalCoordinates & coordinates,
+    const IndependentLocalSolveContext & context,
+    const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active)
+{
+  const auto & p = coordinates.p;
+  const auto & q = coordinates.q;
+  const auto & pore_porosity = coordinates.pore_porosity;
+  const auto total_porosity = pore_porosity[0] + pore_porosity[1];
+
+  auto point = IndependentLocalPoint{};
+  point.p = p;
+  point.q = q;
+  point.pore_porosity = pore_porosity;
+  point.floor_active = floor_active;
+  point.inelastic_strain_increment.zero();
+
+  const auto has_deviatoric_direction =
+      context.trial_equiv_stress > this->_minimum_stress_magnitude;
+  auto dev_direction = GenericRankTwoTensor<is_ad>();
+  dev_direction.zero();
+  if (has_deviatoric_direction)
+    dev_direction = context.trial_dev_stress / context.trial_equiv_stress;
+  const auto q_flow = has_deviatoric_direction ? q : GenericReal<is_ad>(0.0);
+
+  point.hydrostatic_stress = evaluateIndependentHydrostaticStress(p, pore_porosity);
+  if (total_porosity <= 0.0)
+    mooseException("In ", this->_name, ": independent pore solve requires positive porosity.");
+  if (hydrostaticStressPopulationCount(point.hydrostatic_stress) !=
+      MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    mooseException("In ",
+                   this->_name,
+                   ": independent pore kinematics requires exactly two hydrostatic populations.");
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    point.hydrostatic_stress.populations[population_index].fraction =
+        pore_porosity[population_index] / total_porosity;
+  const auto & hydrostatic_stress = point.hydrostatic_stress;
+  validateHydrostaticStressState(hydrostatic_stress, "independent local coupled evaluation");
+
+  if (this->gaugeStressScale(q_flow, hydrostatic_stress) > this->_maximum_stress_magnitude)
+    mooseException("In ",
+                   this->_name,
+                   ": independent local solve exceeded maximum_stress_magnitude at p = ",
+                   MetaPhysicL::raw_value(p),
+                   ", q = ",
+                   MetaPhysicL::raw_value(q_flow),
+                   ", f_0 = ",
+                   MetaPhysicL::raw_value(pore_porosity[0]),
+                   ", f_1 = ",
+                   MetaPhysicL::raw_value(pore_porosity[1]),
+                   ".");
+
+  const auto porosity_old = this->_porosity_old[this->_qp];
+  const auto solid_fraction_old = 1.0 - porosity_old;
+  if (solid_fraction_old <= 0.0)
+    mooseException("In ", this->_name, ": invalid porosity factor in independent pore solve.");
+
+  auto response = IndependentLpsCreepResponse{};
+  response.inelastic_strain_increment.zero();
+  for (auto & derivative : response.dinelastic_dx)
+    derivative.zero();
+
+  if (this->hasViscoplasticDrive(q_flow, hydrostatic_stress, total_porosity))
+    response = evaluateIndependentLpsCreepResponse(
+        hydrostatic_stress, q_flow, dev_direction, pore_porosity);
+
+  point.effective_inelastic_strain_increment = response.effective_inelastic_strain_increment;
+
+  /*
+   * Split the pore-volume part of the LPS flow while preserving the established total-porosity
+   * discretization exactly. In differential form, f_i = V_i/V gives
+   *
+   *   df_i = de_i - f_i de_v,       de_v = sum_i de_i.
+   *
+   * The scalar MOOSE update uses the fixed global-old solid fraction,
+   *
+   *   df = (1-f_old) de_v.
+   *
+   * Distribute the corresponding -f_old de_v correction between the two pore populations in
+   * proportion to their beginning-of-substep pore-volume shares. The two population increments then
+   * sum identically to the historical scalar update while reducing to the exact quotient kinematics
+   * at the beginning of an unsubstepped update.
+   */
+  const auto pore_porosity_begin_total =
+      context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+  if (pore_porosity_begin_total <= 0.0)
+    mooseException("In ", this->_name, ": independent pore solve requires positive porosity.");
+
+  std::array<GenericReal<is_ad>, MAX_HYDROSTATIC_STRESS_POPULATIONS> dilution_coefficient{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    dilution_coefficient[population_index] =
+        porosity_old * context.pore_porosity_begin[population_index] / pore_porosity_begin_total;
+
+  const auto raw_total_volumetric_increment = response.population_volumetric_strain_increment[0] +
+                                              response.population_volumetric_strain_increment[1];
+  PorePorosityState raw_population_porosity_increment{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    raw_population_porosity_increment[population_index] =
+        response.population_volumetric_strain_increment[population_index] -
+        dilution_coefficient[population_index] * raw_total_volumetric_increment;
+  point.raw_population_porosity_increment = raw_population_porosity_increment;
+
+  auto population_volumetric_increment = response.population_volumetric_strain_increment;
+  auto dpopulation_volumetric_dx = response.dpopulation_volumetric_dx;
+
+  /*
+   * Population lower bounds constrain only the volumetric contribution needed to keep that pore
+   * population admissible; the common deviatoric matrix creep remains active. If both populations
+   * are active, distribute the generic total-porosity floor in proportion to their
+   * beginning-of-substep pore-volume shares.
+   */
+  PorePorosityState floor_value{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    floor_value[population_index] = _minimum_porosity *
+                                    context.pore_porosity_begin[population_index] /
+                                    pore_porosity_begin_total;
+
+  const auto active_count =
+      static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
+  if (active_count == 1)
+  {
+    const auto active = floor_active[0] ? 0u : 1u;
+    const auto free = 1u - active;
+    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
+    const auto denominator = 1.0 - dilution_coefficient[active];
+    if (denominator <= 0.0)
+      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+
+    population_volumetric_increment[active] =
+        (target_increment + dilution_coefficient[active] * population_volumetric_increment[free]) /
+        denominator;
+    for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
+      dpopulation_volumetric_dx[active][x_index] =
+          dilution_coefficient[active] / denominator * dpopulation_volumetric_dx[free][x_index];
+  }
+  else if (active_count == 2)
+  {
+    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
+    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+    {
+      const auto target_increment =
+          floor_value[population_index] - context.pore_porosity_begin[population_index];
+      population_volumetric_increment[population_index] =
+          target_increment +
+          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
+      dpopulation_volumetric_dx[population_index].fill(GenericReal<is_ad>(0.0));
+    }
+  }
+
+  const auto total_volumetric_increment =
+      population_volumetric_increment[0] + population_volumetric_increment[1];
+  PorePorosityState population_porosity_increment{};
+  std::array<std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE>,
+             MAX_HYDROSTATIC_STRESS_POPULATIONS>
+      dpopulation_porosity_dx{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    population_porosity_increment[population_index] =
+        population_volumetric_increment[population_index] -
+        dilution_coefficient[population_index] * total_volumetric_increment;
+    for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
+    {
+      const auto dtotal_volumetric_dx =
+          dpopulation_volumetric_dx[0][x_index] + dpopulation_volumetric_dx[1][x_index];
+      dpopulation_porosity_dx[population_index][x_index] =
+          dpopulation_volumetric_dx[population_index][x_index] -
+          dilution_coefficient[population_index] * dtotal_volumetric_dx;
+    }
+  }
+
+  point.inelastic_strain_increment = response.inelastic_strain_increment.deviatoric() +
+                                     this->_identity_two * (total_volumetric_increment / 3.0);
+
+  std::array<GenericRankTwoTensor<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE> dinelastic_dx{};
+  for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
+  {
+    const auto dtotal_volumetric_dx =
+        dpopulation_volumetric_dx[0][x_index] + dpopulation_volumetric_dx[1][x_index];
+    dinelastic_dx[x_index] = response.dinelastic_dx[x_index].deviatoric() +
+                             this->_identity_two * (dtotal_volumetric_dx / 3.0);
+  }
+
+  const auto stress_calculated =
+      context.elasticity_tensor *
+      (context.elastic_strain_old + context.trial_elastic_strain_increment -
+       point.inelastic_strain_increment);
+  const auto p_calculated = stress_calculated.trace() / 3.0;
+  const auto dev_stress_calculated = stress_calculated.deviatoric();
+  const auto q_calculated = has_deviatoric_direction
+                                ? 1.5 * dev_direction.doubleContraction(dev_stress_calculated)
+                                : GenericReal<is_ad>(0.0);
+
+  point.residual[INDEPENDENT_P_INDEX] = p - p_calculated;
+  point.residual[INDEPENDENT_Q_INDEX] = has_deviatoric_direction ? q - q_calculated : q;
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    const auto row = PORE_POROSITY_0_INDEX + population_index;
+    point.residual[row] = floor_active[population_index]
+                              ? pore_porosity[population_index] - floor_value[population_index]
+                              : pore_porosity[population_index] -
+                                    context.pore_porosity_begin[population_index] -
+                                    population_porosity_increment[population_index];
+  }
+
+  for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
+  {
+    const auto elastic_response = context.elasticity_tensor * dinelastic_dx[column];
+    point.jacobian[INDEPENDENT_P_INDEX][column] =
+        (column == INDEPENDENT_P_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
+        elastic_response.trace() / 3.0;
+
+    if (has_deviatoric_direction)
+      point.jacobian[INDEPENDENT_Q_INDEX][column] =
+          (column == INDEPENDENT_Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
+          1.5 * dev_direction.doubleContraction(elastic_response.deviatoric());
+    else
+      point.jacobian[INDEPENDENT_Q_INDEX][column] =
+          column == INDEPENDENT_Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0);
+
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+    {
+      const auto row = PORE_POROSITY_0_INDEX + population_index;
+      if (floor_active[population_index])
+        point.jacobian[row][column] =
+            column == row ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0);
+      else
+        point.jacobian[row][column] =
+            (column == row ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) -
+            dpopulation_porosity_dx[population_index][column];
+    }
+  }
+
+  return point;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::initializeIndependentLocalSolveScales(
+    IndependentLocalSolveContext & context) const
+{
+  using std::abs;
+  using std::max;
+  using std::min;
+
+  const auto bulk_modulus = abs(MetaPhysicL::raw_value(
+      (context.elasticity_tensor(0, 0, 0, 0) + 2.0 * context.elasticity_tensor(0, 0, 1, 1)) / 3.0));
+  const auto shear_modulus = abs(MetaPhysicL::raw_value(context.elasticity_tensor(0, 1, 0, 1)));
+  context.p_scale = max({abs(MetaPhysicL::raw_value(context.p_trial)),
+                         bulk_modulus * this->_max_inelastic_increment,
+                         this->_minimum_stress_magnitude,
+                         1.0});
+  context.q_scale = max({abs(MetaPhysicL::raw_value(context.trial_equiv_stress)),
+                         3.0 * shear_modulus * this->_max_inelastic_increment,
+                         this->_minimum_stress_magnitude,
+                         1.0});
+
+  const auto characteristic_increment =
+      max(0.0,
+          (1.0 - MetaPhysicL::raw_value(this->_porosity_old[this->_qp])) *
+              this->_max_inelastic_increment);
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    const auto physical_scale =
+        max({abs(MetaPhysicL::raw_value(context.pore_porosity_begin[population_index])),
+             _local_porosity_scale_floor,
+             10.0 * _porosity_bound_tolerance});
+    context.porosity_convergence_scale[population_index] = physical_scale;
+    context.porosity_variable_scale[population_index] =
+        max(physical_scale, characteristic_increment);
+    context.porosity_merit_scale[population_index] =
+        max(physical_scale, min(characteristic_increment, 10.0 * physical_scale));
+  }
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalResidual
+PorousViscoplasticityStressUpdateTempl<is_ad>::scaledIndependentResidual(
+    const IndependentLocalResidual & residual, const IndependentLocalSolveContext & context) const
+{
+  return {residual[INDEPENDENT_P_INDEX] / context.p_scale,
+          residual[INDEPENDENT_Q_INDEX] / context.q_scale,
+          residual[PORE_POROSITY_0_INDEX] / context.porosity_merit_scale[0],
+          residual[PORE_POROSITY_1_INDEX] / context.porosity_merit_scale[1]};
+}
+
+template <bool is_ad>
+Real
+PorousViscoplasticityStressUpdateTempl<is_ad>::independentConvergenceResidualNorm(
+    const IndependentLocalResidual & residual, const IndependentLocalSolveContext & context) const
+{
+  const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> scaled = {
+      MetaPhysicL::raw_value(residual[INDEPENDENT_P_INDEX]) / context.p_scale,
+      MetaPhysicL::raw_value(residual[INDEPENDENT_Q_INDEX]) / context.q_scale,
+      MetaPhysicL::raw_value(residual[PORE_POROSITY_0_INDEX]) /
+          context.porosity_convergence_scale[0],
+      MetaPhysicL::raw_value(residual[PORE_POROSITY_1_INDEX]) /
+          context.porosity_convergence_scale[1]};
+  auto norm_squared = Real(0.0);
+  for (const auto value : scaled)
+  {
+    if (!std::isfinite(value))
+      return std::numeric_limits<Real>::infinity();
+    norm_squared += value * value;
+  }
+  return std::sqrt(norm_squared);
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentScaledLocalJacobian
+PorousViscoplasticityStressUpdateTempl<is_ad>::scaledIndependentJacobian(
+    const IndependentLocalJacobian & jacobian, const IndependentLocalSolveContext & context) const
+{
+  const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> variable_scale = {
+      context.p_scale,
+      context.q_scale,
+      context.porosity_variable_scale[0],
+      context.porosity_variable_scale[1]};
+  const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> residual_scale = {
+      context.p_scale,
+      context.q_scale,
+      context.porosity_merit_scale[0],
+      context.porosity_merit_scale[1]};
+  auto scaled = IndependentScaledLocalJacobian{};
+  for (auto row = 0u; row < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++row)
+    for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
+      scaled[row][column] = MetaPhysicL::raw_value(jacobian[row][column]) * variable_scale[column] /
+                            residual_scale[row];
+  return scaled;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::validateFiniteIndependentLocalPoint(
+    const IndependentLocalPoint & point, const char * stage) const
+{
+  validateFiniteValue(point.p, "independent local state", stage, "p");
+  validateFiniteValue(point.q, "independent local state", stage, "q");
+  validateFiniteValue(
+      point.pore_porosity[0], "independent local state", stage, "pore population 0 porosity");
+  validateFiniteValue(
+      point.pore_porosity[1], "independent local state", stage, "pore population 1 porosity");
+  validateFiniteTensor(point.inelastic_strain_increment,
+                       "independent local state",
+                       stage,
+                       "inelastic strain increment");
+  for (const auto & value : point.residual)
+    validateFiniteValue(value, "independent local state", stage, "residual");
+  for (const auto & row : point.jacobian)
+    for (const auto & value : row)
+      validateFiniteValue(value, "independent local state", stage, "Jacobian");
+  validateHydrostaticStressState(point.hydrostatic_stress, stage);
+}
+
+template <bool is_ad>
+std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint>
+PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch(
+    const IndependentLocalPoint & point,
+    const IndependentLocalResidual & correction_scaled,
+    const Real initial_alpha,
+    const IndependentLocalSolveContext & context)
+{
+  auto alpha = initial_alpha;
+  const auto current_scaled = scaledIndependentResidual(point.residual, context);
+  auto current_norm_squared = Real(0.0);
+  for (const auto & value : current_scaled)
+  {
+    const auto raw = MetaPhysicL::raw_value(value);
+    current_norm_squared += raw * raw;
+  }
+
+  for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
+  {
+    auto trial = point.coordinates();
+    trial.p += alpha * context.p_scale * correction_scaled[INDEPENDENT_P_INDEX];
+    trial.q += alpha * context.q_scale * correction_scaled[INDEPENDENT_Q_INDEX];
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      if (!point.floor_active[population_index])
+        trial.pore_porosity[population_index] +=
+            alpha * context.porosity_variable_scale[population_index] *
+            correction_scaled[PORE_POROSITY_0_INDEX + population_index];
+      else
+        trial.pore_porosity[population_index] = point.pore_porosity[population_index];
+
+    const auto total_porosity = trial.pore_porosity[0] + trial.pore_porosity[1];
+    const auto admissible = std::isfinite(MetaPhysicL::raw_value(trial.p)) &&
+                            std::isfinite(MetaPhysicL::raw_value(trial.q)) && trial.q >= 0.0 &&
+                            trial.pore_porosity[0] >= 0.0 && trial.pore_porosity[1] >= 0.0 &&
+                            total_porosity >= _minimum_porosity && total_porosity < 1.0;
+    if (admissible)
+      try
+      {
+        auto candidate = evaluateIndependentLocalPoint(trial, context, point.floor_active);
+        const auto candidate_scaled = scaledIndependentResidual(candidate.residual, context);
+        auto candidate_norm_squared = Real(0.0);
+        for (const auto & value : candidate_scaled)
+        {
+          const auto raw = MetaPhysicL::raw_value(value);
+          candidate_norm_squared += raw * raw;
+        }
+        if (candidate_norm_squared < current_norm_squared)
+          return candidate;
+      }
+      catch (const MooseException &)
+      {
+      }
+
+    alpha *= 0.5;
+  }
+  return std::nullopt;
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
+PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
+    IndependentLocalPoint point,
+    const IndependentLocalSolveContext & context,
+    std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & activate_floor)
+{
+  activate_floor = {{false, false}};
+  const auto population_floor = [&](const unsigned int population_index)
+  {
+    const auto total_begin = context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+    return _minimum_porosity *
+           MetaPhysicL::raw_value(context.pore_porosity_begin[population_index] / total_begin);
+  };
+
+  for (auto iteration = 0u; iteration < _local_newton_max_iterations; ++iteration)
+  {
+    validateFiniteIndependentLocalPoint(point, "independent coupled Newton iteration");
+    const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
+    if (residual_norm <= _local_newton_tolerance)
+      return point;
+
+    const auto jacobian = scaledIndependentJacobian(point.jacobian, context);
+    const auto residual = scaledIndependentResidual(point.residual, context);
+    IndependentLocalResidual rhs{};
+    for (auto row = 0u; row < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++row)
+      rhs[row] = -residual[row];
+    auto correction = IndependentLocalResidual{};
+    if (!solveLinearSystem(jacobian, rhs, correction))
+      mooseException(
+          "In ", this->_name, ": singular analytical independent local (p,q,f_0,f_1) Jacobian.");
+
+    const auto current_total_porosity = point.pore_porosity[0] + point.pore_porosity[1];
+    const auto implied_total_porosity =
+        context.pore_porosity_begin[0] + context.pore_porosity_begin[1] +
+        point.raw_population_porosity_increment[0] + point.raw_population_porosity_increment[1];
+    if (current_total_porosity <= _minimum_porosity + 10.0 * _porosity_bound_tolerance &&
+        implied_total_porosity <= _minimum_porosity + _porosity_bound_tolerance)
+    {
+      activate_floor = {{true, true}};
+      return point;
+    }
+
+    auto alpha = _local_newton_relaxation;
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+    {
+      if (point.floor_active[population_index])
+        continue;
+      const auto column = PORE_POROSITY_0_INDEX + population_index;
+      const auto delta = context.porosity_variable_scale[population_index] *
+                         MetaPhysicL::raw_value(correction[column]);
+      const auto floor_value = population_floor(population_index);
+      const auto distance =
+          MetaPhysicL::raw_value(point.pore_porosity[population_index]) - floor_value;
+      const auto implied = context.pore_porosity_begin[population_index] +
+                           point.raw_population_porosity_increment[population_index];
+      if (delta < 0.0 && distance <= 10.0 * _porosity_bound_tolerance &&
+          implied <= floor_value + _porosity_bound_tolerance)
+      {
+        activate_floor[population_index] = true;
+        return point;
+      }
+      if (delta < 0.0 && distance > 0.0)
+        alpha = std::min(alpha, 0.99 * distance / (-delta));
+    }
+
+    const auto candidate = independentBacktrackingLineSearch(point, correction, alpha, context);
+    if (!candidate)
+    {
+      const auto implied_total = context.pore_porosity_begin[0] + context.pore_porosity_begin[1] +
+                                 point.raw_population_porosity_increment[0] +
+                                 point.raw_population_porosity_increment[1];
+      if (implied_total <= _minimum_porosity + _porosity_bound_tolerance)
+      {
+        activate_floor = {{true, true}};
+        return point;
+      }
+
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+      {
+        if (point.floor_active[population_index])
+          continue;
+        const auto floor_value = population_floor(population_index);
+        const auto implied = context.pore_porosity_begin[population_index] +
+                             point.raw_population_porosity_increment[population_index];
+        if (implied <= floor_value + _porosity_bound_tolerance)
+          activate_floor[population_index] = true;
+      }
+      if (activate_floor[0] || activate_floor[1])
+        return point;
+
+      mooseException(
+          "In ", this->_name, ": independent local line search failed for (p,q,f_0,f_1).");
+    }
+    point = *candidate;
+  }
+
+  const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
+  if (residual_norm <= _local_newton_stagnation_tolerance)
+    return point;
+
+  const auto implied_total = context.pore_porosity_begin[0] + context.pore_porosity_begin[1] +
+                             point.raw_population_porosity_increment[0] +
+                             point.raw_population_porosity_increment[1];
+  if (implied_total <= _minimum_porosity + _porosity_bound_tolerance)
+  {
+    activate_floor = {{true, true}};
+    return point;
+  }
+
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    if (!point.floor_active[population_index])
+    {
+      const auto floor_value = population_floor(population_index);
+      const auto implied = context.pore_porosity_begin[population_index] +
+                           point.raw_population_porosity_increment[population_index];
+      if (implied <= floor_value + _porosity_bound_tolerance)
+        activate_floor[population_index] = true;
+    }
+  if (activate_floor[0] || activate_floor[1])
+    return point;
+
+  if (adaptiveSubstepRefinementAvailable())
+    mooseException("In ",
+                   this->_name,
+                   ": independent local Newton reached its iteration limit while finer adaptive "
+                   "constitutive substeps remain available.");
+
+  mooseException("In ",
+                 this->_name,
+                 ": analytical independent local (p,q,f_0,f_1) Newton failed to converge. "
+                 "Final scaled residual norm = ",
+                 residual_norm,
+                 ".");
+  return point; // Unreachable after mooseException.
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
+PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentPorosityActiveSet(
+    const IndependentLocalSolveContext & context)
+{
+  const auto total_begin = context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+  const auto population_floor = [&](const unsigned int population_index)
+  { return _minimum_porosity * context.pore_porosity_begin[population_index] / total_begin; };
+
+  std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> floor_active{{false, false}};
+  auto coordinates = IndependentLocalCoordinates{
+      context.p_trial, context.trial_equiv_stress, context.pore_porosity_begin};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    const auto floor_value = population_floor(population_index);
+    if (context.pore_porosity_begin[population_index] <= floor_value + _porosity_bound_tolerance)
+    {
+      floor_active[population_index] = true;
+      coordinates.pore_porosity[population_index] = floor_value;
+    }
+  }
+
+  auto point = evaluateIndependentLocalPoint(coordinates, context, floor_active);
+  constexpr auto max_active_set_iterations = 2u * MAX_HYDROSTATIC_STRESS_POPULATIONS + 2u;
+  for (auto active_set_iteration = 0u; active_set_iteration < max_active_set_iterations;
+       ++active_set_iteration)
+  {
+    std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> activate_floor{{false, false}};
+    point = solveIndependentCoupledNewton(point, context, activate_floor);
+
+    if (activate_floor[0] || activate_floor[1])
+    {
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+        if (activate_floor[population_index])
+          floor_active[population_index] = true;
+
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+        if (floor_active[population_index])
+          point.pore_porosity[population_index] = population_floor(population_index);
+
+      point = evaluateIndependentLocalPoint(point.coordinates(), context, floor_active);
+      continue;
+    }
+
+    /*
+     * Check complementarity for every active population. Evaluate the unconstrained population
+     * residual at the converged floor state while retaining any other active population. With
+     * R_fi = f_i - f_i,implied, a negative free residual means that the unconstrained state wants
+     * f_i above its floor and the bound must be released.
+     */
+    auto release_floor = floor_active;
+    auto any_release = false;
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      if (floor_active[population_index])
+      {
+        auto trial_floor_active = floor_active;
+        trial_floor_active[population_index] = false;
+        const auto free_point =
+            evaluateIndependentLocalPoint(point.coordinates(), context, trial_floor_active);
+        const auto row = PORE_POROSITY_0_INDEX + population_index;
+        if (free_point.residual[row] < -_porosity_bound_tolerance)
+        {
+          release_floor[population_index] = false;
+          any_release = true;
+          if (this->_verbose)
+            Moose::out << "Independent pore active set: releasing population " << population_index
+                       << " floor at active_set_iteration = " << active_set_iteration
+                       << ", free residual = " << MetaPhysicL::raw_value(free_point.residual[row])
+                       << std::endl;
+        }
+      }
+
+    if (!any_release)
+      return point;
+
+    floor_active = release_floor;
+    point = evaluateIndependentLocalPoint(point.coordinates(), context, floor_active);
+  }
+
+  mooseException("In ",
+                 this->_name,
+                 ": independent pore-population lower-bound active set failed to stabilize.");
+  return point; // Unreachable after mooseException.
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
+PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSensitivity(
+    const IndependentLocalPoint & point, const IndependentLocalSolveContext & context)
+{
+  if constexpr (!is_ad)
+    return point;
+  else
+  {
+    validateFiniteIndependentLocalPoint(point, "independent implicit AD reconstruction");
+    const auto jacobian = scaledIndependentJacobian(point.jacobian, context);
+    const auto residual = scaledIndependentResidual(point.residual, context);
+    IndependentLocalResidual rhs{};
+    for (auto row = 0u; row < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++row)
+      rhs[row] = -residual[row];
+    auto correction = IndependentLocalResidual{};
+    if (!solveLinearSystem(jacobian, rhs, correction))
+      mooseException("In ",
+                     this->_name,
+                     ": singular independent local Jacobian during AD sensitivity reconstruction.");
+
+    auto coordinates = point.coordinates();
+    std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE> delta = {
+        context.p_scale * correction[INDEPENDENT_P_INDEX],
+        context.q_scale * correction[INDEPENDENT_Q_INDEX],
+        context.porosity_variable_scale[0] * correction[PORE_POROSITY_0_INDEX],
+        context.porosity_variable_scale[1] * correction[PORE_POROSITY_1_INDEX]};
+    coordinates.p += delta[0] - MetaPhysicL::raw_value(delta[0]);
+    coordinates.q += delta[1] - MetaPhysicL::raw_value(delta[1]);
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      if (!point.floor_active[population_index])
+        coordinates.pore_porosity[population_index] +=
+            delta[PORE_POROSITY_0_INDEX + population_index] -
+            MetaPhysicL::raw_value(delta[PORE_POROSITY_0_INDEX + population_index]);
+
+    auto reconstructed = evaluateIndependentLocalPoint(coordinates, context, point.floor_active);
+    validateFiniteIndependentLocalPoint(reconstructed, "independent implicit AD reconstruction");
+    return reconstructed;
+  }
+}
+
+template <bool is_ad>
+RankFourTensor
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTangent(
+    const IndependentLocalPoint & point, const IndependentLocalSolveContext & context) const
+{
+  validateFiniteIndependentLocalPoint(point, "independent consistent tangent evaluation");
+  const auto jacobian = scaledIndependentJacobian(point.jacobian, context);
+  const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> variable_scale = {
+      context.p_scale,
+      context.q_scale,
+      context.porosity_variable_scale[0],
+      context.porosity_variable_scale[1]};
+  const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> residual_scale = {
+      context.p_scale,
+      context.q_scale,
+      context.porosity_merit_scale[0],
+      context.porosity_merit_scale[1]};
+
+  const auto solve_trial_sensitivity = [&](const unsigned int trial_component)
+  {
+    FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> rhs{};
+    rhs[trial_component] = 1.0 / residual_scale[trial_component];
+    FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> scaled_sensitivity{};
+    if (!solveLinearSystem(jacobian, rhs, scaled_sensitivity))
+      mooseException("In ",
+                     this->_name,
+                     ": singular independent local Jacobian during consistent tangent evaluation.");
+    FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> sensitivity{};
+    for (auto i = 0u; i < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++i)
+      sensitivity[i] = variable_scale[i] * scaled_sensitivity[i];
+    return sensitivity;
+  };
+
+  const auto sensitivity_p_trial = solve_trial_sensitivity(INDEPENDENT_P_INDEX);
+  const auto q_trial = MetaPhysicL::raw_value(context.trial_equiv_stress);
+  const auto has_deviatoric_direction = q_trial > this->_minimum_stress_magnitude;
+  FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> sensitivity_q_trial{};
+  if (has_deviatoric_direction)
+    sensitivity_q_trial = solve_trial_sensitivity(INDEPENDENT_Q_INDEX);
+
+  const auto elasticity =
+      [&](const unsigned int i, const unsigned int j, const unsigned int k, const unsigned int l)
+  { return MetaPhysicL::raw_value(context.elasticity_tensor(i, j, k, l)); };
+  const auto identity = RankTwoTensor(RankTwoTensor::initIdentity);
+  auto hydro_trial_gradient = RankTwoTensor();
+  auto equiv_trial_gradient = RankTwoTensor();
+  auto dev_direction = RankTwoTensor();
+  hydro_trial_gradient.zero();
+  equiv_trial_gradient.zero();
+  dev_direction.zero();
+
+  if (has_deviatoric_direction)
+    for (auto i = 0u; i < 3; ++i)
+      for (auto j = 0u; j < 3; ++j)
+        dev_direction(i, j) = MetaPhysicL::raw_value(context.trial_dev_stress(i, j)) / q_trial;
+
+  for (auto k = 0u; k < 3; ++k)
+    for (auto l = 0u; l < 3; ++l)
+    {
+      for (auto i = 0u; i < 3; ++i)
+        hydro_trial_gradient(k, l) += elasticity(i, i, k, l) / 3.0;
+      if (has_deviatoric_direction)
+        for (auto i = 0u; i < 3; ++i)
+          for (auto j = 0u; j < 3; ++j)
+            equiv_trial_gradient(k, l) += 1.5 * dev_direction(i, j) * elasticity(i, j, k, l);
+    }
+
+  auto tangent = RankFourTensor();
+  tangent.zero();
+  if (!has_deviatoric_direction)
+  {
+    const auto dp_dp_trial = sensitivity_p_trial[INDEPENDENT_P_INDEX];
+    for (auto i = 0u; i < 3; ++i)
+      for (auto j = 0u; j < 3; ++j)
+        for (auto k = 0u; k < 3; ++k)
+          for (auto l = 0u; l < 3; ++l)
+            tangent(i, j, k, l) = elasticity(i, j, k, l) +
+                                  identity(i, j) * (dp_dp_trial - 1.0) * hydro_trial_gradient(k, l);
+  }
+  else
+  {
+    const auto dp_dp_trial = sensitivity_p_trial[INDEPENDENT_P_INDEX];
+    const auto dq_dp_trial = sensitivity_p_trial[INDEPENDENT_Q_INDEX];
+    const auto dp_dq_trial = sensitivity_q_trial[INDEPENDENT_P_INDEX];
+    const auto dq_dq_trial = sensitivity_q_trial[INDEPENDENT_Q_INDEX];
+    const auto q = MetaPhysicL::raw_value(point.q);
+    auto p_gradient = RankTwoTensor();
+    auto q_gradient = RankTwoTensor();
+    p_gradient.zero();
+    q_gradient.zero();
+    for (auto k = 0u; k < 3; ++k)
+      for (auto l = 0u; l < 3; ++l)
+      {
+        p_gradient(k, l) =
+            dp_dp_trial * hydro_trial_gradient(k, l) + dp_dq_trial * equiv_trial_gradient(k, l);
+        q_gradient(k, l) =
+            dq_dp_trial * hydro_trial_gradient(k, l) + dq_dq_trial * equiv_trial_gradient(k, l);
+      }
+    for (auto i = 0u; i < 3; ++i)
+      for (auto j = 0u; j < 3; ++j)
+        for (auto k = 0u; k < 3; ++k)
+          for (auto l = 0u; l < 3; ++l)
+          {
+            const auto dev_trial_gradient =
+                elasticity(i, j, k, l) - identity(i, j) * hydro_trial_gradient(k, l);
+            const auto dev_direction_gradient =
+                (dev_trial_gradient - dev_direction(i, j) * equiv_trial_gradient(k, l)) / q_trial;
+            tangent(i, j, k, l) = identity(i, j) * p_gradient(k, l) +
+                                  dev_direction(i, j) * q_gradient(k, l) +
+                                  q * dev_direction_gradient;
+          }
+  }
+
+  for (auto i = 0u; i < 3; ++i)
+    for (auto j = 0u; j < 3; ++j)
+      for (auto k = 0u; k < 3; ++k)
+        for (auto l = 0u; l < 3; ++l)
+          if (!std::isfinite(tangent(i, j, k, l)))
+            mooseException("In ",
+                           this->_name,
+                           ": nonfinite independent consistent tangent component (",
+                           i,
+                           ",",
+                           j,
+                           ",",
+                           k,
+                           ",",
+                           l,
+                           ") = ",
+                           tangent(i, j, k, l),
+                           ".");
+
+  return tangent;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::commitIndependentLocalPoint(
+    const IndependentLocalPoint & point,
+    const IndependentLocalSolveContext & context,
+    GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    GenericRankTwoTensor<is_ad> & stress,
+    GenericReal<is_ad> & effective_inelastic_strain_increment)
+{
+  validateFiniteIndependentLocalPoint(point, "independent local state commit");
+  inelastic_strain_increment = point.inelastic_strain_increment;
+  elastic_strain_increment = context.trial_elastic_strain_increment - inelastic_strain_increment;
+  stress = context.elasticity_tensor * (context.elastic_strain_old + elastic_strain_increment);
+  effective_inelastic_strain_increment = point.effective_inelastic_strain_increment;
+
+  const auto q_flow = context.trial_equiv_stress > this->_minimum_stress_magnitude
+                          ? point.q
+                          : GenericReal<is_ad>(0.0);
+  const auto total_porosity = point.pore_porosity[0] + point.pore_porosity[1];
+  this->setGaugeStresses(q_flow, point.hydrostatic_stress, total_porosity);
+  this->_hydro_stress = point.p;
+  this->_intermediate_porosity = total_porosity;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStepIndependent(
+    GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    GenericRankTwoTensor<is_ad> & stress,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor,
+    const GenericRankTwoTensor<is_ad> & elastic_strain_old,
+    GenericReal<is_ad> & effective_inelastic_strain_increment)
+{
+  const auto trial_elastic_strain_increment = elastic_strain_increment;
+  const auto trial_stress = stress;
+  const auto total_porosity_begin = boundedBeginningPorosity();
+  const auto p_trial = trial_stress.trace() / 3.0;
+  const auto trial_dev_stress = trial_stress.deviatoric();
+  const auto q_trial = this->equivalentStress(trial_dev_stress);
+
+  this->computeStressInitialize(q_trial, elasticity_tensor);
+
+  auto pore_porosity_begin = independentPorePorosityState(total_porosity_begin);
+  const auto population_sum = pore_porosity_begin[0] + pore_porosity_begin[1];
+  const auto population_sum_raw = MetaPhysicL::raw_value(population_sum);
+  if (!std::isfinite(population_sum_raw) || pore_porosity_begin[0] < 0.0 ||
+      pore_porosity_begin[1] < 0.0 || population_sum >= 1.0)
+    mooseException("In ", this->_name, ": invalid beginning independent pore-porosity state.");
+  if (std::abs(population_sum_raw - MetaPhysicL::raw_value(total_porosity_begin)) >
+      10.0 * _porosity_bound_tolerance)
+    mooseException("In ",
+                   this->_name,
+                   ": independent pore porosities do not sum to the beginning total porosity. "
+                   "population_0 = ",
+                   MetaPhysicL::raw_value(pore_porosity_begin[0]),
+                   ", population_1 = ",
+                   MetaPhysicL::raw_value(pore_porosity_begin[1]),
+                   ", total = ",
+                   MetaPhysicL::raw_value(total_porosity_begin),
+                   ".");
+
+  auto context = IndependentLocalSolveContext{p_trial,
+                                              trial_dev_stress,
+                                              q_trial,
+                                              pore_porosity_begin,
+                                              trial_elastic_strain_increment,
+                                              elastic_strain_old,
+                                              elasticity_tensor};
+  initializeIndependentLocalSolveScales(context);
+  auto point = solveIndependentPorosityActiveSet(context);
+
+  if constexpr (is_ad)
+    point = reconstructIndependentImplicitSensitivity(point, context);
+  if constexpr (!is_ad)
+    if (_compute_consistent_tangent)
+      _last_consistent_tangent = computeIndependentConsistentTangent(point, context);
+
+  commitIndependentLocalPoint(point,
+                              context,
+                              elastic_strain_increment,
+                              inelastic_strain_increment,
+                              stress,
+                              effective_inelastic_strain_increment);
+  independentPorePorosityStateAccepted(inelastic_strain_increment, point.pore_porosity);
+
+  if (this->_verbose)
+    Moose::out << this->_name
+               << " independent pore local solve: p = " << MetaPhysicL::raw_value(point.p)
+               << " q = " << MetaPhysicL::raw_value(point.q)
+               << " f_0 = " << MetaPhysicL::raw_value(point.pore_porosity[0])
+               << " f_1 = " << MetaPhysicL::raw_value(point.pore_porosity[1])
+               << " f = " << MetaPhysicL::raw_value(point.pore_porosity[0] + point.pore_porosity[1])
+               << " population_0_floor = " << point.floor_active[0]
+               << " population_1_floor = " << point.floor_active[1]
+               << " residual_norm = " << independentConvergenceResidualNorm(point.residual, context)
+               << std::endl;
+}
+template <bool is_ad>
 void
 PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
     GenericRankTwoTensor<is_ad> & elastic_strain_increment,
@@ -3022,6 +3989,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
     const GenericRankTwoTensor<is_ad> & elastic_strain_old,
     GenericReal<is_ad> & effective_inelastic_strain_increment)
 {
+  if (useIndependentPorePorosityKinematics())
+  {
+    updateStateOneStepIndependent(elastic_strain_increment,
+                                  inelastic_strain_increment,
+                                  stress,
+                                  elasticity_tensor,
+                                  elastic_strain_old,
+                                  effective_inelastic_strain_increment);
+    return;
+  }
+
   const auto trial_elastic_strain_increment = elastic_strain_increment;
   const auto trial_stress = stress;
   const auto porosity_begin = boundedBeginningPorosity();
@@ -3778,6 +4756,220 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeLpsDerivatives(
   return d;
 }
 
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLpsDerivatives
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
+    const GenericReal<is_ad> & gauge_stress,
+    const HydrostaticStressState & hydrostatic_stress,
+    const GenericReal<is_ad> & equiv_stress,
+    const PorePorosityState & pore_porosity,
+    const CreepLaw & law) const
+{
+  using std::abs;
+  using std::pow;
+
+  if (hydrostaticStressPopulationCount(hydrostatic_stress) != MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    mooseException("In ",
+                   this->_name,
+                   ": independent pore kinematics requires exactly two hydrostatic populations.");
+
+  auto d = IndependentLpsDerivatives{};
+  const auto lambda = gauge_stress;
+  const auto q = equiv_stress;
+  const auto f = pore_porosity[0] + pore_porosity[1];
+  const auto n = law.power;
+  const auto alpha = law.power_factor;
+  constexpr auto beta = 1.5;
+  constexpr auto dA_df = 2.0 / 3.0;
+  const auto A = 1.0 + 2.0 * f / 3.0;
+  const auto q2_over_lambda2 = Utility::pow<2>(q / lambda);
+  const auto left = A * q2_over_lambda2;
+
+  d.F_lambda = -2.0 * left / lambda;
+  d.F_q = 2.0 * A * q / Utility::pow<2>(lambda);
+  d.F_lambdalambda = 6.0 * left / Utility::pow<2>(lambda);
+  d.F_lambdaq = -4.0 * A * q / Utility::pow<3>(lambda);
+
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+    const auto fi = pore_porosity[population_index];
+    const auto p_eff = population.effective_hydro_stress;
+    const auto abs_p = abs(p_eff);
+    const auto M = abs_p / lambda;
+    const auto sign_p = p_eff > 0.0 ? Real(1.0) : (p_eff < 0.0 ? Real(-1.0) : Real(0.0));
+
+    const auto exponent = (n + 1.0) / n;
+    const auto mod = pow(beta * M, exponent);
+    const auto y = 1.0 + mod / n;
+    const auto h = pow(y, n);
+
+    auto dh_dM = GenericReal<is_ad>(0.0);
+    auto d2h_dM2 = GenericReal<is_ad>(0.0);
+    if (M > 0.0)
+    {
+      const auto dmod_dM = exponent * mod / M;
+      const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
+      dh_dM = dmod_dM * pow(y, n - 1.0);
+      d2h_dM2 =
+          (n - 1.0) / n * Utility::pow<2>(dmod_dM) * pow(y, n - 2.0) + d2mod_dM2 * pow(y, n - 1.0);
+    }
+    else if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
+      d2h_dM2 = 2.0 * beta * beta;
+
+    const auto Z = h + alpha / h;
+    const auto dZ_dM = dh_dM * (1.0 - alpha / Utility::pow<2>(h));
+    const auto d2Z_dM2 = d2h_dM2 * (1.0 - alpha / Utility::pow<2>(h)) +
+                         2.0 * alpha * Utility::pow<2>(dh_dM) / Utility::pow<3>(h);
+
+    const auto M_lambda = -M / lambda;
+    const auto M_p = sign_p / lambda;
+    const auto M_lambdalambda = 2.0 * M / Utility::pow<2>(lambda);
+    const auto M_lambdap = -sign_p / Utility::pow<2>(lambda);
+
+    d.F_lambda += fi * dZ_dM * M_lambda;
+    d.population_F_p[population_index] = fi * dZ_dM * M_p;
+    d.F_p += d.population_F_p[population_index];
+    d.F_lambdalambda += fi * (d2Z_dM2 * Utility::pow<2>(M_lambda) + dZ_dM * M_lambdalambda);
+    d.population_F_lambdap[population_index] = fi * (d2Z_dM2 * M_lambda * M_p + dZ_dM * M_lambdap);
+    d.F_lambdap += d.population_F_lambdap[population_index];
+    d.population_F_pp[population_index] = fi * d2Z_dM2 * Utility::pow<2>(M_p);
+    d.F_pp += d.population_F_pp[population_index];
+
+    for (auto porosity_index = 0u; porosity_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++porosity_index)
+    {
+      const auto p_f = population.deffective_hydro_dporosity[porosity_index];
+      const auto M_f = sign_p * p_f / lambda;
+      const auto M_lambdaf = -sign_p * p_f / Utility::pow<2>(lambda);
+      const auto explicit_population = porosity_index == population_index ? Real(1.0) : Real(0.0);
+
+      d.F_porosity[porosity_index] += explicit_population * Z + fi * dZ_dM * M_f;
+      d.F_lambdaporosity[porosity_index] += explicit_population * dZ_dM * M_lambda +
+                                            fi * (d2Z_dM2 * M_f * M_lambda + dZ_dM * M_lambdaf);
+      d.population_F_pporosity[population_index][porosity_index] =
+          explicit_population * dZ_dM * M_p + fi * d2Z_dM2 * M_f * M_p;
+      d.F_pporosity[porosity_index] += d.population_F_pporosity[population_index][porosity_index];
+    }
+  }
+
+  for (auto porosity_index = 0u; porosity_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++porosity_index)
+  {
+    d.F_porosity[porosity_index] += dA_df * q2_over_lambda2 - 2.0 * alpha * f;
+    d.F_lambdaporosity[porosity_index] +=
+        -2.0 * dA_df * Utility::pow<2>(q) / Utility::pow<3>(lambda);
+  }
+
+  return d;
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLpsCreepResponse
+PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLpsCreepResponse(
+    const HydrostaticStressState & hydrostatic_stress,
+    const GenericReal<is_ad> & equiv_stress,
+    const GenericRankTwoTensor<is_ad> & dev_direction,
+    const PorePorosityState & pore_porosity)
+{
+  using std::abs;
+
+  auto response = IndependentLpsCreepResponse{};
+  response.inelastic_strain_increment.zero();
+  for (auto & derivative : response.dinelastic_dx)
+    derivative.zero();
+
+  const auto total_porosity = pore_porosity[0] + pore_porosity[1];
+  const auto dev_stress = dev_direction * equiv_stress;
+  const auto A = 1.0 + 2.0 * total_porosity / 3.0;
+  constexpr auto dA_df = 2.0 / 3.0;
+
+  for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
+  {
+    const auto coefficient = creepCoefficient(law_index);
+    if (MetaPhysicL::raw_value(coefficient) == 0.0)
+      continue;
+
+    const auto & law = _creep_laws[law_index];
+    const auto gauge_stress =
+        computeGaugeStress(equiv_stress, hydrostatic_stress, total_porosity, law);
+    const auto lps = computeIndependentLpsDerivatives(
+        gauge_stress, hydrostatic_stress, equiv_stress, pore_porosity, law);
+
+    const auto scaled_F_lambda_raw = MetaPhysicL::raw_value(gauge_stress * lps.F_lambda);
+    if (!std::isfinite(scaled_F_lambda_raw) || abs(scaled_F_lambda_raw) < 1.0e-12)
+      mooseException("In ",
+                     this->_name,
+                     ": singular independent-porosity LPS derivative Lambda*dF/dLambda = ",
+                     scaled_F_lambda_raw,
+                     " for creep law ",
+                     law_index,
+                     ".");
+
+    std::array<GenericReal<is_ad>, INDEPENDENT_LOCAL_SYSTEM_SIZE> dgauge_dx{};
+    dgauge_dx[INDEPENDENT_P_INDEX] = -lps.F_p / lps.F_lambda;
+    dgauge_dx[INDEPENDENT_Q_INDEX] = -lps.F_q / lps.F_lambda;
+    dgauge_dx[PORE_POROSITY_0_INDEX] = -lps.F_porosity[0] / lps.F_lambda;
+    dgauge_dx[PORE_POROSITY_1_INDEX] = -lps.F_porosity[1] / lps.F_lambda;
+
+    const auto dev_factor = 3.0 * A / Utility::pow<2>(gauge_stress);
+    const auto B = this->_identity_two * (lps.F_p / 3.0) + dev_stress * dev_factor;
+    const auto creep_rate = computeCreepRate(law, coefficient, gauge_stress);
+    const auto W = -this->constitutiveTimeStep() * creep_rate / lps.F_lambda;
+
+    response.inelastic_strain_increment += B * W;
+    response.effective_inelastic_strain_increment += creep_rate * this->constitutiveTimeStep();
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      response.population_volumetric_strain_increment[population_index] +=
+          lps.population_F_p[population_index] * W;
+
+    const auto dev_factor_lambda = -2.0 * dev_factor / gauge_stress;
+
+    for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
+    {
+      const auto dp_dx = x_index == INDEPENDENT_P_INDEX ? Real(1.0) : Real(0.0);
+      const auto dq_dx = x_index == INDEPENDENT_Q_INDEX ? Real(1.0) : Real(0.0);
+      const auto porosity_index =
+          x_index >= PORE_POROSITY_0_INDEX ? static_cast<int>(x_index - PORE_POROSITY_0_INDEX) : -1;
+      const auto df_dx = porosity_index >= 0 ? Real(1.0) : Real(0.0);
+
+      auto dFp_dx = lps.F_lambdap * dgauge_dx[x_index] + lps.F_pp * dp_dx;
+      auto dFlambda_dx =
+          lps.F_lambdalambda * dgauge_dx[x_index] + lps.F_lambdap * dp_dx + lps.F_lambdaq * dq_dx;
+      if (porosity_index >= 0)
+      {
+        dFp_dx += lps.F_pporosity[porosity_index];
+        dFlambda_dx += lps.F_lambdaporosity[porosity_index];
+      }
+
+      const auto ddev_factor_dx = dev_factor_lambda * dgauge_dx[x_index] +
+                                  3.0 * dA_df * df_dx / Utility::pow<2>(gauge_stress);
+      const auto ddev_stress_dx = dev_direction * dq_dx;
+      const auto dB_dx = this->_identity_two * (dFp_dx / 3.0) + dev_stress * ddev_factor_dx +
+                         ddev_stress_dx * dev_factor;
+      const auto dW_dx =
+          W * (law.power * dgauge_dx[x_index] / gauge_stress - dFlambda_dx / lps.F_lambda);
+
+      response.dinelastic_dx[x_index] += B * dW_dx + dB_dx * W;
+
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+      {
+        auto dpopulation_Fp_dx = lps.population_F_lambdap[population_index] * dgauge_dx[x_index] +
+                                 lps.population_F_pp[population_index] * dp_dx;
+        if (porosity_index >= 0)
+          dpopulation_Fp_dx += lps.population_F_pporosity[population_index][porosity_index];
+
+        response.dpopulation_volumetric_dx[population_index][x_index] +=
+            lps.population_F_p[population_index] * dW_dx + dpopulation_Fp_dx * W;
+      }
+    }
+  }
+
+  return response;
+}
 template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::LpsCreepResponse
 PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLpsCreepResponse(
