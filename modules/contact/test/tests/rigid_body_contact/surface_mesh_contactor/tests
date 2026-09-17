@@ -1,6 +1,6 @@
 [Tests]
   design = 'SurfaceMeshContactor.md LevelSetContactorAux.md'
-  issues = '#0000'
+  issues = '#33801'
   [sphere_sdf]
     type = 'CSVDiff'
     input = 'sphere_sdf.i'

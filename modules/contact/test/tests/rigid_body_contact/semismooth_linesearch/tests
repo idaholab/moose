@@ -1,6 +1,6 @@
 [Tests]
   design = 'SphereContactor.md RigidBodyNodalNCPKernel.md SemismoothContactLineSearch.md'
-  issues = '#0000'
+  issues = '#33801'
   [semismooth_linesearch]
     type = 'CSVDiff'
     input = 'hertz_inelastic_ls.i'

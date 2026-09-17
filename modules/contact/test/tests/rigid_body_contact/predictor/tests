@@ -1,6 +1,6 @@
 [Tests]
   design = 'RigidBodyContactPredictor.md'
-  issues = '#0000'
+  issues = '#33801'
   # These tests certify BOTH the correctness AND the iteration-count
   # improvement of RigidBodyContactPredictor.  For each control mode
   # (force-controlled, displacement-controlled) we run the SAME input

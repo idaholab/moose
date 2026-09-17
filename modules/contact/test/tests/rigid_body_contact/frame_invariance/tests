@@ -1,6 +1,6 @@
 [Tests]
   design = 'LevelSetContactor.md SphereContactor.md RigidBodyLoadControl.md'
-  issues = '#0000'
+  issues = '#33801'
   # This directory hosts three tests that run the SAME physical problem —
   # a rigid sphere pressed into an elastic body under load control — with
   # contact along the +y, +x, and +z axes respectively.  The X and Z

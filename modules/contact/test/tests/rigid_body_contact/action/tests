@@ -1,6 +1,6 @@
 [Tests]
   design = 'RigidContactAction.md'
-  issues = '#0000'
+  issues = '#33801'
   # Pair of tests that prove `[RigidContact]` expansion is bit-for-bit
   # equivalent to the hand-rolled contact plumbing on the same physics:
   # both use `[Physics/SolidMechanics/QuasiStatic]` for the disp kernels

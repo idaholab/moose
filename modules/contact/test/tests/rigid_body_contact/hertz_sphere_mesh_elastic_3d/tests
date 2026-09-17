@@ -1,6 +1,6 @@
 [Tests]
   design = 'SurfaceMeshContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
-  issues = '#0000'
+  issues = '#33801'
   [hertz_mesh_elastic_3d]
     type = 'CSVDiff'
     input = 'hertz_elastic_3d.i'

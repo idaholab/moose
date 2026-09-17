@@ -1,6 +1,6 @@
 [Tests]
   design = 'SphereContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
-  issues = '#0000'
+  issues = '#33801'
   [hertz_inelastic_finite]
     type = 'CSVDiff'
     input = 'hertz_inelastic_finite.i'

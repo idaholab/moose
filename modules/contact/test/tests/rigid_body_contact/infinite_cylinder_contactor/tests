@@ -1,6 +1,6 @@
 [Tests]
   design = 'InfiniteCylinderContactor.md LevelSetContactorAux.md'
-  issues = '#0000'
+  issues = '#33801'
   [cylinder_sdf]
     type = 'CSVDiff'
     input = 'cylinder_sdf.i'

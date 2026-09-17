@@ -1,6 +1,6 @@
 [Tests]
   design = 'RigidBodyLoadControl.md LevelSetContactor.md'
-  issues = '#0000'
+  issues = '#33801'
   [hertz_load_finite_3d]
     type = 'CSVDiff'
     input = 'hertz_load_finite_3d.i'

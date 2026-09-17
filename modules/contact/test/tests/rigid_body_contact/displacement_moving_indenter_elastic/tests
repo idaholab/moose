@@ -1,6 +1,6 @@
 [Tests]
   design = 'LevelSetContactor.md SphereContactor.md'
-  issues = '#0000'
+  issues = '#33801'
   [hertz_moving]
     type = 'CSVDiff'
     input = 'hertz_moving.i'

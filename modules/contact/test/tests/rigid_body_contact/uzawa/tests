@@ -1,6 +1,6 @@
 [Tests]
   design = 'UzawaTransient.md'
-  issues = '#0000'
+  issues = '#33801'
   # Certifies UzawaTransient correctness on a force-controlled 3D
   # elastic-Hertz problem where plain Newton (baseline
   # load_controlled_elastic_3d/hertz_load_3d) already converges.  We
