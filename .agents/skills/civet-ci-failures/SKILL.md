@@ -25,7 +25,11 @@ scripts/civet_pr_failures.py --pr 33645             # a specific PR
 scripts/civet_pr_failures.py --pr 33645 --errors    # also read logs: build errors, failing tests
 scripts/civet_pr_failures.py --pr 33645 --errors --recipes ~/projects/civet_recipes
 scripts/civet_pr_failures.py --pr 33645 --json      # same findings as JSON; implies --errors
+scripts/civet_pr_failures.py --sha <commit>         # a commit rather than a PR
 ```
+
+CIVET attaches its statuses to the commit, not to the pull request, so `--sha` is enough on its own
+and covers push events to `next` and `devel`, where there is no pull request to name.
 
 The repository is taken from `--repo owner/name`, else the remote named by `--upstream-remote` or
 `$CIVET_UPSTREAM_REMOTE`, else the first of `up`, `upstream`, `origin` that exists. A developer
@@ -88,7 +92,7 @@ The report attaches these to the test they apply to. Correct them as they prove 
 
 | Reason | What it means and what to do |
 | --- | --- |
-| `KILLED: OVER MEMORY` | The harness enforced `--max-memory-per-slot`. Raise `min_slots` in the spec; not reproducible locally, since the cap is a CI scheduling parameter. |
+| `KILLED: OVER MEMORY` | The harness enforced `--max-memory-per-slot`. Raise `min_slots` in the spec. Reproducible on Linux, where memory accounting is consistent; not on macOS. |
 | `TIMEOUT` | Often a slow build rather than the test: `-O0` coverage jobs and `METHOD=dbg` jobs are both far slower than opt. If a test times out only there, reduce its problem size rather than raising `max_time`. |
 | `EXPECTED OUTPUT MISSING` | `RunApp`'s `expect_out` pattern did not match. Update `expect_out`, or fix the output it describes. |
 | `EXPECTED OUTPUT NOT FOUND` | Comes only from `PetscJacobianTester` and `TaoGradientTester`, which grep for a specific diagnostic line. The run usually died before PETSc/TAO printed it — look for the real error earlier in the same output. Nothing to do with gold files. |
@@ -115,10 +119,16 @@ synthesized from the step name. That matters: real invocations carry flags like
 guessed. When a test failed in several modes, the simplest failing invocation is reported, and the
 mode count says whether the failure is specific to one way of running.
 
+It also reports the container the step ran in, read from the step header. Containers are recorded
+per step rather than per job — a fetch step commonly runs in a base image while the steps that build
+and test run in a versioned one — so the container shown is the one belonging to the invocation
+shown. Reproducing the command outside it can behave differently, which is why the two are reported
+together.
+
 ## Watching an event to completion
 
-The tool reports a snapshot and deliberately does not block. A MOOSE event runs for the better part
-of an hour, so watch it in the background rather than waiting inside a turn.
+The tool reports a snapshot and deliberately does not block. A MOOSE event runs for hours, so watch
+it in the background rather than waiting inside a turn.
 
 A poll loop has to get three things right, none of which GitHub hands you:
 
@@ -156,6 +166,21 @@ rather than waiting.
 - `--recipes` matches jobs to recipes by display name, which can appear in more than one branch of
   the recipes tree, so it errs toward reporting a job as blocked.
 
+## When something does not fit
+
+Ask the user rather than guessing. This tool reports what CIVET recorded, and several things it
+cannot settle on its own:
+
+- A failure whose cause is not in the logs, or one whose reason is not in the table above.
+- A remediation here that contradicts what you observe. The table is a starting point, not a
+  specification.
+- A job whose logs return 403. The user can open it in the CIVET web UI; you cannot.
+- Whether a failure is worth fixing at all. A spurious failure needs a re-run, and only the user
+  can decide to invalidate an event or re-push.
+
+Say what you found, what you could not determine, and what you would do next. Do not invent a cause
+for a failure you cannot read, and do not apply a remedy on a hunch.
+
 ## Confidence in what is written here
 
 This skill was written from one extended investigation of a single pull request. Parts of it are
@@ -166,7 +191,8 @@ Verified against source, or stated directly by a MOOSE developer:
 
 - The `fatal: unable to access` row and the diagnostic precedence above, both checked against a
   container build that failed cloning a dependency.
-
+- Reporting on a commit with `--sha`, and the per-step container extraction, both checked against a
+  push event to `next`.
 - The three failure categories, and that MOOSE's base branch is rarely red.
 - `min_slots` as the remedy for `KILLED: OVER MEMORY`.
 - `EXPECTED OUTPUT MISSING` originating in `RunApp`'s `expect_out`, and `EXPECTED OUTPUT NOT FOUND`

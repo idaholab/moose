@@ -33,7 +33,7 @@ import os
 import re
 import subprocess
 import sys
-from typing import List, Optional, Sequence
+from typing import List, NamedTuple, Optional, Sequence
 
 # Remotes tried, in order, when none is named. A developer checkout usually
 # has origin pointing at a personal fork rather than the upstream, so origin
@@ -106,6 +106,9 @@ TEARDOWN_MARKERS = (
 TEST_FAILURE_RE = re.compile(r"\bFAILED \(")
 TEST_TALLY_RE = re.compile(r"^\d+ passed, .*\bFAILED\b")
 
+# The container a step executed in, named once in that step's header
+CONTAINER_RE = re.compile(r"Executing \S+ in (\S+://\S+|\S*\.sif)")
+
 # The literal harness invocation a step logged, as "[time] <dir>: ./run_tests ..."
 INVOCATION_RE = re.compile(r"^\[[\d:]+\]\s+(\S+):\s+(\./run_tests\b.*)$")
 
@@ -145,7 +148,8 @@ NORMALIZE_SUBS = (
 REMEDIATION_HINTS = (
     (
         "KILLED: OVER MEMORY",
-        "raise min_slots in the test spec; not reproducible locally",
+        "raise min_slots in the test spec; reproducible on Linux, where "
+        "memory accounting is consistent",
     ),
     (
         "Error opening ExodusII mesh file: /tmp/",
@@ -284,6 +288,19 @@ def resolve_repo(repo: Optional[str], remote: Optional[str]) -> Optional[str]:
     return None
 
 
+def resolve_target(repo: str, pr: Optional[int], sha: Optional[str]) -> dict:
+    """
+    Resolve what to report on: a pull request, or a bare commit.
+
+    CIVET attaches its statuses to the commit rather than to the pull request,
+    so a SHA is sufficient on its own. That is what lets this report on a push
+    event to next or devel, where there is no pull request at all.
+    """
+    if sha:
+        return {"number": None, "headRefName": None, "headRefOid": sha, "url": None}
+    return resolve_pr(repo, pr)
+
+
 def resolve_pr(repo: str, pr: Optional[int]) -> dict:
     """
     Resolve the PR number and head SHA, defaulting to the branch's PR.
@@ -358,7 +375,10 @@ def fetch_job_steps(job_url: str) -> List[tuple]:
     Fetch the step logs for a CIVET job as (name, text) pairs.
 
     CIVET serves every step of a job as a gzipped tarball with one member per
-    step, which needs no authentication for public repositories.
+    step, which needs no authentication for public repositories. The tarball is
+    read straight into memory and nothing is written to disk, so there is no
+    temporary state to clean up; the cost is that a job's whole log is resident
+    while it is being parsed.
     """
     import io
     import tarfile
@@ -377,6 +397,19 @@ def fetch_job_steps(job_url: str) -> List[tuple]:
             text = handle.read().decode("utf-8", "replace")
             steps.append((member.name.split("/")[-1], text))
     return steps
+
+
+class Failure(NamedTuple):
+    """One occurrence of a failing test: where it failed and how to repeat it."""
+
+    # Display name of the job it failed in
+    job: str
+    # Command that reruns just this test in the mode that failed it
+    command: str
+    # The mode itself, ignoring resource limits, for counting distinct modes
+    mode: str
+    # Container the step ran in, if its header named one
+    container: Optional[str]
 
 
 def unique(values: Sequence[str]) -> List[str]:
@@ -405,6 +438,19 @@ def strip_ci_args(args: List[str]) -> List[str]:
             continue
         kept.append(arg)
     return kept
+
+
+def extract_container(text: str) -> Optional[str]:
+    """
+    Get the container the given step executed in, if its header names one.
+
+    Takes a single step's log, because the container is a property of the step
+    and not of the job: a fetch step runs in a base image while the steps that
+    build and test run in a versioned one. That is why the caller pairs what
+    this returns with a particular step's invocation.
+    """
+    matches = CONTAINER_RE.findall(text)
+    return matches[-1] if matches else None
 
 
 def extract_invocation(text: str) -> Optional[tuple]:
@@ -639,9 +685,16 @@ def rollup_entries(rollup: dict, limit: int) -> List[dict]:
     """
     entries = []
     for test, info in list(rollup.items())[:limit]:
-        jobs = unique([job for job, _, _ in info["modes"]])
-        commands = unique([command for _, command, _ in info["modes"]])
-        modes = unique([mode for _, _, mode in info["modes"]])
+        failures = info["failures"]
+        jobs = unique([f.job for f in failures])
+        commands = unique([f.command for f in failures])
+        modes = unique([f.mode for f in failures])
+        # The container has to be the one belonging to the invocation reported
+        # below, not just any the test failed under
+        chosen = min(commands, key=len)
+        container = next(
+            (f.container for f in failures if f.command == chosen and f.container), None
+        )
         entries.append(
             {
                 "test": test,
@@ -650,7 +703,8 @@ def rollup_entries(rollup: dict, limit: int) -> List[dict]:
                 "hints": hints_for(sorted(info.get("reasons", ()))),
                 "jobs": jobs,
                 "modes": len(modes),
-                "reproduce": min(commands, key=len),
+                "reproduce": chosen,
+                "container": container,
             }
         )
     return entries
@@ -695,6 +749,9 @@ def collect_errors(
             errors = extract_step_errors(text, max_diagnostics)
             step = {"name": name, "exit_code": code, "kind": errors["kind"]}
 
+            container = extract_container(text)
+            step["container"] = container
+
             if errors["kind"] == "test":
                 signatures = errors["signatures"]
                 step["tests_failed"] = errors["total"]
@@ -713,7 +770,7 @@ def collect_errors(
                         test,
                         {
                             "status": line.split(None, 1)[0],
-                            "modes": [],
+                            "failures": [],
                             "reasons": set(),
                         },
                     )
@@ -721,11 +778,12 @@ def collect_errors(
                     # not distinguish a memory kill from a genuine error
                     if reason := re.search(r"FAILED \(([^)]*)\)", line):
                         test_entry["reasons"].add(reason.group(1))
-                    test_entry["modes"].append(
-                        (
-                            entry["context"],
-                            reproduce_command(invocation, test),
-                            mode_identity(invocation),
+                    test_entry["failures"].append(
+                        Failure(
+                            job=entry["context"],
+                            command=reproduce_command(invocation, test),
+                            mode=mode_identity(invocation),
+                            container=container,
                         )
                     )
             else:
@@ -794,6 +852,8 @@ def print_errors(collected: dict, max_failures: int) -> None:
                 scope += f": {', '.join(entry['jobs'])}"
             print(scope)
             print(f"    {entry['reproduce']}")
+            if entry["container"]:
+                print(f"    in {entry['container']}")
             if entry["modes"] > 1:
                 print(f"    (also failed in {entry['modes'] - 1} other mode(s))")
             for hint in entry["hints"]:
@@ -956,6 +1016,14 @@ def real_failures(statuses: Sequence[dict]) -> List[dict]:
     ]
 
 
+def describe_target(info: dict) -> str:
+    """Name what is being reported on, which may be a commit rather than a PR."""
+    sha = info["headRefOid"][:7]
+    if info.get("number") is None:
+        return f"commit {sha}"
+    return f"PR #{info['number']} {info['headRefName']} @ {sha}"
+
+
 def print_digest(info: dict, state: dict, graph: Optional[dict] = None) -> None:
     """Print the job-level report."""
     statuses = state["statuses"]
@@ -971,10 +1039,7 @@ def print_digest(info: dict, state: dict, graph: Optional[dict] = None) -> None:
     if pending:
         counts.append(f"{len(pending)} pending")
     counts.append(f"{len(passed)} passed")
-    print(
-        f"PR #{info['number']} {info['headRefName']} @ {info['headRefOid'][:7]}  "
-        f"jobs: {', '.join(counts)} / {len(statuses)}"
-    )
+    print(f"{describe_target(info)}  jobs: {', '.join(counts)} / {len(statuses)}")
 
     if pending:
         # Every conclusion below is provisional while jobs are still running,
@@ -1070,7 +1135,14 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--pr", type=int, help="PR number (default: branch's PR)")
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("--pr", type=int, help="PR number (default: branch's PR)")
+    target.add_argument(
+        "--sha",
+        type=str,
+        help="Report on a commit instead of a pull request, which is what makes "
+        "push events on next and devel reportable",
+    )
     parser.add_argument(
         "--repo",
         type=str,
@@ -1161,7 +1233,7 @@ def main(argv: Sequence[str]) -> int:
             "pass --repo owner/name or set --upstream-remote"
         )
 
-    info = resolve_pr(slug, args.pr)
+    info = resolve_target(slug, args.pr, args.sha)
     sha = info["headRefOid"]
 
     state = fetch_state(slug, sha)
