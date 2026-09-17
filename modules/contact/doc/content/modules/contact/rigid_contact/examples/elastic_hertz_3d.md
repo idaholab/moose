@@ -13,10 +13,20 @@ quarter of a sphere-on-sphere Hertzian setup:
 - Subdomain `1` is the deformable quarter-sphere, $E = 1.40625\times 10^7$,
   $\nu = 0.25$, radius 2.  Its curved bottom carries sideset `100`; the top
   face carries sideset `2` and is driven by a `FunctionDirichletBC`.
-- The mesh file also contains a rigid-indenter block (`1000`) which is
-  stripped by a `BlockDeletionGenerator` before the run.  The analytic
-  [SphereContactor.md] replaces it.
+- The analytic [SphereContactor.md] plays the role of the rigid indenter.
 - The sidesets `1` and `3` are the symmetry planes.
+
+The mesh is built entirely from
+[SphereMeshGenerator](/meshgenerators/SphereMeshGenerator.md) plus three
+[PlaneDeletionGenerator](/meshgenerators/PlaneDeletionGenerator.md)s to
+carve out the quarter-hemisphere, with sideset ids assigned by
+[SideSetsFromNormalsGenerator](/meshgenerators/SideSetsFromNormalsGenerator.md).
+The top-of-file variable `sphere_refinement` (default `3`) is passed through
+to `SphereMeshGenerator`'s `nr`: increment it to refine the mesh globally.
+`nr = 3` gives ~450 hex elements per octant and runs in a few seconds; the
+Hertzian peak pressure is concentrated in a small pole cap, so users
+comparing quantitative Hertz values should bump `nr` up (`nr = 4` gives
+~3600 elements per octant).
 
 The Hertz reference (with $E^\ast = 1.5\times 10^7$, $R_{\text{eff}} = 1$)
 predicts, at $\text{depth}\ d = 0.01$, contact radius

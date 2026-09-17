@@ -4,8 +4,9 @@
 
 The force-controlled companion of the
 [displacement-controlled plastic example](modules/contact/rigid_contact/examples/ld_inelastic_disp.md).
-Same quarter-sphere J2 plasticity body pressed by an analytic
-[SphereContactor.md], but now the indenter's $y$-translation is a
+Same quarter-sphere J2 plasticity body, same mesh + `sphere_refinement`
+knob, pressed by an analytic
+[SphereContactor.md] --- but now the indenter's $y$-translation is a
 scalar unknown driven by the load-control layer: a target reaction
 $F(t)$ is prescribed, and the outer Newton solves for the depth
 consistent with that reaction.

@@ -20,20 +20,73 @@
 #   depth d = 0.01, contact radius a = sqrt(R d) = 0.1,
 #   peak pressure p0 = 2 E* a / (pi R) = 9.55e5.
 
+# Top-level knob controlling deformable-body mesh resolution.  Passed
+# to `nr` on SphereMeshGenerator (number of radial refinements of the
+# base icosphere): each unit multiplies the element count per octant
+# by 8, so nr = 3 gives 448 hex elems per octant, nr = 4 gives 3584.
+# The Hertz peak pressure is concentrated in a small pole cap of
+# radius sqrt(R d), so users interested in a converged pressure
+# profile should bump this up; nr = 3 is a fast starting point.
+sphere_refinement = 3
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = false
 []
 
 [Mesh]
-  [file]
-    type = FileMeshGenerator
-    file = ../../../test/tests/hertz_spherical/hertz_contact.e
+  # Full ball at the origin ...
+  [sphere]
+    type = SphereMeshGenerator
+    radius = 2.0
+    nr = ${sphere_refinement}
   []
-  [drop_rigid_indenter]
-    type = BlockDeletionGenerator
-    input = file
-    block = 1000
+  # ... cut to the quarter-hemisphere occupying x >= 0, y <= 0, z >= 0.
+  [cut_upper_half]
+    type = PlaneDeletionGenerator
+    input = sphere
+    point = '0 0 0'
+    normal = '0 1 0'
+  []
+  [cut_neg_x]
+    type = PlaneDeletionGenerator
+    input = cut_upper_half
+    point = '0 0 0'
+    normal = '-1 0 0'
+  []
+  [cut_neg_z]
+    type = PlaneDeletionGenerator
+    input = cut_neg_x
+    point = '0 0 0'
+    normal = '0 0 -1'
+  []
+  # Match the sideset / block IDs the original file mesh exposed:
+  #   * block 1     = deformable body
+  #   * sideset 1   = x = 0 symmetry plane
+  #   * sideset 2   = y = 0 top face (driven by the top BC)
+  #   * sideset 3   = z = 0 symmetry plane
+  #   * sideset 100 = curved bottom (contact face)
+  [assign_block]
+    type = RenameBlockGenerator
+    input = cut_neg_z
+    old_block = 0
+    new_block = 1
+  []
+  [rename_curved_ss]
+    type = RenameBoundaryGenerator
+    input = assign_block
+    old_boundary = 0
+    new_boundary = 100
+  []
+  [flat_sidesets]
+    type = SideSetsFromNormalsGenerator
+    input = rename_curved_ss
+    normals = '-1  0  0
+                0  1  0
+                0  0 -1'
+    new_boundary = '1 2 3'
+    normal_tol = 1e-6
+    fixed_normal = true
   []
   allow_renumbering = false
 []

@@ -18,19 +18,59 @@
 #   stabilize_strain = true to avoid nearly-incompressible plastic locking
 #     on linear hexes.
 
+# Top-level mesh-resolution knob; passed to `nr` on SphereMeshGenerator.
+# See the elastic example for the accuracy vs runtime trade-off.
+sphere_refinement = 3
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
-  [file]
-    type = FileMeshGenerator
-    file = ../../../test/tests/hertz_spherical/hertz_contact.e
+  [sphere]
+    type = SphereMeshGenerator
+    radius = 2.0
+    nr = ${sphere_refinement}
   []
-  [drop_rigid_indenter]
-    type = BlockDeletionGenerator
-    input = file
-    block = 1000
+  [cut_upper_half]
+    type = PlaneDeletionGenerator
+    input = sphere
+    point = '0 0 0'
+    normal = '0 1 0'
+  []
+  [cut_neg_x]
+    type = PlaneDeletionGenerator
+    input = cut_upper_half
+    point = '0 0 0'
+    normal = '-1 0 0'
+  []
+  [cut_neg_z]
+    type = PlaneDeletionGenerator
+    input = cut_neg_x
+    point = '0 0 0'
+    normal = '0 0 -1'
+  []
+  [assign_block]
+    type = RenameBlockGenerator
+    input = cut_neg_z
+    old_block = 0
+    new_block = 1
+  []
+  [rename_curved_ss]
+    type = RenameBoundaryGenerator
+    input = assign_block
+    old_boundary = 0
+    new_boundary = 100
+  []
+  [flat_sidesets]
+    type = SideSetsFromNormalsGenerator
+    input = rename_curved_ss
+    normals = '-1  0  0
+                0  1  0
+                0  0 -1'
+    new_boundary = '1 2 3'
+    normal_tol = 1e-6
+    fixed_normal = true
   []
   allow_renumbering = false
 []

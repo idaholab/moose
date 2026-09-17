@@ -2,7 +2,8 @@
 
 ## Description
 
-Same geometry as the [elastic Hertz 3D example](modules/contact/rigid_contact/examples/elastic_hertz_3d.md)
+Same geometry, mesh, and refinement knob (`sphere_refinement`) as the
+[elastic Hertz 3D example](modules/contact/rigid_contact/examples/elastic_hertz_3d.md)
 --- rigid sphere pressed into a quarter-sphere of deformable material at
 $x, z$ symmetry --- but with the deformable body upgraded to a
 finite-strain J2 plasticity model with linear power-law hardening.  The
