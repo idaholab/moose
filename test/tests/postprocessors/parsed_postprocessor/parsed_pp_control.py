@@ -116,7 +116,7 @@ def run_test(moose_exe: str, input_file: str, work_dir: str) -> None:
 
 
 run_test(
-    "/Users/mechnj/projects/myforks/moose/test/moose_test-opt",
+    MOOSE_DIR + "/test/moose_test-opt",
     "parsed_pp_control.i",
-    "/Users/mechnj/projects/myforks/moose/test/tests/postprocessors/parsed_postprocessor",
+    MOOSE_DIR + "/test/tests/postprocessors/parsed_postprocessor",
 )
