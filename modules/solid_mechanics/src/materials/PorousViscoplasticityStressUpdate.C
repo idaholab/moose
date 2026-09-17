@@ -485,6 +485,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeCreepRate(
     const GenericReal<is_ad> & coefficient,
     const GenericReal<is_ad> & gauge_stress) const
 {
+  if (law.power == 1.0)
+    return coefficient * gauge_stress;
+  if (law.power == 3.0)
+    return coefficient * gauge_stress * gauge_stress * gauge_stress;
+
   using std::pow;
   return coefficient * pow(gauge_stress, law.power);
 }
@@ -1523,7 +1528,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateDenseLimitPoint(
 
       const auto & law = _creep_laws[law_index];
       creep_rate += computeCreepRate(law, coefficient, point.q);
-      dcreep_rate_dq += law.power * coefficient * pow(point.q, law.power - 1.0);
+      if (law.power == 1.0)
+        dcreep_rate_dq += coefficient;
+      else if (law.power == 3.0)
+        dcreep_rate_dq += 3.0 * coefficient * Utility::pow<2>(point.q);
+      else
+        dcreep_rate_dq += law.power * coefficient * pow(point.q, law.power - 1.0);
     }
 
   point.effective_inelastic_strain_increment = creep_rate * this->constitutiveTimeStep();
@@ -1837,10 +1847,12 @@ typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::verifyConvergedPoint(
     const LocalPoint & point, const LocalSolveContext & context)
 {
-  auto verified = evaluateLocalPoint(point.coordinates(), context, point.porosity_branch);
-  validateFiniteLocalPoint(verified, "final coupled consistency check");
+  // Every accepted Newton or line-search update stores a fully evaluated LocalPoint, so the
+  // converged point already has synchronized coordinates, residuals, Jacobian, and LPS response.
+  // Re-evaluating it here duplicates the most expensive constitutive work without changing state.
+  validateFiniteLocalPoint(point, "final coupled consistency check");
 
-  const auto residual_norm = convergenceResidualNorm(verified.residual, context);
+  const auto residual_norm = convergenceResidualNorm(point.residual, context);
   if (residual_norm > _local_newton_stagnation_tolerance)
     mooseException("In ",
                    this->_name,
@@ -1849,7 +1861,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::verifyConvergedPoint(
                    residual_norm,
                    ".");
 
-  return verified;
+  return point;
 }
 
 template <bool is_ad>
@@ -2349,7 +2361,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::discoverReducedPorosityBracket(
                  << " Rf/scale = " << residual / context.porosity_convergence_scale << std::endl;
 
     if (reducedPointConverged(probe_point, context))
+    {
+      if (this->_verbose)
+        Moose::out << "Reduced porosity root: converged by continuation probe residual. f = "
+                   << MetaPhysicL::raw_value(probe_point.f) << " |Rf|/scale = "
+                   << std::abs(reducedPorosityResidual(probe_point)) /
+                          context.porosity_convergence_scale
+                   << std::endl;
+
       return probe_point;
+    }
 
     if (residual >= 0.0)
     {
@@ -4580,10 +4601,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidual(
 
     const auto M = abs(population.effective_hydro_stress) / trial_gauge;
     const auto dM_dtrial_gauge = -M / trial_gauge;
-    const auto h = computeH(law.power, M);
-    const auto dh_dM = computeH(law.power, M, true);
-    const auto Z = h + law.power_factor / h;
-    const auto dZ_dM = dh_dM * (1.0 - law.power_factor / Utility::pow<2>(h));
+    const auto h = computeHDerivatives(law.power, M);
+    const auto Z = h.value + law.power_factor / h.value;
+    const auto dZ_dM = h.first * (1.0 - law.power_factor / Utility::pow<2>(h.value));
 
     residual += porosity * population.fraction * Z;
     derivative += porosity * population.fraction * dZ_dM * dM_dtrial_gauge;
@@ -4619,24 +4639,66 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeResidual(
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::LpsHDerivatives
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeHDerivatives(
+    const Real n, const GenericReal<is_ad> & M) const
+{
+  constexpr auto beta = 1.5;
+
+  auto result = LpsHDerivatives{};
+  if (n == 1.0)
+  {
+    const auto beta_M = beta * M;
+    result.value = 1.0 + Utility::pow<2>(beta_M);
+    result.first = 2.0 * beta * beta * M;
+    result.second = 2.0 * beta * beta;
+    return result;
+  }
+
+  using std::pow;
+  const auto exponent = (n + 1.0) / n;
+  const auto mod = pow(beta * M, exponent);
+  const auto y = 1.0 + mod / n;
+
+  if (n == 3.0)
+  {
+    const auto y2 = Utility::pow<2>(y);
+    result.value = y2 * y;
+    if (M == 0.0)
+      return result;
+
+    const auto dmod_dM = exponent * mod / M;
+    const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
+    result.first = dmod_dM * y2;
+    result.second = 2.0 / 3.0 * Utility::pow<2>(dmod_dM) * y + d2mod_dM2 * y2;
+    return result;
+  }
+
+  const auto y_n_minus_2 = pow(y, n - 2.0);
+  const auto y_n_minus_1 = y_n_minus_2 * y;
+  result.value = y_n_minus_1 * y;
+  if (M == 0.0)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
+      result.second = 2.0 * beta * beta;
+    return result;
+  }
+
+  const auto dmod_dM = exponent * mod / M;
+  const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
+  result.first = dmod_dM * y_n_minus_1;
+  result.second = (n - 1.0) / n * Utility::pow<2>(dmod_dM) * y_n_minus_2 + d2mod_dM2 * y_n_minus_1;
+  return result;
+}
+
+template <bool is_ad>
 GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeH(const Real n,
                                                         const GenericReal<is_ad> & M,
                                                         const bool derivative) const
 {
-  using std::pow;
-
-  const auto mod = pow(1.5 * M, (n + 1.0) / n);
-
-  if (derivative)
-  {
-    if (M == 0.0)
-      return 0.0;
-
-    const auto dmod_dM = (n + 1.0) / n * mod / M;
-    return dmod_dM * pow(1.0 + mod / n, n - 1.0);
-  }
-  return pow(1.0 + mod / n, n);
+  const auto h = computeHDerivatives(n, M);
+  return derivative ? h.first : h.value;
 }
 
 template <bool is_ad>
@@ -4649,14 +4711,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeLpsDerivatives(
     const CreepLaw & law) const
 {
   using std::abs;
-  using std::pow;
 
   LpsDerivatives d;
 
   const auto n = law.power;
   const auto alpha = law.power_factor;
-  constexpr auto beta = 1.5;
-
   const auto lambda = gauge_stress;
   const auto q = equiv_stress;
   const auto f = porosity;
@@ -4688,38 +4747,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeLpsDerivatives(
     const auto M = abs_p / lambda;
     const auto sign_p = p_eff > 0.0 ? Real(1.0) : (p_eff < 0.0 ? Real(-1.0) : Real(0.0));
 
-    const auto exponent = (n + 1.0) / n;
-    const auto mod = pow(beta * M, exponent);
-    const auto y = 1.0 + mod / n;
-    const auto h = pow(y, n);
-
-    auto dh_dM = GenericReal<is_ad>(0.0);
-    auto d2h_dM2 = GenericReal<is_ad>(0.0);
-
-    if (M > 0.0)
-    {
-      const auto dmod_dM = exponent * mod / M;
-      const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
-
-      dh_dM = dmod_dM * pow(y, n - 1.0);
-      d2h_dM2 =
-          (n - 1.0) / n * Utility::pow<2>(dmod_dM) * pow(y, n - 2.0) + d2mod_dM2 * pow(y, n - 1.0);
-    }
-    else if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
-      d2h_dM2 = 2.0 * beta * beta;
-    else
-    {
-      /*
-       * For n>1, the LPS H(M) is C1 but not C2 at M=0 because (n+1)/n is between
-       * one and two. Use the zero-curvature semismooth choice at that isolated point.
-       */
-      d2h_dM2 = 0.0;
-    }
-
-    const auto Z = h + alpha / h;
-    const auto dZ_dM = dh_dM * (1.0 - alpha / Utility::pow<2>(h));
-    const auto d2Z_dM2 = d2h_dM2 * (1.0 - alpha / Utility::pow<2>(h)) +
-                         2.0 * alpha * Utility::pow<2>(dh_dM) / Utility::pow<3>(h);
+    const auto h = computeHDerivatives(n, M);
+    const auto Z = h.value + alpha / h.value;
+    const auto dZ_dM = h.first * (1.0 - alpha / Utility::pow<2>(h.value));
+    const auto d2Z_dM2 = h.second * (1.0 - alpha / Utility::pow<2>(h.value)) +
+                         2.0 * alpha * Utility::pow<2>(h.first) / Utility::pow<3>(h.value);
 
     const auto M_lambda = -M / lambda;
     const auto M_p = sign_p / lambda;
@@ -4766,7 +4798,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
     const CreepLaw & law) const
 {
   using std::abs;
-  using std::pow;
 
   if (hydrostaticStressPopulationCount(hydrostatic_stress) != MAX_HYDROSTATIC_STRESS_POPULATIONS)
     mooseException("In ",
@@ -4779,7 +4810,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
   const auto f = pore_porosity[0] + pore_porosity[1];
   const auto n = law.power;
   const auto alpha = law.power_factor;
-  constexpr auto beta = 1.5;
   constexpr auto dA_df = 2.0 / 3.0;
   const auto A = 1.0 + 2.0 * f / 3.0;
   const auto q2_over_lambda2 = Utility::pow<2>(q / lambda);
@@ -4800,28 +4830,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
     const auto M = abs_p / lambda;
     const auto sign_p = p_eff > 0.0 ? Real(1.0) : (p_eff < 0.0 ? Real(-1.0) : Real(0.0));
 
-    const auto exponent = (n + 1.0) / n;
-    const auto mod = pow(beta * M, exponent);
-    const auto y = 1.0 + mod / n;
-    const auto h = pow(y, n);
-
-    auto dh_dM = GenericReal<is_ad>(0.0);
-    auto d2h_dM2 = GenericReal<is_ad>(0.0);
-    if (M > 0.0)
-    {
-      const auto dmod_dM = exponent * mod / M;
-      const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
-      dh_dM = dmod_dM * pow(y, n - 1.0);
-      d2h_dM2 =
-          (n - 1.0) / n * Utility::pow<2>(dmod_dM) * pow(y, n - 2.0) + d2mod_dM2 * pow(y, n - 1.0);
-    }
-    else if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
-      d2h_dM2 = 2.0 * beta * beta;
-
-    const auto Z = h + alpha / h;
-    const auto dZ_dM = dh_dM * (1.0 - alpha / Utility::pow<2>(h));
-    const auto d2Z_dM2 = d2h_dM2 * (1.0 - alpha / Utility::pow<2>(h)) +
-                         2.0 * alpha * Utility::pow<2>(dh_dM) / Utility::pow<3>(h);
+    const auto h = computeHDerivatives(n, M);
+    const auto Z = h.value + alpha / h.value;
+    const auto dZ_dM = h.first * (1.0 - alpha / Utility::pow<2>(h.value));
+    const auto d2Z_dM2 = h.second * (1.0 - alpha / Utility::pow<2>(h.value)) +
+                         2.0 * alpha * Utility::pow<2>(h.first) / Utility::pow<3>(h.value);
 
     const auto M_lambda = -M / lambda;
     const auto M_p = sign_p / lambda;
@@ -5084,7 +5097,23 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
   }
 
   auto gauge_stress = equiv_stress;
-  if (!has_hydrostatic_drive)
+  if (law.power == 1.0)
+  {
+    auto weighted_hydrostatic_stress_squared = GenericReal<is_ad>(0.0);
+    for (auto population_index = 0u; population_index < population_count; ++population_index)
+    {
+      const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+      if (population.fraction > 0.0)
+        weighted_hydrostatic_stress_squared +=
+            population.fraction * Utility::pow<2>(population.effective_hydro_stress);
+    }
+
+    const auto A = 1.0 + 2.0 * porosity / 3.0;
+    gauge_stress = sqrt((A * Utility::pow<2>(equiv_stress) +
+                         2.25 * porosity * weighted_hydrostatic_stress_squared) /
+                        (1.0 - porosity));
+  }
+  else if (!has_hydrostatic_drive)
   {
     const auto A = 1.0 + 2.0 * porosity / 3.0;
     gauge_stress = equiv_stress * sqrt(A) /
