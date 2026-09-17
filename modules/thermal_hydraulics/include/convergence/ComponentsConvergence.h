@@ -25,6 +25,8 @@ public:
 
   virtual void initialSetup() override;
 
+  virtual void preSolve() override;
+
 protected:
   virtual MooseConvergenceStatus checkConvergenceInner(unsigned int iter) override;
 

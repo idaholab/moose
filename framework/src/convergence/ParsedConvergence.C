@@ -68,6 +68,13 @@ ParsedConvergence::initialSetup()
 }
 
 void
+ParsedConvergence::preSolve()
+{
+  for (const auto & convergence : _convergences)
+    convergence->preSolve();
+}
+
+void
 ParsedConvergence::initializeSymbols()
 {
   for (const auto i : index_range(_symbol_values))

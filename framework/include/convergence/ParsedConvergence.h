@@ -28,6 +28,8 @@ public:
 
   virtual void initialSetup() override;
 
+  virtual void preSolve() override;
+
 protected:
   usingFunctionParserUtilsMembers(false);
 

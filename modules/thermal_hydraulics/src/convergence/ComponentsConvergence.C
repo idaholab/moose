@@ -45,6 +45,13 @@ ComponentsConvergence::initialSetup()
   }
 }
 
+void
+ComponentsConvergence::preSolve()
+{
+  for (auto & conv : _convergence_objects)
+    conv->preSolve();
+}
+
 Convergence::MooseConvergenceStatus
 ComponentsConvergence::checkConvergenceInner(unsigned int iter)
 {
