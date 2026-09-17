@@ -104,7 +104,7 @@ DiffusionCG::addFEKernels()
     else if (getProblem().hasVariable(source))
       kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
     else if (getProblem().hasFunctor(source, 0))
-      kernel_type = _use_ad ? "ADFunctorKernel" : "FunctorKernel";
+      kernel_type = "FunctorKernel";
     else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
       kernel_type = _use_ad ? "ADMatBodyForce" : "MatBodyForce";
     else
@@ -134,6 +134,7 @@ DiffusionCG::addFEKernels()
     else if (getProblem().hasFunctor(source, 0))
     {
       params.set<MooseFunctorName>("functor") = source;
+      params.set<bool>("functor_on_rhs") = true;
       if (isParamSetByUser("source_coef"))
         paramError("source_coef",
                    "Setting a coefficient is not implemented with a source functor. Use an "
