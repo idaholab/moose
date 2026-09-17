@@ -94,6 +94,19 @@ transient contact events (plate-front first touch on each roller).
 
 !listing modules/contact/examples/rigid/rolling-reduction/rolling_reduction.i
 
+## Results
+
+!media media/contact/rigid_contact/rolling_reduction.gif
+       id=fig:rolling_reduction
+       caption=Rolling reduction animation, viewed along the roller axis
+               ($+x$ into the page).  The plate enters the frame from the
+               left at rest; as the back face is driven forward the plate
+               top encounters roller 1 (thickness reduced to 0.75), then
+               continues into roller 2 (thickness reduced to 0.5).
+               `plastic_strain_mag` on the deformed shape rises from 0
+               (dark blue) to $\sim 1.3$ (red) in two bands corresponding
+               to each roller's pass.
+
 ## Suggested visualization
 
 - Cutaway of the deformed plate with `plastic_strain_mag` on a
