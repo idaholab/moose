@@ -1,6 +1,6 @@
 [Tests]
   design = 'ParsedPostprocessor.md'
-  issues = '#3447 #5954 #17901 #30689'
+  issues = '#3447 #5954 #17901 #30689 #33783'
   [test]
     type = 'CSVDiff'
     input = 'parsed_pp.i'

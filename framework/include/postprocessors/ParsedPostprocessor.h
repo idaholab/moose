@@ -34,8 +34,17 @@ private:
   /// values of the postprocessors part of the parsed expression
   std::vector<const PostprocessorValue *> _pp_values;
 
+  /// saved pointer to the expression to save on get_param calls
+  const std::string * _pexp;
+
   /// previous expression saved as a string for recognizing controller intervention
   std::string _oldexp;
+
+  /// saved pointer to constant_names to save on get_param calls
+  const std::vector<std::string> * _pcnames;
+
+  /// saved pointer to constant_expressions to save on get_param calls
+  const std::vector<std::string> * _pcexps;
 
   /// whether time is part of the parsed expression
   const bool _use_t;
@@ -46,7 +55,7 @@ private:
   /// This post-processor value
   Real _value;
 
-  ///
+  /// Postprocessors argument for JIT compile
   std::string _postprocessors;
 
   using Moose::FunctorBase<Real>::evaluate;
