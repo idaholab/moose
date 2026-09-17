@@ -50,18 +50,18 @@ force-controlled example, only referencing a
 [SurfaceMeshContactor.md] instead of a [SphereContactor.md] and
 pointing `kss_stiffness` at a value tuned to this problem:
 
-!listing modules/contact/examples/rigid/complete/material_into_indenter.i block=RigidContact
+!listing modules/contact/examples/rigid/stl-contact/material_into_indenter.i block=RigidContact
 
 The contactor itself:
 
-!listing modules/contact/examples/rigid/complete/material_into_indenter.i block=UserObjects
+!listing modules/contact/examples/rigid/stl-contact/material_into_indenter.i block=UserObjects
 
 ## Solver
 
 The executioner is [UzawaTransient.md] with a warm-start
 [RigidBodyContactPredictor.md]:
 
-!listing modules/contact/examples/rigid/complete/material_into_indenter.i block=Executioner
+!listing modules/contact/examples/rigid/stl-contact/material_into_indenter.i block=Executioner
 
 Key knobs:
 
@@ -78,7 +78,7 @@ Key knobs:
 
 ## Full input
 
-!listing modules/contact/examples/rigid/complete/material_into_indenter.i
+!listing modules/contact/examples/rigid/stl-contact/material_into_indenter.i
 
 ## Results
 

@@ -14,7 +14,7 @@
   # actually slower per-solve (each outer iter runs a full primal
   # SNES).  Its purpose is to convert cases that plain Newton
   # limit-cycles on into cases that terminate at all -- see the
-  # `examples/rigid/complete/material_into_indenter.i` header for the
+  # `examples/rigid/stl-contact/material_into_indenter.i` header for the
   # motivating case (finite-strain J2 plasticity, load ramp to
   # F(1) = 1.5e5).
 

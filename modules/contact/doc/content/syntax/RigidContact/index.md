@@ -59,7 +59,7 @@ Force-controlled analytic sphere:
 Force-controlled STL contactor with UzawaTransient (see the
 [Vickers example](modules/contact/rigid_contact/examples/material_into_indenter.md)):
 
-!listing modules/contact/examples/rigid/complete/material_into_indenter.i block=RigidContact
+!listing modules/contact/examples/rigid/stl-contact/material_into_indenter.i block=RigidContact
 
 ## Multiple contact interfaces
 
