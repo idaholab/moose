@@ -35,6 +35,7 @@
       type = MMSTest
       input = test.py
       test_case = TestLinearFV
+      max_threads = 1 # see libmesh issue #3808
     []
   []
 
