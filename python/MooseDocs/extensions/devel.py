@@ -67,14 +67,35 @@ class ExampleCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
         settings["prefix"] = ("Example", settings["prefix"][1])
+        settings["requires_extension"] = (
+            None,
+            "The dotted module name of an extension (e.g. 'MooseDocs.extensions.civet') that "
+            "this example's content depends on. If that extension is not loaded for the "
+            "current documentation build, the raw command text is shown but not "
+            "tokenized/executed, and a note is displayed explaining why.",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings)
-        ex = Example(flt)
+
+        required = settings["requires_extension"]
+        available = required is None or any(
+            type(ext).__module__ == required for ext in self.translator.extensions
+        )
+        ex = Example(flt) if available else Example(flt, recursive=False)
 
         data = info["block"] if "block" in info else info["inline"]
         code = core.Code(ex, content=data)
+
+        if not available:
+            msg = (
+                "This example requires the '{}' extension, which is not enabled for this "
+                "documentation build. It will not render until the extension is made active "
+                "in this build's config.yml.".format(required)
+            )
+            tokens.DisabledToken(ex, tag="p", string=msg)
+
         if flt is parent:
             ex.attributes.update(**self.attributes(settings))
 
