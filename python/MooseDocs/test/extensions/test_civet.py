@@ -19,6 +19,7 @@ from MooseDocs import base
 
 logging.basicConfig()
 
+
 class CivetTestCase(MooseDocsTestCase):
     def assertURL(self, node):
         url = node["url"]
@@ -29,7 +30,7 @@ class CivetTestCase(MooseDocsTestCase):
 
 class TestInlineCivet(CivetTestCase):
     """Test that the locally supplied url and repo are working. The code for this is shared so it
-       should be good enough to test it with one command."""
+    should be good enough to test it with one command."""
 
     EXTENSIONS = [core, command, civet]
     RESULTS = "[!civet!results url=https://civet.inl.gov repo=idaholab/moose](Results)"
@@ -58,7 +59,11 @@ class TestInlineCivet(CivetTestCase):
         self.assertURL(ast(0, 0))
 
 
-@unittest.skipIf(requests.get('https://civet.inl.gov/job_results/3074159').status_code != requests.codes.ok, "CIVET job results not available")
+@unittest.skipIf(
+    requests.get("https://civet.inl.gov/job_results/3074159").status_code
+    != requests.codes.ok,
+    "CIVET job results not available",
+)
 class TestInlineCivetWithConfig(CivetTestCase):
     EXTENSIONS = [core, command, civet]
     RESULTS = "[!civet!results](Results)"
@@ -115,21 +120,20 @@ class TestInlineCivetWithConfig(CivetTestCase):
     def testMergeResultsNoCurrent(self):
         """!civet mergeresults, querying a hash from the git remote; no need to render b/c it only uses core tokens"""
 
-        with mock.patch('mooseutils.git_commit') as git_commit:
-            git_commit.return_value = 'b0fd912d4d4d069d6b4e133188121b0f41c93cf5'
+        with mock.patch("mooseutils.git_commit") as git_commit:
+            git_commit.return_value = "b0fd912d4d4d069d6b4e133188121b0f41c93cf5"
             ast = self.tokenize(self.MERGERESULTS_NOCURRENT)
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'Link', size=4)
-        self.assertToken(ast(0,0), 'Link', size=1)
-        self.assertToken(ast(0,0,0), 'String', size=0)
-        self.assertToken(ast(0,1), 'LineBreak', size=0)
+        self.assertToken(ast(0), "Link", size=4)
+        self.assertToken(ast(0, 0), "Link", size=1)
+        self.assertToken(ast(0, 0, 0), "String", size=0)
+        self.assertToken(ast(0, 1), "LineBreak", size=0)
 
-        self.assertURL(ast(0,0))
-        self.assertToken(ast(0,2), 'Link', size=1)
-        self.assertToken(ast(0,2,0), 'String', size=0)
-        self.assertURL(ast(0,2))
-        self.assertToken(ast(0,3), 'LineBreak', size=0)
-
+        self.assertURL(ast(0, 0))
+        self.assertToken(ast(0, 2), "Link", size=1)
+        self.assertToken(ast(0, 2, 0), "String", size=0)
+        self.assertURL(ast(0, 2))
+        self.assertToken(ast(0, 3), "LineBreak", size=0)
 
     def testBadgesAST(self):
         ast = self.tokenize(self.BADGES)
