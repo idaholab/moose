@@ -11,6 +11,19 @@
     allow_warnings = true
     abs_zero = 1e-8
   []
+  [straight-diagonal-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral pressure and velocity response across a diagonal porous baffle when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-straight-diagonal-pressure-two-term_out"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
 
   [straight]
     type = 'CSVDiff'
@@ -24,6 +37,19 @@
     allow_warnings = true
     abs_zero = 1e-8
   []
+  [straight-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-straight.i
+    csvdiff = 'porous-baffle-straight-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral straight-channel porous baffle response when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-straight-pressure-two-term_out"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
 
   [corner-l]
     type = 'CSVDiff'
@@ -32,6 +58,18 @@
     requirement = 'The system shall preserve the entry, corner, and exit pressure drops for an L-shaped channel with diagonal porous baffle form losses.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
     cli_args = ''
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [corner-l-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-corner-l.i
+    csvdiff = 'porous-baffle-corner-l-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral L-shaped porous baffle response when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-corner-l-pressure-two-term_out"
     recover = false
     max_threads = 1
     allow_warnings = true

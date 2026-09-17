@@ -45,6 +45,59 @@
     allow_warnings = true
   []
 
+  [linear-bernoulli-no-visc-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-no-visc-pressure-two-term.csv'
+    requirement = 'The system shall preserve the zero-gradient one-dimensional porous baffle pressure solution when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "forcheimer_value=0 "
+               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=linear-bernoulli-no-visc-pressure-two-term"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-pressure-two-term.csv'
+    requirement = 'The system shall preserve the viscous zero-gradient one-dimensional porous baffle pressure solution when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "forcheimer_value=0 mu=1 "
+               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=linear-bernoulli-pressure-two-term"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli-forcheimer-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forcheimer-pressure-two-term.csv'
+    requirement = 'The system shall recover the exact linear one-dimensional Forchheimer pressure drop when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "forcheimer_value=50 mu=1 "
+               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=linear-bernoulli-forcheimer-pressure-two-term"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli-forcheimer-form-loss-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forcheimer-form-loss-pressure-two-term.csv'
+    requirement = 'The system shall recover the exact combined one-dimensional Forchheimer and baffle form-loss pressure drop when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "forcheimer_value=50 mu=1 UserObjects/rc/baffle_form_loss='10 10' "
+               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=linear-bernoulli-forcheimer-form-loss-pressure-two-term"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
   [insfv]
     type = 'CSVDiff'
     input = porous-baffle-1d-insfv.i

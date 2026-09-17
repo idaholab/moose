@@ -11,6 +11,19 @@
     allow_warnings = true
     abs_zero = 1e-8
   []
+  [linear-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-2d.i
+    csvdiff = 'porous-baffle-2d-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the two-dimensional porous baffle integral pressure and velocity response when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-2d-pressure-two-term_out"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
 
   [insfv]
     type = 'CSVDiff'

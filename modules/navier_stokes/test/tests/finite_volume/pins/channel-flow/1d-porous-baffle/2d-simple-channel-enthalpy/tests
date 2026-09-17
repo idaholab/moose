@@ -8,6 +8,22 @@
     recover = false
     max_threads = 1
     allow_warnings = true
+    # Pressure is physically zero and converged to pressure_absolute_tolerance = 1e-8.
+    abs_zero = 1e-8
+  []
+  [fluid-only-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-enthalpy-fluid-only.i
+    csvdiff = 'porous-baffle-2d-enthalpy-fluid-only-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral fluid-only enthalpy porous baffle response when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-2d-enthalpy-fluid-only-pressure-two-term_out"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    # Pressure is physically zero and converged to pressure_absolute_tolerance = 1e-8.
+    abs_zero = 1e-8
   []
 
   [fluid-solid]
@@ -16,6 +32,19 @@
     csvdiff = 'porous-baffle-2d-enthalpy_out.csv porous-baffle-2d-enthalpy_out_p_line_0002.csv porous-baffle-2d-enthalpy_out_u_line_0002.csv porous-baffle-2d-enthalpy_out_T_fluid_line_0002.csv porous-baffle-2d-enthalpy_out_T_solid_line_0002.csv'
     requirement = 'The system shall preserve pressure, velocity, fluid temperature, and solid temperature profiles through a porous baffle with coupled fluid-solid heat transfer.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVEnthalpyFunctorMaterial.md'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-4
+  []
+  [fluid-solid-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-enthalpy.i
+    csvdiff = 'porous-baffle-2d-enthalpy-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral coupled fluid-solid porous baffle response when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-2d-enthalpy-pressure-two-term_out"
     recover = false
     max_threads = 1
     allow_warnings = true
