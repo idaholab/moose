@@ -19,7 +19,7 @@ MaterialStdVectorRealGradientAux::validParams()
                              "aux variable.  If the std::vector is not of sufficient size then "
                              "zero is returned");
   params.addRequiredParam<unsigned int>("component",
-                                         "The gradient component to be extracted for this kernel");
+                                        "The gradient component to be extracted for this kernel");
   return params;
 }
 
