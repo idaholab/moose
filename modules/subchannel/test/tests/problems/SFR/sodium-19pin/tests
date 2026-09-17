@@ -44,6 +44,7 @@
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
+    restep = false # Explicitly needs to abort on solve failed
     max_threads = 1
     max_parallel = 1
     requirement = 'The coupled subchannel solver shall converge a transient sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
@@ -55,6 +56,7 @@
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
+    restep = false # Explicitly needs to abort on solve failed
     allow_warnings = true
     max_threads = 1
     max_parallel = 1
