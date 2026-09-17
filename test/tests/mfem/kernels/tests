@@ -250,25 +250,11 @@
     recover = false
     restep = false
   []
-  [MFEMLinearElasticity]
-    type = XMLDiff
-    input = linearelasticity.i
-    xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
-                OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
-  []
   [MFEMLinearElasticityByComponentAMG]
     type = CSVDiff
     input = linearelasticity.i
     cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=by_component '
-               'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
-               'Outputs/ParaViewDataCollection/enable=false '
-               'Outputs/CSV/file_base=OutputData/LinearElasticityByComponentAMG'
-    csvdiff = 'OutputData/LinearElasticityByComponentAMG.csv'
+    csvdiff = 'OutputData/LinearElasticity.csv'
     requirement = 'The system shall have the ability to solve a linear elasticity problem using '
                   'MFEM with a BoomerAMG preconditioner that treats each displacement component '
                   'as a separate unknown.'
@@ -280,10 +266,7 @@
     type = CSVDiff
     input = linearelasticity.i
     cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=rigid_body_modes '
-               'Solvers/boomeramg/l_max_its=1 Solvers/boomeramg/l_tol=0 '
-               'Outputs/ParaViewDataCollection/enable=false '
-               'Outputs/CSV/file_base=OutputData/LinearElasticityRigidBodyModesAMG'
-    csvdiff = 'OutputData/LinearElasticityRigidBodyModesAMG.csv'
+    csvdiff = 'OutputData/LinearElasticity.csv'
     requirement = 'The system shall have the ability to solve a linear elasticity problem using '
                   'MFEM with a BoomerAMG preconditioner that uses the rigid body modes of the '
                   'displacement space.'

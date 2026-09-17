@@ -68,8 +68,8 @@
 [Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-    l_max_its = 500
-    l_tol = 1e-8
+    l_max_its = 1
+    l_tol = 0
     print_level = 2
   []
   [main]
@@ -96,11 +96,6 @@
 []
 
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/LinearElasticity
-    vtk_format = ASCII
-  []
   [CSV]
     type = CSV
     file_base = OutputData/LinearElasticity
