@@ -181,7 +181,7 @@ The residual for the direct solution of the Cahn-Hilliard equation (without boun
 | - | - | - | - | - |
 $\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $c_i$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
 $\left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right)$ | $c_i$ | $\kappa_i$, $M_i$, $\nabla M_i$ | - | [`CHInterface`](/CHInterface.md) |
-$\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right),\nabla \psi \right)$ | $c_i$ | $M_i$ | $\frac{\partial^2 f_{loc} }{\partial c_i^2}$, $\frac{\partial^2 E_d }{\partial c_i^2}$ | [`CahnHilliard`](/CahnHilliard.md) |
+$\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right),\nabla \psi_m \right)$ | $c_i$ | $M_i$ | $\frac{\partial^2 f_{loc} }{\partial c_i^2}$, $\frac{\partial^2 E_d }{\partial c_i^2}$ | [`CahnHilliard`](/CahnHilliard.md) |
 
 In the split form of the Cahn-Hilliard solution, the two residual equations are
 \begin{equation}
@@ -193,9 +193,9 @@ In the split form of the Cahn-Hilliard solution, the two residual equations are
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu$ | - | - | [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) |
-$\left( M_i  \nabla \mu, \nabla \psi_m \right)$ | $\mu$ | $M_i$ | - | [`SplitCHWRes`](/SplitCHWRes.md) |
-$\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
+$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu_i$ | - | - | [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) |
+$\left( M_i  \nabla \mu_i, \nabla \psi_m \right)$ | $\mu_i$ | $M_i$ | - | [`SplitCHWRes`](/SplitCHWRes.md) |
+$\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c_i$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
 
 ## See also
 

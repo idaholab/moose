@@ -3,7 +3,7 @@
 !syntax description /Kernels/AllenCahn
 
 \begin{equation}
-L(\eta,a,b,\dots)\frac{\partial f_{bulk}}(\eta,a,b,\dots)}{\partial\eta},
+L(\eta,a,b,\dots)\frac{\partial f_{bulk}(\eta,a,b,\dots)}{\partial\eta},
 \end{equation}
 
 where $\eta$ is the variable the kernel is acting on, $L$ (`mob_name`) its

@@ -5,7 +5,7 @@
 Implements the term
 
 \begin{equation}
-L\frac{\partial f_{bulk}}(\eta)}{\partial\eta},
+L\frac{\partial f_{bulk}(\eta)}{\partial\eta},
 \end{equation}
 
 where $\eta$ is the variable the kernel is acting on, $L$ (`mob_name`) its
