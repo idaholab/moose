@@ -60,7 +60,7 @@ class CivetExtension(command.CommandExtension):
             "The local directory where the generated test reports will be inserted.",
         )
         config["test_results_cache"] = (
-            os.path.join(os.getenv("HOME"), ".local", "share", "civet", "jobs"),
+            os.path.join("${HOME}", ".local", "share", "civet", "jobs"),
             "Default location for downloading CIVET results.",
         )
         return config
