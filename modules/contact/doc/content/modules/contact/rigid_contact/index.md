@@ -9,7 +9,7 @@ system that is often easier to solve.
 
 Two families of level-set contactors ship with the module:
 
-- Analytic primitives (currently [SphereContactor.md]).
+- Analytic primitives ([SphereContactor.md], [InfiniteCylinderContactor.md]).
 - Triangulated surfaces read from an STL file
   ([SurfaceMeshContactor.md]).
 
@@ -91,6 +91,11 @@ looks like
 - [Vickers indentation with an STL contactor](modules/contact/rigid_contact/examples/material_into_indenter.md)
   --- combines an STL-defined Vickers pyramid, force control, and the
   Uzawa outer solver on a plastic body.
+- [Two-pass plate rolling reduction](modules/contact/rigid_contact/examples/rolling_reduction.md)
+  --- multi-contactor demo: a plate fed through two
+  [InfiniteCylinderContactor.md] rollers that reduce its thickness in
+  two passes, with quarter symmetry across the axial and mid-height
+  planes.
 
 ### Syntax
 
@@ -103,7 +108,7 @@ looks like
 Individual objects are also documented and can be composed by hand for
 advanced setups:
 
-- [LevelSetContactor.md] / [SphereContactor.md] / [SurfaceMeshContactor.md]
+- [LevelSetContactor.md] / [SphereContactor.md] / [InfiniteCylinderContactor.md] / [SurfaceMeshContactor.md]
 - [RigidBodyNodalNCPKernel.md]
 - [RigidBodyNormalMechanicalContact.md]
 - [RigidBodyLoadControl.md]

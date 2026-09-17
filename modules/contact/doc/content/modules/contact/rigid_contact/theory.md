@@ -57,11 +57,16 @@ translation and rotation state:
   possible --- see below.
 - (Placeholder for future rotation support.)
 
-Two concrete contactors ship today:
+Three concrete contactors ship today:
 
 - [SphereContactor.md] --- analytic sphere with user-supplied center
   and radius.  Signed distance is $\|x - c\| - R$; normal is the unit
   radial vector at $x$.
+- [InfiniteCylinderContactor.md] --- analytic infinite cylinder with
+  user-supplied axis-origin, axis direction, and radius.  Signed
+  distance is the perpendicular distance to the axis minus the radius;
+  suitable for rolling-mill / roller-contact setups where the roller
+  can be treated as a straight cylinder.
 - [SurfaceMeshContactor.md] --- signed distance computed from an
   arbitrary closed, oriented triangulated surface (typically an STL
   file).  Distance is computed by a KDTree lookup of the nearest

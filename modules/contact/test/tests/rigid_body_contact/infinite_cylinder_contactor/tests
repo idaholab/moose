@@ -1,0 +1,15 @@
+[Tests]
+  design = 'InfiniteCylinderContactor.md LevelSetContactorAux.md'
+  issues = '#0000'
+  [cylinder_sdf]
+    type = 'CSVDiff'
+    input = 'cylinder_sdf.i'
+    csvdiff = 'cylinder_sdf_out.csv'
+    rel_err = 1e-8
+    max_parallel = 1
+    requirement = 'InfiniteCylinderContactor shall reproduce the signed distance and outward '
+                  'normal of two analytic cylinders (one axis-aligned, one tilted along a '
+                  'diagonal, both radius 1) at pointwise sample locations and match the '
+                  'ParsedFunction analytic reference to bit precision at every mesh node.'
+  []
+[]

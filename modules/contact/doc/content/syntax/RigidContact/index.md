@@ -42,9 +42,10 @@ function of time through
 The *contactor* user object is not created by the action --- users
 declare it themselves in `[UserObjects]` and pass its name in
 [!param](/RigidContact/RigidContactAction/contactor).  See
-[SphereContactor.md] and [SurfaceMeshContactor.md] for the two
-concrete choices, and [LevelSetContactor.md] for the interface that
-new analytic primitives should implement.
+[SphereContactor.md], [InfiniteCylinderContactor.md], and
+[SurfaceMeshContactor.md] for the three concrete choices, and
+[LevelSetContactor.md] for the interface that new analytic primitives
+should implement.
 
 ## Example input
 
