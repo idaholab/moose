@@ -1,0 +1,46 @@
+[Tests]
+  design = 'Restartable.md FileMeshGenerator.md'
+  issues = '#30008'
+
+  [checkpoint_mesh_base]
+    type = RunApp
+    input = checkpoint_mesh_base.i
+    requirement = 'The system shall create a checkpoint restart file with a mesh that has been refined after mesh generation.'
+  []
+
+  [checkpoint_mesh_restart]
+    type = CSVDiff
+    input = checkpoint_mesh_restart.i
+    csvdiff = checkpoint_mesh_restart.csv
+    prereq = checkpoint_mesh_base
+    requirement = 'The system shall construct the mesh for a checkpoint restart from the checkpoint file instead of the Mesh block in the restart input.'
+  []
+
+  [checkpoint_mesh_initial_adapt_base]
+    type = RunApp
+    input = checkpoint_mesh_initial_adapt_base.i
+    requirement = 'The system shall create a checkpoint restart file with a mesh that has been refined by initial adaptivity.'
+  []
+
+  [checkpoint_mesh_initial_adapt_restart]
+    type = CSVDiff
+    input = checkpoint_mesh_initial_adapt_restart.i
+    csvdiff = checkpoint_mesh_initial_adapt_restart.csv
+    prereq = checkpoint_mesh_initial_adapt_base
+    requirement = 'The system shall not repeat initial adaptivity after constructing a checkpoint restart mesh from the checkpoint file.'
+  []
+
+  [checkpoint_mesh_parent_base]
+    type = RunApp
+    input = checkpoint_mesh_parent_base.i
+    requirement = 'The system shall create a parent checkpoint restart file for a parent application with a subapp.'
+  []
+
+  [checkpoint_mesh_parent_restart]
+    type = CSVDiff
+    input = checkpoint_mesh_parent_restart.i
+    csvdiff = checkpoint_mesh_parent_restart_sub0.csv
+    prereq = checkpoint_mesh_parent_base
+    requirement = 'The system shall still uniformly refine a rebuilt subapp mesh when the parent application is restarted from checkpoint.'
+  []
+[]
