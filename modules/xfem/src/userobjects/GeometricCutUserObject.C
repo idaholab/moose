@@ -126,6 +126,12 @@ GeometricCutUserObject::execute()
   }
 }
 
+bool
+GeometricCutUserObject::isCutterMeshChanged() const
+{
+  return false;
+}
+
 void
 GeometricCutUserObject::threadJoin(const UserObject & y)
 {

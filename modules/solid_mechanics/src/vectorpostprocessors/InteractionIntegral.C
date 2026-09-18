@@ -16,6 +16,8 @@
 #include "DerivativeMaterialInterface.h"
 #include "libmesh/utility.h"
 #include "CrackFrontDefinition.h"
+#include "MooseUtils.h"
+#include "NonlinearSystem.h"
 
 registerMooseObject("SolidMechanicsApp", InteractionIntegral);
 registerMooseObject("SolidMechanicsApp", ADInteractionIntegral);
@@ -101,6 +103,15 @@ InteractionIntegralTempl<is_ad>::validParams()
   params.addCoupledVar("additional_eigenstrain_12",
                        "Optional additional eigenstrain variable that will be accounted for in the "
                        "interaction integral (component 12 or XZ).");
+  params.addParam<std::vector<VariableName>>(
+      "enrichment_displacements",
+      {},
+      "Enrichment displacement variables for crack-tip enrichment. Provide 4*ndim variables "
+      "ordered as all four enrichment functions for x, then y, and then z for 3D.");
+  params.addParam<SubdomainID>(
+      "enriched_subdomain_id",
+      Moose::INVALID_BLOCK_ID,
+      "Subdomain ID of the crack-tip enriched region where enrichment DOFs are active.");
   params.addParamNamesToGroup(
       "additional_eigenstrain_00 additional_eigenstrain_01 additional_eigenstrain_11 "
       "additional_eigenstrain_22 additional_eigenstrain_02 additional_eigenstrain_12",
@@ -115,6 +126,7 @@ InteractionIntegralTempl<is_ad>::validParams()
 template <bool is_ad>
 InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
+    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _treat_as_2d(false),
@@ -174,7 +186,15 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     _interaction_integral(declareVector("II_" + Moose::stringify(getParam<MooseEnum>("sif_mode")) +
                                         "_" + Moose::stringify(_ring_index))),
     _eigenstrain_gradient(nullptr),
-    _body_force(nullptr)
+    _body_force(nullptr),
+    _grad_enriched_disp(3),
+    _enrich_variable(4),
+    _B(4),
+    _dBX(4),
+    _dBx(4),
+    _nl(nullptr),
+    _sln(nullptr),
+    _enriched_subdomain_id(getParam<SubdomainID>("enriched_subdomain_id"))
 {
   if (_has_temp && !_total_deigenstrain_dT)
     mooseError("InteractionIntegral Error: To include thermal strain term in interaction integral, "
@@ -238,6 +258,31 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
   if (_has_additional_eigenstrain)
     mooseInfo("A generic eigenstrain provided by the user will be considered in the interaction "
               "integral (via domain integral action).");
+
+  const auto & enrichment_names = getParam<std::vector<VariableName>>("enrichment_displacements");
+  if (!enrichment_names.empty())
+  {
+    if (enrichment_names.size() != 4 * _ndisp)
+      paramError("enrichment_displacements",
+                 "Expected 4*ndim = ",
+                 4 * _ndisp,
+                 " enrichment displacement variables, but received ",
+                 enrichment_names.size(),
+                 ".");
+
+    if (_enriched_subdomain_id == Moose::INVALID_BLOCK_ID)
+      paramError("enriched_subdomain_id",
+                 "This parameter is required when 'enrichment_displacements' is provided.");
+
+    _nl = &(_fe_problem.getNonlinearSystem(/*nl_sys_num=*/0));
+
+    for (const auto j : make_range(4))
+      _enrich_variable[j].resize(_ndisp);
+
+    for (const auto m : make_range(_ndisp))
+      for (const auto j : make_range(4))
+        _enrich_variable[j][m] = &(_nl->getVariable(0, enrichment_names[m * 4 + j]));
+  }
 }
 
 template <bool is_ad>
@@ -301,6 +346,44 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
 
   auto grad_disp = RankTwoTensor::initializeFromRows(
       (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+
+  if (_nl && _sln && !_BI.empty() && _current_elem->subdomain_id() == _enriched_subdomain_id &&
+      !MooseUtils::absoluteFuzzyEqual(_r, 0.0))
+  {
+    crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+    const auto crack_front_point_index =
+        crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+
+    for (const auto j : make_range(4))
+      rotateFromCrackFrontCoordsToGlobal(_dBx[j], _dBX[j], crack_front_point_index);
+
+    for (const auto m : make_range(_ndisp))
+      _grad_enriched_disp[m].zero();
+
+    for (const auto i : make_range(_current_elem->n_nodes()))
+    {
+      const Node * node_i = _current_elem->node_ptr(i);
+      if (!node_i)
+        continue;
+
+      for (const auto j : make_range(4))
+        for (const auto m : make_range(_ndisp))
+        {
+          const auto var_num = _enrich_variable[j][m]->number();
+          if (node_i->n_comp(_nl->number(), var_num) == 0)
+            continue;
+
+          const auto dof = node_i->dof_number(_nl->number(), var_num, 0);
+          const auto soln = (*_sln)(dof);
+          _grad_enriched_disp[m] += ((*_dphi_curr_elem)[i][_qp] * (_B[j] - _BI[i][j]) +
+                                     (*_phi_curr_elem)[i][_qp] * _dBX[j]) *
+                                    soln;
+        }
+    }
+
+    grad_disp += RankTwoTensor::initializeFromRows(
+        _grad_enriched_disp[0], _grad_enriched_disp[1], _grad_enriched_disp[2]);
+  }
 
   // Rotate stress, strain, displacement and temperature to crack front coordinate system
   RealVectorValue grad_q_cf =
@@ -522,6 +605,26 @@ InteractionIntegralTempl<is_ad>::execute()
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();
   fe->reinit(_current_elem);
+
+  if (_nl)
+  {
+    _sln = _nl->currentSolution();
+    _BI.assign(_current_elem->n_nodes(), std::vector<Real>(4, 0.0));
+
+    if (_current_elem->subdomain_id() == _enriched_subdomain_id)
+      for (const auto i : make_range(_current_elem->n_nodes()))
+      {
+        const Node * node_i = _current_elem->node_ptr(i);
+        if (!node_i)
+          continue;
+
+        Real r_node = 0.0;
+        Real theta_node = 0.0;
+        _crack_front_definition->calculateRThetaToCrackFront(*node_i, r_node, theta_node);
+        if (!MooseUtils::absoluteFuzzyEqual(r_node, 0.0))
+          crackTipEnrichementFunctionAtPoint(*node_i, _BI[i]);
+      }
+  }
 
   // calculate q for all nodes in this element
   std::size_t ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
