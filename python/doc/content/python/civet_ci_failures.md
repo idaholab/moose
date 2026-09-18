@@ -1,6 +1,6 @@
 # CIVET Failure Report
 
-`civet_pr_failures.py` reports why [CIVET](https://civet.inl.gov) failed for a pull request,
+`civet_ci_failures.py` reports why [CIVET](https://civet.inl.gov) failed for a pull request,
 a commit, or a single job, in a compact, bounded form. It reads GitHub commit statuses and
 CIVET job step logs through the `gh` CLI, so it needs no CIVET credentials.
 
@@ -10,9 +10,9 @@ There are three ways to name what to report on: a pull request, a commit (which 
 makes push events on `next` and `devel` reportable), or a single CIVET job named by its URL:
 
 ```text
-python/civet_pr_failures/civet_pr_failures.py --pr 33645
-python/civet_pr_failures/civet_pr_failures.py --sha <commit>
-python/civet_pr_failures/civet_pr_failures.py --job <civet job url>
+python/civet_ci_failures/civet_ci_failures.py --pr 33645
+python/civet_ci_failures/civet_ci_failures.py --sha <commit>
+python/civet_ci_failures/civet_ci_failures.py --job <civet job url>
 ```
 
 Without `--pr`, `--sha`, or `--job`, it looks up the current branch's open pull request by

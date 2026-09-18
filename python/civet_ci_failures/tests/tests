@@ -1,9 +1,9 @@
 [Tests]
-  design = 'python/civet_pr_failures.md'
+  design = 'python/civet_ci_failures.md'
   issues = '#32497'
-  [civet_pr_failures]
+  [civet_ci_failures]
     type = PythonUnitTest
-    input = test_civet_pr_failures.py
+    input = test_civet_ci_failures.py
     requirement = "The system shall provide a tool for reporting why CIVET failed on a pull "
                   "request, commit, or single job, which parses CIVET job logs and GitHub commit "
                   "statuses to cluster error signatures, build reproduce commands, and separate "

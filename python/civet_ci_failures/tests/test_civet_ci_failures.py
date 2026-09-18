@@ -21,7 +21,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import civet_pr_failures as cpf
+import civet_ci_failures as ccf
 
 
 class TestLatestStatuses(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestLatestStatuses(unittest.TestCase):
             {"context": "build", "state": "pending"},
         ]
         self.assertEqual(
-            cpf.latest_statuses(statuses),
+            ccf.latest_statuses(statuses),
             [
                 {"context": "build", "state": "success"},
                 {"context": "test", "state": "pending"},
@@ -43,7 +43,7 @@ class TestLatestStatuses(unittest.TestCase):
 
     def testMissingContextKeptOnce(self):
         statuses = [{"state": "success"}, {"state": "pending"}]
-        self.assertEqual(cpf.latest_statuses(statuses), [{"state": "success"}])
+        self.assertEqual(ccf.latest_statuses(statuses), [{"state": "success"}])
 
 
 class TestPendingAndRealFailures(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestPendingAndRealFailures(unittest.TestCase):
             {"context": "a", "state": "pending"},
             {"context": "b", "state": "success"},
         ]
-        self.assertEqual(cpf.pending_jobs(statuses), [statuses[0]])
+        self.assertEqual(ccf.pending_jobs(statuses), [statuses[0]])
 
     def testRealFailuresExcludesCascades(self):
         statuses = [
@@ -60,12 +60,12 @@ class TestPendingAndRealFailures(unittest.TestCase):
             {
                 "context": "b",
                 "state": "failure",
-                "description": cpf.BLOCKED_DESCRIPTION,
+                "description": ccf.BLOCKED_DESCRIPTION,
             },
             {"context": "c", "state": "error", "description": "boom"},
             {"context": "d", "state": "success", "description": None},
         ]
-        self.assertEqual(cpf.real_failures(statuses), [statuses[0], statuses[2]])
+        self.assertEqual(ccf.real_failures(statuses), [statuses[0], statuses[2]])
 
 
 class TestDescribeTarget(unittest.TestCase):
@@ -75,23 +75,23 @@ class TestDescribeTarget(unittest.TestCase):
             "headRefName": "my-branch",
             "headRefOid": "abcdef0123456",
         }
-        self.assertEqual(cpf.describe_target(info), "PR #123 my-branch @ abcdef0")
+        self.assertEqual(ccf.describe_target(info), "PR #123 my-branch @ abcdef0")
 
     def testBareCommit(self):
         info = {"number": None, "headRefName": None, "headRefOid": "abcdef0123456"}
-        self.assertEqual(cpf.describe_target(info), "commit abcdef0")
+        self.assertEqual(ccf.describe_target(info), "commit abcdef0")
 
 
 class TestStripCiArgs(unittest.TestCase):
     def testDropsTimingAndLongestJobs(self):
         self.assertEqual(
-            cpf.strip_ci_args(["-p", "4", "-t", "--longest-jobs=10", "--recover"]),
+            ccf.strip_ci_args(["-p", "4", "-t", "--longest-jobs=10", "--recover"]),
             ["-p", "4", "--recover"],
         )
 
     def testDropsValuedJobSlotArgs(self):
         self.assertEqual(
-            cpf.strip_ci_args(["-j", "8", "--distributed-mesh"]), ["--distributed-mesh"]
+            ccf.strip_ci_args(["-j", "8", "--distributed-mesh"]), ["--distributed-mesh"]
         )
 
     def testKeepsModeAffectingArgs(self):
@@ -101,7 +101,7 @@ class TestStripCiArgs(unittest.TestCase):
             "--min-parallel",
             "7",
         ]
-        self.assertEqual(cpf.strip_ci_args(args), args)
+        self.assertEqual(ccf.strip_ci_args(args), args)
 
 
 class TestExtractContainerAndInvocation(unittest.TestCase):
@@ -109,71 +109,71 @@ class TestExtractContainerAndInvocation(unittest.TestCase):
         text = (
             "Executing step in docker://old:tag\nExecuting step in docker://new:tag\n"
         )
-        self.assertEqual(cpf.extract_container(text), "docker://new:tag")
+        self.assertEqual(ccf.extract_container(text), "docker://new:tag")
 
     def testExtractContainerNoneWhenAbsent(self):
-        self.assertIsNone(cpf.extract_container("nothing to see here"))
+        self.assertIsNone(ccf.extract_container("nothing to see here"))
 
     def testExtractInvocationTakesFirstMatch(self):
         text = (
             "[00:00:01] test: ./run_tests -p 4 --distributed-mesh\n"
             "[00:05:00] test: ./run_tests --failed-tests\n"
         )
-        directory, args = cpf.extract_invocation(text)
+        directory, args = ccf.extract_invocation(text)
         self.assertEqual(directory, "test")
         self.assertEqual(args, ["-p", "4", "--distributed-mesh"])
 
     def testExtractInvocationNoneWhenAbsent(self):
-        self.assertIsNone(cpf.extract_invocation("no invocation logged here"))
+        self.assertIsNone(ccf.extract_invocation("no invocation logged here"))
 
 
 class TestReproduceCommandAndModeIdentity(unittest.TestCase):
     def testNoInvocationFallsBackToBareRunTests(self):
-        cmd = cpf.reproduce_command(None, "controls/web_server_control.connect_port")
+        cmd = ccf.reproduce_command(None, "controls/web_server_control.connect_port")
         self.assertEqual(
             cmd, "./run_tests --re '^controls/web_server_control\\.connect_port$'"
         )
 
     def testInvocationAddsDirectoryAndArgs(self):
         invocation = ("test", ["-p", "4"])
-        cmd = cpf.reproduce_command(invocation, "some.test")
+        cmd = ccf.reproduce_command(invocation, "some.test")
         self.assertEqual(cmd, "cd test && ./run_tests -p 4 --re '^some\\.test$'")
 
     def testInvocationInCurrentDirectorySkipsCd(self):
         invocation = (".", ["-p", "4"])
-        cmd = cpf.reproduce_command(invocation, "some.test")
+        cmd = ccf.reproduce_command(invocation, "some.test")
         self.assertFalse(cmd.startswith("cd"))
 
     def testModeIdentityDropsMemoryLimitButKeepsRest(self):
         invocation = ("test", ["-p", "4", "--max-memory-per-slot=1024"])
-        self.assertEqual(cpf.mode_identity(invocation), "-p 4")
+        self.assertEqual(ccf.mode_identity(invocation), "-p 4")
 
     def testModeIdentityNoneInvocation(self):
-        self.assertEqual(cpf.mode_identity(None), "")
+        self.assertEqual(ccf.mode_identity(None), "")
 
     def testTwoModesDifferingOnlyInMemoryAreIdentical(self):
         a = ("test", ["-p", "4", "--max-memory-per-slot=1024"])
         b = ("test", ["-p", "4", "--max-memory-per-slot=2048"])
-        self.assertEqual(cpf.mode_identity(a), cpf.mode_identity(b))
+        self.assertEqual(ccf.mode_identity(a), ccf.mode_identity(b))
 
 
 class TestRetryNote(unittest.TestCase):
     def testPassedOnRetry(self):
-        self.assertEqual(cpf.retry_note(85), "passed on retry; intermittent")
+        self.assertEqual(ccf.retry_note(85), "passed on retry; intermittent")
 
     def testFailedAgainOnRetry(self):
-        self.assertEqual(cpf.retry_note(1), "failed again on retry")
+        self.assertEqual(ccf.retry_note(1), "failed again on retry")
 
     def testNoRetryAttempted(self):
-        self.assertEqual(cpf.retry_note(128), "no retry attempted")
-        self.assertEqual(cpf.retry_note(0), "no retry attempted")
+        self.assertEqual(ccf.retry_note(128), "no retry attempted")
+        self.assertEqual(ccf.retry_note(0), "no retry attempted")
 
 
 class TestNormalizeError(unittest.TestCase):
     def testTmpDirAddressAndDigitsAreNormalized(self):
         message = "opening /tmp/abc123/file at 0xdeadBEEF, attempt 3"
         self.assertEqual(
-            cpf.normalize_error(message),
+            ccf.normalize_error(message),
             "opening /tmp/<dir>/file at <addr>, attempt N",
         )
 
@@ -181,13 +181,13 @@ class TestNormalizeError(unittest.TestCase):
 class TestErrorSignatures(unittest.TestCase):
     def testErrorBlockSkipsBoilerplateAndLocation(self):
         lines = [
-            cpf.ERROR_BLOCK_MARKER,
+            ccf.ERROR_BLOCK_MARKER,
             "The following occurred in the object foo",
             "input.i:10.5:",
             "  Real error message here  ",
             "trailing noise",
         ]
-        signatures = cpf.error_signatures(lines)
+        signatures = ccf.error_signatures(lines)
         self.assertEqual(signatures["Real error message here"], 1)
 
     def testStandaloneErrorLine(self):
@@ -196,25 +196,25 @@ class TestErrorSignatures(unittest.TestCase):
             "AssertionError: oops",
             "Fatal error: oops",
         ]
-        signatures = cpf.error_signatures(lines)
+        signatures = ccf.error_signatures(lines)
         self.assertEqual(signatures["ValueError: bad value N"], 1)
         self.assertEqual(signatures["AssertionError: oops"], 1)
         self.assertEqual(signatures["Fatal error: oops"], 1)
 
     def testRepeatedSignatureIsCounted(self):
         lines = ["ValueError: bad value 1", "ValueError: bad value 2"]
-        signatures = cpf.error_signatures(lines)
+        signatures = ccf.error_signatures(lines)
         self.assertEqual(signatures["ValueError: bad value N"], 2)
 
 
 class TestHintsFor(unittest.TestCase):
     def testMatchingKeyProducesHint(self):
-        hints = cpf.hints_for(["ERROR ... KILLED: OVER MEMORY ..."])
+        hints = ccf.hints_for(["ERROR ... KILLED: OVER MEMORY ..."])
         self.assertEqual(len(hints), 1)
         self.assertTrue(hints[0].startswith("KILLED: OVER MEMORY -> "))
 
     def testNoMatchProducesNoHints(self):
-        self.assertEqual(cpf.hints_for(["nothing recognizable here"]), [])
+        self.assertEqual(ccf.hints_for(["nothing recognizable here"]), [])
 
 
 class TestDedupeTestFailures(unittest.TestCase):
@@ -224,12 +224,12 @@ class TestDedupeTestFailures(unittest.TestCase):
             "ERROR some.test FAILED (TIMEOUT)",
         ]
         self.assertEqual(
-            cpf.dedupe_test_failures(lines), ["ERROR some.test FAILED (TIMEOUT)"]
+            ccf.dedupe_test_failures(lines), ["ERROR some.test FAILED (TIMEOUT)"]
         )
 
     def testDistinctTestsBothKept(self):
         lines = ["ERROR a FAILED (X)", "ERROR b FAILED (Y)"]
-        self.assertEqual(sorted(cpf.dedupe_test_failures(lines)), sorted(lines))
+        self.assertEqual(sorted(ccf.dedupe_test_failures(lines)), sorted(lines))
 
 
 class TestTestNameOf(unittest.TestCase):
@@ -238,7 +238,7 @@ class TestTestNameOf(unittest.TestCase):
             "ERROR controls/web_server_control.connect_port FAILED (EXIT CODE 1 != 0)"
         )
         self.assertEqual(
-            cpf.test_name_of(line), "controls/web_server_control.connect_port"
+            ccf.test_name_of(line), "controls/web_server_control.connect_port"
         )
 
 
@@ -248,16 +248,16 @@ class TestFailingSteps(unittest.TestCase):
             ("01_Build", "...\ncompleted with return code 0\n"),
             ("02_Test", "...\ncompleted with return code 1\n"),
         ]
-        self.assertEqual(cpf.failing_steps(steps), [("02_Test", 1, steps[1][1])])
+        self.assertEqual(ccf.failing_steps(steps), [("02_Test", 1, steps[1][1])])
 
     def testLastReturnCodeWinsWhenStepRetried(self):
         text = (
             "completed with return code 1\n...retry...\ncompleted with return code 85\n"
         )
-        self.assertEqual(cpf.failing_steps([("step", text)]), [("step", 85, text)])
+        self.assertEqual(ccf.failing_steps([("step", text)]), [("step", 85, text)])
 
     def testNoReturnCodeMeansNotFailing(self):
-        self.assertEqual(cpf.failing_steps([("step", "no marker here")]), [])
+        self.assertEqual(ccf.failing_steps([("step", "no marker here")]), [])
 
 
 class TestExtractStepErrors(unittest.TestCase):
@@ -266,7 +266,7 @@ class TestExtractStepErrors(unittest.TestCase):
             "[0.1s] [ 10MB] some/test: ERROR some.test FAILED (TIMEOUT)\n"
             "1 passed, 1 FAILED\n"
         )
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "test")
         self.assertEqual(result["total"], 1)
         self.assertEqual(result["tally"], "1 passed, 1 FAILED")
@@ -274,7 +274,7 @@ class TestExtractStepErrors(unittest.TestCase):
 
     def testBuildKindFromCompilerDiagnostic(self):
         text = "foo.cc:12:3: error: use of undeclared identifier 'x'\n"
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "build")
         self.assertEqual(result["total"], 1)
 
@@ -283,7 +283,7 @@ class TestExtractStepErrors(unittest.TestCase):
             "foo.cc:12:3: error: use of undeclared identifier 'x'\n"
             "make[1]: *** [foo.o] Error 1\n"
         )
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "build")
         # The TestHarness-prefix stripping above also strips a "file:line:col: "
         # compiler prefix, since it has the same shape.
@@ -291,23 +291,23 @@ class TestExtractStepErrors(unittest.TestCase):
 
     def testInfraKindWinsOverNonDiagnosticBuildComplaint(self):
         text = "ninja: error: loading 'build.ninja'\ncurl: (28) connection timed out\n"
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "infra")
 
     def testMakeFailureFallsBackToBuildWhenNothingElseMatches(self):
         text = "make[2]: *** [target] Error 2\n"
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "build")
 
     def testUnknownKindFallsBackToTailWithoutTeardown(self):
         text = "useful line one\nuseful line two\nRemoving container\nSubmitting step statistics\n"
-        result = cpf.extract_step_errors(text, limit=5)
+        result = ccf.extract_step_errors(text, limit=5)
         self.assertEqual(result["kind"], "unknown")
         self.assertEqual(result["items"], ["useful line one", "useful line two"])
 
     def testLimitCapsItemsButNotTotal(self):
         lines = "\n".join(f"error: problem {i}" for i in range(10))
-        result = cpf.extract_step_errors(lines, limit=3)
+        result = ccf.extract_step_errors(lines, limit=3)
         self.assertEqual(len(result["items"]), 3)
         self.assertEqual(result["total"], 10)
 
@@ -319,13 +319,13 @@ class TestRollupEntries(unittest.TestCase):
                 "status": "ERROR",
                 "reasons": {"TIMEOUT"},
                 "failures": [
-                    cpf.Failure(
+                    ccf.Failure(
                         job="job1",
                         command="cd test && ./run_tests --re a",
                         mode="-p 4",
                         container="docker://x",
                     ),
-                    cpf.Failure(
+                    ccf.Failure(
                         job="job2",
                         command="./run_tests --re a",
                         mode="-p 8",
@@ -334,7 +334,7 @@ class TestRollupEntries(unittest.TestCase):
                 ],
             },
         }
-        entries = cpf.rollup_entries(rollup, limit=10)
+        entries = ccf.rollup_entries(rollup, limit=10)
         self.assertEqual(len(entries), 1)
         entry = entries[0]
         self.assertEqual(entry["test"], "a.test")
@@ -344,14 +344,14 @@ class TestRollupEntries(unittest.TestCase):
         self.assertIsNone(entry["container"])
 
     def testLimitCapsEntries(self):
-        failure = cpf.Failure(
+        failure = ccf.Failure(
             job="job1", command="./run_tests --re x", mode="", container=None
         )
         rollup = {
             f"t{i}.test": {"status": "ERROR", "reasons": set(), "failures": [failure]}
             for i in range(5)
         }
-        self.assertEqual(len(cpf.rollup_entries(rollup, limit=2)), 2)
+        self.assertEqual(len(ccf.rollup_entries(rollup, limit=2)), 2)
 
 
 class TestGreppedLines(unittest.TestCase):
@@ -366,10 +366,10 @@ class TestGreppedLines(unittest.TestCase):
             "MATCH again",
             "eight",
         ]
-        self.assertEqual(cpf.grepped_lines(body, "MATCH", 1), [1, 2, 3, 5, 6, 7])
+        self.assertEqual(ccf.grepped_lines(body, "MATCH", 1), [1, 2, 3, 5, 6, 7])
 
     def testNoMatchIsEmpty(self):
-        self.assertEqual(cpf.grepped_lines(["a", "b"], "nope", 0), [])
+        self.assertEqual(ccf.grepped_lines(["a", "b"], "nope", 0), [])
 
 
 def cfg_file(directory, name, display_name, requires=()):
@@ -390,7 +390,7 @@ class TestLoadRecipeGraphAndDownstream(unittest.TestCase):
         cfg_file(self.tmp, "other.cfg", "Other")
 
     def testGraphMapsNamesAndDeps(self):
-        graph = cpf.load_recipe_graph(self.tmp)
+        graph = ccf.load_recipe_graph(self.tmp)
         self.assertEqual(
             graph["files_of"],
             {
@@ -402,23 +402,23 @@ class TestLoadRecipeGraphAndDownstream(unittest.TestCase):
         self.assertEqual(graph["deps"]["test.cfg"], ["build.cfg"])
 
     def testDownstreamIsTransitiveDependent(self):
-        graph = cpf.load_recipe_graph(self.tmp)
-        self.assertEqual(cpf.downstream_of(graph, ["Build"]), {"Test"})
+        graph = ccf.load_recipe_graph(self.tmp)
+        self.assertEqual(ccf.downstream_of(graph, ["Build"]), {"Test"})
 
     def testBlockedPendingNeedsFailureAndGraph(self):
-        graph = cpf.load_recipe_graph(self.tmp)
+        graph = ccf.load_recipe_graph(self.tmp)
         statuses = [
             {"context": "Build", "state": "failure", "description": "x"},
             {"context": "Test", "state": "pending"},
             {"context": "Other", "state": "pending"},
         ]
-        self.assertEqual(cpf.blocked_pending(graph, statuses), ["Test"])
-        self.assertEqual(cpf.blocked_pending(None, statuses), [])
+        self.assertEqual(ccf.blocked_pending(graph, statuses), ["Test"])
+        self.assertEqual(ccf.blocked_pending(None, statuses), [])
 
     def testEmptyDirWarnsAndReturnsNone(self):
         empty = tempfile.mkdtemp()
         with mock.patch("sys.stderr", new_callable=io.StringIO):
-            self.assertIsNone(cpf.load_recipe_graph(empty))
+            self.assertIsNone(ccf.load_recipe_graph(empty))
 
 
 TEST_STEP_TEXT = (
@@ -437,7 +437,7 @@ class TestCollectJobErrors(unittest.TestCase):
             ("02_Test", TEST_STEP_TEXT),
         ]
         rollup, hint_texts = {}, set()
-        entry = cpf.collect_job_errors(
+        entry = ccf.collect_job_errors(
             "ctx",
             "http://job/1",
             steps,
@@ -458,7 +458,7 @@ class TestCollectJobErrors(unittest.TestCase):
         )
 
     def testNoFailingStepReportsError(self):
-        entry = cpf.collect_job_errors(
+        entry = ccf.collect_job_errors(
             "ctx", "url", [("step", "completed with return code 0\n")], {}, set(), 5, 5
         )
         self.assertIn("error", entry)
@@ -467,7 +467,7 @@ class TestCollectJobErrors(unittest.TestCase):
 class TestCollectOneJob(unittest.TestCase):
     def testUsesRecipeNameFromEnv(self):
         steps = [("01_Build", "completed with return code 1\nerror: something broke\n")]
-        result = cpf.collect_one_job(
+        result = ccf.collect_one_job(
             "http://job/2", steps, {"CIVET_RECIPE_NAME": "My Recipe"}, 5, 5
         )
         self.assertEqual(result["jobs"][0]["context"], "My Recipe")
@@ -483,9 +483,9 @@ class TestCollectErrors(unittest.TestCase):
             {"context": f"job{i}", "target_url": f"http://job/{i}"} for i in range(3)
         ]
         with mock.patch.object(
-            cpf, "fetch_job_steps", return_value=[("step", TEST_STEP_TEXT)]
+            ccf, "fetch_job_steps", return_value=[("step", TEST_STEP_TEXT)]
         ):
-            collected = cpf.collect_errors(
+            collected = ccf.collect_errors(
                 failed_jobs, max_jobs=2, max_diagnostics=5, max_signatures=5
             )
         self.assertEqual(len(collected["jobs"]), 2)
@@ -494,8 +494,8 @@ class TestCollectErrors(unittest.TestCase):
 
     def testUnreadableLogIsReportedNotRaised(self):
         failed_jobs = [{"context": "job0", "target_url": "http://job/0"}]
-        with mock.patch.object(cpf, "fetch_job_steps", side_effect=RuntimeError("403")):
-            collected = cpf.collect_errors(
+        with mock.patch.object(ccf, "fetch_job_steps", side_effect=RuntimeError("403")):
+            collected = ccf.collect_errors(
                 failed_jobs, max_jobs=5, max_diagnostics=5, max_signatures=5
             )
         self.assertIn("could not read logs", collected["jobs"][0]["error"])
@@ -522,7 +522,7 @@ def captured(func, *args, **kwargs):
 class TestJsonPayload(unittest.TestCase):
     def testCountsAndJobListExcludeSuccess(self):
         collected = {"jobs": [], "rollup": {}, "hints": [], "jobs_not_read": 0}
-        payload = cpf.json_payload(
+        payload = ccf.json_payload(
             SAMPLE_INFO, SAMPLE_STATE, collected, max_failures=10
         )
         self.assertEqual(
@@ -542,7 +542,7 @@ class TestJsonPayload(unittest.TestCase):
 
 class TestPrintDigest(unittest.TestCase):
     def testReportsCountsAndIncompleteWarning(self):
-        text = captured(cpf.print_digest, SAMPLE_INFO, SAMPLE_STATE)
+        text = captured(ccf.print_digest, SAMPLE_INFO, SAMPLE_STATE)
         self.assertIn("PR #42 br @ abc123d", text)
         self.assertIn("1 failed, 1 pending, 1 passed / 3", text)
         self.assertIn("EVENT INCOMPLETE", text)
@@ -556,11 +556,26 @@ class TestPrintJobHeader(unittest.TestCase):
             "CIVET_PR_NUM": "99",
             "CIVET_EVENT_CAUSE": "Pull request",
         }
-        text = captured(cpf.print_job_header, "http://job/2", env)
+        text = captured(ccf.print_job_header, "http://job/2", env)
         self.assertIn("My Recipe  http://job/2", text)
         self.assertIn("pull request 99 (Pull request)", text)
         self.assertIn("head ?:? @ ?", text)
         self.assertIn("base ?:? @ ?", text)
+
+    def testPushEventReportsEventCauseInPlaceOfPullRequest(self):
+        # A push to next or devel carries no CIVET_PR_NUM, so the event cause is
+        # all that names the event and the head commit is what to follow it with
+        env = {
+            "CIVET_RECIPE_NAME": "My Recipe",
+            "CIVET_EVENT_CAUSE": "Push next",
+            "CIVET_HEAD_REPO": "idaholab/moose",
+            "CIVET_HEAD_REF": "next",
+            "CIVET_HEAD_SHA": "0123456789abcdef",
+        }
+        text = captured(ccf.print_job_header, "http://job/3", env)
+        self.assertIn("Push next", text)
+        self.assertNotIn("pull request", text)
+        self.assertIn("head idaholab/moose:next @ 0123456789ab", text)
 
 
 class TestPrintErrorsAndSteps(unittest.TestCase):
@@ -571,29 +586,29 @@ class TestPrintErrorsAndSteps(unittest.TestCase):
         self.env = {"CIVET_RECIPE_NAME": "My Recipe"}
 
     def testPrintErrorsShowsDiagnostics(self):
-        collected = cpf.collect_one_job("http://job/2", self.steps, self.env, 5, 5)
-        text = captured(cpf.print_errors, collected, max_failures=10, label_jobs=False)
+        collected = ccf.collect_one_job("http://job/2", self.steps, self.env, 5, 5)
+        text = captured(ccf.print_errors, collected, max_failures=10, label_jobs=False)
         self.assertIn("01_Build (exit 1, build)", text)
         self.assertIn("error: something broke", text)
 
     def testPrintStepListShowsSizeInKB(self):
-        text = captured(cpf.print_step_list, "http://job/2", self.steps)
+        text = captured(ccf.print_step_list, "http://job/2", self.steps)
         self.assertIn("steps in http://job/2", text)
         self.assertIn("01_Build", text)
 
     def testPrintStepLogTailWhenNoPattern(self):
-        text = captured(cpf.print_step_log, self.steps, "01_Build", 100, None, 0)
+        text = captured(ccf.print_step_log, self.steps, "01_Build", 100, None, 0)
         self.assertIn("last 2 of 2 lines", text)
         self.assertIn("error: something broke", text)
 
     def testPrintStepLogGrepsAndMarksGaps(self):
-        text = captured(cpf.print_step_log, self.steps, "01_Build", 100, "broke", 0)
+        text = captured(ccf.print_step_log, self.steps, "01_Build", 100, "broke", 0)
         self.assertIn("1 of 2 lines match 'broke'", text)
         self.assertIn("error: something broke", text)
 
     def testPrintStepLogUnknownStepRaises(self):
-        with self.assertRaises(cpf.GitHubError):
-            cpf.print_step_log(self.steps, "no-such-step", 100, None, 0)
+        with self.assertRaises(ccf.GitHubError):
+            ccf.print_step_log(self.steps, "no-such-step", 100, None, 0)
 
 
 def completed(returncode, stdout="", stderr=""):
@@ -605,56 +620,56 @@ def completed(returncode, stdout="", stderr=""):
 class TestGh(unittest.TestCase):
     def testSuccessReturnsStdout(self):
         with mock.patch("subprocess.run", return_value=completed(0, "hello\n")):
-            self.assertEqual(cpf.gh(["foo"]), "hello\n")
+            self.assertEqual(ccf.gh(["foo"]), "hello\n")
 
     def testNonZeroExitRaisesGitHubError(self):
         with mock.patch("subprocess.run", return_value=completed(1, "", "boom")):
-            with self.assertRaisesRegex(cpf.GitHubError, "boom"):
-                cpf.gh(["foo"])
+            with self.assertRaisesRegex(ccf.GitHubError, "boom"):
+                ccf.gh(["foo"])
 
     def testMissingGhRaisesGitHubError(self):
         with mock.patch("subprocess.run", side_effect=FileNotFoundError()):
-            with self.assertRaisesRegex(cpf.GitHubError, "not found on PATH"):
-                cpf.gh(["foo"])
+            with self.assertRaisesRegex(ccf.GitHubError, "not found on PATH"):
+                ccf.gh(["foo"])
 
     def testGhJsonParsesOrReturnsNoneWhenEmpty(self):
-        with mock.patch.object(cpf, "gh", return_value='{"a": 1}\n'):
-            self.assertEqual(cpf.gh_json(["x"]), {"a": 1})
-        with mock.patch.object(cpf, "gh", return_value=""):
-            self.assertIsNone(cpf.gh_json(["x"]))
+        with mock.patch.object(ccf, "gh", return_value='{"a": 1}\n'):
+            self.assertEqual(ccf.gh_json(["x"]), {"a": 1})
+        with mock.patch.object(ccf, "gh", return_value=""):
+            self.assertIsNone(ccf.gh_json(["x"]))
 
 
 class TestCurrentBranchAndRepoFromRemote(unittest.TestCase):
     def testCurrentBranch(self):
         with mock.patch("subprocess.run", return_value=completed(0, "mybranch\n")):
-            self.assertEqual(cpf.current_branch(), "mybranch")
+            self.assertEqual(ccf.current_branch(), "mybranch")
 
     def testCurrentBranchNotAGitRepoRaises(self):
         with mock.patch("subprocess.run", return_value=completed(1)):
-            with self.assertRaises(cpf.GitHubError):
-                cpf.current_branch()
+            with self.assertRaises(ccf.GitHubError):
+                ccf.current_branch()
 
     def testRepoFromRemoteParsesSlug(self):
         with mock.patch(
             "subprocess.run",
             return_value=completed(0, "git@github.com:idaholab/moose.git\n"),
         ):
-            self.assertEqual(cpf.repo_from_remote("origin"), "idaholab/moose")
+            self.assertEqual(ccf.repo_from_remote("origin"), "idaholab/moose")
 
     def testRepoFromRemoteMissingRemoteReturnsNone(self):
         with mock.patch("subprocess.run", return_value=completed(1)):
-            self.assertIsNone(cpf.repo_from_remote("nope"))
+            self.assertIsNone(ccf.repo_from_remote("nope"))
 
 
 class TestResolveRepo(unittest.TestCase):
     def testExplicitRepoWins(self):
-        self.assertEqual(cpf.resolve_repo("owner/name", None), "owner/name")
+        self.assertEqual(ccf.resolve_repo("owner/name", None), "owner/name")
 
     def testNamedRemoteUsedBeforeCandidates(self):
         with mock.patch.object(
-            cpf, "repo_from_remote", return_value="owner/fromremote"
+            ccf, "repo_from_remote", return_value="owner/fromremote"
         ):
-            self.assertEqual(cpf.resolve_repo(None, "up"), "owner/fromremote")
+            self.assertEqual(ccf.resolve_repo(None, "up"), "owner/fromremote")
 
     def testCandidatesTriedInOrderUntilOneHits(self):
         seen = []
@@ -663,48 +678,48 @@ class TestResolveRepo(unittest.TestCase):
             seen.append(remote)
             return "owner/x" if remote == "upstream" else None
 
-        with mock.patch.object(cpf, "repo_from_remote", side_effect=fake):
-            self.assertEqual(cpf.resolve_repo(None, None), "owner/x")
+        with mock.patch.object(ccf, "repo_from_remote", side_effect=fake):
+            self.assertEqual(ccf.resolve_repo(None, None), "owner/x")
         self.assertEqual(seen, ["up", "upstream"])
 
     def testNoneFoundReturnsNone(self):
-        with mock.patch.object(cpf, "repo_from_remote", return_value=None):
-            self.assertIsNone(cpf.resolve_repo(None, None))
+        with mock.patch.object(ccf, "repo_from_remote", return_value=None):
+            self.assertIsNone(ccf.resolve_repo(None, None))
 
 
 class TestResolvePrAndTarget(unittest.TestCase):
     def testExplicitPrResolved(self):
-        with mock.patch.object(cpf, "gh_json", return_value={"number": 5}):
-            self.assertEqual(cpf.resolve_pr("o/n", 5), {"number": 5})
+        with mock.patch.object(ccf, "gh_json", return_value={"number": 5}):
+            self.assertEqual(ccf.resolve_pr("o/n", 5), {"number": 5})
 
     def testExplicitPrNotFoundRaises(self):
-        with mock.patch.object(cpf, "gh_json", return_value=None):
-            with self.assertRaises(cpf.GitHubError):
-                cpf.resolve_pr("o/n", 5)
+        with mock.patch.object(ccf, "gh_json", return_value=None):
+            with self.assertRaises(ccf.GitHubError):
+                ccf.resolve_pr("o/n", 5)
 
     def testDefaultsToBranchsOpenPr(self):
         with (
-            mock.patch.object(cpf, "current_branch", return_value="mybr"),
-            mock.patch.object(cpf, "gh_json", return_value=[{"number": 7}]),
+            mock.patch.object(ccf, "current_branch", return_value="mybr"),
+            mock.patch.object(ccf, "gh_json", return_value=[{"number": 7}]),
         ):
-            self.assertEqual(cpf.resolve_pr("o/n", None), {"number": 7})
+            self.assertEqual(ccf.resolve_pr("o/n", None), {"number": 7})
 
     def testNoOpenPrForBranchRaises(self):
         with (
-            mock.patch.object(cpf, "current_branch", return_value="mybr"),
-            mock.patch.object(cpf, "gh_json", return_value=[]),
+            mock.patch.object(ccf, "current_branch", return_value="mybr"),
+            mock.patch.object(ccf, "gh_json", return_value=[]),
         ):
-            with self.assertRaises(cpf.GitHubError):
-                cpf.resolve_pr("o/n", None)
+            with self.assertRaises(ccf.GitHubError):
+                ccf.resolve_pr("o/n", None)
 
     def testResolveTargetShaSkipsPrLookup(self):
-        info = cpf.resolve_target("o/n", None, "deadbeef")
+        info = ccf.resolve_target("o/n", None, "deadbeef")
         self.assertEqual(info["headRefOid"], "deadbeef")
         self.assertIsNone(info["number"])
 
     def testResolveTargetPrDelegatesToResolvePr(self):
-        with mock.patch.object(cpf, "resolve_pr", return_value={"number": 1}):
-            self.assertEqual(cpf.resolve_target("o/n", 1, None), {"number": 1})
+        with mock.patch.object(ccf, "resolve_pr", return_value={"number": 1}):
+            self.assertEqual(ccf.resolve_target("o/n", 1, None), {"number": 1})
 
 
 class FakeUrlResponse:
@@ -727,10 +742,10 @@ class TestFetchState(unittest.TestCase):
     def testCombinesRollupStateAndPaginatedStatuses(self):
         status_line = json.dumps({"context": "A", "state": "failure"}) + "\n"
         with (
-            mock.patch.object(cpf, "gh_json", return_value={"state": "failure"}),
-            mock.patch.object(cpf, "gh", return_value=status_line),
+            mock.patch.object(ccf, "gh_json", return_value={"state": "failure"}),
+            mock.patch.object(ccf, "gh", return_value=status_line),
         ):
-            state = cpf.fetch_state("o/n", "sha")
+            state = ccf.fetch_state("o/n", "sha")
         self.assertEqual(state["state"], "failure")
         self.assertEqual(state["statuses"], [{"context": "A", "state": "failure"}])
 
@@ -747,23 +762,23 @@ class TestFetchJobSteps(unittest.TestCase):
         with mock.patch(
             "urllib.request.urlopen", return_value=FakeUrlResponse(buf.getvalue())
         ):
-            steps = cpf.fetch_job_steps("https://civet.inl.gov/job/123/")
+            steps = ccf.fetch_job_steps("https://civet.inl.gov/job/123/")
         self.assertEqual(steps, [("01_Build", "hello world\n")])
 
 
 class TestParseArgs(unittest.TestCase):
     def testDefaults(self):
-        args = cpf.parse_args([])
+        args = ccf.parse_args([])
         self.assertIsNone(args.pr)
         self.assertIsNone(args.sha)
         self.assertIsNone(args.job)
-        self.assertEqual(args.max_failures, cpf.DEFAULT_MAX_FAILURES)
+        self.assertEqual(args.max_failures, ccf.DEFAULT_MAX_FAILURES)
         self.assertFalse(args.as_json)
 
     def testPrAndShaAreMutuallyExclusive(self):
         with mock.patch("sys.stderr", new_callable=io.StringIO):
             with self.assertRaises(SystemExit):
-                cpf.parse_args(["--pr", "5", "--sha", "abc"])
+                ccf.parse_args(["--pr", "5", "--sha", "abc"])
 
 
 JOB_STEPS = [("01_Build", "completed with return code 1\nerror: something broke\n")]
@@ -771,25 +786,25 @@ JOB_STEPS = [("01_Build", "completed with return code 1\nerror: something broke\
 
 class TestMainJobDispatch(unittest.TestCase):
     def testListSteps(self):
-        with mock.patch.object(cpf, "fetch_job_steps", return_value=JOB_STEPS):
-            text = captured(cpf.main, ["--job", "http://job/2", "--list-steps"])
+        with mock.patch.object(ccf, "fetch_job_steps", return_value=JOB_STEPS):
+            text = captured(ccf.main, ["--job", "http://job/2", "--list-steps"])
         self.assertIn("steps in http://job/2", text)
 
     def testStep(self):
-        with mock.patch.object(cpf, "fetch_job_steps", return_value=JOB_STEPS):
-            text = captured(cpf.main, ["--job", "http://job/2", "--step", "01_Build"])
+        with mock.patch.object(ccf, "fetch_job_steps", return_value=JOB_STEPS):
+            text = captured(ccf.main, ["--job", "http://job/2", "--step", "01_Build"])
         self.assertIn("error: something broke", text)
 
     def testPlainJobReportsHeaderAndErrors(self):
-        with mock.patch.object(cpf, "fetch_job_steps", return_value=JOB_STEPS):
-            text = captured(cpf.main, ["--job", "http://job/2"])
+        with mock.patch.object(ccf, "fetch_job_steps", return_value=JOB_STEPS):
+            text = captured(ccf.main, ["--job", "http://job/2"])
         self.assertIn("http://job/2", text)
         self.assertIn("error: something broke", text)
 
     def testUnreadableJobRaisesGitHubError(self):
-        with mock.patch.object(cpf, "fetch_job_steps", side_effect=RuntimeError("403")):
-            with self.assertRaises(cpf.GitHubError):
-                cpf.main(["--job", "http://job/2"])
+        with mock.patch.object(ccf, "fetch_job_steps", side_effect=RuntimeError("403")):
+            with self.assertRaises(ccf.GitHubError):
+                ccf.main(["--job", "http://job/2"])
 
 
 class TestMainPrDispatch(unittest.TestCase):
@@ -799,31 +814,31 @@ class TestMainPrDispatch(unittest.TestCase):
 
     def testDigestOnlyWhenNoErrorsOrJson(self):
         with (
-            mock.patch.object(cpf, "resolve_repo", return_value="o/n"),
-            mock.patch.object(cpf, "resolve_target", return_value=self.info),
-            mock.patch.object(cpf, "fetch_state", return_value=self.state),
-            mock.patch.object(cpf, "collect_errors") as collect,
+            mock.patch.object(ccf, "resolve_repo", return_value="o/n"),
+            mock.patch.object(ccf, "resolve_target", return_value=self.info),
+            mock.patch.object(ccf, "fetch_state", return_value=self.state),
+            mock.patch.object(ccf, "collect_errors") as collect,
         ):
-            text = captured(cpf.main, ["--pr", "5"])
+            text = captured(ccf.main, ["--pr", "5"])
         collect.assert_not_called()
         self.assertIn("PR #5 br @ deadbee", text)
 
     def testJsonImpliesErrorsAndEmitsValidJson(self):
         collected = {"jobs": [], "rollup": {}, "hints": [], "jobs_not_read": 0}
         with (
-            mock.patch.object(cpf, "resolve_repo", return_value="o/n"),
-            mock.patch.object(cpf, "resolve_target", return_value=self.info),
-            mock.patch.object(cpf, "fetch_state", return_value=self.state),
-            mock.patch.object(cpf, "collect_errors", return_value=collected) as collect,
+            mock.patch.object(ccf, "resolve_repo", return_value="o/n"),
+            mock.patch.object(ccf, "resolve_target", return_value=self.info),
+            mock.patch.object(ccf, "fetch_state", return_value=self.state),
+            mock.patch.object(ccf, "collect_errors", return_value=collected) as collect,
         ):
-            text = captured(cpf.main, ["--pr", "5", "--json"])
+            text = captured(ccf.main, ["--pr", "5", "--json"])
         collect.assert_called_once()
         self.assertEqual(json.loads(text)["pr"], 5)
 
     def testNoRepoFoundRaisesGitHubError(self):
-        with mock.patch.object(cpf, "resolve_repo", return_value=None):
-            with self.assertRaises(cpf.GitHubError):
-                cpf.main([])
+        with mock.patch.object(ccf, "resolve_repo", return_value=None):
+            with self.assertRaises(ccf.GitHubError):
+                ccf.main([])
 
 
 if __name__ == "__main__":
