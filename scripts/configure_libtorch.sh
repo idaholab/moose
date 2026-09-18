@@ -164,7 +164,19 @@ function install_libtorch_python()
   set_libtorch_python_build_options
   export MAX_JOBS="$3"
 
-  "$python_executable" -m pip install --no-cache -r "$source_dir/requirements.txt" || return
+  # Detect which pip is available. In a standard Python environment (e.g. conda)
+  # `python3 -m pip` works; in the uv-created apptainer venv there is no pip module,
+  # so fall back to the `pip` wrapper that forwards to `uv pip`.
+  if "$python_executable" -m pip --version &> /dev/null; then
+    PIP_EXE=("$python_executable" -m pip)
+  elif command -v pip &> /dev/null; then
+    PIP_EXE=(pip)
+  else
+    echo "ERROR: pip not found"
+    exit 1
+  fi
+
+  "${PIP_EXE[@]}" install --no-cache -r "$source_dir/requirements.txt" || return
 
   # PyTorch's setup.py always builds in <source>/build, which is also the build directory used by
   # the C++-only build. When that build directory already exists, reconfigure it in place and keep
@@ -201,5 +213,5 @@ function install_libtorch_python()
   fi
 
   cd "$source_dir" || return
-  "$python_executable" -m pip install --no-cache --no-build-isolation .
+  "${PIP_EXE[@]}" install --no-cache --no-build-isolation .
 )
