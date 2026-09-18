@@ -26,11 +26,10 @@ InputParameters
 RigidBodyLoadControl::validParams()
 {
   InputParameters params = NodalScalarKernel::validParams();
-  params.addClassDescription(
-      "Load-control constraint for a rigid-body contactor: enforces "
-      "F(t) = Sum_i w_i * lambda_i * (n_i . direction) so that the scalar "
-      "variable driving the contactor's translation in `direction` is "
-      "determined by the target contact reaction.");
+  params.addClassDescription("Load-control constraint for a rigid-body contactor: enforces "
+                             "F(t) = Sum_i w_i * lambda_i * (n_i . direction) so that the scalar "
+                             "variable driving the contactor's translation in `direction` is "
+                             "determined by the target contact reaction.");
   // Parallel: MOOSE only calls ScalarKernel::computeResidual/Jacobian on
   // the rank owning the scalar DoF (which is the last MPI rank), so that
   // rank must see EVERY boundary node in `_node_ids` to correctly sum
@@ -96,11 +95,10 @@ RigidBodyLoadControl::validParams()
       "to hold `s` fixed at the current outer-iterate value.  This param "
       "sets the *starting* mode; `UzawaTransient` calls `setMode()` at "
       "runtime to flip between the two.");
-  params.addParam<Real>(
-      "s_pin",
-      0.0,
-      "Initial value of the PinScalar target.  Runtime updates go through "
-      "`setMode()`.  In ForceBalance mode this parameter is ignored.");
+  params.addParam<Real>("s_pin",
+                        0.0,
+                        "Initial value of the PinScalar target.  Runtime updates go through "
+                        "`setMode()`.  In ForceBalance mode this parameter is ignored.");
   return params;
 }
 
@@ -111,9 +109,8 @@ RigidBodyLoadControl::RigidBodyLoadControl(const InputParameters & parameters)
     _nodal_area(getUserObject<NodalArea>("nodal_area")),
     _direction(getParam<Point>("direction")),
     _kss_stiffness_constant(getParam<Real>("kss_stiffness")),
-    _kss_stiffness_function(isParamValid("kss_stiffness_function")
-                                ? &getFunction("kss_stiffness_function")
-                                : nullptr),
+    _kss_stiffness_function(
+        isParamValid("kss_stiffness_function") ? &getFunction("kss_stiffness_function") : nullptr),
     _axis(libMesh::invalid_uint),
     _c(getParam<Real>("c")),
     _lm_var_num(coupled("lm_variable")),
@@ -404,8 +401,8 @@ RigidBodyLoadControl::computeJacobian()
       accessible_ks.push_back(k);
   lm_dofs.reserve(accessible_ks.size());
   for (const auto k : accessible_ks)
-    lm_dofs.push_back(_mesh.getMesh().node_ref(_node_ids[k]).dof_number(
-        _sys.number(), _lm_var_num, /*comp=*/0));
+    lm_dofs.push_back(
+        _mesh.getMesh().node_ref(_node_ids[k]).dof_number(_sys.number(), _lm_var_num, /*comp=*/0));
   DenseMatrix<Real> ke_transpose(accessible_ks.size(), 1);
   for (const auto i : index_range(accessible_ks))
     if (gap_branch[accessible_ks[i]])

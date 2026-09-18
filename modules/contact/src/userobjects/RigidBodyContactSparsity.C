@@ -25,10 +25,9 @@ InputParameters
 RigidBodyContactSparsity::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription(
-      "Preallocates the cross-node (LM, disp) Jacobian coupling that "
-      "RigidBodyNormalMechanicalContact writes on the contact sideset's "
-      "lower-d elements, but MOOSE's default sparsity computation misses.");
+  params.addClassDescription("Preallocates the cross-node (LM, disp) Jacobian coupling that "
+                             "RigidBodyNormalMechanicalContact writes on the contact sideset's "
+                             "lower-d elements, but MOOSE's default sparsity computation misses.");
   params.addRequiredParam<VariableName>("lm_variable",
                                         "The Lagrange multiplier field variable on the contact "
                                         "lower-d block (same as the NCP kernel's `variable`).");
@@ -55,9 +54,9 @@ RigidBodyContactSparsity::validParams()
   //      contribution touches a locally-owned row.
   // Rigid-body contact meshes are typically small (a few hundred lower-d
   // faces even in 3D), so full ghosting is cheap and bulletproof.
-  params.addRelationshipManager(
-      "GhostEverything",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC);
+  params.addRelationshipManager("GhostEverything",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   // Attach in the constructor, which runs before es().init() where the
   // sparsity pattern is computed.  execute_on defaults to NONE (nothing to
   // do at runtime).
@@ -83,11 +82,10 @@ RigidBodyContactSparsity::RigidBodyContactSparsity(const InputParameters & param
   // warning, and gives us access to any future MOOSE-side augmentation
   // additions for free.
   auto & nl = _fe_problem.getNonlinearSystemBase(/*sys_num=*/0);
-  nl.addExtraSparsityCallback(
-      [this](libMesh::SparsityPattern::Graph & sparsity,
-             std::vector<libMesh::dof_id_type> & n_nz,
-             std::vector<libMesh::dof_id_type> & n_oz)
-      { applyExtraSparsity(sparsity, n_nz, n_oz); });
+  nl.addExtraSparsityCallback([this](libMesh::SparsityPattern::Graph & sparsity,
+                                     std::vector<libMesh::dof_id_type> & n_nz,
+                                     std::vector<libMesh::dof_id_type> & n_oz)
+                              { applyExtraSparsity(sparsity, n_nz, n_oz); });
 }
 
 void

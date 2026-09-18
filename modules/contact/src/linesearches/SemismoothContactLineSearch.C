@@ -27,12 +27,11 @@ SemismoothContactLineSearch::validParams()
       "Backtracking line search on the semismooth (Fischer-Burmeister) merit "
       "used by PETSc SNESVINEWTONSSLS. Nonmonotone Armijo acceptance permits "
       "temporary merit increases during active-set flips.");
-  params.addRangeCheckedParam<Real>(
-      "armijo_constant",
-      1.0e-4,
-      "armijo_constant > 0 & armijo_constant < 1",
-      "Armijo sufficient-decrease constant c in psi(x + lambda*d) <= "
-      "psi_ref * (1 - c*lambda).");
+  params.addRangeCheckedParam<Real>("armijo_constant",
+                                    1.0e-4,
+                                    "armijo_constant > 0 & armijo_constant < 1",
+                                    "Armijo sufficient-decrease constant c in psi(x + lambda*d) <= "
+                                    "psi_ref * (1 - c*lambda).");
   params.addRangeCheckedParam<Real>(
       "backtrack_factor",
       0.5,
@@ -119,7 +118,8 @@ SemismoothContactLineSearch::lineSearch()
     LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
     if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
     {
-      LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+      LibmeshPetscCall(
+          SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
       return false;
     }
 #endif
@@ -161,9 +161,8 @@ SemismoothContactLineSearch::lineSearch()
   if (!accepted)
   {
     _console << "SemismoothContactLineSearch: sufficient-decrease test failed after " << cuts
-             << " backtracks; accepting lambda = " << lambda
-             << " (merit " << 0.5 * try_norm * try_norm << " vs ref " << psi_ref << ")."
-             << std::endl;
+             << " backtracks; accepting lambda = " << lambda << " (merit "
+             << 0.5 * try_norm * try_norm << " vs ref " << psi_ref << ")." << std::endl;
   }
 
   // ------------------------------------------------------------------

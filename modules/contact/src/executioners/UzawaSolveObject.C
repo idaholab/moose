@@ -177,8 +177,6 @@ UzawaSolveObject::solve()
   // post-processing sees the physical residual.
   _load_control->setMode(RigidBodyLoadControl::Mode::ForceBalance, 0.0);
   _console << "Uzawa: outer loop did not converge in " << _outer_max_iter
-           << " iters, propagating failure so transient can cut back dt"
-           << std::endl;
+           << " iters, propagating failure so transient can cut back dt" << std::endl;
   return false;
 }
-

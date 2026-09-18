@@ -23,10 +23,9 @@ InputParameters
 UzawaTransient::validParams()
 {
   InputParameters params = Transient::validParams();
-  params.addClassDescription(
-      "Transient executioner subclass that runs a Uzawa outer loop around "
-      "the standard per-time-step SNES solve for load-controlled rigid-body "
-      "contact.  See modules/contact/uzawa_solver_plan.md.");
+  params.addClassDescription("Transient executioner subclass that runs a Uzawa outer loop around "
+                             "the standard per-time-step SNES solve for load-controlled rigid-body "
+                             "contact.  See modules/contact/uzawa_solver_plan.md.");
   params.addParam<std::string>(
       "load_control_kernel",
       "",
@@ -62,14 +61,13 @@ UzawaTransient::validParams()
       "The outer scalar Newton damps via `max_step`; if the primal solve "
       "itself fails, the executioner immediately propagates the failure so "
       "IterationAdaptiveDT cuts back.");
-  params.addParam<bool>(
-      "outer_verbose",
-      true,
-      "Print one line per Uzawa outer iter to the console: `Uzawa outer iter "
-      "N: s = <value>, |R_s| = <value>`.  This is the load-controlled "
-      "solve's primary progress signal; on by default.  Inner primal "
-      "SNES/KSP output is unaffected by this flag -- MOOSE prints those "
-      "lines according to its usual PetscOutput conventions.");
+  params.addParam<bool>("outer_verbose",
+                        true,
+                        "Print one line per Uzawa outer iter to the console: `Uzawa outer iter "
+                        "N: s = <value>, |R_s| = <value>`.  This is the load-controlled "
+                        "solve's primary progress signal; on by default.  Inner primal "
+                        "SNES/KSP output is unaffected by this flag -- MOOSE prints those "
+                        "lines according to its usual PetscOutput conventions.");
   return params;
 }
 

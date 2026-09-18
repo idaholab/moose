@@ -23,8 +23,7 @@ InfiniteCylinderContactor::validParams()
       "axis",
       "Direction of the cylinder's axis.  Normalized internally; only the "
       "direction matters.");
-  params.addRequiredRangeCheckedParam<Real>(
-      "radius", "radius > 0", "Cylinder radius.");
+  params.addRequiredRangeCheckedParam<Real>("radius", "radius > 0", "Cylinder radius.");
   return params;
 }
 

@@ -47,14 +47,12 @@ RigidBodyContactPredictor::validParams()
       "sub-Newton iteration.  See uzawa_npc_plan.md.");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "Contact sideset id(s) -- same as the NCP kernel's `boundary`.");
-  params.addRequiredParam<VariableName>("lm_variable",
-                                        "The Lagrange multiplier field variable.");
+  params.addRequiredParam<VariableName>("lm_variable", "The Lagrange multiplier field variable.");
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "Displacement variables in order (x, y[, z]).");
-  params.addParam<VariableName>(
-      "scalar_variable",
-      "Load-control scalar (RigidBodyLoadControl.variable).  Omit for "
-      "displacement-controlled runs.");
+  params.addParam<VariableName>("scalar_variable",
+                                "Load-control scalar (RigidBodyLoadControl.variable).  Omit for "
+                                "displacement-controlled runs.");
   params.addRangeCheckedParam<unsigned int>(
       "k_hops",
       2,
@@ -195,7 +193,8 @@ RigidBodyContactPredictor::setupRegion()
   const auto first_local = dof_map.first_dof(processor_id());
   const auto end_local = dof_map.end_dof(processor_id());
 
-  auto add_local_dof = [&](dof_id_type d, std::vector<dof_id_type> & sink) {
+  auto add_local_dof = [&](dof_id_type d, std::vector<dof_id_type> & sink)
+  {
     if (d >= first_local && d < end_local)
       sink.push_back(d);
   };
@@ -324,7 +323,8 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
     jacobian.close();
 
     Vec r_sub;
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecGetSubVector(r_petsc->vec(), _region_is, &r_sub));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      VecGetSubVector(r_petsc->vec(), _region_is, &r_sub));
 
     PetscReal r_norm;
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecNorm(r_sub, NORM_2, &r_norm));
@@ -335,16 +335,18 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
     if (iter == 0)
       _console << "  " << name() << " |R_sub|[iter 0] = " << r_norm << std::endl;
 
-    if (r_norm < _sub_abs_tol ||
-        (r_norm_initial > 0.0 && r_norm < _sub_rel_tol * r_norm_initial))
+    if (r_norm < _sub_abs_tol || (r_norm_initial > 0.0 && r_norm < _sub_rel_tol * r_norm_initial))
     {
       converged = true;
-      LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
+      LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                        VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
       break;
     }
 
     Mat j_sub;
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), MatCreateSubMatrix(j_petsc->mat(), _region_is, _region_is, MAT_INITIAL_MATRIX, &j_sub));
+    LibmeshPetscCallA(
+        _fe_problem.mesh().comm().get(),
+        MatCreateSubMatrix(j_petsc->mat(), _region_is, _region_is, MAT_INITIAL_MATRIX, &j_sub));
 
     // Solve j_sub * dx = -r_sub.  Direct LU on the small sub-matrix.
     Vec dx;
@@ -352,7 +354,8 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecScale(r_sub, -1.0));
 
     KSP ksp;
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), KSPCreate(_fe_problem.mesh().comm().get(), &ksp));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      KSPCreate(_fe_problem.mesh().comm().get(), &ksp));
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), KSPSetOperators(ksp, j_sub, j_sub));
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), KSPSetType(ksp, KSPPREONLY));
     PC pc;
@@ -371,7 +374,8 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
       LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecDestroy(&dx));
       LibmeshPetscCallA(_fe_problem.mesh().comm().get(), MatDestroy(&j_sub));
       LibmeshPetscCallA(_fe_problem.mesh().comm().get(), KSPDestroy(&ksp));
-      LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
+      LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                        VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
       converged = false;
       break;
     }
@@ -380,9 +384,12 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
     // corresponding entries of the full sln vector.  ADD_VALUES so
     // this is sln <- sln + dx.
     VecScatter scatter;
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecScatterCreate(dx, nullptr, sln_petsc->vec(), _region_is, &scatter));
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecScatterBegin(scatter, dx, sln_petsc->vec(), ADD_VALUES, SCATTER_FORWARD));
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecScatterEnd(scatter, dx, sln_petsc->vec(), ADD_VALUES, SCATTER_FORWARD));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      VecScatterCreate(dx, nullptr, sln_petsc->vec(), _region_is, &scatter));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      VecScatterBegin(scatter, dx, sln_petsc->vec(), ADD_VALUES, SCATTER_FORWARD));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      VecScatterEnd(scatter, dx, sln_petsc->vec(), ADD_VALUES, SCATTER_FORWARD));
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecScatterDestroy(&scatter));
 
     // Enforce lambda >= 0 by simple projection on all LM DOFs in the
@@ -396,7 +403,8 @@ RigidBodyContactPredictor::apply(NumericVector<Number> & sln)
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecDestroy(&dx));
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), MatDestroy(&j_sub));
     LibmeshPetscCallA(_fe_problem.mesh().comm().get(), KSPDestroy(&ksp));
-    LibmeshPetscCallA(_fe_problem.mesh().comm().get(), VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
+    LibmeshPetscCallA(_fe_problem.mesh().comm().get(),
+                      VecRestoreSubVector(r_petsc->vec(), _region_is, &r_sub));
   }
 
   if (!converged)

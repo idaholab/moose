@@ -22,8 +22,7 @@ RigidBodyNodalNCPKernel::validParams()
                              "RigidBodyNormalMechanicalContact for the traction.");
   params.addRequiredParam<UserObjectName>("contactor",
                                           "LevelSetContactor supplying signedDistance / normal.");
-  params.addRequiredCoupledVar("displacements",
-                               "Displacement variables in order (x, y[, z]).");
+  params.addRequiredCoupledVar("displacements", "Displacement variables in order (x, y[, z]).");
   params.addRangeCheckedParam<Real>(
       "c",
       1.0,

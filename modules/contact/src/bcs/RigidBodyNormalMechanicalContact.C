@@ -106,4 +106,3 @@ RigidBodyNormalMechanicalContact::computeLowerDQpJacobian(Moose::ConstraintJacob
     return -query().normal(_component) * _test[_i][_qp] * _phi_lambda[_j][_qp];
   return 0;
 }
-

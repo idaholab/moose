@@ -448,10 +448,9 @@ public:
                                std::vector<dof_id_type> & n_oz) = 0;
 
   /// Signature of a callback registered via addExtraSparsityCallback().
-  using ExtraSparsityCallback =
-      std::function<void(libMesh::SparsityPattern::Graph & sparsity,
-                         std::vector<dof_id_type> & n_nz,
-                         std::vector<dof_id_type> & n_oz)>;
+  using ExtraSparsityCallback = std::function<void(libMesh::SparsityPattern::Graph & sparsity,
+                                                   std::vector<dof_id_type> & n_nz,
+                                                   std::vector<dof_id_type> & n_oz)>;
 
   /**
    * Register a callback to run during DofMap sparsity construction, in addition

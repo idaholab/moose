@@ -32,16 +32,15 @@ InputParameters
 RigidContactAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription(
-      "Expand a `[RigidContact][<name>]` sub-block into the full rigid-body "
-      "analytic-level-set contact stack: LowerDBlockFromSidesetGenerator + "
-      "RigidBodyContactSparsity + normal_lm variable + bounds + "
-      "RigidBodyNodalNCPKernel + RigidBodyNormalMechanicalContact "
-      "(per displacement component), plus the problem-coverage relaxation "
-      "and default SMP preconditioning.  Setting the `force` parameter "
-      "additionally emits the force-control stack (NodalArea UO, scalar "
-      "translation variable, RigidBodyLoadControl kernel).  The contactor "
-      "UO itself is user-defined and referenced by name.");
+  params.addClassDescription("Expand a `[RigidContact][<name>]` sub-block into the full rigid-body "
+                             "analytic-level-set contact stack: LowerDBlockFromSidesetGenerator + "
+                             "RigidBodyContactSparsity + normal_lm variable + bounds + "
+                             "RigidBodyNodalNCPKernel + RigidBodyNormalMechanicalContact "
+                             "(per displacement component), plus the problem-coverage relaxation "
+                             "and default SMP preconditioning.  Setting the `force` parameter "
+                             "additionally emits the force-control stack (NodalArea UO, scalar "
+                             "translation variable, RigidBodyLoadControl kernel).  The contactor "
+                             "UO itself is user-defined and referenced by name.");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "Contact sideset(s) on the deformable body's contact face.");
   params.addRequiredParam<std::vector<VariableName>>(
@@ -50,36 +49,31 @@ RigidContactAction::validParams()
       "contactor",
       "Name of a user-defined `LevelSetContactor` UO (`SphereContactor`, "
       "`SurfaceMeshContactor`, ...) supplied by the user in `[UserObjects]`.");
-  params.addParam<bool>(
-      "add_lower_d_block",
-      true,
-      "Emit a `LowerDBlockFromSidesetGenerator` in the mesh so the LM "
-      "variable has a subdomain to live on.  Turn off if the input's mesh "
-      "already provides a lower-d block on the contact sideset.");
-  params.addParam<bool>(
-      "add_sparsity_uo",
-      true,
-      "Emit the `RigidBodyContactSparsity` UO (LM/disp cross-node "
-      "preallocation + GhostEverything).  Turn off only for advanced "
-      "users hand-managing sparsity.");
-  params.addParam<bool>(
-      "enforce_bounds",
-      true,
-      "Emit `bounds_dummy` aux var + `ConstantBounds` on `normal_lm` (>= 0 "
-      "and <= 1e12).  Required when the executioner uses `SNESVINEWTONSSLS`; "
-      "not needed for plain Newton without bounds.");
-  params.addParam<bool>(
-      "set_problem_coverage_flags",
-      true,
-      "Set `[Problem] kernel_coverage_check = false, material_coverage_check "
-      "= false`.  Needed because the LM variable has no companion "
-      "material/kernel outside this action's NCP nodal kernel.");
-  params.addParam<bool>(
-      "add_full_smp",
-      true,
-      "Emit `[Preconditioning] type = SMP, full = true` when no "
-      "`[Preconditioning]` block already exists.  Required for the LM "
-      "coupling to be preconditioned correctly.");
+  params.addParam<bool>("add_lower_d_block",
+                        true,
+                        "Emit a `LowerDBlockFromSidesetGenerator` in the mesh so the LM "
+                        "variable has a subdomain to live on.  Turn off if the input's mesh "
+                        "already provides a lower-d block on the contact sideset.");
+  params.addParam<bool>("add_sparsity_uo",
+                        true,
+                        "Emit the `RigidBodyContactSparsity` UO (LM/disp cross-node "
+                        "preallocation + GhostEverything).  Turn off only for advanced "
+                        "users hand-managing sparsity.");
+  params.addParam<bool>("enforce_bounds",
+                        true,
+                        "Emit `bounds_dummy` aux var + `ConstantBounds` on `normal_lm` (>= 0 "
+                        "and <= 1e12).  Required when the executioner uses `SNESVINEWTONSSLS`; "
+                        "not needed for plain Newton without bounds.");
+  params.addParam<bool>("set_problem_coverage_flags",
+                        true,
+                        "Set `[Problem] kernel_coverage_check = false, material_coverage_check "
+                        "= false`.  Needed because the LM variable has no companion "
+                        "material/kernel outside this action's NCP nodal kernel.");
+  params.addParam<bool>("add_full_smp",
+                        true,
+                        "Emit `[Preconditioning] type = SMP, full = true` when no "
+                        "`[Preconditioning]` block already exists.  Required for the LM "
+                        "coupling to be preconditioned correctly.");
   params.addRangeCheckedParam<Real>(
       "c",
       1.0,
@@ -88,38 +82,33 @@ RigidContactAction::validParams()
       "`RigidBodyNodalNCPKernel` and (when force-controlled) the "
       "`RigidBodyLoadControl` scalar kernel so their Jacobians remain "
       "consistent.");
-  params.addParam<std::string>(
-      "lm_variable_name",
-      "",
-      "Override the default LM variable name (default = `normal_lm_<sub-"
-      "block-name>`).  Set to `normal_lm` for the ultra-common single-"
-      "block input to keep the classic name.");
-  params.addParam<std::string>(
-      "lower_d_block_name",
-      "",
-      "Override the default lower-d subdomain name (default = "
-      "`contact_lower_<sub-block-name>`).");
-  params.addParam<SubdomainID>(
-      "lower_d_block_id",
-      10001,
-      "Subdomain id given to the newly-created lower-d block.  Must be "
-      "unique across all `[RigidContact]` sub-blocks if you have more "
-      "than one.");
+  params.addParam<std::string>("lm_variable_name",
+                               "",
+                               "Override the default LM variable name (default = `normal_lm_<sub-"
+                               "block-name>`).  Set to `normal_lm` for the ultra-common single-"
+                               "block input to keep the classic name.");
+  params.addParam<std::string>("lower_d_block_name",
+                               "",
+                               "Override the default lower-d subdomain name (default = "
+                               "`contact_lower_<sub-block-name>`).");
+  params.addParam<SubdomainID>("lower_d_block_id",
+                               10001,
+                               "Subdomain id given to the newly-created lower-d block.  Must be "
+                               "unique across all `[RigidContact]` sub-blocks if you have more "
+                               "than one.");
 
   // Force-control extensions.  All active only if `force` is set.
-  params.addParam<FunctionName>(
-      "force",
-      "",
-      "Target integrated normal contact reaction F(t).  Setting this "
-      "activates the force-control stack: adds `NodalArea` UO, a scalar "
-      "`indenter_<axis>` variable, and a `RigidBodyLoadControl` kernel.  "
-      "The contactor UO must have its `disp_<axis>_scalar` set to the "
-      "same scalar name (default `indenter_<axis>`).");
-  params.addParam<Point>(
-      "load_direction",
-      Point(0, 0, 0),
-      "Unit vector along which the contact reaction is measured.  Required "
-      "when `force` is set; ignored otherwise.  Must be axis-aligned.");
+  params.addParam<FunctionName>("force",
+                                "",
+                                "Target integrated normal contact reaction F(t).  Setting this "
+                                "activates the force-control stack: adds `NodalArea` UO, a scalar "
+                                "`indenter_<axis>` variable, and a `RigidBodyLoadControl` kernel.  "
+                                "The contactor UO must have its `disp_<axis>_scalar` set to the "
+                                "same scalar name (default `indenter_<axis>`).");
+  params.addParam<Point>("load_direction",
+                         Point(0, 0, 0),
+                         "Unit vector along which the contact reaction is measured.  Required "
+                         "when `force` is set; ignored otherwise.  Must be axis-aligned.");
   params.addRangeCheckedParam<Real>(
       "kss_stiffness",
       0.0,
@@ -134,22 +123,19 @@ RigidContactAction::validParams()
       "Function-of-time variant of the effective contact stiffness passed "
       "through to `RigidBodyLoadControl`.  Only used when `force` is set. "
       "Mutually exclusive with `kss_stiffness`.");
-  params.addParam<std::string>(
-      "scalar_variable_name",
-      "",
-      "Override the default scalar-variable name for force control "
-      "(default = `indenter_<axis>` derived from `load_direction`).");
-  params.addParam<std::string>(
-      "nodal_area_variable_name",
-      "",
-      "Override the default nodal-area aux-variable name (default = "
-      "`nodal_area_<sub-block-name>`).");
-  params.addParam<Real>(
-      "scalar_initial_condition",
-      0.0,
-      "Initial value for the load-control scalar variable.  A small "
-      "nonzero seed (e.g. 5e-3) is often useful so the first Newton "
-      "step has some LM to bite on.  Only used when `force` is set.");
+  params.addParam<std::string>("scalar_variable_name",
+                               "",
+                               "Override the default scalar-variable name for force control "
+                               "(default = `indenter_<axis>` derived from `load_direction`).");
+  params.addParam<std::string>("nodal_area_variable_name",
+                               "",
+                               "Override the default nodal-area aux-variable name (default = "
+                               "`nodal_area_<sub-block-name>`).");
+  params.addParam<Real>("scalar_initial_condition",
+                        0.0,
+                        "Initial value for the load-control scalar variable.  A small "
+                        "nonzero seed (e.g. 5e-3) is often useful so the first Newton "
+                        "step has some LM to bite on.  Only used when `force` is set.");
   return params;
 }
 
@@ -178,8 +164,7 @@ RigidContactAction::RigidContactAction(const InputParameters & parameters)
     _scalar_initial_condition(getParam<Real>("scalar_initial_condition"))
 {
   if (!_force.empty() && _load_direction.norm() < TOLERANCE)
-    paramError("load_direction",
-               "must be a nonzero axis-aligned unit vector when `force` is set.");
+    paramError("load_direction", "must be a nonzero axis-aligned unit vector when `force` is set.");
   if (!_kss_stiffness_function.empty() && isParamSetByUser("kss_stiffness"))
     paramError("kss_stiffness_function",
                "Set exactly one of `kss_stiffness` (constant) or "
@@ -313,8 +298,7 @@ RigidContactAction::addUserObjects()
     params.set<VariableName>("lm_variable") = lmName();
     params.set<std::vector<VariableName>>("displacements") = _displacements;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary;
-    _problem->addUserObject(
-        "RigidBodyContactSparsity", "rigid_contact_sparsity_" + name(), params);
+    _problem->addUserObject("RigidBodyContactSparsity", "rigid_contact_sparsity_" + name(), params);
   }
   if (!_force.empty())
   {
@@ -423,8 +407,7 @@ RigidContactAction::addBCs()
     params.set<UserObjectName>("contactor") = _contactor_name;
     params.set<MooseEnum>("component") = std::string(comp_tags[i]);
     params.set<std::vector<VariableName>>("displacements") = _displacements;
-    const std::string bc_name =
-        "rigid_contact_bc_" + name() + "_" + std::string(comp_tags[i]);
+    const std::string bc_name = "rigid_contact_bc_" + name() + "_" + std::string(comp_tags[i]);
     _problem->addBoundaryCondition("RigidBodyNormalMechanicalContact", bc_name, params);
   }
 }
@@ -462,8 +445,7 @@ RigidContactAction::addInitialConditions()
   auto params = _factory.getValidParams("ScalarConstantIC");
   params.set<VariableName>("variable") = scalarName();
   params.set<Real>("value") = _scalar_initial_condition;
-  _problem->addInitialCondition(
-      "ScalarConstantIC", "rigid_contact_ic_" + name(), params);
+  _problem->addInitialCondition("ScalarConstantIC", "rigid_contact_ic_" + name(), params);
 }
 
 void
@@ -493,8 +475,8 @@ RigidContactAction::addPreconditioning()
   // `[Preconditioning][smp]` internally.
   auto pc_params = _action_factory.getValidParams("SetupPreconditionerAction");
   pc_params.set<std::string>("type") = "SMP";
-  auto pc_action = _action_factory.create(
-      "SetupPreconditionerAction", "rigid_contact_smp_" + name(), pc_params);
+  auto pc_action =
+      _action_factory.create("SetupPreconditionerAction", "rigid_contact_smp_" + name(), pc_params);
   auto mo_action = std::dynamic_pointer_cast<MooseObjectAction>(pc_action);
   if (!mo_action)
     mooseError("RigidContactAction '",

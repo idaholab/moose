@@ -27,8 +27,9 @@ LevelSetContactor::validParams()
     params.addParam<FunctionName>(std::string("disp_") + axis + "_function",
                                   "Optional Function giving the contactor's rigid translation "
                                   "along the " +
-                                      std::string(axis) + " axis.  Mutually exclusive with "
-                                                          "`disp_" +
+                                      std::string(axis) +
+                                      " axis.  Mutually exclusive with "
+                                      "`disp_" +
                                       std::string(axis) + "_scalar`.");
     params.addCoupledVar(std::string("disp_") + axis + "_scalar",
                          "Optional coupled Scalar variable giving the contactor's rigid "
@@ -40,10 +41,9 @@ LevelSetContactor::validParams()
 }
 
 LevelSetContactor::LevelSetContactor(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _function{{nullptr, nullptr, nullptr}}, _scalar{
-                                                                               {nullptr,
-                                                                                nullptr,
-                                                                                nullptr}}
+  : GeneralUserObject(parameters),
+    _function{{nullptr, nullptr, nullptr}},
+    _scalar{{nullptr, nullptr, nullptr}}
 {
   _scalar_var_num.fill(libMesh::invalid_uint);
   for (const auto k : {0u, 1u, 2u})
