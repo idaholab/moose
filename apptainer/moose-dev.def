@@ -74,15 +74,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     test -d {{ CONDUIT_DIR }} && export CONDUIT_DIR={{ CONDUIT_DIR }}
     test -d {{ MFEM_DIR }} && export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
-
-{% if not WITHOUT_PYTORCH | to_bool %}
-    # PyTorch and NEML2 are installed into the container's Python environment
-    # ({{ PYTHON_DIR }}). Expose their locations so MOOSE's ./configure can find them
-    # (./configure --with-libtorch=$LIBTORCH_DIR --with-neml2=$NEML2_DIR).
-    export LIBTORCH_DIR=$({{ PYTHON_DIR }}/bin/python -c 'import torch, os; print(os.path.dirname(torch.__file__))' 2>/dev/null)
-    export NEML2_DIR=$({{ PYTHON_DIR }}/bin/python -c 'import neml2, os; print(os.path.dirname(neml2.__file__))' 2>/dev/null)
-{%- endif %}
-
 {% if PROFILING | to_bool %}
     # For profiling
     export GPERF_DIR={{ GPERF_DIR }}
@@ -522,6 +513,17 @@ EOF
         # Cleanup
         rm -rf ${NEML2_SRC_DIR} ${NEML2_BUILD_SCRIPT}
     )
+
+    # Write the installed locations of PyTorch and NEML2 so MOOSE's ./configure can find
+    # them (--with-libtorch=$LIBTORCH_DIR --with-neml2=$NEML2_DIR). Both packages are
+    # pip-installed into the container Python's site-packages; Apptainer sources every
+    # script in /.singularity.d/env/ at container start, so write the paths statically
+    # once at build time instead of probing for them with python on every container start.
+    cat > /.singularity.d/env/03-libtorch-neml2.sh <<EOF
+export LIBTORCH_DIR=${PYTHON_DIR}/lib/python${PYTHON_VERSION%.*}/site-packages/torch
+export NEML2_DIR=${PYTHON_DIR}/lib/python${PYTHON_VERSION%.*}/site-packages/neml2
+EOF
+    chmod +x /.singularity.d/env/03-libtorch-neml2.sh
 {%- endif %}
 
 {%- if WITH_MFEM | to_bool %}
