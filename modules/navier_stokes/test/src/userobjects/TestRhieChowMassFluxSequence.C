@@ -17,7 +17,7 @@ TestRhieChowMassFluxSequence::validParams()
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The Rhie-Chow user object.");
   params.addRequiredParam<MooseEnum>("operation",
-                                     MooseEnum("skip_face_flux_iteration"),
+                                     MooseEnum("skip_face_flux_iteration zero_Ainv"),
                                      "The reconstruction sequence to test.");
   return params;
 }
@@ -35,6 +35,15 @@ TestRhieChowMassFluxSequence::execute()
 {
   _rhie_chow.preparePISOCorrector();
   _rhie_chow.computeFaceMassFlux();
-  _rhie_chow.computeFaceMassFlux();
+
+  if (_operation == "skip_face_flux_iteration")
+    _rhie_chow.computeFaceMassFlux();
+  else
+    for (auto & Ainv : _rhie_chow.AinvComponents())
+    {
+      Ainv->zero();
+      Ainv->close();
+    }
+
   _rhie_chow.preparePressureRelaxation();
 }

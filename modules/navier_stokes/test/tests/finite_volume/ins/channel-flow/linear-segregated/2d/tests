@@ -281,6 +281,22 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-zero-Ainv]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=zero_Ainv "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_END "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
+    expect_err = "found invalid momentum-coupling data for component [0-9]+ of cell ID [0-9]+: H/A = .* and 1/A = 0"
+    allow_test_objects = true
+    requirement = "The system shall identify the momentum component and cell when reconstructed "
+                  "pressure gradients encounter a zero inverse momentum diagonal."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i

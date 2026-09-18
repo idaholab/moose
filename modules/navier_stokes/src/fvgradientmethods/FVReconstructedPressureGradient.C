@@ -465,8 +465,18 @@ FVReconstructedPressureGradient::reconstructPressureGradient(
   const auto momentum_dof = elem_info.dofIndices()[rc.momentumSystem(component).number()][0];
   const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
   const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
-  mooseAssert(std::isfinite(HbyA) && std::isfinite(Ainv) && Ainv != 0.0,
-              "Momentum-coupling H/A and 1/A data must be finite, and 1/A must be nonzero.");
+  if (!std::isfinite(HbyA) || !std::isfinite(Ainv) || Ainv == 0.0)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' found invalid momentum-coupling data for component ",
+               component,
+               " of cell ID ",
+               elem_info.elem()->id(),
+               ": H/A = ",
+               HbyA,
+               " and 1/A = ",
+               Ainv,
+               ".");
 
   // Invert the same diagonal momentum relation used by Rhie-Chow,
   //   u_P = -(H/A)_P - A_P^{-1} (grad p)_P,
