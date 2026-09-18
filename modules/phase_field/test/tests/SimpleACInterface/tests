@@ -10,4 +10,11 @@
     input = 'SimpleCoupledACInterface.i'
     exodiff = 'SimpleCoupledACInterface_out.e'
   [../]
+
+  [ADSimpleCoupledACInterface]
+    type = 'Exodiff'
+    input = 'ADSimpleCoupledACInterface.i'
+    exodiff = 'ADSimpleCoupledACInterface_out.e'
+    issues = '#33647'
+  []
 []

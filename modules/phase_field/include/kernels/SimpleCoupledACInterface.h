@@ -9,28 +9,42 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 /**
  * Compute the Allen-Cahn interface term with constant Mobility and Interfacial parameter
  */
-class SimpleCoupledACInterface : public Kernel
+template <bool is_ad>
+class SimpleCoupledACInterfaceTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
+  SimpleCoupledACInterfaceTempl(const InputParameters & parameters);
+
+protected:
+  virtual GenericReal<is_ad> computeQpResidual() override;
+
+  /// Mobility
+  const GenericMaterialProperty<Real, is_ad> & _L;
+  /// Interfacial parameter
+  const GenericMaterialProperty<Real, is_ad> & _kappa;
+  /// Gradient of the coupled variable
+  const GenericVariableGradient<is_ad> & _grad_v;
+
+  usingGenericKernelMembers;
+};
+
+class SimpleCoupledACInterface : public SimpleCoupledACInterfaceTempl<false>
+{
+public:
   SimpleCoupledACInterface(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Mobility
-  const MaterialProperty<Real> & _L;
-  /// Interfacial parameter
-  const MaterialProperty<Real> & _kappa;
-  /// Gradient of the coupled variable
-  const VariableGradient & _grad_v;
   /// Index of the coupled variable
   unsigned int _v_var;
 };
+
+using ADSimpleCoupledACInterface = SimpleCoupledACInterfaceTempl<true>;
