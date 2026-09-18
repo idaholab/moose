@@ -188,6 +188,25 @@
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
+  [reconstructed-gradient-rejects-extra-velocity-blocks]
+    type = 'RunException'
+    input = reconstructed-gradient-partial-blocks.i
+    cli_args = "Variables/pressure/block='0 1' Variables/pressure/gradient_method=reconstructed "
+               "LinearFVKernels/u_advection_stress/block='0 1' "
+               "LinearFVKernels/v_advection_stress/block='0 1' "
+               "LinearFVKernels/u_pressure_left/block=0 "
+               "LinearFVKernels/u_pressure_right/block=1 "
+               "LinearFVKernels/v_pressure_left/block=0 "
+               "LinearFVKernels/v_pressure_right/block=1 "
+               "LinearFVKernels/p_diffusion/block='0 1' "
+               "LinearFVKernels/HbyA_divergence/block='0 1'"
+    expect_err = "requires velocity variable 'vel_x' and RhieChowMassFlux 'rc' to have identical block restrictions"
+    requirement = "The reconstructed pressure-gradient method shall reject a velocity variable "
+                  "defined on blocks outside those handled by its Rhie-Chow object."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
   [momentum-pressure-overlap-on-rc-block]
     type = 'RunException'
     input = momentum-pressure-block-restricted.i

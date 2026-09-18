@@ -1228,24 +1228,4 @@ RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
                  "' has variables: ",
                  Moose::stringify(momentum_system->getVariableNames()));
   }
-
-  const auto & pressure_gradient = pressureGradientField().components();
-  const auto & base_pressure_gradient = basePressureGradientField().components();
-  if (pressure_gradient.size() != _dim || base_pressure_gradient.size() != _dim)
-    mooseError("RhieChowMassFlux '",
-               name(),
-               "' requires reconstructed and base pressure gradients with one component per "
-               "spatial dimension.");
-
-  for (const auto component : make_range(_dim))
-    if (!pressure_gradient[component] || !base_pressure_gradient[component] ||
-        pressure_gradient[component]->size() != base_pressure_gradient[component]->size() ||
-        pressure_gradient[component]->local_size() !=
-            base_pressure_gradient[component]->local_size())
-      mooseError("RhieChowMassFlux '",
-                 name(),
-                 "' has incompatible reconstructed and base pressure-gradient layouts for "
-                 "component ",
-                 component,
-                 ".");
 }
