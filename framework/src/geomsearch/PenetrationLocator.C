@@ -145,22 +145,6 @@ PenetrationLocator::detectPenetration()
 
     Threads::parallel_reduce(recheck_secondary_node_range, pt);
   }
-
-  if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
-    mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
-                             "detected for one or more secondary nodes. This could be because "
-                             "those secondary nodes simply do not project to faces on the primary "
-                             "surface. However, this could also be because contact should be "
-                             "enforced on those nodes, but the faces that they project to "
-                             "are outside the contact patch, which will give an erroneous "
-                             "result. Use appropriate options for 'patch_size' and "
-                             "'patch_update_strategy' in the Mesh block to avoid this issue. "
-                             "Setting 'patch_update_strategy=iteration' is recommended because "
-                             "it completely avoids this potential issue. Also note that this "
-                             "warning is printed only once, so a similar situation could occur "
-                             "multiple times during the simulation but this warning is printed "
-                             "only at the first occurrence."));
 }
 
 void
