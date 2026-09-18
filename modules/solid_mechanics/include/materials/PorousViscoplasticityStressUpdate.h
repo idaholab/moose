@@ -213,6 +213,10 @@ protected:
     return {total_porosity, GenericReal<is_ad>(0.0)};
   }
 
+  /** Return the lower bound for one independently evolving pore population. */
+  virtual GenericReal<is_ad> independentPorePorosityFloor(
+      unsigned int population_index, const PorePorosityState & pore_porosity_begin) const;
+
   /** Evaluate pressure closure and pressure derivatives for independent pore porosities. */
   virtual HydrostaticStressState
   evaluateIndependentHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
