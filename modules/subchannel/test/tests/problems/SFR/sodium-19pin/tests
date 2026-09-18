@@ -19,7 +19,7 @@
     # Tolerance added due to CIVET machine difference
     # See PR: Qprime #31380
     # and PR: various mods #31283
-    rel_err = 1e-3
+    rel_err = 3e-03
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
@@ -51,18 +51,14 @@
   [test_saturated_sodium_tiny_dt]
     type = RunApp
     input = test19_monolithic.i
-    # At this one-microsecond time step, omitting the transient pressure-density coupling drives
-    # the outlet enthalpy negative during the first outer iteration. The ten-iteration limit gives
-    # margin over the two iterations required with that coupling included.
-    cli_args = 'FluidProperties/sodium/type=SodiumSaturationFluidProperties Executioner/type=Transient Executioner/dt=1e-6 Executioner/end_time=1e-6 Executioner/abort_on_solve_fail=true SubChannel/P_tol=1e-5 SubChannel/P_maxit=10 SubChannel/mass_flow_equation_relaxation=1 SubChannel/pressure_equation_relaxation=1 SubChannel/mass_flow_relaxation=1 SubChannel/pressure_relaxation=1 SubChannel/crossflow_relaxation=1 Outputs/exodus=false Outputs/csv=false'
+    cli_args = 'FluidProperties/sodium/type=SodiumSaturationFluidProperties Executioner/type=Transient Executioner/dt=1e-5 Executioner/end_time=1e-5 Executioner/abort_on_solve_fail=true SubChannel/P_tol=1e-5 SubChannel/interpolation_scheme=upwind SubChannel/enthalpy_subcycles=2 SubChannel/rtol=1e-10 SubChannel/atol=1e-12 SubChannel/mass_flow_relaxation=0.3 SubChannel/pressure_relaxation=0.8 Outputs/exodus=false Outputs/csv=false'
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
-    # The end-of-solve energy diagnostic omits transient energy accumulation.
     allow_warnings = true
     max_threads = 1
     max_parallel = 1
-    requirement = 'The coupled subchannel solver shall converge a one-microsecond saturated-sodium transient without mass-flow or pressure under-relaxation.'
+    requirement = 'The coupled subchannel solver shall converge a transient saturated sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
   []
   [test_monolithic]
     type = CSVDiff

@@ -130,6 +130,16 @@ among the sub-apps. If there are more sub-apps than processors, each processor w
 multiple sub-apps.  All sub-apps of a given `MultiApp` are run simultaneously in parallel. Multiple
 `MultiApps` will be executed one after another.
 
+### Concurrent execution
+
+Concurrent execution of child apps of each `MultiApp` is the default behavior. If also specifying in the
+`Problem` block that
+[!param](/Problem/FEProblem/num_concurrent_multiapps) `> 1` then several `MultiApps` will execute concurrently
+as well, meanining the child apps from both `MultiApps` will execute together. The groups of concurrent `MultiApps`
+are created from the [!param](/MultiApps/TransientMultiApp/execution_order_group) parameter of each `MultiApps`.
+
+Executing `MultiApps` concurrently is intended for achieving the maximum utilization of parallel resources when
+several simulations, executed as `MultiApps` do not require the entirety of the available resources.
 
 ## Dynamically Loading MultiApps
 

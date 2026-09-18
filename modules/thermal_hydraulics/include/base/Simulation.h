@@ -430,8 +430,8 @@ protected:
   void setupEquations();
 
   /**
-   * Setup reading initial conditions from a specified file, see 'initial_from_file' and
-   * 'initial_from_file_timestep' parameters
+   * Setup reading initial conditions from a specified file, see 'initial_from_file',
+   * 'initial_from_file_timestep', and 'initial_from_file_weighting_type' parameters
    */
   void setupInitialConditionsFromFile();
 

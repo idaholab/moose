@@ -137,6 +137,27 @@ libMesh::Real projectedLineHalfSpace(libMesh::Point pt1,
                                      const unsigned int axis);
 
 /**
+ * Twice the signed area of a triangle in the xy plane, which is positive when its corners are
+ * ordered counter-clockwise. This is the shoelace determinant, so it is also the half space of the
+ * line through the last two corners that the first one lies in.
+ * @param[in] pt1 first corner of the triangle
+ * @param[in] pt2 second corner of the triangle
+ * @param[in] pt3 third corner of the triangle
+ * @return twice the signed area
+ */
+libMesh::Real
+signedArea2D(const libMesh::Point & pt1, const libMesh::Point & pt2, const libMesh::Point & pt3);
+
+/**
+ * Twice the signed area of a closed polygon in the xy plane, which is positive when its corners are
+ * ordered counter-clockwise. This is the shoelace sum, that is the sum of signedArea2D() over the
+ * triangles fanning out from the origin to each side of the polygon.
+ * @param[in] polygon the corners of the polygon, in order around it
+ * @return twice the signed area
+ */
+libMesh::Real signedArea2D(const std::vector<libMesh::Point> & polygon);
+
+/**
  * Whether a point is in 2-D a polygon in the plane perpendicular to the specified
  * axis, given by corner points
  * @param[in] point point of interest

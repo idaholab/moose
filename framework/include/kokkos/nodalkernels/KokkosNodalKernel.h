@@ -179,7 +179,7 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
   auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
                                    : kokkosBlockNodeID(_thread(tid, 1));
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;

@@ -130,7 +130,17 @@ Axisymmetric2D3DSolutionFunction::initialSetup()
 
   _solution_object_var_indices.resize(_var_names.size());
   for (unsigned int i = 0; i < _var_names.size(); ++i)
+  {
+    if (!_solution_object_ptr->isVariableScalarValued(_var_names[i]))
+      paramError(
+          "from_variables",
+          "The imported variable '",
+          _var_names[i],
+          "' is vector-valued, but Axisymmetric2D3DSolutionFunction supports only scalar-valued "
+          "imported variables.");
+
     _solution_object_var_indices[i] = _solution_object_ptr->getLocalVarIndex(_var_names[i]);
+  }
 }
 
 Real

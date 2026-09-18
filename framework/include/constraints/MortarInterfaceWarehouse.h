@@ -126,8 +126,11 @@ public:
 
   /**
    * Builds mortar segment meshes for each mortar interface
+   * @return Whether any interface's mortar segment coverage (interior-parent subdomains) changed
+   * as a result of this rebuild. Callers that also need to refresh mortar-dependent DoF ghosting
+   * (see \p FEProblemBase::updateMortarMesh()) can key off this instead of re-deriving it.
    */
-  void update();
+  bool update();
 
   /**
    * Invalidates cached MSM node/element ID offsets on all mortar interfaces so they are
@@ -153,13 +156,14 @@ public:
 
   /**
    * \em Adds \p mei to the container of objects that will have their \p mortarSetup method called
-   * as soon as the mortar mesh has been generated for the first time
+   * whenever a mortar mesh's segment coverage is (re)built and has changed, including the first
+   * build
    */
   void notifyWhenMortarSetup(MortarExecutorInterface * mei);
 
   /**
    * \em Removes \p mei from the container of objects that will have their \p mortarSetup method
-   * called as soon as the mortar mesh has been generated for the first time
+   * called whenever a mortar mesh's segment coverage is (re)built and has changed
    */
   void dontNotifyWhenMortarSetup(MortarExecutorInterface * mei);
 
@@ -171,8 +175,10 @@ public:
 private:
   /**
    * Builds mortar segment mesh from specific AutomaticMortarGeneration object
+   * @return Whether \p amg's interior-parent subdomain coverage changed (or this is the first
+   * build)
    */
-  void update(AutomaticMortarGeneration & amg);
+  bool update(AutomaticMortarGeneration & amg);
 
   typedef std::pair<BoundaryID, BoundaryID> MortarKey;
 
@@ -196,8 +202,8 @@ private:
   /// (e.g. the ids of the interior parents)
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;
 
-  /// A container of objects for whom the \p mortarSetup method will be called after the mortar mesh
-  /// has been setup for the first time
+  /// A container of objects for whom the \p mortarSetup method will be called whenever a mortar
+  /// mesh's segment coverage is (re)built and has changed, including the first build
   std::set<MortarExecutorInterface *> _mei_objs;
 
   /// Whether we have performed any mortar mesh construction

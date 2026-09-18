@@ -82,7 +82,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "momentum_equation_relaxation momentum_petsc_options momentum_petsc_options_iname "
-      "momentum_petsc_options_value momentum_petsc_options_value momentum_absolute_tolerance "
+      "momentum_petsc_options_value momentum_absolute_tolerance "
       "momentum_l_tol momentum_l_abs_tol momentum_l_max_its momentum_systems",
       "Momentum Equation");
 
@@ -129,7 +129,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "pressure_variable_relaxation pressure_petsc_options pressure_petsc_options_iname "
-      "pressure_petsc_options_value pressure_petsc_options_value pressure_absolute_tolerance "
+      "pressure_petsc_options_value pressure_absolute_tolerance "
       "pressure_l_tol pressure_l_abs_tol pressure_l_max_its pressure_system",
       "Pressure Equation");
 
@@ -188,6 +188,13 @@ SIMPLESolveBase::validParams()
                                     "0.0<energy_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>(
+      "energy_field_relaxation",
+      1.0,
+      "0.0<energy_field_relaxation<=1.0",
+      "The relaxation which should be used for the energy field. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+
   params.addRangeCheckedParam<unsigned int>(
       "energy_l_max_its",
       10000,
@@ -196,7 +203,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "energy_equation_relaxation energy_petsc_options energy_petsc_options_iname "
-      "energy_petsc_options_value energy_petsc_options_value energy_absolute_tolerance "
+      "energy_petsc_options_value energy_absolute_tolerance "
       "energy_l_tol energy_l_abs_tol energy_l_max_its",
       "Energy Equation");
 
@@ -285,7 +292,7 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "passive_scalar_systems passive_scalar_equation_relaxation passive_scalar_petsc_options "
       "passive_scalar_petsc_options_iname "
-      "passive_scalar_petsc_options_value passive_scalar_petsc_options_value "
+      "passive_scalar_petsc_options_value "
       "passive_scalar_absolute_tolerance "
       "passive_scalar_l_tol passive_scalar_l_abs_tol passive_scalar_l_max_its",
       "Passive Scalars Advection Equation");
@@ -336,7 +343,7 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "pm_radiation_systems pm_radiation_equation_relaxation pm_radiation_petsc_options "
       "pm_radiation_petsc_options_iname "
-      "pm_radiation_petsc_options_value pm_radiation_petsc_options_value "
+      "pm_radiation_petsc_options_value "
       "pm_radiation_absolute_tolerance "
       "pm_radiation_l_tol pm_radiation_l_abs_tol pm_radiation_l_max_its",
       "Participating Medium Radiation Equation");
@@ -396,7 +403,7 @@ SIMPLESolveBase::validParams()
                               "turbulence_field_min_limit "
                               "turbulence_petsc_options "
                               "turbulence_petsc_options_iname "
-                              "turbulence_petsc_options_value turbulence_petsc_options_value "
+                              "turbulence_petsc_options_value "
                               "turbulence_absolute_tolerance "
                               "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
                               "Turbulence Equations");
@@ -433,6 +440,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
+    _energy_field_relaxation(getParam<Real>("energy_field_relaxation")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),

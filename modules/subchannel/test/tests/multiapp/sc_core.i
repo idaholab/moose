@@ -151,7 +151,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 
 [SCMClosures]
   [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski

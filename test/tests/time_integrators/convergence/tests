@@ -256,6 +256,7 @@
       exodiff = 'astabledirk4_2.e'
 
       detail = "a quarter timestep."
+      min_slots = 2
     []
   []
 

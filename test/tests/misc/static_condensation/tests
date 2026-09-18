@@ -35,6 +35,7 @@
     type = MMSTest
     input = test.py
     test_case = TestStaticCondensation
+    max_threads = 1 # static condensation doesn't currently support threading
   []
   [dont_condense]
     requirement = 'The system shall be able to not condense user-specified variables when peforming static condensation.'

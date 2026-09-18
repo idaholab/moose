@@ -23,4 +23,87 @@
     requirement = 'The system shall preserve gradients for multiple linear finite volume variables sharing one named gradient method.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [gradient_time_states]
+    type = CSVDiff
+    input = 'gradient-time-states.i'
+    csvdiff = 'gradient-time-states_csv.csv'
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall optionally preserve arbitrary linear finite volume gradient time-state depth for linear and auxiliary systems, including shared methods and face reads.'
+    max_threads = 1
+  []
+  [gradient_time_states_restart_part1]
+    type = RunApp
+    input = 'gradient-time-states.i'
+    cli_args = 'Executioner/num_steps=2 Outputs/checkpoint=true Outputs/file_base=gradient-time-states-restart'
+    recover = false
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall write requested linear finite volume gradient history to a checkpoint for an explicit restart.'
+    max_threads = 1
+  []
+  [gradient_time_states_restart]
+    type = CSVDiff
+    input = 'gradient-time-states-restart.i'
+    csvdiff = 'gradient-time-states-restart-continued.csv'
+    cli_args = "Executioner/num_steps=2 Outputs/csv/execute_on='INITIAL TIMESTEP_END' Outputs/file_base=gradient-time-states-restart-continued"
+    prereq = 'gradient_time_states_restart_part1'
+    recover = false
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall restore requested linear finite volume gradient history during an explicit restart.'
+    max_threads = 1
+  []
+  [gradient_time_states_missing_part1]
+    type = RunApp
+    input = 'gradient-time-states.i'
+    cli_args = "Postprocessors/active='' Executioner/num_steps=2 Outputs/checkpoint=true Outputs/file_base=gradient-time-states-missing"
+    recover = false
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall write a checkpoint without optional linear finite volume gradient history when no consumer requests it.'
+    max_threads = 1
+  []
+  [missing_restarted_gradient_history]
+    type = RunException
+    input = 'gradient-time-states-restart.i'
+    cli_args = 'Problem/restart_file_base=gradient-time-states-missing_cp/LATEST'
+    expect_err = "Linear FV gradient state 1 for variable '.*'.*was not available in the restart data"
+    prereq = 'gradient_time_states_missing_part1'
+    recover = false
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when requested linear finite volume gradient history is absent from restart data.'
+    max_threads = 1
+  []
+  [unavailable_gradient_state]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_current/state=4 Outputs/file_base=unavailable-gradient-state'
+    expect_err = "Linear FV gradient state 4 with iteration type 'time' was requested for variable 'u'.*maximum allocated state is 3"
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer reads an unallocated linear finite volume gradient state.'
+    max_threads = 1
+  []
+  [unsupported_gradient_iteration_state]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_old/iteration_type=nonlinear Outputs/file_base=unsupported-gradient-iteration-state'
+    expect_err = "Linear FV gradient state 1 with iteration type 'nonlinear' was requested for variable 'u'.*Only time iteration states are supported"
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer reads non-current linear finite volume gradient history for a non-time iteration type.'
+    max_threads = 1
+  []
+  [late_gradient_state_request]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_current/late_oldest_gradient_state=4 Outputs/file_base=late-gradient-state-request'
+    expect_err = 'Linear FV gradient state 4 was requested.*after solution states were initialized'
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer increases linear finite volume gradient history depth after solution-state initialization.'
+    max_threads = 1
+  []
 []

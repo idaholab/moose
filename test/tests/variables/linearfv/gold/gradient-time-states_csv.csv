@@ -1,0 +1,5 @@
+time,aux_current,aux_old,aux_older,aux_oldest,u_current,u_face_current,u_face_old,u_old,u_older,u_oldest,v_shared_oldest
+1,2,1,1,1,2,2,1,1,1,1,1
+2,3,2,1,1,3,3,2,2,1,1,1
+3,4,3,2,1,4,4,3,3,2,1,1
+4,5,4,3,2,5,5,4,4,3,2,2

@@ -153,6 +153,13 @@
     value = 300
   [../]
 
+  [./fixed_temperature]
+    type = FunctionDirichletBC
+    variable = temperature
+    boundary = inner_bottom
+    function = 1200
+  [../]
+
   [./radiation]
     type = GrayLambertNeumannBC
     variable = temperature

@@ -52,6 +52,10 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntaxTask("OptimizationAction", "Optimization", "auto_create_problem");
   addTaskDependency("setup_mesh", "auto_create_mesh");
   addTaskDependency("create_problem", "auto_create_problem");
+
+  // Single-parameter inverse-solve action: one block that generates the full fixed-point
+  // inversion workflow for a single scalar parameter.
+  registerSyntax("SingleParameterInverseSolveAction", "SingleParameterInverseSolve");
 }
 
 void

@@ -89,12 +89,14 @@ The DASSH subchannel code models the internal pin region of sub-assembly XX09 an
 
 For SHRT-17, in the uniform pin power case, both SCM and DASSH exhibit similar behavior. Since DASSH does not resolve the crossflows (contrary to SCM), similar results indicate that crossflows might not be instrumental, in determining the temperature profile for this problem. Additionally, DASSH predicts a slightly less skewed distribution than SCM, which is closer to the experimental results. This means that the crossflows may be underestimated by the lateral momentum balance equation solved by SCM, or that the thimble model incorporated in DASSH improves accuracy. Nonetheless, both the SCM and DASSH calculations, are close enough to suggest that those differences in modeling approach, do not produce large discrepancies in the results.
 
-!media subchannel/v&v/EBR-II/XX09_TTC.png
+!media media_scripts/validation/EBR-II/plot_results.py
+    image_name=XX09_TTC.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC17
     caption=Test SHRT-17
 
-!media subchannel/v&v/EBR-II/XX09_TTC45.png
+!media media_scripts/validation/EBR-II/plot_results.py
+    image_name=XX09_TTC45.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC45
     caption=Test SHRT-45R

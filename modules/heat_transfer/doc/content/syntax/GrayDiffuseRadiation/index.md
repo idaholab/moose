@@ -17,6 +17,11 @@ The following boundary conditions have support:
 | Variable temperature | $T_i$ unknown | [!param](/GrayDiffuseRadiation/boundary) only |
 | Symmetry | symmetry about some plane | [!param](/GrayDiffuseRadiation/symmetry_boundary) only |
 
+For each boundary listed in [!param](/GrayDiffuseRadiation/fixed_temperature_boundary),
+the action applies a `FunctionDirichletBC` to the
+[!param](/GrayDiffuseRadiation/temperature) variable using the corresponding function in
+[!param](/GrayDiffuseRadiation/fixed_boundary_temperatures).
+
 In summary:
 
 - [!param](/GrayDiffuseRadiation/boundary) should contain all boundaries that participate in radiative exchange.

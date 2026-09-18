@@ -27,6 +27,7 @@
       test_case = TestLagrangeTri
       detail = 'simplex elements and'
       min_slots = '2'
+      max_threads = 1 # static condensation doesn't currently support threading
     []
     [quad]
       type = MMSTest
@@ -34,6 +35,7 @@
       test_case = TestLagrangeQuad
       detail = 'tensor-product elements.'
       min_slots = '2'
+      max_threads = 1 # static condensation doesn't currently support threading
     []
   []
   [rt_mms]
@@ -44,6 +46,7 @@
       test_case = TestRTTri
       detail = 'simplex elements and'
       min_slots = 2 # memory intensive
+      max_threads = 1 # static condensation doesn't currently support threading
     []
     [quad]
       type = MMSTest
@@ -51,6 +54,7 @@
       test_case = TestRTQuad
       detail = 'tensor-product elements.'
       min_slots = 2 # memory intensive
+      max_threads = 1 # static condensation doesn't currently support threading
     []
   []
   [prescribed_nonzero_flux]

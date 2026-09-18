@@ -453,8 +453,9 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
-  _obj_function->setMisfitToSimulatedValues();
-
+  // The adjoint solve below applies the misfit as its source. For the Hessian action, that source
+  // is the simulated values from the homogeneous forward solve, so the input must transfer
+  // 'simulation_values' from the homogeneous forward sub-app into 'misfit_values'.
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);

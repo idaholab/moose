@@ -756,7 +756,7 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
   return _grad_p_current;
 }
 
-const std::vector<std::unique_ptr<NumericVector<Number>>> &
+const std::vector<NumericVector<Number> *> &
 RhieChowMassFlux::pressureGradientComponents() const
 {
   return pressureGradientField().components();

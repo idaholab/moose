@@ -239,60 +239,60 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
+    const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
+
+    // If we trigger any actions that can build MeshGenerators, whether through input file
+    // syntax or through custom actions, change the default type to construct. We can't yet
+    // check whether there are any actual MeshGenerator objects because those are added after
+    // setup_mesh. We do this even when cloning the parent app mesh so that MeshGeneratorMesh-only
+    // parameters set in this [Mesh] block (e.g. "data_driven_generator") are not reported unused,
+    // even though the generators themselves are never built in that case.
+    if (!generator_actions.empty())
+    {
+      // Check for whether type has been set or whether for the default type (FileMesh) a file has
+      // been provided
+      if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
+      {
+        // Auto-select MFEMMeshGeneratorMesh when a generator carries the MFEM flag.
+        bool has_mfem_generator = false;
+#ifdef MOOSE_MFEM_ENABLED
+        // We'll have to do something smarter when people add actions other than
+        // AddMeshGeneratorAction that add MFEM mesh generators
+        if (const auto * const mesh_generator_action =
+                dynamic_cast<AddMeshGeneratorAction *>(generator_actions.front()))
+          if (const auto * const is_mfem =
+                  mesh_generator_action->getObjectParams().queryParam<bool>("_mfem_mesh_generator"))
+            has_mfem_generator = *is_mfem;
+#endif
+
+        _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
+        auto original_params = _moose_object_pars;
+        _moose_object_pars = _factory.getValidParams(_type);
+
+        // Since we changing the type on the fly, we'll have to manually extract parameters again
+        // from the input file object.
+        _app.builder().extractParams(_registered_identifier, _moose_object_pars);
+      }
+      else if (!_app.useMasterMesh() && !_moose_object_pars.get<bool>("_mesh_generator_mesh"))
+      {
+        // There are cases where a custom action may register the "add_mesh_generator" task, but
+        // may not actually add any mesh generators depending on user input. We don't want to risk
+        // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
+        // task through explicit input file syntax, then it is definitely safe to warn
+        for (auto generator_action_ptr : generator_actions)
+          if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
+          {
+            mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                       _type,
+                       "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
+          }
+      }
+    }
+
     if (_app.useMasterMesh())
       _mesh = _app.masterMesh()->safeClone();
     else
     {
-      const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
-
-      // If we trigger any actions that can build MeshGenerators, whether through input file
-      // syntax or through custom actions, change the default type to construct. We can't yet
-      // check whether there are any actual MeshGenerator objects because those are added after
-      // setup_mesh
-      if (!generator_actions.empty())
-      {
-        // Check for whether type has been set or whether for the default type (FileMesh) a file has
-        // been provided
-        if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
-        {
-          // Auto-select MFEMMeshGeneratorMesh when a generator carries the MFEM flag.
-          // Guarded at compile time so non-MFEM builds incur zero overhead.
-          bool has_mfem_generator = false;
-#ifdef MOOSE_MFEM_ENABLED
-          // We'll have to do something smarter when people add actions other than
-          // AddMeshGeneratorAction that add MFEM mesh generators
-          if (const auto * const mesh_generator_action =
-                  dynamic_cast<AddMeshGeneratorAction *>(generator_actions.front()))
-            if (const auto * const is_mfem =
-                    mesh_generator_action->getObjectParams().queryParam<bool>(
-                        "_mfem_mesh_generator"))
-              has_mfem_generator = *is_mfem;
-#endif
-
-          _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
-          auto original_params = _moose_object_pars;
-          _moose_object_pars = _factory.getValidParams(_type);
-
-          // Since we changing the type on the fly, we'll have to manually extract parameters again
-          // from the input file object.
-          _app.builder().extractParams(_registered_identifier, _moose_object_pars);
-        }
-        else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
-        {
-          // There are cases where a custom action may register the "add_mesh_generator" task, but
-          // may not actually add any mesh generators depending on user input. We don't want to risk
-          // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
-          // task through explicit input file syntax, then it is definitely safe to warn
-          for (auto generator_action_ptr : generator_actions)
-            if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
-            {
-              mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                         _type,
-                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
-            }
-        }
-      }
-
       // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
       if (_use_split)
         _type = modifyParamsForUseSplit(_moose_object_pars);

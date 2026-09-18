@@ -43,7 +43,6 @@ VectorPostprocessor::validParams()
       "broadcast to all processors unless the '_auto_broadcast' param is set to false within the "
       "validParams function.");
 
-  params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("VectorPostprocessor");
   return params;
 }

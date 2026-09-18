@@ -48,6 +48,11 @@ MooseLinearVariableFV<OutputType>::validParams()
       "Default gradient computation method to register when a consumer requests gradients from "
       "this variable. This may be a built-in method name like 'green-gauss' or "
       "'green-gauss-venkatakrishnan', or the name of an object in [FVGradientMethods].");
+  // A finite volume variable is always a CONSTANT MONOMIAL, whose basis has no p-refined
+  // counterpart, so the p-refinement parameters are fixed here and hidden from the user
+  params.set<bool>("p_refinement") = false;
+  params.suppressParameter<bool>("p_refinement");
+  params.suppressParameter<bool>("disable_p_refinement");
   return params;
 }
 
@@ -63,17 +68,15 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
     // auxiliary systems
-    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face_neighbor(
-        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly.template fePhi<OutputShape>(this->_fe_type)),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(this->_fe_type)),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(this->_fe_type)),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(this->_fe_type)),
+    _phi_face_neighbor(this->_assembly.template fePhiFaceNeighbor<OutputShape>(this->_fe_type)),
     _grad_phi_face_neighbor(
-        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(this->_fe_type)),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(this->_fe_type)),
+    _grad_phi_neighbor(this->_assembly.template feGradPhiNeighbor<OutputShape>(this->_fe_type))
 {
   if (!_linear_system && !_auxiliary_system)
     this->paramError("solver_sys",
@@ -90,9 +93,9 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients()
+MooseLinearVariableFV<OutputType>::requestCellGradients(const unsigned int oldest_state)
 {
-  const auto & reader = requestCellGradients(_default_gradient_method_name);
+  const auto & reader = requestCellGradients(_default_gradient_method_name, oldest_state);
 
   _gradient_reader = &reader;
   return reader;
@@ -107,27 +110,32 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
+MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name,
+                                                        const unsigned int oldest_state)
 {
   const auto & method = _linear_system ? _linear_system->resolveFVGradientMethod(method_name)
                                        : _auxiliary_system->resolveFVGradientMethod(method_name);
 
-  return requestCellGradients(method);
+  return requestCellGradients(method, oldest_state);
 }
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method)
+MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method,
+                                                        const unsigned int oldest_state)
 {
   _needs_cell_gradients = true;
+  _oldest_gradient_state_requested = std::max(_oldest_gradient_state_requested, oldest_state);
+
+  auto new_reader =
+      _linear_system ? _linear_system->registerFVGradient(this->_var_num, method, oldest_state)
+                     : _auxiliary_system->registerFVGradient(this->_var_num, method, oldest_state);
 
   const auto it = _gradient_readers_by_method.find(&method);
   if (it != _gradient_readers_by_method.end())
     return *it->second;
 
-  auto reader = std::make_unique<LinearFVGradientReader>(
-      _linear_system ? _linear_system->registerFVGradient(this->_var_num, method)
-                     : _auxiliary_system->registerFVGradient(this->_var_num, method));
+  auto reader = std::make_unique<LinearFVGradientReader>(std::move(new_reader));
 
   auto & reader_ref = *reader;
   _gradient_readers_by_method.emplace(&method, std::move(reader));
@@ -173,10 +181,7 @@ VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
   mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
-  if (state.state != 0)
-    gradientStateError(state);
-
-  return _gradient_reader->gradient(elem_info);
+  return _gradient_reader->gradient(elem_info, state);
 }
 
 template <typename OutputType>
@@ -184,9 +189,18 @@ Real
 MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
                                                     const unsigned int component) const
 {
+  return gradSlnComponent(elem_info, component, Moose::currentState());
+}
+
+template <typename OutputType>
+Real
+MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
+                                                    const unsigned int component,
+                                                    const StateArg & state) const
+{
   mooseAssert(_gradient_reader,
               "Gradient component requested without calling requestCellGradients().");
-  return _gradient_reader->component(elem_info, component);
+  return _gradient_reader->component(elem_info, component, state);
 }
 
 template <typename OutputType>
@@ -194,10 +208,7 @@ VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
 {
   mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
-  if (state.state != 0)
-    gradientStateError(state);
-
-  return _gradient_reader->gradient(fi);
+  return _gradient_reader->gradient(fi, state);
 }
 
 template <typename OutputType>
@@ -601,7 +612,7 @@ template <typename OutputType>
 unsigned int
 MooseLinearVariableFV<OutputType>::oldestSolutionStateRequested() const
 {
-  unsigned int state = 0;
+  unsigned int state = _oldest_gradient_state_requested;
   state = std::max(state, _element_data->oldestSolutionStateRequested());
   state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
   return state;
@@ -624,7 +635,7 @@ MooseLinearVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/)
 {
   nodalError();
 }

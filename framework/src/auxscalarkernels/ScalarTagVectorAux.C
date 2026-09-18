@@ -16,15 +16,14 @@ InputParameters
 ScalarTagVectorAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxScalarKernel>::validParams();
-  params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
+  params.addParam<TagName>("vector_tag", "TagName", "Tag Name this Aux works on");
   params.addClassDescription("Couple a tag vector, and return its value");
   return params;
 }
 
 ScalarTagVectorAux::ScalarTagVectorAux(const InputParameters & parameters)
   : TagAuxBase<AuxScalarKernel>(parameters),
-    _tag_id(_subproblem.getVectorTagID(getParam<std::string>("vector_tag"))),
-    _v(coupledVectorTagScalarValue("v", _tag_id)),
+    _v(coupledVectorTagScalarValue("v", "vector_tag")),
     _v_var(*getScalarVar("v", 0))
 {
 }

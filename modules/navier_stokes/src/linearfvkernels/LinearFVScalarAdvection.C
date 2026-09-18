@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVScalarAdvection.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "MooseLinearVariableFV.h"
 #include "NS.h"
 

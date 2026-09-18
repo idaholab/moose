@@ -1,0 +1,30 @@
+[Tests]
+  design = '/XYFrontalDelaunayGenerator.md'
+  issues = '#33522'
+
+  [collinear_is_exactly_zero]
+    type = GoogleTest
+    unit_test = GeometricPredicatesTest.collinearIsExactlyZero
+    requirement = 'The system shall evaluate the two-dimensional orientation predicate exactly, reporting a determinant of exactly zero for collinear points whose coordinate differences exceed the precision of a double, where the textbook determinant does not.'
+  []
+  [orientation_sign]
+    type = GoogleTest
+    unit_test = GeometricPredicatesTest.orientationSign
+    requirement = 'The system shall report a positive orientation determinant for three points in counter-clockwise order and a negative one for the same points in clockwise order.'
+  []
+  [cocircular_is_exactly_zero]
+    type = GoogleTest
+    unit_test = GeometricPredicatesTest.cocircularIsExactlyZero
+    requirement = 'The system shall evaluate the in-circle predicate exactly, reporting exactly zero for four cocircular points, a positive value for a fourth point inside the circle through the first three, and a negative value for one outside it.'
+  []
+  [orient2d_permutation_antisymmetry]
+    type = GoogleTest
+    unit_test = GeometricPredicatesTest.orient2dPermutationAntisymmetry
+    requirement = 'The system shall preserve the sign of the orientation predicate under a cyclic rotation of its three arguments and negate it when any two of them are swapped.'
+  []
+  [incircle_permutation_antisymmetry]
+    type = GoogleTest
+    unit_test = GeometricPredicatesTest.incirclePermutationAntisymmetry
+    requirement = 'The system shall preserve the sign of the in-circle predicate under a cyclic rotation of its first three arguments and negate it when two of them are swapped.'
+  []
+[]

@@ -45,7 +45,7 @@ P_out = 155e+5 # Pa
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [constant_beta]
     type = SCMMixingConstantBeta

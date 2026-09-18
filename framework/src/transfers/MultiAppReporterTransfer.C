@@ -244,7 +244,15 @@ MultiAppReporterTransfer::checkSiblingsTransferSupported() const
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
         mooseError("Child application allocation on parallel processes must be the same to support "
-                   "siblings reporter transfer");
+                   "siblings reporter transfer",
+                   ((getToMultiApp()->problemBase().numConcurrentMultiApps() == 1 ||
+                     getFromMultiApp()->getParam<unsigned int>("execution_order_group") !=
+                         getToMultiApp()->getParam<unsigned int>("execution_order_group"))
+                        ? ""
+                        : "\nConcurrent execution of the target and source multiapps is preventing "
+                          "rank assignments to match. You will have to separate the "
+                          "'execution_order_group' of the two applications, or have this feature "
+                          "implemented."));
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");

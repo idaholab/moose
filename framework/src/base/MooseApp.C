@@ -81,7 +81,6 @@
 
 // C++ includes
 #include <numeric> // std::accumulate
-#include <atomic>
 #include <fstream>
 #include <iterator>
 #include <sys/types.h>
@@ -94,53 +93,23 @@
 namespace
 {
 /**
- * Return a temporary checkpoint path used to move mesh topology through CheckpointIO.
+ * Return the path to the checkpoint file used to move mesh topology through CheckpointIO during
+ * backup/restore of an adapted mesh.
  *
- * @param app App whose output file base, communicator, and processor id determine temporary path
- *            ownership
+ * This directory is named from, and relative to, the app's output file base -- the same
+ * convention used by MooseApp::getCheckpointDirectories() and Checkpoint::directory() -- rather
+ * than the platform's system temporary directory, so that it stays on the filesystem MOOSE
+ * already assumes is shared across every rank and node in the job. Because the path is a
+ * deterministic function of app and purpose, every rank computes the identical path
+ * independently; no communication is required to keep ranks in agreement.
+ *
+ * @param app App whose output file base names the checkpoint directory
  * @param purpose Short label included in the directory name, e.g. "backup" or "restore"
- * @param shared Whether all ranks in the app communicator should use one shared checkpoint
- *               directory. Backup performs one collective checkpoint write, then captures each
- *               checkpoint entry as a relative path and byte contents in the Backup object. Restore
- *               recreates that checkpoint layout once before calling CheckpointIO::read().
  */
 std::filesystem::path
-temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
+temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose)
 {
-  static std::atomic<unsigned long> counter = 0;
-
-  std::string dirname;
-  if (!shared || app.processor_id() == 0)
-  {
-    const auto file_base = std::filesystem::path(app.getOutputFileBase()).filename().string();
-    const auto dirname_base = (file_base.empty() ? "moose" : file_base) + "_" + purpose + "_mesh";
-    const auto tmp_dir = std::filesystem::temp_directory_path();
-    std::error_code err;
-
-    do
-    {
-      dirname = dirname_base + "_" + std::to_string(counter++);
-      if (!shared)
-        dirname += "_" + std::to_string(app.processor_id());
-
-      err.clear();
-    } while (!std::filesystem::create_directory(tmp_dir / dirname, err) && !err);
-
-    if (err)
-      mooseError("Unable to create temporary mesh ",
-                 purpose,
-                 " directory ",
-                 std::filesystem::absolute(tmp_dir / dirname),
-                 ": ",
-                 err.message());
-  }
-
-  if (shared)
-    app.comm().broadcast(dirname);
-
-  const auto root = std::filesystem::temp_directory_path() / dirname;
-
-  return root / "mesh.cpr";
+  return std::filesystem::path(app.getOutputFileBase() + "_" + purpose + "_mesh") / "mesh.cpr";
 }
 
 std::string
@@ -174,6 +143,25 @@ writeBackupMeshFile(const std::filesystem::path & path, const std::string & cont
   file.write(contents.data(), contents.size());
 }
 
+/**
+ * Clear any stale contents at a checkpoint directory previously returned by
+ * temporaryBackupMeshPath() and recreate it empty. Must be called by rank 0 only, followed by a
+ * communicator barrier before any rank touches the directory.
+ */
+void
+resetBackupMeshDir(const std::filesystem::path & mesh_path)
+{
+  std::error_code err;
+  std::filesystem::remove_all(mesh_path.parent_path(), err);
+
+  err.clear();
+  if (!std::filesystem::create_directories(mesh_path.parent_path(), err) && err)
+    mooseError("Unable to create temporary mesh backup directory ",
+               std::filesystem::absolute(mesh_path.parent_path()),
+               ": ",
+               err.message());
+}
+
 void
 packMeshBackup(const MooseApp & app, Backup & backup)
 {
@@ -185,14 +173,22 @@ packMeshBackup(const MooseApp & app, Backup & backup)
   if (!app.meshChangedForBackup())
     return;
 
-  const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);
+  const auto mesh_path = temporaryBackupMeshPath(app, "backup");
+
+  if (app.processor_id() == 0)
+    resetBackupMeshDir(mesh_path);
+
+  // Wait for rank 0 to (re)create the checkpoint directory before every rank collectively writes
+  // into it via CheckpointIO::write().
+  app.comm().barrier();
+
   {
     libMesh::CheckpointIO io(app.feProblem().mesh().getMesh(), false);
     io.write(mesh_path.string());
   }
 
   // CheckpointIO::write() is collective; wait until all ranks have finished writing split files
-  // before each rank packs the shared checkpoint tree into its Backup.
+  // before each rank packs the checkpoint tree into its Backup.
   app.comm().barrier();
 
   for (const auto & entry : std::filesystem::recursive_directory_iterator(mesh_path))
@@ -203,7 +199,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
       backup.mesh_files.emplace_back(relative_path, readBackupMeshFile(entry.path()));
     }
 
-  // Keep the shared checkpoint tree alive until all ranks have finished reading from it.
+  // Keep the checkpoint tree alive until all ranks have finished reading from it.
   app.comm().barrier();
 
   if (app.processor_id() == 0)
@@ -219,12 +215,15 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
   if (backup.mesh_files.empty())
     return false;
 
-  const auto mesh_path = temporaryBackupMeshPath(app, "restore", true);
+  const auto mesh_path = temporaryBackupMeshPath(app, "restore");
   if (app.processor_id() == 0)
+  {
+    resetBackupMeshDir(mesh_path);
     for (const auto & [relative_path, contents] : backup.mesh_files)
       writeBackupMeshFile(mesh_path / relative_path, contents);
+  }
 
-  // Rank 0 recreates the shared checkpoint tree, then all ranks collectively read their pieces.
+  // Rank 0 recreates the checkpoint tree, then all ranks collectively read their pieces.
   app.comm().barrier();
 
   auto & mesh_base = mesh.getMesh();
@@ -245,7 +244,7 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
 
   backup.mesh_files.clear();
 
-  // Keep the shared checkpoint tree alive until every rank has completed CheckpointIO::read().
+  // Keep the checkpoint tree alive until every rank has completed CheckpointIO::read().
   app.comm().barrier();
 
   if (app.processor_id() == 0)

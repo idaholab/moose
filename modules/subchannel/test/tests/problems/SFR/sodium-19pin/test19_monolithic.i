@@ -52,14 +52,14 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   duct_HTC_closure = 'gnielinski'
-  pin_HTC_closure = 'Dittus-Boelter'
+  pin_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
   mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski

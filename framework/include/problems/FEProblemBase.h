@@ -249,6 +249,8 @@ public:
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
+  fieldScalarCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num) const;
 
   virtual bool hasVariable(const std::string & var_name) const override;
   // NOTE: hasAuxiliaryVariable defined in parent class
@@ -571,6 +573,13 @@ public:
 
   virtual Real & time() const { return _time; }
   virtual Real & timeOld() const { return _time_old; }
+  /**
+   * The time two steps back. The solution keeps this state, so a multi-step integrator can ask for
+   * it, and a functor evaluated alongside that solution has to be able to ask for the time it
+   * belongs to. Only meaningful once two steps have been taken; before that it holds the start
+   * time, which is what timeOld() does at the first step too.
+   */
+  virtual Real & timeOlder() const { return _time_older; }
   virtual int & timeStep() const { return _t_step; }
   virtual Real & dt() const { return _dt; }
   virtual Real & dtOld() const { return _dt_old; }
@@ -1694,6 +1703,22 @@ public:
    */
   bool execMultiApps(ExecFlagType type, bool auto_advance = true);
 
+  /**
+   * @return the number set for concurrent multiapp execution; greater than 1 enables running the
+   * multiapps of an 'execution_order_group' concurrently, each on its own subset of ranks
+   */
+  unsigned int numConcurrentMultiApps() const { return _num_concurrent_multiapps; }
+
+  /**
+   * Assign each multiapp that shares an 'execution_order_group' with others a disjoint subset of
+   * the ranks so that they can be solved concurrently (at most one child app per rank at a time).
+   * Note that each MultiApp may have multiple child applications, and each child app may use more
+   * than one rank.
+   * - Only does anything when 'num_concurrent_multiapps' > 1.
+   * - Must be called before the sub-apps are created.
+   */
+  void partitionConcurrentMultiApps();
+
   void finalizeMultiApps();
 
   /**
@@ -2165,6 +2190,13 @@ public:
   virtual bool updateMeshXFEM();
 
   /**
+   * Whether meshChanged() should allow the mesh to be contracted (deletes children of coarsened
+   * elements and renumbers nodes and elements). This should be overriden with care as disabling
+   * contraction may result in a substantial increase in the memory footprint of the mesh.
+   */
+  virtual bool allowMeshContractionAfterMeshChanged() const { return true; }
+
+  /**
    * Update data after a mesh change.
    * Iff intermediate_change is true, only perform updates as
    * necessary to prepare for another mesh change
@@ -2176,7 +2208,9 @@ public:
    * due to mesh refinement. \p contract_mesh deletes children of coarsened elements and renumbers
    * nodes and elements. \p clean_refinement_flags resets refinement flags such that any subsequent
    * calls to \p System::restrict_vectors or \p System::prolong_vectors before another AMR step do
-   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method
+   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method.
+   * The value of \p contract_mesh is ignored when
+   * \p FEProblemBase::allowMeshContractionAfterMeshChanged is set to false.
    */
   virtual void
   meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
@@ -3131,6 +3165,7 @@ protected:
   bool _transient;
   Real & _time;
   Real & _time_old;
+  Real & _time_older;
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
@@ -3294,6 +3329,9 @@ protected:
 
   /// Transfers executed just before MultiApps to transfer data between them
   ExecuteMooseObjectWarehouse<Transfer> _between_multi_app_transfers;
+
+  /// Number of concurrent applications being solved at the same time
+  const unsigned int _num_concurrent_multiapps;
 
   /// A map of objects that consume random numbers
   std::map<std::string, std::unique_ptr<RandomData>> _random_data_objects;

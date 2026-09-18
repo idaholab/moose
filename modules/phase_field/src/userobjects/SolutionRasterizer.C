@@ -59,6 +59,13 @@ SolutionRasterizer::initialSetup()
   // initialize parent class
   SolutionUserObject::initialSetup();
 
+  if (!isVariableScalarValued(_variable))
+    paramError("variable",
+               "The imported variable '",
+               _variable,
+               "' is vector-valued, but SolutionRasterizer supports only scalar-valued imported "
+               "variables.");
+
   // open input XYZ file
   std::ifstream stream_in(_xyz_input.c_str());
 
