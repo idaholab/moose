@@ -18,7 +18,7 @@ MFEMProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
-  params.addParam<std::string>("device", "Run app on the chosen device.");
+  params.addParam<std::string>("device", "", "Run app on the chosen device.");
   params.addParam<bool>("gpu_aware_mpi", false, "Use GPU-aware MPI.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy");
   params.addParam<MooseEnum>("assembly_level", assembly_levels, "Matrix assembly level.");
@@ -32,15 +32,7 @@ MFEMProblemSolve::MFEMProblemSolve(
     _mfem_problem(dynamic_cast<MFEMProblem &>(_problem)),
     _problem_operators(problem_operators)
 {
-  if (const auto compute_device = _app.getComputeDevice())
-    _app.setMFEMDevice(
-        *compute_device, getParam<bool>("gpu_aware_mpi"), Moose::PassKey<MFEMProblemSolve>());
-  else
-    _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
-                       : _app.isUltimateMaster() ? "cpu"
-                                                 : "",
-                       getParam<bool>("gpu_aware_mpi"),
-                       Moose::PassKey<MFEMProblemSolve>());
+  _app.setMFEMDevice(getParam<std::string>("device"), getParam<bool>("gpu_aware_mpi"));
 }
 
 bool
