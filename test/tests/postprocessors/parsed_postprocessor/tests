@@ -1,6 +1,6 @@
 [Tests]
   design = 'ParsedPostprocessor.md'
-  issues = '#3447 #5954 #17901 #30689'
+  issues = '#3447 #5954 #17901 #30689 #33783'
   [test]
     type = 'CSVDiff'
     input = 'parsed_pp.i'
@@ -19,5 +19,16 @@
     input = pp_symbols_invalid_length.i
     expect_err = 'pp_symbols must be the same length as pp_names.'
     requirement = 'The system shall detect when the given number of input symbols does not match the number of postprocessor names and will report an error.'
+  []
+  [pp_controllable]
+    type = CSVDiff
+    input = parsed_pp_control.i
+    csvdiff = parsed_pp_control_out.csv
+    command_proxy = parsed_pp_control.py
+    required_python_packages = requests
+    recover = false
+    restep = false
+    requirement = 'The system shall be able to control a parsed postprocessor expression via a REST API.'
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 []
