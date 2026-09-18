@@ -462,8 +462,7 @@ RhieChowMassFlux::finalizePressureCorrector()
 void
 RhieChowMassFlux::initPressureGradient()
 {
-  _pressure_system->updateFVGradient(basePressureGradientField());
-  _pressure_system->updateFVGradient(pressureGradientField());
+  _pressure_system->computeGradients();
 }
 
 void

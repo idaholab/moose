@@ -11,6 +11,7 @@
 #include "GeneralUserObject.h"
 
 class RhieChowMassFlux;
+class LinearFVGradientReader;
 
 /// Exercises Rhie-Chow reconstruction sequencing for validation tests.
 class TestRhieChowMassFluxSequence : public GeneralUserObject
@@ -27,4 +28,5 @@ public:
 private:
   RhieChowMassFlux & _rhie_chow;
   const MooseEnum _operation;
+  const LinearFVGradientReader * _gradient_reader;
 };

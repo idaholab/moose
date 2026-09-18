@@ -54,17 +54,25 @@
     type = 'CSVDiff'
     input = reconstructed-gradient-extra-reader.i
     csvdiff = reconstructed-gradient-extra-reader_out_solution_0001.csv
-    # The pressure-flux BC registers the default gg reader while momentum uses reconstructed.
+    # The pressure-flux BC registers the default gg reader while momentum uses reconstructed. The
+    # test object clears that reader and verifies that pressure-gradient initialization refreshes it.
     cli_args = "pressure_gradient_method=gg "
                "LinearFVKernels/u_pressure/gradient_method=reconstructed "
                "LinearFVKernels/v_pressure/gradient_method=reconstructed "
                "LinearFVBCs/inactive='' "
+               "UserObjects/gradient_init_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/gradient_init_test/rhie_chow_user_object=rc "
+               "UserObjects/gradient_init_test/operation=init_pressure_gradients "
+               "UserObjects/gradient_init_test/pressure=pressure "
+               "UserObjects/gradient_init_test/gradient_method=gg "
+               "UserObjects/gradient_init_test/execute_on=TIMESTEP_END "
                "Executioner/num_iterations=1 Executioner/continue_on_max_its=true "
                "VectorPostprocessors/solution/variable=ordinary_pressure_gradient_x "
                "Outputs/exodus=false Outputs/csv=true"
-    requirement = "The SIMPLE pressure corrector shall refresh an additional ordinary pressure "
-                  "gradient reader after installing the relaxed pressure solution when the "
-                  "momentum coupling uses reconstructed pressure gradients."
+    allow_test_objects = true
+    requirement = "The SIMPLE solve shall refresh an additional ordinary pressure-gradient reader "
+                  "during initialization and after installing the relaxed pressure solution when "
+                  "the momentum coupling uses reconstructed pressure gradients."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'

@@ -131,8 +131,8 @@ public:
    */
   void finalizePressureCorrector();
 
-  /// Compute the base and coupling pressure gradients once, before the first momentum predictor
-  /// of a SIMPLE iteration sequence has anything to read.
+  /// Compute every registered pressure gradient once, before the first momentum predictor of a
+  /// SIMPLE iteration sequence has anything to read.
   void initPressureGradient();
 
   virtual void meshChanged() override;
