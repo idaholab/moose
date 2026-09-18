@@ -21,9 +21,14 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/vector_value.h"
+
+#include "metaphysicl/raw_type.h"
 
 // C++ includes
 #include <array>
+#include <cmath>
+#include <functional>
 #include <optional>
 #include <set>
 #include <memory>
@@ -38,6 +43,61 @@ using libMesh::CompareDofObjectsByID;
 
 typedef boundary_id_type BoundaryID;
 typedef subdomain_id_type SubdomainID;
+
+namespace Moose
+{
+namespace Mortar
+{
+/**
+ * Construct the two tangent vectors used by mortar from a unit normal. The template keeps the
+ * Real-valued and AD contact geometry on the same Householder chart and therefore gives them
+ * identical values.
+ *
+ * The returned vectors are the reflections of two Cartesian basis vectors, so together with the
+ * normal they form an orthonormal frame everywhere, including at the pole handled below. Callers
+ * may use them directly and must not renormalize.
+ * See Lopes, Silva, and Ambrosio, Computer-Aided Design 45(3), 2013, pp. 683-694.
+ */
+template <typename Vector>
+std::array<Vector, 2>
+householderTangents(const Vector & normal)
+{
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(normal.norm()), 1),
+              "The input nodal normal should have unity norm");
+
+  const Vector h_vector(normal(0) + 1.0, normal(1), normal(2));
+
+  // The h = n + e_x chart is singular at (-1, 0, 0). Near that pole, hand over to the
+  // complementary chart built on h2 = n - e_x, whose own singularity is at (1, 0, 0) and so
+  // does not coincide with this branch. h2 alone has the opposite handedness of the primary
+  // chart's frame [n, t1, t2] (det[n, t1, t2] = -1 rather than +1), so the second tangent is
+  // negated to restore it. At n = (-1, 0, 0) itself this reproduces the primary chart's old
+  // constant pole values exactly, {(0, 1, 0), (0, 0, -1)}, but now with correct nonzero
+  // derivatives instead of a differentiated tangency of zero.
+  if (std::abs(MetaPhysicL::raw_value(h_vector(0))) < TOLERANCE)
+  {
+    const Vector h2_vector(normal(0) - 1.0, normal(1), normal(2));
+    const auto h2_squared = h2_vector.norm_sq();
+    return {{Vector(-2.0 * h2_vector(0) * h2_vector(1) / h2_squared,
+                    1.0 - 2.0 * h2_vector(1) * h2_vector(1) / h2_squared,
+                    -2.0 * h2_vector(1) * h2_vector(2) / h2_squared),
+             Vector(2.0 * h2_vector(0) * h2_vector(2) / h2_squared,
+                    2.0 * h2_vector(1) * h2_vector(2) / h2_squared,
+                    2.0 * h2_vector(2) * h2_vector(2) / h2_squared - 1.0)}};
+  }
+
+  // Squared norm directly, rather than squaring the norm, so that no derivative is propagated
+  // through a square root that the squaring then undoes.
+  const auto h_squared = h_vector.norm_sq();
+  return {{Vector(-2.0 * h_vector(0) * h_vector(1) / h_squared,
+                  1.0 - 2.0 * h_vector(1) * h_vector(1) / h_squared,
+                  -2.0 * h_vector(1) * h_vector(2) / h_squared),
+           Vector(-2.0 * h_vector(0) * h_vector(2) / h_squared,
+                  -2.0 * h_vector(1) * h_vector(2) / h_squared,
+                  1.0 - 2.0 * h_vector(2) * h_vector(2) / h_squared)}};
+}
+}
+}
 
 /**
  * Parent-face reference coordinates associated with the vertices of one triangular mortar segment.
@@ -221,6 +281,17 @@ public:
   getNodalTangents(const Elem & secondary_elem) const;
 
   /**
+   * Build the normalized JxW-weighted secondary nodal normals from AD nodal coordinates.
+   *
+   * The coordinate functor combines the node's displacement degrees of freedom with the coordinate
+   * snapshot used to compute the stored nodal geometry. This keeps residual values and their
+   * derivatives evaluated at the same geometry state.
+   */
+  void
+  computeADNodalNormals(const std::function<ADPoint(const Node &, const Point &)> & coordinate,
+                        std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const;
+
+  /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
    * @return The map from secondary interior parent nodes to lower dimensional nodes
    */
@@ -401,6 +472,11 @@ private:
    */
   void buildCouplingInformation();
 
+  /**
+   * Send inactive node IDs to their owning processors so the corresponding LM DoFs can be zeroed.
+   */
+  void sendInactiveNodesToOwners(std::unordered_set<dof_id_type> & inactive_node_ids) const;
+
   /// The Moose app
   MooseApp & _app;
 
@@ -488,6 +564,9 @@ private:
   /// (Householder approach).
   std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
 
+  /// Coordinates used to construct the stored nodal normals
+  std::unordered_map<const Node *, Point> _nodal_geometry_coordinate_snapshot;
+
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
@@ -522,12 +601,6 @@ private:
    */
   void projectPrimaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
                                      SubdomainID lower_dimensional_secondary_subdomain_id);
-
-  /**
-   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
-   */
-  void
-  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
   /**
    * Process aligned nodes
