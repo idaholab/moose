@@ -788,7 +788,7 @@ LinearAssemblySegregatedSolve::solve()
       _rc_uo->initPressureGradient();
 
     // Capture the lagged velocity and coupling pressure gradients before momentum assembly.
-    if (_should_solve_momentum && _should_solve_pressure && _rc_uo)
+    if (_should_solve_momentum && _should_solve_pressure)
       _rc_uo->prepareMomentumPredictor();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;

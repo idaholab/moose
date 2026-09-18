@@ -854,7 +854,7 @@ RhieChowMassFlux::populateCouplingFunctors(
   for (const auto dim_i : index_range(raw_Ainv))
     ainv_reader.emplace_back(*raw_Ainv[dim_i]);
 
-  // We loop through the faces and populate the coupling fields (face H/A and 1/H)
+  // We loop through the faces and populate the coupling fields (face H/A and 1/A)
   for (auto & fi : _flow_face_info)
   {
     Real face_rho = 0;
