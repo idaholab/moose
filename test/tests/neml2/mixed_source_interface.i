@@ -83,6 +83,8 @@
 []
 
 [NEML2]
+  eager = true
+
   input = 'models/mixed_cohesive_model.i'
   device = 'cpu'
 

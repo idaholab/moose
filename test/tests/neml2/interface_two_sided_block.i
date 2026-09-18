@@ -61,7 +61,6 @@ x0_double = '${fparse 2*x0}'
   input = 'approx_kinematics_neml2_1E3.i'
   [all]
     model = 'model'
-    verbose = true
     device = 'cpu'
 
     derivatives = 'neml2_cauchy_stress spatial_deformation_gradient_increment'

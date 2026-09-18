@@ -9,6 +9,11 @@
 
 #ifdef NEML2_ENABLED
 
+// NEML2 v2->v3 migration: superseded by the Python-native model in
+// test/tests/neml2/models/test_models.py (loaded via the NEML2Action 'load' parameter). NEML2 v3
+// has no C++ model surface, so this v2 implementation is guarded out.
+#if 0
+
 #pragma once
 
 #include "neml2/models/Model.h"
@@ -34,5 +39,7 @@ protected:
 };
 
 } // namespace neml2
+
+#endif // 0
 
 #endif // NEML2_ENABLED

@@ -64,6 +64,7 @@
 []
 
 [NEML2]
+  eager = true
   input = 'models/linear_cohesive_model.i'
   device = 'cpu'
 

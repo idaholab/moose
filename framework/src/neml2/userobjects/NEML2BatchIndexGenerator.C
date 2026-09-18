@@ -74,9 +74,6 @@ NEML2BatchIndexGenerator::executeOnElement()
 void
 NEML2BatchIndexGenerator::executeOnBoundary()
 {
-  if (!NEML2Utils::shouldCompute(_fe_problem))
-    return;
-
   if (!_outdated)
     return;
 
@@ -103,9 +100,6 @@ NEML2BatchIndexGenerator::executeOnBoundary()
 void
 NEML2BatchIndexGenerator::executeOnInterface()
 {
-  if (!NEML2Utils::shouldCompute(_fe_problem))
-    return;
-
   if (!_outdated)
     return;
 

@@ -107,3 +107,35 @@ class NEML2TestModel(Model):
             output=product_out,
         )
         return sum_out, product_out, {**v_sum, **v_product}
+
+
+@register_neml2_object("NEML2TestModel2")
+class NEML2TestModel2(Model):
+    r"""``s = u * u - 0.1``.
+    
+    One scalar input (``u``), one scalar output (``s``).
+    """
+
+    hit = HitSchema(
+        input("u", Scalar, "Input variable u"),
+        output("s", Scalar, "Output variable s"),
+    )
+
+    def forward(  # type: ignore[override]
+        self,
+        u: Scalar,
+        *nl_params: Scalar,
+        v: ChainRuleDict | None = None,
+    ):
+        s_out = u * u - 0.1
+
+        if v is None:
+            return s_out
+
+        v_s = self.apply_chain_rule(
+            v,
+            "s",
+            {"u": lambda V: (2.0 * u) * V},
+            output=s_out,
+        )
+        return s_out, {**v_s}
