@@ -72,7 +72,7 @@ which understands the following syntax:
 Coupled non-derivative material properties (such as `F` or `F(c,phi)`) are required to
 exist: an error is thrown if they are never supplied. This can be relaxed with
 [!param](/Materials/DerivativeParsedMaterial/error_on_missing_material_properties), which
-makes them default to zero instead. Requested derivative properties (the `D[u,x]` syntax)
+makes them default to zero instead when the parameter is set to `false`. Requested derivative properties (the `D[u,x]` syntax)
 are always optional and default to zero when they do not exist, since a derivative may
 legitimately evaluate to zero and never be declared.
 

@@ -153,33 +153,33 @@
   []
 
   [postprocessor_coupling]
-    requirement = 'The system shall be capable of coupling postprocessor values in'
+    requirement = 'The system shall be capable of coupling postprocessor values in parsed expressions used to compute'
     [parsed_material]
       type = 'Exodiff'
       input = postprocessors.i
       exodiff = 'postprocessors_out.e'
-      detail = 'ParsedMaterial'
+      detail = 'regular material properties,'
     []
     [derivative_parsed_material]
       type = 'Exodiff'
       input = postprocessors.i
       exodiff = 'postprocessors_out.e'
       cli_args = 'Materials/pp/type=DerivativeParsedMaterial'
-      detail = 'DerivativeParsedMaterialParsedMaterial'
+      detail = 'regular material properties and their derivatives with regards to variables,'
     []
     [ad_parsed_material]
       type = 'Exodiff'
       input = postprocessors.i
       exodiff = 'postprocessors_out.e'
       cli_args = 'Materials/pp/type=ADParsedMaterial'
-      detail = 'ADParsedMaterial'
+      detail = 'material properties with automatic differentation,'
     []
     [ad_derivative_parsed_material]
       type = 'Exodiff'
       input = postprocessors.i
       exodiff = 'postprocessors_out.e'
       cli_args = 'Materials/pp/type=ADDerivativeParsedMaterial'
-      detail = 'ADDerivativeParsedMaterial'
+      detail = 'material properties with automatic differentiation as well as their derivatives with regards to variables.'
     []
   []
 
@@ -336,21 +336,21 @@
   []
 
   [required_property]
-    requirement = 'The system shall require explicitly coupled non-derivative material properties to exist'
+    requirement = 'The system shall require explicitly coupled non-derivative material properties to exist in parsed expressions used to compute'
     issues = '#18917 #32284'
     [parsed_material]
       type = RunException
       input = required_property.i
       cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names=Q'
       expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
-      detail = 'in ParsedMaterials,'
+      detail = 'material properties,'
     []
     [derivative_parsed_material]
       type = RunException
       input = required_property.i
       cli_args = 'Materials/prime/type=DerivativeParsedMaterial Materials/prime/material_property_names=Q'
       expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
-      detail = 'in DerivativeParsedMaterials,'
+      detail = 'material properties and their derivatives with regards to solver variables,'
     []
     [order_independent_missing_first]
       type = RunException
@@ -370,7 +370,7 @@
       type = RunApp
       input = required_property.i
       cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names=Q'
-      detail = 'but provide for a user override to default non-existing properties to zero.'
+      detail = 'but provide for a user a means to default non-existing properties to zero.'
     []
   []
 
