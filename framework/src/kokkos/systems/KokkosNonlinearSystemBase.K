@@ -266,10 +266,28 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
   // rebuilding the vector, keeps its ghost scatter and its GHOSTED registration with libMesh, and
   // makes the staging copy below a device-to-device VecCopy when the caller's direction vector is
   // itself device-resident, instead of a round trip through host memory.
+  //
+  // Skip the conversion when the vector is already a CUDA/HIP-native ("cupm") type, e.g. because
+  // '-vec_type cuda' was requested. PETSc's cupm VecCopy dispatches on the source vector's type,
+  // and its CUDA/HIP implementation only recognizes a CPU or cupm-typed destination's offload
+  // state, so copying a cupm-typed caller vector into a forcibly-Kokkos-typed destination aborts
+  // with "Incompatible offload mask". A cupm vector is already device-resident, so the copy below
+  // is already device-to-device without any conversion here.
   {
     auto * const petsc_direction =
         libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_direction);
-    LibmeshPetscCallA(comm().get(), VecSetType(petsc_direction->vec(), VECKOKKOS));
+
+    PetscBool is_cupm;
+    LibmeshPetscCallA(comm().get(),
+                      PetscObjectTypeCompareAny((PetscObject)petsc_direction->vec(),
+                                                 &is_cupm,
+                                                 VECSEQCUDA,
+                                                 VECMPICUDA,
+                                                 VECSEQHIP,
+                                                 VECMPIHIP,
+                                                 ""));
+    if (!is_cupm)
+      LibmeshPetscCallA(comm().get(), VecSetType(petsc_direction->vec(), VECKOKKOS));
   }
 #endif
 
