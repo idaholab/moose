@@ -583,11 +583,11 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "PiecewiseFunction",
                                                "TimeRampFunction"},
                                VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"},
+                               MATRIX_FUNCS = {"MFEMPerfectlyMatchedLayerFunction"},
                                MFEM_FUNCS = {"MFEMParsedFunction",
                                              "MFEMCoordinateTransformations",
                                              "MFEMScalarQuadratureFunction",
                                              "MFEMVectorQuadratureFunction"};
-                               MATRIX_FUNCS = {"MFEMPerfectlyMatchedLayerFunction"};
 
 void
 MFEMProblem::addFunction(const std::string & type,
