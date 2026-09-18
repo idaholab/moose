@@ -10,11 +10,13 @@
 #include "PorousFlowPorosity.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosity);
+registerMooseObject("PorousFlowApp", ADPorousFlowPorosity);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPorosity::validParams()
+PorousFlowPorosityTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowPorosityExponentialBase::validParams();
+  InputParameters params = PorousFlowPorosityExponentialBaseTempl<is_ad>::validParams();
   params.addParam<bool>(
       "mechanical", false, "If true, porosity will be a function of total volumetric strain");
   params.addParam<bool>(
@@ -58,20 +60,24 @@ PorousFlowPorosity::validParams()
   return params;
 }
 
-PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
-  : PorousFlowPorosityExponentialBase(parameters),
+template <bool is_ad>
+PorousFlowPorosityTempl<is_ad>::PorousFlowPorosityTempl(const InputParameters & parameters)
+  : PorousFlowPorosityExponentialBaseTempl<is_ad>(parameters),
 
-    _mechanical(getParam<bool>("mechanical")),
-    _fluid(getParam<bool>("fluid")),
-    _thermal(getParam<bool>("thermal")),
-    _chemical(getParam<bool>("chemical")),
+    _mechanical(this->template getParam<bool>("mechanical")),
+    _fluid(this->template getParam<bool>("fluid")),
+    _thermal(this->template getParam<bool>("thermal")),
+    _chemical(this->template getParam<bool>("chemical")),
     _phi0(coupledValue("porosity_zero")),
-    _biot(getParam<Real>("biot_coefficient")),
-    _exp_coeff(isParamValid("thermal_expansion_coeff") ? getParam<Real>("thermal_expansion_coeff")
-                                                       : 0.0),
-    _solid_bulk(isParamValid("solid_bulk") ? &(getFunctor<Real>("solid_bulk")) : nullptr),
-    _coeff(isParamValid("biot_coefficient_prime") ? (getParam<Real>("biot_coefficient_prime") - 1.0)
-                                                  : (_biot - 1.0)),
+    _biot(this->template getParam<Real>("biot_coefficient")),
+    _exp_coeff(this->isParamValid("thermal_expansion_coeff")
+                   ? this->template getParam<Real>("thermal_expansion_coeff")
+                   : 0.0),
+    _solid_bulk(this->isParamValid("solid_bulk") ? &(this->template getFunctor<Real>("solid_bulk"))
+                                                 : nullptr),
+    _coeff(this->isParamValid("biot_coefficient_prime")
+               ? (this->template getParam<Real>("biot_coefficient_prime") - 1.0)
+               : (_biot - 1.0)),
 
     _t_reference(nodalOrQpValue("reference_temperature")),
     _p_reference(nodalOrQpValue("reference_porepressure")),
@@ -79,86 +85,111 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
     _c_reference(_num_c_ref),
     _num_initial_c(coupledComponents("initial_mineral_concentrations")),
     _initial_c(_num_initial_c),
-    _c_weights(isParamValid("chemical_weights") ? getParam<std::vector<Real>>("chemical_weights")
-                                                : std::vector<Real>(_num_c_ref, 1.0)),
+    _c_weights(this->isParamValid("chemical_weights")
+                   ? this->template getParam<std::vector<Real>>("chemical_weights")
+                   : std::vector<Real>(_num_c_ref, 1.0)),
 
-    _porosity_old(_chemical ? (_nodal_material
-                                   ? &getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")
-                                   : &getMaterialPropertyOld<Real>("PorousFlow_porosity_qp"))
-                            : nullptr),
-    _vol_strain_qp(_mechanical ? &getMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")
+    _porosity_old(
+        _chemical ? (_nodal_material
+                         ? &this->template getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")
+                         : &this->template getMaterialPropertyOld<Real>("PorousFlow_porosity_qp"))
+                  : nullptr),
+    _vol_strain_qp(_mechanical ? &this->template getGenericMaterialProperty<Real, is_ad>(
+                                     "PorousFlow_total_volumetric_strain_qp")
                                : nullptr),
-    _dvol_strain_qp_dvar(_mechanical ? &getMaterialProperty<std::vector<RealGradient>>(
-                                           "dPorousFlow_total_volumetric_strain_qp_dvar")
-                                     : nullptr),
+    _dvol_strain_qp_dvar((_mechanical && !is_ad)
+                             ? &this->template getMaterialProperty<std::vector<RealGradient>>(
+                                   "dPorousFlow_total_volumetric_strain_qp_dvar")
+                             : nullptr),
 
-    _pf(_fluid ? (_nodal_material
-                      ? &getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_nodal")
-                      : &getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp"))
+    _pf(_fluid ? (_nodal_material ? &this->template getGenericMaterialProperty<Real, is_ad>(
+                                        "PorousFlow_effective_fluid_pressure_nodal")
+                                  : &this->template getGenericMaterialProperty<Real, is_ad>(
+                                        "PorousFlow_effective_fluid_pressure_qp"))
                : nullptr),
-    _dpf_dvar(_fluid ? (_nodal_material ? &getMaterialProperty<std::vector<Real>>(
-                                              "dPorousFlow_effective_fluid_pressure_nodal_dvar")
-                                        : &getMaterialProperty<std::vector<Real>>(
-                                              "dPorousFlow_effective_fluid_pressure_qp_dvar"))
-                     : nullptr),
+    _dpf_dvar((_fluid && !is_ad)
+                  ? (_nodal_material ? &this->template getMaterialProperty<std::vector<Real>>(
+                                           "dPorousFlow_effective_fluid_pressure_nodal_dvar")
+                                     : &this->template getMaterialProperty<std::vector<Real>>(
+                                           "dPorousFlow_effective_fluid_pressure_qp_dvar"))
+                  : nullptr),
 
     _temperature(_thermal
-                     ? (_nodal_material ? &getMaterialProperty<Real>("PorousFlow_temperature_nodal")
-                                        : &getMaterialProperty<Real>("PorousFlow_temperature_qp"))
+                     ? (_nodal_material ? &this->template getGenericMaterialProperty<Real, is_ad>(
+                                              "PorousFlow_temperature_nodal")
+                                        : &this->template getGenericMaterialProperty<Real, is_ad>(
+                                              "PorousFlow_temperature_qp"))
                      : nullptr),
-    _dtemperature_dvar(
-        _thermal
-            ? (_nodal_material
-                   ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")
-                   : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar"))
-            : nullptr),
+    _dtemperature_dvar((_thermal && !is_ad)
+                           ? (_nodal_material
+                                  ? &this->template getMaterialProperty<std::vector<Real>>(
+                                        "dPorousFlow_temperature_nodal_dvar")
+                                  : &this->template getMaterialProperty<std::vector<Real>>(
+                                        "dPorousFlow_temperature_qp_dvar"))
+                           : nullptr),
 
-    _mineral_conc_old(_chemical ? (_nodal_material ? &getMaterialPropertyOld<std::vector<Real>>(
-                                                         "PorousFlow_mineral_concentration_nodal")
-                                                   : &getMaterialPropertyOld<std::vector<Real>>(
-                                                         "PorousFlow_mineral_concentration_qp"))
+    _mineral_conc_old(_chemical ? (_nodal_material
+                                       ? &this->template getMaterialPropertyOld<std::vector<Real>>(
+                                             "PorousFlow_mineral_concentration_nodal")
+                                       : &this->template getMaterialPropertyOld<std::vector<Real>>(
+                                             "PorousFlow_mineral_concentration_qp"))
                                 : nullptr),
-    _reaction_rate(_chemical ? (_nodal_material ? &getMaterialProperty<std::vector<Real>>(
-                                                      "PorousFlow_mineral_reaction_rate_nodal")
-                                                : &getMaterialProperty<std::vector<Real>>(
-                                                      "PorousFlow_mineral_reaction_rate_qp"))
-                             : nullptr),
-    _dreaction_rate_dvar(_chemical ? (_nodal_material
-                                          ? &getMaterialProperty<std::vector<std::vector<Real>>>(
-                                                "dPorousFlow_mineral_reaction_rate_nodal_dvar")
-                                          : &getMaterialProperty<std::vector<std::vector<Real>>>(
-                                                "dPorousFlow_mineral_reaction_rate_qp_dvar"))
-                                   : nullptr),
+    _reaction_rate(_chemical
+                       ? (_nodal_material ? &this->template getMaterialProperty<std::vector<Real>>(
+                                                "PorousFlow_mineral_reaction_rate_nodal")
+                                          : &this->template getMaterialProperty<std::vector<Real>>(
+                                                "PorousFlow_mineral_reaction_rate_qp"))
+                       : nullptr),
+    _dreaction_rate_dvar(
+        _chemical ? (_nodal_material
+                         ? &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                               "dPorousFlow_mineral_reaction_rate_nodal_dvar")
+                         : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                               "dPorousFlow_mineral_reaction_rate_qp_dvar"))
+                  : nullptr),
     _aq_ph(_dictator.aqueousPhaseNumber()),
     _saturation(_chemical
-                    ? (_nodal_material
-                           ? &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
-                           : &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp"))
+                    ? (_nodal_material ? &this->template getMaterialProperty<std::vector<Real>>(
+                                             "PorousFlow_saturation_nodal")
+                                       : &this->template getMaterialProperty<std::vector<Real>>(
+                                             "PorousFlow_saturation_qp"))
                     : nullptr),
-    _dsaturation_dvar(_chemical
-                          ? (_nodal_material ? &getMaterialProperty<std::vector<std::vector<Real>>>(
-                                                   "dPorousFlow_saturation_nodal_dvar")
-                                             : &getMaterialProperty<std::vector<std::vector<Real>>>(
-                                                   "dPorousFlow_saturation_qp_dvar"))
-                          : nullptr)
+    _dsaturation_dvar(
+        _chemical ? (_nodal_material
+                         ? &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                               "dPorousFlow_saturation_nodal_dvar")
+                         : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                               "dPorousFlow_saturation_qp_dvar"))
+                  : nullptr)
 {
-  if (_thermal && !isParamValid("thermal_expansion_coeff"))
-    mooseError("PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff");
+  // PorousFlowAqueousPreDisChemistry and PorousFlowAqueousPreDisMineral are not templated on is_ad,
+  // so the mineral concentration and reaction rate consumed below exist only as non-AD properties
+  if constexpr (is_ad)
+    if (_chemical)
+      this->mooseError(
+          "ADPorousFlowPorosity does not support chemical=true: the aqueous "
+          "precipitation/dissolution materials are not AD.  Use the non-AD PorousFlowPorosity for "
+          "chemistry-coupled porosity");
+
+  if (_thermal && !this->isParamValid("thermal_expansion_coeff"))
+    this->mooseError(
+        "PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff");
   if (_fluid && !_solid_bulk)
-    mooseError("PorousFlowPorosity: When fluid=true you must provide a solid_bulk");
+    this->mooseError("PorousFlowPorosity: When fluid=true you must provide a solid_bulk");
   if (_chemical && _num_c_ref != _dictator.numAqueousKinetic())
-    mooseError("PorousFlowPorosity: When chemical=true you must provide the reference_chemistry "
-               "values.  The Dictator proclaims there should be ",
-               _dictator.numAqueousKinetic(),
-               " of these");
+    this->mooseError(
+        "PorousFlowPorosity: When chemical=true you must provide the reference_chemistry "
+        "values.  The Dictator proclaims there should be ",
+        _dictator.numAqueousKinetic(),
+        " of these");
   if (_chemical && _num_initial_c != _dictator.numAqueousKinetic())
-    mooseError("PorousFlowPorosity: When chemical=true you must provide the "
-               "initial_mineral_concentrations.  "
-               "The Dictator proclaims there should be ",
-               _dictator.numAqueousKinetic(),
-               " of these");
+    this->mooseError("PorousFlowPorosity: When chemical=true you must provide the "
+                     "initial_mineral_concentrations.  "
+                     "The Dictator proclaims there should be ",
+                     _dictator.numAqueousKinetic(),
+                     " of these");
   if (_chemical && _c_weights.size() != _dictator.numAqueousKinetic())
-    mooseError(
+    this->mooseError(
         "PorousFlowPorosity: When chemical=true you must provde the correct number of "
         "chemical_weights (which the Dictator knows is ",
         _dictator.numAqueousKinetic(),
@@ -171,8 +202,9 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
   }
 }
 
-Real
-PorousFlowPorosity::atNegInfinityQp() const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowPorosityTempl<is_ad>::atNegInfinityQp() const
 {
   /*
    *
@@ -185,7 +217,7 @@ PorousFlowPorosity::atNegInfinityQp() const
    * Material: PorousFlowAqueousPreDisMineral
    *
    */
-  Real result = _biot;
+  GenericReal<is_ad> result = _biot;
   if (_chemical)
   {
     if (_t_step == 0 && !_app.isRestarting())
@@ -200,8 +232,9 @@ PorousFlowPorosity::atNegInfinityQp() const
   return result;
 }
 
+template <bool is_ad>
 Real
-PorousFlowPorosity::datNegInfinityQp(unsigned pvar) const
+PorousFlowPorosityTempl<is_ad>::datNegInfinityQp(unsigned pvar) const
 {
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
@@ -212,11 +245,12 @@ PorousFlowPorosity::datNegInfinityQp(unsigned pvar) const
   return result;
 }
 
-Real
-PorousFlowPorosity::atZeroQp() const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowPorosityTempl<is_ad>::atZeroQp() const
 {
   // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
-  Real result = _phi0[0];
+  GenericReal<is_ad> result = _phi0[0];
   if (_chemical)
   {
     if (_t_step == 0 && !_app.isRestarting())
@@ -232,8 +266,9 @@ PorousFlowPorosity::atZeroQp() const
   return result;
 }
 
+template <bool is_ad>
 Real
-PorousFlowPorosity::datZeroQp(unsigned pvar) const
+PorousFlowPorosityTempl<is_ad>::datZeroQp(unsigned pvar) const
 {
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
@@ -244,10 +279,11 @@ PorousFlowPorosity::datZeroQp(unsigned pvar) const
   return result;
 }
 
-Real
-PorousFlowPorosity::decayQp() const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowPorosityTempl<is_ad>::decayQp() const
 {
-  Real result = 0.0;
+  GenericReal<is_ad> result = 0.0;
 
   if (_thermal)
     result += _exp_coeff * ((*_temperature)[_qp] - _t_reference[_qp]);
@@ -257,7 +293,7 @@ PorousFlowPorosity::decayQp() const
     Real solid_bulk;
     // Using Qp 0 can leverage the functor caching
     // TODO: Find a way to effectively use subdomain-constant-ness
-    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    unsigned int qp_used = (_constant_option == Material::ConstantTypeEnum::NONE) ? _qp : 0;
     if (_nodal_material)
     {
       const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
@@ -276,7 +312,7 @@ PorousFlowPorosity::decayQp() const
       solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
     }
     if (solid_bulk <= 0)
-      mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero");
+      this->mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero");
     result += _coeff / solid_bulk * ((*_pf)[_qp] - _p_reference[_qp]);
   }
 
@@ -294,8 +330,9 @@ PorousFlowPorosity::decayQp() const
   return result;
 }
 
+template <bool is_ad>
 Real
-PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
+PorousFlowPorosityTempl<is_ad>::ddecayQp_dvar(unsigned pvar) const
 {
   Real result = 0.0;
 
@@ -307,7 +344,7 @@ PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
     Real solid_bulk;
     // Using Qp 0 can leverage the functor caching
     // TODO: Find a way to effectively use subdomain-constant-ness
-    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    unsigned int qp_used = (_constant_option == Material::ConstantTypeEnum::NONE) ? _qp : 0;
     if (_nodal_material)
     {
       const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
@@ -326,15 +363,16 @@ PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
       solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
     }
     if (solid_bulk <= 0)
-      mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero.");
+      this->mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero.");
     result += _coeff / solid_bulk * (*_dpf_dvar)[_qp][pvar];
   }
 
   return result;
 }
 
+template <bool is_ad>
 RealGradient
-PorousFlowPorosity::ddecayQp_dgradvar(unsigned pvar) const
+PorousFlowPorosityTempl<is_ad>::ddecayQp_dgradvar(unsigned pvar) const
 {
   RealGradient result(0.0, 0.0, 0.0);
   if (_mechanical)
@@ -345,3 +383,6 @@ PorousFlowPorosity::ddecayQp_dgradvar(unsigned pvar) const
   }
   return result;
 }
+
+template class PorousFlowPorosityTempl<false>;
+template class PorousFlowPorosityTempl<true>;

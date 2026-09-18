@@ -17,19 +17,20 @@
  *    + coeff * (effective_pressure - reference_pressure)
  *    + thermal_exp_coeff * (temperature - reference_temperature))
  */
-class PorousFlowPorosity : public PorousFlowPorosityExponentialBase
+template <bool is_ad>
+class PorousFlowPorosityTempl : public PorousFlowPorosityExponentialBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPorosity(const InputParameters & parameters);
+  PorousFlowPorosityTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real atNegInfinityQp() const override;
+  virtual GenericReal<is_ad> atNegInfinityQp() const override;
   virtual Real datNegInfinityQp(unsigned pvar) const override;
-  virtual Real atZeroQp() const override;
+  virtual GenericReal<is_ad> atZeroQp() const override;
   virtual Real datZeroQp(unsigned pvar) const override;
-  virtual Real decayQp() const override;
+  virtual GenericReal<is_ad> decayQp() const override;
   virtual Real ddecayQp_dvar(unsigned pvar) const override;
   virtual RealGradient ddecayQp_dgradvar(unsigned pvar) const override;
 
@@ -85,20 +86,20 @@ protected:
   /// Old value of porosity
   const MaterialProperty<Real> * const _porosity_old;
 
-  /// Strain (first const means we never want to dereference and change the value, second means we'll always be pointing to the same address after initialization (like a reference))
-  const MaterialProperty<Real> * const _vol_strain_qp;
+  /// Strain
+  const GenericMaterialProperty<Real, is_ad> * const _vol_strain_qp;
 
-  /// d(strain)/(dvar) (first const means we never want to dereference and change the value, second means we'll always be pointing to the same address after initialization (like a reference))
+  /// d(strain)/(dvar)
   const MaterialProperty<std::vector<RealGradient>> * const _dvol_strain_qp_dvar;
 
   /// Effective porepressure at the quadpoints or nodes
-  const MaterialProperty<Real> * const _pf;
+  const GenericMaterialProperty<Real, is_ad> * const _pf;
 
   /// d(effective porepressure)/(d porflow variable)
   const MaterialProperty<std::vector<Real>> * const _dpf_dvar;
 
   /// Temperature at the quadpoints or nodes
-  const MaterialProperty<Real> * const _temperature;
+  const GenericMaterialProperty<Real, is_ad> * const _temperature;
 
   /// d(temperature)/(d porflow variable)
   const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
@@ -120,4 +121,9 @@ protected:
 
   /// d(saturation)/d(PorousFlow var)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
+
+  usingPorousFlowPorosityExponentialBaseMembers;
 };
+
+typedef PorousFlowPorosityTempl<false> PorousFlowPorosity;
+typedef PorousFlowPorosityTempl<true> ADPorousFlowPorosity;

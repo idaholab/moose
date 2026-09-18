@@ -86,7 +86,7 @@ PorousFlowFullySaturatedMassTimeDerivativeTempl<
                            ? &this->template getMaterialProperty<std::vector<Real>>(
                                  "dPorousFlow_temperature_qp_dvar")
                            : nullptr),
-    _strain_rate(_includes_mechanical ? &this->template getMaterialProperty<Real>(
+    _strain_rate(_includes_mechanical ? &this->template getGenericMaterialProperty<Real, is_ad>(
                                             "PorousFlow_volumetric_strain_rate_qp")
                                       : nullptr),
     _dstrain_rate_dvar(_includes_mechanical && !is_ad
