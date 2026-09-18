@@ -2,7 +2,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  pore_shape_model = spherical
 []
 
 [Mesh]
@@ -32,18 +31,6 @@
 []
 
 [Functions]
-  [./Q_gtn]
-    type = ParsedFunction
-    symbol_names = 'avg_vonmises gtn_gauge_stress'
-    symbol_values = 'avg_vonmises gtn_gauge_stress'
-    expression = 'avg_vonmises/gtn_gauge_stress'
-  [../]
-  [./M_gtn]
-    type = ParsedFunction
-    symbol_names = 'avg_hydro gtn_gauge_stress'
-    symbol_values = 'avg_hydro gtn_gauge_stress'
-    expression = 'abs(avg_hydro) / gtn_gauge_stress'
-  [../]
   [./Q_ten]
     type = ParsedFunction
     symbol_names = 'avg_vonmises ten_gauge_stress'
@@ -126,7 +113,7 @@
   [../]
   [./stress]
     type = ADComputeMultipleInelasticStress
-    inelastic_models = 'gtn lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
+    inelastic_models = 'lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
     outputs = all
     extra_stress_names = extra_stress
   [../]
@@ -136,17 +123,8 @@
     inelastic_strain = 'combined_inelastic_strain'
     outputs = 'all'
   [../]
-  [./gtn]
-    type = ADViscoplasticityStressUpdate
-    coefficient = 0
-    power = 1 # arbitrary
-    viscoplasticity_model = GTN
-    base_name = gtn
-    outputs = all
-    relative_tolerance = 1e-30
-  [../]
   [./lps_ten]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 10
     base_name = ten
@@ -154,7 +132,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_five]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 5
     base_name = five
@@ -162,7 +140,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_three]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 3
     base_name = three
@@ -170,7 +148,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_two]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 2
     base_name = two
@@ -178,7 +156,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_onepointfive]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 1.5
     base_name = onepointfive
@@ -186,7 +164,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_one]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 1
     base_name = one
@@ -244,19 +222,6 @@
   [./avg_vonmises]
     type = ElementAverageValue
     variable = vonmises_stress
-  [../]
-  [./gtn_gauge_stress]
-    type = ElementAverageValue
-    variable = gtn_gauge_stress
-    outputs = none
-  [../]
-  [./0Q_gtn]
-    type = FunctionValuePostprocessor
-    function = Q_gtn
-  [../]
-  [./0M_gtn]
-    type = FunctionValuePostprocessor
-    function = M_gtn
   [../]
   [./ten_gauge_stress]
     type = ElementAverageValue
