@@ -852,7 +852,8 @@ ArrayBase<T, dimension, index_type>::freeHost()
     _host_data = nullptr;
     _is_host_alias = false;
   }
-  else
+  // A const data type only ever aliases storage owned elsewhere, so there is nothing to free
+  else if constexpr (!std::is_const_v<T>)
   {
     if (!_slots_constructed)
       // Allocated by new
@@ -885,7 +886,8 @@ ArrayBase<T, dimension, index_type>::freeDevice()
     _device_data = nullptr;
     _is_device_alias = false;
   }
-  else
+  // A const data type only ever aliases storage owned elsewhere, so there is nothing to free
+  else if constexpr (!std::is_const_v<T>)
     Moose::Kokkos::free(_device_data);
 
   _is_device_alloc = false;
@@ -995,6 +997,10 @@ template <bool initialize>
 void
 ArrayBase<T, dimension, index_type>::allocHost()
 {
+  static_assert(!std::is_const_v<T>,
+                "An array with a const data type can only alias storage owned elsewhere. Use "
+                "init() together with aliasHost() or aliasDevice().");
+
   if (_is_host_alloc)
     return;
 
@@ -1019,6 +1025,10 @@ template <typename T, unsigned int dimension, typename index_type>
 void
 ArrayBase<T, dimension, index_type>::allocDevice()
 {
+  static_assert(!std::is_const_v<T>,
+                "An array with a const data type can only alias storage owned elsewhere. Use "
+                "init() together with aliasHost() or aliasDevice().");
+
   if (_is_device_alloc)
     return;
 
@@ -1739,7 +1749,8 @@ public:
    * This allocates and copies to both host and device data
    * @param vector The standard vector variable to copy
    */
-  Array(const std::vector<T> & vector) : ArrayBase<T, 1, index_type>(LayoutType::LEFT)
+  Array(const std::vector<std::remove_const_t<T>> & vector)
+    : ArrayBase<T, 1, index_type>(LayoutType::LEFT)
   {
     *this = vector;
   }
@@ -1765,7 +1776,7 @@ public:
    * @param vector The standard vector variable to copy
    */
   template <bool host, bool device>
-  void copyVector(const std::vector<T> & vector)
+  void copyVector(const std::vector<std::remove_const_t<T>> & vector)
   {
     this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
@@ -1789,9 +1800,9 @@ public:
    * @param set The standard set variable to copy
    */
   template <bool host, bool device>
-  void copySet(const std::set<T> & set)
+  void copySet(const std::set<std::remove_const_t<T>> & set)
   {
-    std::vector<T> vector(set.begin(), set.end());
+    std::vector<std::remove_const_t<T>> vector(set.begin(), set.end());
 
     copyVector<host, device>(vector);
   }
@@ -1801,7 +1812,7 @@ public:
    * This allocates and copies to both host and device data
    * @param vector The standard vector variable to copy
    */
-  auto & operator=(const std::vector<T> & vector)
+  auto & operator=(const std::vector<std::remove_const_t<T>> & vector)
   {
     copyVector<true, true>(vector);
 
@@ -1812,7 +1823,7 @@ public:
    * This allocates and copies to both host and device data
    * @param set The standard set variable to copy
    */
-  auto & operator=(const std::set<T> & set)
+  auto & operator=(const std::set<std::remove_const_t<T>> & set)
   {
     copySet<true, true>(set);
 

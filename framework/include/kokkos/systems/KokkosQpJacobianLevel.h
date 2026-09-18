@@ -76,6 +76,18 @@ public:
   }
 
   /**
+   * Get the DOF value of one of the level's tagged vectors for reading, which is valid whether or
+   * not the tagged vector is read-only
+   * @param dof The local DOF index
+   * @param tag The vector tag
+   * @returns The const DOF value
+   */
+  KOKKOS_FUNCTION const Real & getDofValueRead(const dof_id_type dof, const TagID tag) const
+  {
+    return _vectors[tag].read(dof);
+  }
+
+  /**
    * Get whether the level holds a row fixed, in which case the operator contributes nothing to it
    * @param dof The local DOF index
    * @returns Whether the row is fixed

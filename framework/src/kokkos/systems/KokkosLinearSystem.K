@@ -159,7 +159,7 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
     return;
 
   auto & our_kokkos_system = _fe_problem.getKokkosSystem(number());
-  our_kokkos_system.setActiveResidualTags(vector_tags);
+  our_kokkos_system.setActiveAssembledTags(vector_tags);
   our_kokkos_system.setActiveMatrixTags(matrix_tags);
 
   std::set<TagID> needed_solution_vector_tags;
@@ -170,7 +170,7 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   auto & kokkos_systems = _fe_problem.getKokkosSystems();
   for (auto & system : kokkos_systems.constructedEntries())
   {
-    system.setActiveSolutionTags(needed_solution_vector_tags);
+    system.setActiveReadTags(needed_solution_vector_tags);
     system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
   }
 
@@ -208,12 +208,12 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   for (auto & system : kokkos_systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-  our_kokkos_system.clearActiveResidualTags();
+  our_kokkos_system.clearActiveAssembledTags();
   our_kokkos_system.clearActiveMatrixTags();
 
   for (auto & system : kokkos_systems.constructedEntries())
   {
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 }

@@ -358,7 +358,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
   {
     auto tag = _vector_tags[t];
 
-    if (sys.isResidualTagActive(tag))
+    if (sys.isAssembledTagActive(tag))
       ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), scaled_local_re);
   }
 }
@@ -379,7 +379,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
   {
     auto tag = _vector_tags[t];
 
-    if (sys.isResidualTagActive(tag))
+    if (sys.isAssembledTagActive(tag))
     {
       if (add)
         sys.getVectorDofValue(dof, tag) += local_re;
@@ -405,7 +405,7 @@ ResidualObject::accumulateTaggedVectorNodalResidual(const bool add,
   {
     auto tag = _vector_tags[t];
 
-    if (sys.isResidualTagActive(tag))
+    if (sys.isAssembledTagActive(tag))
     {
       if (add)
         sys.getVectorDofValue(dof, tag) += local_re;

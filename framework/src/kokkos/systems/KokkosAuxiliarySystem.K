@@ -75,7 +75,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   for (auto & system : kokkos_fe_systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -131,7 +131,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   for (auto & system : kokkos_fe_systems.constructedEntries())
   {
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 
   disassociateVectorFromTag(solution(), solution_tag);

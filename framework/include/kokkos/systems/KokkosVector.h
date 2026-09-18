@@ -49,9 +49,13 @@ public:
    * @param vector The libMesh PetscVector
    * @param dof_space The DOF layout of the system the vector belongs to
    * @param assemble Whether the vector will be assembled
+   * @param read_only Whether the vector is only read, which takes the underlying array through
+   * PETSc's read-only accessor and so accepts a vector the caller has locked against writes
    */
-  void
-  create(libMesh::NumericVector<PetscScalar> & vector, const DofSpace & dof_space, bool assemble);
+  void create(libMesh::NumericVector<PetscScalar> & vector,
+              const DofSpace & dof_space,
+              bool assemble,
+              bool read_only = false);
   /**
    * Copy from the host libMesh PetscVector
    */
@@ -76,6 +80,8 @@ public:
    */
   KOKKOS_FUNCTION PetscScalar & operator()(dof_id_type i) const
   {
+    KOKKOS_ASSERT(!_read_only);
+
     return i < _local.size() ? _local[i] : _ghost(i);
   }
   /**
@@ -85,6 +91,23 @@ public:
    */
   KOKKOS_FUNCTION PetscScalar & operator[](dof_id_type i) const
   {
+    KOKKOS_ASSERT(!_read_only);
+
+    return i < _local.size() ? _local[i] : _ghost(i);
+  }
+  /**
+   * Get an entry with a given index for reading, which is valid whether or not the vector is
+   * read-only
+   * @param i The entry index local to this process
+   * @returns The const reference of the entry
+   */
+  KOKKOS_FUNCTION const PetscScalar & read(dof_id_type i) const
+  {
+    // A read-only vector whose values PETSc already holds on the device aliases that array, while
+    // one PETSc holds on the host was copied into the owned device storage
+    if (_read_only && !_is_host)
+      return _local_read[i];
+
     return i < _local.size() ? _local[i] : _ghost(i);
   }
   /**
@@ -101,67 +124,16 @@ public:
    */
   auto & operator=(PetscScalar scalar)
   {
+    mooseAssert(!_read_only, "Kokkos vector error: cannot assign to a read-only vector.");
+
     _local = scalar;
     _ghost = scalar;
 
     return *this;
   }
-
-  /**
-   * Kokkos functions for direct assembly on device
-   */
-  ///@{
-  struct PackBuffer
-  {
-  };
-  struct UnpackBuffer
-  {
-  };
-
-  KOKKOS_FUNCTION void operator()(PackBuffer, const PetscCount tid) const;
-  KOKKOS_FUNCTION void operator()(UnpackBuffer, const PetscCount tid) const;
-  ///@}
 #endif
 
 private:
-  /**
-   * Data for direct assembly on device
-   */
-  ///@{
-  struct DeviceAssembly
-  {
-    /**
-     * List of DOFs to send/receive for each process
-     */
-    Array<Array<libMesh::dof_id_type>> list;
-    /**
-     * Number of DOFs to send/receive for each process
-     */
-    Array<int> count;
-    /**
-     * Starting offset of each process into the communication buffer
-     */
-    Array<int> offset;
-    /**
-     * Communication buffer
-     */
-    Array<PetscScalar> buffer;
-    /**
-     * Allocate data
-     */
-    void create(const Array<Array<libMesh::dof_id_type>> & list);
-    /**
-     * Free data
-     */
-    void destroy();
-  };
-
-  DeviceAssembly _send;
-  DeviceAssembly _recv;
-
-  unsigned int _current_proc;
-  ///@}
-
   /**
    * PETSc vectors
    */
@@ -170,17 +142,18 @@ private:
   Vec _local_vector = PETSC_NULLPTR;
   ///@}
   /**
-   * Raw data of local PETSc vector
+   * Raw data of local PETSc vector, held through the writable accessor
    */
   PetscScalar * _array = PETSC_NULLPTR;
+  /**
+   * Raw data of local PETSc vector, held through the read-only accessor when the vector is
+   * read-only. Aliases PETSc's storage; it is never owned here.
+   */
+  const PetscScalar * _read_array = PETSC_NULLPTR;
   /**
    * Pointer to the DOF layout of the system the vector belongs to
    */
   const DofSpace * _dof_space = nullptr;
-  /**
-   * Pointer to the libMesh communicator
-   */
-  const libMesh::Parallel::Communicator * _comm = nullptr;
   /**
    * Data vectors on device
    */
@@ -188,6 +161,11 @@ private:
   Array<PetscScalar> _local;
   Array<PetscScalar> _ghost;
   ///@}
+  /**
+   * Local data on device for a read-only vector PETSc already holds on the device, aliasing PETSc's
+   * array. Const so that the alias needs no cast and cannot be written through.
+   */
+  Array<const PetscScalar> _local_read;
   /**
    * Flag whether the vector will be assembled
    */
@@ -200,6 +178,11 @@ private:
    * Flag whether the PETSc vector is a host vector
    */
   bool _is_host = false;
+  /**
+   * Flag whether the vector is only read, in which case its array is held through PETSc's
+   * read-only accessor
+   */
+  bool _read_only = false;
   /**
    * Flag whether the vector was allocated
    */
