@@ -206,6 +206,24 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Optional material property containing additional pressure in the porosity. Positive "
       "pressure adds to the tension-positive matrix hydrostatic stress. The pressure must use the "
       "same stress units as the constitutive model.");
+  params.addRangeCheckedParam<Real>(
+      "youngs_modulus_porosity_factor",
+      0.0,
+      "youngs_modulus_porosity_factor >= 0.0",
+      "Linear total-porosity factor a_E in E(f) = E_dense * (1 - a_E * f). When nonzero, the "
+      "elasticity tensor supplied to this stress update must be the non-porosity-corrected dense "
+      "isotropic tensor; the correction is evaluated at the current local porosity inside the LPS "
+      "solve.");
+  params.setDocUnit("youngs_modulus_porosity_factor", "unitless");
+  params.addRangeCheckedParam<Real>(
+      "poissons_ratio_porosity_factor",
+      0.0,
+      "poissons_ratio_porosity_factor >= 0.0",
+      "Linear total-porosity factor a_nu in nu(f) = nu_dense * (1 - a_nu * f). When nonzero, the "
+      "elasticity tensor supplied to this stress update must be the non-porosity-corrected dense "
+      "isotropic tensor; the correction is evaluated at the current local porosity inside the LPS "
+      "solve.");
+  params.setDocUnit("poissons_ratio_porosity_factor", "unitless");
   params.addParam<Real>(
       "maximum_gauge_ratio",
       1.0e6,
@@ -330,6 +348,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Maximum hybrid Newton/bisection iterations after a sign-changing reduced-porosity bracket "
       "has been found.");
 
+  params.addParamNamesToGroup("youngs_modulus_porosity_factor poissons_ratio_porosity_factor",
+                              "Porous Elasticity");
+
   params.addParamNamesToGroup(
       "verbose maximum_gauge_ratio maximum_stress_magnitude use_substepping "
       "substep_strain_tolerance adaptive_substepping maximum_number_substeps minimum_porosity "
@@ -373,6 +394,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _derivative(0.0),
     _compute_consistent_tangent(false),
     _last_consistent_tangent(RankFourTensor::initIdentityFour),
+    _youngs_modulus_porosity_factor(
+        this->template getParam<Real>("youngs_modulus_porosity_factor")),
+    _poissons_ratio_porosity_factor(
+        this->template getParam<Real>("poissons_ratio_porosity_factor")),
     _minimum_porosity(this->template getParam<Real>("minimum_porosity")),
     _porosity_bound_tolerance(this->template getParam<Real>("porosity_bound_tolerance")),
     _local_newton_tolerance(this->template getParam<Real>("local_newton_tolerance")),
@@ -792,6 +817,105 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::equivalentStress(
 }
 
 template <bool is_ad>
+bool
+PorousViscoplasticityStressUpdateTempl<is_ad>::porosityDependentElasticityEnabled() const
+{
+  return _youngs_modulus_porosity_factor != 0.0 || _poissons_ratio_porosity_factor != 0.0;
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::PorosityElasticityState
+PorousViscoplasticityStressUpdateTempl<is_ad>::evaluatePorosityElasticity(
+    const GenericRankFourTensor<is_ad> & dense_elasticity_tensor,
+    const GenericReal<is_ad> & porosity) const
+{
+  auto state = PorosityElasticityState{};
+  state.dporosity.zero();
+
+  if (!porosityDependentElasticityEnabled())
+  {
+    state.tensor = dense_elasticity_tensor;
+    return state;
+  }
+
+  const auto porosity_raw = MetaPhysicL::raw_value(porosity);
+  if (!std::isfinite(porosity_raw) || porosity_raw < 0.0 || porosity_raw >= 1.0)
+    mooseException("In ",
+                   this->_name,
+                   ": porosity-dependent elasticity requires total porosity in [0, 1). f = ",
+                   porosity_raw,
+                   ".");
+
+  /*
+   * The porous LPS response is isotropic. Recover dense isotropic K and G from the caller-supplied
+   * tensor, convert them to E and nu, apply the user-supplied linear porosity correlations, then
+   * rebuild the isotropic tensor at the current local porosity. Keeping this operation inside the
+   * p-q-f solve lets elastic stiffening during pore collapse and softening during pore growth act
+   * immediately rather than one global timestep later.
+   */
+  const auto dense_bulk =
+      (dense_elasticity_tensor(0, 0, 0, 0) + 2.0 * dense_elasticity_tensor(0, 0, 1, 1)) / 3.0;
+  const auto dense_shear = dense_elasticity_tensor(0, 1, 0, 1);
+  const auto dense_denominator = 3.0 * dense_bulk + dense_shear;
+
+  if (MetaPhysicL::raw_value(dense_bulk) <= 0.0 || MetaPhysicL::raw_value(dense_shear) <= 0.0 ||
+      MetaPhysicL::raw_value(dense_denominator) <= 0.0)
+    mooseException("In ",
+                   this->_name,
+                   ": porosity-dependent elasticity requires a positive-definite dense isotropic "
+                   "elasticity tensor.");
+
+  const auto dense_youngs = 9.0 * dense_bulk * dense_shear / dense_denominator;
+  const auto dense_poissons = (3.0 * dense_bulk - 2.0 * dense_shear) / (2.0 * dense_denominator);
+
+  const auto youngs_factor = 1.0 - _youngs_modulus_porosity_factor * porosity;
+  const auto poissons_factor = 1.0 - _poissons_ratio_porosity_factor * porosity;
+  const auto youngs = dense_youngs * youngs_factor;
+  const auto poissons = dense_poissons * poissons_factor;
+  const auto dyoungs_df = -_youngs_modulus_porosity_factor * dense_youngs;
+  const auto dpoissons_df = -_poissons_ratio_porosity_factor * dense_poissons;
+
+  const auto one_minus_two_nu = 1.0 - 2.0 * poissons;
+  const auto one_plus_nu = 1.0 + poissons;
+  if (MetaPhysicL::raw_value(youngs_factor) <= 0.0 ||
+      MetaPhysicL::raw_value(one_minus_two_nu) <= 0.0 || MetaPhysicL::raw_value(one_plus_nu) <= 0.0)
+    mooseException("In ",
+                   this->_name,
+                   ": porosity-dependent elasticity produced an inadmissible isotropic state at f "
+                   "= ",
+                   porosity_raw,
+                   ". E/E_dense = ",
+                   MetaPhysicL::raw_value(youngs_factor),
+                   ", nu = ",
+                   MetaPhysicL::raw_value(poissons),
+                   ".");
+
+  const auto bulk = youngs / (3.0 * one_minus_two_nu);
+  const auto shear = youngs / (2.0 * one_plus_nu);
+  const auto dbulk_df = dyoungs_df / (3.0 * one_minus_two_nu) +
+                        2.0 * youngs * dpoissons_df / (3.0 * Utility::pow<2>(one_minus_two_nu));
+  const auto dshear_df = dyoungs_df / (2.0 * one_plus_nu) -
+                         youngs * dpoissons_df / (2.0 * Utility::pow<2>(one_plus_nu));
+  const auto lambda = bulk - 2.0 * shear / 3.0;
+  const auto dlambda_df = dbulk_df - 2.0 * dshear_df / 3.0;
+
+  state.tensor.zero();
+  for (auto i = 0u; i < 3; ++i)
+    for (auto j = 0u; j < 3; ++j)
+      for (auto k = 0u; k < 3; ++k)
+        for (auto l = 0u; l < 3; ++l)
+        {
+          const auto volumetric = _identity_two(i, j) * _identity_two(k, l);
+          const auto shear_part =
+              _identity_two(i, k) * _identity_two(j, l) + _identity_two(i, l) * _identity_two(j, k);
+          state.tensor(i, j, k, l) = lambda * volumetric + shear * shear_part;
+          state.dporosity(i, j, k, l) = dlambda_df * volumetric + dshear_df * shear_part;
+        }
+
+  return state;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::ConstitutiveStateSnapshot
 PorousViscoplasticityStressUpdateTempl<is_ad>::captureConstitutiveState(
     const GenericRankTwoTensor<is_ad> & strain_increment,
@@ -933,22 +1057,37 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLocalPoint(
                    MetaPhysicL::raw_value(f),
                    ".");
 
+  const auto elasticity_state = evaluatePorosityElasticity(context.elasticity_tensor, f);
+
   /*
    * If the model-specific pressure closure gives zero effective hydrostatic drive and there is no
-   * deviatoric drive either, all creep mechanisms are inactive.
+   * deviatoric drive either, all creep mechanisms are inactive. The elastic response can still
+   * depend on the local porosity, so retain dC/df in the mechanical Jacobian.
    */
   if (!this->hasViscoplasticDrive(q_flow, hydrostatic_stress, f))
   {
-    const auto trial_stress = context.elasticity_tensor *
-                              (context.elastic_strain_old + context.trial_elastic_strain_increment);
+    const auto total_elastic_strain =
+        context.elastic_strain_old + context.trial_elastic_strain_increment;
+    const auto trial_stress = elasticity_state.tensor * total_elastic_strain;
     const auto trial_p = trial_stress.trace() / 3.0;
+    const auto trial_dev_stress = trial_stress.deviatoric();
+    auto trial_q = GenericReal<is_ad>(0.0);
+    if (has_deviatoric_direction)
+      trial_q = porosityDependentElasticityEnabled()
+                    ? 1.5 * dev_direction.doubleContraction(trial_dev_stress)
+                    : context.trial_equiv_stress;
+    const auto dstress_df = elasticity_state.dporosity * total_elastic_strain;
 
     point.residual[P_INDEX] = p - trial_p;
-    point.residual[Q_INDEX] = has_deviatoric_direction ? q - context.trial_equiv_stress : q;
+    point.residual[Q_INDEX] = has_deviatoric_direction ? q - trial_q : q;
     point.residual[F_INDEX] = floor_active ? f - _minimum_porosity : f - context.porosity_begin;
 
     point.jacobian[P_INDEX][P_INDEX] = 1.0;
+    point.jacobian[P_INDEX][F_INDEX] = -dstress_df.trace() / 3.0;
     point.jacobian[Q_INDEX][Q_INDEX] = 1.0;
+    if (has_deviatoric_direction)
+      point.jacobian[Q_INDEX][F_INDEX] =
+          -1.5 * dev_direction.doubleContraction(dstress_df.deviatoric());
     point.jacobian[F_INDEX][F_INDEX] = 1.0;
     return point;
   }
@@ -988,10 +1127,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLocalPoint(
         raw_inelastic_strain_increment.deviatoric() + this->_identity_two * (allowed_trace / 3.0);
   }
 
-  const auto stress_calculated =
-      context.elasticity_tensor *
-      (context.elastic_strain_old + context.trial_elastic_strain_increment -
-       point.inelastic_strain_increment);
+  const auto total_elastic_strain = context.elastic_strain_old +
+                                    context.trial_elastic_strain_increment -
+                                    point.inelastic_strain_increment;
+  const auto stress_calculated = elasticity_state.tensor * total_elastic_strain;
   const auto p_calculated = stress_calculated.trace() / 3.0;
   const auto dev_stress_calculated = stress_calculated.deviatoric();
 
@@ -1012,16 +1151,24 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLocalPoint(
     /* The active floor fixes the volumetric increment, leaving only its deviatoric derivative. */
     const auto dinelastic_dx =
         floor_active ? raw_dinelastic_dx[column].deviatoric() : raw_dinelastic_dx[column];
-    const auto elastic_response = context.elasticity_tensor * dinelastic_dx;
+
+    /*
+     * R_sigma = sigma_coordinate - C(f):(epsilon - epsilon_vp). The usual C:d epsilon_vp term
+     * therefore enters with a positive sign, while the explicit dC/df contribution enters with a
+     * negative sign in the porosity column.
+     */
+    auto residual_stress_response = elasticity_state.tensor * dinelastic_dx;
+    if (column == F_INDEX)
+      residual_stress_response -= elasticity_state.dporosity * total_elastic_strain;
 
     point.jacobian[P_INDEX][column] =
         (column == P_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
-        elastic_response.trace() / 3.0;
+        residual_stress_response.trace() / 3.0;
 
     if (has_deviatoric_direction)
       point.jacobian[Q_INDEX][column] =
           (column == Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
-          1.5 * dev_direction.doubleContraction(elastic_response.deviatoric());
+          1.5 * dev_direction.doubleContraction(residual_stress_response.deviatoric());
     else
       point.jacobian[Q_INDEX][column] =
           column == Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0);
@@ -1181,28 +1328,41 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeConsistentTangent(
     const LocalPoint & point, const LocalSolveContext & context) const
 {
   /*
-   * The converged local coordinates x=(p,q,f) satisfy R(x,p_trial,q_trial)=0. For an
-   * isotropic elasticity tensor the scalar equations depend on the trial stress only through
-   * p_trial and q_trial, so implicit differentiation gives
-   *
-   *   J dx/dp_trial = (1,0,0)^T,
-   *   J dx/dq_trial = (0,1,0)^T.
-   *
-   * Solve the already-scaled 3x3 system to retain the conditioning used by the local Newton
-   * solve, then reconstruct d sigma/d epsilon from sigma = p I + q n, where
-   * n = s_trial/q_trial. No finite-difference perturbation is used.
+   * The converged local coordinates x=(p,q,f) satisfy R(x,p_trial,q_trial)=0. With
+   * porosity-dependent isotropic elasticity, the current local K(f) and G(f) can differ from the
+   * beginning-of-substep moduli used to define p_trial and q_trial. The mechanical right-hand
+   * sides therefore carry K(f)/K_begin and G(f)/G_begin. The local Jacobian already contains the
+   * explicit dC/df terms, so these solves recover the full implicit porosity-elasticity coupling.
+   * Reconstruct d sigma/d epsilon from sigma = p I + q n on the active deviatoric branch.
    */
   validateFiniteLocalPoint(point, "consistent tangent evaluation");
+
+  const auto beginning_elasticity_state =
+      evaluatePorosityElasticity(context.elasticity_tensor, context.porosity_begin);
+  const auto current_elasticity_state =
+      evaluatePorosityElasticity(context.elasticity_tensor, point.f);
+  const auto beginning_bulk =
+      MetaPhysicL::raw_value((beginning_elasticity_state.tensor(0, 0, 0, 0) +
+                              2.0 * beginning_elasticity_state.tensor(0, 0, 1, 1)) /
+                             3.0);
+  const auto current_bulk =
+      MetaPhysicL::raw_value((current_elasticity_state.tensor(0, 0, 0, 0) +
+                              2.0 * current_elasticity_state.tensor(0, 0, 1, 1)) /
+                             3.0);
+  const auto beginning_shear =
+      MetaPhysicL::raw_value(beginning_elasticity_state.tensor(0, 1, 0, 1));
+  const auto current_shear = MetaPhysicL::raw_value(current_elasticity_state.tensor(0, 1, 0, 1));
 
   const auto jacobian = scaledJacobian(point.jacobian, context);
   const std::array<Real, LOCAL_SYSTEM_SIZE> variable_scales = {
       context.p_scale, context.q_scale, context.porosity_variable_scale};
   const std::array<Real, LOCAL_SYSTEM_SIZE> residual_scales = {
       context.p_scale, context.q_scale, context.porosity_merit_scale};
-  const auto solve_trial_sensitivity = [&](const LocalVariableIndex trial_component)
+  const auto solve_trial_sensitivity =
+      [&](const LocalVariableIndex trial_component, const Real mechanical_rhs)
   {
     auto rhs = FixedVector<Real, LOCAL_SYSTEM_SIZE>{0.0, 0.0, 0.0};
-    rhs[trial_component] = 1.0 / residual_scales[trial_component];
+    rhs[trial_component] = mechanical_rhs / residual_scales[trial_component];
 
     auto scaled_sensitivity = FixedVector<Real, LOCAL_SYSTEM_SIZE>{};
     if (!solveLinearSystem(jacobian, rhs, scaled_sensitivity))
@@ -1217,16 +1377,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeConsistentTangent(
         variable_scales[F_INDEX] * scaled_sensitivity[F_INDEX]};
   };
 
-  const auto sensitivity_p_trial = solve_trial_sensitivity(P_INDEX);
+  const auto sensitivity_p_trial = solve_trial_sensitivity(P_INDEX, current_bulk / beginning_bulk);
   const auto q_trial = MetaPhysicL::raw_value(context.trial_equiv_stress);
   const auto has_deviatoric_direction = q_trial > this->_minimum_stress_magnitude;
-  const auto sensitivity_q_trial = has_deviatoric_direction
-                                       ? solve_trial_sensitivity(Q_INDEX)
-                                       : FixedVector<Real, LOCAL_SYSTEM_SIZE>{0.0, 0.0, 0.0};
+  const auto sensitivity_q_trial =
+      has_deviatoric_direction ? solve_trial_sensitivity(Q_INDEX, current_shear / beginning_shear)
+                               : FixedVector<Real, LOCAL_SYSTEM_SIZE>{0.0, 0.0, 0.0};
 
   const auto elasticity =
       [&](const unsigned int i, const unsigned int j, const unsigned int k, const unsigned int l)
-  { return MetaPhysicL::raw_value(context.elasticity_tensor(i, j, k, l)); };
+  { return MetaPhysicL::raw_value(beginning_elasticity_state.tensor(i, j, k, l)); };
 
   const auto identity = RankTwoTensor(RankTwoTensor::initIdentity);
   auto hydro_trial_gradient = RankTwoTensor();
@@ -1259,16 +1419,40 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeConsistentTangent(
   if (!has_deviatoric_direction)
   {
     /*
-     * The local q equation is q=0 on the small-deviatoric-stress branch, while the trial
-     * deviatoric stress remains elastic. Only the hydrostatic response is modified.
+     * The local q equation is q=0 on the small-deviatoric-stress branch. The deviatoric stress
+     * remains elastic, but its modulus changes with the implicitly solved porosity. Retain both the
+     * current elastic tensor and the dC/df contribution carried by df/dp_trial.
      */
     const auto dp_dp_trial = sensitivity_p_trial[P_INDEX];
+    const auto df_dp_trial = sensitivity_p_trial[F_INDEX];
+    const auto total_elastic_strain = context.elastic_strain_old +
+                                      context.trial_elastic_strain_increment -
+                                      point.inelastic_strain_increment;
+    const auto dporosity_stress = current_elasticity_state.dporosity * total_elastic_strain;
+    const auto dporosity_stress_hydro = MetaPhysicL::raw_value(dporosity_stress.trace() / 3.0);
+
     for (auto i = 0u; i < 3; ++i)
       for (auto j = 0u; j < 3; ++j)
         for (auto k = 0u; k < 3; ++k)
           for (auto l = 0u; l < 3; ++l)
-            tangent(i, j, k, l) = elasticity(i, j, k, l) +
-                                  identity(i, j) * (dp_dp_trial - 1.0) * hydro_trial_gradient(k, l);
+          {
+            auto current_hydro_gradient = Real(0.0);
+            for (auto m = 0u; m < 3; ++m)
+              current_hydro_gradient +=
+                  MetaPhysicL::raw_value(current_elasticity_state.tensor(m, m, k, l)) / 3.0;
+
+            const auto current_deviatoric_gradient =
+                MetaPhysicL::raw_value(current_elasticity_state.tensor(i, j, k, l)) -
+                identity(i, j) * current_hydro_gradient;
+            const auto dporosity_deviatoric_stress =
+                MetaPhysicL::raw_value(dporosity_stress(i, j)) -
+                identity(i, j) * dporosity_stress_hydro;
+            const auto f_gradient = df_dp_trial * hydro_trial_gradient(k, l);
+
+            tangent(i, j, k, l) = identity(i, j) * dp_dp_trial * hydro_trial_gradient(k, l) +
+                                  current_deviatoric_gradient +
+                                  dporosity_deviatoric_stress * f_gradient;
+          }
   }
   else
   {
@@ -1437,9 +1621,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initializeLocalSolveScales(
    * Instead use matrix-elastic stress scales associated with max_inelastic_increment. For an
    * isotropic tensor, K=(C1111+2 C1122)/3 and G=C1212.
    */
+  const auto beginning_elasticity =
+      evaluatePorosityElasticity(context.elasticity_tensor, context.porosity_begin).tensor;
   const auto bulk_modulus = abs(MetaPhysicL::raw_value(
-      (context.elasticity_tensor(0, 0, 0, 0) + 2.0 * context.elasticity_tensor(0, 0, 1, 1)) / 3.0));
-  const auto shear_modulus = abs(MetaPhysicL::raw_value(context.elasticity_tensor(0, 1, 0, 1)));
+      (beginning_elasticity(0, 0, 0, 0) + 2.0 * beginning_elasticity(0, 0, 1, 1)) / 3.0));
+  const auto shear_modulus = abs(MetaPhysicL::raw_value(beginning_elasticity(0, 1, 0, 1)));
 
   context.p_scale = max({abs(MetaPhysicL::raw_value(context.p_trial)),
                          bulk_modulus * this->_max_inelastic_increment,
@@ -1506,6 +1692,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateDenseLimitPoint(
   point.porosity_branch = PorosityBranch::FLOOR;
   point.f = 0.0;
   point.inelastic_strain_increment.zero();
+  const auto elasticity_state = evaluatePorosityElasticity(context.elasticity_tensor, point.f);
 
   const auto has_deviatoric_direction =
       context.trial_equiv_stress > this->_minimum_stress_magnitude;
@@ -1540,10 +1727,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateDenseLimitPoint(
   point.inelastic_strain_increment =
       dev_direction * (1.5 * point.effective_inelastic_strain_increment);
 
-  const auto stress_calculated =
-      context.elasticity_tensor *
-      (context.elastic_strain_old + context.trial_elastic_strain_increment -
-       point.inelastic_strain_increment);
+  const auto total_elastic_strain = context.elastic_strain_old +
+                                    context.trial_elastic_strain_increment -
+                                    point.inelastic_strain_increment;
+  const auto stress_calculated = elasticity_state.tensor * total_elastic_strain;
   const auto p_calculated = stress_calculated.trace() / 3.0;
   const auto dev_stress_calculated = stress_calculated.deviatoric();
   const auto q_calculated = has_deviatoric_direction
@@ -1563,7 +1750,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateDenseLimitPoint(
   {
     const auto dinelastic_dq =
         dev_direction * (1.5 * this->constitutiveTimeStep() * dcreep_rate_dq);
-    const auto elastic_response = context.elasticity_tensor * dinelastic_dq;
+    const auto elastic_response = elasticity_state.tensor * dinelastic_dq;
 
     point.jacobian[P_INDEX][Q_INDEX] = elastic_response.trace() / 3.0;
     point.jacobian[Q_INDEX][Q_INDEX] =
@@ -1792,8 +1979,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::commitLocalPoint(
   const auto candidate_inelastic_strain_increment = point.inelastic_strain_increment;
   const auto candidate_elastic_strain_increment =
       context.trial_elastic_strain_increment - candidate_inelastic_strain_increment;
-  const auto candidate_stress =
-      context.elasticity_tensor * (context.elastic_strain_old + candidate_elastic_strain_increment);
+  const auto candidate_elasticity = evaluatePorosityElasticity(context.elasticity_tensor, point.f);
+  const auto candidate_stress = candidate_elasticity.tensor *
+                                (context.elastic_strain_old + candidate_elastic_strain_increment);
   const auto candidate_effective_inelastic_strain_increment =
       point.effective_inelastic_strain_increment;
 
@@ -2364,11 +2552,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::discoverReducedPorosityBracket(
     {
       if (this->_verbose)
         Moose::out << "Reduced porosity root: converged by continuation probe residual. f = "
-                   << MetaPhysicL::raw_value(probe_point.f) << " |Rf|/scale = "
-                   << std::abs(reducedPorosityResidual(probe_point)) /
-                          context.porosity_convergence_scale
+                   << MetaPhysicL::raw_value(probe_point.f)
+                   << " |Rf|/scale = " << std::abs(residual) / context.porosity_convergence_scale
                    << std::endl;
-
       return probe_point;
     }
 
@@ -3131,6 +3317,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
   if (solid_fraction_old <= 0.0)
     mooseException("In ", this->_name, ": invalid porosity factor in independent pore solve.");
 
+  const auto elasticity_state =
+      evaluatePorosityElasticity(context.elasticity_tensor, total_porosity);
+
   auto response = IndependentLpsCreepResponse{};
   response.inelastic_strain_increment.zero();
   for (auto & derivative : response.dinelastic_dx)
@@ -3262,10 +3451,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
                              this->_identity_two * (dtotal_volumetric_dx / 3.0);
   }
 
-  const auto stress_calculated =
-      context.elasticity_tensor *
-      (context.elastic_strain_old + context.trial_elastic_strain_increment -
-       point.inelastic_strain_increment);
+  const auto total_elastic_strain = context.elastic_strain_old +
+                                    context.trial_elastic_strain_increment -
+                                    point.inelastic_strain_increment;
+  const auto stress_calculated = elasticity_state.tensor * total_elastic_strain;
   const auto p_calculated = stress_calculated.trace() / 3.0;
   const auto dev_stress_calculated = stress_calculated.deviatoric();
   const auto q_calculated = has_deviatoric_direction
@@ -3287,15 +3476,18 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
 
   for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
   {
-    const auto elastic_response = context.elasticity_tensor * dinelastic_dx[column];
+    auto residual_stress_response = elasticity_state.tensor * dinelastic_dx[column];
+    if (column == PORE_POROSITY_0_INDEX || column == PORE_POROSITY_1_INDEX)
+      residual_stress_response -= elasticity_state.dporosity * total_elastic_strain;
+
     point.jacobian[INDEPENDENT_P_INDEX][column] =
         (column == INDEPENDENT_P_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
-        elastic_response.trace() / 3.0;
+        residual_stress_response.trace() / 3.0;
 
     if (has_deviatoric_direction)
       point.jacobian[INDEPENDENT_Q_INDEX][column] =
           (column == INDEPENDENT_Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0)) +
-          1.5 * dev_direction.doubleContraction(elastic_response.deviatoric());
+          1.5 * dev_direction.doubleContraction(residual_stress_response.deviatoric());
     else
       point.jacobian[INDEPENDENT_Q_INDEX][column] =
           column == INDEPENDENT_Q_INDEX ? GenericReal<is_ad>(1.0) : GenericReal<is_ad>(0.0);
@@ -3326,9 +3518,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initializeIndependentLocalSolveSc
   using std::max;
   using std::min;
 
+  const auto total_porosity_begin = context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+  const auto beginning_elasticity =
+      evaluatePorosityElasticity(context.elasticity_tensor, total_porosity_begin).tensor;
   const auto bulk_modulus = abs(MetaPhysicL::raw_value(
-      (context.elasticity_tensor(0, 0, 0, 0) + 2.0 * context.elasticity_tensor(0, 0, 1, 1)) / 3.0));
-  const auto shear_modulus = abs(MetaPhysicL::raw_value(context.elasticity_tensor(0, 1, 0, 1)));
+      (beginning_elasticity(0, 0, 0, 0) + 2.0 * beginning_elasticity(0, 0, 1, 1)) / 3.0));
+  const auto shear_modulus = abs(MetaPhysicL::raw_value(beginning_elasticity(0, 1, 0, 1)));
   context.p_scale = max({abs(MetaPhysicL::raw_value(context.p_trial)),
                          bulk_modulus * this->_max_inelastic_increment,
                          this->_minimum_stress_magnitude,
@@ -3771,7 +3966,35 @@ RankFourTensor
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTangent(
     const IndependentLocalPoint & point, const IndependentLocalSolveContext & context) const
 {
+  /*
+   * The independent local coordinates x=(p,q,f_0,f_1) satisfy R(x,p_trial,q_trial)=0. The
+   * elasticity correction depends on total porosity f=f_0+f_1, so both porosity columns of the
+   * local Jacobian already contain the same explicit dC/df contribution. As in the scalar solve,
+   * p_trial and q_trial are defined with the beginning-of-substep elastic moduli while the local
+   * residual uses the current K(f) and G(f). Account for that distinction in the mechanical
+   * right-hand sides before reconstructing d sigma/d epsilon.
+   */
   validateFiniteIndependentLocalPoint(point, "independent consistent tangent evaluation");
+
+  const auto beginning_total_porosity =
+      context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+  const auto current_total_porosity = point.pore_porosity[0] + point.pore_porosity[1];
+  const auto beginning_elasticity_state =
+      evaluatePorosityElasticity(context.elasticity_tensor, beginning_total_porosity);
+  const auto current_elasticity_state =
+      evaluatePorosityElasticity(context.elasticity_tensor, current_total_porosity);
+  const auto beginning_bulk =
+      MetaPhysicL::raw_value((beginning_elasticity_state.tensor(0, 0, 0, 0) +
+                              2.0 * beginning_elasticity_state.tensor(0, 0, 1, 1)) /
+                             3.0);
+  const auto current_bulk =
+      MetaPhysicL::raw_value((current_elasticity_state.tensor(0, 0, 0, 0) +
+                              2.0 * current_elasticity_state.tensor(0, 0, 1, 1)) /
+                             3.0);
+  const auto beginning_shear =
+      MetaPhysicL::raw_value(beginning_elasticity_state.tensor(0, 1, 0, 1));
+  const auto current_shear = MetaPhysicL::raw_value(current_elasticity_state.tensor(0, 1, 0, 1));
+
   const auto jacobian = scaledIndependentJacobian(point.jacobian, context);
   const std::array<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> variable_scale = {
       context.p_scale,
@@ -3784,10 +4007,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTange
       context.porosity_merit_scale[0],
       context.porosity_merit_scale[1]};
 
-  const auto solve_trial_sensitivity = [&](const unsigned int trial_component)
+  const auto solve_trial_sensitivity =
+      [&](const unsigned int trial_component, const Real mechanical_rhs)
   {
     FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> rhs{};
-    rhs[trial_component] = 1.0 / residual_scale[trial_component];
+    rhs[trial_component] = mechanical_rhs / residual_scale[trial_component];
     FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> scaled_sensitivity{};
     if (!solveLinearSystem(jacobian, rhs, scaled_sensitivity))
       mooseException("In ",
@@ -3799,16 +4023,18 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTange
     return sensitivity;
   };
 
-  const auto sensitivity_p_trial = solve_trial_sensitivity(INDEPENDENT_P_INDEX);
+  const auto sensitivity_p_trial =
+      solve_trial_sensitivity(INDEPENDENT_P_INDEX, current_bulk / beginning_bulk);
   const auto q_trial = MetaPhysicL::raw_value(context.trial_equiv_stress);
   const auto has_deviatoric_direction = q_trial > this->_minimum_stress_magnitude;
   FixedVector<Real, INDEPENDENT_LOCAL_SYSTEM_SIZE> sensitivity_q_trial{};
   if (has_deviatoric_direction)
-    sensitivity_q_trial = solve_trial_sensitivity(INDEPENDENT_Q_INDEX);
+    sensitivity_q_trial =
+        solve_trial_sensitivity(INDEPENDENT_Q_INDEX, current_shear / beginning_shear);
 
   const auto elasticity =
       [&](const unsigned int i, const unsigned int j, const unsigned int k, const unsigned int l)
-  { return MetaPhysicL::raw_value(context.elasticity_tensor(i, j, k, l)); };
+  { return MetaPhysicL::raw_value(beginning_elasticity_state.tensor(i, j, k, l)); };
   const auto identity = RankTwoTensor(RankTwoTensor::initIdentity);
   auto hydro_trial_gradient = RankTwoTensor();
   auto equiv_trial_gradient = RankTwoTensor();
@@ -3838,12 +4064,36 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTange
   if (!has_deviatoric_direction)
   {
     const auto dp_dp_trial = sensitivity_p_trial[INDEPENDENT_P_INDEX];
+    const auto df_dp_trial =
+        sensitivity_p_trial[PORE_POROSITY_0_INDEX] + sensitivity_p_trial[PORE_POROSITY_1_INDEX];
+    const auto total_elastic_strain = context.elastic_strain_old +
+                                      context.trial_elastic_strain_increment -
+                                      point.inelastic_strain_increment;
+    const auto dporosity_stress = current_elasticity_state.dporosity * total_elastic_strain;
+    const auto dporosity_stress_hydro = MetaPhysicL::raw_value(dporosity_stress.trace() / 3.0);
+
     for (auto i = 0u; i < 3; ++i)
       for (auto j = 0u; j < 3; ++j)
         for (auto k = 0u; k < 3; ++k)
           for (auto l = 0u; l < 3; ++l)
-            tangent(i, j, k, l) = elasticity(i, j, k, l) +
-                                  identity(i, j) * (dp_dp_trial - 1.0) * hydro_trial_gradient(k, l);
+          {
+            auto current_hydro_gradient = Real(0.0);
+            for (auto m = 0u; m < 3; ++m)
+              current_hydro_gradient +=
+                  MetaPhysicL::raw_value(current_elasticity_state.tensor(m, m, k, l)) / 3.0;
+
+            const auto current_deviatoric_gradient =
+                MetaPhysicL::raw_value(current_elasticity_state.tensor(i, j, k, l)) -
+                identity(i, j) * current_hydro_gradient;
+            const auto dporosity_deviatoric_stress =
+                MetaPhysicL::raw_value(dporosity_stress(i, j)) -
+                identity(i, j) * dporosity_stress_hydro;
+            const auto f_gradient = df_dp_trial * hydro_trial_gradient(k, l);
+
+            tangent(i, j, k, l) = identity(i, j) * dp_dp_trial * hydro_trial_gradient(k, l) +
+                                  current_deviatoric_gradient +
+                                  dporosity_deviatoric_stress * f_gradient;
+          }
   }
   else
   {
@@ -3914,13 +4164,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::commitIndependentLocalPoint(
   validateFiniteIndependentLocalPoint(point, "independent local state commit");
   inelastic_strain_increment = point.inelastic_strain_increment;
   elastic_strain_increment = context.trial_elastic_strain_increment - inelastic_strain_increment;
-  stress = context.elasticity_tensor * (context.elastic_strain_old + elastic_strain_increment);
+  const auto total_porosity = point.pore_porosity[0] + point.pore_porosity[1];
+  const auto candidate_elasticity =
+      evaluatePorosityElasticity(context.elasticity_tensor, total_porosity);
+  stress = candidate_elasticity.tensor * (context.elastic_strain_old + elastic_strain_increment);
   effective_inelastic_strain_increment = point.effective_inelastic_strain_increment;
 
   const auto q_flow = context.trial_equiv_stress > this->_minimum_stress_magnitude
                           ? point.q
                           : GenericReal<is_ad>(0.0);
-  const auto total_porosity = point.pore_porosity[0] + point.pore_porosity[1];
   this->setGaugeStresses(q_flow, point.hydrostatic_stress, total_porosity);
   this->_hydro_stress = point.p;
   this->_intermediate_porosity = total_porosity;
@@ -3937,13 +4189,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStepIndependent(
     GenericReal<is_ad> & effective_inelastic_strain_increment)
 {
   const auto trial_elastic_strain_increment = elastic_strain_increment;
-  const auto trial_stress = stress;
   const auto total_porosity_begin = boundedBeginningPorosity();
+  const auto beginning_elasticity =
+      evaluatePorosityElasticity(elasticity_tensor, total_porosity_begin).tensor;
+  auto trial_stress = stress;
+  if (porosityDependentElasticityEnabled())
+    trial_stress = beginning_elasticity * (elastic_strain_old + trial_elastic_strain_increment);
   const auto p_trial = trial_stress.trace() / 3.0;
   const auto trial_dev_stress = trial_stress.deviatoric();
   const auto q_trial = this->equivalentStress(trial_dev_stress);
 
-  this->computeStressInitialize(q_trial, elasticity_tensor);
+  this->computeStressInitialize(q_trial, beginning_elasticity);
 
   auto pore_porosity_begin = independentPorePorosityState(total_porosity_begin);
   const auto population_sum = pore_porosity_begin[0] + pore_porosity_begin[1];
@@ -4022,14 +4278,18 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
   }
 
   const auto trial_elastic_strain_increment = elastic_strain_increment;
-  const auto trial_stress = stress;
   const auto porosity_begin = boundedBeginningPorosity();
+  const auto beginning_elasticity =
+      evaluatePorosityElasticity(elasticity_tensor, porosity_begin).tensor;
+  auto trial_stress = stress;
+  if (porosityDependentElasticityEnabled())
+    trial_stress = beginning_elasticity * (elastic_strain_old + trial_elastic_strain_increment);
   const auto p_trial = trial_stress.trace() / 3.0;
   const auto trial_dev_stress = trial_stress.deviatoric();
   const auto q_trial = this->equivalentStress(trial_dev_stress);
 
   /* Allow the derived model to prepare any state needed by the local constitutive solve. */
-  this->computeStressInitialize(q_trial, elasticity_tensor);
+  this->computeStressInitialize(q_trial, beginning_elasticity);
 
   auto local_context = LocalSolveContext{p_trial,
                                          trial_dev_stress,
@@ -4336,6 +4596,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
 
     GenericRankTwoTensor<is_ad> sub_elastic_strain_old = elastic_strain_old;
     auto sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
+    if (porosityDependentElasticityEnabled())
+    {
+      const auto beginning_elasticity =
+          evaluatePorosityElasticity(elasticity_tensor, boundedBeginningPorosity()).tensor;
+      sub_stress_new = beginning_elasticity * sub_elastic_strain_old;
+    }
 
     strain_increment.zero();
 
@@ -4345,7 +4611,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
       GenericRankTwoTensor<is_ad> sub_inelastic_strain_increment;
       sub_inelastic_strain_increment.zero();
 
-      sub_stress_new += elasticity_tensor * sub_strain_increment;
+      if (porosityDependentElasticityEnabled())
+      {
+        const auto beginning_elasticity =
+            evaluatePorosityElasticity(elasticity_tensor, boundedBeginningPorosity()).tensor;
+        sub_stress_new = beginning_elasticity * (sub_elastic_strain_old + sub_strain_increment);
+      }
+      else
+        sub_stress_new += elasticity_tensor * sub_strain_increment;
 
       GenericReal<is_ad> sub_effective_inelastic_strain_increment = 0.0;
       updateStateOneStep(sub_strain_increment,
@@ -4360,7 +4633,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
       strain_increment += sub_strain_increment;
       inelastic_strain_increment += sub_inelastic_strain_increment;
       sub_elastic_strain_old += sub_strain_increment;
-      sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
+      if (porosityDependentElasticityEnabled())
+      {
+        const auto current_elasticity =
+            evaluatePorosityElasticity(elasticity_tensor, boundedBeginningPorosity()).tensor;
+        sub_stress_new = current_elasticity * sub_elastic_strain_old;
+      }
+      else
+        sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
       accumulated_effective_inelastic_strain_increment += sub_effective_inelastic_strain_increment;
       if (_verbose)
         Moose::out << "PorousViscoplasticityStressUpdateTempl<is_ad> substep " << step + 1 << "/"
@@ -4413,8 +4693,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   // inelastic models. Each successful local p-q-f solve commits the next porosity state directly.
   this->updateIntermediatePorosity(snapshot.strain_increment);
 
+  auto estimate_stress = snapshot.stress;
+  if (porosityDependentElasticityEnabled())
+  {
+    const GenericRankTwoTensor<is_ad> elastic_strain_old_ad = elastic_strain_old;
+    const auto beginning_elasticity =
+        evaluatePorosityElasticity(elasticity_tensor, boundedBeginningPorosity()).tensor;
+    estimate_stress = beginning_elasticity * (elastic_strain_old_ad + snapshot.strain_increment);
+  }
+
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
-                                               : estimateNumberSubsteps(snapshot.stress);
+                                               : estimateNumberSubsteps(estimate_stress);
 
   while (true)
   {
