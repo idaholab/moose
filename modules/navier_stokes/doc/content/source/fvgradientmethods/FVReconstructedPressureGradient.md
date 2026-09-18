@@ -146,9 +146,9 @@ diagnostics, and unrelated equations should continue to use an ordinary gradient
 same reconstructed pressure-gradient definition for every momentum component coupled to one
 pressure equation; independent flow systems should use separate definitions.
 
-The pressure variable and its `RhieChowMassFlux` object must have identical block restrictions.
-Pressure fields on independent flow regions should use separate pressure variables and Rhie-Chow
-objects, or one Rhie-Chow object must span the complete pressure domain.
+The pressure and velocity variables and their `RhieChowMassFlux` object must have identical block
+restrictions. Fields on independent flow regions should use separate variables and Rhie-Chow
+objects, or one Rhie-Chow object must span the complete flow domain.
 
 Mesh quality is outside this gradient method's responsibility. When diagnosing reconstruction on a
 new mesh, use [MeshDiagnosticsGenerator.md] with `check_local_jacobian = ERROR`,

@@ -166,6 +166,20 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
                 "Momentum system linkage must match the RhieChowMassFlux for every spatial "
                 "component.");
 
+    const auto & velocity_variable = rc.velocityVariable(component);
+    if (velocity_variable.blockIDs() != rc.blockIDs())
+      mooseError("FVReconstructedPressureGradient '",
+                 name(),
+                 "' requires velocity variable '",
+                 velocity_variable.name(),
+                 "' and RhieChowMassFlux '",
+                 rc.name(),
+                 "' to have identical block restrictions. Velocity blocks: ",
+                 Moose::stringify(velocity_variable.blockIDs()),
+                 "; Rhie-Chow blocks: ",
+                 Moose::stringify(rc.blockIDs()),
+                 ".");
+
     [[maybe_unused]] const auto * const velocity_gradient = _velocity_gradient_fields[component];
     mooseAssert(velocity_gradient &&
                     &velocity_gradient->system() == &rc.momentumSystem(component) &&
