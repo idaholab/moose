@@ -75,7 +75,7 @@ SemismoothContactLineSearch::lineSearch()
   PetscBool changed_y = PETSC_FALSE, changed_w = PETSC_FALSE;
   Vec X, F, Y, W, G, W_try;
   SNESLineSearch line_search;
-  PetscReal fnorm = 0.0, xnorm = 0.0, ynorm = 0.0, gnorm = 0.0;
+  PetscReal fnorm = 0.0, xnorm = 0.0, ynorm = 0.0;
   SNES snes = _solver->snes();
 
   LibmeshPetscCall(SNESGetLineSearch(snes, &line_search));
