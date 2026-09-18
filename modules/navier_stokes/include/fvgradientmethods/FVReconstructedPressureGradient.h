@@ -216,7 +216,4 @@ private:
 
   /// Persistent coupling pressure gradient.
   GradientContainer _coupling_pressure_gradient;
-
-  /// Whether the coupling pressure gradient has been initialized.
-  bool _coupling_pressure_gradient_initialized = false;
 };

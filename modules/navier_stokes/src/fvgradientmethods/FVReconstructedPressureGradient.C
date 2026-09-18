@@ -39,6 +39,8 @@ FVReconstructedPressureGradient::validParams()
       "base_gradient_method",
       "green-gauss",
       "Gradient method used before Rhie-Chow has computed reconstructed gradients.");
+  // A conservative 0.1 default damps pressure-velocity feedback with the standard SIMPLE
+  // relaxation settings; values near 1 can require retuning those settings to converge.
   params.addRangeCheckedParam<Real>(
       "gradient_relaxation",
       0.1,
@@ -209,10 +211,6 @@ FVReconstructedPressureGradient::resolveGradientMethodDependencies(FEProblemBase
         "Unable to find base FVGradientMethod with name '", _base_gradient_method_name, "'.");
 
   _base_gradient_method = &fe_problem.getFVGradientMethod(_base_gradient_method_name);
-  if (_base_gradient_method == this)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' cannot use itself as its base_gradient_method.");
 }
 
 void
@@ -237,7 +235,7 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
               "FVReconstructedPressureGradient can only compute the pressure variable to which "
               "it is bound.");
 
-  if (!_coupling_pressure_gradient_initialized)
+  if (_coupling_pressure_gradient.empty())
   {
     // No flux-consistent pressure gradient exists before the first pressure corrector. Use the
     // ordinary gradient for the initial momentum predictor instead of inventing coupling data.
@@ -318,7 +316,6 @@ FVReconstructedPressureGradient::resetForTimeStep(const RhieChowMassFlux & rc)
   // momentum balance unchanged across time-step acceptance, rejection, restart, and recovery.
   copyGradient(rc.pressureGradientField().components(Moose::oldState()),
                _coupling_pressure_gradient);
-  _coupling_pressure_gradient_initialized = true;
   transition(PressureGradientReconstructionEvent::Reset);
 }
 
@@ -328,7 +325,6 @@ FVReconstructedPressureGradient::meshChanged()
   _lagged_reconstruction_velocity_gradient.clear();
   _reconstructed_pressure_gradient.clear();
   _coupling_pressure_gradient.clear();
-  _coupling_pressure_gradient_initialized = false;
   transition(PressureGradientReconstructionEvent::Reset);
 }
 
@@ -592,11 +588,8 @@ FVReconstructedPressureGradient::updateCouplingPressureGradient(
   mooseAssert(!base_gradient.empty() && reconstructed_candidate.size() == base_gradient.size(),
               "Base and reconstructed gradients must have equal nonzero component counts.");
 
-  if (!_coupling_pressure_gradient_initialized)
-  {
+  if (_coupling_pressure_gradient.empty())
     copyGradient(base_gradient, _coupling_pressure_gradient);
-    _coupling_pressure_gradient_initialized = true;
-  }
 
   const auto & mesh = rc.pressureSystem().feProblem().mesh();
   const auto pressure_system_number = rc.pressureSystem().number();
