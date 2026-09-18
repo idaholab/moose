@@ -1136,10 +1136,15 @@ protected:
   /// enabled (setupKokkosMatrixFreeJacobian())
   bool _kokkos_mf_enabled = false;
   bool _kokkos_mf_reported = false;
-  TagID _kokkos_mf_x_tag = 0;
+  TagID _kokkos_mf_direction_tag = 0;
   TagID _kokkos_mf_y_tag = 0;
   TagID _kokkos_mf_diag_tag = 0;
-  NumericVector<Number> * _kokkos_mf_x = nullptr;
+  NumericVector<Number> * _kokkos_mf_direction = nullptr;
+  /// Vector tag for the residual the entity-block smoother reads. Every entity block is owned in
+  /// full by the process owning its entity's DOFs, so the smoother needs no ghost values; this tag
+  /// therefore carries no permanent vector, unlike _kokkos_mf_direction_tag, whose vector is
+  /// ghosted for the Jacobian-vector product's direction vector.
+  TagID _kokkos_smoother_r_tag = 0;
   ///@}
 #endif
 

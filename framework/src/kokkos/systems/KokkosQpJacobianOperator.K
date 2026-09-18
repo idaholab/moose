@@ -338,7 +338,7 @@ QpJacobianOperator::operator()(BlockApplyLoop, const dof_id_type block) const
   Real correction[MAX_BLOCK_DOF];
 
   for (unsigned int i = 0; i < size; ++i)
-    residual[i] = _level.getDofValue(_blocks.blockDof(block, i), _x_tag);
+    residual[i] = _level.getDofValueRead(_blocks.blockDof(block, i), _x_tag);
 
   if (_blocks.isFactored(block))
     Utils::choleskySubstitute(_blocks.blockEntries(block), correction, residual, size);
@@ -362,7 +362,7 @@ QpJacobianOperator::operator()(BlockIdentityLoop, const dof_id_type dof) const
   // A row no block covers is a row the level holds fixed, and the level's operator carries the
   // identity there, so the smoother reproduces it rather than leaving the row unset
   if (!_blocks.isBlocked(dof))
-    _level.getDofValue(dof, _y_tag) = _level.getDofValue(dof, _x_tag);
+    _level.getDofValue(dof, _y_tag) = _level.getDofValueRead(dof, _x_tag);
 }
 
 } // namespace Moose::Kokkos

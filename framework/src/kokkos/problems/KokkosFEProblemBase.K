@@ -444,7 +444,7 @@ FEProblemBase::initKokkosStatefulProps()
   for (auto & system : _kokkos_fe_systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
 
     system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     system.reinit();
@@ -483,7 +483,7 @@ FEProblemBase::initKokkosStatefulProps()
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 }
 
@@ -578,7 +578,7 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
     for (auto & system : _kokkos_fe_systems.constructedEntries())
     {
       system.setActiveVariables(needed_moose_vars);
-      system.setActiveSolutionTags(needed_fe_var_vector_tags);
+      system.setActiveReadTags(needed_fe_var_vector_tags);
 
       {
         TIME_SECTION("KokkosCopy", 1);
@@ -639,7 +639,7 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
     for (auto & system : _kokkos_fe_systems.constructedEntries())
     {
       system.clearActiveVariables();
-      system.clearActiveSolutionTags();
+      system.clearActiveReadTags();
     }
   }
   catch (...)

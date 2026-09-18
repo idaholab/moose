@@ -366,14 +366,14 @@ FESystem::reinit()
   // the constrained rows of kokkos/kernels/ad_nonlinear's PetscJacobianTester specs would no longer
   // match their finite difference, since that residual would lose its dependence on its own DOF.
   if (_eliminate_constrained_columns && _constrained_solution_tag != Moose::INVALID_TAG_ID)
-    for (const auto tag : _active_solution_tags)
+    for (const auto tag : _active_read_tags)
       if (tag == _constrained_solution_tag)
       {
         _constraint_operator.enforceConstraints(getVector(tag));
         break;
       }
 
-  for (auto tag : _active_solution_tags)
+  for (auto tag : _active_read_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
       _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
@@ -453,7 +453,7 @@ FESystem::reinit()
   _thread.resize(kokkosAssembly().getMaxQpsPerElem(),
                  num_elems,
                  _active_variables.size(),
-                 _active_solution_tags.size());
+                 _active_read_tags.size());
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
@@ -466,7 +466,7 @@ FESystem::operator()(const ThreadID tid) const
   auto qp = _thread(tid, 0);
   auto elem = _thread(tid, 1);
   auto var = _active_variables(_thread(tid, 2));
-  auto tag = _active_solution_tags(_thread(tid, 3));
+  auto tag = _active_read_tags(_thread(tid, 3));
 
   if (_var_is_scalar[var])
     return;

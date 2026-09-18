@@ -64,16 +64,22 @@ public:
   void setActiveVariables(const std::set<MooseVariableFieldBase *> & vars);
 
   /**
-   * Set the active solution tags
-   * @param tags The active solution tags
+   * Set the active tags whose vectors are read by device code and carry no off-process
+   * contributions, which are synchronized to the device and released without being assembled. The
+   * tags a MOOSE system holds a solution in are the usual case, but the category is the access
+   * mode and not the kind of quantity: an operator application reads a residual this way too.
+   * @param tags The active read tags
+   * @param read_only Whether device code only reads the vectors, which takes their arrays through
+   * PETSc's read-only accessor and so accepts a vector the caller has locked against writes
    */
-  void setActiveSolutionTags(const std::set<TagID> & tags);
+  void setActiveReadTags(const std::set<TagID> & tags, bool read_only = false);
 
   /**
-   * Set the active residual tags
-   * @param tags The active residual tags
+   * Set the active tags whose vectors device code contributes to, which are assembled on release
+   * so that contributions to degrees of freedom owned by another process reach their owner
+   * @param tags The active assembled tags
    */
-  void setActiveResidualTags(const std::set<TagID> & tags);
+  void setActiveAssembledTags(const std::set<TagID> & tags);
 
   /**
    * Set the active matrix tags
@@ -87,17 +93,21 @@ public:
   void clearActiveVariables() { _active_variables.destroy(); }
 
   /**
-   * Clear the cached active solution tags
+   * Clear the cached active read tags
    */
-  void clearActiveSolutionTags() { _active_solution_tags.destroy(); }
+  void clearActiveReadTags()
+  {
+    _active_read_tags.destroy();
+    _read_tags_read_only = false;
+  }
 
   /**
-   * Clear the cached active residual tags
+   * Clear the cached active assembled tags
    */
-  void clearActiveResidualTags()
+  void clearActiveAssembledTags()
   {
-    _active_residual_tags.destroy();
-    _residual_tag_active = false;
+    _active_assembled_tags.destroy();
+    _assembled_tag_active = false;
   }
 
   /**
@@ -130,11 +140,11 @@ public:
   }
 
   /**
-   * Check whether a residual tag is active
-   * @param tag The residual tag
-   * @returns Whether the residual tag is active
+   * Check whether an assembled tag is active
+   * @param tag The assembled tag
+   * @returns Whether the assembled tag is active
    */
-  KOKKOS_FUNCTION bool isResidualTagActive(TagID tag) const { return _residual_tag_active[tag]; }
+  KOKKOS_FUNCTION bool isAssembledTagActive(TagID tag) const { return _assembled_tag_active[tag]; }
 
   /**
    * Check whether a matrix tag is active
@@ -210,8 +220,8 @@ protected:
    * List of active tags
    */
   ///@{
-  Array<TagID> _active_solution_tags;
-  Array<TagID> _active_residual_tags;
+  Array<TagID> _active_read_tags;
+  Array<TagID> _active_assembled_tags;
   Array<TagID> _active_matrix_tags;
   ///@}
 
@@ -219,9 +229,15 @@ protected:
    * Flag whether each tag is active
    */
   ///@{
-  Array<bool> _residual_tag_active;
+  Array<bool> _assembled_tag_active;
   Array<bool> _matrix_tag_active;
   ///@}
+
+  /**
+   * Flag whether the active read tags are only read, in which case their arrays are taken through
+   * PETSc's read-only accessor
+   */
+  bool _read_tags_read_only = false;
 
 private:
   /**

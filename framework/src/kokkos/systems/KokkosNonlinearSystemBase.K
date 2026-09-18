@@ -250,12 +250,28 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
 
   // Suffixed with name() because these tags are added at the FEProblem level and would otherwise
   // collide across multiple matrix-free systems
-  _kokkos_mf_x_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_x", Moose::VECTOR_TAG_SOLUTION);
+  _kokkos_mf_direction_tag =
+      _fe_problem.addVectorTag(name() + "_kokkos_mf_direction", Moose::VECTOR_TAG_SOLUTION);
   _kokkos_mf_y_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_y", Moose::VECTOR_TAG_RESIDUAL);
   _kokkos_mf_diag_tag =
       _fe_problem.addVectorTag(name() + "_kokkos_mf_diag", Moose::VECTOR_TAG_RESIDUAL);
+  _kokkos_smoother_r_tag =
+      _fe_problem.addVectorTag(name() + "_kokkos_smoother_r", Moose::VECTOR_TAG_RESIDUAL);
 
-  _kokkos_mf_x = &addVector(_kokkos_mf_x_tag, false, libMesh::GHOSTED);
+  _kokkos_mf_direction = &addVector(_kokkos_mf_direction_tag, false, libMesh::GHOSTED);
+
+#ifdef PETSC_HAVE_KOKKOS_KERNELS
+  // A ghosted vector's local form, the array the Kokkos wrapper reads through, is a plain host
+  // array unless the vector's own type is Kokkos-aware. Converting the type in place, rather than
+  // rebuilding the vector, keeps its ghost scatter and its GHOSTED registration with libMesh, and
+  // makes the staging copy below a device-to-device VecCopy when the caller's direction vector is
+  // itself device-resident, instead of a round trip through host memory.
+  {
+    auto * const petsc_direction =
+        libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_direction);
+    LibmeshPetscCallA(comm().get(), VecSetType(petsc_direction->vec(), VECKOKKOS));
+  }
+#endif
 
   auto & fe_system = _fe_problem.getKokkosFESystems()[number()];
 
@@ -312,7 +328,7 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
           fe_system.addQpJacobianBlocks(subdomain, object.variable().number(), blocks);
     }
 
-    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
+    object.setMatrixFreeTags(_kokkos_mf_direction_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
   }
 
   // Integrated boundary conditions contribute to the Jacobian through the same element assembly the
@@ -345,7 +361,7 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
                  object.name(),
                  "', which has an off-diagonal Jacobian contribution.");
 
-    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
+    object.setMatrixFreeTags(_kokkos_mf_direction_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
   }
 
   // Automatic scaling reads its factors from the diagonal of an assembled Jacobian, which a
@@ -428,7 +444,7 @@ NonlinearSystemBase::computeKokkosJacobianDiagonal(Vec diag)
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveResidualTags({_kokkos_mf_diag_tag});
+  systems[number()].setActiveAssembledTags({_kokkos_mf_diag_tag});
 
   // No reinit(): kernels read _u/_grad_u from the qp-solution cache populated the last time
   // computeKokkosJacobian() ran, at the same Newton point this diagonal must reflect.
@@ -463,7 +479,7 @@ NonlinearSystemBase::computeKokkosJacobianDiagonal(Vec diag)
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
 
   disassociateVectorFromTag(diag_wrap, _kokkos_mf_diag_tag);
 
@@ -489,7 +505,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveResidualTags(tags);
+  systems[number()].setActiveAssembledTags(tags);
 
   std::set<MooseVariableFieldBase *> needed_moose_vars;
   std::set<TagID> needed_fe_var_vector_tags;
@@ -522,7 +538,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -574,12 +590,12 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
   // Clear
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
 
   for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 }
 
@@ -599,7 +615,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveResidualTags(tags);
+  systems[number()].setActiveAssembledTags(tags);
 
   std::set<TagID> needed_fe_var_vector_tags;
 
@@ -612,7 +628,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   for (auto & system : systems.constructedEntries())
   {
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
     {
       TIME_SECTION("KokkosCopy", 1);
       system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
@@ -655,10 +671,10 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   // Clear
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
 
   for (auto & system : systems.constructedEntries())
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
 }
 
 void
@@ -717,7 +733,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -810,7 +826,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 
   // This system's matrix-free operator manages the tags it needs itself, so it may only be applied
@@ -834,7 +850,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveResidualTags(vector_tags);
+  systems[number()].setActiveAssembledTags(vector_tags);
   systems[number()].setActiveMatrixTags(matrix_tags);
 
   std::set<MooseVariableFieldBase *> needed_moose_vars;
@@ -871,7 +887,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    system.setActiveReadTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -972,13 +988,13 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
   // Clear
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
   systems[number()].clearActiveMatrixTags();
 
   for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
   }
 
   // This system's matrix-free operator manages the tags it needs itself, so it may only be applied
@@ -1075,19 +1091,12 @@ NonlinearSystemBase::applyKokkosEntityBlockSmoother(Vec r, Vec x)
 {
   TIME_SECTION("applyKokkosEntityBlockSmoother", 1);
 
-  // The residual arrives locked against writes, and wrapping a vector for device access takes a
-  // writable array of it, so it is read through the persistent ghosted vector an operator
-  // application reads its input through
-  {
-    libMesh::PetscVector<Number> r_wrap(r, comm());
-    *_kokkos_mf_x = r_wrap;
-  }
-
-  auto * const petsc_r = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_x);
-  LibmeshPetscCallA(comm().get(),
-                    VecGhostUpdateBegin(petsc_r->vec(), INSERT_VALUES, SCATTER_FORWARD));
-  LibmeshPetscCallA(comm().get(),
-                    VecGhostUpdateEnd(petsc_r->vec(), INSERT_VALUES, SCATTER_FORWARD));
+  // Every entity block is owned in full by the process owning its entity's degrees of freedom, so
+  // the smoother reads and writes locally owned rows alone. The residual therefore needs no ghost
+  // values and is read in place through its own read-only tag, which keeps it on the device when
+  // the caller's vector already lives there.
+  libMesh::PetscVector<Number> r_wrap(r, comm());
+  associateVectorToTag(r_wrap, _kokkos_smoother_r_tag);
 
   // Every row is written by the smoother, a row belonging to no block taking the residual, so the
   // correction needs no initial value
@@ -1098,24 +1107,25 @@ NonlinearSystemBase::applyKokkosEntityBlockSmoother(Vec r, Vec x)
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveSolutionTags({_kokkos_mf_x_tag});
-  systems[number()].setActiveResidualTags({_kokkos_mf_y_tag});
+  systems[number()].setActiveReadTags({_kokkos_smoother_r_tag}, /*read_only=*/true);
+  systems[number()].setActiveAssembledTags({_kokkos_mf_y_tag});
 
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   systems.copyToDevice();
 
-  systems[number()].applyEntityBlocks(_kokkos_mf_x_tag, _kokkos_mf_y_tag, systemMatrixTag());
+  systems[number()].applyEntityBlocks(_kokkos_smoother_r_tag, _kokkos_mf_y_tag, systemMatrixTag());
 
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
 
   for (auto & system : systems.constructedEntries())
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
 
+  disassociateVectorFromTag(r_wrap, _kokkos_smoother_r_tag);
   disassociateVectorFromTag(x_wrap, _kokkos_mf_y_tag);
 
   LibmeshPetscCallA(comm().get(), VecAssemblyBegin(x));
@@ -1135,18 +1145,13 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
   if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
     return;
 
-  // Populate the persistent ghosted direction vector from the raw PETSc x, then refresh its
-  // ghost values -- kernels read x by LOCAL (ghost-inclusive) dof index, same as the solution
+  // Populate the persistent ghosted direction vector from the raw PETSc x. libMesh's own vector
+  // assignment already refreshes ghost values in parallel (PetscVector::operator=), so kernels
+  // read x by LOCAL (ghost-inclusive) dof index, same as the solution, once this returns.
   {
     libMesh::PetscVector<Number> x_wrap(x, comm());
-    *_kokkos_mf_x = x_wrap;
+    *_kokkos_mf_direction = x_wrap;
   }
-
-  auto * const petsc_x = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_x);
-  LibmeshPetscCallA(comm().get(),
-                    VecGhostUpdateBegin(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
-  LibmeshPetscCallA(comm().get(),
-                    VecGhostUpdateEnd(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
 
   // Wrap the raw output vector for the duration of this call only; the caller owns it and must
   // see the accumulated result once we return
@@ -1155,8 +1160,8 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 
   auto & systems = _fe_problem.getKokkosFESystems();
 
-  systems[number()].setActiveSolutionTags({_kokkos_mf_x_tag});
-  systems[number()].setActiveResidualTags({_kokkos_mf_y_tag});
+  systems[number()].setActiveReadTags({_kokkos_mf_direction_tag});
+  systems[number()].setActiveAssembledTags({_kokkos_mf_y_tag});
 
   // No reinit(): kernels read _u/_grad_u from the qp-solution cache populated the last time
   // computeKokkosJacobian() ran, at the same Newton point this matvec must reflect.
@@ -1170,7 +1175,7 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
                "matrix-free Jacobian-vector product must be requested only after a Jacobian "
                "evaluation at the solution state it is to reflect.");
 
-  systems[number()].applyQpJacobian(_kokkos_mf_x_tag, _kokkos_mf_y_tag, systemMatrixTag());
+  systems[number()].applyQpJacobian(_kokkos_mf_direction_tag, _kokkos_mf_y_tag, systemMatrixTag());
 
   for (auto & kernel : _kokkos_kernels.getActiveObjects())
   {
@@ -1186,15 +1191,16 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
   // Every DOF a registered Dirichlet-type boundary condition pins -- vertex and bubble (e.g.
   // HIERARCHIC edge/face mode) alike -- overwritten last since the per-boundary-condition action
   // above only reaches a boundary's mesh nodes
-  systems[number()].finalizeConstrainedJacobianVectorProduct(_kokkos_mf_y_tag, _kokkos_mf_x_tag);
+  systems[number()].finalizeConstrainedJacobianVectorProduct(_kokkos_mf_y_tag,
+                                                              _kokkos_mf_direction_tag);
 
   for (auto & system : systems.constructedEntries())
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveAssembledTags();
 
   for (auto & system : systems.constructedEntries())
-    system.clearActiveSolutionTags();
+    system.clearActiveReadTags();
 
   disassociateVectorFromTag(y_wrap, _kokkos_mf_y_tag);
 

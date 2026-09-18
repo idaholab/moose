@@ -47,8 +47,8 @@ System::setupVariables()
 void
 System::setupTags()
 {
-  _residual_tag_active.create(MAX_TAG);
-  _residual_tag_active = false;
+  _assembled_tag_active.create(MAX_TAG);
+  _assembled_tag_active = false;
 
   _matrix_tag_active.create(MAX_TAG);
   _matrix_tag_active = false;
@@ -62,15 +62,15 @@ System::sync(const MemcpyType dir)
 {
   if (dir == MemcpyType::HOST_TO_DEVICE)
   {
-    for (auto tag : _active_solution_tags)
+    for (auto tag : _active_read_tags)
     {
       auto & vector = _system.getVector(tag);
 
-      _vectors[tag].create(vector, *this, false);
+      _vectors[tag].create(vector, *this, false, _read_tags_read_only);
       _vectors[tag].copyToDevice();
     }
 
-    for (auto tag : _active_residual_tags)
+    for (auto tag : _active_assembled_tags)
     {
       auto & vector = _system.getVector(tag);
 
@@ -95,10 +95,10 @@ System::sync(const MemcpyType dir)
   }
   else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
-    for (auto tag : _active_solution_tags)
+    for (auto tag : _active_read_tags)
       _vectors[tag].restore();
 
-    for (auto tag : _active_residual_tags)
+    for (auto tag : _active_assembled_tags)
       _vectors[tag].close();
 
     for (auto tag : _active_matrix_tags)
@@ -166,32 +166,33 @@ System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 }
 
 void
-System::setActiveSolutionTags(const std::set<TagID> & tags)
+System::setActiveReadTags(const std::set<TagID> & tags, bool read_only)
 {
-  std::set<TagID> active_solution_tags;
+  std::set<TagID> active_read_tags;
 
   for (auto tag : tags)
     if (_system.hasVector(tag))
-      active_solution_tags.insert(tag);
+      active_read_tags.insert(tag);
 
-  _active_solution_tags = active_solution_tags;
+  _active_read_tags = active_read_tags;
+  _read_tags_read_only = read_only;
 }
 
 void
-System::setActiveResidualTags(const std::set<TagID> & tags)
+System::setActiveAssembledTags(const std::set<TagID> & tags)
 {
-  std::set<TagID> active_residual_tags;
+  std::set<TagID> active_assembled_tags;
 
   for (auto tag : tags)
     if (_system.hasVector(tag))
     {
-      active_residual_tags.insert(tag);
-      _residual_tag_active[tag] = true;
+      active_assembled_tags.insert(tag);
+      _assembled_tag_active[tag] = true;
     }
 
-  _active_residual_tags = active_residual_tags;
+  _active_assembled_tags = active_assembled_tags;
 
-  _residual_tag_active.copyToDevice();
+  _assembled_tag_active.copyToDevice();
 }
 
 void
