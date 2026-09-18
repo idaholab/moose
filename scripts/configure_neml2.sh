@@ -38,7 +38,19 @@ function pip_install_neml2()
   #                        wheel cache would otherwise serve a stale build).
   # NEML2_MPI=ON is the one build option MOOSE requires; any additional cmake
   # options are forwarded by the caller as further --config-settings arguments.
-  python3 -m pip install "$src_dir" \
+  # Detect which pip is available. In a standard Python environment (e.g. conda)
+  # `python3 -m pip` works; in the uv-created apptainer venv there is no pip module,
+  # so fall back to the `pip` wrapper that forwards to `uv pip`.
+  if python3 -m pip --version &> /dev/null; then
+    PIP_EXE=(python3 -m pip)
+  elif command -v pip &> /dev/null; then
+    PIP_EXE=(pip)
+  else
+    echo "ERROR: pip not found"
+    exit 1
+  fi
+
+  "${PIP_EXE[@]}" install "$src_dir" \
     --no-build-isolation \
     --no-deps \
     --force-reinstall \
