@@ -620,6 +620,21 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateHydrostaticStress(
 }
 
 template <bool is_ad>
+GenericReal<is_ad>
+PorousViscoplasticityStressUpdateTempl<is_ad>::independentPorePorosityFloor(
+    const unsigned int population_index, const PorePorosityState & pore_porosity_begin) const
+{
+  if (population_index >= MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    mooseException("In ", this->_name, ": invalid independent pore-population floor index.");
+
+  const auto total_begin = pore_porosity_begin[0] + pore_porosity_begin[1];
+  if (total_begin <= 0.0)
+    mooseException("In ", this->_name, ": independent pore floor requires positive porosity.");
+
+  return _minimum_porosity * pore_porosity_begin[population_index] / total_begin;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::HydrostaticStressState
 PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentHydrostaticStress(
     const GenericReal<is_ad> & matrix_hydro_stress, const PorePorosityState & pore_porosity) const
@@ -3379,9 +3394,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
   PorePorosityState floor_value{};
   for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
        ++population_index)
-    floor_value[population_index] = _minimum_porosity *
-                                    context.pore_porosity_begin[population_index] /
-                                    pore_porosity_begin_total;
+    floor_value[population_index] =
+        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
 
   const auto active_count =
       static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
@@ -3700,9 +3714,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
   activate_floor = {{false, false}};
   const auto population_floor = [&](const unsigned int population_index)
   {
-    const auto total_begin = context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
-    return _minimum_porosity *
-           MetaPhysicL::raw_value(context.pore_porosity_begin[population_index] / total_begin);
+    return MetaPhysicL::raw_value(
+        independentPorePorosityFloor(population_index, context.pore_porosity_begin));
   };
 
   for (auto iteration = 0u; iteration < _local_newton_max_iterations; ++iteration)
@@ -3835,9 +3848,8 @@ typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentPorosityActiveSet(
     const IndependentLocalSolveContext & context)
 {
-  const auto total_begin = context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
   const auto population_floor = [&](const unsigned int population_index)
-  { return _minimum_porosity * context.pore_porosity_begin[population_index] / total_begin; };
+  { return independentPorePorosityFloor(population_index, context.pore_porosity_begin); };
 
   std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> floor_active{{false, false}};
   auto coordinates = IndependentLocalCoordinates{
@@ -4705,6 +4717,31 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
                                                : estimateNumberSubsteps(estimate_stress);
 
+  std::exception_ptr last_failure;
+  auto last_failure_substeps = 0u;
+  const auto failure_message = [](const std::exception_ptr & failure)
+  {
+    if (!failure)
+      return std::string("no constitutive failure was captured");
+
+    try
+    {
+      std::rethrow_exception(failure);
+    }
+    catch (const MooseException & exception)
+    {
+      return std::string(exception.what());
+    }
+    catch (const std::exception & exception)
+    {
+      return std::string(exception.what());
+    }
+    catch (...)
+    {
+      return std::string("unknown non-standard exception");
+    }
+  };
+
   while (true)
   {
     if (number_substeps > _maximum_number_substeps)
@@ -4737,10 +4774,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     catch (...)
     {
       const auto suggested_number_substeps = _suggested_number_substeps;
+      last_failure = std::current_exception();
+      last_failure_substeps = number_substeps;
       restore();
 
       if (!_adaptive_substepping)
-        throw;
+        std::rethrow_exception(last_failure);
 
       if (number_substeps >= _maximum_number_substeps)
         break;
@@ -4752,18 +4791,35 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
                                                                          : 2 * number_substeps;
 
       if (_verbose)
-        Moose::out << "In " << _name << ": retrying adaptive viscoplastic integration with "
-                   << number_substeps << " substeps." << std::endl;
+        Moose::out << "In " << _name << ": adaptive viscoplastic integration with "
+                   << last_failure_substeps << " substeps failed:\n"
+                   << failure_message(last_failure) << "\nRetrying with " << number_substeps
+                   << " substeps." << std::endl;
     }
   }
 
   restore();
+  const auto last_constitutive_dt = last_failure_substeps > 0
+                                        ? this->globalTimeStep() / last_failure_substeps
+                                        : this->globalTimeStep();
   mooseException("In ",
                  _name,
                  ": adaptive viscoplastic substepping failed after reaching "
                  "maximum_number_substeps = ",
                  _maximum_number_substeps,
-                 ". Cutting global time step.");
+                 ".\nLast constitutive failure:\n  attempted substeps = ",
+                 last_failure_substeps,
+                 "\n  constitutive dt = ",
+                 last_constitutive_dt,
+                 "\n  element = ",
+                 this->_current_elem->id(),
+                 "\n  qp = ",
+                 _qp,
+                 "\n  position = ",
+                 _q_point[_qp],
+                 "\n  cause:\n",
+                 failure_message(last_failure),
+                 "\nCutting global time step.");
 }
 
 template <bool is_ad>
