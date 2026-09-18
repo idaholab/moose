@@ -613,6 +613,21 @@ public:
   virtual void restoreSolutions();
 
   /**
+   * Snapshot geometric search state (both on the regular and, if present, the displaced mesh) so
+   * it can be restored with restoreGeometricSearchState() if this step is later rejected. Called
+   * from advanceState(), i.e. before this step's timestepSetup() has run.
+   */
+  void backupGeometricSearchState();
+
+  /**
+   * Restore geometric search state captured by the most recent backupGeometricSearchState().
+   * Called from TimeStepper::rejectStep(), which must call this before restoreSolutions() so that
+   * the geometric search re-projects from the restored, accepted-state seeds rather than from the
+   * discarded attempt's converged state.
+   */
+  void restoreGeometricSearchState();
+
+  /**
    * Allocate vectors and save old solutions into them.
    */
   virtual void saveOldSolutions();

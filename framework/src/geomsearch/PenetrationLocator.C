@@ -19,6 +19,8 @@
 #include "SubProblem.h"
 #include "MooseApp.h"
 
+#include <sstream>
+
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
@@ -178,6 +180,31 @@ PenetrationLocator::reinit()
   _has_penetrated.clear();
 
   detectPenetration();
+}
+
+std::string
+PenetrationLocator::backup()
+{
+  std::ostringstream stream;
+  dataStore(stream, _penetration_info, &_mesh);
+  dataStore(stream, _has_penetrated, &_mesh);
+  dataStore(stream, _update_location, &_mesh);
+  return stream.str();
+}
+
+void
+PenetrationLocator::restore(const std::string & data)
+{
+  // Delete the PenetrationInfo objects we own before dataLoad clears the map, or we have a
+  // memory leak: the generic std::map dataLoad clears without deleting owned pointers.
+  for (auto & it : _penetration_info)
+    delete it.second;
+  _penetration_info.clear();
+
+  std::istringstream stream(data);
+  dataLoad(stream, _penetration_info, &_mesh);
+  dataLoad(stream, _has_penetrated, &_mesh);
+  dataLoad(stream, _update_location, &_mesh);
 }
 
 Real
