@@ -1,18 +1,27 @@
 ---
-name: write-tests
+name: write-regression-tests
 description: >-
   Use when adding or writing a MOOSE regression test - a new `tests` spec entry, its input file,
   or its gold file - in the MOOSE framework or any MOOSE-based application. Covers where the
   files go, picking the tester type, creating the gold file, and the spec parameters that express
-  parallel/threaded/recover coverage. Use `run-tests` to run what you wrote and
+  parallel/threaded/recover coverage. Behavior reachable without a full solve belongs in a C++
+  unit test under `unit/` instead. Use `run-tests` to run what you wrote and
   `pr-review/references/testing-sqa.md` for the requirement/design/issues traceability rules.
 ---
 
-# Writing MOOSE tests
+# Writing MOOSE regression tests
 
 In MOOSE every test is a requirement, so a new feature, parameter, or error path is incomplete
-until a test specifies it. Read
-`.agents/skills/pr-review/references/testing-sqa.md` before writing the spec: it holds the
+until a test specifies it.
+
+This skill covers regression tests: an input file driven through the TestHarness. The other half of
+MOOSE's coverage is the C++ unit tests in `unit/src/<Thing>Test.C`, gtest cases run by
+`unit/run_tests`, and they are the better home for anything reachable without a full solve -
+utility functions, parameter validation, class APIs, and the arithmetic inside a material or
+kernel. A unit test pins that behavior directly, with no mesh, gold file, or solver tolerance in
+the way. Reach for a regression test when the requirement is about an assembled simulation.
+
+Read `.agents/skills/pr-review/references/testing-sqa.md` before writing the spec: it holds the
 `requirement`/`design`/`issues` rules, how those fields are inherited from the top of the
 `[Tests]` block, and the `detail =` sub-block pattern for one requirement verified by several
 inputs. That reference is the single source for those rules.
@@ -27,9 +36,11 @@ test/tests/<area>/<case>/<case>.i              # the input that drives it
 test/tests/<area>/<case>/gold/<case>_out.e     # the reference output
 ```
 
-Module tests live under `modules/<module>/test/tests/<area>/<case>/` with the same shape. Add to
-an existing `tests` file when the new test belongs to the same area; the SQA fields at the top of
-its `[Tests]` block then already cover it.
+`<area>` is usually the system the object belongs to and `<case>` the object or behavior under
+test, so a typical path reads `test/tests/kernels/ad_coupled_value/`. Module tests live under
+`modules/<module>/test/tests/<area>/<case>/` with the same shape. Add to an existing `tests` file
+when the new test belongs to the same area; the SQA fields at the top of its `[Tests]` block then
+already cover it.
 
 ## Picking the tester type
 
@@ -84,7 +95,9 @@ Per AGENTS.md, one test plus TestHarness options covers process counts, thread c
 mesh, recover, and restep. Do not write sibling specs that differ only in those. Split a test only
 when a mode intentionally has different inputs, expected output, or requirements.
 
-State a test's real needs with spec parameters:
+A test that genuinely requires a particular configuration states that requirement with spec
+parameters, and the harness then honors or skips the test depending on the arguments the harness
+was invoked with:
 
 - `min_parallel`/`max_parallel`, `min_threads`/`max_threads` - the process and thread counts the
   test requires. Give the harness `-j` of at least `-p` x `--n-threads`, or the test is skipped
@@ -96,15 +109,16 @@ State a test's real needs with spec parameters:
 - `recover = false`, `restep = false` - only when the test genuinely cannot support that mode.
 - `heavy = true` - long-running tests, skipped unless `--heavy`.
 - `prereq = '<test name>'` - when a test consumes another's output.
-- `valgrind = 'NONE|NORMAL|HEAVY'` - manual memory management is worth a valgrind recipe.
+- `valgrind = 'NONE|NORMAL|HEAVY'` - leave this at its default unless the test exercises manual
+  memory management, which is worth a valgrind recipe.
 
 ## Tolerances
 
-`Exodiff`/`CSVDiff` default to `rel_err = 5.5e-6` and `abs_zero = 1e-10`
-(`FileTester.validParams`). Set them as tight as the physics allows: a loose tolerance makes the
-test unable to fail. When one column needs slack, `CSVDiff`'s `override_columns`/
-`override_rel_err`/`override_abs_zero` beat widening the whole test, and `run-tests` documents
-their length-matching requirement.
+A diff tester's `rel_err` and `abs_zero` come from `FileTester`'s defaults unless the spec sets
+them. Set them as tight as the physics allows: a loose tolerance makes the test unable to fail.
+When a single column or variable needs slack, give it its own tolerance instead of widening the
+whole test - `CSVDiff` has `override_columns`, `Exodiff` has a `custom_cmp` command file.
+`references/tolerances.md` holds the default values and the mechanics for both.
 
 ## Before calling the test done
 
