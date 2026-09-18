@@ -106,11 +106,11 @@
       detail = 'non-conformality in three dimensions,'
     []
     [elem_types]
-      type = 'RunException'
+      type = 'RunApp'
       input = 'elem_types_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-      expect_err = 'Element type in subdomain  \(0\) : TRI3 QUAD4'
+      expect_out = 'Element type in subdomain  \(0\) : TRI3 QUAD4'
       detail = 'different element types in a single subdomain,'
     []
     [max_size]
