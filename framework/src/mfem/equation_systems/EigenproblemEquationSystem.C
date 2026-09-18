@@ -17,7 +17,17 @@ namespace Moose::MFEM
 {
 
 void
-EigenproblemEquationSystem::ApplyEssentialBCs()
+EigenproblemEquationSystem::AddEssentialConstraint(
+    std::shared_ptr<MFEMEssentialConstraint> constraint)
+{
+  mooseError("Constraint '",
+             constraint->name(),
+             "' cannot be used in an MFEM eigenproblem: essential constraints on interior "
+             "degrees of freedom are not supported by the eigenproblem equation system.");
+}
+
+void
+EigenproblemEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(1);
   _ess_markers.resize(1);
@@ -70,7 +80,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX)
 
   height = trueX.Size();
   width = trueX.Size();
-  ApplyEssentialBCs();
+  ApplyEssentialConstraints();
   FormEigenproblemMatrix();
   FormMassMatrix();
 }
