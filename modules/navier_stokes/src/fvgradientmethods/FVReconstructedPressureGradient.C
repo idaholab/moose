@@ -392,14 +392,15 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
 
   const Real surface_area = surface_vector.norm();
-  const auto face_normal = surface_vector / surface_area;
-  // RhieChow stores the scalar flux relative to FaceInfo::normal(). Flip that orientation when the
-  // current cell is on the opposite side so q_f is outward from this cell.
-  const Point flux_normal =
-      rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
+  const auto pressure_face_type =
+      fi->faceType({_pressure_variable_number, _pressure_system->number()});
+  // On one-sided pressure faces, RhieChow stores the flux outward from the pressure cell. On
+  // two-sided faces, it stores the flux relative to FaceInfo::normal(), so only the neighbor cell
+  // needs the opposite orientation.
+  const Real normal_alignment =
+      pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
   const Real face_flux = rc.getVolumetricFaceFlux(*fi);
   mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
-  const Real normal_alignment = flux_normal * face_normal;
   Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 
   // First-order expansion at the face gives
