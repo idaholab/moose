@@ -132,8 +132,13 @@ The first is to directly solve the equation according to
 \end{equation}
 
 The second approach is to split the fourth order equation into two second order equations, such that
-two variables are solved, the concentration $c_i$ and the chemical potential $\mu_i$. In this case,
-the two residual equations are
+two variables are solved, the concentration $c_i$ and the chemical potential $\mu_i$:
+
+\begin{equation}
+\mu_i = \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_{d}}{\partial c_i} - \nabla\cdot (\kappa_i \nabla c_i)
+\end{equation}
+
+In this case, the two residual equations are
 
 \begin{equation}
 \begin{aligned}
