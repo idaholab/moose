@@ -164,6 +164,7 @@ public:
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
   using LinearFVGradientManager::computeGradients;
+  using LinearFVGradientManager::computeGradientsExcept;
   using LinearFVGradientManager::registerFVGradient;
   using LinearFVGradientManager::updateFVGradient;
 

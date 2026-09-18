@@ -403,17 +403,16 @@ RhieChowMassFlux::prepareMomentumPredictor()
   mooseAssert(_pressure_gradient_field,
               "The pressure gradient field must be linked before preparing momentum.");
 
-  if (usingReconstructedPressureGradientMethod())
-  {
-    for (const auto component : make_range(dimension()))
-      momentumSystem(component).updateFVGradient(
-          velocityVariable(component).requestCellGradients());
-    reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
-  }
-
   _grad_p_current.clear();
   for (const auto & component : pressureGradientComponents())
     _grad_p_current.push_back(component->clone());
+}
+
+void
+RhieChowMassFlux::finalizeMomentumPredictor()
+{
+  if (usingReconstructedPressureGradientMethod())
+    reconstructedGradientMethod().saveLaggedVelocityGradient(*this);
 }
 
 void
@@ -438,7 +437,6 @@ RhieChowMassFlux::preparePressureRelaxation()
 
   // The current pressure solution and corrected face flux are both unrelaxed here. Form the
   // conservative candidate before pressure relaxation replaces that solution.
-  _pressure_system->updateFVGradient(basePressureGradientField());
   reconstructedGradientMethod().computeCandidateFromCorrectedFlux(*this);
   updateCellVelocity(reconstructedGradientMethod().reconstructedCandidate(*this));
 }
@@ -446,17 +444,20 @@ RhieChowMassFlux::preparePressureRelaxation()
 void
 RhieChowMassFlux::finalizePressureCorrector()
 {
-  // Refresh every registered gradient from the relaxed pressure solution.
-  _pressure_system->computeGradients();
-
   if (usingReconstructedPressureGradientMethod())
   {
+    // Refresh every ordinary pressure gradient while leaving the old coupling field untouched
+    // until the current reconstructed candidate has been relaxed into it.
+    _pressure_system->computeGradientsExcept(pressureGradientField());
     reconstructedGradientMethod().finalizeCouplingPressureGradient(
         *this, basePressureGradientComponents());
     _pressure_system->updateFVGradient(pressureGradientField());
   }
   else
+  {
+    _pressure_system->computeGradients();
     updateCellVelocity(pressureGradientComponents());
+  }
 }
 
 void

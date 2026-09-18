@@ -114,6 +114,9 @@ public:
   /// Snapshot the fields read by the next momentum predictor.
   void prepareMomentumPredictor();
 
+  /// Capture the lagged velocity gradients computed while assembling the momentum predictor.
+  void finalizeMomentumPredictor();
+
   /// Capture the lagged velocity gradient for another corrector using the current predictor.
   void preparePISOCorrector();
 

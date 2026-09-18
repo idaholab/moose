@@ -131,7 +131,7 @@ private:
 
   /// Interpolate a lagged velocity-component gradient to a face.
   RealVectorValue reconstructionVelocityGradient(const RhieChowMassFlux & rc,
-                                                 const ElemInfo & elem_info,
+                                                 const RealVectorValue & elem_gradient,
                                                  const FaceInfo & fi,
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
@@ -148,6 +148,7 @@ private:
    * @param rc The bound Rhie-Chow flow-system configuration supplying the corrected face flux
    * and lagged velocity gradients
    * @param elem_info The cell whose velocity-projection system is being assembled
+   * @param elem_velocity_gradients Lagged velocity gradients at the center of elem_info
    * @param fi The face being added to the projection
    * @param surface_vector The coordinate-system-aware area vector of this face, outward from
    * elem_info
@@ -160,6 +161,7 @@ private:
    */
   void assembleFaceProjection(const RhieChowMassFlux & rc,
                               const ElemInfo & elem_info,
+                              const std::vector<RealVectorValue> & elem_velocity_gradients,
                               const FaceInfo * fi,
                               const Point & surface_vector,
                               bool elem_has_info,

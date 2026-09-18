@@ -352,27 +352,20 @@ FVReconstructedPressureGradient::saveLaggedVelocityGradient(RhieChowMassFlux & r
 RealVectorValue
 FVReconstructedPressureGradient::reconstructionVelocityGradient(
     const RhieChowMassFlux & rc,
-    const ElemInfo & elem_info,
+    const RealVectorValue & elem_gradient,
     const FaceInfo & fi,
     const bool elem_has_info,
     const unsigned int velocity_component) const
 {
   const auto dimension = rc.dimension();
-  const auto & velocity = rc.velocityVariable(velocity_component);
-  const auto system_number = rc.momentumSystem(velocity_component).number();
-
-  RealVectorValue elem_gradient;
-  for (const auto direction : make_range(dimension))
-    elem_gradient(direction) =
-        (*_lagged_reconstruction_velocity_gradient[velocity_component][direction])(
-            elem_info.dofIndices()[system_number][velocity.number()]);
-
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
   // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
   // gradient. Otherwise interpolate the two lagged cell gradients to the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
     return elem_gradient;
 
+  const auto & velocity = rc.velocityVariable(velocity_component);
+  const auto system_number = rc.momentumSystem(velocity_component).number();
   RealVectorValue neighbor_gradient;
   for (const auto direction : make_range(dimension))
     neighbor_gradient(direction) =
@@ -391,13 +384,15 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 }
 
 void
-FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux & rc,
-                                                        const ElemInfo & elem_info,
-                                                        const FaceInfo * const fi,
-                                                        const Point & surface_vector,
-                                                        const bool elem_has_info,
-                                                        DenseMatrix<Real> & matrix,
-                                                        DenseVector<Real> & projection_rhs) const
+FVReconstructedPressureGradient::assembleFaceProjection(
+    const RhieChowMassFlux & rc,
+    const ElemInfo & elem_info,
+    const std::vector<RealVectorValue> & elem_velocity_gradients,
+    const FaceInfo * const fi,
+    const Point & surface_vector,
+    const bool elem_has_info,
+    DenseMatrix<Real> & matrix,
+    DenseVector<Real> & projection_rhs) const
 {
   mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
 
@@ -421,8 +416,8 @@ FVReconstructedPressureGradient::assembleFaceProjection(const RhieChowMassFlux &
   Real gradient_flux_correction = 0.0;
   for (const auto component : make_range(rc.dimension()))
   {
-    const auto velocity_gradient =
-        reconstructionVelocityGradient(rc, elem_info, *fi, elem_has_info, component);
+    const auto velocity_gradient = reconstructionVelocityGradient(
+        rc, elem_velocity_gradients[component], *fi, elem_has_info, component);
     for ([[maybe_unused]] const auto direction : make_range(rc.dimension()))
       mooseAssert(std::isfinite(velocity_gradient(direction)),
                   "Lagged velocity gradient must be finite.");
@@ -508,6 +503,9 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
   const auto & base_pressure_gradient = rc.basePressureGradientComponents();
   const auto face_flux_iteration = rc.faceMassFluxGeneration();
 
+  mooseAssert(base_pressure_gradient.size() == dimension,
+              "A base pressure-gradient component must exist for every spatial dimension.");
+
   mooseAssert(face_flux_iteration != _last_reconstructed_face_flux_iteration,
               "The current pressure corrector must produce a new face flux before "
               "reconstruction.");
@@ -523,6 +521,7 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
 
   const auto & mesh = rc.pressureSystem().feProblem().mesh();
   const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+  std::vector<RealVectorValue> elem_velocity_gradients(dimension);
 
   for (const auto & elem_info : mesh.elemInfoVector())
   {
@@ -535,6 +534,20 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     matrix.zero();
     projection_rhs.zero();
 
+    for (const auto component : make_range(dimension))
+    {
+      const auto & velocity = rc.velocityVariable(component);
+      const auto system_number = rc.momentumSystem(component).number();
+      const auto velocity_dof = elem_info->dofIndices()[system_number][velocity.number()];
+      for (const auto direction : make_range(dimension))
+      {
+        const auto gradient =
+            (*_lagged_reconstruction_velocity_gradient[component][direction])(velocity_dof);
+        mooseAssert(std::isfinite(gradient), "Lagged velocity gradient must be finite.");
+        elem_velocity_gradients[component](direction) = gradient;
+      }
+    }
+
     // The coordinate-system-aware surface vector S_f supplied by loopOverElemFaceInfo is outward
     // from this cell, including the appropriate Cartesian or axisymmetric geometric weighting.
     auto act = [&](const Elem &,
@@ -544,8 +557,14 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
                    const Real,
                    const bool elem_has_info)
     {
-      assembleFaceProjection(
-          rc, *elem_info, fi, surface_vector, elem_has_info, matrix, projection_rhs);
+      assembleFaceProjection(rc,
+                             *elem_info,
+                             elem_velocity_gradients,
+                             fi,
+                             surface_vector,
+                             elem_has_info,
+                             matrix,
+                             projection_rhs);
     };
 
     Moose::FV::loopOverElemFaceInfo(
