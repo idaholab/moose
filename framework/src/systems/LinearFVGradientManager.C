@@ -45,6 +45,13 @@ copyGradient(const LinearFVGradientReader::GradientContainer & source,
     mooseAssert(source[component], "Source gradient component vector must be initialized.");
     mooseAssert(destination[component],
                 "Destination gradient component vector must be initialized.");
+    mooseAssert(
+        source[component]->size() == destination[component]->size() &&
+            source[component]->local_size() == destination[component]->local_size() &&
+            source[component]->first_local_index() == destination[component]->first_local_index() &&
+            source[component]->last_local_index() == destination[component]->last_local_index(),
+        "Source and destination gradient component vectors must have matching parallel "
+        "layouts.");
     *destination[component] = *source[component];
   }
 }

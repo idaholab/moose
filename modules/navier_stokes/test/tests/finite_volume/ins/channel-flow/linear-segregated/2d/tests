@@ -48,6 +48,7 @@
                   "the linear finite volume momentum predictor."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-refreshes-other-readers]
@@ -103,6 +104,7 @@
                   "used to publish the momentum-coupling pressure gradient."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-transient-steady]
@@ -129,7 +131,9 @@
     requirement = "The system shall report an error when a reconstructed pressure gradient method "
                   "is registered for a variable other than the pressure variable owned by the "
                   "Rhie-Chow user object."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-wrong-system]
@@ -141,7 +145,9 @@
     expect_err = "must use pressure gradients from the same system"
     requirement = "The system shall report an error when momentum components obtain their "
                   "reconstructed coupling gradients from different pressure systems."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-mixed-method]
@@ -150,7 +156,9 @@
     cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/gradient_method=reconstructed LinearFVKernels/v_pressure/gradient_method=gg'
     expect_err = "must use the same pressure gradient method"
     requirement = "The system shall report an error when different momentum components request different pressure gradient methods for the reconstructed coupling field."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-mixed-pressure-variable]
@@ -160,7 +168,9 @@
     expect_err = "must use the same pressure variable"
     requirement = "The system shall report an error when different momentum components use "
                   "different pressure variables for the reconstructed coupling gradient."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-block-restricted]
@@ -175,6 +185,7 @@
                   "partition the Rhie-Chow object's blocks and share the same coupling gradient."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-rejects-partial-blocks]
@@ -192,6 +203,7 @@
     expect_err = "requires pressure variable 'pressure' and RhieChowMassFlux 'rc' to have identical block restrictions"
     requirement = "The reconstructed pressure-gradient method shall reject a pressure variable "
                   "defined on blocks outside those handled by its Rhie-Chow object."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
@@ -211,6 +223,7 @@
     expect_err = "requires velocity variable 'vel_x' and RhieChowMassFlux 'rc' to have identical block restrictions"
     requirement = "The reconstructed pressure-gradient method shall reject a velocity variable "
                   "defined on blocks outside those handled by its Rhie-Chow object."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
@@ -223,7 +236,9 @@
     requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
                   "contribute pressure sources to the same momentum system on a block handled by "
                   "the Rhie-Chow object."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-overlap-outside-rc-blocks]
@@ -232,7 +247,9 @@
     cli_args = '--check-input'
     requirement = "The system shall allow two LinearFVMomentumPressure kernels to overlap only "
                   "on blocks outside the blocks handled by their Rhie-Chow object."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-block-restricted-inconsistent]
@@ -243,7 +260,9 @@
     requirement = "The system shall report an error when two disjoint block-restricted "
                   "LinearFVMomentumPressure kernels on the same Rhie-Chow object use different "
                   "pressure gradient methods."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-duplicate-kernel]
@@ -256,7 +275,9 @@
     expect_err = "more than one LinearFVMomentumPressure kernel contributing a pressure source on the same block"
     requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
                   "contribute a pressure source to the same momentum system on the same block."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-wrong-component]
@@ -267,7 +288,9 @@
     requirement = "The system shall report an error when a LinearFVMomentumPressure kernel "
                   "declares a momentum component different from the momentum system it is "
                   "linked to."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [momentum-pressure-missing-kernel]
@@ -277,7 +300,9 @@
     expect_err = "found no applicable LinearFVMomentumPressure kernel for momentum system"
     requirement = "The system shall report an error when a momentum system has no applicable "
                   "LinearFVMomentumPressure kernel covering one of the Rhie-Chow object's blocks."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'LinearFVMomentumPressure.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-candidate-skips-face-flux-iteration]
@@ -294,7 +319,9 @@
     requirement = "The system shall reconstruct from the latest corrected face-flux iteration "
                   "when it differs from the previous reconstruction, without requiring "
                   "consecutive iterations."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-invalid-density]
@@ -305,7 +332,9 @@
     requirement = "The system shall identify the face and adjacent cell when reconstructed "
                   "pressure gradients encounter non-positive density while converting corrected "
                   "mass flux to volumetric flux."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [reconstructed-gradient-zero-Ainv]
@@ -321,7 +350,9 @@
     allow_test_objects = true
     requirement = "The system shall identify the momentum component and cell when reconstructed "
                   "pressure gradients encounter a zero inverse momentum diagonal."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
   []
   [energy_boussinesq]
@@ -392,6 +423,7 @@
     requirement = "The standard pressure-gradient method shall exhibit nonuniform block-average "
                   "streamwise velocities when a large momentum body force is applied only in the "
                   "middle section of a three-section channel."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
@@ -406,6 +438,7 @@
     requirement = "The reconstructed pressure-gradient method shall preserve the initial uniform "
                   "streamwise velocity in all three channel sections when a large momentum body "
                   "force is applied only in the middle section."
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
@@ -435,6 +468,7 @@
     input = rotated-channel.i
     exodiff = rotated-channel_out.e
     requirement = 'The system shall support supplying a single normal velocity scalar at an inlet and computing the corresponding velocity vector via the boundary face geometry.'
+    recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     design = 'LinearFVNormalVelocityFunctorDirichletBC.md'
     issues = '#32371'

@@ -274,7 +274,16 @@ FVReconstructedPressureGradient::copyGradient(const GradientView & source,
   mooseAssert(source.size() == destination.size(),
               "Source and destination gradients must have equal component counts.");
   for (const auto component : index_range(source))
+  {
+    mooseAssert(
+        source[component]->size() == destination[component]->size() &&
+            source[component]->local_size() == destination[component]->local_size() &&
+            source[component]->first_local_index() == destination[component]->first_local_index() &&
+            source[component]->last_local_index() == destination[component]->last_local_index(),
+        "Source and destination gradient component vectors must have matching parallel "
+        "layouts.");
     *destination[component] = *source[component];
+  }
 }
 
 void
