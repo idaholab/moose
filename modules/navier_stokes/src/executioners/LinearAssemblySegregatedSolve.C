@@ -433,6 +433,12 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
              << " Linear its: " << its_normalized_residuals[system_i].first << std::endl;
   }
 
+  // Each component's assembly computed its gradient before that component was solved. Solving the
+  // momentum systems does not refresh those fields, so they still contain the pre-solve velocity
+  // gradients required by the reconstructed pressure-gradient update.
+  if (_should_solve_pressure)
+    _rc_uo->finalizeMomentumPredictor();
+
   for (const auto system_i : index_range(_momentum_systems))
   {
     LinearImplicitSystem & momentum_system =
