@@ -109,9 +109,6 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
 class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
-  /// Get the device accelerated computations are supposed to be running on.
-  std::optional<MooseEnum> getComputeDevice() const;
-
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
@@ -1121,22 +1118,10 @@ public:
 
 #ifdef MOOSE_MFEM_ENABLED
   /**
-   * Create/configure the MFEM device with the provided \p device_string. More than one device can
-   * be configured. If supplying multiple devices, they should be comma separated
+   * Create/configure the MFEM device with the provided \p executioner_device. More than one device
+   * can be configured. If supplying multiple devices, they should be comma separated.
    */
-  void setMFEMDevice(const std::string & device_string,
-                     bool gpu_aware_mpi,
-                     Moose::PassKey<MFEMProblemSolve>);
-
-  /**
-   * Get the MFEM device object
-   */
-  std::shared_ptr<mfem::Device> getMFEMDevice(Moose::PassKey<MultiApp>) { return _mfem_device; }
-
-  /**
-   * Get the configured MFEM devices
-   */
-  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
+  void setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi);
 #endif
 
   /**
@@ -1743,14 +1728,6 @@ private:
   const torch::DeviceType _libtorch_device;
 #endif
 
-#ifdef MOOSE_MFEM_ENABLED
-  /// The MFEM Device object
-  std::shared_ptr<mfem::Device> _mfem_device;
-
-  /// MFEM supported devices based on user-provided config
-  std::set<std::string> _mfem_devices;
-#endif
-
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
@@ -1808,11 +1785,3 @@ MooseApp::getInterfaceObjects() const
   const static std::vector<T *> empty;
   return empty;
 }
-
-#ifdef MOOSE_MFEM_ENABLED
-inline const std::set<std::string> &
-MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
-{
-  return _mfem_devices;
-}
-#endif
