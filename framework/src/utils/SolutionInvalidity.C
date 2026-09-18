@@ -45,6 +45,14 @@ SolutionInvalidity::flagInvalidSolutionInternal(const InvalidSolutionID _invalid
   ++_counts[_invalid_solution_id].current_counts;
 }
 
+void
+SolutionInvalidity::flagSolutionWarningForObject(const std::string & object_type,
+                                                 const std::string & message)
+{
+  const auto id = _solution_invalidity_registry.registerInvalidity(object_type, message, true);
+  flagInvalidSolutionInternal(id);
+}
+
 bool
 SolutionInvalidity::hasInvalidSolutionWarning() const
 {
