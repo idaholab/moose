@@ -220,6 +220,17 @@ Applications:
         remove:
             - framework/doc/remove.yml
 
+    solid_mechanics:
+        exe_directory: modules/combined
+        app_types:
+            - SolidMechanicsApp
+        content_directory: modules/solid_mechanics/doc/content
+        remove:
+            - framework/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
+        log_stub_files: WARNING
+
     solid_properties:
         exe_directory: modules/combined
         app_types:
@@ -240,17 +251,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
             - modules/stochastic_tools/doc/remove.yml
-
-    solid_mechanics:
-        exe_directory: modules/combined
-        app_types:
-            - SolidMechanicsApp
-        content_directory: modules/solid_mechanics/doc/content
-        remove:
-            - framework/doc/remove.yml
-        unregister:
-            - framework/doc/unregister.yml
-        log_stub_files: WARNING
 
     subchannel:
         exe_directory: modules/combined
@@ -388,6 +388,10 @@ Requirements:
         directories:
             - modules/optimization
 
+    peridynamics:
+        directories:
+            - modules/peridynamics
+
     phase_field:
         directories:
             - modules/phase_field
@@ -400,10 +404,6 @@ Requirements:
             - modules/porous_flow
         log_duplicate_requirement: WARNING
         log_missing: WARNING
-
-    peridynamics:
-        directories:
-            - modules/peridynamics
 
     ray_tracing:
         directories:
@@ -426,6 +426,13 @@ Requirements:
             - modules/shifted_boundary_method
         log_missing: WARNING
 
+    solid_mechanics:
+        directories:
+            - modules/solid_mechanics
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_empty_issues: WARNING
+
     solid_properties:
         directories:
             - modules/solid_properties
@@ -433,13 +440,6 @@ Requirements:
     stochastic_tools:
         directories:
             - modules/stochastic_tools
-
-    solid_mechanics:
-        directories:
-            - modules/solid_mechanics
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
-        log_empty_issues: WARNING
 
     subchannel:
         directories:
