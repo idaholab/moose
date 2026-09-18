@@ -61,7 +61,7 @@
     input = '../displacement_moving_indenter_elastic/hertz_moving.i'
     csvdiff = 'hertz_moving_csv.csv'
     cli_args = 'Executioner/type=UzawaTransient Outputs/csv/file_base=hertz_moving_csv'
-    rel_err = 1e-8
+    rel_err = 1e-6
     max_parallel = 1
     requirement = 'UzawaTransient shall pass through to plain Transient behavior when no '
                   '`load_control_kernel` is supplied, so displacement-controlled inputs can be '

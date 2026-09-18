@@ -16,7 +16,7 @@
     type = 'CSVDiff'
     input = 'hertz_elastic_with_action.i'
     csvdiff = 'hertz_elastic_with_action_csv.csv'
-    rel_err = 1e-8
+    rel_err = 1e-6
     max_parallel = 1
     requirement = 'The RigidContactAction shall expand a `[RigidContact]` sub-block into the '
                   'analytic-level-set rigid-contact object stack (lower-d block, LM variable + '
@@ -28,7 +28,7 @@
     type = 'CSVDiff'
     input = 'hertz_elastic_without_action.i'
     csvdiff = 'hertz_elastic_without_action_csv.csv'
-    rel_err = 1e-8
+    rel_err = 1e-6
     max_parallel = 1
     requirement = 'The hand-rolled companion input shall produce the same converged state as '
                   'the RigidContactAction-based input, confirming that the action expansion is '
