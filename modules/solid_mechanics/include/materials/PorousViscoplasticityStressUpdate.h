@@ -24,8 +24,10 @@
  * Matrix hydrostatic stress p, equivalent stress q, and porosity f are advanced simultaneously
  * using an analytical local Jacobian. Derived models may optionally expose two independently
  * evolving pore-porosity populations; that path advances (p,q,f_0,f_1) while retaining one common
- * matrix creep response. Derived models specialize the pore-pressure closure and accepted-state
- * bookkeeping.
+ * matrix creep response. Optional linear porosity corrections to the isotropic Young's modulus and
+ * Poisson's ratio are evaluated at the current local porosity so elastic softening participates in
+ * the same constitutive solve. Derived models specialize the pore-pressure closure and
+ * accepted-state bookkeeping.
  */
 template <bool is_ad>
 class PorousViscoplasticityStressUpdateTempl
@@ -418,6 +420,18 @@ private:
   using ScaledLocalJacobian = std::array<std::array<Real, LOCAL_SYSTEM_SIZE>, LOCAL_SYSTEM_SIZE>;
   using LocalResidual = std::array<GenericReal<is_ad>, LOCAL_SYSTEM_SIZE>;
 
+  /** Porosity-corrected isotropic elasticity and its derivative with respect to total porosity. */
+  struct PorosityElasticityState
+  {
+    GenericRankFourTensor<is_ad> tensor;
+    GenericRankFourTensor<is_ad> dporosity;
+  };
+
+  bool porosityDependentElasticityEnabled() const;
+  PorosityElasticityState
+  evaluatePorosityElasticity(const GenericRankFourTensor<is_ad> & dense_elasticity_tensor,
+                             const GenericReal<is_ad> & porosity) const;
+
   /** Trial data, numerical scales, and tolerances shared by one local constitutive solve. */
   struct LocalSolveContext
   {
@@ -783,6 +797,11 @@ protected:
 private:
   bool _compute_consistent_tangent;
   RankFourTensor _last_consistent_tangent;
+
+  /// Linear factor a_E in E(f) = E_dense (1 - a_E f), evaluated inside the local LPS solve.
+  const Real _youngs_modulus_porosity_factor;
+  /// Linear factor a_nu in nu(f) = nu_dense (1 - a_nu f), evaluated inside the local LPS solve.
+  const Real _poissons_ratio_porosity_factor;
 
   const Real _minimum_porosity;
   const Real _porosity_bound_tolerance;
