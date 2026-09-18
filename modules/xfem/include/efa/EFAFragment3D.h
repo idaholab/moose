@@ -12,6 +12,7 @@
 #include "EFAFragment.h"
 
 #include <limits>
+#include <set>
 
 class EFAEdge;
 class EFAFace;
@@ -33,14 +34,33 @@ private:
 
 public:
   // override pure virtual methods
-  virtual void switchNode(EFANode * new_node, EFANode * old_node);
-  virtual bool containsNode(EFANode * node) const;
-  virtual unsigned int getNumCuts() const;
-  virtual unsigned int getNumCutNodes() const;
-  virtual std::set<EFANode *> getAllNodes() const;
-  virtual bool isConnected(EFAFragment * other_fragment) const;
+  void switchNode(EFANode * new_node, EFANode * old_node) override;
+  bool containsNode(EFANode * node) const override;
+  unsigned int getNumCuts() const override;
+  unsigned int getNumCutNodes() const override;
+  std::set<EFANode *> getAllNodes() const override;
+  bool isConnected(EFAFragment * other_fragment) const override;
   virtual bool isEdgeConnected(EFAFragment * other_fragment) const;
-  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes);
+  /// Detect and handle three classes of embedded-node configurations that arise from multi-cut
+  /// conflicts.  A cut-intersection embedded node should sit on edges of exactly 2 fragment faces
+  /// (an element edge is shared by 2 faces in a closed fragment manifold).
+  ///
+  /// (A) Lone-edge (emb_faces.size() == 1): the signature of a multi-cut conflict in
+  ///     EFAElement3D::addFaceEdgeCut, where the fragmentFaceAlreadyCut gate blocks the second
+  ///     cut's symmetric propagation across a shared element edge.  We CANNOT drop the EFANode
+  ///     globally: the same node may be a valid cut vertex on another element's fragment (split()
+  ///     uses it there and getMasterInfo must still find it) or an edge endpoint in inherited
+  ///     cut-plane faces.  Fixed fragment-locally by erasing the spurious edge intersection; the
+  ///     EFANode object stays alive and this element's element-face edges still list it.  These
+  ///     nodes are NOT appended to invalid_emb_out.
+  /// (B) Over-shared (emb_faces.size() > 2): non-manifold topology, not observed in any failing
+  ///     case; local cleanup is unproven and could mask an upstream bug, so we EFAError until a
+  ///     reproducer exists.
+  /// (C) Phantom cut (emb_faces.size() == 2 but no exterior face contributes a real cut): the
+  ///     2D-style criterion from the original code.  The node should be dropped wholesale and is
+  ///     appended to invalid_emb_out for the algorithm driver to purge globally.
+  void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                  std::vector<EFANode *> & invalid_emb_out) override;
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
@@ -65,6 +85,5 @@ private:
   EFAFragment3D * connectSubfaces(EFAFace * start_face,
                                   unsigned int startOldFaceID,
                                   std::vector<std::vector<EFAFace *>> & subfaces);
-  EFAEdge * loneEdgeOnFace(unsigned int face_id) const;
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };
