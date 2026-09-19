@@ -589,10 +589,6 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
-#ifdef MOOSE_MFEM_ENABLED
-  params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
-  params.addPrivateParam<std::set<std::string>>("_mfem_devices");
-#endif
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -696,14 +692,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #ifdef MOOSE_LIBTORCH_ENABLED
     ,
     _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("compute_device")))
-#endif
-#ifdef MOOSE_MFEM_ENABLED
-    ,
-    _mfem_device(isParamValid("_mfem_device")
-                     ? getParam<std::shared_ptr<mfem::Device>>("_mfem_device")
-                     : nullptr),
-    _mfem_devices(isParamValid("_mfem_devices") ? getParam<std::set<std::string>>("_mfem_devices")
-                                                : std::set<std::string>{})
 #endif
 {
   if (&parameters != &_pars)
@@ -924,17 +912,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
 
-#ifdef MOOSE_MFEM_ENABLED
-  if (_mfem_device)
-  {
-    mooseAssert(!isUltimateMaster(),
-                "The MFEM device should only be auto-set for sub-applications");
-    mooseAssert(!_mfem_devices.empty(),
-                "If we are a sub-application and we have an MFEM device object, then we must know "
-                "its configuration string");
-  }
-#endif
-
   // Data specifically associated with the mesh (meta-data) that will read from the restart
   // file early during the simulation setup so that they are available to Actions and other objects
   // that need them during the setup process. Most of the restartable data isn't made available
@@ -958,14 +935,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   queryKokkosGPUs();
 #endif
 #endif
-}
-
-std::optional<MooseEnum>
-MooseApp::getComputeDevice() const
-{
-  if (isParamSetByUser("compute_device"))
-    return getParam<MooseEnum>("compute_device");
-  return {};
 }
 
 MooseApp::~MooseApp()
@@ -3627,27 +3596,33 @@ MooseApp::isInTree()
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string,
-                        bool gpu_aware_mpi,
-                        Moose::PassKey<MFEMProblemSolve>)
+MooseApp::setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi)
 {
-  const auto string_vec = MooseUtils::split(device_string, ",");
-  auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
-  if (!_mfem_device)
+  // Static for lifetime purposes only, otherwise unneeded
+  static mfem::Device device;
+  // Static so multiapps can error when configured with a different device, otherwise unneeded
+  static std::string configured_device;
+
+  std::string selected_device;
+  if (isParamSetByUser("compute_device"))
+    selected_device = static_cast<std::string>(getParam<MooseEnum>("compute_device"));
+  else if (!executioner_device.empty())
+    selected_device = executioner_device;
+  else if (!mfem::Device::IsConfigured())
+    selected_device = "cpu";
+
+  if (!mfem::Device::IsConfigured())
   {
-    _mfem_device = std::make_shared<mfem::Device>(device_string);
-    _mfem_devices = std::move(string_set);
-    _mfem_device->SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
-    _mfem_device->Print(Moose::out);
+    device.Configure(selected_device);
+    device.SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
+    device.Print(Moose::out);
+    configured_device = selected_device;
   }
-  else if (!device_string.empty() && string_set != _mfem_devices)
-    mooseError("Attempted to configure with "
-               "MFEM devices '",
-               MooseUtils::join(string_set, " "),
-               "', but we have already "
-               "configured the MFEM device "
-               "object with the devices '",
-               MooseUtils::join(_mfem_devices, " "),
+  else if (!selected_device.empty() && selected_device != configured_device)
+    mooseError("Attempted to configure with MFEM devices '",
+               selected_device,
+               "', but we have already configured the MFEM device object with the devices '",
+               configured_device,
                "'");
 }
 #endif
