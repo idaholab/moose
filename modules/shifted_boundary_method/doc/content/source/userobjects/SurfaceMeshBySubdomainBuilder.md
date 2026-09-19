@@ -2,7 +2,7 @@
 
 `SurfaceMeshBySubdomainBuilder` prepares the geometric data structures used by
 [`PointInSubdomainCheckUO`](userobjects/PointInSubdomainCheckUO.md) for per-subdomain
-in-out testing. It processes a source surface mesh, identified by the `surface_mesh`
+in-out testing. It processes a source surface mesh, identified by the `complete_boundary_mesh`
 parameter, and groups its boundary elements into one `SurfaceElementSet` per subdomain ID.
 The per-subdomain sets are exposed for reuse by other objects in the simulation.
 
@@ -15,7 +15,7 @@ from these sets.
 
 ## Usage
 
-Set `surface_mesh` to the name under which the surface mesh was stored using the
+Set `complete_boundary_mesh` to the name under which the surface mesh was stored using the
 `MeshGenerator` `save_with_name` parameter. The replicated-mesh check is always performed.
 Because the boundary loops must be closed for a reliable in-out test, consider enabling
 `check_watertightness` when preparing a new mesh.
