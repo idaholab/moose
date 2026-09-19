@@ -58,7 +58,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _old_older_value(nullptr),
     _parent(rhs._parent),
     _property_name(rhs._property_name),
-    _required(false)
+    _required(rhs._required)
 {
 }
 
@@ -74,7 +74,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _old_older_value(nullptr),
     _parent(parent),
     _property_name(rhs._property_name),
-    _required(false)
+    _required(rhs._required)
 {
 }
 
@@ -244,13 +244,19 @@ FunctionMaterialPropertyDescriptor<is_ad>::value(unsigned int qp) const
       // property name
       auto name = derivativePropertyName(_base_name, _derivative_symbols);
 
+      // A property is fetched as required (must be supplied) only if the user opted in through
+      // _required and it is not a derivative property. Derivative properties (D[u,x]) may
+      // legitimately evaluate to zero and never be declared, so they are always coupled as
+      // optional (defaulting to zero when missing), see #32284.
+      const bool required = _required && _derivative_symbols.empty();
+
       // get the material property reference
       if (_material_parent)
-        _value = _required ? &(_material_parent->getGenericMaterialProperty<Real, is_ad>(name))
-                           : &(_material_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
+        _value = required ? &(_material_parent->getGenericMaterialProperty<Real, is_ad>(name))
+                          : &(_material_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
       else if (_kernel_parent)
-        _value = _required ? &(_kernel_parent->getGenericMaterialProperty<Real, is_ad>(name))
-                           : &(_kernel_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
+        _value = required ? &(_kernel_parent->getGenericMaterialProperty<Real, is_ad>(name))
+                          : &(_kernel_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
       else
         mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                    "Kernel object.");
