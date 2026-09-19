@@ -1,0 +1,37 @@
+[Tests]
+  design = 'RigidContactAction.md'
+  issues = '#33801'
+  # Pair of tests that prove `[RigidContact]` expansion is bit-for-bit
+  # equivalent to the hand-rolled contact plumbing on the same physics:
+  # both use `[Physics/SolidMechanics/QuasiStatic]` for the disp kernels
+  # + strain material and CSVDiff against the same gold.
+  # `hertz_elastic_without_action.i` writes out every contact object
+  # (LowerDBlockFromSidesetGenerator, RigidBodyContactSparsity,
+  # normal_lm variable, bounds_dummy + ConstantBounds,
+  # RigidBodyNodalNCPKernel, RigidBodyNormalMechanicalContact per
+  # component, Problem coverage flags, Preconditioning SMP).
+  # `hertz_elastic_with_action.i` collapses all of that into one
+  # `[RigidContact][top]` sub-block.
+  [with_action]
+    type = 'CSVDiff'
+    input = 'hertz_elastic_with_action.i'
+    csvdiff = 'hertz_elastic_with_action_csv.csv'
+    rel_err = 1e-6
+    max_parallel = 1
+    requirement = 'The RigidContactAction shall expand a `[RigidContact]` sub-block into the '
+                  'analytic-level-set rigid-contact object stack (lower-d block, LM variable + '
+                  'bounds, sparsity UO, NCP nodal kernel, mechanical-contact BCs, problem '
+                  'coverage flags, SMP preconditioning) that reproduces a hand-rolled setup '
+                  'bit-for-bit at rel_err = 1e-8.'
+  []
+  [without_action]
+    type = 'CSVDiff'
+    input = 'hertz_elastic_without_action.i'
+    csvdiff = 'hertz_elastic_without_action_csv.csv'
+    rel_err = 1e-6
+    max_parallel = 1
+    requirement = 'The hand-rolled companion input shall produce the same converged state as '
+                  'the RigidContactAction-based input, confirming that the action expansion is '
+                  'a faithful compression of the manual plumbing.'
+  []
+[]

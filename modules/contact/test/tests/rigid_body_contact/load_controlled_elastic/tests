@@ -1,0 +1,16 @@
+[Tests]
+  design = 'RigidBodyLoadControl.md LevelSetContactor.md'
+  issues = '#33801'
+  [hertz_load]
+    type = 'CSVDiff'
+    input = 'hertz_load.i'
+    csvdiff = 'hertz_load_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'Newton shall drive a rigid contactor via a Scalar Lagrange multiplier so the '
+                  'integrated normal contact reaction matches a prescribed target force at each '
+                  'converged step, with the deformable body deforming exactly as under '
+                  'displacement control and without any fictitious stiffness.'
+  []
+[]

@@ -1,0 +1,14 @@
+[Tests]
+  design = 'SurfaceMeshContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
+  issues = '#33801'
+  [hertz_mesh_elastic_3d]
+    type = 'CSVDiff'
+    input = 'hertz_elastic_3d.i'
+    csvdiff = 'hertz_elastic_3d_csv.csv hertz_elastic_3d_csv_contact_lm_0010.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'A rigid body described by a triangulated surface mesh (via SurfaceMeshContactor) '
+                  'shall drive convergent nodal-NCP contact against a deformable elastic body in 3D.'
+  []
+[]
