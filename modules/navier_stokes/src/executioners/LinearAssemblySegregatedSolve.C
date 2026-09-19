@@ -433,6 +433,12 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
              << " Linear its: " << its_normalized_residuals[system_i].first << std::endl;
   }
 
+  // Each component's assembly computed its gradient before that component was solved. Solving the
+  // momentum systems does not refresh those fields, so they still contain the pre-solve velocity
+  // gradients required by the reconstructed pressure-gradient update.
+  if (_should_solve_pressure)
+    _rc_uo->finalizeMomentumPredictor();
+
   for (const auto system_i : index_range(_momentum_systems))
   {
     LinearImplicitSystem & momentum_system =
@@ -458,12 +464,6 @@ LinearAssemblySegregatedSolve::initialSetup()
     _cht.deduceCHTBoundaryCoupling();
     _cht.setupConjugateHeatTransferContainers();
   }
-}
-
-void
-LinearAssemblySegregatedSolve::updatePressureGradient()
-{
-  _pressure_system.computeGradients();
 }
 
 std::pair<unsigned int, Real>
@@ -603,14 +603,12 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 }
 
 std::pair<unsigned int, Real>
-LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_pressure,
-                                               const bool recompute_face_mass_flux,
+LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_flux,
                                                const SolverParams & solver_params)
 {
-  // Compute the coupling fields between the momentum and pressure equations.
-  // The first argument makes sure the pressure gradient is staged at the first
-  // iteration
-  _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
+  // Compute the coupling fields between the momentum and pressure equations using the pressure
+  // gradient captured before the current momentum predictor was assembled.
+  _rc_uo->computeHbyA(_print_fields);
 
   // We set the preconditioner/controllable parameters for the pressure equations through
   // petsc options. Linear tolerances will be overridden within the solver.
@@ -624,6 +622,11 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 
+  // Reconstructed gradients use the unrelaxed pressure and its conservative face flux to form
+  // the candidate that corrects cell velocity exactly. Relaxed feedback is published below after
+  // the relaxed pressure solution has been installed.
+  _rc_uo->preparePressureRelaxation();
+
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
   auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
 
@@ -635,11 +638,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
 
-  // We recompute the updated pressure gradient
-  updatePressureGradient();
-
-  // Reconstruct the cell velocity as well to accelerate convergence
-  _rc_uo->computeCellVelocity();
+  // Refresh ordinary gradients from the relaxed pressure and publish reconstructed feedback for
+  // the next momentum predictor. Ordinary methods retain their existing cell-velocity update.
+  _rc_uo->finalizePressureCorrector();
 
   return residuals;
 }
@@ -790,10 +791,14 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
-    // Initialize pressure gradients, after this we just reuse the last ones from each
-    // iteration
+    // Initialize base and coupling pressure gradients. After this we reuse the last gradients
+    // until the pressure corrector finalizes a new coupling field.
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      updatePressureGradient();
+      _rc_uo->initPressureGradient();
+
+    // Capture the lagged velocity and coupling pressure gradients before momentum assembly.
+    if (_should_solve_momentum && _should_solve_pressure)
+      _rc_uo->prepareMomentumPredictor();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
@@ -808,7 +813,7 @@ LinearAssemblySegregatedSolve::solve()
     // Now we correct the velocity, this function depends on the method, it differs for
     // SIMPLE/PIMPLE, this returns the pressure errors
     if (_should_solve_pressure)
-      ns_residuals[pressure_index] = correctVelocity(true, true, solver_params);
+      ns_residuals[pressure_index] = correctVelocity(true, solver_params);
 
     // If we have an energy equation, solve it here.We assume the material properties in the
     // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature

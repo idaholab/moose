@@ -75,6 +75,12 @@ protected:
   void computeGradients();
 
   /**
+   * Compute and finalize every registered linear FV gradient field except one method.
+   * @param excluded_reader Reader whose gradient method should not be updated.
+   */
+  void computeGradientsExcept(const LinearFVGradientReader & excluded_reader);
+
+  /**
    * Update a registered gradient reader explicitly.
    * @param reader Gradient reader to update.
    */
@@ -118,6 +124,12 @@ protected:
 
   /// Whether any linear finite-volume gradient fields have been registered to this object.
   bool hasLinearFVGradients() const;
+
+  /**
+   * Compute and finalize the supplied registered gradient methods.
+   * @param gradient_methods Methods whose gradient fields should be updated.
+   */
+  void computeGradientsForMethods(const std::vector<const FVGradientMethod *> & gradient_methods);
 
   /**
    * Allocate one zeroed vector per spatial component for gradient storage.
@@ -195,4 +207,7 @@ protected:
   /// Gradient containers keyed by the method object that produces them.
   std::unordered_map<const FVGradientMethod *, LinearFVGradientContainer>
       _linear_fv_gradient_container_by_method;
+
+  /// Registered gradient methods in registration order.
+  std::vector<const FVGradientMethod *> _linear_fv_gradient_methods;
 };

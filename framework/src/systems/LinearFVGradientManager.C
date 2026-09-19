@@ -25,6 +25,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 
+#include <algorithm>
+
 using namespace libMesh;
 
 namespace
@@ -43,6 +45,13 @@ copyGradient(const LinearFVGradientReader::GradientContainer & source,
     mooseAssert(source[component], "Source gradient component vector must be initialized.");
     mooseAssert(destination[component],
                 "Destination gradient component vector must be initialized.");
+    mooseAssert(
+        source[component]->size() == destination[component]->size() &&
+            source[component]->local_size() == destination[component]->local_size() &&
+            source[component]->first_local_index() == destination[component]->first_local_index() &&
+            source[component]->last_local_index() == destination[component]->last_local_index(),
+        "Source and destination gradient component vectors must have matching parallel "
+        "layouts.");
     *destination[component] = *source[component];
   }
 }
@@ -88,7 +97,10 @@ LinearFVGradientManager::registerFVGradient(const unsigned int variable_number,
                _sys.name(),
                "', but no field variable with that number exists on the system.");
 
-  auto & container = _linear_fv_gradient_container_by_method[&method];
+  auto [method_container, inserted] = _linear_fv_gradient_container_by_method.try_emplace(&method);
+  if (inserted)
+    _linear_fv_gradient_methods.push_back(&method);
+  auto & container = method_container->second;
   container.variable_numbers.insert(variable_number);
 
   resizeGradientStateStorage(container, oldest_state);
@@ -109,7 +121,29 @@ LinearFVGradientManager::registerFVGradient(const unsigned int variable_number,
 void
 LinearFVGradientManager::computeGradients()
 {
-  if (_linear_fv_gradient_container_by_method.empty() || !_sys.solutionStatesInitialized())
+  computeGradientsForMethods(_linear_fv_gradient_methods);
+}
+
+void
+LinearFVGradientManager::computeGradientsExcept(const LinearFVGradientReader & excluded_reader)
+{
+  if (&excluded_reader.system() != &_sys)
+    mooseError("Cannot exclude a linear FV gradient field from a different system than '",
+               _sys.name(),
+               "'.");
+
+  auto gradient_methods = _linear_fv_gradient_methods;
+  gradient_methods.erase(
+      std::remove(gradient_methods.begin(), gradient_methods.end(), &excluded_reader.method()),
+      gradient_methods.end());
+  computeGradientsForMethods(gradient_methods);
+}
+
+void
+LinearFVGradientManager::computeGradientsForMethods(
+    const std::vector<const FVGradientMethod *> & gradient_methods)
+{
+  if (gradient_methods.empty() || !_sys.solutionStatesInitialized())
     return;
 
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
@@ -124,11 +158,12 @@ LinearFVGradientManager::computeGradients()
   // conditions consistently use gradients from the previous update.
   // BCs may use cell gradients to compute the boundary face value, which is itself used to
   // compute cell gradients
-  for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-    computeLinearFVGradientContainer(*method_container_pair.first);
+  for (const auto * const method : gradient_methods)
+    computeLinearFVGradientContainer(*method);
 
-  for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-    finalizeLinearFVGradientContainer(method_container_pair.second);
+  for (const auto * const method : gradient_methods)
+    finalizeLinearFVGradientContainer(
+        libmesh_map_find(_linear_fv_gradient_container_by_method, method));
 }
 
 void
