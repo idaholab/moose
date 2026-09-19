@@ -10,6 +10,8 @@
 #include "KokkosQpJacobianOperator.h"
 #include "KokkosUtils.h"
 
+#include "libmesh/petsc_solver_exception.h"
+
 namespace Moose::Kokkos
 {
 
@@ -29,10 +31,222 @@ QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
   _x_tag = x_tag;
   _y_tag = y_tag;
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyLoop> policy(0,
-                                                                                    _thread.size());
+  if (_apply_flops < 0)
+  {
+    ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyFlopLoop> flop_policy(
+        0, _thread.size());
+    double flops = 0;
+    ::Kokkos::parallel_reduce(flop_policy, *this, flops);
+    ::Kokkos::fence();
+    _apply_flops = flops;
+  }
+
+  if (!_apply_scratch_bytes)
+  {
+    ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyScratchLoop> scratch_policy(
+        0, _thread.size());
+    std::size_t bytes = 0;
+    ::Kokkos::parallel_reduce(
+        scratch_policy, *this, ::Kokkos::Max<std::size_t>(bytes));
+    ::Kokkos::fence();
+    _apply_scratch_bytes = bytes;
+  }
+
+  ApplyPolicy policy(_thread.size(), ::Kokkos::AUTO);
+  policy.set_scratch_size(0, ::Kokkos::PerTeam(_apply_scratch_bytes));
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
+
+  // Reported so that a shell operator's applications carry a flop rate in PETSc's log alongside
+  // the events of the assembled operators they are compared against
+  LibmeshPetscCallA(PETSC_COMM_SELF, PetscLogGpuFlops(_apply_flops));
+}
+
+/**
+ * The operations the team loop performs on one (element, variable) pair. Both contractions run over
+ * the fixed three components of the reference gradient whatever the mesh dimension is, because the
+ * cached tensor's gradient blocks are Real3 and Real33, so the counts below are dimension
+ * independent and match what the hardware issues.
+ */
+namespace
+{
+/// applyB(): per DOF, one multiply-add for the value and three for the Real3 reference gradient
+constexpr double APPLY_GATHER_FLOPS_PER_DOF = 8;
+/// applyBT(): per DOF, one multiply for the value and a Real3 dot for the gradient, accumulated
+constexpr double APPLY_SCATTER_FLOPS_PER_DOF = 8;
+/// The value/flux pair: vv * value + vg . grad, then gv * value + gg * grad
+constexpr double APPLY_TENSOR_FLOPS_PER_QP = 28;
+} // namespace
+
+namespace
+{
+/// Scratch views the team loop carves out of its per-team allocation
+///@{
+using ScratchReal =
+    ::Kokkos::View<Real *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryUnmanaged>;
+using ScratchReal3 =
+    ::Kokkos::View<Real3 *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryUnmanaged>;
+///@}
+
+/**
+ * The per-team scratch bytes the team loop carves out for an element, allowing for the alignment
+ * each separate scratch allocation is padded to
+ */
+KOKKOS_INLINE_FUNCTION std::size_t
+applyScratchBytes(const unsigned int num_dofs, const unsigned int num_qps)
+{
+  constexpr std::size_t alignment = 128;
+
+  return num_dofs * sizeof(Real) + num_qps * sizeof(Real) + num_qps * sizeof(Real3) +
+         3 * alignment;
+}
+} // namespace
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(ApplyScratchLoop, const ThreadID tid, std::size_t & bytes) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
+
+  const auto needed = applyScratchBytes(basis.numDofs(), kokkosAssembly().getNumQps(info));
+
+  if (needed > bytes)
+    bytes = needed;
+}
+
+/**
+ * One team per (element, variable) pair. The trial-space gather is done once into scratch and the
+ * quadrature-point contraction is shared across the team, where a thread-per-element loop repeats
+ * the gather for every batch of test functions its accumulator can hold. Each test function is
+ * summed over the quadrature points in index order and each gather runs over the DOFs in index
+ * order, the same orders a thread-per-element loop uses, so the result is unchanged.
+ */
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(ApplyTeamLoop, const ApplyTeam & team) const
+{
+  const ThreadID tid = team.league_rank();
+
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  // A pair with no declared blocks has no cached linearization; the objects responsible for it
+  // supply their own operator action. The test is the same for every thread of the team.
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
+
+  const auto num_dofs = basis.numDofs();
+
+  ScratchReal x_e(team.team_scratch(0), num_dofs);
+  ScratchReal f_qp(team.team_scratch(0), num_qps);
+  ScratchReal3 flux_qp(team.team_scratch(0), num_qps);
+
+  // Gather the direction into the element's trial space once for the whole team. Where the level
+  // eliminates a fixed column, that row's direction is zero.
+  ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, num_dofs),
+                         [&](const unsigned int j)
+                         {
+                           const auto dof = _level.getElemLocalDofIndex(elem, j, var);
+
+                           x_e(j) = _level.isEliminatedColumn(dof)
+                                        ? 0.0
+                                        : _level.getDofValue(dof, _x_tag);
+                         });
+
+  team.team_barrier();
+
+  // Contract the linearization at each quadrature point into the value/flux pair the test
+  // functions are contracted against
+  ::Kokkos::parallel_for(
+      ::Kokkos::TeamThreadRange(team, num_qps),
+      [&](const unsigned int qp)
+      {
+        Real value = 0;
+        Real3 grad = 0;
+
+        for (unsigned int j = 0; j < num_dofs; ++j)
+        {
+          Real phi;
+          Real3 grad_phi;
+          basis.basis(j, qp, phi, grad_phi);
+
+          const auto x_j = x_e(j);
+
+          value += x_j * phi;
+          grad += x_j * grad_phi;
+        }
+
+        const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+
+        f_qp(qp) = tensor.vv * value + tensor.vg * grad;
+        flux_qp(qp) = tensor.gv * value + tensor.gg * grad;
+      });
+
+  team.team_barrier();
+
+  // Accumulate each test function over the quadrature points and reduce it into its row
+  ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, num_dofs),
+                         [&](const unsigned int i)
+                         {
+                           auto row = _level.getElemLocalDofIndex(elem, i, var);
+
+                           if (_level.isConstrained(row))
+                             return;
+
+                           Real y_i = 0;
+
+                           for (unsigned int qp = 0; qp < num_qps; ++qp)
+                           {
+                             Real phi;
+                             Real3 grad_phi;
+                             basis.basis(i, qp, phi, grad_phi);
+
+                             y_i += phi * f_qp(qp) + grad_phi * flux_qp(qp);
+                           }
+
+                           ::Kokkos::atomic_add(&_level.getDofValue(row, _y_tag), y_i);
+                         });
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(ApplyFlopLoop, const ThreadID tid, double & flops) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  // A pair the team loop returns early on contributes nothing
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  const auto num_qps = kokkosAssembly().getNumQps(info);
+
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
+
+  const auto num_dofs = basis.numDofs();
+
+  flops += num_qps * (num_dofs * APPLY_GATHER_FLOPS_PER_DOF + APPLY_TENSOR_FLOPS_PER_QP +
+                      num_dofs * APPLY_SCATTER_FLOPS_PER_DOF);
 }
 
 void
@@ -86,81 +300,6 @@ QpJacobianOperator::applyBlocks(const EntityBlocks & blocks, const TagID r_tag, 
   ::Kokkos::fence();
 }
 
-KOKKOS_FUNCTION void
-QpJacobianOperator::operator()(ApplyLoop, const ThreadID tid) const
-{
-  auto elem = _thread(tid, 0);
-  auto var = _thread(tid, 1);
-
-  auto info = _level.kokkosMesh().getElementInfo(elem);
-  auto sid = info.subdomain;
-
-  // A pair with no declared blocks has no cached linearization; the objects responsible for it
-  // supply their own operator action
-  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
-    return;
-
-  auto num_qps = kokkosAssembly().getNumQps(info);
-  auto qp_offset = kokkosAssembly().getQpOffset(info);
-
-  const LevelBasisTable basis(
-      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
-
-  const auto num_dofs = basis.numDofs();
-
-  // Where the level eliminates a fixed column, that row's value is not an unknown of the
-  // linearization and its direction is zero, so leaving it out of the trial-space gather is what
-  // makes the action this loop applies symmetric whenever the linearization it contracts is, and
-  // makes this loop and the MatrixLoop below the same operator. Where the level does not, the
-  // residual being linearized still reads that row, and dropping it here would make the action
-  // disagree with the residual instead.
-  const auto gather = [&](const unsigned int j) -> Real
-  {
-    const auto dof = _level.getElemLocalDofIndex(elem, j, var);
-
-    return _level.isEliminatedColumn(dof) ? 0.0 : _level.getDofValue(dof, _x_tag);
-  };
-
-  Real local_y[MAX_CACHED_DOF];
-
-  // The test function index is batched so that the per-element accumulator stays within a bounded
-  // amount of per-thread storage. The trial-space gather is repeated for each batch, which costs
-  // nothing for the element types whose DOF count fits in a single batch.
-  for (unsigned int ib = 0; ib < num_dofs; ib += MAX_CACHED_DOF)
-  {
-    const auto ie = ::Kokkos::min(ib + MAX_CACHED_DOF, num_dofs);
-
-    for (unsigned int i = ib; i < ie; ++i)
-      local_y[i - ib] = 0;
-
-    for (unsigned int qp = 0; qp < num_qps; ++qp)
-    {
-      // The direction vector in the reference trial space at this quadrature point
-      Real value;
-      Real3 grad;
-
-      basis.applyB(gather, qp, value, grad);
-
-      const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
-
-      // The linearized value/flux pair the test functions are contracted against
-      const Real f = tensor.vv * value + tensor.vg * grad;
-      const Real3 flux = tensor.gv * value + tensor.gg * grad;
-
-      basis.applyBT(qp, f, flux, ib, ie, local_y);
-    }
-
-    for (unsigned int i = ib; i < ie; ++i)
-    {
-      auto row = _level.getElemLocalDofIndex(elem, i, var);
-
-      if (_level.isConstrained(row))
-        continue;
-
-      ::Kokkos::atomic_add(&_level.getDofValue(row, _y_tag), local_y[i - ib]);
-    }
-  }
-}
 
 KOKKOS_FUNCTION void
 QpJacobianOperator::operator()(DiagonalLoop, const ThreadID tid) const

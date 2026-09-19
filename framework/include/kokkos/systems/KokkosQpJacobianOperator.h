@@ -56,7 +56,13 @@ public:
    * Kokkos function tags for the loops over (element, variable) pairs
    */
   ///@{
-  struct ApplyLoop
+  struct ApplyFlopLoop
+  {
+  };
+  struct ApplyScratchLoop
+  {
+  };
+  struct ApplyTeamLoop
   {
   };
   struct DiagonalLoop
@@ -118,7 +124,14 @@ public:
    */
   void applyBlocks(const EntityBlocks & blocks, TagID r_tag, TagID x_tag);
 
-  KOKKOS_FUNCTION void operator()(ApplyLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(ApplyFlopLoop, const ThreadID tid, double & flops) const;
+  KOKKOS_FUNCTION void operator()(ApplyScratchLoop, const ThreadID tid, std::size_t & bytes) const;
+
+  /// The team policy apply() runs under, one team per (element, variable) pair
+  using ApplyPolicy = ::Kokkos::TeamPolicy<ExecSpace, ApplyTeamLoop>;
+  using ApplyTeam = ApplyPolicy::member_type;
+
+  KOKKOS_FUNCTION void operator()(ApplyTeamLoop, const ApplyTeam & team) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(BlockLoop, const ThreadID tid) const;
@@ -126,6 +139,18 @@ public:
   KOKKOS_FUNCTION void operator()(BlockIdentityLoop, const dof_id_type dof) const;
 
 private:
+  /**
+   * The floating point operations one apply() performs, counted once on first use and reused after.
+   * Negative means it has not been counted yet.
+   */
+  double _apply_flops = -1;
+
+  /**
+   * The per-team scratch an apply() needs, being the largest any (element, variable) pair asks for.
+   * Zero means it has not been measured yet.
+   */
+  std::size_t _apply_scratch_bytes = 0;
+
   /**
    * The quadrature-point linearization the operator contracts
    */
