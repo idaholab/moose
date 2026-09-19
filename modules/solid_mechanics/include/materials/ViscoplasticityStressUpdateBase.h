@@ -124,10 +124,6 @@ protected:
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_console;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_q_point;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_verbose;                                     \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::globalTimeStep;                               \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::constitutiveTimeStep;                         \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::setConstitutiveTimeStep;                      \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::resetConstitutiveTimeStep;                    \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_intermediate_porosity;                       \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain;                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;              \
