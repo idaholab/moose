@@ -148,6 +148,27 @@
     []
   []
 
+  [watertight_blocks]
+    issues = '#32351'
+    requirement = 'The system shall be able to check that a subset of mesh blocks forms a watertight region, reporting boundary entities that are not assigned to a'
+    [sidesets]
+      type = 'RunApp'
+      input = 'watertight_blocks.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of element edges on the boundary of the checked blocks that have not been assigned to a sideset: 2'
+      detail = 'sideset,'
+    []
+    [nodesets]
+      type = 'RunApp'
+      input = 'watertight_blocks.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of nodes on the boundary of the checked blocks that have not been assigned to a nodeset: 1'
+      detail = 'nodeset.'
+    []
+  []
+
   [amr_detection]
     requirement = 'The system shall be able to recognize non-conformalities created by uniform mesh refinements for'
     [quad]
