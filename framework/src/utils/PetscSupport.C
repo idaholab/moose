@@ -133,6 +133,49 @@ applySystemVectorTypeOptions(FEProblemBase & problem, libMesh::System & lm_sys)
   LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
   petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.current_local_solution.get());
   LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
+
+  // A vector PETSc builds with MatCreateVecs(), which is where the Krylov and multigrid work
+  // vectors of a solve come from, takes the matrix's own default vector type. MatCreate() sets
+  // that to the host type and MatCreateVecs() applies it with VecSetType(), which consults no
+  // options, so -vec_type alone leaves every work vector of the solve on the host however the
+  // system's own vectors are typed. Carrying the requested type onto the matrices keeps the whole
+  // solve in one memory space.
+  std::array<char, PETSC_MAX_PATH_LEN> vec_type = {};
+  PetscBool found = PETSC_FALSE;
+  LibmeshPetscCallA(problem.comm().get(),
+                    PetscOptionsGetString(LIBMESH_PETSC_NULLPTR,
+                                          LIBMESH_PETSC_NULLPTR,
+                                          "-vec_type",
+                                          vec_type.data(),
+                                          vec_type.size(),
+                                          &found));
+
+  if (!found)
+    return;
+
+  // The generic name is carried rather than the type resolved off a vector, which would be the
+  // sequential name for a serial vector and so wrong for a parallel matrix; VecSetType() resolves
+  // the generic name against the communicator it is given.
+  for (auto & [_, mat] : as_range(lm_sys.matrices_begin(), lm_sys.matrices_end()))
+    if (auto * const petsc_mat = dynamic_cast<libMesh::PetscMatrixBase<Number> *>(mat.get());
+        petsc_mat && petsc_mat->initialized())
+      LibmeshPetscCallA(problem.comm().get(),
+                        MatSetVecType(petsc_mat->mat(), vec_type.data()));
+
+  // A matrix built after this point, such as a matrix-free shell operator created on the first
+  // Jacobian evaluation, reads its default vector type from the options database in
+  // MatSetFromOptions(). Recording the type there covers those without having to find them.
+  PetscBool mat_vec_type_set = PETSC_FALSE;
+  LibmeshPetscCallA(problem.comm().get(),
+                    PetscOptionsHasName(LIBMESH_PETSC_NULLPTR,
+                                        LIBMESH_PETSC_NULLPTR,
+                                        "-mat_vec_type",
+                                        &mat_vec_type_set));
+
+  if (!mat_vec_type_set)
+    LibmeshPetscCallA(problem.comm().get(),
+                      PetscOptionsSetValue(
+                          LIBMESH_PETSC_NULLPTR, "-mat_vec_type", vec_type.data()));
 }
 
 void
