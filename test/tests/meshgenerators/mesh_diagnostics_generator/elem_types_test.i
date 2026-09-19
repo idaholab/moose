@@ -27,6 +27,14 @@
     input = cmbn
     examine_element_types = INFO
   []
+
+  # split before output as Exodus does not support
+  # different element types in the same block
+  [split_types]
+    type = MeshRepairGenerator
+    input = 'diag'
+    separate_blocks_by_element_types = true
+  []
 []
 
 [Outputs]
