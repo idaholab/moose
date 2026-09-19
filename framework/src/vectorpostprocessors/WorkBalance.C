@@ -106,9 +106,8 @@ public:
       _local_partition_hardware_id_surface_area(0),
       _this_pid(_mesh.processor_id()) // Get this once because it is expensive
   {
-    // This is required because dynamic_pointer_cast() requires an l-value
-    auto partitioner = mesh.getMesh().partitioner()->clone();
-    _petsc_partitioner = dynamic_pointer_cast<PetscExternalPartitioner>(partitioner);
+    _petsc_partitioner =
+        dynamic_cast<PetscExternalPartitioner *>(mesh.getMesh().partitioner().get());
   }
 
   WBElementLoop(WBElementLoop & x, Threads::split split)
@@ -122,14 +121,9 @@ public:
       _local_partition_surface_area(0),
       _local_num_partition_hardware_id_sides(0),
       _local_partition_hardware_id_surface_area(0),
-      _this_pid(x._this_pid)
+      _this_pid(x._this_pid),
+      _petsc_partitioner(x._petsc_partitioner)
   {
-    if (x._petsc_partitioner)
-    {
-      // This is required because dynamic_pointer_cast() requires an l-value
-      auto partitioner = x._petsc_partitioner->clone();
-      _petsc_partitioner = dynamic_pointer_cast<PetscExternalPartitioner>(partitioner);
-    }
   }
 
   virtual ~WBElementLoop() {}
@@ -146,7 +140,7 @@ public:
 
   virtual void onElement(const Elem * elem) override
   {
-    if (_petsc_partitioner && _petsc_partitioner->applyElementEeight())
+    if (_petsc_partitioner && _petsc_partitioner->applyElementWeight())
     {
       // We should change partitioner interface to take const
       // But at this point let us keep API intact
@@ -230,7 +224,7 @@ public:
 
   libMesh::ElemSideBuilder _elem_side_builder;
 
-  std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
+  const PetscExternalPartitioner * _petsc_partitioner;
 
 private:
   bool shouldComputeInternalSide(const Elem & /*elem*/, const Elem & /*neighbor*/) const override

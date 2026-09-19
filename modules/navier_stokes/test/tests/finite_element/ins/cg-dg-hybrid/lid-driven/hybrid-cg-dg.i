@@ -36,7 +36,7 @@ U = 1
   [momentum_x_convection]
     type = ADConservativeAdvection
     variable = u
-    velocity = 'velocity'
+    velocity_material = 'velocity'
     advected_quantity = 'rhou'
   []
   [momentum_x_diffusion]
@@ -54,7 +54,7 @@ U = 1
   [momentum_y_convection]
     type = ADConservativeAdvection
     variable = v
-    velocity = 'velocity'
+    velocity_material = 'velocity'
     advected_quantity = 'rhov'
   []
   [momentum_y_diffusion]
@@ -72,7 +72,7 @@ U = 1
   [mass]
     type = ADConservativeAdvection
     variable = pressure
-    velocity = velocity
+    velocity_material = velocity
     advected_quantity = -1
   []
 []
