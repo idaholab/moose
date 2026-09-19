@@ -14,6 +14,8 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dof_map.h"
 
+#include <unordered_set>
+
 namespace Moose::Kokkos
 {
 
@@ -187,6 +189,19 @@ private:
    * Flag whether the vector was allocated
    */
   bool _is_alloc = false;
+  /**
+   * The PETSc vectors the COO preallocation has been set on, and the DOF layout it was set from.
+   * VecSetPreallocationCOO() is a setup call whose cost is proportional to the vector's local size
+   * rather than to the number of contributions, and PETSc keeps its result on the vector, so
+   * close() sets it once per vector and reuses it afterwards. An operator application is handed
+   * whichever of its caller's work vectors is free, cycling among several, so every vector seen is
+   * remembered rather than only the last. Vectors are identified by PETSc object id, which is
+   * unique over the run, so an entry can never be matched by a later vector.
+   */
+  ///@{
+  std::unordered_set<PetscObjectId> _coo_vector_ids;
+  const DofSpace * _coo_dof_space = nullptr;
+  ///@}
 };
 
 } // namespace Moose::Kokkos

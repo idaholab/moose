@@ -153,6 +153,11 @@ Vector::destroy()
   _is_host = false;
   _read_only = false;
   _is_alloc = false;
+
+  // The next close() on this wrapper describes whatever vector and layout it is then created
+  // around, so the recorded COO preallocations no longer apply
+  _coo_vector_ids.clear();
+  _coo_dof_space = nullptr;
 }
 
 void
@@ -220,11 +225,27 @@ Vector::close()
   // through PETSc's coordinate-format vector interface. The row indices are the same global
   // degrees of freedom a VecSetValues call would use, in the same order the entity-block and
   // quadrature-point Jacobian loops filled _ghost in.
+  //
+  // The preallocation describes the indices alone, and PETSc keeps it on the vector, so it is set
+  // once per vector and layout and reused by every later VecSetValuesCOO() on that vector. Its
+  // cost is proportional to the vector's local size rather than to the number of contributions,
+  // which is why an operator application that closes a vector on every call must not repeat it.
 
-  LibmeshPetscCallQ(VecSetPreallocationCOO(
-      _global_vector,
-      _dof_space->getNumGhostDofs(),
-      reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
+  PetscObjectId vector_id;
+  LibmeshPetscCallQ(PetscObjectGetId(reinterpret_cast<PetscObject>(_global_vector), &vector_id));
+
+  // A change of layout invalidates every preallocation recorded against the old one
+  if (_dof_space != _coo_dof_space)
+  {
+    _coo_vector_ids.clear();
+    _coo_dof_space = _dof_space;
+  }
+
+  if (_coo_vector_ids.insert(vector_id).second)
+    LibmeshPetscCallQ(VecSetPreallocationCOO(
+        _global_vector,
+        _dof_space->getNumGhostDofs(),
+        reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
 
   // A Kokkos/CUDA-typed vector's COO implementation detects and accepts a device array; a plain
   // vector's native implementation reads its values array directly from the host and does not, so
