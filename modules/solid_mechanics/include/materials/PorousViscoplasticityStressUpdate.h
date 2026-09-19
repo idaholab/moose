@@ -214,8 +214,9 @@ protected:
   }
 
   /** Return the lower bound for one independently evolving pore population. */
-  virtual GenericReal<is_ad> independentPorePorosityFloor(
-      unsigned int population_index, const PorePorosityState & pore_porosity_begin) const;
+  virtual GenericReal<is_ad>
+  independentPorePorosityFloor(unsigned int population_index,
+                               const PorePorosityState & pore_porosity_begin) const;
 
   /** Evaluate pressure closure and pressure derivatives for independent pore porosities. */
   virtual HydrostaticStressState
@@ -253,6 +254,9 @@ protected:
 
   /** Configured lower bound used by the local porosity active set. */
   Real minimumPorosity() const { return _minimum_porosity; }
+
+  /** Absolute tolerance used to activate/release the local porosity lower bound. */
+  Real porosityBoundTolerance() const { return _porosity_bound_tolerance; }
 
   /** Return one finite, nonnegative Norton coefficient. */
   GenericReal<is_ad> creepCoefficient(std::size_t law_index) const;
