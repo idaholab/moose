@@ -196,7 +196,7 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
-    const auto doc = "New Engineering Material model Library, version 2";
+    const auto doc = "New Engineering Material model Library, version 3";
 #ifdef NEML2_ENABLED
     have("neml2", doc);
 #else
@@ -204,6 +204,20 @@ Capabilities::registerMooseCapabilities()
             doc,
             "Install neml2 using the scripts/update_and_rebuild_neml2.sh script, then "
             "configure moose with ./configure --with-neml2 --with-libtorch");
+#endif
+  }
+
+  {
+    const auto doc = "Embedded CPython interpreter linked into the executable (host "
+                     "libpython), enabling the NEML2 eager runtime and other "
+                     "embedded-Python features";
+#ifdef NEML2_ENABLED
+    have("embedded_python", doc);
+#else
+    missing("embedded_python",
+            doc,
+            "Configure moose with ./configure --with-neml2 --with-libtorch, which links "
+            "libpython into the executable.");
 #endif
   }
 

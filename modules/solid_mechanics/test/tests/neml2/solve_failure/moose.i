@@ -59,10 +59,10 @@ N = 2
 []
 
 [NEML2]
+  eager = true
   input = 'neml2.i'
   [all]
     model = 'model'
-    verbose = true
     device = 'cpu'
     derivatives = 'neml2_stress neml2_strain'
   []

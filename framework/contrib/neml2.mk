@@ -3,17 +3,13 @@
 ################################################################################
 ifeq ($(ENABLE_NEML2),true)
 
-# NEML2 libraries and pkgconfig are suffixed with the CMake build type
-ifeq ($(METHOD),devel)
-NEML2_SUFFIX := _RelWithDebInfo
-else ifeq ($(METHOD),oprof)
-NEML2_SUFFIX := _Profiling
-else ifeq ($(METHOD),dbg)
-NEML2_SUFFIX := _Debug
-endif
+# MOOSE links the non-editable neml2 PyPI wheel, which ships a single unsuffixed (Release) C++
+# build -- libneml2 / libneml2_eager and neml2.pc. Every MOOSE method (opt/oprof/dbg/devel) links
+# this Release build: a dbg/oprof MOOSE still has full debug/profiling info for its own code, and
+# the neml2 dependency is optimized.
 
 # NEML2 pkgconfig file
-NEML2_PC := $(NEML2_DIR)/share/pkgconfig/neml2$(NEML2_SUFFIX).pc
+NEML2_PC := $(NEML2_DIR)/share/pkgconfig/neml2.pc
 ifeq ($(wildcard $(NEML2_PC)),)
 $(error NEML2 pkgconfig file not found: $(NEML2_PC))
 endif
@@ -35,6 +31,12 @@ endif
 neml2_INCLUDES += $(filter-out $(neml2_torch_INCLUDES),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --cflags $(NEML2_PC)))
 neml2_LDFLAGS  += $(foreach libdir,$(filter-out $(neml2_torch_LDIRS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs-only-L $(NEML2_PC))),$(patsubst -L%,-Wl$(comma)-rpath$(comma)%,$(libdir)))
 neml2_LIBS     += $(filter-out $(neml2_torch_LIBS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs $(NEML2_PC)))
+
+# NEML2 v3 ships two C++ libraries: libneml2 (the aoti runtime, listed by neml2.pc above)
+# and libneml2_eager (the embedded-Python eager runtime, used by MOOSE for the no-compile
+# path). The eager lib is not listed in any .pc file and depends on the aoti lib, so add it
+# explicitly and ahead of -lneml2 on the link line.
+neml2_LIBS     := -lneml2_eager $(neml2_LIBS)
 
 # Append to libmesh flags
 libmesh_CXXFLAGS += $(neml2_CPPFLAGS) # I think MOOSE Makefiles tend to abuse libmesh_CXXFLAGS for preprocessor flags
