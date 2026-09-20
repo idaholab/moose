@@ -65,10 +65,4 @@ MFEMSamplerBase::initialSetup()
       _declared_points[i_dim].get()[i_point] = _query_points[i_point](i_dim);
 }
 
-void
-MFEMSamplerBase::finalize()
-{
-  finalizeValues();
-}
-
 #endif // MOOSE_MFEM_ENABLED
