@@ -44,8 +44,7 @@ MFEMSamplerBase::MFEMSamplerBase(const InputParameters & parameters,
   _finder.Setup(_mesh);
   _finder.FindPoints(_points, mfem::Ordering::byVDIM);
 
-  const auto mesh_dim = _mesh.SpaceDimension();
-  for (const auto i : make_range(mesh_dim))
+  for (const auto i : make_range(_mesh.SpaceDimension()))
   {
     auto & declared = this->declareVector("x_" + std::to_string(i));
     declared.resize(points.size());
@@ -60,20 +59,15 @@ MFEMSamplerBase::initialSetup()
   for (const auto i : index_range(_query_points))
     if (PointLocationCode(point_codes[i]) == PointLocationCode::NOT_FOUND)
       mooseError(typeAndName(), " could not find point at ", _query_points[i], ".");
+
+  for (const auto i_dim : index_range(_declared_points))
+    for (const auto i_point : make_range(_query_points.size()))
+      _declared_points[i_dim].get()[i_point] = _query_points[i_point](i_dim);
 }
 
 void
 MFEMSamplerBase::finalize()
 {
-  _points.HostRead();
-
-  const auto mesh_dim = _mesh.SpaceDimension();
-  const auto num_points = _declared_points[0].get().size();
-  for (const auto i_dim : index_range(_declared_points))
-    for (const auto i_point : make_range(num_points))
-      _declared_points[i_dim].get()[i_point] = _points(
-          Moose::MFEM::MFEMIndex(i_dim, i_point, mesh_dim, num_points, mfem::Ordering::byVDIM));
-
   finalizeValues();
 }
 
