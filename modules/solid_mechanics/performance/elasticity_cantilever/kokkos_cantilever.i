@@ -70,8 +70,11 @@ refinement = 3
 [Executioner]
   type = Steady
   solve_type = LINEAR
-  petsc_options_iname = '-ksp_type -pc_type  -pc_hypre_type  -pc_hypre_boomeramg_coarsen_type  -pc_hypre_boomeramg_interp_type -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_numfunctions'
-  petsc_options_value = ' cg       hypre     boomeramg       HMIS                              ext+i                           0.7                                   3'
+  # PCHYPRE leaves P_max at 0, which lets ext+i interpolation build coarse operators denser than
+  # the fine one. mfem::HypreBoomerAMG truncates to four entries per row by default, so setting it
+  # here is what makes the two backends precondition the same operator the same way.
+  petsc_options_iname = '-ksp_type -pc_type  -pc_hypre_type  -pc_hypre_boomeramg_coarsen_type  -pc_hypre_boomeramg_interp_type -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_numfunctions -pc_hypre_boomeramg_P_max'
+  petsc_options_value = ' cg       hypre     boomeramg       HMIS                              ext+i                           0.7                                   3                                4'
   l_tol = 1e-8
   l_max_its = 500
 []
