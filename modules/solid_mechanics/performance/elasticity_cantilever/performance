@@ -11,6 +11,19 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
+  [libmesh_distributed]
+    type = CSVDiff
+    input = 'kokkos_cantilever.i'
+    cli_args = 'Mesh/gen_mesh/type=DistributedRectilinearMeshGenerator '
+               'Mesh/parallel_type=DISTRIBUTED '
+               'Outputs/file_base=distributed_cantilever_out'
+    csvdiff = 'distributed_cantilever_out.csv'
+    requirement = 'The system shall solve a linear elasticity cantilever through the libMesh '
+                  'backend on a mesh that is generated already distributed, reaching the same '
+                  'result as the replicated case.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
   [mfem]
     type = RunApp
     input = 'mfem_cantilever.i'
