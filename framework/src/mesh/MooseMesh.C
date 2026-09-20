@@ -1410,7 +1410,7 @@ MooseMesh::cacheInfo()
   const auto & mesh = getMesh();
 
   ConstElemRange all_elems(mesh.elements_begin(), mesh.elements_end(), 1);
-  CacheInfoThread ci(*this);
+  CacheInfoThread ci(*this, !hasSingleSubdomain());
   Threads::parallel_reduce(all_elems, ci);
 
   ConstElemRange local_elems(
@@ -1418,7 +1418,13 @@ MooseMesh::cacheInfo()
   CacheSubdomainInfoThread csi(*this);
   Threads::parallel_reduce(local_elems, csi);
 
-  _block_node_list = std::move(ci._block_node_list);
+  _node_block = std::move(ci._node_block);
+  _interface_node_blocks = std::move(ci._interface_node_blocks);
+
+  _block_singletons.clear();
+  for (const auto blk_id : ci._node_block_ids)
+    _block_singletons.emplace(blk_id, std::set<SubdomainID>{blk_id});
+
   _higher_d_elem_side_to_lower_d_elem = std::move(ci._higher_d_elem_side_to_lower_d_elem);
   _lower_d_elem_to_higher_d_elem_side = std::move(ci._lower_d_elem_to_higher_d_elem_side);
   _lower_d_interior_blocks = std::move(ci._lower_d_interior_blocks);
@@ -1446,9 +1452,18 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  auto it = _block_node_list.find(node.id());
+  // cacheInfo() records nothing in this case, and the mesh's own subdomain list is already the
+  // one-element answer for every node
+  if (hasSingleSubdomain())
+    return _mesh_subdomains;
 
-  if (it == _block_node_list.end())
+  // Away from an interface, which is almost every node, this is the only lookup needed
+  if (const auto it = _node_block.find(node.id()); it != _node_block.end())
+    return libmesh_map_find(_block_singletons, it->second);
+
+  const auto it = _interface_node_blocks.find(node.id());
+
+  if (it == _interface_node_blocks.end())
     mooseError("Unable to find node: ", node.id(), " in any block list.");
 
   return it->second;

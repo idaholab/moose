@@ -1432,8 +1432,8 @@ DistributedRectilinearMeshGenerator::generate()
 
   // MeshOutput<MT>::write_equation_systems will automatically renumber node and element IDs.
   // So we have to make that consistent at the first place. Otherwise, the moose cached data such as
-  // _block_node_list will be inconsistent when we doing MooseMesh::getNodeBlockIds. That being
-  // said, moose will pass new ids to getNodeBlockIds while the cached _block_node_list still use
+  // _node_block will be inconsistent when we doing MooseMesh::getNodeBlockIds. That being
+  // said, moose will pass new ids to getNodeBlockIds while the cached _node_block still use
   // the old node IDs. Yes, you could say: go ahead to do a mesh update, but I would say no. I do
   // not change mesh and there is no point to update anything.
   mesh->allow_renumbering(true);

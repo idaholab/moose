@@ -686,6 +686,9 @@ public:
 
   /**
    * Return list of blocks to which the given node belongs.
+   *
+   * Covers every node of every element this rank knows about, inactive ancestors included, which
+   * callers that walk another mesh's nodes or all active nodes of a replicated mesh rely on.
    */
   const std::set<SubdomainID> & getNodeBlockIds(const Node & node) const;
 
@@ -1713,8 +1716,26 @@ protected:
       _elem_to_side_to_qp_to_quadrature_nodes;
   std::vector<BndNode> _extra_bnd_nodes;
 
-  /// list of nodes that belongs to a specified block (domain)
-  std::map<dof_id_type, std::set<SubdomainID>> _block_node_list;
+  /**
+   * Whether every node of the mesh belongs to one and the same subdomain. The node-to-block
+   * relation is then constant, so cacheInfo() records none of it and getNodeBlockIds() answers
+   * from _mesh_subdomains.
+   */
+  bool hasSingleSubdomain() const { return _mesh_subdomains.size() == 1; }
+
+  /// The subdomain of the elements incident on a node, for the nodes whose incident elements all
+  /// agree, which is every node away from a subdomain interface. Left empty when
+  /// hasSingleSubdomain().
+  std::unordered_map<dof_id_type, SubdomainID> _node_block;
+
+  /// The full subdomain set of the nodes whose incident elements disagree, that is the nodes on a
+  /// subdomain interface. A set per node is only affordable because interfaces are a vanishing
+  /// fraction of a refined mesh.
+  std::map<dof_id_type, std::set<SubdomainID>> _interface_node_blocks;
+
+  /// One interned {id} set per subdomain, so that getNodeBlockIds() can answer with a reference for
+  /// the nodes recorded in _node_block.
+  std::map<SubdomainID, std::set<SubdomainID>> _block_singletons;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
   std::map<boundary_id_type, std::vector<dof_id_type>> _node_set_nodes;
