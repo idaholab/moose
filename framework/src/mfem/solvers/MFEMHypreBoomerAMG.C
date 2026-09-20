@@ -29,15 +29,23 @@ MFEMHypreBoomerAMG::validParams()
       "Vector H1 FESpace of the unknown, required when vector_treatment is 'by_component' or "
       "'rigid_body_modes'.");
   MooseEnum vector_treatment("auto scalar by_component rigid_body_modes", "auto");
-  params.addParam<MooseEnum>(
-      "vector_treatment",
-      vector_treatment,
-      "How BoomerAMG treats the components of a vector unknown. 'scalar' coarsens all degrees of "
-      "freedom together as one unknown. 'by_component' coarsens each component separately and "
-      "does not interpolate between them (hypre's 'unknown' approach, SetSystemsOptions). "
-      "'rigid_body_modes' also adds the rigid body modes of the fespace to the interpolation "
-      "(hypre's GM/LN approach, SetElasticityOptions), and is only applied on the CPU. 'auto' is "
-      "'rigid_body_modes' if fespace is set and 'scalar' otherwise.");
+  params.addParam<MooseEnum>("vector_treatment",
+                             vector_treatment,
+                             "Specifies how BoomerAMG treats the components of a vector unknown.");
+  vector_treatment.addDocumentation("scalar",
+                                    "Coarsens all degrees of "
+                                    "freedom together as one unknown.");
+  vector_treatment.addDocumentation(
+      "by_component",
+      "Coarsens each component separately and "
+      "does not interpolate between them (hypre's 'unknown' approach, SetSystemsOptions).");
+  vector_treatment.addDocumentation(
+      "rigid_body_modes",
+      "Adds the rigid body modes of the fespace to the interpolation "
+      "(hypre's GM/LN approach, SetElasticityOptions). Only applied on the CPU.");
+  vector_treatment.addDocumentation("auto",
+                                    "Applies 'rigid_body_modes' vector_treatment option if fespace "
+                                    "is set and 'scalar' otherwise.");
   params.addParam<mfem::real_t>(
       "strength_threshold",
       0.25,
