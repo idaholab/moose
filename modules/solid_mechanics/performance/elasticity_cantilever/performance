@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#33740'
+  design = 'KokkosLinearElasticity.md syntax/Problem/index.md'
+  [libmesh]
+    type = CSVDiff
+    input = 'kokkos_cantilever.i'
+    csvdiff = 'kokkos_cantilever_out.csv'
+    requirement = 'The system shall solve a linear elasticity cantilever through the libMesh '
+                  'backend, for performance comparison against the same problem solved through '
+                  'the MFEM backend.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [mfem]
+    type = RunApp
+    input = 'mfem_cantilever.i'
+    requirement = 'The system shall solve a linear elasticity cantilever through the MFEM '
+                  'backend, for performance comparison against the same problem solved through '
+                  'the libMesh backend.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+[]
