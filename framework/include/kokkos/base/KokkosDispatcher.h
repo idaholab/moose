@@ -439,6 +439,37 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
 namespace Moose::Kokkos
 {
 
+template <typename T, typename = void>
+struct has_qp_jacobian_cache_dispatcher : std::false_type
+{
+};
+
+template <typename T>
+struct has_qp_jacobian_cache_dispatcher<T, std::void_t<typename T::QpJacobianCacheLoop>>
+  : std::true_type
+{
+};
+
+template <typename Object>
+bool
+hasUserQpJacobianTensorHook()
+{
+  return &Object::template computeQpJacobianTensor<Object> !=
+         Object::template defaultQpJacobianTensor<Object>();
+}
+
+template <typename Object>
+void
+registerKokkosQpJacobianCacheDispatcher(const std::string & objectname)
+{
+  if constexpr (has_qp_jacobian_cache_dispatcher<Object>::value)
+  {
+    DispatcherRegistry::addDispatcher<typename Object::QpJacobianCacheLoop, Object>(objectname);
+    DispatcherRegistry::hasUserMethod<typename Object::QpJacobianCacheLoop>(
+        objectname, hasUserQpJacobianTensorHook<Object>());
+  }
+}
+
 template <typename Object>
 void
 registerResidualObjectDispatchers(const std::string & objectname)
@@ -448,6 +479,9 @@ registerResidualObjectDispatchers(const std::string & objectname)
   DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
   DispatcherRegistry::addDispatcher<typename Object::JacobianLoop, Object>(objectname);
   DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
+  DispatcherRegistry::addDispatcher<typename Object::JacobianVectorProductLoop, Object>(
+      objectname);
+  DispatcherRegistry::addDispatcher<typename Object::JacobianDiagonalLoop, Object>(objectname);
 
   if constexpr (Object::uses_precompute_hooks)
   {
@@ -470,6 +504,21 @@ registerResidualObjectDispatchers(const std::string & objectname)
         &Object::template computeQpOffDiagJacobian<Object> !=
             Object::template defaultOffDiagJacobian<Object>());
   }
+
+  // Repurposed as a "supports the Kokkos matrix-free Jacobian-vector product" flag, queried by
+  // NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name. It records whether
+  // Object implements the loop body, not whether it overrides any hook.
+  DispatcherRegistry::hasUserMethod<typename Object::JacobianVectorProductLoop>(
+      objectname, Object::supports_matrix_free);
+
+  // Same repurposing as JacobianVectorProductLoop above, for the Kokkos matrix-free Jacobian
+  // diagonal.
+  DispatcherRegistry::hasUserMethod<typename Object::JacobianDiagonalLoop>(
+      objectname, Object::supports_matrix_free);
+
+  // Element kernels additionally register the quadrature-point Jacobian cache loop; the flag
+  // records whether Object defines the tensor hook the loop calls.
+  registerKokkosQpJacobianCacheDispatcher<Object>(objectname);
 
   if constexpr (Object::supports_scalar_jacobian)
   {

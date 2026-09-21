@@ -62,4 +62,32 @@ NodalBC::computeJacobian()
   }
 }
 
+void
+NodalBC::computeJacobianVectorProduct()
+{
+  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()))
+    mooseError("The Kokkos matrix-free Jacobian-vector product does not support the nodal "
+               "boundary condition '",
+               name(),
+               "', which has an off-diagonal Jacobian contribution.");
+
+  Policy policy(0, numKokkosBoundaryNodes());
+
+  if (!_jvp_dispatcher)
+    _jvp_dispatcher = DispatcherRegistry::build<JacobianVectorProductLoop>(this, type());
+
+  _jvp_dispatcher->parallelFor(policy);
+}
+
+void
+NodalBC::computeJacobianDiagonal()
+{
+  Policy policy(0, numKokkosBoundaryNodes());
+
+  if (!_jacobian_diagonal_dispatcher)
+    _jacobian_diagonal_dispatcher = DispatcherRegistry::build<JacobianDiagonalLoop>(this, type());
+
+  _jacobian_diagonal_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos

@@ -19,8 +19,112 @@
 
 class FEProblemBase;
 
+namespace libMesh
+{
+class System;
+}
+
 namespace Moose::Kokkos
 {
+
+/**
+ * The element-local degree of freedom a tensor-product mode pair carries, and the sign the basis
+ * puts on it.
+ *
+ * On a tensor-product element of a separable family, shape function \c dof is the product of the
+ * one-dimensional shape functions of the mode pair addressing this entry, times \c sign. The sign
+ * keeps an odd edge mode continuous across an edge that an element and its neighbor traverse in
+ * opposite directions, so it is the only part of the factorization that depends on orientation.
+ */
+struct TensorMode
+{
+  /// The element-local degree of freedom index
+  unsigned int dof;
+  /// The sign the basis puts on the product of the one-dimensional shape functions
+  Real sign;
+};
+
+#ifdef MOOSE_KOKKOS_SCOPE
+/**
+ * A table of reference shape data in which each degree of freedom's row is stored once.
+ *
+ * The orientations of an element that agree on the shape function of a degree of freedom share one
+ * row of a pool, so the table is a pool together with the row each degree of freedom reads. A table
+ * is indexed by degree of freedom and quadrature point, as a table holding a row per degree of
+ * freedom would be.
+ *
+ * A table refers to the cached data and holds none of its own, so it is held by value.
+ */
+template <typename T>
+class ShapeTable
+{
+public:
+  /**
+   * Constructor
+   * @param pool The distinct rows, indexed by row and quadrature point
+   * @param rows The pool row each degree of freedom reads
+   */
+  KOKKOS_FUNCTION ShapeTable(const Array2D<T> & pool, const Array<unsigned int> & rows)
+    : _pool(pool), _rows(rows)
+  {
+  }
+  /**
+   * Get a shape value
+   * @param i The shape function index
+   * @param qp The quadrature point index
+   * @returns The shape value
+   */
+  KOKKOS_FUNCTION T & operator()(unsigned int i, unsigned int qp) const
+  {
+    return _pool(_rows(i), qp);
+  }
+  /**
+   * Get the number of quadrature points the table holds
+   * @returns The number of quadrature points
+   */
+  KOKKOS_FUNCTION unsigned int numQps() const { return _pool.n(1); }
+
+private:
+  /// The distinct rows, indexed by row and quadrature point
+  const Array2D<T> & _pool;
+  /// The pool row each degree of freedom reads
+  const Array<unsigned int> & _rows;
+};
+
+/**
+ * The reference shape tables of the sides of an element, each side holding its own pool of rows.
+ */
+template <typename T>
+class ShapeFaceTable
+{
+public:
+  /**
+   * Constructor
+   * @param pool The distinct rows of each side
+   * @param rows The pool row each degree of freedom reads on each side
+   */
+  KOKKOS_FUNCTION ShapeFaceTable(const Array<Array2D<T>> & pool,
+                                 const Array<Array<unsigned int>> & rows)
+    : _pool(pool), _rows(rows)
+  {
+  }
+  /**
+   * Get the table of a side
+   * @param side The side index
+   * @returns The shape table of the side
+   */
+  KOKKOS_FUNCTION ShapeTable<T> operator()(unsigned int side) const
+  {
+    return {_pool(side), _rows(side)};
+  }
+
+private:
+  /// The distinct rows of each side
+  const Array<Array2D<T>> & _pool;
+  /// The pool row each degree of freedom reads on each side
+  const Array<Array<unsigned int>> & _rows;
+};
+#endif
 
 /**
  * The Kokkos assembly class
@@ -37,6 +141,14 @@ public:
    * Initialize assembly
    */
   void init();
+  /**
+   * Register a libMesh system whose variables' FE types need cached reference shape data, in
+   * addition to the problem's solver and auxiliary systems. A p-multigrid level space is such a
+   * system: it carries no residual objects, so it is none of those, but its basis tables are
+   * contracted against the quadrature-point Jacobian cache. Must be called before init().
+   * @param system The libMesh system
+   */
+  void addShapeSystem(libMesh::System & system);
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -139,104 +251,188 @@ public:
     return _n_dofs(elem_type, fe_type);
   }
   /**
+   * Get the number of one-dimensional modes per reference coordinate a FE type carries on an
+   * element type, which is nonzero only where the shape functions factor into a product of
+   * one-dimensional shape functions over the subdomain's quadrature rule
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The number of one-dimensional modes, or zero where the shape functions do not factor
+   */
+  KOKKOS_FUNCTION unsigned int getNumTensorModes(ContiguousSubdomainID subdomain,
+                                                 unsigned int elem_type,
+                                                 unsigned int fe_type) const
+  {
+    return _n_tensor_modes(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the one-dimensional shape functions a separable FE type factors into
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The one-dimensional shape values, indexed by mode and one-dimensional quadrature point
+   */
+  KOKKOS_FUNCTION const Array2D<Real> &
+  getTensorPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  {
+    return _tensor_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the derivatives of the one-dimensional shape functions a separable FE type factors into
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The one-dimensional shape derivatives, indexed by mode and one-dimensional quadrature
+   * point
+   */
+  KOKKOS_FUNCTION const Array2D<Real> & getTensorGradPhi(ContiguousSubdomainID subdomain,
+                                                         unsigned int elem_type,
+                                                         unsigned int fe_type) const
+  {
+    return _tensor_grad_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the degree of freedom and sign each tensor-product mode pair of a separable FE type carries
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
+   * @returns The modes, indexed by the mode of each reference coordinate
+   */
+  KOKKOS_FUNCTION const Array2D<TensorMode> & getTensorModes(ContiguousSubdomainID subdomain,
+                                                             unsigned int elem_type,
+                                                             unsigned int fe_type,
+                                                             unsigned int orientation) const
+  {
+    return _tensor_modes(subdomain, elem_type, fe_type, orientation);
+  }
+  /**
    * Get the shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The shape functions at quadrature points
    */
-  KOKKOS_FUNCTION const auto &
-  getPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeTable<Real> getPhi(ContiguousSubdomainID subdomain,
+                                          unsigned int elem_type,
+                                          unsigned int fe_type,
+                                          unsigned int orientation) const
   {
-    return _phi(subdomain, elem_type, fe_type);
+    return {_phi(subdomain, elem_type, fe_type),
+            _shape_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the face shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The shape functions of all sides at quadrature points
    */
-  KOKKOS_FUNCTION const auto &
-  getPhiFace(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeFaceTable<Real> getPhiFace(ContiguousSubdomainID subdomain,
+                                                  unsigned int elem_type,
+                                                  unsigned int fe_type,
+                                                  unsigned int orientation) const
   {
-    return _phi_face(subdomain, elem_type, fe_type);
+    return {_phi_face(subdomain, elem_type, fe_type),
+            _shape_face_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the gradient of shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The gradient of shape functions at quadrature points
    */
-  KOKKOS_FUNCTION const auto &
-  getGradPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeTable<Real3> getGradPhi(ContiguousSubdomainID subdomain,
+                                               unsigned int elem_type,
+                                               unsigned int fe_type,
+                                               unsigned int orientation) const
   {
-    return _grad_phi(subdomain, elem_type, fe_type);
+    return {_grad_phi(subdomain, elem_type, fe_type),
+            _shape_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the gradient of face shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The gradient of shape functions of all sides at quadrature points
    */
-  KOKKOS_FUNCTION const auto & getGradPhiFace(ContiguousSubdomainID subdomain,
-                                              unsigned int elem_type,
-                                              unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeFaceTable<Real3> getGradPhiFace(ContiguousSubdomainID subdomain,
+                                                       unsigned int elem_type,
+                                                       unsigned int fe_type,
+                                                       unsigned int orientation) const
   {
-    return _grad_phi_face(subdomain, elem_type, fe_type);
+    return {_grad_phi_face(subdomain, elem_type, fe_type),
+            _shape_face_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the vector shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The vector shape functions at quadrature points
    */
-  KOKKOS_FUNCTION const auto &
-  getVectorPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeTable<Real3> getVectorPhi(ContiguousSubdomainID subdomain,
+                                                 unsigned int elem_type,
+                                                 unsigned int fe_type,
+                                                 unsigned int orientation) const
   {
-    return _vector_phi(subdomain, elem_type, fe_type);
+    return {_vector_phi(subdomain, elem_type, fe_type),
+            _shape_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the face vector shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The vector shape functions of all sides at quadrature points
    */
-  KOKKOS_FUNCTION const auto & getVectorPhiFace(ContiguousSubdomainID subdomain,
-                                                unsigned int elem_type,
-                                                unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeFaceTable<Real3> getVectorPhiFace(ContiguousSubdomainID subdomain,
+                                                         unsigned int elem_type,
+                                                         unsigned int fe_type,
+                                                         unsigned int orientation) const
   {
-    return _vector_phi_face(subdomain, elem_type, fe_type);
+    return {_vector_phi_face(subdomain, elem_type, fe_type),
+            _shape_face_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the gradient of vector shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The gradient of vector shape functions at quadrature points
    */
-  KOKKOS_FUNCTION const auto & getVectorGradPhi(ContiguousSubdomainID subdomain,
-                                                unsigned int elem_type,
-                                                unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeTable<Real33> getVectorGradPhi(ContiguousSubdomainID subdomain,
+                                                      unsigned int elem_type,
+                                                      unsigned int fe_type,
+                                                      unsigned int orientation) const
   {
-    return _vector_grad_phi(subdomain, elem_type, fe_type);
+    return {_vector_grad_phi(subdomain, elem_type, fe_type),
+            _shape_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get the gradient of face vector shape functions of a FE type for an element type and subdomain
    * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
    * @returns The gradient of vector shape functions of all sides at quadrature points
    */
-  KOKKOS_FUNCTION const auto & getVectorGradPhiFace(ContiguousSubdomainID subdomain,
-                                                    unsigned int elem_type,
-                                                    unsigned int fe_type) const
+  KOKKOS_FUNCTION ShapeFaceTable<Real33> getVectorGradPhiFace(ContiguousSubdomainID subdomain,
+                                                              unsigned int elem_type,
+                                                              unsigned int fe_type,
+                                                              unsigned int orientation) const
   {
-    return _vector_grad_phi_face(subdomain, elem_type, fe_type);
+    return {_vector_grad_phi_face(subdomain, elem_type, fe_type),
+            _shape_face_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
    * Get whether a cached FE type is vector-valued
@@ -355,6 +551,10 @@ private:
    * FE type ID map
    */
   std::map<FEType, unsigned int> _fe_type_map;
+  /**
+   * Systems registered through addShapeSystem()
+   */
+  std::vector<libMesh::System *> _shape_systems;
 
   /**
    * Mesh dimension
@@ -410,7 +610,9 @@ private:
   Array2D<Array<Array<Real>>> _weights_face;
   ///@}
   /**
-   * Shape functions for reference elements
+   * Shape functions for reference elements. A shape table holds a pool of distinct rows, keyed on
+   * subdomain, element type and FE type, together with the pool row each degree of freedom of an
+   * orientation reads. The rows a family repeats across orientations are then stored once.
    */
   ///@{
   Array3D<Array2D<Real>> _phi;
@@ -421,8 +623,27 @@ private:
   Array3D<Array<Array2D<Real3>>> _vector_phi_face;
   Array3D<Array2D<Real33>> _vector_grad_phi;
   Array3D<Array<Array2D<Real33>>> _vector_grad_phi_face;
+  Array4D<Array<unsigned int>> _shape_rows;
+  Array4D<Array<Array<unsigned int>>> _shape_face_rows;
   Array<bool> _is_vector_fe_type;
   Array2D<unsigned int> _n_dofs;
+  ///@}
+  /**
+   * The factorization of the shape functions of a separable FE type on a tensor-product element
+   * type, over the subdomain's quadrature rule.
+   *
+   * A shape function of such a type is a product of one-dimensional shape functions, one per
+   * reference coordinate, times a sign, and the quadrature rule is the corresponding product of a
+   * one-dimensional rule. A consumer can then contract against the one-dimensional tables, which
+   * costs a factor of the mode count fewer operations and reads a table small enough to stay
+   * cached, instead of against the tables above. The mode count is zero wherever the factorization
+   * does not hold, and a consumer falls back to the full tables there.
+   */
+  ///@{
+  Array3D<unsigned int> _n_tensor_modes;
+  Array3D<Array2D<Real>> _tensor_phi;
+  Array3D<Array2D<Real>> _tensor_grad_phi;
+  Array4D<Array2D<TensorMode>> _tensor_modes;
   ///@}
   /**
    * Shape functions for computing reference-to-physical maps

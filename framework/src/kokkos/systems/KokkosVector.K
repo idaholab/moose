@@ -8,75 +8,42 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosVector.h"
-#include "KokkosFESystem.h"
-
-// #define DEVICE_ASSEMBLY
+#include "KokkosDofSpace.h"
 
 namespace Moose::Kokkos
 {
 
-#ifdef DEVICE_ASSEMBLY
-
 void
-Vector::DeviceAssembly::create(const Array<Array<libMesh::dof_id_type>> & list)
-{
-  this->list = list;
-
-  count.createHost(list.size());
-  offset.create(list.size() + 1);
-  offset = 0;
-
-  for (unsigned int i = 0; i < list.size(); ++i)
-  {
-    count[i] = list[i].size();
-    offset[i + 1] = offset[i] + count[i];
-  }
-
-  offset.copyToDevice();
-
-  buffer.createDevice(offset.last());
-}
-
-void
-Vector::DeviceAssembly::destroy()
-{
-  list.destroy();
-  count.destroy();
-  offset.destroy();
-  buffer.destroy();
-}
-
-KOKKOS_FUNCTION void
-Vector::operator()(PackBuffer, const PetscCount tid) const
-{
-  _send.buffer[_send.offset[_current_proc] + tid] = _ghost(_send.list[_current_proc][tid]);
-}
-
-KOKKOS_FUNCTION void
-Vector::operator()(UnpackBuffer, const PetscCount tid) const
-{
-  _local[_recv.list[_current_proc][tid]] += _recv.buffer[_recv.offset[_current_proc] + tid];
-}
-
-#endif
-
-void
-Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble)
+Vector::create(libMesh::NumericVector<PetscScalar> & vector,
+               const DofSpace & dof_space,
+               bool assemble,
+               bool read_only)
 {
   auto petsc_vector = dynamic_cast<libMesh::PetscVector<PetscScalar> *>(&vector);
 
   mooseAssert(petsc_vector, "Kokkos vector error: provided vector is not a PetscVector.");
 
-  PetscScalar * array;
+  if (read_only && assemble)
+    mooseError("Kokkos vector error: an assembled vector cannot be read-only.");
+
+  PetscScalar * array = PETSC_NULLPTR;
+  const PetscScalar * read_array = PETSC_NULLPTR;
   PetscMemType mtype;
   LibmeshPetscCallQ(VecGhostGetLocalForm(petsc_vector->vec(), &_local_vector));
-  LibmeshPetscCallQ(
-      VecGetArrayAndMemType(_local_vector ? _local_vector : petsc_vector->vec(), &array, &mtype));
+
+  const auto local_form = _local_vector ? _local_vector : petsc_vector->vec();
+
+  // The read-only accessor leaves a write lock the caller holds on the vector intact, which is what
+  // lets an operator application read its input where it already is
+  if (read_only)
+    LibmeshPetscCallQ(VecGetArrayReadAndMemType(local_form, &read_array, &mtype));
+  else
+    LibmeshPetscCallQ(VecGetArrayAndMemType(local_form, &array, &mtype));
 
   auto is_host = mtype == PETSC_MEMTYPE_HOST;
   auto is_ghosted = vector.type() == libMesh::ParallelType::GHOSTED;
-  bool realloc =
-      !_is_alloc || _assemble != assemble || _is_host != is_host || _is_ghosted != is_ghosted;
+  bool realloc = !_is_alloc || _assemble != assemble || _is_host != is_host ||
+                 _is_ghosted != is_ghosted || _read_only != read_only;
 
 #ifndef MOOSE_ENABLE_KOKKOS_GPU
   if (!is_host)
@@ -85,71 +52,80 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
 
   _global_vector = petsc_vector->vec();
   _array = array;
-  _system = &system;
+  _read_array = read_array;
+  _dof_space = &dof_space;
   _assemble = assemble;
   _is_host = is_host;
   _is_ghosted = is_ghosted;
+  _read_only = read_only;
 
   if (realloc)
   {
-    _comm = nullptr;
-
-#ifdef DEVICE_ASSEMBLY
-    _send.destroy();
-    _recv.destroy();
-#endif
-
     _local.destroy();
     _ghost.destroy();
+    _local_read.destroy();
   }
 
   if (assemble)
   {
+    // Off-process contributions accumulate here and are reduced into their owner in close(). The
+    // target PETSc vector's own memory type decides whether that reduction hands PETSc a device
+    // or a host array, so both are kept: a plain (non-Kokkos-typed) vector's native COO
+    // implementation only accepts a host array.
     if (realloc)
     {
-#ifdef DEVICE_ASSEMBLY
-      _comm = &_system->getComm();
-      _send.create(_system->getGhostCommList());
-      _recv.create(_system->getLocalCommList());
-      _ghost.createDevice(_system->getNumGhostDofs());
-#else
-      _ghost.create(_system->getNumGhostDofs());
-#endif
-      _ghost.offset(_system->getNumLocalDofs());
+      _ghost.create(_dof_space->getNumGhostDofs());
+      _ghost.offset(_dof_space->getNumLocalDofs());
     }
 
     if (!_is_host)
     {
       if (realloc)
-        _local.init(_system->getNumLocalDofs());
+        _local.init(_dof_space->getNumLocalDofs());
 
       _local.aliasDevice(_array);
     }
     else
     {
       if (realloc)
-        _local.createDevice(_system->getNumLocalDofs());
+        _local.createDevice(_dof_space->getNumLocalDofs());
 
       _local.aliasHost(_array);
     }
   }
   else
   {
+    // A ghosted vector holds its ghost degrees of freedom alongside the local ones
+    const auto size = _is_ghosted
+                          ? _dof_space->getNumLocalDofs() + _dof_space->getNumGhostDofs()
+                          : _dof_space->getNumLocalDofs();
+
     if (!_is_host)
     {
-      if (realloc)
-        _local.init(_is_ghosted ? _system->getNumLocalDofs() + _system->getNumGhostDofs()
-                                : _system->getNumLocalDofs());
+      if (_read_only)
+      {
+        if (realloc)
+          _local_read.init(size);
 
-      _local.aliasDevice(_array);
+        _local_read.aliasDevice(_read_array);
+      }
+      else
+      {
+        if (realloc)
+          _local.init(size);
+
+        _local.aliasDevice(_array);
+      }
     }
     else
     {
       if (realloc)
-        _local.createDevice(_is_ghosted ? _system->getNumLocalDofs() + _system->getNumGhostDofs()
-                                        : _system->getNumLocalDofs());
+        _local.createDevice(size);
 
-      _local.aliasHost(_array);
+      // A read-only vector's host array is const and so cannot back the owned device storage;
+      // copyToDevice() copies its values in instead
+      if (!_read_only)
+        _local.aliasHost(_array);
     }
   }
 
@@ -165,28 +141,37 @@ Vector::destroy()
   _global_vector = PETSC_NULLPTR;
   _local_vector = PETSC_NULLPTR;
   _array = PETSC_NULLPTR;
-  _system = nullptr;
-  _comm = nullptr;
-
-#ifdef DEVICE_ASSEMBLY
-  _send.destroy();
-  _recv.destroy();
-#endif
+  _read_array = PETSC_NULLPTR;
+  _dof_space = nullptr;
 
   _local.destroy();
   _ghost.destroy();
+  _local_read.destroy();
 
   _assemble = false;
   _is_ghosted = false;
   _is_host = false;
+  _read_only = false;
   _is_alloc = false;
+
+  // The next close() on this wrapper describes whatever vector and layout it is then created
+  // around, so the recorded COO preallocations no longer apply
+  _coo_vector_ids.clear();
+  _coo_dof_space = nullptr;
 }
 
 void
 Vector::copyToDevice()
 {
   if (_is_alloc && _is_host)
-    _local.copyToDevice();
+  {
+    // A read-only vector's host array is held const, so its values are copied into the owned device
+    // storage rather than that storage aliasing them
+    if (_read_only)
+      _local.copyIn(_read_array, MemcpyType::HOST_TO_DEVICE, _local.size());
+    else
+      _local.copyToDevice();
+  }
 
   if (_assemble)
     _ghost = 0;
@@ -198,6 +183,9 @@ Vector::copyToHost()
   if (_assemble)
     mooseError("Kokkos vector error: copyToHost() should not be called for an assembled vector.");
 
+  if (_read_only)
+    mooseError("Kokkos vector error: copyToHost() should not be called for a read-only vector.");
+
   if (_is_alloc && _is_host)
     _local.copyToHost();
 }
@@ -205,8 +193,13 @@ Vector::copyToHost()
 void
 Vector::restore()
 {
-  LibmeshPetscCallQ(
-      VecRestoreArrayAndMemType(_local_vector ? _local_vector : _global_vector, &_array));
+  const auto local_form = _local_vector ? _local_vector : _global_vector;
+
+  if (_read_only)
+    LibmeshPetscCallQ(VecRestoreArrayReadAndMemType(local_form, &_read_array));
+  else
+    LibmeshPetscCallQ(VecRestoreArrayAndMemType(local_form, &_array));
+
   LibmeshPetscCallQ(VecGhostRestoreLocalForm(_global_vector, &_local_vector));
 }
 
@@ -219,44 +212,6 @@ Vector::close()
   if (!_is_alloc)
     return;
 
-#ifdef DEVICE_ASSEMBLY
-
-  // Pack data into send buffer
-
-  for (_current_proc = 0; _current_proc < _comm->size(); ++_current_proc)
-  {
-    Kokkos::RangePolicy<PackBuffer, Kokkos::IndexType<PetscCount>> policy(
-        0, _send.count[_current_proc]);
-    Kokkos::parallel_for(policy, *this);
-  }
-
-  Kokkos::fence();
-
-  // Perform MPI communications
-
-  MPI_Alltoallv(_send.buffer.deviceData(),
-                _send.count.data(),
-                _send.offset.data(),
-                MPIU_SCALAR,
-                _recv.buffer.deviceData(),
-                _recv.count.data(),
-                _recv.offset.data(),
-                MPIU_SCALAR,
-                _comm->get());
-
-  // Unpack data from receive buffer
-
-  for (_current_proc = 0; _current_proc < _comm->size(); ++_current_proc)
-  {
-    Kokkos::RangePolicy<UnpackBuffer, Kokkos::IndexType<PetscCount>> policy(
-        0, _recv.count[_current_proc]);
-    Kokkos::parallel_for(policy, *this);
-  }
-
-  Kokkos::fence();
-
-#endif
-
   // Copy to the host vector if needed
 
   if (_is_host)
@@ -266,18 +221,43 @@ Vector::close()
 
   restore();
 
-#ifndef DEVICE_ASSEMBLY
+  // Every row this rank holds a contribution for but does not own is reduced into its owner
+  // through PETSc's coordinate-format vector interface. The row indices are the same global
+  // degrees of freedom a VecSetValues call would use, in the same order the entity-block and
+  // quadrature-point Jacobian loops filled _ghost in.
+  //
+  // The preallocation describes the indices alone, and PETSc keeps it on the vector, so it is set
+  // once per vector and layout and reused by every later VecSetValuesCOO() on that vector. Its
+  // cost is proportional to the vector's local size rather than to the number of contributions,
+  // which is why an operator application that closes a vector on every call must not repeat it.
 
-  _ghost.copyToHost();
+  PetscObjectId vector_id;
+  LibmeshPetscCallQ(PetscObjectGetId(reinterpret_cast<PetscObject>(_global_vector), &vector_id));
 
-  LibmeshPetscCallQ(
-      VecSetValues(_global_vector,
-                   _system->getNumGhostDofs(),
-                   reinterpret_cast<const PetscInt *>(_system->getDofMap().get_send_list().data()),
-                   _ghost.data(),
-                   ADD_VALUES));
+  // A change of layout invalidates every preallocation recorded against the old one
+  if (_dof_space != _coo_dof_space)
+  {
+    _coo_vector_ids.clear();
+    _coo_dof_space = _dof_space;
+  }
 
-#endif
+  if (_coo_vector_ids.insert(vector_id).second)
+    LibmeshPetscCallQ(VecSetPreallocationCOO(
+        _global_vector,
+        _dof_space->getNumGhostDofs(),
+        reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
+
+  // A Kokkos/CUDA-typed vector's COO implementation detects and accepts a device array; a plain
+  // vector's native implementation reads its values array directly from the host and does not, so
+  // the device-resident contributions are brought back for it, as they were before this vector
+  // used PETSc's COO interface
+  if (_is_host)
+  {
+    _ghost.copyToHost();
+    LibmeshPetscCallQ(VecSetValuesCOO(_global_vector, _ghost.hostData(), ADD_VALUES));
+  }
+  else
+    LibmeshPetscCallQ(VecSetValuesCOO(_global_vector, _ghost.deviceData(), ADD_VALUES));
 }
 
 } // namespace Moose::Kokkos

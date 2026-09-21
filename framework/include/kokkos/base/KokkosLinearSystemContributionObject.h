@@ -132,7 +132,7 @@ LinearSystemContributionObject::accumulateTaggedVector(const Real value,
   for (MOOSE_KOKKOS_INDEX_TYPE index = 0; index < tags_size; ++index)
   {
     const auto tag = _vector_tags[index];
-    if (sys.isResidualTagActive(tag))
+    if (sys.isAssembledTagActive(tag))
     {
       if constexpr (mode == AccumulationMode::Atomic)
         ::Kokkos::atomic_add(&sys.getVectorDofValue(row, tag), value);

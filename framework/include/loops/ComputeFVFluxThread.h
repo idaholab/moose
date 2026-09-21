@@ -25,7 +25,6 @@
 #include "libmesh/elem.h"
 
 // C++
-#include <cstring> // for "Jacobian" exception test
 #include <set>
 
 class MooseVariableFVBase;
@@ -324,14 +323,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
     {
       moose::translateMetaPhysicLError(e);
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap & e)
     {
-      // Continue if we find a libMesh degenerate map exception, but
-      // just throw for any real error
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-          !strstr(e.what(), "det != 0"))
-        throw;
-
       mooseException("We caught a libMesh degeneracy exception in ComputeFVFluxThread:\n",
                      e.what());
     }

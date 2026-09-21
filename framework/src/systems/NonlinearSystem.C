@@ -133,6 +133,17 @@ NonlinearSystem::potentiallySetupFiniteDifferencing()
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
+
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  // Kokkos assembles the residual by accumulating each degree of freedom's contributions with
+  // device atomics, whose completion order across threads is not reproducible, so two evaluations
+  // at the same solution agree only to round-off rather than bitwise. That is sound for reusing
+  // the base vector, but it defeats libMesh's bitwise check that the reuse was safe. Only the GPU
+  // backend is affected: on host the accumulation order follows the thread count, which libMesh
+  // already accounts for.
+  if (_fe_problem.hasKokkosResidualObjects())
+    solver.set_reproducible_residual(false);
+#endif
 }
 
 void
@@ -236,6 +247,15 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   if (!fdp)
     mooseError("Did not setup finite difference preconditioner, and please add a preconditioning "
                "block with type = fdp");
+
+  // Both finite difference types below hand the system matrix to a SNES routine that writes
+  // difference quotients into its entries, so the matrix has to be one that stores entries
+  if (!dynamic_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix()))
+    mooseError("Finite difference preconditioning fills the entries of an assembled system "
+               "matrix. System '",
+               name(),
+               "' has a matrix-free system matrix, which computes its action on a vector and "
+               "holds no entries to difference.");
 
   if (fdp->finiteDifferenceType() == "coloring")
   {

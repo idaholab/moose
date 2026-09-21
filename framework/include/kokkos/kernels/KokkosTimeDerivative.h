@@ -27,10 +27,38 @@ public:
   KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
                                             const unsigned int qp,
                                             AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeQpJacobianTensor(Moose::Kokkos::QpJacobianBlockAccessor & blocks,
+                                               const unsigned int qp,
+                                               AssemblyDatum & datum) const;
+
+  virtual unsigned int qpJacobianBlocks() const override
+  {
+    return Moose::Kokkos::QP_JACOBIAN_VALUE_VALUE;
+  }
+
+  /**
+   * Mass lumping moves each row's mass onto its own diagonal entry, which is a property of the
+   * assembled element matrix and has no quadrature-point tensor that reproduces it, so a lumped
+   * time derivative stays on the assembled path.
+   */
+  virtual bool usesQpJacobianCache() const override
+  {
+    return !_lumping && Moose::Kokkos::TimeKernelValue::usesQpJacobianCache();
+  }
 
 protected:
   const bool _lumping;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosTimeDerivative::computeQpJacobianTensor(Moose::Kokkos::QpJacobianBlockAccessor & blocks,
+                                              const unsigned int /* qp */,
+                                              AssemblyDatum & /* datum */) const
+{
+  blocks.addValueValue(_du_dot_du);
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void

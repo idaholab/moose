@@ -17,11 +17,166 @@
 #include "Assembly.h"
 #include "BoundaryRestrictable.h"
 
+#include "libmesh/fe.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/reference_elem.h"
 
+#include <algorithm>
+#include <cmath>
+#include <map>
+#include <vector>
+
 namespace Moose::Kokkos
 {
+
+namespace
+{
+
+/**
+ * Assemble a reference-space shape function gradient from the per-direction derivatives libMesh
+ * reports, which it sizes by dimension so the directions above the mesh dimension are absent
+ * @param dphidxi The derivatives with respect to the first reference direction
+ * @param dphideta The derivatives with respect to the second reference direction
+ * @param dphidzeta The derivatives with respect to the third reference direction
+ * @param dimension The mesh dimension
+ * @param i The shape function index
+ * @param qp The quadrature point index
+ * @returns The gradient
+ */
+Real3
+referenceGradient(const std::vector<std::vector<Real>> & dphidxi,
+                  const std::vector<std::vector<Real>> & dphideta,
+                  const std::vector<std::vector<Real>> & dphidzeta,
+                  const unsigned int dimension,
+                  const unsigned int i,
+                  const unsigned int qp)
+{
+  Real3 gradient = 0;
+
+  gradient(0) = dphidxi[i][qp];
+
+  if (dimension > 1)
+    gradient(1) = dphideta[i][qp];
+  if (dimension > 2)
+    gradient(2) = dphidzeta[i][qp];
+
+  return gradient;
+}
+
+/**
+ * Assemble a reference-space vector shape function gradient from the per-direction derivatives
+ * libMesh reports, which it sizes by dimension so the directions above the mesh dimension are
+ * absent. Row a, column b holds the derivative of component a with respect to reference direction
+ * b.
+ * @param dphidxi The derivatives with respect to the first reference direction
+ * @param dphideta The derivatives with respect to the second reference direction
+ * @param dphidzeta The derivatives with respect to the third reference direction
+ * @param dimension The mesh dimension
+ * @param i The shape function index
+ * @param qp The quadrature point index
+ * @returns The gradient
+ */
+Real33
+referenceGradient(const std::vector<std::vector<libMesh::RealGradient>> & dphidxi,
+                  const std::vector<std::vector<libMesh::RealGradient>> & dphideta,
+                  const std::vector<std::vector<libMesh::RealGradient>> & dphidzeta,
+                  const unsigned int dimension,
+                  const unsigned int i,
+                  const unsigned int qp)
+{
+  Real33 gradient = 0;
+
+  for (const auto component : make_range(3u))
+  {
+    gradient(component, 0) = dphidxi[i][qp](component);
+
+    if (dimension > 1)
+      gradient(component, 1) = dphideta[i][qp](component);
+    if (dimension > 2)
+      gradient(component, 2) = dphidzeta[i][qp](component);
+  }
+
+  return gradient;
+}
+
+/**
+ * Append the components of a shape value or of a shape function gradient to the key of the row
+ * holding it
+ * @param key The key to append to
+ * @param value The shape value or gradient
+ */
+///@{
+void
+appendComponents(std::vector<Real> & key, const Real value)
+{
+  key.push_back(value);
+}
+
+void
+appendComponents(std::vector<Real> & key, const Real3 & value)
+{
+  for (const auto i : make_range(3u))
+    key.push_back(value(i));
+}
+
+void
+appendComponents(std::vector<Real> & key, const Real33 & value)
+{
+  for (const auto i : make_range(3u))
+    for (const auto j : make_range(3u))
+      key.push_back(value(i, j));
+}
+///@}
+
+/**
+ * Build the key of the row of a reference shape table that one degree of freedom reads, holding the
+ * shape value and its reference gradient at every quadrature point of the table. Degrees of freedom
+ * carrying equal keys read equal rows, so a key is what a row of a pool is addressed by.
+ * @param phi The shape values
+ * @param dphidxi The derivatives with respect to the first reference direction
+ * @param dphideta The derivatives with respect to the second reference direction
+ * @param dphidzeta The derivatives with respect to the third reference direction
+ * @param dimension The mesh dimension
+ * @param i The shape function index
+ * @param n_points The number of quadrature points of the table
+ * @returns The key
+ */
+template <typename Container>
+std::vector<Real>
+shapeKey(const Container & phi,
+         const Container & dphidxi,
+         const Container & dphideta,
+         const Container & dphidzeta,
+         const unsigned int dimension,
+         const unsigned int i,
+         const unsigned int n_points)
+{
+  std::vector<Real> key;
+
+  for (const auto qp : make_range(n_points))
+  {
+    appendComponents(key, phi[i][qp]);
+    appendComponents(key, referenceGradient(dphidxi, dphideta, dphidzeta, dimension, i, qp));
+  }
+
+  return key;
+}
+
+/**
+ * Get the row of a pool that a key is addressed by, adding a row for a key not seen before
+ * @param pool The row assigned to each key seen so far
+ * @param key The key
+ * @returns The row
+ */
+unsigned int
+poolRow(std::map<std::vector<Real>, unsigned int> & pool, const std::vector<Real> & key)
+{
+  const auto row = pool.size();
+
+  return pool.emplace(key, row).first->second;
+}
+
+} // namespace
 
 Assembly::Assembly(FEProblemBase & problem)
   : MeshHolder(*problem.mesh().getKokkosMesh()),
@@ -29,6 +184,12 @@ Assembly::Assembly(FEProblemBase & problem)
     _mesh(problem.mesh()),
     _dimension(_mesh.dimension())
 {
+}
+
+void
+Assembly::addShapeSystem(libMesh::System & system)
+{
+  _shape_systems.push_back(&system);
 }
 
 void
@@ -240,9 +401,10 @@ Assembly::initShape()
       else
       {
         if (fe_type.family != libMesh::LAGRANGE && fe_type.family != libMesh::L2_LAGRANGE &&
-            fe_type.family != libMesh::MONOMIAL && fe_type.family != libMesh::SCALAR)
-          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRNAGE, MONOMIAL, SCALAR for "
-                     "scalar FE families.");
+            fe_type.family != libMesh::MONOMIAL && fe_type.family != libMesh::SCALAR &&
+            fe_type.family != libMesh::HIERARCHIC)
+          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRNAGE, MONOMIAL, SCALAR, "
+                     "HIERARCHIC for scalar FE families.");
       }
 
       fe_types.insert(fe_type);
@@ -257,6 +419,9 @@ Assembly::initShape()
 
   getFETypes(_problem.getAuxiliarySystem().system());
 
+  for (auto * const system : _shape_systems)
+    getFETypes(*system);
+
   _fe_type_map.clear();
 
   for (auto & fet : fe_types)
@@ -266,6 +431,7 @@ Assembly::initShape()
 
   const auto num_subdomains = kokkosMesh().getNumSubdomains();
   const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
+  const auto num_orientations = kokkosMesh().getMaxNumOrientations();
 
   _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
@@ -275,7 +441,15 @@ Assembly::initShape()
   _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _vector_grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _shape_rows.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _shape_face_rows.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
   _is_vector_fe_type.create(_fe_type_map.size());
+
+  _n_tensor_modes.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _n_tensor_modes = 0;
+  _tensor_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _tensor_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _tensor_modes.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
 
   _map_phi.create(num_subdomains, num_elem_types);
   _map_phi_face.create(num_subdomains, num_elem_types);
@@ -329,91 +503,313 @@ Assembly::initShape()
 
       for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
       {
-        auto elem = &libMesh::ReferenceElem::get(elem_type);
+        const auto num_elem_orientations = kokkosMesh().getNumOrientations(elem_type_id);
+
+        // Copies of the types and their IDs, which a lambda cannot capture out of a structured
+        // binding
+        const auto elem_id = elem_type_id;
+        const auto fe_id = fe_type_id;
+        const auto type = elem_type;
+        const auto fet = fe_type;
+
+        // The shape functions of an FE family may depend on the orientation of the element's edges
+        // and faces, so a table is built for each orientation the local mesh presents, evaluated on
+        // an element of the mesh that carries it. Only reference-space quantities are read from
+        // that element, which keeps the tables independent of its geometry.
+        //
+        // The row of a table that a degree of freedom reads is addressed by the shape value and
+        // reference gradient it holds at every quadrature point, so the orientations that agree on
+        // a shape function share one row of a pool, and an orientation carries a list of pool rows.
+        // The number of distinct rows then grows with the number of edges and faces of an element
+        // that a family orients, rather than with the number of orientations of the whole element,
+        // which is what keeps the tables of a high order family affordable. The volume table and
+        // the table of each side are addressed separately, each from its own reinit.
+        //
+        // Filling a pool takes two sweeps over the orientations: the first assigns the rows and so
+        // counts them, and the second, once the pool is allocated, fills each row from the first
+        // orientation that reads it.
+
+        // The row assigned to each key of the volume pool
+        std::map<std::vector<Real>, unsigned int> pool_keys;
+        // The row assigned to each key of the pool of each side
+        std::vector<std::map<std::vector<Real>, unsigned int>> face_pool_keys;
+
+        auto assign_rows = [&](auto & fe, auto & fe_face)
+        {
+          auto & phi = fe.get_phi();
+          auto & dphidxi = fe.get_dphidxi();
+          auto & dphideta = fe.get_dphideta();
+          auto & dphidzeta = fe.get_dphidzeta();
+
+          auto & phi_face = fe_face.get_phi();
+          auto & dphidxi_face = fe_face.get_dphidxi();
+          auto & dphideta_face = fe_face.get_dphideta();
+          auto & dphidzeta_face = fe_face.get_dphidzeta();
+
+          for (const auto orientation : make_range(num_elem_orientations))
+          {
+            auto elem = &kokkosMesh().getOrientationElem(elem_id, orientation);
+
+            fe.reinit(elem);
+
+            _n_dofs(elem_id, fe_id) = phi.size();
+
+            auto & rows = _shape_rows(sid, elem_id, fe_id, orientation);
+
+            rows.create(phi.size());
+
+            for (const auto i : index_range(phi))
+              rows(i) = poolRow(
+                  pool_keys,
+                  shapeKey(phi, dphidxi, dphideta, dphidzeta, _dimension, i, qrule->n_points()));
+
+            auto & face_rows = _shape_face_rows(sid, elem_id, fe_id, orientation);
+
+            face_rows.create(elem->n_sides());
+            face_pool_keys.resize(elem->n_sides());
+
+            for (const auto side : elem->side_index_range())
+            {
+              fe_face.reinit(elem, side);
+
+              face_rows(side).create(phi_face.size());
+
+              for (const auto i : index_range(phi_face))
+                face_rows(side)(i) = poolRow(face_pool_keys[side],
+                                             shapeKey(phi_face,
+                                                      dphidxi_face,
+                                                      dphideta_face,
+                                                      dphidzeta_face,
+                                                      _dimension,
+                                                      i,
+                                                      qrule_face->n_points()));
+            }
+          }
+        };
+
+        auto fill_pools = [&](auto & fe,
+                              auto & fe_face,
+                              auto & phi_pool,
+                              auto & grad_phi_pool,
+                              auto & phi_face_pool,
+                              auto & grad_phi_face_pool)
+        {
+          auto & phi = fe.get_phi();
+          auto & dphidxi = fe.get_dphidxi();
+          auto & dphideta = fe.get_dphideta();
+          auto & dphidzeta = fe.get_dphidzeta();
+
+          auto & phi_face = fe_face.get_phi();
+          auto & dphidxi_face = fe_face.get_dphidxi();
+          auto & dphideta_face = fe_face.get_dphideta();
+          auto & dphidzeta_face = fe_face.get_dphidzeta();
+
+          phi_pool.create(pool_keys.size(), qrule->n_points());
+          grad_phi_pool.create(pool_keys.size(), qrule->n_points());
+
+          phi_face_pool.create(face_pool_keys.size());
+          grad_phi_face_pool.create(face_pool_keys.size());
+
+          for (const auto side : index_range(face_pool_keys))
+          {
+            phi_face_pool(side).create(face_pool_keys[side].size(), qrule_face->n_points());
+            grad_phi_face_pool(side).create(face_pool_keys[side].size(), qrule_face->n_points());
+          }
+
+          // Whether a row holds its shape data yet, so that each row is filled once
+          std::vector<bool> filled(pool_keys.size(), false);
+          std::vector<std::vector<bool>> face_filled;
+
+          for (const auto side : index_range(face_pool_keys))
+            face_filled.emplace_back(face_pool_keys[side].size(), false);
+
+          for (const auto orientation : make_range(num_elem_orientations))
+          {
+            auto elem = &kokkosMesh().getOrientationElem(elem_id, orientation);
+
+            fe.reinit(elem);
+
+            const auto & rows = _shape_rows(sid, elem_id, fe_id, orientation);
+
+            for (const auto i : index_range(phi))
+            {
+              const auto row = rows(i);
+
+              if (filled[row])
+                continue;
+
+              filled[row] = true;
+
+              for (const auto qp : make_range(qrule->n_points()))
+              {
+                phi_pool(row, qp) = phi[i][qp];
+                grad_phi_pool(row, qp) =
+                    referenceGradient(dphidxi, dphideta, dphidzeta, _dimension, i, qp);
+              }
+            }
+
+            const auto & face_rows = _shape_face_rows(sid, elem_id, fe_id, orientation);
+
+            for (const auto side : elem->side_index_range())
+            {
+              fe_face.reinit(elem, side);
+
+              for (const auto i : index_range(phi_face))
+              {
+                const auto row = face_rows(side)(i);
+
+                if (face_filled[side][row])
+                  continue;
+
+                face_filled[side][row] = true;
+
+                for (const auto qp : make_range(qrule_face->n_points()))
+                {
+                  phi_face_pool(side)(row, qp) = phi_face[i][qp];
+                  grad_phi_face_pool(side)(row, qp) = referenceGradient(
+                      dphidxi_face, dphideta_face, dphidzeta_face, _dimension, i, qp);
+                }
+              }
+            }
+          }
+        };
+
+        // A HIERARCHIC quadrilateral carries a tensor-product basis, and QGauss on a
+        // quadrilateral is the product of a one-dimensional rule, so the two-dimensional tables
+        // filled above are outer products of one-dimensional ones. Writing the factorization down
+        // lets a consumer contract against the one-dimensional tables instead, which is a factor of
+        // the mode count fewer operations over a table small enough to stay cached.
+        //
+        // The factorization is checked against the tables it claims to reproduce rather than
+        // assumed: a quadrature rule that is not the product of a one-dimensional rule, or a
+        // degree of freedom numbering that does not match what libMesh reports, leaves the mode
+        // count at zero and the consumer on the full tables.
+        auto build_tensor_tables = [&](auto & fe)
+        {
+          if (_dimension != 2 || fet.family != libMesh::HIERARCHIC)
+            return;
+
+          if (type != libMesh::QUAD4 && type != libMesh::QUAD8 && type != libMesh::QUAD9)
+            return;
+
+          const auto num_dofs = _n_dofs(elem_id, fe_id);
+          const auto num_qps = qrule->n_points();
+
+          const auto n_modes = static_cast<unsigned int>(std::lround(std::sqrt(num_dofs)));
+          const auto n_points = static_cast<unsigned int>(std::lround(std::sqrt(num_qps)));
+
+          if (n_modes * n_modes != num_dofs || n_points * n_points != num_qps)
+            return;
+
+          // The mode count per direction fixes the total order the tables were filled at
+          const auto totalorder = n_modes - 1;
+
+          auto & phi_1d = _tensor_phi(sid, elem_id, fe_id);
+          auto & grad_phi_1d = _tensor_grad_phi(sid, elem_id, fe_id);
+
+          phi_1d.create(n_modes, n_points);
+          grad_phi_1d.create(n_modes, n_points);
+
+          // QBase::tensor_product_quad() varies the first coordinate's index fastest, so the
+          // one-dimensional points are the first coordinates of the rule's leading points
+          for (const auto p : make_range(n_points))
+          {
+            const Point xi(qrule->qp(p)(0));
+
+            for (const auto a : make_range(n_modes))
+            {
+              phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape(
+                  libMesh::EDGE3, static_cast<Order>(totalorder), a, xi);
+              grad_phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape_deriv(
+                  libMesh::EDGE3, static_cast<Order>(totalorder), a, 0, xi);
+            }
+          }
+
+          auto & phi = fe.get_phi();
+          auto & dphidxi = fe.get_dphidxi();
+          auto & dphideta = fe.get_dphideta();
+
+          bool factors = true;
+
+          for (const auto orientation : make_range(num_elem_orientations))
+          {
+            auto elem = &kokkosMesh().getOrientationElem(elem_id, orientation);
+
+            fe.reinit(elem);
+
+            auto & modes = _tensor_modes(sid, elem_id, fe_id, orientation);
+
+            modes.create(n_modes, n_modes);
+
+            // The agreement below is measured relative to the largest magnitude the tables reach,
+            // because a derivative of a high order mode is far from unit size and an absolute
+            // tolerance would have to be chosen per order
+            Real scale = 1;
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(num_qps))
+                scale = std::max({scale,
+                                  std::abs(phi[i][qp]),
+                                  std::abs(dphidxi[i][qp]),
+                                  std::abs(dphideta[i][qp])});
+
+            // Well above the rounding of a product of two high order polynomials and well below the
+            // order-one relative error a wrong mode pair or sign would produce
+            const auto tol = 1e-10 * scale;
+
+            for (const auto i : index_range(phi))
+            {
+              const auto [i0, i1, sign] =
+                  libMesh::fe_hierarchic_quad_tensor_indices(elem, totalorder, i);
+
+              modes(i0, i1) = {static_cast<unsigned int>(i), sign};
+
+              for (const auto qp : make_range(num_qps))
+              {
+                const auto p0 = qp % n_points;
+                const auto p1 = qp / n_points;
+
+                factors =
+                    factors &&
+                    std::abs(sign * phi_1d(i0, p0) * phi_1d(i1, p1) - phi[i][qp]) < tol &&
+                    std::abs(sign * grad_phi_1d(i0, p0) * phi_1d(i1, p1) - dphidxi[i][qp]) < tol &&
+                    std::abs(sign * phi_1d(i0, p0) * grad_phi_1d(i1, p1) - dphideta[i][qp]) < tol;
+              }
+            }
+          }
+
+          if (factors)
+            _n_tensor_modes(sid, elem_id, fe_id) = n_modes;
+          else
+          {
+            phi_1d.destroy();
+            grad_phi_1d.destroy();
+
+            for (const auto orientation : make_range(num_elem_orientations))
+              _tensor_modes(sid, elem_id, fe_id, orientation).destroy();
+          }
+        };
 
         if (is_vector_fe)
         {
-          auto & phi = vector_fe->get_phi();
-          auto & grad_phi = vector_fe->get_dphi();
-
-          vector_fe->reinit(elem);
-
-          _n_dofs(elem_type_id, fe_type_id) = phi.size();
-
-          _vector_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-          _vector_grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-          for (const auto i : index_range(phi))
-            for (const auto qp : make_range(qrule->n_points()))
-            {
-              _vector_phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-              _vector_grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-            }
-
-          _vector_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-          _vector_grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-          for (const auto side : elem->side_index_range())
-          {
-            auto & phi = vector_fe_face->get_phi();
-            auto & grad_phi = vector_fe_face->get_dphi();
-
-            vector_fe_face->reinit(elem, side);
-
-            _vector_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                         qrule_face->n_points());
-            _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(
-                phi.size(), qrule_face->n_points());
-
-            for (const auto i : index_range(phi))
-              for (const auto qp : make_range(qrule_face->n_points()))
-              {
-                _vector_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-                _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
-              }
-          }
+          assign_rows(*vector_fe, *vector_fe_face);
+          fill_pools(*vector_fe,
+                     *vector_fe_face,
+                     _vector_phi(sid, elem_id, fe_id),
+                     _vector_grad_phi(sid, elem_id, fe_id),
+                     _vector_phi_face(sid, elem_id, fe_id),
+                     _vector_grad_phi_face(sid, elem_id, fe_id));
         }
         else
         {
-          auto & phi = fe->get_phi();
-          auto & grad_phi = fe->get_dphi();
-
-          fe->reinit(elem);
-
-          _n_dofs(elem_type_id, fe_type_id) = phi.size();
-
-          _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-          _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-          for (const auto i : index_range(phi))
-            for (const auto qp : make_range(qrule->n_points()))
-            {
-              _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-              _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-            }
-
-          _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-          _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-          for (const auto side : elem->side_index_range())
-          {
-            auto & phi = fe_face->get_phi();
-            auto & grad_phi = fe_face->get_dphi();
-
-            fe_face->reinit(elem, side);
-
-            _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                  qrule_face->n_points());
-            _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                       qrule_face->n_points());
-
-            for (const auto i : index_range(phi))
-              for (const auto qp : make_range(qrule_face->n_points()))
-              {
-                _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-                _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
-              }
-          }
+          assign_rows(*fe, *fe_face);
+          fill_pools(*fe,
+                     *fe_face,
+                     _phi(sid, elem_id, fe_id),
+                     _grad_phi(sid, elem_id, fe_id),
+                     _phi_face(sid, elem_id, fe_id),
+                     _grad_phi_face(sid, elem_id, fe_id));
+          build_tensor_tables(*fe);
         }
       }
     }
@@ -524,7 +920,14 @@ Assembly::initShape()
   _vector_phi_face.copyToDeviceNested();
   _vector_grad_phi.copyToDeviceNested();
   _vector_grad_phi_face.copyToDeviceNested();
+  _shape_rows.copyToDeviceNested();
+  _shape_face_rows.copyToDeviceNested();
   _is_vector_fe_type.copyToDevice();
+
+  _n_tensor_modes.copyToDevice();
+  _tensor_phi.copyToDeviceNested();
+  _tensor_grad_phi.copyToDeviceNested();
+  _tensor_modes.copyToDeviceNested();
 
   _map_phi.copyToDeviceNested();
   _map_phi_face.copyToDeviceNested();

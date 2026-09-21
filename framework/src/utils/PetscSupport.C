@@ -133,6 +133,49 @@ applySystemVectorTypeOptions(FEProblemBase & problem, libMesh::System & lm_sys)
   LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
   petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.current_local_solution.get());
   LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
+
+  // A vector PETSc builds with MatCreateVecs(), which is where the Krylov and multigrid work
+  // vectors of a solve come from, takes the matrix's own default vector type. MatCreate() sets
+  // that to the host type and MatCreateVecs() applies it with VecSetType(), which consults no
+  // options, so -vec_type alone leaves every work vector of the solve on the host however the
+  // system's own vectors are typed. Carrying the requested type onto the matrices keeps the whole
+  // solve in one memory space.
+  std::array<char, PETSC_MAX_PATH_LEN> vec_type = {};
+  PetscBool found = PETSC_FALSE;
+  LibmeshPetscCallA(problem.comm().get(),
+                    PetscOptionsGetString(LIBMESH_PETSC_NULLPTR,
+                                          LIBMESH_PETSC_NULLPTR,
+                                          "-vec_type",
+                                          vec_type.data(),
+                                          vec_type.size(),
+                                          &found));
+
+  if (!found)
+    return;
+
+  // The generic name is carried rather than the type resolved off a vector, which would be the
+  // sequential name for a serial vector and so wrong for a parallel matrix; VecSetType() resolves
+  // the generic name against the communicator it is given.
+  for (auto & [_, mat] : as_range(lm_sys.matrices_begin(), lm_sys.matrices_end()))
+    if (auto * const petsc_mat = dynamic_cast<libMesh::PetscMatrixBase<Number> *>(mat.get());
+        petsc_mat && petsc_mat->initialized())
+      LibmeshPetscCallA(problem.comm().get(),
+                        MatSetVecType(petsc_mat->mat(), vec_type.data()));
+
+  // A matrix built after this point, such as a matrix-free shell operator created on the first
+  // Jacobian evaluation, reads its default vector type from the options database in
+  // MatSetFromOptions(). Recording the type there covers those without having to find them.
+  PetscBool mat_vec_type_set = PETSC_FALSE;
+  LibmeshPetscCallA(problem.comm().get(),
+                    PetscOptionsHasName(LIBMESH_PETSC_NULLPTR,
+                                        LIBMESH_PETSC_NULLPTR,
+                                        "-mat_vec_type",
+                                        &mat_vec_type_set));
+
+  if (!mat_vec_type_set)
+    LibmeshPetscCallA(problem.comm().get(),
+                      PetscOptionsSetValue(
+                          LIBMESH_PETSC_NULLPTR, "-mat_vec_type", vec_type.data()));
 }
 
 void
@@ -314,6 +357,14 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
       break;
   }
 
+  // A matrix-free system's preconditioning matrix is the shell operator, which supplies a
+  // matrix-vector product and a diagonal. Jacobi is the strongest preconditioner that can be built
+  // from those two operations alone, so it is the default here, unless the attached preconditioner
+  // sets the type itself once the solver objects it attaches to exist.
+  if (solver_params._kokkos_matrix_free && !solver_params._preconditioner_sets_pc_type)
+    setSinglePetscOptionIfAppropriate(
+        dont_add_these_options, prefix_with_dash + "pc_type", "jacobi");
+
   Moose::LineSearchType ls_type = solver_params._line_search;
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
@@ -392,6 +443,50 @@ petscSetOptionsHelper(const PetscOptions & po, FEProblemBase * const problem)
   addPetscOptionsFromCommandline(problem);
 }
 
+namespace
+{
+/**
+ * Error out when the preconditioner chosen for a Kokkos matrix-free solver system needs matrix
+ * entries. Such a system's Pmat is the shell operator, which supplies a matrix-vector product and a
+ * diagonal, so only preconditioners built from those two operations can be used. Called once the
+ * PETSc options database holds both the MOOSE defaults and the user's own options, so that it sees
+ * the preconditioner the solve will actually construct.
+ */
+void
+checkMatrixFreePreconditioner(const SolverParams & solver_params)
+{
+  if (!solver_params._kokkos_matrix_free)
+    return;
+
+  const auto option_name = '-' + solver_params._prefix + "pc_type";
+  std::array<char, PETSC_MAX_PATH_LEN> pc_type = {};
+  PetscBool found = PETSC_FALSE;
+  LibmeshPetscCallA(PETSC_COMM_WORLD,
+                    PetscOptionsGetString(LIBMESH_PETSC_NULLPTR,
+                                          LIBMESH_PETSC_NULLPTR,
+                                          option_name.c_str(),
+                                          pc_type.data(),
+                                          pc_type.size(),
+                                          &found));
+
+  if (!found)
+    return;
+
+  // Preconditioners whose setup and application need no more than MatMult and MatGetDiagonal.
+  // 'mg' qualifies only as far as its own machinery goes: each level's smoother carries its own
+  // preconditioner, which is subject to the same restriction on the operator handed to that level.
+  static const std::set<std::string> supported = {"none", "jacobi", "pbjacobi", "mg", "shell"};
+
+  if (!supported.count(pc_type.data()))
+    mooseError("Preconditioner '",
+               pc_type.data(),
+               "' reads matrix entries, which a Kokkos matrix-free system does not provide. Choose "
+               "one of: ",
+               MooseUtils::join(supported, ", "),
+               ".");
+}
+} // namespace
+
 void
 petscSetOptions(const PetscOptions & po,
                 const SolverParams & solver_params,
@@ -400,6 +495,7 @@ petscSetOptions(const PetscOptions & po,
   PetscCallAbort(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
   setSolverOptions(solver_params, po.dont_add_these_options);
   petscSetOptionsHelper(po, problem);
+  checkMatrixFreePreconditioner(solver_params);
 }
 
 void
@@ -411,6 +507,8 @@ petscSetOptions(const PetscOptions & po,
   for (const auto & solver_params : solver_params_vec)
     setSolverOptions(solver_params, po.dont_add_these_options);
   petscSetOptionsHelper(po, problem);
+  for (const auto & solver_params : solver_params_vec)
+    checkMatrixFreePreconditioner(solver_params);
 }
 
 PetscErrorCode
@@ -682,6 +780,7 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
   setSolveTypeFromParams(fe_problem, params);
   setLineSearchFromParams(fe_problem, params);
   setMFFDTypeFromParams(fe_problem, params);
+  setKokkosMatrixFreeFromParams(fe_problem, params);
 }
 
 #define checkPrefix(prefix)                                                                        \
@@ -771,6 +870,33 @@ setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
       fe_problem.solverParams(i)._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
+}
+
+void
+setKokkosMatrixFreeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  if (!params.isParamValid("use_kokkos_matrix_free_jacobian") ||
+      !params.get<bool>("use_kokkos_matrix_free_jacobian"))
+    return;
+
+#ifndef MOOSE_KOKKOS_ENABLED
+  libmesh_ignore(fe_problem);
+  mooseError("'use_kokkos_matrix_free_jacobian' requires a Kokkos-enabled build, and every part of "
+             "the operator it selects is compiled out of this one. Configure MOOSE with "
+             "--with-kokkos.");
+#else
+  for (const auto i : make_range(fe_problem.numNonlinearSystems()))
+  {
+    auto & solver_params = fe_problem.solverParams(i);
+
+    if (solver_params._type == Moose::ST_PJFNK || solver_params._type == Moose::ST_JFNK)
+      mooseError("'use_kokkos_matrix_free_jacobian' cannot be used with solve_type PJFNK or "
+                 "JFNK, which already provide their own PETSc-native (finite-difference) "
+                 "matrix-free Amat. Use solve_type NEWTON.");
+
+    solver_params._kokkos_matrix_free = true;
+  }
+#endif
 }
 
 template <typename T>
@@ -1063,8 +1189,21 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+
+  params.addParam<bool>(
+      "use_kokkos_matrix_free_jacobian",
+      false,
+      "Whether to use an analytic, partial-assembly Kokkos matrix-free Jacobian-vector product "
+      "as both SNES's Amat and Pmat, a shell matrix whose operations are a matrix-vector product "
+      "and a diagonal, which limits preconditioning to what those two supply. "
+      "Requires a Kokkos-enabled build, and Kokkos kernels/nodal boundary conditions that support "
+      "the Jacobian-vector "
+      "product (e.g. KernelGrad/KernelValue-derived kernels). Mutually exclusive with the "
+      "PJFNK/JFNK solve types, which already provide their own (approximate, finite-difference) "
+      "matrix-free Amat via PETSc.");
+
   params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
+                              "mffd_type use_kokkos_matrix_free_jacobian",
                               "PETSc");
 
   return params;

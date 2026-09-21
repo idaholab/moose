@@ -12,12 +12,9 @@
 #include "KokkosTypes.h"
 #include "KokkosVector.h"
 #include "KokkosMatrix.h"
+#include "KokkosDofSpace.h"
 #include "PerfGraphInterface.h"
-#include "KokkosMesh.h"
 
-#include "libmesh/communicator.h"
-
-class MooseMesh;
 class SystemBase;
 
 namespace Moose::Kokkos
@@ -25,9 +22,10 @@ namespace Moose::Kokkos
 
 /**
  * The Kokkos base system class. Each system in MOOSE has a corresponding Kokkos
- * base system.
+ * base system. On top of the system's DOF layout it carries the tagged vectors and matrices the
+ * residual objects assemble into.
  */
-class System : public PerfGraphInterface, public MeshHolder
+class System : public PerfGraphInterface, public DofSpace
 {
 public:
   /**
@@ -41,16 +39,6 @@ public:
    * Used by FESystem in mixed FE+FV simulations.
    */
   System(const System & src) = default;
-
-  /**
-   * CSR format sparsity data
-   */
-  struct Sparsity
-  {
-    Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
-    Array<PetscInt> row_ptr;
-  };
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -76,16 +64,22 @@ public:
   void setActiveVariables(const std::set<MooseVariableFieldBase *> & vars);
 
   /**
-   * Set the active solution tags
-   * @param tags The active solution tags
+   * Set the active tags whose vectors are read by device code and carry no off-process
+   * contributions, which are synchronized to the device and released without being assembled. The
+   * tags a MOOSE system holds a solution in are the usual case, but the category is the access
+   * mode and not the kind of quantity: an operator application reads a residual this way too.
+   * @param tags The active read tags
+   * @param read_only Whether device code only reads the vectors, which takes their arrays through
+   * PETSc's read-only accessor and so accepts a vector the caller has locked against writes
    */
-  void setActiveSolutionTags(const std::set<TagID> & tags);
+  void setActiveReadTags(const std::set<TagID> & tags, bool read_only = false);
 
   /**
-   * Set the active residual tags
-   * @param tags The active residual tags
+   * Set the active tags whose vectors device code contributes to, which are assembled on release
+   * so that contributions to degrees of freedom owned by another process reach their owner
+   * @param tags The active assembled tags
    */
-  void setActiveResidualTags(const std::set<TagID> & tags);
+  void setActiveAssembledTags(const std::set<TagID> & tags);
 
   /**
    * Set the active matrix tags
@@ -99,17 +93,21 @@ public:
   void clearActiveVariables() { _active_variables.destroy(); }
 
   /**
-   * Clear the cached active solution tags
+   * Clear the cached active read tags
    */
-  void clearActiveSolutionTags() { _active_solution_tags.destroy(); }
+  void clearActiveReadTags()
+  {
+    _active_read_tags.destroy();
+    _read_tags_read_only = false;
+  }
 
   /**
-   * Clear the cached active residual tags
+   * Clear the cached active assembled tags
    */
-  void clearActiveResidualTags()
+  void clearActiveAssembledTags()
   {
-    _active_residual_tags.destroy();
-    _residual_tag_active = false;
+    _active_assembled_tags.destroy();
+    _assembled_tag_active = false;
   }
 
   /**
@@ -131,43 +129,6 @@ public:
   ///@}
 
   /**
-   * Get the libMesh DOF map
-   * @returns The libMesh DOF map
-   */
-  const libMesh::DofMap & getDofMap() const { return _dof_map; }
-
-  /**
-   * Get the libMesh communicator
-   * @returns The libMesh communicator
-   */
-  const Parallel::Communicator & getComm() const { return _comm; }
-
-  /**
-   * Get the list of local DOF indices to communicate
-   * @returns The list of local DOF indices to communicate
-   */
-  const Array<Array<dof_id_type>> & getLocalCommList() const { return _local_comm_list; }
-
-  /**
-   * Get the list of ghost DOF indices to communicate
-   * @returns The list of ghost DOF indices to communicate
-   */
-  const Array<Array<dof_id_type>> & getGhostCommList() const { return _ghost_comm_list; }
-
-  /**
-   * Get the sparisty pattern data
-   * @returns The sparisty pattern data
-   */
-  const Sparsity & getSparsity() const { return _sparsity; }
-
-  /**
-   * Check whether a variable is scalar
-   * @param var The variable number
-   * @returns Whether the variable is scalar
-   */
-  KOKKOS_FUNCTION bool isScalarVariable(unsigned int var) const { return _var_is_scalar[var]; }
-
-  /**
    * Check whether a variable is active on a subdomain
    * @param var The variable number
    * @param subdomain The contiguous subdomain ID
@@ -179,11 +140,11 @@ public:
   }
 
   /**
-   * Check whether a residual tag is active
-   * @param tag The residual tag
-   * @returns Whether the residual tag is active
+   * Check whether an assembled tag is active
+   * @param tag The assembled tag
+   * @returns Whether the assembled tag is active
    */
-  KOKKOS_FUNCTION bool isResidualTagActive(TagID tag) const { return _residual_tag_active[tag]; }
+  KOKKOS_FUNCTION bool isAssembledTagActive(TagID tag) const { return _assembled_tag_active[tag]; }
 
   /**
    * Check whether a matrix tag is active
@@ -191,88 +152,6 @@ public:
    * @returns Whether the matrix tag is active
    */
   KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
-
-  /**
-   * Get the number of local DOFs
-   * @returns The number of local DOFs
-   */
-  KOKKOS_FUNCTION dof_id_type getNumLocalDofs() const { return _num_local_dofs; }
-
-  /**
-   * Get the number of ghost DOFs
-   * @returns The number of ghost DOFs
-   */
-  KOKKOS_FUNCTION dof_id_type getNumGhostDofs() const { return _num_ghost_dofs; }
-
-  /**
-   * Get the number of DOFs of a scalar variable
-   * @param var The variable number
-   * @returns The number of scalar DOFs
-   */
-  KOKKOS_FUNCTION unsigned int getNumScalarDofs(unsigned int var) const
-  {
-    return _scalar_dof_index[var].size();
-  }
-
-  /**
-   * Get the local DOF index of a variable for an element
-   * @param elem The contiguous element ID
-   * @param i The element-local DOF index
-   * @param var The variable number
-   * @returns The local DOF index
-   */
-  KOKKOS_FUNCTION dof_id_type getElemLocalDofIndex(ContiguousElementID elem,
-                                                   unsigned int i,
-                                                   unsigned int var) const
-  {
-    return _local_elem_dof_index[var](i, elem);
-  }
-
-  /**
-   * Get the local DOF index of a scalar variable
-   * @param i The scalar DOF index
-   * @param var The variable number
-   * @returns The local DOF index
-   */
-  KOKKOS_FUNCTION dof_id_type getScalarLocalDofIndex(unsigned int i, unsigned int var) const
-  {
-    return _scalar_dof_index[var][i];
-  }
-
-  /**
-   * Get the global DOF index of a variable for an element
-   * @param elem The contiguous element ID
-   * @param i The element-local DOF index
-   * @param var The variable number
-   * @returns The global DOF index
-   */
-  KOKKOS_FUNCTION dof_id_type getElemGlobalDofIndex(ContiguousElementID elem,
-                                                    unsigned int i,
-                                                    unsigned int var) const
-  {
-    return _local_to_global_dof_index[getElemLocalDofIndex(elem, i, var)];
-  }
-
-  /**
-   * Get the global DOF index of a scalar variable
-   * @param i The scalar DOF index
-   * @param var The variable number
-   * @returns The global DOF index
-   */
-  KOKKOS_FUNCTION dof_id_type getScalarGlobalDofIndex(unsigned int i, unsigned int var) const
-  {
-    return _local_to_global_dof_index[getScalarLocalDofIndex(i, var)];
-  }
-
-  /**
-   * Get the global DOF index of a local DOF index
-   * @param dof The local DOF index
-   * @returns The global DOF index
-   */
-  KOKKOS_FUNCTION dof_id_type localToGlobalDofIndex(dof_id_type dof) const
-  {
-    return _local_to_global_dof_index[dof];
-  }
 
   /**
    * Get a tagged Kokkos vector
@@ -320,67 +199,12 @@ protected:
   SystemBase & _system;
 
   /**
-   * Reference of the MOOSE mesh
-   */
-  const MooseMesh & _mesh;
-
-  /**
-   * Reference of the libMesh DOF map
-   */
-  const libMesh::DofMap & _dof_map;
-
-  /**
-   * Reference of the libMesh communicator
-   */
-  const Parallel::Communicator & _comm;
-
-  /**
-   * Number of variables
-   */
-  const unsigned int _num_vars;
-
-  /**
-   * Number of local DOFs
-   */
-  const dof_id_type _num_local_dofs;
-
-  /**
-   * Number of ghost DOFs
-   */
-  const dof_id_type _num_ghost_dofs;
-
-  /**
    * Kokkos vectors and matrices on device
    */
   ///@{
   Array<Vector> _vectors;
   Array<Matrix> _matrices;
   ///@}
-
-  /**
-   * Local element DOF indices of each variable
-   */
-  Array<Array2D<dof_id_type>> _local_elem_dof_index;
-
-  /**
-   * DOF indices of each scalar variable
-   */
-  Array<Array<dof_id_type>> _scalar_dof_index;
-
-  /**
-   * Map from local DOF index to global DOF index
-   */
-  Array<dof_id_type> _local_to_global_dof_index;
-
-  /**
-   * Maximum number of DOFs per element for each variable
-   */
-  Array<unsigned int> _max_dofs_per_elem;
-
-  /**
-   * Whether each variable is scalar
-   */
-  Array<bool> _var_is_scalar;
 
   /**
    * Whether each variable is active on subdomains
@@ -396,8 +220,8 @@ protected:
    * List of active tags
    */
   ///@{
-  Array<TagID> _active_solution_tags;
-  Array<TagID> _active_residual_tags;
+  Array<TagID> _active_read_tags;
+  Array<TagID> _active_assembled_tags;
   Array<TagID> _active_matrix_tags;
   ///@}
 
@@ -405,17 +229,15 @@ protected:
    * Flag whether each tag is active
    */
   ///@{
-  Array<bool> _residual_tag_active;
+  Array<bool> _assembled_tag_active;
   Array<bool> _matrix_tag_active;
   ///@}
 
   /**
-   * List of DOFs to send and receive
+   * Flag whether the active read tags are only read, in which case their arrays are taken through
+   * PETSc's read-only accessor
    */
-  ///@{
-  Array<Array<dof_id_type>> _local_comm_list;
-  Array<Array<dof_id_type>> _ghost_comm_list;
-  ///@}
+  bool _read_tags_read_only = false;
 
 private:
   /**
@@ -424,19 +246,9 @@ private:
   void setupVariables();
 
   /**
-   * Setup DOF data
+   * Allocate the tagged vector, matrix and tag activity data
    */
-  void setupDofs();
-
-  /**
-   * Setup sparsity data
-   */
-  void setupSparsity();
-
-  /**
-   * Matrix sparsity pattern data
-   */
-  Sparsity _sparsity;
+  void setupTags();
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE

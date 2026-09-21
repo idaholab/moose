@@ -24,9 +24,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/enum_point_locator_type.h"
 
-// C++
-#include <cstring>
-
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
 InputParameters
@@ -1509,11 +1506,8 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     {
       fe_elem->reinit(elem);
     }
-    catch (std::exception & e)
+    catch (libMesh::DegenerateMap &)
     {
-      if (!strstr(e.what(), "Jacobian"))
-        throw;
-
       num_bad_elem_qp_jacobians++;
       if (num_bad_elem_qp_jacobians < _num_outputs)
         _console << "Bad Jacobian found in element " << elem->id() << " near point "
@@ -1562,13 +1556,8 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
       {
         fe_elem->reinit(elem, side);
       }
-      catch (std::exception & e)
+      catch (libMesh::DegenerateMap &)
       {
-        // In 2D dbg/devel modes libMesh could hit
-        // libmesh_assert_not_equal_to on a side reinit
-        if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "det != 0"))
-          throw;
-
         num_bad_side_qp_jacobians++;
         if (num_bad_side_qp_jacobians < _num_outputs)
           _console << "Bad Jacobian found in side " << side << " of element" << elem->id()

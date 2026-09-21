@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md'
+
+  [convergence]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestHierarchicDirichletMMS
+    requirement = 'The Kokkos matrix-free Jacobian shall converge a HIERARCHIC finite element '
+                  'solution to a manufactured solution, whose Dirichlet boundary condition is a '
+                  'non-constant, non-preset Function value, at a rate consistent with increasing '
+                  'the polynomial order of the basis.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    max_threads = 1
+  []
+
+  [high_order_exact]
+    type = CSVDiff
+    input = 'hierarchic_exact_high_order.i'
+    csvdiff = 'hierarchic_exact_high_order_out.csv'
+    # The compared error is algebraic rather than discretization error, since the basis represents the
+    # solution exactly, so the threshold sits above where the solve stops and below any error a
+    # mistaken high-order mode would produce
+    abs_zero = 1e-10
+    requirement = 'The Kokkos matrix-free Jacobian shall reproduce a manufactured solution of degree '
+                  'eight to solver tolerance on an order-eight HIERARCHIC basis, which spans that '
+                  'solution exactly, resolving every edge and interior mode the basis carries and '
+                  'the projected Dirichlet value on each of them.'
+    design = 'KokkosDiffusion.md KokkosFunctionDirichletBC.md PMultigrid.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]
