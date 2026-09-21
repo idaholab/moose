@@ -1,0 +1,35 @@
+[Tests]
+  design = 'input_syntax.md'
+  issues = '#33818'
+
+  [expansion]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansion
+    requirement = 'The system shall be able to expand a given positive start and end integer into a string containing all positive integers between start and end (inclusive).'
+  []
+  [singleElementRange]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.singleElementRange
+    requirement = 'The system shall support ranges where the start and end integer are the same.'
+  []
+  [mixedWithLiterals]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.mixedWithLiterals
+    requirement = 'The system shall support the case where a range is mixed with other literals in a string.'
+  []
+  [wrongArgCount]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.wrongArgCount
+    requirement = 'The system shall error if more or fewer than two arguments are provided in a range.'
+  []
+  [nonIntegerIndex]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.nonIntegerIndex
+    requirement = 'The system shall error if a non-positive integer is provided as a start or end index in a range.'
+  []
+  [descendingRange]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.descendingRange
+    requirement = 'The system shall error if the end parameter is larger than the start parameter.'
+  []
+[]
