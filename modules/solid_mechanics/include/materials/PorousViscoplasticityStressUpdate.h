@@ -53,6 +53,8 @@ public:
 
   /** Return the exact one-step tangent when available. */
   TangentCalculationMethod getTangentCalculationMethod() override;
+  /** Limit the global step using the admitted constrained inelastic increment. */
+  virtual Real computeTimeStepLimit() override;
   virtual void updateState(
       GenericRankTwoTensor<is_ad> & strain_increment,
       GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
@@ -115,13 +117,18 @@ protected:
     std::uint64_t gauge_n1_closed_form = 0;
     std::uint64_t gauge_deviatoric_closed_form = 0;
     std::uint64_t gauge_root_solves = 0;
+    std::uint64_t gauge_root_n3_solves = 0;
     std::uint64_t gauge_root_residual_evaluations = 0;
+    std::uint64_t gauge_root_ad_sensitivity_evaluations = 0;
+    std::uint64_t gauge_root_warm_starts = 0;
     std::uint64_t set_gauge_stresses_calls = 0;
     std::uint64_t gauge_commit_evaluations = 0;
     std::uint64_t lps_response_evaluations = 0;
     std::uint64_t independent_lps_response_evaluations = 0;
+    std::uint64_t independent_lps_value_only_response_evaluations = 0;
     std::uint64_t lps_derivative_evaluations = 0;
     std::uint64_t independent_lps_derivative_evaluations = 0;
+    std::uint64_t independent_lps_flow_derivative_evaluations = 0;
     std::uint64_t implicit_sensitivity_reconstructions = 0;
     std::uint64_t independent_implicit_sensitivity_reconstructions = 0;
     std::uint64_t consistent_tangent_evaluations = 0;
@@ -129,6 +136,8 @@ protected:
     std::uint64_t pore_state_evaluations = 0;
     std::uint64_t independent_hydrostatic_evaluations = 0;
     std::uint64_t bubble_eos_evaluations = 0;
+    std::uint64_t bubble_eos_coefficient_updates = 0;
+    std::uint64_t bubble_eos_plenum_skips = 0;
     std::uint64_t bubble_eos_inverse_calls = 0;
     std::uint64_t bubble_eos_inverse_iterations = 0;
     std::uint64_t bubble_eos_inverse_bracket_expansions = 0;
@@ -158,12 +167,26 @@ protected:
     Real power_factor = 0.0;
   };
 
+  /** Value and first derivative of the LPS hydrostatic function H(M). */
+  struct LpsHValueFirst
+  {
+    GenericReal<is_ad> value = 1.0;
+    GenericReal<is_ad> first = 0.0;
+  };
+
   /** Value and first two derivatives of the LPS hydrostatic function H(M). */
   struct LpsHDerivatives
   {
     GenericReal<is_ad> value = 1.0;
     GenericReal<is_ad> first = 0.0;
     GenericReal<is_ad> second = 0.0;
+  };
+
+  /** Real-valued H(M) value and first derivative used by the primal gauge-stress root solve. */
+  struct LpsHValueFirstRaw
+  {
+    Real value = 1.0;
+    Real first = 0.0;
   };
 
   /** First and second partial derivatives of one LPS gauge residual. */
@@ -218,6 +241,14 @@ protected:
     PorePorosityState population_F_lambdap{};
     PorePorosityState population_F_pp{};
     std::array<PorePorosityState, MAX_HYDROSTATIC_STRESS_POPULATIONS> population_F_pporosity{};
+  };
+
+  /** First derivatives needed to evaluate independent-pore LPS flow without its local Jacobian. */
+  struct IndependentLpsFlowDerivatives
+  {
+    GenericReal<is_ad> F_lambda = 0.0;
+    GenericReal<is_ad> F_p = 0.0;
+    PorePorosityState population_F_p{};
   };
 
   /** LPS response split into the volumetric increments carried by each pore population. */
@@ -355,6 +386,7 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
+  LpsHValueFirst computeHValueFirst(Real n, const GenericReal<is_ad> & M) const;
   LpsHDerivatives computeHDerivatives(Real n, const GenericReal<is_ad> & M) const;
   GenericReal<is_ad> computeH(const Real n,
                               const GenericReal<is_ad> & gauge_stress,
@@ -365,6 +397,32 @@ protected:
                                           const GenericReal<is_ad> & porosity,
                                           const CreepLaw & law,
                                           GenericReal<is_ad> & derivative) const;
+
+  /// Real-only H(M) and H'(M) evaluation used inside the hot scalar gauge-root iteration.
+  LpsHValueFirstRaw computeHValueFirstRaw(Real n, Real M) const;
+
+  /// Real-only gauge residual and derivative used by the inherited scalar root algorithm.
+  Real computeGaugeResidualRaw(Real equiv_stress,
+                               Real trial_gauge,
+                               const HydrostaticStressState & hydrostatic_stress,
+                               Real porosity,
+                               const CreepLaw & law,
+                               Real & derivative) const;
+
+  /// Specialized n=3 primal gauge residual using per-root precomputed pressure terms.
+  Real computeGaugeResidualN3Raw(Real trial_gauge, Real & derivative) const;
+
+  /// Positive raw stress scale used by the primal gauge solve.
+  Real gaugeStressScaleRaw(Real equiv_stress,
+                           const HydrostaticStressState & hydrostatic_stress) const;
+
+  /// Recover AD sensitivity of a converged primal gauge root from F(Lambda,z)=0.
+  GenericReal<is_ad>
+  reconstructGaugeStressSensitivity(Real gauge_stress,
+                                    const GenericReal<is_ad> & equiv_stress,
+                                    const HydrostaticStressState & hydrostatic_stress,
+                                    const GenericReal<is_ad> & porosity,
+                                    const CreepLaw & law) const;
 
   /// Compute the gauge stress for a specific creep mechanism.
   GenericReal<is_ad> computeGaugeStress(const GenericReal<is_ad> & equiv_stress,
@@ -396,6 +454,13 @@ protected:
                                        const GenericReal<is_ad> & porosity,
                                        const CreepLaw & law) const;
 
+  IndependentLpsFlowDerivatives
+  computeIndependentLpsFlowDerivatives(const GenericReal<is_ad> & gauge_stress,
+                                       const HydrostaticStressState & hydrostatic_stress,
+                                       const GenericReal<is_ad> & equiv_stress,
+                                       const PorePorosityState & pore_porosity,
+                                       const CreepLaw & law) const;
+
   IndependentLpsDerivatives
   computeIndependentLpsDerivatives(const GenericReal<is_ad> & gauge_stress,
                                    const HydrostaticStressState & hydrostatic_stress,
@@ -408,6 +473,12 @@ protected:
                                       const GenericReal<is_ad> & equiv_stress,
                                       const GenericRankTwoTensor<is_ad> & dev_direction,
                                       const PorePorosityState & pore_porosity);
+
+  IndependentLpsCreepResponse
+  evaluateIndependentLpsCreepResponseValueOnly(const HydrostaticStressState & hydrostatic_stress,
+                                               const GenericReal<is_ad> & equiv_stress,
+                                               const GenericRankTwoTensor<is_ad> & dev_direction,
+                                               const PorePorosityState & pore_porosity);
 
   /// Matrix hydrostatic stress for the spherical porous formulation.
   GenericReal<is_ad> matrixHydroStress(const GenericRankTwoTensor<is_ad> & stress) const;
@@ -452,7 +523,7 @@ protected:
   /// Store the converged current global-step physical effective inelastic rate.
   void recordEffectiveInelasticStrainRate(
       const GenericReal<is_ad> & effective_inelastic_strain_increment);
-  /// Store the admitted global-step rate used by the adaptive substep history predictor.
+  /// Store the admitted global-step rate used by adaptive prediction and global timestep control.
   void recordSubstepControlInelasticStrainRate(Real substep_control_inelastic_strain_increment);
   /**
    * Check one accepted local admitted inelastic increment against the requested substep target. If
@@ -862,7 +933,7 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_rate;
   /// Previous accepted global-step physical effective inelastic rate.
   const MaterialProperty<Real> & _effective_inelastic_strain_rate_old;
-  /// Current admitted inelastic rate used only by the adaptive substep controller.
+  /// Current admitted inelastic rate used by adaptive prediction and global timestep control.
   GenericMaterialProperty<Real, is_ad> & _substep_control_inelastic_strain_rate;
   /// Previous accepted admitted inelastic rate used by adaptive substep prediction.
   const MaterialProperty<Real> & _substep_control_inelastic_strain_rate_old;
@@ -885,6 +956,23 @@ protected:
     HydrostaticStressState hydrostatic_stress;
     GenericReal<is_ad> porosity = 0.0;
     const CreepLaw * law = nullptr;
+
+    // Precomputed primal n=3 gauge-root data. The hydrostatic pressures and porosity are fixed
+    // throughout one inner gauge solve, so avoid rebuilding their fractional powers at every
+    // safeguarded-Newton residual evaluation.
+    struct N3RootState
+    {
+      Real deviatoric_prefactor = 0.0;
+      Real residual_constant = 0.0;
+      Real power_factor = 0.0;
+      std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_weights{};
+      std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> pressure_four_thirds{};
+      unsigned int active_population_count = 0;
+    } n3;
+
+    // Primal root from the previous nearby gauge solve in the current constitutive attempt.
+    Real previous_gauge_stress = std::numeric_limits<Real>::quiet_NaN();
+    Real previous_power = std::numeric_limits<Real>::quiet_NaN();
   };
   GaugeSolveState _gauge_solve_state;
   /// Rank two identity tensor

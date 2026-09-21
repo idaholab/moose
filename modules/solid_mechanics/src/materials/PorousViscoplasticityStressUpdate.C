@@ -591,16 +591,24 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("gauge_n1_closed_form", _performance_counters.gauge_n1_closed_form);
   write_counter("gauge_deviatoric_closed_form", _performance_counters.gauge_deviatoric_closed_form);
   write_counter("gauge_root_solves", _performance_counters.gauge_root_solves);
+  write_counter("gauge_root_n3_solves", _performance_counters.gauge_root_n3_solves);
   write_counter("gauge_root_residual_evaluations",
                 _performance_counters.gauge_root_residual_evaluations);
+  write_counter("gauge_root_ad_sensitivity_evaluations",
+                _performance_counters.gauge_root_ad_sensitivity_evaluations);
+  write_counter("gauge_root_warm_starts", _performance_counters.gauge_root_warm_starts);
   write_counter("set_gauge_stresses_calls", _performance_counters.set_gauge_stresses_calls);
   write_counter("gauge_commit_evaluations", _performance_counters.gauge_commit_evaluations);
   write_counter("lps_response_evaluations", _performance_counters.lps_response_evaluations);
   write_counter("independent_lps_response_evaluations",
                 _performance_counters.independent_lps_response_evaluations);
+  write_counter("independent_lps_value_only_response_evaluations",
+                _performance_counters.independent_lps_value_only_response_evaluations);
   write_counter("lps_derivative_evaluations", _performance_counters.lps_derivative_evaluations);
   write_counter("independent_lps_derivative_evaluations",
                 _performance_counters.independent_lps_derivative_evaluations);
+  write_counter("independent_lps_flow_derivative_evaluations",
+                _performance_counters.independent_lps_flow_derivative_evaluations);
   write_counter("implicit_sensitivity_reconstructions",
                 _performance_counters.implicit_sensitivity_reconstructions);
   write_counter("independent_implicit_sensitivity_reconstructions",
@@ -613,6 +621,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("independent_hydrostatic_evaluations",
                 _performance_counters.independent_hydrostatic_evaluations);
   write_counter("bubble_eos_evaluations", _performance_counters.bubble_eos_evaluations);
+  write_counter("bubble_eos_coefficient_updates",
+                _performance_counters.bubble_eos_coefficient_updates);
+  write_counter("bubble_eos_plenum_skips", _performance_counters.bubble_eos_plenum_skips);
   write_counter("bubble_eos_inverse_calls", _performance_counters.bubble_eos_inverse_calls);
   write_counter("bubble_eos_inverse_iterations",
                 _performance_counters.bubble_eos_inverse_iterations);
@@ -918,6 +929,27 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::getTangentCalculationMethod()
     return substeppingCapabilityRequested() ? TangentCalculationMethod::ELASTIC
                                             : TangentCalculationMethod::FULL;
   }
+}
+
+template <bool is_ad>
+Real
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeTimeStepLimit()
+{
+  const auto admitted_rate =
+      std::abs(MetaPhysicL::raw_value(_substep_control_inelastic_strain_rate[_qp]));
+  if (!std::isfinite(admitted_rate))
+    mooseException("In ", _name, ": admitted inelastic strain rate is nonfinite.");
+
+  if (admitted_rate == 0.0)
+    return std::numeric_limits<Real>::max();
+
+  /*
+   * The local floor active set can reject volumetric creep that remains present in the physical
+   * equivalent-creep diagnostic. Use the admitted controller rate here so the material timestep
+   * recommendation is consistent with the adaptive local controller. Mixed/deviatoric motion
+   * remains represented by substepControlIncrement().
+   */
+  return this->_max_inelastic_increment / admitted_rate;
 }
 
 template <bool is_ad>
@@ -1815,12 +1847,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initializeLocalSolveScales(
   using std::min;
 
   /*
-   * Do not use |p_eff| as the scale for the matrix equilibrium equations. At small porosity the
-   * additional hydrostatic driving pressure can greatly exceed p and q; using p_eff then makes
-   * a mechanically poor state appear converged and prematurely triggers the reduced-f rescue.
-   *
-   * Instead use matrix-elastic stress scales associated with max_inelastic_increment. For an
-   * isotropic tensor, K=(C1111+2 C1122)/3 and G=C1212.
+   * Do not use |p_eff| as the Newton conditioning scale for the matrix equilibrium equations. At
+   * small porosity the additional hydrostatic driving pressure can greatly exceed p and q and
+   * would make corrections unnecessarily small. Instead use matrix-elastic stress scales
+   * associated with max_inelastic_increment; for an isotropic tensor,
+   * K=(C1111+2 C1122)/3 and G=C1212. The separate physical convergence scale below intentionally
+   * includes the active pore-pressure drive.
    */
   const auto beginning_elasticity =
       evaluatePorosityElasticity(context.elasticity_tensor, context.porosity_begin).tensor;
@@ -4217,7 +4249,117 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSen
             delta[PORE_POROSITY_0_INDEX + population_index] -
             MetaPhysicL::raw_value(delta[PORE_POROSITY_0_INDEX + population_index]);
 
-    auto reconstructed = evaluateIndependentLocalPoint(coordinates, context, point.floor_active);
+    /*
+     * Raw p, q, and pore porosities are already converged. Only their derivative payload changed.
+     * Re-evaluating evaluateIndependentLocalPoint() here would rebuild the full local residual,
+     * 4x4 Jacobian, and second-derivative LPS response even though none are used after sensitivity
+     * reconstruction. Recompute only the accepted hydrostatic closure and creep-flow values needed
+     * by commitIndependentLocalPoint(); AD propagates the corrected coordinate sensitivities
+     * through
+     * this value-only path.
+     */
+    auto reconstructed = point;
+    reconstructed.p = coordinates.p;
+    reconstructed.q = coordinates.q;
+    reconstructed.pore_porosity = coordinates.pore_porosity;
+
+    const auto total_porosity = coordinates.pore_porosity[0] + coordinates.pore_porosity[1];
+    if (total_porosity <= 0.0)
+      mooseException(
+          "In ", this->_name, ": independent pore reconstruction requires positive porosity.");
+    reconstructed.hydrostatic_stress =
+        evaluateIndependentHydrostaticStress(coordinates.p, coordinates.pore_porosity);
+    if (hydrostaticStressPopulationCount(reconstructed.hydrostatic_stress) !=
+        MAX_HYDROSTATIC_STRESS_POPULATIONS)
+      mooseException(
+          "In ", this->_name, ": independent pore kinematics requires exactly two populations.");
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      reconstructed.hydrostatic_stress.populations[population_index].fraction =
+          coordinates.pore_porosity[population_index] / total_porosity;
+    validateHydrostaticStressState(reconstructed.hydrostatic_stress,
+                                   "independent implicit AD reconstruction");
+
+    const auto has_deviatoric_direction =
+        context.trial_equiv_stress > this->_minimum_stress_magnitude;
+    auto dev_direction = GenericRankTwoTensor<is_ad>();
+    dev_direction.zero();
+    if (has_deviatoric_direction)
+      dev_direction = context.trial_dev_stress / context.trial_equiv_stress;
+    const auto q_flow = has_deviatoric_direction ? coordinates.q : GenericReal<is_ad>(0.0);
+
+    auto response = IndependentLpsCreepResponse{};
+    response.inelastic_strain_increment.zero();
+    if (this->hasViscoplasticDrive(q_flow, reconstructed.hydrostatic_stress, total_porosity))
+      response = evaluateIndependentLpsCreepResponseValueOnly(
+          reconstructed.hydrostatic_stress, q_flow, dev_direction, coordinates.pore_porosity);
+    reconstructed.effective_inelastic_strain_increment =
+        response.effective_inelastic_strain_increment;
+
+    const auto porosity_old = this->_porosity_old[this->_qp];
+    const auto solid_fraction_old = 1.0 - porosity_old;
+    const auto pore_porosity_begin_total =
+        context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+    if (solid_fraction_old <= 0.0 || pore_porosity_begin_total <= 0.0)
+      mooseException(
+          "In ", this->_name, ": invalid porosity state during independent AD reconstruction.");
+
+    std::array<GenericReal<is_ad>, MAX_HYDROSTATIC_STRESS_POPULATIONS> dilution_coefficient{};
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      dilution_coefficient[population_index] =
+          porosity_old * context.pore_porosity_begin[population_index] / pore_porosity_begin_total;
+
+    auto population_volumetric_increment = response.population_volumetric_strain_increment;
+    PorePorosityState floor_value{};
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      floor_value[population_index] =
+          independentPorePorosityFloor(population_index, context.pore_porosity_begin);
+
+    const auto active_count = static_cast<unsigned int>(point.floor_active[0]) +
+                              static_cast<unsigned int>(point.floor_active[1]);
+    if (active_count == 1)
+    {
+      const auto active = point.floor_active[0] ? 0u : 1u;
+      const auto free = 1u - active;
+      const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
+      const auto denominator = 1.0 - dilution_coefficient[active];
+      if (denominator <= 0.0)
+        mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+      population_volumetric_increment[active] =
+          (target_increment +
+           dilution_coefficient[active] * population_volumetric_increment[free]) /
+          denominator;
+    }
+    else if (active_count == 2)
+    {
+      const auto target_total_increment =
+          floor_value[0] + floor_value[1] - pore_porosity_begin_total;
+      const auto constrained_total_volumetric_increment =
+          target_total_increment / solid_fraction_old;
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+      {
+        const auto target_increment =
+            floor_value[population_index] - context.pore_porosity_begin[population_index];
+        population_volumetric_increment[population_index] =
+            target_increment +
+            dilution_coefficient[population_index] * constrained_total_volumetric_increment;
+      }
+    }
+
+    const auto total_volumetric_increment =
+        population_volumetric_increment[0] + population_volumetric_increment[1];
+    reconstructed.inelastic_strain_increment =
+        response.inelastic_strain_increment.deviatoric() +
+        this->_identity_two * (total_volumetric_increment / 3.0);
+    reconstructed.substep_control_inelastic_strain_increment =
+        substepControlIncrement(response.effective_inelastic_strain_increment,
+                                response.inelastic_strain_increment,
+                                reconstructed.inelastic_strain_increment,
+                                point.floor_active[0] || point.floor_active[1]);
+
     validateFiniteIndependentLocalPoint(reconstructed, "independent implicit AD reconstruction");
     return reconstructed;
   }
@@ -4824,9 +4966,6 @@ void
 PorousViscoplasticityStressUpdateTempl<is_ad>::recordSubstepControlInelasticStrainRate(
     const Real substep_control_inelastic_strain_increment)
 {
-  if (!_adaptive_substepping)
-    return;
-
   if (!std::isfinite(substep_control_inelastic_strain_increment))
     mooseException("In ", _name, ": converged substep-control inelastic increment is nonfinite.");
 
@@ -4892,6 +5031,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     const unsigned int total_number_substeps)
 {
   incrementPerformanceCounter(_performance_counters.constitutive_attempts);
+  _gauge_solve_state.previous_gauge_stress = std::numeric_limits<Real>::quiet_NaN();
+  _gauge_solve_state.previous_power = std::numeric_limits<Real>::quiet_NaN();
   mooseAssert(total_number_substeps > 0,
               "PorousViscoplasticityStressUpdate requires at least one local substep.");
   if (total_number_substeps > _maximum_number_substeps)
@@ -5097,7 +5238,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
                                  number_substeps);
       return;
     }
-    catch (...)
+    catch (const MooseException &)
     {
       incrementPerformanceCounter(_performance_counters.constitutive_retries);
       const auto suggested_number_substeps = _suggested_number_substeps;
@@ -5122,6 +5263,13 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
                    << last_failure_substeps << " substeps failed:\n"
                    << failure_message(last_failure) << "\nRetrying with " << number_substeps
                    << " substeps." << std::endl;
+    }
+    catch (...)
+    {
+      // Roll back every failure, but do not reinterpret unexpected C++ exceptions as a
+      // constitutive convergence problem that might improve with additional local substeps.
+      restore();
+      throw;
     }
   }
 
@@ -5158,22 +5306,27 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initialGuess(
   using std::pow;
   using std::sqrt;
 
-  const auto scale =
-      gaugeStressScale(effective_trial_stress, _gauge_solve_state.hydrostatic_stress);
+  /*
+   * Gauge-root values are solved on primal Real values for both AD and non-AD builds. AD
+   * sensitivity is reconstructed explicitly after convergence, so carrying GenericReal arithmetic
+   * through the initial-guess estimate only adds work without changing the scalar solve.
+   */
+  const auto q = MetaPhysicL::raw_value(effective_trial_stress);
+  const auto scale = gaugeStressScaleRaw(q, _gauge_solve_state.hydrostatic_stress);
   if (!_gauge_solve_state.law || _gauge_solve_state.porosity <= 0.0)
-    return scale;
+    return GenericReal<is_ad>(scale);
 
   const auto & law = *_gauge_solve_state.law;
-  const auto & f = _gauge_solve_state.porosity;
+  const auto f = MetaPhysicL::raw_value(_gauge_solve_state.porosity);
   const auto alpha = law.power_factor;
   const auto A = 1.0 + 2.0 * f / 3.0;
   const auto denominator = 1.0 - (1.0 + alpha) * f + alpha * Utility::pow<2>(f);
 
-  auto lambda_q = GenericReal<is_ad>(0.0);
+  auto lambda_q = 0.0;
   if (denominator > 0.0)
-    lambda_q = effective_trial_stress * sqrt(A / denominator);
+    lambda_q = q * sqrt(A / denominator);
 
-  auto maximum_hydro = GenericReal<is_ad>(0.0);
+  auto maximum_hydro = 0.0;
   const auto population_count =
       hydrostaticStressPopulationCount(_gauge_solve_state.hydrostatic_stress);
   for (auto population_index = 0u; population_index < population_count; ++population_index)
@@ -5183,27 +5336,44 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initialGuess(
     if (population.fraction <= 0.0)
       continue;
 
-    const auto hydro = abs(population.effective_hydro_stress);
-    if (hydro > maximum_hydro)
-      maximum_hydro = hydro;
+    maximum_hydro =
+        std::max(maximum_hydro, abs(MetaPhysicL::raw_value(population.effective_hydro_stress)));
   }
 
-  auto lambda_h = GenericReal<is_ad>(0.0);
+  auto lambda_h = 0.0;
   if (maximum_hydro > 0.0)
   {
-    const auto n_to_n = pow(law.power, law.power);
-    lambda_h = 1.5 * maximum_hydro * pow(f / n_to_n, 1.0 / (law.power + 1.0));
+    if (law.power == 3.0)
+      // n = 3 gives n^n = 27 and 1 / (n + 1) = 1 / 4; avoid two general pow() calls
+      // in the hot root-solve initialization path.
+      lambda_h = 1.5 * maximum_hydro * sqrt(sqrt(f / 27.0));
+    else
+    {
+      const auto n_to_n = pow(law.power, law.power);
+      lambda_h = 1.5 * maximum_hydro * pow(f / n_to_n, 1.0 / (law.power + 1.0));
+    }
   }
 
-  auto guess = lambda_q > lambda_h ? lambda_q : lambda_h;
-  const auto minimum = minimumPermissibleValue(effective_trial_stress);
-  const auto maximum = maximumPermissibleValue(effective_trial_stress);
-  if (guess < minimum)
-    guess = minimum;
-  if (guess > maximum)
-    guess = maximum;
+  const auto minimum = std::max(q, scale / _maximum_gauge_ratio);
+  const auto maximum = scale * _maximum_gauge_ratio;
+  auto guess = std::min(std::max(std::max(lambda_q, lambda_h), minimum), maximum);
 
-  return guess;
+  /*
+   * Adjacent local Newton and line-search points normally perturb p, q, and f only modestly. Reuse
+   * the preceding converged root for the same exponent when it remains admissible and within a
+   * conservative factor of four of the analytical estimate. The inherited safeguarded Newton solve
+   * still owns convergence and bracketing; this changes only its starting value.
+   */
+  const auto previous_gauge = _gauge_solve_state.previous_gauge_stress;
+  if (_gauge_solve_state.previous_power == law.power && std::isfinite(previous_gauge) &&
+      previous_gauge >= minimum && previous_gauge <= maximum && previous_gauge >= 0.25 * guess &&
+      previous_gauge <= 4.0 * guess)
+  {
+    incrementPerformanceCounter(_performance_counters.gauge_root_warm_starts);
+    guess = previous_gauge;
+  }
+
+  return GenericReal<is_ad>(guess);
 }
 
 template <bool is_ad>
@@ -5211,8 +5381,13 @@ GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::maximumPermissibleValue(
     const GenericReal<is_ad> & effective_trial_stress) const
 {
-  return gaugeStressScale(effective_trial_stress, _gauge_solve_state.hydrostatic_stress) *
-         _maximum_gauge_ratio;
+  if constexpr (is_ad)
+    return GenericReal<is_ad>(gaugeStressScaleRaw(MetaPhysicL::raw_value(effective_trial_stress),
+                                                  _gauge_solve_state.hydrostatic_stress) *
+                              _maximum_gauge_ratio);
+  else
+    return gaugeStressScale(effective_trial_stress, _gauge_solve_state.hydrostatic_stress) *
+           _maximum_gauge_ratio;
 }
 
 template <bool is_ad>
@@ -5225,14 +5400,217 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::minimumPermissibleValue(
    * but when q=0 use a small positive floor based on the pressure/deviatoric
    * stress scale. Increasing maximum_gauge_ratio widens this admissible range.
    */
-  auto minimum = effective_trial_stress;
-  const auto positive_floor =
-      gaugeStressScale(effective_trial_stress, _gauge_solve_state.hydrostatic_stress) /
-      _maximum_gauge_ratio;
-  if (positive_floor > minimum)
-    minimum = positive_floor;
+  if constexpr (is_ad)
+  {
+    const auto q = MetaPhysicL::raw_value(effective_trial_stress);
+    const auto positive_floor =
+        gaugeStressScaleRaw(q, _gauge_solve_state.hydrostatic_stress) / _maximum_gauge_ratio;
+    return GenericReal<is_ad>(std::max(q, positive_floor));
+  }
+  else
+  {
+    auto minimum = effective_trial_stress;
+    const auto positive_floor =
+        gaugeStressScale(effective_trial_stress, _gauge_solve_state.hydrostatic_stress) /
+        _maximum_gauge_ratio;
+    if (positive_floor > minimum)
+      minimum = positive_floor;
 
-  return minimum;
+    return minimum;
+  }
+}
+
+template <bool is_ad>
+Real
+PorousViscoplasticityStressUpdateTempl<is_ad>::gaugeStressScaleRaw(
+    const Real equiv_stress, const HydrostaticStressState & hydrostatic_stress) const
+{
+  auto scale = equiv_stress;
+  const auto population_count = hydrostaticStressPopulationCount(hydrostatic_stress);
+  for (auto population_index = 0u; population_index < population_count; ++population_index)
+  {
+    const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+    if (MetaPhysicL::raw_value(population.fraction) <= 0.0)
+      continue;
+
+    scale = std::max(scale, std::abs(MetaPhysicL::raw_value(population.effective_hydro_stress)));
+  }
+
+  return std::max(scale, _minimum_stress_magnitude);
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::LpsHValueFirstRaw
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeHValueFirstRaw(const Real n,
+                                                                     const Real M) const
+{
+  constexpr auto beta = 1.5;
+
+  auto result = LpsHValueFirstRaw{};
+  if (n == 1.0)
+  {
+    const auto beta_M = beta * M;
+    result.value = 1.0 + Utility::pow<2>(beta_M);
+    result.first = 2.0 * beta * beta * M;
+    return result;
+  }
+
+  using std::pow;
+  const auto exponent = (n + 1.0) / n;
+  const auto mod = pow(beta * M, exponent);
+  const auto y = 1.0 + mod / n;
+
+  if (n == 3.0)
+  {
+    const auto y2 = Utility::pow<2>(y);
+    result.value = y2 * y;
+    if (M == 0.0)
+      return result;
+    result.first = exponent * mod / M * y2;
+    return result;
+  }
+
+  const auto y_n_minus_2 = pow(y, n - 2.0);
+  const auto y_n_minus_1 = y_n_minus_2 * y;
+  result.value = y_n_minus_1 * y;
+  if (M == 0.0)
+    return result;
+  result.first = exponent * mod / M * y_n_minus_1;
+  return result;
+}
+
+template <bool is_ad>
+Real
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidualRaw(
+    const Real equiv_stress,
+    const Real trial_gauge,
+    const HydrostaticStressState & hydrostatic_stress,
+    const Real porosity,
+    const CreepLaw & law,
+    Real & derivative) const
+{
+  if (!(trial_gauge > 0.0) || !std::isfinite(trial_gauge))
+  {
+    derivative = std::numeric_limits<Real>::quiet_NaN();
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
+
+  auto residual_left = Utility::pow<2>(equiv_stress / trial_gauge);
+  auto dresidual_left_dtrial_gauge = -2.0 * residual_left / trial_gauge;
+  const auto spherical_factor = 1.0 + porosity / 1.5;
+  residual_left *= spherical_factor;
+  dresidual_left_dtrial_gauge *= spherical_factor;
+
+  auto residual = residual_left - 1.0 - law.power_factor * Utility::pow<2>(porosity);
+  derivative = dresidual_left_dtrial_gauge;
+
+  const auto population_count = hydrostaticStressPopulationCount(hydrostatic_stress);
+  for (auto population_index = 0u; population_index < population_count; ++population_index)
+  {
+    const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+    const auto weight = MetaPhysicL::raw_value(population.fraction);
+    if (weight <= 0.0)
+      continue;
+
+    const auto p_eff = MetaPhysicL::raw_value(population.effective_hydro_stress);
+    const auto M = std::abs(p_eff) / trial_gauge;
+    const auto dM_dtrial_gauge = -M / trial_gauge;
+    const auto h = computeHValueFirstRaw(law.power, M);
+    const auto inverse_h = 1.0 / h.value;
+    const auto Z = h.value + law.power_factor * inverse_h;
+    const auto dZ_dM = h.first * (1.0 - law.power_factor * Utility::pow<2>(inverse_h));
+
+    residual += porosity * weight * Z;
+    derivative += porosity * weight * dZ_dM * dM_dtrial_gauge;
+  }
+
+  return residual;
+}
+
+template <bool is_ad>
+Real
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidualN3Raw(const Real trial_gauge,
+                                                                         Real & derivative) const
+{
+  if (!(trial_gauge > 0.0) || !std::isfinite(trial_gauge))
+  {
+    derivative = std::numeric_limits<Real>::quiet_NaN();
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
+
+  /*
+   * For n = 3,
+   *
+   *   H = [1 + (beta |p_eff| / Lambda)^(4/3) / 3]^3.
+   *
+   * The pore pressures and fractions are fixed for one gauge solve. Their (4/3) pressure powers
+   * are therefore precomputed once in computeGaugeStress(). Each residual evaluation then needs
+   * only one shared Lambda^(-4/3), regardless of whether one or two pore populations are active.
+   */
+  constexpr auto four_thirds = 4.0 / 3.0;
+  const auto inverse_gauge = 1.0 / trial_gauge;
+  const auto inverse_gauge_squared = Utility::pow<2>(inverse_gauge);
+  const auto deviatoric_term = _gauge_solve_state.n3.deviatoric_prefactor * inverse_gauge_squared;
+
+  auto residual = deviatoric_term + _gauge_solve_state.n3.residual_constant;
+  derivative = -2.0 * deviatoric_term * inverse_gauge;
+
+  using std::pow;
+  const auto inverse_gauge_four_thirds = pow(trial_gauge, -four_thirds);
+  for (auto population_index = 0u; population_index < _gauge_solve_state.n3.active_population_count;
+       ++population_index)
+  {
+    const auto mod =
+        _gauge_solve_state.n3.pressure_four_thirds[population_index] * inverse_gauge_four_thirds;
+    const auto y = 1.0 + mod / 3.0;
+    const auto y_squared = Utility::pow<2>(y);
+    const auto h = y_squared * y;
+    const auto inverse_h = 1.0 / h;
+    const auto Z = h + _gauge_solve_state.n3.power_factor * inverse_h;
+
+    // dH/dLambda = y^2 d[(beta |p|/Lambda)^(4/3)]/dLambda.
+    const auto dh_dgauge = -four_thirds * y_squared * mod * inverse_gauge;
+    const auto dZ_dgauge =
+        dh_dgauge * (1.0 - _gauge_solve_state.n3.power_factor * Utility::pow<2>(inverse_h));
+    const auto porosity_weight = _gauge_solve_state.n3.porosity_weights[population_index];
+
+    residual += porosity_weight * Z;
+    derivative += porosity_weight * dZ_dgauge;
+  }
+
+  return residual;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructGaugeStressSensitivity(
+    const Real gauge_stress,
+    const GenericReal<is_ad> & equiv_stress,
+    const HydrostaticStressState & hydrostatic_stress,
+    const GenericReal<is_ad> & porosity,
+    const CreepLaw & law) const
+{
+  auto reconstructed = GenericReal<is_ad>(gauge_stress);
+  if constexpr (is_ad)
+  {
+    incrementPerformanceCounter(_performance_counters.gauge_root_ad_sensitivity_evaluations);
+    auto derivative = GenericReal<is_ad>(0.0);
+    const auto residual = computeGaugeResidual(
+        equiv_stress, reconstructed, hydrostatic_stress, porosity, law, derivative);
+    const auto derivative_raw = MetaPhysicL::raw_value(derivative);
+    if (!std::isfinite(derivative_raw) || std::abs(derivative_raw) < 1.0e-30)
+      mooseException("In ",
+                     this->_name,
+                     ": singular gauge residual derivative during AD sensitivity reconstruction. "
+                     "dF/dLambda = ",
+                     derivative_raw,
+                     ".");
+
+    // Remove the already-converged primal residual and retain only its AD derivative payload.
+    const auto residual_derivative_only = residual - MetaPhysicL::raw_value(residual);
+    reconstructed -= residual_derivative_only / derivative_raw;
+  }
+  return reconstructed;
 }
 
 template <bool is_ad>
@@ -5273,9 +5651,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidual(
 
     const auto M = abs(population.effective_hydro_stress) / trial_gauge;
     const auto dM_dtrial_gauge = -M / trial_gauge;
-    const auto h = computeHDerivatives(law.power, M);
-    const auto Z = h.value + law.power_factor / h.value;
-    const auto dZ_dM = h.first * (1.0 - law.power_factor / Utility::pow<2>(h.value));
+    const auto h = computeHValueFirst(law.power, M);
+    const auto inverse_h = 1.0 / h.value;
+    const auto Z = h.value + law.power_factor * inverse_h;
+    const auto dZ_dM = h.first * (1.0 - law.power_factor * Utility::pow<2>(inverse_h));
 
     residual += porosity * population.fraction * Z;
     derivative += porosity * population.fraction * dZ_dM * dM_dtrial_gauge;
@@ -5303,12 +5682,62 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeResidual(
 {
   incrementPerformanceCounter(_performance_counters.gauge_root_residual_evaluations);
   mooseAssert(_gauge_solve_state.law, "Gauge-stress solve does not have an active creep law.");
-  return computeGaugeResidual(equiv_stress,
-                              trial_gauge,
-                              _gauge_solve_state.hydrostatic_stress,
-                              _gauge_solve_state.porosity,
-                              *_gauge_solve_state.law,
-                              _derivative);
+
+  // The inner gauge root is a primal scalar solve for both AD and non-AD materials. AD sensitivity
+  // is reconstructed explicitly after convergence, so use the same Real-only residual kernel in
+  // both builds rather than maintaining a second generic-arithmetic root path.
+  auto derivative = 0.0;
+  const auto residual =
+      _gauge_solve_state.law->power == 3.0
+          ? computeGaugeResidualN3Raw(MetaPhysicL::raw_value(trial_gauge), derivative)
+          : computeGaugeResidualRaw(MetaPhysicL::raw_value(equiv_stress),
+                                    MetaPhysicL::raw_value(trial_gauge),
+                                    _gauge_solve_state.hydrostatic_stress,
+                                    MetaPhysicL::raw_value(_gauge_solve_state.porosity),
+                                    *_gauge_solve_state.law,
+                                    derivative);
+  _derivative = GenericReal<is_ad>(derivative);
+  return GenericReal<is_ad>(residual);
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::LpsHValueFirst
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeHValueFirst(
+    const Real n, const GenericReal<is_ad> & M) const
+{
+  constexpr auto beta = 1.5;
+
+  auto result = LpsHValueFirst{};
+  if (n == 1.0)
+  {
+    const auto beta_M = beta * M;
+    result.value = 1.0 + Utility::pow<2>(beta_M);
+    result.first = 2.0 * beta * beta * M;
+    return result;
+  }
+
+  using std::pow;
+  const auto exponent = (n + 1.0) / n;
+  const auto mod = pow(beta * M, exponent);
+  const auto y = 1.0 + mod / n;
+
+  if (n == 3.0)
+  {
+    const auto y2 = Utility::pow<2>(y);
+    result.value = y2 * y;
+    if (M == 0.0)
+      return result;
+    result.first = exponent * mod / M * y2;
+    return result;
+  }
+
+  const auto y_n_minus_2 = pow(y, n - 2.0);
+  const auto y_n_minus_1 = y_n_minus_2 * y;
+  result.value = y_n_minus_1 * y;
+  if (M == 0.0)
+    return result;
+  result.first = exponent * mod / M * y_n_minus_1;
+  return result;
 }
 
 template <bool is_ad>
@@ -5493,6 +5922,68 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeLpsDerivatives(
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLpsFlowDerivatives
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsFlowDerivatives(
+    const GenericReal<is_ad> & gauge_stress,
+    const HydrostaticStressState & hydrostatic_stress,
+    const GenericReal<is_ad> & equiv_stress,
+    const PorePorosityState & pore_porosity,
+    const CreepLaw & law) const
+{
+  incrementPerformanceCounter(_performance_counters.independent_lps_flow_derivative_evaluations);
+  using std::abs;
+
+  if (hydrostaticStressPopulationCount(hydrostatic_stress) != MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    mooseException("In ",
+                   this->_name,
+                   ": independent pore kinematics requires exactly two hydrostatic populations.");
+
+  auto d = IndependentLpsFlowDerivatives{};
+  const auto lambda = gauge_stress;
+  const auto q = equiv_stress;
+  const auto f = pore_porosity[0] + pore_porosity[1];
+  const auto alpha = law.power_factor;
+  const auto A = 1.0 + 2.0 * f / 3.0;
+  const auto left = A * Utility::pow<2>(q / lambda);
+  d.F_lambda = -2.0 * left / lambda;
+
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+    const auto fi = pore_porosity[population_index];
+    const auto p_eff = population.effective_hydro_stress;
+
+    if (law.power == 1.0)
+    {
+      constexpr auto beta_squared = 2.25;
+      const auto pressure_ratio_squared = Utility::pow<2>(p_eff / lambda);
+      const auto Z_lambda = -2.0 * beta_squared * pressure_ratio_squared / lambda;
+      const auto Z_p = 2.0 * beta_squared * p_eff / Utility::pow<2>(lambda);
+      d.F_lambda += fi * Z_lambda;
+      d.population_F_p[population_index] = fi * Z_p;
+      d.F_p += d.population_F_p[population_index];
+      continue;
+    }
+
+    const auto abs_p = abs(p_eff);
+    const auto M = abs_p / lambda;
+    const auto sign_p = p_eff > 0.0 ? Real(1.0) : (p_eff < 0.0 ? Real(-1.0) : Real(0.0));
+    const auto h = computeHValueFirst(law.power, M);
+    const auto inverse_h = 1.0 / h.value;
+    const auto dZ_dM = h.first * (1.0 - alpha * Utility::pow<2>(inverse_h));
+    const auto M_lambda = -M / lambda;
+    const auto M_p = sign_p / lambda;
+
+    d.F_lambda += fi * dZ_dM * M_lambda;
+    d.population_F_p[population_index] = fi * dZ_dM * M_p;
+    d.F_p += d.population_F_p[population_index];
+  }
+
+  return d;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLpsDerivatives
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
     const GenericReal<is_ad> & gauge_stress,
@@ -5617,6 +6108,63 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
   }
 
   return d;
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLpsCreepResponse
+PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLpsCreepResponseValueOnly(
+    const HydrostaticStressState & hydrostatic_stress,
+    const GenericReal<is_ad> & equiv_stress,
+    const GenericRankTwoTensor<is_ad> & dev_direction,
+    const PorePorosityState & pore_porosity)
+{
+  incrementPerformanceCounter(
+      _performance_counters.independent_lps_value_only_response_evaluations);
+  using std::abs;
+
+  auto response = IndependentLpsCreepResponse{};
+  response.inelastic_strain_increment.zero();
+
+  const auto total_porosity = pore_porosity[0] + pore_porosity[1];
+  const auto dev_stress = dev_direction * equiv_stress;
+  const auto A = 1.0 + 2.0 * total_porosity / 3.0;
+
+  for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
+  {
+    const auto coefficient = creepCoefficient(law_index);
+    if (MetaPhysicL::raw_value(coefficient) == 0.0)
+      continue;
+
+    const auto & law = _creep_laws[law_index];
+    const auto gauge_stress =
+        computeGaugeStress(equiv_stress, hydrostatic_stress, total_porosity, law);
+    const auto lps = computeIndependentLpsFlowDerivatives(
+        gauge_stress, hydrostatic_stress, equiv_stress, pore_porosity, law);
+
+    const auto scaled_F_lambda_raw = MetaPhysicL::raw_value(gauge_stress * lps.F_lambda);
+    if (!std::isfinite(scaled_F_lambda_raw) || abs(scaled_F_lambda_raw) < 1.0e-12)
+      mooseException("In ",
+                     this->_name,
+                     ": singular independent-porosity LPS derivative Lambda*dF/dLambda = ",
+                     scaled_F_lambda_raw,
+                     " for creep law ",
+                     law_index,
+                     ".");
+
+    const auto dev_factor = 3.0 * A / Utility::pow<2>(gauge_stress);
+    const auto B = this->_identity_two * (lps.F_p / 3.0) + dev_stress * dev_factor;
+    const auto creep_rate = computeCreepRate(law, coefficient, gauge_stress);
+    const auto W = -this->constitutiveTimeStep() * creep_rate / lps.F_lambda;
+
+    response.inelastic_strain_increment += B * W;
+    response.effective_inelastic_strain_increment += creep_rate * this->constitutiveTimeStep();
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      response.population_volumetric_strain_increment[population_index] +=
+          lps.population_F_p[population_index] * W;
+  }
+
+  return response;
 }
 
 template <bool is_ad>
@@ -5872,7 +6420,44 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
     _gauge_solve_state.hydrostatic_stress = hydrostatic_stress;
     _gauge_solve_state.porosity = porosity;
     _gauge_solve_state.law = &law;
+
+    if (law.power == 3.0)
+    {
+      incrementPerformanceCounter(_performance_counters.gauge_root_n3_solves);
+
+      constexpr auto beta = 1.5;
+      constexpr auto four_thirds = 4.0 / 3.0;
+      const auto f = MetaPhysicL::raw_value(porosity);
+      const auto q = MetaPhysicL::raw_value(equiv_stress);
+      _gauge_solve_state.n3.deviatoric_prefactor = (1.0 + f / 1.5) * Utility::pow<2>(q);
+      _gauge_solve_state.n3.residual_constant = -1.0 - law.power_factor * Utility::pow<2>(f);
+      _gauge_solve_state.n3.power_factor = law.power_factor;
+      _gauge_solve_state.n3.active_population_count = 0;
+
+      using std::abs;
+      using std::pow;
+      for (auto population_index = 0u; population_index < population_count; ++population_index)
+      {
+        const auto population = hydrostaticStressPopulation(hydrostatic_stress, population_index);
+        const auto weight = MetaPhysicL::raw_value(population.fraction);
+        if (weight <= 0.0)
+          continue;
+
+        const auto active_index = _gauge_solve_state.n3.active_population_count++;
+        _gauge_solve_state.n3.porosity_weights[active_index] = f * weight;
+        const auto pressure = abs(MetaPhysicL::raw_value(population.effective_hydro_stress));
+        _gauge_solve_state.n3.pressure_four_thirds[active_index] =
+            pow(beta * pressure, four_thirds);
+      }
+    }
+
     this->returnMappingSolve(equiv_stress, gauge_stress, _console);
+    if constexpr (is_ad)
+      gauge_stress = reconstructGaugeStressSensitivity(
+          MetaPhysicL::raw_value(gauge_stress), equiv_stress, hydrostatic_stress, porosity, law);
+
+    _gauge_solve_state.previous_gauge_stress = MetaPhysicL::raw_value(gauge_stress);
+    _gauge_solve_state.previous_power = law.power;
   }
 
   mooseAssert(gauge_stress >= equiv_stress,
