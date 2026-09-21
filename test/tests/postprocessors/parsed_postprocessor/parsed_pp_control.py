@@ -32,12 +32,14 @@ if __name__ == "__main__":
         control.set_continue()
 
         # Control through the timesteps, changing 'expression' from "c + t"
-        # to "c + t < n" where n increases by 2 each timestep
+        # to "c + t < n" where n increases by 50 each timestep
         n = 0
         for _ in range(2):
             control.wait("TIMESTEP_BEGIN")
 
-            n += 2
-            control.set_string("Postprocessors/parsed/expression", f"c + t < {n}")
+            control.set_string(
+                "Postprocessors/parsed/expression", f"10 * (c + t < {n})"
+            )
 
+            n += 50
             control.set_continue()

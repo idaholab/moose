@@ -42,10 +42,10 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
     _n_pp(coupledPostprocessors("pp_names")),
-    _pexp(&getParam<std::string>("expression")),
+    _pexp(getParam<std::string>("expression")),
     _oldexp(getParam<std::string>("expression")),
-    _pcnames(&getParam<std::vector<std::string>>("constant_names")),
-    _pcexps(&getParam<std::vector<std::string>>("constant_expressions")),
+    _pcnames(getParam<std::vector<std::string>>("constant_names")),
+    _pcexps(getParam<std::vector<std::string>>("constant_expressions")),
     _use_t(getParam<bool>("use_t")),
     _value(0.0),
     _postprocessors("")
@@ -94,16 +94,16 @@ ParsedPostprocessor::initialize()
 void
 ParsedPostprocessor::execute()
 {
+  if (_pexp != _oldexp)
+  {
+    _oldexp = _pexp;
+    parsedFunctionSetup(_func_F, _pexp, _postprocessors, _pcnames, _pcexps, comm());
+  }
 }
 
 void
 ParsedPostprocessor::finalize()
 {
-  if (*_pexp != _oldexp)
-  {
-    _oldexp = *_pexp;
-    parsedFunctionSetup(_func_F, *_pexp, _postprocessors, *_pcnames, *_pcexps, comm());
-  }
   for (unsigned int i = 0; i < _n_pp; i++)
     _func_params[i] = *_pp_values[i];
 

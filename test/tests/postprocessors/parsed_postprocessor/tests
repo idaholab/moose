@@ -28,7 +28,7 @@
     required_python_packages = requests
     recover = false
     restep = false
-    requirement = 'The system shall be able to control a parsed postprocessor expression via a REST API.'
+    requirement = 'The system shall be able to control the parsed expression of a postprocessor via a REST API.'
     valgrind = 'none' # http library is not completely valgrind clean
   []
 []
