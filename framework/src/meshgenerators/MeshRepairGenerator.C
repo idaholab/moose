@@ -2621,13 +2621,17 @@ MeshRepairGenerator::collapseRedundantVertex(
         return false;
   }
 
-  // Partition the star and decide each reducer's fate, all without mutating the mesh so the
+  // Partition the star and decide each element's fate, all without mutating the mesh so the
   // collapse can still decline cleanly. A "reducer" contains both v and keep (it loses that edge);
-  // a "mover" contains only v (v is replaced by keep in place). Each reducer either (a) reduces to
-  // a supported standard lower type, (b) is rebuilt as a C0Polyhedron - a 3D cell that stays 3D but
-  // has no standard lower form, e.g. a hexahedron losing one edge - or (c) is deleted because it
-  // drops below its own dimension (e.g. a tetrahedron collapsing to a triangle), which means it
-  // shared the collapsed edge and was itself a needle/sliver.
+  // a "mover" contains only v (v is replaced by keep, keeping its full vertex count). A reducer
+  // either (a) reduces to a supported standard lower type, (b) is rebuilt as a C0Polyhedron - a 3D
+  // cell that stays 3D but has no standard lower form, e.g. a hexahedron losing one edge - or (c)
+  // is deleted because it drops below its own dimension (e.g. a tetrahedron collapsing to a
+  // triangle), which means it shared the collapsed edge and was itself a needle/sliver. A mover
+  // that is a Polyhedron or Polygon is likewise rebuilt from scratch rather than mutated in place:
+  // libMesh caches each face as its own object (and, for a Polyhedron, a node-identity map into it)
+  // that a plain set_node() does not refresh, so it would keep referencing v after v is deleted
+  // below.
   struct PolyPrep
   {
     std::vector<std::shared_ptr<libMesh::Polygon>> faces;
@@ -2636,9 +2640,11 @@ MeshRepairGenerator::collapseRedundantVertex(
     subdomain_id_type sub;
     processor_id_type pid;
   };
-  std::vector<dof_id_type> mover_ids;
+  const std::map<dof_id_type, Node *> subs{{v->id(), keep}};
+  std::vector<dof_id_type> mover_ids;                          // plain movers
   std::map<dof_id_type, std::unique_ptr<Elem>> std_candidates; // reducer -> standard replacement
-  std::map<dof_id_type, PolyPrep> poly_preps; // reducer -> polyhedron rebuild inputs
+  std::map<dof_id_type, std::unique_ptr<Elem>> polygon_candidates; // Polygon mover -> full rebuild
+  std::map<dof_id_type, PolyPrep> poly_preps; // reducer, or Polyhedron mover -> rebuild inputs
   std::set<dof_id_type> delete_ids;           // reducers that drop below dimension
   for (const auto eid : star)
   {
@@ -2651,7 +2657,26 @@ MeshRepairGenerator::collapseRedundantVertex(
         has_keep = true;
     if (!has_keep)
     {
-      mover_ids.push_back(eid);
+      if (dynamic_cast<libMesh::Polyhedron *>(e))
+      {
+        PolyPrep prep;
+        prep.sub = e->subdomain_id();
+        prep.pid = e->processor_id();
+        collapsedElementFaces(*e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
+        poly_preps[eid] = std::move(prep); // rebuild as a polyhedron at commit
+      }
+      else if (dynamic_cast<libMesh::Polygon *>(e))
+      {
+        auto poly = std::make_unique<libMesh::C0Polygon>(e->n_nodes());
+        for (const auto i : make_range(e->n_nodes()))
+          poly->set_node(i, e->node_id(i) == v->id() ? keep : const_cast<Node *>(e->node_ptr(i)));
+        poly->subdomain_id() = e->subdomain_id();
+        if (poly->volume() <= invert_floor)
+          return false; // would distort a genuine-corner element: decline
+        polygon_candidates[eid] = std::move(poly);
+      }
+      else
+        mover_ids.push_back(eid);
       continue;
     }
 
@@ -2667,7 +2692,6 @@ MeshRepairGenerator::collapseRedundantVertex(
     PolyPrep prep;
     prep.sub = e->subdomain_id();
     prep.pid = e->processor_id();
-    const std::map<dof_id_type, Node *> subs{{v->id(), keep}};
     const unsigned int nd =
         collapsedElementFaces(*e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
     if (e->dim() == 3 && nd >= 4)
@@ -2683,29 +2707,16 @@ MeshRepairGenerator::collapseRedundantVertex(
   }
 
   // Collapse the vertex (merge v -> keep) and let every incident element adapt: reducers reduce (a
-  // supported lower type, else a polyhedron, else deletion, decided above) and movers - elements
-  // that contain v but not keep - are reshaped by substituting v -> keep. The merge is a node
-  // identification, so the mesh stays conformal; a colinear (non-coincident) merge slides v along
-  // the edge to keep, which is validated per element below (reject only if a mover would actually
-  // invert or degenerate). This adapts the surrounding cluster rather than refusing whenever a
-  // mover exists.
+  // supported lower type, else a polyhedron, else deletion, decided above); a plain mover is
+  // reshaped by substituting v -> keep in place, while a Polyhedron/Polygon mover is rebuilt from
+  // scratch above. The merge is a node identification, so the mesh stays conformal; a colinear
+  // (non-coincident) merge slides v along the edge to keep, which is validated per element below
+  // (reject only if a mover would actually invert or degenerate). This adapts the surrounding
+  // cluster rather than refusing whenever a mover exists.
 
-  // Refresh the cached triangulation of a polyhedron/polygon mover whose nodes have moved
-  auto retriangulate = [](Elem * e)
-  {
-    if (auto * ph = dynamic_cast<libMesh::Polyhedron *>(e))
-      ph->retriangulate();
-    else if (auto * pg = dynamic_cast<libMesh::Polygon *>(e))
-      pg->retriangulate();
-  };
-
-  // Apply v -> keep to the movers, saving originals for rollback, and validate each stays
-  // non-degenerate and above the floor (this rejects a genuine-corner element that v would
-  // distort). A moved polyhedron/polygon is retriangulated so its cached mapping reflects the new
-  // node positions; leaving it stale would dangle once v is deleted below (retriangulate() throws
-  // if the reshaped cell cannot be tetrahedralized, which we also treat as invalid).
+  // Apply v -> keep to the plain movers, saving originals for rollback, and validate each stays
+  // non-degenerate and above the floor (this rejects a genuine-corner element that v would distort)
   std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
-  std::set<Elem *> changed;
   bool ok = true;
   for (const auto eid : mover_ids)
   {
@@ -2717,17 +2728,7 @@ MeshRepairGenerator::collapseRedundantVertex(
       {
         saved.emplace_back(e, n, e->node_ptr(n));
         e->set_node(n, keep);
-        changed.insert(e);
       }
-    try
-    {
-      retriangulate(e);
-    }
-    catch (const std::exception &)
-    {
-      ok = false;
-      break;
-    }
     std::set<dof_id_type> distinct;
     for (const auto n : make_range(e->n_nodes()))
       distinct.insert(e->node_id(n));
@@ -2741,20 +2742,13 @@ MeshRepairGenerator::collapseRedundantVertex(
   {
     for (auto & [e, n, orig] : saved)
       e->set_node(n, orig);
-    for (auto * e : changed)
-      try
-      {
-        retriangulate(e); // restore each moved cell's triangulation to match the restored nodes
-      }
-      catch (const std::exception &)
-      {
-      }
     return false;
   }
 
-  // Create the polyhedron rebuilds. Each is a sound-convex-cell check that mutates the mesh (the
-  // new cell coexists with its still-present old element until commit), so if any fails we delete
-  // the ones already made, undo the movers, and decline.
+  // Create the polyhedron rebuilds (reducers that need one, and Polyhedron movers). Each is a
+  // sound-convex-cell check that mutates the mesh (the new cell coexists with its still-present old
+  // element until commit), so if any fails we delete the ones already made, undo the plain movers,
+  // and decline.
   std::map<dof_id_type, Elem *> poly_replacements;
   for (auto & [eid, prep] : poly_preps)
   {
@@ -2782,11 +2776,14 @@ MeshRepairGenerator::collapseRedundantVertex(
   }
   touched_nodes.insert(keep->id());
 
-  // Commit. Standard reducers are replaced (carrying subdomain/boundary ids across the merge);
-  // polyhedron reducers had their replacement added above, so drop the old cell; delete-reducers
-  // and the now-orphaned vertex v are removed.
+  // Commit. Standard reducers and rebuilt Polygon movers are replaced (carrying subdomain/boundary
+  // ids across the merge via node_sub); polyhedron rebuilds (reducers and Polyhedron movers) had
+  // their replacement added above, so drop the old cell; delete-reducers and the now-orphaned
+  // vertex v are removed.
   const std::map<dof_id_type, dof_id_type> node_sub{{v->id(), keep->id()}};
   for (auto & [eid, cand] : std_candidates)
+    replaceReducedElement(mesh, mesh->query_elem_ptr(eid), std::move(cand), node_sub);
+  for (auto & [eid, cand] : polygon_candidates)
     replaceReducedElement(mesh, mesh->query_elem_ptr(eid), std::move(cand), node_sub);
   for (const auto & kv : poly_replacements)
   {
