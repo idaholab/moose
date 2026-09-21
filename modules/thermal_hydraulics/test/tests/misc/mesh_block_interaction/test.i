@@ -21,6 +21,12 @@
   []
 []
 
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
+  []
+[]
+
 [Components]
   [inlet]
     type = InletMassFlowRateTemperature1Phase
@@ -37,6 +43,7 @@
     n_elems = 15
     A = 1
     D_h = 1
+    fp = fp
   []
 
   [outlet]
