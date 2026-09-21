@@ -21,7 +21,7 @@ Setting [!param](/VectorPostprocessors/Eigenvalues/natural_frequency) to `true` 
 | `frequency` | $f$ | Hz |
 | `period` | $T$ | s |
 
-The relations above carry no conversion factor, so the units listed hold when the stiffness and mass terms of the eigenvalue problem are expressed in SI units. These columns are meaningful for a modal analysis, in which the eigenvalue the [Eigenvalue.md] executioner solves for is the square of the angular frequency; see [1D elastic waves](modules/solid_mechanics/1d_elastic_waves.md) for such a setup. The imaginary part of the eigenvalue takes no part in these three columns and stays in `eigen_values_imag`.
+The relations above carry no conversion factor, so the units listed hold when the stiffness and mass terms of the eigenvalue problem are expressed in SI units. These columns are meaningful for a modal analysis, in which the eigenvalue the [Eigenvalue.md] executioner solves for is the square of the angular frequency; the solid mechanics module's frequency domain analysis page shows such a setup. The imaginary part of the eigenvalue takes no part in these three columns and stays in `eigen_values_imag`.
 
 The three vectors are declared only when [!param](/VectorPostprocessors/Eigenvalues/natural_frequency) is `true`. An input that leaves it at its default therefore writes exactly the two eigenvalue columns to CSV.
 
