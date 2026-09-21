@@ -51,6 +51,11 @@ MFEMHypreBoomerAMG::validParams()
       0.25,
       "HypreBoomerAMG strong threshold. Defaults to 0.25, or to 0.5 when vector_treatment is "
       "'by_component' or 'rigid_body_modes'.");
+  params.addParam<int>(
+      "aggressive_coarsening_levels",
+      0,
+      "Number of levels, counted from the finest, on which to apply aggressive coarsening. "
+      "Aggressive coarsening produces a cheaper hierarchy at the cost of more iterations.");
   MooseEnum errmode("ignore=0 warn=1 abort=2", "abort");
   params.addParam<MooseEnum>("error_mode", errmode, "Set the behavior for treating hypre errors.");
   return params;
@@ -128,6 +133,9 @@ MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
   // and only when given, to leave each set's own default in place otherwise.
   if (isParamSetByUser("strength_threshold"))
     solver.SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
+
+  if (isParamSetByUser("aggressive_coarsening_levels"))
+    solver.SetAggressiveCoarsening(getParam<int>("aggressive_coarsening_levels"));
 }
 
 #endif

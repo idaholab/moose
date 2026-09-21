@@ -32,6 +32,14 @@ Both need [!param](/Solvers/MFEMHypreBoomerAMG/fespace), the space of the unknow
 
 For backward compatibility, setting `fespace` without `vector_treatment` selects `rigid_body_modes`.
 
+## Aggressive coarsening
+
+[!param](/Solvers/MFEMHypreBoomerAMG/aggressive_coarsening_levels) applies aggressive coarsening to
+that many levels, counted from the finest. Aggressive coarsening builds a smaller and sparser
+hierarchy, which makes both the setup and each cycle cheaper, and in exchange the preconditioner is
+weaker so the solve takes more iterations. Whether it pays depends on the problem, so it is off by
+default; one level is a common choice where it helps.
+
 ## Example Input File Syntax
 
 !listing test/tests/mfem/kernels/diffusion.i block=Solvers
