@@ -65,13 +65,7 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
 ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
-    // This constraint configures the user object before execution, but UserObjectInterface hands
-    // out only const references. FEProblemBase::getUserObject would give a mutable one, except that
-    // it resolves the type through TheWarehouse's static_cast, which cannot downcast to
-    // WeightedVelocitiesUserObject across its virtual WeightedGapUserObject base. Only the
-    // dynamic_cast behind UserObjectInterface can, so cast the constness away here.
-    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
-        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))),
+    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")),
     _c_t(getParam<Real>("c_t")),
     _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
                                     .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),
@@ -90,13 +84,14 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
-  _weighted_velocities_uo.includeNodalNormalDerivatives();
+  if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
+    paramError("weighted_velocities_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_velocities_uo.name(),
+               "'.");
 
-  // Same reasoning as ComputeWeightedGapLMMechanicalContact's constructor: the above call
-  // guarantees nodal-normal derivatives are enabled, so 'weighted_velocities_uo' must resolve to
-  // the same interface as this constraint. This is a separate check from the parent's (which
-  // covers 'weighted_gap_uo') because a hand-written input may point the two user object
-  // parameters at different objects.
+  // The weighted-gap and weighted-velocity parameters may identify different user objects, so each
+  // object's interface and displacement configuration must be validated.
   if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
       primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
     paramError("weighted_velocities_uo",

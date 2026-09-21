@@ -45,18 +45,15 @@ components of the NCP function onto the same level and achieve optimal
 convergence in the non-linear solve.
 
 Mechanical mortar contact uses normalized, weighted secondary nodal normals to evaluate the
-weighted gap. Supported quasistatic local-basis contact includes the displacement derivatives of
-the nodal normal directions in Jacobian evaluations. This behavior applies to the `mortar` and
-non-augmented `mortar_penalty` formulations with `frictionless` or `coulomb` contact and
+weighted gap. Quasistatic local-basis contact includes the displacement derivatives of the nodal
+normal directions in Jacobian evaluations. This behavior applies to the `mortar` and
+`mortar_penalty` formulations, including augmented-Lagrangian penalty contact, with `frictionless`
+or `coulomb` contact and
 [!param](/Constraints/ComputeWeightedGapLMMechanicalContact/interpolate_normals) set to `false`.
-The normal, tangent, weighted-gap, and tangential-velocity values at a fixed solution state remain
-unchanged. The contact force is assembled by interpolating the nodal traction vector,
-$\sum_j \Phi_j z_j \boldsymbol{n}_j$, rather than by scaling an interpolated scalar pressure by the
-nodal normal of the residual row's own node. Only the former is the transpose of the weighted gap, so
-the discrete contact force is self-equilibrated and independent of secondary node numbering. Traction
-and force values therefore differ from earlier MOOSE releases on interfaces where the secondary nodal
-normals vary along the face. Residual evaluations contain no derivatives of the normal or tangent
-directions. The Jacobian includes the normal-direction term in the weighted-gap derivative,
+The contact force is assembled by interpolating the nodal traction vector,
+$\sum_j \Phi_j z_j \boldsymbol{n}_j$. This is the transpose of the weighted gap, so the discrete
+contact force is self-equilibrated and independent of secondary node numbering. The Jacobian
+includes the normal-direction term in the weighted-gap derivative,
 
 !equation
 \delta (\boldsymbol{G}_A \cdot \boldsymbol{n}_A)
@@ -78,41 +75,33 @@ tangential-friction, and penalty contact constraints use the same linearized dir
 Mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices are unchanged;
 their weighted contributions are already contained in $\boldsymbol{G}_A$.
 
-Dynamic mortar through [ContactAction](/ContactAction.md) uses frozen normal and tangent directions
-in its Jacobian. Augmented-Lagrangian penalty, Cartesian-LM, cohesive-zone, and nonmortar contact
-also use frozen directions. Quadrature-point normal interpolation is not supported for this
-local-basis contact path. The displacement variables must be nodal nonlinear variables in the
-system assembled by the contact objects.
+Dynamic mortar through [ContactAction](/ContactAction.md), Cartesian-LM, cohesive-zone, and
+nonmortar contact do not include displacement derivatives of normal and tangent vectors in their
+Jacobians. Quadrature-point normal interpolation is not supported for quasistatic local-basis
+contact. The displacement variables must be nodal nonlinear variables in the system assembled by
+the contact objects.
 
 Only the averaged secondary nodal-normal field and its derived Householder tangents are
 differentiated. Mortar segment topology, primary-secondary projections and parent reference
-coordinates, mortar-segment `JxW`, moving overlap boundaries, and active-set decisions remain
-fixed. The contact Jacobian therefore includes additional nodal-direction derivative terms, but
-this does not guarantee quadratic Newton convergence.
+coordinates, mortar-segment `JxW`, moving overlap boundaries, and active-set decisions do not
+include displacement derivatives. The contact Jacobian therefore includes additional
+nodal-direction derivative terms, but this does not guarantee quadratic Newton convergence.
 
 The normal derivatives span the incident-face star of each secondary node, so the required
-AD derivative capacity can increase relative to a fixed normal direction. The requirement depends
-on the secondary face order, node valence, displacement variables, and system degree-of-freedom
-layout. The configured sparse AD container must be large enough for the largest scalar normal or
-tangent component in the target mesh; no single derivative size is appropriate for every problem.
+AD derivative capacity can increase relative to when derivative information is not included in the
+normal. The requirement depends on the secondary face order, node valence, displacement variables,
+and system degree-of-freedom layout. The configured sparse AD container must be large enough for the
+largest scalar normal or tangent component in the target mesh; no single derivative size is appropriate
+for every problem.
 If the capacity is insufficient, reconfigure with a larger `--with-derivative-size` value and
 rebuild the MOOSE libraries and application consistently.
 
-The relationship managers extended for this feature make the required remote interface elements
-(each point-neighbor face's `interior_parent()`) available to the owning process, so the coupling
-they introduce is preallocated once at the start of the solve. For distributed contact where the
-secondary/primary correspondence itself moves during the solve (sliding, remeshing), new couplings
-can still appear between degrees of freedom owned by the same process after that initial
-preallocation; the recommendation is to set
-[!param](/Problem/FEProblem/use_hash_table_matrix_assembly) to `true` in that case, since hash-table
-assembly tolerates such couplings without reallocation. This PR's own distributed regression test
-enables that option but runs only a single time step, so it does not itself demonstrate that the
-option is necessary or sufficient for a moving case.
-
-This moving/distributed mechanism does not explain every reallocation observed with this feature:
-second-order (TET10/TRI6 and TET14/TRI7) interfaces reallocate even in a single-process,
-single-time-step, non-moving configuration where no relationship-manager remote coupling or
-correspondence change is involved. That reallocation's mechanism has not been characterized.
+The contact relationship managers make each point-neighbor secondary face and its
+`interior_parent()` available where the nodal-normal coupling is assembled. When sliding,
+remeshing, or another topology change alters the secondary-primary correspondence during a solve,
+new local degree-of-freedom couplings can appear after initial sparsity preallocation. Set
+[!param](/Problem/FEProblem/use_hash_table_matrix_assembly) to `true` for such problems so matrix
+assembly can accommodate the changing coupling pattern.
 
 ## Node-based scaling for edge dropping
 

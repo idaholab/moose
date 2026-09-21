@@ -67,10 +67,9 @@ protected:
 
   /**
    * Query the mortar interface couplings of the query element. If a lower dimensional secondary
-   * element is found, then we search for its point neighbors, which we ghost, as well as all of the
-   * point neighbors, their interior parents, and the point neighbors' mortar interface couplings.
-   * This kind of ghosting is required for mortar nodal auxiliary kernels and nodal-normal contact
-   * Jacobians.
+   * element is found, then we ghost its point neighbors, their interior parents, and their mortar
+   * interface couplings. This kind of ghosting is required for mortar nodal auxiliary kernels and
+   * nodal-normal contact Jacobians.
    */
   void ghostLowerDSecondaryElemPointNeighbors(const processor_id_type p,
                                               const Elem * const query_elem,

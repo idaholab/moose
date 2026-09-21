@@ -88,20 +88,15 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
-    // See ComputeFrictionalForceLMMechanicalContact for why the constness is cast away rather than
-    // taking a mutable reference from FEProblemBase: the contact user objects derive from
-    // WeightedGapUserObject virtually, so only UserObjectInterface's dynamic_cast can resolve them.
-    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
-        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
+    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
-  _weighted_gap_uo.includeNodalNormalDerivatives();
+  if (!_weighted_gap_uo.usesNodalNormalDerivatives())
+    paramError("weighted_gap_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_gap_uo.name(),
+               "'.");
 
-  // The above call guarantees nodal-normal derivatives are now enabled, so the geometry cached by
-  // 'weighted_gap_uo' (WeightedGapUserObject.C:192-211, keyed only by Node pointer) must belong to
-  // this exact constraint's interface: a mismatched secondary/primary subdomain pair can leave that
-  // cache empty (hard-erroring deep inside libmesh_map_find instead of here), and a mismatched
-  // displacement variable would silently seed the wrong derivative indices
-  // (WeightedGapUserObject::nodalCoordinate()).
+  // The user object and constraint must assemble the same interface and displacement variables.
   if (secondarySubdomain() != _weighted_gap_uo.secondarySubdomain() ||
       primarySubdomain() != _weighted_gap_uo.primarySubdomain())
     paramError("weighted_gap_uo",

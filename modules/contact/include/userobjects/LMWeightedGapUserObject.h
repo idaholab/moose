@@ -41,6 +41,7 @@ public:
   virtual void reinit() override {}
   virtual Real getNormalContactPressure(const Node * const /*node*/) const override;
   virtual ADReal nodalContactPressure(const Node & node) const override;
+  virtual bool usesNodalNormalDerivatives() const override { return true; }
 
   /// The traction stays on the Lagrange multiplier's own basis, which is the basis adSlnLower()
   /// uses. Under Petrov-Galerkin test() is the auxiliary standard basis carrying the weighted gap.
@@ -94,8 +95,8 @@ protected:
   void verifyLagrange(const MooseVariable & var, const std::string & var_name) const;
 
   /**
-   * As above, and additionally require that \p var shares \p reference_var's finite element type
-   * (order/family) and dual/standard basis choice (\p useDual()). A per-direction traction basis
+   * Verify nodal degrees of freedom and require that \p var shares \p reference_var's finite element
+   * type (order/family) and dual/standard basis choice (\p useDual()). A per-direction traction basis
    * (WeightedVelocitiesUserObject::tangentialTractionBasis) indexes its dof lookups and loop bound
    * by a tangential Lagrange multiplier, so that variable's node count and dof numbering must match
    * the normal Lagrange multiplier's for the two to stay comparable node-for-node.

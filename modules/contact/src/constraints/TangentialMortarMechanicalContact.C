@@ -47,70 +47,64 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
     paramError("interpolate_normals",
                "Mechanical mortar contact uses tangents derived from normalized secondary nodal "
                "normals and cannot be combined with quadrature-point normal interpolation.");
+}
 
-  // Same reasoning as NormalMortarMechanicalContact: this constraint only reads the resulting
-  // flag, so the check below only applies once the user object confirms derivatives are on. A
-  // mismatched interface here can leave the user object's normal cache empty for this
-  // constraint's nodes (hard-erroring inside libmesh_map_find rather than here), and a mismatched
-  // displacement variable would read the wrong derivative indices from the cached normal.
-  if (_weighted_velocities_uo.nodalNormalDerivativesEnabled())
-  {
-    if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
-        primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
-      paramError("weighted_velocities_uo",
-                 "'weighted_velocities_uo' must be defined on the same secondary/primary "
-                 "subdomain pair as this constraint when nodal-normal derivatives are enabled.");
+void
+TangentialMortarMechanicalContact::initialSetup()
+{
+  ADMortarLagrangeConstraint::initialSetup();
 
-    if (&_secondary_var != _weighted_velocities_uo.dispVar(_component))
-      paramError("weighted_velocities_uo",
-                 "'weighted_velocities_uo' must use the same displacement variable as this "
-                 "constraint's 'variable' when nodal-normal derivatives are enabled.");
+  if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
+    return;
 
-    if (getParam<bool>("use_displaced_mesh") !=
-        _weighted_velocities_uo.parameters().get<bool>("use_displaced_mesh"))
-      paramError("weighted_velocities_uo",
-                 "'weighted_velocities_uo' must use the same 'use_displaced_mesh' setting as "
-                 "this constraint when nodal-normal derivatives are enabled.");
-  }
+  if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must be defined on the same secondary/primary subdomain "
+               "pair as this constraint when nodal-normal derivatives are enabled.");
+
+  if (&_secondary_var != _weighted_velocities_uo.dispVar(_component))
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must use the same displacement variable as this "
+               "constraint's 'variable' when nodal-normal derivatives are enabled.");
+
+  if (getParam<bool>("use_displaced_mesh") !=
+      _weighted_velocities_uo.parameters().get<bool>("use_displaced_mesh"))
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must use the same 'use_displaced_mesh' setting as this "
+               "constraint when nodal-normal derivatives are enabled.");
 }
 
 ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
-  // Interpolate the nodal frictional traction vectors, sum_j Phi_j z_j t_j, rather than scaling an
-  // interpolated scalar pressure by the tangent belonging to this row's node. Each node carries its
-  // own Householder tangent frame, and those frames are unrelated between nodes, so pairing one
-  // node's tangential coefficient with another node's frame is not a small error. See
-  // WeightedGapUserObject::nodalContactPressure for why interpolating the vector is the consistent
-  // choice.
-  const auto direction = static_cast<unsigned int>(_direction);
-  // tangentialTractionBasis(direction), not tractionBasis(): the latter is the normal Lagrange
-  // multiplier's basis, so both this loop's bound and its dof lookup below must come from this
-  // direction's own tangential Lagrange multiplier -- the same variable nodalTangentialPressure
-  // reads its coefficients from -- or a node could be paired with another node's coefficient.
+  // Interpolate each nodal tangential pressure with its own Householder tangent frame.
+  const auto direction = cast_int<unsigned int>(_direction);
+  // The interpolation basis and nodal coefficient lookup both belong to this direction's tangential
+  // Lagrange multiplier, preserving their node-for-node correspondence.
   const auto & phi = _weighted_velocities_uo.tangentialTractionBasis(direction);
-  const bool ad_tangents = _weighted_velocities_uo.usesNodalNormalDerivatives();
-
-  // Take the geometric tangents from this constraint's mortar generation, whose state is
-  // reinitialized in this loop. A user object can be configured on a different interface than the
-  // constraint that consumes it, in which case its own copy is never populated.
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  const bool ad_tangents = _weighted_velocities_uo.shouldRecordNodalNormalDerivatives();
 
   ADReal traction_component = 0;
-  for (const auto j : index_range(phi))
-  {
-    const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
-        _lower_secondary_elem->node_ref(j), direction);
-
-    // householderTangents() applies a Householder reflection to two Cartesian basis vectors, so the
-    // frame it returns is already orthonormal and needs no normalization here.
-    if (ad_tangents)
+  if (ad_tangents)
+    for (const auto j : index_range(phi))
     {
+      const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
+          _lower_secondary_elem->node_ref(j), direction);
+      // householderTangents() applies a Householder reflection to two Cartesian basis vectors, so
+      // the frame it returns is already orthonormal and needs no normalization here.
       const auto & tangents = _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, j);
       traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
     }
-    else
+  else
+  {
+    const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+    for (const auto j : index_range(phi))
+    {
+      const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
+          _lower_secondary_elem->node_ref(j), direction);
       traction_component += phi[j][_qp] * nodal_pressure * nodal_tangents[direction][j](_component);
+    }
   }
 
   switch (type)

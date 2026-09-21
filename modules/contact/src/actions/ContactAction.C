@@ -894,10 +894,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<Real>("minimum_projection_angle") = getParam<Real>("minimum_projection_angle");
     params.set<MooseEnum>("mortar_3d_subpatch_plane") =
         getParam<MooseEnum>("mortar_3d_subpatch_plane");
-    const bool augmented_penalty =
-        _formulation == ContactFormulation::MORTAR_PENALTY &&
-        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
-    params.set<bool>("ghost_point_neighbors") = !_mortar_dynamics && !augmented_penalty;
+    params.set<bool>("ghost_point_neighbors") = !_mortar_dynamics;
     addRelationshipManagers(input_rm_type, params);
   }
   else

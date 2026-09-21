@@ -64,10 +64,9 @@ TEST(MortarNodalGeometryTest, weightedNormalAndHouseholderTangents)
   EXPECT_NEAR(
       MetaPhysicL::raw_value(ad_tangents[0] * ad_tangents[1]), 0.0, orthogonality_tolerance);
 
-  // Repeat the same orthonormality and finite-difference checks along a curve through the pole
-  // (-1, 0, 0), where the primary Householder chart (h = n + e_x) is singular and reflection
-  // hands off to the complementary chart (h = n - e_x). The chart handover must not break
-  // orthonormality or differentiability, unlike the constant-fallback it replaced.
+  // Check orthonormality and finite-difference derivatives along a curve through the pole
+  // (-1, 0, 0), where reflection switches from the singular primary Householder chart
+  // (h = n + e_x) to the complementary chart (h = n - e_x).
   constexpr Real singular_coordinate = 0.0;
   const auto singular_tangents_at = [](const auto & perturbed_coordinate)
   {
