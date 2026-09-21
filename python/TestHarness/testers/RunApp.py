@@ -691,12 +691,6 @@ class RunApp(Tester):
 
         return output
 
-    def postRun(self, options):
-        super().postRun(options)
-
-        if self._delete_output_after_running:
-            util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
-
     def mustOutputExist(self, exit_code):
         if self.specs["expect_exit_code"] != 0:
             return exit_code != 0
