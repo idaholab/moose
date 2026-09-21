@@ -17,19 +17,25 @@ InputParameters
 RealVectorFunctionControl::validParams()
 {
   InputParameters params = Control::validParams();
-  params.addClassDescription("Sets all component a 'RealEigenVector' input parameters to the value "
-                             "of a provided function.");
+  params.addClassDescription(
+      "Sets all components of a 'RealEigenVector' or 'std::vector<Real>' input parameter to the "
+      "value of a provided function.");
   params.addRequiredParam<FunctionName>(
       "function", "The function to use for controlling the specified parameter.");
   params.addRequiredParam<std::string>(
       "parameter",
       "The input parameter(s) to control. Specify a single parameter name and all "
       "parameters in all objects matching the name will be updated");
+  params.addParam<MooseEnum>("vector_type",
+                             MooseEnum("RealEigenVector std::vector<Real>", "RealEigenVector"),
+                             "The type of the vector parameter being controlled.");
   return params;
 }
 
 RealVectorFunctionControl::RealVectorFunctionControl(const InputParameters & parameters)
-  : Control(parameters), _function(getFunction("function"))
+  : Control(parameters),
+    _function(getFunction("function")),
+    _vector_type(getParam<MooseEnum>("vector_type"))
 {
 }
 
@@ -38,6 +44,14 @@ RealVectorFunctionControl::execute()
 {
   Real value = _function.value(_t);
   auto cname = getParam<std::string>("parameter");
-  unsigned int ncomp = getControllableValueByName<RealEigenVector>(cname).size();
-  setControllableValueByName<RealEigenVector>(cname, RealEigenVector::Constant(ncomp, value));
+  if (_vector_type == "RealEigenVector")
+  {
+    unsigned int ncomp = getControllableValueByName<RealEigenVector>(cname).size();
+    setControllableValueByName<RealEigenVector>(cname, RealEigenVector::Constant(ncomp, value));
+  }
+  else
+  {
+    unsigned int ncomp = getControllableValueByName<std::vector<Real>>(cname).size();
+    setControllableValueByName<std::vector<Real>>(cname, std::vector<Real>(ncomp, value));
+  }
 }

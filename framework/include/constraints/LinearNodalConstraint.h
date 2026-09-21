@@ -25,7 +25,18 @@ public:
 
   LinearNodalConstraint(const InputParameters & parameters);
 
+  virtual void addConstraintRows(libMesh::DofMap & dof_map) const override;
+
+  virtual bool constraintRowsChanged() override;
+
+  virtual void residualSetup() override;
+
+  virtual void jacobianSetup() override;
+
 protected:
+  /// Copy the controllable 'weights' parameter into _weights
+  void refreshWeights();
+
   /**
    * Computes the residual for the current secondary node
    */
@@ -42,6 +53,7 @@ protected:
   std::vector<unsigned int> _secondary_node_ids;
   // Holds the secondary node set or side set
   std::string _secondary_node_set_id;
-  // Penalty if constraint is not satisfied
+  // Penalty if constraint is not satisfied. Unused, and not required as an input, with the rows
+  // formulation
   Real _penalty;
 };

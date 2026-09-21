@@ -23,6 +23,8 @@ public:
    */
   virtual void meshChanged() override;
 
+  virtual void addConstraintRows(libMesh::DofMap & dof_map) const override;
+
 protected:
   /**
    * Update the sets of nodes with constrained DOFs
@@ -39,7 +41,8 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  /// Penalty if constraint is not satisfied
+  /// Penalty if constraint is not satisfied. Unused, and not required as an input, with the rows
+  /// formulation
   Real _penalty;
 
 private:

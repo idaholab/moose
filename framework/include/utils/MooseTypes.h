@@ -971,7 +971,8 @@ enum TimeIntegratorType
 enum ConstraintFormulationType
 {
   Penalty,
-  Kinematic
+  Kinematic,
+  Rows
 };
 /**
  * Type of the line search
