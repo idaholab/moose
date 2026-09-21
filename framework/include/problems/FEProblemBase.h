@@ -3631,6 +3631,13 @@ private:
                            const std::string & name,
                            const VariableName & var_name);
 
+  /**
+   * Copies variables (queued via initial_from_file_var) out of a checkpoint's stored solution
+   * into this problem's solution vectors, to seed initial conditions. \p folder_base is the
+   * checkpoint folder base up to the time step (see MooseApp::getCheckpointFileBaseForRestart).
+   */
+  void copyVarsFromCheckpoint(const std::string & folder_base);
+
   /*
    * Test if stateful property redistribution is expected to be
    * necessary, and set it up if so.

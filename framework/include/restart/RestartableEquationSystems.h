@@ -154,7 +154,52 @@ public:
     return _loaded_variables;
   }
 
+  /**
+   * Represents a request to copy a single variable's solution data, loaded from a source
+   * (checkpoint) EquationSystems, into a target System's vector during the next load().
+   *
+   * This is used to seed initial conditions from a checkpoint file (initial_from_file_var):
+   * the source variable is looked up by name in the loaded header and its data is written
+   * directly into a live System's solution vector. No systems/variables are added to this
+   * object's own EquationSystems, so the dof indexing of the live systems is left untouched.
+   */
+  struct VariableCopy
+  {
+    /// Name of the source variable as stored in the loaded (checkpoint) data
+    std::string source_variable;
+    /// The target (live) system that owns the variable to write into
+    const libMesh::System * to_system;
+    /// The target (live) vector to write into (typically the system solution)
+    libMesh::NumericVector<libMesh::Number> * to_vector;
+    /// The target (live) variable to write into
+    const libMesh::Variable * to_variable;
+  };
+
+  /**
+   * Registers a variable copy to be performed during the next load(): the source variable
+   * \p source_variable is located by name in the loaded data and its solution is written into
+   * \p to_vector using the dof layout of \p to_variable within \p to_system.
+   */
+  void addVariableCopy(const std::string & source_variable,
+                       const libMesh::System & to_system,
+                       libMesh::NumericVector<libMesh::Number> & to_vector,
+                       const libMesh::Variable & to_variable);
+
+  /**
+   * @returns Whether the variable copy targeting the variable \p to_variable_name in the system
+   * \p to_system_name was performed during load()
+   */
+  bool wasVariableCopied(const std::string & to_system_name,
+                         const std::string & to_variable_name) const;
+
+  /// @returns The variable copies queued via addVariableCopy()
+  const std::vector<VariableCopy> & getVariableCopies() const { return _variable_copies; }
+
 private:
+  /// Performs the queued variable copies (see addVariableCopy) from the loaded data into their
+  /// targets. Called from load() once the header has been read.
+  void performVariableCopies(std::istream & stream);
+
   /// Internal method for building the header struct
   EquationSystemsHeader
   buildHeader(const std::vector<const libMesh::DofObject *> & ordered_objects) const;
@@ -184,6 +229,12 @@ private:
 
   /// The variables that were loaded in load(); [system name, vector name, variable name]
   std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
+
+  /// Variable copies to perform during load() (see addVariableCopy)
+  std::vector<VariableCopy> _variable_copies;
+
+  /// The [target system name, target variable name] copies completed during the last load()
+  std::set<std::pair<std::string, std::string>> _completed_variable_copies;
 };
 
 void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);
