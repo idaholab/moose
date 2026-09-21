@@ -85,6 +85,7 @@ refinement = 3
     l_max_its = 1
     l_tol = 0
     strength_threshold = 0.7
+    aggressive_coarsening_levels = 1
     print_level = 1
   []
   [main]
