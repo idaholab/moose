@@ -365,6 +365,16 @@ protected:
                                   const GenericRankTwoTensor<is_ad> & elastic_strain_old,
                                   GenericReal<is_ad> & effective_inelastic_strain_increment);
 
+  /**
+   * Convert the physical effective creep increment to the controller increment after any active
+   * porosity-floor projection. Unconstrained states retain the historical effective increment.
+   */
+  Real substepControlIncrement(
+      const GenericReal<is_ad> & effective_inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
+      bool constrained) const;
+
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
   /// Estimate local substeps from an explicitly supplied hydrostatic driving stress and porosity.
@@ -373,18 +383,19 @@ protected:
                                                const GenericReal<is_ad> & porosity);
   /// Convert a predicted full-step effective inelastic increment to a local substep count.
   unsigned int computeRequiredSubsteps(Real effective_inelastic_strain_increment) const;
-  /// Estimate adaptive substeps from the previous accepted global-step effective inelastic rate.
+  /// Estimate adaptive substeps from the previous accepted global-step substep-control rate.
   unsigned int estimateAdaptiveNumberSubstepsFromHistory() const;
-  /// Store the converged current global-step effective inelastic rate for use after timestep
-  /// acceptance.
+  /// Store the converged current global-step physical effective inelastic rate.
   void recordEffectiveInelasticStrainRate(
       const GenericReal<is_ad> & effective_inelastic_strain_increment);
+  /// Store the admitted global-step rate used by the adaptive substep history predictor.
+  void recordSubstepControlInelasticStrainRate(Real substep_control_inelastic_strain_increment);
   /**
-   * Check one accepted local effective inelastic increment against the requested substep target.
-   * If the target is exceeded, record an a-posteriori retry suggestion and throw so the adaptive
+   * Check one accepted local admitted inelastic increment against the requested substep target. If
+   * the target is exceeded, record an a-posteriori retry suggestion and throw so the adaptive
    * driver can restart from the accepted global-old state.
    */
-  void checkSubstepIncrement(const GenericReal<is_ad> & effective_inelastic_strain_increment,
+  void checkSubstepIncrement(Real substep_control_inelastic_strain_increment,
                              unsigned int total_number_substeps,
                              unsigned int substep_index);
 
@@ -497,6 +508,7 @@ private:
     LocalResidual residual{};
     GenericRankTwoTensor<is_ad> inelastic_strain_increment;
     GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
+    Real substep_control_inelastic_strain_increment = 0.0;
     HydrostaticStressState hydrostatic_stress;
     LocalJacobian jacobian{};
 
@@ -695,6 +707,7 @@ private:
     IndependentLocalJacobian jacobian{};
     GenericRankTwoTensor<is_ad> inelastic_strain_increment;
     GenericReal<is_ad> effective_inelastic_strain_increment = 0.0;
+    Real substep_control_inelastic_strain_increment = 0.0;
     PorePorosityState raw_population_porosity_increment{};
     HydrostaticStressState hydrostatic_stress;
 
@@ -781,13 +794,19 @@ protected:
   /// Maximum number of local constitutive substeps
   const unsigned int _maximum_number_substeps;
 
-  /// Current converged global-step effective inelastic rate.
+  /// Current converged global-step physical effective inelastic rate.
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_rate;
-  /// Previous accepted global-step effective inelastic rate used by adaptive substep prediction.
+  /// Previous accepted global-step physical effective inelastic rate.
   const MaterialProperty<Real> & _effective_inelastic_strain_rate_old;
+  /// Current admitted inelastic rate used only by the adaptive substep controller.
+  GenericMaterialProperty<Real, is_ad> & _substep_control_inelastic_strain_rate;
+  /// Previous accepted admitted inelastic rate used by adaptive substep prediction.
+  const MaterialProperty<Real> & _substep_control_inelastic_strain_rate_old;
 
   /// A-posteriori number of substeps suggested by the last failed increment check.
   unsigned int _suggested_number_substeps;
+  /// Admitted increment from the most recent one-step update, used only by the substep controller.
+  Real _substep_control_inelastic_strain_increment;
 
   /// Container for matrix hydrostatic stress
   GenericReal<is_ad> _hydro_stress;
