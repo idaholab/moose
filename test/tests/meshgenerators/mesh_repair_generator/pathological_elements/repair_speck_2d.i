@@ -1,6 +1,6 @@
 # A QUAD4 collapsed to a point: its four nodes lie within 1e-6 of one corner, sharing that corner
 # with a healthy unit quadrilateral. repair2DSlivers cannot absorb it (its longest edge has ~zero
-# length), so the point-collapse repair removes it by merging its vertices onto a single node.
+# length), so the speck repair removes it by merging its vertices onto a single node.
 [Mesh]
   [healthy]
     type = ElementGenerator
@@ -8,7 +8,7 @@
     element_connectivity = '0 1 2 3'
     elem_type = QUAD4
   []
-  [point_quad]
+  [speck_quad]
     type = ElementGenerator
     input = healthy
     nodal_positions = '0 0 0   1e-6 0 0   1e-6 1e-6 0   0 1e-6 0'
@@ -17,7 +17,7 @@
   []
   [repair]
     type = MeshRepairGenerator
-    input = point_quad
+    input = speck_quad
     fix_node_overlap = true
     fix_degenerate_elements = true
   []

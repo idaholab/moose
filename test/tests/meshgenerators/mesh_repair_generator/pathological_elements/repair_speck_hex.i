@@ -1,5 +1,5 @@
 # A HEX8 collapsed to a point: its eight nodes lie within 1e-6 of one corner, sharing that corner
-# with a healthy unit hexahedron via 'fix_node_overlap'. The point-collapse repair merges its eight
+# with a healthy unit hexahedron via 'fix_node_overlap'. The speck repair merges its eight
 # vertices onto a single node and deletes it, leaving the healthy hexahedron intact.
 [Mesh]
   [healthy]
@@ -8,7 +8,7 @@
     element_connectivity = '0 1 2 3 4 5 6 7'
     elem_type = HEX8
   []
-  [point_hex]
+  [speck_hex]
     type = ElementGenerator
     input = healthy
     nodal_positions = '0 0 0   1e-6 0 0   1e-6 1e-6 0   0 1e-6 0   0 0 1e-6   1e-6 0 1e-6   1e-6 1e-6 1e-6   0 1e-6 1e-6'
@@ -17,7 +17,7 @@
   []
   [repair]
     type = MeshRepairGenerator
-    input = point_hex
+    input = speck_hex
     fix_node_overlap = true
     fix_degenerate_elements = true
   []

@@ -50,7 +50,7 @@ private:
   /// Whether to split non-convex polygons
   const bool _split_nonconvex_polygons;
 
-  /// whether to repair degenerate (near-zero-quality) elements: point-collapse, slivers, and
+  /// whether to repair degenerate (near-zero-quality) elements: specks, slivers, and
   /// pancakes
   const bool _fix_degenerate_elements;
   /// a 2D element is treated as degenerate (a zero-area element) if its area is below this fraction
@@ -65,15 +65,15 @@ private:
   /// relative floor below which a collapse-reshaped neighbor is rejected as inverting / re-degenerating
   const Real _tet_collapse_volume_floor;
 
-  /// @brief Repair point-collapse elements: first-order 2D/3D elements collapsed toward a point
+  /// @brief Repair speck elements: first-order 2D/3D elements collapsed toward a point
   ///        (small in every dimension, i.e. a tiny diameter hmax()). Each is removed by merging
   ///        all of its vertices onto one representative node - a sub-tolerance move - and deleting
   ///        it, reusing collapseByFaceMerge so the merge is committed only if every neighbor stays
   ///        non-degenerate and non-inverted; otherwise the element is left in place. Runs in
-  ///        node-disjoint passes. A point-collapse that shares a face/edge with another element (a
+  ///        node-disjoint passes. A speck that shares a face/edge with another element (a
   ///        degenerate cluster) is left in place - cluster removal is not yet implemented.
   /// @param mesh the mesh to modify
-  void repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const;
+  void repairSpecks(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Removes nodes that overlap
   /// @param mesh the mesh to modify

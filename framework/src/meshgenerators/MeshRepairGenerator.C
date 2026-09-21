@@ -60,12 +60,12 @@ MeshRepairGenerator::validParams()
       "fix_degenerate_elements",
       false,
       "Whether to repair degenerate (near-zero-quality) elements. Degeneracy includes: a "
-      "point-collapse element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
+      "speck element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
       "needle tetrahedron, or in 2D a thin triangle, quadrilateral, or polygon); a pancake (thin "
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
       "or hexahedral slab); or an element collapsed to a lower topology by one or more short edges "
       "or in-plane vertices (a quadrilateral becoming a triangle, a pyramid a tetrahedron, or a "
-      "hexahedron a prism). A point-collapse element (collapsed toward a point) is removed by "
+      "hexahedron a prism). A speck element (collapsed toward a point) is removed by "
       "merging its "
       "coincident vertices onto a single node. A 2D sliver (TRI3, QUAD4, polygon) is absorbed into "
       "its longest-edge "
@@ -173,9 +173,9 @@ MeshRepairGenerator::generate()
 
   if (_fix_degenerate_elements)
   {
-    // Remove point-collapse elements (collapsed toward a point) first, so the sliver/pancake passes
+    // Remove speck elements (collapsed toward a point) first, so the sliver/pancake passes
     // below only see elements that are thin in one or two dimensions
-    repairPointCollapse(mesh);
+    repairSpecks(mesh);
 
     // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
     repair2DSlivers(mesh);
@@ -599,7 +599,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
 }
 
 void
-MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repairSpecks(std::unique_ptr<MeshBase> & mesh) const
 {
   // Mesh scales for the diameter (all-dimensions-thin) test and the collapse floor
   const auto bbox = MeshTools::create_bounding_box(*mesh);
@@ -609,14 +609,14 @@ MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
       std::max(std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2)),
                Real(1e-30));
 
-  // A first-order 2D/3D element is a point-collapse element when it is small in
+  // A first-order 2D/3D element is a speck element when it is small in
   // *every* dimension, i.e. its diameter hmax() (the maximum vertex separation) is below the
   // isotropic length equivalent of the zero-volume/area fraction: cbrt(fraction)*cbrt(volume) in
-  // 3D, sqrt(fraction)*sqrt(area) in 2D. This diameter test is what separates a point-collapse
+  // 3D, sqrt(fraction)*sqrt(area) in 2D. This diameter test is what separates a speck
   // from a sliver (thin in two dimensions) or a pancake (thin in one dimension), whose diameter
   // stays full-sized. Either test is disabled by setting its fraction to 0. Only first-order
   // elements are handled (like the other repairs), so every node is a vertex.
-  auto isPointCollapsed = [&](const Elem & e)
+  auto isSpeck = [&](const Elem & e)
   {
     if (e.n_nodes() != e.n_vertices())
       return false;
@@ -632,13 +632,13 @@ MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
 
   // Repair in node-disjoint passes (like the other routines): a merge whose star overlaps a merge
   // already committed this pass is deferred to the next pass. Removals never create new
-  // point-collapses, so this terminates.
+  // specks, so this terminates.
   bool repaired_in_pass = true;
   while (repaired_in_pass)
   {
     repaired_in_pass = false;
 
-    // node id -> ids of all incident elements (the collapse star), and the current point-collapsed
+    // node id -> ids of all incident elements (the collapse star), and the current speck
     // elements
     std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
     std::vector<dof_id_type> collapsed_ids;
@@ -646,7 +646,7 @@ MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
     {
       for (const auto n : make_range(elem->n_nodes()))
         node_to_elems[elem->node_id(n)].push_back(elem->id());
-      if (isPointCollapsed(*elem))
+      if (isSpeck(*elem))
         collapsed_ids.push_back(elem->id());
     }
 
@@ -656,7 +656,7 @@ MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
     for (const auto cid : collapsed_ids)
     {
       Elem * e = mesh->query_elem_ptr(cid);
-      if (!e || !isPointCollapsed(*e))
+      if (!e || !isSpeck(*e))
         continue;
 
       // Representative kept node: the element's lowest-id vertex. Every other vertex is merged onto
@@ -706,20 +706,20 @@ MeshRepairGenerator::repairPointCollapse(std::unique_ptr<MeshBase> & mesh) const
     }
   }
 
-  // Count any point-collapsed elements that remain: a merge that would corrupt a neighbor, or a
-  // degenerate cluster (a point-collapse sharing a face/edge with another element), is left in
+  // Count any speck elements that remain: a merge that would corrupt a neighbor, or a
+  // degenerate cluster (a speck sharing a face/edge with another element), is left in
   // place
   for (const auto & elem : mesh->active_element_ptr_range())
-    if (isPointCollapsed(*elem))
+    if (isSpeck(*elem))
       ++num_skipped;
 
   if (num_repaired)
     mesh->prepare_for_use();
   if (num_repaired || num_skipped)
   {
-    _console << "Number of point-collapse elements removed: " << num_repaired << std::endl;
+    _console << "Number of speck elements removed: " << num_repaired << std::endl;
     if (num_skipped)
-      _console << "Number of point-collapse elements that could not be removed (left in place): "
+      _console << "Number of speck elements that could not be removed (left in place): "
                << num_skipped << std::endl;
   }
 }
@@ -2273,7 +2273,7 @@ MeshRepairGenerator::repairHexPancakes(std::unique_ptr<MeshBase> & mesh) const
 
   // Index of the most-squashed opposite-face pair if the hex is a flat-slab pancake (thin in one
   // dimension), else -1. A hex thin in two dimensions (a sliver/column, two squashed pairs) or
-  // three (a point) is deferred to repairHexSlivers / the point-collapse pass and returns -1 here.
+  // three (a point) is deferred to repairHexSlivers / the speck pass and returns -1 here.
   auto squashedPair = [&](const Elem & e) -> int
   {
     if (e.type() != HEX8)
@@ -3302,7 +3302,7 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
       }
     }
     // Exactly one pinched lateral face reduces to a prism; two or more means the hex is a sliver
-    // (thin in two dimensions) or a point, which repairHexSlivers / the point-collapse pass handle.
+    // (thin in two dimensions) or a point, which repairHexSlivers / the speck pass handle.
     return (count == 1) ? found : -1;
   };
 
