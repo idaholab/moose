@@ -2690,9 +2690,22 @@ MeshRepairGenerator::collapseRedundantVertex(
   // invert or degenerate). This adapts the surrounding cluster rather than refusing whenever a
   // mover exists.
 
+  // Refresh the cached triangulation of a polyhedron/polygon mover whose nodes have moved
+  auto retriangulate = [](Elem * e)
+  {
+    if (auto * ph = dynamic_cast<libMesh::Polyhedron *>(e))
+      ph->retriangulate();
+    else if (auto * pg = dynamic_cast<libMesh::Polygon *>(e))
+      pg->retriangulate();
+  };
+
   // Apply v -> keep to the movers, saving originals for rollback, and validate each stays
-  // non-degenerate and above the floor (this rejects a genuine-corner element that v would distort)
+  // non-degenerate and above the floor (this rejects a genuine-corner element that v would
+  // distort). A moved polyhedron/polygon is retriangulated so its cached mapping reflects the new
+  // node positions; leaving it stale would dangle once v is deleted below (retriangulate() throws
+  // if the reshaped cell cannot be tetrahedralized, which we also treat as invalid).
   std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
+  std::set<Elem *> changed;
   bool ok = true;
   for (const auto eid : mover_ids)
   {
@@ -2704,7 +2717,17 @@ MeshRepairGenerator::collapseRedundantVertex(
       {
         saved.emplace_back(e, n, e->node_ptr(n));
         e->set_node(n, keep);
+        changed.insert(e);
       }
+    try
+    {
+      retriangulate(e);
+    }
+    catch (const std::exception &)
+    {
+      ok = false;
+      break;
+    }
     std::set<dof_id_type> distinct;
     for (const auto n : make_range(e->n_nodes()))
       distinct.insert(e->node_id(n));
@@ -2718,6 +2741,14 @@ MeshRepairGenerator::collapseRedundantVertex(
   {
     for (auto & [e, n, orig] : saved)
       e->set_node(n, orig);
+    for (auto * e : changed)
+      try
+      {
+        retriangulate(e); // restore each moved cell's triangulation to match the restored nodes
+      }
+      catch (const std::exception &)
+      {
+      }
     return false;
   }
 
