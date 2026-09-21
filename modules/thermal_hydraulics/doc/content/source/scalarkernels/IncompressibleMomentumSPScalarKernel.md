@@ -4,17 +4,16 @@
 
 ## Overview
 
-This object implements the time-dependent, globally compressible, locally incompressible momentum-transport 1D path integration with an arbitrary number of segments for a
-single variable fluid mass flow rate. Given a coupled variable characteristic pressure drop and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)).
+This object implements the time-dependent, globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
+single variable fluid mass flow rate. It requires a coupled variable characteristic pressure drop and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
-The form of the residual contribution is as follows with mass flow rate, \dot{u}, as the primary variable
+!equation
 \begin{equation}
   \sum_{i=1}^{N} \frac{L_i}{A_i} \frac{du}{dt} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
 \end{equation}
 
-
-Takes fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
-Takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
+This kernel takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
+It also takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
 All parameters are defined as functors,
 which should allow versatility in accepting a variety of input arguments.
 
