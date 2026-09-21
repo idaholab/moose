@@ -153,7 +153,7 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
   mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::FULL);
   curl_coeff.Project(_curlu_vec);
 
-  // todo - check if this clears out what's in the array
+  // This doesn't clear out what's in the array
   pa_grad_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
 
   NLCurlCurlGradPASetup(
