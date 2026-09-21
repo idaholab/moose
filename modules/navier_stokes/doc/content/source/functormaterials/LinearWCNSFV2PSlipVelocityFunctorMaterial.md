@@ -44,12 +44,8 @@ The closure is
 equations (58) and (63) of [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in
 the buoyancy factor is the
 *mixture* density, so the `rho` parameter of this object should be given `rho_mixture` and not the
-continuous phase density. The two agree only in the dilute limit.
-
-!alert warning
-The nonlinear counterpart is given the continuous phase density by
-[WCNSFVTwoPhaseMixturePhysics.md], so the two discretizations do not evaluate the same slip
-velocity outside the dilute limit.
+continuous phase density. The two agree only in the dilute limit. The viscosity of the relaxation
+time is that of the continuous phase, supplied under `mu`.
 
 ## The drag function
 
