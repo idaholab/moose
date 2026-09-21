@@ -369,11 +369,11 @@ protected:
    * Convert the physical effective creep increment to the controller increment after any active
    * porosity-floor projection. Unconstrained states retain the historical effective increment.
    */
-  Real substepControlIncrement(
-      const GenericReal<is_ad> & effective_inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
-      bool constrained) const;
+  Real
+  substepControlIncrement(const GenericReal<is_ad> & effective_inelastic_strain_increment,
+                          const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
+                          const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
+                          bool constrained) const;
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
