@@ -13,8 +13,11 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <cmath>
+#include <fstream>
 #include <limits>
+#include <sstream>
 
 namespace
 {
@@ -365,6 +368,19 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Maximum hybrid Newton/bisection iterations after a sign-changing reduced-porosity bracket "
       "has been found.");
 
+  params.addParam<bool>(
+      "enable_performance_diagnostics",
+      false,
+      "Collect low-overhead algorithmic work counters for the porous constitutive update and "
+      "write one CSV per material instance at shutdown. No wall-clock timers are inserted into "
+      "threaded material evaluation; use a sampling profiler for time attribution.");
+  params.addParam<std::string>(
+      "performance_diagnostics_file_base",
+      "porous_lps_performance",
+      "Path prefix for opt-in porous constitutive performance-counter CSV files.");
+  params.addParamNamesToGroup("enable_performance_diagnostics performance_diagnostics_file_base",
+                              "Performance Diagnostics");
+
   params.addParamNamesToGroup("youngs_modulus_porosity_factor poissons_ratio_porosity_factor",
                               "Porous Elasticity");
 
@@ -416,6 +432,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
     _derivative(0.0),
+    _enable_performance_diagnostics(
+        this->template getParam<bool>("enable_performance_diagnostics")),
+    _performance_diagnostics_file_base(
+        this->template getParam<std::string>("performance_diagnostics_file_base")),
+    _performance_rank(static_cast<unsigned int>(this->processor_id())),
+    _performance_thread(static_cast<unsigned int>(this->_tid)),
     _compute_consistent_tangent(false),
     _last_consistent_tangent(RankFourTensor::initIdentityFour),
     _youngs_modulus_porosity_factor(
@@ -508,6 +530,106 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
 }
 
 template <bool is_ad>
+PorousViscoplasticityStressUpdateTempl<is_ad>::~PorousViscoplasticityStressUpdateTempl()
+{
+  writePerformanceDiagnostics();
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() const
+{
+  if (!_enable_performance_diagnostics)
+    return;
+
+  auto object_name = std::string(this->_name);
+  for (auto & character : object_name)
+    if (!(std::isalnum(static_cast<unsigned char>(character)) || character == '_' ||
+          character == '-'))
+      character = '_';
+
+  std::ostringstream path;
+  path << _performance_diagnostics_file_base << '_' << object_name << "_rank" << _performance_rank
+       << "_thread" << _performance_thread << "_instance" << reinterpret_cast<std::uintptr_t>(this)
+       << ".csv";
+
+  std::ofstream output(path.str());
+  if (!output)
+    return;
+
+  output << "key,value\n";
+  output << "object," << object_name << '\n';
+  output << "rank," << _performance_rank << '\n';
+  output << "thread," << _performance_thread << '\n';
+  output << "is_ad," << (is_ad ? 1 : 0) << '\n';
+
+  const auto write_counter = [&output](const char * name, const std::uint64_t value)
+  { output << name << ',' << value << '\n'; };
+  write_counter("update_state_calls", _performance_counters.update_state_calls);
+  write_counter("update_state_substep_calls", _performance_counters.update_state_substep_calls);
+  write_counter("constitutive_attempts", _performance_counters.constitutive_attempts);
+  write_counter("constitutive_retries", _performance_counters.constitutive_retries);
+  write_counter("scalar_one_step_calls", _performance_counters.scalar_one_step_calls);
+  write_counter("independent_one_step_calls", _performance_counters.independent_one_step_calls);
+  write_counter("scalar_local_point_evaluations",
+                _performance_counters.scalar_local_point_evaluations);
+  write_counter("independent_local_point_evaluations",
+                _performance_counters.independent_local_point_evaluations);
+  write_counter("scalar_newton_solves", _performance_counters.scalar_newton_solves);
+  write_counter("scalar_newton_iterations", _performance_counters.scalar_newton_iterations);
+  write_counter("independent_newton_solves", _performance_counters.independent_newton_solves);
+  write_counter("independent_newton_iterations",
+                _performance_counters.independent_newton_iterations);
+  write_counter("scalar_line_search_trials", _performance_counters.scalar_line_search_trials);
+  write_counter("independent_line_search_trials",
+                _performance_counters.independent_line_search_trials);
+  write_counter("dense_limit_solves", _performance_counters.dense_limit_solves);
+  write_counter("fixed_porosity_mechanical_solves",
+                _performance_counters.fixed_porosity_mechanical_solves);
+  write_counter("reduced_porosity_solves", _performance_counters.reduced_porosity_solves);
+  write_counter("gauge_evaluations", _performance_counters.gauge_evaluations);
+  write_counter("gauge_n1_closed_form", _performance_counters.gauge_n1_closed_form);
+  write_counter("gauge_deviatoric_closed_form", _performance_counters.gauge_deviatoric_closed_form);
+  write_counter("gauge_root_solves", _performance_counters.gauge_root_solves);
+  write_counter("gauge_root_residual_evaluations",
+                _performance_counters.gauge_root_residual_evaluations);
+  write_counter("set_gauge_stresses_calls", _performance_counters.set_gauge_stresses_calls);
+  write_counter("gauge_commit_evaluations", _performance_counters.gauge_commit_evaluations);
+  write_counter("lps_response_evaluations", _performance_counters.lps_response_evaluations);
+  write_counter("independent_lps_response_evaluations",
+                _performance_counters.independent_lps_response_evaluations);
+  write_counter("lps_derivative_evaluations", _performance_counters.lps_derivative_evaluations);
+  write_counter("independent_lps_derivative_evaluations",
+                _performance_counters.independent_lps_derivative_evaluations);
+  write_counter("implicit_sensitivity_reconstructions",
+                _performance_counters.implicit_sensitivity_reconstructions);
+  write_counter("independent_implicit_sensitivity_reconstructions",
+                _performance_counters.independent_implicit_sensitivity_reconstructions);
+  write_counter("consistent_tangent_evaluations",
+                _performance_counters.consistent_tangent_evaluations);
+  write_counter("independent_consistent_tangent_evaluations",
+                _performance_counters.independent_consistent_tangent_evaluations);
+  write_counter("pore_state_evaluations", _performance_counters.pore_state_evaluations);
+  write_counter("independent_hydrostatic_evaluations",
+                _performance_counters.independent_hydrostatic_evaluations);
+  write_counter("bubble_eos_evaluations", _performance_counters.bubble_eos_evaluations);
+  write_counter("bubble_eos_inverse_calls", _performance_counters.bubble_eos_inverse_calls);
+  write_counter("bubble_eos_inverse_iterations",
+                _performance_counters.bubble_eos_inverse_iterations);
+  write_counter("bubble_eos_inverse_bracket_expansions",
+                _performance_counters.bubble_eos_inverse_bracket_expansions);
+  write_counter("active_gas_coefficient_evaluations",
+                _performance_counters.active_gas_coefficient_evaluations);
+  write_counter("active_gas_integrations", _performance_counters.active_gas_integrations);
+  write_counter("closed_active_gas_integrations",
+                _performance_counters.closed_active_gas_integrations);
+  write_counter("connected_active_gas_integrations",
+                _performance_counters.connected_active_gas_integrations);
+  write_counter("diffusive_gas_increment_evaluations",
+                _performance_counters.diffusive_gas_increment_evaluations);
+}
+
+template <bool is_ad>
 GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::creepCoefficient(const std::size_t law_index) const
 {
@@ -561,6 +683,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::setGaugeStresses(
     const HydrostaticStressState & hydrostatic_stress,
     const GenericReal<is_ad> & porosity)
 {
+  incrementPerformanceCounter(_performance_counters.set_gauge_stresses_calls);
   const auto has_drive = hasViscoplasticDrive(equiv_stress, hydrostatic_stress, porosity);
   auto primary_set = false;
   _gauge_stress[_qp] = 0.0;
@@ -579,8 +702,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::setGaugeStresses(
 
     auto gauge_stress = equiv_stress;
     if (has_drive)
+    {
+      incrementPerformanceCounter(_performance_counters.gauge_commit_evaluations);
       gauge_stress =
           computeGaugeStress(equiv_stress, hydrostatic_stress, porosity, _creep_laws[law_index]);
+    }
     setGaugeStress(law_index, gauge_stress);
     if (!primary_set)
     {
@@ -1015,6 +1141,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
     const bool compute_full_tangent_operator,
     RankFourTensor & tangent_operator)
 {
+  incrementPerformanceCounter(_performance_counters.update_state_calls);
   const auto previous_tangent_request = _compute_consistent_tangent;
   const auto tangent_requested =
       !is_ad && compute_full_tangent_operator && !substeppingCapabilityRequested();
@@ -1058,6 +1185,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLocalPoint(
     const LocalSolveContext & context,
     const PorosityBranch porosity_branch)
 {
+  incrementPerformanceCounter(_performance_counters.scalar_local_point_evaluations);
   const auto & p = coordinates.p;
   const auto & q = coordinates.q;
   const auto & f = coordinates.f;
@@ -1337,6 +1465,7 @@ typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructImplicitSensitivity(
     const LocalPoint & point, const LocalSolveContext & context)
 {
+  incrementPerformanceCounter(_performance_counters.implicit_sensitivity_reconstructions);
   if constexpr (!is_ad)
     return point;
   else
@@ -1386,6 +1515,7 @@ RankFourTensor
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeConsistentTangent(
     const LocalPoint & point, const LocalSolveContext & context) const
 {
+  incrementPerformanceCounter(_performance_counters.consistent_tangent_evaluations);
   /*
    * The converged local coordinates x=(p,q,f) satisfy R(x,p_trial,q_trial)=0. With
    * porosity-dependent isotropic elasticity, the current local K(f) and G(f) can differ from the
@@ -1581,12 +1711,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::backtrackingLineSearch(
     const LocalResidualScope residual_scope,
     const LocalSolveContext & context)
 {
+  // Trial evaluations are counted separately from accepted Newton iterations.
   const auto coupled_scope = residual_scope == LocalResidualScope::COUPLED;
   auto alpha = initial_alpha;
   const auto residual_norm = residualNorm(scaledResidual(point.residual, context), residual_scope);
 
   for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
   {
+    incrementPerformanceCounter(_performance_counters.scalar_line_search_trials);
     const auto trial_coordinates =
         LocalCoordinates{point.p + alpha * context.p_scale * correction_scaled[P_INDEX],
                          point.q + alpha * context.q_scale * correction_scaled[Q_INDEX],
@@ -1846,6 +1978,7 @@ typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveDenseLimit(
     const LocalSolveContext & context) const
 {
+  incrementPerformanceCounter(_performance_counters.dense_limit_solves);
   using std::abs;
   using std::max;
   using std::min;
@@ -2294,6 +2427,7 @@ std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveMechanicalAtFixedPorosity(
     const LocalCoordinates & seed, const Real tolerance, const LocalSolveContext & context)
 {
+  incrementPerformanceCounter(_performance_counters.fixed_porosity_mechanical_solves);
 
   std::optional<LocalPoint> point;
   try
@@ -3044,6 +3178,7 @@ std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalSolve
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveReducedPorosity(
     const LocalPoint & point, const LocalSolveContext & context, bool & reduced_porosity_attempted)
 {
+  incrementPerformanceCounter(_performance_counters.reduced_porosity_solves);
   reduced_porosity_attempted = true;
   auto best_abs_rf_scaled = std::numeric_limits<Real>::infinity();
 
@@ -3243,6 +3378,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
                                                                   const LocalSolveContext & context,
                                                                   bool & reduced_porosity_attempted)
 {
+  incrementPerformanceCounter(_performance_counters.scalar_newton_solves);
   /*
    * The active-set driver supplies a fully evaluated point on the current branch. Every accepted
    * Newton, reduced-porosity, or branch-transition update likewise replaces it with a complete
@@ -3252,6 +3388,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
 
   for (auto iteration = 0u; iteration < _local_newton_max_iterations; ++iteration)
   {
+    incrementPerformanceCounter(_performance_counters.scalar_newton_iterations);
     validateFiniteLocalPoint(point, "coupled Newton iteration");
     const auto residual_norm = convergenceResidualNorm(point.residual, context);
     if (residual_norm <= _local_newton_tolerance)
@@ -3361,6 +3498,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
     const IndependentLocalSolveContext & context,
     const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active)
 {
+  incrementPerformanceCounter(_performance_counters.independent_local_point_evaluations);
   const auto & p = coordinates.p;
   const auto & q = coordinates.q;
   const auto & pore_porosity = coordinates.pore_porosity;
@@ -3759,6 +3897,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch
     const Real initial_alpha,
     const IndependentLocalSolveContext & context)
 {
+  // Trial evaluations are counted separately from accepted Newton iterations.
   auto alpha = initial_alpha;
   const auto current_scaled = scaledIndependentResidual(point.residual, context);
   auto current_norm_squared = Real(0.0);
@@ -3770,6 +3909,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch
 
   for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
   {
+    incrementPerformanceCounter(_performance_counters.independent_line_search_trials);
     auto trial = point.coordinates();
     trial.p += alpha * context.p_scale * correction_scaled[INDEPENDENT_P_INDEX];
     trial.q += alpha * context.q_scale * correction_scaled[INDEPENDENT_Q_INDEX];
@@ -3817,6 +3957,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     const IndependentLocalSolveContext & context,
     std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & activate_floor)
 {
+  incrementPerformanceCounter(_performance_counters.independent_newton_solves);
   activate_floor = {{false, false}};
   const auto population_floor = [&](const unsigned int population_index)
   {
@@ -3826,6 +3967,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
 
   for (auto iteration = 0u; iteration < _local_newton_max_iterations; ++iteration)
   {
+    incrementPerformanceCounter(_performance_counters.independent_newton_iterations);
     validateFiniteIndependentLocalPoint(point, "independent coupled Newton iteration");
     const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
     if (residual_norm <= _local_newton_tolerance)
@@ -4042,6 +4184,8 @@ typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSensitivity(
     const IndependentLocalPoint & point, const IndependentLocalSolveContext & context)
 {
+  incrementPerformanceCounter(
+      _performance_counters.independent_implicit_sensitivity_reconstructions);
   if constexpr (!is_ad)
     return point;
   else
@@ -4084,6 +4228,7 @@ RankFourTensor
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentConsistentTangent(
     const IndependentLocalPoint & point, const IndependentLocalSolveContext & context) const
 {
+  incrementPerformanceCounter(_performance_counters.independent_consistent_tangent_evaluations);
   /*
    * The independent local coordinates x=(p,q,f_0,f_1) satisfy R(x,p_trial,q_trial)=0. The
    * elasticity correction depends on total porosity f=f_0+f_1, so both porosity columns of the
@@ -4307,6 +4452,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStepIndependent(
     const GenericRankTwoTensor<is_ad> & elastic_strain_old,
     GenericReal<is_ad> & effective_inelastic_strain_increment)
 {
+  incrementPerformanceCounter(_performance_counters.independent_one_step_calls);
   const auto trial_elastic_strain_increment = elastic_strain_increment;
   const auto total_porosity_begin = boundedBeginningPorosity();
   const auto beginning_elasticity =
@@ -4395,6 +4541,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
                                   effective_inelastic_strain_increment);
     return;
   }
+
+  incrementPerformanceCounter(_performance_counters.scalar_one_step_calls);
 
   const auto trial_elastic_strain_increment = elastic_strain_increment;
   const auto porosity_begin = boundedBeginningPorosity();
@@ -4743,6 +4891,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     const RankTwoTensor & elastic_strain_old,
     const unsigned int total_number_substeps)
 {
+  incrementPerformanceCounter(_performance_counters.constitutive_attempts);
   mooseAssert(total_number_substeps > 0,
               "PorousViscoplasticityStressUpdate requires at least one local substep.");
   if (total_number_substeps > _maximum_number_substeps)
@@ -4871,6 +5020,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     bool /*compute_full_tangent_operator*/,
     RankFourTensor & /*tangent_operator*/)
 {
+  incrementPerformanceCounter(_performance_counters.update_state_substep_calls);
   this->resetConstitutiveTimeStep();
   const auto snapshot =
       captureConstitutiveState(strain_increment, inelastic_strain_increment, stress_new);
@@ -4949,6 +5099,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     }
     catch (...)
     {
+      incrementPerformanceCounter(_performance_counters.constitutive_retries);
       const auto suggested_number_substeps = _suggested_number_substeps;
       last_failure = std::current_exception();
       last_failure_substeps = number_substeps;
@@ -5150,6 +5301,7 @@ GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & equiv_stress, const GenericReal<is_ad> & trial_gauge)
 {
+  incrementPerformanceCounter(_performance_counters.gauge_root_residual_evaluations);
   mooseAssert(_gauge_solve_state.law, "Gauge-stress solve does not have an active creep law.");
   return computeGaugeResidual(equiv_stress,
                               trial_gauge,
@@ -5231,6 +5383,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeLpsDerivatives(
     const GenericReal<is_ad> & porosity,
     const CreepLaw & law) const
 {
+  incrementPerformanceCounter(_performance_counters.lps_derivative_evaluations);
   using std::abs;
 
   LpsDerivatives d;
@@ -5348,6 +5501,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeIndependentLpsDerivatives(
     const PorePorosityState & pore_porosity,
     const CreepLaw & law) const
 {
+  incrementPerformanceCounter(_performance_counters.independent_lps_derivative_evaluations);
   using std::abs;
 
   if (hydrostaticStressPopulationCount(hydrostatic_stress) != MAX_HYDROSTATIC_STRESS_POPULATIONS)
@@ -5473,6 +5627,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLpsCreepRespon
     const GenericRankTwoTensor<is_ad> & dev_direction,
     const PorePorosityState & pore_porosity)
 {
+  incrementPerformanceCounter(_performance_counters.independent_lps_response_evaluations);
   using std::abs;
 
   auto response = IndependentLpsCreepResponse{};
@@ -5578,6 +5733,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLpsCreepResponse(
     const GenericRankTwoTensor<is_ad> & dev_direction,
     const GenericReal<is_ad> & porosity)
 {
+  incrementPerformanceCounter(_performance_counters.lps_response_evaluations);
   using std::abs;
 
   auto response = LpsCreepResponse{};
@@ -5665,6 +5821,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
     const GenericReal<is_ad> & porosity,
     const CreepLaw & law)
 {
+  incrementPerformanceCounter(_performance_counters.gauge_evaluations);
   using std::abs;
   using std::sqrt;
 
@@ -5686,6 +5843,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
   auto gauge_stress = equiv_stress;
   if (law.power == 1.0)
   {
+    incrementPerformanceCounter(_performance_counters.gauge_n1_closed_form);
     auto weighted_hydrostatic_stress_squared = GenericReal<is_ad>(0.0);
     for (auto population_index = 0u; population_index < population_count; ++population_index)
     {
@@ -5702,6 +5860,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
   }
   else if (!has_hydrostatic_drive)
   {
+    incrementPerformanceCounter(_performance_counters.gauge_deviatoric_closed_form);
     const auto A = 1.0 + 2.0 * porosity / 3.0;
     gauge_stress = equiv_stress * sqrt(A) /
                    sqrt(1.0 - (1.0 + law.power_factor) * porosity +
@@ -5709,6 +5868,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
   }
   else
   {
+    incrementPerformanceCounter(_performance_counters.gauge_root_solves);
     _gauge_solve_state.hydrostatic_stress = hydrostatic_stress;
     _gauge_solve_state.porosity = porosity;
     _gauge_solve_state.law = &law;

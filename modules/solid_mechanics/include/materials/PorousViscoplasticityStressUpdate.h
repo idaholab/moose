@@ -14,8 +14,10 @@
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <optional>
+#include <string>
 #include <vector>
 
 /**
@@ -38,6 +40,7 @@ public:
   static InputParameters validParams();
 
   PorousViscoplasticityStressUpdateTempl(const InputParameters & parameters);
+  virtual ~PorousViscoplasticityStressUpdateTempl() override;
 
   enum class SubsteppingType
   {
@@ -86,6 +89,67 @@ public:
                            const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
 
 protected:
+  /**
+   * Low-overhead counters used only when opt-in constitutive performance diagnostics are enabled.
+   */
+  struct PerformanceCounters
+  {
+    std::uint64_t update_state_calls = 0;
+    std::uint64_t update_state_substep_calls = 0;
+    std::uint64_t constitutive_attempts = 0;
+    std::uint64_t constitutive_retries = 0;
+    std::uint64_t scalar_one_step_calls = 0;
+    std::uint64_t independent_one_step_calls = 0;
+    std::uint64_t scalar_local_point_evaluations = 0;
+    std::uint64_t independent_local_point_evaluations = 0;
+    std::uint64_t scalar_newton_solves = 0;
+    std::uint64_t scalar_newton_iterations = 0;
+    std::uint64_t independent_newton_solves = 0;
+    std::uint64_t independent_newton_iterations = 0;
+    std::uint64_t scalar_line_search_trials = 0;
+    std::uint64_t independent_line_search_trials = 0;
+    std::uint64_t dense_limit_solves = 0;
+    std::uint64_t fixed_porosity_mechanical_solves = 0;
+    std::uint64_t reduced_porosity_solves = 0;
+    std::uint64_t gauge_evaluations = 0;
+    std::uint64_t gauge_n1_closed_form = 0;
+    std::uint64_t gauge_deviatoric_closed_form = 0;
+    std::uint64_t gauge_root_solves = 0;
+    std::uint64_t gauge_root_residual_evaluations = 0;
+    std::uint64_t set_gauge_stresses_calls = 0;
+    std::uint64_t gauge_commit_evaluations = 0;
+    std::uint64_t lps_response_evaluations = 0;
+    std::uint64_t independent_lps_response_evaluations = 0;
+    std::uint64_t lps_derivative_evaluations = 0;
+    std::uint64_t independent_lps_derivative_evaluations = 0;
+    std::uint64_t implicit_sensitivity_reconstructions = 0;
+    std::uint64_t independent_implicit_sensitivity_reconstructions = 0;
+    std::uint64_t consistent_tangent_evaluations = 0;
+    std::uint64_t independent_consistent_tangent_evaluations = 0;
+    std::uint64_t pore_state_evaluations = 0;
+    std::uint64_t independent_hydrostatic_evaluations = 0;
+    std::uint64_t bubble_eos_evaluations = 0;
+    std::uint64_t bubble_eos_inverse_calls = 0;
+    std::uint64_t bubble_eos_inverse_iterations = 0;
+    std::uint64_t bubble_eos_inverse_bracket_expansions = 0;
+    std::uint64_t active_gas_coefficient_evaluations = 0;
+    std::uint64_t active_gas_integrations = 0;
+    std::uint64_t closed_active_gas_integrations = 0;
+    std::uint64_t connected_active_gas_integrations = 0;
+    std::uint64_t diffusive_gas_increment_evaluations = 0;
+  };
+
+  void incrementPerformanceCounter(std::uint64_t & counter, std::uint64_t amount = 1) const
+  {
+    if (_enable_performance_diagnostics)
+      counter += amount;
+  }
+
+  /**
+   * Write this material instance's counters without introducing timers into threaded evaluation.
+   */
+  void writePerformanceDiagnostics() const;
+
   /** One Norton-type creep mechanism and its exponent-dependent porous gauge-surface factor. */
   struct CreepLaw
   {
@@ -828,6 +892,17 @@ protected:
 
   /// Container for dF/dLambda
   GenericReal<is_ad> _derivative;
+
+  /// Enable cumulative per-material-instance algorithmic performance counters.
+  const bool _enable_performance_diagnostics;
+  /// Output path prefix for per-rank/per-thread counter files.
+  const std::string _performance_diagnostics_file_base;
+  /// MPI rank captured during construction for diagnostics emitted during destruction.
+  const unsigned int _performance_rank;
+  /// MOOSE thread id captured during construction for diagnostics emitted during destruction.
+  const unsigned int _performance_thread;
+  /// Mutable so const constitutive helper functions can record opt-in diagnostic work counts.
+  mutable PerformanceCounters _performance_counters;
 
 private:
   bool _compute_consistent_tangent;
