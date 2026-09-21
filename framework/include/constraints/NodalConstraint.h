@@ -44,6 +44,10 @@ public:
    */
   virtual void updateConnectivity();
 
+  virtual bool usesExactConstraints() const override { return _formulation == Moose::Exact; }
+
+  virtual void addExactConstraints(libMesh::DofMap & dof_map) const override;
+
   /**
    * Reinitialize the primary and secondary nodes on the SubProblem that owns this constraint's
    * variables.
@@ -83,6 +87,27 @@ protected:
    */
   std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                          const std::vector<dof_id_type> & node_ids);
+
+  /**
+   * Tie the secondary variable at each secondary node to the weighted sum of the primary variable
+   * at the primary nodes. Every rank must call this. Nodes this rank does not have, and primary
+   * nodes, are skipped.
+   * @param dof_map The DofMap that receives the exact constraints
+   * @param secondary_nodes The IDs of the secondary nodes to constrain
+   */
+  void addTieConstraints(libMesh::DofMap & dof_map,
+                         const std::vector<dof_id_type> & secondary_nodes) const;
+
+  /**
+   * @param boundary_name The node set or side set holding the nodes
+   * @return The IDs of the nodes of the boundary that this rank owns
+   */
+  std::vector<dof_id_type> ownedBoundaryNodes(const BoundaryName & boundary_name) const;
+
+  /**
+   * Error out when 'penalty' is missing and the formulation needs it
+   */
+  void checkPenaltyParam() const;
 
   /// Elements this constraint retained on each distributed mesh during the previous mesh update.
   std::map<MooseMesh *, std::set<Elem *>> _retained_elems;
