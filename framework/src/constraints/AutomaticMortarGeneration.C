@@ -901,14 +901,22 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       throw MooseException(
           "AutomaticMortarGeneration: Both orientations cannot simultaneously be valid.");
 
-    // If both orientations are invalid, reject this primary-node projection without splitting the
-    // mortar segment. This can occur for a recoverable intermediate nonlinear iterate.
+    // We are going to treat the case where both orientations are invalid as a case in which we
+    // should not be splitting the mortar mesh to incorporate primary mesh elements.
+    // In practice, this case has appeared for very oblique projections, so we assume these cases
+    // will not be considered in mortar thermomechanical contact.
     if (!orientation1_valid && !orientation2_valid)
     {
-      _app.solutionInvalidity().flagSolutionWarningForObject(
-          "AutomaticMortarGeneration",
-          "Unable to determine a valid secondary-primary orientation. The primary-node projection "
-          "was rejected and the mortar segment was not split.");
+      static const auto invalid_orientation_id =
+          moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
+              "AutomaticMortarGeneration",
+              "Unable to determine valid secondary-primary orientation. Consequently we will "
+              "consider projection of the primary node invalid and not split the mortar segment. "
+              "This situation can indicate there are very oblique projections between primary "
+              "(mortar) and secondary (non-mortar) surfaces for a good problem set up. It can also "
+              "mean your time step is too large.",
+              true);
+      _app.solutionInvalidity().flagInvalidSolutionInternal(invalid_orientation_id);
       continue;
     }
 
