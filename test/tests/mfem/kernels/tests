@@ -14,8 +14,7 @@
   [MFEMCurlCurlPartial]
     type = CSVDiff
     input = curlcurl.i
-    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
-              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial '
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
@@ -26,10 +25,9 @@
     recover = false
   []
   [MFEMCurlCurlPartialNL_LinearKernel]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl_nl_linear_kernel.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
     capabilities = 'mfem'
     compute_devices = 'cpu'
@@ -38,10 +36,9 @@
     recover = false
   []
   [MFEMCurlCurlNL]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl_nl.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner AND the nonlinear kernel'
     capabilities = 'mfem'
     compute_devices = 'cpu'
@@ -49,10 +46,9 @@
     recover = false
   []
   [MFEMCurlCurlNLPartial]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl_nl.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     requirement = 'Same as above, with partial assembly'
     capabilities = 'mfem'
     compute_devices = 'cpu'
@@ -61,25 +57,43 @@
     recover = false
   []
   [MFEMNLCurlCurlMMS]
-    type = XMLDiff
+    type = CSVDiff
     input = nl_curlcurl_MMS.i
-    xmldiff = 'OutputData/NLCurlCurlMMS/Run0/Run0.pvd
-                OutputData/NLCurlCurlMMS/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to...'
+    csvdiff = 'OutputData/NLCurlCurlMMS.csv '
+              'OutputData/NLCurlCurlMMS_line_sample_h_field_0001.csv'
+    # h_field_0 and h_field_1 are identically zero in the manufactured solution
+    # (exact_h_field = (0, 0, sin(kappa*x))), so the sampled values there are roundoff-
+    # limited and have no reproducible relative precision. The transverse error is
+    # already checked properly by the h_field_l2_error postprocessor, which takes the
+    # norm over the full vector, so nothing is lost by excluding them here.
+    ignore_columns = 'h_field_0 h_field_1'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel, as measured by the L2 error '
+                  'against the exact solution.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMNLCurlCurlMMSPartial]
-    type = XMLDiff
+    type = CSVDiff
     input = nl_curlcurl_MMS.i
-    xmldiff = 'OutputData/NLCurlCurlMMS/Run0/Run0.pvd
-                OutputData/NLCurlCurlMMS/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to...'
+    csvdiff = 'OutputData/NLCurlCurlMMS.csv '
+              'OutputData/NLCurlCurlMMS_line_sample_h_field_0001.csv'
+    # h_field_0 and h_field_1 are identically zero in the manufactured solution
+    # (exact_h_field = (0, 0, sin(kappa*x))), so the sampled values there are roundoff-
+    # limited and have no reproducible relative precision. The transverse error is
+    # already checked properly by the h_field_l2_error postprocessor, which takes the
+    # norm over the full vector, so nothing is lost by excluding them here.
+    ignore_columns = 'h_field_0 h_field_1'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel with partial assembly, as '
+                  'measured by the L2 error against the exact solution.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    max_parallel = 1 # schemadiff with multiple ranks
     cli_args = 'Executioner/assembly_level=partial'
     recover = false
   []

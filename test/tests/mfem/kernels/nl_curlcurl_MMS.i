@@ -127,10 +127,25 @@
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/NLCurlCurlMMS
-    vtk_format = ASCII
+[VectorPostprocessors]
+  [line_sample_h_field]
+    type = MFEMVariableLineValueSampler
+    variable = 'h_field'
+    start_point = '-0.99 -0.99 0.99'
+    end_point = '0.99 0.99 -0.99'
+    num_points = 114
   []
+[]
+
+[Postprocessors]
+  [h_field_l2_error]
+    type = MFEMVectorL2Error
+    variable = h_field
+    function = exact_h_field
+  []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/NLCurlCurlMMS
 []

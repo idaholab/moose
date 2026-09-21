@@ -136,10 +136,20 @@
   device = cpu
 []
 
+ [VectorPostprocessors]
+   [line_sample_e_field]
+     type = MFEMVariableLineValueSampler
+     variable = 'e_field'
+     start_point = '-0.99 -0.99 0.99'
+     end_point = '0.99 0.99 -0.99'
+     num_points = 114
+   []
+ []
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/CurlCurl # name is changing so we can use schemadiff test
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/CurlCurl/curlcurl
   []
 []
