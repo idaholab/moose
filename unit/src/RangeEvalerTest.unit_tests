@@ -1,5 +1,5 @@
 [Tests]
-  design = 'input_syntax.md'
+  design = '/modules/doc/content/application_usage/input_syntax.md'
   issues = '#33818'
 
   [expansion]
