@@ -34,10 +34,28 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter.
 
 When a [FVReconstructedPressureGradient.md] is used, each PISO pressure correction produces a new
-conservative face flux and therefore a new compatible cell-velocity reconstruction. The momentum
-matrix and its $H/A$ field remain fixed during the PIfSO sequence, while the corrected velocity
-gradient from one pressure correction is used in the next reconstruction. The relaxed reconstructed
-pressure gradient enters the next momentum predictor. This keeps every cell-velocity correction
+conservative face flux and therefore a new compatible cell-velocity reconstruction. At the start of
+corrector $k+1$, the velocity gradient is frozen at
+
+!equation
+G^k = \nabla \vec{u}^k.
+
+The first corrector uses the gradient from the momentum predictor; each later corrector uses the
+gradient of the velocity reconstructed by the preceding corrector. These gradients use each
+velocity variable's [!param](/Variables/MooseLinearVariableFVReal/gradient_method), which is
+`green-gauss` by default; they do not use the reconstructed pressure-gradient object's
+`base_gradient_method`. For each face $f$ of cell $P$, the corrected face flux supplies
+$\vec{u}_f^{k+1}\cdot\vec{n}_f$, and the cell velocity is reconstructed in a least-squares sense from
+
+!equation
+\vec{u}_P^{k+1}\cdot\vec{n}_f \approx
+\vec{u}_f^{k+1}\cdot\vec{n}_f
+- \left[G_f^k(\vec{x}_f-\vec{x}_P)\right]\cdot\vec{n}_f.
+
+Using $G_f^k$ rather than $\nabla\vec{u}^{k+1}$ makes this reconstruction explicit: the velocity
+being reconstructed does not also determine the gradient used to reconstruct itself. The momentum
+matrix and its $H/A$ field remain fixed during the PISO sequence, and the relaxed reconstructed
+pressure gradient enters the next momentum predictor. Thus, every cell-velocity correction remains
 consistent with the latest continuity-preserving face flux without requiring another momentum solve
 inside the PISO sequence.
 

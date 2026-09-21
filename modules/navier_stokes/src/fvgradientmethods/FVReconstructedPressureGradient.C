@@ -219,14 +219,6 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  if (!_pressure_system)
-  {
-    mooseAssert(_base_gradient_method,
-                "resolveGradientMethodDependencies() must run before gradients are computed.");
-    _base_gradient_method->computeGradient(system, gradient, variable_numbers);
-    return;
-  }
-
   mooseAssert(_pressure_system == &system,
               "FVReconstructedPressureGradient can only compute gradients for the pressure "
               "system it is bound to.");
@@ -369,7 +361,8 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
   const auto dimension = rc.dimension();
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
   // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
-  // gradient. Otherwise interpolate the two lagged cell gradients to the face.
+  // gradient (zero Hessian approximation). Otherwise interpolate the two lagged cell gradients to
+  // the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
     return elem_gradient;
 

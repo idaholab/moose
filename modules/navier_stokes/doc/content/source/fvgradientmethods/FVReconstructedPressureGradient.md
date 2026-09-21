@@ -22,10 +22,15 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
 1. Freeze the velocity gradient. Before the pressure corrector changes the face flux, the current
    cell-centered velocity gradient $(\nabla\mathbf{u})_P$ is saved as a lagged reference,
    $(\nabla\mathbf{u})^{\text{lag}}_P$. This keeps the reconstruction from depending on the same
-   velocity field it is trying to update. At an internal face, the lagged gradients of the two
-   neighboring cells are averaged to a face value $(\nabla\mathbf{u})^{\text{lag}}_f$; at a domain
-   boundary, or at the edge of this method's block restriction, the owning cell's lagged gradient
-   is used directly.
+   velocity field it is trying to update. This saved field is computed using each velocity
+   variable's [!param](/Variables/MooseLinearVariableFVReal/gradient_method), which defaults to
+   `green-gauss`; if a velocity variable selects another gradient method, that method supplies its
+   lagged gradient instead. It is not computed using
+   [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), which controls
+   the pressure gradient used before a reconstructed coupling gradient exists. At an internal face,
+   the lagged gradients of the two neighboring cells are averaged to a face value
+   $(\nabla\mathbf{u})^{\text{lag}}_f$; at a domain boundary, or at the edge of this method's block
+   restriction, the owning cell's lagged gradient is used directly.
 
 2. Turn each corrected face flux into a face equation for the cell velocity. A first-order Taylor
    expansion of the velocity from the cell centroid to the face centroid gives
@@ -99,14 +104,31 @@ corrector, not once for the whole sequence:
   gradient method only needs the flux from the final corrector to advance the advection terms, but
   the reconstruction always needs the flux produced by its own pressure solve to build a new
   candidate, so this cost is paid at every corrector.
-- Step 1 (freezing $(\nabla\mathbf u)^{\text{lag}}_P$) is repeated before every corrector, using the
-  cell velocity produced by the previous corrector, or, for the first corrector, by the previous
-  momentum predictor. Freezing the gradient once per corrector, rather than once per momentum
-  predictor, keeps each corrector's reconstruction from depending on a velocity field that it is
-  about to correct again.
-- Steps 2 through 4 then run against that corrector's own corrected flux and lagged gradient. The
-  resulting pressure-gradient candidate is used immediately, unrelaxed, to update the cell velocity
-  for that corrector, exactly as described above.
+- Index the velocity entering corrector $k+1$ by $\mathbf u^k$. Step 1 is repeated before every
+  corrector and saves
+
+  \begin{equation}
+  \mathbf G_P^k = \nabla\mathbf u_P^k,
+  \qquad
+  \mathbf G_f^k = \mathcal I_f(\mathbf G_P^k),
+  \end{equation}
+
+  where $\mathcal I_f$ denotes the face interpolation described in step 1. For the first corrector,
+  $\mathbf u^0$ is the velocity from the momentum predictor; for each later corrector,
+  $\mathbf u^k$ is the velocity reconstructed by the preceding corrector.
+- Steps 2 through 4 then use the current corrector's flux $q_f^{k+1}$ together with the frozen
+  gradient $\mathbf G_f^k$. In particular, the face equation becomes
+
+  \begin{equation}
+  \mathbf u_P^{k+1}\cdot\mathbf n_f \approx
+    \frac{q_f^{k+1}}{|\mathbf S_f|}
+    - \left[\mathbf G_f^k\,\mathbf d_{Pf}\right]\cdot\mathbf n_f.
+  \end{equation}
+
+  The right-hand side contains $\mathbf G_f^k$, not $(\nabla\mathbf u^{k+1})_f$. Therefore the
+  reconstruction of $\mathbf u_P^{k+1}$ is explicit rather than self-dependent. Its resulting
+  pressure-gradient candidate is used immediately, unrelaxed, to update the cell velocity for that
+  corrector.
 - The coupling gradient is also relaxed and updated after every corrector, blending in that
   corrector's own candidate. With $C$ correctors producing candidates
   $\mathbf g^{(0)}_{\text{reconstructed}},\dots,\mathbf g^{(C-1)}_{\text{reconstructed}}$ in order,
@@ -123,9 +145,35 @@ corrector, not once for the whole sequence:
 
 Because the flux recomputation and the per-cell least-squares solve repeat at every corrector, using
 this gradient method with a nonzero [!param](/Executioner/PIMPLE/num_piso_iterations) costs more per
-momentum predictor than an ordinary gradient method does. In exchange, the cell velocity and pressure
-gradient stay mutually consistent through every corrector, rather than only at the end of the PISO
-sequence.
+momentum predictor than an ordinary gradient method does. In exchange, every corrector completes the
+same discrete consistency chain:
+
+\begin{equation}
+\left(q_f^{k+1},\mathbf G_f^k\right)
+\;\longrightarrow\;
+\mathbf u_{P,\text{reconstructed}}^{k+1}
+\;\longrightarrow\;
+\mathbf g_{P,\text{reconstructed}}^{k+1}
+\;\longrightarrow\;
+\mathbf u_P^{k+1}
+=
+-\left(\frac{\mathbf H}{\mathbf A}\right)_P
+-\mathbf A_P^{-1}\mathbf g_{P,\text{reconstructed}}^{k+1}.
+\end{equation}
+
+The corrected flux and frozen velocity gradient first determine the least-squares cell velocity.
+Inverting the fixed momentum balance then determines the unrelaxed reconstructed pressure-gradient
+candidate, and applying that same balance to the candidate reproduces the reconstructed cell
+velocity, up to solver roundoff. That cell velocity is therefore compatible both with the latest
+conservative face flux and with the candidate pressure gradient used to obtain it. Repeating this
+process after every pressure solve also gives the next corrector a cell velocity reconstructed from
+the immediately preceding flux; if reconstruction were deferred until the last corrector, the
+intermediate correctors would retain a cell velocity associated with an older face flux.
+
+Here, "mutually consistent" refers to the cell velocity and the unrelaxed reconstructed candidate,
+not to the relaxed coupling gradient. The coupling gradient is the separate sequential blend defined
+above. It supplies stable pressure-gradient feedback to the next momentum predictor and, when
+$\alpha<1$, does not by itself reproduce the current reconstructed cell velocity exactly.
 
 ## Initial and Transient Behavior
 
