@@ -547,9 +547,11 @@ LibtorchDRLControlTrainer::extractWindowAveragedSequence(const std::vector<Real>
     const auto window_begin = 1 + entry_i * _timestep_window;
     const auto window_end = window_begin + _timestep_window;
     if (window_end > sample.size())
-      mooseError("Reporter reward data is shorter than required by the configured timestep window.");
+      mooseError(
+          "Reporter reward data is shorter than required by the configured timestep window.");
 
-    const Real sum = std::accumulate(sample.begin() + window_begin, sample.begin() + window_end, 0.0);
+    const Real sum =
+        std::accumulate(sample.begin() + window_begin, sample.begin() + window_end, 0.0);
     values.push_back(sum / _timestep_window);
   }
 
