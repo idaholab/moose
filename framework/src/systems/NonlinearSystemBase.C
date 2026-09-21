@@ -50,6 +50,10 @@
 #include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
+// ConstraintWarehouse.h only forward declares MultiPointConstraint, so the complete type
+// is needed here to instantiate its warehouse member
+#include "MultiPointConstraint.h"
+#include "MultiPointConstraintHub.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
@@ -608,6 +612,39 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   _constraints.addObject(constraint);
   postAddResidualObject(*constraint);
 
+  // A constraint enforced with degree of freedom constraint rows is applied by the DofMap, through
+  // the single libMesh constraint object of this system. Build that object and attach it when the
+  // first such constraint is added
+  if (constraint->usesConstraintRows() && !_mpc_hub)
+  {
+    auto attach_hub =
+        [this, &name](SystemBase & constrained_sys, std::unique_ptr<MultiPointConstraintHub> & hub)
+    {
+      if (constrained_sys.system().has_constraint_object())
+        mooseError("Another constraint object is already attached to the libMesh system '",
+                   constrained_sys.system().name(),
+                   "', so the degree of freedom constraint rows of '",
+                   name,
+                   "' cannot be applied.");
+
+      hub = std::make_unique<MultiPointConstraintHub>(*this, constrained_sys);
+      constrained_sys.system().attach_constraint_object(*hub);
+    };
+
+    attach_hub(*this, _mpc_hub);
+
+    // Objects that use the displaced mesh are assembled through the Assembly of the displaced copy
+    // of this system, which reduces their element vectors and matrices with the constraints of the
+    // displaced DofMap. The two systems share their degree of freedom numbering, so the same rows
+    // go into both
+    // DisplacedProblem::solverSys() is indexed by the solver system number, which is what
+    // FEProblemBase::nlSysNum() returns for a nonlinear system, and not by the libMesh system
+    // number this system carries
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem())
+      attach_hub(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
+                 _displaced_mpc_hub);
+  }
+
   if (!_fe_problem.useHashTableMatrixAssembly())
     if (constraint && constraint->addCouplingEntriesToJacobian())
       addImplicitGeometricCouplingEntriesToJacobian(true);
@@ -1082,6 +1119,11 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      // A constraint enforced with degree of freedom constraint rows is applied by the DofMap and
+      // contributes no residual
+      if (nc->usesConstraintRows())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1109,6 +1151,11 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      // A constraint enforced with degree of freedom constraint rows is applied by the DofMap and
+      // contributes no Jacobian
+      if (nc->usesConstraintRows())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1308,6 +1355,11 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             for (const auto & nec : constraints)
             {
+              // A constraint enforced with degree of freedom constraint rows is applied by the
+              // DofMap, which sets the secondary value itself
+              if (nec->usesConstraintRows())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1583,6 +1635,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
             for (const auto & nec : constraints)
             {
+              // A constraint enforced with degree of freedom constraint rows is applied by the
+              // DofMap and contributes no residual
+              if (nec->usesConstraintRows())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1976,13 +2033,19 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                          "residual_and_jacobian_together does not yet support NodalKernels. Their "
                          "contributions would be silently dropped. Please use "
                          "residual_and_jacobian_together = false");
+  // A nodal constraint enforced with degree of freedom constraint rows is applied by the DofMap
+  // and has no residual or Jacobian contribution to drop
   if (_constraints.hasActiveNodalConstraints())
-    mooseDocumentedError(
-        "moose",
-        33531,
-        "residual_and_jacobian_together does not yet support nodal constraints. Their "
-        "contributions would be silently dropped. Please use "
-        "residual_and_jacobian_together = false");
+    for (const auto & nc : _constraints.getActiveNodalConstraints())
+      if (!nc->usesConstraintRows())
+      {
+        mooseDocumentedError(
+            "moose",
+            33531,
+            "residual_and_jacobian_together does not yet support nodal constraints. Their "
+            "contributions would be silently dropped. Please use "
+            "residual_and_jacobian_together = false");
+      }
 
   // Make matrix ready to use
   activateAllMatrixTags();
@@ -2804,6 +2867,11 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
             for (const auto & nec : constraints)
             {
+              // A constraint enforced with degree of freedom constraint rows is applied by the
+              // DofMap and contributes no Jacobian
+              if (nec->usesConstraintRows())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -4275,9 +4343,40 @@ NonlinearSystemBase::assembleScalingVector()
     displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
 }
 
+void
+NonlinearSystemBase::reinitConstraintRows()
+{
+  if (_mpc_hub)
+    _mpc_hub->reinit();
+  if (_displaced_mpc_hub)
+    _displaced_mpc_hub->reinit();
+}
+
 bool
 NonlinearSystemBase::preSolve()
 {
+  // A constraint enforced with degree of freedom constraint rows may emit different coefficients
+  // than the ones its rows currently carry, for instance because a Control changed one of its
+  // parameters at the beginning of this time step. Ask every active row provider once per solve,
+  // and rebuild the rows before the initial solution is set, so that this solve sees the new
+  // coefficients. Every provider is asked, even after one has reported a change, because asking a
+  // provider is how it records the coefficients it emitted: a provider left unasked would keep
+  // comparing against an older copy and report a change it has already had rebuilt
+  if (_mpc_hub)
+  {
+    bool changed = false;
+    for (const auto & constraint : _constraints.getActiveObjects())
+      if (constraint->usesConstraintRows() && constraint->constraintRowsChanged())
+        changed = true;
+
+    // Rebuilding the constraints is collective, so every rank must reach the same answer. A rank
+    // that owns no changed row would otherwise skip the rebuild and the run would hang
+    _communicator.max(changed);
+
+    if (changed)
+      reinitConstraintRows();
+  }
+
   // Clear the iteration counters
   _current_l_its.clear();
   _current_nl_its = 0;

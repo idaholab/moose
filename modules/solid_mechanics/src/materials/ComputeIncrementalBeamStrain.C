@@ -108,6 +108,8 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
                                                              : nullptr)
 {
+  _nonlinear_sys.needSolutionState(1);
+
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != _nrot)
     mooseError("ComputeIncrementalBeamStrain: The number of variables supplied in 'displacements' "
@@ -140,7 +142,7 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
 }
 
 void
-ComputeIncrementalBeamStrain::initQpStatefulProperties()
+ComputeIncrementalBeamStrain::computeOriginalLocalConfig()
 {
   // compute initial orientation of the beam for calculating initial rotation matrix
   const std::vector<RealGradient> * orientation =
@@ -173,6 +175,12 @@ ComputeIncrementalBeamStrain::initQpStatefulProperties()
   _original_local_config(2, 0) = z_orientation(0);
   _original_local_config(2, 1) = z_orientation(1);
   _original_local_config(2, 2) = z_orientation(2);
+}
+
+void
+ComputeIncrementalBeamStrain::initQpStatefulProperties()
+{
+  computeOriginalLocalConfig();
 
   _total_rotation[_qp] = _original_local_config;
 
@@ -218,6 +226,9 @@ ComputeIncrementalBeamStrain::computeProperties()
   // For small rotation problems, the rotation matrix is essentially the transformation from the
   // global to original beam local configuration and is never updated. This method has to be
   // overriden for scenarios with finite rotation
+  if (_original_local_config.L2norm() == 0.0)
+    computeOriginalLocalConfig();
+
   computeRotation();
   _initial_rotation[0] = _original_local_config;
 

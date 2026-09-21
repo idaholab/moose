@@ -46,6 +46,9 @@ A(x) = \lambda B(x),
 where $A(\cdot)$ and $B(\cdot)$ are nonlinear functions. In the EigenProblem
 system, the kernels of $A(\cdot)$ are referred to as "noneigen,"
 and the kernels of $B(\cdot)$ are referred to as "eigen."
+Constraints do not follow this kernel split: the
+[eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag) reports what the penalty, mortar and
+degree-of-freedom-row families reach under an eigenvalue solve.
 To utilize Newton method to solve this problem, we define $\lambda = \frac{1}{|B(x)|}$,
 and rewrite the nonlinear eigen problem as
 \begin{equation}

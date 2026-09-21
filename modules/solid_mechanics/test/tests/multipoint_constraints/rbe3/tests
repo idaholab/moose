@@ -1,0 +1,56 @@
+[Tests]
+  design = 'source/constraints/RBE3Constraint.md'
+  issues = '#33821'
+  # The 'force_cornerN' postprocessors scale the residual saved by 'save_in' at the fixed truss
+  # bottoms by -1, because that residual is the support reaction, which is the negative of the
+  # force the constraint delivers into the truss. 'abs_zero' covers the zero reactions of the
+  # initial step, which the relative tolerance cannot compare.
+  [rbe3_force_split_equal]
+    type = 'CSVDiff'
+    input = 'rbe3_force_split_equal.i'
+    csvdiff = 'rbe3_force_split_equal_out.csv'
+    abs_zero = 1e-8
+    requirement = 'The system shall distribute a force applied at the reference node of an RBE3 constraint with equal weights onto four independent nodes as one quarter each.'
+  []
+
+  # Same input as rbe3_force_split_equal with the weight of corner1 doubled. The closed form of
+  # the physics is F_i = (w_i/W) F + w_i (J^-1 (d x F)) x r_i with W = 5, the weighted centroid
+  # (0.4, 0.4), d = (0.1, 0.1, 0) and J^-1 (d x F) = (1/14, -1/14, 0), which gives 2/7, 3/14,
+  # 2/7, 3/14. Dropping the d term of the row coefficients gives 0.4, 0.2, 0.2, 0.2 instead.
+  [rbe3_force_split_weighted]
+    type = 'CSVDiff'
+    input = 'rbe3_force_split_equal.i'
+    cli_args = 'Constraints/rbe3/weights="2 1 1 1"
+                Outputs/file_base=rbe3_force_split_weighted'
+    csvdiff = 'rbe3_force_split_weighted.csv'
+    abs_zero = 1e-8
+    requirement = 'The system shall distribute a force applied at the reference node of an RBE3 constraint with weights two, one, one, one onto the four independent nodes as the weighted least-squares solution.'
+  []
+
+  [plate_eigen_reference]
+    type = 'CSVDiff'
+    input = 'plate_eigen_reference.i'
+    csvdiff = 'plate_eigen_reference_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    # The Eigenvalue executioner takes a single step, so there is no transient to recover
+    recover = false
+    requirement = 'The system shall compute the lowest eigenvalue of a plate clamped along one edge.'
+  []
+
+  # The gold of this test is a copy of the gold of plate_eigen_reference, and 'rel_err' is the 0.1
+  # percent of the requirement rather than the tighter CSVDiff default, because the soft stub the
+  # reference node hangs on does add a stiffness of its own. Measured on this mesh, the stub raises
+  # the eigenvalue by 1.4e-5 relative at the Young's modulus it is given, 1e-9 of the plate's, and
+  # that shift is proportional to the modulus: at 1e-6 of the plate's it is 1.4e-2, outside the
+  # requirement. The constraint itself adds nothing, which is what the shift going to zero with the
+  # stub modulus shows. A penalty formulation would shift the eigenvalue by far more.
+  [rbe3_plate_eigen_unchanged]
+    type = 'CSVDiff'
+    input = 'rbe3_plate_eigen_unchanged.i'
+    csvdiff = 'rbe3_plate_eigen_unchanged_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-3
+    recover = false
+    requirement = 'The system shall leave the lowest eigenvalue of a plate unchanged within 0.1 percent when an RBE3 constraint with a reference node above a four-node patch is added, because the constraint adds no stiffness.'
+  []
+[]

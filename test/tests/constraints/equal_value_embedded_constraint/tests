@@ -170,6 +170,84 @@
       detail = "3D subdomains."
     []
   []
+  [rows]
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
+    requirement = "The system shall reproduce the solution of a kinematic equal value embedded "
+                  "constraint when the same constraint is enforced with degree of freedom "
+                  "constraint rows, including with automatic differentiation, between "
+    issues = '#11722 #33821'
+    # Both formulations are exact at convergence, so each case below writes the file name of its
+    # kinematic twin and diffs against that already committed kinematic gold. No gold of its own
+    # is needed. The prereq serializes the runs that share an output file; the automatic
+    # differentiation case chains onto its own non-AD twin for the same reason.
+    [1D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=rows '
+                 'Outputs/file_base=1D_2D_kinematic_out'
+      exodiff = '1D_2D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'kinematic/1D_2D'
+      detail = "1D and 2D;"
+    []
+    [1D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=rows '
+                 'Outputs/file_base=1D_3D_kinematic_out'
+      exodiff = '1D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'kinematic/1D_3D'
+      detail = "1D and 3D;"
+    []
+    [2D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=rows '
+                 'Outputs/file_base=2D_2D_kinematic_out'
+      exodiff = '2D_2D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'kinematic/2D_2D'
+      detail = "2D;"
+    []
+    [2D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=rows '
+                 'Outputs/file_base=2D_3D_kinematic_out'
+      exodiff = '2D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'kinematic/2D_3D'
+      detail = "2D and 3D;"
+    []
+    [3D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=rows '
+                 'Outputs/file_base=3D_3D_kinematic_out'
+      exodiff = '3D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'kinematic/3D_3D'
+      detail = "3D subdomains; and"
+    []
+    [3D_3D_AD]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=rows '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint '
+                 'Outputs/file_base=3D_3D_kinematic_out'
+      exodiff = '3D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+      prereq = 'rows/3D_3D'
+      detail = "3D subdomains with automatic differentiation."
+    []
+  []
   [error_kinematic_AD]
     design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall error when kinematic constraints are used with automatic differentiation."

@@ -136,6 +136,87 @@ standard interfaces for quadrature point contributions to primary, secondary, lo
 scalar variables in the residual and Jacobian. Additional discussion can be found at
 [`ScalarKernels`](syntax/ScalarKernels/index.md).
 
+## Constraints Under the Eigen Tag id=eigen-tag
+
+An [EigenProblem.md] assembles two matrices, the noneigen matrix $K$ and the eigen matrix $M$, and
+routes each object to one of them by tag. `extra_vector_tags = 'eigen'` marks an object as an eigen
+object. The matrix tag of the eigen matrix is named `Eigen` and the matrix tag of the noneigen
+matrix is named `A_tag`.
+
+The three constraint families behave differently under that split. The paragraphs below report what
+the four inputs in `test/tests/problems/eigen_problem/constraints` measure on an 8x8 QUAD4 Laplace
+eigenproblem: the unit square for the nodal and row inputs, a 1 by 0.7 rectangle for the mortar
+input.
+
+### Penalty Nodal Constraints
+
+A penalty nodal constraint such as [LinearNodalConstraint.md] reaches neither matrix under
+`Executioner/type = Eigenvalue`, because `NonlinearSystemBase::constraintJacobians()` is gated on
+`tags.count(systemMatrixTag())`, and an eigen assembly only ever carries the eigen or the noneigen
+tag. Under a +linear+ eigen solve, which uses only those matrices, the constraint is therefore a
+silent no-op: the measured spectrum is bit-identical with no constraint at all, with a penalty of
+1e3, with a penalty of 1e8, and with `extra_vector_tags = eigen` on the constraint.
+`extra_vector_tags` is a residual vector tag and cannot move a contribution between $K$ and $M$ in
+any case.
+
+!listing test/tests/problems/eigen_problem/constraints/spike_penalty_nodal.i block=Constraints
+
+Under a +nonlinear+ eigen solve, `solve_type = newton`, the same constraint does not converge at
+all rather than being ignored. `NonlinearSystemBase::enforceNodalConstraintsResidual()` applies the
+penalty residual unconditionally while the gate above removes its Jacobian, so residual and
+Jacobian disagree and the eigen iteration stalls and aborts.
+
+The fix for either case is `formulation = rows` on the same constraint, which replaces the penalty
+residual with degree of freedom constraint rows and so obeys the rules of the section below. On the
+8x8 square of the input beneath, which ties node 10 to node 39, the rows leg reports an eigenvalue
+of 22.807 with a tie error of 0, while the same tie enforced with a penalty leaves the untied
+fundamental mode at 19.994 with a tie error of 0.194.
+
+!listing test/tests/problems/eigen_problem/constraints/nodal_rows_eigen.i block=Constraints
+
+### Mortar Lagrange-Multiplier Constraints
+
+A mortar constraint such as [EqualValueConstraint.md] does tie the interface: it reproduces the
+single-domain spectrum for the physical modes. The multiplier rows land in $K$ only and leave a zero
+block in $M$, so the generalized problem is singular on the $M$ side and needs a direct
+shift-invert. The settings that cope with that singular $M$ are `solve_type = krylovschur` with
+`-st_type sinvert`, `-eps_target 0` and a `mumps` factorization.
+
+Two further points matter on this rig. A first-order multiplier is over-constrained where the
+interface ends land on a Dirichlet boundary, because those multiplier equations are redundant with
+the Dirichlet conditions; pin the end multipliers to zero, or a mode disappears. The domain is a
+rectangle rather than a square because the square's second and third modes are a degenerate pair,
+and Krylov-Schur on this singular-$M$ problem drops one member of such a pair when its subspace is
+small or its arithmetic differs from one build to the next; distinct modes are found at every
+subspace size.
+
+!listing test/tests/problems/eigen_problem/constraints/spike_mortar_tie.i block=Constraints
+
+### Degree of Freedom Constraint Rows
+
+A [MultiPointConstraint.md] leaf, or any other constraint enforced with rows such as a
+[NodalConstraint.md] with `formulation = rows`, is condensed out of both matrices by
+`NonlinearEigenSystem::initializeCondensedMatrices()`, and the eigenvector gets its constrained
+values back through `enforce_constraints_exactly`. The solve sees the exact reduced problem, with no
+spurious mode and no shift.
+
+Two limits follow from how MOOSE fills the condensed matrices. A constrained `DofMap` needs a
+nonlinear eigen solve, `solve_type = newton`: the condensed matrices are filled only in the SNES
+callbacks, so a linear eigen solve type such as `krylovschur` or `jacobi_davidson` receives empty
+matrices. A nonlinear eigen solve returns exactly one eigenpair, so set `n_eigen_pairs = 1`.
+
+!listing test/tests/problems/eigen_problem/constraints/spike_dof_row.i block=Constraints
+
+### Sparsity
+
+A constraint whose `addCouplingEntriesToJacobian()` returns true errors with "Need a system matrix"
+under an eigenvalue solve unless the input sets `Problem/use_hash_table_matrix_assembly = true`. The
+mortar input above sets it. A constraint enforced with rows returns false, because libMesh already
+expands the sparsity pattern of a constrained degree of freedom to the degrees of freedom that
+constrain it, so an input that uses rows alone does not need that setting. `nodal_rows_eigen.i`
+sets it because the same input is also run with `formulation = penalty`, which does ask for those
+coupling entries.
+
 !syntax list /Constraints objects=True actions=False subsystems=False
 
 !syntax list /Constraints objects=False actions=False subsystems=True

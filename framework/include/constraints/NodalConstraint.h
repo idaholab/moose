@@ -44,6 +44,10 @@ public:
    */
   virtual void updateConnectivity();
 
+  virtual bool usesConstraintRows() const override { return _formulation == Moose::Rows; }
+
+  virtual void addConstraintRows(libMesh::DofMap & dof_map) const override;
+
   /**
    * Reinitialize the primary and secondary nodes on the SubProblem that owns this constraint's
    * variables.
@@ -83,6 +87,39 @@ protected:
    */
   std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                          const std::vector<dof_id_type> & node_ids);
+
+  /**
+   * Add one degree of freedom constraint row per secondary node, tying the secondary variable at
+   * that node to the weighted sum of the primary variable at the primary nodes.
+   *
+   * Derived classes call this from their addConstraintRows() with the secondary nodes they hold at
+   * that moment, which is not necessarily _connected_nodes: libMesh rebuilds the rows during
+   * EquationSystems::reinit(), before MOOSE notifies this object that the mesh changed.
+   *
+   * This method is collective. Every rank adds the rows of the secondary nodes it has, and every
+   * problem it finds is gathered so that all the ranks raise the same error instead of one rank
+   * erroring on its own.
+   *
+   * @param dof_map The DofMap that receives the rows
+   * @param secondary_nodes The IDs of the secondary nodes to constrain. An ID this rank does not
+   * have, and a node that is also a primary node, are skipped
+   */
+  void addTieRows(libMesh::DofMap & dof_map,
+                  const std::vector<dof_id_type> & secondary_nodes) const;
+
+  /**
+   * @return The IDs of the nodes of the boundary \p boundary_name that this rank owns
+   *
+   * The rows of a live boundary are built from this at call time, because libMesh rebuilds them
+   * inside EquationSystems::reinit(), before MOOSE notifies this object that the mesh changed
+   */
+  std::vector<dof_id_type> ownedBoundaryNodes(const BoundaryName & boundary_name) const;
+
+  /**
+   * Error out when the 'penalty' parameter is missing and this constraint is enforced with a
+   * residual. The rows formulation enforces the constraint exactly, so it needs no penalty.
+   */
+  void checkPenaltyParam() const;
 
   /// Elements this constraint retained on each distributed mesh during the previous mesh update.
   std::map<MooseMesh *, std::set<Elem *>> _retained_elems;
