@@ -621,8 +621,8 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
     _rc_uo->computeFaceMassFlux();
 
   // Reconstructed gradients use the unrelaxed pressure and its conservative face flux to form
-  // the candidate that corrects cell velocity exactly. Relaxed feedback is published below after
-  // the relaxed pressure solution has been installed.
+  // the candidate pressure gradient that corrects cell velocity exactly. Relaxed feedback is
+  // published below after the relaxed pressure solution has been computed.
   _rc_uo->preparePressureRelaxation();
 
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
@@ -636,8 +636,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
 
-  // Refresh ordinary gradients from the relaxed pressure and publish reconstructed feedback for
-  // the next momentum predictor. Ordinary methods retain their existing cell-velocity update.
+  // Refresh other registered pressure gradients from the relaxed pressure, then publish relaxed
+  // reconstructed coupling feedback for the next momentum predictor. Without reconstruction,
+  // preserve the existing update of cell velocity from the relaxed pressure gradient.
   _rc_uo->finalizePressureCorrector();
 
   return residuals;
