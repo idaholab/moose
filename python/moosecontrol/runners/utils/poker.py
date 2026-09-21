@@ -86,19 +86,25 @@ class Poker(Thread):
         """Run the poke thread."""
         logger.debug("Poke thread started")
 
-        # Poll until we've been told not to or until
-        # a poke fails
+        # Poll until we've been told not to. A failed poke is treated as
+        # transient (e.g. a momentary HTTP hiccup on the webserver's control
+        # channel) and retried on the next tick rather than stopping the
+        # thread outright - MOOSE only resets its client timeout on a
+        # successful poke, so silently giving up here would eventually cause
+        # an unrelated-looking fatal client_timeout error on the MOOSE side.
         while not self._stop_event.is_set():
             logger.debug("Poking webserver")
             try:
                 request = self.poke()
             except Exception as e:
-                logger.debug(f"Poke raised {type(e).__name__}; stopping")
-                break
-            if request.status_code != 200:
-                logger.debug(f"Poke has status code {request.status_code}; stopping")
-                break
-            self._num_poked += 1
+                logger.debug(f"Poke raised {type(e).__name__}; will retry")
+            else:
+                if request.status_code != 200:
+                    logger.debug(
+                        f"Poke has status code {request.status_code}; will retry"
+                    )
+                else:
+                    self._num_poked += 1
             self._stop_event.wait(self.poll_time)
 
         # Close the session
