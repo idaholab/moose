@@ -403,7 +403,10 @@ MooseApp::validParams()
       "console");
 
   params.addCommandLineParam<unsigned int>(
-      "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
+      "n_threads",
+      "--n-threads=<n>",
+      "Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the "
+      "maximum number of threads and setting the OpenMP number of threads");
   // This probably shouldn't be global, but the implications of removing this are currently
   // unknown and we need to manage it with libmesh better
   params.setGlobalCommandLineParam("n_threads");
