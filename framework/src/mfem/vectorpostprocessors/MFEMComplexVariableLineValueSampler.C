@@ -9,22 +9,17 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMVariableLineValueSampler.h"
+#include "MFEMComplexVariableLineValueSampler.h"
 
-#include "libmesh/point.h"
-#include "MooseError.h"
-#include "MFEMProblem.h"
-
-#include <vector>
-
-registerMooseObject("MooseApp", MFEMVariableLineValueSampler);
+registerMooseObject("MooseApp", MFEMComplexVariableLineValueSampler);
 
 InputParameters
-MFEMVariableLineValueSampler::validParams()
+MFEMComplexVariableLineValueSampler::validParams()
 {
-  InputParameters params = MFEMVariableValueSamplerBase::validParams();
+  InputParameters params = MFEMComplexVariableValueSamplerBase::validParams();
 
-  params.addClassDescription("Sample an MFEM variable along a specified line.");
+  params.addClassDescription("Sample a complex MFEM variable along a specified line, outputting "
+                             "real and imaginary parts as separate columns.");
 
   // these should not be of type libmesh::Point - need mfem::Point parsing
   params.addRequiredParam<Point>("start_point", "The beginning of the line");
@@ -36,8 +31,9 @@ MFEMVariableLineValueSampler::validParams()
   return params;
 }
 
-MFEMVariableLineValueSampler::MFEMVariableLineValueSampler(const InputParameters & parameters)
-  : MFEMVariableValueSamplerBase(
+MFEMComplexVariableLineValueSampler::MFEMComplexVariableLineValueSampler(
+    const InputParameters & parameters)
+  : MFEMComplexVariableValueSamplerBase(
         parameters,
         // can't call getParam as that requires initialized base class
         // so calling parameters.get directly
