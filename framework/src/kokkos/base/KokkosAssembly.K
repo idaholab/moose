@@ -17,9 +17,12 @@
 #include "Assembly.h"
 #include "BoundaryRestrictable.h"
 
+#include "libmesh/fe.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/reference_elem.h"
 
+#include <algorithm>
+#include <cmath>
 #include <map>
 #include <vector>
 
@@ -442,6 +445,12 @@ Assembly::initShape()
   _shape_face_rows.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
   _is_vector_fe_type.create(_fe_type_map.size());
 
+  _n_tensor_modes.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _n_tensor_modes = 0;
+  _tensor_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _tensor_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _tensor_modes.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+
   _map_phi.create(num_subdomains, num_elem_types);
   _map_phi_face.create(num_subdomains, num_elem_types);
   _map_psi_face.create(num_subdomains, num_elem_types);
@@ -496,9 +505,12 @@ Assembly::initShape()
       {
         const auto num_elem_orientations = kokkosMesh().getNumOrientations(elem_type_id);
 
-        // Copies of the type IDs, which a lambda cannot capture out of a structured binding
+        // Copies of the types and their IDs, which a lambda cannot capture out of a structured
+        // binding
         const auto elem_id = elem_type_id;
         const auto fe_id = fe_type_id;
+        const auto type = elem_type;
+        const auto fet = fe_type;
 
         // The shape functions of an FE family may depend on the orientation of the element's edges
         // and faces, so a table is built for each orientation the local mesh presents, evaluated on
@@ -662,6 +674,122 @@ Assembly::initShape()
           }
         };
 
+        // A HIERARCHIC quadrilateral carries a tensor-product basis, and QGauss on a
+        // quadrilateral is the product of a one-dimensional rule, so the two-dimensional tables
+        // filled above are outer products of one-dimensional ones. Writing the factorization down
+        // lets a consumer contract against the one-dimensional tables instead, which is a factor of
+        // the mode count fewer operations over a table small enough to stay cached.
+        //
+        // The factorization is checked against the tables it claims to reproduce rather than
+        // assumed: a quadrature rule that is not the product of a one-dimensional rule, or a
+        // degree of freedom numbering that does not match what libMesh reports, leaves the mode
+        // count at zero and the consumer on the full tables.
+        auto build_tensor_tables = [&](auto & fe)
+        {
+          if (_dimension != 2 || fet.family != libMesh::HIERARCHIC)
+            return;
+
+          if (type != libMesh::QUAD4 && type != libMesh::QUAD8 && type != libMesh::QUAD9)
+            return;
+
+          const auto num_dofs = _n_dofs(elem_id, fe_id);
+          const auto num_qps = qrule->n_points();
+
+          const auto n_modes = static_cast<unsigned int>(std::lround(std::sqrt(num_dofs)));
+          const auto n_points = static_cast<unsigned int>(std::lround(std::sqrt(num_qps)));
+
+          if (n_modes * n_modes != num_dofs || n_points * n_points != num_qps)
+            return;
+
+          // The mode count per direction fixes the total order the tables were filled at
+          const auto totalorder = n_modes - 1;
+
+          auto & phi_1d = _tensor_phi(sid, elem_id, fe_id);
+          auto & grad_phi_1d = _tensor_grad_phi(sid, elem_id, fe_id);
+
+          phi_1d.create(n_modes, n_points);
+          grad_phi_1d.create(n_modes, n_points);
+
+          // QBase::tensor_product_quad() varies the first coordinate's index fastest, so the
+          // one-dimensional points are the first coordinates of the rule's leading points
+          for (const auto p : make_range(n_points))
+          {
+            const Point xi(qrule->qp(p)(0));
+
+            for (const auto a : make_range(n_modes))
+            {
+              phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape(
+                  libMesh::EDGE3, static_cast<Order>(totalorder), a, xi);
+              grad_phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape_deriv(
+                  libMesh::EDGE3, static_cast<Order>(totalorder), a, 0, xi);
+            }
+          }
+
+          auto & phi = fe.get_phi();
+          auto & dphidxi = fe.get_dphidxi();
+          auto & dphideta = fe.get_dphideta();
+
+          bool factors = true;
+
+          for (const auto orientation : make_range(num_elem_orientations))
+          {
+            auto elem = &kokkosMesh().getOrientationElem(elem_id, orientation);
+
+            fe.reinit(elem);
+
+            auto & modes = _tensor_modes(sid, elem_id, fe_id, orientation);
+
+            modes.create(n_modes, n_modes);
+
+            // The agreement below is measured relative to the largest magnitude the tables reach,
+            // because a derivative of a high order mode is far from unit size and an absolute
+            // tolerance would have to be chosen per order
+            Real scale = 1;
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(num_qps))
+                scale = std::max({scale,
+                                  std::abs(phi[i][qp]),
+                                  std::abs(dphidxi[i][qp]),
+                                  std::abs(dphideta[i][qp])});
+
+            // Well above the rounding of a product of two high order polynomials and well below the
+            // order-one relative error a wrong mode pair or sign would produce
+            const auto tol = 1e-10 * scale;
+
+            for (const auto i : index_range(phi))
+            {
+              const auto [i0, i1, sign] =
+                  libMesh::fe_hierarchic_quad_tensor_indices(elem, totalorder, i);
+
+              modes(i0, i1) = {static_cast<unsigned int>(i), sign};
+
+              for (const auto qp : make_range(num_qps))
+              {
+                const auto p0 = qp % n_points;
+                const auto p1 = qp / n_points;
+
+                factors =
+                    factors &&
+                    std::abs(sign * phi_1d(i0, p0) * phi_1d(i1, p1) - phi[i][qp]) < tol &&
+                    std::abs(sign * grad_phi_1d(i0, p0) * phi_1d(i1, p1) - dphidxi[i][qp]) < tol &&
+                    std::abs(sign * phi_1d(i0, p0) * grad_phi_1d(i1, p1) - dphideta[i][qp]) < tol;
+              }
+            }
+          }
+
+          if (factors)
+            _n_tensor_modes(sid, elem_id, fe_id) = n_modes;
+          else
+          {
+            phi_1d.destroy();
+            grad_phi_1d.destroy();
+
+            for (const auto orientation : make_range(num_elem_orientations))
+              _tensor_modes(sid, elem_id, fe_id, orientation).destroy();
+          }
+        };
+
         if (is_vector_fe)
         {
           assign_rows(*vector_fe, *vector_fe_face);
@@ -681,6 +809,7 @@ Assembly::initShape()
                      _grad_phi(sid, elem_id, fe_id),
                      _phi_face(sid, elem_id, fe_id),
                      _grad_phi_face(sid, elem_id, fe_id));
+          build_tensor_tables(*fe);
         }
       }
     }
@@ -794,6 +923,11 @@ Assembly::initShape()
   _shape_rows.copyToDeviceNested();
   _shape_face_rows.copyToDeviceNested();
   _is_vector_fe_type.copyToDevice();
+
+  _n_tensor_modes.copyToDevice();
+  _tensor_phi.copyToDeviceNested();
+  _tensor_grad_phi.copyToDeviceNested();
+  _tensor_modes.copyToDeviceNested();
 
   _map_phi.copyToDeviceNested();
   _map_phi_face.copyToDeviceNested();

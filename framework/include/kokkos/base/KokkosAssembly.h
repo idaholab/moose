@@ -27,6 +27,23 @@ class System;
 namespace Moose::Kokkos
 {
 
+/**
+ * The element-local degree of freedom a tensor-product mode pair carries, and the sign the basis
+ * puts on it.
+ *
+ * On a tensor-product element of a separable family, shape function \c dof is the product of the
+ * one-dimensional shape functions of the mode pair addressing this entry, times \c sign. The sign
+ * keeps an odd edge mode continuous across an edge that an element and its neighbor traverse in
+ * opposite directions, so it is the only part of the factorization that depends on orientation.
+ */
+struct TensorMode
+{
+  /// The element-local degree of freedom index
+  unsigned int dof;
+  /// The sign the basis puts on the product of the one-dimensional shape functions
+  Real sign;
+};
+
 #ifdef MOOSE_KOKKOS_SCOPE
 /**
  * A table of reference shape data in which each degree of freedom's row is stored once.
@@ -232,6 +249,62 @@ public:
   KOKKOS_FUNCTION unsigned int getNumDofs(unsigned int elem_type, unsigned int fe_type) const
   {
     return _n_dofs(elem_type, fe_type);
+  }
+  /**
+   * Get the number of one-dimensional modes per reference coordinate a FE type carries on an
+   * element type, which is nonzero only where the shape functions factor into a product of
+   * one-dimensional shape functions over the subdomain's quadrature rule
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The number of one-dimensional modes, or zero where the shape functions do not factor
+   */
+  KOKKOS_FUNCTION unsigned int getNumTensorModes(ContiguousSubdomainID subdomain,
+                                                 unsigned int elem_type,
+                                                 unsigned int fe_type) const
+  {
+    return _n_tensor_modes(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the one-dimensional shape functions a separable FE type factors into
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The one-dimensional shape values, indexed by mode and one-dimensional quadrature point
+   */
+  KOKKOS_FUNCTION const Array2D<Real> &
+  getTensorPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  {
+    return _tensor_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the derivatives of the one-dimensional shape functions a separable FE type factors into
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The one-dimensional shape derivatives, indexed by mode and one-dimensional quadrature
+   * point
+   */
+  KOKKOS_FUNCTION const Array2D<Real> & getTensorGradPhi(ContiguousSubdomainID subdomain,
+                                                         unsigned int elem_type,
+                                                         unsigned int fe_type) const
+  {
+    return _tensor_grad_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the degree of freedom and sign each tensor-product mode pair of a separable FE type carries
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
+   * @returns The modes, indexed by the mode of each reference coordinate
+   */
+  KOKKOS_FUNCTION const Array2D<TensorMode> & getTensorModes(ContiguousSubdomainID subdomain,
+                                                             unsigned int elem_type,
+                                                             unsigned int fe_type,
+                                                             unsigned int orientation) const
+  {
+    return _tensor_modes(subdomain, elem_type, fe_type, orientation);
   }
   /**
    * Get the shape functions of a FE type for an element type and subdomain
@@ -554,6 +627,23 @@ private:
   Array4D<Array<Array<unsigned int>>> _shape_face_rows;
   Array<bool> _is_vector_fe_type;
   Array2D<unsigned int> _n_dofs;
+  ///@}
+  /**
+   * The factorization of the shape functions of a separable FE type on a tensor-product element
+   * type, over the subdomain's quadrature rule.
+   *
+   * A shape function of such a type is a product of one-dimensional shape functions, one per
+   * reference coordinate, times a sign, and the quadrature rule is the corresponding product of a
+   * one-dimensional rule. A consumer can then contract against the one-dimensional tables, which
+   * costs a factor of the mode count fewer operations and reads a table small enough to stay
+   * cached, instead of against the tables above. The mode count is zero wherever the factorization
+   * does not hold, and a consumer falls back to the full tables there.
+   */
+  ///@{
+  Array3D<unsigned int> _n_tensor_modes;
+  Array3D<Array2D<Real>> _tensor_phi;
+  Array3D<Array2D<Real>> _tensor_grad_phi;
+  Array4D<Array2D<TensorMode>> _tensor_modes;
   ///@}
   /**
    * Shape functions for computing reference-to-physical maps
