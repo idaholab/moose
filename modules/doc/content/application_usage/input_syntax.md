@@ -86,6 +86,11 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   `block0 block1 ... block10`. The last index must not be smaller than
   the first.
 
+- `${range <first_index> <last_index>}`: expands to the
+  whitespace-separated inclusive list of integers in the range provided, e.g.
+  `${range 3 7}` evaluates to `3 4 5 6 7`. The last index must not be smaller than
+  the first.
+
 - `${repeat <name> <count>}`: expands to the name repeated count times,
   separated by whitespace, e.g. `${repeat foo 3}` evaluates to
   `foo foo foo`.
