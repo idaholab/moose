@@ -41,7 +41,6 @@ template <bool is_ad>
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::IncompressibleMomentumSPScalarKernelTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
     // Lots of inputs so we need to be clear what is what
     // This block defines coupled state variables the kernel relies on
     _dPc(ScalarCoupleable::coupledScalarValue("reference_pressure_drop"))
@@ -93,7 +92,7 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidual()
     momentum_residual += (*(Base::_forms_losses[i]))(_qp, _state) * _G * abs(_G) / 2.0 / _rhog;
     // Gravity
     // get local density for natural circulation aspect
-    auto _rhol = Base::_fp.rho_from_p_T(_Pref(_qp, _state), (*(Base::_T[i]))[_i]);
+    auto _rhol = Base::_fp.rho_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[i]))[_i]);
     momentum_residual += _rhol * Base::_gravity(_qp, _state) * (*(Base::_lengths[i]))(_qp, _state) *
                          sin((*(Base::_alphas[i]))(_qp, _state));
     // Pump pressure
@@ -119,7 +118,7 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobian()
     const int _i = 0;
     const auto _state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
     // start by getting global fluid properties
-    auto _mu = Base::_fp.mu_from_p_T(Base::_Pref(_qp, _state), (*(_T[0]))[_i]);
+    auto _mu = Base::_fp.mu_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[0]))[_i]);
     auto _rhog = Base::_fp.rho_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[0]))[_i]);
     // loop over segments
     for (size_t i = 0; i < Base::_n_segments; ++i)

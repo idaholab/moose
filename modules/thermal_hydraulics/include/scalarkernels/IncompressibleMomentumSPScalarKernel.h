@@ -20,8 +20,7 @@ class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class IncompressibleMomentumSPScalarKernelTempl
-  : public std::conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type,
-    public FunctorInterface
+  : public std::conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type
 {
   using Base = typename std::
       conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type;

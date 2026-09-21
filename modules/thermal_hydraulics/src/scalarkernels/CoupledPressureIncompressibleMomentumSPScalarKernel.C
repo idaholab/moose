@@ -41,11 +41,7 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 template <bool is_ad>
 CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::
     CoupledPressureIncompressibleMomentumSPScalarKernelTempl(const InputParameters & parameters)
-  : Base(parameters),
-    FunctorInterface(this),
-    // Lots of inputs so we need to be clear what is what
-    // This block defines coupled state variables the kernel relies on
-    _mc(ScalarCoupleable::coupledScalarValue("coupled_mass_flow_rate"))
+  : Base(parameters), _mc(ScalarCoupleable::coupledScalarValue("coupled_mass_flow_rate"))
 {
 }
 
@@ -119,7 +115,7 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobi
     const Moose::ElemArg _qp = Moose::ElemArg();
     const auto _state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
     // loop over segments
-    for (size_t i = 0; i < _n_segments; ++i)
+    for (size_t i = 0; i < Base::_n_segments; ++i)
     {
       // reference pressure drop
       momentum_residual -= (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);

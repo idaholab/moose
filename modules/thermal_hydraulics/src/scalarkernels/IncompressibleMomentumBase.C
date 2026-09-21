@@ -130,25 +130,5 @@ IncompressibleMomentumBaseTempl<is_ad>::IncompressibleMomentumBaseTempl(
   }
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumBaseTempl<is_ad>::computeQpResidual()
-{
-}
-
-template <bool is_ad>
-Real
-IncompressibleMomentumBaseTempl<is_ad>::computeQpJacobian()
-{
-}
-
-template <>
-Real
-IncompressibleMomentumBaseTempl<true>::computeQpJacobian()
-{
-  mooseError("Internal error, calling computeQpJacobian in AD class.");
-  return 0.0;
-}
-
 template class IncompressibleMomentumBaseTempl<false>;
 template class IncompressibleMomentumBaseTempl<true>;

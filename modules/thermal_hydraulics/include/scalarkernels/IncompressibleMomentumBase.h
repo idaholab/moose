@@ -30,8 +30,6 @@ public:
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
   size_t _n_temps;
   std::vector<const VariableValue *> _T;
   bool _is_implicit;
