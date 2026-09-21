@@ -5,11 +5,11 @@ free energy itself is never used directly in the phase field equations, rather d
 free energy are required. In the case of a free energies involving multiple coupled variables,
 different derivatives will be required for each residual equation.
 
-In the free energy based model approach, a [Function Material](FunctionMaterials) class defines these
+In the free energy based model approach, a [Function Material](FunctionMaterials.md) class defines these
 required free energy derivatives, which are used by the respective kernels. These derivatives can be
 defined in the code by the user or they can be generated using automatic differentiation. The
 derivatives can also come from CALPHAD type free energies. The required order of derivative that is
-required for the residual are shown on the [Basic Phase Field Equations](phase_field/Phase_Field_Equations.md)
+required for the residual are shown on the [Phase_Field_Equations.md]
 page for the Allen-Cahn equation and for the two solution approaches for the Cahn-Hilliard equations.
 One additional derivative is required to define the Jacobian term used in the solution of the nonlinear
 system of FEM equations. It is common to also define the full free energy, even when not required, for
@@ -66,14 +66,14 @@ MathFreeEnergy::computeD3F(unsigned int j_var, unsigned int k_var, unsigned int 
 ```
 
 An alternative to writing your own free energy materials is to take advantage of the
-[`DerivativeParsedMaterial`](FunctionMaterials), where the free energy is entered in the input file
+[DerivativeParsedMaterial.md], where the free energy is entered in the input file
 and all required derivatives are taken automatically. This approach is highly encouraged, as it
 drastically simplifies model development.
 
 
 ## See also
 
-- [Basic Phase Field Equations](phase_field/Phase_Field_Equations.md) - Basic information about the equations underlying the phase field module
-- [Function Materials](FunctionMaterials) - The key component in the modular free energy phase field modeling approach. This page lists the available function materials and explains how to define a free energy function and combine multiple free energy contributions (including elastic energy) into a total free energy.
-- [Function Material Kernels](FunctionMaterialKernels) - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
-- [ExpressionBuilder](ExpressionBuilder) - Use automatic differentiation with Free energies defined in the C++ code.
+- [Phase_Field_Equations.md] - Basic information about the equations underlying the phase field module
+- [FunctionMaterials.md] - The key component in the modular free energy phase field modeling approach. This page lists the available function materials and explains how to define a free energy function and combine multiple free energy contributions (including elastic energy) into a total free energy.
+- [FunctionMaterialKernels.md] - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
+- [ExpressionBuilder.md] - Use automatic differentiation with Free energies defined in the C++ code.
