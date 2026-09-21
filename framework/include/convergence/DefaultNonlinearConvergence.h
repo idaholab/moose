@@ -84,8 +84,6 @@ protected:
   const Real _nl_rel_step_tol;
   /// Maximum number of residual (function) evaluations
   const unsigned int _nl_max_funcs;
-
-private:
   /// Nonlinear maximum nonlinear iterations (modifiable by setMaximumIterations)
   unsigned int _nl_max_its;
   /// Nonlinear absolute tolerance (modifiable by setAbsoluteTolerance)
