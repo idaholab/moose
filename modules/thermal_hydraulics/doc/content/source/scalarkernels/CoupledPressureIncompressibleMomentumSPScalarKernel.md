@@ -5,7 +5,7 @@
 ## Overview
 
 This object implements the time-dependent, globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
-single variable characteristic pressure drop. It requires a coupled variable characteristic mass flow rate and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md))
+single variable characteristic pressure drop. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable characteristic mass flow rate and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md))
 
 !equation
 \begin{equation}

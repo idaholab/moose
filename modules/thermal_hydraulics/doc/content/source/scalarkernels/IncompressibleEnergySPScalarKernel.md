@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object implements the time-dependent, globally compressible, locally incompressible, single-phase, energy-transport solve along a single 1D segment for a single variable fluid temperature. It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as (coupled [ScalarVariables](syntax/Variables/index.md)).
+This object implements the time-dependent, globally compressible, locally incompressible, single-phase, energy-transport solve along a single 1D segment for a single variable fluid temperature. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
 !equation
 \begin{equation}
