@@ -109,11 +109,8 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
 
   for (const auto coupled_elem_id : coupled_set)
   {
-    // After adaptivity the mortar coupling map still holds the element ids from the previous mortar
-    // generation, so an id here may name an element the current mesh no longer has. Skipping it
-    // only under-ghosts until the mortar mesh is regenerated, which reinitializes ghosting
-    // (FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects with mortar_changed) and runs this
-    // functor again against a consistent map.
+    // During adaptivity, the coupling map can temporarily contain element ids absent from the
+    // current mesh. Mortar regeneration rebuilds the map and reinitializes ghosting.
     const Elem * const coupled_elem = _mesh->query_elem_ptr(coupled_elem_id);
     if (coupled_elem && coupled_elem->processor_id() != p)
       coupled_elements.emplace(coupled_elem, _null_mat);
@@ -128,21 +125,18 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
     const SubdomainID secondary_subdomain_id,
     const AutomaticMortarGeneration & amg) const
 {
-  // Node processor ids appear to be tied to higher-dimensional element processor ids rather than
-  // lower-dimensional ones, based on debugging experience, so the query may be a secondary face,
-  // its interior parent, or a paired primary parent. Start from every associated secondary face,
-  // including those reachable only through the AMG mortar-interface-coupling container, so the
-  // ghosting graph contains the complete remote nodal-normal support in either row direction.
+  // The query may be a secondary face, one of its volume parents, or a coupled primary parent.
+  // Start from every associated secondary face so the ghosting graph contains the complete
+  // nodal-normal support in either row direction.
   std::vector<const Elem *> secondary_lower_elem_candidates;
   if (query_elem->subdomain_id() == secondary_subdomain_id)
     secondary_lower_elem_candidates.push_back(query_elem);
-
-  // Coupling functors can run before mortar data is rebuilt after mesh refinement. Use the
-  // relationship manager's current mesh for face topology instead of AMG-owned element pointers.
-  for (const auto side : query_elem->side_index_range())
-    if (const Elem * const lower_elem = _moose_mesh->getLowerDElem(query_elem, side);
-        lower_elem && lower_elem->subdomain_id() == secondary_subdomain_id)
-      secondary_lower_elem_candidates.push_back(lower_elem);
+  else
+    // The relationship manager's mesh supplies the current face topology during mesh refinement.
+    for (const auto side : query_elem->side_index_range())
+      if (const Elem * const lower_elem = _moose_mesh->getLowerDElem(query_elem, side);
+          lower_elem && lower_elem->subdomain_id() == secondary_subdomain_id)
+        secondary_lower_elem_candidates.push_back(lower_elem);
 
   const auto & mic = amg.mortarInterfaceCoupling();
   if (const auto find_it = mic.find(query_elem->id()); find_it != mic.end())
@@ -151,12 +145,8 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
           coupled_elem && coupled_elem->subdomain_id() == secondary_subdomain_id)
         secondary_lower_elem_candidates.push_back(coupled_elem);
 
-  // One higher-dimensional element can have lower-dimensional elements on several sides, the
-  // unordered_multimap holding the coupling information can repeat a key-value pair when a
-  // secondary face carries several mortar segments, and the three candidate sources above overlap.
-  // Track the faces already handled so each is ghosted once. A tree-based set is used because the
-  // candidates are gathered from those overlapping sources rather than bounded by one element's
-  // side count.
+  // Candidate sources can overlap, and mortar coupling can repeat a face for several segments.
+  // Track each face so it is ghosted once.
   std::set<dof_id_type> secondary_lower_elems_handled;
   for (const Elem * const candidate : secondary_lower_elem_candidates)
   {
@@ -168,9 +158,8 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
     candidate->active_family_tree(active_secondary_lower_elems);
     for (const Elem * const secondary_lower_elem : active_secondary_lower_elems)
     {
-      // Higher-d-secondary to higher-d-primary coupling is supported, so a coupled element reached
-      // above need not be a secondary lower-dimensional element at all; it can be a primary
-      // higher-dimensional element, which this subdomain check discards.
+      // Coupling entries can identify higher-dimensional primary elements. Only lower-dimensional
+      // elements in the secondary subdomain contribute to the secondary face star.
       if (secondary_lower_elem->subdomain_id() != secondary_subdomain_id ||
           !secondary_lower_elems_handled.insert(secondary_lower_elem->id()).second)
         continue;

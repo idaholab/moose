@@ -20,6 +20,8 @@ public:
 
   NormalMortarMechanicalContact(const InputParameters & parameters);
 
+  void initialSetup() override;
+
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 

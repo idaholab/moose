@@ -62,7 +62,7 @@ WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
 {
   mooseAssert(nodal_index < lower_secondary_elem.n_nodes(),
               "Nodal tangent index must refer to a node on the secondary element.");
-  mooseAssert(usesNodalNormalDerivatives(),
+  mooseAssert(shouldRecordNodalNormalDerivatives(),
               "AD contact tangents should only be requested while recording nodal-normal "
               "derivatives.");
   const Node * const node = lower_secondary_elem.node_ptr(nodal_index);
@@ -131,7 +131,7 @@ WeightedVelocitiesUserObject::computeQpIProperties()
       _is_weighted_gap_nodal ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
-  if (usesNodalNormalDerivatives())
+  if (shouldRecordNodalNormalDerivatives())
   {
     const auto & tangents = contactTangents(*_lower_secondary_elem, _i);
     for (const auto direction : make_range(_3d ? 2 : 1))

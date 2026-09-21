@@ -191,10 +191,8 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   }
 
-  // Every row here carries the same derivative support: the quadrature-point traction that
-  // computeQpResidual() interpolates does not depend on the test function index, and scaling an
-  // ADReal by a Real preserves its sparsity pattern. That matters because cacheJacobian() takes the
-  // column layout from the first row and only compares the others in a debug build, so a row-
-  // dependent factor here would silently drop Jacobian entries in an optimized build.
+  // cacheJacobian() uses the first row's column layout. Every row here has that same derivative
+  // support because the interpolated quadrature-point traction is independent of the test-function
+  // index and multiplication by a Real preserves the AD sparsity pattern.
   addResidualsAndJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
 }

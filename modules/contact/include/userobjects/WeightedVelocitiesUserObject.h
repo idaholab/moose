@@ -50,8 +50,8 @@ public:
    * @return The nodal frictional pressure at that node, expressed in that node's local tangent
    * frame and carrying its derivatives
    *
-   * Consumers interpolate this together with the node's own tangent to build the frictional
-   * traction vector, for the same reason the normal traction interpolates the nodal vector; see
+   * Consumers interpolate each nodal pressure with that node's tangent to form the frictional
+   * traction vector and preserve the discrete transpose relation; see
    * \p WeightedGapUserObject::nodalContactPressure.
    */
   virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const = 0;
@@ -59,13 +59,11 @@ public:
   /**
    * @param direction Tangent direction, 0 or 1
    * @return The basis belonging to the Lagrange multiplier variable representing the tangential
-   * contact pressure in that direction. Unlike \p tractionBasis, which is keyed to the normal
-   * Lagrange multiplier, this lets a consumer index its dof lookups and loop bound by the same
-   * variable that \p nodalTangentialPressure reads the coefficients from. Defaults to
-   * \p tractionBasis(), ignoring direction: correct for any subclass (e.g. penalty, cohesive zone)
-   * that has no separate per-direction Lagrange multipliers and so shares one basis across normal
-   * and both tangential directions; only a subclass with distinct tangential LM variables (see
-   * \p LMWeightedVelocitiesUserObject) needs to override this.
+   * contact pressure in that direction. Consumers use this basis for both the interpolation loop
+   * and the coefficient lookup performed by \p nodalTangentialPressure. The default returns
+   * \p tractionBasis() for formulations that share one basis across normal and tangential
+   * directions. Formulations with distinct tangential Lagrange multipliers, such as
+   * \p LMWeightedVelocitiesUserObject, override it.
    */
   virtual const VariableTestValue & tangentialTractionBasis(unsigned int /*direction*/) const
   {
@@ -138,9 +136,8 @@ protected:
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;
 
-  /// AD contact tangent frames, keyed on the secondary node they belong to. Cached because the
-  /// Householder construction would otherwise be repeated for every test function and quadrature
-  /// point that interpolates the frictional traction.
+  /// AD contact tangent frames, keyed on the secondary node and reused by every test function and
+  /// quadrature point that interpolates the frictional traction.
   mutable std::unordered_map<const Node *, std::array<ADRealVectorValue, 2>> _ad_nodal_tangents;
 };
 

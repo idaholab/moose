@@ -109,5 +109,5 @@ protected:
   const Real * _normalization_ptr = nullptr;
 
   /// The weighted gap user object
-  WeightedGapUserObject & _weighted_gap_uo;
+  const WeightedGapUserObject & _weighted_gap_uo;
 };

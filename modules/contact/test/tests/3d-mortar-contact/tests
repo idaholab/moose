@@ -278,12 +278,8 @@
       capabilities = 'ad_size>=150 & method!=dbg'
       exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
       custom_cmp = 'frictionless-mortar-3d-delaunay-msm.cmp'
-      # Without nl_abs_tol, this case exhausts nl_max_its=30: the residual plateaus at
-      # ~7.9e-10 (measured) instead of clearing the relative tolerance implied by
-      # |R0|~8.2e-3 and nl_rel_tol=1e-9. This tracks the mortar Jacobian's known
-      # incompleteness -- the mortar segment mesh geometry (AutomaticMortarGeneration's
-      # segment vertices) and Assembly::_coord_msm are not differentiated w.r.t. the
-      # displacement field -- not a correctness defect introduced by this PR.
+      # Mortar segment geometry and coordinate factors do not carry displacement derivatives, so
+      # use an absolute nonlinear tolerance for this moving-interface solve.
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 Executioner/nl_abs_tol=1e-8 '
                  'Outputs/exodus=false Outputs/csv=false '
@@ -291,15 +287,8 @@
                  'Contact/mortar/c_normal=1'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       valgrind = 'none'
-      # This comparison sits on a near-tied poly2tri triangulation decision (see
-      # frictionless-mortar-3d-delaunay-msm.cmp) that this PR's own traction-vector fix
-      # (#33657) moves the overlap configuration onto: which diagonal poly2tri draws
-      # through a handful of near-cocircular quads is toolchain-sensitive (observed to
-      # flip across independent Linux CIVET builders, not just macOS). All node
-      # coordinates are unaffected -- only the element connectivity of the few elements
-      # straddling the tied diagonal differs -- so use partial (not exact) matching to
-      # skip those unmatched elements while still exactly checking every matched element
-      # and all 256 node coordinates.
+      # Near-cocircular overlap polygons can select either valid diagonal across toolchains. Partial
+      # matching compares the common elements and every node coordinate.
       map = false
       partial = true
       prereq = 'frictionless-mortar-3d-action/first'
@@ -394,13 +383,8 @@
       capabilities = 'ad_size>=150'
       exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
       custom_cmp = 'frictionless-mortar-3d-delaunay-msm.cmp'
-      # Without nl_abs_tol, this case exhausts nl_max_its=30: the residual plateaus at
-      # ~7.9e-10 (measured) instead of clearing the default relative tolerance (nl_rel_tol
-      # is unset here, so it defaults to 1e-8) implied by |R0|~8.2e-3. This tracks the
-      # mortar Jacobian's known incompleteness -- the mortar segment mesh geometry
-      # (AutomaticMortarGeneration's segment vertices) and Assembly::_coord_msm are not
-      # differentiated w.r.t. the displacement field -- not a correctness defect
-      # introduced by this PR.
+      # Mortar segment geometry and coordinate factors do not carry displacement derivatives, so
+      # use an absolute nonlinear tolerance for this moving-interface solve.
       cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Executioner/nl_abs_tol=1e-8 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-direct-delaunay '
@@ -413,8 +397,8 @@
                  'Constraints/normal_z/triangulation=delaunay '
                  'UserObjects/weighted_gap_uo/triangulation=delaunay'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
-      # Same near-tied poly2tri configuration as frictionless-mortar-3d-action-triangulation/
-      # delaunay above; see the comment there for the partial-matching rationale.
+      # Near-cocircular overlap polygons can select either valid diagonal across toolchains. Partial
+      # matching compares the common elements and every node coordinate.
       map = false
       partial = true
       prereq = 'frictionless-mortar-3d-debug-mesh'

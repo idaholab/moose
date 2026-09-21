@@ -476,7 +476,6 @@ AutomaticMortarGeneration::clear()
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
-  _nodal_geometry_coordinate_snapshot.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
   _secondary_elems_to_mortar_segments.clear();
   _secondary_ip_sub_ids.clear();
@@ -1730,8 +1729,9 @@ AutomaticMortarGeneration::buildCouplingInformation()
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
-    // Rows attached to a secondary node or either volume parent may need the complete secondary
-    // face-star coupling, even when this lower-dimensional face is owned by another processor.
+    // Every process owning a row on a secondary node or either volume parent needs the complete
+    // secondary face-star coupling, including when that process also owns the lower-dimensional
+    // face.
     std::set<processor_id_type> secondary_face_coupling_processors{
         secondary_elem->processor_id(),
         secondary_elem->interior_parent()->processor_id(),
@@ -2191,8 +2191,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
   /// The _periodic flag tells us whether we want to inward vs outward facing normals
   Real sign = _periodic ? -1 : 1;
 
-  _nodal_geometry_coordinate_snapshot.clear();
-
   // First loop over lower-dimensional secondary side elements and compute/save the outward normal
   // for each one. We loop over all active elements currently, but this procedure could be
   // parallelized as well.
@@ -2232,12 +2230,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
 
     // Look up which side of the interior parent secondary_elem is.
     auto s = interior_parent->which_side_am_i(secondary_elem);
-
-    // Save the coordinates used for the Real nodal geometry. The AD path later adds displacement
-    // derivatives to these same values so both paths use the same geometry state.
-    auto parent_side_elem = interior_parent->build_side_ptr(s);
-    for (const auto & node : parent_side_elem->node_ref_range())
-      _nodal_geometry_coordinate_snapshot.emplace(&node, node);
 
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
@@ -2279,7 +2271,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
 
 void
 AutomaticMortarGeneration::computeADNodalNormals(
-    const std::function<ADPoint(const Node &, const Point &)> & coordinate,
+    const std::function<ADPoint(const Node &)> & coordinate,
     std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const
 {
   const auto dim = _mesh.mesh_dimension();
@@ -2329,8 +2321,7 @@ AutomaticMortarGeneration::computeADNodalNormals(
                       qweights.size() == face_points.size(),
                   "Face nodal geometry vectors and quadrature weights must have the same size.");
 
-      // Use the parent-side map rather than a standalone lower-dimensional basis. This preserves
-      // enriched mappings such as the TET14-to-TRI7 face.
+      // The parent-side map includes enriched face mappings such as TET14-to-TRI7.
       auto parent_side_elem = interior_parent->build_side_ptr(side);
       const unsigned int n_mapping_shape_functions =
           dim == 2 ? libMesh::FE<2, LAGRANGE>::n_dofs(parent_side_elem.get(),
@@ -2350,11 +2341,7 @@ AutomaticMortarGeneration::computeADNodalNormals(
       std::vector<ADPoint> side_points;
       side_points.reserve(n_mapping_shape_functions);
       for (const auto side_node_index : make_range(n_mapping_shape_functions))
-      {
-        const Node & node = parent_side_elem->node_ref(side_node_index);
-        side_points.push_back(
-            coordinate(node, libmesh_map_find(_nodal_geometry_coordinate_snapshot, &node)));
-      }
+        side_points.push_back(coordinate(parent_side_elem->node_ref(side_node_index)));
 
       for (const auto qp : index_range(face_points))
       {
@@ -2405,15 +2392,13 @@ AutomaticMortarGeneration::computeADNodalNormals(
 
     auto nodal_normal = weighted_area_vector.unit();
     const auto & stored_normal = libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
-    // Both normals are unit vectors built from the same coordinates, so the equivalent FE and AD
-    // evaluations agree to a few times machine epsilon and differ only through operation ordering.
-    // 1e-10 sits far enough above that floor to be insensitive to the ordering, and far enough
-    // below the O(1) disagreement of a genuinely stale geometry state to still catch one.
+    // Equivalent FE and AD evaluations of the same unit normal may differ through operation
+    // ordering. The tolerance admits roundoff while detecting inconsistent geometry states.
     mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() < 1e-10,
                 "The stored and AD secondary nodal normals must use the same geometry state.");
     // Set the raw value from the stored contact direction while retaining the derivatives produced
     // by the equivalent AD area-vector calculation.
-    for (const auto component : make_range(3u))
+    for (const auto component : make_range(Moose::dim))
       nodal_normal(component).value() = stored_normal(component);
     nodal_normals.emplace(secondary_node, std::move(nodal_normal));
   }

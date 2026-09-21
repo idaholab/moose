@@ -20,12 +20,11 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
-  params.set<bool>("allow_nodal_normal_derivatives") = true;
   params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.set<bool>("ghost_point_neighbors") = true;
   params.suppressParameter<bool>("ghost_point_neighbors");
-  // Penalty contact has no LM constraint to contribute the nodal-normal point-neighbor coupling
-  // to the matrix graph, so its weighted-gap object supplies the coupling relationship manager
-  // directly.
+  // The weighted-gap object supplies penalty contact's nodal-normal point-neighbor matrix coupling.
+  // MortarConsumerInterface supplies the geometric and algebraic relationship manager.
   const auto configure_point_neighbors =
       [](const InputParameters & obj_params, InputParameters & rm_params)
   {
@@ -38,16 +37,10 @@ PenaltyWeightedGapUserObject::validParams()
         obj_params.get<SubdomainName>("secondary_subdomain");
     rm_params.set<SubdomainName>("primary_subdomain") =
         obj_params.get<SubdomainName>("primary_subdomain");
-    // penetration_tolerance is required exactly for augmented-Lagrange contact, which uses
-    // frozen-normal geometry.
-    rm_params.set<bool>("ghost_point_neighbors") =
-        obj_params.get<bool>("use_nodal_normal_derivatives") &&
-        !obj_params.isParamValid("penetration_tolerance");
+    rm_params.set<bool>("ghost_point_neighbors") = true;
   };
-  params.addRelationshipManager("AugmentSparsityOnInterface",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC,
-                                configure_point_neighbors);
+  // Coupling relationship managers are attached through a separate system lifecycle from geometric
+  // and algebraic relationship managers.
   params.addRelationshipManager("AugmentSparsityOnInterface",
                                 Moose::RelationshipManagerType::COUPLING,
                                 configure_point_neighbors);
@@ -143,8 +136,7 @@ PenaltyWeightedGapUserObject::test() const
 const VariableTestValue &
 PenaltyWeightedGapUserObject::tractionBasis() const
 {
-  // Penalty contact has no separate Lagrange multiplier: the traction is interpolated with the
-  // same basis as the weighted gap, so this is not a Petrov-Galerkin split.
+  // Penalty contact interpolates traction and weighted gap with the same basis.
   return test();
 }
 
