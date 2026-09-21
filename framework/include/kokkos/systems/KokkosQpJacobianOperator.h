@@ -35,6 +35,14 @@ namespace Moose::Kokkos
  * cached tensors and its own basis tables, which is what allows a coarse operator to be Galerkin
  * without an assembled coarse matrix.
  *
+ * Where the level's basis factors into a product of one-dimensional shape functions over a
+ * quadrature rule that factors the same way, the action is contracted one reference coordinate at a
+ * time instead, which is sum factorization. That replaces the dense contraction against the
+ * two-dimensional tables with a sequence of contractions against the one-dimensional ones, costing
+ * a factor of the mode count fewer operations over a table small enough to stay cached. The two
+ * loops partition the (element, variable) pairs by whether the pair's basis factors, so a mesh
+ * carrying both kinds of element runs both.
+ *
  * The same contraction also assembles a level into a sparse matrix, entry by entry, which is how
  * the coarsest level reaches an algebraic-multigrid coarse solve while remaining the exact Galerkin
  * operator of the fine linearization.
@@ -63,6 +71,15 @@ public:
   {
   };
   struct ApplyTeamLoop
+  {
+  };
+  struct ApplyTensorFlopLoop
+  {
+  };
+  struct ApplyTensorSizeLoop
+  {
+  };
+  struct ApplyTensorLoop
   {
   };
   struct DiagonalLoop
@@ -127,11 +144,20 @@ public:
   KOKKOS_FUNCTION void operator()(ApplyFlopLoop, const ThreadID tid, double & flops) const;
   KOKKOS_FUNCTION void operator()(ApplyScratchLoop, const ThreadID tid, std::size_t & bytes) const;
 
-  /// The team policy apply() runs under, one team per (element, variable) pair
+  KOKKOS_FUNCTION void operator()(ApplyTensorFlopLoop, const ThreadID tid, double & flops) const;
+  KOKKOS_FUNCTION void
+  operator()(ApplyTensorSizeLoop, const ThreadID tid, unsigned int & team_size) const;
+
+  /// The team policies apply() runs under, one team per (element, variable) pair
+  ///@{
   using ApplyPolicy = ::Kokkos::TeamPolicy<ExecSpace, ApplyTeamLoop>;
   using ApplyTeam = ApplyPolicy::member_type;
+  using ApplyTensorPolicy = ::Kokkos::TeamPolicy<ExecSpace, ApplyTensorLoop>;
+  using ApplyTensorTeam = ApplyTensorPolicy::member_type;
+  ///@}
 
   KOKKOS_FUNCTION void operator()(ApplyTeamLoop, const ApplyTeam & team) const;
+  KOKKOS_FUNCTION void operator()(ApplyTensorLoop, const ApplyTensorTeam & team) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(BlockLoop, const ThreadID tid) const;
@@ -140,16 +166,29 @@ public:
 
 private:
   /**
-   * The floating point operations one apply() performs, counted once on first use and reused after.
-   * Negative means it has not been counted yet.
+   * The floating point operations one apply() performs on the pairs of each of its two loops,
+   * counted once on first use and reused after. A loop whose count is zero owns no pair and is not
+   * dispatched. Negative means they have not been counted yet.
    */
+  ///@{
   double _apply_flops = -1;
+  double _apply_tensor_flops = -1;
+  ///@}
 
   /**
-   * The per-team scratch an apply() needs, being the largest any (element, variable) pair asks for.
-   * Zero means it has not been measured yet.
+   * The per-team scratch an apply() needs, being the largest any (element, variable) pair asks for
+   * on whichever of the two loops owns it. Both loops are given that much, since the difference
+   * between them is far below what limits occupancy. Zero means it has not been measured yet.
    */
   std::size_t _apply_scratch_bytes = 0;
+
+  /**
+   * The team size the sum-factorized apply() runs under, being the largest range any phase of that
+   * loop runs over, so that every phase has a thread per index. Leaving the size to
+   * ::Kokkos::AUTO instead gives a team whose threads beyond that range do nothing. Zero means it
+   * has not been measured yet.
+   */
+  unsigned int _apply_tensor_team_size = 0;
 
   /**
    * The quadrature-point linearization the operator contracts

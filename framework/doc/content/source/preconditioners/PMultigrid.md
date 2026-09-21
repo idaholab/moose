@@ -32,6 +32,33 @@ element basis function in the finer element basis, so a transfer depends on the 
 bases alone and is built once at initial setup. Setting `verify = level_transfers` checks the transpose
 relationship of each transfer there, at the cost of one application of each direction.
 
+## Sum factorization
+
+A level whose basis is a product of one-dimensional shape functions, one per reference coordinate,
+over a quadrature rule that is the product of a one-dimensional rule, applies its operator by
+contracting one coordinate at a time against the one-dimensional tables. That is sum factorization:
+it replaces a contraction over every pair of degree of freedom and quadrature point with a sequence
+of contractions each carrying one index fewer, so the arithmetic grows one power of the polynomial
+order more slowly. The `HIERARCHIC` family on a quadrilateral is such a basis at every order and
+`QGAUSS` on a quadrilateral is such a rule, so every level of the hierarchies above applies its
+operator this way.
+
+The saving grows with order. Counting a multiply-add as two operations, an application on one
+order-eight element falls from 107,244 operations to 17,010, and the tables the contraction reads
+fall from about 210 kB per element type to about 1.3 kB, small enough that a team stages them in
+scratch once and every phase of the contraction reads them from there.
+
+The two forms are the same operator and are selected per element type and FE type, so a mesh that
+mixes quadrilaterals with elements whose basis does not factor applies both. They differ only in the
+order their terms are summed, and therefore agree to roundoff, which is what `verify =
+level_matrices` measures between the factored application and the assembled operator of the coarsest
+level.
+
+Whether a basis factors is established at setup by checking the one-dimensional products against the
+element tables the assembly caches. A quadrature rule that is not the product of a one-dimensional
+rule, or a degree of freedom numbering that does not match what libMesh reports, leaves the level
+contracting the full element basis rather than producing a wrong answer.
+
 ## The coarsest level
 
 The coarsest level is the only one that assembles a sparse matrix, and it is factored directly, by LU.
