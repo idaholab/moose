@@ -20,4 +20,20 @@
     issues = '#13509'
   []
 
+  [construct_side_sets_exterior_only]
+    type = 'Exodiff'
+    input = 'side_list_from_node_list_exterior_only.i'
+    cli_args = "--mesh-only"
+    exodiff = 'side_list_from_node_list_exterior_only_in.e'
+    recover = false
+    exodiff_opts = '-pedantic'
+
+    requirement = 'The system shall have the ability to exclude sides that are interior to the '
+                 'mesh when constructing a side set from a set of nodes, so that a node set '
+                 'spanning both faces of a mesh that is a single element layer deep does not '
+                 'spuriously add interior sides to the side set.'
+    design = 'MooseMesh.md'
+    issues = '#30917'
+  []
+
 []

@@ -1566,4 +1566,21 @@ addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_ext
         binfo.add_side(elem, i_side, extern_bid);
       }
 }
+
+void
+removeInteriorSides(MeshBase & mesh, const std::set<BoundaryID> & boundary_ids)
+{
+  auto & binfo = mesh.get_boundary_info();
+  std::vector<boundary_id_type> side_ids;
+  for (const auto & elem : mesh.active_element_ptr_range())
+    for (const auto & side : elem->side_index_range())
+      if (elem->neighbor_ptr(side))
+      {
+        binfo.boundary_ids(elem, side, side_ids);
+        for (const auto & id : side_ids)
+          if (boundary_ids.count(id))
+            binfo.remove_side(elem, side, id);
+      }
+  mesh.unset_is_prepared();
+}
 }

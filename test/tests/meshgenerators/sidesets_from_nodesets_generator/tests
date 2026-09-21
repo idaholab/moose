@@ -21,4 +21,17 @@
     requirement = 'The system shall be able to create side sets from a selection of node sets.'
     issues = '#31452'
   []
+  [node_to_side_exterior_only]
+    type = 'Exodiff'
+    input = 'from_nodes_thin_mesh.i'
+    exodiff = 'from_nodes_thin_mesh_in.e'
+    cli_args = "--mesh-only"
+    recover = false
+    exodiff_opts = '-pedantic'
+    requirement = 'The system shall be able to exclude sides that are interior to the mesh when '
+                 'creating side sets from a node set, so that a node set spanning both faces of a '
+                 'mesh that is a single element layer deep does not spuriously add interior sides '
+                 'to the side set.'
+    issues = '#30917'
+  []
 []

@@ -10,6 +10,7 @@
 #include "SideSetsFromNodeSetsGenerator.h"
 
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem_side_builder.h"
 
@@ -26,6 +27,10 @@ SideSetsFromNodeSetsGenerator::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "nodesets_to_convert",
       "If specified, list of nodesets to convert. If not specified, all nodesets are converted");
+  params.addParam<bool>("exterior_only",
+                        false,
+                        "If true, exclude sides that are interior to the mesh (i.e. have a "
+                        "neighboring element) from the constructed side sets.");
   return params;
 }
 
@@ -37,14 +42,15 @@ SideSetsFromNodeSetsGenerator::SideSetsFromNodeSetsGenerator(const InputParamete
 std::unique_ptr<MeshBase>
 SideSetsFromNodeSetsGenerator::generate()
 {
+  auto & binfo = _input->get_boundary_info();
+  std::set<BoundaryID> nodeset_ids;
+
   if (!isParamValid("nodesets_to_convert"))
-    _input->get_boundary_info().build_side_list_from_node_list();
+    nodeset_ids = binfo.get_node_boundary_ids();
   else
   {
     const auto & nodeset_names = getParam<std::vector<BoundaryName>>("nodesets_to_convert");
-    auto & binfo = _input->get_boundary_info();
 
-    std::set<BoundaryID> nodeset_ids;
     for (const auto & nodeset_name : nodeset_names)
     {
       // Look through the nodeset map.
@@ -59,8 +65,12 @@ SideSetsFromNodeSetsGenerator::generate()
                    "Nodeset '" + nodeset_name + "' does not exist in the input mesh");
       nodeset_ids.insert(nodeset_id);
     }
-    _input->get_boundary_info().build_side_list_from_node_list(nodeset_ids);
   }
+
+  binfo.build_side_list_from_node_list(nodeset_ids);
+
+  if (getParam<bool>("exterior_only"))
+    MooseMeshUtils::removeInteriorSides(*_input, nodeset_ids);
 
   return dynamic_pointer_cast<MeshBase>(_input);
 }

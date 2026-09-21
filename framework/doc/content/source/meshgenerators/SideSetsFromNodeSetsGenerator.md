@@ -13,6 +13,9 @@ of the created sideset. For a 3D hexagonal element, the four nodes on the corner
 must be part of the original node set to make the quadrilateral face be part of the created side set.
 
 In the current implementation, this operation indiscriminately converts +all+ node sets into side sets.
+Because every side whose nodes are all in the node set is converted, regardless of whether that
+side lies on the exterior of the mesh, sides interior to the mesh can be spuriously added to the
+side set. Set `exterior_only = true` to exclude any side that has a neighboring element.
 
 !alert note
 This operation can also be performed [automatically](MooseMesh.md#more_detail) at the end of the mesh generation process

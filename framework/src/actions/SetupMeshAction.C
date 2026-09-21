@@ -10,6 +10,7 @@
 #include "SetupMeshAction.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MooseMeshUtils.h"
 #include "FileMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
@@ -61,6 +62,11 @@ SetupMeshAction::validParams()
                         "If true, construct side lists from the nodesets in the mesh (i.e. if "
                         "every node on a give side is in a nodeset then add that side to a "
                         "sideset");
+  params.addParam<bool>("construct_side_list_from_node_list_exterior_only",
+                        false,
+                        "If true, when constructing side lists from node lists, exclude sides "
+                        "that are interior to the mesh (i.e. have a neighboring element). Has no "
+                        "effect unless 'construct_side_list_from_node_list' is also true.");
 
   params.addParam<std::vector<BoundaryName>>(
       "ghosted_boundaries", {}, "Boundaries to be ghosted if using Nemesis");
@@ -99,7 +105,8 @@ SetupMeshAction::validParams()
 
   // groups
   params.addParamNamesToGroup("ghosted_boundaries ghosted_boundaries_inflation", "Advanced");
-  params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning",
+  params.addParamNamesToGroup("second_order construct_side_list_from_node_list "
+                              "construct_side_list_from_node_list_exterior_only skip_partitioning",
                               "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
   params.addParamNamesToGroup("use_split split_file", "Split Mesh");
@@ -181,7 +188,13 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
   }
 
   if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
+  {
+    auto & binfo = mesh->getMesh().get_boundary_info();
+    const auto nodeset_ids = binfo.get_node_boundary_ids();
+    binfo.build_side_list_from_node_list();
+    if (getParam<bool>("construct_side_list_from_node_list_exterior_only"))
+      MooseMeshUtils::removeInteriorSides(mesh->getMesh(), nodeset_ids);
+  }
 
   // Here we can override the partitioning for special cases
   if (getParam<bool>("skip_partitioning"))
