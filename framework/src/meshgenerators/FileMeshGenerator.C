@@ -188,5 +188,6 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
     return file_name;
 
   // LATEST
-  return MooseUtils::convertLatestCheckpoint(file_name) + object.getMooseApp().checkpointSuffix();
+  return MooseUtils::convertLatestCheckpoint(file_name, "mesh") +
+         object.getMooseApp().checkpointSuffix();
 }
