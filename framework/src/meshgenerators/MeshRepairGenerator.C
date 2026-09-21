@@ -2672,7 +2672,7 @@ MeshRepairGenerator::collapseRedundantVertex(
         collapsedElementFaces(*e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
     if (e->dim() == 3 && nd >= 4)
       poly_preps[eid] = std::move(prep); // rebuild as a polyhedron at commit
-    else if (nd < e->dim() + 1 && coincident)
+    else if (nd < unsigned(e->dim() + 1) && coincident)
       // Dropped below a valid cell of its dimension by a coincident (short-edge) merge: it shared
       // the near-zero edge, so it was itself a needle/sliver - remove it. (A colinear merge would
       // instead be moving a genuine vertex, so declining below is the safe choice there.)
@@ -3368,7 +3368,7 @@ MeshRepairGenerator::repairHexToPrism(std::unique_ptr<MeshBase> & mesh) const
             *e, subs, boundary_info, prep.faces, prep.face_bcs, prep.edge_bcs);
         if (e->dim() == 3 && nd >= 4)
           poly_preps[eid] = std::move(prep);
-        else if (nd < e->dim() + 1)
+        else if (nd < (unsigned)(e->dim() + 1))
           delete_ids.insert(eid); // the merges are coincident, so a sub-3D reducer was a needle
         else
         {
