@@ -14,15 +14,17 @@
 #include "FunctorInterface.h"
 #include "MooseTypes.h"
 #include "SinglePhaseFluidProperties.h"
+#include "IncompressibleMomentumBase.h"
 
 class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class CoupledPressureIncompressibleMomentumSPScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type,
+  : public std::conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type,
     public FunctorInterface
 {
-  using Base = typename std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type;
+  using Base = typename std::
+      conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type;
 
 public:
   CoupledPressureIncompressibleMomentumSPScalarKernelTempl(const InputParameters & parameters);
@@ -33,20 +35,6 @@ protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   const VariableValue & _mc;
-  size_t _n_temps;
-  std::vector<const VariableValue *> _T;
-  bool _is_implicit;
-  const Moose::Functor<GenericReal<is_ad>> & _Pref;
-  const SinglePhaseFluidProperties & _fp;
-  size_t _n_segments;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _areas;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _perimeters;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _lengths;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _alphas;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _forms_losses;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _dPps;
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _roughnesses;
-  const Moose::Functor<GenericReal<is_ad>> & _gravity;
 };
 
 typedef CoupledPressureIncompressibleMomentumSPScalarKernelTempl<false>
