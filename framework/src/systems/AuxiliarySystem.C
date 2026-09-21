@@ -43,18 +43,18 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _aux_scalar_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _elemental_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _nodal_array_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads())
+    _aux_scalar_storage(_app.getExecuteOnEnum(), n_threads()),
+    _nodal_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _elemental_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _nodal_array_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _elemental_array_aux_storage(_app.getExecuteOnEnum(), n_threads())
 #ifdef MOOSE_KOKKOS_ENABLED
     ,
-    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads())
+    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), n_threads()),
+    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), n_threads())
 #endif
 {
   _nodal_vars.resize(this->n_threads());

@@ -13,8 +13,8 @@
 
 // Defined out-of-line so the MooseObjectWarehouse<MaterialBase> base is instantiated here, where
 // MaterialBase is complete (it is only forward-declared in the header).
-MaterialWarehouse::MaterialWarehouse(bool threaded, THREAD_ID num_threads)
-  : MooseObjectWarehouse<MaterialBase>(threaded, num_threads)
+MaterialWarehouse::MaterialWarehouse(THREAD_ID num_threads)
+  : MooseObjectWarehouse<MaterialBase>(num_threads)
 {
 }
 
