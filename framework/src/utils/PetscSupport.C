@@ -942,7 +942,20 @@ addPetscPairsToPetscOptions(
       if ((option_name == "-pc_factor_mat_solver_package" ||
            option_name == "-pc_factor_mat_solver_type") &&
           option_value == "superlu_dist")
+      {
         superlu_dist_found = true;
+
+        // SuperLU_DIST performs its own internal OpenMP-parallel factorization, which races
+        // with MOOSE's own threading and has been observed to corrupt memory (illegal BLAS
+        // arguments, segfaults) when MOOSE is run with more than one thread.
+        if (libMesh::n_threads() > 1)
+          mooseError("The PETSc option '",
+                     option_name,
+                     "' may not be set to 'superlu_dist' when running with multiple threads "
+                     "(--n-threads > 1); SuperLU_DIST's internal OpenMP-parallel "
+                     "factorization is not safe to combine with MOOSE's threading. Use a "
+                     "different solver package (e.g. mumps) or run with a single thread.");
+      }
       if (option_name == "-mat_superlu_dist_fact")
         fact_pattern_found = true;
       if (option_name == "-mat_superlu_dist_replacetinypivot")

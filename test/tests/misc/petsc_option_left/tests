@@ -63,4 +63,16 @@
     requirement = 'The system shall not warn about a vector type option that was already consumed before the PETSc options database is rebuilt.'
     issues = '#28053'
   []
+
+  [superlu_dist_multithreaded]
+    type = RunException
+    input = '2d_diffusion_petsc_option.i'
+    min_threads = 2
+    cli_args = "Executioner/petsc_options_iname='-pc_type -pc_factor_mat_solver_type' "
+               "Executioner/petsc_options_value='lu superlu_dist'"
+    expect_err = "may not be set to 'superlu_dist' when running with multiple threads"
+    capabilities = 'superlu'
+    requirement = "The system shall error out if the PETSc option '-pc_factor_mat_solver_type superlu_dist' is combined with multiple threads, since SuperLU_DIST's internal OpenMP threading is not safe to combine with MOOSE's own threading."
+    issues = '#24297'
+  []
 []
