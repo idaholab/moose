@@ -28,13 +28,13 @@ protected:
   /// The dimension of the simulation
   const unsigned int _dim;
 
-  /// slip velocity in direction x
+  /// x component of the relative velocity added to the mixture velocity
   const Moose::Functor<ADReal> * const _u_slip;
-  /// slip velocity in direction y
+  /// y component of the relative velocity added to the mixture velocity
   const Moose::Functor<ADReal> * const _v_slip;
-  /// slip velocity in direction z
+  /// z component of the relative velocity added to the mixture velocity
   const Moose::Functor<ADReal> * const _w_slip;
 
-  /// Boolean to determine if slip velocity is available
+  /// Whether a relative velocity was supplied
   bool _add_slip_model;
 };
