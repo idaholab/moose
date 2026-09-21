@@ -269,6 +269,13 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
   if (!getParam<bool>("use_dispersed_phase_drag_model"))
     errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
+  if (getParam<bool>("use_dispersed_phase_drag_model") &&
+      isParamSetByUser("slip_linear_friction_name"))
+    paramError("slip_linear_friction_name",
+               "A prescribed slip friction factor cannot be combined with "
+               "'use_dispersed_phase_drag_model'. The drag model forms its particle Reynolds "
+               "number from the slip velocity, so it is solved inside the slip closure rather "
+               "than supplied to it.");
 }
 
 void
@@ -292,11 +299,13 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 void
 WCNSFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
 {
-  params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
+  // The phase fraction is advected at u_m + u_Md: the drift velocity, measured against the centre
+  // of mass, not the slip velocity, see VTT Publications 288 equation (28)
+  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
   if (dimension() >= 2)
-    params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
+    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
   if (dimension() >= 3)
-    params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
+    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
 }
 
 void
@@ -451,15 +460,28 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
       for (const auto j : make_range(dimension()))
         params.set<SolverVariableName>(vel_components[j]) =
             _flow_equations_physics->getVelocityNames()[j];
-      params.set<MooseFunctorName>(NS::density) = _phase_1_density;
-      params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
+      // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
+      // density, see VTT Publications 288 equation (58); the relaxation time carries the
+      // continuous phase viscosity, Stokes drag being exerted by the fluid the particle moves in
+      params.set<MooseFunctorName>(NS::density) = "rho_mixture";
+      params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
       params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+      params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
+      // The phase equation is advected with the drift velocity, which this object derives from
+      // the slip velocity it computes
+      params.set<MooseFunctorName>("drift_velocity_name") = "vel_drift_" + components[dim];
       params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
-      if (isParamValid("slip_linear_friction_name"))
+      // The drag model is solved inside the slip closure rather than read from the drag material:
+      // its particle Reynolds number is formed from the slip velocity, so a drag functor built the
+      // correct way depends on the slip velocity and cannot also be an input to it
+      if (getParam<bool>("use_dispersed_phase_drag_model"))
+      {
+        params.set<bool>("use_dispersed_phase_drag_model") = true;
+        params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+      }
+      else if (isParamValid("slip_linear_friction_name"))
         params.set<MooseFunctorName>("linear_coef_name") =
             getParam<MooseFunctorName>("slip_linear_friction_name");
-      else if (getParam<bool>("use_dispersed_phase_drag_model"))
-        params.set<MooseFunctorName>("linear_coef_name") = "Darcy_coefficient";
       else if (_flow_equations_physics)
       {
         if (!_flow_equations_physics->getLinearFrictionCoefName().empty())
@@ -495,12 +517,15 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
 
     auto params = getFactory().getValidParams("NSFVDispersePhaseDragFunctorMaterial");
     assignBlocks(params, _blocks);
+    const std::vector<std::string> components = {"x", "y", "z"};
     params.set<MooseFunctorName>("drag_coef_name") = "Darcy_coefficient";
+    // The particle Reynolds number is formed from the slip velocity and the continuous phase
+    // properties, which is its definition. The slip closure no longer reads this material; it is
+    // kept for the drag coefficient it exposes to friction kernels and to output.
     for (const auto j : make_range(dimension()))
-      params.set<MooseFunctorName>(vel_components[j]) = {
-          _flow_equations_physics->getVelocityNames()[j]};
-    params.set<MooseFunctorName>(NS::density) = "rho_mixture";
-    params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
+      params.set<MooseFunctorName>(vel_components[j]) = "vel_slip_" + components[j];
+    params.set<MooseFunctorName>(NS::density) = _phase_1_density;
+    params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
     params.set<MooseFunctorName>("particle_diameter") =
         getParam<MooseFunctorName>("particle_diameter");
     if (getParam<bool>("output_all_properties"))
