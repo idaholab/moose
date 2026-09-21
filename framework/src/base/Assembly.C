@@ -1080,8 +1080,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
   const auto & phi_map = fe->get_fe_map().get_phi_map();
-  // Use the mapping basis itself because enriched elements such as TET14 have more mapping nodes
-  // than the generic second-order helper FE.
+  // The mapping basis includes every mapping node, including enriched nodes on elements such as TET14.
   const auto num_shapes = phi_map.size();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();

@@ -43,11 +43,7 @@
       type = 'PetscJacobianTester'
       prereq = soft/small
       input = 'small.i'
-      # The Jacobian ratio peaks at 1.39e-3 during contact activation; settled active states remain
-      # below 6.2e-5. PetscJacobianTester's only_final_jacobian could restrict the check to the
-      # settled state and keep the tighter bound, but that discards the activation step entirely --
-      # exactly where a nodal-normal-derivative defect would show. Loosening the bound here instead
-      # keeps that step covered.
+      # Contact activation is nonsmooth and is intentionally included in the Jacobian check.
       ratio_tol = 2e-3
       difference_tol = 1
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'

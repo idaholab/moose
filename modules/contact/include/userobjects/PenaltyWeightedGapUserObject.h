@@ -32,6 +32,7 @@ public:
 
   virtual const ADVariableValue & contactPressure() const override;
   virtual ADReal nodalContactPressure(const Node & node) const override;
+  virtual bool usesNodalNormalDerivatives() const override { return true; }
   virtual const VariableTestValue & tractionBasis() const override;
   virtual void initialize() override;
   virtual void finalize() override;

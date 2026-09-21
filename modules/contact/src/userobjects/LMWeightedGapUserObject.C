@@ -43,7 +43,7 @@ LMWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription(
       "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
-  params.set<bool>("allow_nodal_normal_derivatives") = true;
+  params.set<bool>("use_nodal_normal_derivatives") = true;
   params += LMWeightedGapUserObject::newParams();
   return params;
 }
@@ -84,7 +84,7 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
       paramError("use_nodal_scaling",
                  "Node-based scaling requires 'correct_edge_dropping = true'.");
 
-    // Built once here rather than per element in fullNodalIntegrals().
+    // This FE object is shared by all fullNodalIntegrals() evaluations.
     const FEType fe_type(FIRST, LAGRANGE);
     const auto lower_dim = _subproblem.mesh().dimension() - 1;
     _nodal_scaling_fe = FEBase::build(lower_dim, fe_type);
@@ -147,10 +147,8 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
-  // Returns the stored multiplier, which under node-based scaling is the scaled quantity
-  // zhat_j = kappa_j*lambda_j, not the physical pressure. Callers needing the physical pressure
-  // should use nodalContactPressure() or getNormalContactPressure() instead, both of which divide
-  // by nodalScale().
+  // Under node-based scaling, the stored multiplier is zhat_j = kappa_j*lambda_j.
+  // nodalContactPressure() and getNormalContactPressure() return the physical pressure lambda_j.
   return _lm_var->adSlnLower();
 }
 
@@ -278,14 +276,13 @@ LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
   mooseAssert(node.n_dofs(sys_num, var_num),
               "The Lagrange multiplier must have a degree of freedom at this secondary node.");
 
-  // There is no lower-dimensional AD nodal value accessor, so seed the nodal Lagrange multiplier
-  // derivative directly, as the mortar contact constraints do.
+  // Seed the lower-dimensional nodal Lagrange multiplier derivative explicitly.
   const auto dof_index = node.dof_number(sys_num, var_num, 0);
   ADReal nodal_pressure = (*_lm_var->sys().currentSolution())(dof_index);
-  Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
+  if (Moose::doDerivatives(_subproblem, _sys))
+    Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
   // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
-  // keyed by the displaced-mesh node pointer, and callers may pass a different pointer of the same
-  // id, so map through the mesh to match -- exactly as getNormalContactPressure() does below.
+  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
   return nodal_pressure / nodalScale(_subproblem.mesh().nodePtr(node.id()));
 }
 
@@ -301,8 +298,7 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
   // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
-  // keyed by the displaced-mesh node pointer, and callers may pass a different pointer of the same
-  // id, so map through the mesh to match -- exactly as getNormalGap() does above.
+  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
   return (*_lm_var->sys().currentSolution())(dof_number) /
          nodalScale(_subproblem.mesh().nodePtr(node->id()));
 }
