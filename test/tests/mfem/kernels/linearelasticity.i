@@ -68,8 +68,8 @@
 [Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-    l_max_its = 500
-    l_tol = 1e-8
+    l_max_its = 1
+    l_tol = 0
     print_level = 2
   []
   [main]
@@ -87,10 +87,17 @@
   device = "cpu"
 []
 
+[Postprocessors]
+  [displacement_l2_norm]
+    type = MFEMVectorL2Error
+    variable = displacement
+    function = '0 0 0'
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [CSV]
+    type = CSV
     file_base = OutputData/LinearElasticity
-    vtk_format = ASCII
   []
 []
