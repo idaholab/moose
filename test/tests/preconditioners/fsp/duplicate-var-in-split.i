@@ -65,12 +65,12 @@
     [u]
       vars = 'v'
       petsc_options_iname = '-pc_type -ksp_type'
-      petsc_options_value = '     hypre preonly'
+      petsc_options_value = 'hypre preonly'
     []
     [v]
       vars = 'v'
       petsc_options_iname = '-pc_type -ksp_type'
-      petsc_options_value = '     hypre  preonly'
+      petsc_options_value = 'hypre preonly'
     []
   []
 []
