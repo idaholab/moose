@@ -75,9 +75,8 @@ LibtorchRLValueEstimator::estimate(const LibtorchRLTrajectoryBuffer::Trajectory 
     const auto step = num_steps - reverse_step - 1;
     const Real continuation =
         trajectory.terminals.empty() || !trajectory.terminals[step] ? 1.0 : 0.0;
-    const auto delta =
-        trajectory.rewards[step] + _discount_factor * continuation * next_values[step] -
-        values[step];
+    const auto delta = trajectory.rewards[step] +
+                       _discount_factor * continuation * next_values[step] - values[step];
     gae = delta + _discount_factor * _lambda_factor * continuation * gae;
     targets.advantages[step] = gae;
     targets.value_targets[step] = gae + values[step];

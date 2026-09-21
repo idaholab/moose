@@ -186,7 +186,6 @@ LibtorchDRLControl::execute()
       _current_control_signal_log_probabilities.assign(n_controls, 0.0);
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
-
   }
 
   _previous_control_signal = _current_smoothed_signal;
@@ -212,7 +211,8 @@ LibtorchDRLControl::applyControlSignals()
 {
   for (const auto control_i : index_range(_control_names))
   {
-    const Real applied_signal = computeControlOffset(control_i) + _current_smoothed_signal[control_i];
+    const Real applied_signal =
+        computeControlOffset(control_i) + _current_smoothed_signal[control_i];
     setControllableValueByName<Real>(_control_names[control_i], applied_signal);
   }
 }
