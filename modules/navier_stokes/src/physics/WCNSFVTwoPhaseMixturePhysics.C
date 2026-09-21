@@ -342,6 +342,7 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
     params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+    params.set<MooseFunctorName>("rho_c") = _phase_1_density;
     params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
