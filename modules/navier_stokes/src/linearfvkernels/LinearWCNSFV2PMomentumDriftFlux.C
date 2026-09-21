@@ -91,9 +91,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeFlux()
   //
   // Sign. A LinearFVFluxKernel assembles its face flux onto the left hand side, so the flux set
   // here is the left hand side form of the term. Summing the phase momentum equations puts
-  // +div(sum_k a_k rho_k u_Mk u_Mk) on the left hand side, hence the positive sign. This differs
-  // from the nonlinear WCNSFV2PMomentumDriftFlux, which carries the opposite sign and is left
-  // unchanged; the two discretizations therefore disagree on this term by construction.
+  // +div(sum_k a_k rho_k u_Mk u_Mk) on the left hand side, hence the positive sign.
   _slip_mass_flux = face_coefficient * uslipdotn;
   _face_flux = _slip_mass_flux * u_slip_vel_vec(_index);
 }

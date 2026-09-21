@@ -49,11 +49,6 @@ equations (18) and (21) of [!cite](manninen1996mixture) and the `driftFluxFoam` 
 which adds `fvc::div(tauDm)` to the left hand side of its momentum equation with
 `tauDm = betad*sqr(Udm) + betac*sqr(Ucm)`.
 
-!alert warning
-The nonlinear counterpart of this object, [WCNSFV2PMomentumDriftFlux.md], carries the opposite
-sign and the dilute coefficient. The two discretizations therefore do not solve the same momentum
-equation, and results obtained with one are not comparable with the other for this term.
-
 ## Numerical treatment
 
 The term has no genuine linear dependence on the velocity component being solved for: the slip
