@@ -34,13 +34,13 @@ protected:
   /// z-velocity
   MooseVariableField<Real> * const _w_var;
 
-  /// Continuous phase density
+  /// Mixture density
   const Moose::Functor<ADReal> & _rho_mixture;
 
   /// Dispersed Phase Density
   const Moose::Functor<ADReal> & _rho_d;
 
-  /// Mixture density
+  /// Continuous phase dynamic viscosity (the member keeps its historical name)
   const Moose::Functor<ADReal> & _mu_mixture;
 
   // Gravity acceleration vector
@@ -61,8 +61,17 @@ protected:
   /// The linear friction factor, for laminar flow
   const Moose::Functor<ADReal> & _linear_friction;
 
+  /// Whether the drag is closed by the correlation solved together with the force balance
+  const bool _use_drag_model;
+
+  /// Continuous phase density, for the drag model's Reynolds number
+  const Moose::Functor<ADReal> * const _rho_c;
+
   /// Particle diameter in the dispersed phase
   const Moose::Functor<ADReal> & _particle_diameter;
+
+  /// Dispersed phase fraction, converting the slip velocity into the drift velocity
+  const Moose::Functor<ADReal> & _f_d;
 
   /// index of the velocity component x|y|z
   unsigned int _index;
