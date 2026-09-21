@@ -21,7 +21,7 @@ import mooseutils
 from FactorySystem.InputParameters import InputParameters
 from FactorySystem.MooseObject import MooseObject
 
-from TestHarness import OutputInterface
+from TestHarness import OutputInterface, util
 from TestHarness.capability_util import checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
@@ -739,7 +739,8 @@ class Tester(MooseObject, OutputInterface):
         """
         Entry point for after the tester has processed its results.
         """
-        return
+        if self._delete_output_after_running:
+            util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
 
     def setDeleteOutputAfterRunning(self, value):
         """
