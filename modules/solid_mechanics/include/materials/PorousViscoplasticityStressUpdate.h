@@ -249,6 +249,9 @@ protected:
   {
   }
 
+  /** Lower bound used by the scalar one-population porosity solve. */
+  virtual GenericReal<is_ad> scalarPorosityFloor() const { return _minimum_porosity; }
+
   /** Validate and, within tolerance, clamp the beginning-of-substep porosity to its floor. */
   GenericReal<is_ad> boundedBeginningPorosity() const;
 
@@ -447,15 +450,18 @@ private:
     const GenericRankTwoTensor<is_ad> & trial_dev_stress;
     const GenericReal<is_ad> & trial_equiv_stress;
     const GenericReal<is_ad> & porosity_begin;
+    const GenericReal<is_ad> & porosity_floor;
     const GenericRankTwoTensor<is_ad> & trial_elastic_strain_increment;
     const GenericRankTwoTensor<is_ad> & elastic_strain_old;
     const GenericRankFourTensor<is_ad> & elasticity_tensor;
 
-    // Newton-variable and line-search scales are numerical-conditioning choices. Porosity
-    // convergence has its own physical scale so merit balancing cannot loosen the accepted Rf
-    // tolerance.
+    // Newton-variable and line-search scales are numerical-conditioning choices. Mechanical
+    // convergence uses a physical driving-stress scale independent of max_inelastic_increment,
+    // while porosity convergence has its own physical scale so merit balancing cannot loosen the
+    // accepted Rf tolerance.
     Real p_scale = 1.0;
     Real q_scale = 1.0;
+    Real mechanical_convergence_scale = 1.0;
     Real porosity_variable_scale = 1.0;
     Real porosity_merit_scale = 1.0;
     Real porosity_convergence_scale = 1.0;
@@ -597,7 +603,8 @@ private:
   LocalPoint verifyReducedConvergedPoint(const LocalSolveResult & reduced,
                                          const LocalSolveContext & context);
   GenericReal<is_ad> impliedPorosity(const LocalPoint & point) const;
-  bool freeIncrementReachesPorosityFloor(const LocalPoint & point) const;
+  bool freeIncrementReachesPorosityFloor(const LocalPoint & point,
+                                         const LocalSolveContext & context) const;
   Real reducedPorosityResidual(const LocalPoint & point) const;
   bool reducedPointConverged(const LocalPoint & point, const LocalSolveContext & context) const;
   std::optional<LocalPoint> solveReducedPoint(const LocalCoordinates & seed,
@@ -672,6 +679,7 @@ private:
     const GenericRankFourTensor<is_ad> & elasticity_tensor;
     Real p_scale = 1.0;
     Real q_scale = 1.0;
+    Real mechanical_convergence_scale = 1.0;
     std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_variable_scale{{1.0, 1.0}};
     std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_merit_scale{{1.0, 1.0}};
     std::array<Real, MAX_HYDROSTATIC_STRESS_POPULATIONS> porosity_convergence_scale{{1.0, 1.0}};
