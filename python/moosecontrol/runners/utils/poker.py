@@ -17,6 +17,9 @@ from requests import Session
 
 logger = getLogger("Poker")
 
+# Number of consecutive failed pokes allowed before giving up
+MAX_CONSECUTIVE_FAILURES: int = 5
+
 
 class Poker(Thread):
     """
@@ -64,6 +67,8 @@ class Poker(Thread):
         self._stop_event: Event = Event()
         # The number of times that we've poked
         self._num_poked: int = 0
+        # The number of consecutive failed pokes
+        self._consecutive_failures: int = 0
 
     @property
     def poll_time(self) -> float:
@@ -92,19 +97,32 @@ class Poker(Thread):
         # thread outright - MOOSE only resets its client timeout on a
         # successful poke, so silently giving up here would eventually cause
         # an unrelated-looking fatal client_timeout error on the MOOSE side.
+        # If pokes keep failing, though, give up after MAX_CONSECUTIVE_FAILURES
+        # in a row instead of retrying forever.
         while not self._stop_event.is_set():
             logger.debug("Poking webserver")
             try:
                 request = self.poke()
             except Exception as e:
+                self._consecutive_failures += 1
                 logger.debug(f"Poke raised {type(e).__name__}; will retry")
             else:
                 if request.status_code != 200:
+                    self._consecutive_failures += 1
                     logger.debug(
                         f"Poke has status code {request.status_code}; will retry"
                     )
                 else:
+                    self._consecutive_failures = 0
                     self._num_poked += 1
+
+            if self._consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                logger.debug(
+                    f"Poke failed {self._consecutive_failures} times in a "
+                    "row; giving up"
+                )
+                break
+
             self._stop_event.wait(self.poll_time)
 
         # Close the session
