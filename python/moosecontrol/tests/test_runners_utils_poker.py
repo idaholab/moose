@@ -225,7 +225,7 @@ class TestPoker(MooseControlTestCase):
         with patch.object(session, "get", new=mock_get):
             poke_thread.start()
             while poke_thread.num_poked < 3:
-                sleep(0.001)
+                sleep(0.001)  # Small sleep
             self.assertTrue(poke_thread.is_alive())
             poke_thread.stop()
             poke_thread.join()
