@@ -195,8 +195,8 @@ RangeEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::Brac
   if (argv.size() != 2)
   {
     exp.errors.emplace_back(
-        "range error: Expected 2 arguments ${range first_index last_index} in '" +
-            n->fullpath() + "'",
+        "range error: Expected 2 arguments ${range first_index last_index} in '" + n->fullpath() +
+            "'",
         n);
     return n->val();
   }
@@ -217,9 +217,8 @@ RangeEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::Brac
 
   if (index[1] < index[0])
   {
-    exp.errors.emplace_back("range error: last index " + argv[1] +
-                                " is smaller than first index " + argv[0] + " in '" +
-                                n->fullpath() + "'",
+    exp.errors.emplace_back("range error: last index " + argv[1] + " is smaller than first index " +
+                                argv[0] + " in '" + n->fullpath() + "'",
                             n);
     return n->val();
   }
