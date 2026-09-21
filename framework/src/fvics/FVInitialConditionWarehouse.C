@@ -14,8 +14,7 @@
 #include "MooseVariableFE.h"
 
 FVInitialConditionWarehouse::FVInitialConditionWarehouse(THREAD_ID num_threads)
-  : MooseObjectWarehouseBase<FVInitialConditionBase>(/*threaded=*/true, num_threads),
-    _block_ics(num_threads)
+  : MooseObjectWarehouseBase<FVInitialConditionBase>(num_threads), _block_ics(num_threads)
 {
 }
 

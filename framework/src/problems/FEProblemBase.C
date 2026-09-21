@@ -454,14 +454,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_assembly(*this),
 #endif
-    _mesh_divisions(/*threaded=*/true, n_threads()),
-    _functions(true, n_threads()),
+    _mesh_divisions(n_threads()),
+    _functions(n_threads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_functions(true, n_threads()),
+    _kokkos_functions(n_threads()),
 #endif
-    _convergences(true, n_threads()),
-    _nonlocal_kernels(true, n_threads()),
-    _nonlocal_integrated_bcs(true, n_threads()),
+    _convergences(n_threads()),
+    _nonlocal_kernels(n_threads()),
+    _nonlocal_integrated_bcs(n_threads()),
     _ics(n_threads()),
     _fv_ics(n_threads()),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -481,23 +481,23 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
             "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
 #endif
-    _materials(true, n_threads()),
-    _interface_materials(true, n_threads()),
-    _discrete_materials(true, n_threads()),
-    _all_materials(true, n_threads()),
+    _materials(n_threads()),
+    _interface_materials(n_threads()),
+    _discrete_materials(n_threads()),
+    _all_materials(n_threads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_materials(true, n_threads()),
+    _kokkos_materials(n_threads()),
 #endif
-    _indicators(true, n_threads()),
-    _internal_side_indicators(true, n_threads()),
-    _markers(true, n_threads()),
+    _indicators(n_threads()),
+    _internal_side_indicators(n_threads()),
+    _markers(n_threads()),
     _reporter_data(_app),
-    _multi_apps(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _transient_multi_apps(_app.getExecuteOnEnum(), /*threaded=*/true, n_threads()),
-    _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _multi_apps(_app.getExecuteOnEnum(), n_threads()),
+    _transient_multi_apps(_app.getExecuteOnEnum(), n_threads()),
+    _transfers(_app.getExecuteOnEnum(), 1),
+    _to_multi_app_transfers(_app.getExecuteOnEnum(), 1),
+    _from_multi_app_transfers(_app.getExecuteOnEnum(), 1),
+    _between_multi_app_transfers(_app.getExecuteOnEnum(), 1),
     _num_concurrent_multiapps(getParam<unsigned int>("num_concurrent_multiapps")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
@@ -554,7 +554,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _verbose_restore(getParam<bool>("verbose_restore")),
     _current_execute_on_flag(EXEC_NONE),
-    _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _control_warehouse(_app.getExecuteOnEnum(), 1),
     _is_petsc_options_inserted(false),
     _line_search(nullptr),
     _using_ad_mat_props(false),
