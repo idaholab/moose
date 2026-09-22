@@ -355,6 +355,17 @@ void dontAddCommonSNESOptions(FEProblemBase & fe_problem);
 void dontAddCommonSNESOptions(FEProblemBase & fe_problem, const std::string & prefix);
 
 /**
+ * Apply the vector type recorded in the options database to \p mat, so that the work vectors PETSc
+ * builds from it with MatCreateVecs() live in the same memory space as the rest of the solve.
+ *
+ * MatCreateShell() performs no MatSetFromOptions(), so a shell operator never picks that type up on
+ * its own and keeps the host default MatCreate() gave it. Every shell MOOSE hands to PETSc calls
+ * this at construction, before anything can ask it for a vector. Does nothing when no vector type
+ * has been requested.
+ */
+void applyMatrixVecTypeOptions(const libMesh::Parallel::Communicator & comm, Mat mat);
+
+/**
  * Create a matrix from a binary file. Note that the returned libMesh matrix wrapper will not
  * destroy the created matrix on destruction. \p petsc_mat must be destroyed manually via \p
  * MatDestroy

@@ -116,6 +116,34 @@ PetscOptionsScope::~PetscOptionsScope()
 #endif
 }
 
+void
+applyMatrixVecTypeOptions(const libMesh::Parallel::Communicator & comm, Mat mat)
+{
+  // MatCreateShell() runs MatSetSizes(), MatSetType() and MatSetUp() and no options routine, so a
+  // shell never reads a requested vector type for itself and keeps the host default that
+  // MatCreate() gave it. PCMG builds each level's work vectors from that level's operator and
+  // transfer with MatCreateVecs(), which applies the default through VecSetType(), so a solve whose
+  // own vectors were placed on the device ends up moving those work vectors across the bus on every
+  // application. The option read here is the one applyVectorTypeOptions() records for this purpose.
+  std::array<char, PETSC_MAX_PATH_LEN> vec_type = {};
+  PetscBool found = PETSC_FALSE;
+  LibmeshPetscCallA(comm.get(),
+                    PetscOptionsGetString(LIBMESH_PETSC_NULLPTR,
+                                          LIBMESH_PETSC_NULLPTR,
+                                          "-mat_vec_type",
+                                          vec_type.data(),
+                                          vec_type.size(),
+                                          &found));
+
+  if (!found)
+    return;
+
+  // The generic name is carried rather than a name resolved off an existing vector, which would be
+  // the sequential one for a serial vector and so wrong for a parallel matrix; VecSetType()
+  // resolves the generic name against the communicator it is given.
+  LibmeshPetscCallA(comm.get(), MatSetVecType(mat, vec_type.data()));
+}
+
 namespace
 {
 

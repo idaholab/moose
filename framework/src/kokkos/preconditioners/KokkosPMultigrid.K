@@ -14,6 +14,7 @@
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
 #include "KokkosLevelTransfer.h"
+#include "PetscSupport.h"
 
 #include "libmesh/petsc_matrix_base.h"
 
@@ -375,6 +376,7 @@ PMultigrid::verifyOperatorConditioning()
     LibmeshPetscCallA(
         comm().get(),
         MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, inverse, &inverse_shell));
+    Moose::PetscSupport::applyMatrixVecTypeOptions(comm(), inverse_shell);
     LibmeshPetscCallA(comm().get(),
                       MatShellSetOperation(
                           inverse_shell, MATOP_MULT, (void (*)(void))mooseKokkosInverseShellMult));
@@ -431,6 +433,7 @@ PMultigrid::verifyCycleSymmetry()
   Mat cycle;
   LibmeshPetscCallA(comm().get(),
                     MatCreateShell(comm().get(), local_rows, local_cols, rows, cols, pc, &cycle));
+  Moose::PetscSupport::applyMatrixVecTypeOptions(comm(), cycle);
   LibmeshPetscCallA(
       comm().get(),
       MatShellSetOperation(cycle, MATOP_MULT, (void (*)(void))mooseKokkosPreconditionerShellMult));

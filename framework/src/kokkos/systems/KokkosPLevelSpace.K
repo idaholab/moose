@@ -19,6 +19,7 @@
 #include "ConsoleStream.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
+#include "PetscSupport.h"
 
 #include "libmesh/dirichlet_boundaries.h"
 #include "libmesh/dof_map.h"
@@ -502,6 +503,22 @@ PLevelSpace::operatorMat() const
   mooseAssert(_operator, "The p-multigrid level operator has not been built yet.");
 
   return _operator;
+}
+
+void
+PLevelSpace::applyShellVecTypeOptions()
+{
+  // A shell keeps the host default vector type until it is given one, and PCMG builds each level's
+  // work vectors from the operator and the transfer below. This runs from
+  // PMultigrid::setupSolver() rather than from the shells' own construction in init(), because the
+  // requested type only reaches the options database when FEProblemBase::solve() applies the
+  // system's PETSc options, which is later than init() and earlier than setupSolver().
+  //
+  // A level that assembles hands PETSc a real matrix, whose type its own creation settled.
+  if (!_assemble)
+    Moose::PetscSupport::applyMatrixVecTypeOptions(_sys.comm(), _operator);
+
+  Moose::PetscSupport::applyMatrixVecTypeOptions(_sys.comm(), _interpolation);
 }
 
 Mat
