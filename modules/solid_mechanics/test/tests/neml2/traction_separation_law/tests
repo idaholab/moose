@@ -1,0 +1,20 @@
+[Tests]
+  [bilinear_mixed_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_moose.i'
+    # Native-MOOSE reference solution; its gold is its own output at tight default tolerance.
+    exodiff = 'bilinear_mixed_moose_out.e'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall compute the reaction-force history of a bi-linear mixed-mode cohesive zone problem driven through a prescribed loading history using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_neml2.i'
+    # The gold is a symlink to the native-MOOSE reference output above, so the NEML2
+    # cohesive response must reproduce it to within the react_y.cmp tolerances.
+    exodiff = 'bilinear_mixed_neml2_out.e'
+    custom_cmp = 'react_y.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the reaction-force history of an equivalent cohesive zone problem driven through the same loading history within a tolerance of one percent, when the cohesive response is computed with the NEML2 traction separation law instead of the native MOOSE cohesive traction law.'
+  []
+[]

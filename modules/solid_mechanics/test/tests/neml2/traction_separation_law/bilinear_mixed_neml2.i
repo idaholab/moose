@@ -1,5 +1,9 @@
 boundary = 'Block1_Block2'
 
+[Problem]
+  extra_tag_vectors = 'ref'
+[]
+
 [Mesh]
   [msh]
     type = GeneratedMeshGenerator
@@ -56,6 +60,7 @@ boundary = 'Block1_Block2'
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
+        extra_vector_tags = 'ref'
       []
     []
   []
@@ -85,6 +90,21 @@ boundary = 'Block1_Block2'
     # CZMComputeDisplacementJumpTotalLagrangian, so it must be routed through
     # interface material data
     interface_material_inputs = 'interface_displacement_jump'
+  []
+[]
+
+[AuxVariables]
+  [react_y]
+  []
+[]
+
+[AuxKernels]
+  [react_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'react_y'
+    scaled = false
   []
 []
 
@@ -163,11 +183,26 @@ boundary = 'Block1_Block2'
   nl_rel_tol = 1e-50
   nl_abs_tol = 1e-15
   start_time = 0.0
-  dt = 0.1
   end_time = 1.0
-  dtmin = 0.1
+
+  # Small time steps at the start resolve damage nucleation (the interface jumps past the
+  # onset separation delta_c = normal_strength / penalty_stiffness = 0.01 in one step
+  # otherwise), and again through the peak-to-failure window; coarse steps suffice elsewhere.
+  [TimeStepper]
+    type = TimeSequenceStepper
+    time_sequence = '0 0.001 0.002 0.005 0.01 0.03 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2 0.25 0.3 0.4 0.5 0.52 0.54 0.56 0.58 0.6 0.62 0.64 0.66 0.68 0.7 0.72 0.74 0.76 0.78 0.8 0.82 0.84 0.86 0.88 0.9 0.92 0.94 0.96 0.98 1.0'
+  []
+[]
+
+[Postprocessors]
+  [react_y]
+    type = NodalSum
+    variable = 'react_y'
+    boundary = 'top'
+  []
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []
