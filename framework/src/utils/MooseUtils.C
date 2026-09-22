@@ -238,13 +238,13 @@ convertLatestCheckpoint(std::string orig, const std::string & context)
       existing_files = "(no files found)";
 
     mooseError("Unable to find a suitable ",
-                context,
-                " file: no '*.rd' checkpoint file exists in directory '",
-                path,
-                "' (searched because of the 'LATEST' setting in '",
-                orig,
-                "').\nFiles found in that directory: ",
-                existing_files);
+               context,
+               " file: no '*.rd' checkpoint file exists in directory '",
+               path,
+               "' (searched because of the 'LATEST' setting in '",
+               orig,
+               "').\nFiles found in that directory: ",
+               existing_files);
   }
 
   return converted;
