@@ -44,6 +44,22 @@ struct TensorMode
   Real sign;
 };
 
+/**
+ * A reference vector shape function gradient that occupies a single component.
+ *
+ * Row a of a reference vector shape gradient holds the derivative of component a, so a shape
+ * function carrying one nonzero component leaves one nonzero row. Storing that row and its index
+ * lets a consumer contract against three entries instead of reading all nine, which is where the
+ * cost of a vector element kernel sits.
+ */
+struct ComponentGradient
+{
+  /// The nonzero row of the gradient, the reference gradient of the scalar basis function
+  Real3 gradient;
+  /// The component that row holds the derivative of
+  unsigned int component;
+};
+
 #ifdef MOOSE_KOKKOS_SCOPE
 /**
  * A table of reference shape data in which each degree of freedom's row is stored once.
@@ -83,6 +99,12 @@ public:
    * @returns The number of quadrature points
    */
   KOKKOS_FUNCTION unsigned int numQps() const { return _pool.n(1); }
+  /**
+   * Get whether the table holds any data, which a pool that is only filled for some FE families
+   * does not
+   * @returns Whether the table is populated
+   */
+  KOKKOS_FUNCTION bool valid() const { return _pool.size(); }
 
 private:
   /// The distinct rows, indexed by row and quadrature point
@@ -435,6 +457,25 @@ public:
             _shape_face_rows(subdomain, elem_type, fe_type, orientation)};
   }
   /**
+   * Get the single-component form of the gradient of vector shape functions of a FE type, for an
+   * element type and subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param orientation The contiguous edge and face orientation ID
+   * @returns The compact gradients, in a table that is invalid for a family whose shape functions
+   * are not single-component
+   */
+  KOKKOS_FUNCTION ShapeTable<ComponentGradient>
+  getVectorGradPhiComponents(ContiguousSubdomainID subdomain,
+                             unsigned int elem_type,
+                             unsigned int fe_type,
+                             unsigned int orientation) const
+  {
+    return {_vector_grad_phi_component(subdomain, elem_type, fe_type),
+            _shape_rows(subdomain, elem_type, fe_type, orientation)};
+  }
+  /**
    * Get whether a cached FE type is vector-valued
    * @param fe_type The FE type ID
    * @returns Whether the FE type is vector-valued
@@ -623,6 +664,7 @@ private:
   Array3D<Array<Array2D<Real3>>> _vector_phi_face;
   Array3D<Array2D<Real33>> _vector_grad_phi;
   Array3D<Array<Array2D<Real33>>> _vector_grad_phi_face;
+  Array3D<Array2D<ComponentGradient>> _vector_grad_phi_component;
   Array4D<Array<unsigned int>> _shape_rows;
   Array4D<Array<Array<unsigned int>>> _shape_face_rows;
   Array<bool> _is_vector_fe_type;

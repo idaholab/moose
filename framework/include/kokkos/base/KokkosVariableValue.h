@@ -162,6 +162,25 @@ public:
   {
     return reference(datum, i, qp) * datum.J(qp).transpose();
   }
+
+  /**
+   * Get the single-component form of the current vector shape function gradient, for use with
+   * Real33::contractRow() in place of a full contraction. The table is invalid for a family whose
+   * shape functions are not single-component.
+   *
+   * The table is indexed by element-local degree of freedom, so it applies to the element
+   * quadrature rule and not to a side.
+   *
+   * @param datum The AssemblyDatum object of the current thread
+   * @returns The compact gradients
+   */
+  KOKKOS_FUNCTION ShapeTable<ComponentGradient> components(AssemblyDatum & datum) const
+  {
+    auto & elem = datum.elem();
+
+    return datum.assembly().getVectorGradPhiComponents(
+        elem.subdomain, elem.type, is_test ? datum.ife() : datum.jfe(), elem.orientation);
+  }
 };
 
 template <bool is_test>

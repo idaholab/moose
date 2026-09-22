@@ -441,6 +441,7 @@ Assembly::initShape()
   _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _vector_grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_grad_phi_component.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _shape_rows.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
   _shape_face_rows.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
   _is_vector_fe_type.create(_fe_type_map.size());
@@ -790,6 +791,63 @@ Assembly::initShape()
           }
         };
 
+        // A shape function of a vector Lagrange family carries one nonzero component, so row a of
+        // its reference gradient, which holds the derivative of component a, is nonzero for a
+        // single a. Storing that row on its own lets a consumer read three entries per degree of
+        // freedom and quadrature point instead of nine, which is where the cost of a vector
+        // element kernel sits: the multiply count of the contraction is not what limits it.
+        //
+        // The structure is read off the table it condenses rather than assumed from the family or
+        // from the degree of freedom numbering, both of which are conventions rather than
+        // guarantees. A family whose shape functions carry more than one component leaves the
+        // compact pool empty and its consumers on the full gradient. Entries are compared against
+        // exact zero because the off-component entries of a single-component basis are
+        // structurally absent rather than the result of arithmetic that could round.
+        auto build_vector_components = [&](auto & pool, auto & compact)
+        {
+          compact.create(pool.n(0), pool.n(1));
+
+          for (const auto row : make_range(pool.n(0)))
+          {
+            auto component = libMesh::invalid_uint;
+
+            for (const auto qp : make_range(pool.n(1)))
+              for (const auto a : make_range(3u))
+              {
+                bool nonzero = false;
+
+                for (const auto b : make_range(3u))
+                  nonzero = nonzero || pool(row, qp)(a, b) != 0;
+
+                if (!nonzero)
+                  continue;
+
+                if (component != libMesh::invalid_uint && component != a)
+                {
+                  compact.destroy();
+                  return;
+                }
+
+                component = a;
+              }
+
+            // A shape function whose gradient vanishes at every quadrature point contributes
+            // nothing, so any component reproduces it.
+            if (component == libMesh::invalid_uint)
+              component = 0;
+
+            for (const auto qp : make_range(pool.n(1)))
+            {
+              auto & entry = compact(row, qp);
+
+              entry.component = component;
+
+              for (const auto b : make_range(3u))
+                entry.gradient(b) = pool(row, qp)(component, b);
+            }
+          }
+        };
+
         if (is_vector_fe)
         {
           assign_rows(*vector_fe, *vector_fe_face);
@@ -799,6 +857,8 @@ Assembly::initShape()
                      _vector_grad_phi(sid, elem_id, fe_id),
                      _vector_phi_face(sid, elem_id, fe_id),
                      _vector_grad_phi_face(sid, elem_id, fe_id));
+          build_vector_components(_vector_grad_phi(sid, elem_id, fe_id),
+                                  _vector_grad_phi_component(sid, elem_id, fe_id));
         }
         else
         {
@@ -920,6 +980,7 @@ Assembly::initShape()
   _vector_phi_face.copyToDeviceNested();
   _vector_grad_phi.copyToDeviceNested();
   _vector_grad_phi_face.copyToDeviceNested();
+  _vector_grad_phi_component.copyToDeviceNested();
   _shape_rows.copyToDeviceNested();
   _shape_face_rows.copyToDeviceNested();
   _is_vector_fe_type.copyToDevice();
