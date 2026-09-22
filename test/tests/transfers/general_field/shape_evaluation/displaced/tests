@@ -6,5 +6,6 @@
         input = 'parent.i'
         exodiff = 'parent_out.e'
         requirement = "The system shall be able to transfer from a source application that is being displaced."
+        max_threads = 1 # child.i requests superlu_dist, which is not thread-safe
     []
 []

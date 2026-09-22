@@ -7,5 +7,6 @@
       csvdiff = transient_synthetic_data_csv_sample_0011.csv
       allow_test_objects = true
       requirement = 'The system shall create synthetic transient data in a consumable format.'
+      max_threads = 1 # transient_synthetic_data.i requests superlu_dist, which is not thread-safe
     []
 []

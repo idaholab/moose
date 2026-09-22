@@ -10,5 +10,6 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce eliminating initial
                    overclosure between the primary and secondary surfaces."
+    max_threads = 1 # overclosure.i requests superlu_dist, which is not thread-safe
   [../]
 []

@@ -8,5 +8,6 @@
     abs_zero = 5e-09
     capabilities = 'superlu'
     requirement = 'The system shall be able to output the incremental slip components to an auxiliary variable.'
+    max_threads = 1 # incremental_slip.i requests superlu_dist, which is not thread-safe
   []
 []

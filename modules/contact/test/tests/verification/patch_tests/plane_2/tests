@@ -13,6 +13,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane geometry (NAFEMS CGS1 contact patch test with mismatched nodes)."
+    max_threads = 1 # plane2_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./glued_pen]
     type = 'CSVDiff'

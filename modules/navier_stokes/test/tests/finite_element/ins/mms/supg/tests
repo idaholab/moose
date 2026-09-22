@@ -129,5 +129,6 @@
     capabilities = 'superlu'
     requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind and pressure stabilized Petrov-Galerkin and with a Q1Q1 discretization'
     recover = false # We only execute output on final
+    max_threads = 1 # supg_pspg_adv_dominated_mms.i requests superlu_dist, which is not thread-safe
   [../]
 []

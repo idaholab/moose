@@ -12,6 +12,7 @@
     input = 'hertz_contact_rz_quad8.i'
     type = 'RunApp'
     requirement = 'The Contact system shall simulate Hertz contact between sphere and plane as a 2D axisymmetric problem with Quad8 elements.'
+    max_threads = 1 # hertz_contact_rz_quad8.i requests superlu_dist, which is not thread-safe
   [../]
 
   [./hertz_contact]

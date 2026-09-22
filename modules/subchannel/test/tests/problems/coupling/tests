@@ -10,5 +10,6 @@
     mesh_mode = 'replicated'
     allow_warnings = true
     requirement = 'The system will examine the coupling using SCM as main app'
+    max_threads = 1 # sub.i requests superlu_dist, which is not thread-safe
   []
 []

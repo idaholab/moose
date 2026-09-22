@@ -7,5 +7,6 @@
     csvdiff = '1D_fluid_only_out.csv'
     abs_zero = 1e-08
     requirement = 'The system shall reproduce fluid pressures that match accurately with theoretical pressures.'
+    max_threads = 1 # 1D_fluid_only.i requests superlu_dist, which is not thread-safe
   [../]
 []

@@ -27,6 +27,7 @@
       capabilities = 'superlu & compiler!=clang'
       allow_warnings = true
       detail = "support the failure and the ability to limit the number of processors for the sub-application."
+      max_threads = 1 # failure_with_max_procs_set.i requests superlu_dist, which is not thread-safe
     []
   []
 []

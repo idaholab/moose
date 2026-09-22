@@ -16,6 +16,7 @@
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane strain "
                   "single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [glued_pen]
     type = 'CSVDiff'

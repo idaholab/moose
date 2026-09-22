@@ -9,6 +9,7 @@
       exodiff = 'scalar_constraint_kernel_RJ_out.e'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       detail = 'showing the correct results with separate computation of residual and Jacobian'
+      max_threads = 1 # scalar_constraint_kernel_RJ.i requests superlu_dist, which is not thread-safe
     []
     [jacobian_separate]
       type = 'PetscJacobianTester'
@@ -17,6 +18,7 @@
       detail = 'verifying the separated Jacobian'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       prereq = 'kernel_dirichlet/physics_separate'
+      max_threads = 1 # scalar_constraint_kernel_RJ.i requests superlu_dist, which is not thread-safe
     []
     [physics_together]
       type = 'Exodiff'
@@ -25,6 +27,7 @@
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       detail = 'showing the correct results with computation of residual and Jacobian together'
       prereq = 'kernel_dirichlet/jacobian_separate'
+      max_threads = 1 # scalar_constraint_kernel_RJ.i requests superlu_dist, which is not thread-safe
     []
     [jacobian_together]
       type = 'PetscJacobianTester'
@@ -33,6 +36,7 @@
       detail = 'verifying the Jacobian together'
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       prereq = 'kernel_dirichlet/physics_together'
+      max_threads = 1 # scalar_constraint_kernel_RJ.i requests superlu_dist, which is not thread-safe
     []
   []
 
@@ -44,6 +48,7 @@
       csvdiff = 'scalar_constraint_together_out.csv'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       detail = 'showing the correct results with separate computation of residual and Jacobian for Neumann'
+      max_threads = 1 # scalar_constraint_together.i requests superlu_dist, which is not thread-safe
     []
     [jacobian_separate]
       type = 'PetscJacobianTester'
@@ -52,6 +57,7 @@
       detail = 'verifying the separated Jacobian for Neumann'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       prereq = 'kernel_neumann/physics_separate'
+      max_threads = 1 # scalar_constraint_together.i requests superlu_dist, which is not thread-safe
     []
     [physics_together]
       type = 'CSVDiff'
@@ -60,6 +66,7 @@
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       detail = 'showing the correct results with computation of residual and Jacobian together for Neumann'
       prereq = 'kernel_neumann/jacobian_separate'
+      max_threads = 1 # scalar_constraint_together.i requests superlu_dist, which is not thread-safe
     []
     [jacobian_together]
       type = 'PetscJacobianTester'
@@ -68,6 +75,7 @@
       detail = 'verifying the Jacobian together for Neumann'
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       prereq = 'kernel_neumann/physics_together'
+      max_threads = 1 # scalar_constraint_together.i requests superlu_dist, which is not thread-safe
     []
   []
 
@@ -76,6 +84,7 @@
     input = 'scalar_constraint_together.i'
     csvdiff = 'scalar_constraint_together_out.csv'
     requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver, computing the residual and Jacobian simultaneously.'
+    max_threads = 1 # scalar_constraint_together.i requests superlu_dist, which is not thread-safe
   []
 
   [bipass]

@@ -10,6 +10,7 @@
       csvdiff = forward_exact_csv_sample_0011.csv
       allow_test_objects = true
       detail = 'creating synthetic data, '
+      max_threads = 1 # forward_exact.i requests superlu_dist, which is not thread-safe
     []
     [parameter_mesh]
       type = Exodiff

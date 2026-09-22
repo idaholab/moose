@@ -6,6 +6,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [allow_solution_invalid]
@@ -15,6 +16,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [solution_invalid_warning]
@@ -27,6 +29,7 @@
       cli_args = 'Materials/filter/flag_solution_warning=true Problem/show_invalid_solution_console=false'
       expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show solution counts'
       detail = 'unless the user specifies to silence them,'
+      max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
     []
     [console_output]
       type = 'RunApp'
@@ -40,6 +43,7 @@
 ------------------------------------------------------------------------------
 "
       detail = 'and otherwise both in the console window and a json file.'
+      max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
     []
   []
 
@@ -53,6 +57,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output to screen immediately a detailed reason as to why a solution is invalid'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [solution_invalid_json]
@@ -66,6 +71,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [solution_invalid_transient]
@@ -81,6 +87,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [warning_tracking_json]
@@ -113,6 +120,7 @@
     max_parallel = 3
     issues = '#22814'
     requirement = 'The system shall be able to handle a solution invalidity happening on just one processor in a parallel run'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [solution_valid_again_by_cutting_step]
@@ -125,6 +133,7 @@
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to handle a solution invalidity occurs in the previous time step and recover in the next time step'
+    max_threads = 1 # solution_invalid.i requests superlu_dist, which is not thread-safe
   []
 
   [test]
@@ -143,6 +152,7 @@
       restep = false
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
+      max_threads = 1 # solution_invalid_recover.i requests superlu_dist, which is not thread-safe
     []
 
     [solution_valid_recover]
@@ -158,6 +168,7 @@
       # The object is meant to keep its state across failed timesteps, though.
       restep = false
       detail = 'restarting from the output data'
+      max_threads = 1 # solution_invalid_recover.i requests superlu_dist, which is not thread-safe
     []
   []
 
@@ -181,6 +192,7 @@
       | NonsafeMaterial : Solution invalid warning! | 5    |             48 |         240 |
       -------------------------------------------------------------------------------------
   "
+      max_threads = 1 # solution_invalid_timehistory.i requests superlu_dist, which is not thread-safe
     []
     [use_solution_warning_subblock]
       type = 'RunApp'
@@ -196,6 +208,7 @@
 | NonsafeMaterial : Solution invalid warning! | 2-3  |             96 |         240 |
 -------------------------------------------------------------------------------------
   "
+      max_threads = 1 # solution_invalid_timehistory.i requests superlu_dist, which is not thread-safe
     []
   []
 []

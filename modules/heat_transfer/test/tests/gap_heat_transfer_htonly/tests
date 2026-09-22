@@ -82,6 +82,7 @@
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
+    max_threads = 1 # cyl3D.i requests superlu_dist, which is not thread-safe
   []
   [cyl2D]
     type = Exodiff
@@ -92,6 +93,7 @@
                   "gap in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
+    max_threads = 1 # cyl2D.i requests superlu_dist, which is not thread-safe
   []
   [sphere3D]
     type = Exodiff
@@ -102,6 +104,7 @@
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
+    max_threads = 1 # sphere3D.i requests superlu_dist, which is not thread-safe
   []
   [sphere2DRZ]
     type = Exodiff
@@ -112,6 +115,7 @@
                   "gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
+    max_threads = 1 # sphere2DRZ.i requests superlu_dist, which is not thread-safe
   []
   [cyl2D_xz]
     type = Exodiff
@@ -122,6 +126,7 @@
                   "gap in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
+    max_threads = 1 # cyl2D_xz.i requests superlu_dist, which is not thread-safe
   []
   [cyl2D_yz]
     type = Exodiff
@@ -132,6 +137,7 @@
                   "gap in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
+    max_threads = 1 # cyl2D_yz.i requests superlu_dist, which is not thread-safe
   []
   [planar_xy]
     type = Exodiff

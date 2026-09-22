@@ -17,6 +17,7 @@
     abs_zero = 1e-7
     requirement = "The system shall enforce the automatic patch update using the iteration option "
                   "and give results equal to the 'always' option."
+    max_threads = 1 # sliding_update.i requests superlu_dist, which is not thread-safe
   []
   [error_test]
     type = RunException

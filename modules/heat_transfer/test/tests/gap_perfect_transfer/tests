@@ -8,6 +8,7 @@
       input = perfect_transfer_gap.i
       csvdiff = perfect_transfer_gap_out.csv
       detail = 'the use of a penalty parameter, and'
+      max_threads = 1 # perfect_transfer_gap.i requests superlu_dist, which is not thread-safe
     []
     [error_check]
       type = RunException

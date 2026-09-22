@@ -7,5 +7,6 @@
     csvdiff = 'wave_height_bc_out.csv'
     abs_zero = 1e-08
     requirement = 'The system shall reproduce wave heights that are consistent with the ones provided.'
+    max_threads = 1 # wave_height_bc.i requests superlu_dist, which is not thread-safe
   [../]
 []

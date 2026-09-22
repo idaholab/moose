@@ -18,6 +18,7 @@
   design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
   # Uses a MultiAppGeometricInterpolationTransfer
   mesh_mode = 'replicated'
+  max_threads = 1 # matrix_app_dirac.i requests superlu_dist, which is not thread-safe
 []
 [non_conforming_dirac]
   type = CSVDiff
@@ -28,5 +29,6 @@
   design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
   # Uses a MultiAppGeometricInterpolationTransfer
   mesh_mode = 'replicated'
+  max_threads = 1 # fracture_app_dirac.i requests superlu_dist, which is not thread-safe
 []
 []

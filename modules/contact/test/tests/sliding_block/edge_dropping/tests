@@ -12,6 +12,7 @@
                   'basis'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-slide-2d-nondual]
     type = 'CSVDiff'
@@ -25,6 +26,7 @@
                'Outputs/file_base="two_equal_blocks_slide_2d_nondual_out"'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-slide-3d]
     type = 'CSVDiff'

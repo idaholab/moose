@@ -8,6 +8,7 @@
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip.'
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   [../]
   [./single_point_2d_predictor]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip. With predictor solver options.'
+    max_threads = 1 # single_point_2d_predictor.i requests superlu_dist, which is not thread-safe
   [../]
   [./single_point_2d_tp]
     type = 'Exodiff'
@@ -24,5 +26,6 @@
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip when formulation selected is tangential_penalty contact.'
+    max_threads = 1 # single_point_2d_tp.i requests superlu_dist, which is not thread-safe
   [../]
 []

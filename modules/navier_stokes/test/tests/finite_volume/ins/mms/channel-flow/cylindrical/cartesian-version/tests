@@ -7,6 +7,7 @@
     test_case = Test2DRCWalls
     min_parallel = 8
     requirement = 'The system shall exhibit second order convergence for all variables in a Cartesian, no-slip, channel-flow problem using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
+    max_threads = 1 # 2d-rc-no-slip-walls.i requests superlu_dist, which is not thread-safe
   []
   [two_term_symmetry]
     type = MMSTest
@@ -14,6 +15,7 @@
     test_case = Test2DRCSymmetry
     min_parallel = 8
     requirement = 'The system shall exhibit second order convergence for all variables in a Cartesian, no-slip, channel-flow problem with a symmetry axis using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
+    max_threads = 1 # 2d-rc-symmetry.i requests superlu_dist, which is not thread-safe
   []
   [two_term_symmetry_rz]
     type = MMSTest
@@ -21,5 +23,6 @@
     test_case = Test2DRZRCSymmetry
     min_parallel = 8
     requirement = 'The system shall exhibit second order convergence for all variables in an axisymmetric, no-slip, channel-flow problem using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
+    max_threads = 1 # 2d-rc-rz-symmetry.i requests superlu_dist, which is not thread-safe
   []
 []

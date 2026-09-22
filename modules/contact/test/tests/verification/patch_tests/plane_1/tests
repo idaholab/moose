@@ -13,6 +13,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
+    max_threads = 1 # plane1_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -26,6 +27,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact for
     2D plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
+    max_threads = 1 # plane1_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -40,6 +42,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic
     contact for 2D plane geometry (NAFEMS CGS1 contact patch test with matched
     nodes)."
+    max_threads = 1 # plane1_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'

@@ -7,5 +7,6 @@
     csvdiff = '1D_struc_acoustic_out.csv'
     abs_zero = 1e-08
     requirement = 'The system shall reproduce fluid pressures and structural stresses that match accurately with the ones provided.'
+    max_threads = 1 # 1D_struc_acoustic.i requests superlu_dist, which is not thread-safe
   [../]
 []

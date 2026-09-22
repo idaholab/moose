@@ -14,6 +14,7 @@
                   'mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-vel.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-wear]
     type = 'Exodiff'
@@ -28,6 +29,7 @@
                   'equation via a mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-wear.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'

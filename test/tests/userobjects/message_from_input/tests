@@ -11,6 +11,7 @@
       expect_out = 'Test Message'
 
       detail = "print out the user-defined message"
+      max_threads = 1 # message_from_input.i requests superlu_dist, which is not thread-safe
     []
   []
 []

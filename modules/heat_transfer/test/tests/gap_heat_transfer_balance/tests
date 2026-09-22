@@ -10,6 +10,7 @@
     requirement = "Energy balance must be fulfilled for the heat transfer of concentric spheres "
                   "involving radiation, when the gap distance is not negligible with respect to the "
                   "body main dimensions."
+    max_threads = 1 # large_gap_heat_transfer_test_sphere.i requests superlu_dist, which is not thread-safe
   []
   [large_gap_heat_transfer_test_rz_cylinder]
     type = CSVDiff

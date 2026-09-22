@@ -6,5 +6,6 @@
     input = 'function_heat_source.i'
     csvdiff = 'function_heat_source_out.csv'
     requirement = 'The system shall produce a moving heat source where its path is function dependent'
+    max_threads = 1 # function_heat_source.i requests superlu_dist, which is not thread-safe
   [../]
 []

@@ -9,6 +9,7 @@
                   'same height come into contact using the dual basis'
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-compress-2d_pg]
     type = 'CSVDiff'
@@ -18,6 +19,7 @@
                   'same height come into contact using the Petrov-Galerkin approach.'
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_2d_pg.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-compress-2d-nondual]
     type = 'CSVDiff'

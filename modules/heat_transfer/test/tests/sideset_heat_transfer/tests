@@ -32,6 +32,7 @@
       exodiff = 'cfem_gap_out.e'
       abs_zero = 1e-6
       detail = 'block restricted continuous finite element variables.'
+      max_threads = 1 # cfem_gap.i requests superlu_dist, which is not thread-safe
     [../]
   []
   [./1D_gap_err]

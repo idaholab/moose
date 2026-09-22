@@ -7,6 +7,7 @@
     exodiff = recover_out.e
     capabilities = 'superlu'
     requirement = 'The system shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    max_threads = 1 # recover.i requests superlu_dist, which is not thread-safe
   []
   [recover_2]
     type = RunApp
@@ -34,6 +35,7 @@
     exodiff = ad_recover_out.e
     capabilities = 'superlu'
     requirement = 'The system shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    max_threads = 1 # ad_recover.i requests superlu_dist, which is not thread-safe
   []
   [ad_recover_2]
     type = RunApp
