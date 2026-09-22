@@ -220,6 +220,11 @@ PMultigrid::setupSolver()
   // interpolation and the next finer level's operator
   LibmeshPetscCall(PCMGSetGalerkin(pc, PC_MG_GALERKIN_NONE));
 
+  // Before PCMG is handed any of them, since it builds each level's work vectors from the operator
+  // and the transfer it is given
+  for (const auto & level : _levels)
+    level->applyShellVecTypeOptions();
+
   for (const auto i : index_range(_levels))
   {
     KSP smoother;

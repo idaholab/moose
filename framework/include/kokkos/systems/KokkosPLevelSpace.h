@@ -156,6 +156,13 @@ public:
   Mat interpolationMat() const;
 
   /**
+   * Give this level's shell matrices the vector type the solve requested, so that the work vectors
+   * PETSc builds from them with MatCreateVecs() share the memory space of the rest of the solve.
+   * Called once the system's PETSc options have been applied and before PCMG asks for a vector.
+   */
+  void applyShellVecTypeOptions();
+
+  /**
    * Entry points of the level's shell matrices, which read the linearization from the fine system's
    * quadrature-point Jacobian cache
    */
