@@ -145,6 +145,8 @@ using ScratchReal =
     ::Kokkos::View<Real *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryUnmanaged>;
 using ScratchReal3 =
     ::Kokkos::View<Real3 *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryUnmanaged>;
+using ScratchTensor =
+    ::Kokkos::View<QpJacobianTensor *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryUnmanaged>;
 ///@}
 
 /**
@@ -171,6 +173,18 @@ applyTensorScratchBytes(const unsigned int n_modes, const unsigned int n_points)
 
   return (n_modes * n_modes + 2 * n_points * n_modes + 3 * n_points * n_points) * sizeof(Real) +
          6 * alignment;
+}
+
+/**
+ * The per-team scratch the block assembly carves out for an element, holding that element's
+ * quadrature-point linearization, allowing for the alignment the allocation is padded to
+ */
+KOKKOS_INLINE_FUNCTION std::size_t
+blockScratchBytes(const unsigned int num_qps)
+{
+  constexpr std::size_t alignment = 128;
+
+  return num_qps * sizeof(QpJacobianTensor) + alignment;
 }
 } // namespace
 
@@ -590,8 +604,18 @@ QpJacobianOperator::assembleBlocks(const EntityBlocks & blocks)
 {
   _blocks = blocks;
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, BlockLoop> policy(0,
-                                                                                    _thread.size());
+  if (!_block_scratch_bytes)
+  {
+    ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, BlockScratchLoop> scratch_policy(
+        0, _thread.size());
+    std::size_t bytes = 0;
+    ::Kokkos::parallel_reduce(scratch_policy, *this, ::Kokkos::Max<std::size_t>(bytes));
+    ::Kokkos::fence();
+    _block_scratch_bytes = bytes;
+  }
+
+  BlockPolicy policy(_thread.size(), ::Kokkos::AUTO);
+  policy.set_scratch_size(0, ::Kokkos::PerTeam(_block_scratch_bytes));
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
@@ -721,7 +745,7 @@ QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
 }
 
 KOKKOS_FUNCTION void
-QpJacobianOperator::operator()(BlockLoop, const ThreadID tid) const
+QpJacobianOperator::operator()(BlockScratchLoop, const ThreadID tid, std::size_t & bytes) const
 {
   auto elem = _thread(tid, 0);
   auto var = _thread(tid, 1);
@@ -732,54 +756,93 @@ QpJacobianOperator::operator()(BlockLoop, const ThreadID tid) const
   if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
     return;
 
-  auto num_qps = kokkosAssembly().getNumQps(info);
-  auto qp_offset = kokkosAssembly().getQpOffset(info);
+  const auto needed = blockScratchBytes(kokkosAssembly().getNumQps(info));
+
+  if (needed > bytes)
+    bytes = needed;
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(BlockLoop, const BlockTeam & team) const
+{
+  const ThreadID tid = team.league_rank();
+
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  const auto num_qps = kokkosAssembly().getNumQps(info);
+  const auto qp_offset = kokkosAssembly().getQpOffset(info);
 
   const LevelBasisTable basis(
       kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
 
   const auto num_dofs = basis.numDofs();
 
-  // The decomposition holds no fixed row and no row this process does not own, so the pair tests
-  // below are what confine the contraction to the entries of a block this process is building. An
-  // entity's block gathers a contribution from every element that carries the entity, which for an
-  // interior block is one element and for a shared edge or face is each element on it.
-  for (unsigned int i = 0; i < num_dofs; ++i)
-  {
-    const auto row = _level.getElemLocalDofIndex(elem, i, var);
+  // Every pair of degrees of freedom sharing a block sums over the same quadrature points, so the
+  // element's linearization is staged here and read once rather than once per pair. It is private to
+  // this element, which is what makes scratch the right place for it; the basis tables below are
+  // identical for every element of a type and belong in the cache that already serves them.
+  ScratchTensor tensors(team.team_scratch(0), num_qps);
 
-    if (!_blocks.isBlocked(row))
-      continue;
+  ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, num_qps),
+                         [&](const unsigned int qp)
+                         { tensors(qp) = _cache.getTensor(sid, var, qp_offset + qp); });
 
-    const auto block = _blocks.blockOfDof(row);
-    const auto row_pos = _blocks.posOfDof(row);
+  team.team_barrier();
 
-    for (unsigned int j = 0; j < num_dofs; ++j)
-    {
-      const auto col = _level.getElemLocalDofIndex(elem, j, var);
-
-      if (!_blocks.isBlocked(col) || _blocks.blockOfDof(col) != block)
-        continue;
-
-      Real entry = 0;
-
-      for (unsigned int qp = 0; qp < num_qps; ++qp)
+  // One thread per ordered pair of the element's degrees of freedom. The decomposition holds no
+  // fixed row and no row this process does not own, so the pair tests are what confine the
+  // contraction to the entries of a block this process is building. An entity's block gathers a
+  // contribution from every element carrying the entity, which for an interior block is one element
+  // and for a shared edge or face is each element on it.
+  ::Kokkos::parallel_for(
+      ::Kokkos::TeamThreadRange(team, num_dofs * num_dofs),
+      [&](const unsigned int pair)
       {
-        const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+        const auto i = pair / num_dofs;
 
-        Real value_i, value_j;
-        Real3 grad_i, grad_j;
+        const auto row = _level.getElemLocalDofIndex(elem, i, var);
 
-        basis.basis(i, qp, value_i, grad_i);
-        basis.basis(j, qp, value_j, grad_j);
+        if (!_blocks.isBlocked(row))
+          return;
 
-        entry += value_i * (tensor.vv * value_j + tensor.vg * grad_j) +
-                 grad_i * (tensor.gv * value_j + tensor.gg * grad_j);
-      }
+        const auto j = pair % num_dofs;
 
-      ::Kokkos::atomic_add(&_blocks.entry(block, row_pos, _blocks.posOfDof(col)), entry);
-    }
-  }
+        const auto col = _level.getElemLocalDofIndex(elem, j, var);
+
+        if (!_blocks.isBlocked(col))
+          return;
+
+        const auto block = _blocks.blockOfDof(row);
+
+        if (_blocks.blockOfDof(col) != block)
+          return;
+
+        Real entry = 0;
+
+        for (unsigned int qp = 0; qp < num_qps; ++qp)
+        {
+          const auto & tensor = tensors(qp);
+
+          Real value_i, value_j;
+          Real3 grad_i, grad_j;
+
+          basis.basis(i, qp, value_i, grad_i);
+          basis.basis(j, qp, value_j, grad_j);
+
+          entry += value_i * (tensor.vv * value_j + tensor.vg * grad_j) +
+                   grad_i * (tensor.gv * value_j + tensor.gg * grad_j);
+        }
+
+        ::Kokkos::atomic_add(&_blocks.entry(block, _blocks.posOfDof(row), _blocks.posOfDof(col)),
+                             entry);
+      });
 }
 
 KOKKOS_FUNCTION void

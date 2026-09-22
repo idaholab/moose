@@ -91,6 +91,9 @@ public:
   struct BlockLoop
   {
   };
+  struct BlockScratchLoop
+  {
+  };
   struct BlockApplyLoop
   {
   };
@@ -156,11 +159,19 @@ public:
   using ApplyTensorTeam = ApplyTensorPolicy::member_type;
   ///@}
 
+  /// The team policy assembleBlocks() runs under, one team per (element, variable) pair
+  ///@{
+  using BlockPolicy = ::Kokkos::TeamPolicy<ExecSpace, BlockLoop>;
+  using BlockTeam = BlockPolicy::member_type;
+  ///@}
+
   KOKKOS_FUNCTION void operator()(ApplyTeamLoop, const ApplyTeam & team) const;
   KOKKOS_FUNCTION void operator()(ApplyTensorLoop, const ApplyTensorTeam & team) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(BlockLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(BlockLoop, const BlockTeam & team) const;
+  KOKKOS_FUNCTION void
+  operator()(BlockScratchLoop, const ThreadID tid, std::size_t & bytes) const;
   KOKKOS_FUNCTION void operator()(BlockApplyLoop, const dof_id_type block) const;
   KOKKOS_FUNCTION void operator()(BlockIdentityLoop, const dof_id_type dof) const;
 
@@ -181,6 +192,12 @@ private:
    * between them is far below what limits occupancy. Zero means it has not been measured yet.
    */
   std::size_t _apply_scratch_bytes = 0;
+
+  /**
+   * The per-team scratch an assembleBlocks() needs, being the largest any (element, variable) pair
+   * asks for. Zero means it has not been measured yet.
+   */
+  std::size_t _block_scratch_bytes = 0;
 
   /**
    * The team size the sum-factorized apply() runs under, being the largest range any phase of that
