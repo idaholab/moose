@@ -104,8 +104,8 @@ public:
   FEProblemBase & feProblem() { return _fe_problem; }
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
-  /// @return the number of threads the associated application uses (see MooseApp::n_threads())
-  THREAD_ID n_threads() const;
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
 
   /**
    * Applies scaling factors to the system's variables

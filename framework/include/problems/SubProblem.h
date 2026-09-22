@@ -88,8 +88,8 @@ public:
   virtual const MooseMesh & mesh() const = 0;
   virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
-  /// @return the number of threads the associated application uses (see MooseApp::n_threads())
-  THREAD_ID n_threads() const;
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
 
   /**
    * @returns whether there will be nonlocal coupling at any point in the simulation, e.g. whether
