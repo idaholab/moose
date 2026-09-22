@@ -154,10 +154,10 @@ Vector::destroy()
   _read_only = false;
   _is_alloc = false;
 
-  // The next close() on this wrapper describes whatever vector and layout it is then created
-  // around, so the recorded COO preallocations no longer apply
-  _coo_vector_ids.clear();
-  _coo_dof_space = nullptr;
+  // The next close() on this wrapper reduces over whatever layout it is then created around, so the
+  // star forest built for the old one no longer applies
+  _ghost_reduction.reset();
+  _reduction_dof_space = nullptr;
 }
 
 void
@@ -217,47 +217,60 @@ Vector::close()
   if (_is_host)
     _local.copyToHost();
 
+  // Every row this rank holds a contribution for but does not own is reduced into its owner through
+  // a star forest over the vector's layout. Leaf i is _ghost entry i, which the entity-block and
+  // quadrature-point Jacobian loops filled against the send list's i'th global degree of freedom, so
+  // the graph is that list read as the row each leaf belongs to.
+  //
+  // PETSc's coordinate-format interface reduces the same contributions and builds the same star
+  // forest to do it, but its preallocation also builds a map from each local row to the entries
+  // landing on it, so that repeated indices can be summed. Its cost is therefore proportional to the
+  // vector's local size rather than to the number of contributions, and it is kept on the vector, so
+  // an operator application handed whichever of its caller's work vectors is free pays that setup
+  // once per vector. There is exactly one contribution per ghost degree of freedom here, so there is
+  // nothing for that map to coalesce, and the forest alone is built once per layout instead.
+
+  if (_dof_space != _reduction_dof_space)
+  {
+    PetscSF reduction;
+    LibmeshPetscCallQ(PetscSFCreate(_dof_space->getDofMap().comm().get(), &reduction));
+
+    PetscLayout layout;
+    LibmeshPetscCallQ(VecGetLayout(_global_vector, &layout));
+    LibmeshPetscCallQ(PetscSFSetGraphLayout(
+        reduction,
+        layout,
+        _dof_space->getNumGhostDofs(),
+        LIBMESH_PETSC_NULLPTR,
+        PETSC_COPY_VALUES,
+        reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
+
+    _ghost_reduction = std::shared_ptr<PetscSF>(new PetscSF(reduction),
+                                                [](PetscSF * const sf)
+                                                {
+                                                  PetscSFDestroy(sf);
+                                                  delete sf;
+                                                });
+    _reduction_dof_space = _dof_space;
+  }
+
+  // The reduction reads and writes arrays rather than the vector, so it runs while the array is
+  // still held, and a device-resident contribution is reduced where it already is
+  const auto memtype = _is_host ? PETSC_MEMTYPE_HOST : PETSC_MEMTYPE_DEVICE;
+
+  if (_is_host)
+    _ghost.copyToHost();
+
+  const PetscScalar * const contributions = _is_host ? _ghost.hostData() : _ghost.deviceData();
+
+  LibmeshPetscCallQ(PetscSFReduceWithMemTypeBegin(
+      *_ghost_reduction, MPIU_SCALAR, memtype, contributions, memtype, _array, MPIU_SUM));
+  LibmeshPetscCallQ(
+      PetscSFReduceEnd(*_ghost_reduction, MPIU_SCALAR, contributions, _array, MPIU_SUM));
+
   // Restore the PETSc vector
 
   restore();
-
-  // Every row this rank holds a contribution for but does not own is reduced into its owner
-  // through PETSc's coordinate-format vector interface. The row indices are the same global
-  // degrees of freedom a VecSetValues call would use, in the same order the entity-block and
-  // quadrature-point Jacobian loops filled _ghost in.
-  //
-  // The preallocation describes the indices alone, and PETSc keeps it on the vector, so it is set
-  // once per vector and layout and reused by every later VecSetValuesCOO() on that vector. Its
-  // cost is proportional to the vector's local size rather than to the number of contributions,
-  // which is why an operator application that closes a vector on every call must not repeat it.
-
-  PetscObjectId vector_id;
-  LibmeshPetscCallQ(PetscObjectGetId(reinterpret_cast<PetscObject>(_global_vector), &vector_id));
-
-  // A change of layout invalidates every preallocation recorded against the old one
-  if (_dof_space != _coo_dof_space)
-  {
-    _coo_vector_ids.clear();
-    _coo_dof_space = _dof_space;
-  }
-
-  if (_coo_vector_ids.insert(vector_id).second)
-    LibmeshPetscCallQ(VecSetPreallocationCOO(
-        _global_vector,
-        _dof_space->getNumGhostDofs(),
-        reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
-
-  // A Kokkos/CUDA-typed vector's COO implementation detects and accepts a device array; a plain
-  // vector's native implementation reads its values array directly from the host and does not, so
-  // the device-resident contributions are brought back for it, as they were before this vector
-  // used PETSc's COO interface
-  if (_is_host)
-  {
-    _ghost.copyToHost();
-    LibmeshPetscCallQ(VecSetValuesCOO(_global_vector, _ghost.hostData(), ADD_VALUES));
-  }
-  else
-    LibmeshPetscCallQ(VecSetValuesCOO(_global_vector, _ghost.deviceData(), ADD_VALUES));
 }
 
 } // namespace Moose::Kokkos
