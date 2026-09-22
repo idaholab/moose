@@ -128,20 +128,17 @@ coil_conductivity = 1.0
     variable = induced_e_field
     source = induced_potential
     scale_factor = -1.0
-    execute_on = TIMESTEP_END
   []
   [update_external_e_field]
     type = MFEMGradAux
     variable = transition_external_e_field
     source = transition_external_potential
     scale_factor = -1.0
-    execute_on = TIMESTEP_END
   []
   [update_total_e_field]
     type = MFEMSumAux
     variable = e_field
     source_variables = 'induced_e_field external_e_field'
-    execute_on = TIMESTEP_END
   []
 []
 

@@ -82,7 +82,6 @@ centre_y = 0.1
     type = MFEMGradAux
     variable = velocity
     source = velocity_potential
-    execute_on = TIMESTEP_END
   []
 []
 

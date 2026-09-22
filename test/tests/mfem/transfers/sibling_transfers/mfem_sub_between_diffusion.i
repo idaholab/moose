@@ -96,7 +96,6 @@
     start_point = '0.0 0.0 0.0'
     end_point = '1.0 1.0 0.0'
     num_points = 14
-    execute_on = TIMESTEP_END
   []
   [elem_sample]
     type = MFEMVariableLineValueSampler
@@ -104,7 +103,6 @@
     start_point = '0.0 0.0 0.0'
     end_point = '1.0 1.0 0.0'
     num_points = 14
-    execute_on = TIMESTEP_END
   []
 []
 

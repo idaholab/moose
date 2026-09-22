@@ -39,7 +39,6 @@
     type = MFEMGradAux
     variable = concentration_gradient
     source = concentration
-    execute_on = TIMESTEP_END
   []
 []
 
