@@ -250,26 +250,29 @@ PMultigrid::setupSolver()
     }
     else
     {
-      // Factor the coarsest level directly. A multigrid preconditioner has to be a fixed linear
-      // operator, because the outer Krylov method builds its space from repeated applications and
-      // relates its recurrence residual to the true one on the assumption that the operator does
-      // not change between them. A direct factorization is such an operator exactly, and it is
-      // affordable because this is the coarsest level of a p-hierarchy: order one on the fine mesh.
+      // Solve the coarsest level with one algebraic multigrid cycle. A multigrid preconditioner has
+      // to be a fixed linear operator, because the outer Krylov method builds its space from repeated
+      // applications and relates its recurrence residual to the true one on the assumption that the
+      // operator does not change between them. A single cycle of a multigrid method is such an
+      // operator, as a direct factorization is.
       //
-      // Iterating this level instead fails whichever way the iteration is stopped, which is why the
-      // obvious cheaper alternatives are rejected here. Stopping on a relative tolerance makes the
-      // work, and so the operator, depend on the right-hand side. Stopping after a fixed number of
-      // iterations fixes the work but not the operator, because a Krylov method builds its
-      // polynomial from the Krylov space of the vector it is given and so remains a nonlinear
-      // function of that vector however many steps it runs. Either way the outer Krylov method
-      // reports a recurrence residual its true residual does not match, and a linear problem takes
-      // several Newton steps.
+      // Iterating this level with a Krylov method instead fails whichever way the iteration is
+      // stopped, which is why the obvious cheaper alternatives are rejected here. Stopping on a
+      // relative tolerance makes the work, and so the operator, depend on the right-hand side.
+      // Stopping after a fixed number of iterations fixes the work but not the operator, because a
+      // Krylov method builds its polynomial from the Krylov space of the vector it is given and so
+      // remains a nonlinear function of that vector however many steps it runs. Either way the outer
+      // Krylov method reports a recurrence residual its true residual does not match, and a linear
+      // problem takes several Newton steps.
       //
-      // No solver package is named, so PETSc selects one: in parallel that is whichever
-      // distributed factorization the build provides, and on one process its own LU.
-      // '-mg_coarse_pc_factor_mat_solver_type' overrides the choice.
+      // The cycle is preferred to a factorization because the coarsest level of a p-hierarchy is not
+      // small: coarsening the polynomial degree leaves the mesh alone, so this level still carries a
+      // degree of freedom per mesh vertex, and it is factorized once per Jacobian and solved on every
+      // cycle. Where the factorization is wanted, '-mg_coarse_pc_type lu' restores it and
+      // '-mg_coarse_pc_factor_mat_solver_type' then names the package.
       LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
-      LibmeshPetscCall(PCSetType(smoother_pc, PCLU));
+      LibmeshPetscCall(PCSetType(smoother_pc, PCHYPRE));
+      LibmeshPetscCall(PCHYPRESetType(smoother_pc, "boomeramg"));
     }
 
     // Read the level's own options last, so that everything set above is a default a user can
