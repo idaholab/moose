@@ -41,16 +41,22 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const DofSpace & dof
   _row_ptr = sparsity.row_ptr;
   _is_host = is_host;
 
+  {
+    // MatSetPreallocationCOO() is documented as being free to modify the index arrays it is given,
+    // translating them to global numbering in place, while the CSR arrays here are read on device
+    // by find() for the life of the run.  The copies are therefore required, and the scope releases
+    // them before the value array below is allocated, so that the two are not held at once.
+    std::vector<PetscInt> col_idx(&_col_idx.begin(), &_col_idx.end());
+    std::vector<PetscInt> row_idx(&_row_idx.begin(), &_row_idx.end());
+
+    LibmeshPetscCallQ(
+        MatSetPreallocationCOO(_matrix, col_idx.size(), row_idx.data(), col_idx.data()));
+  }
+
   if (!_is_host)
     _val.createDevice(_col_idx.size());
   else
     _val.create(_col_idx.size());
-
-  std::vector<PetscInt> col_idx(&_col_idx.begin(), &_col_idx.end());
-  std::vector<PetscInt> row_idx(&_row_idx.begin(), &_row_idx.end());
-
-  LibmeshPetscCallQ(
-      MatSetPreallocationCOO(_matrix, col_idx.size(), row_idx.data(), col_idx.data()));
 
   _is_alloc = true;
 }
