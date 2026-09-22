@@ -5,7 +5,7 @@
     type = CSVDiff
     input = case1_scm.i
     csvdiff = case1_scm_out.csv
-    cli_args = '--error --error-override --compute-device=cpu'
+    cli_args = '--error --compute-device=cpu'
     rel_err = 5e-5
     allow_warnings = true
     recover = false

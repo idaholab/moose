@@ -1,4 +1,3 @@
 app_name = external_petsc_solver
 allow_warnings = false
 allow_unused = false
-allow_override = false

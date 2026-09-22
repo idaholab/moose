@@ -108,11 +108,6 @@ class RunApp(Tester):
             "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.",
         )
         params.addParam(
-            "allow_override",
-            True,
-            "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = False' in the testroot file.",
-        )
-        params.addParam(
             "allow_deprecated",
             True,
             "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!",
@@ -440,9 +435,6 @@ class RunApp(Tester):
             and (specs["allow_unused"] or options.allow_unused)
         ):
             cli_args.append("--allow-unused")
-
-        if "--error-override" not in cli_args and not specs["allow_override"]:
-            cli_args.append("--error-override")
 
         if (
             "--error-deprecated" not in cli_args
