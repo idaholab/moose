@@ -9,15 +9,19 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
+
+# Locate the MOOSE python modules (chigger, mooseutils) so this script can be
+# run without first exporting MOOSE_DIR or otherwise configuring PYTHONPATH.
+MOOSE_DIR = os.environ.get(
+    "MOOSE_DIR",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")),
+)
+sys.path.append(os.path.join(MOOSE_DIR, "python"))
+
 import vtk
 import chigger
 import mooseutils
-
-#!/usr/bin/env python3
-import os
-import argparse
-import vtk
-import chigger
 
 EXODUS = "step9_out.e"
 PREFIX = "step09"
