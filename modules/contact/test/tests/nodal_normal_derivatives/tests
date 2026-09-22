@@ -96,25 +96,24 @@
                   'one time step on a fully overlapping, partitioned QUAD4 interface.'
   []
 
-  [augmented_mortar_penalty_friction_jacobian]
-    type = PetscJacobianTester
+  [augmented_mortar_penalty_friction]
+    type = RunApp
     input = curved_3d_action.i
     cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
                'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 '
-               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 '
-               'Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm '
+               'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
+               'Contact/mortar/penalty_friction=1e2 ICs/inactive=normal_lm '
                'Problem/type=AugmentedLagrangianContactProblem '
                'Contact/mortar/al_penetration_tolerance=1e-4 '
                'Contact/mortar/al_incremental_slip_tolerance=1e-4 '
-               'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true '
-               'Mesh/Partitioner/nx=2 -snes_test_err 1e-7'
-    run_sim = false
-    ratio_tol = 2e-5
-    difference_tol = 1e-4
-    design = 'ContactAction.md PenaltyFrictionUserObject.md'
-    requirement = 'Three-dimensional augmented-Lagrange mortar-penalty friction shall compute a '
-                  'Jacobian that includes nodal-normal derivatives and agrees with a finite-difference '
-                  'approximation, without allocating new matrix nonzeros.'
+               'Executioner/nl_abs_tol=1e-4 Executioner/end_time=0.05 Executioner/dt=0.05 '
+               'Problem/error_on_jacobian_nonzero_reallocation=true Mesh/Partitioner/nx=2'
+    expect_out = 'Solve Converged!'
+    design = 'ContactAction.md PenaltyFrictionUserObject.md '
+             'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Three-dimensional augmented-Lagrange mortar-penalty friction shall solve with '
+                  'nodal traction-vector interpolation and without displacement derivatives of the '
+                  'normal and tangent directions.'
   []
 
   [mortar_penalty_friction_jacobian]

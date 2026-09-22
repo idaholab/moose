@@ -47,8 +47,7 @@ convergence in the non-linear solve.
 Mechanical mortar contact uses normalized, weighted secondary nodal normals to evaluate the
 weighted gap. Quasistatic local-basis contact includes the displacement derivatives of the nodal
 normal directions in Jacobian evaluations. This behavior applies to the `mortar` and
-`mortar_penalty` formulations, including augmented-Lagrangian penalty contact, with `frictionless`
-or `coulomb` contact and
+non-augmented `mortar_penalty` formulations with `frictionless` or `coulomb` contact and
 [!param](/Constraints/ComputeWeightedGapLMMechanicalContact/interpolate_normals) set to `false`.
 The contact force is assembled by interpolating the nodal traction vector,
 $\sum_j \Phi_j z_j \boldsymbol{n}_j$. This is the transpose of the weighted gap, so the discrete
@@ -75,11 +74,16 @@ tangential-friction, and penalty contact constraints use the same linearized dir
 Mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices are unchanged;
 their weighted contributions are already contained in $\boldsymbol{G}_A$.
 
-Dynamic mortar through [ContactAction](/ContactAction.md), Cartesian-LM, cohesive-zone, and
-nonmortar contact do not include displacement derivatives of normal and tangent vectors in their
-Jacobians. Quadrature-point normal interpolation is not supported for quasistatic local-basis
-contact. The displacement variables must be nodal nonlinear variables in the system assembled by
-the contact objects.
+Augmented-Lagrangian `mortar_penalty` contact retains the same nodal traction-vector interpolation,
+but its inner Newton Jacobian does not include displacement derivatives of the normal and tangent
+directions. Including the direction derivatives in this formulation requires separate treatment of
+the nonsmooth active-set and Coulomb return-map generalized Jacobian and its globalization.
+
+Dynamic mortar through [ContactAction](/ContactAction.md), Cartesian-LM, cohesive-zone, augmented-
+Lagrangian `mortar_penalty`, and nonmortar contact do not include displacement derivatives of normal
+and tangent vectors in their Jacobians. Quadrature-point normal interpolation is not supported for
+quasistatic local-basis contact. The displacement variables must be nodal nonlinear variables in
+the system assembled by the contact objects.
 
 Only the averaged secondary nodal-normal field and its derived Householder tangents are
 differentiated. Mortar segment topology, primary-secondary projections and parent reference
