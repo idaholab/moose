@@ -159,7 +159,7 @@ Again: you *MUST* turn on `checkpoint = true` in the `Outputs` block of your inp
 ### `--n-threads`
 
 `--n-threads` controls the number of threads per MPI process MOOSE will use for the computation.  This is how you turn on shared-memory parallelism.
-It directly sets the numbers of threads if Application/num_threads is not passed. If it is passed, then this argument specifies the maximum number of threads, it is notably setting the OpenMP number of threads.
+It directly sets the numbers of threads if Application/num_threads is not passed. If it is passed, then this argument specifies the maximum number of threads; it is notably setting the OpenMP number of threads.
 
 ### Mesh Splitting Options
 
