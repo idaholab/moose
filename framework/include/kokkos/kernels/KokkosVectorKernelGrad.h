@@ -103,14 +103,26 @@ VectorKernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum 
       datum,
       [&](Real * local_re, const unsigned int ib, const unsigned int ie)
       {
+        const auto components = _grad_test.components(datum);
+
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
           Real33 value =
               (datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum)) *
               datum.J(qp);
 
-          for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += value.contract(_grad_test.reference(datum, i, qp));
+          // A single-component test function leaves one nonzero row in its gradient, so the
+          // compact form of the gradient carries the whole contribution in three entries.
+          if (components.valid())
+            for (unsigned int i = ib; i < ie; ++i)
+            {
+              const auto & entry = components(i, qp);
+
+              local_re[i] += value.contractRow(entry.gradient, entry.component);
+            }
+          else
+            for (unsigned int i = ib; i < ie; ++i)
+              local_re[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }
@@ -123,14 +135,26 @@ VectorKernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum 
       datum,
       [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
+        const auto components = _grad_test.components(datum);
+
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
           Real33 value =
               (datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum)) *
               datum.J(qp);
 
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
+          // A single-component test function leaves one nonzero row in its gradient, so the
+          // compact form of the gradient carries the whole contribution in three entries.
+          if (components.valid())
+            for (unsigned int i = ib; i < ie; ++i)
+            {
+              const auto & entry = components(i, qp);
+
+              local_ke[i] += value.contractRow(entry.gradient, entry.component);
+            }
+          else
+            for (unsigned int i = ib; i < ie; ++i)
+              local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }
@@ -144,14 +168,26 @@ VectorKernelGrad::computeOffDiagJacobianInternal(const Derived & kernel,
       datum,
       [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
+        const auto components = _grad_test.components(datum);
+
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
           Real33 value = (datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
                                               j, datum.jvar(), qp, datum)) *
                          datum.J(qp);
 
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
+          // A single-component test function leaves one nonzero row in its gradient, so the
+          // compact form of the gradient carries the whole contribution in three entries.
+          if (components.valid())
+            for (unsigned int i = ib; i < ie; ++i)
+            {
+              const auto & entry = components(i, qp);
+
+              local_ke[i] += value.contractRow(entry.gradient, entry.component);
+            }
+          else
+            for (unsigned int i = ib; i < ie; ++i)
+              local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }

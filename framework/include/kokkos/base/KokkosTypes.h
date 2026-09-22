@@ -92,6 +92,7 @@ struct Real33
   KOKKOS_INLINE_FUNCTION void operator*=(const Real scalar);
 
   KOKKOS_INLINE_FUNCTION Real contract(const Real33 tensor) const;
+  KOKKOS_INLINE_FUNCTION Real contractRow(const Real3 vector, const unsigned int row) const;
   KOKKOS_INLINE_FUNCTION void identity(const unsigned int dim = 3);
   KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3) const;
   KOKKOS_INLINE_FUNCTION Real33 inverse(const unsigned int dim = 3) const;
@@ -379,6 +380,17 @@ Real33::contract(const Real33 tensor) const
   for (unsigned int i = 0; i < Moose::dim; ++i)
     for (unsigned int j = 0; j < Moose::dim; ++j)
       value += a[i][j] * tensor.a[i][j];
+
+  return value;
+}
+
+KOKKOS_INLINE_FUNCTION Real
+Real33::contractRow(const Real3 vector, const unsigned int row) const
+{
+  Real value = 0;
+
+  for (unsigned int j = 0; j < Moose::dim; ++j)
+    value += a[row][j] * vector(j);
 
   return value;
 }
