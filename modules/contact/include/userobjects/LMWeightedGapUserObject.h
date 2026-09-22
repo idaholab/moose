@@ -95,11 +95,12 @@ protected:
   void verifyLagrange(const MooseVariable & var, const std::string & var_name) const;
 
   /**
-   * Verify nodal degrees of freedom and require that \p var shares \p reference_var's finite element
-   * type (order/family) and dual/standard basis choice (\p useDual()). A per-direction traction basis
-   * (WeightedVelocitiesUserObject::tangentialTractionBasis) indexes its dof lookups and loop bound
-   * by a tangential Lagrange multiplier, so that variable's node count and dof numbering must match
-   * the normal Lagrange multiplier's for the two to stay comparable node-for-node.
+   * Verify nodal degrees of freedom and require that \p var shares \p reference_var's finite
+   * element type (order/family) and dual/standard basis choice (\p useDual()). A per-direction
+   * traction basis (WeightedVelocitiesUserObject::tangentialTractionBasis) indexes its dof lookups
+   * and loop bound by a tangential Lagrange multiplier, so that variable's node count and dof
+   * numbering must match the normal Lagrange multiplier's for the two to stay comparable
+   * node-for-node.
    */
   void verifyLagrange(const MooseVariable & var,
                       const std::string & var_name,
