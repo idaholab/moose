@@ -339,7 +339,7 @@ protected:
   mutable std::unique_ptr<SumOperatorExtension> _sumOperator;
 
   // Store the op that comes out of FormLinearSystem
-  mfem::OperatorHandle * _system_operator;
+  mfem::Operator * _system_operator = nullptr;
 
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;

@@ -300,7 +300,7 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   // hold a reference to op. Later, we'll pass this into SumOperatorExtension
   // so we can perform AddMult on the linear part of the system, then on the
   // nonlinear part of the system.
-  _system_operator = &op;
+  _system_operator = aux_a.Ptr();
 
   aux_a.SetOperatorOwner(false);
 }
@@ -492,9 +492,13 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
       if (c_nlf_grad)
         c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
 
+      // At time of writing, ComplexEquationSystem::FormSystemOperator does not store Aux_a. So we
+      // guard against dereferencing nullptr here.
+      mooseAssert(_system_operator, "Bilinear Operator is null!");
+
       // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
       _sumOperator =
-          std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
+          std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator, 1.0, nlf);
 
       return *_sumOperator;
     }
