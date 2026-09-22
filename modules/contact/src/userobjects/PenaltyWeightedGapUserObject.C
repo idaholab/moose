@@ -37,7 +37,9 @@ PenaltyWeightedGapUserObject::validParams()
         obj_params.get<SubdomainName>("secondary_subdomain");
     rm_params.set<SubdomainName>("primary_subdomain") =
         obj_params.get<SubdomainName>("primary_subdomain");
-    rm_params.set<bool>("ghost_point_neighbors") = true;
+    rm_params.set<bool>("ghost_point_neighbors") =
+        obj_params.get<bool>("use_nodal_normal_derivatives") &&
+        !obj_params.isParamValid("penetration_tolerance");
   };
   // Coupling relationship managers are attached through a separate system lifecycle from geometric
   // and algebraic relationship managers.
