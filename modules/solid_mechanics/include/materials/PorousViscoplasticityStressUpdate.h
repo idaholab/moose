@@ -124,6 +124,14 @@ protected:
     std::uint64_t independent_line_search_trials = 0;
     std::uint64_t dense_limit_solves = 0;
     std::uint64_t fixed_porosity_mechanical_solves = 0;
+    /// Independent two-population fixed-porosity mechanical recovery attempts.
+    std::uint64_t independent_fixed_porosity_mechanical_solves = 0;
+    /// Newton iterations spent in independent fixed-porosity mechanical recovery.
+    std::uint64_t independent_fixed_porosity_mechanical_iterations = 0;
+    /// Backtracking trials spent only in independent fixed-porosity mechanical recovery.
+    std::uint64_t independent_fixed_porosity_mechanical_line_search_trials = 0;
+    /// Independent fixed-porosity recoveries accepted by the full four-equation criterion.
+    std::uint64_t independent_fixed_porosity_recovery_successes = 0;
     std::uint64_t reduced_porosity_solves = 0;
     std::uint64_t gauge_evaluations = 0;
     std::uint64_t gauge_n1_closed_form = 0;
@@ -429,12 +437,12 @@ protected:
                            const HydrostaticStressState & hydrostatic_stress) const;
 
   /// Recover AD sensitivity of a converged primal gauge root from F(Lambda,z)=0.
-  GenericReal<is_ad> reconstructGaugeStressSensitivity(
-      Real gauge_stress,
-      const GenericReal<is_ad> & equiv_stress,
-      const HydrostaticStressState & hydrostatic_stress,
-      const GenericReal<is_ad> & porosity,
-      const CreepLaw & law) const;
+  GenericReal<is_ad>
+  reconstructGaugeStressSensitivity(Real gauge_stress,
+                                    const GenericReal<is_ad> & equiv_stress,
+                                    const HydrostaticStressState & hydrostatic_stress,
+                                    const GenericReal<is_ad> & porosity,
+                                    const CreepLaw & law) const;
 
   /// Compute the gauge stress for a specific creep mechanism.
   GenericReal<is_ad> computeGaugeStress(const GenericReal<is_ad> & equiv_stress,
@@ -486,11 +494,11 @@ protected:
                                       const GenericRankTwoTensor<is_ad> & dev_direction,
                                       const PorePorosityState & pore_porosity);
 
-  IndependentLpsCreepResponse evaluateIndependentLpsCreepResponseValueOnly(
-      const HydrostaticStressState & hydrostatic_stress,
-      const GenericReal<is_ad> & equiv_stress,
-      const GenericRankTwoTensor<is_ad> & dev_direction,
-      const PorePorosityState & pore_porosity);
+  IndependentLpsCreepResponse
+  evaluateIndependentLpsCreepResponseValueOnly(const HydrostaticStressState & hydrostatic_stress,
+                                               const GenericReal<is_ad> & equiv_stress,
+                                               const GenericRankTwoTensor<is_ad> & dev_direction,
+                                               const PorePorosityState & pore_porosity);
 
   /// Matrix hydrostatic stress for the spherical porous formulation.
   GenericReal<is_ad> matrixHydroStress(const GenericRankTwoTensor<is_ad> & stress) const;
@@ -516,11 +524,11 @@ protected:
    * Convert the physical effective creep increment to the controller increment after any active
    * porosity-floor projection. Unconstrained states retain the historical effective increment.
    */
-  Real substepControlIncrement(
-      const GenericReal<is_ad> & effective_inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
-      const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
-      bool constrained) const;
+  Real
+  substepControlIncrement(const GenericReal<is_ad> & effective_inelastic_strain_increment,
+                          const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
+                          const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
+                          bool constrained) const;
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
@@ -585,16 +593,16 @@ private:
    * complete fixed-substep path captures those dependencies without dropping derived-state terms.
    * The helper restores the unperturbed accepted state before returning.
    */
-  RankFourTensor computeSubsteppedConsistentTangent(
-      const ConstitutiveStateSnapshot & snapshot,
-      const GenericReal<is_ad> & beginning_porosity,
-      const RankTwoTensor & accepted_stress,
-      GenericRankTwoTensor<is_ad> & strain_increment,
-      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-      GenericRankTwoTensor<is_ad> & stress_new,
-      const GenericRankFourTensor<is_ad> & elasticity_tensor,
-      const RankTwoTensor & elastic_strain_old,
-      unsigned int total_number_substeps);
+  RankFourTensor
+  computeSubsteppedConsistentTangent(const ConstitutiveStateSnapshot & snapshot,
+                                     const GenericReal<is_ad> & beginning_porosity,
+                                     const RankTwoTensor & accepted_stress,
+                                     GenericRankTwoTensor<is_ad> & strain_increment,
+                                     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                     GenericRankTwoTensor<is_ad> & stress_new,
+                                     const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                                     const RankTwoTensor & elastic_strain_old,
+                                     unsigned int total_number_substeps);
 
   enum LocalVariableIndex : unsigned int
   {
@@ -911,6 +919,10 @@ private:
                                     const IndependentLocalResidual & correction_scaled,
                                     Real initial_alpha,
                                     const IndependentLocalSolveContext & context);
+  std::optional<IndependentLocalPoint>
+  solveIndependentMechanicalAtFixedPorosity(const IndependentLocalPoint & seed,
+                                            Real tolerance,
+                                            const IndependentLocalSolveContext & context);
   IndependentLocalPoint solveIndependentCoupledNewton(
       IndependentLocalPoint point,
       const IndependentLocalSolveContext & context,
