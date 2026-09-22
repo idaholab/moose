@@ -1,0 +1,23 @@
+[Tests]
+  issues = '#33794'
+  [cg_matprop_source]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = 'Physics/Diffusion/ContinuousGalerkin/diff/use_automatic_differentiation=true
+                Physics/Diffusion/ContinuousGalerkin/diff/source_functor=2
+                Outputs/file_base=cg_matprop_source'
+    csvdiff = 'cg_matprop_source_sample_0010.csv'
+    requirement = 'The system shall be able to solve a diffusion equation with a source term computed using a material property with a continuous Galerkin discretization with a shorthand syntax.'
+    design = 'DiffusionCG.md'
+  []
+  [cg_functor_source]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = 'Physics/Diffusion/ContinuousGalerkin/diff/use_automatic_differentiation=true
+                Physics/Diffusion/ContinuousGalerkin/diff/source_matprop=source
+                Outputs/file_base=cg_functor_source'
+    csvdiff = 'cg_functor_source_sample_0010.csv'
+    requirement = 'The system shall be able to solve a diffusion equation with a source term computed using a functor with a continuous Galerkin discretization with a shorthand syntax.'
+    design = 'DiffusionCG.md'
+  []
+[]
