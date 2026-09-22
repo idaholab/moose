@@ -75,13 +75,18 @@ refinement = 3
   # here is what makes the two backends precondition the same operator the same way. One level of
   # aggressive coarsening is cheaper still on this problem and is requested of both backends, so
   # that they continue to precondition the operator the same way.
+  # PETSc asks BoomerAMG for CF-relaxation, relaxing coarse and fine points in separate passes,
+  # by calling HYPRE_BoomerAMGSetRelaxOrder(1).  mfem::HypreBoomerAMG never calls that function, so
+  # the two backends smooth differently unless it is turned off here.  On this problem the separate
+  # passes cost about a quarter of each preconditioner application and change the iteration count
+  # not at all.
   # The Kokkos assembly fills the Jacobian through PETSc's COO interface, which MATHYPRE
   # implements, so asking for that matrix type has the assembly build the hypre ParCSR that
   # BoomerAMG consumes. PCSetUp then skips the AIJ-to-ParCSR conversion, and the Krylov iterations
   # use hypre's ParCSR matrix-vector product, which is measurably faster than PETSc's MPIAIJ one on
   # this operator.
-  petsc_options_iname = '-ksp_type -pc_type  -pc_hypre_type  -pc_hypre_boomeramg_coarsen_type  -pc_hypre_boomeramg_interp_type -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_numfunctions -pc_hypre_boomeramg_P_max -pc_hypre_boomeramg_agg_nl -nl0_mat_type'
-  petsc_options_value = ' cg       hypre     boomeramg       HMIS                              ext+i                           0.7                                   3                                4                         1                        hypre'
+  petsc_options_iname = '-ksp_type -pc_type  -pc_hypre_type  -pc_hypre_boomeramg_coarsen_type  -pc_hypre_boomeramg_interp_type -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_numfunctions -pc_hypre_boomeramg_P_max -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_no_CF -nl0_mat_type'
+  petsc_options_value = ' cg       hypre     boomeramg       HMIS                              ext+i                           0.7                                   3                                4                         1                         true                      hypre'
   l_tol = 1e-8
   l_max_its = 500
 []
