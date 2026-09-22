@@ -32,7 +32,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
-    cli_args = 'Executioner/assembly_level=partial'
+    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMNLCurlCurlKernel'
     recover = false
   []
   [MFEMCurlCurlNL]
@@ -60,13 +60,7 @@
     type = CSVDiff
     input = nl_curlcurl_MMS.i
     csvdiff = 'OutputData/NLCurlCurlMMS.csv '
-              'OutputData/NLCurlCurlMMS_line_sample_h_field_0001.csv'
-    # h_field_0 and h_field_1 are identically zero in the manufactured solution
-    # (exact_h_field = (0, 0, sin(kappa*x))), so the sampled values there are roundoff-
-    # limited and have no reproducible relative precision. The transverse error is
-    # already checked properly by the h_field_l2_error postprocessor, which takes the
-    # norm over the full vector, so nothing is lost by excluding them here.
-    ignore_columns = 'h_field_0 h_field_1'
+              'OutputData/NLCurlCurlMMS_legacy_line_sample_h_field_0001.csv'
     design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
     issues = '#33579'
     requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
@@ -74,19 +68,14 @@
                   'against the exact solution.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
+    cli_args = 'Outputs/line_sample/file_base_suffix=legacy'
     recover = false
   []
   [MFEMNLCurlCurlMMSPartial]
     type = CSVDiff
     input = nl_curlcurl_MMS.i
     csvdiff = 'OutputData/NLCurlCurlMMS.csv '
-              'OutputData/NLCurlCurlMMS_line_sample_h_field_0001.csv'
-    # h_field_0 and h_field_1 are identically zero in the manufactured solution
-    # (exact_h_field = (0, 0, sin(kappa*x))), so the sampled values there are roundoff-
-    # limited and have no reproducible relative precision. The transverse error is
-    # already checked properly by the h_field_l2_error postprocessor, which takes the
-    # norm over the full vector, so nothing is lost by excluding them here.
-    ignore_columns = 'h_field_0 h_field_1'
+              'OutputData/NLCurlCurlMMS_partial_line_sample_h_field_0001.csv'
     design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
     issues = '#33579'
     requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
@@ -94,7 +83,8 @@
                   'measured by the L2 error against the exact solution.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    cli_args = 'Executioner/assembly_level=partial'
+    cli_args = 'Executioner/assembly_level=partial '
+               'Outputs/line_sample/file_base_suffix=partial'
     recover = false
   []
   [MFEMDiffusion]

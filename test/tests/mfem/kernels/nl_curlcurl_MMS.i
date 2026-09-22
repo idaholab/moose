@@ -146,6 +146,18 @@
 []
 
 [Outputs]
-  csv = true
-  file_base = OutputData/NLCurlCurlMMS
+  # The L2 error agrees between assembly levels, so it is written on its own and both tests
+  # diff the same gold. The sampled field goes to a separate CSV whose file base each test
+  # suffixes, letting the two assembly levels carry different golds; they select different
+  # integration rules, which moves the transverse components.
+  [error]
+    type = CSV
+    file_base = OutputData/NLCurlCurlMMS
+    execute_vector_postprocessors_on = NONE
+  []
+  [line_sample]
+    type = CSV
+    file_base = OutputData/NLCurlCurlMMS
+    execute_postprocessors_on = NONE
+  []
 []
