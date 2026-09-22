@@ -19,6 +19,7 @@
 
 #include "libmesh/fe.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/fe_lagrange_gll_shape.h"
 #include "libmesh/reference_elem.h"
 
 #include <algorithm>
@@ -689,7 +690,14 @@ Assembly::initShape()
         // count at zero and the consumer on the full tables.
         auto build_tensor_tables = [&](auto & fe)
         {
-          if (_dimension != 2 || fet.family != libMesh::HIERARCHIC)
+          // Each of these families is an exact tensor product on a quadrilateral, with libMesh
+          // supplying the map from a shape function to the pair of one-dimensional indices it is the
+          // product of. Both maps are orientation dependent, which is why they take the element
+          // rather than its type.
+          const auto gll =
+              fet.family == libMesh::LAGRANGE_GLL || fet.family == libMesh::L2_LAGRANGE_GLL;
+
+          if (_dimension != 2 || (fet.family != libMesh::HIERARCHIC && !gll))
             return;
 
           if (type != libMesh::QUAD4 && type != libMesh::QUAD8 && type != libMesh::QUAD9)
@@ -721,10 +729,20 @@ Assembly::initShape()
 
             for (const auto a : make_range(n_modes))
             {
-              phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape(
-                  libMesh::EDGE3, static_cast<Order>(totalorder), a, xi);
-              grad_phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape_deriv(
-                  libMesh::EDGE3, static_cast<Order>(totalorder), a, 0, xi);
+              if (gll)
+              {
+                phi_1d(a, p) =
+                    libMesh::fe_lagrange_gll_1D_shape(static_cast<Order>(totalorder), a, xi(0));
+                grad_phi_1d(a, p) = libMesh::fe_lagrange_gll_1D_shape_deriv(
+                    static_cast<Order>(totalorder), a, 0, xi(0));
+              }
+              else
+              {
+                phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape(
+                    libMesh::EDGE3, static_cast<Order>(totalorder), a, xi);
+                grad_phi_1d(a, p) = libMesh::FE<1, libMesh::HIERARCHIC>::shape_deriv(
+                    libMesh::EDGE3, static_cast<Order>(totalorder), a, 0, xi);
+              }
             }
           }
 
@@ -762,8 +780,29 @@ Assembly::initShape()
 
             for (const auto i : index_range(phi))
             {
-              const auto [i0, i1, sign] =
-                  libMesh::fe_hierarchic_quad_tensor_indices(elem, totalorder, i);
+              unsigned int i0, i1;
+              // A nodal basis carries no sign: a shape function belongs to one interpolation point,
+              // and an element sharing that point shares the function itself. The hierarchic basis
+              // puts a sign on an odd edge mode instead, which is its whole orientation dependence.
+              Real sign = 1;
+
+              if (gll)
+              {
+                unsigned int indices[3];
+
+                if (fet.family == libMesh::LAGRANGE_GLL)
+                  libMesh::fe_lagrange_gll_tensor_index<libMesh::LAGRANGE_GLL>(
+                      elem, static_cast<Order>(totalorder), 2, i, indices);
+                else
+                  libMesh::fe_lagrange_gll_tensor_index<libMesh::L2_LAGRANGE_GLL>(
+                      elem, static_cast<Order>(totalorder), 2, i, indices);
+
+                i0 = indices[0];
+                i1 = indices[1];
+              }
+              else
+                std::tie(i0, i1, sign) =
+                    libMesh::fe_hierarchic_quad_tensor_indices(elem, totalorder, i);
 
               modes(i0, i1) = {static_cast<unsigned int>(i), sign};
 
