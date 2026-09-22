@@ -14,7 +14,9 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dof_map.h"
 
-#include <unordered_set>
+#include <petscsf.h>
+
+#include <memory>
 
 namespace Moose::Kokkos
 {
@@ -190,17 +192,17 @@ private:
    */
   bool _is_alloc = false;
   /**
-   * The PETSc vectors the COO preallocation has been set on, and the DOF layout it was set from.
-   * VecSetPreallocationCOO() is a setup call whose cost is proportional to the vector's local size
-   * rather than to the number of contributions, and PETSc keeps its result on the vector, so
-   * close() sets it once per vector and reuses it afterwards. An operator application is handed
-   * whichever of its caller's work vectors is free, cycling among several, so every vector seen is
-   * remembered rather than only the last. Vectors are identified by PETSc object id, which is
-   * unique over the run, so an entry can never be matched by a later vector.
+   * The star forest close() reduces the off-process contributions through, and the DOF layout it was
+   * built from. The pattern depends on the layout alone rather than on the vector, so one star forest
+   * serves every vector this wrapper is created around and is rebuilt only when the layout changes.
+   *
+   * Ownership is shared rather than held directly because this class is a value type: it is copied on
+   * the host and copied bytewise into device memory, so a member whose destructor frees a resource
+   * would have every copy free what the original still refers to.
    */
   ///@{
-  std::unordered_set<PetscObjectId> _coo_vector_ids;
-  const DofSpace * _coo_dof_space = nullptr;
+  std::shared_ptr<PetscSF> _ghost_reduction;
+  const DofSpace * _reduction_dof_space = nullptr;
   ///@}
 };
 
