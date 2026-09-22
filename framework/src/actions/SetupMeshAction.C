@@ -63,7 +63,7 @@ SetupMeshAction::validParams()
                         "every node on a give side is in a nodeset then add that side to a "
                         "sideset");
   params.addParam<bool>("construct_side_list_from_node_list_exterior_only",
-                        false,
+                        true,
                         "If true, when constructing side lists from node lists, exclude sides "
                         "that are interior to the mesh (i.e. have a neighboring element). Has no "
                         "effect unless 'construct_side_list_from_node_list' is also true.");
