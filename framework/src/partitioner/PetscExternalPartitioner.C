@@ -17,6 +17,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/petsc_solver_exception.h"
+#include <algorithm>
 #include <memory>
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
@@ -248,13 +249,28 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                 "No side weights should be provided since there are no neighbors at all");
   }
 
-  // Copy over weights
-  if (side_weights.size())
+  /*
+   * Whether side (edge) weights are in use has to be decided collectively, not from this rank's
+   * own side_weights vector: a rank with no local elements has an empty side_weights vector
+   * regardless of whether side weighting is enabled, so its local size cannot distinguish
+   * "weighting is off" from "weighting is on, but this rank has nothing to weight."
+   */
+  bool use_side_weights = !side_weights.empty();
+  comm.max(use_side_weights);
+
+  /*
+   * Copy over weights. A rank with nothing to weight must still supply a non-null array once
+   * side weighting is enabled anywhere: PT-Scotch's SCOTCH_dgraphBuild requires every rank to
+   * agree on whether each optional array is null, and a zero-size allocation is not guaranteed
+   * to return a non-null pointer.
+   */
+  if (use_side_weights)
   {
     mooseAssert((PetscInt)side_weights.size() == i,
                 "Side weight size " << side_weights.size()
                                     << " does not match with adjacency matrix size " << i);
-    LibmeshPetscCallA(comm.get(), PetscCalloc1(side_weights.size(), &values));
+    LibmeshPetscCallA(comm.get(),
+                      PetscCalloc1(std::max<std::size_t>(side_weights.size(), 1), &values));
     i = 0;
     for (auto weight : side_weights)
       values[i++] = weight;
@@ -265,9 +281,9 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
-  if (values)
-    // This should only be set to true if the adjacency matrix has valid edge weights (which
-    // correspond to \p values)
+  if (use_side_weights)
+    // Set based on whether side weighting is enabled anywhere, not on whether this rank's
+    // 'values' pointer happens to be null, for the same collective-agreement reason as above
     LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
   LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
@@ -275,15 +291,21 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     mooseAssert(!elem_weights.size(),
                 "No element weights should be provided since there are no elements at all");
 
+  // Element weights are subject to the same collective-agreement requirement as side weights
+  bool use_elem_weights = !elem_weights.empty();
+  comm.max(use_elem_weights);
+
   // Handle element weights
-  if (elem_weights.size())
+  if (use_elem_weights)
   {
     mooseAssert((PetscInt)elem_weights.size() == num_local_elems,
                 "Element weight size " << elem_weights.size()
                                        << " does not match with the number of local elements"
                                        << num_local_elems);
 
-    LibmeshPetscCallA(comm.get(), PetscCalloc1(elem_weights.size(), &petsc_elem_weights));
+    LibmeshPetscCallA(
+        comm.get(),
+        PetscCalloc1(std::max<std::size_t>(elem_weights.size(), 1), &petsc_elem_weights));
     i = 0;
     for (auto weight : elem_weights)
       petsc_elem_weights[i++] = weight;
