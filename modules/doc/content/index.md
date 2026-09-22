@@ -62,55 +62,59 @@ email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subsc
 !row-end!
 
 !row! style=display:inline-flex;
-!col! small=12 medium=4 large=2
+!col! small=12 medium=3 large=3 style=align-content:center;
+
+!style! halign=center
 
 !media large_media/organization_logos/INL-Logo_Left-Black.png
        dark_src=large_media/organization_logos/INL-Logo_Left-White.png
        link=https://inl.gov
        alt=Idaho National Laboratory
-       style=width:100%;display:block;
+       style=width:90%;
+
+!style-end!
 
 !col-end!
 
-!col! small=12 medium=4 large=2
+!col! small=12 medium=3 large=3 style=align-content:center;
 
-!style halign=center
+!style! halign=center
 
 !media large_media/organization_logos/Argonne_cmyk_black.png
        dark_src=large_media/organization_logos/Argonne_cmyk_white.png
        link=https://www.anl.gov/
        alt=Argonne National Laboratory
-       style=width:100%;display:block;
+       style=width:90%;
+
+!style-end!
 
 !col-end!
 
-!col! small=12 medium=4 large=2
+!col! small=12 medium=3 large=3 style=align-content:center;
 
-!style halign=center
+!style! halign=center
 
 !media large_media/organization_logos/LosAlamosLab_light.png
        dark_src=large_media/organization_logos/LosAlamosLab_dark.png
        link=https://lanl.gov/
        alt=Los Alamos National Laboratory
-       style=width:100%;display:block;
+       style=width:90%;
+
+!style-end!
 
 !col-end!
 
-!col! small=12 medium=4 large=2
+!col! small=12 medium=3 large=3 style=align-content:center;
 
-!style halign=center
+!style! halign=center
 
 !media large_media/organization_logos/OLCF_official_black_10_26_15.png
        dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png
        link=https://www.olcf.ornl.gov/
        alt=Oak Ridge National Laboratory, Leadership Computing Facility
-       style=width:100%;display:block;
+       style=width:90%;
+
+!style-end!
 
 !col-end!
 !row-end!
-
-
-
-
-
-
