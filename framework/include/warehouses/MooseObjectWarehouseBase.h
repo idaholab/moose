@@ -283,8 +283,7 @@ protected:
 };
 
 template <typename T>
-MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(
-    THREAD_ID num_threads /*=libMesh::n_threads()*/)
+MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(THREAD_ID num_threads)
   : _num_threads(num_threads),
     _all_objects(_num_threads),
     _active_objects(_num_threads),

@@ -148,7 +148,7 @@ public:
   removeInputParameters(const MooseObject & moose_object, THREAD_ID tid, const AddRemoveParamsKey);
 
 private:
-  /// The number of threads this warehouse stores per-thread data for (see MooseApp::n_threads())
+  /// The number of threads this warehouse stores per-thread data for (see MooseApp::numThreads())
   const THREAD_ID _num_threads;
 
   /// Storage for the InputParameters objects

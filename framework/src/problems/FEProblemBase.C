@@ -454,16 +454,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_assembly(*this),
 #endif
-    _mesh_divisions(n_threads()),
-    _functions(n_threads()),
+    _mesh_divisions(numThreads()),
+    _functions(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_functions(n_threads()),
+    _kokkos_functions(numThreads()),
 #endif
-    _convergences(n_threads()),
-    _nonlocal_kernels(n_threads()),
-    _nonlocal_integrated_bcs(n_threads()),
-    _ics(n_threads()),
-    _fv_ics(n_threads()),
+    _convergences(numThreads()),
+    _nonlocal_kernels(numThreads()),
+    _nonlocal_integrated_bcs(numThreads()),
+    _ics(numThreads()),
+    _fv_ics(numThreads()),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "material_props", &_mesh, _material_prop_registry, *this)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -481,23 +481,23 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
             "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
 #endif
-    _materials(n_threads()),
-    _interface_materials(n_threads()),
-    _discrete_materials(n_threads()),
-    _all_materials(n_threads()),
+    _materials(numThreads()),
+    _interface_materials(numThreads()),
+    _discrete_materials(numThreads()),
+    _all_materials(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_materials(n_threads()),
+    _kokkos_materials(numThreads()),
 #endif
-    _indicators(n_threads()),
-    _internal_side_indicators(n_threads()),
-    _markers(n_threads()),
+    _indicators(numThreads()),
+    _internal_side_indicators(numThreads()),
+    _markers(numThreads()),
     _reporter_data(_app),
-    _multi_apps(_app.getExecuteOnEnum(), n_threads()),
-    _transient_multi_apps(_app.getExecuteOnEnum(), n_threads()),
-    _transfers(_app.getExecuteOnEnum(), 1),
-    _to_multi_app_transfers(_app.getExecuteOnEnum(), 1),
-    _from_multi_app_transfers(_app.getExecuteOnEnum(), 1),
-    _between_multi_app_transfers(_app.getExecuteOnEnum(), 1),
+    _multi_apps(_app.getExecuteOnEnum(), numThreads()),
+    _transient_multi_apps(_app.getExecuteOnEnum(), numThreads()),
+    _transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _to_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _from_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _between_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
     _num_concurrent_multiapps(getParam<unsigned int>("num_concurrent_multiapps")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
@@ -554,7 +554,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _verbose_restore(getParam<bool>("verbose_restore")),
     _current_execute_on_flag(EXEC_NONE),
-    _control_warehouse(_app.getExecuteOnEnum(), 1),
+    _control_warehouse(_app.getExecuteOnEnum(), /*n_threads=*/1),
     _is_petsc_options_inserted(false),
     _line_search(nullptr),
     _using_ad_mat_props(false),
@@ -650,7 +650,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _dt = 0;
   _dt_old = _dt;
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
 
   _real_zero.resize(n_threads, 0.);
   _scalar_zero.resize(n_threads);
@@ -822,7 +822,7 @@ FEProblemBase::hasSolutionState(unsigned int state,
 void
 FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems)
 {
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
 
   _assembly.resize(n_threads);
   for (const auto i : make_range(n_threads))
@@ -883,7 +883,7 @@ FEProblemBase::~FEProblemBase()
   // an unflushed stream and start destructing things.
   _console << std::flush;
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _zero[i].release();
@@ -1002,12 +1002,12 @@ FEProblemBase::initialSetup()
       TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
 
       MaxVarNDofsPerElem mvndpe(*this, sys);
-      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), mvndpe, this->n_threads());
+      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), mvndpe, numThreads());
       max_var_n_dofs_per_elem = mvndpe.max();
       _communicator.max(max_var_n_dofs_per_elem);
 
       MaxVarNDofsPerNode mvndpn(*this, sys);
-      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), mvndpn, this->n_threads());
+      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), mvndpn, numThreads());
       max_var_n_dofs_per_node = mvndpn.max();
       _communicator.max(max_var_n_dofs_per_node);
       global_max_var_n_dofs_per_elem =
@@ -1031,7 +1031,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("resizingVarValues", 5, "Resizing Variable Values");
 
-    for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+    for (unsigned int tid = 0; tid < numThreads(); ++tid)
     {
       _phi_zero[tid].resize(global_max_var_n_dofs_per_elem, std::vector<Real>(getMaxQps(), 0.));
       _grad_phi_zero[tid].resize(global_max_var_n_dofs_per_elem,
@@ -1142,7 +1142,7 @@ FEProblemBase::initialSetup()
     }
   }
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
 
   // Convergence initial setup
   {
@@ -1481,7 +1481,7 @@ FEProblemBase::initialSetup()
     // check that variables are defined along boundaries of boundary restricted nodal objects
     const auto & bnd_nodes = getCurrentAlgebraicBndNodeRange();
     BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
-    Threads::parallel_reduce(bnd_nodes, bnict, this->n_threads());
+    Threads::parallel_reduce(bnd_nodes, bnict, numThreads());
 
     // Nodal bcs aren't threaded
     for (auto & nl : _nl)
@@ -1534,7 +1534,7 @@ FEProblemBase::initialSetup()
     // check that variables are defined along boundaries of boundary restricted elemental objects
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
-    Threads::parallel_reduce(bnd_elems, beict, this->n_threads());
+    Threads::parallel_reduce(bnd_elems, beict, numThreads());
   }
 
   if (_fv_face_integrity_check)
@@ -1758,7 +1758,7 @@ FEProblemBase::timestepSetup()
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.timestepSetup(tid);
@@ -1825,7 +1825,7 @@ FEProblemBase::checkNonlocalCoupling()
 {
   TIME_SECTION("checkNonlocalCoupling", 5, "Checking Nonlocal Coupling");
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     for (auto & nl : _nl)
     {
       const auto & all_kernels = nl->getKernelWarehouse();
@@ -2375,7 +2375,7 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
        * In that case we need to resize the zeros to compensate.
        */
       unsigned int max_qpts = getMaxQps();
-      for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+      for (unsigned int tid = 0; tid < numThreads(); ++tid)
       {
         // the highest available order in libMesh is 43
         _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
@@ -2721,7 +2721,7 @@ FEProblemBase::addFunction(const std::string & type,
 
   parameters.set<SubProblem *>("_subproblem") = this;
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     logAdd("Function", name, type, parameters);
@@ -2745,7 +2745,7 @@ FEProblemBase::addConvergence(const std::string & type,
 {
   parallel_object_only();
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::shared_ptr<Convergence> conv = _factory.create<Convergence>(type, name, parameters, tid);
     _convergences.addObject(conv, tid);
@@ -2874,7 +2874,7 @@ FEProblemBase::addMeshDivision(const std::string & type,
   parallel_object_only();
   parameters.set<FEProblemBase *>("_fe_problem_base") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, tid);
     _mesh_divisions.addObject(func, tid);
@@ -3798,7 +3798,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   // field IC
   if (hasVariable(var_name))
   {
-    for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
     {
       MooseVariableFEBase & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
@@ -3858,7 +3858,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
   // field IC
   if (hasVariable(var_name))
   {
-    for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
     {
       auto & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
@@ -3888,7 +3888,7 @@ FEProblemBase::projectSolution()
   FloatingPointExceptionGuard fpe_guard(_app);
 
   ComputeInitialConditionThread cic(*this);
-  Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cic, this->n_threads());
+  Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cic, numThreads());
 
   if (haveFV())
   {
@@ -3896,7 +3896,7 @@ FEProblemBase::projectSolution()
     ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
 
     ComputeFVInitialConditionThread cfvic(*this);
-    Threads::parallel_reduce(elem_info_range, cfvic, this->n_threads());
+    Threads::parallel_reduce(elem_info_range, cfvic, numThreads());
   }
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3906,7 +3906,7 @@ FEProblemBase::projectSolution()
 
   // now run boundary-restricted initial conditions
   ComputeBoundaryInitialConditionThread cbic(*this);
-  Threads::parallel_reduce(getCurrentAlgebraicBndNodeRange(), cbic, this->n_threads());
+  Threads::parallel_reduce(getCurrentAlgebraicBndNodeRange(), cbic, numThreads());
 
   for (auto & nl : _nl)
     nl->solution().close();
@@ -3955,12 +3955,12 @@ FEProblemBase::projectInitialConditionOnCustomRange(
   if (target_vars)
   {
     ComputeInitialConditionThread cic(*this, &(*target_vars));
-    Threads::parallel_reduce(elem_range, cic, this->n_threads());
+    Threads::parallel_reduce(elem_range, cic, numThreads());
   }
   else
   {
     ComputeInitialConditionThread cic(*this);
-    Threads::parallel_reduce(elem_range, cic, this->n_threads());
+    Threads::parallel_reduce(elem_range, cic, numThreads());
   }
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3971,12 +3971,12 @@ FEProblemBase::projectInitialConditionOnCustomRange(
   if (target_vars)
   {
     ComputeBoundaryInitialConditionThread cbic(*this, &(*target_vars));
-    Threads::parallel_reduce(bnd_nodes, cbic, this->n_threads());
+    Threads::parallel_reduce(bnd_nodes, cbic, numThreads());
   }
   else
   {
     ComputeBoundaryInitialConditionThread cbic(*this);
-    Threads::parallel_reduce(bnd_nodes, cbic, this->n_threads());
+    Threads::parallel_reduce(bnd_nodes, cbic, numThreads());
   }
 
   for (auto & nl : _nl)
@@ -4155,7 +4155,7 @@ FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
 
   auto add_functor_materials = [&](const auto & parameters, const auto & name)
   {
-    for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+    for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     {
       // Create the general Block/Boundary MaterialBase object
       std::shared_ptr<MaterialBase> material =
@@ -4220,7 +4220,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (parameters.isKokkosObject())
@@ -4708,7 +4708,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name);
 
-  for (const auto tid : make_range(this->n_threads()))
+  for (const auto tid : make_range(numThreads()))
   {
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
@@ -4759,7 +4759,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   // Add as a Functor if it is one. We usually need to add the user object from thread 0 as the
   // registered functor for all threads because when user objects are thread joined, generally only
   // the primary thread copy ends up with all the data
-  for (const auto tid : make_range(this->n_threads()))
+  for (const auto tid : make_range(numThreads()))
   {
     const decltype(uos)::size_type uo_index = uos.front()->needThreadedCopy() ? tid : 0;
     if (const auto functor = dynamic_cast<Moose::FunctorBase<Real> *>(uos[uo_index].get()))
@@ -4782,7 +4782,7 @@ FEProblemBase::addFVInterpolationMethod(const std::string & method_type,
 
   addObjectParamsHelper(parameters, name);
 
-  for (const auto tid : make_range(this->n_threads()))
+  for (const auto tid : make_range(numThreads()))
   {
     auto method = _factory.create<FVInterpolationMethod>(method_type, name, parameters, tid);
     logAdd("FVInterpolationMethod", name, method_type, parameters);
@@ -5107,12 +5107,12 @@ FEProblemBase::computeIndicators()
 
     // compute Indicators
     ComputeIndicatorThread cit(*this);
-    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cit, this->n_threads());
+    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cit, numThreads());
     _aux->solution().close();
     _aux->update();
 
     ComputeIndicatorThread finalize_cit(*this, true);
-    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), finalize_cit, this->n_threads());
+    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), finalize_cit, numThreads());
     _aux->solution().close();
     _aux->update();
 
@@ -5138,7 +5138,7 @@ FEProblemBase::computeMarkers()
 
     _adaptivity.updateErrorVectors();
 
-    for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
     {
       const auto & markers = _markers.getActiveObjects(tid);
       for (const auto & marker : markers)
@@ -5146,7 +5146,7 @@ FEProblemBase::computeMarkers()
     }
 
     ComputeMarkerThread cmt(*this);
-    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cmt, this->n_threads());
+    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cmt, numThreads());
 
     _aux->solution().close();
     _aux->update();
@@ -5178,7 +5178,7 @@ FEProblemBase::customSetup(const ExecFlagType & exec_type)
   if (_line_search)
     _line_search->customSetup(exec_type);
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.customSetup(exec_type, tid);
@@ -5542,7 +5542,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       // because some nodal user objects (NodalNormal related) depend on elemental user objects
       // :-(
       ComputeUserObjectsThread cppt(*this, query);
-      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cppt, this->n_threads());
+      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cppt, numThreads());
 
       // There is one instance in rattlesnake where an elemental user object's finalize depends
       // on a side user object having been finalized first :-(
@@ -5573,7 +5573,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
     if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
     {
       ComputeNodalUserObjectsThread cnppt(*this, query);
-      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), cnppt, this->n_threads());
+      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), cnppt, numThreads());
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
     }
 
@@ -5649,7 +5649,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
                                                       tguos.end(),
                                                       /*grainsize=*/1),
                                ctguot,
-                               this->n_threads());
+                               numThreads());
       joinAndFinalize(q);
     }
 
@@ -5715,7 +5715,7 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
 {
   // TODO: This should be done in a threaded loop, but this should be super quick so for now
   // do a serial loop.
-  for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
   {
     std::vector<Sampler *> objects;
     theWarehouse()
@@ -5739,7 +5739,7 @@ FEProblemBase::updateActiveObjects()
 {
   TIME_SECTION("updateActiveObjects", 5, "Updating Active Objects");
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
   {
     for (auto & nl : _nl)
       nl->updateActive(tid);
@@ -5858,7 +5858,7 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::shared_ptr<Indicator> indicator =
         _factory.create<Indicator>(indicator_name, name, parameters, tid);
@@ -5901,7 +5901,7 @@ FEProblemBase::addMarker(const std::string & marker_name,
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::shared_ptr<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
     logAdd("Marker", name, marker_name, parameters);
@@ -6822,7 +6822,7 @@ FEProblemBase::updateMaxQps()
   // Find the maximum number of quadrature points
   {
     MaxQpsThread mqt(*this);
-    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), mqt, this->n_threads());
+    Threads::parallel_reduce(getCurrentAlgebraicElementRange(), mqt, numThreads());
     _max_qps = mqt.max();
 
     // If we have more shape functions or more quadrature points on
@@ -6839,7 +6839,7 @@ FEProblemBase::updateMaxQps()
                Moose::constMaxQpsPerElem,
                " to ",
                max_qpts);
-  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < numThreads(); ++tid)
   {
     // the highest available order in libMesh is 43
     _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
@@ -6857,7 +6857,7 @@ FEProblemBase::updateMaxQps()
 void
 FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < numThreads(); ++tid)
     for (const auto i : index_range(_nl))
       _assembly[tid][i]->bumpVolumeQRuleOrder(order, block);
 
@@ -6870,7 +6870,7 @@ FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 void
 FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < numThreads(); ++tid)
     for (const auto i : index_range(_nl))
       _assembly[tid][i]->bumpAllQRuleOrder(order, block);
 
@@ -6905,7 +6905,7 @@ FEProblemBase::createQRules(QuadratureType type,
   if (face_order == INVALID_ORDER)
     face_order = order;
 
-  for (unsigned int tid = 0; tid < this->n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < numThreads(); ++tid)
     for (const auto i : index_range(_solver_systems))
       _assembly[tid][i]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
@@ -7156,7 +7156,7 @@ FEProblemBase::init()
     sys->update();
   _aux->update();
 
-  for (THREAD_ID tid = 0; tid < this->n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < numThreads(); ++tid)
     for (const auto i : index_range(_nl))
     {
       mooseAssert(
@@ -7863,7 +7863,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       _aux->zeroVariablesForResidual();
 
-      unsigned int n_threads = this->n_threads();
+      unsigned int n_threads = numThreads();
 
       _current_execute_on_flag = EXEC_LINEAR;
 
@@ -8110,7 +8110,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
       _aux->zeroVariablesForResidual();
 
-      unsigned int n_threads = this->n_threads();
+      unsigned int n_threads = numThreads();
 
       _current_execute_on_flag = EXEC_LINEAR;
 
@@ -8268,7 +8268,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         _aux->zeroVariablesForJacobian();
 
-        unsigned int n_threads = this->n_threads();
+        unsigned int n_threads = numThreads();
 
         // Random interface objects
         for (const auto & it : _random_data_objects)
@@ -8403,7 +8403,7 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
       NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
       _lower.swap(lower);
       _upper.swap(upper);
-      for (THREAD_ID tid = 0; tid < this->n_threads(); tid++)
+      for (THREAD_ID tid = 0; tid < numThreads(); tid++)
         _all_materials.residualSetup(tid);
 
       _aux->residualSetup();
@@ -8479,7 +8479,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     matrix.zero();
   }
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
 
   _current_execute_on_flag = EXEC_NONLINEAR;
 
@@ -8984,15 +8984,15 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 
   auto fill_data = [this](auto & storage)
   {
-    std::vector<MaterialData *> data(this->n_threads());
-    for (const auto tid : make_range(this->n_threads()))
+    std::vector<MaterialData *> data(numThreads());
+    for (const auto tid : make_range(numThreads()))
       data[tid] = &storage.getMaterialData(tid);
     return data;
   };
   _xfem->setMaterialData(fill_data(_material_props));
   _xfem->setBoundaryMaterialData(fill_data(_bnd_material_props));
 
-  unsigned int n_threads = this->n_threads();
+  unsigned int n_threads = numThreads();
   for (unsigned int i = 0; i < n_threads; ++i)
     for (const auto nl_sys_num : index_range(_nl))
     {
@@ -9149,7 +9149,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
       ProjectMaterialProperties pmp(
           /* refine = */ true, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.refinedElementRange();
-      Threads::parallel_reduce(range, pmp, this->n_threads());
+      Threads::parallel_reduce(range, pmp, numThreads());
 
       // Concurrent erasure from the shared hash map is not safe while we are reading from it in
       // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is
@@ -9170,7 +9170,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
       ProjectMaterialProperties pmp(
           /* refine = */ false, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.coarsenedElementRange();
-      Threads::parallel_reduce(range, pmp, this->n_threads());
+      Threads::parallel_reduce(range, pmp, numThreads());
       // Note that we do not do the erasure for p-refinement because the coarse level element is the
       // same as our active refined level element
       if (!doingPRefinement())
@@ -9222,7 +9222,7 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
   ComputeMaterialsObjectThread cmt(
       *this, _material_props, _bnd_material_props, _neighbor_material_props, _assembly);
   if (threaded)
-    Threads::parallel_reduce(elem_range, cmt, this->n_threads());
+    Threads::parallel_reduce(elem_range, cmt, numThreads());
   else
     cmt(elem_range, true);
 

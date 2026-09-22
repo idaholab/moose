@@ -418,18 +418,13 @@ public:
 
   /**
    * Returns the number of threads this application uses.
-   *
-   * This is the [Application] num_threads value (or the process-wide count when unset), capped at
-   * the process-wide libMesh::n_threads(). An FE backend that does not support MOOSE threading
-   * (e.g. MFEM) reduces it to 1 via setNumThreads().
+   * This is set by the [Application] num_threads value, or the process-wide count,
+   * which is set by the command line --n-threads, when unset
    */
-  THREAD_ID n_threads() const { return _num_threads; }
+  THREAD_ID numThreads() const { return _num_threads; }
 
   /**
-   * Sets the number of threads this application uses, capped to [1, libMesh::n_threads()].
-   *
-   * Intended for FE backends that do not support MOOSE threading and reduce the count once their
-   * problem is set up (e.g. MFEM reduces it to 1). See n_threads().
+   * Sets the number of threads this application uses
    */
   void setNumThreads(THREAD_ID num_threads);
 
@@ -1359,8 +1354,7 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
-  /// The number of threads this application uses, capped at libMesh::n_threads(). Not const: an FE
-  /// backend that does not support MOOSE threading reduces it via setNumThreads() (see n_threads()).
+  /// The number of threads this application uses
   THREAD_ID _num_threads;
 
   /// Where the restartable data is held (indexed on tid)
@@ -1505,8 +1499,8 @@ private:
 
   /**
    * Determines the number of threads this application should use from the [Application] block's
-   * num_threads parameter, capped at the process-wide libMesh::n_threads(). Used to initialize
-   * _num_threads. An over-request is warned about in setupOptions(). See n_threads().
+   * num_threads parameter. Used to initialize _num_threads. An over-request is warned about
+   * in setupOptions(). See numThreads().
    */
   THREAD_ID determineNumThreads() const;
 
