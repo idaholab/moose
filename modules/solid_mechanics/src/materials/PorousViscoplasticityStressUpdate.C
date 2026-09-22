@@ -331,9 +331,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "accepted non-AD constitutive path when more than one local substep is used. The accepted "
       "substep count is held fixed during the tangent replay so controller branch changes are not "
       "included in the material tangent. Centered differences are used when both perturbations "
-      "succeed; if one replay throws a recoverable constitutive exception, the successful side is "
-      "used as a one-sided fallback. The helper does not infer active-set/topology branch "
-      "identity, so transition behavior must be qualified separately.");
+      "succeed; if nearby perturbations fail, the helper retries at smaller strain increments "
+      "before using a one-sided fallback or rejecting the tangent. The helper does not infer "
+      "active-set/topology branch identity, so transition behavior must be qualified separately.");
   params.setDocUnit("substep_tangent_perturbation", "unitless");
 
   params.addRangeCheckedParam<Real>("minimum_porosity",
@@ -648,6 +648,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("dense_limit_solves", _performance_counters.dense_limit_solves);
   write_counter("fixed_porosity_mechanical_solves",
                 _performance_counters.fixed_porosity_mechanical_solves);
+  write_counter("independent_fixed_porosity_mechanical_solves",
+                _performance_counters.independent_fixed_porosity_mechanical_solves);
+  write_counter("independent_fixed_porosity_mechanical_iterations",
+                _performance_counters.independent_fixed_porosity_mechanical_iterations);
+  write_counter("independent_fixed_porosity_mechanical_line_search_trials",
+                _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
+  write_counter("independent_fixed_porosity_recovery_successes",
+                _performance_counters.independent_fixed_porosity_recovery_successes);
   write_counter("reduced_porosity_solves", _performance_counters.reduced_porosity_solves);
   write_counter("gauge_evaluations", _performance_counters.gauge_evaluations);
   write_counter("gauge_n1_closed_form", _performance_counters.gauge_n1_closed_form);
@@ -1315,31 +1323,61 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
       return {RankTwoTensor(replay_stress), std::string{}};
     };
 
-    const auto h = _substep_tangent_perturbation;
+    constexpr std::array<Real, 3> tangent_perturbation_factors = {1.0, 0.3, 0.1};
     for (const auto & component : symmetric_components)
     {
       const auto k = component[0];
       const auto l = component[1];
-      const auto stress_plus = replay(k, l, h);
-      const auto stress_minus = replay(k, l, -h);
 
       auto directional_derivative = RankTwoTensor{};
-      if (stress_plus.stress && stress_minus.stress)
-        directional_derivative = (*stress_plus.stress - *stress_minus.stress) / (2.0 * h);
-      else if (stress_plus.stress)
+      auto derivative_available = false;
+      auto centered_derivative = false;
+      TangentReplayResult last_plus;
+      TangentReplayResult last_minus;
+
+      for (const auto factor : tangent_perturbation_factors)
       {
-        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
-        directional_derivative = (*stress_plus.stress - accepted_stress) / h;
+        const auto h = factor * _substep_tangent_perturbation;
+        last_plus = replay(k, l, h);
+        last_minus = replay(k, l, -h);
+
+        if (last_plus.stress && last_minus.stress)
+        {
+          directional_derivative = (*last_plus.stress - *last_minus.stress) / (2.0 * h);
+          derivative_available = true;
+          centered_derivative = true;
+          break;
+        }
+
+        if (last_plus.stress)
+        {
+          directional_derivative = (*last_plus.stress - accepted_stress) / h;
+          derivative_available = true;
+        }
+        else if (last_minus.stress)
+        {
+          directional_derivative = (accepted_stress - *last_minus.stress) / h;
+          derivative_available = true;
+        }
       }
-      else if (stress_minus.stress)
+
+      if (!derivative_available)
       {
-        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
-        directional_derivative = (accepted_stress - *stress_minus.stress) / h;
-      }
-      else
-      {
+        const auto unperturbed = replay(k, l, 0.0);
         restoreConstitutiveState(
             snapshot, strain_increment, inelastic_strain_increment, stress_new);
+
+        if (!unperturbed.stress)
+          mooseException("In ",
+                         _name,
+                         ": the accepted fixed-substep constitutive path could not be reproduced "
+                         "while constructing the full multi-substep tangent for component (",
+                         k,
+                         ", ",
+                         l,
+                         "). Unperturbed replay failure: ",
+                         unperturbed.failure_message);
+
         mooseException("In ",
                        _name,
                        ": both strain perturbations failed while constructing the full "
@@ -1347,12 +1385,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
                        k,
                        ", ",
                        l,
-                       ").\n  +h failure: ",
-                       stress_plus.failure_message,
+                       ") down to perturbation = ",
+                       0.1 * _substep_tangent_perturbation,
+                       ". The unperturbed fixed-substep replay succeeded.\n  +h failure: ",
+                       last_plus.failure_message,
                        "\n  -h failure: ",
-                       stress_minus.failure_message,
-                       "\nReduce substep_tangent_perturbation or cut the global timestep.");
+                       last_minus.failure_message,
+                       "\nCut the global timestep or reduce substep_tangent_perturbation.");
       }
+
+      if (!centered_derivative)
+        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
 
       // A symmetric shear perturbation changes both epsilon_kl and epsilon_lk by h. Rank-four
       // contraction contains both minor-symmetric terms, so each tensor component receives half
@@ -4285,6 +4328,107 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch
 }
 
 template <bool is_ad>
+std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint>
+PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentMechanicalAtFixedPorosity(
+    const IndependentLocalPoint & seed,
+    const Real tolerance,
+    const IndependentLocalSolveContext & context)
+{
+  incrementPerformanceCounter(_performance_counters.independent_fixed_porosity_mechanical_solves);
+
+  std::optional<IndependentLocalPoint> point;
+  try
+  {
+    point = evaluateIndependentLocalPoint(seed.coordinates(), context, seed.floor_active);
+  }
+  catch (const MooseException &)
+  {
+    return std::nullopt;
+  }
+
+  constexpr auto max_iterations = 15u;
+  for (auto iteration = 0u; iteration < max_iterations; ++iteration)
+  {
+    incrementPerformanceCounter(
+        _performance_counters.independent_fixed_porosity_mechanical_iterations);
+    validateFiniteIndependentLocalPoint(*point, "independent fixed-porosity mechanical recovery");
+
+    if (physicalMechanicalResidualNorm(point->residual,
+                                       context.mechanical_convergence_scale,
+                                       _local_newton_absolute_stress_tolerance,
+                                       tolerance) <= tolerance)
+      return point;
+
+    const auto residual = scaledIndependentResidual(point->residual, context);
+    const auto local_jacobian = scaledIndependentJacobian(point->jacobian, context);
+    const auto mechanical_jacobian =
+        FixedMatrix<Real, 2>{{{local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_P_INDEX],
+                               local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_Q_INDEX]},
+                              {local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_P_INDEX],
+                               local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_Q_INDEX]}}};
+    const auto mechanical_rhs = FixedVector<GenericReal<is_ad>, 2>{-residual[INDEPENDENT_P_INDEX],
+                                                                   -residual[INDEPENDENT_Q_INDEX]};
+    auto mechanical_correction = FixedVector<GenericReal<is_ad>, 2>{};
+
+    if (!solveLinearSystem(mechanical_jacobian, mechanical_rhs, mechanical_correction))
+      return std::nullopt;
+
+    const auto residual_p = MetaPhysicL::raw_value(residual[INDEPENDENT_P_INDEX]);
+    const auto residual_q = MetaPhysicL::raw_value(residual[INDEPENDENT_Q_INDEX]);
+    const auto current_mechanical_norm_squared = residual_p * residual_p + residual_q * residual_q;
+    auto alpha = _local_newton_relaxation;
+    auto accepted_candidate = std::optional<IndependentLocalPoint>{};
+
+    for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
+    {
+      incrementPerformanceCounter(
+          _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
+      auto trial = point->coordinates();
+      trial.p += alpha * context.p_scale * mechanical_correction[0];
+      trial.q += alpha * context.q_scale * mechanical_correction[1];
+
+      const auto p_raw = MetaPhysicL::raw_value(trial.p);
+      const auto q_raw = MetaPhysicL::raw_value(trial.q);
+      if (std::isfinite(p_raw) && std::isfinite(q_raw) && trial.q >= 0.0)
+        try
+        {
+          auto candidate = evaluateIndependentLocalPoint(trial, context, point->floor_active);
+          const auto candidate_residual = scaledIndependentResidual(candidate.residual, context);
+          const auto candidate_residual_p =
+              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_P_INDEX]);
+          const auto candidate_residual_q =
+              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_Q_INDEX]);
+          const auto candidate_mechanical_norm_squared =
+              candidate_residual_p * candidate_residual_p +
+              candidate_residual_q * candidate_residual_q;
+          if (candidate_mechanical_norm_squared < current_mechanical_norm_squared)
+          {
+            accepted_candidate = candidate;
+            break;
+          }
+        }
+        catch (const MooseException &)
+        {
+        }
+
+      alpha *= 0.5;
+    }
+
+    if (!accepted_candidate)
+      return std::nullopt;
+
+    point = accepted_candidate;
+  }
+
+  return physicalMechanicalResidualNorm(point->residual,
+                                        context.mechanical_convergence_scale,
+                                        _local_newton_absolute_stress_tolerance,
+                                        tolerance) <= tolerance
+             ? point
+             : std::nullopt;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     IndependentLocalPoint point,
@@ -4385,7 +4529,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     point = *candidate;
   }
 
-  const auto residual_norm = independentConvergenceResidualNorm(
+  auto residual_norm = independentConvergenceResidualNorm(
       point.residual, context, _local_newton_stagnation_tolerance);
   if (residual_norm <= _local_newton_stagnation_tolerance)
     return point;
@@ -4417,6 +4561,34 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
                    this->_name,
                    ": independent local Newton reached its iteration limit while finer adaptive "
                    "constitutive substeps remain available.");
+
+  /*
+   * At the finest permitted subdivision, the coupled four-variable Newton can stall after the two
+   * porosity equations are already effectively converged while a small p-q imbalance remains.
+   * Project the current state onto the fixed-(f_0,f_1) mechanical equilibrium manifold before
+   * requesting an expensive global timestep cut. The recovery is accepted only if the complete
+   * four-equation physical convergence criterion is satisfied afterward.
+   */
+  if (const auto polished = solveIndependentMechanicalAtFixedPorosity(
+          point, _local_newton_stagnation_tolerance, context))
+  {
+    const auto polished_residual_norm = independentConvergenceResidualNorm(
+        polished->residual, context, _local_newton_stagnation_tolerance);
+    if (polished_residual_norm <= _local_newton_stagnation_tolerance)
+    {
+      incrementPerformanceCounter(
+          _performance_counters.independent_fixed_porosity_recovery_successes);
+      if (this->_verbose)
+        Moose::out << "In " << this->_name
+                   << ": independent fixed-porosity mechanical recovery converged at the finest "
+                      "constitutive subdivision."
+                   << std::endl;
+      return *polished;
+    }
+
+    point = *polished;
+    residual_norm = polished_residual_norm;
+  }
 
   const auto mechanical_residual_magnitude = physicalMechanicalResidualMagnitude(point.residual);
   const auto stagnation_mechanical_residual_limit =
