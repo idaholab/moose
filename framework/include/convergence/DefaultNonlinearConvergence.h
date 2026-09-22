@@ -67,6 +67,14 @@ protected:
   /// Performs setup necessary for each call to checkConvergence
   virtual void nonlinearConvergenceSetup() {}
 
+  /**
+   * Warns, once per simulation, if any PETSc SNES tolerance/iteration options (e.g.
+   * -snes_rtol) were set to a value different from what this object caches and enforces,
+   * since such PETSc-level settings are otherwise silently ignored by this object's own
+   * convergence check.
+   */
+  void checkPetscToleranceOverrides();
+
   FEProblemBase & _fe_problem;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
@@ -90,4 +98,8 @@ protected:
   Real _nl_abs_tol;
   /// Nonlinear relative tolerance (modifiable by setRelativeTolerance)
   Real _nl_rel_tol;
+
+private:
+  /// Whether checkPetscToleranceOverrides() has already run for this simulation
+  bool _nl_checked_petsc_tolerance_overrides = false;
 };
