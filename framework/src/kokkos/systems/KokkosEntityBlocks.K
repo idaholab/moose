@@ -213,8 +213,12 @@ EntityBlocks::init(const DofSpace & dof_space,
 void
 EntityBlocks::zero()
 {
+  // create() allocates both sides and assigning a scalar fills whichever sides an array holds, so
+  // this zeroes the device entries in place. Uploading the host zeros on top of them would move the
+  // whole entry array across the bus, several gigabytes for an order-eight quadrilateral, to no
+  // effect: the block loop accumulates on the device, and reduce() and copyEntriesToHost() are what
+  // bring the entries back to the host.
   _entries = 0;
-  _entries.copyToDevice();
 }
 
 void
