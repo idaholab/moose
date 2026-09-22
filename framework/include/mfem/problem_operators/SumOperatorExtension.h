@@ -12,40 +12,11 @@ so I figure this is a good place to put it.
 namespace Moose::MFEM
 {
 
-// We have to do something hacky to get the constrained list out of the ConstrainedOperator.
-// We need this for the stuff that comes in ConstrainedOperator::AssembleDiagonal, after
-// calling AssembleDiagonal on the non/bi-linearform underneath.
-//
-// Revisiting this comment - the whole point of this is to avoid double-adding 1s to the
-// diagonal of the finished operator, which ends up happening whenever there is a bilinear
-// and a nonlinear form added to the same variable
-class ConstrainedOperatorExtension : public mfem::ConstrainedOperator
-{
-public:
-  void FinishAssembleDiagonal(mfem::Vector & diag) const
-  {
-    if (diag_policy == DIAG_KEEP)
-    {
-      return;
-    }
-
-    const int csz = constraint_list.Size();
-    auto d_diag = diag.ReadWrite();
-    auto idx = constraint_list.Read();
-
-    // just do simple for loop
-    mooseAssert(diag_policy == DIAG_ONE or diag_policy == DIAG_ZERO, "");
-
-    for (int i = 0; i < csz; i++)
-    {
-      const int id = idx[i];
-      d_diag[id] = (diag_policy == DIAG_ONE) ? 1.0 : 0.0;
-    }
-  }
-};
-
 // Since the member variables of SumOperator are private, we have
 // to define our own class anyway...
+// It is essential that the first operator is the gradient of the
+// nonlinear form here, as we call B->AssembleDiagonal later one,
+// and this will fail for the gradient of the nlf.
 class SumOperatorExtension : public mfem::Operator
 {
   const mfem::Operator *A, *B;
@@ -86,8 +57,8 @@ public:
   void MultTranspose(const mfem::Vector & x, mfem::Vector & y) const override
   {
     z.SetSize(A->Width());
-    A->Mult(x, z);
-    B->Mult(x, y);
+    A->MultTranspose(x, z);
+    B->MultTranspose(x, y);
     add(_alpha, z, _beta, y, y);
   }
 
@@ -100,11 +71,12 @@ public:
     // the nlf will hold most things
     // firstly, the dnfi
     mfem::Array<mfem::NonlinearFormIntegrator *> & dnfi = *_nlf->GetDNFI();
+    mfem::Array<mfem::NonlinearFormIntegrator *> & bnfi = *_nlf->GetBNFI();
 
     // next, the elemR. this should also unlock the size we need for ye
     mfem::FiniteElementSpace * fes = _nlf->FESpace();
 
-    // this LEXICOGRAPHIC is correct. i check in gdb
+    // this LEXICOGRAPHIC is correct. This is how PABilinearFormExtensions do it.
     const mfem::Operator * elemR =
         fes->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
 
@@ -113,9 +85,16 @@ public:
     mfem::Vector ye(ye_size);
     ye = 0.0;
 
+    // assemble grad diag on each of the domain integrators
     for (int i = 0; i < dnfi.Size(); i++)
     {
       dnfi[i]->AssembleGradDiagonalPA(ye);
+    }
+
+    // ditto for the boundary integrators
+    for (int i = 0; i < bnfi.Size(); i++)
+    {
+      bnfi[i]->AssembleGradDiagonalPA(ye);
     }
 
     // finally, let's do it the way that the blf path does it
@@ -128,39 +107,33 @@ public:
       elemR->MultTranspose(ye, diag);
   }
 
-  void AssembleDiagonalOnConstrainedOperatorExtn(mfem::Vector & diag) const
-  {
-    // first, call AssembleDiagOnNonlinearForm
-    AssembleDiagOnNonlinearForm(diag);
-
-    // does A cast into ConstrainedOperator?
-    const mfem::ConstrainedOperator * cA = dynamic_cast<const mfem::ConstrainedOperator *>(A);
-    mooseAssert(cA, "");
-
-    // Now, do all the rest of the stuff that happens in ConstrainedOperator::AssembleDiagonal
-    // cast A into constrained operator
-    const ConstrainedOperatorExtension * cA_extn =
-        reinterpret_cast<const ConstrainedOperatorExtension *>(cA);
-    mooseAssert(cA_extn, "");
-
-    cA_extn->FinishAssembleDiagonal(diag);
-  }
-
   void AssembleDiagonal(mfem::Vector & diag) const override
   {
-    // slow and steady. Yes we could reuse the z vector here...
-    mfem::Vector tempA(diag.Size());
-    mfem::Vector tempB(diag.Size());
+    mfem::Vector nlf_diag(diag.Size());
+    AssembleDiagOnNonlinearForm(nlf_diag);
 
-    // send temp A down
-    // A->AssembleDiagonal(tempA);
-    AssembleDiagonalOnConstrainedOperatorExtn(tempA);
+    // Ultimately, we want the diag that we assemble here to have 1s
+    // on all essential rows. Since we combine diagonal values from
+    // the nonlinear form and the bilinear form here, we arbitrarily
+    // make sure the nonlinear form has a diag_policy of 0 (see the
+    // call to mfem::forall below) and the bilinear form has a diag_policy
+    // of 1 (default). This means when we combine at the end, we have 1s
+    // on essential rows.
+    const mfem::Array<int> & ess_tdofs = _nlf->GetEssentialTrueDofs();
+    const int csz = ess_tdofs.Size();
+    auto idx = ess_tdofs.Read();
+    auto d_diag = nlf_diag.ReadWrite();
+    for (int i = 0; i < csz; i++)
+      d_diag[idx[i]] = 0.0;
 
     // ditto for B
-    B->AssembleDiagonal(tempB);
+    mfem::Vector b_diag(diag.Size());
+    B->AssembleDiagonal(b_diag);
 
     // mix them together
-    add(_alpha, tempA, _beta, tempB, diag);
+    mooseAssert(_alpha == 1.0 and _beta == 1.0,
+                "alpha!=1.0 or beta!=1.0. We are putting the wrong values on the diagonal.");
+    add(_alpha, nlf_diag, _beta, b_diag, diag);
   }
 };
 
