@@ -109,7 +109,7 @@ libuuid:
 libxcb:
   - '1'
 libxml2:
-  - '2.14'
+  - '2.15'
 ncurses:
   - 6
 openssl:
@@ -121,7 +121,7 @@ readline:
 ucc:
   - 1
 ucx:
-  - '1.20'
+  - '1.22'
 xz:
   - 5
 zlib:
