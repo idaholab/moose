@@ -945,9 +945,10 @@ addPetscPairsToPetscOptions(
       {
         superlu_dist_found = true;
 
-        // SuperLU_DIST performs its own internal OpenMP-parallel factorization, which races
-        // with MOOSE's own threading and has been observed to corrupt memory (illegal BLAS
-        // arguments, segfaults) when MOOSE is run with more than one thread.
+        // SuperLU_DIST performs its own internal OpenMP-parallel factorization. Its OpenMP
+        // threads and MOOSE's own worker threads both call into PETSc's global (non-thread-safe)
+        // error-logging call stack; concurrent access corrupts that state and produces heap
+        // corruption and segfaults when MOOSE is run with more than one thread.
         if (libMesh::n_threads() > 1)
           mooseError("The PETSc option '",
                      option_name,
