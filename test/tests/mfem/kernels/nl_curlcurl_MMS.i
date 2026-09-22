@@ -1,5 +1,10 @@
-# Definite Maxwell problem solved with Nedelec elements of the first kind
-# based on MFEM Example 3.
+# Manufactured solution for the nonlinear definite Maxwell problem
+#   curl( k(|curl u|) curl u ) + u = f,   k(s) = 1 + s^2
+# with exact solution u = (0, 0, sin(kappa*x)).  Then
+#   curl u = (0, -kappa*cos(kappa*x), 0),  |curl u| = kappa*|cos(kappa*x)|
+# and the forcing that reproduces it is
+#   f_z = kappa^2*sin(kappa*x)*(1 + 3*kappa^2*cos(kappa*x)^2) + sin(kappa*x)
+# where the trailing sin(kappa*x) is the contribution of the mass kernel.
 
 [Mesh]
   type = MFEMFileMesh
@@ -17,11 +22,6 @@
     fec_order = FIRST
     closed_basis=GaussLobatto
     open_basis=IntegratedGLL
-  []
-  [HDivFESpace]
-    type = MFEMVectorFESpace
-    fec_type = RT
-    fec_order = CONSTANT
   []
 []
 
@@ -47,7 +47,7 @@
     type = ParsedVectorFunction
     expression_x = '0'
     expression_y = '0'
-    expression_z = '(kappa^2) * sin(kappa * x) * (1 + 3 * (kappa^2) * (cos(kappa * x)^2) )'
+    expression_z = '(kappa^2) * sin(kappa * x) * (1 + 3 * (kappa^2) * (cos(kappa * x)^2) ) + sin(kappa * x)'
 
     symbol_names = kappa
     symbol_values = 3.1415926535

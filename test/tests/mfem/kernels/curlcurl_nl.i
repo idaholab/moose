@@ -117,6 +117,8 @@
 [Solvers]
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
+    inner_pi_iterations = 0
+    inner_g_iterations = 0
   []
   [lin]
     type = MFEMGMRESSolver
