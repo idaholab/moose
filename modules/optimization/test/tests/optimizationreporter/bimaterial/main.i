@@ -2,7 +2,7 @@
 # The purpose of main.i is to find the two diffusivity_values
 # (one in the bottom material of model.i, and one in the top material of model.i)
 # such that the misfit between experimental observations (defined in model.i) and MOOSE predictions is minimised.
-# The adjoint computed in grad.i is used to compute the gradient for the gradient based LMVM solver in TAO
+# The adjoint computed in grad.i is used to compute the gradient for the gradient based BQNLS solver in TAO
 # PETSc-TAO optimisation is used to perform this inversion
 #
 [Optimization]
@@ -41,7 +41,7 @@
 
 [Executioner]
   # type = Optimize
-  # tao_solver = taoblmvm
+  # tao_solver = taobqnls
   # petsc_options_iname = '-tao_fd_gradient -tao_gatol'
   # petsc_options_value = ' true            0.001'
   type = Optimize
