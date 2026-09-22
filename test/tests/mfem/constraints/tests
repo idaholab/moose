@@ -1,0 +1,109 @@
+[Tests]
+  design = 'MFEMEssentialConstraint.md'
+  issues = '#33623'
+  [MFEMInteriorEssentialConstraint]
+    type = CSVDiff
+    input = subdomain_constraint_source.i
+    csvdiff = subdomain_constraint_source_out_line_sample_0001.csv
+    design = 'MFEMScalarEssentialConstraint.md'
+    requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom in MFEM problems'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMTreeCotreeGaugeMagnetodynamic]
+    type = CSVDiff
+    input = tree_cotree_gauge_magnetodynamic.i
+    csvdiff = tree_cotree_gauge_magnetodynamic_out.csv
+    # MFEM transient problems do not restore their state when a timestep is
+    # rejected and retried, so a repeated step does not reproduce the original
+    # result. Every other MFEM transient test opts out of restep for the same
+    # reason.
+    restep = false
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall be able to apply a tree-cotree gauge restricted to the non-conducting region that removes the gradient null space of an H(curl) variable in an otherwise singular magnetodynamic MFEM problem, giving a partition-independent solution'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMComplexTreeCotreeGaugeTimeHarmonic]
+    type = CSVDiff
+    input = tree_cotree_gauge_time_harmonic.i
+    csvdiff = tree_cotree_gauge_time_harmonic_out.csv
+    design = 'MFEMComplexTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall be able to apply a tree-cotree gauge to a complex (time-harmonic) H(curl) variable, removing the gradient null space of the curl-curl operator in an otherwise singular frequency-domain MFEM problem'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMComplexInteriorEssentialConstraint]
+    type = CSVDiff
+    input = complex_subdomain_constraint_source.i
+    csvdiff = complex_subdomain_constraint_source_out_point_sample_0001.csv
+    design = 'MFEMComplexScalarEssentialConstraint.md'
+    requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom of a complex scalar variable in MFEM problems'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMVectorInteriorEssentialConstraint]
+    type = CSVDiff
+    input = vector_subdomain_constraint_source.i
+    csvdiff = vector_subdomain_constraint_source_out_point_sample_0001.csv
+    design = 'MFEMVectorEssentialConstraint.md'
+    requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom of a vector variable in MFEM problems'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMComplexVectorInteriorEssentialConstraint]
+    type = CSVDiff
+    input = complex_vector_subdomain_constraint_source.i
+    csvdiff = complex_vector_subdomain_constraint_source_out_point_sample_0001.csv
+    design = 'MFEMComplexVectorEssentialConstraint.md'
+    requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom of a complex vector variable in MFEM problems'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMInvalidConstraintBlock]
+    type = RunException
+    input = invalid_constraint_block.i
+    expect_err = "Subdomain attribute 99 is not present in the mesh"
+    design = 'MFEMScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if an essential constraint in an MFEM problem is restricted to a subdomain that the mesh does not contain'
+    capabilities = 'mfem'
+  []
+  [MFEMComplexConstraintInRealProblem]
+    type = RunException
+    input = complex_constraint_in_real_problem.i
+    expect_err = "there is no corresponding complex equation system"
+    design = 'MFEMComplexScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if a complex essential constraint is applied in a real MFEM problem'
+    capabilities = 'mfem'
+  []
+  [MFEMRealConstraintInComplexProblem]
+    type = RunException
+    input = real_constraint_in_complex_problem.i
+    expect_err = "acts on a real variable and cannot be used in a complex"
+    design = 'MFEMScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if a real essential constraint is applied in a complex MFEM problem'
+    capabilities = 'mfem'
+  []
+  [MFEMConstraintOnNonTrialVariable]
+    type = RunException
+    input = constraint_on_non_trial_variable.i
+    expect_err = "is not a trial variable of the equation system"
+    design = 'MFEMEssentialConstraint.md'
+    requirement = 'The system shall report an error if an essential constraint in an MFEM problem is applied to a variable that no equation is solved for, since the constraint would otherwise never be applied'
+    capabilities = 'mfem'
+  []
+  [MFEMTreeCotreeGaugeHighOrder]
+    type = RunException
+    input = tree_cotree_gauge_high_order.i
+    expect_err = "requires a FIRST order H\(curl\) space"
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall report an error if a tree-cotree gauge is applied to an H(curl) variable whose finite element space is of higher than first order, since only the lowest-order edge degrees of freedom are gauged'
+    capabilities = 'mfem'
+  []
+[]
