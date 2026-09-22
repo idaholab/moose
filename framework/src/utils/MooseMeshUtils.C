@@ -11,6 +11,7 @@
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/id_types.h"
 #include "libmesh/int_range.h"
@@ -1574,13 +1575,21 @@ removeInteriorSides(MeshBase & mesh, const std::set<BoundaryID> & boundary_ids)
   std::vector<boundary_id_type> side_ids;
   for (const auto & elem : mesh.active_element_ptr_range())
     for (const auto & side : elem->side_index_range())
-      if (elem->neighbor_ptr(side))
+    {
+      // A side with a neighbor in a different subdomain is a deliberate interface between
+      // blocks, not a spurious interior side, so leave it in the boundary. A neighbor we can't
+      // see (RemoteElem, on a distributed mesh) is treated like a same-subdomain neighbor, since
+      // its subdomain can't be checked and this matches the prior, unconditional removal.
+      const auto neighbor = elem->neighbor_ptr(side);
+      if (neighbor &&
+          (neighbor == libMesh::remote_elem || neighbor->subdomain_id() == elem->subdomain_id()))
       {
         binfo.boundary_ids(elem, side, side_ids);
         for (const auto & id : side_ids)
           if (boundary_ids.count(id))
             binfo.remove_side(elem, side, id);
       }
+    }
   mesh.unset_is_prepared();
 }
 }

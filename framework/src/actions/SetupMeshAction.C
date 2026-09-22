@@ -65,8 +65,10 @@ SetupMeshAction::validParams()
   params.addParam<bool>("construct_side_list_from_node_list_exterior_only",
                         true,
                         "If true, when constructing side lists from node lists, exclude sides "
-                        "that are interior to the mesh (i.e. have a neighboring element). Has no "
-                        "effect unless 'construct_side_list_from_node_list' is also true.");
+                        "that are interior to a block (i.e. have a neighboring element in the "
+                        "same subdomain), while still allowing sides on an interface between two "
+                        "different subdomains. Has no effect unless "
+                        "'construct_side_list_from_node_list' is also true.");
 
   params.addParam<std::vector<BoundaryName>>(
       "ghosted_boundaries", {}, "Boundaries to be ghosted if using Nemesis");

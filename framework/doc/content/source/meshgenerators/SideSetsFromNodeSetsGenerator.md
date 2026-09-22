@@ -14,8 +14,10 @@ must be part of the original node set to make the quadrilateral face be part of 
 
 In the current implementation, this operation indiscriminately converts +all+ node sets into side sets.
 Because every side whose nodes are all in the node set is converted, regardless of whether that
-side lies on the exterior of the mesh, sides interior to the mesh can be spuriously added to the
-side set. Set `exterior_only = true` to exclude any side that has a neighboring element.
+side lies on the exterior of the mesh, sides interior to a block can be spuriously added to the
+side set (for example on a mesh only one element layer deep). Set `exterior_only = true` to
+exclude any such side whose neighboring element is in the same subdomain, while still allowing
+sides on an interface between two different subdomains.
 
 !alert note
 This operation can also be performed [automatically](MooseMesh.md#more_detail) at the end of the mesh generation process

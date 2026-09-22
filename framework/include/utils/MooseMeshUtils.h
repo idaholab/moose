@@ -630,8 +630,9 @@ void buildPolyLineMesh(MeshBase & mesh,
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
 
 /**
- * Removes sides from the given boundary ids wherever the element side has a neighbor (i.e. the
- * side is interior to the mesh, not on its exterior)
+ * Removes sides from the given boundary ids wherever the element side has a neighbor in the same
+ * subdomain (i.e. the side is interior to a block, not on the mesh exterior or on an interface
+ * between two different subdomains)
  * @param mesh the mesh to modify
  * @param boundary_ids the boundary ids to restrict removal to
  */

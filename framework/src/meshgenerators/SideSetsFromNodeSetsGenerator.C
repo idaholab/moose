@@ -29,8 +29,10 @@ SideSetsFromNodeSetsGenerator::validParams()
       "If specified, list of nodesets to convert. If not specified, all nodesets are converted");
   params.addParam<bool>("exterior_only",
                         false,
-                        "If true, exclude sides that are interior to the mesh (i.e. have a "
-                        "neighboring element) from the constructed side sets.");
+                        "If true, exclude sides that are interior to a block (i.e. have a "
+                        "neighboring element in the same subdomain) from the constructed side "
+                        "sets, while still allowing sides on an interface between two different "
+                        "subdomains.");
   return params;
 }
 
