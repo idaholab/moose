@@ -14,8 +14,6 @@ This is executioner performs optimization using the [TAO](https://petsc.org/rele
 | Bounded Conjugate Gradient | `taobncg` | [TAOBNCG](https://petsc.org/release/docs/manualpages/Tao/TAOBNCG/) | `bncg` |
 | Newton Line Search | `taonls` | [TAONLS](https://petsc.org/release/docs/manualpages/Tao/TAONLS/) | `nls` |
 | Bounded Newton Line Search | `taobnls` | [TAOBNLS](https://petsc.org/release/docs/manualpages/Tao/TAOBNLS/) | `bnls` |
-| Limited Memory Variable Metric | `taolmvm` | [TAOLMVM](https://petsc.org/release/docs/manualpages/Tao/TAOLMVM/) | `lmvm` |
-| Bounded Limited Memory Variable Metric | `taoblmvm` | [TAOBLMVM](https://petsc.org/release/docs/manualpages/Tao/TAOBLMVM/) | `blmvm` |
 | Nelder-Mead | `taonm` | [TAONM](https://petsc.org/release/docs/manualpages/Tao/TAONM/) | `nm` |
 | Bounded Quasi-Newton Line Search | `taobqnls` | [TAOBQNLS](https://petsc.org/release/docs/manualpages/Tao/TAOBQNLS/) | `bqnls` |
 | Orthant-wise Limited Memory | `taoowlqn` | [TAOOWLQN](https://petsc.org/release/docs/manualpages/Tao/TAOOWLQN/) | `taoowlqn` |
