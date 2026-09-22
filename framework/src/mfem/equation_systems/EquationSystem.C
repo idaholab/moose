@@ -333,7 +333,6 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
-
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(_ess_tdof_lists.at(j),
                               *_var_ess_constraints.at(j),
