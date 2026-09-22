@@ -42,7 +42,7 @@ if __name__ == "__main__":
     with (
         patch.object(Poker, "poke", _flaky_poke),
         TestMooseControl(
-            "web_server", runner_kwargs={"poke_poll_time": 0.1}
+            "web_server", runner_kwargs={"poke_poll_time": 0.02}
         ) as control,
     ):
         control.wait("INITIAL")
@@ -50,6 +50,6 @@ if __name__ == "__main__":
         # Sit idle for longer than the client_timeout set below (twice
         # over); if the poke thread had stopped instead of retrying,
         # MOOSE would kill the simulation well before this returns
-        sleep(5)
+        sleep(1)
 
         control.set_continue()

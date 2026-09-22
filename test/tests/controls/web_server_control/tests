@@ -328,7 +328,7 @@
     input = 'wait_initial.i'
     command_proxy = 'poke_retry.py'
     required_python_packages = requests
-    cli_args = 'Controls/web_server/client_timeout=2'
+    cli_args = 'Controls/web_server/client_timeout=0.4'
     recover = false
     restep = false
     requirement = 'The system shall retry a failed poll of a running MOOSE simulation via a REST API instead of allowing it to be killed by a transient connection failure'
