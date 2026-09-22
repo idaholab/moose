@@ -98,8 +98,20 @@ protected:
   {
     std::uint64_t update_state_calls = 0;
     std::uint64_t update_state_substep_calls = 0;
+    /// Total full constitutive path integrations, including numerical tangent replays.
     std::uint64_t constitutive_attempts = 0;
+    /// Caught recoverable constitutive failures, whether or not another local retry is possible.
+    std::uint64_t constitutive_failures = 0;
+    /// Recoverable constitutive failures that actually schedule another local-substep attempt.
     std::uint64_t constitutive_retries = 0;
+    /// Full numerical multi-substep tangent constructions.
+    std::uint64_t substep_tangent_evaluations = 0;
+    /// Full-path integrations performed only for numerical tangent construction/restoration.
+    std::uint64_t substep_tangent_replays = 0;
+    /// Perturbed tangent replays rejected with a recoverable constitutive exception.
+    std::uint64_t substep_tangent_replay_failures = 0;
+    /// Tangent columns that fall back to a one-sided difference.
+    std::uint64_t substep_tangent_one_sided_components = 0;
     std::uint64_t scalar_one_step_calls = 0;
     std::uint64_t independent_one_step_calls = 0;
     std::uint64_t scalar_local_point_evaluations = 0;
@@ -868,6 +880,12 @@ private:
 
     IndependentLocalCoordinates coordinates() const { return {p, q, pore_porosity}; }
   };
+
+  PorePorosityState projectIndependentPopulationVolumetricIncrements(
+      const PorePorosityState & population_volumetric_increment,
+      const PorePorosityState & dilution_coefficient,
+      const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active,
+      const IndependentLocalSolveContext & context) const;
 
   IndependentLocalPoint evaluateIndependentLocalPoint(
       const IndependentLocalCoordinates & coordinates,
