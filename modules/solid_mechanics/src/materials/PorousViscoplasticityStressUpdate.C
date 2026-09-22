@@ -15,6 +15,7 @@
 #include <array>
 #include <cctype>
 #include <cmath>
+#include <exception>
 #include <fstream>
 #include <limits>
 #include <sstream>
@@ -305,8 +306,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Absolute symmetric-strain perturbation used to numerically differentiate the complete "
       "accepted non-AD constitutive path when more than one local substep is used. The accepted "
       "substep count is held fixed during the tangent replay so controller branch changes are not "
-      "included in the material tangent. Centered differences are used on smooth branches, with a "
-      "one-sided branch-local fallback if one perturbation is inadmissible.");
+      "included in the material tangent. Centered differences are used when both perturbations "
+      "succeed; if one replay throws a recoverable constitutive exception, the successful side is "
+      "used as a one-sided fallback. The helper does not infer active-set/topology branch "
+      "identity, so transition behavior must be qualified separately.");
   params.setDocUnit("substep_tangent_perturbation", "unitless");
 
   params.addRangeCheckedParam<Real>("minimum_porosity",
@@ -581,7 +584,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("update_state_calls", _performance_counters.update_state_calls);
   write_counter("update_state_substep_calls", _performance_counters.update_state_substep_calls);
   write_counter("constitutive_attempts", _performance_counters.constitutive_attempts);
+  write_counter("constitutive_failures", _performance_counters.constitutive_failures);
   write_counter("constitutive_retries", _performance_counters.constitutive_retries);
+  write_counter("substep_tangent_evaluations", _performance_counters.substep_tangent_evaluations);
+  write_counter("substep_tangent_replays", _performance_counters.substep_tangent_replays);
+  write_counter("substep_tangent_replay_failures",
+                _performance_counters.substep_tangent_replay_failures);
+  write_counter("substep_tangent_one_sided_components",
+                _performance_counters.substep_tangent_one_sided_components);
   write_counter("scalar_one_step_calls", _performance_counters.scalar_one_step_calls);
   write_counter("independent_one_step_calls", _performance_counters.independent_one_step_calls);
   write_counter("scalar_local_point_evaluations",
@@ -1206,12 +1216,20 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
     constexpr std::array<std::array<unsigned int, 2>, 6> symmetric_components = {
         {{{0, 0}}, {{1, 1}}, {{2, 2}}, {{0, 1}}, {{0, 2}}, {{1, 2}}}};
 
+    incrementPerformanceCounter(_performance_counters.substep_tangent_evaluations);
+
     auto tangent = RankFourTensor{};
     tangent.zero();
 
+    struct TangentReplayResult
+    {
+      std::optional<RankTwoTensor> stress;
+      std::string failure_message;
+    };
+
     const auto replay = [&](const unsigned int k,
                             const unsigned int l,
-                            const Real signed_perturbation) -> std::optional<RankTwoTensor>
+                            const Real signed_perturbation) -> TangentReplayResult
     {
       auto replay_strain_increment = snapshot.strain_increment;
       auto replay_inelastic_strain_increment = snapshot.inelastic_strain_increment;
@@ -1229,6 +1247,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
 
       try
       {
+        incrementPerformanceCounter(_performance_counters.substep_tangent_replays);
         updateStateSubstepInternal(replay_strain_increment,
                                    replay_inelastic_strain_increment,
                                    replay_stress,
@@ -1237,14 +1256,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
                                    total_number_substeps,
                                    false);
       }
-      catch (const MooseException &)
+      catch (const MooseException & exception)
       {
-        // A nearby perturbation may cross an active-set or topology boundary. Restore immediately
-        // and let the caller use the successful side as a branch-local one-sided derivative when
-        // possible.
+        incrementPerformanceCounter(_performance_counters.substep_tangent_replay_failures);
+        // A nearby perturbation can become inadmissible. Preserve the original failure so a
+        // two-sided failure reports the causes rather than replacing them with a generic message.
+        const auto failure_message = std::string(exception.what());
         restoreConstitutiveState(
             snapshot, replay_strain_increment, replay_inelastic_strain_increment, replay_stress);
-        return std::nullopt;
+        return {std::nullopt, failure_message};
       }
       catch (...)
       {
@@ -1253,7 +1273,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
         throw;
       }
 
-      return RankTwoTensor(replay_stress);
+      return {RankTwoTensor(replay_stress), std::string{}};
     };
 
     const auto h = _substep_tangent_perturbation;
@@ -1265,12 +1285,18 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
       const auto stress_minus = replay(k, l, -h);
 
       auto directional_derivative = RankTwoTensor{};
-      if (stress_plus && stress_minus)
-        directional_derivative = (*stress_plus - *stress_minus) / (2.0 * h);
-      else if (stress_plus)
-        directional_derivative = (*stress_plus - accepted_stress) / h;
-      else if (stress_minus)
-        directional_derivative = (accepted_stress - *stress_minus) / h;
+      if (stress_plus.stress && stress_minus.stress)
+        directional_derivative = (*stress_plus.stress - *stress_minus.stress) / (2.0 * h);
+      else if (stress_plus.stress)
+      {
+        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
+        directional_derivative = (*stress_plus.stress - accepted_stress) / h;
+      }
+      else if (stress_minus.stress)
+      {
+        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
+        directional_derivative = (accepted_stress - *stress_minus.stress) / h;
+      }
       else
       {
         restoreConstitutiveState(
@@ -1282,7 +1308,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
                        k,
                        ", ",
                        l,
-                       "). Reduce substep_tangent_perturbation or cut the global timestep.");
+                       ").\n  +h failure: ",
+                       stress_plus.failure_message,
+                       "\n  -h failure: ",
+                       stress_minus.failure_message,
+                       "\nReduce substep_tangent_perturbation or cut the global timestep.");
       }
 
       // A symmetric shear perturbation changes both epsilon_kl and epsilon_lk by h. Rank-four
@@ -1327,6 +1357,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
     strain_increment = snapshot.strain_increment;
     inelastic_strain_increment.zero();
     stress_new = snapshot.stress;
+    incrementPerformanceCounter(_performance_counters.substep_tangent_replays);
     updateStateSubstepInternal(strain_increment,
                                inelastic_strain_increment,
                                stress_new,
@@ -3703,6 +3734,60 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::PorePorosityState
+PorousViscoplasticityStressUpdateTempl<is_ad>::projectIndependentPopulationVolumetricIncrements(
+    const PorePorosityState & unconstrained_increment,
+    const PorePorosityState & dilution_coefficient,
+    const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active,
+    const IndependentLocalSolveContext & context) const
+{
+  auto projected_increment = unconstrained_increment;
+  const auto pore_porosity_begin_total =
+      context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
+  const auto solid_fraction_old = 1.0 - this->_porosity_old[this->_qp];
+  if (pore_porosity_begin_total <= 0.0 || solid_fraction_old <= 0.0)
+    mooseException(
+        "In ", this->_name, ": invalid porosity state during independent pore-flow projection.");
+
+  PorePorosityState floor_value{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    floor_value[population_index] =
+        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
+
+  const auto active_count =
+      static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
+  if (active_count == 1)
+  {
+    const auto active = floor_active[0] ? 0u : 1u;
+    const auto free = 1u - active;
+    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
+    const auto denominator = 1.0 - dilution_coefficient[active];
+    if (denominator <= 0.0)
+      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+
+    projected_increment[active] =
+        (target_increment + dilution_coefficient[active] * projected_increment[free]) / denominator;
+  }
+  else if (active_count == 2)
+  {
+    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
+    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+    {
+      const auto target_increment =
+          floor_value[population_index] - context.pore_porosity_begin[population_index];
+      projected_increment[population_index] =
+          target_increment +
+          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
+    }
+  }
+
+  return projected_increment;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
     const IndependentLocalCoordinates & coordinates,
@@ -3813,54 +3898,27 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
         dilution_coefficient[population_index] * raw_total_volumetric_increment;
   point.raw_population_porosity_increment = raw_population_porosity_increment;
 
-  auto population_volumetric_increment = response.population_volumetric_strain_increment;
+  const auto population_volumetric_increment = projectIndependentPopulationVolumetricIncrements(
+      response.population_volumetric_strain_increment, dilution_coefficient, floor_active, context);
   auto dpopulation_volumetric_dx = response.dpopulation_volumetric_dx;
 
-  /*
-   * Population lower bounds constrain only the volumetric contribution needed to keep that pore
-   * population admissible; the common deviatoric matrix creep remains active. If both populations
-   * are active, distribute the generic total-porosity floor in proportion to their
-   * beginning-of-substep pore-volume shares.
-   */
-  PorePorosityState floor_value{};
-  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-       ++population_index)
-    floor_value[population_index] =
-        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
-
+  // Apply the derivatives of the shared admitted-flow projection. The projected values themselves
+  // have one owner in projectIndependentPopulationVolumetricIncrements().
   const auto active_count =
       static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
   if (active_count == 1)
   {
     const auto active = floor_active[0] ? 0u : 1u;
     const auto free = 1u - active;
-    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
     const auto denominator = 1.0 - dilution_coefficient[active];
-    if (denominator <= 0.0)
-      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
-
-    population_volumetric_increment[active] =
-        (target_increment + dilution_coefficient[active] * population_volumetric_increment[free]) /
-        denominator;
     for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
       dpopulation_volumetric_dx[active][x_index] =
           dilution_coefficient[active] / denominator * dpopulation_volumetric_dx[free][x_index];
   }
   else if (active_count == 2)
-  {
-    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
-    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
     for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
          ++population_index)
-    {
-      const auto target_increment =
-          floor_value[population_index] - context.pore_porosity_begin[population_index];
-      population_volumetric_increment[population_index] =
-          target_increment +
-          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
       dpopulation_volumetric_dx[population_index].fill(GenericReal<is_ad>(0.0));
-    }
-  }
 
   const auto total_volumetric_increment =
       population_volumetric_increment[0] + population_volumetric_increment[1];
@@ -3917,11 +3975,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
        ++population_index)
   {
     const auto row = PORE_POROSITY_0_INDEX + population_index;
-    point.residual[row] = floor_active[population_index]
-                              ? pore_porosity[population_index] - floor_value[population_index]
-                              : pore_porosity[population_index] -
-                                    context.pore_porosity_begin[population_index] -
-                                    population_porosity_increment[population_index];
+    point.residual[row] =
+        floor_active[population_index]
+            ? pore_porosity[population_index] -
+                  independentPorePorosityFloor(population_index, context.pore_porosity_begin)
+            : pore_porosity[population_index] - context.pore_porosity_begin[population_index] -
+                  population_porosity_increment[population_index];
   }
 
   for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
@@ -4489,44 +4548,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSen
       dilution_coefficient[population_index] =
           porosity_old * context.pore_porosity_begin[population_index] / pore_porosity_begin_total;
 
-    auto population_volumetric_increment = response.population_volumetric_strain_increment;
-    PorePorosityState floor_value{};
-    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-         ++population_index)
-      floor_value[population_index] =
-          independentPorePorosityFloor(population_index, context.pore_porosity_begin);
-
-    const auto active_count = static_cast<unsigned int>(point.floor_active[0]) +
-                              static_cast<unsigned int>(point.floor_active[1]);
-    if (active_count == 1)
-    {
-      const auto active = point.floor_active[0] ? 0u : 1u;
-      const auto free = 1u - active;
-      const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
-      const auto denominator = 1.0 - dilution_coefficient[active];
-      if (denominator <= 0.0)
-        mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
-      population_volumetric_increment[active] =
-          (target_increment +
-           dilution_coefficient[active] * population_volumetric_increment[free]) /
-          denominator;
-    }
-    else if (active_count == 2)
-    {
-      const auto target_total_increment =
-          floor_value[0] + floor_value[1] - pore_porosity_begin_total;
-      const auto constrained_total_volumetric_increment =
-          target_total_increment / solid_fraction_old;
-      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-           ++population_index)
-      {
-        const auto target_increment =
-            floor_value[population_index] - context.pore_porosity_begin[population_index];
-        population_volumetric_increment[population_index] =
-            target_increment +
-            dilution_coefficient[population_index] * constrained_total_volumetric_increment;
-      }
-    }
+    const auto population_volumetric_increment = projectIndependentPopulationVolumetricIncrements(
+        response.population_volumetric_strain_increment,
+        dilution_coefficient,
+        point.floor_active,
+        context);
 
     const auto total_volumetric_increment =
         population_volumetric_increment[0] + population_volumetric_increment[1];
@@ -5346,8 +5372,33 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   this->resetConstitutiveTimeStep();
   const auto snapshot =
       captureConstitutiveState(strain_increment, inelastic_strain_increment, stress_new);
-  const auto restore = [&]()
+  const auto restore =
+      [this, &snapshot, &strain_increment, &inelastic_strain_increment, &stress_new]()
   { restoreConstitutiveState(snapshot, strain_increment, inelastic_strain_increment, stress_new); };
+  const auto previous_tangent_request = _compute_consistent_tangent;
+  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
+
+  // Every exception that escapes this routine must restore both caller tensors and constitutive
+  // trial state, including failures during porosity preparation and substep estimation. Internal
+  // MooseException catches can still refine the local substep count without triggering this guard.
+  const auto uncaught_exceptions_on_entry = std::uncaught_exceptions();
+  struct RollbackGuard
+  {
+    const decltype(restore) & restore_state;
+    bool & tangent_request;
+    bool previous_tangent_request;
+    int uncaught_exceptions_on_entry;
+
+    ~RollbackGuard()
+    {
+      if (std::uncaught_exceptions() > uncaught_exceptions_on_entry)
+      {
+        restore_state();
+        tangent_request = previous_tangent_request;
+      }
+    }
+  } rollback_guard{
+      restore, _compute_consistent_tangent, previous_tangent_request, uncaught_exceptions_on_entry};
 
   // Initialize this model's substep porosity from inelastic increments already computed by other
   // inelastic models. Each successful local p-q-f solve commits the next porosity state directly.
@@ -5365,9 +5416,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
                                                : estimateNumberSubsteps(estimate_stress);
-
-  const auto previous_tangent_request = _compute_consistent_tangent;
-  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
 
   std::exception_ptr last_failure;
   auto last_failure_substeps = 0u;
@@ -5432,7 +5480,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     }
     catch (const MooseException &)
     {
-      incrementPerformanceCounter(_performance_counters.constitutive_retries);
+      incrementPerformanceCounter(_performance_counters.constitutive_failures);
       const auto suggested_number_substeps = _suggested_number_substeps;
       last_failure = std::current_exception();
       last_failure_substeps = number_substeps;
@@ -5452,6 +5500,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       else
         number_substeps = number_substeps > _maximum_number_substeps / 2 ? _maximum_number_substeps
                                                                          : 2 * number_substeps;
+
+      incrementPerformanceCounter(_performance_counters.constitutive_retries);
 
       if (_verbose)
         Moose::out << "In " << _name << ": adaptive viscoplastic integration with "
