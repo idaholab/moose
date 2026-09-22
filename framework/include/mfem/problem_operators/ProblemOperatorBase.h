@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMProblem.h"
+#include "PerfGraphInterface.h"
 #include <functional>
 
 namespace Moose::MFEM
@@ -49,7 +50,7 @@ namespace Moose::MFEM
  *      3. Block-vector bookkeeping (trial/test true-DoF offsets and vectors) that
  *         bridges between the true-DoF algebraic world with the FE gridfunction world.
  */
-class ProblemOperatorBase
+class ProblemOperatorBase : public PerfGraphInterface
 {
 public:
   ProblemOperatorBase(MFEMProblem & problem);
