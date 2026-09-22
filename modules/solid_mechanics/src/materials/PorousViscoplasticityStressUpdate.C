@@ -298,6 +298,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "maximum_number_substeps>=1",
       "Maximum number of local constitutive substeps before cutting the global timestep.");
 
+  params.addRangeCheckedParam<Real>(
+      "substep_tangent_perturbation",
+      1.0e-8,
+      "substep_tangent_perturbation>0.0",
+      "Absolute symmetric-strain perturbation used to numerically differentiate the complete "
+      "accepted non-AD constitutive path when more than one local substep is used. The accepted "
+      "substep count is held fixed during the tangent replay so controller branch changes are not "
+      "included in the material tangent. Centered differences are used on smooth branches, with a "
+      "one-sided branch-local fallback if one perturbation is inadmissible.");
+  params.setDocUnit("substep_tangent_perturbation", "unitless");
+
   params.addRangeCheckedParam<Real>("minimum_porosity",
                                     0.0,
                                     "minimum_porosity >= 0.0 & minimum_porosity < 1.0",
@@ -386,7 +397,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
 
   params.addParamNamesToGroup(
       "verbose maximum_gauge_ratio maximum_stress_magnitude use_substepping "
-      "substep_strain_tolerance adaptive_substepping maximum_number_substeps minimum_porosity "
+      "substep_strain_tolerance adaptive_substepping maximum_number_substeps "
+      "substep_tangent_perturbation minimum_porosity "
       "porosity_bound_tolerance local_newton_tolerance local_newton_stagnation_tolerance "
       "local_newton_max_iterations local_newton_relaxation local_newton_max_backtracks "
       "local_porosity_scale_floor reduced_porosity_max_probes reduced_porosity_probe_growth "
@@ -415,6 +427,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _adaptive_substepping(this->template getParam<bool>("adaptive_substepping")),
     _maximum_number_substeps(this->template getParam<unsigned int>("maximum_number_substeps")),
+    _substep_tangent_perturbation(this->template getParam<Real>("substep_tangent_perturbation")),
     _effective_inelastic_strain_rate(this->template declareGenericProperty<Real, is_ad>(
         this->_base_name + "effective_" +
         this->template getParam<std::string>("inelastic_strain_name") + "_rate")),
@@ -924,10 +937,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::getTangentCalculationMethod()
   }
   else
   {
-    // The one-step tangent is exact. A FULL tangent for local substepping would also need to
-    // propagate mechanical, porosity, and derived-model state sensitivities through every substep.
-    return substeppingCapabilityRequested() ? TangentCalculationMethod::ELASTIC
-                                            : TangentCalculationMethod::FULL;
+    // The one-step tangent is analytical. Multi-substep integration numerically differentiates the
+    // complete accepted fixed-substep constitutive map, including derived-model state evolution.
+    return TangentCalculationMethod::FULL;
   }
 }
 
@@ -1161,6 +1173,173 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::restoreConstitutiveState(
 }
 
 template <bool is_ad>
+RankFourTensor
+PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangent(
+    const ConstitutiveStateSnapshot & snapshot,
+    const GenericReal<is_ad> & beginning_porosity,
+    const RankTwoTensor & accepted_stress,
+    GenericRankTwoTensor<is_ad> & strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    GenericRankTwoTensor<is_ad> & stress_new,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor,
+    const RankTwoTensor & elastic_strain_old,
+    const unsigned int total_number_substeps)
+{
+  if constexpr (is_ad)
+  {
+    mooseError("computeSubsteppedConsistentTangent is only used by the non-AD stress update.");
+    return RankFourTensor(RankFourTensor::initIdentityFour);
+  }
+  else
+  {
+    mooseAssert(total_number_substeps > 1,
+                "The numerical substep tangent is only needed for multiple local substeps.");
+
+    /*
+     * Differentiate the complete accepted constitutive map rather than the final local substep.
+     * Holding the accepted substep count fixed is intentional: the material tangent is the local
+     * derivative of the accepted constitutive branch, not a derivative of the discrete controller
+     * decision that selected N. Each replay starts from the beginning-of-global-step material
+     * state, so derived classes naturally replay gas inventory, pore topology, and other substep
+     * state.
+     */
+    constexpr std::array<std::array<unsigned int, 2>, 6> symmetric_components = {
+        {{{0, 0}}, {{1, 1}}, {{2, 2}}, {{0, 1}}, {{0, 2}}, {{1, 2}}}};
+
+    auto tangent = RankFourTensor{};
+    tangent.zero();
+
+    const auto replay = [&](const unsigned int k,
+                            const unsigned int l,
+                            const Real signed_perturbation) -> std::optional<RankTwoTensor>
+    {
+      auto replay_strain_increment = snapshot.strain_increment;
+      auto replay_inelastic_strain_increment = snapshot.inelastic_strain_increment;
+      auto replay_stress = snapshot.stress;
+
+      restoreConstitutiveState(
+          snapshot, replay_strain_increment, replay_inelastic_strain_increment, replay_stress);
+      _intermediate_porosity = beginning_porosity;
+      _suggested_number_substeps = 0;
+      replay_inelastic_strain_increment.zero();
+
+      replay_strain_increment(k, l) += signed_perturbation;
+      if (k != l)
+        replay_strain_increment(l, k) += signed_perturbation;
+
+      try
+      {
+        updateStateSubstepInternal(replay_strain_increment,
+                                   replay_inelastic_strain_increment,
+                                   replay_stress,
+                                   elasticity_tensor,
+                                   elastic_strain_old,
+                                   total_number_substeps,
+                                   false);
+      }
+      catch (const MooseException &)
+      {
+        // A nearby perturbation may cross an active-set or topology boundary. Restore immediately
+        // and let the caller use the successful side as a branch-local one-sided derivative when
+        // possible.
+        restoreConstitutiveState(
+            snapshot, replay_strain_increment, replay_inelastic_strain_increment, replay_stress);
+        return std::nullopt;
+      }
+      catch (...)
+      {
+        restoreConstitutiveState(
+            snapshot, replay_strain_increment, replay_inelastic_strain_increment, replay_stress);
+        throw;
+      }
+
+      return RankTwoTensor(replay_stress);
+    };
+
+    const auto h = _substep_tangent_perturbation;
+    for (const auto & component : symmetric_components)
+    {
+      const auto k = component[0];
+      const auto l = component[1];
+      const auto stress_plus = replay(k, l, h);
+      const auto stress_minus = replay(k, l, -h);
+
+      auto directional_derivative = RankTwoTensor{};
+      if (stress_plus && stress_minus)
+        directional_derivative = (*stress_plus - *stress_minus) / (2.0 * h);
+      else if (stress_plus)
+        directional_derivative = (*stress_plus - accepted_stress) / h;
+      else if (stress_minus)
+        directional_derivative = (accepted_stress - *stress_minus) / h;
+      else
+      {
+        restoreConstitutiveState(
+            snapshot, strain_increment, inelastic_strain_increment, stress_new);
+        mooseException("In ",
+                       _name,
+                       ": both strain perturbations failed while constructing the full "
+                       "multi-substep tangent for component (",
+                       k,
+                       ", ",
+                       l,
+                       "). Reduce substep_tangent_perturbation or cut the global timestep.");
+      }
+
+      // A symmetric shear perturbation changes both epsilon_kl and epsilon_lk by h. Rank-four
+      // contraction contains both minor-symmetric terms, so each tensor component receives half
+      // of that directional derivative for k != l.
+      const auto input_component_factor = k == l ? 1.0 : 0.5;
+      for (auto i = 0u; i < 3; ++i)
+        for (auto j = 0u; j < 3; ++j)
+        {
+          const auto symmetric_stress_derivative =
+              0.5 * (directional_derivative(i, j) + directional_derivative(j, i));
+          const auto value = input_component_factor * symmetric_stress_derivative;
+          if (!std::isfinite(value))
+          {
+            restoreConstitutiveState(
+                snapshot, strain_increment, inelastic_strain_increment, stress_new);
+            mooseException("In ",
+                           _name,
+                           ": nonfinite full multi-substep tangent component (",
+                           i,
+                           ", ",
+                           j,
+                           ", ",
+                           k,
+                           ", ",
+                           l,
+                           ").");
+          }
+          tangent(i, j, k, l) = value;
+          tangent(i, j, l, k) = value;
+        }
+    }
+
+    /*
+     * Replays mutate stateful material properties. Restore the beginning state and execute the
+     * unperturbed accepted path once more so the caller receives exactly the same accepted state it
+     * had before tangent construction, including all derived-model substep state.
+     */
+    restoreConstitutiveState(snapshot, strain_increment, inelastic_strain_increment, stress_new);
+    _intermediate_porosity = beginning_porosity;
+    _suggested_number_substeps = 0;
+    strain_increment = snapshot.strain_increment;
+    inelastic_strain_increment.zero();
+    stress_new = snapshot.stress;
+    updateStateSubstepInternal(strain_increment,
+                               inelastic_strain_increment,
+                               stress_new,
+                               elasticity_tensor,
+                               elastic_strain_old,
+                               total_number_substeps,
+                               false);
+
+    return tangent;
+  }
+}
+
+template <bool is_ad>
 void
 PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
     GenericRankTwoTensor<is_ad> & elastic_strain_increment,
@@ -1175,8 +1354,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
 {
   incrementPerformanceCounter(_performance_counters.update_state_calls);
   const auto previous_tangent_request = _compute_consistent_tangent;
-  const auto tangent_requested =
-      !is_ad && compute_full_tangent_operator && !substeppingCapabilityRequested();
+  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
   _compute_consistent_tangent = tangent_requested;
 
   // _dt aliases FEProblem::dt(), so never use it as constitutive scratch storage.
@@ -1193,7 +1371,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
                                stress,
                                elasticity_tensor,
                                elastic_strain_old,
-                               1);
+                               1,
+                               true);
 
     if constexpr (!is_ad)
       if (tangent_requested)
@@ -5028,7 +5207,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     GenericRankTwoTensor<is_ad> & stress_new,
     const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
-    const unsigned int total_number_substeps)
+    const unsigned int total_number_substeps,
+    const bool enforce_substep_control)
 {
   incrementPerformanceCounter(_performance_counters.constitutive_attempts);
   _gauge_solve_state.previous_gauge_stress = std::numeric_limits<Real>::quiet_NaN();
@@ -5101,8 +5281,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
           std::isfinite(_substep_control_inelastic_strain_increment)
               ? _substep_control_inelastic_strain_increment
               : std::abs(MetaPhysicL::raw_value(sub_effective_inelastic_strain_increment));
-      checkSubstepIncrement(
-          substep_control_inelastic_strain_increment, total_number_substeps, step + 1);
+      if (enforce_substep_control)
+        checkSubstepIncrement(
+            substep_control_inelastic_strain_increment, total_number_substeps, step + 1);
 
       strain_increment += sub_strain_increment;
       inelastic_strain_increment += sub_inelastic_strain_increment;
@@ -5142,7 +5323,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
 
   // Preserve the historical one-substep ordering: finalize the accepted trial state before the
   // adaptive a-posteriori check requests a transactional retry.
-  if (total_number_substeps == 1)
+  if (enforce_substep_control && total_number_substeps == 1)
     checkSubstepIncrement(accumulated_substep_control_inelastic_strain_increment, 1, 1);
 
   this->resetConstitutiveTimeStep();
@@ -5158,8 +5339,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     const RankTwoTensor & /*stress_old*/,
     const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
-    bool /*compute_full_tangent_operator*/,
-    RankFourTensor & /*tangent_operator*/)
+    const bool compute_full_tangent_operator,
+    RankFourTensor & tangent_operator)
 {
   incrementPerformanceCounter(_performance_counters.update_state_substep_calls);
   this->resetConstitutiveTimeStep();
@@ -5171,6 +5352,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   // Initialize this model's substep porosity from inelastic increments already computed by other
   // inelastic models. Each successful local p-q-f solve commits the next porosity state directly.
   this->updateIntermediatePorosity(snapshot.strain_increment);
+  const auto beginning_porosity = _intermediate_porosity;
 
   auto estimate_stress = snapshot.stress;
   if (porosityDependentElasticityEnabled())
@@ -5183,6 +5365,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
                                                : estimateNumberSubsteps(estimate_stress);
+
+  const auto previous_tangent_request = _compute_consistent_tangent;
+  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
 
   std::exception_ptr last_failure;
   auto last_failure_substeps = 0u;
@@ -5209,11 +5394,13 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     }
   };
 
+  auto accepted = false;
   while (true)
   {
     if (number_substeps > _maximum_number_substeps)
     {
       restore();
+      _compute_consistent_tangent = previous_tangent_request;
       mooseException("In ",
                      _name,
                      ": estimated number of viscoplastic substeps (",
@@ -5225,18 +5412,23 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
     restore();
     inelastic_strain_increment.zero();
-    this->updateIntermediatePorosity(snapshot.strain_increment);
+    _intermediate_porosity = beginning_porosity;
     _suggested_number_substeps = 0;
 
     try
     {
+      // A single accepted substep can use the existing exact analytical tangent. For multiple
+      // substeps, defer tangent construction until the complete accepted path is known.
+      _compute_consistent_tangent = tangent_requested && number_substeps == 1;
       updateStateSubstepInternal(strain_increment,
                                  inelastic_strain_increment,
                                  stress_new,
                                  elasticity_tensor,
                                  elastic_strain_old,
-                                 number_substeps);
-      return;
+                                 number_substeps,
+                                 true);
+      accepted = true;
+      break;
     }
     catch (const MooseException &)
     {
@@ -5247,7 +5439,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       restore();
 
       if (!_adaptive_substepping)
+      {
+        _compute_consistent_tangent = previous_tangent_request;
         std::rethrow_exception(last_failure);
+      }
 
       if (number_substeps >= _maximum_number_substeps)
         break;
@@ -5269,32 +5464,69 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       // Roll back every failure, but do not reinterpret unexpected C++ exceptions as a
       // constitutive convergence problem that might improve with additional local substeps.
       restore();
+      _compute_consistent_tangent = previous_tangent_request;
       throw;
     }
   }
 
-  restore();
-  const auto last_constitutive_dt = last_failure_substeps > 0
-                                        ? this->globalTimeStep() / last_failure_substeps
-                                        : this->globalTimeStep();
-  mooseException("In ",
-                 _name,
-                 ": adaptive viscoplastic substepping failed after reaching "
-                 "maximum_number_substeps = ",
-                 _maximum_number_substeps,
-                 ".\nLast constitutive failure:\n  attempted substeps = ",
-                 last_failure_substeps,
-                 "\n  constitutive dt = ",
-                 last_constitutive_dt,
-                 "\n  element = ",
-                 this->_current_elem->id(),
-                 "\n  qp = ",
-                 _qp,
-                 "\n  position = ",
-                 _q_point[_qp],
-                 "\n  cause:\n",
-                 failure_message(last_failure),
-                 "\nCutting global time step.");
+  if (!accepted)
+  {
+    restore();
+    _compute_consistent_tangent = previous_tangent_request;
+    const auto last_constitutive_dt = last_failure_substeps > 0
+                                          ? this->globalTimeStep() / last_failure_substeps
+                                          : this->globalTimeStep();
+    mooseException("In ",
+                   _name,
+                   ": adaptive viscoplastic substepping failed after reaching "
+                   "maximum_number_substeps = ",
+                   _maximum_number_substeps,
+                   ".\nLast constitutive failure:\n  attempted substeps = ",
+                   last_failure_substeps,
+                   "\n  constitutive dt = ",
+                   last_constitutive_dt,
+                   "\n  element = ",
+                   this->_current_elem->id(),
+                   "\n  qp = ",
+                   _qp,
+                   "\n  position = ",
+                   _q_point[_qp],
+                   "\n  cause:\n",
+                   failure_message(last_failure),
+                   "\nCutting global time step.");
+  }
+
+  try
+  {
+    if constexpr (!is_ad)
+      if (tangent_requested)
+      {
+        if (number_substeps == 1)
+          tangent_operator = _last_consistent_tangent;
+        else
+        {
+          const auto accepted_stress = stress_new;
+          _compute_consistent_tangent = false;
+          tangent_operator = computeSubsteppedConsistentTangent(snapshot,
+                                                                beginning_porosity,
+                                                                accepted_stress,
+                                                                strain_increment,
+                                                                inelastic_strain_increment,
+                                                                stress_new,
+                                                                elasticity_tensor,
+                                                                elastic_strain_old,
+                                                                number_substeps);
+        }
+      }
+  }
+  catch (...)
+  {
+    restore();
+    _compute_consistent_tangent = previous_tangent_request;
+    throw;
+  }
+
+  _compute_consistent_tangent = previous_tangent_request;
 }
 
 template <bool is_ad>

@@ -51,7 +51,7 @@ public:
   /** The spherical LPS porous constitutive response is isotropic. */
   bool isIsotropic() override { return true; }
 
-  /** Return the exact one-step tangent when available. */
+  /** Return a full non-AD tangent for both one-step and substepped integration. */
   TangentCalculationMethod getTangentCalculationMethod() override;
   /** Limit the global step using the admitted constrained inelastic increment. */
   virtual Real computeTimeStepLimit() override;
@@ -540,7 +540,8 @@ protected:
                                   GenericRankTwoTensor<is_ad> & stress_new,
                                   const GenericRankFourTensor<is_ad> & elasticity_tensor,
                                   const RankTwoTensor & elastic_strain_old,
-                                  unsigned int total_number_substeps);
+                                  unsigned int total_number_substeps,
+                                  bool enforce_substep_control = true);
 
 private:
   /** Caller-owned and material state restored when one constitutive attempt is rejected. */
@@ -563,6 +564,25 @@ private:
                                 GenericRankTwoTensor<is_ad> & strain_increment,
                                 GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
                                 GenericRankTwoTensor<is_ad> & stress);
+
+  /**
+   * Numerically differentiate the complete accepted multi-substep constitutive map.
+   *
+   * The one-step non-AD tangent is analytical. For more than one local substep, the accepted
+   * algorithm also transports porosity and derived-model state between substeps. Replaying the
+   * complete fixed-substep path captures those dependencies without dropping derived-state terms.
+   * The helper restores the unperturbed accepted state before returning.
+   */
+  RankFourTensor
+  computeSubsteppedConsistentTangent(const ConstitutiveStateSnapshot & snapshot,
+                                     const GenericReal<is_ad> & beginning_porosity,
+                                     const RankTwoTensor & accepted_stress,
+                                     GenericRankTwoTensor<is_ad> & strain_increment,
+                                     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                     GenericRankTwoTensor<is_ad> & stress_new,
+                                     const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                                     const RankTwoTensor & elastic_strain_old,
+                                     unsigned int total_number_substeps);
 
   enum LocalVariableIndex : unsigned int
   {
@@ -928,6 +948,8 @@ protected:
 
   /// Maximum number of local constitutive substeps
   const unsigned int _maximum_number_substeps;
+  /// Absolute symmetric-strain perturbation used by the non-AD multi-substep numerical tangent.
+  const Real _substep_tangent_perturbation;
 
   /// Current converged global-step physical effective inelastic rate.
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_rate;
