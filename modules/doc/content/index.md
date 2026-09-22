@@ -118,3 +118,42 @@ email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subsc
 
 !col-end!
 !row-end!
+
+!row! style=display:inline-flex;
+!col! small=12 medium=3 large=3
+!! Empty to ensure proper spacing
+!col-end!
+
+!col! small=12 medium=3 large=3 style=align-content:center;
+
+!style! halign=center
+
+!media large_media/organization_logos/UKAEA_Light.png
+       dark_src=large_media/organization_logos/UKAEA_Dark.png
+       link=https://www.ukaea.org/
+       alt=United Kingdom Atomic Energy Authority
+       style=width:90%;
+
+!style-end!
+
+!col-end!
+
+!col! small=12 medium=3 large=3 style=align-content:center;
+
+!style! halign=center
+
+!media large_media/organization_logos/UKRI_STFC_Light_RGB.png
+       dark_src=large_media/organization_logos/UKRI_STFC_Dark_RGB.png
+       link=https://www.ukri.org/councils/stfc/
+       alt=United Kingdom Research and Innovation, Science and Technology Facilities Council
+       style=width:90%;
+
+!style-end!
+
+!col-end!
+
+!col! small=12 medium=3 large=3
+!! Empty to ensure proper spacing
+!col-end!
+
+!row-end!
