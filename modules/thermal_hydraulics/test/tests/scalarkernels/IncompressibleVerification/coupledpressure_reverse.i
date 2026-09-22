@@ -13,7 +13,7 @@ epsilon = 0.0001
 forms = 0.0
 pump = 0.0
 gravity = 0.0
-area = ${fparse 3.14159* ${R}^2}
+area = '${fparse 3.14159* ${R}^2}'
 
 [Mesh]
   type = GeneratedMesh
@@ -24,18 +24,18 @@ area = ${fparse 3.14159* ${R}^2}
 []
 
 [Variables]
-    [m1]
-        family = SCALAR
-        initial_condition = ${min}
-    []
-    [dPc]
-        family = SCALAR
-        initial_condition = ${dP}
-    []
-    [T1]
-        family = SCALAR
-        initial_condition = ${Tin}
-    []
+  [m1]
+    family = SCALAR
+    initial_condition = ${min}
+  []
+  [dPc]
+    family = SCALAR
+    initial_condition = ${dP}
+  []
+  [T1]
+    family = SCALAR
+    initial_condition = ${Tin}
+  []
 []
 
 [FluidProperties]
@@ -45,38 +45,38 @@ area = ${fparse 3.14159* ${R}^2}
 []
 
 [ScalarKernels]
-    [pipe1_mom]
-        type = CoupledPressureIncompressibleMomentumSPScalarKernel
-        variable = 'dPc'
-        coupled_mass_flow_rate = 'm1'
-        temperatures = 'T1'
-        reference_pressure = ${Pin}
-        fp = 'water'
-        areas = '${area}'
-        perimeters = '${fparse 2*3.14159* ${R}}'
-        lengths = '${length}'
-        alphas = '${alpha}'
-        forms_losses = '${forms}'
-        pump_pressures = '${pump}'
-        roughnesses = '${epsilon}'
-        g = ${gravity}
-        is_implicit = True
-    []
-    [pipe1_coupledDT]
-      type = CoupledODETimeDerivative
-      variable = 'dPc'
-      v = 'm1'
-    []
-    [temp]
-      type = ParsedODEKernel
-      expression = 'T1 - ${Tin}'
-      variable = T1
-    []
-    [m1k]
-      type = ParsedODEKernel
-      expression = 'm1 - ${min}'
-      variable = m1
-    []
+  [pipe1_mom]
+    type = CoupledPressureIncompressibleMomentumSPScalarKernel
+    variable = 'dPc'
+    coupled_mass_flow_rate = 'm1'
+    temperatures = 'T1'
+    reference_pressure = ${Pin}
+    fp = 'water'
+    areas = '${area}'
+    perimeters = '${fparse 2*3.14159* ${R}}'
+    lengths = '${length}'
+    alphas = '${alpha}'
+    forms_losses = '${forms}'
+    pump_pressures = '${pump}'
+    roughnesses = '${epsilon}'
+    g = ${gravity}
+    is_implicit = True
+  []
+  [pipe1_coupledDT]
+    type = CoupledODETimeDerivative
+    variable = 'dPc'
+    v = 'm1'
+  []
+  [temp]
+    type = ParsedODEKernel
+    expression = 'T1 - ${Tin}'
+    variable = T1
+  []
+  [m1k]
+    type = ParsedODEKernel
+    expression = 'm1 - ${min}'
+    variable = m1
+  []
 []
 
 [Postprocessors]

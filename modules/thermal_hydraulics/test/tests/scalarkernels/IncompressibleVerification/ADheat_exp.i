@@ -15,7 +15,7 @@ epsilon = 0.0001
 forms = 0.0
 pump = 0.0
 gravity = 0.0
-area = ${fparse 3.14159* ${R}^2}
+area = '${fparse 3.14159* ${R}^2}'
 
 [Mesh]
   type = GeneratedMesh
@@ -26,30 +26,30 @@ area = ${fparse 3.14159* ${R}^2}
 []
 
 [Variables]
-    [m1]
-        family = SCALAR
-        initial_condition = ${min}
-    []
-    [dPc]
-        family = SCALAR
-        initial_condition = ${dP}
-    []
-    [T0]
-        family = SCALAR
-        initial_condition = ${Tin}
-    []
-    [T1]
-        family = SCALAR
-        initial_condition = ${Tin}
-    []
-    [Tw]
-        family = SCALAR
-        initial_condition = ${Tout}
-    []
-    [T2]
-        family = SCALAR
-        initial_condition = ${Tout}
-    []
+  [m1]
+    family = SCALAR
+    initial_condition = ${min}
+  []
+  [dPc]
+    family = SCALAR
+    initial_condition = ${dP}
+  []
+  [T0]
+    family = SCALAR
+    initial_condition = ${Tin}
+  []
+  [T1]
+    family = SCALAR
+    initial_condition = ${Tin}
+  []
+  [Tw]
+    family = SCALAR
+    initial_condition = ${Tout}
+  []
+  [T2]
+    family = SCALAR
+    initial_condition = ${Tout}
+  []
 []
 
 [FluidProperties]
@@ -59,57 +59,57 @@ area = ${fparse 3.14159* ${R}^2}
 []
 
 [ScalarKernels]
-    [pipe1_mom]
-        type = IncompressibleMomentumSPScalarKernel
-        variable = 'm1'
-        reference_pressure_drop = 'dPc'
-        temperatures = 'T1'
-        reference_pressure = ${Pin}
-        fp = 'water'
-        areas = '${area}'
-        perimeters = '${fparse 2*3.14159* ${R}}'
-        lengths = '${length}'
-        alphas = '${alpha}'
-        forms_losses = '${forms}'
-        pump_pressures = '${pump}'
-        roughnesses = '${epsilon}'
-        g = ${gravity}
-        is_implicit = True
-    []
-    [temp1]
-      type = IncompressibleEnergySPScalarKernel
-      mass_flow_rate = 'm1'
-      inlet_temperature = 'T0'
-      outlet_temperature = 'T2'
-      wall_temperature = 'Tw'
-      area = ${area}
-      fp = water
-      length = ${length}
-      perimeter = ${fparse 2*3.14159* ${R}}
-      reference_pressure = ${Pin}
-      variable = T1
-      is_implicit = True
-    []
-    [temp0]
-      type = ParsedODEKernel
-      expression = 'T0 - ${Tin}'
-      variable = T0
-    []
-    [temp2]
-      type = ParsedODEKernel
-      expression = 'T2 - ${Tout}'
-      variable = T2
-    []
-    [walltemp]
-      type = ParsedODEKernel
-      expression = 'Tw - ${Tout}'
-      variable = Tw
-    []
-    [dPk]
-      type = ParsedODEKernel
-      expression = 'dPc - ${dP}'
-      variable = dPc
-    []
+  [pipe1_mom]
+    type = IncompressibleMomentumSPScalarKernel
+    variable = 'm1'
+    reference_pressure_drop = 'dPc'
+    temperatures = 'T1'
+    reference_pressure = ${Pin}
+    fp = 'water'
+    areas = '${area}'
+    perimeters = '${fparse 2*3.14159* ${R}}'
+    lengths = '${length}'
+    alphas = '${alpha}'
+    forms_losses = '${forms}'
+    pump_pressures = '${pump}'
+    roughnesses = '${epsilon}'
+    g = ${gravity}
+    is_implicit = True
+  []
+  [temp1]
+    type = IncompressibleEnergySPScalarKernel
+    mass_flow_rate = 'm1'
+    inlet_temperature = 'T0'
+    outlet_temperature = 'T2'
+    wall_temperature = 'Tw'
+    area = ${area}
+    fp = water
+    length = ${length}
+    perimeter = '${fparse 2*3.14159* ${R}}'
+    reference_pressure = ${Pin}
+    variable = T1
+    is_implicit = True
+  []
+  [temp0]
+    type = ParsedODEKernel
+    expression = 'T0 - ${Tin}'
+    variable = T0
+  []
+  [temp2]
+    type = ParsedODEKernel
+    expression = 'T2 - ${Tout}'
+    variable = T2
+  []
+  [walltemp]
+    type = ParsedODEKernel
+    expression = 'Tw - ${Tout}'
+    variable = Tw
+  []
+  [dPk]
+    type = ParsedODEKernel
+    expression = 'dPc - ${dP}'
+    variable = dPc
+  []
 []
 
 [Postprocessors]
