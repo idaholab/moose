@@ -67,10 +67,10 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _w(isParamValid("w") ? dynamic_cast<INSFVVelocityVariable *>(
                                &UserObject::_subproblem.getVariable(0, getParam<VariableName>("w")))
                          : nullptr),
-    _ps(libMesh::n_threads(), nullptr),
-    _us(libMesh::n_threads(), nullptr),
-    _vs(libMesh::n_threads(), nullptr),
-    _ws(libMesh::n_threads(), nullptr),
+    _ps(UserObject::_subproblem.numThreads(), nullptr),
+    _us(UserObject::_subproblem.numThreads(), nullptr),
+    _vs(UserObject::_subproblem.numThreads(), nullptr),
+    _ws(UserObject::_subproblem.numThreads(), nullptr),
     _displaced(dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem)))
 {
   if (!_p)
