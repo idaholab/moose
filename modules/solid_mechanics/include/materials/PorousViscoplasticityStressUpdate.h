@@ -98,20 +98,8 @@ protected:
   {
     std::uint64_t update_state_calls = 0;
     std::uint64_t update_state_substep_calls = 0;
-    /// Total full constitutive path integrations, including numerical tangent replays.
     std::uint64_t constitutive_attempts = 0;
-    /// Caught recoverable constitutive failures, whether or not another local retry is possible.
-    std::uint64_t constitutive_failures = 0;
-    /// Recoverable constitutive failures that actually schedule another local-substep attempt.
     std::uint64_t constitutive_retries = 0;
-    /// Full numerical multi-substep tangent constructions.
-    std::uint64_t substep_tangent_evaluations = 0;
-    /// Full-path integrations performed only for numerical tangent construction/restoration.
-    std::uint64_t substep_tangent_replays = 0;
-    /// Perturbed tangent replays rejected with a recoverable constitutive exception.
-    std::uint64_t substep_tangent_replay_failures = 0;
-    /// Tangent columns that fall back to a one-sided difference.
-    std::uint64_t substep_tangent_one_sided_components = 0;
     std::uint64_t scalar_one_step_calls = 0;
     std::uint64_t independent_one_step_calls = 0;
     std::uint64_t scalar_local_point_evaluations = 0;
@@ -124,14 +112,6 @@ protected:
     std::uint64_t independent_line_search_trials = 0;
     std::uint64_t dense_limit_solves = 0;
     std::uint64_t fixed_porosity_mechanical_solves = 0;
-    /// Independent two-population fixed-porosity mechanical recovery attempts.
-    std::uint64_t independent_fixed_porosity_mechanical_solves = 0;
-    /// Newton iterations spent in independent fixed-porosity mechanical recovery.
-    std::uint64_t independent_fixed_porosity_mechanical_iterations = 0;
-    /// Backtracking trials spent only in independent fixed-porosity mechanical recovery.
-    std::uint64_t independent_fixed_porosity_mechanical_line_search_trials = 0;
-    /// Independent fixed-porosity recoveries accepted by the full four-equation criterion.
-    std::uint64_t independent_fixed_porosity_recovery_successes = 0;
     std::uint64_t reduced_porosity_solves = 0;
     std::uint64_t gauge_evaluations = 0;
     std::uint64_t gauge_n1_closed_form = 0;
@@ -407,6 +387,12 @@ protected:
                               const unsigned int total_it) override;
 
   LpsHValueFirst computeHValueFirst(Real n, const GenericReal<is_ad> & M) const;
+  /**
+   * Return H(M) and its first two derivatives. For nonlinear powers n > 1, H is C1 but not C2
+   * at M = 0: the nonzero-M second derivative diverges as M approaches zero. The exact-zero
+   * branch returns a finite zero second derivative as a local-Jacobian convention; it is not the
+   * limiting curvature.
+   */
   LpsHDerivatives computeHDerivatives(Real n, const GenericReal<is_ad> & M) const;
   GenericReal<is_ad> computeH(const Real n,
                               const GenericReal<is_ad> & gauge_stress,
@@ -755,8 +741,7 @@ private:
   LocalResidual scaledResidual(const LocalResidual & residual,
                                const LocalSolveContext & context) const;
   Real convergenceResidualNorm(const LocalResidual & residual,
-                               const LocalSolveContext & context,
-                               Real relative_tolerance) const;
+                               const LocalSolveContext & context) const;
   Real residualNorm(const LocalResidual & residual,
                     LocalResidualScope scope = LocalResidualScope::COUPLED) const;
   void validateFiniteLocalPoint(const LocalPoint & point, const char * stage) const;
@@ -787,9 +772,7 @@ private:
   std::optional<LocalPoint> solveMechanicalAtFixedPorosity(const LocalCoordinates & seed,
                                                            Real tolerance,
                                                            const LocalSolveContext & context);
-  LocalPoint verifyConvergedPoint(const LocalPoint & point,
-                                  const LocalSolveContext & context,
-                                  Real acceptance_tolerance);
+  LocalPoint verifyConvergedPoint(const LocalPoint & point, const LocalSolveContext & context);
   LocalPoint verifyReducedConvergedPoint(const LocalSolveResult & reduced,
                                          const LocalSolveContext & context);
   GenericReal<is_ad> impliedPorosity(const LocalPoint & point) const;
@@ -892,12 +875,6 @@ private:
     IndependentLocalCoordinates coordinates() const { return {p, q, pore_porosity}; }
   };
 
-  PorePorosityState projectIndependentPopulationVolumetricIncrements(
-      const PorePorosityState & population_volumetric_increment,
-      const PorePorosityState & dilution_coefficient,
-      const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active,
-      const IndependentLocalSolveContext & context) const;
-
   IndependentLocalPoint evaluateIndependentLocalPoint(
       const IndependentLocalCoordinates & coordinates,
       const IndependentLocalSolveContext & context,
@@ -907,8 +884,7 @@ private:
   scaledIndependentResidual(const IndependentLocalResidual & residual,
                             const IndependentLocalSolveContext & context) const;
   Real independentConvergenceResidualNorm(const IndependentLocalResidual & residual,
-                                          const IndependentLocalSolveContext & context,
-                                          Real relative_tolerance) const;
+                                          const IndependentLocalSolveContext & context) const;
   IndependentScaledLocalJacobian
   scaledIndependentJacobian(const IndependentLocalJacobian & jacobian,
                             const IndependentLocalSolveContext & context) const;
@@ -919,10 +895,6 @@ private:
                                     const IndependentLocalResidual & correction_scaled,
                                     Real initial_alpha,
                                     const IndependentLocalSolveContext & context);
-  std::optional<IndependentLocalPoint>
-  solveIndependentMechanicalAtFixedPorosity(const IndependentLocalPoint & seed,
-                                            Real tolerance,
-                                            const IndependentLocalSolveContext & context);
   IndependentLocalPoint solveIndependentCoupledNewton(
       IndependentLocalPoint point,
       const IndependentLocalSolveContext & context,
@@ -1061,8 +1033,6 @@ private:
   const Real _porosity_bound_tolerance;
   const Real _local_newton_tolerance;
   const Real _local_newton_stagnation_tolerance;
-  /// Absolute Rp-Rq residual tolerance; defaults to the low-drive cutoff for compatibility.
-  const Real _local_newton_absolute_stress_tolerance;
   const unsigned int _local_newton_max_iterations;
   const Real _local_newton_relaxation;
   const unsigned int _local_newton_max_backtracks;

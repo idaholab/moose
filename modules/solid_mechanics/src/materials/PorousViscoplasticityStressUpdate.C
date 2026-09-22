@@ -15,7 +15,6 @@
 #include <array>
 #include <cctype>
 #include <cmath>
-#include <exception>
 #include <fstream>
 #include <limits>
 #include <sstream>
@@ -148,60 +147,36 @@ solveLinearSystem(const FixedMatrix<MatrixValue, N> & input,
  *
  * Comparing this norm to relative_tolerance is equivalent to the mixed criterion
  *
- *   ||R_mech|| <= absolute_stress_tolerance
+ *   ||R_mech|| <= minimum_stress_magnitude
  *                 + relative_tolerance * mechanical_reference_scale.
- *
- * The absolute term is deliberately independent of the selected relative tolerance. This keeps a
- * looser stagnation tolerance from also loosening the dimensional stress-residual floor.
  */
 template <typename ResidualValue, std::size_t N>
 Real
-physicalMechanicalResidualMagnitude(const std::array<ResidualValue, N> & residual)
+physicalMechanicalResidualNorm(const std::array<ResidualValue, N> & residual,
+                               const Real mechanical_reference_scale,
+                               const Real minimum_stress_magnitude,
+                               const Real relative_tolerance)
 {
   static_assert(N >= 2, "The mechanical residual requires p and q components.");
 
-  const auto residual_p = MetaPhysicL::raw_value(residual[0]);
-  const auto residual_q = MetaPhysicL::raw_value(residual[1]);
-  if (!std::isfinite(residual_p) || !std::isfinite(residual_q))
-    return std::numeric_limits<Real>::infinity();
-
-  return std::hypot(residual_p, residual_q);
-}
-
-Real
-physicalMechanicalResidualLimit(const Real mechanical_reference_scale,
-                                const Real absolute_stress_tolerance,
-                                const Real relative_tolerance)
-{
   using std::max;
 
   if (!(relative_tolerance > 0.0) || !std::isfinite(relative_tolerance) ||
       !std::isfinite(mechanical_reference_scale) || mechanical_reference_scale < 0.0)
     return std::numeric_limits<Real>::infinity();
 
-  const auto bounded_absolute_stress_tolerance =
-      max(absolute_stress_tolerance, std::numeric_limits<Real>::min());
-  return bounded_absolute_stress_tolerance + relative_tolerance * mechanical_reference_scale;
-}
+  const auto absolute_stress_tolerance =
+      max(minimum_stress_magnitude, std::numeric_limits<Real>::min());
+  const auto convergence_scale =
+      mechanical_reference_scale + absolute_stress_tolerance / relative_tolerance;
+  const auto residual_p = MetaPhysicL::raw_value(residual[0]);
+  const auto residual_q = MetaPhysicL::raw_value(residual[1]);
 
-template <typename ResidualValue, std::size_t N>
-Real
-physicalMechanicalResidualNorm(const std::array<ResidualValue, N> & residual,
-                               const Real mechanical_reference_scale,
-                               const Real absolute_stress_tolerance,
-                               const Real relative_tolerance)
-{
-  const auto residual_magnitude = physicalMechanicalResidualMagnitude(residual);
-  const auto residual_limit = physicalMechanicalResidualLimit(
-      mechanical_reference_scale, absolute_stress_tolerance, relative_tolerance);
-
-  if (!std::isfinite(residual_magnitude) || !std::isfinite(residual_limit) ||
-      !(residual_limit > 0.0))
+  if (!std::isfinite(residual_p) || !std::isfinite(residual_q) ||
+      !std::isfinite(convergence_scale) || !(convergence_scale > 0.0))
     return std::numeric_limits<Real>::infinity();
 
-  // Return a norm compared directly with relative_tolerance while retaining the exact mixed
-  // dimensional criterion documented above. This ordering preserves the historical scaling form.
-  return residual_magnitude / (residual_limit / relative_tolerance);
+  return std::hypot(residual_p, residual_q) / convergence_scale;
 }
 
 } // namespace
@@ -330,10 +305,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Absolute symmetric-strain perturbation used to numerically differentiate the complete "
       "accepted non-AD constitutive path when more than one local substep is used. The accepted "
       "substep count is held fixed during the tangent replay so controller branch changes are not "
-      "included in the material tangent. Centered differences are used when both perturbations "
-      "succeed; if nearby perturbations fail, the helper retries at smaller strain increments "
-      "before using a one-sided fallback or rejecting the tangent. The helper does not infer "
-      "active-set/topology branch identity, so transition behavior must be qualified separately.");
+      "included in the material tangent. Centered differences are used on smooth branches, with a "
+      "one-sided branch-local fallback if one perturbation is inadmissible.");
   params.setDocUnit("substep_tangent_perturbation", "unitless");
 
   params.addRangeCheckedParam<Real>("minimum_porosity",
@@ -358,17 +331,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "local_newton_stagnation_tolerance",
       1.0e-7,
       "local_newton_stagnation_tolerance > 0.0",
-      "Relative convergence tolerance used only for near-converged stalled or iteration-limited "
-      "local solves. The dimensional stress-residual floor is not relaxed by this parameter.");
-
-  params.addRangeCheckedParam<Real>(
-      "local_newton_absolute_stress_tolerance",
-      0.0,
-      "local_newton_absolute_stress_tolerance >= 0.0",
-      "Absolute Rp-Rq residual tolerance in Pa for local convergence. A value of zero preserves "
-      "the historical/default behavior by using minimum_stress_magnitude. Set a positive value "
-      "to decouple convergence accuracy from the low-drive viscoplastic cutoff.");
-  params.setDocUnit("local_newton_absolute_stress_tolerance", "Pa");
+      "Near-converged residual norm below which a stalled local line search is accepted.");
 
   params.addRangeCheckedParam<unsigned int>(
       "local_newton_max_iterations",
@@ -437,8 +400,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "substep_strain_tolerance adaptive_substepping maximum_number_substeps "
       "substep_tangent_perturbation minimum_porosity "
       "porosity_bound_tolerance local_newton_tolerance local_newton_stagnation_tolerance "
-      "local_newton_absolute_stress_tolerance local_newton_max_iterations "
-      "local_newton_relaxation local_newton_max_backtracks "
+      "local_newton_max_iterations local_newton_relaxation local_newton_max_backtracks "
       "local_porosity_scale_floor reduced_porosity_max_probes reduced_porosity_probe_growth "
       "reduced_porosity_root_max_iterations",
       "Advanced");
@@ -500,10 +462,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _local_newton_tolerance(this->template getParam<Real>("local_newton_tolerance")),
     _local_newton_stagnation_tolerance(
         this->template getParam<Real>("local_newton_stagnation_tolerance")),
-    _local_newton_absolute_stress_tolerance(
-        this->template getParam<Real>("local_newton_absolute_stress_tolerance") > 0.0
-            ? this->template getParam<Real>("local_newton_absolute_stress_tolerance")
-            : _minimum_stress_magnitude),
     _local_newton_max_iterations(
         this->template getParam<unsigned int>("local_newton_max_iterations")),
     _local_newton_relaxation(this->template getParam<Real>("local_newton_relaxation")),
@@ -623,14 +581,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("update_state_calls", _performance_counters.update_state_calls);
   write_counter("update_state_substep_calls", _performance_counters.update_state_substep_calls);
   write_counter("constitutive_attempts", _performance_counters.constitutive_attempts);
-  write_counter("constitutive_failures", _performance_counters.constitutive_failures);
   write_counter("constitutive_retries", _performance_counters.constitutive_retries);
-  write_counter("substep_tangent_evaluations", _performance_counters.substep_tangent_evaluations);
-  write_counter("substep_tangent_replays", _performance_counters.substep_tangent_replays);
-  write_counter("substep_tangent_replay_failures",
-                _performance_counters.substep_tangent_replay_failures);
-  write_counter("substep_tangent_one_sided_components",
-                _performance_counters.substep_tangent_one_sided_components);
   write_counter("scalar_one_step_calls", _performance_counters.scalar_one_step_calls);
   write_counter("independent_one_step_calls", _performance_counters.independent_one_step_calls);
   write_counter("scalar_local_point_evaluations",
@@ -648,14 +599,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("dense_limit_solves", _performance_counters.dense_limit_solves);
   write_counter("fixed_porosity_mechanical_solves",
                 _performance_counters.fixed_porosity_mechanical_solves);
-  write_counter("independent_fixed_porosity_mechanical_solves",
-                _performance_counters.independent_fixed_porosity_mechanical_solves);
-  write_counter("independent_fixed_porosity_mechanical_iterations",
-                _performance_counters.independent_fixed_porosity_mechanical_iterations);
-  write_counter("independent_fixed_porosity_mechanical_line_search_trials",
-                _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
-  write_counter("independent_fixed_porosity_recovery_successes",
-                _performance_counters.independent_fixed_porosity_recovery_successes);
   write_counter("reduced_porosity_solves", _performance_counters.reduced_porosity_solves);
   write_counter("gauge_evaluations", _performance_counters.gauge_evaluations);
   write_counter("gauge_n1_closed_form", _performance_counters.gauge_n1_closed_form);
@@ -1263,20 +1206,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
     constexpr std::array<std::array<unsigned int, 2>, 6> symmetric_components = {
         {{{0, 0}}, {{1, 1}}, {{2, 2}}, {{0, 1}}, {{0, 2}}, {{1, 2}}}};
 
-    incrementPerformanceCounter(_performance_counters.substep_tangent_evaluations);
-
     auto tangent = RankFourTensor{};
     tangent.zero();
 
-    struct TangentReplayResult
-    {
-      std::optional<RankTwoTensor> stress;
-      std::string failure_message;
-    };
-
     const auto replay = [&](const unsigned int k,
                             const unsigned int l,
-                            const Real signed_perturbation) -> TangentReplayResult
+                            const Real signed_perturbation) -> std::optional<RankTwoTensor>
     {
       auto replay_strain_increment = snapshot.strain_increment;
       auto replay_inelastic_strain_increment = snapshot.inelastic_strain_increment;
@@ -1294,7 +1229,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
 
       try
       {
-        incrementPerformanceCounter(_performance_counters.substep_tangent_replays);
         updateStateSubstepInternal(replay_strain_increment,
                                    replay_inelastic_strain_increment,
                                    replay_stress,
@@ -1303,15 +1237,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
                                    total_number_substeps,
                                    false);
       }
-      catch (const MooseException & exception)
+      catch (const MooseException &)
       {
-        incrementPerformanceCounter(_performance_counters.substep_tangent_replay_failures);
-        // A nearby perturbation can become inadmissible. Preserve the original failure so a
-        // two-sided failure reports the causes rather than replacing them with a generic message.
-        const auto failure_message = std::string(exception.what());
+        // A nearby perturbation may cross an active-set or topology boundary. Restore immediately
+        // and let the caller use the successful side as a branch-local one-sided derivative when
+        // possible.
         restoreConstitutiveState(
             snapshot, replay_strain_increment, replay_inelastic_strain_increment, replay_stress);
-        return {std::nullopt, failure_message};
+        return std::nullopt;
       }
       catch (...)
       {
@@ -1320,64 +1253,28 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
         throw;
       }
 
-      return {RankTwoTensor(replay_stress), std::string{}};
+      return RankTwoTensor(replay_stress);
     };
 
-    constexpr std::array<Real, 3> tangent_perturbation_factors = {1.0, 0.3, 0.1};
+    const auto h = _substep_tangent_perturbation;
     for (const auto & component : symmetric_components)
     {
       const auto k = component[0];
       const auto l = component[1];
+      const auto stress_plus = replay(k, l, h);
+      const auto stress_minus = replay(k, l, -h);
 
       auto directional_derivative = RankTwoTensor{};
-      auto derivative_available = false;
-      auto centered_derivative = false;
-      TangentReplayResult last_plus;
-      TangentReplayResult last_minus;
-
-      for (const auto factor : tangent_perturbation_factors)
+      if (stress_plus && stress_minus)
+        directional_derivative = (*stress_plus - *stress_minus) / (2.0 * h);
+      else if (stress_plus)
+        directional_derivative = (*stress_plus - accepted_stress) / h;
+      else if (stress_minus)
+        directional_derivative = (accepted_stress - *stress_minus) / h;
+      else
       {
-        const auto h = factor * _substep_tangent_perturbation;
-        last_plus = replay(k, l, h);
-        last_minus = replay(k, l, -h);
-
-        if (last_plus.stress && last_minus.stress)
-        {
-          directional_derivative = (*last_plus.stress - *last_minus.stress) / (2.0 * h);
-          derivative_available = true;
-          centered_derivative = true;
-          break;
-        }
-
-        if (last_plus.stress)
-        {
-          directional_derivative = (*last_plus.stress - accepted_stress) / h;
-          derivative_available = true;
-        }
-        else if (last_minus.stress)
-        {
-          directional_derivative = (accepted_stress - *last_minus.stress) / h;
-          derivative_available = true;
-        }
-      }
-
-      if (!derivative_available)
-      {
-        const auto unperturbed = replay(k, l, 0.0);
         restoreConstitutiveState(
             snapshot, strain_increment, inelastic_strain_increment, stress_new);
-
-        if (!unperturbed.stress)
-          mooseException("In ",
-                         _name,
-                         ": the accepted fixed-substep constitutive path could not be reproduced "
-                         "while constructing the full multi-substep tangent for component (",
-                         k,
-                         ", ",
-                         l,
-                         "). Unperturbed replay failure: ",
-                         unperturbed.failure_message);
-
         mooseException("In ",
                        _name,
                        ": both strain perturbations failed while constructing the full "
@@ -1385,17 +1282,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
                        k,
                        ", ",
                        l,
-                       ") down to perturbation = ",
-                       0.1 * _substep_tangent_perturbation,
-                       ". The unperturbed fixed-substep replay succeeded.\n  +h failure: ",
-                       last_plus.failure_message,
-                       "\n  -h failure: ",
-                       last_minus.failure_message,
-                       "\nCut the global timestep or reduce substep_tangent_perturbation.");
+                       "). Reduce substep_tangent_perturbation or cut the global timestep.");
       }
-
-      if (!centered_derivative)
-        incrementPerformanceCounter(_performance_counters.substep_tangent_one_sided_components);
 
       // A symmetric shear perturbation changes both epsilon_kl and epsilon_lk by h. Rank-four
       // contraction contains both minor-symmetric terms, so each tensor component receives half
@@ -1439,7 +1327,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeSubsteppedConsistentTangen
     strain_increment = snapshot.strain_increment;
     inelastic_strain_increment.zero();
     stress_new = snapshot.stress;
-    incrementPerformanceCounter(_performance_counters.substep_tangent_replays);
     updateStateSubstepInternal(strain_increment,
                                inelastic_strain_increment,
                                stress_new,
@@ -1700,15 +1587,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::scaledResidual(
 template <bool is_ad>
 Real
 PorousViscoplasticityStressUpdateTempl<is_ad>::convergenceResidualNorm(
-    const LocalResidual & residual,
-    const LocalSolveContext & context,
-    const Real relative_tolerance) const
+    const LocalResidual & residual, const LocalSolveContext & context) const
 {
-  const auto mechanical_norm =
-      physicalMechanicalResidualNorm(residual,
-                                     context.mechanical_convergence_scale,
-                                     _local_newton_absolute_stress_tolerance,
-                                     relative_tolerance);
+  const auto mechanical_norm = physicalMechanicalResidualNorm(residual,
+                                                              context.mechanical_convergence_scale,
+                                                              this->_minimum_stress_magnitude,
+                                                              _local_newton_tolerance);
   const auto porosity_residual =
       MetaPhysicL::raw_value(residual[F_INDEX]) / context.porosity_convergence_scale;
   if (!std::isfinite(porosity_residual))
@@ -2194,9 +2078,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initializeLocalSolveScales(
           min(characteristic_increment, 10.0 * context.porosity_convergence_scale));
 
   context.reduced_probe_tolerance = max(_local_newton_tolerance, 1.0e-5);
-  // Reduced-root probing may be deliberately loose, but a recovered state must satisfy the same
-  // final mechanical accuracy contract as an ordinary coupled Newton solve.
-  context.reduced_final_tolerance = _local_newton_tolerance;
+  context.reduced_final_tolerance =
+      min(_local_newton_tolerance, 0.1 * _local_newton_stagnation_tolerance);
 }
 
 template <bool is_ad>
@@ -2581,15 +2464,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::commitLocalPoint(
 template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::verifyConvergedPoint(
-    const LocalPoint & point, const LocalSolveContext & context, const Real acceptance_tolerance)
+    const LocalPoint & point, const LocalSolveContext & context)
 {
   // Every accepted Newton or line-search update stores a fully evaluated LocalPoint, so the
   // converged point already has synchronized coordinates, residuals, Jacobian, and LPS response.
   // Re-evaluating it here duplicates the most expensive constitutive work without changing state.
   validateFiniteLocalPoint(point, "final coupled consistency check");
 
-  const auto residual_norm = convergenceResidualNorm(point.residual, context, acceptance_tolerance);
-  if (residual_norm > acceptance_tolerance)
+  const auto residual_norm = convergenceResidualNorm(point.residual, context);
+  if (residual_norm > _local_newton_stagnation_tolerance)
     mooseException("In ",
                    this->_name,
                    ": final analytical coupled local consistency check failed with scaled "
@@ -2609,11 +2492,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::verifyReducedConvergedPoint(
 
   auto verified = evaluateLocalPoint(reduced.point.coordinates(), context, PorosityBranch::FREE);
   validateFiniteLocalPoint(verified, "final reduced-porosity consistency check");
-  const auto mechanical_norm =
-      physicalMechanicalResidualNorm(verified.residual,
-                                     context.mechanical_convergence_scale,
-                                     _local_newton_absolute_stress_tolerance,
-                                     context.reduced_final_tolerance);
+  const auto mechanical_norm = physicalMechanicalResidualNorm(verified.residual,
+                                                              context.mechanical_convergence_scale,
+                                                              this->_minimum_stress_magnitude,
+                                                              context.reduced_final_tolerance);
   const auto porosity_residual_magnitude =
       abs(MetaPhysicL::raw_value(verified.residual[F_INDEX])) / context.porosity_convergence_scale;
 
@@ -2670,11 +2552,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reducedPointConverged(
 {
   using std::abs;
 
-  const auto mechanical_norm =
-      physicalMechanicalResidualNorm(point.residual,
-                                     context.mechanical_convergence_scale,
-                                     _local_newton_absolute_stress_tolerance,
-                                     context.reduced_final_tolerance);
+  const auto mechanical_norm = physicalMechanicalResidualNorm(point.residual,
+                                                              context.mechanical_convergence_scale,
+                                                              this->_minimum_stress_magnitude,
+                                                              context.reduced_final_tolerance);
   const auto scaled_porosity_residual =
       MetaPhysicL::raw_value(point.residual[F_INDEX]) / context.porosity_convergence_scale;
   if (!std::isfinite(scaled_porosity_residual))
@@ -2776,7 +2657,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveMechanicalAtFixedPorosity(
     const auto residual = scaledResidual(point->residual, context);
     if (physicalMechanicalResidualNorm(point->residual,
                                        context.mechanical_convergence_scale,
-                                       _local_newton_absolute_stress_tolerance,
+                                       this->_minimum_stress_magnitude,
                                        tolerance) <= tolerance)
       return point;
 
@@ -2809,7 +2690,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveMechanicalAtFixedPorosity(
 
   return physicalMechanicalResidualNorm(point->residual,
                                         context.mechanical_convergence_scale,
-                                        _local_newton_absolute_stress_tolerance,
+                                        this->_minimum_stress_magnitude,
                                         tolerance) <= tolerance
              ? point
              : std::nullopt;
@@ -3613,10 +3494,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::recoverFailedCoupledLineSearch(
   if (freeIncrementReachesPorosityFloor(point, context))
     return {point, true};
 
-  const auto residual_norm =
-      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
+  const auto residual_norm = convergenceResidualNorm(point.residual, context);
   if (residual_norm <= _local_newton_stagnation_tolerance)
-    return {verifyConvergedPoint(point, context, _local_newton_stagnation_tolerance), false};
+    return {verifyConvergedPoint(point, context), false};
 
   if (adaptive_refinement_available)
   {
@@ -3643,19 +3523,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::throwCoupledLineSearchFailure(
   const auto residual = scaledResidual(point.residual, context);
   const auto & hydrostatic_stress = point.hydrostatic_stress;
   const auto residual_norm = residualNorm(residual);
-  const auto ordinary_convergence_residual_norm =
-      convergenceResidualNorm(point.residual, context, _local_newton_tolerance);
-  const auto stagnation_convergence_residual_norm =
-      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
-  const auto mechanical_residual_magnitude = physicalMechanicalResidualMagnitude(point.residual);
-  const auto ordinary_mechanical_residual_limit =
-      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
-                                      _local_newton_absolute_stress_tolerance,
-                                      _local_newton_tolerance);
-  const auto stagnation_mechanical_residual_limit =
-      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
-                                      _local_newton_absolute_stress_tolerance,
-                                      _local_newton_stagnation_tolerance);
+  const auto convergence_residual_norm = convergenceResidualNorm(point.residual, context);
+  const auto mechanical_residual_norm =
+      physicalMechanicalResidualNorm(point.residual,
+                                     context.mechanical_convergence_scale,
+                                     this->_minimum_stress_magnitude,
+                                     _local_newton_tolerance);
 
   mooseException("In ",
                  this->_name,
@@ -3667,16 +3540,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::throwCoupledLineSearchFailure(
                  this->globalTimeStep(),
                  "\n  scaled residual norm = ",
                  residual_norm,
-                 "\n  ordinary convergence residual norm = ",
-                 ordinary_convergence_residual_norm,
-                 "\n  stagnation convergence residual norm = ",
-                 stagnation_convergence_residual_norm,
-                 "\n  mechanical residual magnitude [Pa] = ",
-                 mechanical_residual_magnitude,
-                 "\n  ordinary mechanical residual limit [Pa] = ",
-                 ordinary_mechanical_residual_limit,
-                 "\n  stagnation mechanical residual limit [Pa] = ",
-                 stagnation_mechanical_residual_limit,
+                 "\n  convergence residual norm = ",
+                 convergence_residual_norm,
+                 "\n  physical mechanical residual norm = ",
+                 mechanical_residual_norm,
                  "\n  scaled Rp = ",
                  MetaPhysicL::raw_value(residual[P_INDEX]),
                  "\n  scaled Rq = ",
@@ -3734,10 +3601,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
   {
     incrementPerformanceCounter(_performance_counters.scalar_newton_iterations);
     validateFiniteLocalPoint(point, "coupled Newton iteration");
-    const auto residual_norm =
-        convergenceResidualNorm(point.residual, context, _local_newton_tolerance);
+    const auto residual_norm = convergenceResidualNorm(point.residual, context);
     if (residual_norm <= _local_newton_tolerance)
-      return {verifyConvergedPoint(point, context, _local_newton_tolerance), false};
+      return {verifyConvergedPoint(point, context), false};
 
     const auto jacobian = scaledJacobian(point.jacobian, context);
     const auto residual = scaledResidual(point.residual, context);
@@ -3767,10 +3633,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
   const auto mechanical_residual_norm =
       physicalMechanicalResidualNorm(point.residual,
                                      context.mechanical_convergence_scale,
-                                     _local_newton_absolute_stress_tolerance,
+                                     this->_minimum_stress_magnitude,
                                      context.reduced_probe_tolerance);
-  const auto residual_norm =
-      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
+  const auto residual_norm = convergenceResidualNorm(point.residual, context);
 
   /*
    * After the iteration limit, activate the free-branch floor only if mechanics are already
@@ -3782,7 +3647,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
     return {point, true};
 
   if (residual_norm <= _local_newton_stagnation_tolerance)
-    return {verifyConvergedPoint(point, context, _local_newton_stagnation_tolerance), false};
+    return {verifyConvergedPoint(point, context), false};
 
   /*
    * A coupled Newton solve can exhaust its iteration budget while continuing to accept line-search
@@ -3835,60 +3700,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
                  ".");
 
   return {point, false}; // Unreachable after mooseException.
-}
-
-template <bool is_ad>
-typename PorousViscoplasticityStressUpdateTempl<is_ad>::PorePorosityState
-PorousViscoplasticityStressUpdateTempl<is_ad>::projectIndependentPopulationVolumetricIncrements(
-    const PorePorosityState & unconstrained_increment,
-    const PorePorosityState & dilution_coefficient,
-    const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active,
-    const IndependentLocalSolveContext & context) const
-{
-  auto projected_increment = unconstrained_increment;
-  const auto pore_porosity_begin_total =
-      context.pore_porosity_begin[0] + context.pore_porosity_begin[1];
-  const auto solid_fraction_old = 1.0 - this->_porosity_old[this->_qp];
-  if (pore_porosity_begin_total <= 0.0 || solid_fraction_old <= 0.0)
-    mooseException(
-        "In ", this->_name, ": invalid porosity state during independent pore-flow projection.");
-
-  PorePorosityState floor_value{};
-  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-       ++population_index)
-    floor_value[population_index] =
-        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
-
-  const auto active_count =
-      static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
-  if (active_count == 1)
-  {
-    const auto active = floor_active[0] ? 0u : 1u;
-    const auto free = 1u - active;
-    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
-    const auto denominator = 1.0 - dilution_coefficient[active];
-    if (denominator <= 0.0)
-      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
-
-    projected_increment[active] =
-        (target_increment + dilution_coefficient[active] * projected_increment[free]) / denominator;
-  }
-  else if (active_count == 2)
-  {
-    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
-    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
-    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-         ++population_index)
-    {
-      const auto target_increment =
-          floor_value[population_index] - context.pore_porosity_begin[population_index];
-      projected_increment[population_index] =
-          target_increment +
-          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
-    }
-  }
-
-  return projected_increment;
 }
 
 template <bool is_ad>
@@ -4002,27 +3813,54 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
         dilution_coefficient[population_index] * raw_total_volumetric_increment;
   point.raw_population_porosity_increment = raw_population_porosity_increment;
 
-  const auto population_volumetric_increment = projectIndependentPopulationVolumetricIncrements(
-      response.population_volumetric_strain_increment, dilution_coefficient, floor_active, context);
+  auto population_volumetric_increment = response.population_volumetric_strain_increment;
   auto dpopulation_volumetric_dx = response.dpopulation_volumetric_dx;
 
-  // Apply the derivatives of the shared admitted-flow projection. The projected values themselves
-  // have one owner in projectIndependentPopulationVolumetricIncrements().
+  /*
+   * Population lower bounds constrain only the volumetric contribution needed to keep that pore
+   * population admissible; the common deviatoric matrix creep remains active. If both populations
+   * are active, distribute the generic total-porosity floor in proportion to their
+   * beginning-of-substep pore-volume shares.
+   */
+  PorePorosityState floor_value{};
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    floor_value[population_index] =
+        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
+
   const auto active_count =
       static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
   if (active_count == 1)
   {
     const auto active = floor_active[0] ? 0u : 1u;
     const auto free = 1u - active;
+    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
     const auto denominator = 1.0 - dilution_coefficient[active];
+    if (denominator <= 0.0)
+      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+
+    population_volumetric_increment[active] =
+        (target_increment + dilution_coefficient[active] * population_volumetric_increment[free]) /
+        denominator;
     for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
       dpopulation_volumetric_dx[active][x_index] =
           dilution_coefficient[active] / denominator * dpopulation_volumetric_dx[free][x_index];
   }
   else if (active_count == 2)
+  {
+    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
+    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
     for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
          ++population_index)
+    {
+      const auto target_increment =
+          floor_value[population_index] - context.pore_porosity_begin[population_index];
+      population_volumetric_increment[population_index] =
+          target_increment +
+          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
       dpopulation_volumetric_dx[population_index].fill(GenericReal<is_ad>(0.0));
+    }
+  }
 
   const auto total_volumetric_increment =
       population_volumetric_increment[0] + population_volumetric_increment[1];
@@ -4079,12 +3917,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
        ++population_index)
   {
     const auto row = PORE_POROSITY_0_INDEX + population_index;
-    point.residual[row] =
-        floor_active[population_index]
-            ? pore_porosity[population_index] -
-                  independentPorePorosityFloor(population_index, context.pore_porosity_begin)
-            : pore_porosity[population_index] - context.pore_porosity_begin[population_index] -
-                  population_porosity_increment[population_index];
+    point.residual[row] = floor_active[population_index]
+                              ? pore_porosity[population_index] - floor_value[population_index]
+                              : pore_porosity[population_index] -
+                                    context.pore_porosity_begin[population_index] -
+                                    population_porosity_increment[population_index];
   }
 
   for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
@@ -4188,15 +4025,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::scaledIndependentResidual(
 template <bool is_ad>
 Real
 PorousViscoplasticityStressUpdateTempl<is_ad>::independentConvergenceResidualNorm(
-    const IndependentLocalResidual & residual,
-    const IndependentLocalSolveContext & context,
-    const Real relative_tolerance) const
+    const IndependentLocalResidual & residual, const IndependentLocalSolveContext & context) const
 {
-  const auto mechanical_norm =
-      physicalMechanicalResidualNorm(residual,
-                                     context.mechanical_convergence_scale,
-                                     _local_newton_absolute_stress_tolerance,
-                                     relative_tolerance);
+  const auto mechanical_norm = physicalMechanicalResidualNorm(residual,
+                                                              context.mechanical_convergence_scale,
+                                                              this->_minimum_stress_magnitude,
+                                                              _local_newton_tolerance);
   auto norm_squared = mechanical_norm * mechanical_norm;
   for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
        ++population_index)
@@ -4328,107 +4162,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch
 }
 
 template <bool is_ad>
-std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint>
-PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentMechanicalAtFixedPorosity(
-    const IndependentLocalPoint & seed,
-    const Real tolerance,
-    const IndependentLocalSolveContext & context)
-{
-  incrementPerformanceCounter(_performance_counters.independent_fixed_porosity_mechanical_solves);
-
-  std::optional<IndependentLocalPoint> point;
-  try
-  {
-    point = evaluateIndependentLocalPoint(seed.coordinates(), context, seed.floor_active);
-  }
-  catch (const MooseException &)
-  {
-    return std::nullopt;
-  }
-
-  constexpr auto max_iterations = 15u;
-  for (auto iteration = 0u; iteration < max_iterations; ++iteration)
-  {
-    incrementPerformanceCounter(
-        _performance_counters.independent_fixed_porosity_mechanical_iterations);
-    validateFiniteIndependentLocalPoint(*point, "independent fixed-porosity mechanical recovery");
-
-    if (physicalMechanicalResidualNorm(point->residual,
-                                       context.mechanical_convergence_scale,
-                                       _local_newton_absolute_stress_tolerance,
-                                       tolerance) <= tolerance)
-      return point;
-
-    const auto residual = scaledIndependentResidual(point->residual, context);
-    const auto local_jacobian = scaledIndependentJacobian(point->jacobian, context);
-    const auto mechanical_jacobian =
-        FixedMatrix<Real, 2>{{{local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_P_INDEX],
-                               local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_Q_INDEX]},
-                              {local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_P_INDEX],
-                               local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_Q_INDEX]}}};
-    const auto mechanical_rhs = FixedVector<GenericReal<is_ad>, 2>{-residual[INDEPENDENT_P_INDEX],
-                                                                   -residual[INDEPENDENT_Q_INDEX]};
-    auto mechanical_correction = FixedVector<GenericReal<is_ad>, 2>{};
-
-    if (!solveLinearSystem(mechanical_jacobian, mechanical_rhs, mechanical_correction))
-      return std::nullopt;
-
-    const auto residual_p = MetaPhysicL::raw_value(residual[INDEPENDENT_P_INDEX]);
-    const auto residual_q = MetaPhysicL::raw_value(residual[INDEPENDENT_Q_INDEX]);
-    const auto current_mechanical_norm_squared = residual_p * residual_p + residual_q * residual_q;
-    auto alpha = _local_newton_relaxation;
-    auto accepted_candidate = std::optional<IndependentLocalPoint>{};
-
-    for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
-    {
-      incrementPerformanceCounter(
-          _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
-      auto trial = point->coordinates();
-      trial.p += alpha * context.p_scale * mechanical_correction[0];
-      trial.q += alpha * context.q_scale * mechanical_correction[1];
-
-      const auto p_raw = MetaPhysicL::raw_value(trial.p);
-      const auto q_raw = MetaPhysicL::raw_value(trial.q);
-      if (std::isfinite(p_raw) && std::isfinite(q_raw) && trial.q >= 0.0)
-        try
-        {
-          auto candidate = evaluateIndependentLocalPoint(trial, context, point->floor_active);
-          const auto candidate_residual = scaledIndependentResidual(candidate.residual, context);
-          const auto candidate_residual_p =
-              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_P_INDEX]);
-          const auto candidate_residual_q =
-              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_Q_INDEX]);
-          const auto candidate_mechanical_norm_squared =
-              candidate_residual_p * candidate_residual_p +
-              candidate_residual_q * candidate_residual_q;
-          if (candidate_mechanical_norm_squared < current_mechanical_norm_squared)
-          {
-            accepted_candidate = candidate;
-            break;
-          }
-        }
-        catch (const MooseException &)
-        {
-        }
-
-      alpha *= 0.5;
-    }
-
-    if (!accepted_candidate)
-      return std::nullopt;
-
-    point = accepted_candidate;
-  }
-
-  return physicalMechanicalResidualNorm(point->residual,
-                                        context.mechanical_convergence_scale,
-                                        _local_newton_absolute_stress_tolerance,
-                                        tolerance) <= tolerance
-             ? point
-             : std::nullopt;
-}
-
-template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     IndependentLocalPoint point,
@@ -4447,8 +4180,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
   {
     incrementPerformanceCounter(_performance_counters.independent_newton_iterations);
     validateFiniteIndependentLocalPoint(point, "independent coupled Newton iteration");
-    const auto residual_norm =
-        independentConvergenceResidualNorm(point.residual, context, _local_newton_tolerance);
+    const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
     if (residual_norm <= _local_newton_tolerance)
       return point;
 
@@ -4529,8 +4261,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     point = *candidate;
   }
 
-  auto residual_norm = independentConvergenceResidualNorm(
-      point.residual, context, _local_newton_stagnation_tolerance);
+  const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
   if (residual_norm <= _local_newton_stagnation_tolerance)
     return point;
 
@@ -4562,48 +4293,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
                    ": independent local Newton reached its iteration limit while finer adaptive "
                    "constitutive substeps remain available.");
 
-  /*
-   * At the finest permitted subdivision, the coupled four-variable Newton can stall after the two
-   * porosity equations are already effectively converged while a small p-q imbalance remains.
-   * Project the current state onto the fixed-(f_0,f_1) mechanical equilibrium manifold before
-   * requesting an expensive global timestep cut. The recovery is accepted only if the complete
-   * four-equation physical convergence criterion is satisfied afterward.
-   */
-  if (const auto polished = solveIndependentMechanicalAtFixedPorosity(
-          point, _local_newton_stagnation_tolerance, context))
-  {
-    const auto polished_residual_norm = independentConvergenceResidualNorm(
-        polished->residual, context, _local_newton_stagnation_tolerance);
-    if (polished_residual_norm <= _local_newton_stagnation_tolerance)
-    {
-      incrementPerformanceCounter(
-          _performance_counters.independent_fixed_porosity_recovery_successes);
-      if (this->_verbose)
-        Moose::out << "In " << this->_name
-                   << ": independent fixed-porosity mechanical recovery converged at the finest "
-                      "constitutive subdivision."
-                   << std::endl;
-      return *polished;
-    }
-
-    point = *polished;
-    residual_norm = polished_residual_norm;
-  }
-
-  const auto mechanical_residual_magnitude = physicalMechanicalResidualMagnitude(point.residual);
-  const auto stagnation_mechanical_residual_limit =
-      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
-                                      _local_newton_absolute_stress_tolerance,
-                                      _local_newton_stagnation_tolerance);
   mooseException("In ",
                  this->_name,
                  ": analytical independent local (p,q,f_0,f_1) Newton failed to converge. "
-                 "Final stagnation-scaled residual norm = ",
+                 "Final scaled residual norm = ",
                  residual_norm,
-                 ", mechanical residual magnitude [Pa] = ",
-                 mechanical_residual_magnitude,
-                 ", stagnation mechanical residual limit [Pa] = ",
-                 stagnation_mechanical_residual_limit,
                  ".");
   return point; // Unreachable after mooseException.
 }
@@ -4795,11 +4489,44 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSen
       dilution_coefficient[population_index] =
           porosity_old * context.pore_porosity_begin[population_index] / pore_porosity_begin_total;
 
-    const auto population_volumetric_increment = projectIndependentPopulationVolumetricIncrements(
-        response.population_volumetric_strain_increment,
-        dilution_coefficient,
-        point.floor_active,
-        context);
+    auto population_volumetric_increment = response.population_volumetric_strain_increment;
+    PorePorosityState floor_value{};
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+      floor_value[population_index] =
+          independentPorePorosityFloor(population_index, context.pore_porosity_begin);
+
+    const auto active_count = static_cast<unsigned int>(point.floor_active[0]) +
+                              static_cast<unsigned int>(point.floor_active[1]);
+    if (active_count == 1)
+    {
+      const auto active = point.floor_active[0] ? 0u : 1u;
+      const auto free = 1u - active;
+      const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
+      const auto denominator = 1.0 - dilution_coefficient[active];
+      if (denominator <= 0.0)
+        mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+      population_volumetric_increment[active] =
+          (target_increment +
+           dilution_coefficient[active] * population_volumetric_increment[free]) /
+          denominator;
+    }
+    else if (active_count == 2)
+    {
+      const auto target_total_increment =
+          floor_value[0] + floor_value[1] - pore_porosity_begin_total;
+      const auto constrained_total_volumetric_increment =
+          target_total_increment / solid_fraction_old;
+      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+           ++population_index)
+      {
+        const auto target_increment =
+            floor_value[population_index] - context.pore_porosity_begin[population_index];
+        population_volumetric_increment[population_index] =
+            target_increment +
+            dilution_coefficient[population_index] * constrained_total_volumetric_increment;
+      }
+    }
 
     const auto total_volumetric_increment =
         population_volumetric_increment[0] + population_volumetric_increment[1];
@@ -5112,12 +4839,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStepIndependent(
                << " f = " << MetaPhysicL::raw_value(point.pore_porosity[0] + point.pore_porosity[1])
                << " population_0_floor = " << point.floor_active[0]
                << " population_1_floor = " << point.floor_active[1]
-               << " ordinary_convergence_norm = "
-               << independentConvergenceResidualNorm(
-                      point.residual, context, _local_newton_tolerance)
-               << " stagnation_convergence_norm = "
-               << independentConvergenceResidualNorm(
-                      point.residual, context, _local_newton_stagnation_tolerance)
+               << " residual_norm = " << independentConvergenceResidualNorm(point.residual, context)
                << std::endl;
 }
 template <bool is_ad>
@@ -5211,11 +4933,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
                << " global_dt = " << this->globalTimeStep() << " shared_dt = " << this->_dt
                << " numerical_merit_norm = "
                << residualNorm(scaledResidual(point.residual, local_context))
-               << " ordinary_convergence_norm = "
-               << convergenceResidualNorm(point.residual, local_context, _local_newton_tolerance)
-               << " stagnation_convergence_norm = "
-               << convergenceResidualNorm(
-                      point.residual, local_context, _local_newton_stagnation_tolerance)
+               << " physical_convergence_norm = "
+               << convergenceResidualNorm(point.residual, local_context)
                << " porosity_variable_scale = " << local_context.porosity_variable_scale
                << " porosity_merit_scale = " << local_context.porosity_merit_scale
                << " porosity_convergence_scale = " << local_context.porosity_convergence_scale
@@ -5627,33 +5346,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   this->resetConstitutiveTimeStep();
   const auto snapshot =
       captureConstitutiveState(strain_increment, inelastic_strain_increment, stress_new);
-  const auto restore =
-      [this, &snapshot, &strain_increment, &inelastic_strain_increment, &stress_new]()
+  const auto restore = [&]()
   { restoreConstitutiveState(snapshot, strain_increment, inelastic_strain_increment, stress_new); };
-  const auto previous_tangent_request = _compute_consistent_tangent;
-  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
-
-  // Every exception that escapes this routine must restore both caller tensors and constitutive
-  // trial state, including failures during porosity preparation and substep estimation. Internal
-  // MooseException catches can still refine the local substep count without triggering this guard.
-  const auto uncaught_exceptions_on_entry = std::uncaught_exceptions();
-  struct RollbackGuard
-  {
-    const decltype(restore) & restore_state;
-    bool & tangent_request;
-    bool previous_tangent_request;
-    int uncaught_exceptions_on_entry;
-
-    ~RollbackGuard()
-    {
-      if (std::uncaught_exceptions() > uncaught_exceptions_on_entry)
-      {
-        restore_state();
-        tangent_request = previous_tangent_request;
-      }
-    }
-  } rollback_guard{
-      restore, _compute_consistent_tangent, previous_tangent_request, uncaught_exceptions_on_entry};
 
   // Initialize this model's substep porosity from inelastic increments already computed by other
   // inelastic models. Each successful local p-q-f solve commits the next porosity state directly.
@@ -5671,6 +5365,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
                                                : estimateNumberSubsteps(estimate_stress);
+
+  const auto previous_tangent_request = _compute_consistent_tangent;
+  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
 
   std::exception_ptr last_failure;
   auto last_failure_substeps = 0u;
@@ -5735,7 +5432,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     }
     catch (const MooseException &)
     {
-      incrementPerformanceCounter(_performance_counters.constitutive_failures);
+      incrementPerformanceCounter(_performance_counters.constitutive_retries);
       const auto suggested_number_substeps = _suggested_number_substeps;
       last_failure = std::current_exception();
       last_failure_substeps = number_substeps;
@@ -5755,8 +5452,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       else
         number_substeps = number_substeps > _maximum_number_substeps / 2 ? _maximum_number_substeps
                                                                          : 2 * number_substeps;
-
-      incrementPerformanceCounter(_performance_counters.constitutive_retries);
 
       if (_verbose)
         Moose::out << "In " << _name << ": adaptive viscoplastic integration with "
@@ -6304,7 +5999,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeHDerivatives(
     const auto y2 = Utility::pow<2>(y);
     result.value = y2 * y;
     if (M == 0.0)
+    {
+      // For nonlinear n > 1, H' tends to zero but H'' has no finite M -> 0+ limit.
+      // Returning the initialized zero second derivative at exactly M = 0 is the finite
+      // branch-local Jacobian convention, not the limiting curvature.
       return result;
+    }
 
     const auto dmod_dM = exponent * mod / M;
     const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
@@ -6320,6 +6020,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeHDerivatives(
   {
     if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
       result.second = 2.0 * beta * beta;
+    // For nonlinear powers outside the n = 1 branch, H'' is singular as M -> 0+. The
+    // initialized zero at exactly M = 0 is deliberately finite and must not be interpreted as
+    // that one-sided limit.
     return result;
   }
 
