@@ -219,6 +219,18 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
+  // On a fresh run, FEProblemBase::initialSetup() calls copySolutionsBackwards() to initialize
+  // gradient time-state storage before SIMPLE or PIMPLE calls linkRhieChowUserObject(). That state
+  // initialization reaches this method with no linked Rhie-Chow pressure system, so seed the
+  // gradient history with the ordinary gradient until the executioner completes the linkage.
+  if (!_pressure_system)
+  {
+    mooseAssert(_base_gradient_method,
+                "resolveGradientMethodDependencies() must run before gradients are computed.");
+    _base_gradient_method->computeGradient(system, gradient, variable_numbers);
+    return;
+  }
+
   mooseAssert(_pressure_system == &system,
               "FVReconstructedPressureGradient can only compute gradients for the pressure "
               "system it is bound to.");
