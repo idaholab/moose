@@ -71,7 +71,6 @@
     variable = b_field
     source = a_field
     scale_factor = 1.0
-    execute_on = TIMESTEP_END
   []
 []
 
