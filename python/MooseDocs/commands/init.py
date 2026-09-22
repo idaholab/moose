@@ -200,12 +200,20 @@ def update_config_with_sqa(filename, app, category):
 
 
 def _insert_sorted_entry(
-    text, header, entry_indent, pinned_keys, category, new_entry_lines, blank_separated, trailing_blank
+    text,
+    header,
+    entry_indent,
+    pinned_keys,
+    category,
+    new_entry_lines,
+    blank_separated,
+    trailing_blank,
 ):
     """Inserts a new key: ... entry into a block of a hand-maintained yml file, keeping
     every entry not in 'pinned_keys' sorted alphabetically (case-insensitive) and leaving
     the rest of the file untouched. Returns (new_text, changed); changed is False (and
-    new_text == text) if 'category' is already present, so the caller can skip writing."""
+    new_text == text) if 'category' is already present, so the caller can skip writing.
+    """
     lines = text.splitlines(keepends=True)
     header_idx = next(i for i, line in enumerate(lines) if line.rstrip("\n") == header)
     start_idx = header_idx + 1
@@ -241,7 +249,11 @@ def _insert_sorted_entry(
 
     module_entries = [[key, entry_lines] for key, entry_lines, _ in module_entries]
     insert_pos = next(
-        (idx for idx, (key, _) in enumerate(module_entries) if key.lower() > category.lower()),
+        (
+            idx
+            for idx, (key, _) in enumerate(module_entries)
+            if key.lower() > category.lower()
+        ),
         len(module_entries),
     )
     module_entries.insert(insert_pos, [category, new_entry_lines])
@@ -255,7 +267,10 @@ def _insert_sorted_entry(
         block_lines.append("\n")
 
     return (
-        "".join(lines[:start_idx]) + pinned_text + "".join(block_lines) + "".join(lines[end_idx:])
+        "".join(lines[:start_idx])
+        + pinned_text
+        + "".join(block_lines)
+        + "".join(lines[end_idx:])
     ), True
 
 
@@ -281,9 +296,13 @@ def update_module_sqa_registration(app, category):
     if changed:
         _write_file(config_filename, text)
     else:
-        LOG.warning("Category '%s' already exists in %s, skipping.", category, config_filename)
+        LOG.warning(
+            "Category '%s' already exists in %s, skipping.", category, config_filename
+        )
 
-    reports_filename = os.path.join(MooseDocs.MOOSE_DIR, "modules", "doc", "sqa_reports.yml")
+    reports_filename = os.path.join(
+        MooseDocs.MOOSE_DIR, "modules", "doc", "sqa_reports.yml"
+    )
     text = _read_file(reports_filename)
     text, applications_changed = _insert_sorted_entry(
         text,
@@ -316,7 +335,15 @@ def update_module_sqa_registration(app, category):
         text,
         header="Requirements:",
         entry_indent="    ",
-        pinned_keys={"create_diff_report", "moose_test", "stork", "tutorials", "scripts", "python", "combined"},
+        pinned_keys={
+            "create_diff_report",
+            "moose_test",
+            "stork",
+            "tutorials",
+            "scripts",
+            "python",
+            "combined",
+        },
         category=category,
         new_entry_lines=[
             "    {}:\n".format(category),

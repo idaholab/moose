@@ -325,7 +325,9 @@ class TestInit(unittest.TestCase):
 
     @mock.patch("MooseDocs.commands.init._read_file")
     @mock.patch("MooseDocs.commands.init._write_file")
-    def testUpdateModuleSqaRegistrationIdempotent(self, mock_write_file, mock_read_file):
+    def testUpdateModuleSqaRegistrationIdempotent(
+        self, mock_write_file, mock_read_file
+    ):
         mock_write_file.side_effect = self.mockInitWrite
         self._fixture_config_yml = (
             "Extensions:\n"
