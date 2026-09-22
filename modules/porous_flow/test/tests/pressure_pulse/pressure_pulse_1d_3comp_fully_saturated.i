@@ -120,8 +120,8 @@
   [andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -pc_factor_shift_type'
-    petsc_options_value = 'bcgs lu 1E-15 1E-10 10000 NONZERO'
+    petsc_options_iname = '-ksp_type -pc_type -pc_factor_shift_type'
+    petsc_options_value = 'bcgs lu NONZERO'
   []
 []
 
@@ -130,6 +130,9 @@
   solve_type = Newton
   dt = 1E3
   end_time = 1E4
+  nl_abs_tol = 1E-15
+  nl_rel_tol = 1E-10
+  nl_max_its = 10000
 []
 
 [Postprocessors]

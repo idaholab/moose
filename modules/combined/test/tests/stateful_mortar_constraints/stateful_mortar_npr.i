@@ -338,9 +338,10 @@ order = FIRST
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
+  nl_max_its = 20
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
-  petsc_options_value = 'lu       NONZERO               1e-15                   20'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       NONZERO               1e-15'
   end_time = 0.5
   dt = 0.1
   dtmin = 0.1
