@@ -12,7 +12,7 @@
   [repair]
     type = MeshRepairGenerator
     input = tet0
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
 []
 

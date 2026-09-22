@@ -57,9 +57,9 @@ MeshRepairGenerator::validParams()
                         "Merge boundaries if they have the same name but different boundary IDs");
 
   params.addParam<bool>(
-      "fix_degenerate_elements",
+      "fix_pathological_elements",
       false,
-      "Whether to repair degenerate (near-zero-quality) elements. Degeneracy includes: a "
+      "Whether to repair pathological (near-zero-quality) elements. Pathology includes: a "
       "speck element (thin in all dimensions); a sliver (thin in two dimensions, e.g. a "
       "needle tetrahedron, or in 2D a thin triangle, quadrilateral, or polygon); a pancake (thin "
       "in one dimension, i.e. a flat/squashed element such as a flat tetrahedron, pyramid, wedge, "
@@ -90,13 +90,14 @@ MeshRepairGenerator::validParams()
       "zero_area_fraction>=0",
       "A 2D element whose area is below this fraction of the mesh surface-area scale is treated as "
       "degenerate, i.e. a zero-area element (set to 0 to disable this test). Only used when "
-      "'fix_degenerate_elements' is set.");
+      "'fix_pathological_elements' is set.");
   params.addRangeCheckedParam<Real>(
       "flatness_tol",
       0.02,
       "flatness_tol>=0",
       "Relative distance tolerance of the flatness (flap) test used to flag flat pancakes and "
-      "slivers (set to 0 to disable this test). Only used when 'fix_degenerate_elements' is set. A "
+      "slivers (set to 0 to disable this test). Only used when 'fix_pathological_elements' is set. "
+      "A "
       "2D element is flagged as a sliver if every vertex other than the two ends of its longest "
       "edge lies within this fraction of the longest-edge length from that edge, projecting onto "
       "its interior. In 3D this is the distance from the apex to its opposite face (the largest "
@@ -112,7 +113,7 @@ MeshRepairGenerator::validParams()
       "zero_volume_fraction>=0",
       "A TET4, PYRAMID5, PRISM6, or HEX8 whose volume is below this fraction of the mesh "
       "bounding-box volume is treated as degenerate, i.e. a zero-volume element (set to 0 to "
-      "disable this test). Only used when 'fix_degenerate_elements' is enabled.");
+      "disable this test). Only used when 'fix_pathological_elements' is enabled.");
   params.addRangeCheckedParam<Real>(
       "tet_collapse_volume_floor",
       1e-9,
@@ -142,14 +143,14 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name")),
     _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
-    _fix_degenerate_elements(getParam<bool>("fix_degenerate_elements")),
+    _fix_pathological_elements(getParam<bool>("fix_pathological_elements")),
     _zero_area_tol(getParam<Real>("zero_area_fraction")),
     _flatness_tol(getParam<Real>("flatness_tol")),
     _zero_volume_tol(getParam<Real>("zero_volume_fraction")),
     _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge && !_fix_degenerate_elements &&
+      !_boundary_id_merge && !_fix_pathological_elements &&
       !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
@@ -171,7 +172,7 @@ MeshRepairGenerator::generate()
   if (_fix_overlapping_nodes)
     fixOverlappingNodes(mesh);
 
-  if (_fix_degenerate_elements)
+  if (_fix_pathological_elements)
   {
     // Remove speck elements (collapsed toward a point) first, so the sliver/pancake passes
     // below only see elements that are thin in one or two dimensions

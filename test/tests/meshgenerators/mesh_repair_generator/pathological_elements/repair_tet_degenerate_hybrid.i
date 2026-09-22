@@ -41,7 +41,7 @@
     type = MeshRepairGenerator
     input = s3
     fix_node_overlap = true
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
 []
 [Problem]

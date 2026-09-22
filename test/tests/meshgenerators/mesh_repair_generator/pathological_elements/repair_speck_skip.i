@@ -28,7 +28,7 @@
     type = MeshRepairGenerator
     input = speck_quad_b
     fix_node_overlap = true
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
 []
 

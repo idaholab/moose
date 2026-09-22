@@ -19,7 +19,7 @@
   [repair]
     type = MeshRepairGenerator
     input = healthy
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator

@@ -50,9 +50,9 @@ private:
   /// Whether to split non-convex polygons
   const bool _split_nonconvex_polygons;
 
-  /// whether to repair degenerate (near-zero-quality) elements: specks, slivers, and
-  /// pancakes
-  const bool _fix_degenerate_elements;
+  /// whether to repair pathological (near-zero-quality) elements: specks, slivers, pancakes, and
+  /// degenerate elements
+  const bool _fix_pathological_elements;
   /// a 2D element is treated as degenerate (a zero-area element) if its area is below this fraction
   /// of the mesh surface-area scale (0 disables)
   const Real _zero_area_tol;

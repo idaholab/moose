@@ -25,7 +25,7 @@
     type = MeshRepairGenerator
     input = right
     fix_node_overlap = true
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator

@@ -13,7 +13,7 @@
   [repair]
     type = MeshRepairGenerator
     input = pyr
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
 []
 

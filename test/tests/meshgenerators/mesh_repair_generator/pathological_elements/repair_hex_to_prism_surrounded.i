@@ -73,7 +73,7 @@
     input = node7
     fix_node_overlap = true
     fix_elements_orientation = true
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator

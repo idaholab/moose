@@ -12,7 +12,7 @@
   [repair]
     type = MeshRepairGenerator
     input = pyramid_colinear
-    fix_degenerate_elements = true
+    fix_pathological_elements = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator

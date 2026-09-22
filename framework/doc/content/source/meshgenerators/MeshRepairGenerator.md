@@ -18,8 +18,8 @@ The operations currently implemented are:
 
 - merging boundaries with the same name but different boundary IDs.
 
-- repairing degenerate (near-zero-quality) elements, gated by
-  [!param](/Mesh/MeshRepairGenerator/fix_degenerate_elements). Degeneracy is classified into four kinds: a
+- repairing pathological (near-zero-quality) elements, gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_pathological_elements). Pathology is classified into four kinds: a
   **speck** element (thin in all dimensions), flagged by
   [!param](/Mesh/MeshRepairGenerator/zero_volume_fraction) (or [!param](/Mesh/MeshRepairGenerator/zero_area_fraction) in
   2D); a **sliver** (thin in two dimensions, e.g. a needle tetrahedron, or in 2D a thin triangle, quadrilateral, or
