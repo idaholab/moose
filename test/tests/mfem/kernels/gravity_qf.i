@@ -12,10 +12,7 @@
 []
 
 [Kernels]
-  active = 'diff qf_gravity'
-  [qf_gravity]
-    type = MFEMVectorDomainLFKernel
-    variable = displacement
-    vector_coefficient = qf_gravity
+  [gravity]
+    vector_coefficient := qf_gravity
   []
 []
