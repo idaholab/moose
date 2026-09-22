@@ -62,7 +62,7 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector,
   if (realloc)
   {
     _local.destroy();
-    _ghost.destroy();
+    _stash.destroy();
     _local_read.destroy();
   }
 
@@ -74,8 +74,8 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector,
     // implementation only accepts a host array.
     if (realloc)
     {
-      _ghost.create(_dof_space->getNumGhostDofs());
-      _ghost.offset(_dof_space->getNumLocalDofs());
+      _stash.create(_dof_space->getNumGhostDofs());
+      _stash.offset(_dof_space->getNumLocalDofs());
     }
 
     if (!_is_host)
@@ -145,7 +145,7 @@ Vector::destroy()
   _dof_space = nullptr;
 
   _local.destroy();
-  _ghost.destroy();
+  _stash.destroy();
   _local_read.destroy();
 
   _assemble = false;
@@ -156,7 +156,7 @@ Vector::destroy()
 
   // The next close() on this wrapper reduces over whatever layout it is then created around, so the
   // star forest built for the old one no longer applies
-  _ghost_reduction.reset();
+  _reduction.reset();
   _reduction_dof_space = nullptr;
 }
 
@@ -174,7 +174,7 @@ Vector::copyToDevice()
   }
 
   if (_assemble)
-    _ghost = 0;
+    _stash = 0;
 }
 
 void
@@ -218,7 +218,7 @@ Vector::close()
     _local.copyToHost();
 
   // Every row this rank holds a contribution for but does not own is reduced into its owner through
-  // a star forest over the vector's layout. Leaf i is _ghost entry i, which the entity-block and
+  // a star forest over the vector's layout. Leaf i is _stash entry i, which the entity-block and
   // quadrature-point Jacobian loops filled against the send list's i'th global degree of freedom, so
   // the graph is that list read as the row each leaf belongs to.
   //
@@ -245,7 +245,7 @@ Vector::close()
         PETSC_COPY_VALUES,
         reinterpret_cast<const PetscInt *>(_dof_space->getDofMap().get_send_list().data())));
 
-    _ghost_reduction = std::shared_ptr<PetscSF>(new PetscSF(reduction),
+    _reduction = std::shared_ptr<PetscSF>(new PetscSF(reduction),
                                                 [](PetscSF * const sf)
                                                 {
                                                   PetscSFDestroy(sf);
@@ -259,14 +259,14 @@ Vector::close()
   const auto memtype = _is_host ? PETSC_MEMTYPE_HOST : PETSC_MEMTYPE_DEVICE;
 
   if (_is_host)
-    _ghost.copyToHost();
+    _stash.copyToHost();
 
-  const PetscScalar * const contributions = _is_host ? _ghost.hostData() : _ghost.deviceData();
+  const PetscScalar * const contributions = _is_host ? _stash.hostData() : _stash.deviceData();
 
   LibmeshPetscCallQ(PetscSFReduceWithMemTypeBegin(
-      *_ghost_reduction, MPIU_SCALAR, memtype, contributions, memtype, _array, MPIU_SUM));
+      *_reduction, MPIU_SCALAR, memtype, contributions, memtype, _array, MPIU_SUM));
   LibmeshPetscCallQ(
-      PetscSFReduceEnd(*_ghost_reduction, MPIU_SCALAR, contributions, _array, MPIU_SUM));
+      PetscSFReduceEnd(*_reduction, MPIU_SCALAR, contributions, _array, MPIU_SUM));
 
   // Restore the PETSc vector
 

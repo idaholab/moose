@@ -86,7 +86,7 @@ public:
   {
     KOKKOS_ASSERT(!_read_only);
 
-    return i < _local.size() ? _local[i] : _ghost(i);
+    return i < _local.size() ? _local[i] : _stash(i);
   }
   /**
    * Get an entry with a given index
@@ -97,7 +97,7 @@ public:
   {
     KOKKOS_ASSERT(!_read_only);
 
-    return i < _local.size() ? _local[i] : _ghost(i);
+    return i < _local.size() ? _local[i] : _stash(i);
   }
   /**
    * Get an entry with a given index for reading, which is valid whether or not the vector is
@@ -112,7 +112,7 @@ public:
     if (_read_only && !_is_host)
       return _local_read[i];
 
-    return i < _local.size() ? _local[i] : _ghost(i);
+    return i < _local.size() ? _local[i] : _stash(i);
   }
   /**
    * Whether an index past the locally owned degrees of freedom resolves in this vector. An
@@ -131,7 +131,7 @@ public:
     mooseAssert(!_read_only, "Kokkos vector error: cannot assign to a read-only vector.");
 
     _local = scalar;
-    _ghost = scalar;
+    _stash = scalar;
 
     return *this;
   }
@@ -159,11 +159,19 @@ private:
    */
   const DofSpace * _dof_space = nullptr;
   /**
-   * Data vectors on device
+   * Data vectors on device.
+   *
+   * _local holds the entries this process owns, aliasing PETSc's array. For a vector read through a
+   * ghosted layout it is sized to take the ghost entries after them as well, so reading an entry
+   * another process owns is a read of _local.
+   *
+   * _stash holds contributions to rows another process owns, which close() reduces into their owners.
+   * It exists only for a vector being assembled, and it is a write-side buffer rather than the
+   * ghosting of a vector for reading: PETSc's own name for such a buffer is a stash.
    */
   ///@{
   Array<PetscScalar> _local;
-  Array<PetscScalar> _ghost;
+  Array<PetscScalar> _stash;
   ///@}
   /**
    * Local data on device for a read-only vector PETSc already holds on the device, aliasing PETSc's
@@ -201,7 +209,7 @@ private:
    * would have every copy free what the original still refers to.
    */
   ///@{
-  std::shared_ptr<PetscSF> _ghost_reduction;
+  std::shared_ptr<PetscSF> _reduction;
   const DofSpace * _reduction_dof_space = nullptr;
   ///@}
 };
