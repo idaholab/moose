@@ -429,12 +429,12 @@ protected:
                            const HydrostaticStressState & hydrostatic_stress) const;
 
   /// Recover AD sensitivity of a converged primal gauge root from F(Lambda,z)=0.
-  GenericReal<is_ad>
-  reconstructGaugeStressSensitivity(Real gauge_stress,
-                                    const GenericReal<is_ad> & equiv_stress,
-                                    const HydrostaticStressState & hydrostatic_stress,
-                                    const GenericReal<is_ad> & porosity,
-                                    const CreepLaw & law) const;
+  GenericReal<is_ad> reconstructGaugeStressSensitivity(
+      Real gauge_stress,
+      const GenericReal<is_ad> & equiv_stress,
+      const HydrostaticStressState & hydrostatic_stress,
+      const GenericReal<is_ad> & porosity,
+      const CreepLaw & law) const;
 
   /// Compute the gauge stress for a specific creep mechanism.
   GenericReal<is_ad> computeGaugeStress(const GenericReal<is_ad> & equiv_stress,
@@ -486,11 +486,11 @@ protected:
                                       const GenericRankTwoTensor<is_ad> & dev_direction,
                                       const PorePorosityState & pore_porosity);
 
-  IndependentLpsCreepResponse
-  evaluateIndependentLpsCreepResponseValueOnly(const HydrostaticStressState & hydrostatic_stress,
-                                               const GenericReal<is_ad> & equiv_stress,
-                                               const GenericRankTwoTensor<is_ad> & dev_direction,
-                                               const PorePorosityState & pore_porosity);
+  IndependentLpsCreepResponse evaluateIndependentLpsCreepResponseValueOnly(
+      const HydrostaticStressState & hydrostatic_stress,
+      const GenericReal<is_ad> & equiv_stress,
+      const GenericRankTwoTensor<is_ad> & dev_direction,
+      const PorePorosityState & pore_porosity);
 
   /// Matrix hydrostatic stress for the spherical porous formulation.
   GenericReal<is_ad> matrixHydroStress(const GenericRankTwoTensor<is_ad> & stress) const;
@@ -516,11 +516,11 @@ protected:
    * Convert the physical effective creep increment to the controller increment after any active
    * porosity-floor projection. Unconstrained states retain the historical effective increment.
    */
-  Real
-  substepControlIncrement(const GenericReal<is_ad> & effective_inelastic_strain_increment,
-                          const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
-                          const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
-                          bool constrained) const;
+  Real substepControlIncrement(
+      const GenericReal<is_ad> & effective_inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & raw_inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & admitted_inelastic_strain_increment,
+      bool constrained) const;
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
@@ -585,16 +585,16 @@ private:
    * complete fixed-substep path captures those dependencies without dropping derived-state terms.
    * The helper restores the unperturbed accepted state before returning.
    */
-  RankFourTensor
-  computeSubsteppedConsistentTangent(const ConstitutiveStateSnapshot & snapshot,
-                                     const GenericReal<is_ad> & beginning_porosity,
-                                     const RankTwoTensor & accepted_stress,
-                                     GenericRankTwoTensor<is_ad> & strain_increment,
-                                     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-                                     GenericRankTwoTensor<is_ad> & stress_new,
-                                     const GenericRankFourTensor<is_ad> & elasticity_tensor,
-                                     const RankTwoTensor & elastic_strain_old,
-                                     unsigned int total_number_substeps);
+  RankFourTensor computeSubsteppedConsistentTangent(
+      const ConstitutiveStateSnapshot & snapshot,
+      const GenericReal<is_ad> & beginning_porosity,
+      const RankTwoTensor & accepted_stress,
+      GenericRankTwoTensor<is_ad> & strain_increment,
+      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      GenericRankTwoTensor<is_ad> & stress_new,
+      const GenericRankFourTensor<is_ad> & elasticity_tensor,
+      const RankTwoTensor & elastic_strain_old,
+      unsigned int total_number_substeps);
 
   enum LocalVariableIndex : unsigned int
   {
@@ -747,7 +747,8 @@ private:
   LocalResidual scaledResidual(const LocalResidual & residual,
                                const LocalSolveContext & context) const;
   Real convergenceResidualNorm(const LocalResidual & residual,
-                               const LocalSolveContext & context) const;
+                               const LocalSolveContext & context,
+                               Real relative_tolerance) const;
   Real residualNorm(const LocalResidual & residual,
                     LocalResidualScope scope = LocalResidualScope::COUPLED) const;
   void validateFiniteLocalPoint(const LocalPoint & point, const char * stage) const;
@@ -778,7 +779,9 @@ private:
   std::optional<LocalPoint> solveMechanicalAtFixedPorosity(const LocalCoordinates & seed,
                                                            Real tolerance,
                                                            const LocalSolveContext & context);
-  LocalPoint verifyConvergedPoint(const LocalPoint & point, const LocalSolveContext & context);
+  LocalPoint verifyConvergedPoint(const LocalPoint & point,
+                                  const LocalSolveContext & context,
+                                  Real acceptance_tolerance);
   LocalPoint verifyReducedConvergedPoint(const LocalSolveResult & reduced,
                                          const LocalSolveContext & context);
   GenericReal<is_ad> impliedPorosity(const LocalPoint & point) const;
@@ -896,7 +899,8 @@ private:
   scaledIndependentResidual(const IndependentLocalResidual & residual,
                             const IndependentLocalSolveContext & context) const;
   Real independentConvergenceResidualNorm(const IndependentLocalResidual & residual,
-                                          const IndependentLocalSolveContext & context) const;
+                                          const IndependentLocalSolveContext & context,
+                                          Real relative_tolerance) const;
   IndependentScaledLocalJacobian
   scaledIndependentJacobian(const IndependentLocalJacobian & jacobian,
                             const IndependentLocalSolveContext & context) const;
@@ -1045,6 +1049,8 @@ private:
   const Real _porosity_bound_tolerance;
   const Real _local_newton_tolerance;
   const Real _local_newton_stagnation_tolerance;
+  /// Absolute Rp-Rq residual tolerance; defaults to the low-drive cutoff for compatibility.
+  const Real _local_newton_absolute_stress_tolerance;
   const unsigned int _local_newton_max_iterations;
   const Real _local_newton_relaxation;
   const unsigned int _local_newton_max_backtracks;
