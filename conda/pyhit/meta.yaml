@@ -1,6 +1,6 @@
 package:
   name: moose-pyhit
-  version: 2026.08.23
+  version: 2026.09.22
 
 source:
   - path: ../../python/moosetree
@@ -25,19 +25,19 @@ source:
 build:
   number: 0
   run_exports:
-    - moose-wasp 2026.08.13_ce25dcd build_1
+    - moose-wasp 2026.08.13_ce25dcd build_2
 
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - moose-wasp 2026.08.13_ce25dcd build_1
+    - moose-wasp 2026.08.13_ce25dcd build_2
     - make
   host:
     - python {{ python }}
-    - moose-wasp 2026.08.13_ce25dcd build_1
+    - moose-wasp 2026.08.13_ce25dcd build_2
   run:
     - python {{ python }}
-    - moose-wasp 2026.08.13_ce25dcd build_1
+    - moose-wasp 2026.08.13_ce25dcd build_2
 
 test:
   imports:
