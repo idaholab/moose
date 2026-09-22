@@ -7,9 +7,13 @@ problem operators with custom inputs. This class is specifically intended for co
 user-defined custom operators which may be raw `mfem::Operator`'s optimized for specific
 purposes, e.g. a physics application, a bespoke solver or preconditioner implementation, usage of an optimized
 third-party library, or cutting-edge mfem functionality. Users' operators may still access the wider MOOSE
-multi-physics system. As of yet, the user may only provide a single, but arbitrarily convoluted, problem composer
-(and thus operator) object per [MFEMProblem.md]. The problem composer classes are built within the [MFEMProblem.md] class,
-however the [ProblemOperator.md]s are built by MFEM executioners.
+multi-physics system. The problem composer classes and the [ProblemOperator.md]s they create are
+both built within the [MFEMProblem.md] class, during the `add_mfem_problem_composer` and
+`set_mfem_problem_operators` tasks respectively. Every problem composer added contributes one
+problem operator. Composers deriving from [MFEMWeakFormProblemComposerBase.md] additionally name
+the weak form supplying their equation system through the `weak_form` parameter; composers built
+directly on [MFEMProblemComposer.md], such as the custom composer below, have no associated weak
+form and so do not take that parameter.
 
 ## Using a custom problem composer to plug in a custom problem operator
 
@@ -45,6 +49,12 @@ input parameters, retrieving `FESpace`s and `GridFunction`s has to be done no ea
 
 The rest of the `Init()` function mirrors the MFEM ex0p example, i.e. build the forms, add the
 integrators, assemble the forms and form the linear system.
+
+`Init()` is called once by the [MFEMProblem.md] during the `set_mfem_problem_operators` task. The
+base class implementation populates the operator's trial and test variables and block offsets
+through `SetGridFunctions()` before aliasing the trial grid functions into the operator's true-DoF
+solution vector, so an override that relies on any of those members must call the base class
+implementation first.
 
 The `Solve()` method solves the linear/non-linear system that has been setup and passes the
 data to the mfem `GridFunction`s so that the [Postprocessor.md] can view the results.

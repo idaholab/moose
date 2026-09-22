@@ -78,9 +78,8 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
     _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
   auto & problem = getMFEMProblem();
-  auto eq_sys = problem.getProblemData().eqn_system;
 
-  if (eq_sys->IsEigen() || eq_sys->IsComplex())
+  if (_equation_system->IsEigen() || _equation_system->IsComplex())
     mooseError("GeometricMultigridSolver '", name(), "': requires a real, non-eigen eq. system");
 
   // Co-own the hierarchy so it outlives this solver.
@@ -135,9 +134,8 @@ void
 MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 {
   auto & problem = getMFEMProblem();
-  auto eq_sys = problem.getProblemData().eqn_system;
 
-  if (eq_sys->IsNonlinear() || eq_sys->IsMultivariate())
+  if (_equation_system->IsNonlinear() || _equation_system->IsMultivariate())
     mooseError("GeometricMultigridSolver '", name(), "': requires a univariate, linear eq. system");
 
   const int N = _hierarchy->GetNumLevels();
@@ -158,7 +156,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   };
 
   // Obtain essential boundary attribute markers from the equation system.
-  mfem::Array<int> & ess_bdr = eq_sys->GetEssentialBoundaryMarkers(_var_name);
+  mfem::Array<int> & ess_bdr = _equation_system->GetEssentialBoundaryMarkers(_var_name);
 
   auto & finest_fespace =
       cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(finest_level));
@@ -198,8 +196,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
       level_op = const_cast<mfem::Operator *>(&op);
     else
     {
-      auto blf =
-          eq_sys->BuildBilinearFormForFESpace(_var_name, level_fespace, _assembly_levels[level]);
+      auto blf = _equation_system->BuildBilinearFormForFESpace(
+          _var_name, level_fespace, _assembly_levels[level]);
 
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
       blf->FormSystemMatrix(level_tdofs, *level_op_handle);
