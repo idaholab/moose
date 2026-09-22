@@ -107,7 +107,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
   }
 
   // Register the elemental/face functors which will be queried in the pressure equation
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     UserObject::_subproblem.addFunctor("Ainv", _Ainv, tid);
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
