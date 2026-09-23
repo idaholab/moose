@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#33859'
+  design = 'KokkosComputeIsotropicElasticityTensor.md KokkosComputeSmallStrain.md '
+           'KokkosComputeLinearElasticStress.md KokkosVectorStressDivergence.md'
+
+  [small_strain_elasticity]
+    requirement = 'The system shall compute the displacement field of an isotropic linear elastic '
+                  'solid under small strains, reaching the same result whether the constitutive '
+                  'chain is assembled'
+    [reference]
+      type = CSVDiff
+      input = 'cpu_small_strain.i'
+      cli_args = 'Outputs/file_base=small_strain_out'
+      csvdiff = 'small_strain_out.csv'
+      detail = 'from three scalar displacement variables through the non-Kokkos objects,'
+    []
+    [kokkos]
+      type = CSVDiff
+      input = 'kokkos_small_strain.i'
+      cli_args = 'Outputs/file_base=small_strain_out'
+      csvdiff = 'small_strain_out.csv'
+      detail = 'or from a single vector displacement variable through the Kokkos objects.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      prereq = 'small_strain_elasticity/reference'
+    []
+  []
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_small_strain.i'
+    cli_args = 'Outputs/csv=false'
+    requirement = 'The Kokkos stress divergence kernel shall compute an exact Jacobian for a '
+                  'vector displacement variable.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]
