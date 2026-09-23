@@ -108,11 +108,23 @@ NodalArea::finalize()
 Real
 NodalArea::nodalArea(const Node * node) const
 {
-  std::map<const Node *, Real>::const_iterator it = _node_areas.find(node);
-  Real retVal(0);
-  if (it != _node_areas.end())
-  {
-    retVal = it->second;
-  }
-  return retVal;
+  // Read the tributary area from the associated aux variable's ghosted
+  // solution vector -- that vector is populated by `finalize()` (see
+  // above) and is properly ghosted, so this returns the correct value
+  // for both locally-owned and ghosted nodes.  The prior implementation
+  // read from the `_node_areas` map which only holds LOCAL
+  // contributions and returns 0 for nodes owned by other ranks; that
+  // caused per-node weights to be zeroed out for consumers that touch
+  // the entire boundary from a single rank (e.g.
+  // RigidBodyLoadControl's ScalarKernel, which is called only on the
+  // scalar-owning rank).
+  if (node->n_dofs(_system.number(), _variable->number()) == 0)
+    return 0;
+  const dof_id_type dof = node->dof_number(_system.number(), _variable->number(), 0);
+  // Read from the GHOSTED aux solution (currentSolution), not the
+  // parallel `_aux_solution` -- for a non-local dof, calling operator()
+  // on the non-ghosted vector is undefined behaviour and can segfault
+  // on the scalar-owning rank of RigidBodyLoadControl.
+  const auto * cs = _system.currentSolution();
+  return cs ? (*cs)(dof) : _aux_solution(dof);
 }

@@ -122,6 +122,7 @@ initLineSearchType()
     line_search_type_to_enum["CP"] = LS_CP;
     line_search_type_to_enum["CONTACT"] = LS_CONTACT;
     line_search_type_to_enum["PROJECT"] = LS_PROJECT;
+    line_search_type_to_enum["SEMISMOOTH"] = LS_SEMISMOOTH;
   }
 }
 

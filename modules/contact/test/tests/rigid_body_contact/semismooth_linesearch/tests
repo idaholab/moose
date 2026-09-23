@@ -1,0 +1,15 @@
+[Tests]
+  design = 'SphereContactor.md RigidBodyNodalNCPKernel.md SemismoothContactLineSearch.md'
+  issues = '#33801'
+  [semismooth_linesearch]
+    type = 'CSVDiff'
+    input = 'hertz_inelastic_ls.i'
+    csvdiff = 'hertz_inelastic_ls_csv.csv hertz_inelastic_ls_csv_contact_lm_0002.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'The semismooth Newton line search shall recover a converged, physically '
+                  'consistent state on a large-step (dt = 0.5) rigid-body contact problem '
+                  'that would otherwise stall Newton due to complementarity-driven kinks.'
+  []
+[]

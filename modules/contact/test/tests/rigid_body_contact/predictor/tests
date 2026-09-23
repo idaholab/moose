@@ -1,0 +1,73 @@
+[Tests]
+  design = 'RigidBodyContactPredictor.md'
+  issues = '#33801'
+  # These tests certify BOTH the correctness AND the iteration-count
+  # improvement of RigidBodyContactPredictor.  For each control mode
+  # (force-controlled, displacement-controlled) we run the SAME input
+  # file that the baseline test in a sibling directory uses, but with
+  # a [Predictor] block added via `cli_args`, and compare the output
+  # CSV against a NEW gold that captures:
+  #   * `applied_force` / `indenter_translation` / `indenter_y`:
+  #     converged state quantities.  Must match the baseline gold
+  #     within a modest tolerance -- the physical fixed point does
+  #     not depend on the initial guess.
+  #   * `cumulative_nl` / `num_nl`: iteration counts.  These are
+  #     LOWER in the gold than the baseline gold ships (see comment
+  #     on each test), which is the entire point of the predictor.
+  # If a future change breaks correctness, the state columns diff.
+  # If it silently makes the predictor a no-op, the iter columns diff.
+  #
+  # Baseline iter counts (for comparison):
+  #   load_controlled_elastic/hertz_load_csv.csv @ t=0.02: cumulative_nl = 32
+  #   displacement_moving_indenter_elastic/hertz_moving_csv.csv @ t=0.5: cumulative_nl = 16
+
+  [hertz_load_with_predictor]
+    type = 'CSVDiff'
+    input = '../load_controlled_elastic/hertz_load.i'
+    csvdiff = 'hertz_load_predictor_csv.csv'
+    cli_args = 'Outputs/csv/file_base=hertz_load_predictor_csv Executioner/end_time=0.02 Executioner/Predictor/type=RigidBodyContactPredictor Executioner/Predictor/boundary=100 Executioner/Predictor/lm_variable=normal_lm Executioner/Predictor/displacements="disp_x disp_y" Executioner/Predictor/scalar_variable=indenter_y Executioner/Predictor/k_hops=3 Executioner/Predictor/sub_max_iter=15'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'RigidBodyContactPredictor shall correctly warm-start a force-controlled rigid-'
+                  'body contact solve and reduce the outer Newton iteration count.  The gold '
+                  'certifies cumulative_nl = 3 through the first three steps, vs. cumulative_nl '
+                  '= 32 for the same steps without the predictor.'
+  []
+  # MPI parallel test: same hertz_load setup but run under mpiexec -n 2.
+  # Locks in a fix for a segfault where `RigidBodyContactPredictor::apply()`
+  # called `_fe_problem.computeResidual()` on the system's OWNED-only
+  # solution vector; MOOSE's `MooseVariableScalar::reinit` then called
+  # `PetscVector::get()` for scalar DOFs owned by the last rank, which
+  # segfaults on any non-owning rank.  The fix uses the system's ghosted
+  # `current_local_solution` as the working vector so scalar reads see
+  # valid ghosted values on every rank.  Iter counts (cumulative_nl /
+  # num_nl) match the serial gold; converged state matches to within
+  # 1.5% (parallel partitioning changes the primal's convergence path
+  # by a small amount at the LU-precision boundary).
+  [hertz_load_with_predictor_mpi]
+    type = 'CSVDiff'
+    input = '../load_controlled_elastic/hertz_load.i'
+    csvdiff = 'hertz_load_predictor_mpi_csv.csv'
+    cli_args = 'Outputs/csv/file_base=hertz_load_predictor_mpi_csv Executioner/end_time=0.02 Executioner/Predictor/type=RigidBodyContactPredictor Executioner/Predictor/boundary=100 Executioner/Predictor/lm_variable=normal_lm Executioner/Predictor/displacements="disp_x disp_y" Executioner/Predictor/scalar_variable=indenter_y Executioner/Predictor/k_hops=3 Executioner/Predictor/sub_max_iter=15'
+    rel_err = 1e-2
+    min_parallel = 2
+    max_parallel = 2
+    prereq = 'hertz_load_with_predictor'
+    requirement = 'RigidBodyContactPredictor shall run correctly under MPI when the load-control '
+                  'scalar DoF is owned by a rank other than 0.  Exercises the fix to use the '
+                  'system-owned ghosted `current_local_solution` inside `apply()` so that '
+                  'MOOSE`s scalar-variable reinit on non-owning ranks does not segfault.'
+  []
+  [hertz_moving_with_predictor]
+    type = 'CSVDiff'
+    input = '../displacement_moving_indenter_elastic/hertz_moving.i'
+    csvdiff = 'hertz_moving_predictor_csv.csv'
+    cli_args = 'Outputs/csv/file_base=hertz_moving_predictor_csv Executioner/end_time=0.5 Executioner/Predictor/type=RigidBodyContactPredictor Executioner/Predictor/boundary=100 Executioner/Predictor/lm_variable=normal_lm Executioner/Predictor/displacements="disp_x disp_y" Executioner/Predictor/k_hops=3 Executioner/Predictor/sub_max_iter=15'
+    rel_err = 1e-2
+    max_parallel = 1
+    requirement = 'RigidBodyContactPredictor shall correctly warm-start a displacement-controlled '
+                  'rigid-body contact solve (no scalar_variable) and reduce the outer Newton '
+                  'iteration count.  The gold certifies cumulative_nl = 5 through the first five '
+                  'steps, vs. cumulative_nl = 16 for the same steps without the predictor.'
+  []
+[]
