@@ -48,7 +48,6 @@ public:
   struct Sparsity
   {
     Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
     Array<PetscInt> row_ptr;
   };
 
@@ -159,6 +158,18 @@ public:
    * @returns The sparisty pattern data
    */
   const Sparsity & getSparsity() const { return _sparsity; }
+
+  /**
+   * Build the COO index arrays describing the sparsity pattern
+   *
+   * PETSc consumes these arrays destructively, so a fresh pair is needed for each matrix
+   * preallocated from this system.  The arrays are resized to the number of nonzeros and fully
+   * overwritten, which lets one allocation be reused across the matrices.
+   *
+   * @param coo_i The row index of each nonzero
+   * @param coo_j The column index of each nonzero
+   */
+  void buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const;
 
   /**
    * Check whether a variable is scalar
