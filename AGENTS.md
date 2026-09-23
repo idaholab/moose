@@ -34,7 +34,8 @@ Before implementing:
 - If existing functionality can accomplish a subtask, use it, don't
   reimplement it.
 - If existing functionality is nearly capable of a subtask, prefer
-  short extensions or bug fixes of it over long rewrites of it.
+  short extensions or bug fixes of it over long rewrites of it. If the
+  extension only fits by distorting the existing design, rework the design.
 - Don't be afraid to cross into submodules for feature additions or bug
   fixes, especially if it aids in the 'Simplicity First' principle.
 
@@ -42,19 +43,32 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 
 ## 3. Surgical Changes
 
-**Touch only what you must. Clean up only your own mess.**
+**Make the smallest change that gets the computer science and the mathematics right.**
+
+Diff size is a tiebreaker among correct designs, and the design wins when the two
+conflict. If the minimal patch requires the worse algorithm, the wrong data
+structure, a formulation that only happens to work on the case at hand, or a
+special case bolted onto a general routine, take the larger change instead and
+say what you are widening and why.
+
+A widening that stays inside the code you were already editing needs only that
+note; proceed. For a large restructuring - spanning files beyond the ones the task
+named, changing a public interface, or reworking something other code depends on -
+present both paths with their costs and wait for the user to choose.
 
 When editing existing code:
 - Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it - don't delete it.
+- Refactor when the correct design needs it - a better interface, data layout, or
+  algorithm - and leave working code alone otherwise.
 
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
-The test: Every changed line should trace directly to the user's request.
+The test: Every changed line should trace to the user's request or to the design
+that request requires.
 
 ## 4. Code Comments
 
@@ -153,4 +167,4 @@ not govern unrelated conversations or prescribe the user's conversational style.
 
 ---
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+**These guidelines are working if:** diffs are as small as the design allows, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
