@@ -9,7 +9,10 @@
 #pragma once
 
 #include "PorousViscoplasticityStressUpdate.h"
+#include "MooseEnum.h"
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
 /**
@@ -84,12 +87,61 @@ public:
 
   PorousViscoplasticityStressUpdateTest(const InputParameters & parameters);
 
+  virtual void updateStateSubstep(RankTwoTensor & strain_increment,
+                                  RankTwoTensor & inelastic_strain_increment,
+                                  const RankTwoTensor & rotation_increment,
+                                  RankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const RankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  bool compute_full_tangent_operator,
+                                  RankFourTensor & tangent_operator) override;
+
 protected:
   using Base = PorousViscoplasticityStressUpdateTestStateTempl<false>;
+  using PorePorosityState = typename Base::PorePorosityState;
 
   virtual void initQpStatefulProperties() override;
+  virtual Real scalarPorosityFloor() const override;
+  virtual unsigned int estimateNumberSubsteps(const RankTwoTensor & stress) override;
+  virtual PorePorosityState independentPorePorosityState(const Real & total_porosity) const override;
+  virtual void independentPorePorosityStateAccepted(
+      const RankTwoTensor & inelastic_strain_increment,
+      const PorePorosityState & pore_porosity) override;
 
 private:
+  struct RollbackState
+  {
+    RankTwoTensor strain_increment;
+    RankTwoTensor inelastic_strain_increment;
+    RankTwoTensor stress;
+    RankFourTensor tangent;
+
+    Real intermediate_porosity = 0.0;
+    Real effective_inelastic_strain = 0.0;
+    RankTwoTensor inelastic_strain;
+    Real effective_inelastic_strain_rate = 0.0;
+    Real substep_control_inelastic_strain_rate = 0.0;
+    Real hydro_stress = 0.0;
+    Real gauge_stress = 0.0;
+    std::vector<Real> gauge_stresses;
+    Real population_0_porosity = 0.0;
+    Real population_1_porosity = 0.0;
+    std::uint64_t constitutive_retries = 0;
+  };
+
+  RollbackState captureRollbackState(const RankTwoTensor & strain_increment,
+                                     const RankTwoTensor & inelastic_strain_increment,
+                                     const RankTwoTensor & stress,
+                                     const RankFourTensor & tangent) const;
+  void verifyRollbackState(const RollbackState & expected,
+                           const RankTwoTensor & strain_increment,
+                           const RankTwoTensor & inelastic_strain_increment,
+                           const RankTwoTensor & stress,
+                           const RankFourTensor & tangent) const;
+  void throwInjectedFailure(const char * stage) const;
+  std::string failurePointName() const;
+
   void runKernelChecks();
   void checkN1Derivatives(Real pressure, Real deffective_hydro_df) const;
   void checkHigherPowerNearZeroPressure(Real power) const;
@@ -105,7 +157,11 @@ private:
                   Real absolute_tolerance = 5.0e-30) const;
 
   const bool _run_kernel_checks;
+  const MooseEnum _failure_point;
   bool _kernel_checks_complete = false;
+  bool _inside_update_state_substep = false;
+  unsigned int _accepted_state_calls = 0;
+  unsigned int _accepted_path_substeps = 0;
 };
 
 /** AD counterpart used to exercise the generic independent two-population solve. */
