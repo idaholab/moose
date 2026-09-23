@@ -16,6 +16,11 @@ touching any code:
   and re-check the rest only after it is green.
 - **Batch the fixes.** Any push restarts the whole matrix, and a force-push restarts it from
   scratch, so collect fixes and push once.
+- **A gated matrix is not a hundred failures.** `Precheck` gates every other job. When it
+  fails, `gh pr checks` reports the rest of the matrix as `ERROR` with a zeroed
+  `startedAt` (`0001-01-01T00:00:00`), which reads as a catastrophic failure but means
+  those jobs are `Not_Started`. The Civet event page (`/event/<id>`, linked from any job
+  page) gives the real per-job status; count causes from that, not from `gh` rows.
 
 State the cause count explicitly before proposing fixes. If you cannot say how many
 distinct causes there are, you are not ready to fix any of them.
@@ -164,7 +169,67 @@ package's `full_version` away from it, so `--verify` reports `CHANGE`. Bump agai
 sweep and its version still matches the base ref. Let `--verify` decide; do not
 pre-emptively bump on the theory that a changed file must mean a changed version.
 
-## 8. Re-read what the fix falsified
+## 8. Satisfy the Precheck format and lint gates before pushing
+
+`Precheck` runs the formatters and linters, and it gates the whole matrix: when it fails,
+every other job stays `Not_Started` and nothing else in the PR is tested that cycle. Its
+three format steps are not allowed to fail, unlike `Size check`, `Fixup commit check` and
+`Submodule check`, so one unformatted line costs a full cycle. Run all three before pushing:
+
+```bash
+git clang-format upstream/devel                   # C and C++, diff-scoped
+black --check --diff --config pyproject.toml .    # Python, whole tree
+ruff check --no-cache --config pyproject.toml .   # Python, whole tree
+```
+
+Those are Civet's own invocations. Drop `--check --diff` from black, or add `--fix` to ruff,
+to apply what they report instead of printing it.
+
+What is in scope differs per tool, which is what makes "my edit was small" an unreliable
+guide:
+
+- **`git clang-format` is diff-scoped** and reformats only the lines the diff touches. It
+  covers `.C`/`.h` and plain `.c` alike through clang-format's default extension list, so a
+  C file is gated exactly like a C++ one.
+- **black runs over the whole tree**, minus the `extend-exclude` list in `[tool.black]`
+  (contrib, submodules, `petsc`, `libmesh`). Every other Python file is in scope whether or
+  not this PR touched it, so a file that arrives unformatted from elsewhere fails the gate
+  here.
+- **ruff runs over the whole tree, but `[tool.ruff] include` is an allowlist** — currently
+  parts of `python/` and `scripts/coverage.py`. Most Python in the repo is therefore
+  unlinted, and black being clean says nothing about ruff. Inside the allowlist the enabled
+  rules (`D`, `E`, `F`, `I`, `N801`, `SIM`, `TID`) require NumPy-style docstrings and sorted
+  imports, which is stricter than the rest of the tree looks.
+
+Do not hand-format on the theory that the result looks like the surrounding code.
+`.clang-format` sets `ColumnLimit: 100`, and clang-format keeps an initializer on one line
+when it fits in exactly 100 columns while wrapping one that is a single character longer, so
+two adjacent declarations that read as a matched pair are formatted differently.
+
+**These tools are themselves pins in this update.** `black`, `ruff`, `clang_format` and
+`clang_tools` all live in `conda/tools/conda_build_config.yaml`, mirrored in
+`requirements.txt` (`version-sources.md` has the row). That cuts both ways: a binary from an
+older environment can disagree with the one Civet runs, so check versions before trusting a
+clean local run; and moving one of those pins changes what the gate accepts, so a tree that
+was clean can go red without anyone editing it. A bump whose consequence is a tree-wide
+reformat or relint belongs in its own update — the same rule `conda/conda_build_config.yaml`
+already states for a clang-format major bump.
+
+`scripts/install_format_hook.sh` installs a pre-commit hook that runs `git clang-format` on
+staged C++ files under `framework`, `modules`, `test`, `unit`, `examples`, `tutorials` and
+`stork`. It does not cover Python; black and ruff stay manual.
+
+When `Precheck` has already failed on formatting, take its answer instead of guessing again.
+The `Clang format` step publishes the patch and prints the command:
+
+```bash
+curl -s https://mooseframework.inl.gov/docs/PRs/<pr>/clang_format/style.patch | git apply -v
+```
+
+Fold the formatting into the commit that introduced the code rather than adding a follow-up
+commit, and regenerate the hash block afterwards — the amend invalidates it, as above.
+
+## 9. Re-read what the fix falsified
 
 `--verify` checks versions, not claims. A fix late in the PR can contradict something the
 newsletter or the PR body already asserts — most often a paragraph explaining why a pin was
@@ -172,7 +237,7 @@ deliberately left where it was, which stops being true the moment the pin moves.
 catch this. After each fix, re-read both documents for the rationale you just invalidated,
 and add the bullets the fix earns.
 
-## 9. Know what not to fix
+## 10. Know what not to fix
 
 - **Deferred failures** go on the `## To do` checklist with enough detail to resume from
   cold: the diagnostic, the mechanism, and where it fires. A deferred item with no
