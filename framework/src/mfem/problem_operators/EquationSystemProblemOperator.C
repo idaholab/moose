@@ -24,10 +24,20 @@ EquationSystemProblemOperator::SetGridFunctions()
 void
 EquationSystemProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
-
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    // Covers everything between the weak form and a solvable system: element matrices, the sparsity
+    // MFEM builds while assembling them, essential boundary condition elimination and the parallel
+    // assembly of the operator handed to the solver.
+    TIME_SECTION("FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator();
+  }
+
+  {
+    TIME_SECTION("SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
