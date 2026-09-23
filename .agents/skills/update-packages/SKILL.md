@@ -230,6 +230,12 @@ will notice:
   full version and influential set. This needs no conda environment beyond `yaml`,
   `jinja2` and `tabulate`.
 - `cd scripts && ./run_tests --re premake` if `versioner.yaml` structure changed.
+- The three `Precheck` format gates, which gate every other job in the matrix, so one
+  unformatted line costs a whole CI cycle. `git clang-format upstream/devel` for C and C++;
+  `black --check --diff --config pyproject.toml .` and
+  `ruff check --no-cache --config pyproject.toml .` for Python. The Python pair runs over the
+  whole tree rather than the diff, so run them even when the update touched no `.py` file.
+  Do not hand-format instead — see `references/troubleshooting.md`.
 
 Full conda and apptainer builds are Civet's job, not something to attempt locally unless
 the user asks. If they do, `conda/generate_recipe.sh` and
