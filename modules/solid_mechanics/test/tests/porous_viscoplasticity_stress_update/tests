@@ -249,4 +249,12 @@
     abs_zero = 1e-12
     requirement = 'Reordering simultaneous distinct-power creep mechanisms shall preserve the complete physical output history.'
   []
+  [implementation_kernels]
+    type = RunApp
+    allow_test_objects = true
+    input = implementation_kernels.i
+    cli_args = 'AD="" use_ad=false Executioner/num_steps=1'
+    expect_out = 'Porous LPS implementation kernel checks passed'
+    requirement = 'The generic porous-LPS implementation shall retain its signed zero-pressure derivatives, optimized/general kernel equivalence, independent-population derivatives, and no/one/two-floor population projection algebra.'
+  []
 []
