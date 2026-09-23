@@ -6,7 +6,7 @@ Instead of this class, users are encouraged to utilize the [PorousFlowSinkBC](Po
 adding fluid at a mass flux rate (computed by a function) at a specified temperature.
 
 !alert note
-Despite its name, PorousFlowEnthalpySinkBC adds heat energy rather than removing it.  The term "Sink" is used solely to maintain consistency with other PorousFlow objects.
+Despite its name, PorousFlowEnthalpySink adds heat energy rather than removing it.  The term "Sink" is used solely to maintain consistency with other PorousFlow objects.
 
 This object should be used in conjunction with [PorousFlowSink](PorousFlowSink.md)
 that uses the same `flux_function`, so that the correct amount of fluid is injected into the system.
