@@ -37,6 +37,10 @@ Before implementing:
   short extensions or bug fixes of it over long rewrites of it.
 - Don't be afraid to cross into submodules for feature additions or bug
   fixes, especially if it aids in the 'Simplicity First' principle.
+- Dependencies are in scope for fixes. A fix belongs where the defect is, not
+  where the build is convenient. Linking against an installed copy of a
+  dependency does not put its source out of reach; PETSc, libMesh and MFEM are
+  all present in the tree.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
