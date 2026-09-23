@@ -104,7 +104,8 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
                                            mfem::VectorCoefficient & curlu_vec,
                                            mfem::real_t curlu_zero_tol,
                                            const mfem::IntegrationRule * ir)
-  : _curlcurl_res_integ(k, ir),
+  : mfem::NonlinearFormIntegrator(ir), // so the PA path sees the rule
+    _curlcurl_res_integ(k, ir),
     _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir),
     _k_coef(k),
@@ -137,7 +138,7 @@ void
 NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
                                      const mfem::FiniteElementSpace & fes)
 {
-  PreAssemblySetup(fes);
+  const mfem::IntegrationRule * ir = PreAssemblySetup(fes);
 
   mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
@@ -158,7 +159,7 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
 void
 NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 {
-  PreAssemblySetup(fes);
+  const mfem::IntegrationRule * ir = PreAssemblySetup(fes);
 
   mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
@@ -232,12 +233,11 @@ NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
 
 // This gets called by both AssemblePA and AssembleGradPA, since they
 // both need to store the transformation jacobians.
-void
+const mfem::IntegrationRule *
 NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
 {
-  // start with some basic stuff
   const mfem::FiniteElement * fel = fes.GetTypicalFE();
-  mfem::Mesh * mesh = fes.GetMesh(); // should this be parmesh?
+  mfem::Mesh * mesh = fes.GetMesh();
 
   // crucial check to see if it casts into VTFE
   const mfem::VectorTensorFiniteElement * el =
@@ -246,34 +246,35 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   mooseAssert(el, "Only VectorTensorFiniteElement is supported!");
   mooseAssert(el->GetDerivType() == mfem::FiniteElement::CURL, "Unknown kernel type");
 
-  // we use the mass integrator to fetch the integration rule, much like
-  // with the AssembleGradPA from the normal curl curl class
-  ir = &mfem::MassIntegrator::GetRule(*el, *el, *mesh->GetTypicalElementTransformation());
-
+  // Match mfem::CurlCurlIntegrator::AssemblePA: honour a prescribed rule, otherwise fall back
+  // to the mass-integrator rule the PA kernels were written against.
+  const mfem::IntegrationRule * rule =
+      IntRule ? IntRule
+              : &mfem::MassIntegrator::GetRule(*el, *el, *mesh->GetTypicalElementTransformation());
   const int dims = el->GetDim();
-  mooseAssert(dims == 3, "");
+  mooseAssert(dims == 3, "Following methods are only implemented in 3D");
 
-  nq = ir->GetNPoints();
+  nq = rule->GetNPoints();
   dim = mesh->Dimension();
-  mooseAssert(dim == 3, "");
+  mooseAssert(dim == 3, "Following methods are only implemented in 3D");
 
   ne = fes.GetNE();
-  geom = mesh->GetGeometricFactors(*ir, mfem::GeometricFactors::JACOBIANS);
-  mapsC = &el->GetDofToQuad(*ir, mfem::DofToQuad::TENSOR);
-  mapsO = &el->GetDofToQuadOpen(*ir, mfem::DofToQuad::TENSOR);
+  geom = mesh->GetGeometricFactors(*rule, mfem::GeometricFactors::JACOBIANS);
+  mapsC = &el->GetDofToQuad(*rule, mfem::DofToQuad::TENSOR);
+  mapsO = &el->GetDofToQuadOpen(*rule, mfem::DofToQuad::TENSOR);
   dofs1D = mapsC->ndof;
   quad1D = mapsC->nqpt;
 
-  // the open basis is just for verification
-  mooseAssert(dofs1D == mapsO->ndof + 1 && quad1D == mapsO->nqpt, "");
+  mooseAssert(dofs1D == mapsO->ndof + 1 && quad1D == mapsO->nqpt,
+              "Must be one fewer open basis function per dim than closed.");
 
   if (!_qspace || _qspace_mesh != mesh || _qspace_mesh_sequence != mesh->GetSequence() ||
-      _qspace_ir != ir)
+      _qspace_ir != rule)
   {
-    _qspace = std::make_unique<mfem::QuadratureSpace>(*mesh, *ir);
+    _qspace = std::make_unique<mfem::QuadratureSpace>(*mesh, *rule);
     _qspace_mesh = mesh;
     _qspace_mesh_sequence = mesh->GetSequence();
-    _qspace_ir = ir;
+    _qspace_ir = rule;
   }
 
   symmetric = true;                             // we can hardcode this
@@ -281,6 +282,7 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   ndata = (dim == 2)
               ? 1
               : (symmetric ? sym_dims : dim * dim); // symmetric => only store 6 things instead of 9
+  return rule;
 }
 
 // For now, no multithreading. this will be very slow
