@@ -130,42 +130,47 @@
     requirement = 'The Jacobian for the AD lps single split problem shall agree with a finite-difference Jacobian within the specified tolerances'
   []
 
+  # Fast constitutive-integration equivalence: four fine global steps versus one coarse global
+  # step that adaptively refines into multiple local porous-LPS substeps.
   [lps_single_nonsubstepping]
-    type = CSVDiff
-    input = 'lps_single_nonsubstepping.i'
-    csvdiff = 'lps_single_nonsubstepping_out.csv'
-    heavy = true
-    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
+    type = RunApp
+    input = lps_single_substep_equivalence.i
+    cli_args = 'dt=0.25 substepping=NONE adaptive=false Outputs/file_base=lps_single_nonsubstepping'
+    requirement = 'The generic porous-LPS integration reference shall advance the linear loading history through four quarter-size global timesteps with local constitutive substepping disabled.'
   []
   [lps_single_substepping]
-    type = CSVDiff
-    input = 'lps_single_substepping.i'
-    csvdiff = 'lps_single_substepping_out.csv'
-    heavy = true
-    rel_err = 5e-3
-    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
+    type = RunApp
+    input = lps_single_substep_equivalence.i
+    cli_args = 'dt=1 substepping=INCREMENT_BASED adaptive=true verbose=true Outputs/file_base=lps_single_substepping'
+    expect_out = 'substep 2/[0-9]+ dt_sub = .* global_dt = 1 shared_dt = 1'
+    prereq = lps_single_nonsubstepping
+    requirement = 'The generic porous-LPS integration candidate shall refine one coarse global interval into multiple accepted local constitutive substeps without changing the global timestep.'
+  []
+  [lps_single_substepping_compare]
+    type = RunCommand
+    command = 'python3 compare_lps_substep_equivalence.py lps_single_nonsubstepping.csv lps_single_substepping.csv'
+    prereq = lps_single_substepping
+    requirement = 'One coarse porous-LPS global step resolved by adaptive local constitutive substeps shall reproduce the final stress, gauge, inelastic-strain, and porosity state from a four-step fine-global reference.'
   []
 
   [review_substep_tangent_smooth_clean]
     type = RunCommand
     command = 'python3 check_substep_tangent_diagnostics.py clean review_substep_tangent_smooth_perf'
-    prereq = lps_single_substepping
-    heavy = true
+    prereq = lps_single_substepping_compare
     requirement = 'The generic non-AD multi-substep tangent cost regression shall remove stale per-instance diagnostics before measuring replay work.'
   []
   [review_substep_tangent_smooth_diagnostics]
     type = RunApp
     input = lps_single_substepping.i
-    cli_args = 'AD="" use_ad=false Materials/stress/tangent_operator=nonlinear Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=review_substep_tangent_smooth_perf Outputs/csv=false Executioner/num_steps=1'
+    cli_args = 'AD="" use_ad=false dt=0.1 Materials/stress/tangent_operator=nonlinear Materials/lps/adaptive_substepping=false Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=review_substep_tangent_smooth_perf Outputs/csv=false Executioner/num_steps=1'
+    expect_out = 'substep 2/'
     prereq = review_substep_tangent_smooth_clean
-    heavy = true
-    requirement = 'A smooth generic non-AD multi-substep FULL tangent shall expose the cost of complete-path numerical replay without leaving the accepted constitutive branch.'
+    requirement = 'A smooth generic non-AD fixed-multi-substep FULL tangent shall explicitly exercise more than one local substep and expose the cost of complete-path numerical replay without leaving the accepted constitutive branch.'
   []
   [review_substep_tangent_smooth_verify]
     type = RunCommand
     command = 'python3 check_substep_tangent_diagnostics.py smooth review_substep_tangent_smooth_perf'
     prereq = review_substep_tangent_smooth_diagnostics
-    heavy = true
     requirement = 'Each smooth generic multi-substep tangent shall use twelve perturbed and one restoration replay, with six centered accepted-branch directions and no branch fallback.'
   []
 
@@ -198,20 +203,18 @@
   [local_substepping_preserves_global_dt]
     type = RunApp
     input = preserve_global_dt.i
-    cli_args = 'Materials/lps/verbose=true Executioner/dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    cli_args = 'Materials/lps/verbose=true dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
     expect_out = 'global_dt = 0.1 shared_dt = 0.1'
-    heavy = true
     requirement = 'The porous viscoplastic stress update shall perform local constitutive substepping without modifying the FEProblem global timestep.'
   []
 
   [local_substepping_preserves_global_dt_threaded]
     type = RunApp
     input = preserve_global_dt.i
-    cli_args = 'Materials/lps/verbose=true Executioner/dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    cli_args = 'Materials/lps/verbose=true dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
     expect_out = 'global_dt = 0.1 shared_dt = 0.1'
     min_threads = 2
     max_threads = 2
-    heavy = true
     prereq = local_substepping_preserves_global_dt
     requirement = 'The porous viscoplastic stress update shall preserve the FEProblem global timestep when constitutive substepping executes with multiple threads.'
   []
