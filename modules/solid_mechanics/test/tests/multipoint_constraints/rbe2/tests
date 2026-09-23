@@ -1,0 +1,106 @@
+[Tests]
+  design = 'source/constraints/RBE2Constraint.md'
+  issues = '#33821'
+  # Every solid in this directory is meshed three elements across each cross section direction.
+  # An even count would put a solid node at (5, 0.5, 0.5), which is where the beam stub's first
+  # node sits, and RBE2Constraint rejects a dependent node at the position of its independent node.
+  [rbe2_rigid_rotation]
+    type = CSVDiff
+    input = 'rbe2_rigid_rotation.i'
+    csvdiff = 'rbe2_rigid_rotation_out.csv'
+    # The solution is the exact rigid body motion, so the nodal L2 errors come out between 1e-14
+    # and 1e-13 and the CSVDiff default absolute cutoff of 1e-10 reads them as zero. Dropping the
+    # rotation term of a constraint row makes them of the order of the prescribed rotation, 1e-2.
+    # The input is linear and solved by LU, so one Newton iteration takes step 1 from an initial
+    # residual of 2.1e3 to the 8e-11 round-off floor of this assembly and step 2 begins at that
+    # floor, where no relative criterion can be met: its nl_abs_tol is set two decades above it.
+    requirement = 'The system shall move every dependent node of an RBE2 constraint as a rigid body when the independent node is given a prescribed rotation.'
+  []
+  [rbe2_rigid_rotation_distributed]
+    type = CSVDiff
+    input = 'rbe2_rigid_rotation.i'
+    csvdiff = 'rbe2_rigid_rotation_out.csv'
+    mesh_mode = DISTRIBUTED
+    min_parallel = 2
+    # Runs the input of rbe2_rigid_rotation and compares against the same gold file, so the two
+    # tests cannot write that output at the same time
+    prereq = 'rbe2_rigid_rotation'
+    requirement = 'The system shall produce the same rigid-body motion from an RBE2 constraint on a distributed mesh with the independent node owned by another process.'
+  []
+  [rbe2_after_refinement]
+    type = CSVDiff
+    input = 'rbe2_after_refinement.i'
+    csvdiff = 'rbe2_after_refinement_out.csv'
+    # The solid is clamped at the far end here, unlike in rbe2_rigid_rotation, so that the
+    # prescribed face motion strains it: a rigid body motion of a free body is a zero energy mode
+    # and a dependent node left unconstrained by the refinement would still sit at the rigid
+    # position. The marker refines the solid alone, which leaves the independent node's element
+    # intact while creating the new dependent-boundary nodes the requirement names. Measured on
+    # this rig, a refinement-created node without its row moves the second-step error to 6.8e-03,
+    # seven decades above the 1e-10 default cutoff that reads the healthy values as zero.
+    # Step 1 falls from 2.1e3 to 2e-11 in one Newton iteration and step 2, which starts at 4.1e2
+    # because the refined mesh is not in equilibrium with the projected solution, to 3e-12.
+    #
+    # Distributed mesh plus more than one rank plus adaptivity aborts with MPI_ERR_TRUNCATE in
+    # this build. The abort reproduces with 'Constraints/active=' set, that is with no RBE2
+    # constraint at all, so it is not a limitation of this constraint; the suspect is the
+    # experimental stateful material property projection under adaptivity
+    mesh_mode = REPLICATED
+    requirement = 'The system shall re-apply RBE2 constraint rows after uniform mesh refinement, including on the nodes the refinement creates on the dependent boundary.'
+  []
+  [rbe2_beam_splice]
+    type = CSVDiff
+    input = 'rbe2_beam_splice.i'
+    csvdiff = 'rbe2_beam_splice_out.csv'
+    # The two segments are combined without stitching, so the node at x = 1 is duplicated and the
+    # RBE2 constraint is the only thing joining them; that is what the test exists to check.
+    # The gold tip deflection is 7.226222e-03 against P L^3 / (3 E I) = 7.226462e-03, an agreement
+    # of 3.3e-05. The rest is the O(h^2) error of the 80 linear Timoshenko elements (6.2e-04 with
+    # 20 of them) plus a shear term 3 E I / (k A G L^2) = 5.9e-06 that no refinement removes, and
+    # that term is already as small as it is only because the input's Poisson ratio of -0.99987
+    # makes the shear modulus 1.0e4. So this rig cannot assert the Euler-Bernoulli formula more
+    # tightly than 3.3e-05, and rel_err below is the reproducibility of a deterministic LU solve
+    # rather than that agreement; the tip load of 1e-4 drives the residual to a 2e-13 floor on
+    # step 1 and step 2 starts there, so the input's nl_abs_tol sits a decade above it.
+    # Untying the rotations turns the splice into a hinge and the segment beyond it into a
+    # mechanism.
+    rel_err = 1e-6
+    requirement = 'The system shall tie translations and rotations of a dependent beam node to an independent beam node so that two beam segments joined by an RBE2 constraint deflect as one continuous cantilever.'
+  []
+  [cantilever_face_mass_eigen]
+    type = CSVDiff
+    input = 'cantilever_face_mass_eigen.i'
+    csvdiff = 'cantilever_face_mass_eigen_out_omega_squared_0001.csv'
+    # The density and the tip mass enter the eigen tag with negative coefficients, so the reported
+    # eigenvalue is the squared angular frequency. The tip mass is 1.0, applied as 1.0/16 on each
+    # of the 16 nodes of the free face, and rbe2_tip_mass_eigen puts that same total on one node.
+    # The free power iterations leave a residual of order 1e-5, so the default relative criterion
+    # would ask for 1e-13 and the Newton phase would stall at round-off; the input's nl_abs_tol is
+    # the value below which the eigenvalue is already stationary to thirteen digits.
+    capabilities = 'slepc & mumps'
+    recover = false
+    requirement = 'The system shall compute the first bending eigenvalue of a cantilever whose tip mass is lumped directly onto the free-face nodes.'
+  []
+  [rbe2_tip_mass_eigen]
+    type = CSVDiff
+    input = 'rbe2_tip_mass_eigen.i'
+    csvdiff = 'rbe2_tip_mass_eigen_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    recover = false
+    # The gold is the output of cantilever_face_mass_eigen, so this tolerance is the one percent
+    # agreement the requirement states rather than a reproducibility tolerance. The comparison is
+    # only like for like because both inputs use the same solver: a degree-of-freedom constraint
+    # row reaches the eigen matrices only through the nonlinear eigen solve callbacks, and a
+    # nonlinear eigen solve computes exactly one eigenpair, so the reference run is configured the
+    # same way even though it has no constraint. Both carry an nl_abs_tol for the same reason:
+    # after the free power iterations the default relative criterion is unreachable.
+    # The stub exists only to give the independent node its six degrees of freedom, and a beam
+    # stub stalls that nonlinear eigen solve, so the six variables are carried there by a stiffness
+    # eleven orders of magnitude below the cantilever's, which changes no eigenvalue; the stub also
+    # owns a placeholder material because a block without one fails the material coverage check.
+    # With the spider removed the tip mass hangs on that stiffness alone and the eigenvalue falls
+    # from 999.3 to 3.3e-07, so this test cannot pass by coincidence.
+    rel_err = 1e-2
+    requirement = 'The system shall match, within one percent, the first bending eigenvalue of a cantilever whose tip mass sits on the independent node of an RBE2 spider to that of the same cantilever with the mass lumped on the face nodes.'
+  []
+[]

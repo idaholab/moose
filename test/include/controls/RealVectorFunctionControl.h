@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Control.h"
+#include "MooseEnum.h"
 
 class Function;
 
@@ -29,4 +30,7 @@ public:
 private:
   /// The function to execute
   const Function & _function;
+
+  /// The type of the vector parameter being controlled
+  const MooseEnum & _vector_type;
 };

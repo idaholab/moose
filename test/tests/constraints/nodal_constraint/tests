@@ -43,4 +43,245 @@
     requirement = "The system shall be able to tally the contributions of nodal constraints in "
                   "additional tagged system vectors and matrices."
   []
+
+  # The kinematic formulation transfers the secondary node's physics residual to the primary nodes
+  # and leaves penalty * (u_secondary - sum_j w_j u_primary_j) as the whole secondary equation, so
+  # the tie it produces is exact at convergence and independent of the penalty value. The gold
+  # written here is therefore the reference the rows formulation below is compared against; the
+  # penalty gold of the five blocks above is only penalty-accurate and cannot be used for that.
+  [kinematic]
+    requirement = "The system shall enforce a nodal constraint with the kinematic formulation"
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [nodal]
+      type = 'Exodiff'
+      input = 'nodal_constraint_test.i'
+      cli_args = 'Constraints/c1/formulation=kinematic
+                  Outputs/file_base=nodal_constraint_test_kinematic_out'
+      exodiff = 'nodal_constraint_test_kinematic_out.e'
+      max_parallel = 1
+      recover = false
+      detail = 'tying the value of a variable at two nodes,'
+    []
+    [displaced]
+      type = 'Exodiff'
+      input = 'nodal_constraint_displaced_test.i'
+      cli_args = 'Constraints/c1/formulation=kinematic
+                  Outputs/file_base=nodal_constraint_displaced_test_kinematic_out'
+      exodiff = 'nodal_constraint_displaced_test_kinematic_out.e'
+      max_parallel = 1
+      recover = false
+      detail = 'tying the value of a variable at two nodes of a displaced mesh, and'
+    []
+    [linear]
+      type = 'Exodiff'
+      input = 'linear_nodal_constraint.i'
+      cli_args = 'Constraints/c1/formulation=kinematic
+                  Outputs/file_base=linear_nodal_constraint_kinematic_out'
+      exodiff = 'linear_nodal_constraint_kinematic_out.e'
+      max_parallel = 1
+      recover = false
+      detail = 'tying a secondary node to a weighted primary node.'
+    []
+  []
+
+  # Each leaf below re-runs the input of its kinematic twin with formulation = rows and the same
+  # Outputs/file_base, so the exodiff compares the rows solution against the kinematic gold the
+  # twin just wrote. The prereq is what keeps the two runs from writing that file at the same time.
+  # abs_zero is raised from the 1e-10 default to 1e-9 because the two legs are different operators:
+  # the rows leg solves the condensed system and the kinematic leg solves the full one, so their
+  # answers agree only to the nonlinear solve tolerance, not to round-off. It stays far below the
+  # failures this test exists to catch: a secondary node left without its row floats free and moves
+  # by O(1), a rows run that still assembled the penalty residual double counts the tie, and a tie
+  # that were only penalty-accurate would differ from the exact kinematic gold near 1e-5.
+  # The rows leg of a constraint whose secondary nodes come from a node set lives next to its own
+  # input, in array_variables/tests.
+  [rows]
+    requirement = "The system shall reproduce the solution of a nodal constraint enforced with the "
+                  "kinematic formulation when the same constraint is enforced with degree of "
+                  "freedom constraint rows"
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [nodal]
+      type = 'Exodiff'
+      input = 'nodal_constraint_test.i'
+      cli_args = 'Constraints/c1/formulation=rows
+                  Outputs/file_base=nodal_constraint_test_kinematic_out'
+      exodiff = 'nodal_constraint_test_kinematic_out.e'
+      abs_zero = 1e-9
+      max_parallel = 1
+      recover = false
+      prereq = 'kinematic/nodal'
+      detail = 'tying the value of a variable at two nodes,'
+    []
+    [displaced]
+      type = 'Exodiff'
+      input = 'nodal_constraint_displaced_test.i'
+      cli_args = 'Constraints/c1/formulation=rows
+                  Outputs/file_base=nodal_constraint_displaced_test_kinematic_out'
+      exodiff = 'nodal_constraint_displaced_test_kinematic_out.e'
+      abs_zero = 1e-9
+      max_parallel = 1
+      recover = false
+      prereq = 'kinematic/displaced'
+      detail = 'tying the value of a variable at two nodes of a displaced mesh, and'
+    []
+    [linear]
+      type = 'Exodiff'
+      input = 'linear_nodal_constraint.i'
+      cli_args = 'Constraints/c1/formulation=rows
+                  Outputs/file_base=linear_nodal_constraint_kinematic_out'
+      exodiff = 'linear_nodal_constraint_kinematic_out.e'
+      abs_zero = 1e-9
+      max_parallel = 1
+      recover = false
+      prereq = 'kinematic/linear'
+      detail = 'tying a secondary node to a weighted primary node.'
+    []
+  []
+
+  # This case is deliberately not a leg of the kinematic/rows sweep above, and no kinematic gold
+  # exists for it. Measured on this input: the kinematic formulation does not converge here, it
+  # aborts with DIVERGED_DTOL under line_search none or basic and with DIVERGED_LINE_SEARCH under
+  # bt, because its transfer reads jacobian(secondary_dof, primary_dof), and the two variables of
+  # this input live on two blocks that no kernel couples, so those entries are zero. The penalty
+  # gold of linear_nodal_constraint_different_variables is not a reference for rows either, and not
+  # at any tolerance: the penalty primary residual is penalty * (w * u_primary - u_secondary),
+  # which returns the secondary reaction to the primary with a factor of one instead of the weight
+  # w, so at w = 10 the penalty solution satisfies R_primary + R_secondary = 6e-12 while the rows
+  # solution satisfies the work conjugate R_primary + 10 * R_secondary = 9e-15. The two solutions
+  # differ by 15.6 percent (u at the primary node is 0.36363694 with the penalty and 0.30693069
+  # with the rows), which is a difference of formulation and not an O(1/penalty) leak.
+  # This leaf therefore carries its own gold. That gold is a strong assertion even so: the rows
+  # answer sits 15.6 percent away from the penalty answer, so a rows formulation that quietly fell
+  # back to the penalty path fails here, as does a secondary node left with no row at all.
+  [rows_different_variables]
+    type = 'Exodiff'
+    input = 'linear_nodal_constraint_different_variables.i'
+    cli_args = 'Constraints/c1/formulation=rows
+                Outputs/file_base=linear_nodal_constraint_different_variables_rows_out'
+    exodiff = 'linear_nodal_constraint_different_variables_rows_out.e'
+    max_parallel = 1
+    recover = false
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    requirement = "The system shall tie a secondary node of one variable to a weighted primary "
+                  "node of another variable with degree of freedom constraint rows, on a problem "
+                  "the kinematic formulation cannot solve."
+  []
+
+  # This input measures the tie it declares, u(node 4) = 10 * u(node 0), instead of inferring it
+  # from a field comparison: tie_error is u_secondary - 10 * u_primary at the converged solution,
+  # and the 10 is the weight of the input's own Constraints/c1. Each leaf runs that one input with
+  # one formulation and writes its own file_base, so the three golds record the three-way
+  # difference the feature exists to produce: the rows gold holds a machine zero, the kinematic
+  # gold holds a zero at the nonlinear solve tolerance, and the penalty gold holds the O(1/penalty)
+  # leak, near 6e-6 for the penalty of 1e5 this input carries. The leaves therefore fail loudly for
+  # the two mutations that matter: a row that carried the weight on the wrong side of the tie moves
+  # tie_error to O(1), and a formulation switch that quietly did nothing makes the rows and
+  # kinematic leaves reproduce the penalty leak.
+  # The input also computes the iteration counts and the total time of FEProblem::solve, but they
+  # carry outputs = none and so never reach this CSV: a wall clock reading is not reproducible and
+  # a committed gold must not hold one, and the iteration counts depend on the PETSc build. They
+  # still exist and still compute, for a run that asks for them on another output.
+  [tie_error]
+    requirement = "The system shall enforce a linear nodal constraint exactly when it is enforced "
+                  "with degree of freedom constraint rows and only approximately when it is "
+                  "enforced with a penalty."
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [rows]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=rows
+                  Outputs/file_base=linear_nodal_constraint_tie_error_rows'
+      csvdiff = 'linear_nodal_constraint_tie_error_rows.csv'
+      # the rows tie is an identity the DofMap imposes, so the only error left in it is the rounding
+      # of the weighted sum; a tie that the default abs_zero of 1e-10 still called zero would not be
+      # the machine zero this leaf asserts
+      abs_zero = 1e-12
+      max_parallel = 1
+      recover = false
+      detail = 'reporting a tie error at machine zero with the rows formulation,'
+    []
+    [kinematic]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=kinematic
+                  Outputs/file_base=linear_nodal_constraint_tie_error_kinematic'
+      csvdiff = 'linear_nodal_constraint_tie_error_kinematic.csv'
+      # the kinematic tie is exact only once the nonlinear solve has converged, so its zero is the
+      # solve tolerance rather than round-off, but it stays far below the 6e-6 penalty leak
+      abs_zero = 1e-8
+      max_parallel = 1
+      recover = false
+      detail = 'reporting a tie error at the nonlinear solve tolerance with the kinematic '
+               'formulation, and'
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=penalty
+                  Outputs/file_base=linear_nodal_constraint_tie_error_penalty'
+      csvdiff = 'linear_nodal_constraint_tie_error_penalty.csv'
+      # tie_error is a nonzero number here, not a zero, so it is compared relatively; the penalty
+      # row divides the residual by the penalty, which pins this leak far more tightly than the
+      # solution itself is converged
+      rel_err = 1e-6
+      max_parallel = 1
+      recover = false
+      detail = 'reporting a tie error of the order of one over the penalty with the penalty '
+               'formulation.'
+    []
+  []
+
+  # This block runs at one rank and at two, deliberately unlike the max_parallel = 1 of every
+  # block above it. Rebuilding the rows is collective, so NonlinearSystemBase::preSolve() agrees on
+  # the answer across ranks with _communicator.max before it rebuilds; without that agreement a
+  # rank that owns no changed row skips the rebuild and the run hangs instead of failing, and a
+  # serial-only test cannot see it. The two legs share one gold, so the parallel leg waits on the
+  # serial one through prereq rather than racing it for the same output file.
+  # ratio is u(node 4) / u(node 0), which is exactly the weight the tie carries. The control drives
+  # that weight with the function t, so the rows the DofMap holds have to be rebuilt to 1 at the
+  # first step and to 2 at the second. A preSolve() that never polls the row providers, or a
+  # constraintRowsChanged() that never refreshes the weights it last emitted, leaves ratio at 1 for
+  # the whole run.
+  [rows_reinit]
+    requirement = "The system shall rebuild the degree of freedom constraint rows of a nodal "
+                  "constraint whose weights a control changes between time steps"
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [serial]
+      type = 'CSVDiff'
+      input = 'rows_reinit.i'
+      csvdiff = 'rows_reinit_out.csv'
+      abs_zero = 1e-10
+      max_parallel = 1
+      detail = 'when the solve runs on one process, and'
+    []
+    [parallel]
+      type = 'CSVDiff'
+      input = 'rows_reinit.i'
+      csvdiff = 'rows_reinit_out.csv'
+      abs_zero = 1e-10
+      min_parallel = 2
+      max_parallel = 2
+      # the rows are read from a replicated mesh so that every rank holding the secondary node also
+      # holds the primary node and can build the same row for it
+      mesh_mode = 'replicated'
+      prereq = 'rows_reinit/serial'
+      detail = 'when the solve runs on two processes.'
+    []
+  []
+
 []

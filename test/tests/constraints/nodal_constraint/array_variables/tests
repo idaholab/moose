@@ -8,4 +8,30 @@
     # see #29005
     mesh_mode = 'replicated'
   []
+
+  # Same input and same constraint as the leaf above, with the tie handed to the DofMap instead of
+  # assembled as a penalty. It is the only rows leg whose secondary nodes come from a node set
+  # rather than from a list of node ids, so it covers the branch of
+  # LinearNodalConstraint::addConstraintRows that reads the node set at call time. There is no gold:
+  # the penalty answer is not a rows reference, and no kinematic run of this input exists, so the
+  # assertion is that the run completes. The prereq is what keeps this leaf from racing the leaf
+  # above for the same output file, since the two run the same input from the same directory.
+  [run_with_nodal_constraint_rows]
+    type = RunApp
+    input = 'MWE_array_aux.i'
+    cli_args = 'Constraints/copy_Tw_node5/formulation=rows'
+    issues = '#32700 #33821'
+    design = 'ArrayMooseVariable.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    requirement = 'The system shall be able to use nodal constraints enforced with degree of '
+                  'freedom constraint rows in the presence of array variables.'
+    # see #29005
+    mesh_mode = 'replicated'
+    # a rank that holds a secondary node has to hold every primary node to build the same row, and
+    # this leaf does not exist to test that
+    max_parallel = 1
+    recover = false
+    prereq = 'run_with_nodal_constraints'
+  []
 []

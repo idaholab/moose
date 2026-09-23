@@ -32,6 +32,11 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
     _rhouA(coupledValue("rhouA")),
     _rhouA_var_number(coupled("rhouA"))
 {
+  if (_formulation == Moose::Rows)
+    paramError("formulation",
+               "The rows formulation is not supported: this constraint is a flux balance, not a "
+               "fixed tie between nodes.");
+
   _primary_node_vector = getParam<std::vector<dof_id_type>>("nodes");
   // just a dummy value that is never used
   _connected_nodes.push_back(*_primary_node_vector.begin());

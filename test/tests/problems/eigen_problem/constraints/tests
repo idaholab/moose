@@ -1,0 +1,193 @@
+[Tests]
+  design = 'syntax/Constraints/index.md source/constraints/MultiPointConstraint.md '
+           'source/constraints/NodalConstraint.md '
+           'source/constraints/LinearNodalConstraint.md '
+           'source/constraints/EqualValueConstraint.md'
+  issues = '#33821'
+
+  # Every leaf below runs the Eigenvalue executioner, which takes a single step, so
+  # none of them has a transient to recover and all of them set recover = false.
+
+  # Nodes 39 and 41 of the 8x8 unit-square mesh are the interior nodes at
+  # (0.375, 0.5) and (0.625, 0.5), one on each side of the x = 1/2 line.
+  # The two legs are expected to produce IDENTICAL gold, which is why the gold of
+  # the second leg is a symlink to the gold of the first, and identical in turn to
+  # the same input with no [Constraints] block at all and to the same input with
+  # the penalty raised from 1e3 to 1e8: under Executioner/type = Eigenvalue a
+  # penalty LinearNodalConstraint reaches neither matrix, because
+  # NonlinearSystemBase::constraintJacobians() is gated on
+  # tags.count(systemMatrixTag()) while an eigen assembly only ever carries the A
+  # or the B tag. This gold therefore records a framework limitation rather than a
+  # tag-routing success, and extra_vector_tags is a residual vector tag that cannot
+  # move a contribution between K and M in any case. A fix to that gate will change
+  # this gold.
+  # Two solver settings in the input are load-bearing. The solve must stay a direct
+  # shift-invert, because an iterative eigensolver left at its default tolerance
+  # does not converge on this problem, and n_basis_vectors must stay at 20 or more,
+  # because a smaller subspace locks one copy of the degenerate 51.543648677132
+  # pair and deflates past the other, reporting a higher genuine eigenvalue in its
+  # place. rel_err is pinned at 1e-10 rather than left at the CSVDiff default
+  # because the last digits of a degenerate pair are basis-dependent: ten
+  # significant digits sits about two orders of magnitude above that noise and far
+  # inside the 60 percent gap to the neighbouring mode that a wrong mode set would
+  # show.
+  [spike_penalty_nodal]
+    requirement = 'The system shall report the eigenvalues of a Laplace problem in which two nodes '
+                  'are tied by a penalty nodal constraint, with default tags and with the '
+                  'constraint marked as an eigen object, so the matrices the penalty enters are '
+                  'visible.'
+    [default_tags]
+      type = 'CSVDiff'
+      input = 'spike_penalty_nodal.i'
+      csvdiff = 'spike_penalty_nodal_out_eigenvalues_0001.csv'
+      capabilities = 'slepc & mumps'
+      max_parallel = 1
+      recover = false
+      rel_err = 1e-10
+      detail = 'with the constraint left on its default tags, and'
+    []
+    [eigen_tag]
+      type = 'CSVDiff'
+      input = 'spike_penalty_nodal.i'
+      cli_args = 'Constraints/tie/extra_vector_tags=eigen
+                  Outputs/file_base=spike_penalty_nodal_eigen_tag'
+      csvdiff = 'spike_penalty_nodal_eigen_tag_eigenvalues_0001.csv'
+      capabilities = 'slepc & mumps'
+      max_parallel = 1
+      recover = false
+      rel_err = 1e-10
+      detail = 'with the constraint marked as an eigen object.'
+    []
+  []
+
+  # The mortar tie reproduces the single-domain discrete spectrum exactly, so the
+  # tolerances are tighter than the CSVDiff defaults: with the tie removed the two
+  # half-domain spectra appear instead, which a loose tolerance could hide.
+  # The gold is compared against the measured unsplit 8x8 QUAD4 spectrum of the
+  # 1 by 0.7 rectangle, 30.39928607716, 61.948773441798, 94.785994984584,
+  # 119.89068918384, which runs 1.3 to 10 percent above the analytic
+  # pi^2 (m^2 + n^2 / 0.49) values 30.01, 59.62, 90.44, 108.97, so the discrete
+  # reference and never the analytic one is the yardstick; the mortar run agrees
+  # with it to 1e-10. The domain is a rectangle rather than the unit square of the
+  # other inputs because the square's second and third modes are a degenerate
+  # pair, and Krylov-Schur on the singular-M mortar problem drops one member of
+  # that pair when its subspace is small or its arithmetic differs (n_basis_vectors
+  # of 12 or 16 here, 20 on one CIVET build); the rectangle's first four modes are
+  # distinct and every subspace size from 12 up returns the same four. The first
+  # order multiplier is pinned to zero at the two interface end nodes, which the
+  # Dirichlet conditions already pin to zero on both sides: those two multiplier
+  # equations are redundant, and leaving them in over-constrains the interface and
+  # eliminates a mode. Nodes 4 and 76 are original nodes, which the break keeps on
+  # the lower block id, so their ids do not depend on the platform.
+  [spike_mortar_tie]
+    type = 'CSVDiff'
+    input = 'spike_mortar_tie.i'
+    csvdiff = 'spike_mortar_tie_out_eigenvalues_0001.csv'
+    capabilities = 'slepc & mumps'
+    max_parallel = 1
+    recover = false
+    rel_err = 1e-6
+    abs_zero = 1e-9
+    requirement = 'The system shall report the eigenvalues of a Laplace problem whose interior '
+                  'interface is tied by a mortar equal-value constraint, matching the untied '
+                  'single-domain spectrum for the physical modes.'
+  []
+
+  # The nine interface node pairs are (36 + 6 j, 3 + 4 j), j = 0..8, from the two
+  # generated pieces the input combines (a 3x8 piece holding nodes 0-35 and a 5x8
+  # piece holding 36-89, x fastest, meeting at x = 3/8). Node 60 and node 19 are the
+  # duplicated pair at (3/8, 1/2). The input does not use BreakMeshByBlockGenerator
+  # because that generator numbers its duplicate nodes in unordered_map order, which
+  # differs between libc++ and libstdc++, and hard-coded pairs then tie
+  # non-coincident nodes on one of them. The cut is off centre so that the tie is
+  # load-bearing: untied, the wider piece alone carries the fundamental mode at
+  # 16.365748 with a tie_error of 1.3596539, and the rows restore the full square's
+  # 19.994161312495 with a tie_error of 0. Two equal halves would share one
+  # eigenvalue and the untied problem would be degenerate.
+  # The solve has to be a nonlinear eigen solve: MOOSE fills the condensed eigen
+  # matrices only in the SNES callbacks of SlepcSupport, which run only when
+  # EigenProblem::isNonlinearEigenvalueSolver() is true, so a linear eigen
+  # solve_type such as krylovschur hands SLEPc empty matrices. A nonlinear eigen solve returns exactly one
+  # eigenpair, which is why n_eigen_pairs is 1 and the eigenvalue gold is a single
+  # row. abs_zero is the 1e-10 that the tied pair is required to agree to; the only
+  # other near-zero entry is the exactly zero imaginary part.
+  [spike_dof_row]
+    type = 'CSVDiff'
+    input = 'spike_dof_row.i'
+    csvdiff = 'spike_dof_row_out_eigenvalues_0001.csv spike_dof_row_out.csv'
+    capabilities = 'slepc & mumps'
+    max_parallel = 1
+    recover = false
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    requirement = 'The system shall condense a user-added degree-of-freedom constraint row out of '
+                  'both eigen matrices and restore the constrained value on the eigenvector.'
+  []
+
+  # The two leaves below run one input and one nodal constraint once per formulation. Both the
+  # eigenvalue and tie_error, the difference of the eigenvector at the two tied nodes, carry the
+  # assertion: measured on this rig the rows leg reports 22.807300717083 with tie_error 0 and the
+  # penalty leg 19.994161312495 with tie_error 0.19435823077614, where 19.994161312495 is
+  # bit-identical to the same input run with 'Constraints/active=' and is the untied fundamental
+  # mode of the 8x8 square.
+  # The tie is node 39 at (0.375, 0.5) to node 10 at (0.125, 0.125), and the pair is chosen so
+  # that the tie binds. The pair 39 and 41 that spike_penalty_nodal.i uses cannot be used here: it
+  # is a mirror pair about x = 1/2, the fundamental mode is symmetric about that line, so the
+  # untied mode already satisfies u_41 = u_39 (measured untied tie_error -2.8e-17) and neither the
+  # eigenvalue nor tie_error would tell a working tie from a tie that never reached a matrix.
+  # Four settings are load-bearing. The rows leg needs solve_type = newton, because constraint
+  # rows reach the eigen matrices only through the SNES callbacks of SlepcSupport, which run only
+  # for a nonlinear eigen solve; a nonlinear eigen solve returns exactly one eigenpair, which is
+  # why n_eigen_pairs is 1 and the eigenvalue gold is a single row. The penalty leg instead
+  # switches to the linear eigen solve of spike_penalty_nodal.i, krylovschur with -st_type sinvert
+  # and an -eps_target of 0, because a penalty nodal constraint under a NONLINEAR eigen solve does
+  # not converge at all: the penalty residual is applied unconditionally by
+  # NonlinearSystemBase::enforceNodalConstraintsResidual() while its Jacobian is gated out by the
+  # tags.count(systemMatrixTag()) test in constraintJacobians(), so residual and Jacobian disagree
+  # and the eigen iteration stalls near 19.9942 and aborts. The 'silent no-op' recorded on
+  # spike_penalty_nodal above is therefore a statement about a linear eigen solve, where only the
+  # matrices are used. use_hash_table_matrix_assembly is needed because on the penalty leg the
+  # constraint asks for implicit geometric coupling entries and
+  # NonlinearSystemBase::addImplicitGeometricCouplingEntries() requires a system matrix, which an
+  # eigen assembly does not carry; the same error is what a rows constraint would hit if it still
+  # asked for those entries. penalty = 1e3, the value spike_penalty_nodal.i uses, is required by
+  # the penalty formulation and is an ignored parameter on the rows leg, which needs no penalty.
+  # The nonzero tie_error of the penalty leg is a component of an eigenvector, so its sign and
+  # scale are whatever the eigen solver's normalization produces; a solver that normalized the
+  # mode differently would change that gold value without changing what the leg demonstrates.
+  [nodal_rows_eigen]
+    requirement = 'The system shall condense a linear nodal constraint enforced with degree of '
+                  'freedom constraint rows out of both matrices of an eigenvalue problem so that '
+                  'the tie is exact, while the same constraint enforced with a penalty leaves the '
+                  'tie open.'
+    [rows]
+      type = 'CSVDiff'
+      input = 'nodal_rows_eigen.i'
+      csvdiff = 'nodal_rows_eigen_out_eigenvalues_0001.csv nodal_rows_eigen_out.csv'
+      capabilities = 'slepc & mumps'
+      max_parallel = 1
+      recover = false
+      rel_err = 1e-6
+      # abs_zero is the tolerance to which the tied pair is required to agree; the only other
+      # near-zero entry is the exactly zero imaginary part
+      abs_zero = 1e-10
+      detail = 'with the tie enforced by degree of freedom constraint rows, and'
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'nodal_rows_eigen.i'
+      cli_args = 'Constraints/tie/formulation=penalty
+                  Executioner/solve_type=krylovschur
+                  Executioner/petsc_options_iname="-st_type -eps_target -st_pc_type -st_pc_factor_mat_solver_type"
+                  Executioner/petsc_options_value="sinvert 0 lu mumps"
+                  Outputs/file_base=nodal_rows_eigen_penalty'
+      csvdiff = 'nodal_rows_eigen_penalty_eigenvalues_0001.csv nodal_rows_eigen_penalty.csv'
+      capabilities = 'slepc & mumps'
+      max_parallel = 1
+      recover = false
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'with the same tie enforced by a penalty.'
+    []
+  []
+[]

@@ -36,8 +36,21 @@ r_m &= r_m - \phi_i k_p(u_{secondary} - u_{primary})
 \end{equation}
 where $r_{s,copy}$ is the ghosted residual. The penalty parameter must be selected carefully, as small values lead to large differences between the secondary node's solution and the solution in the primary element, while large values may lead to poor convergence.
 
-!alert warning title=`ADEqualValueEmbeddedConstraint` only works for PENALTY formulation
-Automatic differentation cannot be used to compute Jacobian terms for [!param](/Constraints/ADEqualValueEmbeddedConstraint/formulation) = KINEMATIC because the KINEMATIC implementation enforces the constraint by enforcing the residual value on the secondary node prior to application of the constraint, $r_{s,copy}$ in [!eqref](eqn:kinematic).  This secondary node residual value is a nonAD copy of the residual and cannot be used to compute derivatives for the Jacobian.
+### Rows
+
+This option assembles no residual and no Jacobian. For each secondary node it hands libMesh one degree of freedom constraint row that makes the secondary value the shape-function interpolation of the primary variable at that node,
+\begin{equation}
+u_{secondary} = \sum_i N_i(\xi_s)\, u_i ,
+\end{equation}
+where $u_i$ are the degrees of freedom of [!param](/Constraints/EqualValueEmbeddedConstraint/primary_variable) on the primary element that contains the node, $\xi_s$ is the reference coordinate of that node in that element, and $N_i$ are the shape functions of the primary variable there. The reference coordinate comes from `FEMap::inverse_map` and the weights from `FEInterface::shape` on the undisplaced mesh, which is the same point and the same interpolation the two residual formulations use. libMesh condenses the constrained degrees of freedom out of every matrix and vector MOOSE assembles, so the tie is exact, no penalty parameter enters, and [!param](/Constraints/EqualValueEmbeddedConstraint/penalty) may be omitted. [NodalConstraint.md#rows] describes the mechanism and its parallel rules in more detail.
+
+A node that both blocks share constrains its own degree of freedom. The tie already holds there, so no row is added for it. A secondary node that an enabled nodal boundary condition already pins is skipped as well, so that the boundary condition keeps the node, as it does under the other two formulations.
+
+!alert note title=The secondary-to-primary pairing is not rebuilt on mesh change
+Every formulation of this constraint locates the primary element of each secondary node once, when the object is constructed. Mesh adaptation is therefore not supported with any of the three, including `rows`.
+
+!alert warning title=`ADEqualValueEmbeddedConstraint` does not support the KINEMATIC formulation
+Automatic differentiation cannot be used to compute Jacobian terms for [!param](/Constraints/ADEqualValueEmbeddedConstraint/formulation) = KINEMATIC because the KINEMATIC implementation enforces the constraint by enforcing the residual value on the secondary node prior to application of the constraint, $r_{s,copy}$ in [!eqref](eqn:kinematic).  This secondary node residual value is a nonAD copy of the residual and cannot be used to compute derivatives for the Jacobian. The PENALTY and ROWS formulations carry no such restriction, and ROWS computes no Jacobian at all.
 
 !syntax parameters /Constraints/EqualValueEmbeddedConstraint
 
