@@ -36,19 +36,24 @@ refinement = 3
 []
 
 [Kernels]
-  [elasticity]
-    type = KokkosLinearElasticity
+  [stress_divergence]
+    type = KokkosVectorStressDivergence
     variable = disp
-    lambda = lambda
-    mu = mu
   []
 []
 
 [Materials]
-  [lame]
-    type = KokkosGenericConstantMaterial
-    prop_names = 'lambda mu'
-    prop_values = '60.5e9 25.9e9'
+  [elasticity_tensor]
+    type = KokkosComputeIsotropicElasticityTensor
+    lambda = 60.5e9
+    shear_modulus = 25.9e9
+  []
+  [strain]
+    type = KokkosComputeSmallStrain
+    displacements = disp
+  []
+  [stress]
+    type = KokkosComputeLinearElasticStress
   []
 []
 
