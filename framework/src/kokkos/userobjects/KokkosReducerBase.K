@@ -9,14 +9,18 @@
 
 #include "KokkosReducerBase.h"
 
+#include "DisplacedProblem.h"
 #include "FEProblemBase.h"
 
 namespace Moose::Kokkos
 {
 
 ReducerBase::ReducerBase(const MooseObject * object)
-  : MeshHolder(*object->getMooseApp().feProblem().mesh().getKokkosMesh()),
-    AssemblyHolder(object->getMooseApp().feProblem().kokkosAssembly()),
+  : MeshHolder(
+        *object->getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
+    AssemblyHolder(object->getParam<bool>("use_displaced_mesh")
+                       ? object->getMooseApp().feProblem().getDisplacedProblem()->kokkosAssembly()
+                       : object->getMooseApp().feProblem().kokkosAssembly()),
     FESystemHolder(object->getMooseApp().feProblem().getKokkosFESystems()),
     _reducer_object(object)
 {
