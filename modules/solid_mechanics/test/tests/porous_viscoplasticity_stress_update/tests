@@ -293,6 +293,44 @@
     input = lps_multi_pure_deviatoric.i
     requirement = 'Simultaneous n=1, n=3, and n=4.5 porous-LPS mechanisms shall accumulate inelastic strain under pure-deviatoric loading without producing a significant net porosity change, while retaining distinct positive gauge stresses.'
   []
+  # Generic adaptive-substep history and floor-aware admitted-motion controls belong to MOOSE.
+  [review_adaptive_substepping_relaxed_increment]
+    type = RunApp
+    input = lps_adaptive_substepping.i
+    expect_out = 'substep 2/2 dt_sub = 0.5 global_dt = 1 shared_dt = 1'
+    requirement = 'Generic adaptive porous-LPS substepping shall reject an oversized converged local increment, refine the constitutive subdivision, and complete the unchanged global timestep.'
+  []
+  [review_adaptive_substepping_history_predictor]
+    type = RunApp
+    input = lps_adaptive_substepping.i
+    expect_out = 'adaptive history substep predictor'
+    prereq = review_adaptive_substepping_relaxed_increment
+    requirement = 'After an accepted global step, generic adaptive porous-LPS substepping shall initialize its local subdivision from the previous accepted admitted substep-control rate.'
+  []
+  [review_adaptive_substepping_history_cutback]
+    type = RunApp
+    input = lps_adaptive_history_cutback.i
+    custom_evaluation_script = check_adaptive_history_cutback.py
+    prereq = review_adaptive_substepping_history_predictor
+    requirement = 'A failed global timestep shall not advance generic porous-LPS adaptive history, and the retry prediction shall rescale the previous accepted admitted controller rate using the current global timestep.'
+  []
+  [review_floor_substep_budget]
+    type = RunApp
+    input = lps_floor_controls.i
+    cli_args = 'Materials/lps/use_substepping=INCREMENT_BASED Materials/lps/adaptive_substepping=true Materials/lps/maximum_number_substeps=2 Executioner/dtmin=0.1'
+    requirement = 'A stationary generic scalar porosity floor with zero admitted inelastic motion shall not exhaust the local adaptive refinement budget solely because unconstrained creep remains nonzero.'
+  []
+  [review_floor_global_timestep_limit]
+    type = RunApp
+    input = lps_floor_controls.i
+    requirement = 'A stationary generic scalar porosity floor with zero admitted inelastic motion shall not restrict the global material timestep through blocked creep.'
+  []
+  [review_floor_mixed_timestep_limit]
+    type = RunApp
+    input = lps_floor_mixed_controls.i
+    requirement = 'Mixed loading at the generic scalar porosity floor shall retain a finite material timestep recommendation from admitted deviatoric creep while blocking volumetric collapse.'
+  []
+
   [prescribed_two_population_nonad]
     type = RunApp
     allow_test_objects = true
