@@ -17,6 +17,8 @@
 #include "PetscSupport.h"
 
 #include "libmesh/petsc_matrix_base.h"
+#include "libmesh/petsc_vector.h"
+#include "libmesh/wrapped_petsc.h"
 
 namespace
 {
@@ -197,7 +199,30 @@ PMultigrid::verifyLevelMatrices()
 
     level->apply(cache, *x, *matrix_free);
 
-    level->matrix().vector_mult(*assembled, *x);
+    // The assembled operator is measured through a host AIJ copy of itself, for two reasons that
+    // both come of the hypre format the coarsest level's operator carries under a BoomerAMG coarse
+    // solve. A hypre matrix held in device memory multiplies device vectors only, while the level's
+    // own vectors follow whatever memory space the solve asked for. And PETSc measures symmetry by
+    // comparing a matrix against its transpose, which a hypre matrix has no operation for. The copy
+    // carries the entries the assembly wrote whichever format the operator itself is in, which is
+    // what this check measures, and the check is a verification aid for the sizes where a copy of
+    // the coarsest level costs nothing worth avoiding.
+    //
+    // The concrete type is named rather than the MATAIJ alias: converting a device-resident hypre
+    // matrix to MATAIJ yields a device AIJ matrix, whose product with the host vectors here is
+    // silently zero rather than an error.
+    libMesh::WrappedPetsc<Mat> aij;
+    LibmeshPetscCallA(
+        comm().get(),
+        MatConvert(libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(level->matrix()).mat(),
+                   comm().size() > 1 ? MATMPIAIJ : MATSEQAIJ,
+                   MAT_INITIAL_MATRIX,
+                   aij.get()));
+
+    LibmeshPetscCallA(comm().get(),
+                      MatMult(aij,
+                              libMesh::cast_ref<libMesh::PetscVector<Number> &>(*x).vec(),
+                              libMesh::cast_ref<libMesh::PetscVector<Number> &>(*assembled).vec()));
 
     assembled->add(-1.0, *matrix_free);
 
@@ -217,11 +242,7 @@ PMultigrid::verifyLevelMatrices()
     // identity on every constrained row (no asymmetric row-replacement term), so this measures, it
     // does not assume, that the assembled matrix a coarse solver factors is actually symmetric
     PetscBool is_symmetric;
-    LibmeshPetscCallA(
-        comm().get(),
-        MatIsSymmetric(libMesh::cast_ref<libMesh::PetscMatrix<Number> &>(level->matrix()).mat(),
-                       1e-10,
-                       &is_symmetric));
+    LibmeshPetscCallA(comm().get(), MatIsSymmetric(aij, 1e-10, &is_symmetric));
 
     _console << "p-multigrid level p = " << level->order() << ": assembled operator is "
              << (is_symmetric ? "symmetric" : "NOT symmetric") << " (measured, tolerance 1e-10)"

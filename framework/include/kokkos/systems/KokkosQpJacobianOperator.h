@@ -88,6 +88,9 @@ public:
   struct MatrixLoop
   {
   };
+  struct MatrixIdentityLoop
+  {
+  };
   struct BlockLoop
   {
   };
@@ -116,7 +119,9 @@ public:
   void diagonal(TagID diag_tag);
 
   /**
-   * Accumulate the operator's entries into a matrix over the level's DOF layout
+   * Accumulate the operator's entries into a matrix over the level's DOF layout, and place the
+   * identity on every row the level holds fixed, which together are the operator the level's
+   * matrix-free action realizes
    * @param matrix The matrix on the level
    */
   void assemble(Matrix & matrix);
@@ -169,6 +174,7 @@ public:
   KOKKOS_FUNCTION void operator()(ApplyTensorLoop, const ApplyTensorTeam & team) const;
   KOKKOS_FUNCTION void operator()(DiagonalLoop, const ThreadID tid) const;
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(MatrixIdentityLoop, const dof_id_type dof) const;
   KOKKOS_FUNCTION void operator()(BlockLoop, const BlockTeam & team) const;
   KOKKOS_FUNCTION void
   operator()(BlockScratchLoop, const ThreadID tid, std::size_t & bytes) const;

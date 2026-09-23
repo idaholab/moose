@@ -78,6 +78,10 @@ protected:
   /// Whether a smoothed level inverts its entity blocks rather than the operator diagonal
   const bool _entity_block_smoother;
 
+  /// Whether the coarsest level is solved by one BoomerAMG cycle rather than by a direct
+  /// factorization, which also decides whether that level's assembled operator is a hypre matrix
+  const bool _boomeramg_coarse_solver;
+
   ///@{
   /// Which checks the 'verify' parameter named, read once so that each check site is a named member
   /// rather than a string lookup

@@ -19,11 +19,13 @@
   #   level 2   p = 4   smoothed
   #   level 3   p = 8   the solver system itself, smoothed
   #
-  # The coarsest level is factored directly, because a multigrid preconditioner has to be a fixed
-  # linear operator: the outer Krylov method builds its space from repeated applications of it and
-  # relates the residual its recurrence tracks to the true residual on the assumption that it does not
-  # change between them. No solver package is named, which leaves the choice to PETSc: a distributed
-  # factorization in parallel, and PETSc's own LU on one process.
+  # The coarsest level is solved by a single algebraic multigrid cycle, because a multigrid
+  # preconditioner has to be a fixed linear operator: the outer Krylov method builds its space from
+  # repeated applications of it and relates the residual its recurrence tracks to the true residual
+  # on the assumption that it does not change between them. One cycle of a multigrid method is such
+  # an operator, as a direct factorization is, and is the cheaper of the two on this level, which
+  # carries a degree of freedom per mesh vertex because coarsening the polynomial degree leaves the
+  # mesh alone.
   #
   # The four numbers of '-mg_levels_ksp_chebyshev_esteig' are the transform PETSc applies to the
   # eigenvalue estimates it measures, as 'a,b,c,d' in
@@ -44,21 +46,24 @@
   # They minimize a different functional once preconditioned, so compare the three in the true
   # residual rather than in what each reports.
   #
-  # Two settings are deliberately absent because a parameter of the Preconditioning block already owns
-  # them, and stating them twice would let the two disagree. The level count follows 'level_orders',
-  # and PETSc errors out if '-pc_mg_levels' contradicts it. The preconditioner on each smoothed level
-  # follows 'smoother', and '-mg_levels_pc_type' would silently replace the shell that
-  # 'smoother = entity_block' installs.
+  # Three settings are deliberately absent because a parameter of the Preconditioning block already
+  # owns them, and stating them twice would let the two disagree. The level count follows
+  # 'level_orders', and PETSc errors out if '-pc_mg_levels' contradicts it. The preconditioner on
+  # each smoothed level follows 'smoother', and '-mg_levels_pc_type' would silently replace the shell
+  # that 'smoother = entity_block' installs. The preconditioner on the coarsest level follows
+  # 'coarse_solver', which also decides the format that level's operator is assembled in: a hypre
+  # matrix for the multigrid cycle and an AIJ one for a factorization. A '-mg_coarse_pc_type' naming
+  # a factorization over a hypre operator is the one pairing that cannot work, and PMG reports it.
   #
   # Each level's operator and interpolation have no command-line spelling either, being shells: the
   # operator contracts the quadrature-point Jacobian cache against that level's basis, and the
   # interpolation is the element embedding between consecutive levels.
   petsc_options_iname = '-ksp_type -pc_type -pc_mg_galerkin -pc_mg_cycle_type '
-                        '-mg_coarse_ksp_type -mg_coarse_pc_type '
+                        '-mg_coarse_ksp_type '
                         '-mg_levels_ksp_type -mg_levels_ksp_max_it '
                         '-mg_levels_ksp_chebyshev_esteig -mg_levels_esteig_ksp_type'
   petsc_options_value = 'gmres mg none v '
-                        'preonly lu '
+                        'preonly '
                         'chebyshev 2 '
                         '0,0.1,0,1.1 gmres'
 []

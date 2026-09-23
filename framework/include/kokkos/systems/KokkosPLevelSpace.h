@@ -52,8 +52,13 @@ public:
    * @param order The polynomial order of the level
    * @param assemble Whether the level assembles its operator into a sparse matrix, which the
    * coarsest level does so that a coarse solver can be applied to it
+   * @param hypre Whether that matrix is hypre's own IJ matrix rather than an AIJ one, which a
+   * BoomerAMG coarse solve wants so that hypre owns what it solves; read only when assemble is set
    */
-  PLevelSpace(NonlinearSystemBase & fine, unsigned int order, bool assemble = false);
+  PLevelSpace(NonlinearSystemBase & fine,
+              unsigned int order,
+              bool assemble = false,
+              bool hypre = false);
 
   /**
    * Destructor
@@ -328,6 +333,9 @@ private:
 
   /// Whether the level assembles its operator into a sparse matrix
   const bool _assemble;
+
+  /// Whether the assembled matrix is hypre's own IJ matrix rather than an AIJ one
+  const bool _hypre;
 
   /// The level's libMesh system, which owns its DofMap and vectors
   libMesh::System & _sys;

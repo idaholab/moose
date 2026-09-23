@@ -61,23 +61,52 @@ contracting the full element basis rather than producing a wrong answer.
 
 ## The coarsest level
 
-The coarsest level is the only one that assembles a sparse matrix, and it is factored directly, by LU.
-No solver package is named, so PETSc selects one: whichever distributed factorization the build
-provides when the solve is parallel, and PETSc's own LU on a single process. Naming one explicitly is
-a matter of setting `-mg_coarse_pc_factor_mat_solver_type`.
+The coarsest level is the only one that assembles a sparse matrix, which is what a coarse solver is
+applied to. `coarse_solver` names that solver.
 
-A multigrid preconditioner has to be a
-fixed linear operator: the outer Krylov method builds its space from repeated applications of it, and
-relates the residual its recurrence tracks to the true residual on the assumption that the operator does
-not change between applications. A direct factorization is such an operator exactly, and it is
-affordable because the coarsest level of a p-hierarchy is a low-order space on the fine mesh.
+Either choice is a fixed linear operator, which is what the hierarchy requires of it: the outer
+Krylov method builds its space from repeated applications of the preconditioner, and relates the
+residual its recurrence tracks to the true residual on the assumption that the preconditioner does
+not change between applications. A direct factorization is such an operator exactly, and so is a
+fixed number of multigrid cycles.
 
-Iterating that level instead fails whichever way the iteration is stopped. Stopping on a relative
-tolerance makes the work, and so the operator, depend on the right-hand side. Stopping after a fixed
-number of iterations fixes the work but not the operator, because a Krylov method builds its polynomial
-from the Krylov space of the vector it is given: it is a nonlinear function of that vector however many
-steps it runs. The symptom, when it happens, is an outer solve that reports convergence it has not
-achieved, and a linear problem that takes several Newton steps.
+Iterating that level with a Krylov method instead fails whichever way the iteration is stopped.
+Stopping on a relative tolerance makes the work, and so the operator, depend on the right-hand side.
+Stopping after a fixed number of iterations fixes the work but not the operator, because a Krylov
+method builds its polynomial from the Krylov space of the vector it is given: it is a nonlinear
+function of that vector however many steps it runs. The symptom, when it happens, is an outer solve
+that reports convergence it has not achieved, and a linear problem that takes several Newton steps.
+
+The default, `boomeramg`, applies one cycle of hypre's algebraic multigrid. It is the cheaper of the
+two because the coarsest level of a p-hierarchy is not small: coarsening the polynomial degree leaves
+the mesh alone, so this level still carries a degree of freedom per mesh vertex, and a factorization
+is formed once per Jacobian and applied on every cycle. Over an order-eight nodal basis on a
+512-by-512 mesh, whose coarsest level carries 263,169 degrees of freedom, `SNESSolve` is 1.27 s
+against 3.88 s, at the same eleven linear iterations.
+
+`lu` factorizes the operator directly. No solver package is named, so PETSc selects one: whichever
+distributed factorization the build provides when the solve is parallel, and PETSc's own LU on a
+single process. `-mg_coarse_pc_factor_mat_solver_type` names one explicitly.
+
+### What the coarse solver settles about the operator
+
+`coarse_solver` also settles the format the level's operator is assembled in, because the two solvers
+read a matrix differently and a matrix cannot be retyped once it has been preallocated. `boomeramg`
+assembles it as a hypre matrix, so that hypre owns the matrix it solves: the assembly writes into
+hypre's own array, and nothing converts a copy of the matrix on every setup. `lu` assembles it as an
+AIJ matrix, which is the format a factorization reads. Overriding `-mg_coarse_pc_type` to a
+factorization while `coarse_solver` is `boomeramg` is therefore an error, and the preconditioner
+reports it naming both; the other direction, a hypre preconditioner over an AIJ operator, works and
+pays the conversion.
+
+On a GPU that format decides where the coarse solve runs, which is why it follows the parameter
+rather than being fixed. PETSc takes the memory space of the hypre matrix it builds from the matrix it
+was handed, so a host AIJ operator leaves hypre's whole solve on the host however device resident the
+rest of the cycle is. PETSc also gives BoomerAMG the relaxation hypre implements on a device,
+l1-scaled Jacobi, in place of the symmetric SOR/Jacobi it uses on the host. That is the weaker
+smoother: one sweep of it costs the benchmark above three of its eleven linear iterations, so the
+preconditioner asks for two sweeps wherever the operator is in device memory.
+`-mg_coarse_pc_hypre_boomeramg_grid_sweeps_all` overrides that.
 
 ## The smoother on each level
 
@@ -119,7 +148,8 @@ operator application per degree of freedom, which makes it a verification aid fo
 solve that asks for CG should ask for this check alongside it.
 
 The cycle is symmetric as well, each of its parts being so: the smoothers are symmetric, the coarse
-level is solved by a symmetric factorization, and restriction is the transpose of prolongation. CG is
+solve is symmetric whichever `coarse_solver` supplies it, a factorization and a multigrid cycle over
+symmetric relaxation alike, and restriction is the transpose of prolongation. CG is
 therefore a valid outer accelerator over the whole hierarchy, and so is MINRES; both need a fixed
 number of vectors where GMRES needs one per iteration, which favors them at larger scale. Setting
 `verify = cycle_symmetry` forms the cycle explicitly and measures it against its transpose,

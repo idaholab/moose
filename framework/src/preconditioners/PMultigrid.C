@@ -15,6 +15,7 @@
 
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+#include "PetscSupport.h"
 
 #include "libmesh/petsc_nonlinear_solver.h"
 
@@ -71,6 +72,21 @@ PMultigrid::validParams()
       "default; the two coincide at orders two and three, where a hierarchic entity carries a "
       "single mode. See PMultigrid.md for measured iteration counts.");
 
+  MooseEnum coarse_solver("boomeramg lu", "boomeramg");
+
+  params.addParam<MooseEnum>(
+      "coarse_solver",
+      coarse_solver,
+      "The solver applied to the coarsest level, which is solved rather than smoothed. Either "
+      "choice is a fixed linear operator, which is what the outer Krylov method requires of the "
+      "cycle. 'boomeramg', the default, applies one algebraic multigrid cycle, and assembles that "
+      "level's operator as a hypre matrix so that hypre owns what it solves and can solve it on "
+      "the device. 'lu' factorizes the operator directly and assembles it as an AIJ matrix, which "
+      "is the format a factorization reads; '-mg_coarse_pc_factor_mat_solver_type' then names the "
+      "package. Coarsening the polynomial degree leaves the mesh alone, so the coarsest level of a "
+      "p-hierarchy still carries a degree of freedom per mesh vertex, and the cycle is the cheaper "
+      "of the two once that level is large. See PMultigrid.md for measured times.");
+
   MultiMooseEnum verify("level_operators level_transfers level_galerkin level_matrices "
                         "entity_blocks operator_symmetry cycle_symmetry operator_conditioning");
 
@@ -109,6 +125,7 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
     _entity_block_smoother(getParam<MooseEnum>("smoother") == "entity_block"),
+    _boomeramg_coarse_solver(getParam<MooseEnum>("coarse_solver") == "boomeramg"),
     _verify_level_operators(getParam<MultiMooseEnum>("verify").contains("level_operators")),
     _verify_level_transfers(getParam<MultiMooseEnum>("verify").contains("level_transfers")),
     _verify_level_galerkin(getParam<MultiMooseEnum>("verify").contains("level_galerkin")),
@@ -136,8 +153,15 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
   // types have to be registered before the Kokkos assembly caches reference shape data; the
   // preconditioner is constructed ahead of both. The coarsest level assembles its operator, which
   // is what a coarse solver of the cycle is applied to; the orders ascend, so that is the first.
+  // Which format that operator is assembled in follows the coarse solver, because a matrix cannot
+  // be retyped once it has been preallocated.
   for (const auto i : index_range(_level_orders))
-    _levels.push_back(std::make_unique<Moose::Kokkos::PLevelSpace>(_nl, _level_orders[i], !i));
+  {
+    const bool coarsest = !i;
+
+    _levels.push_back(std::make_unique<Moose::Kokkos::PLevelSpace>(
+        _nl, _level_orders[i], coarsest, coarsest && _boomeramg_coarse_solver));
+  }
 }
 
 void
@@ -268,11 +292,45 @@ PMultigrid::setupSolver()
       // The cycle is preferred to a factorization because the coarsest level of a p-hierarchy is not
       // small: coarsening the polynomial degree leaves the mesh alone, so this level still carries a
       // degree of freedom per mesh vertex, and it is factorized once per Jacobian and solved on every
-      // cycle. Where the factorization is wanted, '-mg_coarse_pc_type lu' restores it and
+      // cycle. Where the factorization is wanted, 'coarse_solver = lu' selects it, which also
+      // assembles this level's operator as the AIJ matrix a factorization reads, and
       // '-mg_coarse_pc_factor_mat_solver_type' then names the package.
       LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
-      LibmeshPetscCall(PCSetType(smoother_pc, PCHYPRE));
-      LibmeshPetscCall(PCHYPRESetType(smoother_pc, "boomeramg"));
+
+      if (_boomeramg_coarse_solver)
+      {
+        LibmeshPetscCall(PCSetType(smoother_pc, PCHYPRE));
+        LibmeshPetscCall(PCHYPRESetType(smoother_pc, "boomeramg"));
+
+        // For an operator in device memory PETSc gives BoomerAMG the relaxation hypre implements
+        // there, l1-scaled Jacobi, in place of the symmetric SOR/Jacobi it uses on the host, and
+        // leaves the sweep count at one. The substitute is the weaker smoother, and one sweep of it
+        // under-solves this level by enough to cost outer iterations: three of eleven over the
+        // benchmark PMultigrid.md reports. Two sweeps recover the count and leave the solve faster
+        // than the host relaxation did. The sweep count has no API setter, so it goes through the
+        // options database, and only where the option is unset, which keeps it a default the user
+        // overrides like every other one here.
+        PetscMemType memtype;
+        LibmeshPetscCall(MatGetCurrentMemType(_levels[i]->operatorMat(), &memtype));
+
+        if (PetscMemTypeDevice(memtype))
+        {
+          const char * prefix;
+          LibmeshPetscCall(PCGetOptionsPrefix(smoother_pc, &prefix));
+
+          PetscBool set;
+          LibmeshPetscCall(PetscOptionsHasName(
+              LIBMESH_PETSC_NULLPTR, prefix, "-pc_hypre_boomeramg_grid_sweeps_all", &set));
+
+          if (!set)
+            Moose::PetscSupport::setSinglePetscOption(std::string("-") + prefix +
+                                                          "pc_hypre_boomeramg_grid_sweeps_all",
+                                                      "2",
+                                                      &_fe_problem);
+        }
+      }
+      else
+        LibmeshPetscCall(PCSetType(smoother_pc, PCLU));
     }
 
     // Read the level's own options last, so that everything set above is a default a user can
@@ -280,6 +338,32 @@ PMultigrid::setupSolver()
     // coarsest, mg_levels_<level>_ for the rest, and mg_levels_ for all of them at once -- and
     // without this call those prefixes are accepted on the command line and silently ignored.
     LibmeshPetscCall(KSPSetFromOptions(smoother));
+
+    // Reading those options is the earliest point an override of the coarse preconditioner is
+    // visible, and the last point before PCMG is handed the level, so the one pairing the matrix
+    // format rules out is caught here. A hypre matrix holds its entries in hypre's own IJ
+    // structure, which PETSc has no factorization for, and the format cannot be changed now: it
+    // was settled when the level preallocated its operator. The two directions are not symmetric,
+    // so only this one is an error -- an AIJ operator under a hypre preconditioner works, and pays
+    // a conversion of the matrix on every setup. Leaving the pairing to PETSc's own refusal in
+    // MatGetFactor would report it during the first solve, in terms that name neither the
+    // parameter nor the option that conflict.
+    if (!i && _boomeramg_coarse_solver)
+    {
+      PCType pc_type;
+      LibmeshPetscCall(PCGetType(smoother_pc, &pc_type));
+
+      const std::string coarse_pc(pc_type);
+
+      if (coarse_pc == PCLU || coarse_pc == PCCHOLESKY || coarse_pc == PCILU || coarse_pc == PCICC)
+        paramError("coarse_solver",
+                   "'boomeramg' assembles the coarsest level's operator as a hypre matrix, so that "
+                   "hypre owns what it solves, and that format carries no entries PETSc can "
+                   "factorize. The coarsest level's preconditioner is '",
+                   coarse_pc,
+                   "', which factorizes. Set 'coarse_solver = lu' to assemble that operator as the "
+                   "AIJ matrix a factorization reads, or drop the '-mg_coarse_pc_type' override.");
+    }
 
     // The interpolation from level i to the next finer level (i + 1, or the solver system if i is
     // the finest of _levels) is this level's own transfer, per PCMGSetInterpolation's convention
