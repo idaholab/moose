@@ -417,6 +417,18 @@ public:
   processor_id_type processor_id() const { return _comm->rank(); }
 
   /**
+   * Returns the number of threads this application uses.
+   * This is set by the [Application] num_threads value, or the process-wide count,
+   * which is set by the command line --n-threads, when unset
+   */
+  THREAD_ID numThreads() const { return _num_threads; }
+
+  /**
+   * Sets the number of threads this application uses
+   */
+  void setNumThreads(THREAD_ID num_threads);
+
+  /**
    * Get the command line
    * @return The reference to the command line object
    * Setup options based on InputParameters.
@@ -1342,6 +1354,9 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
+  /// The number of threads this application uses
+  THREAD_ID _num_threads;
+
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
 
@@ -1475,6 +1490,20 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * @return the raw num_threads value requested in the [Application] input block, read directly
+   * from the parser (the block is not applied to the app's InputParameters), or std::nullopt if
+   * unset. May be out of range; determineNumThreads() clamps it.
+   */
+  std::optional<int> requestedNumThreads() const;
+
+  /**
+   * Determines the number of threads this application should use from the [Application] block's
+   * num_threads parameter. Used to initialize _num_threads. An over-request is warned about
+   * in setupOptions(). See numThreads().
+   */
+  THREAD_ID determineNumThreads() const;
+
   /**
    * Internal function used to recursively create the executor objects.
    *

@@ -106,7 +106,7 @@ PorousFlowDarcyBaseTempl<is_ad>::PorousFlowDarcyBaseTempl(const InputParameters 
                "MONOMIAL) cannot be used as a PorousFlow variable.");
 
 #ifdef LIBMESH_HAVE_TBB_API
-  if (libMesh::n_threads() > 1)
+  if (this->_fe_problem.numThreads() > 1)
     mooseWarning("PorousFlowDarcyBase: num_upwinds and num_downwinds may not be computed "
                  "accurately when using TBB and greater than 1 thread");
 #endif

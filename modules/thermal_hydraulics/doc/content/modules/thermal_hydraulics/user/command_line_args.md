@@ -26,7 +26,7 @@ These options are related to running in parallel:
 | Command-line option | Description |
 | :- | :- |
 | `--keep-cout` | Keep standard output from all processors when running in parallel |
-| `--n-threads=<n>` | Runs the specified number of threads per process |
+| `--n-threads=<n>` | Sets the maximum number of threads per process |
 | `--distributed-mesh` | The libMesh Mesh underlying MooseMesh should always be a DistributedMesh |
 | `--redirect-stdout` | Keep standard output from all processors when running in parallel |
 

@@ -32,9 +32,8 @@ class MooseObjectWarehouseBase
 public:
   /**
    * Constructor.
-   * @param threaded When true (default) threaded storage is enabled.
    */
-  MooseObjectWarehouseBase(bool threaded = true);
+  MooseObjectWarehouseBase(THREAD_ID num_threads = libMesh::n_threads());
 
   /**
    * Destructor.
@@ -284,8 +283,8 @@ protected:
 };
 
 template <typename T>
-MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/)
-  : _num_threads(threaded ? libMesh::n_threads() : 1),
+MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(THREAD_ID num_threads)
+  : _num_threads(num_threads),
     _all_objects(_num_threads),
     _active_objects(_num_threads),
     _all_block_objects(_num_threads),

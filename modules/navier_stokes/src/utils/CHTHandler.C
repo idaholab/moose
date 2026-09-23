@@ -346,7 +346,7 @@ CHTHandler::setupConjugateHeatTransferContainers()
     auto & temperature_container = _boundary_temperature.back();
 
     // Time to register the functors on all of the threads
-    for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto tid : make_range(_problem.numThreads()))
     {
       _problem.addFunctor("heat_flux_to_solid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
       _problem.addFunctor("heat_flux_to_fluid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);

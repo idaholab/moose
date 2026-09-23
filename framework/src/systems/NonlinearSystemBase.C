@@ -151,19 +151,28 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _Re_time(NULL),
     _Re_non_time_tag(-1),
     _Re_non_time(NULL),
-    _scalar_kernels(/*threaded=*/false),
-    _nodal_bcs(/*threaded=*/false),
-    _preset_nodal_bcs(/*threaded=*/false),
-    _ad_preset_nodal_bcs(/*threaded=*/false),
+    _kernels(numThreads()),
+    _hybridized_kernels(numThreads()),
+    _scalar_kernels(/*n_threads=*/1),
+    _dg_kernels(numThreads()),
+    _interface_kernels(numThreads()),
+    _integrated_bcs(numThreads()),
+    _nodal_bcs(/*n_threads=*/1),
+    _preset_nodal_bcs(/*n_threads=*/1),
+    _ad_preset_nodal_bcs(/*n_threads=*/1),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_kernels(/*threaded=*/false),
-    _kokkos_integrated_bcs(/*threaded=*/false),
-    _kokkos_nodal_bcs(/*threaded=*/false),
-    _kokkos_preset_nodal_bcs(/*threaded=*/false),
-    _kokkos_nodal_kernels(/*threaded=*/false),
+    _kokkos_kernels(/*n_threads=*/1),
+    _kokkos_integrated_bcs(/*n_threads=*/1),
+    _kokkos_nodal_bcs(/*n_threads=*/1),
+    _kokkos_preset_nodal_bcs(/*n_threads=*/1),
+    _kokkos_nodal_kernels(/*n_threads=*/1),
 #endif
-    _general_dampers(/*threaded=*/false),
-    _splits(/*threaded=*/false),
+    _dirac_kernels(numThreads()),
+    _element_dampers(numThreads()),
+    _nodal_dampers(numThreads()),
+    _general_dampers(/*n_threads=*/1),
+    _nodal_kernels(numThreads()),
+    _splits(/*n_threads=*/1),
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
     _fdcoloring(nullptr),
@@ -276,7 +285,7 @@ NonlinearSystemBase::initialSetup()
   {
     TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
 
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
     {
       _kernels.initialSetup(tid);
       _nodal_kernels.initialSetup(tid);
@@ -361,7 +370,7 @@ NonlinearSystemBase::timestepSetup()
 {
   SolverSystem::timestepSetup();
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     _kernels.timestepSetup(tid);
     _nodal_kernels.timestepSetup(tid);
@@ -397,7 +406,7 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 {
   SolverSystem::customSetup(exec_type);
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     _kernels.customSetup(exec_type, tid);
     _nodal_kernels.customSetup(exec_type, tid);
@@ -440,7 +449,7 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     // Create the kernel object via the factory and add to warehouse
     std::shared_ptr<KernelBase> kernel =
@@ -462,7 +471,7 @@ NonlinearSystemBase::addHDGKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     // Create the kernel object via the factory and add to warehouse
     auto kernel = _factory.create<HDGKernel>(kernel_name, name, parameters, tid);
@@ -479,7 +488,7 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     // Create the kernel object via the factory and add to the warehouse
     std::shared_ptr<NodalKernelBase> kernel =
@@ -576,7 +585,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
     if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
       _has_diag_save_in = true;
 
-    for (tid = 1; tid < libMesh::n_threads(); tid++)
+    for (tid = 1; tid < this->numThreads(); tid++)
     {
       // Create the object
       bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
@@ -618,7 +627,7 @@ NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     std::shared_ptr<DiracKernelBase> kernel =
         _factory.create<DiracKernelBase>(kernel_name, name, parameters, tid);
@@ -634,7 +643,7 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
   {
     auto dg_kernel = _factory.create<DGKernelBase>(dg_kernel_name, name, parameters, tid);
     _dg_kernels.addObject(dg_kernel, tid);
@@ -656,7 +665,7 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
                                         const std::string & name,
                                         InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
   {
     std::shared_ptr<InterfaceKernelBase> interface_kernel =
         _factory.create<InterfaceKernelBase>(interface_kernel_name, name, parameters, tid);
@@ -678,7 +687,7 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
   {
     std::shared_ptr<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
 
@@ -1702,7 +1711,7 @@ NonlinearSystemBase::residualSetup()
 
   SolverSystem::residualSetup();
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     _kernels.residualSetup(tid);
     _nodal_kernels.residualSetup(tid);
@@ -1760,7 +1769,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
 
   // reinit scalar variables
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
     _fe_problem.reinitScalars(tid);
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -1776,7 +1785,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
 
     ComputeResidualThread cr(_fe_problem, tags);
-    Threads::parallel_reduce(elem_range, cr);
+    Threads::parallel_reduce(elem_range, cr, this->numThreads());
 
     // We pass face information directly to FV residual objects for their evaluation. Consequently
     // we must make sure to do separate threaded loops for 1) undisplaced face information objects
@@ -1788,7 +1797,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       ComputeFVFluxResidualThread<FVRange> fvr(
           _fe_problem, this->number(), tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvr);
+      Threads::parallel_reduce(faces, fvr, this->numThreads());
     }
     if (auto displaced_problem = _fe_problem.getDisplacedProblem();
         displaced_problem && displaced_problem->haveFV())
@@ -1797,10 +1806,10 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
           _fe_problem, this->number(), tags, /*on_displaced=*/true);
       FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
                     displaced_problem->mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvr);
+      Threads::parallel_reduce(faces, fvr, this->numThreads());
     }
 
-    unsigned int n_threads = libMesh::n_threads();
+    unsigned int n_threads = this->numThreads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
       _fe_problem.addCachedResidual(i);
@@ -1868,9 +1877,9 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       {
         _fe_problem.reinitNode(*range.begin(), 0);
 
-        Threads::parallel_reduce(range, cnk);
+        Threads::parallel_reduce(range, cnk, this->numThreads());
 
-        unsigned int n_threads = libMesh::n_threads();
+        unsigned int n_threads = this->numThreads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any cached residuals that might be hanging around
           _fe_problem.addCachedResidual(i);
@@ -1896,9 +1905,9 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
       const ConstBndNodeRange & bnd_node_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
-      Threads::parallel_reduce(bnd_node_range, cnk);
+      Threads::parallel_reduce(bnd_node_range, cnk, this->numThreads());
 
-      unsigned int n_threads = libMesh::n_threads();
+      unsigned int n_threads = this->numThreads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached residuals that might be hanging around
         _fe_problem.addCachedResidual(i);
@@ -2028,7 +2037,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   }
 
   // reinit scalar variables
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
     _fe_problem.reinitScalars(tid);
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -2044,7 +2053,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
 
     ComputeResidualAndJacobianThread crj(_fe_problem, vector_tags, matrix_tags);
-    Threads::parallel_reduce(elem_range, crj);
+    Threads::parallel_reduce(elem_range, crj, this->numThreads());
 
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     if (_fe_problem.haveFV())
@@ -2052,7 +2061,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       ComputeFVFluxRJThread<FVRange> fvrj(
           _fe_problem, this->number(), vector_tags, matrix_tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvrj);
+      Threads::parallel_reduce(faces, fvrj, this->numThreads());
     }
     if (auto displaced_problem = _fe_problem.getDisplacedProblem();
         displaced_problem && displaced_problem->haveFV())
@@ -2061,12 +2070,12 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
           _fe_problem, this->number(), vector_tags, matrix_tags, /*on_displaced=*/true);
       FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
                     displaced_problem->mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvr);
+      Threads::parallel_reduce(faces, fvr, this->numThreads());
     }
 
     mortarConstraints(Moose::ComputeType::ResidualAndJacobian, vector_tags, matrix_tags);
 
-    unsigned int n_threads = libMesh::n_threads();
+    unsigned int n_threads = this->numThreads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
     {
@@ -2232,7 +2241,7 @@ NonlinearSystemBase::computeNodalBCsJacobian(const std::set<TagID> & tags)
     // reinit scalar variables again. This reinit does not re-fill any of the scalar variable
     // solution arrays because that was done above. It only will reorder the derivative
     // information for AD calculations to be suitable for NodalBC calculations
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    for (unsigned int tid = 0; tid < this->numThreads(); tid++)
       _fe_problem.reinitScalars(tid, true);
 
     // Get variable coupling list.  We do all the NodalBCBase stuff on
@@ -2967,7 +2976,7 @@ NonlinearSystemBase::jacobianSetup()
 {
   SolverSystem::jacobianSetup();
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     _kernels.jacobianSetup(tid);
     _nodal_kernels.jacobianSetup(tid);
@@ -3049,7 +3058,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
 
   // reinit scalar variables
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
     _fe_problem.reinitScalars(tid);
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -3069,9 +3078,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     {
       ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
       const ConstNodeRange & range = _fe_problem.getCurrentAlgebraicNodeRange();
-      Threads::parallel_reduce(range, cnkjt);
+      Threads::parallel_reduce(range, cnkjt, this->numThreads());
 
-      unsigned int n_threads = libMesh::n_threads();
+      unsigned int n_threads = this->numThreads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached jacobians that might be hanging around
         _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
@@ -3085,7 +3094,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       ComputeFVFluxJacobianThread<FVRange> fvj(
           _fe_problem, this->number(), tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvj);
+      Threads::parallel_reduce(faces, fvj, this->numThreads());
     }
     if (auto displaced_problem = _fe_problem.getDisplacedProblem();
         displaced_problem && displaced_problem->haveFV())
@@ -3094,7 +3103,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           _fe_problem, this->number(), tags, /*on_displaced=*/true);
       FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
                     displaced_problem->mesh().ownedFaceInfoEnd());
-      Threads::parallel_reduce(faces, fvr);
+      Threads::parallel_reduce(faces, fvr, this->numThreads());
     }
 
     mortarConstraints(Moose::ComputeType::Jacobian, {}, tags);
@@ -3110,8 +3119,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       // IntegratedBCs and/or InterfaceKernels may use penalty factors. DGKernels may be ok, but
       // they are almost always used in conjunction with Kernels
       ComputeJacobianForScalingThread cj(_fe_problem, tags);
-      Threads::parallel_reduce(elem_range, cj);
-      unsigned int n_threads = libMesh::n_threads();
+      Threads::parallel_reduce(elem_range, cj, this->numThreads());
+      unsigned int n_threads = this->numThreads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any Jacobian contributions still hanging around
         _fe_problem.addCachedJacobian(i);
@@ -3132,9 +3141,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       case Moose::COUPLING_DIAG:
       {
         ComputeJacobianThread cj(_fe_problem, tags);
-        Threads::parallel_reduce(elem_range, cj);
+        Threads::parallel_reduce(elem_range, cj, this->numThreads());
 
-        unsigned int n_threads = libMesh::n_threads();
+        unsigned int n_threads = this->numThreads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any Jacobian contributions still hanging around
           _fe_problem.addCachedJacobian(i);
@@ -3145,8 +3154,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
           const ConstBndNodeRange & bnd_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
-          Threads::parallel_reduce(bnd_range, cnkjt);
-          unsigned int n_threads = libMesh::n_threads();
+          Threads::parallel_reduce(bnd_range, cnkjt, this->numThreads());
+          unsigned int n_threads = this->numThreads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
             _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
@@ -3158,8 +3167,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       case Moose::COUPLING_CUSTOM:
       {
         ComputeFullJacobianThread cj(_fe_problem, tags);
-        Threads::parallel_reduce(elem_range, cj);
-        unsigned int n_threads = libMesh::n_threads();
+        Threads::parallel_reduce(elem_range, cj, this->numThreads());
+        unsigned int n_threads = this->numThreads();
 
         for (unsigned int i = 0; i < n_threads; i++)
           _fe_problem.addCachedJacobian(i);
@@ -3170,8 +3179,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
           const ConstBndNodeRange & bnd_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
-          Threads::parallel_reduce(bnd_range, cnkjt);
-          unsigned int n_threads = libMesh::n_threads();
+          Threads::parallel_reduce(bnd_range, cnkjt, this->numThreads());
+          unsigned int n_threads = this->numThreads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
             _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
@@ -3337,14 +3346,14 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
     jacobian.zero();
   }
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
     _fe_problem.reinitScalars(tid);
 
   PARALLEL_TRY
   {
     const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
     ComputeJacobianBlocksThread cjb(_fe_problem, blocks, tags);
-    Threads::parallel_reduce(elem_range, cjb);
+    Threads::parallel_reduce(elem_range, cjb, this->numThreads());
   }
   PARALLEL_CATCH;
 
@@ -3452,7 +3461,8 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeElemDampingThread cid(_fe_problem, *this);
-        Threads::parallel_reduce(_fe_problem.getCurrentAlgebraicElementRange(), cid);
+        Threads::parallel_reduce(
+            _fe_problem.getCurrentAlgebraicElementRange(), cid, this->numThreads());
         damping = std::min(cid.damping(), damping);
       }
       PARALLEL_CATCH;
@@ -3467,7 +3477,8 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeNodalDampingThread cndt(_fe_problem, *this);
-        Threads::parallel_reduce(_fe_problem.getCurrentAlgebraicNodeRange(), cndt);
+        Threads::parallel_reduce(
+            _fe_problem.getCurrentAlgebraicNodeRange(), cndt, this->numThreads());
         damping = std::min(cndt.damping(), damping);
       }
       PARALLEL_CATCH;
@@ -3534,7 +3545,7 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & vector_ta
     TIME_SECTION("computeDirac", 3, "Computing DiracKernels");
 
     // TODO: Need a threading fix... but it's complicated!
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
     {
       const auto & dkernels = _dirac_kernels.getActiveObjects(tid);
       for (const auto & dkernel : dkernels)
@@ -3557,11 +3568,11 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & vector_ta
     // AD DiracKernels computing the residual and Jacobian together cache their residual
     // contributions (via addResidualsAndJacobian), so those must be flushed too
     if (compute_type != Moose::ComputeType::Jacobian)
-      for (const auto tid : make_range(libMesh::n_threads()))
+      for (const auto tid : make_range(this->numThreads()))
         _fe_problem.addCachedResidual(tid);
 
     if (compute_type != Moose::ComputeType::Residual)
-      for (const auto tid : make_range(libMesh::n_threads()))
+      for (const auto tid : make_range(this->numThreads()))
         _fe_problem.addCachedJacobian(tid);
   }
 }

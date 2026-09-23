@@ -110,7 +110,7 @@ INSFVRhieChowInterpolator::validParams()
 
 INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & params)
   : RhieChowInterpolatorBase(params),
-    _vel(libMesh::n_threads()),
+    _vel(UserObject::_subproblem.numThreads()),
     _a(_moose_mesh, blockIDs(), "a", /*extrapolated_boundary*/ true),
     _ax(_a, 0),
     _ay(_a, 1),
@@ -133,7 +133,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
                  "Displacement provided but we are not running on the displaced mesh. If you "
                  "really want this object to run on the displaced mesh, then set "
                  "'use_displaced_mesh = true', otherwise remove this displacement parameter");
-    disp_container.resize(libMesh::n_threads());
+    disp_container.resize(UserObject::_subproblem.numThreads());
     fillContainer(disp_name, disp_container);
     checkBlocks(*disp_container[0]);
   };
@@ -157,7 +157,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
       paramError("disp_z", "If 'disp_x' is provided, then 'disp_z' must be as well");
   }
 
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     _vel[tid] = std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
         name() + std::to_string(tid),
@@ -209,7 +209,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 void
 INSFVRhieChowInterpolator::fillARead()
 {
-  _a_read.resize(libMesh::n_threads());
+  _a_read.resize(UserObject::_subproblem.numThreads());
 
   if (isParamValid("a_u"))
   {
@@ -220,7 +220,7 @@ INSFVRhieChowInterpolator::fillARead()
       mooseError("If a_u is provided, then a_w must be provided");
 
     _a_data_provided = true;
-    _a_aux.resize(libMesh::n_threads());
+    _a_aux.resize(UserObject::_subproblem.numThreads());
   }
   else if (isParamValid("a_v"))
     paramError("a_v", "If the a_v coefficients are provided, then a_u must be provided");
@@ -229,7 +229,7 @@ INSFVRhieChowInterpolator::fillARead()
 
   if (_a_data_provided)
   {
-    for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
     {
       const Moose::FunctorBase<ADReal> *v_comp, *w_comp;
       if (_dim > 1)
@@ -252,7 +252,7 @@ INSFVRhieChowInterpolator::fillARead()
     }
   }
   else
-    for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
     {
       _a_read[tid] = &_a;
 

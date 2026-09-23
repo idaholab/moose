@@ -20,7 +20,7 @@ class FVInitialConditionBase;
 class FVInitialConditionWarehouse : public MooseObjectWarehouseBase<FVInitialConditionBase>
 {
 public:
-  FVInitialConditionWarehouse();
+  FVInitialConditionWarehouse(THREAD_ID num_threads = libMesh::n_threads());
 
   /**
    * Initial setup

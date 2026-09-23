@@ -49,7 +49,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
-  if (libMesh::n_threads() > 1)
+  if (_problem.numThreads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
 
   if (_output_opt_iters && _problem.isTransient())

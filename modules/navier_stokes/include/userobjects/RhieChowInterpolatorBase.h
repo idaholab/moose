@@ -168,7 +168,7 @@ void
 RhieChowInterpolatorBase::fillContainer(const std::string & name, Container & container)
 {
   typedef typename Container::value_type ContainedType;
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     auto * const var = static_cast<ContainedType>(
         &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));

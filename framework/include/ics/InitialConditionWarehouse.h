@@ -20,7 +20,7 @@ class InitialConditionBase;
 class InitialConditionWarehouse : public MooseObjectWarehouseBase<InitialConditionBase>
 {
 public:
-  InitialConditionWarehouse();
+  InitialConditionWarehouse(THREAD_ID num_threads = libMesh::n_threads());
 
   /**
    * Initial setup
