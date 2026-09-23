@@ -249,6 +249,50 @@
     abs_zero = 1e-12
     requirement = 'Reordering simultaneous distinct-power creep mechanisms shall preserve the complete physical output history.'
   []
+
+  # Generic multi-law edge behavior belongs to solid_mechanics rather than the BISON gas model.
+  [review_zero_law_reference]
+    type = RunApp
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient=coef_linear Materials/lps/power=1 Outputs/file_base=review_zero_law_reference'
+    requirement = 'A single active linear porous-LPS mechanism shall provide the reference trajectory for an otherwise identical model containing an exactly inactive creep law.'
+  []
+  [review_zero_law_candidate]
+    type = RunApp
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient="coef_zero coef_linear" Materials/lps/power="3 1" Outputs/file_base=review_zero_law_candidate'
+    prereq = review_zero_law_reference
+    requirement = 'An exactly zero porous-LPS creep coefficient shall disable that mechanism without altering the integrated mechanical response.'
+  []
+  [review_zero_law_compare]
+    type = RunCommand
+    command = 'python3 compare_lps_multi.py review_zero_law_reference.csv review_zero_law_candidate.csv 1e-12'
+    prereq = review_zero_law_candidate
+    requirement = 'Adding an exactly inactive porous-LPS mechanism shall preserve the complete generic mechanics history on the same time grid.'
+  []
+  [review_leading_zero_gauge]
+    type = RunApp
+    input = lps_multi_zero_gauge.i
+    prereq = review_zero_law_compare
+    requirement = 'For multiple porous-LPS laws, an exactly inactive leading mechanism shall report zero per-law gauge stress while the legacy gauge_stress diagnostic follows the first active mechanism.'
+  []
+  [review_negative_coefficient]
+    type = RunException
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient=coef_negative Materials/lps/power=3 Outputs/csv=false'
+    expect_err = 'must be finite and nonnegative'
+    requirement = 'A negative Norton coefficient supplied to the generic porous-LPS model shall be rejected rather than interpreted as a signed creep rate.'
+  []
+  [review_multi_law_timestep_limit]
+    type = RunApp
+    input = lps_multi_timestep_limit.i
+    requirement = 'The generic porous-LPS material timestep recommendation shall use the admitted effective strain rate summed over all simultaneously active creep laws.'
+  []
+  [review_multi_law_pure_deviatoric]
+    type = RunApp
+    input = lps_multi_pure_deviatoric.i
+    requirement = 'Simultaneous n=1, n=3, and n=4.5 porous-LPS mechanisms shall accumulate inelastic strain under pure-deviatoric loading without producing a significant net porosity change, while retaining distinct positive gauge stresses.'
+  []
   [prescribed_two_population_nonad]
     type = RunApp
     allow_test_objects = true
