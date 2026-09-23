@@ -80,6 +80,60 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [coarse_solver_boomeramg]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The default coarse solver. What the view asserts beyond convergence is the format of the
+    # coarsest level's operator: hypre's own, so that the coarse solve reads the matrix the assembly
+    # wrote rather than a copy PETSc converts from it on every setup, and reads it in the memory
+    # space the assembly wrote it in.
+    cli_args = 'Outputs/exodus=false -ksp_max_it 40 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'HYPRE BoomerAMG preconditioning.*'
+                 'linear system matrix.*type: hypre.*'
+                 'Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall solve its coarsest level with a single '
+                  'algebraic multigrid cycle by default, assembling that level operator in the '
+                  'format the multigrid package owns so that no copy of it is converted per setup.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [coarse_solver_lu]
+    type = RunApp
+    input = 'pmultigrid.i'
+    # The factorization, and with it the other operator format, since a factorization reads matrix
+    # entries and the hypre format exposes none. The report of a factored matrix is what asserts the
+    # level was assembled in a format that can be factorized: PETSc refuses to factor a hypre
+    # operator at all.
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/coarse_solver=lu '
+               '-ksp_max_it 40 -ksp_converged_reason -ksp_view'
+    expect_out = 'Linear solve converged due to CONVERGED_RTOL.*'
+                 'type: lu.*package used to perform factorization.*'
+                 'Solve Converged'
+    requirement = 'The p-multigrid preconditioner shall solve its coarsest level by a direct '
+                  'factorization when asked for one, assembling that level operator in a format the '
+                  'factorization reads.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [coarse_solver_conflict]
+    type = RunException
+    input = 'pmultigrid.i'
+    # The one pairing the operator format rules out. The reverse pairing, a hypre preconditioner
+    # over an AIJ operator, is what the default replaced: it works, at the cost of the conversion,
+    # and so is not an error.
+    cli_args = 'Outputs/exodus=false -mg_coarse_pc_type lu'
+    expect_err = "assembles the coarsest level's operator as a hypre matrix.*"
+                 "preconditioner is 'lu', which factorizes"
+    requirement = 'The p-multigrid preconditioner shall report an error naming both the parameter '
+                  'and the conflicting option when the coarse solver it assembles a hypre operator '
+                  'for is overridden to a factorization, which cannot read that format.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_operators]
     type = RunApp
     input = 'pmultigrid.i'

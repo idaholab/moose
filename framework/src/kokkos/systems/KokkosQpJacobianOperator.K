@@ -596,6 +596,11 @@ QpJacobianOperator::assemble(Matrix & matrix)
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, MatrixLoop> policy(
       0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, MatrixIdentityLoop>
+      identity_policy(0, _level.getNumLocalDofs());
+  ::Kokkos::parallel_for(identity_policy, *this);
+
   ::Kokkos::fence();
 }
 
@@ -742,6 +747,24 @@ QpJacobianOperator::operator()(MatrixLoop, const ThreadID tid) const
       ::Kokkos::atomic_add(&_matrix(row, _level.getElemGlobalDofIndex(elem, j, var)), entry);
     }
   }
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(MatrixIdentityLoop, const dof_id_type dof) const
+{
+  // The element loop contributes nothing to a row the level holds fixed, in either index, so the
+  // identity that completes the level's operator on those rows is written here. It is written into
+  // the same entries the element loop fills, before the matrix is assembled, which keeps the whole
+  // of the level's operator on the device. Writing it into the assembled matrix instead does not
+  // work at all: MatSetValues() on a hypre-typed operator in device memory, which is what a level
+  // carries under a BoomerAMG coarse solve, loses the matrix's off-diagonal column map on more than
+  // one process. An AIJ operator takes that write, and so does a host-resident hypre one, so the
+  // arrangement here is what makes the two formats interchangeable.
+  //
+  // Only the locally owned rows are written. A row this process ghosts carries its own entries,
+  // which the reduction sums into the owner, so writing the identity there too would double it.
+  if (_level.isConstrained(dof))
+    _matrix(dof, _level.localToGlobalDofIndex(dof)) = 1.0;
 }
 
 KOKKOS_FUNCTION void

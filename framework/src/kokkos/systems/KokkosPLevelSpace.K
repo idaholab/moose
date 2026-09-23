@@ -93,10 +93,14 @@ PLevelSpace::systemName(const NonlinearSystemBase & fine, const unsigned int ord
   return fine.name() + "_p" + std::to_string(order);
 }
 
-PLevelSpace::PLevelSpace(NonlinearSystemBase & fine, const unsigned int order, const bool assemble)
+PLevelSpace::PLevelSpace(NonlinearSystemBase & fine,
+                         const unsigned int order,
+                         const bool assemble,
+                         const bool hypre)
   : _fine(fine),
     _order(order),
     _assemble(assemble),
+    _hypre(hypre),
     _sys(fine.feProblem().es().add_system<libMesh::System>(systemName(fine, order)))
 {
   const auto & fine_sys = _fine.system();
@@ -207,6 +211,30 @@ PLevelSpace::init()
                  _order,
                  " assembles its operator, but libMesh computed no sparsity pattern for the "
                  "level's DOF map, so there is no pattern to assemble over.");
+
+    // A hypre preconditioner handed an AIJ operator builds its own IJ copy of it, and takes the
+    // memory space of that copy from the AIJ matrix it was given, so a host-resident AIJ operator
+    // puts hypre's whole solve on the host. Typing the operator MATHYPRE instead leaves hypre
+    // owning the matrix it solves, in the memory space hypre itself defaults to, with no copy and
+    // no conversion per setup. The device assembly needs no rework for it: MATHYPRE carries the
+    // coordinate-format interface Matrix fills the operator through, and its delegate holds the
+    // same value array hypre's own matrix does, so the assembly writes where hypre reads.
+    //
+    // This has to precede Matrix::create(), which reads the matrix's memory space to place its
+    // value buffer and then preallocates the coordinate pattern. MatSetType() discards both.
+    if (_hypre)
+    {
+      const auto mat = libMesh::cast_ptr<libMesh::PetscMatrix<Number> *>(_matrix_object)->mat();
+
+      LibmeshPetscCallA(_sys.comm().get(), MatSetType(mat, MATHYPRE));
+
+#ifndef MOOSE_ENABLE_KOKKOS_GPU
+      // MATHYPRE takes its memory space from hypre's own default, which is device memory in a
+      // CUDA-enabled hypre. A build without Kokkos device support assembles on the host, so the
+      // operator is held there and hypre solves it there.
+      LibmeshPetscCallA(_sys.comm().get(), MatBindToCPU(mat, PETSC_TRUE));
+#endif
+    }
 
     _matrix.create(*_matrix_object, dofSpace());
   }
@@ -453,22 +481,11 @@ PLevelSpace::assembleMatrix(const QpJacobianCache & cache)
 
   QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level());
 
+  // The identity the level's operator carries on every row it holds fixed is placed by the assembly
+  // as well, so that the matrix is complete when it is closed below
   op.assemble(_matrix);
 
   _matrix.close();
-
-  // The element loops contribute nothing to a row the level holds fixed, so the identity goes on
-  // those rows here, which is the same operator the matrix-free application realizes
-  if (_num_constrained_dofs)
-  {
-    const auto first_dof = _sys.get_dof_map().first_dof();
-
-    for (const auto dof : make_range(dofSpace().getNumLocalDofs()))
-      if (_constrained_dof[dof])
-        _matrix_object->set(first_dof + dof, first_dof + dof, 1.0);
-
-    _matrix_object->close();
-  }
 }
 
 libMesh::SparseMatrix<Number> &
@@ -587,6 +604,25 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
   // Read before factoring, which overwrites the entries with their factor
   _blocks.copyEntriesToHost();
 
+  // The comparison reads the operator one entry at a time, which is not how a hypre matrix -- the
+  // format this level's operator carries under a BoomerAMG coarse solve -- is well served: in
+  // device memory every read costs a device allocation, and from order five upward the values such
+  // a read returns disagree with the blocks where the same operator read through a copy agrees with
+  // them to round-off. The entries are read from a host AIJ copy instead, which carries what the
+  // assembly wrote whichever format the operator itself is in, and whose action
+  // verifyLevelMatrices measures against the matrix-free one. The concrete type is named rather
+  // than the MATAIJ alias, which converting a device-resident hypre matrix resolves to a device
+  // AIJ type.
+  libMesh::WrappedPetsc<Mat> aij;
+  LibmeshPetscCallA(
+      _sys.comm().get(),
+      MatConvert(libMesh::cast_ptr<libMesh::PetscMatrix<Number> *>(_matrix_object)->mat(),
+                 _sys.comm().size() > 1 ? MATMPIAIJ : MATSEQAIJ,
+                 MAT_INITIAL_MATRIX,
+                 aij.get()));
+
+  const libMesh::PetscMatrix<Number> assembled_operator(*aij, _sys.comm(), false);
+
   const auto first_dof = _sys.get_dof_map().first_dof();
 
   Real error = 0;
@@ -600,7 +636,7 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
       for (const auto j : make_range(_blocks.blockSize(block)))
       {
         const auto col = first_dof + _blocks.blockDof(block, j);
-        const auto assembled = (*_matrix_object)(row, col);
+        const auto assembled = assembled_operator(row, col);
 
         error = std::max(error, std::abs(_blocks.entry(block, i, j) - assembled));
         scale = std::max(scale, std::abs(assembled));
