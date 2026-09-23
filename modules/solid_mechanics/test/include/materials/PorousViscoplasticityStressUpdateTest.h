@@ -18,9 +18,9 @@
 /**
  * Shared test-only extension of the generic porous-LPS material.
  *
- * The extension supplies two independently evolving pore populations with prescribed linear
- * pressure closures and explicit population floors. This keeps tests of the generic independent
- * local solver in solid_mechanics without depending on BISON gas EOS, topology, or inventory.
+ * The extension supplies test-prescribed scalar and two-population linear pressure closures.
+ * This keeps tests of the generic scalar and independent local solvers in solid_mechanics without
+ * depending on BISON gas EOS, topology, or inventory.
  */
 template <bool is_ad>
 class PorousViscoplasticityStressUpdateTestStateTempl
@@ -45,6 +45,10 @@ protected:
     return _use_prescribed_two_population_state;
   }
 
+  virtual HydrostaticStressState
+  evaluateHydrostaticStress(const GenericReal<is_ad> & matrix_hydro_stress,
+                            const GenericReal<is_ad> & porosity) const override;
+
   virtual PorePorosityState
   independentPorePorosityState(const GenericReal<is_ad> & total_porosity) const override;
 
@@ -60,6 +64,10 @@ protected:
       const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
       const PorePorosityState & pore_porosity) override;
 
+  const bool _use_prescribed_scalar_pressure;
+  const Real _scalar_pressure_reference_porosity;
+  const Real _scalar_pressure;
+  const Real _scalar_pressure_derivative;
   const bool _use_prescribed_two_population_state;
   const Real _initial_population_0_fraction;
   const Real _test_initial_total_porosity;

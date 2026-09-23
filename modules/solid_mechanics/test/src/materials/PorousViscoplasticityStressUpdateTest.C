@@ -61,6 +61,21 @@ PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::validParams()
 {
   InputParameters params = Base::validParams();
   params.addParam<bool>(
+      "use_prescribed_scalar_pressure",
+      false,
+      "Use a test-prescribed scalar pressure that varies linearly with total porosity.");
+  params.addRangeCheckedParam<Real>(
+      "scalar_pressure_reference_porosity",
+      0.1,
+      "scalar_pressure_reference_porosity >= 0.0 & scalar_pressure_reference_porosity < 1.0",
+      "Reference porosity for the test-prescribed scalar linear pressure closure.");
+  params.addParam<Real>(
+      "scalar_pressure", 0.0, "Pressure at the scalar pressure reference porosity.");
+  params.addParam<Real>(
+      "scalar_pressure_derivative",
+      0.0,
+      "Derivative of the test-prescribed scalar pressure with respect to total porosity.");
+  params.addParam<bool>(
       "use_prescribed_two_population_state",
       false,
       "Use two independently evolving pore populations with test-prescribed pressure closures.");
@@ -94,6 +109,13 @@ template <bool is_ad>
 PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::
     PorousViscoplasticityStressUpdateTestStateTempl(const InputParameters & parameters)
   : Base(parameters),
+    _use_prescribed_scalar_pressure(
+        this->template getParam<bool>("use_prescribed_scalar_pressure")),
+    _scalar_pressure_reference_porosity(
+        this->template getParam<Real>("scalar_pressure_reference_porosity")),
+    _scalar_pressure(this->template getParam<Real>("scalar_pressure")),
+    _scalar_pressure_derivative(
+        this->template getParam<Real>("scalar_pressure_derivative")),
     _use_prescribed_two_population_state(
         this->template getParam<bool>("use_prescribed_two_population_state")),
     _initial_population_0_fraction(
@@ -117,6 +139,16 @@ PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::
     _test_population_1_effective_hydrostatic_stress(this->template declareGenericProperty<Real, is_ad>(
         "test_population_1_effective_hydrostatic_stress"))
 {
+  if (_use_prescribed_scalar_pressure && _use_prescribed_two_population_state)
+    this->paramError(
+        "use_prescribed_scalar_pressure",
+        "The scalar and independent two-population test pressure closures are mutually exclusive.");
+  if (!std::isfinite(_scalar_pressure))
+    this->paramError("scalar_pressure", "Test scalar pressure must be finite.");
+  if (!std::isfinite(_scalar_pressure_derivative))
+    this->paramError("scalar_pressure_derivative",
+                     "Test scalar pressure derivative must be finite.");
+
   if (_population_pressures.size() != Base::MAX_HYDROSTATIC_STRESS_POPULATIONS)
     this->paramError("population_pressures", "Exactly two test population pressures are required.");
   if (_population_pressure_derivatives.size() !=
@@ -173,6 +205,21 @@ PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::resetIncrementalMaterial
   Base::resetIncrementalMaterialProperties();
   _test_population_0_porosity[this->_qp] = _test_population_0_porosity_old[this->_qp];
   _test_population_1_porosity[this->_qp] = _test_population_1_porosity_old[this->_qp];
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::HydrostaticStressState
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::evaluateHydrostaticStress(
+    const GenericReal<is_ad> & matrix_hydro_stress,
+    const GenericReal<is_ad> & porosity) const
+{
+  if (!_use_prescribed_scalar_pressure)
+    return Base::evaluateHydrostaticStress(matrix_hydro_stress, porosity);
+
+  const auto pressure =
+      _scalar_pressure +
+      _scalar_pressure_derivative * (porosity - _scalar_pressure_reference_porosity);
+  return {matrix_hydro_stress + pressure, _scalar_pressure_derivative};
 }
 
 template <bool is_ad>
