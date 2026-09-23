@@ -102,6 +102,39 @@ struct Real33
 #endif
 };
 
+/**
+ * A fourth-order tensor storing all 81 components.
+ *
+ * The components are stored densely rather than in a representation exploiting the minor
+ * symmetries, because constitutive tangents such as the derivative of the first Piola-Kirchhoff
+ * stress with respect to the deformation gradient have no minor symmetry.
+ */
+struct Real3333
+{
+  Real a[3][3][3][3];
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  KOKKOS_INLINE_FUNCTION Real3333() { *this = 0; }
+  KOKKOS_INLINE_FUNCTION Real3333(const Real3333 & tensor) = default;
+
+  KOKKOS_INLINE_FUNCTION Real &
+  operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
+  {
+    return a[i][j][k][l];
+  }
+  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i,
+                                         unsigned int j,
+                                         unsigned int k,
+                                         unsigned int l) const
+  {
+    return a[i][j][k][l];
+  }
+
+  KOKKOS_INLINE_FUNCTION Real3333 & operator=(const Real3333 & tensor);
+  KOKKOS_INLINE_FUNCTION Real3333 & operator=(const Real scalar);
+#endif
+};
+
 #ifdef MOOSE_KOKKOS_SCOPE
 
 template <typename T>
@@ -478,6 +511,48 @@ KOKKOS_INLINE_FUNCTION Real3
 Real33::col(const unsigned int j) const
 {
   return Real3(a[0][j], a[1][j], a[2][j]);
+}
+
+KOKKOS_INLINE_FUNCTION Real3333 &
+Real3333::operator=(const Real3333 & tensor)
+{
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      for (unsigned int k = 0; k < Moose::dim; ++k)
+        for (unsigned int l = 0; l < Moose::dim; ++l)
+          a[i][j][k][l] = tensor.a[i][j][k][l];
+
+  return *this;
+}
+
+KOKKOS_INLINE_FUNCTION Real3333 &
+Real3333::operator=(const Real scalar)
+{
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      for (unsigned int k = 0; k < Moose::dim; ++k)
+        for (unsigned int l = 0; l < Moose::dim; ++l)
+          a[i][j][k][l] = scalar;
+
+  return *this;
+}
+
+/**
+ * Contract a fourth-order tensor with a second-order tensor over the trailing index pair,
+ * $t_{ij} = C_{ijkl} g_{kl}$
+ */
+KOKKOS_INLINE_FUNCTION Real33
+operator*(const Real3333 & left, const Real33 right)
+{
+  Real33 mul;
+
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      for (unsigned int k = 0; k < Moose::dim; ++k)
+        for (unsigned int l = 0; l < Moose::dim; ++l)
+          mul(i, j) += left(i, j, k, l) * right(k, l);
+
+  return mul;
 }
 
 KOKKOS_INLINE_FUNCTION Real3

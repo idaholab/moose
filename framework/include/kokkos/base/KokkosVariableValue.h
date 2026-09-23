@@ -727,13 +727,11 @@ public:
 
   /**
    * Get the current vector variable gradient
-   * @param datum The AssemblyDatum object of the current thread
+   * @param datum The Datum object of the current thread
    * @param qp The local quadrature point index
    * @returns The vector variable gradient
    */
-  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum,
-                                    unsigned int qp,
-                                    unsigned int comp = 0) const;
+  KOKKOS_FUNCTION Real33 operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
 
   /**
    * Get the Kokkos variable
@@ -853,7 +851,7 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
 }
 
 KOKKOS_FUNCTION inline Real33
-VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+VectorVariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) const
 {
   KOKKOS_ASSERT(_var.initialized());
 
