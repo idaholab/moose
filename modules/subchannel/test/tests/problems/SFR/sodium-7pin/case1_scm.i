@@ -48,7 +48,6 @@ axial_shape_scale = 1.33449883449883
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
   P_out = ${outlet_pressure}
   compute_density = true
   compute_viscosity = true
