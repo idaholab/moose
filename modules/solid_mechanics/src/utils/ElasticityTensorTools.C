@@ -114,6 +114,150 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
   return test * phi * sum;
 }
 
+IsotropicElasticConstants
+isotropicElasticConstants(const IsotropicElasticInput & input)
+{
+  const bool bulk_modulus_set = input.bulk_modulus.has_value();
+  const bool lambda_set = input.lambda.has_value();
+  const bool poissons_ratio_set = input.poissons_ratio.has_value();
+  const bool shear_modulus_set = input.shear_modulus.has_value();
+  const bool youngs_modulus_set = input.youngs_modulus.has_value();
+
+  const unsigned int num_supplied =
+      bulk_modulus_set + lambda_set + poissons_ratio_set + shear_modulus_set + youngs_modulus_set;
+  if (num_supplied != 2)
+    mooseError("Exactly two isotropic elastic constants are required, but ",
+               num_supplied,
+               " were supplied.");
+
+  const Real bulk_modulus = input.bulk_modulus.value_or(0);
+  const Real lambda = input.lambda.value_or(0);
+  const Real poissons_ratio = input.poissons_ratio.value_or(0);
+  const Real shear_modulus = input.shear_modulus.value_or(0);
+  const Real youngs_modulus = input.youngs_modulus.value_or(0);
+
+  IsotropicElasticConstants result;
+  Real elas_mod;
+  Real poiss_rat;
+
+  if (youngs_modulus_set && poissons_ratio_set)
+  {
+    // The conversion RankFourTensorTempl::fillSymmetricIsotropicEandNu performs internally
+    result.lambda =
+        youngs_modulus * poissons_ratio / ((1.0 + poissons_ratio) * (1.0 - 2.0 * poissons_ratio));
+    result.shear_modulus = youngs_modulus / (2.0 * (1.0 + poissons_ratio));
+    result.effective_stiffness =
+        std::max(std::sqrt((youngs_modulus * (1 - poissons_ratio)) /
+                           ((1 + poissons_ratio) * (1 - 2 * poissons_ratio))),
+                 std::sqrt(youngs_modulus / (2 * (1 + poissons_ratio))));
+    return result;
+  }
+
+  if (lambda_set && shear_modulus_set)
+  {
+    result.lambda = lambda;
+    result.shear_modulus = shear_modulus;
+    elas_mod = (shear_modulus * (3 * lambda + 2 * shear_modulus)) / (lambda + shear_modulus);
+    poiss_rat = lambda / (2 * (lambda + shear_modulus));
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(shear_modulus));
+  }
+  else if (shear_modulus_set && bulk_modulus_set)
+  {
+    result.lambda = bulk_modulus - 2.0 / 3.0 * shear_modulus;
+    result.shear_modulus = shear_modulus;
+    elas_mod = (9 * bulk_modulus * shear_modulus) / (3 * bulk_modulus + shear_modulus);
+    poiss_rat = (3 * bulk_modulus - 2 * shear_modulus) / (2 * (3 * bulk_modulus + shear_modulus));
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(shear_modulus));
+  }
+  else if (poissons_ratio_set && bulk_modulus_set)
+  {
+    result.lambda = 3.0 * bulk_modulus * poissons_ratio / (1.0 + poissons_ratio);
+    result.shear_modulus =
+        3.0 * bulk_modulus * (1.0 - 2.0 * poissons_ratio) / (2.0 * (1.0 + poissons_ratio));
+    elas_mod = 3 * bulk_modulus * (1 - 2 * poissons_ratio);
+    poiss_rat = poissons_ratio;
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (lambda_set && bulk_modulus_set)
+  {
+    result.lambda = lambda;
+    result.shear_modulus = 3.0 * (bulk_modulus - lambda) / 2.0;
+    elas_mod = (9 * bulk_modulus * (bulk_modulus - lambda)) / (3 * bulk_modulus - lambda);
+    poiss_rat = (lambda) / ((3 * bulk_modulus - lambda));
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (shear_modulus_set && youngs_modulus_set)
+  {
+    result.lambda = shear_modulus * (youngs_modulus - 2.0 * shear_modulus) /
+                    (3.0 * shear_modulus - youngs_modulus);
+    result.shear_modulus = shear_modulus;
+    elas_mod = youngs_modulus;
+    poiss_rat = (youngs_modulus - 2 * shear_modulus) / (2 * shear_modulus);
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (shear_modulus_set && poissons_ratio_set)
+  {
+    result.lambda = 2.0 * shear_modulus * poissons_ratio / (1.0 - 2.0 * poissons_ratio);
+    result.shear_modulus = shear_modulus;
+    elas_mod = (2 * shear_modulus * (1 + poissons_ratio));
+    poiss_rat = (poissons_ratio);
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (youngs_modulus_set && bulk_modulus_set)
+  {
+    result.lambda = 3.0 * bulk_modulus * (3.0 * bulk_modulus - youngs_modulus) /
+                    (9.0 * bulk_modulus - youngs_modulus);
+    result.shear_modulus =
+        3.0 * bulk_modulus * youngs_modulus / (9.0 * bulk_modulus - youngs_modulus);
+    elas_mod = (youngs_modulus);
+    poiss_rat = (3 * bulk_modulus - youngs_modulus) / (6 * bulk_modulus);
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (lambda_set && poissons_ratio_set)
+  {
+    result.lambda = lambda;
+    result.shear_modulus = lambda * (1.0 - 2.0 * poissons_ratio) / (2.0 * poissons_ratio);
+    elas_mod = (lambda * (1 + poissons_ratio) * (1 - 2 * poissons_ratio)) / (poissons_ratio);
+    poiss_rat = (poissons_ratio);
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else if (lambda_set && youngs_modulus_set)
+  {
+    result.lambda = lambda;
+    result.shear_modulus = (youngs_modulus - 3.0 * lambda +
+                            std::sqrt(youngs_modulus * youngs_modulus + 9.0 * lambda * lambda +
+                                      2.0 * youngs_modulus * lambda)) /
+                           4.0;
+    elas_mod = (youngs_modulus);
+    poiss_rat = (2 * lambda) / (youngs_modulus + lambda +
+                                std::sqrt(std::pow(youngs_modulus, 2) + 9 * std::pow(lambda, 2) +
+                                          2 * youngs_modulus * lambda));
+    result.effective_stiffness =
+        std::max(std::sqrt((elas_mod * (1 - poiss_rat)) / ((1 + poiss_rat) * (1 - 2 * poiss_rat))),
+                 std::sqrt(elas_mod / (2 * (1 + poiss_rat))));
+  }
+  else
+    mooseError("Incorrect combination of isotropic elastic properties.");
+
+  return result;
+}
+
 void
 toVoigtNotationIndexConversion(int k, int & a, int & b)
 {

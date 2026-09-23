@@ -11,6 +11,8 @@
 
 #include "RankFourTensorForward.h"
 
+#include <optional>
+
 namespace ElasticityTensorTools
 {
 
@@ -52,6 +54,39 @@ Real momentJacobian(const RankFourTensor & r4t,
  */
 Real
 momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Real test, Real phi);
+
+/**
+ * A set of isotropic elastic constants as supplied by a user, of which exactly two carry a value.
+ */
+struct IsotropicElasticInput
+{
+  std::optional<Real> bulk_modulus;
+  std::optional<Real> lambda;
+  std::optional<Real> poissons_ratio;
+  std::optional<Real> shear_modulus;
+  std::optional<Real> youngs_modulus;
+};
+
+/**
+ * The Lame parameters of an isotropic material, together with its effective stiffness.
+ */
+struct IsotropicElasticConstants
+{
+  /// Lame's first parameter
+  Real lambda;
+  /// Shear modulus, Lame's second parameter
+  Real shear_modulus;
+  /// Larger of the dilatational and shear wave moduli, in units of a wave speed
+  Real effective_stiffness;
+};
+
+/**
+ * Convert any valid pair of isotropic elastic constants into the Lame parameters and the effective
+ * stiffness.
+ * @param input The supplied constants, exactly two of which must carry a value
+ * @returns The Lame parameters and the effective stiffness
+ */
+IsotropicElasticConstants isotropicElasticConstants(const IsotropicElasticInput & input);
 
 /**
  * Get the shear modulus for an isotropic elasticity tensor
