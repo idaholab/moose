@@ -31,12 +31,22 @@ public:
   /**
    * Constructor
    * @param problem The MOOSE problem
+   * @param mesh The MOOSE mesh
    */
-  Assembly(FEProblemBase & problem);
+  Assembly(FEProblemBase & problem, MooseMesh & mesh);
   /**
    * Initialize assembly
    */
   void init();
+  /**
+   * Initialize assembly by shallow-copying shared data
+   * @param assembly The initialized assembly to share
+   */
+  void init(const Assembly & assembly);
+  /**
+   * Update geometry-dependent physical map data
+   */
+  void update();
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -45,11 +55,6 @@ public:
    * @returns The FE type ID
    */
   unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
-  /**
-   * Get the mesh dimension
-   * @returns The mesh dimension
-   */
-  KOKKOS_FUNCTION unsigned int getDimension() const { return _dimension; }
   /**
    * Get the maximum number of quadrature points per element in the current partition
    * @returns The maximum number of quadrature points per element
@@ -331,6 +336,10 @@ public:
 
 private:
   /**
+   * Initialize assembly data shared by reference and displaced assemblies
+   */
+  void initSharedData();
+  /**
    * Initialize quadrature data
    */
   void initQuadrature();
@@ -344,13 +353,13 @@ private:
   void cachePhysicalMap();
 
   /**
-   * Reference of the MOOSE problem
+   * Pointer to the MOOSE problem
    */
-  FEProblemBase & _problem;
+  FEProblemBase * _problem;
   /**
-   * Reference of the MOOSE mesh
+   * Pointer to the MOOSE mesh
    */
-  MooseMesh & _mesh;
+  MooseMesh * _mesh;
   /**
    * FE type ID map
    */
@@ -359,7 +368,7 @@ private:
   /**
    * Mesh dimension
    */
-  const unsigned int _dimension;
+  unsigned int _dimension;
   /**
    * Coordinate system type of each subdomain
    */
