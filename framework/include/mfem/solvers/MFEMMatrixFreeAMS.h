@@ -34,6 +34,10 @@ public:
   {
     _ess_bdr_markers = ess_bdr_markers;
   }
+  /// Set whether the equation system contains nonlinear integrators, which determines whether the
+  /// Jacobi smoother is built from the operator rather than from the bilinear form
+  void SetNonlinear(bool nonlinear) { _nonlinear = nonlinear; }
+
   void SetOperator(const mfem::Operator & op) override;
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
@@ -51,6 +55,7 @@ private:
   const int _inner_g_its;
   mfem::ParBilinearForm * _aform;
   mfem::Array<int> _ess_bdr_markers;
+  bool _nonlinear = false;
 };
 } // namespace Moose::MFEM
 

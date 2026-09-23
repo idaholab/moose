@@ -33,8 +33,17 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
   height = op.Height();
   width = op.Width();
 
-  mfem::OperatorJacobiSmoother * smoother = new mfem::OperatorJacobiSmoother(0.25);
-  smoother->SetOperator(op);
+  // Build the Jacobi smoother from op rather than letting mfem::MatrixFreeAMS build its own from
+  // _aform. For a nonlinear problem the gradient term belongs to the equation system's nonlinear
+  // form, so _aform, the bilinear form, is not the operator being preconditioned. The damping
+  // matches the value MFEM uses for its own smoother.
+  mfem::Solver * smoother = nullptr;
+  if (_nonlinear)
+  {
+    auto * jacobi = new mfem::OperatorJacobiSmoother(0.25);
+    jacobi->SetOperator(op); // the damping-only constructor defers the diagonal to here
+    smoother = jacobi;
+  }
 
   // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this
   // constructs the solver
@@ -105,6 +114,7 @@ Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemConte
   auto & matrix_free_ams = cast_ref<Moose::MFEM::MatrixFreeAMS &>(*_solver);
   matrix_free_ams.SetBilinearForm(*_a);
   matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
+  matrix_free_ams.SetNonlinear(_equation_system->IsNonlinear());
 }
 
 #endif
