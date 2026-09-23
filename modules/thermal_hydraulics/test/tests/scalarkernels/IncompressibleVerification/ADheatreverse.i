@@ -118,9 +118,15 @@ area = '${fparse 3.14159* ${R}^2}'
     variable = T1
     execute_on = 'TIMESTEP_END'
   []
+  [M]
+    type = ScalarVariable
+    variable = m1
+    execute_on = 'TIMESTEP_END'
+  []
   [Re]
     type = ParsedPostprocessor
-    expression = 'abs(${min}) / ${area} * 2 * ${R} / ${mu}'
+    expression = 'abs(M) / ${area} * 2 * ${R} / ${mu}'
+    pp_names = 'M'
     execute_on = 'TIMESTEP_END'
   []
   [Pr]
@@ -136,8 +142,9 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [in]
     type = ParsedPostprocessor
-    expression = '1 / 2 * (1 - abs(${min})/${min}) * ${Tout}
-                  + 1 / 2 * (1 + abs(${min})/${min}) * ${Tin}'
+    expression = '1 / 2 * (1 - abs(M)/M) * ${Tout}
+                  + 1 / 2 * (1 + abs(M)/M) * ${Tin}'
+    pp_names = 'M'
     execute_on = 'TIMESTEP_END'
   []
   [q]
@@ -148,9 +155,9 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [analytical_T]
     type = ParsedPostprocessor
-    expression = '1 / abs(${min}) / ${cp} * (q * ${length} - ${min} / 2 * (1 - abs(${min})/${min}) * ${cp} * ${Tout}
-                  + ${min} / 2 * (1 + abs(${min})/${min}) * ${cp} * ${Tin}) '
-    pp_names = 'T q'
+    expression = '1 / abs(M) / ${cp} * (q * ${length} - M / 2 * (1 - abs(M)/M) * ${cp} * ${Tout}
+                  + M / 2 * (1 + abs(M)/M) * ${cp} * ${Tin}) '
+    pp_names = 'T q M'
   []
   [relative_error]
     type = ParsedPostprocessor

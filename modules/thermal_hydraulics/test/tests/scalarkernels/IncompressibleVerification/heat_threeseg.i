@@ -190,14 +190,21 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     variable = T3
     execute_on = 'TIMESTEP_END'
   []
+  [M]
+    type = ScalarVariable
+    variable = m1
+    execute_on = 'TIMESTEP_END'
+  []
   [Re1]
     type = ParsedPostprocessor
-    expression = 'abs(${min}) / ${area1} * 2 * ${R1} / ${mu}'
+    expression = 'abs(M) / ${area1} * 2 * ${R1} / ${mu}'
+    pp_names = 'M'
     execute_on = 'TIMESTEP_END'
   []
   [Re2]
     type = ParsedPostprocessor
-    expression = 'abs(${min}) / ${area2} * 2 * ${R2} / ${mu}'
+    expression = 'abs(M) / ${area2} * 2 * ${R2} / ${mu}'
+    pp_names = 'M'
     execute_on = 'TIMESTEP_END'
   []
   [Pr]
@@ -219,23 +226,23 @@ area2 = '${fparse 3.14159* ${R2}^2}'
   []
   [in1]
     type = ParsedPostprocessor
-    expression = '1 / 2 * (1 - abs(${min})/${min}) * Ttwo
-                  + 1 / 2 * (1 + abs(${min})/${min}) * ${Tin}'
-    pp_names = 'Ttwo'
+    expression = '1 / 2 * (1 - abs(M)/M) * Ttwo
+                  + 1 / 2 * (1 + abs(M)/M) * ${Tin}'
+    pp_names = 'Ttwo M'
     execute_on = 'TIMESTEP_END'
   []
   [in2]
     type = ParsedPostprocessor
-    expression = '1 / 2 * (1 - abs(${min})/${min}) * Tthree
-                  + 1 / 2 * (1 + abs(${min})/${min}) * Tone'
-    pp_names = 'Tone Tthree'
+    expression = '1 / 2 * (1 - abs(M)/M) * Tthree
+                  + 1 / 2 * (1 + abs(M)/M) * Tone'
+    pp_names = 'Tone Tthree M'
     execute_on = 'TIMESTEP_END'
   []
   [in3]
     type = ParsedPostprocessor
-    expression = '1 / 2 * (1 - abs(${min})/${min}) * ${Tout}
-                  + 1 / 2 * (1 + abs(${min})/${min}) * Ttwo'
-    pp_names = 'Ttwo'
+    expression = '1 / 2 * (1 - abs(M)/M) * ${Tout}
+                  + 1 / 2 * (1 + abs(M)/M) * Ttwo'
+    pp_names = 'Ttwo M'
     execute_on = 'TIMESTEP_END'
   []
   [q1]
@@ -258,21 +265,21 @@ area2 = '${fparse 3.14159* ${R2}^2}'
   []
   [analytical_T1]
     type = ParsedPostprocessor
-    expression = '1 / abs(${min}) / ${cp} * (q1 * ${length1} - ${min} / 2 * (1 - abs(${min})/${min}) * ${cp} * Ttwo
-                  + ${min} / 2 * (1 + abs(${min})/${min}) * ${cp} * ${Tin})'
-    pp_names = 'Ttwo q1'
+    expression = '1 / abs(M) / ${cp} * (q1 * ${length1} - M / 2 * (1 - abs(M)/M) * ${cp} * Ttwo
+                  + M / 2 * (1 + abs(M)/M) * ${cp} * ${Tin})'
+    pp_names = 'Ttwo q1 M'
   []
   [analytical_T2]
     type = ParsedPostprocessor
-    expression = '1 / abs(${min}) / ${cp} * (q2 * ${length2} - ${min} / 2 * (1 - abs(${min})/${min}) * ${cp} * Tthree
-                  + ${min} / 2 * (1 + abs(${min})/${min}) * ${cp} * Tone)'
-    pp_names = 'Tone Tthree q2'
+    expression = '1 / abs(M) / ${cp} * (q2 * ${length2} - M / 2 * (1 - abs(M)/M) * ${cp} * Tthree
+                  + M / 2 * (1 + abs(M)/M) * ${cp} * Tone)'
+    pp_names = 'Tone Tthree q2 M'
   []
   [analytical_T3]
     type = ParsedPostprocessor
-    expression = '1 / abs(${min}) / ${cp} * (q3 * ${length3} - ${min} / 2 * (1 - abs(${min})/${min}) * ${cp} * ${Tout}
-                  + ${min} / 2 * (1 + abs(${min})/${min}) * ${cp} * Ttwo)'
-    pp_names = 'Ttwo q3'
+    expression = '1 / abs(M) / ${cp} * (q3 * ${length3} - M / 2 * (1 - abs(M)/M) * ${cp} * ${Tout}
+                  + M / 2 * (1 + abs(M)/M) * ${cp} * Ttwo)'
+    pp_names = 'Ttwo q3 M'
   []
   [relative_error1]
     type = ParsedPostprocessor
