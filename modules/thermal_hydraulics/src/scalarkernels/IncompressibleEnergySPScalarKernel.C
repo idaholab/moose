@@ -149,7 +149,7 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
     // Advection component
     energy_residual += abs(_m[_i]) * _cp / _length(_qp, _state);
     // Wall heat transfer
-    energy_residual += -_q;
+    energy_residual -= _q;
     // Transient term
     energy_residual += _area(_qp, _state) * _rho * _cp * Base::_du_dot_du[_i];
 

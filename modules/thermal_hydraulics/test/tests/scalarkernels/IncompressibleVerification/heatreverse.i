@@ -5,8 +5,8 @@ R = 0.025
 min = 1.0
 Pin = 101300
 dP = -10130
-Tin = 293.15
-Tout = 323.15
+Tin = 323.15
+Tout = 293.15
 mu = 0.001002
 cp = 4185.0
 k = 0.598
@@ -40,11 +40,11 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [T1]
     family = SCALAR
-    initial_condition = ${Tin}
+    initial_condition = ${Tout}
   []
   [Tw]
     family = SCALAR
-    initial_condition = ${Tout}
+    initial_condition = ${Tin}
   []
   [T2]
     family = SCALAR
@@ -102,7 +102,7 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [walltemp]
     type = ParsedODEKernel
-    expression = 'Tw - ${Tout}'
+    expression = 'Tw - ${Tin}'
     variable = Tw
   []
   [dPk]
@@ -149,7 +149,7 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [q]
     type = ParsedPostprocessor
-    expression = 'h * ${fparse 2*3.14159* ${R}} / 2 * ( 2 * ${Tout} - T - in)'
+    expression = 'h * ${fparse 2*3.14159* ${R}} / 2 * ( 2 * ${Tin} - T - in)'
     pp_names = 'T h in'
     execute_on = 'TIMESTEP_END'
   []
