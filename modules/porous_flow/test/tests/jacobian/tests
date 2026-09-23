@@ -160,6 +160,17 @@
     issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [mass01_fully_saturated_thm_AD]
+    type = 'PetscJacobianTester'
+    input = 'mass01_fully_saturated_thm_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = mass01_fully_saturated
+    requirement = 'The system shall compute an exact Jacobian via AD for the fully-saturated mass time derivative kernel with thermo-hydro-mechanical coupling, including the displacement dependence carried by the volumetric strain rate.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
 
   [fflux01]
     type = 'PetscJacobianTester'
@@ -451,6 +462,17 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the mass volumetric expansion, with constant bulk modulus, HM porosity and VG capilarity.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [mass_vol_exp02_AD]
+    type = 'PetscJacobianTester'
+    input = 'mass_vol_exp02_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = mass_vol_exp02
+    requirement = 'The system shall compute via automatic differentiation all Jacobian entries of physics kernels for the mass volumetric expansion, with constant bulk modulus, HM porosity and VG capilarity.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
   [mass_vol_exp03]
@@ -806,6 +828,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [heat_vol_exp01_AD]
+    type = 'PetscJacobianTester'
+    input = 'heat_vol_exp01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = heat_vol_exp01
+    requirement = 'The system shall compute via automatic differentiation all Jacobian entries of physics kernels for the heat volumetric expansion, 1phase with constant bulk modulus, VG capilarity and THM porosity.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
 
   [phe01]
     type = 'PetscJacobianTester'
@@ -908,6 +941,17 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the volumetric expansion of desorbed mass.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [desorped_mass_vol_exp01_AD]
+    type = 'PetscJacobianTester'
+    input = 'desorped_mass_vol_exp01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = desorped_mass_vol_exp01
+    requirement = 'The system shall compute via automatic differentiation all Jacobian entries of physics kernels for the volumetric expansion of desorbed mass.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
 
