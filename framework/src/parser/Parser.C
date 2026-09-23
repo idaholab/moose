@@ -192,40 +192,67 @@ RangeEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::Brac
   std::vector<std::string> argv;
   argv.insert(argv.begin(), args.begin(), args.end());
 
-  if (argv.size() != 2)
+  if (argv.size() < 2 || argv.size() > 3)
   {
-    exp.errors.emplace_back(
-        "range error: Expected 2 arguments ${range first_index last_index} in '" + n->fullpath() +
-            "'",
-        n);
-    return n->val();
-  }
-
-  std::array<int, 2> index;
-  for (const auto i : make_range(2))
-  {
-    const auto & arg = argv[i];
-    if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
-    {
-      exp.errors.emplace_back("range error: index '" + arg +
-                                  "' is not a non-negative integer in '" + n->fullpath() + "'",
-                              n);
-      return n->val();
-    }
-    index[i] = MooseUtils::convert<int>(arg);
-  }
-
-  if (index[1] < index[0])
-  {
-    exp.errors.emplace_back("range error: last index " + argv[1] + " is smaller than first index " +
-                                argv[0] + " in '" + n->fullpath() + "'",
+    exp.errors.emplace_back("range error: Expected either 2 arguments '${range start stop}' "
+                                "or 3 arguments '${range start stop step}' in '" + n->fullpath() +
+                                "'",
                             n);
     return n->val();
   }
 
+  std::array<int, 3> int_args;
+  for (const auto i : make_range(argv.size()))
+  {
+    bool success = false;
+    if (!argv[i].empty())
+      success = MooseUtils::convert(argv[i], int_args[i], false);
+
+    if (!success)
+    {
+      exp.errors.emplace_back(
+          "range error: parameter '" + argv[i] + "' is not an integer in '" + n->fullpath() + "'", n);
+      return n->val();
+    }
+  }
+  if (argv.size() == 2)
+    int_args[2] = 1;
+
+  if (int_args[2] == 0)
+  {
+    exp.errors.emplace_back("range error: step is zero in '" + n->fullpath() + "'", n);
+    return n->val();
+  }
+
   std::vector<std::string> names;
-  for (const auto i : make_range(index[0], index[1] + 1))
-    names.push_back(std::to_string(i));
+  if (int_args[2] > 0)
+  {
+    if (int_args[1] < int_args[0])
+    {
+      exp.errors.emplace_back("range error: end point '" + argv[1] +
+                                  "' is smaller than the start point '" + argv[0] +
+                                  "' when the step is positive in '" + n->fullpath() + "'",
+                              n);
+      return n->val();
+    }
+
+    for (int i = int_args[0]; i < int_args[1]; i += int_args[2])
+      names.push_back(std::to_string(i));
+  }
+  else
+  {
+    if (int_args[0] < int_args[1])
+    {
+      exp.errors.emplace_back("range error: start point '" + argv[0] +
+                                  "' is smaller than the end point '" + argv[1] +
+                                  "' when the step is negative in '" + n->fullpath() + "'",
+                              n);
+      return n->val();
+    }
+
+    for (int i = int_args[0]; i > int_args[1]; i += int_args[2])
+      names.push_back(std::to_string(i));
+  }
 
   return MooseUtils::stringJoin(names);
 }
