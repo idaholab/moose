@@ -7,6 +7,7 @@
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 2D model using a penalty method.'
+    max_threads = 1 # inclined_bc_2d.i requests superlu_dist, which is not thread-safe
   [../]
   [./3D]
     type = Exodiff
@@ -16,6 +17,7 @@
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 3D model using a penalty method.'
+    max_threads = 1 # inclined_bc_3d.i requests superlu_dist, which is not thread-safe
   [../]
   [ad]
     type = Exodiff
@@ -25,5 +27,6 @@
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions while using automatic differentiation.'
     capabilities = 'superlu & method!=dbg'
+    max_threads = 1 # ad_inclined_bc_3d.i requests superlu_dist, which is not thread-safe
   []
 []

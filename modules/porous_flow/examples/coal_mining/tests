@@ -11,5 +11,6 @@
     requirement = 'PorousFlow shall be able to simulate caving coupled with fluid flow associated with underground coal mining'
     design = 'porous_flow/coal_mining.md'
     issues = '#14148'
+    max_threads = 1 # coarse_with_fluid.i requests superlu_dist, which is not thread-safe
   [../]
 []

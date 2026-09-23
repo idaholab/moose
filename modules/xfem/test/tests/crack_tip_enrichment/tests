@@ -10,6 +10,7 @@
     design = 'LineSegmentCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
+    max_threads = 1 # edge_crack_2d.i requests superlu_dist, which is not thread-safe
   [../]
   [./crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
@@ -24,5 +25,6 @@
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
+    max_threads = 1 # penny_crack_3d.i requests superlu_dist, which is not thread-safe
   [../]
 []

@@ -16,6 +16,7 @@
     cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
     capabilities = 'superlu'
     requirement = 'The system shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    max_threads = 1 # recover.i requests superlu_dist, which is not thread-safe
   []
   [recover_3]
     type = Exodiff
@@ -27,6 +28,7 @@
     capabilities = 'superlu'
     restep = false # Restep happens at the recover_2 step
     requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    max_threads = 1 # recover.i requests superlu_dist, which is not thread-safe
   []
 
   [ad_recover_1]
@@ -44,6 +46,7 @@
     cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
     capabilities = 'superlu'
     requirement = 'The system shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    max_threads = 1 # ad_recover.i requests superlu_dist, which is not thread-safe
   []
   [ad_recover_3]
     type = Exodiff
@@ -55,6 +58,7 @@
     capabilities = 'superlu'
     restep = false # Restep happens at the ad_recover_2 step
     requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    max_threads = 1 # ad_recover.i requests superlu_dist, which is not thread-safe
   []
 
   [ad_recover_jacobian]

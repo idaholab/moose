@@ -90,6 +90,7 @@
        capabilities = 'superlu'
 
        detail = "SuperLU,"
+       max_threads = 1 # input.i requests superlu_dist, which is not thread-safe
     []
     [mumps]
        type = RunApp

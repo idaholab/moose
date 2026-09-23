@@ -14,6 +14,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+    max_threads = 1 # hertz_cyl_qsym_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -28,6 +29,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+    max_threads = 1 # hertz_cyl_qsym_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -42,6 +44,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+    max_threads = 1 # hertz_cyl_qsym_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -56,6 +59,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+    max_threads = 1 # hertz_cyl_qsym_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -71,5 +75,6 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+    max_threads = 1 # hertz_cyl_qsym_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
 []

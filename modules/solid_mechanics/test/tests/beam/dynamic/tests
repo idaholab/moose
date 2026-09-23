@@ -55,6 +55,7 @@
                   " of a massless Euler-Bernoulli beam modeled using beam elements"
                   " with a nodal masses placed at the ends."
     verification = 'beam_vandv.md'
+    max_threads = 1 # dyn_euler_small_added_mass.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass_file]
     type = 'Exodiff'
@@ -67,6 +68,7 @@
                   " of a massless Euler-Bernoulli beam modeled using beam elements"
                   " with added nodal masses when the location and values of the"
                   " masses are provided using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_file.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass_gravity]
     type = 'Exodiff'
@@ -78,6 +80,7 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements when gravitational force"
                   " (proportional to nodal mass) is applied to the beam."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass_gravity_2]
     type = 'Exodiff'
@@ -89,6 +92,7 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements under gravitational force when"
                   " the nodal mass distribution is provided using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./add_dynamic_variables_action]
     type = 'Exodiff'
@@ -100,6 +104,7 @@
                   " velocities and accelerations required for a dynamic simulation"
                   " using beam elements."
     design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
+    max_threads = 1 # dyn_euler_small_added_mass_dyn_variable_action.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass_inertia_damping]
     type = 'Exodiff'
@@ -110,6 +115,7 @@
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping."
     verification = 'beam_vandv.md'
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass_inertia_damping_ti]
     type = 'Exodiff'
@@ -122,6 +128,7 @@
                   " accelerations computed by the Newmark-Beta time integrator."
     issues = "#12185"
     prereq = "dyn_euler_added_mass_inertia_damping_action"
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping_ti.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'
@@ -146,6 +153,7 @@
                   " matrix in the presence of Rayleigh damping and numerical damping"
                   " in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping_action.i requests superlu_dist, which is not thread-safe
   [../]
   [./dyn_euler_added_mass2]
     type = 'CSVDiff'
@@ -174,6 +182,7 @@
     requirement = "The NodalRotatioanlInertia class shall produce an error if"
                   " the number of rotational velocities and accelerations provided"
                   " as input differ from the number of rotations."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_3]
     type = 'RunException'
@@ -183,6 +192,7 @@
     capabilities = 'superlu'
     requirement = "The NodalRotationalInertia class shall produce an error if the"
                   " user provided nodal inertia is not positive definite."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_4]
     type = 'RunException'
@@ -192,6 +202,7 @@
     capabilities = 'superlu'
     requirement = "The NodalRotatioanlInertia class shall produce an error if the"
                   " user provided x and y orientations are not unit vectors."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_5]
     type = 'RunException'
@@ -202,6 +213,7 @@
     requirement = "The NodalRotatioanlInertia class shall produce an error if the"
                   " user provided x and y orientations are not perpendicular to each"
                   " other."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_6]
     type = 'RunException'
@@ -211,6 +223,7 @@
     capabilities = 'superlu'
     requirement = "The NodalRotatioanlInertia class shall produce an error if only"
                   " x or y orientation is provided as input by the user."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_7]
     type = 'RunException'
@@ -231,6 +244,7 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is provided as input both as a constant value"
                   " and also using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_file.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_9]
     type = 'RunException'
@@ -241,6 +255,7 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is not provided as input either as a constant value"
                   " or using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_file.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_10]
     type = 'RunException'
@@ -250,6 +265,7 @@
     capabilities = 'superlu'
     requirement = "The NodalTranslationalInertia class shall produce an error"
                   " if the number of columns in the nodal mass file is not 4."
+    max_threads = 1 # dyn_euler_small_added_mass_file.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_11]
     type = 'RunException'
@@ -260,6 +276,7 @@
     requirement = "The NodalTranslationalInertia class shall produce an error"
                   " if all the nodal positions provided in the nodal mass file"
                   " cannot be found in the given boundary or mesh block."
+    max_threads = 1 # dyn_euler_small_added_mass_file.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_12]
     type = 'RunException'
@@ -270,6 +287,7 @@
     requirement = "The NodalGravity class shall produce an error if"
                   " nodal mass is provided as input both as a constant value"
                   " and also using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_13]
     type = 'RunException'
@@ -280,6 +298,7 @@
     requirement = "The NodalGravity class shall produce an error if"
                   " nodal mass is not provided as input either as a constant value"
                   " or using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_14]
     type = 'RunException'
@@ -289,6 +308,7 @@
     capabilities = 'superlu'
     requirement = "The NodalGravity class shall produce an error"
                   " if the number of columns in the nodal mass file is not 4."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_15]
     type = 'RunException'
@@ -299,6 +319,7 @@
     requirement = "The NodalGravity class shall produce an error"
                   " if all the nodal positions provided in the nodal mass file"
                   " cannot be found in the given boundary or mesh block."
+    max_threads = 1 # dyn_euler_small_added_mass_gravity.i requests superlu_dist, which is not thread-safe
   [../]
   [./error_16]
     type = 'RunException'
@@ -321,5 +342,6 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is provided as input both as constant value and"
                   " also using a csv file."
+    max_threads = 1 # dyn_euler_small_added_mass_inertia_damping_action.i requests superlu_dist, which is not thread-safe
   [../]
 []

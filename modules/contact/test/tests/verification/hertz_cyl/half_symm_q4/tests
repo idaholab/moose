@@ -15,6 +15,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -30,6 +31,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -49,6 +51,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -68,6 +71,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -90,6 +94,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_0_pen]
     type = 'CSVDiff'
@@ -107,6 +112,7 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 0."
+    max_threads = 1 # hertz_cyl_half_1deg_template3.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -125,6 +131,7 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 0.2."
+    max_threads = 1 # hertz_cyl_half_1deg_template3.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_1_0_pen]
     type = 'CSVDiff'
@@ -142,6 +149,7 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 1.0."
+    max_threads = 1 # hertz_cyl_half_1deg_template3.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -161,5 +169,6 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
+    max_threads = 1 # hertz_cyl_half_1deg_template1.i requests superlu_dist, which is not thread-safe
   [../]
 []

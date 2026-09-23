@@ -14,6 +14,7 @@
     allow_warnings = true
     rel_err = 1e-4
     requirement = 'The system shall support mechanics frictional contact problems with a 0.2 friction coefficient.'
+    max_threads = 1 # frictional_02_penalty.i requests superlu_dist, which is not thread-safe
   []
 
   [frictional_mu04_penalty]
@@ -52,6 +53,7 @@
     rel_err = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictionless contact problems with a penalty formulation.'
+    max_threads = 1 # frictionless_penalty.i requests superlu_dist, which is not thread-safe
   []
 
   [frictionless_aug]
@@ -65,6 +67,7 @@
     rel_err = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictionless contact problems using the augmented Lagrangian method.'
+    max_threads = 1 # frictionless_aug.i requests superlu_dist, which is not thread-safe
   []
 
   [frictional_mu02_aug]
@@ -78,6 +81,7 @@
     abs_zero = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictional contact problems using the augmented Lagrangian method.'
+    max_threads = 1 # frictional_02_aug.i requests superlu_dist, which is not thread-safe
   []
 
 []

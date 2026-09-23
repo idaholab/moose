@@ -35,6 +35,7 @@
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D plane strain "
                   "single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless_kin]
     type = 'CSVDiff'
@@ -52,6 +53,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D plane "
                   "strain single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless_pen]
     type = 'CSVDiff'
@@ -70,6 +72,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane "
                   "strain single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless_pen_contact_line_search]
     type = 'CSVDiff'
@@ -102,6 +105,7 @@
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane "
                   "strain single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [mu_0_0_pen]
     type = 'CSVDiff'
@@ -120,6 +124,7 @@
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane "
                   "strain single point contact model."
+    max_threads = 1 # single_point_2d.i requests superlu_dist, which is not thread-safe
   []
   [mu_0_2_kin]
     type = 'CSVDiff'
@@ -138,6 +143,7 @@
     for 2D plane "
                   "strain single point contact model with a non-zero friction
     coefficient."
+    max_threads = 1 # single_point_2d_frictional.i requests superlu_dist, which is not thread-safe
   []
   [mu_0_2_pen]
     type = 'CSVDiff'
@@ -158,5 +164,6 @@
     for 2D plane "
                   "strain single point contact model with a non-zero friction
     coefficient."
+    max_threads = 1 # single_point_2d_frictional.i requests superlu_dist, which is not thread-safe
   []
 []

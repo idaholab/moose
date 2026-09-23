@@ -149,6 +149,7 @@
                   "in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
+    max_threads = 1 # planar_xy.i requests superlu_dist, which is not thread-safe
   []
   [planar_xz]
     type = Exodiff
@@ -160,6 +161,7 @@
                   "in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
+    max_threads = 1 # planar_xz.i requests superlu_dist, which is not thread-safe
   []
   [planar_yz]
     type = Exodiff
@@ -171,6 +173,7 @@
                   "in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
+    max_threads = 1 # planar_yz.i requests superlu_dist, which is not thread-safe
   []
   [corner_wrap]
     type = Exodiff

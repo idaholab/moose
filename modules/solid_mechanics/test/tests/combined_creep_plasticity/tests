@@ -33,6 +33,7 @@
                    and plasticity 3D cube problem with a time-varying pressure
                    BC."
     capabilities = 'superlu & method!=dbg'
+    max_threads = 1 # combined_stress_prescribed.i requests superlu_dist, which is not thread-safe
   []
   [stress_relaxation]
     type = 'Exodiff'

@@ -70,6 +70,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
+    max_threads = 1 # ring1_template2.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -84,6 +85,7 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
+    max_threads = 1 # ring1_template2.i requests superlu_dist, which is not thread-safe
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -97,5 +99,6 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
+    max_threads = 1 # ring1_mu_0_2_pen.i requests superlu_dist, which is not thread-safe
   [../]
 []
