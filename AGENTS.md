@@ -40,8 +40,7 @@ Before implementing:
   fixes, especially if it aids in the 'Simplicity First' principle.
 - Dependencies are in scope for fixes. A fix belongs where the defect is, not
   where the build is convenient. Linking against an installed copy of a
-  dependency does not put its source out of reach; PETSc, libMesh and MFEM are
-  all present in the tree.
+  dependency does not put its source out of reach.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
