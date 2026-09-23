@@ -1,6 +1,6 @@
 [Tests]
   issues = '#33740'
-  design = 'KokkosLinearElasticity.md syntax/Problem/index.md'
+  design = 'KokkosVectorStressDivergence.md syntax/Problem/index.md'
   [libmesh]
     type = CSVDiff
     input = 'kokkos_cantilever.i'
