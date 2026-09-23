@@ -488,6 +488,8 @@ class Job(OutputInterface):
         if not tester.shouldExecute():
             run_tester = lambda: tester.run(self.options, 0, "")
             try_catch(run_tester, "TESTER RUN", "tester_run")
+            post_run = lambda: tester.postRun(self.options)
+            try_catch(post_run, "TESTER POST RUN", "tester_post_run")
             return
 
         if self.options.pedantic_checks and self.canParallel():
@@ -579,6 +581,10 @@ class Job(OutputInterface):
             else:
                 message = "Skipping validation due to non-zero exit code"
                 self.validation_output.appendOutput(message)
+
+        post_run = lambda: tester.postRun(self.options)
+        if not try_catch(post_run, "TESTER POST RUN", "tester_post_run"):
+            return
 
         # Run finalize now that we're done
         finalize()

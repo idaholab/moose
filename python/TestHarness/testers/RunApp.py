@@ -196,6 +196,16 @@ class RunApp(Tester):
             if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
 
+        # Skipping the pre-run deletion (delete_output_before_running=False) is normally
+        # done because a leftover output is needed by/for something else (an expensive
+        # file to regenerate, or a later test that consumes it). Deleting it after this
+        # run still closes the gap #23749 is about (a stale file masking a regression
+        # that stopped producing output) without disturbing whatever needed it to survive
+        # from before this run started. TestHarness-generated multi-part tests (e.g.
+        # recover) that need their output to survive across parts override this via
+        # setDeleteOutputAfterRunning().
+        self.setDeleteOutputAfterRunning(not params["delete_output_before_running"])
+
         # The capabilities file that we need to set with
         # --testharness-capabilities, if any. This should
         # only be valid if we have a 'capabilities' spec
