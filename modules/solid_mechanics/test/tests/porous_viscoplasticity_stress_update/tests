@@ -249,9 +249,56 @@
     abs_zero = 1e-12
     requirement = 'Reordering simultaneous distinct-power creep mechanisms shall preserve the complete physical output history.'
   []
+  [prescribed_two_population_nonad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = 'AD="" use_ad=false Materials/stress/tangent_operator=nonlinear Outputs/file_base=prescribed_two_population_nonad'
+    requirement = 'The generic non-AD porous-LPS material shall solve two independently evolving pore populations with prescribed pressure closures without relying on BISON gas physics.'
+  []
+  [prescribed_two_population_ad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = 'Outputs/file_base=prescribed_two_population_ad'
+    prereq = prescribed_two_population_nonad
+    requirement = 'The generic AD porous-LPS material shall solve the same prescribed independent two-population problem as the non-AD path.'
+  []
+  [prescribed_two_population_compare]
+    type = RunCommand
+    command = 'python3 compare_prescribed_two_population.py prescribed_two_population_nonad.csv prescribed_two_population_ad.csv'
+    prereq = prescribed_two_population_ad
+    requirement = 'The generic AD and non-AD independent two-population implementations shall produce equivalent mechanical and pore-population histories.'
+  []
+  [prescribed_two_population_ad_jacobian]
+    type = PetscJacobianTester
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = '-snes_test_err 1e-11 Executioner/num_steps=1 Outputs/csv=false'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 2e-6
+    difference_tol = 1e8
+    prereq = prescribed_two_population_compare
+    requirement = 'The AD Jacobian shall include the generic independent pore-population pressure and porosity sensitivities.'
+  []
+  [prescribed_two_population_active_floor]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_active_floor.i
+    cli_args = 'Outputs/csv=false'
+    prereq = prescribed_two_population_ad_jacobian
+    requirement = 'The generic independent two-population active set shall hold both explicit pore-population floors while retaining a finite deviatoric viscoplastic response.'
+  []
+
   [implementation_kernels]
     type = RunApp
     allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
     input = implementation_kernels.i
     cli_args = 'AD="" use_ad=false Executioner/num_steps=1'
     expect_out = 'Porous LPS implementation kernel checks passed'

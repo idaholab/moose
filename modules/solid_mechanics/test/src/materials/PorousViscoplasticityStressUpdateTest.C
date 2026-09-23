@@ -15,11 +15,232 @@
 #include <cmath>
 
 registerMooseObject("SolidMechanicsTestApp", PorousViscoplasticityStressUpdateTest);
+registerMooseObject("SolidMechanicsTestApp", ADPorousViscoplasticityStressUpdateTest);
+
+template <bool is_ad>
+InputParameters
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::validParams()
+{
+  InputParameters params = Base::validParams();
+  params.addParam<bool>(
+      "use_prescribed_two_population_state",
+      false,
+      "Use two independently evolving pore populations with test-prescribed pressure closures.");
+  params.addRangeCheckedParam<Real>(
+      "initial_population_0_fraction",
+      0.5,
+      "initial_population_0_fraction >= 0.0 & initial_population_0_fraction <= 1.0",
+      "Initial fraction of total porosity assigned to test pore population 0.");
+  params.addRangeCheckedParam<Real>(
+      "test_initial_total_porosity",
+      0.1,
+      "test_initial_total_porosity > 0.0 & test_initial_total_porosity < 1.0",
+      "Initial total porosity used only to initialize the test-owned pore-population state.");
+  params.addParam<std::vector<Real>>(
+      "population_pressures",
+      {0.0, 0.0},
+      "Constant pressure offsets for test pore populations 0 and 1.");
+  params.addParam<std::vector<Real>>(
+      "population_pressure_derivatives",
+      {0.0, 0.0, 0.0, 0.0},
+      "Linear pressure derivatives [dp0/df0, dp0/df1, dp1/df0, dp1/df1] used by the "
+      "prescribed two-population closure.");
+  params.addParam<std::vector<Real>>(
+      "population_porosity_floors",
+      {0.0, 0.0},
+      "Explicit lower bounds for test pore-population porosities 0 and 1.");
+  return params;
+}
+
+template <bool is_ad>
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::
+    PorousViscoplasticityStressUpdateTestStateTempl(const InputParameters & parameters)
+  : Base(parameters),
+    _use_prescribed_two_population_state(
+        this->template getParam<bool>("use_prescribed_two_population_state")),
+    _initial_population_0_fraction(
+        this->template getParam<Real>("initial_population_0_fraction")),
+    _test_initial_total_porosity(this->template getParam<Real>("test_initial_total_porosity")),
+    _population_pressures(this->template getParam<std::vector<Real>>("population_pressures")),
+    _population_pressure_derivatives(
+        this->template getParam<std::vector<Real>>("population_pressure_derivatives")),
+    _population_porosity_floors(
+        this->template getParam<std::vector<Real>>("population_porosity_floors")),
+    _test_population_0_porosity(
+        this->template declareGenericProperty<Real, is_ad>("test_population_0_porosity")),
+    _test_population_0_porosity_old(
+        this->template getMaterialPropertyOld<Real>("test_population_0_porosity")),
+    _test_population_1_porosity(
+        this->template declareGenericProperty<Real, is_ad>("test_population_1_porosity")),
+    _test_population_1_porosity_old(
+        this->template getMaterialPropertyOld<Real>("test_population_1_porosity")),
+    _test_population_0_effective_hydrostatic_stress(this->template declareGenericProperty<Real, is_ad>(
+        "test_population_0_effective_hydrostatic_stress")),
+    _test_population_1_effective_hydrostatic_stress(this->template declareGenericProperty<Real, is_ad>(
+        "test_population_1_effective_hydrostatic_stress"))
+{
+  if (_population_pressures.size() != Base::MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    this->paramError("population_pressures", "Exactly two test population pressures are required.");
+  if (_population_pressure_derivatives.size() !=
+      Base::MAX_HYDROSTATIC_STRESS_POPULATIONS * Base::MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    this->paramError("population_pressure_derivatives",
+                     "Exactly four pressure derivatives are required.");
+  if (_population_porosity_floors.size() != Base::MAX_HYDROSTATIC_STRESS_POPULATIONS)
+    this->paramError("population_porosity_floors",
+                     "Exactly two test population porosity floors are required.");
+
+  for (const auto pressure : _population_pressures)
+    if (!std::isfinite(pressure))
+      this->paramError("population_pressures", "Test population pressures must be finite.");
+  for (const auto derivative : _population_pressure_derivatives)
+    if (!std::isfinite(derivative))
+      this->paramError("population_pressure_derivatives",
+                       "Test population pressure derivatives must be finite.");
+  for (const auto floor : _population_porosity_floors)
+    if (!std::isfinite(floor) || floor < 0.0 || floor >= 1.0)
+      this->paramError("population_porosity_floors",
+                       "Test population porosity floors must be finite and in [0, 1).");
+  if (_population_porosity_floors[0] + _population_porosity_floors[1] >= 1.0)
+    this->paramError("population_porosity_floors",
+                     "The sum of test population porosity floors must be less than one.");
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::initQpStatefulProperties()
+{
+  Base::initQpStatefulProperties();
+
+  const auto total_porosity = _test_initial_total_porosity;
+  _test_population_0_porosity[this->_qp] = _initial_population_0_fraction * total_porosity;
+  _test_population_1_porosity[this->_qp] =
+      (1.0 - _initial_population_0_fraction) * total_porosity;
+  _test_population_0_effective_hydrostatic_stress[this->_qp] = 0.0;
+  _test_population_1_effective_hydrostatic_stress[this->_qp] = 0.0;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::propagateQpStatefulProperties()
+{
+  Base::propagateQpStatefulProperties();
+  _test_population_0_porosity[this->_qp] = _test_population_0_porosity_old[this->_qp];
+  _test_population_1_porosity[this->_qp] = _test_population_1_porosity_old[this->_qp];
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::resetIncrementalMaterialProperties()
+{
+  Base::resetIncrementalMaterialProperties();
+  _test_population_0_porosity[this->_qp] = _test_population_0_porosity_old[this->_qp];
+  _test_population_1_porosity[this->_qp] = _test_population_1_porosity_old[this->_qp];
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::PorePorosityState
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::independentPorePorosityState(
+    const GenericReal<is_ad> & total_porosity) const
+{
+  if (!_use_prescribed_two_population_state)
+    return Base::independentPorePorosityState(total_porosity);
+
+  auto state = PorePorosityState{_test_population_0_porosity[this->_qp],
+                                 _test_population_1_porosity[this->_qp]};
+  const auto stored_total = state[0] + state[1];
+  if (stored_total > 0.0)
+  {
+    const auto scale = total_porosity / stored_total;
+    state[0] *= scale;
+    state[1] *= scale;
+  }
+  else
+  {
+    state[0] = _initial_population_0_fraction * total_porosity;
+    state[1] = (1.0 - _initial_population_0_fraction) * total_porosity;
+  }
+  return state;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::independentPorePorosityFloor(
+    const unsigned int population_index, const PorePorosityState & pore_porosity_begin) const
+{
+  auto floor = Base::independentPorePorosityFloor(population_index, pore_porosity_begin);
+  if (_use_prescribed_two_population_state &&
+      _population_porosity_floors[population_index] > MetaPhysicL::raw_value(floor))
+    floor = _population_porosity_floors[population_index];
+  return floor;
+}
+
+template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::HydrostaticStressState
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::evaluateIndependentHydrostaticStress(
+    const GenericReal<is_ad> & matrix_hydro_stress, const PorePorosityState & pore_porosity) const
+{
+  if (!_use_prescribed_two_population_state)
+    return Base::evaluateIndependentHydrostaticStress(matrix_hydro_stress, pore_porosity);
+
+  const auto total_porosity = pore_porosity[0] + pore_porosity[1];
+  if (!(total_porosity > 0.0))
+    mooseException("In ", this->_name, ": prescribed two-population porosity must be positive.");
+
+  const std::array<Real, Base::MAX_HYDROSTATIC_STRESS_POPULATIONS> reference_porosity = {
+      _initial_population_0_fraction * _test_initial_total_porosity,
+      (1.0 - _initial_population_0_fraction) * _test_initial_total_porosity};
+
+  auto state = HydrostaticStressState{};
+  state.population_count = Base::MAX_HYDROSTATIC_STRESS_POPULATIONS;
+  for (auto population_index = 0u;
+       population_index < Base::MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+  {
+    auto & population = state.populations[population_index];
+    population.fraction = pore_porosity[population_index] / total_porosity;
+
+    auto pressure = GenericReal<is_ad>(_population_pressures[population_index]);
+    for (auto porosity_index = 0u;
+         porosity_index < Base::MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++porosity_index)
+    {
+      const auto derivative =
+          _population_pressure_derivatives[population_index * Base::MAX_HYDROSTATIC_STRESS_POPULATIONS +
+                                           porosity_index];
+      pressure += derivative * (pore_porosity[porosity_index] - reference_porosity[porosity_index]);
+      population.deffective_hydro_dporosity[porosity_index] = derivative;
+    }
+    population.effective_hydro_stress = matrix_hydro_stress + pressure;
+  }
+
+  state.effective_hydro_stress = pore_porosity[0] > 0.0
+                                     ? state.populations[0].effective_hydro_stress
+                                     : state.populations[1].effective_hydro_stress;
+  return state;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTestStateTempl<is_ad>::independentPorePorosityStateAccepted(
+    const GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    const PorePorosityState & pore_porosity)
+{
+  _test_population_0_porosity[this->_qp] = pore_porosity[0];
+  _test_population_1_porosity[this->_qp] = pore_porosity[1];
+
+  const auto state = evaluateIndependentHydrostaticStress(this->_hydro_stress, pore_porosity);
+  _test_population_0_effective_hydrostatic_stress[this->_qp] =
+      state.populations[0].effective_hydro_stress;
+  _test_population_1_effective_hydrostatic_stress[this->_qp] =
+      state.populations[1].effective_hydro_stress;
+
+  Base::independentPorePorosityStateAccepted(inelastic_strain_increment, pore_porosity);
+}
 
 InputParameters
 PorousViscoplasticityStressUpdateTest::validParams()
 {
-  auto params = Base::validParams();
+  InputParameters params = Base::validParams();
   params.addClassDescription(
       "Test-only porous viscoplastic stress update used to exercise protected generic LPS kernels "
       "and, in later tests, controlled generic constitutive extension points.");
@@ -33,6 +254,24 @@ PorousViscoplasticityStressUpdateTest::PorousViscoplasticityStressUpdateTest(
   : Base(parameters), _run_kernel_checks(getParam<bool>("run_kernel_checks"))
 {
 }
+
+InputParameters
+ADPorousViscoplasticityStressUpdateTest::validParams()
+{
+  InputParameters params = Base::validParams();
+  params.addClassDescription(
+      "AD test-only porous viscoplastic stress update with prescribed independent pore populations.");
+  return params;
+}
+
+ADPorousViscoplasticityStressUpdateTest::ADPorousViscoplasticityStressUpdateTest(
+    const InputParameters & parameters)
+  : Base(parameters)
+{
+}
+
+template class PorousViscoplasticityStressUpdateTestStateTempl<false>;
+template class PorousViscoplasticityStressUpdateTestStateTempl<true>;
 
 void
 PorousViscoplasticityStressUpdateTest::checkClose(const char * label,
