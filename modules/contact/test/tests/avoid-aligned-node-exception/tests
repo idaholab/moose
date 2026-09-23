@@ -11,5 +11,6 @@
     mesh_mode = 'replicated'
     abs_zero = 1e-8
     rel_err = 1e-5
+    max_threads = 1 # test.i requests superlu_dist, which is not thread-safe
   []
 []

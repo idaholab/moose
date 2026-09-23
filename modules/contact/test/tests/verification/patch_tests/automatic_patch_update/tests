@@ -8,6 +8,7 @@
     cli_args = "Mesh/patch_update_strategy='always'"
     abs_zero = 1e-7
     requirement = "The system shall enforce the automatic patch update using the 'always' option."
+    max_threads = 1 # sliding_update.i requests superlu_dist, which is not thread-safe
   []
   [sliding_blocks]
     type = 'Exodiff'
@@ -46,6 +47,7 @@
     requirement = "The system shall be able to couple iteration patch update strategies with initial "
                   "adaptivity when using geometric searches with a replicated mesh."
     custom_cmp = iteration_adaptivity_parallel.cmp
+    max_threads = 1 # iteration_adaptivity_parallel.i requests superlu_dist, which is not thread-safe
   []
   [iteration_adaptivity_parallel_node_face]
     type = 'Exodiff'
@@ -56,5 +58,6 @@
     requirement = "The system shall be able to couple iteration patch update strategies with initial "
                   "adaptivity when using geometric searches using node face contact with a "
                   "replicated or distributed mesh."
+    max_threads = 1 # iteration_adaptivity_parallel_node_face.i requests superlu_dist, which is not thread-safe
   []
 []

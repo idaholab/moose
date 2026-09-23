@@ -29,6 +29,7 @@
                   'constraints where the primary suface is composed of a single element and the '
                   'secondary side is composed of first order faces with a required derivative '
                   'container size of less than 50.'
+    max_threads = 1 # frictionless-mortar-3d-test-derivative-trimming.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-mortar-3d-action]
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -399,6 +400,7 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     valgrind = 'none'
+    max_threads = 1 # frictional-mortar-3d.i requests superlu_dist, which is not thread-safe
   []
   [frictional-mortar-3d-pg]
     type = 'CSVDiff'
@@ -439,6 +441,7 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     valgrind = 'none'
+    max_threads = 1 # frictional-mortar-3d-action.i requests superlu_dist, which is not thread-safe
   []
   [frictional-mortar-3d-pg-action]
     prereq = 'frictional-mortar-3d-pg'
@@ -459,6 +462,7 @@
                   'constraint using the Petrov-Galerkin approach in contact action.'
     rel_err = 2.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1 # frictional-mortar-3d-action.i requests superlu_dist, which is not thread-safe
   []
   [half_sphere_nodal_geometry]
     type = 'Exodiff'
@@ -475,6 +479,7 @@
     # not running any time step, just examining nodal geometry
     recover = false
     restep = false
+    max_threads = 1 # half_sphere_nodal_geometry.i requests superlu_dist, which is not thread-safe
   []
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'
@@ -485,6 +490,7 @@
                   'penalty approach'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1 # frictional-mortar-3d-penalty.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-mortar-3d-penalty]
     type = 'Exodiff'
@@ -495,6 +501,7 @@
                   'penalty approach'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1 # frictionless-mortar-3d-penalty.i requests superlu_dist, which is not thread-safe
   []
   [frictional-mortar-3d-al]
     type = 'Exodiff'

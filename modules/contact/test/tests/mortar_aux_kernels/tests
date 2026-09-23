@@ -83,6 +83,7 @@
                   'asymmetric problem for a short simulation.'
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-fretting-wear-test.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-fretting-wear-test-quick-multiple-projections]
     type = 'Exodiff'
@@ -104,6 +105,7 @@
                   'patch area. '
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-fretting-wear-test.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-fretting-wear-test-quick-multiple-projections-lowerd]
     type = 'Exodiff'
@@ -141,6 +143,7 @@
                   'contact force direction at the geometry discontinuity.'
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-fretting-wear-test.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-fretting-wear-test-action-quick]
     type = 'Exodiff'
@@ -159,6 +162,7 @@
                   'asymmetric problem for a short simulation using the contact action.'
     # ComputeDynamicFrictionalForceLMMechanicalContact created by action does not support recover
     recover = false
+    max_threads = 1 # block-dynamics-aux-fretting-wear-test-action.i requests superlu_dist, which is not thread-safe
   []
   [block-dynamics-aux-fretting-wear-test-projection_angle]
     type = 'Exodiff'
@@ -177,6 +181,7 @@
                   'mesh does not contain segments built from oblique projections. Therefore, the '
                   'system shall generate many segments from oblique projections if a very small '
                   'minimum projection angle is chosen. '
+    max_threads = 1 # block-dynamics-aux-fretting-wear-test-projection_angle.i requests superlu_dist, which is not thread-safe
   []
   [pressure-aux-frictionless]
     type = CSVDiff
@@ -187,6 +192,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall produce the correct normal contact pressure '
                   'value for frictionless mortar contact when using an auxiliary kernel.'
+    max_threads = 1 # pressure-aux-frictionless.i requests superlu_dist, which is not thread-safe
   []
   [pressure-aux-frictionless-3d]
     type = CSVDiff
@@ -197,6 +203,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to  produce the correct normal contact pressure '
                   'value in 3D for frictionless mortar contact when using an auxiliary kernel.'
+    max_threads = 1 # pressure-aux-frictionless-3d.i requests superlu_dist, which is not thread-safe
   []
   [pressure-aux-friction]
     type = CSVDiff
@@ -207,6 +214,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value for frictional mortar contact when using an auxiliary kernel.'
+    max_threads = 1 # pressure-aux-friction.i requests superlu_dist, which is not thread-safe
   []
   [pressure-aux-friction-3d]
     type = CSVDiff
@@ -217,5 +225,6 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value in 3D for frictional mortar contact when using an auxiliary kernel.'
+    max_threads = 1 # pressure-aux-friction-3d.i requests superlu_dist, which is not thread-safe
   []
 []

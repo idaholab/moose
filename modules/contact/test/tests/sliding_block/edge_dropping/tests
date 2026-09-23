@@ -37,6 +37,7 @@
                   'secondary mortar element does not project to the primary surface'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_3d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-slide-3d-nondual]
     type = 'CSVDiff'
@@ -50,6 +51,7 @@
                'Outputs/file_base="two_equal_blocks_slide_3d_nondual_out"'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_3d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-slide-2d-nodal-scaling]
     type = 'CSVDiff'
@@ -66,6 +68,7 @@
     issues = '#18853'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-rz]
     type = 'CSVDiff'
@@ -108,6 +111,7 @@
              'userobjects/LMWeightedGapUserObject.md'
     issues = '#18853'
     allow_test_objects = true
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-slide-2d-nodal-scaling-normalize-c]
     type = 'CSVDiff'
@@ -125,6 +129,7 @@
     issues = '#18853'
     allow_test_objects = true
     capabilities = 'ad_size>=100'
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
   [nodal-scaling-requires-first-order]
     type = 'RunException'
@@ -138,6 +143,7 @@
              'userobjects/LMWeightedGapUserObject.md'
     issues = '#18853'
     allow_test_objects = true
+    max_threads = 1 # two_equal_blocks_slide_2d.i requests superlu_dist, which is not thread-safe
   []
 
 []

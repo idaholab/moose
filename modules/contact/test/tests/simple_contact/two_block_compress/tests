@@ -32,6 +32,7 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_2d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-compress-3d]
     type = 'CSVDiff'
@@ -42,6 +43,7 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_3d.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-compress-3d_pg]
     type = 'CSVDiff'
@@ -52,6 +54,7 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_3d_pg.i requests superlu_dist, which is not thread-safe
   []
   [frictionless-compress-3d-nondual]
     type = 'CSVDiff'
@@ -64,6 +67,7 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
     abs_zero = 1.0e-8
+    max_threads = 1 # two_equal_blocks_compress_3d.i requests superlu_dist, which is not thread-safe
   []
 
 []

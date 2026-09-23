@@ -11,6 +11,7 @@
     valgrind = 'heavy'
     capabilities = 'method!=dbg'
     recover = false # output on final
+    max_threads = 1 # frictional_bouncing_block_action_restart_1.i requests superlu_dist, which is not thread-safe
   []
   [frictional_bouncing_block_action_restart_2]
     type = 'Exodiff'
@@ -24,5 +25,6 @@
     prereq = 'frictional_bouncing_block_action_restart_1'
     valgrind = 'heavy'
     capabilities = 'method!=dbg'
+    max_threads = 1 # frictional_bouncing_block_action_restart_2.i requests superlu_dist, which is not thread-safe
   []
 []

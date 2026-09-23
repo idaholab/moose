@@ -74,6 +74,7 @@
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
     requirement = "Python utilities for driving stochastic simulations shall support cache tolerances supplied on a per-parameter basis"
+    max_threads = 1 # vpp_test_runner.i runs vpp_general.i as a sub-app, which requests superlu_dist, which is not thread-safe
   []
   [list_format]
     type = RunApp
@@ -85,6 +86,7 @@
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
     requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching"
+    max_threads = 1 # vpp_test_runner.i runs vpp_general.i as a sub-app, which requests superlu_dist, which is not thread-safe
   []
   [nested_list_format]
     type = RunApp
@@ -96,5 +98,6 @@
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
     requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching, including nested lists"
+    max_threads = 1 # vpp_test_runner.i runs vpp_general.i as a sub-app, which requests superlu_dist, which is not thread-safe
   []
 []

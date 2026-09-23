@@ -87,6 +87,7 @@
                   "strain single point contact model using the contact line
     search solver "
                   "options."
+    max_threads = 1 # single_point_2d_contact_line_search.i requests superlu_dist, which is not thread-safe
   []
   [mu_0_0_kin]
     type = 'CSVDiff'
