@@ -341,6 +341,17 @@ GeneratedMeshGenerator::generate()
     }
   }
 
-  mesh->unset_is_prepared();
+  // Biasing moves node coordinates, which invalidates anything cached from the geometry. It
+  // leaves the element connectivity, the partition and the boundary id sets alone, so only the
+  // point locator and the stored ranges need to be dropped. Without a bias nothing here has
+  // touched the mesh that build_cube() already prepared, apart from the boundary ids handled
+  // above. Invalidating the whole preparation instead would discard the partition and make
+  // MooseMesh::prepare() repartition the mesh a second time, which dominates mesh setup.
+  if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
+  {
+    mesh->clear_point_locator();
+    mesh->clear_stored_ranges();
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
