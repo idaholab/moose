@@ -664,7 +664,7 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
   auto & system = systems[nodal.sys().number()];
   system.setActiveVariables({&nodal, &elemental, &vector});
   const auto solution_tag = _problem->getVectorTagID(Moose::SOLUTION_TAG);
-  system.setActiveSolutionTags({solution_tag});
+  system.setActiveReadTags({solution_tag});
   system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
   system.reinit();
   systems.copyToDevice();
