@@ -295,6 +295,114 @@
     requirement = 'The generic independent two-population active set shall hold both explicit pore-population floors while retaining a finite deviatoric viscoplastic response.'
   []
 
+  [prescribed_fixed_porosity_recovery_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Outputs/file_base=prescribed_fixed_porosity_recovery Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    recover = false
+    restep = false
+    requirement = 'The generic non-AD independent-pore fixture shall checkpoint a state with both explicit population porosity floors active.'
+  []
+  [prescribed_fixed_porosity_recovery_clean]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --clean prescribed_fixed_porosity_recovery_perf'
+    prereq = prescribed_fixed_porosity_recovery_setup
+    requirement = 'The generic fixed-porosity recovery regression shall remove stale per-instance performance diagnostics before measuring the continuation.'
+  []
+  [prescribed_fixed_porosity_recovery]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/stress/tangent_operator=nonlinear Materials/lps/local_newton_max_iterations=1 Materials/lps/local_newton_relaxation=0.75 Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=prescribed_fixed_porosity_recovery_perf Outputs/file_base=prescribed_fixed_porosity_recovery Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    expect_out = 'independent fixed-porosity mechanical recovery converged at the finest constitutive subdivision'
+    prereq = prescribed_fixed_porosity_recovery_clean
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A deliberately under-iterated generic non-AD independent-pore solve at two active population floors shall recover p-q equilibrium at fixed porosities with the nonlinear tangent without cutting the global timestep.'
+  []
+  [prescribed_fixed_porosity_recovery_verify]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py prescribed_fixed_porosity_recovery_perf prescribed_fixed_porosity_recovery.csv'
+    prereq = prescribed_fixed_porosity_recovery
+    requirement = 'The generic non-AD fixed-porosity recovery shall be attempted and accepted in exactly one nominal 0.1-s continuation step with both population floors retained.'
+  []
+  [prescribed_fixed_porosity_reference_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Outputs/file_base=prescribed_fixed_porosity_reference Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    prereq = prescribed_fixed_porosity_recovery_verify
+    recover = false
+    restep = false
+    requirement = 'The generic recovery regression shall create an independently named checkpoint for a normally converged non-AD reference continuation.'
+  []
+  [prescribed_fixed_porosity_reference]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/stress/tangent_operator=nonlinear Materials/lps/verbose=true Outputs/file_base=prescribed_fixed_porosity_reference Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    absent_out = 'independent fixed-porosity mechanical recovery converged'
+    prereq = prescribed_fixed_porosity_reference_setup
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A normally converged generic non-AD continuation shall provide an independent reference state for the forced fixed-porosity recovery path.'
+  []
+  [prescribed_fixed_porosity_recovery_compare]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --compare prescribed_fixed_porosity_recovery.csv prescribed_fixed_porosity_reference.csv'
+    prereq = prescribed_fixed_porosity_reference
+    requirement = 'The forced generic non-AD fixed-porosity recovery shall reproduce the normally converged terminal mechanics and pore-population state.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'Outputs/file_base=prescribed_fixed_porosity_recovery_ad Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    prereq = prescribed_fixed_porosity_recovery_compare
+    recover = false
+    restep = false
+    requirement = 'The generic AD independent-pore fixture shall checkpoint the same two-active-floor state used by the non-AD recovery qualification.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_clean]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --clean prescribed_fixed_porosity_recovery_ad_perf'
+    prereq = prescribed_fixed_porosity_recovery_ad_setup
+    requirement = 'The generic AD fixed-porosity recovery regression shall remove stale per-instance performance diagnostics before measuring the continuation.'
+  []
+  [prescribed_fixed_porosity_recovery_ad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/lps/local_newton_max_iterations=1 Materials/lps/local_newton_relaxation=0.75 Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=prescribed_fixed_porosity_recovery_ad_perf Outputs/file_base=prescribed_fixed_porosity_recovery_ad Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    expect_out = 'independent fixed-porosity mechanical recovery converged at the finest constitutive subdivision'
+    prereq = prescribed_fixed_porosity_recovery_ad_clean
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A deliberately under-iterated generic AD independent-pore solve at active population floors shall exercise and accept the fixed-porosity p-q recovery without cutting the global timestep.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_verify]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py prescribed_fixed_porosity_recovery_ad_perf prescribed_fixed_porosity_recovery_ad.csv'
+    prereq = prescribed_fixed_porosity_recovery_ad
+    requirement = 'The generic AD fixed-porosity recovery shall be attempted and accepted in exactly one nominal 0.1-s continuation step with both population floors retained.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_compare]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --compare prescribed_fixed_porosity_recovery_ad.csv prescribed_fixed_porosity_reference.csv'
+    prereq = prescribed_fixed_porosity_recovery_ad_verify
+    requirement = 'The forced generic AD fixed-porosity recovery shall reproduce the normally converged non-AD terminal mechanics and pore-population state within the declared regression tolerances.'
+  []
+
   [implementation_kernels]
     type = RunApp
     allow_test_objects = true
