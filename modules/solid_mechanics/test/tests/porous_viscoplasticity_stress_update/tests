@@ -403,6 +403,55 @@
     requirement = 'The forced generic AD fixed-porosity recovery shall reproduce the normally converged non-AD terminal mechanics and pore-population state within the declared regression tolerances.'
   []
 
+  # Test the generic transactional rollback guard directly in solid_mechanics. Unexpected C++
+  # exceptions must restore caller tensors and generic constitutive trial state and must not be
+  # reinterpreted as recoverable local convergence failures.
+  [prescribed_unexpected_exception_preparation_rollback]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=preparation Materials/lps/youngs_modulus_porosity_factor=0.1'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at preparation'
+    requirement = 'An unexpected C++ exception during generic porosity-dependent substep preparation shall restore caller and porous-LPS trial state and propagate without adaptive refinement.'
+  []
+  [prescribed_unexpected_exception_estimation_rollback]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=estimation Materials/lps/adaptive_substepping=false'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at estimation'
+    requirement = 'An unexpected C++ exception during generic porous-LPS substep estimation shall restore caller and constitutive trial state and propagate without adaptive refinement.'
+  []
+  [prescribed_unexpected_exception_adaptive_no_retry]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=adaptive_attempt'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at adaptive_attempt'
+    requirement = 'With adaptive constitutive retries enabled, an unexpected C++ exception from the first generic local attempt shall restore trial state and escape immediately rather than being converted into a finer-substep retry.'
+  []
+  [prescribed_unexpected_exception_post_accept_rollback]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=post_accept Materials/lps/adaptive_substepping=false Materials/lps/max_inelastic_increment=1e-4 Materials/lps/substep_strain_tolerance=1.5e-3 Materials/stress/tangent_operator=elastic Executioner/num_steps=1'
+    expect_out = 'Verified generic unexpected-exception rollback at post_accept'
+    requirement = 'After one generic local substep has committed independent pore and strain state, an unexpected exception before the next local solve shall restore the global-step trial state and escape the constitutive update without a local retry; the transient executioner may recover by cutting the global time step.'
+  []
+  [prescribed_unexpected_exception_tangent_replay_rollback]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=tangent_replay Materials/lps/adaptive_substepping=false Materials/lps/max_inelastic_increment=4e-4 Materials/lps/substep_strain_tolerance=1.5e-3 Materials/stress/tangent_operator=nonlinear Executioner/num_steps=1'
+    expect_out = 'Verified generic unexpected-exception rollback at tangent_replay'
+    requirement = 'An unexpected C++ exception on the first accepted state of a generic non-AD multi-substep tangent replay shall restore the accepted-path trial state and escape the constitutive update without a local retry; the transient executioner may recover by cutting the global time step.'
+  []
+
   [implementation_kernels]
     type = RunApp
     allow_test_objects = true

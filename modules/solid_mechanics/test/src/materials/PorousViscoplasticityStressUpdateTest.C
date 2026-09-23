@@ -13,9 +13,47 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <exception>
+#include <stdexcept>
 
 registerMooseObject("SolidMechanicsTestApp", PorousViscoplasticityStressUpdateTest);
 registerMooseObject("SolidMechanicsTestApp", ADPorousViscoplasticityStressUpdateTest);
+
+namespace
+{
+bool
+rollbackNearlyEqual(const Real left, const Real right)
+{
+  using std::abs;
+  using std::max;
+
+  return abs(left - right) <= 1e-12 * max({1.0, abs(left), abs(right)});
+}
+
+bool
+rollbackTensorEqual(const RankTwoTensor & left, const RankTwoTensor & right)
+{
+  for (auto i = 0u; i < 3; ++i)
+    for (auto j = 0u; j < 3; ++j)
+      if (!rollbackNearlyEqual(left(i, j), right(i, j)))
+        return false;
+
+  return true;
+}
+
+bool
+rollbackTensorEqual(const RankFourTensor & left, const RankFourTensor & right)
+{
+  for (auto i = 0u; i < 3; ++i)
+    for (auto j = 0u; j < 3; ++j)
+      for (auto k = 0u; k < 3; ++k)
+        for (auto l = 0u; l < 3; ++l)
+          if (!rollbackNearlyEqual(left(i, j, k, l), right(i, j, k, l)))
+            return false;
+
+  return true;
+}
+} // namespace
 
 template <bool is_ad>
 InputParameters
@@ -246,13 +284,249 @@ PorousViscoplasticityStressUpdateTest::validParams()
       "and, in later tests, controlled generic constitutive extension points.");
   params.addParam<bool>(
       "run_kernel_checks", false, "Run direct protected-kernel and population-projection checks.");
+  params.addParam<MooseEnum>(
+      "failure_point",
+      MooseEnum("none preparation estimation adaptive_attempt post_accept tangent_replay", "none"),
+      "Generic constitutive stage at which to inject std::runtime_error for rollback testing.");
   return params;
 }
 
 PorousViscoplasticityStressUpdateTest::PorousViscoplasticityStressUpdateTest(
     const InputParameters & parameters)
-  : Base(parameters), _run_kernel_checks(getParam<bool>("run_kernel_checks"))
+  : Base(parameters),
+    _run_kernel_checks(getParam<bool>("run_kernel_checks")),
+    _failure_point(getParam<MooseEnum>("failure_point"))
 {
+}
+
+std::string
+PorousViscoplasticityStressUpdateTest::failurePointName() const
+{
+  return _failure_point;
+}
+
+void
+PorousViscoplasticityStressUpdateTest::throwInjectedFailure(const char * stage) const
+{
+  throw std::runtime_error(std::string("Injected nonrecoverable porous-LPS test failure at ") +
+                           stage);
+}
+
+PorousViscoplasticityStressUpdateTest::RollbackState
+PorousViscoplasticityStressUpdateTest::captureRollbackState(
+    const RankTwoTensor & strain_increment,
+    const RankTwoTensor & inelastic_strain_increment,
+    const RankTwoTensor & stress,
+    const RankFourTensor & tangent) const
+{
+  auto state = RollbackState{};
+  state.strain_increment = strain_increment;
+  state.inelastic_strain_increment = inelastic_strain_increment;
+  state.stress = stress;
+  state.tangent = tangent;
+
+  state.intermediate_porosity = _intermediate_porosity;
+  state.effective_inelastic_strain = _effective_inelastic_strain[_qp];
+  state.inelastic_strain = _inelastic_strain[_qp];
+  state.effective_inelastic_strain_rate = _effective_inelastic_strain_rate[_qp];
+  state.substep_control_inelastic_strain_rate = _substep_control_inelastic_strain_rate[_qp];
+  state.hydro_stress = _hydro_stress;
+  state.gauge_stress = _gauge_stress[_qp];
+  state.gauge_stresses.reserve(_gauge_stress_laws.size());
+  for (const auto * gauge_stress : _gauge_stress_laws)
+    state.gauge_stresses.push_back((*gauge_stress)[_qp]);
+
+  state.population_0_porosity = _test_population_0_porosity[_qp];
+  state.population_1_porosity = _test_population_1_porosity[_qp];
+  state.constitutive_retries = _performance_counters.constitutive_retries;
+  return state;
+}
+
+void
+PorousViscoplasticityStressUpdateTest::verifyRollbackState(
+    const RollbackState & expected,
+    const RankTwoTensor & strain_increment,
+    const RankTwoTensor & inelastic_strain_increment,
+    const RankTwoTensor & stress,
+    const RankFourTensor & tangent) const
+{
+  const auto check = [this](const bool condition, const char * field)
+  {
+    if (!condition)
+      mooseError("In ",
+                 _name,
+                 ": generic unexpected-exception rollback verification failed at ",
+                 failurePointName(),
+                 ". Field was not restored: ",
+                 field,
+                 ".");
+  };
+
+  check(rollbackTensorEqual(strain_increment, expected.strain_increment), "strain_increment");
+  check(rollbackTensorEqual(inelastic_strain_increment, expected.inelastic_strain_increment),
+        "inelastic_strain_increment");
+  check(rollbackTensorEqual(stress, expected.stress), "stress");
+  check(rollbackTensorEqual(tangent, expected.tangent), "tangent_operator");
+
+  check(rollbackNearlyEqual(_intermediate_porosity, expected.intermediate_porosity),
+        "intermediate_porosity");
+  check(rollbackNearlyEqual(_effective_inelastic_strain[_qp], expected.effective_inelastic_strain),
+        "effective_inelastic_strain");
+  check(rollbackTensorEqual(_inelastic_strain[_qp], expected.inelastic_strain),
+        "inelastic_strain");
+  check(rollbackNearlyEqual(_effective_inelastic_strain_rate[_qp],
+                            expected.effective_inelastic_strain_rate),
+        "effective_inelastic_strain_rate");
+  check(rollbackNearlyEqual(_substep_control_inelastic_strain_rate[_qp],
+                            expected.substep_control_inelastic_strain_rate),
+        "substep_control_inelastic_strain_rate");
+  check(rollbackNearlyEqual(_hydro_stress, expected.hydro_stress), "hydro_stress");
+  check(rollbackNearlyEqual(_gauge_stress[_qp], expected.gauge_stress), "gauge_stress");
+  check(_gauge_stress_laws.size() == expected.gauge_stresses.size(), "gauge_stress_law_count");
+  for (auto law_index = std::size_t{0}; law_index < _gauge_stress_laws.size(); ++law_index)
+    check(rollbackNearlyEqual((*_gauge_stress_laws[law_index])[_qp],
+                              expected.gauge_stresses[law_index]),
+          "gauge_stress_law");
+  check(rollbackNearlyEqual(_test_population_0_porosity[_qp], expected.population_0_porosity),
+        "population_0_porosity");
+  check(rollbackNearlyEqual(_test_population_1_porosity[_qp], expected.population_1_porosity),
+        "population_1_porosity");
+
+  check(rollbackNearlyEqual(constitutiveTimeStep(), globalTimeStep()), "constitutive_timestep");
+  check(_performance_counters.constitutive_retries == expected.constitutive_retries,
+        "constitutive_retries counter");
+
+  if (_failure_point == "preparation" || _failure_point == "estimation")
+    check(_accepted_state_calls == 0, "accepted state before pre-attempt injected failure");
+  else if (_failure_point == "adaptive_attempt")
+    check(_accepted_state_calls == 1,
+          "unexpected exception must escape the first local attempt without adaptive retry");
+  else if (_failure_point == "post_accept")
+  {
+    check(_accepted_path_substeps > 1, "post-accept rollback requires a multi-substep path");
+    check(_accepted_state_calls == 1,
+          "post-accept failure must occur before the second local state is accepted");
+  }
+  else if (_failure_point == "tangent_replay")
+  {
+    check(_accepted_path_substeps > 1, "tangent replay requires a multi-substep accepted path");
+    check(_accepted_state_calls == _accepted_path_substeps + 1,
+          "tangent replay failure must occur on the first accepted replay state");
+  }
+
+  Moose::out << "Verified generic unexpected-exception rollback at " << failurePointName()
+             << std::endl;
+}
+
+void
+PorousViscoplasticityStressUpdateTest::updateStateSubstep(
+    RankTwoTensor & strain_increment,
+    RankTwoTensor & inelastic_strain_increment,
+    const RankTwoTensor & rotation_increment,
+    RankTwoTensor & stress_new,
+    const RankTwoTensor & stress_old,
+    const RankFourTensor & elasticity_tensor,
+    const RankTwoTensor & elastic_strain_old,
+    const bool compute_full_tangent_operator,
+    RankFourTensor & tangent_operator)
+{
+  const auto rollback_state = captureRollbackState(
+      strain_increment, inelastic_strain_increment, stress_new, tangent_operator);
+  _accepted_state_calls = 0;
+  _accepted_path_substeps = 0;
+  _inside_update_state_substep = true;
+
+  try
+  {
+    Base::updateStateSubstep(strain_increment,
+                             inelastic_strain_increment,
+                             rotation_increment,
+                             stress_new,
+                             stress_old,
+                             elasticity_tensor,
+                             elastic_strain_old,
+                             compute_full_tangent_operator,
+                             tangent_operator);
+    _inside_update_state_substep = false;
+  }
+  catch (const std::exception & error)
+  {
+    _inside_update_state_substep = false;
+    const auto expected_message =
+        std::string("Injected nonrecoverable porous-LPS test failure at ") + failurePointName();
+    if (error.what() != expected_message)
+      mooseError("In ",
+                 _name,
+                 ": unexpected std::exception reached generic rollback test. Expected '",
+                 expected_message,
+                 "' but received '",
+                 error.what(),
+                 "'.");
+
+    verifyRollbackState(
+        rollback_state, strain_increment, inelastic_strain_increment, stress_new, tangent_operator);
+    throw;
+  }
+  catch (...)
+  {
+    _inside_update_state_substep = false;
+    mooseError("In ", _name, ": non-standard exception reached generic rollback test.");
+  }
+}
+
+Real
+PorousViscoplasticityStressUpdateTest::scalarPorosityFloor() const
+{
+  if (_inside_update_state_substep && _failure_point == "preparation")
+    throwInjectedFailure("preparation");
+
+  return Base::scalarPorosityFloor();
+}
+
+unsigned int
+PorousViscoplasticityStressUpdateTest::estimateNumberSubsteps(const RankTwoTensor & stress)
+{
+  if (_inside_update_state_substep && _failure_point == "estimation")
+    throwInjectedFailure("estimation");
+
+  return Base::estimateNumberSubsteps(stress);
+}
+
+PorousViscoplasticityStressUpdateTest::PorePorosityState
+PorousViscoplasticityStressUpdateTest::independentPorePorosityState(
+    const Real & total_porosity) const
+{
+  if (_inside_update_state_substep && _failure_point == "post_accept" &&
+      _accepted_state_calls == 1)
+    throwInjectedFailure("post_accept");
+
+  return Base::independentPorePorosityState(total_porosity);
+}
+
+void
+PorousViscoplasticityStressUpdateTest::independentPorePorosityStateAccepted(
+    const RankTwoTensor & inelastic_strain_increment, const PorePorosityState & pore_porosity)
+{
+  Base::independentPorePorosityStateAccepted(inelastic_strain_increment, pore_porosity);
+
+  if (!_inside_update_state_substep)
+    return;
+
+  if (_accepted_state_calls == 0)
+  {
+    const auto local_dt = constitutiveTimeStep();
+    if (local_dt > 0.0)
+      _accepted_path_substeps =
+          static_cast<unsigned int>(std::lround(globalTimeStep() / local_dt));
+  }
+  ++_accepted_state_calls;
+
+  if (_failure_point == "adaptive_attempt" && _accepted_state_calls == 1)
+    throwInjectedFailure("adaptive_attempt");
+
+  if (_failure_point == "tangent_replay" && _accepted_path_substeps > 1 &&
+      _accepted_state_calls == _accepted_path_substeps + 1)
+    throwInjectedFailure("tangent_replay");
 }
 
 InputParameters
