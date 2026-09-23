@@ -73,7 +73,9 @@ public:
   void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
   void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
-  void PreAssemblySetup(const mfem::FiniteElementSpace & fes);
+  // Performs the setup for both AssemblePA and AssembleGradPA, then returns
+  // the integration rule we need for projecting coefficients.
+  const mfem::IntegrationRule * PreAssemblySetup(const mfem::FiniteElementSpace & fes);
 
 protected:
   mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
@@ -85,7 +87,6 @@ protected:
   const mfem::DofToQuad * mapsO;       ///< Not owned. DOF-to-quad map, open.
   const mfem::DofToQuad * mapsC;       ///< Not owned. DOF-to-quad map, closed.
   const mfem::GeometricFactors * geom; ///< Not owned
-  const mfem::IntegrationRule * ir;
   int dim, ne, nq, dofs1D, quad1D;
   int ndata;             // number of matrix elements to store per qpoint
   bool symmetric = true; ///< False if using a nonsymmetric matrix coefficient
