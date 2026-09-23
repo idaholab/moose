@@ -43,12 +43,24 @@ rules, which apply here too.
 3. **The versioner-hash commit is always last.** Any later amend, rebase, or new commit
    invalidates it and it must be regenerated. This is the single most common way a
    package-update PR fails CI.
-4. **`--verify` clean is the gate**, not "it looks right". Run it against the ref the PR
-   targets (`upstream/master`), and run it again after every history change.
+4. **`--verify` clean is the gate**, not "it looks right". Run it against `upstream/devel`
+   — the same ref every step of this task uses, and the one the published packages
+   correspond to — not against the PR's base branch `next`, which already contains `devel`
+   plus whatever else is queued. Run it again after every history change.
 5. **Bump dependers.** Changing a package's influential files changes its hash, which
    changes the hash of everything downstream. `scripts/versioner.yaml` records
    `# dependers: ...` in a comment above each package — trust the comment as a map, but
    let `--verify` be the authority on what still needs a bump.
+6. **Every commit references the PR or issue.** End the message body with
+   `refs idaholab#<pr/issue>`, above any `Co-Authored-By:` line. A package update is dozens
+   of commits across several Civet cycles, so the trailer is what ties a late compiler fix
+   back to the update it belongs to. Add it when writing the commit; going back to amend a
+   pushed history for a missing trailer costs a force-push and a full CI restart.
+
+   The number is not known until Step 9 creates the PR. Either open the PR early — a draft
+   is enough to get a number — or reference the tracking issue for the update if one
+   exists. Most of the upstream history carries the bare `refs #<n>` form; `idaholab#<n>`
+   resolves the same on GitHub and stays unambiguous when the branch lives on a fork.
 
 ## Step 0 — Establish the working state
 
@@ -195,6 +207,11 @@ cd scripts && ./run_tests --re versioner
 This runs `test_versioner.py`, which walks every entry in `versioner_hashes.yaml`; it is
 slow and spawns processes. It is the check that most reliably catches a stale hash commit.
 
+AGENTS.md section 6 requires asking the user whether their stack uses conda, and which
+environment to activate, *before* running this. Ask early — at Step 0, alongside the scope
+question — rather than at the end, so the answer is in hand when you get here instead of
+blocking the last check in the task.
+
 It needs an activated `moose` conda environment: the TestHarness imports `hit` (built
 pyhit) and the test itself imports `mooseutils` and `mock`. If `hit` is unavailable but
 the conda environment is, run the unittest directly instead:
@@ -233,9 +250,16 @@ Follow `pr-create` for the audit and the approval-gated push. Package-update spe
 
 ## Step 10 — Iterate
 
-Expect Civet failures. Package updates routinely require regolding, tolerance changes,
-and small source fixes for new compiler or library behavior — those belong in this same
-PR, as their own commits, and often need a newsletter mention too.
+Expect Civet failures, and expect to spend more time here than on Steps 1-9 combined.
+Package updates routinely require regolding, tolerance changes, and small source fixes for
+new compiler or library behavior — those belong in this same PR, as their own commits, and
+often need a newsletter mention too.
+
+`references/troubleshooting.md` is the playbook for this phase: reducing a list of red jobs
+to a list of causes, reading a job page without being misled by a truncated fetch, telling
+your diff apart from a channel that moved underneath the PR, what a toolchain bump
+predictably breaks, and the git recipes for landing a fix without invalidating the hash
+commit.
 
 After **any** history change (new commit, amend, rebase onto `next`):
 
@@ -244,10 +268,24 @@ After **any** history change (new commit, amend, rebase onto `next`):
    `scripts/tests/versioner_hashes.yaml`.
 3. Keep the hash commit last.
 
-If a new commit changes an influential file, the affected package needs *another* bump
-(normally `build_number`), not just a new hash.
+Step 2 is not optional bookkeeping: the block is keyed on `HEAD` at the moment `--summary`
+ran, so any commit added above it invalidates it even when no package hash moved.
+
+A late commit that touches an influential file usually needs **no** further version bump.
+The invariant is measured against the base ref, and Step 3 already moved that package's
+`full_version` away from it, so `--verify` reports `CHANGE` and there is nothing to do.
+Bump again only when `--verify` actually says `NEED BUMP` — the case where the package was
+not part of the original sweep and its version still matches the base ref.
+
+`--verify` cannot see prose. A fix can falsify something the newsletter or the PR body
+already claims, so re-read both after each one.
 
 ## When a package update is already in flight and broken
+
+First decide which kind of broken it is. If the versioner gate itself is red, work the list
+below. If the versioner gate is clean and the red jobs are builds and tests, the failures
+are content failures and `references/troubleshooting.md` is the relevant reference — do not
+go looking for a versioner problem that `--verify` has already ruled out.
 
 Diagnose in this order, since each step's answer changes the next:
 
