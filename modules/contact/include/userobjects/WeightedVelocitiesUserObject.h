@@ -52,9 +52,10 @@ public:
    *
    * Consumers interpolate each nodal pressure with that node's tangent to form the frictional
    * traction vector and preserve the discrete transpose relation; see
-   * \p WeightedGapUserObject::nodalContactPressure.
+   * \p WeightedGapUserObject::nodalContactPressure. The default reports that this operation is not
+   * available.
    */
-  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const = 0;
+  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const;
 
   /**
    * @param direction Tangent direction, 0 or 1

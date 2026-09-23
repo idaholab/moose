@@ -56,6 +56,13 @@ WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters
                "'use_displaced_mesh' must be true for the WeightedVelocitiesUserObject object");
 }
 
+ADReal
+WeightedVelocitiesUserObject::nodalTangentialPressure(const Node & /*node*/,
+                                                      unsigned int /*direction*/) const
+{
+  mooseError("Nodal tangential pressure is not available for user object '", name(), "'.");
+}
+
 const std::array<ADRealVectorValue, 2> &
 WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
                                               const unsigned int nodal_index) const
