@@ -74,19 +74,17 @@
   []
 []
 
-[MortarGapHeatTransfer]
+[ThermalContact]
   [mortar_heat_transfer]
-   temperature = temp
-
-   primary_emissivity = 1.0
-   secondary_emissivity = 1.0
-   boundary = 100
-   use_displaced_mesh = true
-   gap_conductivity = 0.02
-
-   primary_boundary = 100
-   secondary_boundary = 101
-   gap_flux_options = 'CONDUCTION RADIATION'
+    formulation = mortar
+    variable = temp
+    primary = 100
+    secondary = 101
+    primary_emissivity = 1.0
+    secondary_emissivity = 1.0
+    use_displaced_mesh = true
+    gap_conductivity = 0.02
+    gap_flux_options = 'CONDUCTION RADIATION'
   []
 []
 

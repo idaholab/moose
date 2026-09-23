@@ -1,6 +1,6 @@
 [Tests]
   design = 'GapConductanceConstraint.md'
-  issues = '#17252'
+  issues = '#17252 #19057'
   parallel_scheduling = true
   [thermomechanical_mortar]
     requirement = 'The system shall be able to solve two-dimensional thermomechanical contact with finite-strain tensor mechanics and heat conduction physics with'
@@ -71,7 +71,7 @@
       csvdiff = first_high_k_action.csv
       heavy = true
       detail = 'high conductivity in the gap and first order variables'
-      cli_args = 'name=first_high_k_action MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      cli_args = 'name=first_high_k_action ThermalContact/mortar_heat_transfer/gap_conductivity=100'
     []
     [second_low_k_action]
       type = CSVDiff
@@ -88,8 +88,15 @@
       csvdiff = second_high_k_action.csv
       heavy = true
       detail = 'high conductivity in the gap and second order variables'
-      cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND ThermalContact/mortar_heat_transfer/gap_conductivity=100'
       capabilities = 'ad_size>=73'
+    []
+    [ambiguous_mechanical_contact]
+      type = RunException
+      input = finite_action.i
+      cli_args = 'Contact/frictionless_duplicate/primary=plank_right Contact/frictionless_duplicate/secondary=block_left Contact/frictionless_duplicate/formulation=mortar'
+      expect_err = 'More than one mortar Contact action matches the thermal contact boundary pair'
+      detail = 'an error when multiple mechanical mortar actions match the thermal boundary pair'
     []
   []
 
