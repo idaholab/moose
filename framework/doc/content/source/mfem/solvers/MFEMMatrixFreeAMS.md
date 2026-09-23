@@ -26,6 +26,13 @@ Implementation details for the `mfem::MatrixFreeAMS` preconditioner, along with 
 comparisons against Hypre's AMS preconditioner for 2D problems, can be found in
 [this paper](https://www.osti.gov/servlets/purl/1835018).
 
+## Nonlinear problems
+
+For nonlinear systems `MFEMMatrixFreeAMS` builds the Jacobi smoother from the operator
+being preconditioned rather than from the bilinear form, so that the nonlinear contribution is
+included. Linear systems keep MFEM's default smoother, for which the bilinear form already is the
+full operator.
+
 ## Example Input File Syntax
 
 !listing test/tests/mfem/kernels/curlcurl.i block=Solvers
