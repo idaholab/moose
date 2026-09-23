@@ -518,6 +518,15 @@ public:
    * @param scalar The scalar value to be assigned
    */
   auto & operator=(const T & scalar);
+  /**
+   * Assign a scalar value uniformly to the device data alone, leaving the host data as it stands
+   * @param scalar The scalar value to be assigned
+   *
+   * For an array the device writes and a later copyToHost() reads back, which is what operator=
+   * cannot know: filling the host side as well costs a pass over the whole array that nothing reads
+   * before that copy overwrites it.
+   */
+  void fillDevice(const T & scalar);
 
   /**
    * Array iterator
@@ -1440,6 +1449,14 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
     ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
 
   return *this;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::fillDevice(const T & scalar)
+{
+  if (_is_device_alloc)
+    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
 }
 
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
