@@ -73,9 +73,7 @@ public:
   void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
   void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
-  // pass in pointer to a quadrature space, so that the assembly method
-  // can fetch what it needs
-  void PreAssemblySetup(const mfem::FiniteElementSpace & fes, mfem::QuadratureSpace *& qs);
+  void PreAssemblySetup(const mfem::FiniteElementSpace & fes);
 
 protected:
   mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
@@ -96,7 +94,17 @@ protected:
   mfem::Coefficient & _k_coef;
   // Coefficient for k'(s) / s
   mfem::Coefficient & _dk_du_u_coef;
+  // Coefficient for the curl of u
   mfem::VectorCoefficient & _curlu_vec;
+
+  /// Quadrature space the solution-dependent coefficients are projected onto. Owned, and
+  /// rebuilt whenever the mesh or integration rule it was built from changes.
+  std::unique_ptr<mfem::QuadratureSpace> _qspace;
+  /// What _qspace was built from, used to detect that it has gone stale. The sequence counter
+  /// catches in-place refinement, which leaves the mesh pointer unchanged.
+  const mfem::Mesh * _qspace_mesh = nullptr;
+  long _qspace_mesh_sequence = -1;
+  const mfem::IntegrationRule * _qspace_ir = nullptr;
 };
 }
 
