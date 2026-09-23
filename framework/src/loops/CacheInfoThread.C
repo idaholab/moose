@@ -12,9 +12,33 @@
 #include "libmesh/elem.h"
 #include "libmesh/threads.h"
 
-CacheInfoThread::CacheInfoThread(MooseMesh & mesh) : _mesh(mesh) {}
+CacheInfoThread::CacheInfoThread(MooseMesh & mesh, const bool cache_node_blocks)
+  : _mesh(mesh), _cache_node_blocks(cache_node_blocks)
+{
+}
 
-CacheInfoThread::CacheInfoThread(CacheInfoThread & x, Threads::split /*split*/) : _mesh(x._mesh) {}
+CacheInfoThread::CacheInfoThread(CacheInfoThread & x, Threads::split /*split*/)
+  : _mesh(x._mesh), _cache_node_blocks(x._cache_node_blocks)
+{
+}
+
+void
+CacheInfoThread::cacheNodeBlock(const dof_id_type node_id, const SubdomainID block_id)
+{
+  if (const auto it = _interface_node_blocks.find(node_id); it != _interface_node_blocks.end())
+  {
+    it->second.insert(block_id);
+    return;
+  }
+
+  const auto [it, inserted] = _node_block.emplace(node_id, block_id);
+  if (inserted || it->second == block_id)
+    return;
+
+  // The elements incident on this node disagree, so it needs the full set from here on
+  _interface_node_blocks.emplace(node_id, std::set<SubdomainID>{it->second, block_id});
+  _node_block.erase(it);
+}
 
 void
 CacheInfoThread::operator()(const ConstElemRange & range)
@@ -50,10 +74,15 @@ CacheInfoThread::operator()(const ConstElemRange & range)
       }
     }
 
-    for (const auto nd : make_range(elem->n_nodes()))
+    if (_cache_node_blocks)
     {
-      const Node & node = *elem->node_ptr(nd);
-      _block_node_list[node.id()].insert(elem->subdomain_id());
+      const auto block_id = elem->subdomain_id();
+      _node_block_ids.insert(block_id);
+      for (const auto nd : make_range(elem->n_nodes()))
+      {
+        const Node & node = *elem->node_ptr(nd);
+        cacheNodeBlock(node.id(), block_id);
+      }
     }
   }
 }
@@ -61,8 +90,14 @@ CacheInfoThread::operator()(const ConstElemRange & range)
 void
 CacheInfoThread::join(const CacheInfoThread & y)
 {
-  for (const auto & [key, values] : y._block_node_list)
-    _block_node_list[key].insert(values.begin(), values.end());
+  // Replaying y's records through cacheNodeBlock() keeps the two containers disjoint: a node that
+  // each thread saw with a single, but different, subdomain becomes an interface node here
+  for (const auto & [node_id, block_id] : y._node_block)
+    cacheNodeBlock(node_id, block_id);
+  for (const auto & [node_id, block_ids] : y._interface_node_blocks)
+    for (const auto block_id : block_ids)
+      cacheNodeBlock(node_id, block_id);
+  _node_block_ids.insert(y._node_block_ids.begin(), y._node_block_ids.end());
 
   _higher_d_elem_side_to_lower_d_elem.insert(y._higher_d_elem_side_to_lower_d_elem.begin(),
                                              y._higher_d_elem_side_to_lower_d_elem.end());
