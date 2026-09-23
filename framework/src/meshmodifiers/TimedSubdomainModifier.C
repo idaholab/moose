@@ -279,6 +279,11 @@ TimedSubdomainModifier::computeSubdomainID()
   // get the subdomain-id of the current element
   SubdomainID resulting_subdomain_id = _current_elem->subdomain_id();
 
+  // On the initial execution, _t_old equals _t (both the start time), so there is no prior
+  // time step to bound the window from below. Any requested change at or before the start
+  // time must still be applied here, or it would never be applied at all.
+  const bool initial = _current_execute_flag == EXEC_INITIAL;
+
   // check for all the subdomain changes that can have been requested between the previous and the
   // current time
   for (const auto & time_pair : _times_and_indices)
@@ -290,7 +295,7 @@ TimedSubdomainModifier::computeSubdomainID()
     const auto j = time_pair.index;
 
     // do we have to apply?
-    if (t > _t_old && t <= _t && resulting_subdomain_id == _blocks_from[j])
+    if (t <= _t && (initial || t > _t_old) && resulting_subdomain_id == _blocks_from[j])
     {
       // we have to change the subdomain-id using the original index (stored in 'j')
       resulting_subdomain_id = _blocks_to[j];
