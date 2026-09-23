@@ -1,35 +1,60 @@
 [Tests]
-  design = '/modules/doc/content/application_usage/input_syntax.md'
+  design = 'Parser.md'
   issues = '#33818'
 
   [expansion]
     type = GoogleTest
     unit_test = RangeEvalerTest.expansion
-    requirement = 'The system shall be able to expand a given positive start and end integer into a string containing all positive integers between start and end (inclusive).'
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end.'
   []
-  [singleElementRange]
+  [expansionProvideStep]
     type = GoogleTest
-    unit_test = RangeEvalerTest.singleElementRange
-    requirement = 'The system shall support ranges where the start and end integer are the same.'
+    unit_test = RangeEvalerTest.expansionProvideStep
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end, with a step size separating each entry.'
+  []
+  [expansionProvideNegStep]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansionProvideNegStep
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end, with a negative step size separating each entry.'
+  []
+  [expansionNegVals]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansionNegVals
+    requirement = 'The system shall be able to expand a given negative start and end integer into a string containing all negative integers between start and end.'
   []
   [mixedWithLiterals]
     type = GoogleTest
     unit_test = RangeEvalerTest.mixedWithLiterals
-    requirement = 'The system shall support the case where a range is mixed with other literals in a string.'
+    requirement = 'The system shall support the case where a range is mixed with other numerals in a string.'
   []
-  [wrongArgCount]
+  [wrongArgCountLess]
     type = GoogleTest
-    unit_test = RangeEvalerTest.wrongArgCount
-    requirement = 'The system shall error if more or fewer than two arguments are provided in a range.'
+    unit_test = RangeEvalerTest.wrongArgCountLess
+    requirement = 'The system shall error if fewer than two arguments are provided to a range.'
   []
-  [nonIntegerIndex]
+  [wrongArgCountGreater]
     type = GoogleTest
-    unit_test = RangeEvalerTest.nonIntegerIndex
-    requirement = 'The system shall error if a non-positive integer is provided as a start or end index in a range.'
+    unit_test = RangeEvalerTest.wrongArgCountGreater
+    requirement = 'The system shall error if more than three arguments are provided to a range.'
   []
-  [descendingRange]
+  [nonInteger]
     type = GoogleTest
-    unit_test = RangeEvalerTest.descendingRange
-    requirement = 'The system shall error if the end parameter is larger than the start parameter.'
+    unit_test = RangeEvalerTest.nonInteger
+    requirement = 'The system shall error if non-integers are provided to a range.'
+  []
+  [posStepSmallerEnd]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.posStepSmallerEnd
+    requirement = 'The system shall error if a positive step value is provided to a range where the end point is larger than the start point.'
+  []
+  [negStepLargerEnd]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.negStepLargerEnd
+    requirement = 'The system shall error if a negative step value is provided to a range where the start point is larger than the end point.'
+  []
+  [zeroStep]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.zeroStep
+    requirement = 'The system shall error if a zero step value is provided to a range.'
   []
 []

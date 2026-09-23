@@ -25,40 +25,75 @@ TEST(RangeEvalerTest, expansion)
 {
   const auto [value, errors] = expandRange("blocks = '${range 0 3}'");
   EXPECT_TRUE(errors.empty());
-  EXPECT_EQ(value, "0 1 2 3");
+  EXPECT_EQ(value, "0 1 2");
 }
 
-TEST(RangeEvalerTest, singleElementRange)
+TEST(RangeEvalerTest, expansionProvideStep)
 {
-  const auto [value, errors] = expandRange("blocks = '${range 5 5}'");
+  const auto [value, errors] = expandRange("blocks = '${range 0 6 2}'");
   EXPECT_TRUE(errors.empty());
-  EXPECT_EQ(value, "5");
+  EXPECT_EQ(value, "0 2 4");
+}
+
+TEST(RangeEvalerTest, expansionProvideNegStep)
+{
+  const auto [value, errors] = expandRange("blocks = '${range 6 0 -2}'");
+  EXPECT_TRUE(errors.empty());
+  EXPECT_EQ(value, "6 4 2");
+}
+
+TEST(RangeEvalerTest, expansionNegVals)
+{
+  const auto [value, errors] = expandRange("blocks = '${range -4 -1}'");
+  EXPECT_TRUE(errors.empty());
+  EXPECT_EQ(value, "-4 -3 -2");
 }
 
 TEST(RangeEvalerTest, mixedWithLiterals)
 {
-  const auto [value, errors] = expandRange("blocks = '0 ${range 1 4} 5'");
+  const auto [value, errors] = expandRange("blocks = '0 ${range 1 5} 5'");
   EXPECT_TRUE(errors.empty());
   EXPECT_EQ(value, "0 1 2 3 4 5");
 }
 
-TEST(RangeEvalerTest, wrongArgCount)
+TEST(RangeEvalerTest, wrongArgCountLess)
 {
   const auto [value, errors] = expandRange("blocks = '${range 0}'");
   ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("Expected 2 arguments"), std::string::npos);
+  EXPECT_NE(errors[0].message.find("Expected either 2 arguments"), std::string::npos);
 }
 
-TEST(RangeEvalerTest, nonIntegerIndex)
+TEST(RangeEvalerTest, wrongArgCountGreater)
 {
-  const auto [value, errors] = expandRange("blocks = '${range a 3}'");
+  const auto [value, errors] = expandRange("blocks = '${range 0 1 2 3}'");
   ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("is not a non-negative integer"), std::string::npos);
+  EXPECT_NE(errors[0].message.find("or 3 arguments"), std::string::npos);
 }
 
-TEST(RangeEvalerTest, descendingRange)
+TEST(RangeEvalerTest, nonInteger)
 {
-  const auto [value, errors] = expandRange("blocks = '${range 3 0}'");
+  const auto [value, errors] = expandRange("blocks = '${range s 5.5 -}'");
   ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("is smaller than first index"), std::string::npos);
+  EXPECT_NE(errors[0].message.find("is not an integer in"), std::string::npos);
+}
+
+TEST(RangeEvalerTest, posStepSmallerEnd)
+{
+  const auto [value, errors] = expandRange("blocks = '${range 5 0 1}'");
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].message.find("is smaller than the start point"), std::string::npos);
+}
+
+TEST(RangeEvalerTest, negStepLargerEnd)
+{
+  const auto [value, errors] = expandRange("blocks = '${range 0 5 -1}'");
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].message.find("is smaller than the end point"), std::string::npos);
+}
+
+TEST(RangeEvalerTest, zeroStep)
+{
+  const auto [value, errors] = expandRange("blocks = '${range 0 5 0}'");
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].message.find("step is zero in"), std::string::npos);
 }
