@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#33859'
+  design = 'KokkosNEML2ToMOOSEMaterialProperty.md'
+
+  [bridge]
+    type = CSVDiff
+    input = 'bridge.i'
+    csvdiff = 'bridge_out.csv'
+    requirement = 'The system shall read a NEML2 output into a Kokkos material property without '
+                  'transferring it through host memory, reproducing the values obtained by the '
+                  'non-Kokkos bridge that does transfer it.'
+    # The bridge aliases device storage, so it requires a NEML2 output resident on a CUDA device
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+    # The two paths agree to roundoff, so the golded difference is exact zero
+    abs_zero = 1e-12
+    rel_err = 1e-6
+  []
+[]
