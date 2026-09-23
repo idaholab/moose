@@ -74,6 +74,7 @@ Global Options:
   --show-controls                     Shows the Control logic available and executed
   --show-input                        Shows the parsed input file before running the simulation
   --show-outputs                      Shows the output execution time information
+  --suppress-info                     Disables informational messages
   --test-checkpoint-half-transient    Run half of a transient with checkpoints enabled; used by the TestHarness
   -t --timing                         Enable all performance logging for timing; disables screen output of performance logs for all Console objects
   --timpi-sync <type=nbx>             Changes the sync type used in spare parallel communitations within TIMPI
