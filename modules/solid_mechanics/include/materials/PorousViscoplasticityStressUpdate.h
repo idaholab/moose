@@ -289,6 +289,16 @@ protected:
         dpopulation_volumetric_dx{};
   };
 
+  /** Value-only result of applying independent pore-population lower bounds. */
+  struct IndependentPopulationProjection
+  {
+    PorePorosityState floor_value{};
+    PorePorosityState population_volumetric_increment{};
+    unsigned int active_count = 0;
+    unsigned int active_population = MAX_HYDROSTATIC_STRESS_POPULATIONS;
+    GenericReal<is_ad> active_denominator = 1.0;
+  };
+
   /** One pore population's share of total porosity and hydrostatic driving stress. */
   struct HydrostaticStressPopulation
   {
@@ -338,6 +348,14 @@ protected:
   virtual GenericReal<is_ad>
   independentPorePorosityFloor(unsigned int population_index,
                                const PorePorosityState & pore_porosity_begin) const;
+
+  /** Apply one- or two-population porosity floors to the volumetric LPS increments. */
+  IndependentPopulationProjection projectIndependentPopulationVolumetricIncrement(
+      const PorePorosityState & unconstrained_population_volumetric_increment,
+      const PorePorosityState & pore_porosity_begin,
+      const PorePorosityState & dilution_coefficient,
+      const GenericReal<is_ad> & solid_fraction_old,
+      const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active) const;
 
   /** Evaluate pressure closure and pressure derivatives for independent pore porosities. */
   virtual HydrostaticStressState
