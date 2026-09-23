@@ -1,5 +1,5 @@
 [Tests]
-  [test]
+  [NIST_csvdiff]
     type = CSVDiff
     input = '../thermal_solid_properties.i'
     cli_args = "

@@ -97,77 +97,8 @@ ThermalCopperProperties::ThermalCopperProperties(const InputParameters & paramet
 Real
 ThermalCopperProperties::k_from_T(const Real & T) const
 {
-  if ((T < 4.0) || (T > 300.0))
-    flagInvalidSolution("Thermal conductivity evaluated outside valid range [4, 300] K");
-
   Real k, dk_dT;
-
-  switch (_rrr)
-  {
-    case RRR_50:
-      computeThermalConductivity(
-          T, _k50_a, _k50_b, _k50_c, _k50_d, _k50_e, _k50_f, _k50_g, _k50_h, _k50_i, k, dk_dT);
-      break;
-    case RRR_100:
-      computeThermalConductivity(T,
-                                 _k100_a,
-                                 _k100_b,
-                                 _k100_c,
-                                 _k100_d,
-                                 _k100_e,
-                                 _k100_f,
-                                 _k100_g,
-                                 _k100_h,
-                                 _k100_i,
-                                 k,
-                                 dk_dT);
-      break;
-    case RRR_150:
-      computeThermalConductivity(T,
-                                 _k150_a,
-                                 _k150_b,
-                                 _k150_c,
-                                 _k150_d,
-                                 _k150_e,
-                                 _k150_f,
-                                 _k150_g,
-                                 _k150_h,
-                                 _k150_i,
-                                 k,
-                                 dk_dT);
-      break;
-    case RRR_300:
-      computeThermalConductivity(T,
-                                 _k300_a,
-                                 _k300_b,
-                                 _k300_c,
-                                 _k300_d,
-                                 _k300_e,
-                                 _k300_f,
-                                 _k300_g,
-                                 _k300_h,
-                                 _k300_i,
-                                 k,
-                                 dk_dT);
-      break;
-    case RRR_500:
-      computeThermalConductivity(T,
-                                 _k500_a,
-                                 _k500_b,
-                                 _k500_c,
-                                 _k500_d,
-                                 _k500_e,
-                                 _k500_f,
-                                 _k500_g,
-                                 _k500_h,
-                                 _k500_i,
-                                 k,
-                                 dk_dT);
-      break;
-    default:
-      mooseError("Unhandled RRRValue enum!");
-  }
-
+  k_from_T(T, k, dk_dT);
   return k;
 }
 
@@ -290,22 +221,9 @@ ThermalCopperProperties::computeThermalConductivity(const Real & T,
 Real
 ThermalCopperProperties::cp_from_T(const Real & T) const
 {
-  if ((T < 4.0) || (T > 300.0))
-    flagInvalidSolution("Specific heat evaluated outside valid range [4, 300] K");
-
-  // NIST correlation: log10(cp) = sum of polynomial in log10(T)
-  const Real log10_T = std::log10(T);
-  const Real log10_T2 = Utility::pow<2>(log10_T);
-  const Real log10_T3 = Utility::pow<3>(log10_T);
-  const Real log10_T4 = Utility::pow<4>(log10_T);
-  const Real log10_T5 = Utility::pow<5>(log10_T);
-  const Real log10_T6 = Utility::pow<6>(log10_T);
-  const Real log10_T7 = Utility::pow<7>(log10_T);
-
-  const Real log10_cp = _cp_a + _cp_b * log10_T + _cp_c * log10_T2 + _cp_d * log10_T3 +
-                        _cp_e * log10_T4 + _cp_f * log10_T5 + _cp_g * log10_T6 + _cp_h * log10_T7;
-
-  return std::pow(10.0, log10_cp);
+  Real cp, dcp_dT;
+  cp_from_T(T, cp, dcp_dT);
+  return cp;
 }
 
 void
