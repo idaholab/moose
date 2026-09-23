@@ -141,6 +141,24 @@ protected:
     std::uint64_t independent_implicit_sensitivity_reconstructions = 0;
     std::uint64_t consistent_tangent_evaluations = 0;
     std::uint64_t independent_consistent_tangent_evaluations = 0;
+    /// Complete multi-substep numerical tangent constructions.
+    std::uint64_t substep_tangent_evaluations = 0;
+    /// Perturbed complete-path replays used by the multi-substep numerical tangent.
+    std::uint64_t substep_tangent_perturbed_replays = 0;
+    /// Final unperturbed complete-path replays used to restore the accepted state.
+    std::uint64_t substep_tangent_restoration_replays = 0;
+    /// Tangent directions evaluated with the historical centered finite difference.
+    std::uint64_t substep_tangent_centered_directions = 0;
+    /// Tangent directions evaluated one-sided because one perturbation failed.
+    std::uint64_t substep_tangent_one_sided_directions = 0;
+    /// Perturbed tangent replays rejected because the constitutive solve threw.
+    std::uint64_t substep_tangent_failed_replays = 0;
+    /// Successful perturbed tangent replays whose constitutive branch history changed.
+    std::uint64_t substep_tangent_branch_mismatches = 0;
+    /// Tangent directions that retained the historical secant policy despite a branch mismatch.
+    std::uint64_t substep_tangent_cross_branch_directions = 0;
+    /// Unperturbed restoration replays whose branch history differed from the accepted path.
+    std::uint64_t substep_tangent_restoration_branch_mismatches = 0;
     std::uint64_t pore_state_evaluations = 0;
     std::uint64_t independent_hydrostatic_evaluations = 0;
     std::uint64_t bubble_eos_evaluations = 0;
@@ -352,6 +370,13 @@ protected:
   {
   }
 
+  /**
+   * Return derived-model nonsmooth branch bits that must remain fixed for a branch-local numerical
+   * tangent. The base separately tracks kinematic mode, dense/floor active sets, and population
+   * count. Smooth activation away from an exactly hydrostatic q=0 state is intentionally excluded.
+   */
+  virtual std::uint64_t additionalConstitutiveBranchSignature() const { return 0; }
+
   /** Lower bound used by the scalar one-population porosity solve. */
   virtual GenericReal<is_ad> scalarPorosityFloor() const { return _minimum_porosity; }
 
@@ -549,7 +574,8 @@ protected:
                                   const GenericRankFourTensor<is_ad> & elasticity_tensor,
                                   const RankTwoTensor & elastic_strain_old,
                                   unsigned int total_number_substeps,
-                                  bool enforce_substep_control = true);
+                                  bool enforce_substep_control = true,
+                                  std::vector<std::uint64_t> * branch_history = nullptr);
 
 private:
   /** Caller-owned and material state restored when one constitutive attempt is rejected. */
@@ -573,6 +599,12 @@ private:
                                 GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
                                 GenericRankTwoTensor<is_ad> & stress);
 
+  std::uint64_t makeConstitutiveBranchSignature(
+      bool independent_kinematics,
+      bool dense_limit,
+      const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active,
+      const HydrostaticStressState & hydrostatic_stress) const;
+
   /**
    * Numerically differentiate the complete accepted multi-substep constitutive map.
    *
@@ -590,7 +622,8 @@ private:
                                      GenericRankTwoTensor<is_ad> & stress_new,
                                      const GenericRankFourTensor<is_ad> & elasticity_tensor,
                                      const RankTwoTensor & elastic_strain_old,
-                                     unsigned int total_number_substeps);
+                                     unsigned int total_number_substeps,
+                                     const std::vector<std::uint64_t> & accepted_branch_history);
 
   enum LocalVariableIndex : unsigned int
   {
@@ -1033,6 +1066,7 @@ protected:
 private:
   bool _compute_consistent_tangent;
   RankFourTensor _last_consistent_tangent;
+  std::uint64_t _last_constitutive_branch_signature = 0;
 
   /// Linear factor a_E in E(f) = E_dense (1 - a_E f), evaluated inside the local LPS solve.
   const Real _youngs_modulus_porosity_factor;

@@ -146,6 +146,29 @@
     requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
   []
 
+  [review_substep_tangent_smooth_clean]
+    type = RunCommand
+    command = 'python3 check_substep_tangent_diagnostics.py clean review_substep_tangent_smooth_perf'
+    prereq = lps_single_substepping
+    heavy = true
+    requirement = 'The generic non-AD multi-substep tangent cost regression shall remove stale per-instance diagnostics before measuring replay work.'
+  []
+  [review_substep_tangent_smooth_diagnostics]
+    type = RunApp
+    input = lps_single_substepping.i
+    cli_args = 'AD="" use_ad=false Materials/stress/tangent_operator=nonlinear Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=review_substep_tangent_smooth_perf Outputs/csv=false Executioner/num_steps=1'
+    prereq = review_substep_tangent_smooth_clean
+    heavy = true
+    requirement = 'A smooth generic non-AD multi-substep FULL tangent shall expose the cost of complete-path numerical replay without leaving the accepted constitutive branch.'
+  []
+  [review_substep_tangent_smooth_verify]
+    type = RunCommand
+    command = 'python3 check_substep_tangent_diagnostics.py smooth review_substep_tangent_smooth_perf'
+    prereq = review_substep_tangent_smooth_diagnostics
+    heavy = true
+    requirement = 'Each smooth generic multi-substep tangent shall use twelve perturbed and one restoration replay, with six centered accepted-branch directions and no branch fallback.'
+  []
+
   [negative]
     requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor, when automatic differentiaton is requested,'
     [zero]
