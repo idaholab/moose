@@ -97,6 +97,11 @@ struct Real33
   KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3) const;
   KOKKOS_INLINE_FUNCTION Real33 inverse(const unsigned int dim = 3) const;
   KOKKOS_INLINE_FUNCTION Real33 transpose() const;
+  /**
+   * The equivalent full second-order tensor, which for a tensor already stored in full is itself.
+   * Real6 provides the same method, so a kernel can be written against either representation.
+   */
+  KOKKOS_INLINE_FUNCTION Real33 full() const { return *this; }
   KOKKOS_INLINE_FUNCTION Real3 row(const unsigned int i) const;
   KOKKOS_INLINE_FUNCTION Real3 col(const unsigned int j) const;
 #endif
@@ -132,6 +137,65 @@ struct Real3333
 
   KOKKOS_INLINE_FUNCTION Real3333 & operator=(const Real3333 & tensor);
   KOKKOS_INLINE_FUNCTION Real3333 & operator=(const Real scalar);
+#endif
+};
+
+/**
+ * A symmetric second-order tensor in Mandel notation, storing six components ordered
+ * (11, 22, 33, 23, 13, 12).
+ *
+ * The shear components carry a factor of sqrt(2), so a stored off-diagonal entry is sqrt(2) times
+ * the corresponding tensor component. Storing the factor rather than applying it on access is what
+ * makes a double contraction with Real66 a plain matrix-vector product. This is the component order
+ * and factor convention of SymmetricRankTwoTensor, and also of NEML2's SR2, so a batch of SR2
+ * values shares this layout exactly.
+ */
+struct Real6
+{
+  Real a[6];
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /// Number of independent components of a symmetric second-order tensor in three dimensions
+  static constexpr unsigned int N = 6;
+  /// sqrt(2), the Mandel factor of the shear components; the value of MathUtils::sqrt2, repeated
+  /// here to keep this device-facing header independent of MathUtils
+  static constexpr Real mandel_sqrt2 = 1.4142135623730951;
+
+  KOKKOS_INLINE_FUNCTION Real6() { *this = 0; }
+  KOKKOS_INLINE_FUNCTION Real6(const Real6 & tensor) = default;
+  /// Take the symmetric part of a full second-order tensor and apply the Mandel factors
+  KOKKOS_INLINE_FUNCTION Real6(const Real33 & tensor);
+
+  KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i) { return a[i]; }
+  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i) const { return a[i]; }
+
+  KOKKOS_INLINE_FUNCTION Real6 & operator=(const Real6 & tensor);
+  KOKKOS_INLINE_FUNCTION Real6 & operator=(const Real scalar);
+
+  /// Expand into the equivalent full second-order tensor, undoing the Mandel factors
+  KOKKOS_INLINE_FUNCTION Real33 full() const;
+#endif
+};
+
+/**
+ * A fourth-order tensor with minor symmetry in Mandel notation, stored as a six by six matrix over
+ * the component ordering of Real6.
+ *
+ * This is the layout of SymmetricRankFourTensor, and also of NEML2's SSR4.
+ */
+struct Real66
+{
+  Real a[6][6];
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  KOKKOS_INLINE_FUNCTION Real66() { *this = 0; }
+  KOKKOS_INLINE_FUNCTION Real66(const Real66 & tensor) = default;
+
+  KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i, unsigned int j) { return a[i][j]; }
+  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i, unsigned int j) const { return a[i][j]; }
+
+  KOKKOS_INLINE_FUNCTION Real66 & operator=(const Real66 & tensor);
+  KOKKOS_INLINE_FUNCTION Real66 & operator=(const Real scalar);
 #endif
 };
 
@@ -551,6 +615,92 @@ operator*(const Real3333 & left, const Real33 right)
       for (unsigned int k = 0; k < Moose::dim; ++k)
         for (unsigned int l = 0; l < Moose::dim; ++l)
           mul(i, j) += left(i, j, k, l) * right(k, l);
+
+  return mul;
+}
+
+KOKKOS_INLINE_FUNCTION
+Real6::Real6(const Real33 & tensor)
+{
+  a[0] = tensor(0, 0);
+  a[1] = tensor(1, 1);
+  a[2] = tensor(2, 2);
+  a[3] = mandel_sqrt2 * 0.5 * (tensor(1, 2) + tensor(2, 1));
+  a[4] = mandel_sqrt2 * 0.5 * (tensor(0, 2) + tensor(2, 0));
+  a[5] = mandel_sqrt2 * 0.5 * (tensor(0, 1) + tensor(1, 0));
+}
+
+KOKKOS_INLINE_FUNCTION Real6 &
+Real6::operator=(const Real6 & tensor)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    a[i] = tensor.a[i];
+
+  return *this;
+}
+
+KOKKOS_INLINE_FUNCTION Real6 &
+Real6::operator=(const Real scalar)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    a[i] = scalar;
+
+  return *this;
+}
+
+KOKKOS_INLINE_FUNCTION Real33
+Real6::full() const
+{
+  Real33 tensor;
+
+  tensor(0, 0) = a[0];
+  tensor(1, 1) = a[1];
+  tensor(2, 2) = a[2];
+  tensor(1, 2) = tensor(2, 1) = a[3] / mandel_sqrt2;
+  tensor(0, 2) = tensor(2, 0) = a[4] / mandel_sqrt2;
+  tensor(0, 1) = tensor(1, 0) = a[5] / mandel_sqrt2;
+
+  return tensor;
+}
+
+KOKKOS_INLINE_FUNCTION Real66 &
+Real66::operator=(const Real66 & tensor)
+{
+  for (unsigned int i = 0; i < Real6::N; ++i)
+    for (unsigned int j = 0; j < Real6::N; ++j)
+      a[i][j] = tensor.a[i][j];
+
+  return *this;
+}
+
+KOKKOS_INLINE_FUNCTION Real66 &
+Real66::operator=(const Real scalar)
+{
+  for (unsigned int i = 0; i < Real6::N; ++i)
+    for (unsigned int j = 0; j < Real6::N; ++j)
+      a[i][j] = scalar;
+
+  return *this;
+}
+
+/**
+ * Double contraction of a minor-symmetric fourth-order tensor with a symmetric second-order tensor.
+ * Because both operands carry their Mandel factors, the contraction is a plain matrix-vector
+ * product, at 36 multiplies against the 81 of the dense form.
+ */
+// A batch of NEML2 SR2 or SSR4 values is consumed by reinterpreting its storage as these types, so
+// they must be exactly as wide as the component counts imply, with no padding.
+static_assert(sizeof(Real6) == 6 * sizeof(Real), "Real6 must be six packed Reals");
+static_assert(sizeof(Real66) == 36 * sizeof(Real), "Real66 must be thirty-six packed Reals");
+
+KOKKOS_INLINE_FUNCTION Real6
+operator*(const Real66 & left, const Real6 right)
+{
+  Real6 mul;
+
+  for (unsigned int i = 0; i < Real6::N; ++i)
+    for (unsigned int j = 0; j < Real6::N; ++j)
+      mul(i) += left(i, j) * right(j);
 
   return mul;
 }
