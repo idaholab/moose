@@ -14,8 +14,10 @@
 #include "FunctorInterface.h"
 #include "MooseTypes.h"
 #include "ThermalSolidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 
 class ThermalSolidProperties;
+class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class PipeInnerWallTemperatureScalarKernelTempl
@@ -31,21 +33,27 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual Real computeQpJacobian();
   const ThermalSolidProperties & _sp;
+  const SinglePhaseFluidProperties & _fp;
+  const VariableValue & _m;
   const VariableValue & _Tout;
   const VariableValue & _Tup;
   const VariableValue & _Tdown;
   const VariableValue & _Tf;
+  const VariableValue & _Tfup;
+  const VariableValue & _Tfdown;
   bool _is_implicit;
+  const Moose::Functor<GenericReal<is_ad>> & _Pref;
   const Moose::Functor<GenericReal<is_ad>> & _inner_diameter;
   const Moose::Functor<GenericReal<is_ad>> & _outer_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _mid_diameter;
   const Moose::Functor<GenericReal<is_ad>> & _length;
   const Moose::Functor<GenericReal<is_ad>> & _upstream_spacing;
   const Moose::Functor<GenericReal<is_ad>> & _downstream_spacing;
-  const Moose::Functor<GenericReal<is_ad>> & _htc;
-  const Moose::Functor<GenericReal<is_ad>> & _perimeter;
+  const Moose::Functor<GenericReal<is_ad>> & _upstream_inner_diameter;
+  const Moose::Functor<GenericReal<is_ad>> & _upstream_outer_diameter;
+  const Moose::Functor<GenericReal<is_ad>> & _downstream_inner_diameter;
+  const Moose::Functor<GenericReal<is_ad>> & _downstream_outer_diameter;
 };
 
 typedef PipeInnerWallTemperatureScalarKernelTempl<false> PipeInnerWallTemperatureScalarKernel;
