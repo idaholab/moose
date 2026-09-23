@@ -56,23 +56,23 @@ libfabric:
 # conda-forge packages
 #
 
-# The clang version held here is intentionally behind conda-forge-pinning: it
-# must match clang_tools in conda/tools/conda_build_config.yaml, which provides
-# git clang-format, and moving it therefore reformats the entire tree. Bump the
-# two together in a dedicated update.
+# The clang version here must match clang_tools in
+# conda/tools/conda_build_config.yaml, which provides git clang-format. Bump the
+# two together, and note that a clang-format major bump reformats the entire
+# tree, so the reformat itself belongs in its own update.
 c_compiler:
   - gcc                                                     # [linux]
   - clang                                                   # [osx]
 c_compiler_version:
   - 15                                                      # [linux]
-  - 19                                                      # [osx]
+  - 21                                                      # [osx]
 
 cxx_compiler:
   - gxx                                                     # [linux]
   - clangxx                                                 # [osx]
 cxx_compiler_version:
   - 15                                                      # [linux]
-  - 19                                                      # [osx]
+  - 21                                                      # [osx]
 
 fortran_compiler:
   - gfortran
