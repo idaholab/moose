@@ -24,17 +24,6 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
-  [MFEMCurlCurlPartialNL_LinearKernel]
-    type = CSVDiff
-    input = curlcurl_nl_linear_kernel.i
-    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
-    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
-    capabilities = 'mfem'
-    compute_devices = 'cpu'
-    max_parallel = 1 # schemadiff with multiple ranks
-    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMNLCurlCurlKernel'
-    recover = false
-  []
   [MFEMCurlCurlNL]
     type = CSVDiff
     input = curlcurl_nl.i
@@ -43,6 +32,17 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMCurlCurlPartialNL_LinearKernel]
+    type = CSVDiff
+    input = curlcurl_nl.i
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMNLCurlCurlKernel'
     recover = false
   []
   [MFEMCurlCurlNLPartial]

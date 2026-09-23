@@ -92,9 +92,10 @@ protected:
   int ndata;             // number of matrix elements to store per qpoint
   bool symmetric = true; ///< False if using a nonsymmetric matrix coefficient
 
-  // we also need to capture the coefficient for the k function and its derivative
+  // Coefficient for k(s)
   mfem::Coefficient & _k_coef;
-  mfem::Coefficient & _dk_du_u_coef; // this is k'(s) / s
+  // Coefficient for k'(s) / s
+  mfem::Coefficient & _dk_du_u_coef;
   mfem::VectorCoefficient & _curlu_vec;
 };
 }

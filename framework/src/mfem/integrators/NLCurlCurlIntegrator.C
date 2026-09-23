@@ -31,7 +31,7 @@ namespace Moose::MFEM
 // Vector & k_coeff  - reference to the vector of k(s) evaluated at each quadpoint. length is
 //    one per quadpoint per element
 // Vector & dk_coeff - ditto for the k'(s) / s
-// Vector & op - most important part!! this is the diagonal operator
+// Vector & op - this is the diagonal operator
 static void NLCurlCurlGradPASetup(const int Q1D,
                                   const int ne,
                                   const mfem::Array<mfem::real_t> & w,
@@ -46,13 +46,12 @@ static void NLCurlCurlGradPASetup(const int Q1D,
 // (we skip coeff_dim, as we expect the functions to be scalar functions)
 // const int ne - the number of elements
 // const Array<real_t> & w, the quadrature weights - get these from the integration rule
-// const Array<real_t> & w, the quadrature weights - get these from the integration rule
 // const Vector &j - the jacobian matrices in the form of a flat vector. Its length is
 //    9 * number of elements * number of quadpoints, i.e. one 3x3 matrix for each quadpoint
 //    in each element
 // Vector & k_coeff  - reference to the vector of k(s) evaluated at each quadpoint. length is
 //    one per quadpoint per element
-// Vector & op - most important part!! this is the diagonal operator
+// Vector & op - this is the diagonal operator
 static void NLCurlCurlPASetup(const int Q1D,
                               const int ne,
                               const mfem::Array<mfem::real_t> & w,
@@ -108,10 +107,6 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
   : _curlcurl_res_integ(k, ir),
     _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir),
-    // here we capture the k coefficient directly in this class so we can probe
-    // it during AssembleGradPA. We also add a new coeff reference called _dk_du_u_coef
-    // where we hold k'(s) / s, which should be written into the input file to
-    // avoid post-hoc calculations there
     _k_coef(k),
     _dk_du_u_coef(dk_dcurlu),
     _curlu_vec(curlu_vec)
@@ -136,9 +131,8 @@ NLCurlCurlIntegrator::AssembleElementGrad(const mfem::FiniteElement & el,
   _curlcurl_jac_integ.AssembleElementGrad(el, Tr, elfun, elmat);
 }
 
-// the first argument is the current state vector, which we actually don't need, since u appears
-// only embedded in the function of k and as a curl. We keep other stuff for that already, i.e.
-// we can totally ignore the x argument here
+// The first argument is the current state vector, which we actually don't need, since u appears
+// only embedded in the function of k and as a curl.
 void
 NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
                                      const mfem::FiniteElementSpace & fes)
@@ -163,12 +157,12 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
   delete qs;
 }
 
-// here, we redundantly re-do everything that AssembleGradPA also has.
-// When everything is correct, then we can make it nicer.
+// This mirrors AssembleGradPA exactly. We are performing redundant work here, and we
+// will fix that in subsequent PRs.
 void
 NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 {
-  // pass in pointer to a QS, so we can use to to project our coefficients
+  // pass in pointer to a QS, so we can use to project our coefficients
   mfem::QuadratureSpace * qs;
   PreAssemblySetup(fes, qs);
 
@@ -246,7 +240,8 @@ NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
                                                    diag);
 }
 
-// For now, we call this from AssemblePA and AssembleGradPA
+// This gets called by both AssemblePA and AssembleGradPA, since they
+// both need to store the transformation jacobians.
 void
 NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes,
                                        mfem::QuadratureSpace *& qs)
@@ -316,14 +311,11 @@ NLCurlCurlGradPASetup(const int Q1D,
   auto K = mfem::Reshape(k_coeff.Read(), 1, NQ, NE);
   auto DK = mfem::Reshape(dk_coeff.Read(), 1, NQ, NE);
 
-  // the Curl gridfunction
+  // the Curl CoefficientVector
   auto C = mfem::Reshape(c.Read(), 3, NQ, NE);
 
   // finally, our operator
   auto Diag = mfem::Reshape(op.Write(), NQ, 6, NE);
-
-  // TODO: replace this with mfem::forall (or some 2D/3D variant, so we can
-  // use shared memory)
 
   // for each element
   for (int e = 0; e < NE; e++)
@@ -348,7 +340,7 @@ NLCurlCurlGradPASetup(const int Q1D,
       // element/qpoint
       const mfem::real_t alpha = DK(0, q, e);
 
-      // kitto for k
+      // ditto for k
       const mfem::real_t k = K(0, q, e);
 
       // load the c_i - elements of the curl vector
