@@ -27,7 +27,7 @@ and what stops a container from being overwritten in place.
 ./scripts/versioner.py <library> --yaml            # all computed fields, incl. influential
 ./scripts/versioner.py <library> --json            # same, JSON
 ./scripts/versioner.py --build-templates           # regenerate every templated file
-./scripts/versioner.py --verify <base_ref>         # the gate; use upstream/next
+./scripts/versioner.py --verify <base_ref>         # the gate; use upstream/devel
 ./scripts/versioner.py --verify <base_ref> --brief # compact, markdown tables, no color
 ./scripts/versioner.py --summary                   # YAML block for versioner_hashes.yaml
 ```
@@ -160,8 +160,10 @@ Rules:
 - Append at the end, separated from the previous block by one blank line.
 - Add the PR number as the trailing comment on the sha line.
 - `app` is intentionally excluded.
-- The sha is `git rev-parse HEAD` at the time of generation, which means **the block is
-  only valid if this is the final commit**. Regenerate after any amend or rebase.
+- The sha is `git rev-parse HEAD` at the time of generation, so in the committed history it
+  is the commit *below* `Update versioner hashes` — the content tip. This is why **the block
+  is only valid if the hash commit is the final commit**. Regenerate after any amend,
+  rebase, or added commit, including one that changes no package hash.
 - A hash quoted as a string in the output (e.g. `hash: '2947116'`) is normal YAML
   behaviour for an all-digit value; leave it as generated.
 
