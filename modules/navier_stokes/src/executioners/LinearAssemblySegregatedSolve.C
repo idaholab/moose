@@ -622,7 +622,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
 
   // Reconstructed gradients use the unrelaxed pressure and its conservative face flux to form
   // the candidate pressure gradient that corrects cell velocity exactly. Relaxed feedback is
-  // published below after the relaxed pressure solution has been computed.
+  // published below after the relaxed pressure solution has been computed. Here,
+  // mdot = [(rhoHbyA)_f - (rho/A)_f grad(p)_face] dot normal * S. Only the unrelaxed pressure
+  // makes div(mdot) = 0; using a relaxed pressure would leave a continuity residual.
   _rc_uo->preparePressureRelaxation();
 
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());

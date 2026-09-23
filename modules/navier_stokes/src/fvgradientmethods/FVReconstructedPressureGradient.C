@@ -411,6 +411,11 @@ FVReconstructedPressureGradient::assembleFaceProjection(
   mooseAssert(fi, "FaceInfo must be available while reconstructing a cell.");
 
   const Real surface_area = surface_vector.norm();
+  // An axisymmetric face on the symmetry axis has zero physical area and adds no projection
+  // equation.
+  if (surface_area == 0.0)
+    return;
+
   const auto pressure_face_type =
       fi->faceType({_pressure_variable_number, _pressure_system->number()});
   // On one-sided pressure faces, RhieChow stores the flux outward from the pressure cell. On
