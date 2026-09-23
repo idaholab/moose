@@ -15,6 +15,7 @@
 #include <array>
 #include <cctype>
 #include <cmath>
+#include <exception>
 #include <fstream>
 #include <limits>
 #include <sstream>
@@ -147,36 +148,60 @@ solveLinearSystem(const FixedMatrix<MatrixValue, N> & input,
  *
  * Comparing this norm to relative_tolerance is equivalent to the mixed criterion
  *
- *   ||R_mech|| <= minimum_stress_magnitude
+ *   ||R_mech|| <= absolute_stress_tolerance
  *                 + relative_tolerance * mechanical_reference_scale.
+ *
+ * The absolute term is deliberately independent of the selected relative tolerance. This keeps a
+ * looser stagnation tolerance from also loosening the dimensional stress-residual floor.
  */
 template <typename ResidualValue, std::size_t N>
 Real
-physicalMechanicalResidualNorm(const std::array<ResidualValue, N> & residual,
-                               const Real mechanical_reference_scale,
-                               const Real minimum_stress_magnitude,
-                               const Real relative_tolerance)
+physicalMechanicalResidualMagnitude(const std::array<ResidualValue, N> & residual)
 {
   static_assert(N >= 2, "The mechanical residual requires p and q components.");
 
+  const auto residual_p = MetaPhysicL::raw_value(residual[0]);
+  const auto residual_q = MetaPhysicL::raw_value(residual[1]);
+  if (!std::isfinite(residual_p) || !std::isfinite(residual_q))
+    return std::numeric_limits<Real>::infinity();
+
+  return std::hypot(residual_p, residual_q);
+}
+
+Real
+physicalMechanicalResidualLimit(const Real mechanical_reference_scale,
+                                const Real absolute_stress_tolerance,
+                                const Real relative_tolerance)
+{
   using std::max;
 
   if (!(relative_tolerance > 0.0) || !std::isfinite(relative_tolerance) ||
       !std::isfinite(mechanical_reference_scale) || mechanical_reference_scale < 0.0)
     return std::numeric_limits<Real>::infinity();
 
-  const auto absolute_stress_tolerance =
-      max(minimum_stress_magnitude, std::numeric_limits<Real>::min());
-  const auto convergence_scale =
-      mechanical_reference_scale + absolute_stress_tolerance / relative_tolerance;
-  const auto residual_p = MetaPhysicL::raw_value(residual[0]);
-  const auto residual_q = MetaPhysicL::raw_value(residual[1]);
+  const auto bounded_absolute_stress_tolerance =
+      max(absolute_stress_tolerance, std::numeric_limits<Real>::min());
+  return bounded_absolute_stress_tolerance + relative_tolerance * mechanical_reference_scale;
+}
 
-  if (!std::isfinite(residual_p) || !std::isfinite(residual_q) ||
-      !std::isfinite(convergence_scale) || !(convergence_scale > 0.0))
+template <typename ResidualValue, std::size_t N>
+Real
+physicalMechanicalResidualNorm(const std::array<ResidualValue, N> & residual,
+                               const Real mechanical_reference_scale,
+                               const Real absolute_stress_tolerance,
+                               const Real relative_tolerance)
+{
+  const auto residual_magnitude = physicalMechanicalResidualMagnitude(residual);
+  const auto residual_limit = physicalMechanicalResidualLimit(
+      mechanical_reference_scale, absolute_stress_tolerance, relative_tolerance);
+
+  if (!std::isfinite(residual_magnitude) || !std::isfinite(residual_limit) ||
+      !(residual_limit > 0.0))
     return std::numeric_limits<Real>::infinity();
 
-  return std::hypot(residual_p, residual_q) / convergence_scale;
+  // Return a norm compared directly with relative_tolerance while retaining the exact mixed
+  // dimensional criterion documented above. This ordering preserves the historical scaling form.
+  return residual_magnitude / (residual_limit / relative_tolerance);
 }
 
 } // namespace
@@ -331,7 +356,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "local_newton_stagnation_tolerance",
       1.0e-7,
       "local_newton_stagnation_tolerance > 0.0",
-      "Near-converged residual norm below which a stalled local line search is accepted.");
+      "Relative convergence tolerance used only for near-converged stalled or iteration-limited "
+      "local solves. The dimensional stress-residual floor is not relaxed by this parameter.");
+
+  params.addRangeCheckedParam<Real>(
+      "local_newton_absolute_stress_tolerance",
+      0.0,
+      "local_newton_absolute_stress_tolerance >= 0.0",
+      "Absolute Rp-Rq residual tolerance in Pa for local convergence. A value of zero preserves "
+      "the historical/default behavior by using minimum_stress_magnitude. Set a positive value "
+      "to decouple convergence accuracy from the low-drive viscoplastic cutoff.");
+  params.setDocUnit("local_newton_absolute_stress_tolerance", "Pa");
 
   params.addRangeCheckedParam<unsigned int>(
       "local_newton_max_iterations",
@@ -400,7 +435,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "substep_strain_tolerance adaptive_substepping maximum_number_substeps "
       "substep_tangent_perturbation minimum_porosity "
       "porosity_bound_tolerance local_newton_tolerance local_newton_stagnation_tolerance "
-      "local_newton_max_iterations local_newton_relaxation local_newton_max_backtracks "
+      "local_newton_absolute_stress_tolerance local_newton_max_iterations "
+      "local_newton_relaxation local_newton_max_backtracks "
       "local_porosity_scale_floor reduced_porosity_max_probes reduced_porosity_probe_growth "
       "reduced_porosity_root_max_iterations",
       "Advanced");
@@ -462,6 +498,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _local_newton_tolerance(this->template getParam<Real>("local_newton_tolerance")),
     _local_newton_stagnation_tolerance(
         this->template getParam<Real>("local_newton_stagnation_tolerance")),
+    _local_newton_absolute_stress_tolerance(
+        this->template getParam<Real>("local_newton_absolute_stress_tolerance") > 0.0
+            ? this->template getParam<Real>("local_newton_absolute_stress_tolerance")
+            : _minimum_stress_magnitude),
     _local_newton_max_iterations(
         this->template getParam<unsigned int>("local_newton_max_iterations")),
     _local_newton_relaxation(this->template getParam<Real>("local_newton_relaxation")),
@@ -599,6 +639,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::writePerformanceDiagnostics() con
   write_counter("dense_limit_solves", _performance_counters.dense_limit_solves);
   write_counter("fixed_porosity_mechanical_solves",
                 _performance_counters.fixed_porosity_mechanical_solves);
+  write_counter("independent_fixed_porosity_mechanical_solves",
+                _performance_counters.independent_fixed_porosity_mechanical_solves);
+  write_counter("independent_fixed_porosity_mechanical_iterations",
+                _performance_counters.independent_fixed_porosity_mechanical_iterations);
+  write_counter("independent_fixed_porosity_mechanical_line_search_trials",
+                _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
+  write_counter("independent_fixed_porosity_recovery_successes",
+                _performance_counters.independent_fixed_porosity_recovery_successes);
   write_counter("reduced_porosity_solves", _performance_counters.reduced_porosity_solves);
   write_counter("gauge_evaluations", _performance_counters.gauge_evaluations);
   write_counter("gauge_n1_closed_form", _performance_counters.gauge_n1_closed_form);
@@ -1587,12 +1635,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::scaledResidual(
 template <bool is_ad>
 Real
 PorousViscoplasticityStressUpdateTempl<is_ad>::convergenceResidualNorm(
-    const LocalResidual & residual, const LocalSolveContext & context) const
+    const LocalResidual & residual,
+    const LocalSolveContext & context,
+    const Real relative_tolerance) const
 {
-  const auto mechanical_norm = physicalMechanicalResidualNorm(residual,
-                                                              context.mechanical_convergence_scale,
-                                                              this->_minimum_stress_magnitude,
-                                                              _local_newton_tolerance);
+  const auto mechanical_norm =
+      physicalMechanicalResidualNorm(residual,
+                                     context.mechanical_convergence_scale,
+                                     _local_newton_absolute_stress_tolerance,
+                                     relative_tolerance);
   const auto porosity_residual =
       MetaPhysicL::raw_value(residual[F_INDEX]) / context.porosity_convergence_scale;
   if (!std::isfinite(porosity_residual))
@@ -2078,8 +2129,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::initializeLocalSolveScales(
           min(characteristic_increment, 10.0 * context.porosity_convergence_scale));
 
   context.reduced_probe_tolerance = max(_local_newton_tolerance, 1.0e-5);
-  context.reduced_final_tolerance =
-      min(_local_newton_tolerance, 0.1 * _local_newton_stagnation_tolerance);
+  // Reduced-root probing may be deliberately loose, but a recovered state must satisfy the same
+  // final mechanical accuracy contract as an ordinary coupled Newton solve.
+  context.reduced_final_tolerance = _local_newton_tolerance;
 }
 
 template <bool is_ad>
@@ -2464,15 +2516,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::commitLocalPoint(
 template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::LocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::verifyConvergedPoint(
-    const LocalPoint & point, const LocalSolveContext & context)
+    const LocalPoint & point, const LocalSolveContext & context, const Real acceptance_tolerance)
 {
   // Every accepted Newton or line-search update stores a fully evaluated LocalPoint, so the
   // converged point already has synchronized coordinates, residuals, Jacobian, and LPS response.
   // Re-evaluating it here duplicates the most expensive constitutive work without changing state.
   validateFiniteLocalPoint(point, "final coupled consistency check");
 
-  const auto residual_norm = convergenceResidualNorm(point.residual, context);
-  if (residual_norm > _local_newton_stagnation_tolerance)
+  const auto residual_norm = convergenceResidualNorm(point.residual, context, acceptance_tolerance);
+  if (residual_norm > acceptance_tolerance)
     mooseException("In ",
                    this->_name,
                    ": final analytical coupled local consistency check failed with scaled "
@@ -2492,10 +2544,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::verifyReducedConvergedPoint(
 
   auto verified = evaluateLocalPoint(reduced.point.coordinates(), context, PorosityBranch::FREE);
   validateFiniteLocalPoint(verified, "final reduced-porosity consistency check");
-  const auto mechanical_norm = physicalMechanicalResidualNorm(verified.residual,
-                                                              context.mechanical_convergence_scale,
-                                                              this->_minimum_stress_magnitude,
-                                                              context.reduced_final_tolerance);
+  const auto mechanical_norm =
+      physicalMechanicalResidualNorm(verified.residual,
+                                     context.mechanical_convergence_scale,
+                                     _local_newton_absolute_stress_tolerance,
+                                     context.reduced_final_tolerance);
   const auto porosity_residual_magnitude =
       abs(MetaPhysicL::raw_value(verified.residual[F_INDEX])) / context.porosity_convergence_scale;
 
@@ -2552,10 +2605,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reducedPointConverged(
 {
   using std::abs;
 
-  const auto mechanical_norm = physicalMechanicalResidualNorm(point.residual,
-                                                              context.mechanical_convergence_scale,
-                                                              this->_minimum_stress_magnitude,
-                                                              context.reduced_final_tolerance);
+  const auto mechanical_norm =
+      physicalMechanicalResidualNorm(point.residual,
+                                     context.mechanical_convergence_scale,
+                                     _local_newton_absolute_stress_tolerance,
+                                     context.reduced_final_tolerance);
   const auto scaled_porosity_residual =
       MetaPhysicL::raw_value(point.residual[F_INDEX]) / context.porosity_convergence_scale;
   if (!std::isfinite(scaled_porosity_residual))
@@ -2657,7 +2711,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveMechanicalAtFixedPorosity(
     const auto residual = scaledResidual(point->residual, context);
     if (physicalMechanicalResidualNorm(point->residual,
                                        context.mechanical_convergence_scale,
-                                       this->_minimum_stress_magnitude,
+                                       _local_newton_absolute_stress_tolerance,
                                        tolerance) <= tolerance)
       return point;
 
@@ -2690,7 +2744,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveMechanicalAtFixedPorosity(
 
   return physicalMechanicalResidualNorm(point->residual,
                                         context.mechanical_convergence_scale,
-                                        this->_minimum_stress_magnitude,
+                                        _local_newton_absolute_stress_tolerance,
                                         tolerance) <= tolerance
              ? point
              : std::nullopt;
@@ -3494,9 +3548,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::recoverFailedCoupledLineSearch(
   if (freeIncrementReachesPorosityFloor(point, context))
     return {point, true};
 
-  const auto residual_norm = convergenceResidualNorm(point.residual, context);
+  const auto residual_norm =
+      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
   if (residual_norm <= _local_newton_stagnation_tolerance)
-    return {verifyConvergedPoint(point, context), false};
+    return {verifyConvergedPoint(point, context, _local_newton_stagnation_tolerance), false};
 
   if (adaptive_refinement_available)
   {
@@ -3523,12 +3578,19 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::throwCoupledLineSearchFailure(
   const auto residual = scaledResidual(point.residual, context);
   const auto & hydrostatic_stress = point.hydrostatic_stress;
   const auto residual_norm = residualNorm(residual);
-  const auto convergence_residual_norm = convergenceResidualNorm(point.residual, context);
-  const auto mechanical_residual_norm =
-      physicalMechanicalResidualNorm(point.residual,
-                                     context.mechanical_convergence_scale,
-                                     this->_minimum_stress_magnitude,
-                                     _local_newton_tolerance);
+  const auto ordinary_convergence_residual_norm =
+      convergenceResidualNorm(point.residual, context, _local_newton_tolerance);
+  const auto stagnation_convergence_residual_norm =
+      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
+  const auto mechanical_residual_magnitude = physicalMechanicalResidualMagnitude(point.residual);
+  const auto ordinary_mechanical_residual_limit =
+      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
+                                      _local_newton_absolute_stress_tolerance,
+                                      _local_newton_tolerance);
+  const auto stagnation_mechanical_residual_limit =
+      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
+                                      _local_newton_absolute_stress_tolerance,
+                                      _local_newton_stagnation_tolerance);
 
   mooseException("In ",
                  this->_name,
@@ -3540,10 +3602,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::throwCoupledLineSearchFailure(
                  this->globalTimeStep(),
                  "\n  scaled residual norm = ",
                  residual_norm,
-                 "\n  convergence residual norm = ",
-                 convergence_residual_norm,
-                 "\n  physical mechanical residual norm = ",
-                 mechanical_residual_norm,
+                 "\n  ordinary convergence residual norm = ",
+                 ordinary_convergence_residual_norm,
+                 "\n  stagnation convergence residual norm = ",
+                 stagnation_convergence_residual_norm,
+                 "\n  mechanical residual magnitude [Pa] = ",
+                 mechanical_residual_magnitude,
+                 "\n  ordinary mechanical residual limit [Pa] = ",
+                 ordinary_mechanical_residual_limit,
+                 "\n  stagnation mechanical residual limit [Pa] = ",
+                 stagnation_mechanical_residual_limit,
                  "\n  scaled Rp = ",
                  MetaPhysicL::raw_value(residual[P_INDEX]),
                  "\n  scaled Rq = ",
@@ -3601,9 +3669,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
   {
     incrementPerformanceCounter(_performance_counters.scalar_newton_iterations);
     validateFiniteLocalPoint(point, "coupled Newton iteration");
-    const auto residual_norm = convergenceResidualNorm(point.residual, context);
+    const auto residual_norm =
+        convergenceResidualNorm(point.residual, context, _local_newton_tolerance);
     if (residual_norm <= _local_newton_tolerance)
-      return {verifyConvergedPoint(point, context), false};
+      return {verifyConvergedPoint(point, context, _local_newton_tolerance), false};
 
     const auto jacobian = scaledJacobian(point.jacobian, context);
     const auto residual = scaledResidual(point.residual, context);
@@ -3633,9 +3702,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
   const auto mechanical_residual_norm =
       physicalMechanicalResidualNorm(point.residual,
                                      context.mechanical_convergence_scale,
-                                     this->_minimum_stress_magnitude,
+                                     _local_newton_absolute_stress_tolerance,
                                      context.reduced_probe_tolerance);
-  const auto residual_norm = convergenceResidualNorm(point.residual, context);
+  const auto residual_norm =
+      convergenceResidualNorm(point.residual, context, _local_newton_stagnation_tolerance);
 
   /*
    * After the iteration limit, activate the free-branch floor only if mechanics are already
@@ -3647,7 +3717,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveCoupledNewton(LocalPoint poi
     return {point, true};
 
   if (residual_norm <= _local_newton_stagnation_tolerance)
-    return {verifyConvergedPoint(point, context), false};
+    return {verifyConvergedPoint(point, context, _local_newton_stagnation_tolerance), false};
 
   /*
    * A coupled Newton solve can exhaust its iteration budget while continuing to accept line-search
@@ -4025,12 +4095,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::scaledIndependentResidual(
 template <bool is_ad>
 Real
 PorousViscoplasticityStressUpdateTempl<is_ad>::independentConvergenceResidualNorm(
-    const IndependentLocalResidual & residual, const IndependentLocalSolveContext & context) const
+    const IndependentLocalResidual & residual,
+    const IndependentLocalSolveContext & context,
+    const Real relative_tolerance) const
 {
-  const auto mechanical_norm = physicalMechanicalResidualNorm(residual,
-                                                              context.mechanical_convergence_scale,
-                                                              this->_minimum_stress_magnitude,
-                                                              _local_newton_tolerance);
+  const auto mechanical_norm =
+      physicalMechanicalResidualNorm(residual,
+                                     context.mechanical_convergence_scale,
+                                     _local_newton_absolute_stress_tolerance,
+                                     relative_tolerance);
   auto norm_squared = mechanical_norm * mechanical_norm;
   for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
        ++population_index)
@@ -4162,6 +4235,107 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentBacktrackingLineSearch
 }
 
 template <bool is_ad>
+std::optional<typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint>
+PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentMechanicalAtFixedPorosity(
+    const IndependentLocalPoint & seed,
+    const Real tolerance,
+    const IndependentLocalSolveContext & context)
+{
+  incrementPerformanceCounter(_performance_counters.independent_fixed_porosity_mechanical_solves);
+
+  std::optional<IndependentLocalPoint> point;
+  try
+  {
+    point = evaluateIndependentLocalPoint(seed.coordinates(), context, seed.floor_active);
+  }
+  catch (const MooseException &)
+  {
+    return std::nullopt;
+  }
+
+  constexpr auto max_iterations = 15u;
+  for (auto iteration = 0u; iteration < max_iterations; ++iteration)
+  {
+    incrementPerformanceCounter(
+        _performance_counters.independent_fixed_porosity_mechanical_iterations);
+    validateFiniteIndependentLocalPoint(*point, "independent fixed-porosity mechanical recovery");
+
+    if (physicalMechanicalResidualNorm(point->residual,
+                                       context.mechanical_convergence_scale,
+                                       _local_newton_absolute_stress_tolerance,
+                                       tolerance) <= tolerance)
+      return point;
+
+    const auto residual = scaledIndependentResidual(point->residual, context);
+    const auto local_jacobian = scaledIndependentJacobian(point->jacobian, context);
+    const auto mechanical_jacobian =
+        FixedMatrix<Real, 2>{{{local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_P_INDEX],
+                               local_jacobian[INDEPENDENT_P_INDEX][INDEPENDENT_Q_INDEX]},
+                              {local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_P_INDEX],
+                               local_jacobian[INDEPENDENT_Q_INDEX][INDEPENDENT_Q_INDEX]}}};
+    const auto mechanical_rhs = FixedVector<GenericReal<is_ad>, 2>{-residual[INDEPENDENT_P_INDEX],
+                                                                   -residual[INDEPENDENT_Q_INDEX]};
+    auto mechanical_correction = FixedVector<GenericReal<is_ad>, 2>{};
+
+    if (!solveLinearSystem(mechanical_jacobian, mechanical_rhs, mechanical_correction))
+      return std::nullopt;
+
+    const auto residual_p = MetaPhysicL::raw_value(residual[INDEPENDENT_P_INDEX]);
+    const auto residual_q = MetaPhysicL::raw_value(residual[INDEPENDENT_Q_INDEX]);
+    const auto current_mechanical_norm_squared = residual_p * residual_p + residual_q * residual_q;
+    auto alpha = _local_newton_relaxation;
+    auto accepted_candidate = std::optional<IndependentLocalPoint>{};
+
+    for (auto backtrack = 0u; backtrack <= _local_newton_max_backtracks; ++backtrack)
+    {
+      incrementPerformanceCounter(
+          _performance_counters.independent_fixed_porosity_mechanical_line_search_trials);
+      auto trial = point->coordinates();
+      trial.p += alpha * context.p_scale * mechanical_correction[0];
+      trial.q += alpha * context.q_scale * mechanical_correction[1];
+
+      const auto p_raw = MetaPhysicL::raw_value(trial.p);
+      const auto q_raw = MetaPhysicL::raw_value(trial.q);
+      if (std::isfinite(p_raw) && std::isfinite(q_raw) && trial.q >= 0.0)
+        try
+        {
+          auto candidate = evaluateIndependentLocalPoint(trial, context, point->floor_active);
+          const auto candidate_residual = scaledIndependentResidual(candidate.residual, context);
+          const auto candidate_residual_p =
+              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_P_INDEX]);
+          const auto candidate_residual_q =
+              MetaPhysicL::raw_value(candidate_residual[INDEPENDENT_Q_INDEX]);
+          const auto candidate_mechanical_norm_squared =
+              candidate_residual_p * candidate_residual_p +
+              candidate_residual_q * candidate_residual_q;
+          if (candidate_mechanical_norm_squared < current_mechanical_norm_squared)
+          {
+            accepted_candidate = candidate;
+            break;
+          }
+        }
+        catch (const MooseException &)
+        {
+        }
+
+      alpha *= 0.5;
+    }
+
+    if (!accepted_candidate)
+      return std::nullopt;
+
+    point = accepted_candidate;
+  }
+
+  return physicalMechanicalResidualNorm(point->residual,
+                                        context.mechanical_convergence_scale,
+                                        _local_newton_absolute_stress_tolerance,
+                                        tolerance) <= tolerance
+             ? point
+             : std::nullopt;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentLocalPoint
 PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     IndependentLocalPoint point,
@@ -4180,7 +4354,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
   {
     incrementPerformanceCounter(_performance_counters.independent_newton_iterations);
     validateFiniteIndependentLocalPoint(point, "independent coupled Newton iteration");
-    const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
+    const auto residual_norm =
+        independentConvergenceResidualNorm(point.residual, context, _local_newton_tolerance);
     if (residual_norm <= _local_newton_tolerance)
       return point;
 
@@ -4261,7 +4436,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
     point = *candidate;
   }
 
-  const auto residual_norm = independentConvergenceResidualNorm(point.residual, context);
+  auto residual_norm = independentConvergenceResidualNorm(
+      point.residual, context, _local_newton_stagnation_tolerance);
   if (residual_norm <= _local_newton_stagnation_tolerance)
     return point;
 
@@ -4293,11 +4469,48 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::solveIndependentCoupledNewton(
                    ": independent local Newton reached its iteration limit while finer adaptive "
                    "constitutive substeps remain available.");
 
+  /*
+   * At the finest permitted subdivision, the coupled four-variable Newton can stall after the two
+   * porosity equations are already effectively converged while a small p-q imbalance remains.
+   * Project the current state onto the fixed-(f_0,f_1) mechanical equilibrium manifold before
+   * requesting an expensive global timestep cut. The recovery is accepted only if the complete
+   * four-equation physical convergence criterion is satisfied afterward.
+   */
+  if (const auto polished = solveIndependentMechanicalAtFixedPorosity(
+          point, _local_newton_stagnation_tolerance, context))
+  {
+    const auto polished_residual_norm = independentConvergenceResidualNorm(
+        polished->residual, context, _local_newton_stagnation_tolerance);
+    if (polished_residual_norm <= _local_newton_stagnation_tolerance)
+    {
+      incrementPerformanceCounter(
+          _performance_counters.independent_fixed_porosity_recovery_successes);
+      if (this->_verbose)
+        Moose::out << "In " << this->_name
+                   << ": independent fixed-porosity mechanical recovery converged at the finest "
+                      "constitutive subdivision."
+                   << std::endl;
+      return *polished;
+    }
+
+    point = *polished;
+    residual_norm = polished_residual_norm;
+  }
+
+  const auto mechanical_residual_magnitude = physicalMechanicalResidualMagnitude(point.residual);
+  const auto stagnation_mechanical_residual_limit =
+      physicalMechanicalResidualLimit(context.mechanical_convergence_scale,
+                                      _local_newton_absolute_stress_tolerance,
+                                      _local_newton_stagnation_tolerance);
   mooseException("In ",
                  this->_name,
                  ": analytical independent local (p,q,f_0,f_1) Newton failed to converge. "
-                 "Final scaled residual norm = ",
+                 "Final stagnation-scaled residual norm = ",
                  residual_norm,
+                 ", mechanical residual magnitude [Pa] = ",
+                 mechanical_residual_magnitude,
+                 ", stagnation mechanical residual limit [Pa] = ",
+                 stagnation_mechanical_residual_limit,
                  ".");
   return point; // Unreachable after mooseException.
 }
@@ -4839,7 +5052,12 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStepIndependent(
                << " f = " << MetaPhysicL::raw_value(point.pore_porosity[0] + point.pore_porosity[1])
                << " population_0_floor = " << point.floor_active[0]
                << " population_1_floor = " << point.floor_active[1]
-               << " residual_norm = " << independentConvergenceResidualNorm(point.residual, context)
+               << " ordinary_convergence_norm = "
+               << independentConvergenceResidualNorm(
+                      point.residual, context, _local_newton_tolerance)
+               << " stagnation_convergence_norm = "
+               << independentConvergenceResidualNorm(
+                      point.residual, context, _local_newton_stagnation_tolerance)
                << std::endl;
 }
 template <bool is_ad>
@@ -4933,8 +5151,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
                << " global_dt = " << this->globalTimeStep() << " shared_dt = " << this->_dt
                << " numerical_merit_norm = "
                << residualNorm(scaledResidual(point.residual, local_context))
-               << " physical_convergence_norm = "
-               << convergenceResidualNorm(point.residual, local_context)
+               << " ordinary_convergence_norm = "
+               << convergenceResidualNorm(point.residual, local_context, _local_newton_tolerance)
+               << " stagnation_convergence_norm = "
+               << convergenceResidualNorm(
+                      point.residual, local_context, _local_newton_stagnation_tolerance)
                << " porosity_variable_scale = " << local_context.porosity_variable_scale
                << " porosity_merit_scale = " << local_context.porosity_merit_scale
                << " porosity_convergence_scale = " << local_context.porosity_convergence_scale
@@ -5346,8 +5567,33 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   this->resetConstitutiveTimeStep();
   const auto snapshot =
       captureConstitutiveState(strain_increment, inelastic_strain_increment, stress_new);
-  const auto restore = [&]()
+  const auto restore =
+      [this, &snapshot, &strain_increment, &inelastic_strain_increment, &stress_new]()
   { restoreConstitutiveState(snapshot, strain_increment, inelastic_strain_increment, stress_new); };
+  const auto previous_tangent_request = _compute_consistent_tangent;
+  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
+
+  // Every exception that escapes this routine must restore both caller tensors and constitutive
+  // trial state, including failures during porosity preparation and substep estimation. Internal
+  // MooseException catches can still refine the local substep count without triggering this guard.
+  const auto uncaught_exceptions_on_entry = std::uncaught_exceptions();
+  struct RollbackGuard
+  {
+    const decltype(restore) & restore_state;
+    bool & tangent_request;
+    bool previous_tangent_request;
+    int uncaught_exceptions_on_entry;
+
+    ~RollbackGuard()
+    {
+      if (std::uncaught_exceptions() > uncaught_exceptions_on_entry)
+      {
+        restore_state();
+        tangent_request = previous_tangent_request;
+      }
+    }
+  } rollback_guard{
+      restore, _compute_consistent_tangent, previous_tangent_request, uncaught_exceptions_on_entry};
 
   // Initialize this model's substep porosity from inelastic increments already computed by other
   // inelastic models. Each successful local p-q-f solve commits the next porosity state directly.
@@ -5365,9 +5611,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
   auto number_substeps = _adaptive_substepping ? estimateAdaptiveNumberSubstepsFromHistory()
                                                : estimateNumberSubsteps(estimate_stress);
-
-  const auto previous_tangent_request = _compute_consistent_tangent;
-  const auto tangent_requested = !is_ad && compute_full_tangent_operator;
 
   std::exception_ptr last_failure;
   auto last_failure_substeps = 0u;
@@ -5999,12 +6242,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeHDerivatives(
     const auto y2 = Utility::pow<2>(y);
     result.value = y2 * y;
     if (M == 0.0)
-    {
-      // For nonlinear n > 1, H' tends to zero but H'' has no finite M -> 0+ limit.
-      // Returning the initialized zero second derivative at exactly M = 0 is the finite
-      // branch-local Jacobian convention, not the limiting curvature.
       return result;
-    }
 
     const auto dmod_dM = exponent * mod / M;
     const auto d2mod_dM2 = exponent * (exponent - 1.0) * mod / Utility::pow<2>(M);
@@ -6020,9 +6258,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeHDerivatives(
   {
     if (MooseUtils::absoluteFuzzyEqual(n, 1.0))
       result.second = 2.0 * beta * beta;
-    // For nonlinear powers outside the n = 1 branch, H'' is singular as M -> 0+. The
-    // initialized zero at exactly M = 0 is deliberately finite and must not be interpreted as
-    // that one-sided limit.
     return result;
   }
 
