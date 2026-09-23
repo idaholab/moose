@@ -884,6 +884,60 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::independentPorePorosityFloor(
 }
 
 template <bool is_ad>
+typename PorousViscoplasticityStressUpdateTempl<is_ad>::IndependentPopulationProjection
+PorousViscoplasticityStressUpdateTempl<is_ad>::projectIndependentPopulationVolumetricIncrement(
+    const PorePorosityState & unconstrained_population_volumetric_increment,
+    const PorePorosityState & pore_porosity_begin,
+    const PorePorosityState & dilution_coefficient,
+    const GenericReal<is_ad> & solid_fraction_old,
+    const std::array<bool, MAX_HYDROSTATIC_STRESS_POPULATIONS> & floor_active) const
+{
+  auto projection = IndependentPopulationProjection{};
+  projection.population_volumetric_increment = unconstrained_population_volumetric_increment;
+  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+       ++population_index)
+    projection.floor_value[population_index] =
+        independentPorePorosityFloor(population_index, pore_porosity_begin);
+
+  projection.active_count =
+      static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
+  if (projection.active_count == 1)
+  {
+    projection.active_population = floor_active[0] ? 0u : 1u;
+    const auto free_population = 1u - projection.active_population;
+    const auto target_increment = projection.floor_value[projection.active_population] -
+                                  pore_porosity_begin[projection.active_population];
+    projection.active_denominator = 1.0 - dilution_coefficient[projection.active_population];
+    if (projection.active_denominator <= 0.0)
+      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
+
+    projection.population_volumetric_increment[projection.active_population] =
+        (target_increment +
+         dilution_coefficient[projection.active_population] *
+             projection.population_volumetric_increment[free_population]) /
+        projection.active_denominator;
+  }
+  else if (projection.active_count == 2)
+  {
+    const auto pore_porosity_begin_total = pore_porosity_begin[0] + pore_porosity_begin[1];
+    const auto target_total_increment =
+        projection.floor_value[0] + projection.floor_value[1] - pore_porosity_begin_total;
+    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
+    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
+         ++population_index)
+    {
+      const auto target_increment =
+          projection.floor_value[population_index] - pore_porosity_begin[population_index];
+      projection.population_volumetric_increment[population_index] =
+          target_increment +
+          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
+    }
+  }
+
+  return projection;
+}
+
+template <bool is_ad>
 typename PorousViscoplasticityStressUpdateTempl<is_ad>::HydrostaticStressState
 PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentHydrostaticStress(
     const GenericReal<is_ad> & matrix_hydro_stress, const PorePorosityState & pore_porosity) const
@@ -3990,54 +4044,34 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
         dilution_coefficient[population_index] * raw_total_volumetric_increment;
   point.raw_population_porosity_increment = raw_population_porosity_increment;
 
-  auto population_volumetric_increment = response.population_volumetric_strain_increment;
-  auto dpopulation_volumetric_dx = response.dpopulation_volumetric_dx;
-
   /*
    * Population lower bounds constrain only the volumetric contribution needed to keep that pore
-   * population admissible; the common deviatoric matrix creep remains active. If both populations
-   * are active, distribute the generic total-porosity floor in proportion to their
-   * beginning-of-substep pore-volume shares.
+   * population admissible; the common deviatoric matrix creep remains active. Share the value
+   * projection with the AD reconstruction, while retaining the analytical local-coordinate
+   * derivatives here.
    */
-  PorePorosityState floor_value{};
-  for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-       ++population_index)
-    floor_value[population_index] =
-        independentPorePorosityFloor(population_index, context.pore_porosity_begin);
+  const auto projection = projectIndependentPopulationVolumetricIncrement(
+      response.population_volumetric_strain_increment,
+      context.pore_porosity_begin,
+      dilution_coefficient,
+      solid_fraction_old,
+      floor_active);
+  const auto & population_volumetric_increment = projection.population_volumetric_increment;
+  auto dpopulation_volumetric_dx = response.dpopulation_volumetric_dx;
 
-  const auto active_count =
-      static_cast<unsigned int>(floor_active[0]) + static_cast<unsigned int>(floor_active[1]);
-  if (active_count == 1)
+  if (projection.active_count == 1)
   {
-    const auto active = floor_active[0] ? 0u : 1u;
+    const auto active = projection.active_population;
     const auto free = 1u - active;
-    const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
-    const auto denominator = 1.0 - dilution_coefficient[active];
-    if (denominator <= 0.0)
-      mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
-
-    population_volumetric_increment[active] =
-        (target_increment + dilution_coefficient[active] * population_volumetric_increment[free]) /
-        denominator;
     for (auto x_index = 0u; x_index < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++x_index)
       dpopulation_volumetric_dx[active][x_index] =
-          dilution_coefficient[active] / denominator * dpopulation_volumetric_dx[free][x_index];
+          dilution_coefficient[active] / projection.active_denominator *
+          dpopulation_volumetric_dx[free][x_index];
   }
-  else if (active_count == 2)
-  {
-    const auto target_total_increment = floor_value[0] + floor_value[1] - pore_porosity_begin_total;
-    const auto constrained_total_volumetric_increment = target_total_increment / solid_fraction_old;
+  else if (projection.active_count == 2)
     for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
          ++population_index)
-    {
-      const auto target_increment =
-          floor_value[population_index] - context.pore_porosity_begin[population_index];
-      population_volumetric_increment[population_index] =
-          target_increment +
-          dilution_coefficient[population_index] * constrained_total_volumetric_increment;
       dpopulation_volumetric_dx[population_index].fill(GenericReal<is_ad>(0.0));
-    }
-  }
 
   const auto total_volumetric_increment =
       population_volumetric_increment[0] + population_volumetric_increment[1];
@@ -4094,11 +4128,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateIndependentLocalPoint(
        ++population_index)
   {
     const auto row = PORE_POROSITY_0_INDEX + population_index;
-    point.residual[row] = floor_active[population_index]
-                              ? pore_porosity[population_index] - floor_value[population_index]
-                              : pore_porosity[population_index] -
-                                    context.pore_porosity_begin[population_index] -
-                                    population_porosity_increment[population_index];
+    point.residual[row] =
+        floor_active[population_index]
+            ? pore_porosity[population_index] - projection.floor_value[population_index]
+            : pore_porosity[population_index] - context.pore_porosity_begin[population_index] -
+                  population_porosity_increment[population_index];
   }
 
   for (auto column = 0u; column < INDEPENDENT_LOCAL_SYSTEM_SIZE; ++column)
@@ -4809,47 +4843,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::reconstructIndependentImplicitSen
       dilution_coefficient[population_index] =
           porosity_old * context.pore_porosity_begin[population_index] / pore_porosity_begin_total;
 
-    auto population_volumetric_increment = response.population_volumetric_strain_increment;
-    PorePorosityState floor_value{};
-    for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-         ++population_index)
-      floor_value[population_index] =
-          independentPorePorosityFloor(population_index, context.pore_porosity_begin);
-
-    const auto active_count = static_cast<unsigned int>(point.floor_active[0]) +
-                              static_cast<unsigned int>(point.floor_active[1]);
-    if (active_count == 1)
-    {
-      const auto active = point.floor_active[0] ? 0u : 1u;
-      const auto free = 1u - active;
-      const auto target_increment = floor_value[active] - context.pore_porosity_begin[active];
-      const auto denominator = 1.0 - dilution_coefficient[active];
-      if (denominator <= 0.0)
-        mooseException("In ", this->_name, ": singular independent pore lower-bound constraint.");
-      population_volumetric_increment[active] =
-          (target_increment +
-           dilution_coefficient[active] * population_volumetric_increment[free]) /
-          denominator;
-    }
-    else if (active_count == 2)
-    {
-      const auto target_total_increment =
-          floor_value[0] + floor_value[1] - pore_porosity_begin_total;
-      const auto constrained_total_volumetric_increment =
-          target_total_increment / solid_fraction_old;
-      for (auto population_index = 0u; population_index < MAX_HYDROSTATIC_STRESS_POPULATIONS;
-           ++population_index)
-      {
-        const auto target_increment =
-            floor_value[population_index] - context.pore_porosity_begin[population_index];
-        population_volumetric_increment[population_index] =
-            target_increment +
-            dilution_coefficient[population_index] * constrained_total_volumetric_increment;
-      }
-    }
-
-    const auto total_volumetric_increment =
-        population_volumetric_increment[0] + population_volumetric_increment[1];
+    const auto projection = projectIndependentPopulationVolumetricIncrement(
+        response.population_volumetric_strain_increment,
+        context.pore_porosity_begin,
+        dilution_coefficient,
+        solid_fraction_old,
+        point.floor_active);
+    const auto total_volumetric_increment = projection.population_volumetric_increment[0] +
+                                            projection.population_volumetric_increment[1];
     reconstructed.inelastic_strain_increment =
         response.inelastic_strain_increment.deviatoric() +
         this->_identity_two * (total_volumetric_increment / 3.0);
