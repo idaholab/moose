@@ -30,7 +30,7 @@ namespace Moose::MFEM
 // const Vector& c - this is the curl, evaluated at each qpoint
 // Vector & k_coeff  - reference to the vector of k(s) evaluated at each quadpoint. length is
 //    one per quadpoint per element
-// Vector & dk_coeff - ditto for the k'(s) / s
+// Vector & dk_coeff - ditto for k'(s) / s
 // Vector & op - this is the diagonal operator
 static void NLCurlCurlGradPASetup(const int Q1D,
                                   const int ne,
@@ -137,14 +137,13 @@ void
 NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
                                      const mfem::FiniteElementSpace & fes)
 {
-  mfem::QuadratureSpace * qs;
-  PreAssemblySetup(fes, qs);
+  PreAssemblySetup(fes);
 
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);
+  mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
-  mfem::CoefficientVector dk_coeff(*qs, mfem::CoefficientStorage::FULL);
+  mfem::CoefficientVector dk_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   dk_coeff.Project(_dk_du_u_coef);
-  mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::FULL);
+  mfem::CoefficientVector curl_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   curl_coeff.Project(_curlu_vec);
 
   // This doesn't clear out what's in the array
@@ -152,9 +151,6 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
 
   NLCurlCurlGradPASetup(
       quad1D, ne, ir->GetWeights(), geom->J, curl_coeff, k_coeff, dk_coeff, pa_grad_data);
-
-  // todo: make this a member variable (and a unique ptr)
-  delete qs;
 }
 
 // This mirrors AssembleGradPA exactly. We are performing redundant work here, and we
@@ -162,19 +158,13 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
 void
 NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 {
-  // pass in pointer to a QS, so we can use to project our coefficients
-  mfem::QuadratureSpace * qs;
-  PreAssemblySetup(fes, qs);
+  PreAssemblySetup(fes);
 
-  // now the qs has been allocated, we can project. Here we only need the k function
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);
+  mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
 
   pa_res_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
   NLCurlCurlPASetup(quad1D, ne, ir->GetWeights(), geom->J, k_coeff, pa_res_data);
-
-  // todo: make this a member variable (and a unique ptr)
-  delete qs;
 }
 
 void
@@ -243,8 +233,7 @@ NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
 // This gets called by both AssemblePA and AssembleGradPA, since they
 // both need to store the transformation jacobians.
 void
-NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes,
-                                       mfem::QuadratureSpace *& qs)
+NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
 {
   // start with some basic stuff
   const mfem::FiniteElement * fel = fes.GetTypicalFE();
@@ -278,9 +267,14 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes,
   // the open basis is just for verification
   mooseAssert(dofs1D == mapsO->ndof + 1 && quad1D == mapsO->nqpt, "");
 
-  // This is just so we can project our coefficients in the caller.
-  // Should be deleted after use.
-  qs = new mfem::QuadratureSpace(*mesh, *ir);
+  if (!_qspace || _qspace_mesh != mesh || _qspace_mesh_sequence != mesh->GetSequence() ||
+      _qspace_ir != ir)
+  {
+    _qspace = std::make_unique<mfem::QuadratureSpace>(*mesh, *ir);
+    _qspace_mesh = mesh;
+    _qspace_mesh_sequence = mesh->GetSequence();
+    _qspace_ir = ir;
+  }
 
   symmetric = true;                             // we can hardcode this
   const int sym_dims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
