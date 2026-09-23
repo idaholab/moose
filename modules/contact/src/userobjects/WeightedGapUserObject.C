@@ -81,6 +81,18 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   }
 }
 
+ADReal
+WeightedGapUserObject::nodalContactPressure(const Node & /*node*/) const
+{
+  mooseError("Nodal contact pressure is not available for user object '", name(), "'.");
+}
+
+const VariableTestValue &
+WeightedGapUserObject::tractionBasis() const
+{
+  return test();
+}
+
 bool
 WeightedGapUserObject::shouldRecordNodalNormalDerivatives() const
 {

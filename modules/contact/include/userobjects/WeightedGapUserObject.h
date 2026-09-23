@@ -44,14 +44,16 @@ public:
    * vector \f$\sum_j \Phi_j z_{n,j} \mathbf{n}_j\f$. This nodal traction interpolation is the
    * discrete transpose of the weighted gap and balances the two sides of the interface; see
    * Popp et al., Comput Methods Appl Mech Eng 264 (2013) 67, Eq. (11).
+   * The default reports that this operation is not available.
    */
-  virtual ADReal nodalContactPressure(const Node & node) const = 0;
+  virtual ADReal nodalContactPressure(const Node & node) const;
 
   /**
    * @return The basis that interpolates the contact traction. Under the Petrov-Galerkin approach,
    * this is the dual basis; \p test() is the auxiliary standard basis used by the weighted gap.
+   * The default returns \p test().
    */
-  virtual const VariableTestValue & tractionBasis() const = 0;
+  virtual const VariableTestValue & tractionBasis() const;
 
   /**
    * @param node Node pointer
@@ -66,7 +68,7 @@ public:
   virtual Real getNormalGap(const Node * const /*node*/) const;
 
   /// Whether this formulation includes displacement derivatives of the secondary nodal normals
-  virtual bool usesNodalNormalDerivatives() const = 0;
+  virtual bool usesNodalNormalDerivatives() const { return false; }
 
   /// Whether the current assembly records nodal-normal derivatives for this object's system
   bool shouldRecordNodalNormalDerivatives() const;
