@@ -385,10 +385,23 @@ NEML2FEInterpolation::updateInterpolations()
 {
   TIME_SECTION("updateInterpolations", 2, "Updating FEM interpolations for NEML2");
 
-  // convert the local solution vector to neml2 tensor
-  auto sol = at::from_blob(const_cast<Real *>(_petsc_solution->get_array_read()),
+  // Take the solution where PETSc already keeps it. VecGetArrayReadAndMemType reports the memory
+  // type and hands back a device pointer for a device-resident vector, so wrapping that pointer
+  // directly keeps the solution on the device instead of copying it to the host and back. For a
+  // host-resident vector the behaviour is unchanged: the array is wrapped on the host and the
+  // to() below moves it.
+  Vec local_vector = PETSC_NULLPTR;
+  LibmeshPetscCallQ(VecGhostGetLocalForm(_petsc_solution->vec(), &local_vector));
+  const auto local_form = local_vector ? local_vector : _petsc_solution->vec();
+
+  const PetscScalar * read_array = PETSC_NULLPTR;
+  PetscMemType mtype;
+  LibmeshPetscCallQ(VecGetArrayReadAndMemType(local_form, &read_array, &mtype));
+
+  const auto array_device = mtype == PETSC_MEMTYPE_HOST ? torch::kCPU : _app.getLibtorchDevice();
+  auto sol = at::from_blob(const_cast<Real *>(read_array),
                            {local_ndof()},
-                           torch::kFloat64)
+                           torch::TensorOptions().dtype(torch::kFloat64).device(array_device))
                  .to(_app.getLibtorchDevice());
 
   // interpolate variable values
@@ -411,8 +424,10 @@ NEML2FEInterpolation::updateInterpolations()
     val = neml2::discretization::interpolate(sol_scattered, grad_phi);
   }
 
-  // close solution and residual vector access
-  const_cast<PetscVector<Real> *>(_petsc_solution)->restore_array();
+  // Release the borrowed array. The interpolated values above are independent tensors, so nothing
+  // still refers to it.
+  LibmeshPetscCallQ(VecRestoreArrayReadAndMemType(local_form, &read_array));
+  LibmeshPetscCallQ(VecGhostRestoreLocalForm(_petsc_solution->vec(), &local_vector));
 
   // done
   _interp_up_to_date = true;
