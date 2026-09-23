@@ -9,6 +9,7 @@
 
 #include "KokkosResidualObject.h"
 
+#include "DisplacedProblem.h"
 #include "FEProblemBase.h"
 
 namespace Moose::Kokkos
@@ -39,8 +40,10 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
                                Moose::VarFieldType field_type,
                                bool nodal)
   : ::ResidualObject(parameters, nodal),
-    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
-    AssemblyHolder(_fe_problem.kokkosAssembly()),
+    MeshHolder(*_subproblem.mesh().getKokkosMesh()),
+    AssemblyHolder(getParam<bool>("use_displaced_mesh")
+                       ? _fe_problem.getDisplacedProblem()->kokkosAssembly()
+                       : _fe_problem.kokkosAssembly()),
     FESystemHolder(_fe_problem.getKokkosFESystems()),
     _var(_subproblem.getVariable(_tid,
                                  getParam<NonlinearVariableName>("variable"),

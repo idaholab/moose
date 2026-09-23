@@ -118,8 +118,10 @@ System::setupDofs()
         }
       }
 
-      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+      for (const auto ghost_elem : kokkosMesh().getGhostElements())
       {
+        const auto ghost_id = kokkosMesh().getContiguousElementID(ghost_elem);
+
         if (!_dof_map.is_evaluable(*ghost_elem, var))
           continue;
 

@@ -197,7 +197,7 @@ public:
             ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
             : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
 
-    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.mesh().getDimension());
   }
 };
 
@@ -406,12 +406,14 @@ VariableValueTempl<is_ad>::get(Datum & datum,
 
       if constexpr (is_ad)
         value = side == libMesh::invalid_uint
-                    ? sys.getVectorQpADValue(elem, datum.qpOffset(), idx, var, tag, seed)
-                    : sys.getVectorQpADValueFace(elem, side, idx, var, tag, seed);
+                    ? sys.getVectorQpADValue(
+                          elem, datum.qpOffset(), idx, var, tag, seed, datum.assembly())
+                    : sys.getVectorQpADValueFace(elem, side, idx, var, tag, seed, datum.assembly());
       else
         value = side == libMesh::invalid_uint
-                    ? sys.getVectorQpValue(elem, datum.qpOffset() + idx, var, tag)
-                    : sys.getVectorQpValueFace(elem, side, idx, var, tag);
+                    ? sys.getVectorQpValue(
+                          elem, datum.qpOffset() + idx, var, tag, datum.mesh().isDisplaced())
+                    : sys.getVectorQpValueFace(elem, side, idx, var, tag, datum.assembly());
     }
   }
   else
@@ -578,21 +580,36 @@ VariableGradientTempl<is_ad>::get(Datum & datum,
     auto side = datum.side();
 
     if constexpr (is_ad)
-      grad =
-          side == libMesh::invalid_uint
-              ? datum.system(_var.sys(comp))
-                    .getVectorQpADGrad(
-                        elem, datum.J(qp), datum.qpOffset(), qp, _var.var(comp), _var.tag(), seed)
-              : datum.system(_var.sys(comp))
-                    .getVectorQpADGradFace(
-                        elem, side, datum.J(qp), qp, _var.var(comp), _var.tag(), seed);
+      grad = side == libMesh::invalid_uint ? datum.system(_var.sys(comp))
+                                                 .getVectorQpADGrad(elem,
+                                                                    datum.J(qp),
+                                                                    datum.qpOffset(),
+                                                                    qp,
+                                                                    _var.var(comp),
+                                                                    _var.tag(),
+                                                                    seed,
+                                                                    datum.assembly())
+                                           : datum.system(_var.sys(comp))
+                                                 .getVectorQpADGradFace(elem,
+                                                                        side,
+                                                                        datum.J(qp),
+                                                                        qp,
+                                                                        _var.var(comp),
+                                                                        _var.tag(),
+                                                                        seed,
+                                                                        datum.assembly());
     else
       grad =
           side == libMesh::invalid_uint
               ? datum.system(_var.sys(comp))
-                    .getVectorQpGrad(elem, datum.qpOffset() + qp, _var.var(comp), _var.tag())
+                    .getVectorQpGrad(elem,
+                                     datum.qpOffset() + qp,
+                                     _var.var(comp),
+                                     _var.tag(),
+                                     datum.mesh().isDisplaced())
               : datum.system(_var.sys(comp))
-                    .getVectorQpGradFace(elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
+                    .getVectorQpGradFace(
+                        elem, side, datum.J(qp), qp, _var.var(comp), _var.tag(), datum.assembly());
   }
 
   return grad;
@@ -789,7 +806,7 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
 
     if (_dof)
     {
-      auto dimension = datum.assembly().getDimension();
+      auto dimension = datum.mesh().getDimension();
 
       if (datum.isNodal())
       {
@@ -815,9 +832,10 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
       auto side = datum.side();
 
       if (side == libMesh::invalid_uint)
-        value = sys.getVectorQpVectorValue(elem, datum.qpOffset() + idx, var, tag);
+        value = sys.getVectorQpVectorValue(
+            elem, datum.qpOffset() + idx, var, tag, datum.mesh().isDisplaced());
       else
-        value = sys.getVectorQpVectorValueFace(elem, side, idx, var, tag);
+        value = sys.getVectorQpVectorValueFace(elem, side, idx, var, tag, datum.assembly());
     }
   }
   else
@@ -844,9 +862,10 @@ VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsig
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
-      grad = sys.getVectorQpVectorGrad(elem, datum.qpOffset() + qp, var, tag);
+      grad = sys.getVectorQpVectorGrad(
+          elem, datum.qpOffset() + qp, var, tag, datum.mesh().isDisplaced());
     else
-      grad = sys.getVectorQpVectorGradFace(elem, side, datum.J(qp), qp, var, tag);
+      grad = sys.getVectorQpVectorGradFace(elem, side, datum.J(qp), qp, var, tag, datum.assembly());
   }
 
   return grad;
@@ -870,7 +889,8 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
-      curl = sys.getVectorQpVectorCurl(elem, datum.qpOffset() + qp, var, tag);
+      curl = sys.getVectorQpVectorCurl(
+          elem, datum.qpOffset() + qp, var, tag, datum.mesh().isDisplaced());
     else
     {
       auto fe = sys.getFETypeID(var);
@@ -884,7 +904,7 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
         grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
                 (grad_phi(i, qp) * jacobian_transpose);
 
-      curl = curlFromVectorGradient(grad, datum.assembly().getDimension());
+      curl = curlFromVectorGradient(grad, datum.mesh().getDimension());
     }
   }
 
