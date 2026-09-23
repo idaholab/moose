@@ -8,9 +8,7 @@ This object implements the time-dependent, globally compressible, locally incomp
 single variable fluid mass flow rate. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable characteristic pressure drop and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
 !equation
-\begin{equation}
-  \sum_{i=1}^{N} \frac{L_i}{A_i} \frac{du}{dt} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
-\end{equation}
+\sum_{i=1}^{N} \frac{L_i}{A_i} \frac{du}{dt} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
 
 This kernel takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
 It also takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
