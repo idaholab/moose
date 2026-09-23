@@ -49,8 +49,10 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     _eq(_mesh),
     _ref_mesh(_mproblem.mesh()),
     _displacements(getParam<std::vector<std::string>>("displacements")),
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_assembly(_mproblem, _mesh),
+#endif
     _geometric_search_data(*this, _mesh)
-
 {
   // Disable refinement/coarsening in EquationSystems::reinit because we already do this ourselves
   _eq.disable_refine_in_reinit();

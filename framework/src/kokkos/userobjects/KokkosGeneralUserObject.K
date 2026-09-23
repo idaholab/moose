@@ -9,6 +9,8 @@
 
 #include "KokkosGeneralUserObject.h"
 
+#include "DisplacedProblem.h"
+
 namespace Moose::Kokkos
 {
 
@@ -23,8 +25,10 @@ GeneralUserObject::validParams()
 
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
-    AssemblyHolder(_fe_problem.kokkosAssembly()),
+    MeshHolder(*_subproblem.mesh().getKokkosMesh()),
+    AssemblyHolder(getParam<bool>("use_displaced_mesh")
+                       ? _fe_problem.getDisplacedProblem()->kokkosAssembly()
+                       : _fe_problem.kokkosAssembly()),
     FESystemHolder(_fe_problem.getKokkosFESystems()),
     ::CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     ::MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
