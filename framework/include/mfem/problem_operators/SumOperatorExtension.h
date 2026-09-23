@@ -1,7 +1,12 @@
-/*
-The other classes in this directory are inherting from mfem::Operator,
-so I figure this is a good place to put it.
-*/
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "libmesh/ignore_warnings.h"
@@ -12,10 +17,10 @@ so I figure this is a good place to put it.
 namespace Moose::MFEM
 {
 
-// Since the member variables of SumOperator are private, we have
-// to define our own class anyway...
+// This class is necessary since a lot of the member variables
+// of mfem::SumOperator are private.
 // It is essential that the first operator is the gradient of the
-// nonlinear form here, as we call B->AssembleDiagonal later one,
+// nonlinear form here, as we call B->AssembleDiagonal later on,
 // and this will fail for the gradient of the nlf.
 class SumOperatorExtension : public mfem::Operator
 {
@@ -68,19 +73,16 @@ public:
   // underlying bilinearform instead)
   void AssembleDiagOnNonlinearForm(mfem::Vector & diag) const
   {
-    // the nlf will hold most things
     // firstly, the dnfi
     mfem::Array<mfem::NonlinearFormIntegrator *> & dnfi = *_nlf->GetDNFI();
     mfem::Array<mfem::NonlinearFormIntegrator *> & bnfi = *_nlf->GetBNFI();
 
-    // next, the elemR. this should also unlock the size we need for ye
     mfem::FiniteElementSpace * fes = _nlf->FESpace();
 
-    // this LEXICOGRAPHIC is correct. This is how PABilinearFormExtensions do it.
     const mfem::Operator * elemR =
         fes->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
 
-    const int ye_size = elemR->Height(); // check this
+    const int ye_size = elemR->Height();
 
     mfem::Vector ye(ye_size);
     ye = 0.0;
@@ -114,9 +116,9 @@ public:
 
     // Ultimately, we want the diag that we assemble here to have 1s
     // on all essential rows. Since we combine diagonal values from
-    // the nonlinear form and the bilinear form here, we arbitrarily
+    // the nonlinear form and the bilinear form here, we choose to
     // make sure the nonlinear form has a diag_policy of 0 (see the
-    // call to mfem::forall below) and the bilinear form has a diag_policy
+    // for loop) and the bilinear form has a diag_policy
     // of 1 (default). This means when we combine at the end, we have 1s
     // on essential rows.
     const mfem::Array<int> & ess_tdofs = _nlf->GetEssentialTrueDofs();

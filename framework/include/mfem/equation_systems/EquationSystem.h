@@ -27,10 +27,6 @@ namespace Moose::MFEM
 {
 class CoefficientManager;
 
-// We need another operator, which is a small extension to the SumOperator.
-// We forward declare it here
-class SumOperatorExtension;
-
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
  *
@@ -335,7 +331,8 @@ protected:
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
 
-  // We need a SumOperator to handle some crazy stuff
+  // We use this to combine nonlinear + linear operators when using partial
+  // assembly.
   mutable std::unique_ptr<SumOperatorExtension> _sumOperator;
 
   // Store the op that comes out of FormLinearSystem

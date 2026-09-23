@@ -297,9 +297,8 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
 
   op.Reset(aux_a.Ptr());
 
-  // hold a reference to op. Later, we'll pass this into SumOperatorExtension
-  // so we can perform AddMult on the linear part of the system, then on the
-  // nonlinear part of the system.
+  // Keep the pointer to the linear system's operator so we can
+  // use it to form SumOperatorExtension later (for partial assembly)
   _system_operator = aux_a.Ptr();
 
   aux_a.SetOperatorOwner(false);
@@ -486,16 +485,18 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
       mfem::Operator * nlf_grad = &nlf->GetGradient(u);
 
-      // does it cast into constrained operator?
+      // Check if it casts into ConstrainedOperator so we can set the diagonal policy. Without
+      // this, we get 2s on the diagonal of essential rows when we should have 1s, due to the
+      // linear operator already contributing 1s.
       mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
-      if (c_nlf_grad)
-        c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+      mooseAssert(c_nlf_grad, "Could not cast the nlf gradient into Constrained Operator");
+      c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
 
-      // At time of writing, ComplexEquationSystem::FormSystemOperator does not store Aux_a. So we
+      // ComplexEquationSystem::FormSystemOperator does not store aux_a. So we
       // guard against dereferencing nullptr here.
       mooseAssert(_system_operator, "Bilinear Operator is null!");
 
-      // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
+      // The returned operators are owned by nlf/blf, so SumOperatorExtension must not delete them.
       _sumOperator =
           std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator, 1.0, nlf);
 
@@ -570,8 +571,8 @@ EquationSystem::BuildNonlinearForms()
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
 
-    // these two are necessary for nonstandard assembly levels, but are also unsafe
-    // if there are no integrators. So guard this part
+    // These two are necessary for nonstandard assembly levels, but are also
+    // cause segfaults if there are no integrators.
     if (nlf->GetDNFI()->Size() or nlf->GetBNFI()->Size())
     {
       nlf->SetAssemblyLevel(_assembly_level);
