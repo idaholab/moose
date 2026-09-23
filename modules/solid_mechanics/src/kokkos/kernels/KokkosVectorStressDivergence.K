@@ -10,9 +10,11 @@
 #include "KokkosVectorStressDivergence.h"
 
 registerKokkosResidualObject("SolidMechanicsApp", KokkosVectorStressDivergence);
+registerKokkosResidualObject("SolidMechanicsApp", KokkosSymmetricVectorStressDivergence);
 
+template <typename RankTwo, typename RankFour>
 InputParameters
-KokkosVectorStressDivergence::validParams()
+KokkosVectorStressDivergenceTempl<RankTwo, RankFour>::validParams()
 {
   InputParameters params = Moose::Kokkos::VectorKernelGrad::validParams();
   params.addClassDescription(
@@ -25,11 +27,15 @@ KokkosVectorStressDivergence::validParams()
   return params;
 }
 
-KokkosVectorStressDivergence::KokkosVectorStressDivergence(const InputParameters & parameters)
+template <typename RankTwo, typename RankFour>
+KokkosVectorStressDivergenceTempl<RankTwo, RankFour>::KokkosVectorStressDivergenceTempl(
+    const InputParameters & parameters)
   : Moose::Kokkos::VectorKernelGrad(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress(getKokkosMaterialPropertyByName<Moose::Kokkos::Real33>(_base_name + "stress")),
-    _Jacobian_mult(
-        getKokkosMaterialPropertyByName<Moose::Kokkos::Real3333>(_base_name + "Jacobian_mult"))
+    _stress(getKokkosMaterialPropertyByName<RankTwo>(_base_name + "stress")),
+    _Jacobian_mult(getKokkosMaterialPropertyByName<RankFour>(_base_name + "Jacobian_mult"))
 {
 }
+
+template class KokkosVectorStressDivergenceTempl<Moose::Kokkos::Real33, Moose::Kokkos::Real3333>;
+template class KokkosVectorStressDivergenceTempl<Moose::Kokkos::Real6, Moose::Kokkos::Real66>;
