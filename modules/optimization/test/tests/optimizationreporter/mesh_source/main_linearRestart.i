@@ -8,7 +8,10 @@
   parameter_meshes = 'parameter_mesh_restart_out.e'
   exodus_timesteps_for_parameter_mesh_variable = 2
   initial_condition_mesh_variable = restart_source
-  lower_bounds = -1
+  # The restart source recovered by taobqnls dips to about -1.17, so the bound must
+  # sit below that for the exact-solution initial condition to be feasible and the
+  # solve to converge in a single iteration.
+  lower_bounds = -2
   upper_bounds = 5
   outputs = none
 []
