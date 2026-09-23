@@ -334,6 +334,62 @@
     requirement = 'Mixed loading at the generic scalar porosity floor shall retain a finite material timestep recommendation from admitted deviatoric creep while blocking volumetric collapse.'
   []
 
+  # Generic scalar reduced-porosity globalization and convergence-acceptance behavior.
+  [review_reduced_porosity_root_acceptance]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = lps_reduced_porosity_opening.i
+    expect_out = 'Reduced porosity root: converged by'
+    requirement = 'A generic porosity-dependent scalar pressure closure shall recover and certify an opening FREE root through reduced-porosity globalization after the coupled Newton iteration budget is exhausted.'
+  []
+  [review_porosity_merit_scale_cap]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = lps_reduced_porosity_opening.i
+    expect_out = 'porosity_variable_scale = [^ ]+ porosity_merit_scale = 1e-05 porosity_convergence_scale = 1e-06'
+    prereq = review_reduced_porosity_root_acceptance
+    requirement = 'At very small porosity, the generic coupled local line-search merit shall remain within one decade of the physical porosity convergence scale while retaining a separately conditioned porosity variable scale.'
+  []
+  [review_reduced_porosity_downward]
+    type = RunApp
+    input = lps_reduced_porosity_downward.i
+    expect_out = 'Reduced porosity downward probe:'
+    requirement = 'The generic scalar porous-LPS solver shall recover a FREE collapse root below an under-iterated coupled state by searching downward on the mechanically equilibrated reduced porosity residual.'
+  []
+  [review_reduced_porosity_downward_jacobian]
+    type = PetscJacobianTester
+    input = lps_reduced_porosity_downward.i
+    cli_args = 'Mesh/nx=2 Mesh/ny=2 -snes_test_err 1e-11 Executioner/num_steps=1'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 1e-6
+    difference_tol = 1e8
+    prereq = review_reduced_porosity_downward
+    requirement = 'The generic AD Jacobian shall remain consistent after reduced-porosity globalization reconstructs a converged scalar p-q-f state from raw bracket coordinates.'
+  []
+  [review_adaptive_defers_reduced_porosity_recovery]
+    type = RunApp
+    input = lps_reduced_porosity_downward.i
+    cli_args = 'Materials/lps/use_substepping=INCREMENT_BASED Materials/lps/adaptive_substepping=true Materials/lps/maximum_number_substeps=2'
+    expect_out = 'deferring reduced-porosity recovery after the coupled Newton iteration limit to finer adaptive substeps'
+    prereq = review_reduced_porosity_downward
+    requirement = 'A failed coarse generic porous-LPS constitutive attempt shall request cheaper adaptive local refinement before paying for reduced-porosity globalization.'
+  []
+  [review_stagnation_acceptance_contract]
+    type = RunApp
+    input = lps_convergence_acceptance.i
+    custom_evaluation_script = check_convergence_acceptance.py
+    requirement = 'An iteration-limited generic scalar solve shall use the stagnation tolerance for fallback acceptance while the same state still fails the stricter ordinary local convergence tolerance.'
+  []
+  [review_nonfinite_local_state]
+    type = RunException
+    input = lps_nonfinite_local_state.i
+    expect_err = 'nonfinite .*inelastic increment'
+    requirement = 'A nonfinite generic porous-LPS constitutive trial shall raise a recoverable MooseException before nonfinite strain or stress can be committed.'
+  []
+
   [prescribed_two_population_nonad]
     type = RunApp
     allow_test_objects = true
