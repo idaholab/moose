@@ -195,8 +195,8 @@ RangeEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::Brac
   if (argv.size() < 2 || argv.size() > 3)
   {
     exp.errors.emplace_back("range error: Expected either 2 arguments '${range start stop}' "
-                                "or 3 arguments '${range start stop step}' in '" + n->fullpath() +
-                                "'",
+                            "or 3 arguments '${range start stop step}' in '" +
+                                n->fullpath() + "'",
                             n);
     return n->val();
   }
@@ -210,8 +210,9 @@ RangeEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::Brac
 
     if (!success)
     {
-      exp.errors.emplace_back(
-          "range error: parameter '" + argv[i] + "' is not an integer in '" + n->fullpath() + "'", n);
+      exp.errors.emplace_back("range error: parameter '" + argv[i] + "' is not an integer in '" +
+                                  n->fullpath() + "'",
+                              n);
       return n->val();
     }
   }
