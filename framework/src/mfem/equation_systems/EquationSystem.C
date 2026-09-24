@@ -529,6 +529,7 @@ EquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, blf, _kernels_map);
     // Assemble
     blf->Assemble();
+    blf->Finalize();
   }
 }
 
@@ -561,6 +562,7 @@ EquationSystem::BuildMixedBilinearForms()
             coupled_var_name, test_var_name, mblf, _kernels_map);
         // Assemble mixed bilinear forms
         mblf->Assemble();
+        mblf->Finalize();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
         test_mblfs->Register(coupled_var_name, mblf);
@@ -715,6 +717,7 @@ EquationSystem::BuildBilinearFormForFESpace(const std::string & var_name,
   ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _integrated_bc_map);
   ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _kernels_map);
   blf->Assemble();
+  blf->Finalize();
   return blf;
 }
 

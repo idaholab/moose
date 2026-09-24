@@ -106,6 +106,7 @@ ComplexEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, slf, _cmplx_kernels_map);
     // Assemble
     slf->Assemble();
+    slf->Finalize();
   }
 }
 
@@ -140,6 +141,7 @@ ComplexEquationSystem::BuildMixedBilinearForms()
             coupled_var_name, test_var_name, mslf, _cmplx_kernels_map);
         // Assemble mixed bilinear forms
         mslf->Assemble();
+        mslf->Finalize();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
         test_mslfs->Register(coupled_var_name, mslf);
