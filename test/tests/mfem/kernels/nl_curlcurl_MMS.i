@@ -67,7 +67,7 @@
     symbol_names = 'j'
     symbol_values = 'h_field_curl_mag'
   []
-  # we need dk/ds / s in the finished kernel.
+  # we need k'(s) / s in the finished kernel.
   # so we just input that here. it is usually
   # something nontrivial, but here it is just 2
   [dk_ds_s]
@@ -90,7 +90,7 @@
     variable = h_field
     k_coefficient = k
     curlu_dk_dcurlu_coefficient = j_dk_dj
-    dk_dcurl_u_coefficient = dk_ds_s
+    dk_dcurlu_over_curlu_coefficient = dk_ds_s
   []
   [mass]
     type = MFEMVectorFEMassKernel
