@@ -591,6 +591,175 @@ Assembly::update()
 }
 
 void
+Assembly::reinit(const FESystem & system)
+{
+  const unsigned int number = system.number();
+  const unsigned int num_systems = _problem->es().n_systems();
+  const unsigned int num_subdomains = kokkosMesh().getNumSubdomains();
+  const unsigned int num_variables = system.getNumVariables();
+
+  if (!_qp_solutions.isAlloc())
+  {
+    _qp_solutions.create(num_systems, MAX_TAG);
+    _qp_solutions_grad.create(num_systems, MAX_TAG);
+    _qp_vector_solutions.create(num_systems, MAX_TAG);
+    _qp_vector_solutions_grad.create(num_systems, MAX_TAG);
+    _qp_vector_solutions_curl.create(num_systems, MAX_TAG);
+  }
+
+  for (auto tag : system.getActiveSolutionTags())
+  {
+    auto & qp_solutions = _qp_solutions(number, tag);
+    auto & qp_solutions_grad = _qp_solutions_grad(number, tag);
+    auto & qp_vector_solutions = _qp_vector_solutions(number, tag);
+    auto & qp_vector_solutions_grad = _qp_vector_solutions_grad(number, tag);
+    auto & qp_vector_solutions_curl = _qp_vector_solutions_curl(number, tag);
+
+    if (!qp_solutions.isAlloc())
+      qp_solutions.create(num_subdomains, num_variables);
+
+    if (!qp_solutions_grad.isAlloc())
+      qp_solutions_grad.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions.isAlloc())
+      qp_vector_solutions.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions_grad.isAlloc())
+      qp_vector_solutions_grad.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions_curl.isAlloc())
+      qp_vector_solutions_curl.create(num_subdomains, num_variables);
+
+    for (auto subdomain : _mesh->meshSubdomains())
+    {
+      auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
+
+      for (auto var : system.getActiveVariables())
+      {
+        if (!system.isVariableActive(var, sid))
+          continue;
+
+        if (system.isVectorVariable(var))
+        {
+          if (!qp_vector_solutions(sid, var).isAlloc())
+            qp_vector_solutions(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_vector_solutions_grad(sid, var).isAlloc())
+            qp_vector_solutions_grad(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_vector_solutions_curl(sid, var).isAlloc())
+            qp_vector_solutions_curl(sid, var).createDevice(getNumQps(sid));
+        }
+        else if (!system.isScalarVariable(var))
+        {
+          if (!qp_solutions(sid, var).isAlloc())
+            qp_solutions(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_solutions_grad(sid, var).isAlloc())
+            qp_solutions_grad(sid, var).createDevice(getNumQps(sid));
+        }
+      }
+    }
+
+    qp_solutions.copyToDevice();
+    qp_solutions_grad.copyToDevice();
+    qp_vector_solutions.copyToDevice();
+    qp_vector_solutions_grad.copyToDevice();
+    qp_vector_solutions_curl.copyToDevice();
+  }
+
+  _qp_solutions.copyToDevice();
+  _qp_solutions_grad.copyToDevice();
+  _qp_vector_solutions.copyToDevice();
+  _qp_vector_solutions_grad.copyToDevice();
+  _qp_vector_solutions_curl.copyToDevice();
+
+  _thread.resize(getMaxQpsPerElem(),
+                 kokkosMesh().getNumLocalElements(),
+                 system.getActiveVariables().size(),
+                 system.getActiveSolutionTags().size());
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
+  ::Kokkos::parallel_for(
+      policy, KOKKOS_CLASS_LAMBDA(const ThreadID tid) { cacheSolutionQpValues(tid, system); });
+  ::Kokkos::fence();
+}
+
+KOKKOS_FUNCTION void
+Assembly::cacheSolutionQpValues(const ThreadID tid, const FESystem & system) const
+{
+  auto qp = _thread(tid, 0);
+  auto elem = _thread(tid, 1);
+  auto var = system.getActiveVariables()(_thread(tid, 2));
+  auto tag = system.getActiveSolutionTags()(_thread(tid, 3));
+
+  if (system.isScalarVariable(var))
+    return;
+
+  auto info = kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+  auto elem_type = info.type;
+
+  if (!system.isVariableActive(var, sid))
+    return;
+
+  auto fe_type = system.getFETypeID(var);
+  auto num_dofs = getNumDofs(elem_type, fe_type);
+  auto num_qps = getNumQps(info);
+  auto qp_offset = getQpOffset(info);
+
+  if (qp >= num_qps)
+    return;
+
+  if (system.isVectorVariable(var))
+  {
+    auto & phi = getVectorPhi(sid, elem_type, fe_type);
+    auto & grad_phi = getVectorGradPhi(sid, elem_type, fe_type);
+    auto jacobian = getJacobian(info, qp).transpose();
+
+    Real3 value = 0;
+    Real33 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = system.getVectorDofValue(system.getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * grad_phi(i, qp);
+    }
+
+    grad = grad * jacobian;
+
+    getSolutionQpVectorValue(system, info, qp_offset + qp, var, tag) = value;
+    getSolutionQpVectorGrad(system, info, qp_offset + qp, var, tag) = grad;
+    getSolutionQpVectorCurl(system, info, qp_offset + qp, var, tag) =
+        curlFromVectorGradient(grad, kokkosMesh().getDimension());
+  }
+  else
+  {
+    auto & phi = getPhi(sid, elem_type, fe_type);
+    auto & grad_phi = getGradPhi(sid, elem_type, fe_type);
+    auto jacobian = getJacobian(info, qp);
+
+    Real value = 0;
+    Real3 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = system.getVectorDofValue(system.getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * grad_phi(i, qp);
+    }
+
+    grad = jacobian * grad;
+
+    getSolutionQpValue(system, info, qp_offset + qp, var, tag) = value;
+    getSolutionQpGrad(system, info, qp_offset + qp, var, tag) = grad;
+  }
+}
+
+void
 Assembly::cachePhysicalMap()
 {
   const auto num_subdomains = kokkosMesh().getNumSubdomains();

@@ -53,6 +53,12 @@ public:
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
+   * Get the system number
+   * @returns The system number
+   */
+  KOKKOS_FUNCTION unsigned int number() const { return _number; }
+
+  /**
    * Synchronize the active tagged vectors and matrices between host and device
    * @param dir Copy direction
    */
@@ -204,6 +210,30 @@ public:
   KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
 
   /**
+   * Get the active variable numbers
+   * @returns The active variable numbers
+   */
+  KOKKOS_FUNCTION const Array<unsigned int> & getActiveVariables() const
+  {
+    return _active_variables;
+  }
+
+  /**
+   * Get the active solution tags
+   * @returns The active solution tags
+   */
+  KOKKOS_FUNCTION const Array<TagID> & getActiveSolutionTags() const
+  {
+    return _active_solution_tags;
+  }
+
+  /**
+   * Get the number of variables
+   * @returns The number of variables
+   */
+  KOKKOS_FUNCTION unsigned int getNumVariables() const { return _num_vars; }
+
+  /**
    * Get the number of local DOFs
    * @returns The number of local DOFs
    */
@@ -344,6 +374,11 @@ protected:
    * Reference of the libMesh communicator
    */
   const Parallel::Communicator & _comm;
+
+  /**
+   * System number
+   */
+  const unsigned int _number;
 
   /**
    * Number of variables

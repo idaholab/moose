@@ -373,7 +373,8 @@ VariableValueTempl<is_ad>::get(Datum & datum,
 
   if (_var.coupled())
   {
-    auto & sys = datum.system(_var.sys(comp));
+    auto & assembly = datum.assembly();
+    auto & system = datum.system(_var.sys(comp));
     auto var = _var.var(comp);
     auto tag = _var.tag();
 
@@ -382,22 +383,22 @@ VariableValueTempl<is_ad>::get(Datum & datum,
       unsigned int dof;
 
       if (_var.scalar())
-        dof = sys.getScalarLocalDofIndex(idx, var);
+        dof = system.getScalarLocalDofIndex(idx, var);
       else if (datum.isNodal())
       {
         auto node = datum.node();
-        dof = sys.getNodeLocalDofIndex(node, 0, var);
+        dof = system.getNodeLocalDofIndex(node, 0, var);
       }
       else
       {
         auto elem = datum.elem().id;
-        dof = sys.getElemLocalDofIndex(elem, idx, var);
+        dof = system.getElemLocalDofIndex(elem, idx, var);
       }
 
       if constexpr (is_ad)
-        value = sys.getVectorDofADValue(dof, tag, seed);
+        value = system.getVectorDofADValue(dof, tag, seed);
       else
-        value = sys.getVectorDofValue(dof, tag);
+        value = system.getVectorDofValue(dof, tag);
     }
     else
     {
@@ -405,15 +406,14 @@ VariableValueTempl<is_ad>::get(Datum & datum,
       auto side = datum.side();
 
       if constexpr (is_ad)
-        value = side == libMesh::invalid_uint
-                    ? sys.getVectorQpADValue(
-                          elem, datum.qpOffset(), idx, var, tag, seed, datum.assembly())
-                    : sys.getVectorQpADValueFace(elem, side, idx, var, tag, seed, datum.assembly());
+        value =
+            side == libMesh::invalid_uint
+                ? assembly.getSolutionQpADValue(system, elem, datum.qpOffset(), idx, var, tag, seed)
+                : assembly.getSolutionQpADValueFace(system, elem, side, idx, var, tag, seed);
       else
         value = side == libMesh::invalid_uint
-                    ? sys.getVectorQpValue(
-                          elem, datum.qpOffset() + idx, var, tag, datum.mesh().isDisplaced())
-                    : sys.getVectorQpValueFace(elem, side, idx, var, tag, datum.assembly());
+                    ? assembly.getSolutionQpValue(system, elem, datum.qpOffset() + idx, var, tag)
+                    : assembly.getSolutionQpValueFace(system, elem, side, idx, var, tag);
     }
   }
   else
@@ -576,40 +576,29 @@ VariableGradientTempl<is_ad>::get(Datum & datum,
   {
     KOKKOS_ASSERT(!datum.isNodal());
 
+    auto & assembly = datum.assembly();
+    auto & system = datum.system(_var.sys(comp));
     auto & elem = datum.elem();
     auto side = datum.side();
 
     if constexpr (is_ad)
-      grad = side == libMesh::invalid_uint ? datum.system(_var.sys(comp))
-                                                 .getVectorQpADGrad(elem,
-                                                                    datum.J(qp),
-                                                                    datum.qpOffset(),
-                                                                    qp,
-                                                                    _var.var(comp),
-                                                                    _var.tag(),
-                                                                    seed,
-                                                                    datum.assembly())
-                                           : datum.system(_var.sys(comp))
-                                                 .getVectorQpADGradFace(elem,
-                                                                        side,
-                                                                        datum.J(qp),
-                                                                        qp,
-                                                                        _var.var(comp),
-                                                                        _var.tag(),
-                                                                        seed,
-                                                                        datum.assembly());
+      grad = side == libMesh::invalid_uint
+                 ? assembly.getSolutionQpADGrad(system,
+                                                elem,
+                                                datum.J(qp),
+                                                datum.qpOffset(),
+                                                qp,
+                                                _var.var(comp),
+                                                _var.tag(),
+                                                seed)
+                 : assembly.getSolutionQpADGradFace(
+                       system, elem, side, datum.J(qp), qp, _var.var(comp), _var.tag(), seed);
     else
-      grad =
-          side == libMesh::invalid_uint
-              ? datum.system(_var.sys(comp))
-                    .getVectorQpGrad(elem,
-                                     datum.qpOffset() + qp,
-                                     _var.var(comp),
-                                     _var.tag(),
-                                     datum.mesh().isDisplaced())
-              : datum.system(_var.sys(comp))
-                    .getVectorQpGradFace(
-                        elem, side, datum.J(qp), qp, _var.var(comp), _var.tag(), datum.assembly());
+      grad = side == libMesh::invalid_uint
+                 ? assembly.getSolutionQpGrad(
+                       system, elem, datum.qpOffset() + qp, _var.var(comp), _var.tag())
+                 : assembly.getSolutionQpGradFace(
+                       system, elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
   }
 
   return grad;
@@ -800,7 +789,8 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
 
   if (_var.coupled())
   {
-    auto & sys = datum.system(_var.sys(comp));
+    auto & assembly = datum.assembly();
+    auto & system = datum.system(_var.sys(comp));
     auto var = _var.var(comp);
     auto tag = _var.tag();
 
@@ -813,7 +803,7 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
         auto node = datum.node();
 
         for (unsigned int c = 0; c < dimension; ++c)
-          value(c) = sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, c, var), tag);
+          value(c) = system.getVectorDofValue(system.getNodeLocalDofIndex(node, c, var), tag);
       }
       else
       {
@@ -821,7 +811,8 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
         auto offset = idx * dimension;
 
         for (unsigned int c = 0; c < dimension; ++c)
-          value(c) = sys.getVectorDofValue(sys.getElemLocalDofIndex(elem, offset + c, var), tag);
+          value(c) =
+              system.getVectorDofValue(system.getElemLocalDofIndex(elem, offset + c, var), tag);
       }
     }
     else
@@ -832,10 +823,9 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigne
       auto side = datum.side();
 
       if (side == libMesh::invalid_uint)
-        value = sys.getVectorQpVectorValue(
-            elem, datum.qpOffset() + idx, var, tag, datum.mesh().isDisplaced());
+        value = assembly.getSolutionQpVectorValue(system, elem, datum.qpOffset() + idx, var, tag);
       else
-        value = sys.getVectorQpVectorValueFace(elem, side, idx, var, tag, datum.assembly());
+        value = assembly.getSolutionQpVectorValueFace(system, elem, side, idx, var, tag);
     }
   }
   else
@@ -855,17 +845,17 @@ VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsig
   {
     KOKKOS_ASSERT(!datum.isNodal());
 
+    auto & assembly = datum.assembly();
+    auto & system = datum.system(_var.sys(comp));
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto & sys = datum.system(_var.sys(comp));
     auto var = _var.var(comp);
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
-      grad = sys.getVectorQpVectorGrad(
-          elem, datum.qpOffset() + qp, var, tag, datum.mesh().isDisplaced());
+      grad = assembly.getSolutionQpVectorGrad(system, elem, datum.qpOffset() + qp, var, tag);
     else
-      grad = sys.getVectorQpVectorGradFace(elem, side, datum.J(qp), qp, var, tag, datum.assembly());
+      grad = assembly.getSolutionQpVectorGradFace(system, elem, side, datum.J(qp), qp, var, tag);
   }
 
   return grad;
@@ -882,26 +872,26 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
   {
     KOKKOS_ASSERT(!datum.isNodal());
 
+    auto & assembly = datum.assembly();
+    auto & system = datum.system(_var.sys(comp));
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto & sys = datum.system(_var.sys(comp));
     auto var = _var.var(comp);
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
-      curl = sys.getVectorQpVectorCurl(
-          elem, datum.qpOffset() + qp, var, tag, datum.mesh().isDisplaced());
+      curl = assembly.getSolutionQpVectorCurl(system, elem, datum.qpOffset() + qp, var, tag);
     else
     {
-      auto fe = sys.getFETypeID(var);
-      auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
-      auto & grad_phi = datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
+      auto fe = system.getFETypeID(var);
+      auto n_dofs = assembly.getNumDofs(elem.type, fe);
+      auto & grad_phi = assembly.getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
       auto jacobian = datum.J(qp);
       auto jacobian_transpose = jacobian.transpose();
       Real33 grad = 0;
 
       for (unsigned int i = 0; i < n_dofs; ++i)
-        grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
+        grad += system.getVectorDofValue(system.getElemLocalDofIndex(elem.id, i, var), tag) *
                 (grad_phi(i, qp) * jacobian_transpose);
 
       curl = curlFromVectorGradient(grad, datum.mesh().getDimension());
