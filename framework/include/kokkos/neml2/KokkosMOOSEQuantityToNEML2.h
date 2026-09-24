@@ -56,8 +56,11 @@ struct KokkosNEML2BaseShape<Moose::Kokkos::Real6>
  * @tparam T The Kokkos property type, whose storage must match the NEML2 variable's component
  * layout. Real corresponds to a NEML2 Scalar and Real6 to SR2, which is Mandel with the component
  * order of SymmetricRankTwoTensor, so components are copied without conversion.
+ * @tparam state The property state to read, 0 for the current value and 1 for the old value. A
+ * NEML2 model with history takes its old state as an input, and reading it from the Kokkos property
+ * the corresponding output was retrieved into keeps that round trip on the device.
  */
-template <typename T>
+template <typename T, unsigned int state>
 class KokkosMOOSEQuantityToNEML2 : public Moose::Kokkos::ElementUserObject, public MOOSEToNEML2
 {
 public:
@@ -92,14 +95,17 @@ private:
   Moose::Kokkos::NEML2BatchLayout _layout;
 };
 
-typedef KokkosMOOSEQuantityToNEML2<Real> KokkosMOOSERealToNEML2;
-typedef KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6>
+typedef KokkosMOOSEQuantityToNEML2<Real, 0> KokkosMOOSERealToNEML2;
+typedef KokkosMOOSEQuantityToNEML2<Real, 1> KokkosMOOSEOldRealToNEML2;
+typedef KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6, 0>
     KokkosMOOSESymmetricRankTwoTensorToNEML2;
+typedef KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6, 1>
+    KokkosMOOSEOldSymmetricRankTwoTensorToNEML2;
 
-template <typename T>
+template <typename T, unsigned int state>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosMOOSEQuantityToNEML2<T>::execute(Moose::Kokkos::Datum & datum) const
+KokkosMOOSEQuantityToNEML2<T, state>::execute(Moose::Kokkos::Datum & datum) const
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {

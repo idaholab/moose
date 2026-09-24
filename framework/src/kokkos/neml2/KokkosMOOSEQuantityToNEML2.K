@@ -14,11 +14,13 @@
 #include <ATen/ops/from_blob.h>
 
 registerKokkosUserObject("MooseApp", KokkosMOOSERealToNEML2);
+registerKokkosUserObject("MooseApp", KokkosMOOSEOldRealToNEML2);
 registerKokkosUserObject("MooseApp", KokkosMOOSESymmetricRankTwoTensorToNEML2);
+registerKokkosUserObject("MooseApp", KokkosMOOSEOldSymmetricRankTwoTensorToNEML2);
 
-template <typename T>
+template <typename T, unsigned int state>
 InputParameters
-KokkosMOOSEQuantityToNEML2<T>::validParams()
+KokkosMOOSEQuantityToNEML2<T, state>::validParams()
 {
   InputParameters params = Moose::Kokkos::ElementUserObject::validParams();
   params += MOOSEToNEML2::validParams();
@@ -34,17 +36,17 @@ KokkosMOOSEQuantityToNEML2<T>::validParams()
   return params;
 }
 
-template <typename T>
-KokkosMOOSEQuantityToNEML2<T>::KokkosMOOSEQuantityToNEML2(const InputParameters & parameters)
+template <typename T, unsigned int state>
+KokkosMOOSEQuantityToNEML2<T, state>::KokkosMOOSEQuantityToNEML2(const InputParameters & parameters)
   : Moose::Kokkos::ElementUserObject(parameters),
     MOOSEToNEML2(parameters),
-    _prop(this->template getKokkosMaterialProperty<T>("from_moose"))
+    _prop(this->template getKokkosMaterialProperty<T, 0, state>("from_moose"))
 {
 }
 
-template <typename T>
+template <typename T, unsigned int state>
 void
-KokkosMOOSEQuantityToNEML2<T>::compute()
+KokkosMOOSEQuantityToNEML2<T, state>::compute()
 {
   // The numbering depends only on the mesh and this object's block coverage
   if (!_layout.built())
@@ -56,9 +58,9 @@ KokkosMOOSEQuantityToNEML2<T>::compute()
   Moose::Kokkos::ElementUserObject::compute();
 }
 
-template <typename T>
+template <typename T, unsigned int state>
 neml2::Tensor
-KokkosMOOSEQuantityToNEML2<T>::gatheredData() const
+KokkosMOOSEQuantityToNEML2<T, state>::gatheredData() const
 {
   if (!_layout.built())
     mooseError("The gathered data was requested before this object computed it. The NEML2 executor "
@@ -78,7 +80,9 @@ KokkosMOOSEQuantityToNEML2<T>::gatheredData() const
                        1);
 }
 
-template class KokkosMOOSEQuantityToNEML2<Real>;
-template class KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6>;
+template class KokkosMOOSEQuantityToNEML2<Real, 0>;
+template class KokkosMOOSEQuantityToNEML2<Real, 1>;
+template class KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6, 0>;
+template class KokkosMOOSEQuantityToNEML2<Moose::Kokkos::Real6, 1>;
 
 #endif
