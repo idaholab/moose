@@ -1974,3 +1974,39 @@ c2b839ea0c891a2869dfce73d09bd66070122e01: # 33466
   wasp:
     full_version: 2026.08.13_ce25dcd_1
     hash: d5ba359
+
+ca7bdb59d8ddf6a2177c383ed6e9066b89e7cbbd: # 33833
+  build:
+    full_version: 2026.09.22
+    hash: 1ab3a3d
+  libmesh:
+    full_version: 2026.08.18_0772c3d_2
+    hash: a6c72b9
+  libmesh-vtk:
+    full_version: 9.7.0_2
+    hash: ae98893
+  moose-dev:
+    full_version: 2026.09.22
+    hash: 3cd6b44
+  mpi:
+    full_version: 2026.08.23
+    hash: 8f300ce
+  petsc:
+    full_version: 3.25.5_0
+    hash: e8f298a
+  pprof:
+    full_version: 2026.07.09_b9395ee_1
+    hash: ac4a5bd
+  pyhit:
+    full_version: 2026.09.22
+    hash: 0782742
+  seacas:
+    full_version: 2025.10.14_6
+    hash: 9c1eb1f
+  tools:
+    full_version: 2026.09.22
+    hash: a8ca840
+  wasp:
+    full_version: 2026.08.13_ce25dcd_2
+    hash: 8ced395
+
