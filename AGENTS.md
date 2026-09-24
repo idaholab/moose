@@ -70,6 +70,11 @@ The test: Every changed line should trace directly to the user's request.
   obvious from their names.
 - Omit process narration and edit history. A comment records what the code does
   and why, not the sequence of changes or investigation that produced it.
+- Avoid negating clauses that describe what was not done or contrast against an
+  alternative ("rather than X", "instead of Y", "not a Z"), unless the contrast
+  itself is the useful information, such as explaining why an obvious-seeming
+  alternative was rejected. State what the code does directly instead of framing
+  it against something it isn't.
 - Use ASCII characters.
 
 ## 5. Code Style
@@ -141,11 +146,17 @@ not govern unrelated conversations or prescribe the user's conversational style.
   any local sweep, so listing checks it already performs is noise to a reviewer. Report
   verification only where CI cannot reach it, such as a manual performance comparison or a
   downstream application build.
-- Do not catalog what the change leaves undone in a "Not included", "Future work", or
+- Do not catalog work that was never started in a "Not included", "Future work", or
   "Limitations" section. A related bug worth tracking belongs in its own issue, referenced in
   one line.
-- Leave investigation dead ends out. A path that looked related and turned out not to be is not
-  a finding, and reporting it competes with the actual change for the reviewer's attention.
+- Report a hypothesis that was tested and failed, giving the measurement and the mechanism that
+  explains it. That is a result, and recording it stops the next reader repeating the work. Leave
+  out a path abandoned without a measurement, and one whose irrelevance is evident from the code
+  alone. A plausible hypothesis that measurement refuted is worth recording even when the answer
+  is that the path was unrelated, because what gets repeated is the hypothesis, not the
+  conclusion. In a pull request description keep even a tested failure to one sentence, since a
+  reviewer is deciding about a bounded diff, and put the detail in the documentation or the
+  issue.
 - Write clear, grammatical, concise prose for peer computational scientists and engineers.
   Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes, parameters,
   input syntax, commands, and diagnostics, and remove repetition and boilerplate before
