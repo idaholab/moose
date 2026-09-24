@@ -24,23 +24,11 @@ namespace Moose::MFEM
 // and this will fail for the gradient of the nlf.
 class SumOperatorExtension : public mfem::Operator
 {
-  const mfem::Operator *A, *B;
-  const mfem::real_t _alpha, _beta;
-  mutable mfem::Vector z;
-  mfem::ParNonlinearForm * _nlf; // not owned
 public:
   SumOperatorExtension(const mfem::Operator * A,
-                       const mfem::real_t alpha,
                        const mfem::Operator * B,
-                       const mfem::real_t beta,
                        mfem::ParNonlinearForm * nlf)
-    : Operator(A->Height(), A->Width()),
-      A(A),
-      B(B),
-      _alpha(alpha),
-      _beta(beta),
-      z(A->Height()),
-      _nlf(nlf)
+    : Operator(A->Height(), A->Width()), _A(A), _B(B), _z(A->Height()), _nlf(nlf)
   {
     mooseAssert(A->Width() == B->Width(), "Operator Widths must match");
     mooseAssert(A->Height() == B->Height(), "Operator Heights must match");
@@ -49,22 +37,22 @@ public:
     // not be in iterative mode.
   }
 
-  virtual ~SumOperatorExtension() {}
+  ~SumOperatorExtension() override = default;
 
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
-    z.SetSize(A->Height());
-    A->Mult(x, z);
-    B->Mult(x, y);
-    add(_alpha, z, _beta, y, y);
+    _z.SetSize(_A->Height());
+    _A->Mult(x, _z);
+    _B->Mult(x, y);
+    add(_alpha, _z, _beta, y, y);
   }
 
   void MultTranspose(const mfem::Vector & x, mfem::Vector & y) const override
   {
-    z.SetSize(A->Width());
-    A->MultTranspose(x, z);
-    B->MultTranspose(x, y);
-    add(_alpha, z, _beta, y, y);
+    _z.SetSize(_A->Width());
+    _A->MultTranspose(x, _z);
+    _B->MultTranspose(x, y);
+    add(_alpha, _z, _beta, y, y);
   }
 
   // This mostly copies the method taken by a BilinearForm/PABilinearFormExtension.
@@ -123,20 +111,23 @@ public:
     // on essential rows.
     const mfem::Array<int> & ess_tdofs = _nlf->GetEssentialTrueDofs();
     const int csz = ess_tdofs.Size();
-    auto idx = ess_tdofs.Read();
-    auto d_diag = nlf_diag.ReadWrite();
+    auto idx = ess_tdofs.HostRead();
+    auto d_diag = nlf_diag.HostReadWrite();
     for (int i = 0; i < csz; i++)
       d_diag[idx[i]] = 0.0;
 
     // ditto for B
     mfem::Vector b_diag(diag.Size());
-    B->AssembleDiagonal(b_diag);
+    _B->AssembleDiagonal(b_diag);
 
-    // mix them together
-    mooseAssert(_alpha == 1.0 and _beta == 1.0,
-                "alpha!=1.0 or beta!=1.0. We are putting the wrong values on the diagonal.");
     add(_alpha, nlf_diag, _beta, b_diag, diag);
   }
+
+private:
+  const mfem::Operator *_A, *_B;
+  const mfem::real_t _alpha = 1.0, _beta = 1.0;
+  mutable mfem::Vector _z;
+  mfem::ParNonlinearForm * _nlf; // not owned
 };
 
 } // namespace Moose::MFEM

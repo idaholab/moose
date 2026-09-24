@@ -14,14 +14,14 @@
   [MFEMCurlCurlPartial]
     type = CSVDiff
     input = curlcurl.i
-    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
+              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial '
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMCurlCurlNL]
@@ -42,7 +42,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
-    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMNLCurlCurlKernel'
+    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMCurlCurlKernel'
     recover = false
   []
   [MFEMCurlCurlNLPartial]
