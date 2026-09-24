@@ -1,19 +1,48 @@
 [Tests]
   issues = '#33859'
-  design = 'KokkosMOOSEQuantityToNEML2.md'
+  design = 'KokkosMOOSEQuantityToNEML2.md KokkosNEML2ToMOOSEMaterialProperty.md'
 
   [gather]
     type = CSVDiff
     input = 'gather.i'
     csvdiff = 'gather_out.csv'
     requirement = 'The system shall gather a Kokkos material property into a NEML2 input variable '
-                  'without transferring it through host memory, producing the same constitutive '
-                  'response as gathering the same quantity on the host.'
+                  'without transferring it through host memory, and gather a stateful model\'s old '
+                  'state from the Kokkos property its output was retrieved into, producing the same '
+                  'constitutive response as gathering the same quantities on the host.'
     # The gatherer hands NEML2 a tensor aliasing Kokkos device storage, so it requires a CUDA device
     capabilities = 'kokkos & neml2 & libtorch & cuda'
     compute_devices = 'cuda'
     allow_test_objects = true
-    # The golded stress difference between the two retrieval paths is exact zero
+    # The golded difference between the two retrieval paths is exact zero
+    abs_zero = 1e-12
+    rel_err = 1e-6
+  []
+
+  [varying]
+    type = CSVDiff
+    input = 'varying.i'
+    csvdiff = 'varying_out.csv'
+    requirement = 'The system shall gather Kokkos material properties into a NEML2 model and '
+                  'retrieve its output on the device under a strain that varies from element to '
+                  'element, agreeing with the non-Kokkos bridge pointwise.'
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+    abs_zero = 1e-12
+    rel_err = 1e-6
+  []
+
+  [multiblock]
+    type = CSVDiff
+    input = 'multiblock.i'
+    csvdiff = 'multiblock_out.csv'
+    requirement = 'The system shall assign NEML2 batch entries to quadrature points consistently '
+                  'across several subdomains, reproducing on a subdivided mesh the stress field '
+                  'obtained on a single subdomain.'
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
     abs_zero = 1e-12
     rel_err = 1e-6
   []

@@ -192,6 +192,25 @@
   dt = 1.0
 []
 
+[AuxVariables]
+  [weighted_s]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  # Weighting by position makes the integral below sensitive to the stress field being permuted among
+  # quadrature points, which an extreme value or a plain integral is not
+  [weighted_s]
+    type = ParsedAux
+    variable = weighted_s
+    coupled_variables = 'device_s'
+    use_xyzt = true
+    expression = 'device_s * (x + 2 * y + 3 * z)'
+  []
+[]
+
 [Postprocessors]
   # Zero when the device bridge reproduces the host bridge
   [max_abs_difference]
@@ -204,6 +223,13 @@
     type = ElementExtremeValue
     variable = host_s
     value_type = max_abs
+  []
+  # Identifies the stress field itself, not just its extreme. Subdividing the mesh into subdomains
+  # cannot change it, because the response is pointwise and the displacement is prescribed by
+  # position, so the multiblock test golds the same value.
+  [stress_moment]
+    type = ElementIntegralVariablePostprocessor
+    variable = weighted_s
   []
 []
 
