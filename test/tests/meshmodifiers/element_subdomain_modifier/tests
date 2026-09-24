@@ -168,8 +168,6 @@
     input = 'amr_bc.i'
     exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
-    # MeshModifiers cannot reverse their state when re-doing a timestep, currently. See #30878.
-    restep = false
     requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 
@@ -180,8 +178,6 @@
     exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
     amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
-    # MeshModifiers cannot reverse their state when re-doing a timestep, currently. See #30878.
-    restep = false
     requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 
@@ -211,6 +207,15 @@
     requirement = 'When the desired value is not present in the subdomain ID list, the closest existing subdomain ID value will be assigned to the element with a warning.'
     allow_warnings = true
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
+  []
+
+  [timed_subdomain_rollback]
+    type = 'Exodiff'
+    input = 'timed_subdomain_rollback.i'
+    exodiff = 'timed_subdomain_rollback_out.e timed_subdomain_rollback_out.e-s002'
+    issues = '#30878'
+    requirement = 'The system shall restore element subdomain changes before retrying a failed '
+                  'timestep with a reduced timestep size.'
   []
 
   [times]
