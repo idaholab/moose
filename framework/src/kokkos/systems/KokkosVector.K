@@ -254,6 +254,13 @@ Vector::close()
     _reduction_dof_space = _dof_space;
   }
 
+  // A star forest built once per degree-of-freedom layout, rather than PETSc's coordinate-format
+  // vector interface. PETSc caches that interface's preallocation on the vector it was called for,
+  // and an operator application is handed whichever of its caller's work vectors is free, so a
+  // solve that cycles among several dozen of them builds a preallocation per vector where a forest
+  // keyed on the layout is built once. There is also nothing here for such a preallocation to
+  // coalesce, since this buffer holds exactly one contribution per off-process degree of freedom.
+  //
   // The reduction reads and writes arrays rather than the vector, so it runs while the array is
   // still held, and a device-resident contribution is reduced where it already is
   const auto memtype = _is_host ? PETSC_MEMTYPE_HOST : PETSC_MEMTYPE_DEVICE;
