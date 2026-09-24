@@ -87,12 +87,14 @@ public:
       bnfi[i]->AssembleGradDiagonalPA(ye);
     }
 
-    // finally, let's do it the way that the blf path does it
-    const mfem::ElementRestriction * H1elem_restrict =
+    // ElementRestriction applies orientation sign flips, which H(curl) and H(div) spaces carry
+    // on shared DoFs. A diagonal needs those signs squared, so the unsigned transpose is the
+    // correct one here; restrictions without signs need no such correction.
+    const mfem::ElementRestriction * const signed_restriction =
         dynamic_cast<const mfem::ElementRestriction *>(elemR);
 
-    if (H1elem_restrict)
-      H1elem_restrict->AbsMultTranspose(ye, diag);
+    if (signed_restriction)
+      signed_restriction->AbsMultTranspose(ye, diag);
     else
       elemR->MultTranspose(ye, diag);
   }
