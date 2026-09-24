@@ -3,6 +3,7 @@
 The Path-Integrated Incompressible Flow Model is used to model one-dimensional, single-phase flow using the incompressible Navier-Stokes equation in flow paths of variable geometry.
 
 ## Flow Equations
+
 The governing flow equations for incompressible flow within a 1D flow path are as follows:
 
 !equation
