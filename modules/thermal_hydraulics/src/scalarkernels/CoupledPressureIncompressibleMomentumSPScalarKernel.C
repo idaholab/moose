@@ -83,7 +83,7 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidu
     }
     // Friction
     momentum_residual += _fd / _Dh * _G * abs(_G) / 2.0 / _rhog * (*(Base::_areas[i]))(_qp, _state);
-    // Forms
+    // Form losses
     momentum_residual += (*(Base::_forms_losses[i]))(_qp, _state) * _G * abs(_G) / 2.0 / _rhog *
                          (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);
     // Gravity
