@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#33859'
+  design = 'KokkosMOOSEQuantityToNEML2.md'
+
+  [gather]
+    type = CSVDiff
+    input = 'gather.i'
+    csvdiff = 'gather_out.csv'
+    requirement = 'The system shall gather a Kokkos material property into a NEML2 input variable '
+                  'without transferring it through host memory, producing the same constitutive '
+                  'response as gathering the same quantity on the host.'
+    # The gatherer hands NEML2 a tensor aliasing Kokkos device storage, so it requires a CUDA device
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+    # The golded stress difference between the two retrieval paths is exact zero
+    abs_zero = 1e-12
+    rel_err = 1e-6
+  []
+[]
