@@ -13,13 +13,17 @@
 
 /**
  * Small strain tensor computed from a single vector displacement variable.
+ *
+ * @tparam RankTwo The representation the strain is stored in, either the dense Real33 or the
+ * minor-symmetric Mandel Real6. The strain is symmetric by construction, so both are exact.
  */
-class KokkosComputeSmallStrain : public Moose::Kokkos::Material
+template <typename RankTwo>
+class KokkosComputeSmallStrainTempl : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();
 
-  KokkosComputeSmallStrain(const InputParameters & parameters);
+  KokkosComputeSmallStrainTempl(const InputParameters & parameters);
 
   template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
@@ -32,14 +36,19 @@ private:
   const Moose::Kokkos::VectorVariableGradient _grad_disp;
 
   /// Total strain
-  Moose::Kokkos::MaterialProperty<Moose::Kokkos::Real33> _total_strain;
+  Moose::Kokkos::MaterialProperty<RankTwo> _total_strain;
   /// Mechanical strain, which equals the total strain in the absence of eigenstrains
-  Moose::Kokkos::MaterialProperty<Moose::Kokkos::Real33> _mechanical_strain;
+  Moose::Kokkos::MaterialProperty<RankTwo> _mechanical_strain;
 };
 
+typedef KokkosComputeSmallStrainTempl<Moose::Kokkos::Real33> KokkosComputeSmallStrain;
+typedef KokkosComputeSmallStrainTempl<Moose::Kokkos::Real6> KokkosSymmetricComputeSmallStrain;
+
+template <typename RankTwo>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosComputeSmallStrain::computeQpProperties(const unsigned int qp, Datum & datum) const
+KokkosComputeSmallStrainTempl<RankTwo>::computeQpProperties(const unsigned int qp,
+                                                           Datum & datum) const
 {
   const auto grad = _grad_disp(datum, qp);
 
@@ -48,6 +57,6 @@ KokkosComputeSmallStrain::computeQpProperties(const unsigned int qp, Datum & dat
   strain += grad.transpose();
   strain *= 0.5;
 
-  _total_strain(datum, qp) = strain;
-  _mechanical_strain(datum, qp) = strain;
+  _total_strain(datum, qp) = RankTwo(strain);
+  _mechanical_strain(datum, qp) = RankTwo(strain);
 }

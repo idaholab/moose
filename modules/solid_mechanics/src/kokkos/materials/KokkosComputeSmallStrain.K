@@ -10,9 +10,11 @@
 #include "KokkosComputeSmallStrain.h"
 
 registerKokkosMaterial("SolidMechanicsApp", KokkosComputeSmallStrain);
+registerKokkosMaterial("SolidMechanicsApp", KokkosSymmetricComputeSmallStrain);
 
+template <typename RankTwo>
 InputParameters
-KokkosComputeSmallStrain::validParams()
+KokkosComputeSmallStrainTempl<RankTwo>::validParams()
 {
   InputParameters params = Moose::Kokkos::Material::validParams();
   params.addClassDescription("Compute a small strain from a vector displacement variable.");
@@ -27,13 +29,16 @@ KokkosComputeSmallStrain::validParams()
   return params;
 }
 
-KokkosComputeSmallStrain::KokkosComputeSmallStrain(const InputParameters & parameters)
+template <typename RankTwo>
+KokkosComputeSmallStrainTempl<RankTwo>::KokkosComputeSmallStrainTempl(
+    const InputParameters & parameters)
   : Moose::Kokkos::Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _grad_disp(kokkosCoupledVectorGradient("displacements")),
-    _total_strain(declareKokkosPropertyByName<Moose::Kokkos::Real33>(_base_name + "total_strain")),
+    _total_strain(
+        this->template declareKokkosPropertyByName<RankTwo>(_base_name + "total_strain")),
     _mechanical_strain(
-        declareKokkosPropertyByName<Moose::Kokkos::Real33>(_base_name + "mechanical_strain"))
+        this->template declareKokkosPropertyByName<RankTwo>(_base_name + "mechanical_strain"))
 {
   if (coupledComponents("displacements") != 1)
     paramError("displacements",
@@ -42,3 +47,6 @@ KokkosComputeSmallStrain::KokkosComputeSmallStrain(const InputParameters & param
                coupledComponents("displacements"),
                " variables were supplied.");
 }
+
+template class KokkosComputeSmallStrainTempl<Moose::Kokkos::Real33>;
+template class KokkosComputeSmallStrainTempl<Moose::Kokkos::Real6>;
