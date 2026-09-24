@@ -476,6 +476,10 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   {
     if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
     {
+      mooseAssert(
+          _test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+          "Non-legacy assembly is only supported for single test and trial variable systems");
+
       // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
       const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
       SetTrialVariablesFromTrueVectors(block_solution);
@@ -497,10 +501,9 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
       mooseAssert(_system_operator, "Bilinear Operator is null!");
 
       // The returned operators are owned by nlf/blf, so SumOperatorExtension must not delete them.
-      _sumOperator =
-          std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator, 1.0, nlf);
+      _sum_operator = std::make_unique<SumOperatorExtension>(nlf_grad, _system_operator, nlf);
 
-      return *_sumOperator;
+      return *_sum_operator;
     }
     else
     {
@@ -571,9 +574,9 @@ EquationSystem::BuildNonlinearForms()
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
 
-    // These two are necessary for nonstandard assembly levels, but are also
+    // These two are necessary for nonstandard assembly levels, but also
     // cause segfaults if there are no integrators.
-    if (nlf->GetDNFI()->Size() or nlf->GetBNFI()->Size())
+    if (nlf->GetDNFI()->Size() || nlf->GetBNFI()->Size())
     {
       nlf->SetAssemblyLevel(_assembly_level);
       nlf->Setup();

@@ -73,8 +73,8 @@ public:
   void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
   void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
-  // Performs the setup for both AssemblePA and AssembleGradPA, then returns
-  // the integration rule we need for projecting coefficients.
+  /// Performs the setup for both AssemblePA and AssembleGradPA, then returns
+  /// the integration rule we need for projecting coefficients.
   const mfem::IntegrationRule * PreAssemblySetup(const mfem::FiniteElementSpace & fes);
 
 protected:
@@ -83,19 +83,25 @@ protected:
   mfem::CurlCurlIntegrator _curlcurl_jac_integ;
 
   // Extra stuff we need for the PA extension
-  mfem::Vector pa_res_data, pa_grad_data;
-  const mfem::DofToQuad * mapsO;       ///< Not owned. DOF-to-quad map, open.
-  const mfem::DofToQuad * mapsC;       ///< Not owned. DOF-to-quad map, closed.
-  const mfem::GeometricFactors * geom; ///< Not owned
-  int dim, ne, nq, dofs1D, quad1D;
-  int ndata;             // number of matrix elements to store per qpoint
-  bool symmetric = true; ///< False if using a nonsymmetric matrix coefficient
+  mfem::Vector _pa_res_data, _pa_grad_data;
+  const mfem::DofToQuad * _mapsO;       ///< Not owned. DOF-to-quad map, open.
+  const mfem::DofToQuad * _mapsC;       ///< Not owned. DOF-to-quad map, closed.
+  const mfem::GeometricFactors * _geom; ///< Not owned
+  int _dim, _ne, _nq, _dofs1D, _quad1D;
 
-  // Coefficient for k(s)
+  /// Since k() is a scalar function, the matrices we form will always be symmetric,
+  /// since the two matrices we form are k(s) J^TJ and k'(s)/s * J^T * (curl u) * (curl u)^T J,
+  /// both of which are symmetric.
+  const bool _symmetric = true; ///< False if using a nonsymmetric matrix coefficient
+  /// Number of matrix elements to store per quadpoint. Since we only support 3D matrices
+  /// with scalar k, we can set this to 6.
+  const int _ndata = 6;
+
+  /// Coefficient for k(s)
   mfem::Coefficient & _k_coef;
-  // Coefficient for k'(s) / s
-  mfem::Coefficient & _dk_du_u_coef;
-  // Coefficient for the curl of u
+  /// Coefficient for k'(s) / s, with s = |curl u|
+  mfem::Coefficient & _dk_dcurlu_coef;
+  /// Coefficient for the curl of u
   mfem::VectorCoefficient & _curlu_vec;
 
   /// Quadrature space the solution-dependent coefficients are projected onto. Owned, and

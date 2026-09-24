@@ -333,7 +333,7 @@ protected:
 
   // We use this to combine nonlinear + linear operators when using partial
   // assembly.
-  mutable std::unique_ptr<SumOperatorExtension> _sumOperator;
+  mutable std::unique_ptr<SumOperatorExtension> _sum_operator;
 
   // Store the op that comes out of FormLinearSystem
   mfem::Operator * _system_operator = nullptr;
