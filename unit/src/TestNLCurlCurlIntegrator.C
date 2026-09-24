@@ -185,6 +185,10 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyMatchesLegacy)
 
 TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
 {
+  if (mfem::Mpi::WorldSize() > 1)
+    GTEST_SKIP() << "SumOperatorExtension assembles its diagonal on local rather than true DoFs, "
+                    "and overruns diag vector in parallel.";
+
   mfem::Mesh serial = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
   mfem::ParMesh mesh(MPI_COMM_WORLD, serial);
   mfem::ND_FECollection fec(1, mesh.Dimension());
@@ -270,6 +274,90 @@ TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
   // and a diagonal of zero makes OperatorJacobiSmoother abort.
   for (const auto tdof : ess_tdofs)
     EXPECT_DOUBLE_EQ(assembled(tdof), 1.0);
+}
+
+TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyNeedsSetupAfterStateChange)
+{
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
+  mfem::ND_FECollection fec(1, mesh.Dimension());
+  mfem::FiniteElementSpace fespace(&mesh, &fec);
+
+  // The integrator reads its coefficients from this grid function rather than from the vector
+  // passed to Mult(), so moving it is what makes previously assembled PA data stale.
+  mfem::GridFunction gf(&fespace);
+  auto project_state = [&](mfem::real_t phase)
+  {
+    mfem::VectorFunctionCoefficient field(3,
+                                          [phase](const mfem::Vector & p, mfem::Vector & v)
+                                          {
+                                            v(0) = std::sin(p(1) + phase);
+                                            v(1) = std::cos(p(2) + phase);
+                                            v(2) = std::sin(p(0) + phase);
+                                          });
+    gf.ProjectCoefficient(field);
+  };
+
+  mfem::CurlGridFunctionCoefficient curl_gf_coeff(&gf);
+  MFEMVectorMagnitudeCoefficient curl_u_norm_coeff(curl_gf_coeff);
+  mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
+  mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
+                                                     [](double s) { return 2.0 * s * s; });
+  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0);
+
+  // Pinned so that legacy assembly is an exact reference rather than a nearby one; see
+  // NLCurlCurlIntegratorPartialAssemblyMatchesLegacy.
+  const auto & ir = mfem::IntRules.Get(mfem::Geometry::CUBE, 2 * fec.GetOrder());
+
+  auto add_integrator = [&](mfem::NonlinearForm & form)
+  {
+    form.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
+        k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
+  };
+
+  mfem::NonlinearForm partial(&fespace);
+  add_integrator(partial);
+  partial.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
+
+  // Assemble at the first state, then hold the evaluation point fixed so that the state the
+  // coefficients are read at is the only thing that varies.
+  project_state(0.0);
+  partial.Setup();
+
+  mfem::Vector x(fespace.GetTrueVSize());
+  x = gf;
+
+  project_state(1.3);
+
+  mfem::Vector stale(x.Size());
+  partial.Mult(x, stale);
+
+  mfem::Vector refreshed(x.Size());
+  partial.Setup();
+  partial.Mult(x, refreshed);
+
+  // Legacy assembly evaluates the coefficients on every Mult(), so it is the reference for the
+  // second state.
+  mfem::NonlinearForm legacy(&fespace);
+  add_integrator(legacy);
+  legacy.SetAssemblyLevel(mfem::AssemblyLevel::LEGACY);
+  legacy.Setup();
+
+  mfem::Vector reference(x.Size());
+  legacy.Mult(x, reference);
+  ASSERT_GT(reference.Norml2(), 0.0);
+
+  // Setup() brings the partially assembled data back to the current state.
+  mfem::Vector refreshed_error(refreshed);
+  refreshed_error -= reference;
+  EXPECT_LT(refreshed_error.Norml2(), 1e-10 * reference.Norml2());
+
+  // Without it the residual is visibly wrong. This is not merely a sanity check on the
+  // assertion above: it pins the fact that NonlinearForm::Mult() does not refresh
+  // solution-dependent PA data by itself, which is the assumption
+  // EquationSystem::ComputeNonlinearResidual relies on when it calls Setup().
+  mfem::Vector stale_error(stale);
+  stale_error -= reference;
+  EXPECT_GT(stale_error.Norml2(), 0.01 * reference.Norml2());
 }
 
 #endif
