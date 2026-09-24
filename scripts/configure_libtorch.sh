@@ -65,7 +65,6 @@ function configure_libtorch()
   # -DUSE_ITT=OFF: we don't need ITT support because we don't use PyTorch's profiler
   # -DUSE_VALGRIND=OFF: we don't need Valgrind support because we don't use PyTorch's C++ API for Python bindings
   #    and we don't use PyTorch's profiler
-  # -DUSE_OBSERVERS=OFF: we don't need observers support because we don't use PyTorch's profiler
   cmake \
     -DCMAKE_C_COMPILER="$(underlying_compiler "${CC:-cc}")" \
     -DCMAKE_CXX_COMPILER="$(underlying_compiler "${CXX:-c++}")" \
@@ -98,7 +97,6 @@ function configure_libtorch()
     -DUSE_NUMPY=OFF \
     -DUSE_ITT=OFF \
     -DUSE_VALGRIND=OFF \
-    -DUSE_OBSERVERS=OFF \
     -B "$2" \
     -S "$1" \
     "${ARGS[@]}"
