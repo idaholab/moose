@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosMaterialPropertyDecl.h"
+#include "KokkosTypesDataIO.h"
 
 #ifdef MOOSE_KOKKOS_SCOPE
 #include "KokkosMaterialPropertyValueDecl.h"
