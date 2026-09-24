@@ -22,7 +22,7 @@ namespace Moose::MFEM
 // The params are:
 // const int Q1D - the number of quadpoints in each dimension
 // (we skip coeff_dim, as we expect the functions to be scalar functions)
-// const int ne - the number of elements
+// const int NE - the number of elements
 // const Array<real_t> & w, the quadrature weights - get these from the integration rule
 // const Vector &j - the jacobian matrices in the form of a flat vector. Its length is
 //    9 * number of elements * number of quadpoints, i.e. one 3x3 matrix for each quadpoint
@@ -33,7 +33,7 @@ namespace Moose::MFEM
 // Vector & dk_coeff - ditto for k'(s) / s
 // Vector & op - this is the diagonal operator
 static void NLCurlCurlGradPASetup(const int Q1D,
-                                  const int ne,
+                                  const int NE,
                                   const mfem::Array<mfem::real_t> & w,
                                   const mfem::Vector & j,
                                   const mfem::Vector & c,
@@ -44,7 +44,7 @@ static void NLCurlCurlGradPASetup(const int Q1D,
 // Same, but creates the op used for AddMultPA
 // const int Q1D - the number of quadpoints in each dimension
 // (we skip coeff_dim, as we expect the functions to be scalar functions)
-// const int ne - the number of elements
+// const int NE - the number of elements
 // const Array<real_t> & w, the quadrature weights - get these from the integration rule
 // const Vector &j - the jacobian matrices in the form of a flat vector. Its length is
 //    9 * number of elements * number of quadpoints, i.e. one 3x3 matrix for each quadpoint
@@ -53,7 +53,7 @@ static void NLCurlCurlGradPASetup(const int Q1D,
 //    one per quadpoint per element
 // Vector & op - this is the diagonal operator
 static void NLCurlCurlPASetup(const int Q1D,
-                              const int ne,
+                              const int NE,
                               const mfem::Array<mfem::real_t> & w,
                               const mfem::Vector & j,
                               mfem::Vector & k_coeff,
@@ -109,7 +109,7 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
     _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir),
     _k_coef(k),
-    _dk_du_u_coef(dk_dcurlu),
+    _dk_dcurlu_coef(dk_dcurlu),
     _curlu_vec(curlu_vec)
 {
 }
@@ -143,15 +143,15 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
   mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
   mfem::CoefficientVector dk_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  dk_coeff.Project(_dk_du_u_coef);
+  dk_coeff.Project(_dk_dcurlu_coef);
   mfem::CoefficientVector curl_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   curl_coeff.Project(_curlu_vec);
 
   // This doesn't clear out what's in the array
-  pa_grad_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
+  _pa_grad_data.SetSize(_ndata * _nq * _ne, mfem::Device::GetMemoryType());
 
   NLCurlCurlGradPASetup(
-      quad1D, ne, ir->GetWeights(), geom->J, curl_coeff, k_coeff, dk_coeff, pa_grad_data);
+      _quad1D, _ne, ir->GetWeights(), _geom->J, curl_coeff, k_coeff, dk_coeff, _pa_grad_data);
 }
 
 // This mirrors AssembleGradPA exactly. We are performing redundant work here, and we
@@ -164,28 +164,28 @@ NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
   mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
 
-  pa_res_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
-  NLCurlCurlPASetup(quad1D, ne, ir->GetWeights(), geom->J, k_coeff, pa_res_data);
+  _pa_res_data.SetSize(_ndata * _nq * _ne, mfem::Device::GetMemoryType());
+  NLCurlCurlPASetup(_quad1D, _ne, ir->GetWeights(), _geom->J, k_coeff, _pa_res_data);
 }
 
 void
 NLCurlCurlIntegrator::AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const
 {
   // hardcoding the symmetric argument to be true
-  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim,
-                                                dofs1D,
-                                                quad1D,
-                                                dofs1D,
-                                                quad1D,
+  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(_dim,
+                                                _dofs1D,
+                                                _quad1D,
+                                                _dofs1D,
+                                                _quad1D,
                                                 true,
-                                                ne,
-                                                mapsO->B,
-                                                mapsC->B,
-                                                mapsO->Bt,
-                                                mapsC->Bt,
-                                                mapsC->G,
-                                                mapsC->Gt,
-                                                pa_grad_data,
+                                                _ne,
+                                                _mapsO->B,
+                                                _mapsC->B,
+                                                _mapsO->Bt,
+                                                _mapsC->Bt,
+                                                _mapsC->G,
+                                                _mapsC->Gt,
+                                                _pa_grad_data,
                                                 x,
                                                 y,
                                                 false);
@@ -194,20 +194,20 @@ NLCurlCurlIntegrator::AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) co
 void
 NLCurlCurlIntegrator::AddMultPA(const mfem::Vector & x, mfem::Vector & y) const
 {
-  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim,
-                                                dofs1D,
-                                                quad1D,
-                                                dofs1D,
-                                                quad1D,
+  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(_dim,
+                                                _dofs1D,
+                                                _quad1D,
+                                                _dofs1D,
+                                                _quad1D,
                                                 true,
-                                                ne,
-                                                mapsO->B,
-                                                mapsC->B,
-                                                mapsO->Bt,
-                                                mapsC->Bt,
-                                                mapsC->G,
-                                                mapsC->Gt,
-                                                pa_res_data,
+                                                _ne,
+                                                _mapsO->B,
+                                                _mapsC->B,
+                                                _mapsO->Bt,
+                                                _mapsC->Bt,
+                                                _mapsC->G,
+                                                _mapsC->Gt,
+                                                _pa_res_data,
                                                 x,
                                                 y,
                                                 false);
@@ -216,18 +216,18 @@ NLCurlCurlIntegrator::AddMultPA(const mfem::Vector & x, mfem::Vector & y) const
 void
 NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
 {
-  mfem::CurlCurlIntegrator::DiagonalPAKernels::Run(dim,
-                                                   dofs1D,
-                                                   quad1D,
-                                                   dofs1D,
-                                                   quad1D,
-                                                   symmetric,
-                                                   ne,
-                                                   mapsO->B,
-                                                   mapsC->B,
-                                                   mapsO->G,
-                                                   mapsC->G,
-                                                   pa_grad_data,
+  mfem::CurlCurlIntegrator::DiagonalPAKernels::Run(_dim,
+                                                   _dofs1D,
+                                                   _quad1D,
+                                                   _dofs1D,
+                                                   _quad1D,
+                                                   _symmetric,
+                                                   _ne,
+                                                   _mapsO->B,
+                                                   _mapsC->B,
+                                                   _mapsO->G,
+                                                   _mapsC->G,
+                                                   _pa_grad_data,
                                                    diag);
 }
 
@@ -254,19 +254,19 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   const int dims = el->GetDim();
   mooseAssert(dims == 3, "Following methods are only implemented in 3D");
 
-  nq = rule->GetNPoints();
-  dim = mesh->Dimension();
-  mooseAssert(dim == 3, "Following methods are only implemented in 3D");
+  _nq = rule->GetNPoints();
+  _dim = mesh->Dimension();
+  mooseAssert(_dim == 3, "Following methods are only implemented in 3D");
 
-  ne = fes.GetNE();
-  geom = mesh->GetGeometricFactors(*rule, mfem::GeometricFactors::JACOBIANS);
-  mapsC = &el->GetDofToQuad(*rule, mfem::DofToQuad::TENSOR);
-  mapsO = &el->GetDofToQuadOpen(*rule, mfem::DofToQuad::TENSOR);
-  dofs1D = mapsC->ndof;
-  quad1D = mapsC->nqpt;
+  _ne = fes.GetNE();
+  _geom = mesh->GetGeometricFactors(*rule, mfem::GeometricFactors::JACOBIANS);
+  _mapsC = &el->GetDofToQuad(*rule, mfem::DofToQuad::TENSOR);
+  _mapsO = &el->GetDofToQuadOpen(*rule, mfem::DofToQuad::TENSOR);
+  _dofs1D = _mapsC->ndof;
+  _quad1D = _mapsC->nqpt;
 
-  mooseAssert(dofs1D == mapsO->ndof + 1 && quad1D == mapsO->nqpt,
-              "Must be one fewer open basis function per dim than closed.");
+  mooseAssert(_dofs1D == _mapsO->ndof + 1 && _quad1D == _mapsO->nqpt,
+              "Must be one fewer open basis function per _dim than closed.");
 
   if (!_qspace || _qspace_mesh != mesh || _qspace_mesh_sequence != mesh->GetSequence() ||
       _qspace_ir != rule)
@@ -277,11 +277,6 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
     _qspace_ir = rule;
   }
 
-  symmetric = true;                             // we can hardcode this
-  const int sym_dims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
-  ndata = (dim == 2)
-              ? 1
-              : (symmetric ? sym_dims : dim * dim); // symmetric => only store 6 things instead of 9
   return rule;
 }
 
