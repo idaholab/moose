@@ -58,9 +58,8 @@ NEML2FEInterpolation::getValue(const std::string & var_name)
 
   if (success)
   {
-    const auto * var = getMOOSEVariable(var_name);
-    _phis.emplace(var->feType(), &var->phi());
-    _moose_vars.emplace(var_name, var);
+    _moose_vars.emplace(var_name, getMOOSEVariable(var_name));
+    getPhi(var_name);
   }
 
   return it->second;
@@ -73,9 +72,8 @@ NEML2FEInterpolation::getGradient(const std::string & var_name)
 
   if (success)
   {
-    const auto * var = getMOOSEVariable(var_name);
-    _grad_phis.emplace(var->feType(), &var->gradPhi());
-    _moose_vars.emplace(var_name, var);
+    _moose_vars.emplace(var_name, getMOOSEVariable(var_name));
+    getPhiGradient(var_name);
   }
 
   return it->second;
@@ -90,7 +88,15 @@ NEML2FEInterpolation::getPhi(const std::string & var_name)
   if (it != _neml2_phi.end())
     return it->second;
 
-  _phis.emplace(var->feType(), &var->phi());
+  const auto * scalar_var = dynamic_cast<const MooseVariableFE<Real> *>(var);
+
+  if (!scalar_var)
+    mooseError("Shape function values are only supported for standard finite element variables; "
+               "variable '",
+               var_name,
+               "' is not one. Its gradients are supported.");
+
+  _phis.emplace(var->feType(), &scalar_var->phi());
   auto [it2, success] = _neml2_phi.emplace(var->feType(), neml2::Tensor());
   return it2->second;
 }
@@ -104,7 +110,15 @@ NEML2FEInterpolation::getPhiGradient(const std::string & var_name)
   if (it != _neml2_grad_phi.end())
     return it->second;
 
-  _grad_phis.emplace(var->feType(), &var->gradPhi());
+  if (const auto * scalar_var = dynamic_cast<const MooseVariableFE<Real> *>(var))
+    _grad_phis.emplace(var->feType(), &scalar_var->gradPhi());
+  else if (const auto * vector_var = dynamic_cast<const MooseVariableFE<RealVectorValue> *>(var))
+    _vector_grad_phis.emplace(var->feType(), &vector_var->gradPhi());
+  else
+    mooseError("Shape function gradients of variable '",
+               var_name,
+               "' are not supported; only standard and vector finite element variables are.");
+
   auto [it2, success] = _neml2_grad_phi.emplace(var->feType(), neml2::Tensor());
   return it2->second;
 }
@@ -127,15 +141,17 @@ NEML2FEInterpolation::local_ndof() const
   return _local_ndof;
 }
 
-const MooseVariableFE<Real> *
+const MooseVariableFieldBase *
 NEML2FEInterpolation::getMOOSEVariable(const std::string & var_name) const
 {
-  const auto * var = &_fe_problem.getVariable(
-      0, var_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD);
-  const auto * var_fe = dynamic_cast<const MooseVariableFE<Real> *>(var);
+  const auto * var_fe = &_fe_problem.getVariable(
+      0, var_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_ANY);
 
-  if (!var_fe)
-    mooseError("NEML2FEInterpolation only supports variables of type MooseVariableFE<Real>");
+  if (!dynamic_cast<const MooseVariableFE<Real> *>(var_fe) &&
+      !dynamic_cast<const MooseVariableFE<RealVectorValue> *>(var_fe))
+    mooseError("NEML2FEInterpolation supports standard and vector finite element variables; '",
+               var_name,
+               "' is neither.");
 
   if (var_fe->scalingFactor() != 1)
     mooseError("Scaling factors other than unity are not yet supported");
@@ -206,7 +222,7 @@ NEML2FEInterpolation::syncWithMainThread()
     _moose_vars.emplace(var_name, getMOOSEVariable(var_name));
     if (main_uo._phis.count(var->feType()))
       getPhi(var_name);
-    if (main_uo._grad_phis.count(var->feType()))
+    if (main_uo._grad_phis.count(var->feType()) || main_uo._vector_grad_phis.count(var->feType()))
       getPhiGradient(var_name);
   }
 }
@@ -273,13 +289,32 @@ NEML2FEInterpolation::execute()
   }
 
   // shape function gradients
-  for (const auto & [fetype, grad_phi] : _grad_phis)
+  gatherGradPhi<Real>();
+  gatherGradPhi<RealVectorValue>();
+}
+
+template <typename OutputType>
+std::unordered_map<FEType, const typename OutputTools<OutputType>::VariablePhiGradient *> &
+NEML2FEInterpolation::gradPhiTables()
+{
+  if constexpr (std::is_same_v<OutputType, Real>)
+    return _grad_phis;
+  else
+    return _vector_grad_phis;
+}
+
+template <typename OutputType>
+void
+NEML2FEInterpolation::gatherGradPhi()
+{
+  for (const auto & [fetype, grad_phi] : gradPhiTables<OutputType>())
   {
     auto & moose_grad_phi = _moose_grad_phi[fetype];
     for (auto i : index_range(*grad_phi))
       for (auto qp : index_range(_q_point))
-        for (auto j : make_range(3))
-          moose_grad_phi.push_back((*grad_phi)[i][qp](j));
+        for (const auto c : make_range(NEML2GradientLayout<OutputType>::n_components))
+          moose_grad_phi.push_back(
+              NEML2GradientLayout<OutputType>::component((*grad_phi)[i][qp], c));
   }
 }
 
@@ -363,20 +398,41 @@ NEML2FEInterpolation::updateGradPhi()
   auto nelem = _neml2_assembly.numElem();
   auto nqp = _neml2_assembly.numQP();
 
-  for (auto & [fetype, moose_grad_phi] : _moose_grad_phi)
+  buildGradPhiTensors<Real>();
+  buildGradPhiTensors<RealVectorValue>();
+}
+
+template <typename OutputType>
+void
+NEML2FEInterpolation::buildGradPhiTensors()
+{
+  using Layout = NEML2GradientLayout<OutputType>;
+
+  auto device = _app.getLibtorchDevice();
+  auto nelem = _neml2_assembly.numElem();
+  auto nqp = _neml2_assembly.numQP();
+
+  for (const auto & [fetype, grad_phi] : gradPhiTables<OutputType>())
   {
+    libmesh_ignore(grad_phi);
+
     auto ndofe = _ndofe.at(fetype);
+    auto & moose_grad_phi = _moose_grad_phi.at(fetype);
 
     // sanity check on sizes
-    if (moose_grad_phi.size() != std::size_t(nelem * ndofe * nqp * 3))
+    const auto expected = nelem * ndofe * nqp * Layout::n_components;
+    if (moose_grad_phi.size() != std::size_t(expected))
       mooseError("shape function gradient size mismatch, expected ",
-                 nelem * ndofe * nqp * 3,
+                 expected,
                  " but got ",
                  moose_grad_phi.size());
+
+    auto shape = neml2::TensorShape{nelem, ndofe, nqp};
+    for (const auto d : Layout::baseShape())
+      shape.push_back(d);
+
     _neml2_grad_phi[fetype] =
-        neml2::Tensor(at::from_blob(moose_grad_phi.data(), {nelem, ndofe, nqp, 3}, torch::kFloat64),
-                      3)
-            .to(device);
+        neml2::Tensor(at::from_blob(moose_grad_phi.data(), shape, torch::kFloat64), 3).to(device);
   }
 }
 

@@ -34,6 +34,34 @@
  *
  * Other objects can "couple" to variable values and/or gradients using through this interface.
  */
+/**
+ * The NEML2 layout of one shape function gradient of a variable of the given output type.
+ *
+ * OutputTools already parameterises the MOOSE shape table types, so the only per-kind facts the
+ * interpolation needs are how many Reals one gradient holds, how NEML2 should see their shape, and
+ * how to reach one of them.
+ */
+template <typename OutputType>
+struct NEML2GradientLayout;
+
+template <>
+struct NEML2GradientLayout<Real>
+{
+  /// A scalar field's shape function gradient is a vector
+  static constexpr int64_t n_components = 3;
+  static neml2::TensorShape baseShape() { return {3}; }
+  static Real component(const RealGradient & grad, int64_t c) { return grad(c); }
+};
+
+template <>
+struct NEML2GradientLayout<RealVectorValue>
+{
+  /// A vector field's shape function gradient is a second-order tensor
+  static constexpr int64_t n_components = 9;
+  static neml2::TensorShape baseShape() { return {3, 3}; }
+  static Real component(const RealTensor & grad, int64_t c) { return grad(c / 3, c % 3); }
+};
+
 class NEML2FEInterpolation : public ElementUserObject
 {
 public:
@@ -125,6 +153,19 @@ protected:
   virtual void updateGradPhi();
   virtual void updateInterpolations();
 
+  /// The gradient tables of one output type
+  template <typename OutputType>
+  std::unordered_map<FEType, const typename OutputTools<OutputType>::VariablePhiGradient *> &
+  gradPhiTables();
+
+  /// Append the current element's shape function gradients of one output type
+  template <typename OutputType>
+  void gatherGradPhi();
+
+  /// Convert the gathered shape function gradients of one output type to NEML2 tensors
+  template <typename OutputType>
+  void buildGradPhiTensors();
+
   /// Assembly
   const NEML2Assembly & _neml2_assembly;
 
@@ -141,13 +182,14 @@ protected:
   std::unordered_map<std::string, neml2::Tensor> _grad_vars;
 
   /// moose variables that have been coupled
-  std::unordered_map<std::string, const MooseVariableFE<Real> *> _moose_vars;
+  std::unordered_map<std::string, const MooseVariableFieldBase *> _moose_vars;
 
   /// cached information on the requested function spaces
   ///@{
   std::unordered_map<FEType, int64_t> _ndofe;
   std::unordered_map<FEType, const VariablePhiValue *> _phis;
   std::unordered_map<FEType, const VariablePhiGradient *> _grad_phis;
+  std::unordered_map<FEType, const VectorVariablePhiGradient *> _vector_grad_phis;
 
   std::unordered_map<std::string, std::vector<int64_t>> _moose_dof_map;
   std::unordered_map<std::string, std::vector<dof_id_type>> _moose_dof_map_global;
@@ -164,7 +206,7 @@ protected:
 
 private:
   /// Helper to get the MOOSE variable and check for common restrictions
-  const MooseVariableFE<Real> * getMOOSEVariable(const std::string & var_name) const;
+  const MooseVariableFieldBase * getMOOSEVariable(const std::string & var_name) const;
 
   /// Helper vector to store local dof indices
   std::vector<dof_id_type> _dof_indices;
