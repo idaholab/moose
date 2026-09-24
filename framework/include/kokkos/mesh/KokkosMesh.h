@@ -199,6 +199,11 @@ public:
   }
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
+   * Get the mesh dimension
+   * @returns The mesh dimension
+   */
+  KOKKOS_FUNCTION unsigned int getDimension() const { return _dimension; }
+  /**
    * Get the element information object
    * @param elem The contiguous element ID
    * @returns The element information object
@@ -449,6 +454,10 @@ private:
    * Reference of the MOOSE mesh
    */
   MooseMesh & _mesh;
+  /**
+   * Mesh dimension
+   */
+  unsigned int _dimension;
   /**
    * Flag whether the mesh was initialized
    */
