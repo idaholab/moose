@@ -9,7 +9,7 @@ PorousFlow can be used to simulate flow through fractured porous media in the ca
 - [Transfers](multiapp_fracture_flow_transfers.md)
 - [MultiApp primer](multiapp_fracture_flow_primer.md): the diffusion equation with no fractures, and quantifying the errors introduced by the MultiApp approach
 - [Diffusion in mixed dimensions](multiapp_fracture_flow_diffusion.md)
-- [Porous flow in a single matrix system](multiapp_fracture_flow_PorousFlow_2D.md)
+- [Porous flow in a system with a single 1D fracture](multiapp_fracture_flow_PorousFlow_2D.md)
 - [Porous flow in a small fracture network](multiapp_fracture_flow_PorousFlow_3D.md)
 
 

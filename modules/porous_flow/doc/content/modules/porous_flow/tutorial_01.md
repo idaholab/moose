@@ -44,8 +44,8 @@ A = (\alpha_{B} - \phi)\alpha_{T} + \phi\alpha_{f} \ .
 In these equations
 
 - $\phi$ is the porosity (dimensionless)
-- $K_{f}$ is the bulk modulus of the fluid (units Pa$^{-1}$)
-- $K$ is the bulk modulus of the drained porous skeleton (units Pa$^{-1}$)
+- $K_{f}$ is the bulk modulus of the fluid (units Pa)
+- $K$ is the bulk modulus of the drained porous skeleton (units Pa)
 - $\alpha_{T}$ is the volumetric thermal expansion coefficient of the drained porous skeleton (units K$^{-1}$)
 - $\alpha_{f}$ is the volumetric thermal expansion coefficient of the fluid (units K$^{-1}$)
 
