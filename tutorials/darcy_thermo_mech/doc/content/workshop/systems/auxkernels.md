@@ -61,8 +61,8 @@ other nodal auxiliary variables
 ```moose
 [AuxVariables]
   [aux]
-    order = LAGRANGE
-    family = FIRST
+    order = FIRST
+    family = LAGRANGE
   []
 []
 ```
@@ -106,7 +106,7 @@ Directly compute a vector AuxVariable values by:
 - inheriting from the `VectorAuxKernel` class
 - overriding `computeValue()`, with the difference being the return value of a `RealVectorValue` instead of Real.
 
-The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
+The auxiliary variable will have to use a vector-valued family, such as LAGRANGE_VEC or MONOMIAL_VEC.
 
 ```moose
 [AuxVariables]
