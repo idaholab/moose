@@ -66,7 +66,23 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
 
   // The numbering depends only on the mesh and the model's block coverage
   if (!_layout.built())
+  {
+    // Subdomain-major numbering coincides with the element loop's on a single subdomain only, so
+    // across several this material can read the output only if the inputs were gathered in the same
+    // order it reads them
+    if (blockIDs().size() > 1 && !_execute_neml2_model.batchOrderDiffersFromElementLoop())
+      mooseError("This material covers ",
+                 blockIDs().size(),
+                 " subdomains and reads the NEML2 output in the Kokkos assembly's subdomain-major "
+                 "order, but the model's inputs were gathered in the order the element loop visits "
+                 "elements, which interleaves the subdomains. Reading one numbering as though it were "
+                 "the other pairs each quadrature point with another point's result.\n\nGather every "
+                 "batched input with the Kokkos gatherers so that one numbering applies throughout, or "
+                 "retrieve the output with NEML2ToMOOSEMaterialProperty, which shares the element "
+                 "loop's numbering.");
+
     _layout.build(kokkosAssembly(), kokkosMesh(), blockIDs());
+  }
 
   const auto n_reals = static_cast<dof_id_type>(tensor.numel());
 

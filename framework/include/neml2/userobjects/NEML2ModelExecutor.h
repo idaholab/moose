@@ -45,6 +45,12 @@ public:
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
+  /**
+   * Get whether a gatherer has assigned quadrature points to batch entries in an order other than the
+   * element loop's, in which case getBatchIndex() does not describe this model's batch
+   */
+  bool batchOrderDiffersFromElementLoop() const { return _batch_order_differs_from_element_loop; }
+
   /// Get a reference(!) to the requested output view
   const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
 
@@ -119,6 +125,8 @@ protected:
 
   /// MOOSE data gathering user objects
   std::vector<const MOOSEToNEML2 *> _gatherers;
+  /// Whether any gatherer numbers the batch in an order other than the element loop's
+  bool _batch_order_differs_from_element_loop = false;
   std::vector<const MOOSEToNEML2 *> _param_gatherers;
 
   /// set of output variables that were retrieved (by other objects)

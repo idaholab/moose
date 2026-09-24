@@ -78,6 +78,12 @@ public:
 
   virtual neml2::Tensor gatheredData() const override;
 
+  /**
+   * The layout's numbering is subdomain-major, which coincides with the element loop's only when a
+   * single subdomain is covered
+   */
+  virtual bool batchOrderDiffersFromElementLoop() const override { return blockIDs().size() > 1; }
+
   template <typename Derived>
   KOKKOS_FUNCTION void execute(Moose::Kokkos::Datum & datum) const;
 
