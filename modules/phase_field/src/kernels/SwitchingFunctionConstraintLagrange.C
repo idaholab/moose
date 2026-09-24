@@ -10,11 +10,13 @@
 #include "SwitchingFunctionConstraintLagrange.h"
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintLagrange);
+registerMooseObject("PhaseFieldApp", ADSwitchingFunctionConstraintLagrange);
 
+template <bool is_ad>
 InputParameters
-SwitchingFunctionConstraintLagrange::validParams()
+SwitchingFunctionConstraintLagrangeTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
                              "functions in a multiphase system. This kernel acts on the Lagrange "
                              "multiplier variable.");
@@ -24,15 +26,14 @@ SwitchingFunctionConstraintLagrange::validParams()
   return params;
 }
 
-SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(
+template <bool is_ad>
+SwitchingFunctionConstraintLagrangeTempl<is_ad>::SwitchingFunctionConstraintLagrangeTempl(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _h_names(getParam<std::vector<MaterialPropertyName>>("h_names")),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>(parameters),
+    _h_names(this->template getParam<std::vector<MaterialPropertyName>>("h_names")),
     _num_h(_h_names.size()),
     _h(_num_h),
-    _dh(_num_h),
-    _eta_map(getParameterJvarMap("etas")),
-    _epsilon(getParam<Real>("epsilon"))
+    _epsilon(this->template getParam<Real>("epsilon"))
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
@@ -41,22 +42,33 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(
   // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
   for (std::size_t i = 0; i < _num_h; ++i)
   {
-    _h[i] = &getMaterialPropertyByName<Real>(_h_names[i]);
-
-    _dh[i].resize(_num_h);
-    for (std::size_t j = 0; j < _num_h; ++j)
-      _dh[i][j] = &getMaterialPropertyDerivative<Real>(_h_names[i], coupledName("etas", j));
+    _h[i] = &this->template getGenericMaterialPropertyByName<Real, is_ad>(_h_names[i]);
   }
 }
 
-Real
-SwitchingFunctionConstraintLagrange::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+SwitchingFunctionConstraintLagrangeTempl<is_ad>::computeQpResidual()
 {
-  Real g = -_epsilon * _u[_qp] - 1.0;
+  GenericReal<is_ad> g = -_epsilon * _u[_qp] - 1.0;
   for (std::size_t i = 0; i < _num_h; ++i)
     g += (*_h[i])[_qp];
 
   return _test[_i][_qp] * g;
+}
+
+SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(
+    const InputParameters & parameters)
+  : SwitchingFunctionConstraintLagrangeTempl<false>(parameters),
+    _dh(_num_h),
+    _eta_map(getParameterJvarMap("etas"))
+{
+  for (std::size_t i = 0; i < _num_h; ++i)
+  {
+    _dh[i].resize(_num_h);
+    for (std::size_t j = 0; j < _num_h; ++j)
+      _dh[i][j] = &getMaterialPropertyDerivative<Real>(_h_names[i], coupledName("etas", j));
+  }
 }
 
 Real
@@ -79,3 +91,6 @@ SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
+
+template class SwitchingFunctionConstraintLagrangeTempl<false>;
+template class SwitchingFunctionConstraintLagrangeTempl<true>;

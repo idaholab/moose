@@ -19,16 +19,17 @@
  * \f$ h(\eta) \f$ or the double well function  \f$ g(\eta) \f$.
  * Implement computeQpProperties in the derived classes.
  */
-class OrderParameterFunctionMaterial : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class OrderParameterFunctionMaterialTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  OrderParameterFunctionMaterial(const InputParameters & parameters);
+  OrderParameterFunctionMaterialTempl(const InputParameters & parameters);
 
 protected:
   /// Coupled variable value for the order parameter \f$ \eta \f$.
-  const VariableValue & _eta;
+  const GenericVariableValue<is_ad> & _eta;
   unsigned int _eta_var;
   VariableName _eta_name;
 
@@ -36,11 +37,14 @@ protected:
   std::string _function_name;
 
   /// Material property to store \f$ f(\eta) \f$
-  MaterialProperty<Real> & _prop_f;
+  GenericMaterialProperty<Real, is_ad> & _prop_f;
 
   /// Material property to store the derivative \f$ df(\eta)/d\eta \f$
-  MaterialProperty<Real> & _prop_df;
+  GenericMaterialProperty<Real, is_ad> & _prop_df;
 
   /// Material property to store the second derivative \f$ d^2f(\eta)/d\eta^2 \f$
-  MaterialProperty<Real> & _prop_d2f;
+  GenericMaterialProperty<Real, is_ad> & _prop_d2f;
 };
+
+typedef OrderParameterFunctionMaterialTempl<false> OrderParameterFunctionMaterial;
+typedef OrderParameterFunctionMaterialTempl<true> ADOrderParameterFunctionMaterial;

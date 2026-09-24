@@ -8,103 +8,110 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KKSPhaseChemicalPotential.h"
-#include "MathUtils.h"
-
-using namespace MathUtils;
 
 registerMooseObject("PhaseFieldApp", KKSPhaseChemicalPotential);
+registerMooseObject("PhaseFieldApp", ADKKSPhaseChemicalPotential);
 
+template <bool is_ad>
 InputParameters
-KKSPhaseChemicalPotential::validParams()
+KKSPhaseChemicalPotentialTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical "
-                             "potentials $dF_a/dc_a = dF_b/dc_b$. The non-linear variable of this "
+                             "potentials $dF_a/dc_a = dF_b/dc_b$. The nonlinear variable of this "
                              "kernel is $c_a$.");
   params.addRequiredCoupledVar(
-      "cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
-  params.addRequiredParam<MaterialPropertyName>("fa_name",
-                                                "Base name of the free energy function "
-                                                "Fa (f_name in the corresponding "
-                                                "derivative function material)");
-  params.addRequiredParam<MaterialPropertyName>("fb_name",
-                                                "Base name of the free energy function "
-                                                "Fb (f_name in the corresponding "
-                                                "derivative function material)");
-  params.addParam<Real>("ka",
-                        1.0,
-                        "Site fraction for the ca variable (specify this if ca is a sublattice "
-                        "concentration, and make sure it is a true site fraction eg. 0.6666666) ");
-  params.addParam<Real>("kb",
-                        1.0,
-                        "Site fraction for the cb variable (specify this if ca is a sublattice "
-                        "concentration, and make sure it is a true site fraction eg. 0.6666666) ");
+      "cb", "Phase b concentration"); // ca is the nonlinear variable of this kernel
+  params.addRequiredParam<MaterialPropertyName>(
+      "fa_name",
+      "Base name of the phase-a free-energy function (the property_name/f_name of its derivative "
+      "material)");
+  params.addRequiredParam<MaterialPropertyName>(
+      "fb_name",
+      "Base name of the phase-b free-energy function (the property_name/f_name of its derivative "
+      "material)");
+  params.addParam<Real>(
+      "ka",
+      1.0,
+      "Site fraction for ca when ca is a sublattice concentration; use 1 for ordinary KKS");
+  params.addParam<Real>(
+      "kb",
+      1.0,
+      "Site fraction for cb when cb is a sublattice concentration; use 1 for ordinary KKS");
   params.addCoupledVar(
       "args_a",
-      "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");
+      "Additional nonlinear variables on which Fa depends; needed by the non-AD Jacobian and "
+      "retained for equivalent AD/non-AD coupling declarations");
   params.addCoupledVar(
       "args_b",
-      "Vector of further parameters to Fb (optional, to add in second cross derivatives of Fb)");
+      "Additional nonlinear variables on which Fb depends; needed by the non-AD Jacobian and "
+      "retained for equivalent AD/non-AD coupling declarations");
   return params;
 }
 
-KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _cb_var(coupled("cb")),
-    _cb_name(coupledName("cb", 0)),
-    // first derivatives
-    _dfadca(getMaterialPropertyDerivative<Real>("fa_name", _var.name())),
-    _dfbdcb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name)),
-    // second derivatives d2F/dx*dca for jacobian diagonal elements
-    _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
-    _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name())),
-    _d2fadcadarg(_n_args),
-    _d2fbdcbdarg(_n_args),
-    // site fractions
-    _ka(getParam<Real>("ka")),
-    _kb(getParam<Real>("kb"))
+template <bool is_ad>
+KKSPhaseChemicalPotentialTempl<is_ad>::KKSPhaseChemicalPotentialTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>(parameters),
+    _cb_name(this->coupledName("cb")),
+    _fa_name(this->template getParam<MaterialPropertyName>("fa_name")),
+    _fb_name(this->template getParam<MaterialPropertyName>("fb_name")),
+    _dfadca(this->template getMaterialPropertyDerivativeByName<Real, is_ad>(_fa_name, _var.name())),
+    _dfbdcb(this->template getMaterialPropertyDerivativeByName<Real, is_ad>(_fb_name, _cb_name)),
+    _ka(this->template getParam<Real>("ka")),
+    _kb(this->template getParam<Real>("kb"))
 {
 #ifdef DEBUG
-  _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name
+  _console << "KKSPhaseChemicalPotential(" << this->name() << ") " << _var.name() << ' ' << _cb_name
            << '\n';
 #endif
+}
 
-  // lookup table for the material properties representing the derivatives needed for the
-  // off-diagonal jacobian
+template <bool is_ad>
+void
+KKSPhaseChemicalPotentialTempl<is_ad>::initialSetup()
+{
+  // U is Real and is_ad selects MaterialProperty<Real> or ADMaterialProperty<Real>.
+  this->template validateNonlinearCoupling<Real, is_ad>(_fa_name);
+  this->template validateNonlinearCoupling<Real, is_ad>(_fb_name);
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+KKSPhaseChemicalPotentialTempl<is_ad>::computeQpResidual()
+{
+  return _test[_i][_qp] * (_dfadca[_qp] / _ka - _dfbdcb[_qp] / _kb);
+}
+
+KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters)
+  : KKSPhaseChemicalPotentialTempl<false>(parameters),
+    _d2fadca2(getMaterialPropertyDerivativeByName<Real>(_fa_name, _var.name(), _var.name())),
+    _d2fbdcbca(getMaterialPropertyDerivativeByName<Real>(_fb_name, _cb_name, _var.name())),
+    _d2fadcadarg(_n_args),
+    _d2fbdcbdarg(_n_args)
+{
   for (std::size_t i = 0; i < _n_args; ++i)
   {
-    _d2fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), i);
-    _d2fbdcbdarg[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, i);
+    const VariableName & arg_name = _coupled_standard_moose_vars[i]->name();
+    _d2fadcadarg[i] = &getMaterialPropertyDerivativeByName<Real>(_fa_name, _var.name(), arg_name);
+    _d2fbdcbdarg[i] = &getMaterialPropertyDerivativeByName<Real>(_fb_name, _cb_name, arg_name);
   }
-}
-
-void
-KKSPhaseChemicalPotential::initialSetup()
-{
-  validateNonlinearCoupling<Real>("fa_name");
-  validateNonlinearCoupling<Real>("fb_name");
-}
-
-Real
-KKSPhaseChemicalPotential::computeQpResidual()
-{
-  // enforce _dfadca==_dfbdcb
-  return _test[_i][_qp] * (_dfadca[_qp] / _ka - _dfbdcb[_qp] / _kb);
 }
 
 Real
 KKSPhaseChemicalPotential::computeQpJacobian()
 {
-  // for on diagonal we return the d/dca derivative of the residual
   return _test[_i][_qp] * _phi[_j][_qp] * (_d2fadca2[_qp] / _ka - _d2fbdcbca[_qp] / _kb);
 }
 
 Real
 KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   return _test[_i][_qp] * _phi[_j][_qp] *
          ((*_d2fadcadarg[cvar])[_qp] / _ka - (*_d2fbdcbdarg[cvar])[_qp] / _kb);
 }
+
+template class KKSPhaseChemicalPotentialTempl<false>;
+template class KKSPhaseChemicalPotentialTempl<true>;
