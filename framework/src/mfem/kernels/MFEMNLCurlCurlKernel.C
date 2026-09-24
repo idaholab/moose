@@ -37,10 +37,13 @@ MFEMNLCurlCurlKernel::validParams()
       "$|\\vec \\nabla \\times \\vec u| \\partial k(|\\nabla "
       "\\times \\vec u|)/\\partial |\\nabla \\times \\vec u|$");
   params.addParam<MFEMScalarCoefficientName>(
-      "dk_dcurl_u_coefficient",
+      "dk_dcurlu_over_curlu_coefficient",
       "0.",
-      "Name of coeff representing $ \\partial k(|\\nabla \\times \\vec u|)/\\partial |\\nabla "
-      "\\times \\vec u| * ( 1 / |\\nabla \\times \\vec u| )$");
+      "Name of the coefficient representing $\\partial k(|\\vec\\nabla \\times \\vec u|)/"
+      "\\partial |\\vec\\nabla \\times \\vec u| / |\\vec\\nabla \\times \\vec u|$. Read only when "
+      "using partial assembly, which forms the Jacobian from it rather than from "
+      "'curlu_dk_dcurlu_coefficient'. The default is consistent with a constant "
+      "'k_coefficient'");
   params.addParam<mfem::real_t>(
       "curlu_zero_tol",
       1e-32,
@@ -52,7 +55,7 @@ MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
     _curlu_dk_dcurlu_coef(getScalarCoefficient("curlu_dk_dcurlu_coefficient")),
-    _dk_dcurlu_coef(getScalarCoefficient("dk_dcurl_u_coefficient")),
+    _dk_dcurlu_coef(getScalarCoefficient("dk_dcurlu_over_curlu_coefficient")),
     _curlu_vec_coef(getVectorCoefficientByName(getTrialVariableName() + "_curl")),
     _curlu_zero_tol(getParam<mfem::real_t>("curlu_zero_tol"))
 {

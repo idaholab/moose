@@ -26,9 +26,10 @@
   []
   [MFEMCurlCurlNL]
     type = CSVDiff
+    issues = '#33579'
     input = curlcurl_nl.i
     csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
-    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner AND the nonlinear kernel'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
@@ -36,9 +37,10 @@
   []
   [MFEMCurlCurlPartialNL_LinearKernel]
     type = CSVDiff
+    issues = '#33579'
     input = curlcurl_nl.i
     csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
-    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients with the linear kernel.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
@@ -47,12 +49,13 @@
   []
   [MFEMCurlCurlNLPartial]
     type = CSVDiff
+    issues = '#33579'
     input = curlcurl_nl.i
     csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
-    requirement = 'Same as above, with partial assembly'
+    requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    max_parallel = 1 # schemadiff with multiple ranks
+    max_parallel = 1 # SumOperatorExtension assembles its diagonal on local rather than true DoFs, which reads beyond the end of the diag vector in parallel.
     cli_args = 'Executioner/assembly_level=partial'
     recover = false
   []
@@ -83,6 +86,7 @@
                   'measured by the L2 error against the exact solution.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
+    max_parallel = 1 # SumOperatorExtension assembles its diagonal on local rather than true DoFs, which reads beyond the end of the diag vector in parallel.
     cli_args = 'Executioner/assembly_level=partial '
                'Outputs/line_sample/file_base_suffix=partial'
     recover = false

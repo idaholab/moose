@@ -171,13 +171,12 @@ NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 void
 NLCurlCurlIntegrator::AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const
 {
-  // hardcoding the symmetric argument to be true
   mfem::CurlCurlIntegrator::ApplyPAKernels::Run(_dim,
                                                 _dofs1D,
                                                 _quad1D,
                                                 _dofs1D,
                                                 _quad1D,
-                                                true,
+                                                _symmetric,
                                                 _ne,
                                                 _mapsO->B,
                                                 _mapsC->B,
@@ -199,7 +198,7 @@ NLCurlCurlIntegrator::AddMultPA(const mfem::Vector & x, mfem::Vector & y) const
                                                 _quad1D,
                                                 _dofs1D,
                                                 _quad1D,
-                                                true,
+                                                _symmetric,
                                                 _ne,
                                                 _mapsO->B,
                                                 _mapsC->B,
@@ -251,8 +250,7 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   const mfem::IntegrationRule * rule =
       IntRule ? IntRule
               : &mfem::MassIntegrator::GetRule(*el, *el, *mesh->GetTypicalElementTransformation());
-  const int dims = el->GetDim();
-  mooseAssert(dims == 3, "Following methods are only implemented in 3D");
+  mooseAssert(el->GetDim() == 3, "Following methods are only implemented in 3D");
 
   _nq = rule->GetNPoints();
   _dim = mesh->Dimension();
@@ -266,7 +264,7 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   _quad1D = _mapsC->nqpt;
 
   mooseAssert(_dofs1D == _mapsO->ndof + 1 && _quad1D == _mapsO->nqpt,
-              "Must be one fewer open basis function per _dim than closed.");
+              "Must be one fewer open basis function per _dim than closed per dim.");
 
   if (!_qspace || _qspace_mesh != mesh || _qspace_mesh_sequence != mesh->GetSequence() ||
       _qspace_ir != rule)
