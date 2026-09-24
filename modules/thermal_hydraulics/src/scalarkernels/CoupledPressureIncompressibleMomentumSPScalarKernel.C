@@ -9,9 +9,6 @@
 
 #include "CoupledPressureIncompressibleMomentumSPScalarKernel.h"
 
-// MOOSE includes
-#include "Assembly.h"
-#include "MooseVariableScalar.h"
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
@@ -23,8 +20,7 @@ template <bool is_ad>
 InputParameters
 CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = is_ad ? ADIncompressibleMomentumSPBase::validParams()
-                                 : IncompressibleMomentumSPBase::validParams();
+  InputParameters params = IncompressibleMomentumSPBaseTempl<is_ad>::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription("Implements a generic momentum solve over a 1D flow path, acting on "
                              "the reference pressure drop.");
@@ -55,16 +51,16 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidu
   auto _mu = Base::_fp.mu_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[0]))[_i]);
   auto _rhog = Base::_fp.rho_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[0]))[_i]);
   // loop over segments
-  for (size_t i = 0; i < Base::_n_segments; ++i)
+  for (size_t j = 0; j < Base::_n_segments; ++j)
   {
     // Decide flow regime for friction factor
-    auto _Dh = 4.0 * (*(Base::_areas[i]))(_qp, _state) / (*(Base::_perimeters[i]))(_qp, _state);
-    auto _G = _mc[_i] / (*(Base::_areas[i]))(_qp, _state);
+    auto _Dh = 4.0 * (*(Base::_areas[j]))(_qp, _state) / (*(Base::_perimeters[j]))(_qp, _state);
+    auto _G = _mc[_i] / (*(Base::_areas[j]))(_qp, _state);
     auto _Re = abs(_G) * _Dh / _mu;
     auto _lam = 64.0 / _Re;
     auto _turb =
         0.25 /
-        pow((log10((*(Base::_roughnesses[i]))(_qp, _state) / (_Dh * 3.7) + 5.74 / pow(_Re, 0.9))),
+        pow((log10((*(Base::_roughnesses[j]))(_qp, _state) / (_Dh * 3.7) + 5.74 / pow(_Re, 0.9))),
             2);
     auto _fd = 64.0 / _Re;
     auto _pfd = &_fd;
@@ -82,22 +78,22 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidu
       *_pfd = std::max(*_pfd, std::max(_lam, _turb));
     }
     // Friction
-    momentum_residual += _fd / _Dh * _G * abs(_G) / 2.0 / _rhog * (*(Base::_areas[i]))(_qp, _state);
+    momentum_residual += _fd / _Dh * _G * abs(_G) / 2.0 / _rhog * (*(Base::_areas[j]))(_qp, _state);
     // Form losses
-    momentum_residual += (*(Base::_forms_losses[i]))(_qp, _state) * _G * abs(_G) / 2.0 / _rhog *
-                         (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);
+    momentum_residual += (*(Base::_forms_losses[j]))(_qp, _state) * _G * abs(_G) / 2.0 / _rhog *
+                         (*(Base::_areas[j]))(_qp, _state) / (*(Base::_lengths[j]))(_qp, _state);
     // Gravity
     // get local density for natural circulation aspect
-    auto _rhol = Base::_fp.rho_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[i]))[_i]);
+    auto _rhol = Base::_fp.rho_from_p_T(Base::_Pref(_qp, _state), (*(Base::_T[j]))[_i]);
     momentum_residual += _rhol * Base::_gravity(_qp, _state) *
-                         sin((*(Base::_alphas[i]))(_qp, _state)) *
-                         (*(Base::_areas[i]))(_qp, _state);
+                         sin((*(Base::_alphas[j]))(_qp, _state)) *
+                         (*(Base::_areas[j]))(_qp, _state);
     // Pump pressure
-    momentum_residual -= (*(Base::_dPps[i]))(_qp, _state) * (*(Base::_areas[i]))(_qp, _state) /
-                         (*(Base::_lengths[i]))(_qp, _state);
+    momentum_residual -= (*(Base::_dPps[j]))(_qp, _state) * (*(Base::_areas[j]))(_qp, _state) /
+                         (*(Base::_lengths[j]))(_qp, _state);
     // reference pressure drop
     momentum_residual -=
-        Base::_u[_i] * (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);
+        Base::_u[_i] * (*(Base::_areas[j]))(_qp, _state) / (*(Base::_lengths[j]))(_qp, _state);
   }
 
   return momentum_residual;
@@ -109,13 +105,13 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobi
 {
   if constexpr (!is_ad)
   {
-    Real momentum_residual = 0;
+    Real momentum_jacob = 0;
     const Moose::ElemArg _qp = Moose::ElemArg();
     const auto _state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
-    for (size_t i = 0; i < Base::_n_segments; ++i)
-      momentum_residual -= (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);
+    for (size_t j = 0; j < Base::_n_segments; ++j)
+      momentum_jacob -= (*(Base::_areas[j]))(_qp, _state) / (*(Base::_lengths[j]))(_qp, _state);
 
-    return momentum_residual;
+    return momentum_jacob;
   }
   else
   {

@@ -9,9 +9,6 @@
 
 #include "IncompressibleEnergySPScalarKernel.h"
 
-// MOOSE includes
-#include "Assembly.h"
-#include "MooseVariableScalar.h"
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
@@ -27,8 +24,6 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::validParams()
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription("Implements a generic energy solve over a 1D flow path segment.");
-  // Lots of inputs so we need to be clear what is what
-  // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("mass_flow_rate",
                        {},
                        "Mass flow rate in component. Takes a "
@@ -45,13 +40,10 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::validParams()
                        {},
                        "Wall temperature adjacent to fluid. Takes a "
                        "scalar variable name");
-
-  // This block grabs boolean parameters that control the solve type
   params.addParam<bool>(
       "is_implicit",
       false,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
-  // This block characterizes the geometry and fluid type
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addRequiredParam<MooseFunctorName>("area", "Segment/Component flow area [m^2]");
@@ -67,15 +59,11 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::IncompressibleEnergySPScalarKern
   : Base(parameters),
     FunctorInterface(this),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
-    // Lots of inputs so we need to be clear what is what
-    // This block defines coupled state variables the kernel relies on
     _m(ScalarCoupleable::coupledScalarValue("mass_flow_rate")),
     _Tup(ScalarCoupleable::coupledScalarValue("inlet_temperature")),
     _Tdown(ScalarCoupleable::coupledScalarValue("outlet_temperature")),
     _Tw(ScalarCoupleable::coupledScalarValue("wall_temperature")),
-    // This block grabs boolean parameters that control the solve type
     _is_implicit(this->template getParam<bool>("is_implicit")),
-    // This block characterizes the geometry and fluid type
     _Pref(this->template getFunctor<GenericReal<is_ad>>("reference_pressure")),
     _area(this->template getFunctor<GenericReal<is_ad>>("area")),
     _perimeter(this->template getFunctor<GenericReal<is_ad>>("perimeter")),
@@ -126,7 +114,7 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
 {
   if constexpr (!is_ad)
   {
-    Real energy_residual = 0;
+    Real energy_jacob = 0;
     const Moose::ElemArg _qp = Moose::ElemArg();
     const int _i = 0;
     const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
@@ -147,13 +135,13 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
     auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
     auto _q = -_h * _perimeter(_qp, _state) / 2.0;
     // Advection component
-    energy_residual += abs(_m[_i]) * _cp / _length(_qp, _state);
+    energy_jacob += abs(_m[_i]) * _cp / _length(_qp, _state);
     // Wall heat transfer
-    energy_residual -= _q;
+    energy_jacob -= _q;
     // Transient term
-    energy_residual += _area(_qp, _state) * _rho * _cp * Base::_du_dot_du[_i];
+    energy_jacob += _area(_qp, _state) * _rho * _cp * Base::_du_dot_du[_i];
 
-    return energy_residual;
+    return energy_jacob;
   }
   else
   {

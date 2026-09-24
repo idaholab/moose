@@ -9,15 +9,9 @@
 
 #include "IncompressibleMomentumSPBase.h"
 
-// MOOSE includes
-#include "Assembly.h"
-#include "MooseVariableScalar.h"
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
-
-registerMooseObject("ThermalHydraulicsApp", IncompressibleMomentumSPBase);
-registerMooseObject("ThermalHydraulicsApp", ADIncompressibleMomentumSPBase);
 
 template <bool is_ad>
 InputParameters
@@ -27,18 +21,14 @@ IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
-  // Lots of inputs so we need to be clear what is what
-  // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("temperatures",
                        {},
                        "Fluid temperature in each segment of this component. Takes a "
                        "list of scalar variable names");
-  // This block grabs boolean parameters that control the solve type
   params.addParam<bool>(
       "is_implicit",
       false,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
-  // This block characterizes the geometry and fluid type
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addParam<std::vector<MooseFunctorName>>(
@@ -66,7 +56,6 @@ IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
       "pump_pressures",
       std::vector<MooseFunctorName>({}),
       "Pump pressure gains per segment [Pa]. Takes a vector of functors.");
-  // This block characterizes material properties not included in fluid properties object
   params.addParam<std::vector<MooseFunctorName>>(
       "roughnesses",
       std::vector<MooseFunctorName>({}),
@@ -81,13 +70,9 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     const InputParameters & parameters)
   : Base(parameters),
     FunctorInterface(this),
-    // Lots of inputs so we need to be clear what is what
-    // This block defines coupled state variables the kernel relies on
     _n_temps(ScalarCoupleable::coupledScalarComponents("temperatures")),
     _T(_n_temps),
-    // This block grabs boolean parameters that control the solve type
     _is_implicit(this->template getParam<bool>("is_implicit")),
-    // This block characterizes the geometry and fluid type
     _Pref(this->template getFunctor<GenericReal<is_ad>>("reference_pressure")),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
     _n_segments(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
@@ -97,7 +82,6 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     _alphas(this->template getParam<std::vector<MooseFunctorName>>("alphas").size()),
     _forms_losses(this->template getParam<std::vector<MooseFunctorName>>("forms_losses").size()),
     _dPps(this->template getParam<std::vector<MooseFunctorName>>("pump_pressures").size()),
-    // This block characterizes material properties not included in fluid properties object
     _roughnesses(this->template getParam<std::vector<MooseFunctorName>>("roughnesses").size()),
     _gravity(this->template getFunctor<GenericReal<is_ad>>("g"))
 {
@@ -116,16 +100,16 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     mooseError(
         "Must provide consistent number of segments for each parameter! Including temperatures!");
   }
-  for (size_t i = 0; i < _n_segments; ++i)
+  for (size_t j = 0; j < _n_segments; ++j)
   {
-    _T[i] = &(ScalarCoupleable::coupledScalarValue("temperatures", i));
-    _areas[i] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[i]));
-    _perimeters[i] = &(this->template getFunctor<GenericReal<is_ad>>(perimeter_names[i]));
-    _lengths[i] = &(this->template getFunctor<GenericReal<is_ad>>(length_names[i]));
-    _alphas[i] = &(this->template getFunctor<GenericReal<is_ad>>(alpha_names[i]));
-    _forms_losses[i] = &(this->template getFunctor<GenericReal<is_ad>>(forms_loss_names[i]));
-    _dPps[i] = &(this->template getFunctor<GenericReal<is_ad>>(dPp_names[i]));
-    _roughnesses[i] = &(this->template getFunctor<GenericReal<is_ad>>(roughness_names[i]));
+    _T[j] = &(ScalarCoupleable::coupledScalarValue("temperatures", j));
+    _areas[j] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[j]));
+    _perimeters[j] = &(this->template getFunctor<GenericReal<is_ad>>(perimeter_names[j]));
+    _lengths[j] = &(this->template getFunctor<GenericReal<is_ad>>(length_names[j]));
+    _alphas[j] = &(this->template getFunctor<GenericReal<is_ad>>(alpha_names[j]));
+    _forms_losses[j] = &(this->template getFunctor<GenericReal<is_ad>>(forms_loss_names[j]));
+    _dPps[j] = &(this->template getFunctor<GenericReal<is_ad>>(dPp_names[j]));
+    _roughnesses[j] = &(this->template getFunctor<GenericReal<is_ad>>(roughness_names[j]));
   }
 }
 

@@ -12,8 +12,6 @@
 #include "ODETimeDerivative.h"
 #include "ADScalarTimeDerivative.h"
 #include "FunctorInterface.h"
-#include "MooseTypes.h"
-#include "SinglePhaseFluidProperties.h"
 
 class SinglePhaseFluidProperties;
 
@@ -30,21 +28,32 @@ public:
   static InputParameters validParams();
 
 protected:
-  size_t _n_temps;
+  /// Number of coupled temperature variables
+  const size_t _n_temps;
+  /// Coupled temperature variables
   std::vector<const VariableValue *> _T;
-  bool _is_implicit;
+  /// Property state integration flag
+  const bool _is_implicit;
+  /// System reference pressure
   const Moose::Functor<GenericReal<is_ad>> & _Pref;
+  /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
-  size_t _n_segments;
+  /// Number of geometrically/thermally unique segments
+  const size_t _n_segments;
+  /// Flow area of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _areas;
+  /// Wetted perimeter of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _perimeters;
+  /// Length of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _lengths;
+  /// Angle with respect to the horizontal of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _alphas;
+  /// Forms loss coefficients of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _forms_losses;
+  /// Pump pressure gains of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _dPps;
+  /// Wall roughness of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _roughnesses;
+  /// Gravitational acceleration in the vertical downward direction
   const Moose::Functor<GenericReal<is_ad>> & _gravity;
 };
-
-typedef IncompressibleMomentumSPBaseTempl<false> IncompressibleMomentumSPBase;
-typedef IncompressibleMomentumSPBaseTempl<true> ADIncompressibleMomentumSPBase;

@@ -12,8 +12,6 @@
 #include "ODETimeDerivative.h"
 #include "ADScalarTimeDerivative.h"
 #include "FunctorInterface.h"
-#include "MooseTypes.h"
-#include "SinglePhaseFluidProperties.h"
 
 class SinglePhaseFluidProperties;
 
@@ -32,15 +30,25 @@ public:
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+  /// Coupled mass flow rate through the segment
   const VariableValue & _m;
+  /// Coupled temperature of the upstream segment
   const VariableValue & _Tup;
+  /// Coupled temperature of the downstream segment
   const VariableValue & _Tdown;
+  /// Coupled temperature of the component wall
   const VariableValue & _Tw;
-  bool _is_implicit;
+  /// Property state integration flag
+  const bool _is_implicit;
+  /// System reference pressure
   const Moose::Functor<GenericReal<is_ad>> & _Pref;
+  /// Flow area of the segment
   const Moose::Functor<GenericReal<is_ad>> & _area;
+  /// Wetted perimeter of the segment
   const Moose::Functor<GenericReal<is_ad>> & _perimeter;
+  /// Length of the segment
   const Moose::Functor<GenericReal<is_ad>> & _length;
 };
 

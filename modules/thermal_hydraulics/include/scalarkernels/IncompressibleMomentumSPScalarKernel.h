@@ -9,22 +9,12 @@
 
 #pragma once
 
-#include "ODETimeDerivative.h"
-#include "ADScalarTimeDerivative.h"
-#include "FunctorInterface.h"
-#include "MooseTypes.h"
-#include "SinglePhaseFluidProperties.h"
 #include "IncompressibleMomentumSPBase.h"
 
-class SinglePhaseFluidProperties;
-
 template <bool is_ad>
-class IncompressibleMomentumSPScalarKernelTempl
-  : public std::conditional<is_ad, ADIncompressibleMomentumSPBase, IncompressibleMomentumSPBase>::
-        type
+class IncompressibleMomentumSPScalarKernelTempl : public IncompressibleMomentumSPBaseTempl<is_ad>
 {
-  using Base = typename std::
-      conditional<is_ad, ADIncompressibleMomentumSPBase, IncompressibleMomentumSPBase>::type;
+  using Base = IncompressibleMomentumSPBaseTempl<is_ad>;
 
 public:
   IncompressibleMomentumSPScalarKernelTempl(const InputParameters & parameters);
@@ -34,6 +24,7 @@ public:
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  /// Coupled reference pressure drop from inlet to outlet of the path
   const VariableValue & _dPc;
 };
 
