@@ -396,6 +396,12 @@ QpJacobianOperator::operator()(ApplyTensorLoop, const ApplyTensorTeam & team) co
   ScratchReal flux_xi(team.team_scratch(0), n_points * n_points);
   ScratchReal flux_eta(team.team_scratch(0), n_points * n_points);
 
+  // The one-dimensional tables the phases below read are deliberately not staged in team scratch.
+  // They are read-only and identical for every element of a type, so a cached copy already serves
+  // every resident team, and staging replaces that with a private copy per team in the same
+  // physical memory, spending a resource that bounds occupancy. Scratch is for data reused within a
+  // team and not shared across teams.
+
   // Gather the direction into the element's trial space in tensor order, with the sign the basis
   // puts on a mode pair folded in. Where the level eliminates a fixed column, that row's direction
   // is zero.
@@ -632,6 +638,22 @@ QpJacobianOperator::applyBlocks(const EntityBlocks & blocks, const TagID r_tag, 
   _x_tag = r_tag;
   _y_tag = x_tag;
 
+  // One thread per block, rather than a team per block. A team is the arrangement a profiler's
+  // memory metrics appear to ask for: a thread per block puts blocks of very different sizes in one
+  // warp, so the loops over a block's rows diverge and only a fraction of the bytes in each fetched
+  // sector are used. Staging a block's factor in team scratch with a cooperative read fixes exactly
+  // that, yet is slower end to end where the blocks are many and individually small, which is what
+  // a p-hierarchy over a two-dimensional element gives: the scratch caps a multiprocessor at a
+  // handful of teams while the Cholesky substitution down a block's rows is a dependency chain, so
+  // the arrangement trades a large number of concurrent chains for that handful. The kernel is
+  // latency bound on the chain, and its high memory throughput follows from running many
+  // inefficient streams at once rather than showing that bandwidth is the limit.
+  //
+  // That balance rests on the block count and the block sizes, which the polynomial order and the
+  // element dimension set, and on how much scratch a multiprocessor has against the size of one
+  // factor. Few large blocks would leave a thread per block with too little parallelism to win, and
+  // a factor that does not fit in scratch rules a team out before any of this applies, so the
+  // choice is worth measuring again if any of those change.
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>, BlockApplyLoop> policy(
       0, blocks.numBlocks());
   ::Kokkos::parallel_for(policy, *this);
