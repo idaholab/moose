@@ -19,14 +19,6 @@ Furthermore, use of this kernel also necessitates the use of a [CoupledODETimeDe
 
 This may be a temporary requirement if an ADCoupledODETimeDerivative (or similar) object becomes available as a base class for this kernel.
 
-This kernel takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
-It also takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
-All parameters are defined as functors,
-which should allow versatility in accepting a variety of input arguments.
-
-Some consideration should be given to the [!param](scalarkernels/CoupledPressureIncompressibleMomentumSPScalarKernel/is_implicit) parameter. This term allows the user to select whether the solve
-should be done with the current or the previous state values of functor properties. This may allow the system to evolve more slowly which may avoid some issues with respect to divergence of particularly unstable systems.
-
 Rather than using [ParsedODEKernel.md], the scalar kernels block can be simplified.
 
 If parameters are to be made available to external control objects, there is still a need to define appropriate [Postprocessors](syntax/Postprocessors/index.md) to inform the scalar kernels, as these cannot be assumed for the general case. Otherwise (for constant properties) it is fine to set values directly in the scalar kernel definition.

@@ -10,14 +10,6 @@ single variable fluid mass flow rate. See the theory manual for more details [th
 !equation
 \sum_{i=1}^{N} \frac{L_i}{A_i} \frac{du}{dt} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
 
-This kernel takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
-It also takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
-All parameters are defined as functors,
-which should allow versatility in accepting a variety of input arguments.
-
-Some consideration should be given to the [!param](scalarkernels/IncompressibleMomentumSPScalarKernel/is_implicit) parameter. This term allows the user to select whether the solve
-should be done with the current or the previous state values of functor properties. This may allow the system to evolve more slowly which may avoid some issues with respect to divergence of particularly unstable systems.
-
 Rather than using [ParsedODEKernel.md] and [ODETimeDerivative.md] kernels, the scalar kernels block can be simplified.
 
 If parameters are to be made available to external control objects, there is still a need to define appropriate [Postprocessors](syntax/Postprocessors/index.md) to inform the scalar kernels, as these cannot be assumed for the general case. Otherwise (for constant properties) it is fine to set values directly in the scalar kernel definition.
