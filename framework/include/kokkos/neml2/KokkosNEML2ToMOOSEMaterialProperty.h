@@ -26,14 +26,16 @@ class NEML2ModelExecutor;
  * Here the NEML2 output tensor's device storage is aliased and read on the device, so the whole
  * scatter is a single kernel and no data crosses the bus.
  *
- * Aliasing requires the NEML2 output to be contiguous and resident on the Kokkos device, both of
- * which are checked. A derivative retrieved through dynamic_expand() is broadcast rather than
- * materialized, so a tangent that is constant along the batch dimension carries a zero stride; such
- * a variable is rejected rather than silently read through the wrong strides.
+ * Aliasing requires contiguous storage resident on the Kokkos device. A NEML2 output is not always
+ * contiguous: a state variable is a slice of the model's state axis, and a derivative retrieved
+ * through dynamic_expand() is a broadcast whose batch stride is zero where the value does not vary.
+ * Such an output is made contiguous on the device before being aliased, which costs one
+ * device-to-device copy per solve and keeps the read correct for any layout.
  *
  * @tparam T The Kokkos property type, whose storage must match the NEML2 variable's component
- * layout. Real6 corresponds to SR2 and Real66 to SSR4; both are Mandel with the component order of
- * SymmetricRankTwoTensor, so the components are copied without conversion.
+ * layout. Real corresponds to a NEML2 Scalar, Real6 to SR2 and Real66 to SSR4; the latter two are
+ * Mandel with the component order of SymmetricRankTwoTensor, so the components are copied without
+ * conversion.
  */
 template <typename T>
 class KokkosNEML2ToMOOSEMaterialProperty : public Moose::Kokkos::Material
@@ -68,6 +70,11 @@ private:
 
   /// Aliases the contiguous NEML2 output's device storage; no copy of the values is made
   Moose::Kokkos::Array<Real> _source;
+  /**
+   * Holds a contiguous device copy when the NEML2 output is a view. Empty when the output is already
+   * contiguous, in which case its own storage is aliased.
+   */
+  neml2::Tensor _contiguous;
   /// Assignment of quadrature points to NEML2 batch entries
   Moose::Kokkos::NEML2BatchLayout _layout;
 
@@ -75,6 +82,7 @@ private:
   Moose::Kokkos::MaterialProperty<T> _prop;
 };
 
+typedef KokkosNEML2ToMOOSEMaterialProperty<Real> KokkosNEML2ToMOOSERealMaterialProperty;
 typedef KokkosNEML2ToMOOSEMaterialProperty<Moose::Kokkos::Real6>
     KokkosNEML2ToMOOSESymmetricRankTwoTensorMaterialProperty;
 typedef KokkosNEML2ToMOOSEMaterialProperty<Moose::Kokkos::Real66>
