@@ -68,10 +68,10 @@ ParsedConvergence::initialSetup()
 }
 
 void
-ParsedConvergence::preSolve()
+ParsedConvergence::preLoop()
 {
   for (const auto & convergence : _convergences)
-    convergence->preSolve();
+    convergence->preLoop();
 }
 
 void

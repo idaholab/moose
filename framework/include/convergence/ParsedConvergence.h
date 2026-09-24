@@ -28,7 +28,7 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void preSolve() override;
+  virtual void preLoop() override;
   virtual void preIteration() override;
 
 protected:

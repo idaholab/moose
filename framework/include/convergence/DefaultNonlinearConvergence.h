@@ -28,7 +28,7 @@ public:
 
   virtual void initialSetup() override;
   virtual void checkIterationType(IterationType it_type) const override;
-  virtual void preSolve() override;
+  virtual void preLoop() override;
   virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
   /// Sets the maximum nonlinear iterations

@@ -58,9 +58,9 @@ DefaultNonlinearConvergence::initialSetup()
 {
   DefaultConvergenceBase::initialSetup();
 
-  // This method is also called in preSolve(), which will overwrite the parameters set here.
+  // This method is also called in preLoop(), which will overwrite the parameters set here.
   // It needs to be called here to collect the names of any duplicate parameters for the
-  // checkDuplicateSetSharedExecutionerParams() check. It needs to be called in preSolve()
+  // checkDuplicateSetSharedExecutionerParams() check. It needs to be called in preLoop()
   // because it needs to know the current nonlinear system; Convergence objects do not know
   // their "associated" nonlinear system (and they could in fact have multiple).
   setNonlinearSystemParameters();
@@ -76,9 +76,9 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 }
 
 void
-DefaultNonlinearConvergence::preSolve()
+DefaultNonlinearConvergence::preLoop()
 {
-  DefaultConvergenceBase::preSolve();
+  DefaultConvergenceBase::preLoop();
 
   setNonlinearSystemParameters();
 }

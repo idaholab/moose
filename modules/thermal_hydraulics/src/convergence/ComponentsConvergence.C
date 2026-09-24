@@ -46,10 +46,10 @@ ComponentsConvergence::initialSetup()
 }
 
 void
-ComponentsConvergence::preSolve()
+ComponentsConvergence::preLoop()
 {
   for (auto & conv : _convergence_objects)
-    conv->preSolve();
+    conv->preLoop();
 }
 
 void

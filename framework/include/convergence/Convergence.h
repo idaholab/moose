@@ -53,14 +53,6 @@ public:
   virtual void preLoop() {}
 
   /**
-   * Method that gets called before the solve that this convergence checks. What counts as
-   * "the solve" depends on the iteration type: for nonlinear (Newton) convergence, this is
-   * called once per nonlinear solve, before the Newton iteration loop begins (not before each
-   * Newton iteration).
-   */
-  virtual void preSolve() {}
-
-  /**
    * Method that gets called before each iteration in a loop that this convergence object is
    * checking. For example, for fixed-point convergence, this is called once per fixed-point
    * iteration, before that iteration's sub-solve(s).
