@@ -14,16 +14,17 @@
 #include "FunctorInterface.h"
 #include "MooseTypes.h"
 #include "SinglePhaseFluidProperties.h"
-#include "IncompressibleMomentumBase.h"
+#include "IncompressibleMomentumSPBase.h"
 
 class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class IncompressibleMomentumSPScalarKernelTempl
-  : public std::conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type
+  : public std::conditional<is_ad, ADIncompressibleMomentumSPBase, IncompressibleMomentumSPBase>::
+        type
 {
   using Base = typename std::
-      conditional<is_ad, ADIncompressibleMomentumBase, IncompressibleMomentumBase>::type;
+      conditional<is_ad, ADIncompressibleMomentumSPBase, IncompressibleMomentumSPBase>::type;
 
 public:
   IncompressibleMomentumSPScalarKernelTempl(const InputParameters & parameters);

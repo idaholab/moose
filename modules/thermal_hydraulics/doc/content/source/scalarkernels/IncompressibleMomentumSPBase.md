@@ -1,4 +1,4 @@
-# IncompressibleMomentumBase
+# IncompressibleMomentumSPBase
 
 !syntax description /ScalarKernels/IncompressibleMomentumSPBase
 

@@ -23,8 +23,8 @@ template <bool is_ad>
 InputParameters
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = is_ad ? ADIncompressibleMomentumBase::validParams()
-                                 : IncompressibleMomentumBase::validParams();
+  InputParameters params = is_ad ? ADIncompressibleMomentumSPBase::validParams()
+                                 : IncompressibleMomentumSPBase::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription(
       "Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate.");

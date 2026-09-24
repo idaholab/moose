@@ -18,14 +18,14 @@
 class SinglePhaseFluidProperties;
 
 template <bool is_ad>
-class IncompressibleMomentumBaseTempl
+class IncompressibleMomentumSPBaseTempl
   : public std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type,
     public FunctorInterface
 {
   using Base = typename std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type;
 
 public:
-  IncompressibleMomentumBaseTempl(const InputParameters & parameters);
+  IncompressibleMomentumSPBaseTempl(const InputParameters & parameters);
   virtual bool isADObject() const override { return is_ad; };
   static InputParameters validParams();
 
@@ -46,5 +46,5 @@ protected:
   const Moose::Functor<GenericReal<is_ad>> & _gravity;
 };
 
-typedef IncompressibleMomentumBaseTempl<false> IncompressibleMomentumBase;
-typedef IncompressibleMomentumBaseTempl<true> ADIncompressibleMomentumBase;
+typedef IncompressibleMomentumSPBaseTempl<false> IncompressibleMomentumSPBase;
+typedef IncompressibleMomentumSPBaseTempl<true> ADIncompressibleMomentumSPBase;

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IncompressibleMomentumBase.h"
+#include "IncompressibleMomentumSPBase.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -16,18 +16,17 @@
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("ThermalHydraulicsApp", IncompressibleMomentumBase);
-registerMooseObject("ThermalHydraulicsApp", ADIncompressibleMomentumBase);
+registerMooseObject("ThermalHydraulicsApp", IncompressibleMomentumSPBase);
+registerMooseObject("ThermalHydraulicsApp", ADIncompressibleMomentumSPBase);
 
 template <bool is_ad>
 InputParameters
-IncompressibleMomentumBaseTempl<is_ad>::validParams()
+IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
 {
   InputParameters params =
       is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
   params += FunctorInterface::validParams();
-  params.addClassDescription("Implements a generic momentum solve over a 1D flow path, acting on "
-                             "the reference pressure drop.");
+  params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
   // Lots of inputs so we need to be clear what is what
   // This block defines coupled state variables the kernel relies on
   params.addCoupledVar("temperatures",
@@ -78,7 +77,7 @@ IncompressibleMomentumBaseTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-IncompressibleMomentumBaseTempl<is_ad>::IncompressibleMomentumBaseTempl(
+IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     const InputParameters & parameters)
   : Base(parameters),
     FunctorInterface(this),
@@ -130,5 +129,5 @@ IncompressibleMomentumBaseTempl<is_ad>::IncompressibleMomentumBaseTempl(
   }
 }
 
-template class IncompressibleMomentumBaseTempl<false>;
-template class IncompressibleMomentumBaseTempl<true>;
+template class IncompressibleMomentumSPBaseTempl<false>;
+template class IncompressibleMomentumSPBaseTempl<true>;
