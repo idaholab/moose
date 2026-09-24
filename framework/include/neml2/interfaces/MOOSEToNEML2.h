@@ -39,6 +39,17 @@ public:
   /// Convert data gathered from MOOSE into neml2::Tensor
   virtual neml2::Tensor gatheredData() const = 0;
 
+  /**
+   * Get whether this object assigns quadrature points to batch entries in an order other than the one
+   * the element loop visits them in, which is the order NEML2BatchIndexGenerator numbers.
+   *
+   * A NEML2 model is evaluated pointwise along its batch dimension, so every object gathering an input
+   * and every object retrieving an output must assign quadrature points to batch entries the same way.
+   * Disagreement pairs one point's input with another's output, which converges to a wrong answer
+   * rather than failing, so the executor rejects a mixture instead.
+   */
+  virtual bool batchOrderDiffersFromElementLoop() const { return false; }
+
   /// Insert the gathered data into the NEML2 material model
   void insertInto(std::map<std::string, neml2::Tensor> &) const;
 

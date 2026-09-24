@@ -115,6 +115,9 @@ NEML2ModelExecutor::initialSetup()
 
     addGatheredVariable(gatherer_name, uo.NEML2Name());
     _gatherers.push_back(&uo);
+
+    if (uo.batchOrderDiffersFromElementLoop())
+      _batch_order_differs_from_element_loop = true;
   }
 
   // deal with user object provided model parameters
@@ -147,6 +150,15 @@ NEML2ModelExecutor::initialSetup()
 std::size_t
 NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 {
+  if (_batch_order_differs_from_element_loop)
+    mooseError(
+        "This model's batch is not numbered in the order the element loop visits elements, because a "
+        "gatherer assigned quadrature points to batch entries in a different order, so the index "
+        "returned here would not identify the requested element's entries.\n\nObjects that index the "
+        "batch by element, such as NEML2ToMOOSEMaterialProperty, cannot read this model's output. Use "
+        "the Kokkos retrievers, which share the gatherers' numbering, or gather every batched input on "
+        "the host so that the element loop's numbering applies throughout.");
+
   return _batch_index_generator.getBatchIndex(elem_id);
 }
 
