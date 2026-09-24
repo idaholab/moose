@@ -112,12 +112,8 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobi
     Real momentum_residual = 0;
     const Moose::ElemArg _qp = Moose::ElemArg();
     const auto _state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
-    // loop over segments
     for (size_t i = 0; i < Base::_n_segments; ++i)
-    {
-      // reference pressure drop
       momentum_residual -= (*(Base::_areas[i]))(_qp, _state) / (*(Base::_lengths[i]))(_qp, _state);
-    }
 
     return momentum_residual;
   }
