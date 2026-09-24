@@ -62,15 +62,16 @@ PMultigrid::validParams()
   params.addParam<MooseEnum>(
       "smoother",
       smoother,
-      "The smoother applied on each level that is smoothed rather than solved. 'entity_block', the "
-      "default, inverts the block of degrees of freedom each mesh entity carries -- an element's "
-      "interior modes, and each shared face, edge and vertex -- which reaches the modes a point "
-      "smoother cannot damp and the coarse spaces do not represent. 'point_jacobi' reads the "
-      "operator diagonal alone, which at high order ignores the coupling among the many basis "
-      "functions one entity carries. The block smoother is modestly more expensive per application "
-      "and converges in far fewer iterations from order four upward, which is why it is the "
-      "default; the two coincide at orders two and three, where a hierarchic entity carries a "
-      "single mode. See PMultigrid.md for measured iteration counts.");
+      "The smoother applied on each level that is smoothed rather than solved. Which one is "
+      "appropriate depends on the basis, and not by a small margin. 'entity_block', the default, "
+      "inverts the block of degrees of freedom each mesh entity carries -- an element's interior "
+      "modes, and each shared face, edge and vertex -- and is effective whichever basis the "
+      "variables use, which is why it is the default. 'point_jacobi' reads the operator diagonal "
+      "alone. On a nodal basis at the Gauss-Lobatto points that is effective and is the faster "
+      "choice overall, costing one extra linear iteration while removing the block smoother's "
+      "assembly, factorization and application entirely. On a modal hierarchic basis at high order "
+      "it is not effective at all and fails to converge, a diagonal being unable to damp the "
+      "several modes one entity carries. See PMultigrid.md for measured iteration counts.");
 
   MooseEnum coarse_solver("boomeramg lu", "boomeramg");
 

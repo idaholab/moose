@@ -116,10 +116,11 @@ element's interior modes together, then each shared face, edge and vertex. The d
 off the degree-of-freedom map rather than constructed, so it follows whatever family and order the
 level holds.
 
-`point_jacobi` reads the operator diagonal alone. It is the cheaper application and the much weaker
-smoother, because a modal basis puts several modes on one entity and a diagonal cannot represent the
-coupling among them. The gap between the two widens with polynomial order, since the number of modes an
-entity carries grows with it. On a hierarchic diffusion problem over a 16-by-16 mesh of biquadratic
+`point_jacobi` reads the operator diagonal alone, and **which of the two is appropriate depends on
+the basis rather than only on the polynomial order.** On a modal hierarchic basis it is much the
+weaker smoother, because such a basis puts several modes on one entity and a diagonal cannot
+represent the coupling among them; the gap widens with order, since the number of modes an entity
+carries grows with it. On a hierarchic diffusion problem over a 16-by-16 mesh of biquadratic
 elements, solved to a linear tolerance of 1e-8, with the coarse levels each row lists:
 
 | fine order | coarse levels | `point_jacobi` | `entity_block` |
@@ -132,9 +133,19 @@ elements, solved to a linear tolerance of 1e-8, with the coarse levels each row 
 The block smoother costs between a tenth and a quarter more per application, so those counts carry over
 to time to solution: the two are within a fifth of one another at orders two and three, where a
 hierarchic entity carries a single mode and the two smoothers coincide, while the block smoother is
-about four times faster at order four and thirty-seven times faster at order eight. That is why it is
-the default, and `point_jacobi` is worth selecting only for a low-order hierarchy where the counts
-agree.
+about four times faster at order four and thirty-seven times faster at order eight.
+
+On a nodal basis at the Gauss-Lobatto points the ordering reverses. There `point_jacobi` is
+effective, and is the faster choice by a wide margin: over an 8-4-2-1 hierarchy on an order-eight
+`LAGRANGE_GLL` space it takes 11 linear iterations against the block smoother's 10, and is 1.7 times
+faster end to end, because it removes the block assembly, factorization and application entirely. The
+blocks a `LAGRANGE_GLL` entity carries are better conditioned for the same reason the basis converges
+in fewer iterations than a hierarchic one: it is collocated with the quadrature rule of its own order.
+
+`entity_block` is the default because it is the choice that serves both bases. `point_jacobi` does not
+merely converge more slowly on a modal basis at high order; it fails to converge. Selecting it is
+worthwhile whenever the variables use a nodal family, and a solve that does so should confirm the
+iteration count rather than assume it.
 
 ## Symmetry and the outer Krylov method
 
