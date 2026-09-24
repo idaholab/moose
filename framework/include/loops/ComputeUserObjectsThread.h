@@ -17,7 +17,6 @@
 #include "libmesh/elem_range.h"
 
 #include <map>
-#include <tuple>
 
 class InternalSideUserObject;
 class ElementUserObject;
@@ -30,8 +29,8 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
-
 }
+
 /**
  * Class for threaded computation of UserObjects.
  */
