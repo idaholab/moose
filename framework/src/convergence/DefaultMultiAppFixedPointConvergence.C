@@ -84,9 +84,9 @@ DefaultMultiAppFixedPointConvergence::checkIterationType(IterationType it_type) 
 }
 
 void
-DefaultMultiAppFixedPointConvergence::initialize()
+DefaultMultiAppFixedPointConvergence::preLoop()
 {
-  DefaultConvergenceBase::initialize();
+  DefaultConvergenceBase::preLoop();
 
   _fixed_point_timestep_begin_norm.clear();
   _fixed_point_timestep_end_norm.clear();

@@ -300,7 +300,7 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.initialize();
+    convergence.preLoop();
   }
 
   _fixed_point_it = 0;

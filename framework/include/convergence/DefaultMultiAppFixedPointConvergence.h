@@ -25,7 +25,7 @@ public:
   DefaultMultiAppFixedPointConvergence(const InputParameters & parameters);
 
   virtual void checkIterationType(IterationType it_type) const override;
-  virtual void initialize() override;
+  virtual void preLoop() override;
   virtual void preIteration() override;
 
   virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;

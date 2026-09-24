@@ -50,7 +50,7 @@ public:
   /**
    * Method that gets called before each iteration loop
    */
-  virtual void initialize() {}
+  virtual void preLoop() {}
 
   /**
    * Method that gets called before the solve that this convergence checks. What counts as
