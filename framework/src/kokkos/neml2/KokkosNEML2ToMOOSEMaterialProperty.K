@@ -14,6 +14,7 @@
 #include "NEML2ModelExecutor.h"
 #include "NEML2Utils.h"
 
+registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSERealMaterialProperty);
 registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSESymmetricRankTwoTensorMaterialProperty);
 registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSESymmetricRankFourTensorMaterialProperty);
 
@@ -49,19 +50,19 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
-  const auto & tensor = _value;
-
-  if (!tensor.is_contiguous())
-    mooseError("The NEML2 output '",
-               getParam<std::string>("from_neml2"),
-               "' is not contiguous, so its storage cannot be aliased. Reading it through the "
-               "wrong strides would silently produce incorrect values.");
-
-  if (!tensor.device().is_cuda())
+  if (!_value.device().is_cuda())
     mooseError("The NEML2 output '",
                getParam<std::string>("from_neml2"),
                "' is not resident on the device. Set the NEML2 'device' and 'output_device' to a "
                "CUDA device so that this material can read it without a host transfer.");
+
+  // A NEML2 output is a view whenever it is a slice of the model's state axis or a broadcast
+  // produced by dynamic_expand(). Aliasing needs contiguous storage, so a view is compacted on the
+  // device and the copy is held for as long as it is aliased.
+  if (!_value.is_contiguous())
+    _contiguous = _value.contiguous();
+
+  const auto & tensor = _value.is_contiguous() ? _value : _contiguous;
 
   // The numbering depends only on the mesh and the model's block coverage
   if (!_layout.built())
@@ -88,6 +89,7 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
   Moose::Kokkos::Material::computeProperties();
 }
 
+template class KokkosNEML2ToMOOSEMaterialProperty<Real>;
 template class KokkosNEML2ToMOOSEMaterialProperty<Moose::Kokkos::Real6>;
 template class KokkosNEML2ToMOOSEMaterialProperty<Moose::Kokkos::Real66>;
 

@@ -11,19 +11,25 @@ transfer per quadrature point per property. This object instead aliases the stor
 output tensor and gathers the components on the device, so the whole scatter is a single kernel and
 no values cross the bus.
 
-The property type must have the same component layout as the NEML2 variable. `Real6` corresponds to
-`SR2` and `Real66` to `SSR4`: both are Mandel with the component order of
-[SymmetricRankTwoTensor](SymmetricRankTwoTensor.md), so the components are copied without
-conversion. Two variants are registered accordingly:
+The property type must have the same component layout as the NEML2 variable. `Real` corresponds to a
+`Scalar`, `Real6` to `SR2` and `Real66` to `SSR4`: the latter two are Mandel with the component order
+of [SymmetricRankTwoTensor](SymmetricRankTwoTensor.md), so the components are copied without
+conversion. Three variants are registered accordingly:
 
+- `KokkosNEML2ToMOOSERealMaterialProperty`, emitting `Real`
 - `KokkosNEML2ToMOOSESymmetricRankTwoTensorMaterialProperty`, emitting `Real6`
 - `KokkosNEML2ToMOOSESymmetricRankFourTensorMaterialProperty`, emitting `Real66`
 
+Retrieving a stateful NEML2 output into a Kokkos property is what allows the model's old state to be
+gathered back on the device by [KokkosMOOSEQuantityToNEML2](KokkosMOOSEQuantityToNEML2.md), keeping
+the whole state round trip off the host.
+
 !alert note
-Aliasing requires the NEML2 output to be contiguous and resident on the device, so the NEML2
-[!param](/NEML2/device) and `output_device` must name a CUDA device. A variable that is not
-contiguous, which a derivative retrieved through an expanding view can be, is rejected rather than
-read through the wrong strides.
+Aliasing requires contiguous storage, and a NEML2 output is not always contiguous: a state variable
+is a slice of the model's state axis, and a derivative is a broadcast. Such an output is compacted on
+the device first, at the cost of one device-to-device copy per solve. The output must still be
+resident on the device, so the NEML2 [!param](/NEML2/device) and `output_device` must name a CUDA
+device.
 
 ## Example Input Syntax
 
