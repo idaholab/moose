@@ -1,22 +1,24 @@
-# Validates KokkosMOOSESymmetricRankTwoTensorToNEML2, which gathers a Kokkos material property into a
-# NEML2 input variable on the device.
+# Validates the Kokkos NEML2 gather and retrieve objects across more than one subdomain.
 #
-# The strain NEML2 consumes is produced by a Kokkos material from a vector displacement variable and
-# handed to NEML2 by the Kokkos gatherer, replacing the host gatherer the NEML2 action would
-# otherwise create. Everything downstream is unchanged from the neml2_bridge test, so the reported
-# stress magnitude must reproduce that test's values: the constitutive problem is identical and only
-# the route the strain takes into NEML2 differs.
+# NEML2BatchLayout numbers batch entries by contiguous subdomain ID and then by the assembly's
+# quadrature point offset within the subdomain. On a single subdomain the subdomain offset is zero and
+# the numbering reduces to the assembly's own, so only a mesh with several subdomains exercises it.
 #
-# The model is stateful, and its old state is gathered on the device as well: each stateful NEML2
-# output is retrieved into a Kokkos material property and its old value is gathered back as the
-# corresponding input. Every per-quadrature-point quantity entering and leaving the model therefore
-# uses one numbering, so nothing depends on the Kokkos numbering agreeing with
-# NEML2BatchIndexGenerator's. The second step is what exercises the state round trip, since the old
-# state is zero on the first one.
+# This is the problem of varying.i with the elements divided between two subdomains, so it must produce
+# the same stress field: the constitutive response is pointwise and the displacement is prescribed by
+# position, and subdividing a mesh changes neither. device_magnitude and stress_moment are therefore
+# golded at varying.i's values, and stress_moment being weighted by position would change if the stress
+# were distributed differently among the elements.
 #
-# The displacement field is prescribed through an auxiliary variable rather than solved, because only
-# the strain gather and the constitutive update are under test. A solved displacement field would
-# bring in a displaced mesh, which the Kokkos problem does not support.
+# The displacement is quadratic in position so that the strain varies from element to element. Under an
+# affine displacement every quadrature point carries the same strain and this test would pass whatever
+# the numbering did. Keep the displacement non-affine.
+#
+# The non-Kokkos bridge is deliberately absent. It indexes the NEML2 output through
+# NEML2BatchIndexGenerator's element map, which orders elements as the element loop visits them and so
+# interleaves the subdomains, while the inputs here are gathered in NEML2BatchLayout's subdomain-major
+# order. The two coincide on one subdomain and not on several, so the host bridge cannot read a
+# Kokkos-gathered batch on this mesh.
 
 [Mesh]
   [gmg]
@@ -25,6 +27,15 @@
     nx = 3
     ny = 3
     nz = 3
+  []
+  # Claims part of every row of elements, so the two subdomains interleave in element ID order and the
+  # subdomain-major numbering genuinely differs from the element-loop one
+  [split]
+    type = SubdomainBoundingBoxGenerator
+    input = gmg
+    block_id = 1
+    bottom_left = '-0.1 -0.1 -0.1'
+    top_right = '0.5 1.1 1.1'
   []
 []
 
@@ -59,12 +70,12 @@
 []
 
 [Functions]
-  # The same prescribed displacement as the neml2_bridge test, as one vector function
+  # Quadratic in position, so that the strain varies from element to element
   [ramp]
     type = ParsedVectorFunction
-    expression_x = '0.002 * t * x'
-    expression_y = '-0.001 * t * y + 0.0005 * t * x'
-    expression_z = '0.0003 * t * z'
+    expression_x = '0.002 * t * x * x'
+    expression_y = '-0.001 * t * y * y + 0.0005 * t * x * z'
+    expression_z = '0.0003 * t * z * z + 0.0004 * t * x * y'
   []
 []
 
@@ -73,15 +84,7 @@
     family = LAGRANGE_VEC
     order = FIRST
   []
-  [host_s]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [device_s]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [difference]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -94,25 +97,12 @@
     function = ramp
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
-  # The NEML2 stress retrieved by the non-Kokkos bridge the action creates
-  [host_s]
-    type = MaterialSymmetricRankTwoTensorAux
-    variable = host_s
-    property = 'neml2_stress'
-    component = 5
-  []
-  # The same NEML2 output retrieved on the device
+  # The NEML2 stress retrieved on the device
   [device_s]
     type = KokkosSymmetricRankTwoComponentAux
     variable = device_s
     property = 'kokkos_neml2_stress'
     component = 5
-  []
-  [difference]
-    type = ParsedAux
-    variable = difference
-    coupled_variables = 'host_s device_s'
-    expression = 'device_s - host_s'
   []
 []
 
@@ -212,16 +202,9 @@
 []
 
 [Postprocessors]
-  # Zero when the device bridge reproduces the host bridge
-  [max_abs_difference]
+  [device_magnitude]
     type = ElementExtremeValue
-    variable = difference
-    value_type = max_abs
-  []
-  # Must reproduce the neml2_bridge test, where the same strain reaches NEML2 through the host
-  [reference_magnitude]
-    type = ElementExtremeValue
-    variable = host_s
+    variable = device_s
     value_type = max_abs
   []
   # Identifies the stress field itself, not just its extreme. Subdividing the mesh into subdomains

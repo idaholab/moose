@@ -1,4 +1,4 @@
-time,max_abs_difference,reference_magnitude
-0,0,0
-1,0,0.6967608063025
-2,0,0.7249279241177
+time,max_abs_difference,reference_magnitude,stress_moment
+0,0,0,0
+1,0,0.6967608063025,2.0902824189075
+2,0,0.7249279241177,2.1747837723531

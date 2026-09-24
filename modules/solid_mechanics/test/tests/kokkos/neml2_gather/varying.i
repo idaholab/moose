@@ -1,22 +1,19 @@
-# Validates KokkosMOOSESymmetricRankTwoTensorToNEML2, which gathers a Kokkos material property into a
-# NEML2 input variable on the device.
+# Validates the Kokkos NEML2 gather and retrieve objects under a strain that varies in space, which
+# is what gives a comparison of the two bridges any power.
 #
-# The strain NEML2 consumes is produced by a Kokkos material from a vector displacement variable and
-# handed to NEML2 by the Kokkos gatherer, replacing the host gatherer the NEML2 action would
-# otherwise create. Everything downstream is unchanged from the neml2_bridge test, so the reported
-# stress magnitude must reproduce that test's values: the constitutive problem is identical and only
-# the route the strain takes into NEML2 differs.
+# The prescribed displacement is quadratic in position, so its gradient differs from element to
+# element. Under an affine displacement the gradient is spatially constant, every quadrature point
+# carries the same strain and the same stress, and any permutation of the NEML2 batch is invisible to
+# every comparison that can be made. Keep the displacement non-affine.
 #
-# The model is stateful, and its old state is gathered on the device as well: each stateful NEML2
-# output is retrieved into a Kokkos material property and its old value is gathered back as the
-# corresponding input. Every per-quadrature-point quantity entering and leaving the model therefore
-# uses one numbering, so nothing depends on the Kokkos numbering agreeing with
-# NEML2BatchIndexGenerator's. The second step is what exercises the state round trip, since the old
-# state is zero on the first one.
+# On a single subdomain NEML2BatchLayout's numbering coincides with NEML2BatchIndexGenerator's, so the
+# non-Kokkos bridge is a valid independent reference here and the two must agree pointwise. multiblock.i
+# takes the same problem onto two subdomains, where that coincidence ends, and reproduces the stress
+# field golded here.
 #
 # The displacement field is prescribed through an auxiliary variable rather than solved, because only
-# the strain gather and the constitutive update are under test. A solved displacement field would
-# bring in a displaced mesh, which the Kokkos problem does not support.
+# the gather, the constitutive update and the retrieve are under test. A solved displacement field
+# would bring in a displaced mesh, which the Kokkos problem does not support.
 
 [Mesh]
   [gmg]
@@ -59,12 +56,12 @@
 []
 
 [Functions]
-  # The same prescribed displacement as the neml2_bridge test, as one vector function
+  # Quadratic in position, so that the strain varies from element to element
   [ramp]
     type = ParsedVectorFunction
-    expression_x = '0.002 * t * x'
-    expression_y = '-0.001 * t * y + 0.0005 * t * x'
-    expression_z = '0.0003 * t * z'
+    expression_x = '0.002 * t * x * x'
+    expression_y = '-0.001 * t * y * y + 0.0005 * t * x * z'
+    expression_z = '0.0003 * t * z * z + 0.0004 * t * x * y'
   []
 []
 
@@ -218,10 +215,9 @@
     variable = difference
     value_type = max_abs
   []
-  # Must reproduce the neml2_bridge test, where the same strain reaches NEML2 through the host
-  [reference_magnitude]
+  [device_magnitude]
     type = ElementExtremeValue
-    variable = host_s
+    variable = device_s
     value_type = max_abs
   []
   # Identifies the stress field itself, not just its extreme. Subdividing the mesh into subdomains
