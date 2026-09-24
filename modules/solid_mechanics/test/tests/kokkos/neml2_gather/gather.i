@@ -7,9 +7,12 @@
 # stress magnitude must reproduce that test's values: the constitutive problem is identical and only
 # the route the strain takes into NEML2 differs.
 #
-# The model is stateful, so its old state is still gathered on the host through
-# NEML2BatchIndexGenerator's numbering while the strain arrives through the Kokkos numbering. The
-# second step is what tests that the two agree, since the old state is zero on the first one.
+# The model is stateful, and its old state is gathered on the device as well: each stateful NEML2
+# output is retrieved into a Kokkos material property and its old value is gathered back as the
+# corresponding input. Every per-quadrature-point quantity entering and leaving the model therefore
+# uses one numbering, so nothing depends on the Kokkos numbering agreeing with
+# NEML2BatchIndexGenerator's. The second step is what exercises the state round trip, since the old
+# state is zero on the first one.
 #
 # The displacement field is prescribed through an auxiliary variable rather than solved, because only
 # the strain gather and the constitutive update are under test. A solved displacement field would
@@ -119,8 +122,8 @@
     model = 'model'
     device = 'cuda'
     output_device = 'cuda'
-    # The strain is supplied by the Kokkos gatherer below instead of a host gatherer
-    input_kernels = 'neml2_strain'
+    # Every per-quadrature-point input is supplied by a Kokkos gatherer below instead of a host one
+    input_kernels = 'neml2_strain plastic_strain~1 equivalent_plastic_strain~1 flow_rate~1'
   []
 []
 
@@ -129,6 +132,23 @@
     type = KokkosMOOSESymmetricRankTwoTensorToNEML2
     from_moose = 'mechanical_strain'
     to_neml2 = 'neml2_strain'
+  []
+  # The old state, read from the Kokkos properties the corresponding outputs are retrieved into.
+  # Requesting the old value is what makes those properties stateful.
+  [plastic_strain~1]
+    type = KokkosMOOSEOldSymmetricRankTwoTensorToNEML2
+    from_moose = 'kokkos_plastic_strain'
+    to_neml2 = 'plastic_strain~1'
+  []
+  [equivalent_plastic_strain~1]
+    type = KokkosMOOSEOldRealToNEML2
+    from_moose = 'kokkos_equivalent_plastic_strain'
+    to_neml2 = 'equivalent_plastic_strain~1'
+  []
+  [flow_rate~1]
+    type = KokkosMOOSEOldRealToNEML2
+    from_moose = 'kokkos_flow_rate'
+    to_neml2 = 'flow_rate~1'
   []
 []
 
@@ -142,6 +162,26 @@
     neml2_executor = 'neml2_model_all'
     from_neml2 = 'neml2_stress'
     to_moose = 'kokkos_neml2_stress'
+  []
+  # The stateful outputs, retrieved into Kokkos properties so the old state can be gathered on the
+  # device by the user objects above
+  [kokkos_plastic_strain]
+    type = KokkosNEML2ToMOOSESymmetricRankTwoTensorMaterialProperty
+    neml2_executor = 'neml2_model_all'
+    from_neml2 = 'plastic_strain'
+    to_moose = 'kokkos_plastic_strain'
+  []
+  [kokkos_equivalent_plastic_strain]
+    type = KokkosNEML2ToMOOSERealMaterialProperty
+    neml2_executor = 'neml2_model_all'
+    from_neml2 = 'equivalent_plastic_strain'
+    to_moose = 'kokkos_equivalent_plastic_strain'
+  []
+  [kokkos_flow_rate]
+    type = KokkosNEML2ToMOOSERealMaterialProperty
+    neml2_executor = 'neml2_model_all'
+    from_neml2 = 'flow_rate'
+    to_moose = 'kokkos_flow_rate'
   []
 []
 

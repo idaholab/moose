@@ -19,10 +19,17 @@ that numbering, taken from the numbering Kokkos material property storage alread
 The property type must have the same component layout as the NEML2 variable. `Real` corresponds to a
 NEML2 `Scalar`, and `Real6` to `SR2`, which is Mandel with the component order of
 [SymmetricRankTwoTensor](SymmetricRankTwoTensor.md), so the components are copied without conversion.
-Two variants are registered accordingly:
+Four variants are registered accordingly, in current-value and old-value pairs:
 
-- `KokkosMOOSERealToNEML2`, reading `Real`
-- `KokkosMOOSESymmetricRankTwoTensorToNEML2`, reading `Real6`
+- `KokkosMOOSERealToNEML2` and `KokkosMOOSEOldRealToNEML2`, reading `Real`
+- `KokkosMOOSESymmetricRankTwoTensorToNEML2` and `KokkosMOOSEOldSymmetricRankTwoTensorToNEML2`,
+  reading `Real6`
+
+A NEML2 model with history takes its old state as an input. Pairing the `Old` variants with
+[KokkosNEML2ToMOOSEMaterialProperty](KokkosNEML2ToMOOSEMaterialProperty.md) closes that round trip on
+the device: each stateful output is retrieved into a Kokkos material property, and its old value is
+gathered back as the corresponding input. Requesting the old value is also what makes the property
+stateful, so no separate declaration is needed.
 
 Name the object after the NEML2 input variable it supplies and list that variable in
 [!param](/NEML2/input_kernels), so that the `NEML2` action does not also create a host gatherer for
