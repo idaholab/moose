@@ -14,7 +14,10 @@ namespace Moose::Kokkos
 {
 
 void
-Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system)
+Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix,
+               const System & system,
+               std::vector<PetscInt> & coo_i,
+               std::vector<PetscInt> & coo_j)
 {
   auto petsc_matrix = dynamic_cast<libMesh::PetscMatrix<PetscScalar> *>(&matrix);
 
@@ -37,20 +40,22 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
   _matrix = petsc_matrix->mat();
   _nr = sparsity.row_ptr.size() - 1;
   _col_idx = sparsity.col_idx;
-  _row_idx = sparsity.row_idx;
   _row_ptr = sparsity.row_ptr;
   _is_host = is_host;
+
+  // MatSetPreallocationCOO() sorts its index arrays in place and biases the row indices while doing
+  // so, so it cannot be handed the sparsity arrays themselves: the column indices are read on
+  // device by find() for the life of the run, and every matrix tag preallocates from the same
+  // sparsity.  Filling the scratch arrays here keeps that cost behind the early return above, which
+  // matters because this call is reached on every host-to-device synchronization.
+  system.buildCooIndices(coo_i, coo_j);
+
+  LibmeshPetscCallQ(MatSetPreallocationCOO(_matrix, coo_i.size(), coo_i.data(), coo_j.data()));
 
   if (!_is_host)
     _val.createDevice(_col_idx.size());
   else
     _val.create(_col_idx.size());
-
-  std::vector<PetscInt> col_idx(&_col_idx.begin(), &_col_idx.end());
-  std::vector<PetscInt> row_idx(&_row_idx.begin(), &_row_idx.end());
-
-  LibmeshPetscCallQ(
-      MatSetPreallocationCOO(_matrix, col_idx.size(), row_idx.data(), col_idx.data()));
 
   _is_alloc = true;
 }
@@ -62,7 +67,6 @@ Matrix::destroy()
   _nr = 0;
 
   _col_idx.destroy();
-  _row_idx.destroy();
   _row_ptr.destroy();
   _val.destroy();
 
