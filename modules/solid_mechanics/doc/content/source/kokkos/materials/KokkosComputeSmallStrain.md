@@ -9,6 +9,12 @@ for details.
 all of the displacement components, of a family such as `LAGRANGE_VEC`, rather than one scalar
 variable per component.
 
+A second variant, `KokkosSymmetricComputeSmallStrain`, stores the strain in the minor-symmetric
+Mandel representation `Real6` instead of the dense `Real33`. The small strain is symmetric by
+construction, so both are exact. Use the Mandel variant when the consumer expects that layout, such
+as a NEML2 `SR2` input variable gathered by
+[KokkosMOOSEQuantityToNEML2](KokkosMOOSEQuantityToNEML2.md), or the Mandel stress divergence kernel.
+
 !alert note
 Eigenstrains, a global strain and the volumetric locking correction of the non-Kokkos material are
 not available, so `mechanical_strain` always equals `total_strain`.

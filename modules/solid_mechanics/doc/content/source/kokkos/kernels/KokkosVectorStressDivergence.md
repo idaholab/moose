@@ -12,6 +12,12 @@ variable per component and so requires a `component` parameter, this kernel acts
 variable of a family such as `LAGRANGE_VEC` and carries no `component` parameter. A single
 kernel block therefore replaces the three of the non-Kokkos form.
 
+A second variant, `KokkosSymmetricVectorStressDivergence`, reads the stress and the Jacobian
+multiplier in the minor-symmetric Mandel representation, `Real6` and `Real66`, instead of the dense
+`Real33` and `Real3333`. The two are equivalent for a tangent with minor symmetry, which holds for
+the small strain family, and the Mandel form contracts a 6x6 matrix with a 6-vector rather than an
+81-entry tensor with a 9-entry one.
+
 ## Example Input Syntax
 
 !listing solid_mechanics/test/tests/kokkos/small_strain_elasticity/kokkos_small_strain.i block=Kernels
