@@ -40,9 +40,14 @@ rules, which apply here too.
 2. **Version each thing in exactly one place.** Several versions are mirrored
    (conda ↔ apptainer ↔ `requirements.txt`). `references/version-sources.md` lists every
    pin, its single source of truth, and its required mirrors.
-3. **The versioner-hash commit is always last.** Any later amend, rebase, or new commit
-   invalidates it and it must be regenerated. This is the single most common way a
-   package-update PR fails CI.
+3. **The versioner-hash commit is always last, and the branch only carries it when it is
+   ready to merge.** Its block is keyed on a commit SHA, so an amend or a rebase that
+   orphans that SHA leaves `test_versioner.py` unable to resolve it — the single most
+   common way a package-update PR fails CI. A commit added *on top* is a different case:
+   the keyed commit is immutable and still reachable, so the block stays correct, merely
+   incomplete as a record of the branch tip. Rather than regenerate it every cycle, drop
+   it at the first Step 10 fix and re-add it once the branch is green; Step 10 has the
+   recipe.
 4. **`--verify` clean is the gate**, not "it looks right". Run it against `upstream/devel`
    — the same ref every step of this task uses, and the one the published packages
    correspond to — not against the PR's base branch `next`, which already contains `devel`
@@ -267,15 +272,22 @@ your diff apart from a channel that moved underneath the PR, what a toolchain bu
 predictably breaks, and the git recipes for landing a fix without invalidating the hash
 commit.
 
-After **any** history change (new commit, amend, rebase onto `next`):
+Run the branch without the hash commit for the whole of this phase. Drop it at the first
+fix, along with the fix's own push:
 
-1. Re-run `./scripts/versioner.py --verify upstream/devel`.
-2. Re-run `./scripts/versioner.py --summary` and replace the last block in
-   `scripts/tests/versioner_hashes.yaml`.
-3. Keep the hash commit last.
+```bash
+git rebase --onto <hash-commit>^ <hash-commit> <branch-name>
+# ... commit the fix ...
+```
 
-Step 2 is not optional bookkeeping: the block is keyed on `HEAD` at the moment `--summary`
-ran, so any commit added above it invalidates it even when no package hash moved.
+`test_versioner.py` only walks the entries the file contains, so a branch with no block for
+its own tip passes. Every later fix is then a plain push with no bookkeeping, instead of a
+`reset --soft` and a force-push per cycle. Re-add the block once the branch is green, and
+put it on the PR's `## To do` checklist — nothing in CI will remind you that it is missing.
+
+Re-run `./scripts/versioner.py --verify upstream/devel` after every history change
+regardless; it reads `scripts/versioner.yaml`, not the hash file, so it stays the gate
+whether or not the hash commit is present.
 
 A late commit that touches an influential file usually needs **no** further version bump.
 The invariant is measured against the base ref, and Step 3 already moved that package's

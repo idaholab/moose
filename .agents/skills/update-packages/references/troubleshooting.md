@@ -135,11 +135,25 @@ the `meta.yaml.template` that consumes the key shows the real package name.
 
 `Update versioner hashes` must be the final commit, and the block it adds is keyed on
 `git rev-parse HEAD` at the moment `--summary` ran — in the committed history, the commit
-directly below it. **Any** commit added on top invalidates the block, even one that changes
-no package hash.
+directly below it.
 
-To add a commit to a branch that already carries the hash commit, unwind it, commit the
-work, and regenerate:
+Know which of those two facts CI actually enforces, because it decides how much work each
+cycle costs. `test_versioner.py` loads the file and walks the entries it finds, resolving
+each key with `get_packages(<commit>)`; nothing asserts that the branch tip has an entry.
+So a commit added on top costs nothing — the keyed commit is immutable and still reachable,
+and its recomputed hashes are unchanged. What fails is an unresolvable key: an amend,
+reset or rebase that orphans the keyed SHA makes the test raise
+`Reference <sha> is not valid` in a fresh clone of the branch. "Keep it last" is therefore a
+review expectation about recording the final state, while "never orphan its key" is the
+hard constraint.
+
+The cheap way through Step 10 is to carry no hash commit at all: drop it at the first fix
+with the `git rebase --onto` recipe below, push fixes as plain fast-forwards, and re-add the
+block once the branch is green. Regenerating it per cycle instead costs a `reset --soft` and
+a force-push every time, and a force-push restarts the matrix from scratch.
+
+When you do need to add a commit beneath an existing hash commit — regenerating the block at
+the end, or amending it to carry the PR number — unwind it, commit the work, and regenerate:
 
 ```bash
 git reset --soft HEAD~                                                     # undo the hash commit
