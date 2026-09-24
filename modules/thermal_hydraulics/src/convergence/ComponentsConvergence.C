@@ -52,6 +52,13 @@ ComponentsConvergence::preSolve()
     conv->preSolve();
 }
 
+void
+ComponentsConvergence::preIteration()
+{
+  for (auto & conv : _convergence_objects)
+    conv->preIteration();
+}
+
 Convergence::MooseConvergenceStatus
 ComponentsConvergence::checkConvergenceInner(unsigned int iter)
 {

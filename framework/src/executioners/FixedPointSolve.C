@@ -452,7 +452,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.preSolve();
+    convergence.preIteration();
   }
 
   // Keep track of the solution warnings from the TIMESTEP_BEGIN phase before:

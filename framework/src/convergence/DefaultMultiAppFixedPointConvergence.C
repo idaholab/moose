@@ -109,9 +109,9 @@ DefaultMultiAppFixedPointConvergence::initialize()
 }
 
 void
-DefaultMultiAppFixedPointConvergence::preSolve()
+DefaultMultiAppFixedPointConvergence::preIteration()
 {
-  DefaultConvergenceBase::preSolve();
+  DefaultConvergenceBase::preIteration();
 
   // compute TIMESTEP_BEGIN residual norm; this should be executed after TIMESTEP_BEGIN
   // but before the solve
