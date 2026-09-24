@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosMaterial.h"
+#include "KokkosNEML2BatchLayout.h"
 
 #ifdef NEML2_ENABLED
 
@@ -26,8 +27,9 @@ class NEML2ModelExecutor;
  * scatter is a single kernel and no data crosses the bus.
  *
  * Aliasing requires the NEML2 output to be contiguous and resident on the Kokkos device, both of
- * which are checked. A derivative retrieved through dynamic_expand() is not necessarily contiguous,
- * and such a variable is rejected rather than silently read through the wrong strides.
+ * which are checked. A derivative retrieved through dynamic_expand() is broadcast rather than
+ * materialized, so a tangent that is constant along the batch dimension carries a zero stride; such
+ * a variable is rejected rather than silently read through the wrong strides.
  *
  * @tparam T The Kokkos property type, whose storage must match the NEML2 variable's component
  * layout. Real6 corresponds to SR2 and Real66 to SSR4; both are Mandel with the component order of
@@ -64,13 +66,10 @@ private:
    */
   const neml2::Tensor & _value;
 
-  /// Whether the batch offsets have been gathered for the current mesh
-  bool _offsets_current = false;
-
   /// Aliases the contiguous NEML2 output's device storage; no copy of the values is made
   Moose::Kokkos::Array<Real> _source;
-  /// NEML2 batch offset of each element, indexed by contiguous element ID
-  Moose::Kokkos::Array<dof_id_type> _batch_offset;
+  /// Assignment of quadrature points to NEML2 batch entries
+  Moose::Kokkos::NEML2BatchLayout _layout;
 
   /// Emitted property
   Moose::Kokkos::MaterialProperty<T> _prop;
@@ -87,7 +86,7 @@ KOKKOS_FUNCTION void
 KokkosNEML2ToMOOSEMaterialProperty<T>::computeQpProperties(const unsigned int qp,
                                                            Datum & datum) const
 {
-  const auto batch = _batch_offset[datum.elem().id] + qp;
+  const auto batch = _layout.index(datum, qp);
 
   // The property type's storage matches the NEML2 variable's component layout, so the components
   // transfer without conversion

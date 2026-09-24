@@ -63,27 +63,27 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
                "' is not resident on the device. Set the NEML2 'device' and 'output_device' to a "
                "CUDA device so that this material can read it without a host transfer.");
 
+  // The numbering depends only on the mesh and the model's block coverage
+  if (!_layout.built())
+    _layout.build(kokkosAssembly(), kokkosMesh(), blockIDs());
+
   const auto n_reals = static_cast<dof_id_type>(tensor.numel());
+
+  if (n_reals != _layout.size() * _n_components)
+    mooseError("The NEML2 output '",
+               getParam<std::string>("from_neml2"),
+               "' has ",
+               n_reals / _n_components,
+               " batch entries, but this material covers ",
+               _layout.size(),
+               " quadrature points. The NEML2 model and this material must be restricted to the "
+               "same blocks.");
 
   if (!_source.isAlloc())
     _source.init(n_reals);
 
   // NEML2 reassigns its output tensors on every solve, so the pointer is refreshed each time
   _source.aliasDevice(const_cast<Real *>(tensor.template data_ptr<Real>()));
-
-  // The batch offsets depend only on the mesh and the model's element coverage
-  if (!_offsets_current)
-  {
-    _batch_offset.create(kokkosMesh().getNumLocalElements());
-
-    for (const auto * elem : _mesh.getMesh().active_local_element_ptr_range())
-      if (hasBlocks(elem->subdomain_id()))
-        _batch_offset[kokkosMesh().getContiguousElementID(elem)] =
-            _execute_neml2_model.getBatchIndex(elem->id());
-
-    _batch_offset.copyToDevice();
-    _offsets_current = true;
-  }
 
   Moose::Kokkos::Material::computeProperties();
 }
