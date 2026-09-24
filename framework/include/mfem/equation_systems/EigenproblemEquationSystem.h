@@ -13,9 +13,15 @@
 
 #include "EquationSystem.h"
 
+#include <variant>
+
 namespace Moose::MFEM
 {
 class EigensolverBase;
+
+/// Scalar or matrix coefficient scaling the eigenproblem right-hand side. mfem::Coefficient and
+/// mfem::MatrixCoefficient are unrelated types, so no single reference can express both.
+using EigenRHSCoefficient = std::variant<mfem::Coefficient *, mfem::MatrixCoefficient *>;
 
 /// Equation system specialization for eigenproblems.
 class EigenproblemEquationSystem : public EquationSystem
@@ -25,7 +31,7 @@ public:
   ~EigenproblemEquationSystem() override = default;
 
   /// Build eigenproblem system, with essential boundary conditions accounted for
-  void BuildEigenproblemJacobian(mfem::BlockVector & trueX);
+  void BuildEigenproblemJacobian(mfem::BlockVector & trueX, EigenRHSCoefficient rhs_coefficient);
 
   /// Prepare the provided eigensolver
   void PrepareEigensolver(EigensolverBase & solver);
@@ -36,11 +42,14 @@ protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
 
+  /// Verify that the problem is homogeneous (all Dirichlet BCs are zero)
+  virtual void CheckProblemIsHomogeneous();
+
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
   void FormEigenproblemMatrix();
 
   /// Form mass matrix for the eigensolver with Dirichlet BC elimination.
-  void FormMassMatrix();
+  void FormMassMatrix(EigenRHSCoefficient rhs_coefficient);
 
 private:
   friend class EigenproblemESProblemOperator;

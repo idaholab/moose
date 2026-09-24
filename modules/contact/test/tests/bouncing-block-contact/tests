@@ -237,6 +237,20 @@
     capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
+  [recoverable_invalid_orientation]
+    type = RunApp
+    input = 'variational-frictional.i'
+    cli_args = 'Executioner/start_time=50 Executioner/num_steps=1 Outputs/exodus=false --error'
+    expect_out = 'Solve Converged!.*Unable to determine valid secondary-primary orientation.*'
+                 'consider projection of the primary node invalid'
+    requirement = 'The system shall permit a nonlinear solve to converge after rejecting a mortar '
+                  'primary-node projection with invalid secondary-primary orientation when warnings '
+                  'are errors.'
+    design = 'AutomaticMortarGeneration.md SolutionInvalidity.md'
+    issues = '#33797'
+    recover = false
+    restep = false
+  []
   [split_secondary_action]
     type = 'Exodiff'
     input = 'variational-frictional-action.i'
