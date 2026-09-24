@@ -161,9 +161,12 @@ Rules:
 - Add the PR number as the trailing comment on the sha line.
 - `app` is intentionally excluded.
 - The sha is `git rev-parse HEAD` at the time of generation, so in the committed history it
-  is the commit *below* `Update versioner hashes` — the content tip. This is why **the block
-  is only valid if the hash commit is the final commit**. Regenerate after any amend,
-  rebase, or added commit, including one that changes no package hash.
+  is the commit *below* `Update versioner hashes` — the content tip. **Regenerate after any
+  amend, reset or rebase that orphans that sha**: `test_versioner.py` resolves every key it
+  finds, and an orphaned one raises `Reference <sha> is not valid`. A commit added on top
+  leaves the block valid — the keyed commit is immutable — but stops it describing the
+  branch tip, which is why the hash commit goes on last and only when the branch is ready
+  to merge.
 - A hash quoted as a string in the output (e.g. `hash: '2947116'`) is normal YAML
   behaviour for an all-digit value; leave it as generated.
 
