@@ -152,7 +152,8 @@ NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel
 
   Real local_re = kernel.template computeQpResidual<Derived>(0, datum);
 
-  accumulateTaggedNodalResidual(true, local_re, node);
+  accumulateTaggedNodalResidual(
+      true, local_re * sys.getVariableScalingFactor(_kokkos_var.var()), node);
 }
 
 template <typename Derived>
@@ -169,7 +170,8 @@ NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel
 
   Real local_ke = kernel.template computeQpJacobian<Derived>(0, datum);
 
-  accumulateTaggedNodalMatrix(true, local_ke, node, _kokkos_var.var());
+  accumulateTaggedNodalMatrix(
+      true, local_ke * sys.getVariableScalingFactor(_kokkos_var.var()), node, _kokkos_var.var());
 }
 
 template <typename Derived>
@@ -188,7 +190,8 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
 
   Real local_ke = kernel.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
-  accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
+  accumulateTaggedNodalMatrix(
+      true, local_ke * sys.getVariableScalingFactor(_kokkos_var.var()), node, jvar);
 }
 
 } // namespace Moose::Kokkos

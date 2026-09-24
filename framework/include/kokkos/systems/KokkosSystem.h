@@ -168,6 +168,16 @@ public:
   KOKKOS_FUNCTION bool isScalarVariable(unsigned int var) const { return _var_is_scalar[var]; }
 
   /**
+   * Get the equation scaling factor of a variable
+   * @param var The variable number
+   * @returns The scaling factor
+   */
+  KOKKOS_FUNCTION Real getVariableScalingFactor(unsigned int var) const
+  {
+    return _var_scaling_factor[var];
+  }
+
+  /**
    * Check whether a variable is active on a subdomain
    * @param var The variable number
    * @param subdomain The contiguous subdomain ID
@@ -383,6 +393,11 @@ protected:
   Array<bool> _var_is_scalar;
 
   /**
+   * Equation scaling factor of each variable
+   */
+  Array<Real> _var_scaling_factor;
+
+  /**
    * Whether each variable is active on subdomains
    */
   Array2D<bool> _var_subdomain_active;
@@ -422,6 +437,11 @@ private:
    * Setup variable data
    */
   void setupVariables();
+
+  /**
+   * Update variable scaling factors on device
+   */
+  void updateVariableScalingFactors();
 
   /**
    * Setup DOF data
