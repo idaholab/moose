@@ -23,8 +23,7 @@ NEML2SmallStrain::validParams()
   InputParameters params = NEML2PreKernel::validParams();
   params.addClassDescription(
       "This user object calculates the small strain from displacement gradients. "
-      "It takes either a single vector displacement variable, whose gradient is already second "
-      "order, or 1 to 3 standard variables contributing one row each.");
+      "It requires 1 to 3 displacement variables, which are used to compute the strain tensor.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements", "The displacements to use to calculate the strain.");
   return params;
@@ -46,19 +45,6 @@ NEML2SmallStrain::forward()
 {
   // gradient of displacements
   const auto & dux = *_grad_disp_x;
-
-  // The gradient of a vector variable is already a second-order tensor, so it needs no assembling
-  // from rows. A standard variable's gradient is a vector and supplies one row.
-  if (dux.base_dim() == 2)
-  {
-    if (_grad_disp_y || _grad_disp_z)
-      mooseError("A vector displacement variable already carries every component, so it must be "
-                 "the only variable supplied to 'displacements'.");
-
-    _output = neml2::SR2(neml2::R2(dux));
-    return;
-  }
-
   auto duy = _grad_disp_y ? *_grad_disp_y : neml2::Tensor::zeros_like(dux);
   auto duz = _grad_disp_z ? *_grad_disp_z : neml2::Tensor::zeros_like(dux);
   auto du = neml2::R2(neml2::base_stack({dux, duy, duz}, -2));
