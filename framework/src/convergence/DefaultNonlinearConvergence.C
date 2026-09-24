@@ -274,7 +274,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   }
   else if (checkResidualConvergence(n_iter, fnorm, ref_residual, _nl_rel_tol, _nl_abs_tol, oss))
     status = MooseConvergenceStatus::CONVERGED;
-  else if (nfuncs >= static_cast<PetscInt>(_nl_max_funcs))
+  else if (nfuncs >= cast_int<PetscInt>(_nl_max_funcs))
   {
     oss << "Exceeded maximum number of residual evaluations: " << nfuncs << " > " << _nl_max_funcs
         << '\n';
