@@ -39,6 +39,10 @@ class NEML2ModelExecutor;
  * material constant_on = SUBDOMAIN then stores it once per subdomain as well, which is only correct
  * for a broadcast output and is rejected otherwise.
  *
+ * NEML2 batch entries correspond to element quadrature points, so only the element copy of this
+ * material is evaluated. A face or neighbor copy is handed a datum carrying a facial quadrature point
+ * offset, which does not index the batch, so those copies leave their property alone.
+ *
  * @tparam T The Kokkos property type, whose storage must match the NEML2 variable's component
  * layout. Real corresponds to a NEML2 Scalar, Real6 to SR2 and Real66 to SSR4; the latter two are
  * Mandel with the component order of SymmetricRankTwoTensor, so the components are copied without
@@ -84,10 +88,12 @@ private:
   /// Aliases the contiguous NEML2 output's device storage; no copy of the values is made
   Moose::Kokkos::Array<Real> _source;
   /**
-   * Holds a contiguous device copy when the NEML2 output is a strided view. Empty when the output is
-   * already contiguous or is a broadcast, in which cases its own storage is aliased.
+   * Owns the compacted copy of a strided NEML2 output. Allocated once and rewritten in place, so that
+   * it is reused between solves and so that the functor copy a dispatcher holds shares this storage
+   * rather than pinning a tensor that would never be released. Unallocated when the output is already
+   * contiguous or is a broadcast, in which cases its own storage is aliased.
    */
-  neml2::Tensor _contiguous;
+  Moose::Kokkos::Array<Real> _compacted;
 
   /**
    * Whether the NEML2 output does not vary along the batch, in which case _source holds the one set of
