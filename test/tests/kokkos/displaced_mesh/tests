@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#33860'
+  design = 'DisplacedProblem.md'
+
+  [kernel]
+    type = CSVDiff
+    input = 'kokkos_displaced_kernel.i'
+    csvdiff = 'kokkos_displaced_kernel_out.csv'
+    requirement = 'The Kokkos system shall assemble residuals and Jacobians using displaced mesh.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+  [geometry]
+    type = CSVDiff
+    input = 'kokkos_displaced_geometry.i'
+    csvdiff = 'kokkos_displaced_geometry_out.csv'
+    requirement = 'The Kokkos system shall keep reference and displaced quadrature data distinct.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]
