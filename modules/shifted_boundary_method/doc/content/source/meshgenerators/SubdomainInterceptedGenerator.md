@@ -2,7 +2,7 @@
 
 !syntax description /Mesh/SubdomainInterceptedGenerator
 
-The `SubdomainInterceptedGenerator` assigns element subdomains according to their intersection with
+The `SubdomainInterceptedGenerator` assigns element subdomains according to their intersections with
 a supplied implicit boundary. The `intercepted_subdomain_policy` controls how elements containing
 multiple regions are classified.
 

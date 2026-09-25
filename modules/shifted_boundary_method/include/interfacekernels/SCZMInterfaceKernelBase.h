@@ -12,27 +12,25 @@
 #include "SBMInterfaceBase.h"
 #include "JvarMapInterface.h"
 
-/// Non-AD base class for implementing DG shifted cohesive zone models (SCZM) for 1D, 2D, and 3D
-/// traction-separation laws. This is the hand-coded-Jacobian counterpart of
-/// ADSCZMInterfaceKernelBase. The kernel operates only on a single displacement component; one
-/// kernel is required for each displacement component.
-class SCZMInterfaceKernelBase : public JvarMapKernelInterface<SBMInterfaceBase>
+/// Base class for AD and non-AD shifted cohesive zone interface kernels.
+template <bool is_ad>
+class SCZMInterfaceKernelBaseTempl : public JvarMapKernelInterface<SBMInterfaceBase<is_ad>>
 {
 public:
   static InputParameters validParams();
-  SCZMInterfaceKernelBase(const InputParameters & parameters);
+  SCZMInterfaceKernelBaseTempl(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual(Moose::DGResidualType type) override;
-  Real computeQpJacobian(Moose::DGJacobianType type) override;
-  Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar) override;
+  GenericReal<is_ad> computeQpResidual(Moose::DGResidualType type) override;
 
-  /// Whether or not to perform shifted integration
+  /**
+   * Whether to apply the shifted integration corrections.
+   *
+   * Shifted integration is the default and intended mode for SBM simulations. It can be disabled
+   * only to provide a non-shifted baseline with the same interface kernel and cohesive-zone model,
+   * which isolates the effect of the shifted correction terms for verification and comparison.
+   */
   bool perform_shifted() const override { return _shifted; }
-
-  /// Method computing the derivative of residual[_component] w.r.t displacement[component_j]
-  virtual Real computeDResidualDDisplacement(const unsigned int & component_j,
-                                             const Moose::DGJacobianType & type) const = 0;
 
   /// Base name of the material system that this kernel applies to
   const std::string _base_name;
@@ -43,18 +41,14 @@ protected:
   /// Number of displacement components
   const unsigned int _ndisp;
 
-  /// Coupled displacement component variable IDs
-  std::vector<unsigned int> _disp_var;
+  /// Traction in the global frame
+  const GenericMaterialProperty<RealVectorValue, is_ad> & _traction_global;
 
-  /// Pointer to displacement variables
-  std::vector<MooseVariable *> _vars;
-
-  /// Values of the traction and its derivative w.r.t. the displacement jump
-  ///@{
-  const MaterialProperty<RealVectorValue> & _traction_global;
-  const MaterialProperty<RankTwoTensor> & _dtraction_djump_global;
-  ///@}
-
-  /// Applying shifted integration
+  /// True by default; false only when requesting the non-shifted verification baseline
   const bool _shifted;
+
+  usingGenericInterfaceKernelMembers;
 };
+
+using SCZMInterfaceKernelBase = SCZMInterfaceKernelBaseTempl<false>;
+using ADSCZMInterfaceKernelBase = SCZMInterfaceKernelBaseTempl<true>;

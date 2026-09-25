@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBase.h"
+#include "GenericInterfaceKernel.h"
 
 template <typename Parent>
 InputParameters
@@ -68,5 +69,5 @@ SBMBase<Parent>::trueNormal() const
 // Explicit template instantiations
 
 template class SBMBase<IntegratedBC>;
-template class SBMBase<InterfaceKernel>;
-template class SBMBase<ADInterfaceKernel>;
+template class SBMBase<GenericInterfaceKernel<false>>;
+template class SBMBase<GenericInterfaceKernel<true>>;

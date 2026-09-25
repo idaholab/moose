@@ -149,7 +149,9 @@ ShiftedCohesiveZoneAction::validParams()
   params.addParam<bool>(
       "volumetric_locking_correction",
       false,
-      "Whether to apply volume locking to the directional correction term in SCZM.");
+      "Whether to apply volumetric locking correction to the directional correction Jacobian "
+      "term in SCZM. If not specified, this value is automatically inherited from the solid "
+      "mechanics physics block.");
 
   return params;
 }

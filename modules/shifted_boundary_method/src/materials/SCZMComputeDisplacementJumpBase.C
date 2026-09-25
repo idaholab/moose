@@ -21,7 +21,11 @@ SCZMComputeDisplacementJumpBase<is_ad>::validParams()
       "interface in local coordinates");
 
   // no shifted testing
-  params.addParam<bool>("no_shifted", false, "Disable shifted terms.");
+  params.addParam<bool>(
+      "no_shifted",
+      false,
+      "Disable shifted integration corrections to provide a non-shifted baseline for verification "
+      "and comparison.");
 
   params.addParam<UserObjectName>(
       "sbm_distance_uo",

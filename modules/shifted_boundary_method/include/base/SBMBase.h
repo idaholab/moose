@@ -32,7 +32,12 @@ public:
 protected:
   virtual void initialSetup() override;
 
-  /// Whether or not to perform shifted integration. Must be implemented by derived class.
+  /**
+   * Whether to apply shifted integration corrections.
+   *
+   * Shifted integration is the intended SBM mode. A derived class may return false to retain the
+   * same formulation without its shifted corrections as a verification or comparison baseline.
+   */
   virtual bool perform_shifted() const = 0;
 
   /// Returns the characteristic mesh size, computed as (element_volume)^(1/dim)

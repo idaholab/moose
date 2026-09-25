@@ -7,7 +7,7 @@ toward the query point as the gradient.
 
 ## Geometry Sources
 
-Exactly one geometry source must be selected:
+A single geometry source, which can be either of the two types listed below, must be selected:
 
 - Set `builder` to an [`SBMSurfaceMeshBuilder`](userobjects/SBMSurfaceMeshBuilder.md) for a
   saved mesh containing one interface.

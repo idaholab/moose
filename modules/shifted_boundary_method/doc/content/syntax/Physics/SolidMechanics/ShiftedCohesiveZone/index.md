@@ -65,18 +65,25 @@ interface subdomains automatically. For other boundary names, set `interface_sub
 one pair per boundary in the same order. The pair selects an interface; its order does not control
 the final true-normal orientation.
 
-The `no_shifted = true` option disables shifted evaluation and does not provide another geometry
+Shifted integration is enabled by default and is the intended mode for SBM simulations. The
+`no_shifted = true` option is retained primarily for verification and comparison: it disables the
+shifted correction terms while using the same interface kernel and cohesive-zone model, providing a
+non-shifted baseline that isolates their effect. This option does not require a separate geometry
 source.
 
 ## Define the traction law
 
 The Physics does not create the constitutive traction law. Define an interface material such as
 `BiLinearMixedModeTraction` or `SalehaniIrani3DCTraction` and restrict it to the same surrogate
-boundaries as the SCZM Physics. The action-created displacement-jump and global-traction materials
-then use the properties produced by this constitutive material.
+interfaces/ boundaries as the SCZM Physics. The Action also creates the displacement-jump and
+global-traction materials. The displacement-jump material computes the local displacement jump
+used by the constitutive material to determine the local traction. The global-traction material
+then uses the local traction to compute the traction required by the equilibrium equations.
 
-For multiple interfaces, define the boundary list once with HIT substitution and use it in both
-places. The complete-interface example uses this pattern:
+For multiple interfaces, define the boundary list once at the top of the input file and use `${interfaces}`
+wherever it is needed. The `${interfaces}` expression is replaced with the boundary list assigned to
+interfaces. Reusing this list in both the Physics and the traction material keeps their boundary
+specifications consistent. The complete-interface example uses this pattern:
 
 !listing modules/shifted_boundary_method/test/tests/grain_boundary_case/grain_boundary_sczm_coarse_lambda1.i start=interfaces end=ny include-end=false
 

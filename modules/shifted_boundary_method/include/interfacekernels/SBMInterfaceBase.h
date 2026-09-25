@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SBMBase.h"
+#include "GenericInterfaceKernel.h"
 
-using SBMInterfaceBase = SBMBase<InterfaceKernel>;
-using ADSBMInterfaceBase = SBMBase<ADInterfaceKernel>;
+template <bool is_ad>
+using SBMInterfaceBase = SBMBase<GenericInterfaceKernel<is_ad>>;

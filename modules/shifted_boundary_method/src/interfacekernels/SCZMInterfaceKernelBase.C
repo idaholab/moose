@@ -9,10 +9,11 @@
 
 #include "SCZMInterfaceKernelBase.h"
 
+template <bool is_ad>
 InputParameters
-SCZMInterfaceKernelBase::validParams()
+SCZMInterfaceKernelBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = SBMInterfaceBase::validParams();
+  InputParameters params = SBMInterfaceBase<is_ad>::validParams();
 
   params.addRequiredParam<unsigned int>("component",
                                         "The component of the displacement vector this kernel is "
@@ -23,79 +24,58 @@ SCZMInterfaceKernelBase::validParams()
   params.addParam<std::string>("traction_global_name",
                                "traction_global",
                                "Name of the traction material property (global frame)");
-
-  params.addParam<bool>("no_shifted", false, "Applying Shifted.");
+  params.addParam<bool>(
+      "no_shifted",
+      false,
+      "Disable the shifted integration corrections while retaining the same interface kernel and "
+      "cohesive-zone model. Shifted integration is enabled by default and is the intended SBM "
+      "mode; disable it only to isolate the effect of the correction terms for verification and "
+      "comparison.");
 
   return params;
 }
 
-SCZMInterfaceKernelBase::SCZMInterfaceKernelBase(const InputParameters & parameters)
-  : JvarMapKernelInterface<SBMInterfaceBase>(parameters),
-    _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
-                   ? getParam<std::string>("base_name") + "_"
+template <bool is_ad>
+SCZMInterfaceKernelBaseTempl<is_ad>::SCZMInterfaceKernelBaseTempl(
+    const InputParameters & parameters)
+  : JvarMapKernelInterface<SBMInterfaceBase<is_ad>>(parameters),
+    _base_name(this->isParamValid("base_name") &&
+                       !this->template getParam<std::string>("base_name").empty()
+                   ? this->template getParam<std::string>("base_name") + "_"
                    : ""),
-    _component(getParam<unsigned int>("component")),
-    _ndisp(coupledComponents("displacements")),
-    _disp_var(_ndisp),
-    _vars(_ndisp),
-    _traction_global(getMaterialPropertyByName<RealVectorValue>(
-        _base_name + getParam<std::string>("traction_global_name"))),
-    _dtraction_djump_global(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "dtraction_djump_global")),
-    _shifted(!getParam<bool>("no_shifted"))
+    _component(this->template getParam<unsigned int>("component")),
+    _ndisp(this->coupledComponents("displacements")),
+    _traction_global(this->template getGenericMaterialPropertyByName<RealVectorValue, is_ad>(
+        _base_name + this->template getParam<std::string>("traction_global_name"))),
+    _shifted(!this->template getParam<bool>("no_shifted"))
 {
-  // Enforce consistency
-  if (_ndisp != _mesh.dimension())
-    paramError("displacements", "Number of displacements must match problem dimension.");
+  if (_ndisp != this->_mesh.dimension())
+    this->paramError("displacements", "Number of displacements must match problem dimension.");
 
   if (_ndisp > 3 || _ndisp < 1)
-    mooseError("the SCZM material requires 1, 2 or 3 displacement variables");
-
-  for (const auto i : make_range(_ndisp))
-  {
-    _disp_var[i] = coupled("displacements", i);
-    _vars[i] = getVar("displacements", i);
-  }
+    this->paramError("displacements",
+                     "The SCZM material requires 1, 2, or 3 displacement variables.");
 }
 
-Real
-SCZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
+template <bool is_ad>
+GenericReal<is_ad>
+SCZMInterfaceKernelBaseTempl<is_ad>::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = _traction_global[_qp](_component);
+  auto residual = _traction_global[this->_qp](_component);
 
   switch (type)
   {
-    // [test_secondary-test_primary]*T where T represents the traction.
     case Moose::Element:
-      r *= -_test[_i][_qp];
+      residual *= -this->_test[this->_i][this->_qp];
       break;
 
     case Moose::Neighbor:
-      r *= _test_neighbor[_i][_qp];
+      residual *= this->_test_neighbor[this->_i][this->_qp];
       break;
   }
 
-  return r;
+  return residual;
 }
 
-Real
-SCZMInterfaceKernelBase::computeQpJacobian(Moose::DGJacobianType type)
-{
-  // diagonal Jacobian coefficient for the displacement component this kernel works on
-  return computeDResidualDDisplacement(_component, type);
-}
-
-Real
-SCZMInterfaceKernelBase::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
-{
-  // bail out if jvar is not coupled
-  if (getJvarMap()[jvar] < 0)
-    return 0.0;
-
-  // Jacobian of residual[_component] w.r.t. coupled displacement component
-  for (const auto off_diag_component : make_range(_ndisp))
-    if (jvar == _disp_var[off_diag_component])
-      return computeDResidualDDisplacement(off_diag_component, type);
-
-  return 0.0;
-}
+template class SCZMInterfaceKernelBaseTempl<false>;
+template class SCZMInterfaceKernelBaseTempl<true>;

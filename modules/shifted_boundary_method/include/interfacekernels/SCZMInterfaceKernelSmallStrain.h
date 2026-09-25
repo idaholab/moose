@@ -11,47 +11,58 @@
 
 #include "SCZMInterfaceKernelBase.h"
 
-/// Non-AD DG cohesive zone model kernel for the small strain formulation. This is the
-/// hand-coded-Jacobian counterpart of ADSCZMInterfaceKernelSmallStrain and assumes the
-/// traction-separation law only depends on the displacement jump. One kernel is required for each
-/// displacement component.
-class SCZMInterfaceKernelSmallStrain : public SCZMInterfaceKernelBase
+/// AD and non-AD shifted cohesive zone interface kernel for the small-strain formulation.
+template <bool is_ad>
+class SCZMInterfaceKernelSmallStrainTempl : public SCZMInterfaceKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
-  SCZMInterfaceKernelSmallStrain(const InputParameters & parameters);
+  SCZMInterfaceKernelSmallStrainTempl(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual(Moose::DGResidualType type) override;
+  GenericReal<is_ad> computeQpResidual(Moose::DGResidualType type) override;
   Real computeQpJacobian(Moose::DGJacobianType type) override;
   Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar) override;
 
-  Real computeDResidualDDisplacement(const unsigned int & component_j,
-                                     const Moose::DGJacobianType & type) const override;
-
-  /// Analytic Jacobian of the stress-based directional correction term
+  Real computeDResidualDDisplacement(unsigned int component_j, Moose::DGJacobianType type) const;
   Real calculateDirectionalCorrectionJacobian(unsigned int ivar,
                                               unsigned int jvar,
                                               Moose::DGJacobianType type) const;
 
   /// The stress tensor on the element and neighbor sides
   ///@{
-  const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<RankTwoTensor> & _stress_neighbor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress_neighbor;
   ///@}
 
-  /// The material tangent on the element and neighbor sides
+  /// Non-AD data used by the hand-coded Jacobian
   ///@{
-  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
-  const MaterialProperty<RankFourTensor> & _Jacobian_mult_neighbor;
-  ///@}
-
-  /// Whether the material tangent is d(PK1)/d(F) instead of d(stress)/d(strain)
+  std::vector<unsigned int> _disp_var;
+  std::vector<MooseVariable *> _vars;
+  const MaterialProperty<RankTwoTensor> * _dtraction_djump_global;
+  const MaterialProperty<RankFourTensor> * _Jacobian_mult;
+  const MaterialProperty<RankFourTensor> * _Jacobian_mult_neighbor;
   bool _tangent_is_dpk1_df;
+  ///@}
 
   /// Whether to add the directional correction term
   const bool _directional_correction;
 
   /// Whether to apply the volumetric locking correction to the directional correction term
-  const bool _volumetric_locking_correction;
+  bool _volumetric_locking_correction;
+
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_base_name;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_component;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_ndisp;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_shifted;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_coord;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_coord_sys;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_JxW;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::_normals;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::surrogateDistance;
+  using SCZMInterfaceKernelBaseTempl<is_ad>::trueNormal;
+  usingGenericInterfaceKernelMembers;
 };
+
+using SCZMInterfaceKernelSmallStrain = SCZMInterfaceKernelSmallStrainTempl<false>;
+using ADSCZMInterfaceKernelSmallStrain = SCZMInterfaceKernelSmallStrainTempl<true>;

@@ -9,10 +9,16 @@ information required to accurately impose boundary conditions.
 
 The same concept can be applied to internal interfaces. This extension, known as the
 Shifted Interface Method (SIM), replaces a true material interface with a surrogate
-interface. This module applies SIM to solid-mechanics interface problems through the
-Shifted Cohesive-Zone Method (SCZM). It provides tools for constructing surrogate
-domains and interfaces, evaluating distances and normals from MSH- or STL-based surface
-representations, and enforcing cohesive-zone laws on non-interface-fitted meshes.
+interface. When applied to cohesive-zone modeling, SIM is referred to as the Shifted
+Cohesive-Zone Method (SCZM).
+
+SIM is not limited in principle to cohesive-zone problems. It can be applied to other
+physics involving interface conditions, including thermal-contact problems,
+fluid-interface problems, electromagnetics with dielectric interfaces, and mass
+transport with membrane interfaces. This module currently provides tools for
+constructing surrogate domains and interfaces, evaluating distances and normals from
+MSH- or STL-based surface representations, and enforcing interface laws on
+non-interface-fitted meshes.
 
 The SCZM workflow has three main components.
 
@@ -39,23 +45,33 @@ The distance and normal data are provided by objects such as
 [`ShortestDistanceToSurface`](source/userobjects/ShortestDistanceToSurface.md) and
 [`BoundaryShortestDistanceToSurface`](source/userobjects/BoundaryShortestDistanceToSurface.md).
 
-## Shifted Cohesive-Zone Method
+## Shifted Interface Method
 
-SCZM combines the surrogate interface with the distance and normal information described
-above. Interface kernels enforce the cohesive traction-separation law on the surrogate
-interface. Their weak form uses the distance vector to evaluate the shifted displacement
-jump and the true normal to correct the traction contribution for the geometric mismatch.
-The [Shifted Cohesive Zone Physics](syntax/Physics/SolidMechanics/ShiftedCohesiveZone/index.md)
+The Shifted Interface Method (SIM) imposes interface conditions on a surrogate interface
+formed by faces of the background mesh rather than on the true interface. Because the
+surrogate and true interfaces do not coincide, SIM accounts for this geometric
+discrepancy when evaluating the interface conditions.
+
+At each quadrature point on the surrogate interface, a distance vector maps the
+quadrature point to its corresponding location on the true interface. A Taylor expansion
+along this distance vector approximates the solution and other required quantities at the
+true interface using values evaluated on the surrogate interface. For interface
+conditions involving fluxes or tractions, the normal of the true interface is also used
+to account for the difference in orientation between the true and surrogate interfaces.
+
+This module currently demonstrates SIM through the Shifted Cohesive-Zone Method (SCZM)
+for solid-mechanics interface problems. SCZM interface kernels enforce a cohesive
+traction-separation law on the surrogate interface. The [Shifted Cohesive Zone Physics](syntax/Physics/SolidMechanics/ShiftedCohesiveZone/index.md)
 creates the required user objects, materials, and interface kernels for this formulation.
 
 ## Citing
 
 !! sbm-citation-start
 
-The following paper describes the formulation, implementation, verification, and
-applications of the Shifted Cohesive-Zone Method:
+The MOOSE implementation of the Shifted Cohesive-Zone Method (SCZM) is described by
+Yang et al.:
 
-```
+```bibtex
 @article{yang2026shifted,
   author = {Cheng-Hau Yang and Mark C. Messner and Tianchen Hu},
   title = {A Shifted Cohesive-Zone Method for Non-Interface-Fitted Meshes with Applications to Crystal Plasticity},
@@ -67,6 +83,37 @@ applications of the Shifted Cohesive-Zone Method:
   issn = {0045-7825},
   doi = {https://doi.org/10.1016/j.cma.2026.119259},
   url = {https://www.sciencedirect.com/science/article/pii/S0045782526005323}
+}
+```
+
+The Shifted Boundary Method (SBM), which provides the foundation for this work, was
+originally introduced by Main and Scovazzi:
+
+```bibtex
+@article{main2018shifted,
+  title = {The shifted boundary method for embedded domain computations. Part I: Poisson and Stokes problems},
+  author = {Main, Alex and Scovazzi, Guglielmo},
+  journal = {Journal of Computational Physics},
+  volume = {372},
+  pages = {972--995},
+  year = {2018},
+  publisher = {Elsevier}
+}
+```
+
+The extension of the shifted-boundary concept to internal interfaces, referred to as the
+Shifted Interface Method (SIM), was introduced by Li et al.:
+
+```bibtex
+@article{li2020shifted,
+  title = {The shifted interface method: a flexible approach to embedded interface computations},
+  author = {Li, Kangan and Atallah, Nabil M and Main, G Alex and Scovazzi, Guglielmo},
+  journal = {International Journal for Numerical Methods in Engineering},
+  volume = {121},
+  number = {3},
+  pages = {492--518},
+  year = {2020},
+  publisher = {Wiley Online Library}
 }
 ```
 
