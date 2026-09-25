@@ -28,8 +28,8 @@ public:
   /// Interpolate the real variable at all query points.
   void execute() override;
 
-protected:
-  void finalizeValues() override;
+  /// Copies interpolated values into the VPP vectors.
+  void finalize() override;
 
 private:
   int getFESpaceContinuityType() const override;

@@ -22,7 +22,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
-        min_slots = 4 # occasionally uses lots of memory
+        min_slots = 2 # occasionally uses lots of memory
       []
     []
     [error]

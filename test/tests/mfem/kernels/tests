@@ -305,23 +305,18 @@
     []
   []
   [MFEMGravity]
-    type = XMLDiff
+    type = CSVDiff
     input = gravity.i
-    xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
-                OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Gravity.csv'
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    # clang skip: significant diffs with clang 22 that are unresolved #33466
-    capabilities = 'mfem & platform=linux & compiler!=clang'
-    compute_devices = 'cpu' # schemadiff with cuda
-    max_parallel = 1 # schemadiff with multiple ranks
-    # diffs at 9e-4 with -march=x86-64-v3
-    rel_err = 2e-3
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     recover = false
   []
   [MFEMGravityQuadratureFunction]
     type = CSVDiff
     input = gravity_qf.i
-    csvdiff = 'OutputData/GravityQF.csv'
+    csvdiff = 'OutputData/Gravity.csv'
     design = 'MFEMVectorQuadratureFunction.md'
     requirement = 'The system shall have the ability to precompute a vector coefficient at quadrature points and reuse the stored values in place of the original coefficient.'
     capabilities = 'mfem'

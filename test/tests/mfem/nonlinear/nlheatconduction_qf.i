@@ -15,11 +15,7 @@
 []
 
 [Kernels]
-  active = 'qf_nl_diffusion linear_diffusion dT_dt'
-  [qf_nl_diffusion]
-    type = MFEMNLDiffusionKernel
-    variable = temperature
-    k_coefficient = qf_k
-    dk_du_coefficient = ${alpha}
+  [nl_diffusion]
+    k_coefficient := qf_k
   []
 []

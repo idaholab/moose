@@ -34,6 +34,7 @@ MFEMSuperLU::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
   solver->iterative_mode = getParam<bool>("use_initial_guess");
+  solver->SetDeviceOffload(mfem::Device::IsAvailable());
   _solver = std::move(solver);
 }
 

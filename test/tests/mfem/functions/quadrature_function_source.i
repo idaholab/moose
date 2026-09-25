@@ -11,11 +11,7 @@
 []
 
 [Kernels]
-  active = 'diff qf_source'
-  [qf_source]
-    type = MFEMDomainLFKernel
-    variable = variable
-    coefficient = qf_source
-    block = wire
+  [source]
+    coefficient := qf_source
   []
 []

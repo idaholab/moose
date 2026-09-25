@@ -31,8 +31,8 @@ public:
   /// Interpolate the real and imaginary parts of the complex variable.
   void execute() override;
 
-protected:
-  void finalizeValues() override;
+  /// Copies interpolated values into the VPP vectors.
+  void finalize() override;
 
 private:
   int getFESpaceContinuityType() const override;

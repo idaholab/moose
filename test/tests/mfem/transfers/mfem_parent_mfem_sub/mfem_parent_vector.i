@@ -128,25 +128,21 @@
     type = MFEMVectorL2Error
     variable = mfem_parent_h1_vector_var
     function = mfem_sub_h1_vector_var
-    execute_on = TIMESTEP_END
   []
   [HCurl_Var_L2_Error]
     type = MFEMVectorL2Error
     variable = mfem_parent_hcurl_vector_var
     function = mfem_sub_hcurl_vector_var
-    execute_on = TIMESTEP_END
   []
   [HDiv_Var_L2_Error]
     type = MFEMVectorL2Error
     variable = mfem_parent_hdiv_vector_var
     function = mfem_sub_hdiv_vector_var
-    execute_on = TIMESTEP_END
   []
   [L2_Var_L2_Error]
     type = MFEMVectorL2Error
     variable = mfem_parent_l2_vector_var
     function = mfem_sub_l2_vector_var
-    execute_on = TIMESTEP_END
   []
 []
 

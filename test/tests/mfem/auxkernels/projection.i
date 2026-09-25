@@ -119,7 +119,6 @@
     start_point = '-3 -2 0'
     end_point = '3 2 0'
     num_points = 101
-    execute_on = 'final'
   []
   [line_sample_J]
     type = MFEMVariableLineValueSampler
@@ -127,7 +126,6 @@
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101
-    execute_on = 'final'
   []
   [line_sample_GAz]
     type = MFEMVariableLineValueSampler
@@ -135,7 +133,6 @@
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101
-    execute_on = 'final'
   []
   [line_sample_GAz_copy]
     type = MFEMVariableLineValueSampler
@@ -143,14 +140,12 @@
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101
-    execute_on = 'final'
   []
 []
 
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'final'
     file_base = OutputData/Projection/projection
   []
 []

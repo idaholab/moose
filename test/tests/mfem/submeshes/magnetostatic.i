@@ -51,7 +51,6 @@
     type = MFEMCurlAux
     variable = b_field
     source = a_field
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -140,7 +139,6 @@
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'timestep_end'
     file_base = OutputData/electric_potential
   []
 []
