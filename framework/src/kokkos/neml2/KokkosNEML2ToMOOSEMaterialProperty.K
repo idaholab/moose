@@ -14,6 +14,9 @@
 #include "NEML2ModelExecutor.h"
 #include "NEML2Utils.h"
 
+#include <ATen/ops/from_blob.h>
+
+
 registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSERealMaterialProperty);
 registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSESymmetricRankTwoTensorMaterialProperty);
 registerKokkosMaterial("MooseApp", KokkosNEML2ToMOOSESymmetricRankFourTensorMaterialProperty);
@@ -59,6 +62,12 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
+  // A NEML2 batch entry is an element quadrature point. A face or neighbor copy of this material is
+  // handed a datum whose quadrature point offset counts facial quadrature points, which indexes
+  // something else entirely, so such a copy has nothing it can correctly write.
+  if (_bnd || _neighbor)
+    return;
+
   if (!_value.device().is_cuda())
     mooseError("The NEML2 output '",
                getParam<std::string>("from_neml2"),
@@ -80,11 +89,6 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
   // broadcast, such as a state variable sliced out of the model's state axis, is compacted instead,
   // which copies only the values actually needed.
   _broadcast = isBatchBroadcast();
-
-  if (!_broadcast && !_value.is_contiguous())
-    _contiguous = _value.contiguous();
-
-  const auto & tensor = (_broadcast || _value.is_contiguous()) ? _value : _contiguous;
 
   // The numbering depends only on the mesh and the model's block coverage
   if (!_layout.built())
@@ -131,13 +135,29 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
 
   // A broadcast aliases one set of components rather than one per batch entry
   const auto n_reals =
-      _broadcast ? _n_components : static_cast<dof_id_type>(tensor.numel());
+      _broadcast ? _n_components : static_cast<dof_id_type>(_value.numel());
 
   if (!_source.isAlloc())
     _source.init(n_reals);
 
-  // NEML2 reassigns its output tensors on every solve, so the pointer is refreshed each time
-  _source.aliasDevice(const_cast<Real *>(tensor.template data_ptr<Real>()));
+  if (_broadcast || _value.is_contiguous())
+    // NEML2 reassigns its output tensors on every solve, so the pointer is refreshed each time
+    _source.aliasDevice(const_cast<Real *>(_value.template data_ptr<Real>()));
+  else
+  {
+    // Compact the strided view into storage this object owns, rather than into a tensor whose handle
+    // the functor would carry. Wrapping the buffer lets the copy gather the strides on the device and
+    // write straight into it, with no intermediate allocation.
+    if (!_compacted.isAlloc())
+      _compacted.createDevice(n_reals);
+
+    at::from_blob(_compacted.deviceData(),
+                  _value.sizes(),
+                  torch::TensorOptions().dtype(torch::kFloat64).device(_value.device()))
+        .copy_(_value);
+
+    _source.aliasDevice(_compacted.deviceData());
+  }
 
   Moose::Kokkos::Material::computeProperties();
 }
