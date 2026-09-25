@@ -63,6 +63,39 @@ where
 
 The implication of this discretization is that the temperature of the segment is defined at the opposite end of the segment from the flow entrance. Hence, proper conservation of energy necessitates the modified wall heat transfer term following the form of Newton's law of cooling. Furthermore, a modified advection term is used to ensure the proper directionality of the advection regardless of the flow direction.
 
+Most closure quantities in the governing equations are user-supplied quantities, including: flow area, reference pressure, forms loss coefficients, gravitational acceleration, segment angles, pump pressure gains, and wetted perimeters.
+
+A few notable closure quantities are not user-specified inputs, and are worth some discussion.
+
+The thermophysical properties ($\rho$, $\mu$, $k$, & $c_p$) are computed from the coupled temperature values and the reference pressure using a supplied [SinglePhaseFluidProperties.md] object. Most terms in the momentum equation utilize the average temperature from inlet to outlet of the flow path to compute the fluid properties, except for the gravitational term, which uses local temperature to model natural circulation effects. Since the temperature equation is solved on a segment-local basis, local temperature is used to compute the thermophysical properties.
+
+The hydraulic diameter of each segment is computed using the closure relation:
+
+!equation
+D_{h,i} = \frac{4 A_i}{P_{w,i}} \,
+
+The friction factor of each segment is computed differently for laminar, turbulent, and transition flow. For $Re < 2300$ the flow is deemed laminar and the following analytical relation is used:
+
+!equation
+f = \frac{64}{Re} \,
+
+For $Re > 4000$ the flow is deemed turbulent and the Swamee-Jain approximation of the Colebrook-White equation is used:
+
+!equation
+f = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{Re^{0.9}} \right) \right)^2} \,
+
+For $2300 < Re < 4000$ the flow is deemed be transitioning and a conservative interpolation between turbulent and laminar predictions is used:
+
+!equation
+f = \max(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb}, f_{lam})) \,
+
+The heat transfer coefficient is computed using the Dittus-Boelter correlation:
+
+!equation
+h = 0.023 Re^{0.8} Pr^{0.4} \,
+
+Future iterations of these kernels will see expanded options for closure correlations. Stay tuned!
+
 ## Junctions
 
 The above equations are valid for 1D flow paths only; for a flow junction, the mass conservation equation is as follows:

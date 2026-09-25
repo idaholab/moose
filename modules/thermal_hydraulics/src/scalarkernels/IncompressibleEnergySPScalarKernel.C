@@ -87,7 +87,7 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpResidual()
   auto _cp = _fp.cp_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
   auto _k = _fp.k_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
 
-  // Decide flow regime for HTC
+  // Compute HTC quantities
   auto _Dh = 4.0 * _area(_qp, _state) / _perimeter(_qp, _state);
   auto _G = abs(_m[_i]) / _area(_qp, _state);
   auto _Re = _G * _Dh / _mu;
