@@ -135,6 +135,14 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
 
   if (_fe_problem.solverParams(_nl.number())._type != Moose::ST_JFNK)
     mooseError("PBP must be used with JFNK solve type");
+
+  // PETSc applies '-pc_type' from its options database (via KSPSetFromOptions /
+  // SNESSetFromOptions) after attachPreconditioner() installs the PBP as a PCSHELL, so an
+  // explicit '-pc_type' always overrides and silently disables the PBP set up here.
+  if (_fe_problem.getPetscOptions().user_set_options.contains(_nl.prefix() + "-pc_type"))
+    mooseError("The '-pc_type' PETSc option was set explicitly through 'petsc_options_iname' "
+               "and 'petsc_options_value', which overrides the Physics-Based Preconditioner "
+               "(PBP) set up in this Preconditioning block. Remove '-pc_type' to use PBP.");
 }
 
 PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner() { this->clear(); }
