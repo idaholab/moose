@@ -16,6 +16,7 @@
       input = 'nested_monte_carlo.i'
       csvdiff = 'nested_monte_carlo_out_data_0001.csv'
       min_parallel = 3
+      prereq = nested_monte_carlo/serial
       detail = 'in parallel;'
     []
   []

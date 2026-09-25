@@ -41,7 +41,7 @@ MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
 }
 
 Real
-MonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+MonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   return _distributions[col_index]->quantile(getRand(row_index * getNumberOfCols() + col_index));
 }

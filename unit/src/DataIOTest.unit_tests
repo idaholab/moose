@@ -1,0 +1,10 @@
+[Tests]
+  design = 'DataIO.md'
+  issues = '#32193'
+  [undefined_torch_tensor]
+    type = GoogleTest
+    unit_test = DataIOTest.undefinedTorchTensor
+    requirement = 'The system shall correctly store and load an undefined torch::Tensor as recoverable data without marking it as defined.'
+    capabilities = 'libtorch'
+  []
+[]

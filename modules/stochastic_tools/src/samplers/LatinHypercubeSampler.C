@@ -27,7 +27,9 @@ LatinHypercubeSampler::validParams()
 }
 
 LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
-  : Sampler(parameters)
+  : Sampler(parameters),
+    _shufflers(declareRestartableData<std::vector<std::unique_ptr<MooseRandomPerturbation>>>(
+        "lhs_shufflers"))
 {
   const auto & distribution_names = getParam<std::vector<DistributionName>>("distributions");
   for (const DistributionName & name : distribution_names)
@@ -51,7 +53,7 @@ LatinHypercubeSampler::executeTearDown()
 }
 
 Real
-LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   mooseAssert(_shufflers.size() > 0, "Shufflers have not been initialized.");
 
