@@ -15,6 +15,7 @@
 
 #ifdef NEML2_ENABLED
 #include <ATen/ATen.h>
+#include <torch/csrc/autograd/autograd.h>
 #include "libmesh/id_types.h"
 #include "neml2/tensors/functions/jacrev.h"
 #include "neml2/dispatchers/ValueMapLoader.h"
@@ -60,6 +61,13 @@ NEML2ModelExecutor::validParams()
       "param_gatherers",
       {},
       "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters");
+  params.addParam<std::vector<UserObjectName>>(
+      "cotangent_gatherers",
+      {},
+      "List of MOOSE*ToNEML2 user objects gathering MOOSE data as reverse-mode cotangents. The "
+      "NEML2 name of each gatherer identifies the NEML2 output variable the cotangent is paired "
+      "with. A cotangent is used to evaluate the vector-Jacobian product between itself and the "
+      "derivative of that output variable with respect to the NEML2 model parameters.");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -89,6 +97,8 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
   for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("gatherers"))
     _depend_uo.insert(gatherer_name);
   for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("param_gatherers"))
+    _depend_uo.insert(gatherer_name);
+  for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("cotangent_gatherers"))
     _depend_uo.insert(gatherer_name);
 #endif
 }
@@ -126,6 +136,24 @@ NEML2ModelExecutor::initialSetup()
     addGatheredParameter(gatherer_name, uo.NEML2Name());
     _param_gatherers.push_back(&uo);
   }
+
+  // deal with user object provided cotangents
+  for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("cotangent_gatherers"))
+  {
+    // gather coupled user objects late to ensure they are constructed. Do not add them as
+    // dependencies (that's already done in the constructor).
+    const auto & uo = getUserObjectByName<MOOSEToNEML2>(gatherer_name, /*is_dependency=*/false);
+    addGatheredCotangent(gatherer_name, uo);
+  }
+
+  // A vector-Jacobian product consumes the autograd graph of a single unchunked forward
+  // evaluation. Whether that graph survives chunked dispatch has not been verified, so refuse the
+  // combination rather than silently returning a partial result.
+  if (!_retrieved_parameter_vjps.empty() && scheduler())
+    mooseError("NEML2 parameter derivative vector-Jacobian products cannot be computed when a work "
+               "scheduler (and hence a work dispatcher) is used, because the autograd graph is not "
+               "guaranteed to survive dispatched evaluation. Either remove the scheduler or "
+               "request the materialized parameter derivatives instead.");
 
   // iterate over set of required inputs and error out if we find one that is not provided
   for (const auto & [iname, ivar] : model().input_variables())
@@ -176,6 +204,20 @@ NEML2ModelExecutor::addGatheredParameter(const UserObjectName & gatherer_name,
                gatherer_name,
                "' is already gathered by another gatherer.");
   _gathered_parameter_names.insert(param);
+}
+
+void
+NEML2ModelExecutor::addGatheredCotangent(const UserObjectName & gatherer_name,
+                                         const MOOSEToNEML2 & uo)
+{
+  if (_cotangent_gatherers.count(uo.NEML2Name()))
+    paramError("cotangent_gatherers",
+               "The cotangent of the NEML2 output variable `",
+               uo.NEML2Name(),
+               "` gathered by UO '",
+               gatherer_name,
+               "' is already gathered by another gatherer.");
+  _cotangent_gatherers[uo.NEML2Name()] = &uo;
 }
 
 void
@@ -258,6 +300,24 @@ NEML2ModelExecutor::fillInputs()
     for (const auto & [y, dy] : _retrieved_parameter_derivatives)
       for (const auto & [p, tensor] : dy)
         model().get_parameter(p).requires_grad_(true);
+
+    // Same for the model parameters whose derivative is only requested as a vector-Jacobian
+    // product. Both re-applications must happen every step because set_parameters above replaces
+    // the parameter tensors wholesale, which drops the gradient flag.
+    for (const auto & [y, gy] : _retrieved_parameter_vjps)
+      for (const auto & [p, _] : gy)
+      {
+        const neml2::Tensor pval = model().get_parameter(p);
+        if (pval.batch_dim() == 0)
+          mooseError("The NEML2 model parameter '",
+                     p,
+                     "' is not batched, but a vector-Jacobian product with respect to it was "
+                     "requested. Vector-Jacobian products require per-quadrature-point batched "
+                     "(function-driven) NEML2 model parameters, because the reverse pass on an "
+                     "unbatched model parameter sums the contribution over the entire domain "
+                     "instead of producing a per-quadrature-point value.");
+        model().get_parameter(p).requires_grad_(true);
+      }
   }
   catch (std::exception & e)
   {
@@ -449,6 +509,53 @@ NEML2ModelExecutor::extractOutputs()
     for (auto & [y, target] : _retrieved_outputs)
       target = _out[y].to(output_device());
 
+    // retrieve the vector-Jacobian products between the gathered cotangents and the parameter
+    // derivatives. Seeding a single reverse pass with the cotangent directly yields the double
+    // contraction cotangent : dy/dp for every requested model parameter at once, instead of
+    // materializing dy/dp one base component at a time. MOOSE and NEML2 share the same Mandel
+    // convention (component order and sqrt(2) factors), so the flat dot product performed by
+    // autograd is the double contraction, with no correction factor. Note that NEML2 does not
+    // apply the implicit function theorem to model parameters inside an unrolled ImplicitUpdate
+    // solve, and that limitation is inherited here.
+    for (auto it = _retrieved_parameter_vjps.begin(); it != _retrieved_parameter_vjps.end(); ++it)
+    {
+      const auto & y = it->first;
+      auto & gy = it->second;
+
+      const auto gatherer = _cotangent_gatherers.find(y);
+      if (gatherer == _cotangent_gatherers.end())
+        mooseError("A vector-Jacobian product with the cotangent of the NEML2 output variable '",
+                   y,
+                   "' was requested, but no gatherer supplies that cotangent.");
+
+      // Differentiate with respect to every requested model parameter in one reverse pass
+      std::vector<neml2::Tensor> ps;
+      for (const auto & [p, _] : gy)
+        ps.push_back(model().get_parameter(p));
+      const std::vector<neml2::ATensor> pts(ps.begin(), ps.end());
+
+      // The forward graph is shared by every consumer, so it must be retained while any of them
+      // still needs it, i.e. the materialized parameter derivatives below and the cotangents of
+      // the remaining output variables.
+      const bool retain_graph = !_retrieved_parameter_derivatives.empty() ||
+                                std::next(it) != _retrieved_parameter_vjps.end();
+
+      const auto g = torch::autograd::grad({_out[y]},
+                                           pts,
+                                           {gatherer->second->gatheredData().to(device())},
+                                           retain_graph,
+                                           /*create_graph=*/false,
+                                           /*allow_unused=*/false);
+
+      // grad returns one tensor per model parameter, in the order the parameters were supplied
+      std::size_t i = 0;
+      for (auto & [_, target] : gy)
+      {
+        target = neml2::Tensor(g[i], ps[i].dynamic_dim(), ps[i].intmd_dim()).to(output_device());
+        i++;
+      }
+    }
+
     // retrieve parameter derivatives
     for (auto & [y, dy] : _retrieved_parameter_derivatives)
       for (auto & [p, target] : dy)
@@ -576,6 +683,33 @@ NEML2ModelExecutor::getOutputParameterDerivative(const neml2::VariableName & out
                "', but the NEML2 model parameter does not exist.");
 
   return _retrieved_parameter_derivatives[output_name][parameter_name];
+}
+
+const neml2::Tensor &
+NEML2ModelExecutor::getOutputParameterVJP(const neml2::VariableName & output_name,
+                                          const std::string & parameter_name) const
+{
+  checkExecutionStage();
+
+  if (!model().output_variables().count(output_name))
+    mooseError("Trying to retrieve the vector-Jacobian product between the cotangent of NEML2 "
+               "output variable '",
+               output_name,
+               "' and the derivative of that output variable with respect to NEML2 model "
+               "parameter '",
+               parameter_name,
+               "', but the NEML2 output variable does not exist.");
+
+  if (model().named_parameters().count(parameter_name) != 1)
+    mooseError("Trying to retrieve the vector-Jacobian product between the cotangent of NEML2 "
+               "output variable '",
+               output_name,
+               "' and the derivative of that output variable with respect to NEML2 model "
+               "parameter '",
+               parameter_name,
+               "', but the NEML2 model parameter does not exist.");
+
+  return _retrieved_parameter_vjps[output_name][parameter_name];
 }
 
 #endif
