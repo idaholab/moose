@@ -13,7 +13,7 @@
 
 #include "MFEMComplexVariableValueSamplerBase.h"
 
-/*
+/**
  * Samples a complex-valued MFEM variable at a set of points evenly
  * distributed along a line.
  * Outputs real and imaginary parts as separate VPP columns.
