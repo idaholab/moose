@@ -14,6 +14,9 @@
 #include "AuxiliarySystem.h"
 
 #include "libmesh/system.h"
+#include "libmesh/int_range.h"
+
+#include <algorithm>
 
 namespace Moose::Kokkos
 {
@@ -201,18 +204,17 @@ System::setupSparsity()
     return;
 
   std::vector<PetscInt> col_idx;
-  std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};
 
+  // The rows are laid out as the locally owned rows in ascending order followed by the ghost rows
+  // in send list order.  buildCooIndices() recovers each row's global index from that ordering, so
+  // the two must be kept consistent.
   for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
   {
     auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
 
     for (auto col : cols)
-    {
       col_idx.push_back(col);
-      row_idx.push_back(r);
-    }
 
     row_ptr.push_back(col_idx.size());
   }
@@ -245,17 +247,43 @@ System::setupSparsity()
     auto n_cols = recv_num_cols[proc][row[proc]++];
 
     for (PetscInt c = 0; c < n_cols; ++c)
-    {
       col_idx.push_back(recv_cols[proc][col[proc]++]);
-      row_idx.push_back(r);
-    }
 
     row_ptr.push_back(col_idx.size());
   }
 
   _sparsity.col_idx = col_idx;
-  _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
+}
+
+void
+System::buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const
+{
+  const auto & col_idx = _sparsity.col_idx;
+  const auto & row_ptr = _sparsity.row_ptr;
+
+  coo_i.resize(col_idx.size());
+  coo_j.assign(&col_idx.begin(), &col_idx.end());
+
+  // Every nonzero of a row carries that row's global index, which setupSparsity() leaves implicit
+  // in the row ordering.  The two loops below walk the rows in the order it wrote them.
+  dof_id_type row = 0;
+
+  auto fill_row = [&](const PetscInt global_row)
+  {
+    std::fill(coo_i.begin() + row_ptr[row], coo_i.begin() + row_ptr[row + 1], global_row);
+    ++row;
+  };
+
+  for (const auto global_row : make_range(_dof_map.first_dof(), _dof_map.end_dof()))
+    fill_row(global_row);
+
+  for (const auto global_row : _dof_map.get_send_list())
+    fill_row(global_row);
+
+  mooseAssert(row == row_ptr.size() - 1,
+              "Kokkos system error: the DOF map no longer describes the rows that setupSparsity() "
+              "recorded.");
 }
 
 void
@@ -279,16 +307,23 @@ System::sync(const MemcpyType dir)
       _vectors[tag].copyToDevice();
     }
 
-    for (auto tag : _active_matrix_tags)
     {
-      auto & matrix = _system.getMatrix(tag);
+      // PETSc consumes the COO index arrays destructively, so each matrix needs its own copy of
+      // them.  Holding the storage here lets one allocation serve every matrix tag, and releases it
+      // once the last one is preallocated.
+      std::vector<PetscInt> coo_i, coo_j;
 
+      for (auto tag : _active_matrix_tags)
       {
-        TIME_SECTION("MatSetPreallocation", 1);
-        _matrices[tag].create(matrix, *this);
-      }
+        auto & matrix = _system.getMatrix(tag);
 
-      _matrices[tag] = 0;
+        {
+          TIME_SECTION("MatSetPreallocation", 1);
+          _matrices[tag].create(matrix, *this, coo_i, coo_j);
+        }
+
+        _matrices[tag] = 0;
+      }
     }
 
     _vectors.copyToDevice();
