@@ -40,7 +40,7 @@
       input = 'kokkos_auto_scaling_iterations.i'
       exodiff = 'kokkos_auto_scaling_iterations.e'
       cli_args = 'Outputs/file_base=kokkos_auto_scaling_iterations'
-      detail = 'with Kokkos kernels, reducing the iteration count for a poorly scaled problem,'
+      detail = 'with Kokkos kernels for a poorly scaled problem,'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda xpu'
     []
@@ -50,7 +50,7 @@
       input = 'kokkos_auto_scaling_iterations_disabled.i'
       exodiff = 'kokkos_auto_scaling_iterations_disabled.e'
       cli_args = 'Executioner/automatic_scaling=false Outputs/file_base=kokkos_auto_scaling_iterations_disabled'
-      detail = 'while the same problem requires more iterations when scaling is disabled,'
+      detail = 'and producing the same solution when scaling is disabled,'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda xpu'
     []

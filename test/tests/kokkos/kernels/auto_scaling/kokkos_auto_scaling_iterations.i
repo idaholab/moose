@@ -89,9 +89,11 @@ coef = 1e12
 [Postprocessors]
   [nonlinear_iterations]
     type = NumNonlinearIterations
+    outputs = console
   []
   [linear_iterations]
     type = NumLinearIterations
+    outputs = console
   []
 []
 
