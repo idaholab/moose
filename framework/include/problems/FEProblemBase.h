@@ -1321,6 +1321,35 @@ public:
    *
    * @param tid The thread id
    */
+  /**
+   * Material property IDs needed by consumers, separated by the material data type consumed.
+   *
+   * Activity is otherwise decided from a single set, and because property IDs are per name a property
+   * needed by a volume consumer marks the face and neighbor copies of its material active as well.
+   * Keeping the sets apart lets a material copy be evaluated only when a consumer of its own data type
+   * needs one of its properties.
+   */
+  using KokkosNeededMatProps =
+      std::array<std::unordered_set<unsigned int>, Moose::INTERFACE_MATERIAL_DATA + 1>;
+
+  /**
+   * Split needed material property IDs by the material data type their consumers read
+   *
+   * @param needed_mat_props The property IDs needed by the consumers of this evaluation
+   * @returns One set of property IDs per material data type
+   */
+  KokkosNeededMatProps
+  splitKokkosMatPropsByDataType(const std::unordered_set<unsigned int> & needed_mat_props) const;
+
+  /**
+   * Mark active properties on the Kokkos materials only, one set per material data type.
+   *
+   * Deliberately does not touch _all_materials, which also holds the non-Kokkos materials: narrowing
+   * their activity from the Kokkos consumers' needs would skip a non-Kokkos material that a non-Kokkos
+   * consumer wants.
+   */
+  void setActiveKokkosMaterialProperties(const KokkosNeededMatProps & mat_prop_ids);
+
   void setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                    const THREAD_ID tid);
 
