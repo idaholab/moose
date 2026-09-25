@@ -50,9 +50,25 @@ protected:
     return TangentCalculationMethod::PARTIAL;
   }
 
+  /**
+   * Compute the equivalent creep strain rate for a supplied equivalent stress.
+   */
+  virtual GenericReal<is_ad> computeCreepStrainRate(const GenericReal<is_ad> & stress_eq);
+
+  /**
+   * Compute the strain energy rate density by Gaussian quadrature in equivalent stress space.
+   */
+  virtual Real computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate) override;
+
   /// Creep strain material property
   GenericMaterialProperty<RankTwoTensor, is_ad> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
+
+private:
+  /// Gaussian quadrature order used for the strain energy rate density integration
+  const std::string _serd_integration_order;
 };
 
 typedef RadialReturnCreepStressUpdateBaseTempl<false> RadialReturnCreepStressUpdateBase;
