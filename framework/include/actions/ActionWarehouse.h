@@ -15,6 +15,7 @@
 #include <vector>
 #include <list>
 #include <ostream>
+#include <functional>
 
 // MOOSE includes
 #include "Action.h"
@@ -318,11 +319,27 @@ protected:
   void buildBuildableActions(const std::string & task);
 
   /**
-   * @return The names of the UserObjects referenced by \p params through its UserObjectName (or
-   * std::vector<UserObjectName>) parameters. Mirrors
+   * @return The names referenced by \p params through its \p NameType (or
+   * std::vector<NameType>) parameters, e.g. \p UserObjectName or \p ComponentName. Mirrors
    * MeshGeneratorSystem::getMeshGeneratorParamDependencies.
    */
-  std::vector<UserObjectName> getUserObjectParamDependencies(const InputParameters & params) const;
+  template <typename NameType>
+  std::vector<NameType> getNameParamDependencies(const InputParameters & params) const;
+
+  /**
+   * Reorder \p actions so that an action that references another (through a \p NameType
+   * parameter, or through \p extra_deps for a dependency that cannot be expressed as a NameType
+   * parameter, e.g. one embedded in a compound string parameter) is constructed after the one it
+   * references, according to the name -> Action mapping in \p action_for_name. This makes the
+   * input order-agnostic. A cycle is not treated as an error (a NameType parameter does not
+   * always denote a construction-time dependency) - \p actions is left in its original order in
+   * that case.
+   */
+  template <typename NameType>
+  void sortActionsByDependency(
+      std::list<Action *> & actions,
+      const std::map<std::string, Action *> & action_for_name,
+      const std::function<std::vector<NameType>(Action *)> & extra_deps = {}) const;
 
   /**
    * Reorder the UserObject-constructing actions \p actions so that a UserObject that references
@@ -332,6 +349,15 @@ protected:
    * MeshGeneratorSystem performs for mesh generators.
    */
   void sortUserObjectActions(std::list<Action *> & actions) const;
+
+  /**
+   * Reorder the ActionComponent-constructing actions \p actions so that a component that
+   * references another component (through a ComponentName parameter, e.g. ComponentJunction's
+   * "first_component"/"second_component") is constructed after the one it references. Without
+   * this, same-task ordering falls back to input-file declaration order, which is unenforced and
+   * fails on stale/empty state if a referencing component is declared first.
+   */
+  void sortActionComponentActions(std::list<Action *> & actions) const;
 
   std::vector<std::shared_ptr<Action>> _all_ptrs;
 

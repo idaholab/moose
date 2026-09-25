@@ -64,6 +64,14 @@ public:
   /// Return the dimension of the component
   unsigned int dimension() const { return _dimension; }
 
+  /// Names of UserObjects that must be constructed before this component's own 'add_user_object'
+  /// task, for a dependency that this component cannot express through a UserObjectName-typed
+  /// parameter of its own (e.g. because the referenced UserObject's name is only known once looked
+  /// up from another, already-built component - such as a boundary condition component finding
+  /// the numerical flux UserObject built by the Physics of the flow channel it connects to).
+  /// Default empty. See ActionWarehouse::sortUserObjectActions.
+  virtual std::vector<UserObjectName> dependsOnUserObjects() const { return {}; }
+
   /// Merge another component's group into this component's group. The group is shared
   /// (via a shared_ptr) by every component in it, so a single call connects both sides.
   void addConnectedComponent(ActionComponent & component);
