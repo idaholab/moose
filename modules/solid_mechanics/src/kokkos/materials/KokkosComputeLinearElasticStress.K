@@ -9,6 +9,8 @@
 
 #include "KokkosComputeLinearElasticStress.h"
 
+#include "FEProblemBase.h"
+
 registerKokkosMaterial("SolidMechanicsApp", KokkosComputeLinearElasticStress);
 
 InputParameters
@@ -32,7 +34,22 @@ KokkosComputeLinearElasticStress::KokkosComputeLinearElasticStress(
     _mechanical_strain(
         getKokkosMaterialPropertyByName<Moose::Kokkos::Real33>(_base_name + "mechanical_strain")),
     _stress(declareKokkosPropertyByName<Moose::Kokkos::Real33>(_base_name + "stress")),
-    _Jacobian_mult(
-        declareKokkosPropertyByName<Moose::Kokkos::Real3333>(_base_name + "Jacobian_mult"))
+    _Jacobian_mult(declareKokkosPropertyByName<Moose::Kokkos::Real3333>(
+        _base_name + "Jacobian_mult", {}, Moose::Kokkos::PropertyConstantOption::SUBDOMAIN))
 {
+  _fe_problem.addKokkosMeshInitializationHook(
+      std::bind(&KokkosComputeLinearElasticStress::checkElasticityTensorGranularity, this));
+}
+
+void
+KokkosComputeLinearElasticStress::checkElasticityTensorGranularity()
+{
+  for (const auto block : blockIDs())
+    if (_elasticity_tensor.constantOption(block) != Moose::Kokkos::PropertyConstantOption::SUBDOMAIN)
+      mooseError("The tangent this material declares is stored once per subdomain, which is only "
+                 "correct when the elasticity tensor it copies is too, but '",
+                 _base_name,
+                 "elasticity_tensor' is not constant on subdomains for block ",
+                 block,
+                 ". Leave the elasticity tensor material at its default constant_on = SUBDOMAIN.");
 }
