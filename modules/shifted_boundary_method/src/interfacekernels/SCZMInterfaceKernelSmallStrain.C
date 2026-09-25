@@ -179,15 +179,12 @@ SCZMInterfaceKernelSmallStrainTempl<is_ad>::computeQpResidual(Moose::DGResidualT
   return residual;
 }
 
-template <bool is_ad>
+template <>
 Real
-SCZMInterfaceKernelSmallStrainTempl<is_ad>::computeDResidualDDisplacement(
-    unsigned int component_j, Moose::DGJacobianType type) const
+SCZMInterfaceKernelSmallStrainTempl<true>::computeDResidualDDisplacement(
+    unsigned int /*component_j*/, Moose::DGJacobianType /*type*/) const
 {
-  if constexpr (is_ad)
-    return 0;
-  else
-    return computeDResidualDDisplacement(component_j, type);
+  return 0;
 }
 
 template <>
@@ -246,88 +243,6 @@ SCZMInterfaceKernelSmallStrainTempl<false>::computeDResidualDDisplacement(
   jac *= true_normal_dot_surrogate_normal; // Area correction
 
   return jac;
-}
-
-template <>
-Real SCZMInterfaceKernelSmallStrainTempl<false>::calculateDirectionalCorrectionJacobian(
-    unsigned int ivar, unsigned int jvar, Moose::DGJacobianType type) const;
-
-template <bool is_ad>
-Real
-SCZMInterfaceKernelSmallStrainTempl<is_ad>::computeQpJacobian(Moose::DGJacobianType)
-{
-  return 0;
-}
-
-template <>
-Real
-SCZMInterfaceKernelSmallStrainTempl<false>::computeQpJacobian(Moose::DGJacobianType type)
-{
-  Real jacobian = computeDResidualDDisplacement(this->_component, type);
-
-  if (_shifted && _directional_correction)
-    switch (type)
-    {
-      case Moose::ElementElement:
-        jacobian -= calculateDirectionalCorrectionJacobian(_component, _component, type);
-        break;
-      case Moose::NeighborNeighbor:
-        jacobian += calculateDirectionalCorrectionJacobian(_component, _component, type);
-        break;
-      case Moose::ElementNeighbor:
-      case Moose::NeighborElement:
-        break;
-    }
-
-  return jacobian;
-}
-
-template <bool is_ad>
-Real
-SCZMInterfaceKernelSmallStrainTempl<is_ad>::computeQpOffDiagJacobian(Moose::DGJacobianType,
-                                                                     unsigned int)
-{
-  return 0;
-}
-
-template <>
-Real
-SCZMInterfaceKernelSmallStrainTempl<false>::computeQpOffDiagJacobian(Moose::DGJacobianType type,
-                                                                     unsigned int jvar)
-{
-  if (this->getJvarMap()[jvar] < 0)
-    return 0;
-
-  Real jacobian = 0;
-  for (const auto coupled_component : make_range(this->_ndisp))
-    if (jvar == _disp_var[coupled_component])
-      jacobian = computeDResidualDDisplacement(coupled_component, type);
-
-  if (_shifted && _directional_correction)
-    for (const auto coupled_component : make_range(_ndisp))
-      if (jvar == _disp_var[coupled_component])
-        switch (type)
-        {
-          case Moose::ElementElement:
-            jacobian -= calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
-            break;
-          case Moose::NeighborNeighbor:
-            jacobian += calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
-            break;
-          case Moose::ElementNeighbor:
-          case Moose::NeighborElement:
-            break;
-        }
-
-  return jacobian;
-}
-
-template <bool is_ad>
-Real
-SCZMInterfaceKernelSmallStrainTempl<is_ad>::calculateDirectionalCorrectionJacobian(
-    unsigned int, unsigned int, Moose::DGJacobianType) const
-{
-  return 0;
 }
 
 template <>
@@ -401,6 +316,84 @@ SCZMInterfaceKernelSmallStrainTempl<false>::calculateDirectionalCorrectionJacobi
   }
 
   return jacobian;
+}
+
+template <>
+Real
+SCZMInterfaceKernelSmallStrainTempl<true>::computeQpJacobian(Moose::DGJacobianType /*type*/)
+{
+  return 0;
+}
+
+template <>
+Real
+SCZMInterfaceKernelSmallStrainTempl<false>::computeQpJacobian(Moose::DGJacobianType type)
+{
+  Real jacobian = computeDResidualDDisplacement(this->_component, type);
+
+  if (_shifted && _directional_correction)
+    switch (type)
+    {
+      case Moose::ElementElement:
+        jacobian -= calculateDirectionalCorrectionJacobian(_component, _component, type);
+        break;
+      case Moose::NeighborNeighbor:
+        jacobian += calculateDirectionalCorrectionJacobian(_component, _component, type);
+        break;
+      case Moose::ElementNeighbor:
+      case Moose::NeighborElement:
+        break;
+    }
+
+  return jacobian;
+}
+
+template <>
+Real
+SCZMInterfaceKernelSmallStrainTempl<true>::computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/,
+                                                                    unsigned int /*jvar*/)
+{
+  return 0;
+}
+
+template <>
+Real
+SCZMInterfaceKernelSmallStrainTempl<false>::computeQpOffDiagJacobian(Moose::DGJacobianType type,
+                                                                     unsigned int jvar)
+{
+  if (this->getJvarMap()[jvar] < 0)
+    return 0;
+
+  Real jacobian = 0;
+  for (const auto coupled_component : make_range(this->_ndisp))
+    if (jvar == _disp_var[coupled_component])
+      jacobian = computeDResidualDDisplacement(coupled_component, type);
+
+  if (_shifted && _directional_correction)
+    for (const auto coupled_component : make_range(_ndisp))
+      if (jvar == _disp_var[coupled_component])
+        switch (type)
+        {
+          case Moose::ElementElement:
+            jacobian -= calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
+            break;
+          case Moose::NeighborNeighbor:
+            jacobian += calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
+            break;
+          case Moose::ElementNeighbor:
+          case Moose::NeighborElement:
+            break;
+        }
+
+  return jacobian;
+}
+
+template <>
+Real
+SCZMInterfaceKernelSmallStrainTempl<true>::calculateDirectionalCorrectionJacobian(
+    unsigned int, unsigned int, Moose::DGJacobianType) const
+{
+  return 0;
 }
 
 template class SCZMInterfaceKernelSmallStrainTempl<false>;
