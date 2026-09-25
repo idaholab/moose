@@ -910,7 +910,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
 std::string
 ContactAction::pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair) const
 {
-  return _boundary_pairs.size() > 1 ? "_" + Moose::stringify(pair, "_") : "";
+  return _boundary_pairs.size() > 1 ? ContactPairLowerDBlockGenerator::pairSuffix(pair) : "";
 }
 
 void

@@ -31,6 +31,12 @@ public:
   static std::vector<std::pair<BoundaryName, BoundaryName>>
   findPairsCentroid(MeshBase & mesh, const std::vector<BoundaryName> & boundaries, Real distance);
 
+  /**
+   * Name suffix identifying a (primary, secondary) boundary pair, used to build unique object
+   * names when there is more than one contact pair
+   */
+  static std::string pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair);
+
 protected:
   std::unique_ptr<MeshBase> & _input;
 
@@ -43,6 +49,27 @@ private:
   const MooseEnum & _pairing_method;
   /// Prefix prepended to the names of generated subdomain blocks
   const std::string & _prefix;
+
+  /// A candidate contact boundary with its sideset area and area-weighted centroid
+  struct CandidateBoundary
+  {
+    BoundaryName name;
+    BoundaryID id;
+    Real area;
+    Point centroid;
+  };
+
+  /**
+   * Resolve the candidate boundary names to boundary IDs, erroring if any boundary is listed more
+   * than once, and compute the area and centroid of each candidate sideset. Areas and centroids are
+   * computed in Cartesian coordinates.
+   */
+  static std::vector<CandidateBoundary>
+  candidateBoundaries(const MeshBase & mesh, const std::vector<BoundaryName> & boundaries);
+
+  /// Order two paired boundaries as (primary, secondary), with the larger surface as primary
+  static std::pair<BoundaryName, BoundaryName> orderPair(const CandidateBoundary & a,
+                                                         const CandidateBoundary & b);
 
   static void removeDuplicatePairs(std::vector<std::pair<BoundaryName, BoundaryName>> & pairs);
 };

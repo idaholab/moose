@@ -17,10 +17,6 @@ offset = 1e-2
     input = file
     block = '3 4'
   []
-  [nodelist]
-    type = NodeSetsFromSideSetsGenerator
-    input = delete
-  []
 []
 
 [Variables]
