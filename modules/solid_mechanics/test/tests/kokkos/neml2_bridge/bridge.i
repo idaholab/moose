@@ -8,8 +8,7 @@
 # and the expected result is zero rather than a stored gold value.
 #
 # The displacement field is prescribed through auxiliary variables rather than solved, because only
-# the constitutive update and the two bridges are under test. A solved displacement field would
-# bring in a displaced mesh, which the Kokkos problem does not support.
+# the constitutive update and the two bridges are under test.
 
 [Mesh]
   [gmg]

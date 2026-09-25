@@ -15,8 +15,7 @@
 # state is zero on the first one.
 #
 # The displacement field is prescribed through an auxiliary variable rather than solved, because only
-# the strain gather and the constitutive update are under test. A solved displacement field would
-# bring in a displaced mesh, which the Kokkos problem does not support.
+# the strain gather and the constitutive update are under test.
 
 [Mesh]
   [gmg]
