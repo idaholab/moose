@@ -24,7 +24,7 @@ using namespace libMesh;
 TEST(ActiveElementFractionTest, UnitSquare)
 {
   Parallel::Communicator comm(MPI_COMM_SELF);
-  auto mesh = std::make_unique<SerialMesh>(comm);
+  auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
 
   Node * n0 = mesh->add_point(Point(0.0, 0.0, 0.0), 0);
   Node * n1 = mesh->add_point(Point(1.0, 0.0, 0.0), 1);
@@ -70,7 +70,7 @@ TEST(ActiveElementFractionTest, UnitSquare)
 TEST(ElementDomainOccupancyTest, DomainEnclosedWithinElement)
 {
   Parallel::Communicator comm(MPI_COMM_SELF);
-  auto mesh = std::make_unique<SerialMesh>(comm);
+  auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
 
   Node * n0 = mesh->add_point(Point(0.0, 0.0, 0.0), 0);
   Node * n1 = mesh->add_point(Point(1.0, 0.0, 0.0), 1);
