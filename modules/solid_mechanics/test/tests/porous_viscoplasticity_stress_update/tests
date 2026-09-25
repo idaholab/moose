@@ -1,0 +1,605 @@
+[Tests]
+  issues = '#13494'
+  design = 'source/materials/PorousViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+  parallel_scheduling = True
+  [exact_spherical]
+    type = CSVDiff
+    input = exact.i
+    csvdiff = exact_spherical_out.csv
+    requirement = 'The system shall compute a ratio between the gauge stress, equivalent stress, and hydrostatic stress in a viscoplasticity solve across a wide swath of exponents and stress states using spherical pore geometry in spherical coordinates.'
+    capabilities = 'method!=dbg'
+  []
+  [exact_spherical-jac]
+    type = 'PetscJacobianTester'
+    input = 'exact.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e4
+    prereq = exact_spherical
+    requirement = 'The Jacobian for the AD exact spherical problem shall agree with a finite-difference Jacobian within the specified tolerances'
+  []
+
+  [creep_nonad]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_nonad_out.csv
+    cli_args = 'AD="" use_ad=false Outputs/file_base=creep_nonad_out'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute a creep strain based on an external loading not using automatic differentiation.'
+  []
+  [creep]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_out.csv
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute a creep strain based on an external loading using automatic differentiation.'
+  []
+  [creep-jac]
+    type = 'PetscJacobianTester'
+    input = 'creep.i'
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
+    run_sim = 'True'
+    ratio_tol = 7e-7
+    difference_tol = 1e8
+    prereq = creep
+    requirement = 'The Jacobian for the AD regular creep problem shall agree with a finite-difference Jacobian within the specified tolerances'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+  []
+  [lps_single_no_porosity]
+    type = CSVDiff
+    input = 'lps_single.i'
+    cli_args = 'porosity_name=0 Outputs/file_base=lps_single_no_porosity_out'
+    rel_err = 1e-3
+    csvdiff = 'lps_single_no_porosity_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that matches a simple radial return calculation if porosity is not coupled.'
+  []
+  [lps_single_nonad]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_nonad_out.csv'
+    cli_args = 'AD="" use_ad=false Outputs/file_base=lps_single_nonad_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain not using automatic differentiation.'
+  []
+  [lps_single]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain using automatic differentiation.'
+  []
+  [lps_single-jac]
+    type = 'PetscJacobianTester'
+    input = 'lps_single.i'
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
+    run_sim = 'True'
+    ratio_tol = 1e-6
+    difference_tol = 1e8
+    prereq = lps_single
+    requirement = 'The Jacobian for the AD lps single problem shall agree with a finite-difference Jacobian within the specified tolerances'
+  []
+  [lps_single_negative_pressure]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_negative_pressure_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=-1e7 Outputs/file_base=lps_single_negative_pressure_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that decreases the porosity due to an external strain and a negative porosity pressure.'
+  []
+  [lps_single_positive_pressure]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_positive_pressure_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=1e7 Outputs/file_base=lps_single_positive_pressure_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that decreases the porosity due to an external strain and a positive porosity pressure.'
+  []
+  [lps_single_hydrostatic]
+    type = CSVDiff
+    input = 'lps_single_hydrostatic.i'
+    csvdiff = 'lps_single_hydrostatic_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using the LPS formulation that increases the porosity due to an internal porosity pressure.'
+  []
+  [lps_single_negative_hydrostatic]
+    type = CSVDiff
+    input = 'lps_single_hydrostatic.i'
+    csvdiff = 'lps_single_negative_hydrostatic_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=-1e7 Outputs/file_base=lps_single_negative_hydrostatic_out'
+    requirement = 'The system shall compute the viscoplastic response using the LPS formulation that increases the porosity due to an internal porosity pressure.'
+  []
+
+  [lps_single_split_no_porosity]
+    type = CSVDiff
+    input = 'lps_single_split.i'
+    cli_args = 'porosity_name=0 Outputs/file_base=lps_single_split_no_porosity_out'
+    csvdiff = 'lps_single_split_no_porosity_out.csv'
+    rel_err = 1e-4
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that matches a simple radial return calculation if porosity is not coupled.'
+  []
+  [lps_single_split]
+    type = CSVDiff
+    input = 'lps_single_split.i'
+    csvdiff = 'lps_single_split_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
+  []
+  [lps_single_split-jac]
+    type = 'PetscJacobianTester'
+    input = 'lps_single_split.i'
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
+    run_sim = 'True'
+    ratio_tol = 1e-6
+    difference_tol = 1e8
+    prereq = lps_single_split
+    requirement = 'The Jacobian for the AD lps single split problem shall agree with a finite-difference Jacobian within the specified tolerances'
+  []
+
+  # Fast constitutive-integration equivalence: four fine global steps versus one coarse global
+  # step that adaptively refines into multiple local porous-LPS substeps.
+  [lps_single_nonsubstepping]
+    type = RunApp
+    input = lps_single_substep_equivalence.i
+    cli_args = 'dt=0.25 substepping=NONE adaptive=false Outputs/file_base=lps_single_nonsubstepping'
+    requirement = 'The generic porous-LPS integration reference shall advance the linear loading history through four quarter-size global timesteps with local constitutive substepping disabled.'
+  []
+  [lps_single_substepping]
+    type = RunApp
+    input = lps_single_substep_equivalence.i
+    cli_args = 'dt=1 substepping=INCREMENT_BASED adaptive=true verbose=true Outputs/file_base=lps_single_substepping'
+    expect_out = 'substep 2/[0-9]+ dt_sub = .* global_dt = 1 shared_dt = 1'
+    prereq = lps_single_nonsubstepping
+    requirement = 'The generic porous-LPS integration candidate shall refine one coarse global interval into multiple accepted local constitutive substeps without changing the global timestep.'
+  []
+  [lps_single_substepping_compare]
+    type = RunCommand
+    command = 'python3 compare_lps_substep_equivalence.py lps_single_nonsubstepping.csv lps_single_substepping.csv'
+    prereq = lps_single_substepping
+    requirement = 'One coarse porous-LPS global step resolved by adaptive local constitutive substeps shall reproduce the final stress, gauge, inelastic-strain, and porosity state from a four-step fine-global reference.'
+  []
+
+  [review_substep_tangent_smooth_clean]
+    type = RunCommand
+    command = 'python3 check_substep_tangent_diagnostics.py clean review_substep_tangent_smooth_perf'
+    prereq = lps_single_substepping_compare
+    requirement = 'The generic non-AD multi-substep tangent cost regression shall remove stale per-instance diagnostics before measuring replay work.'
+  []
+  [review_substep_tangent_smooth_diagnostics]
+    type = RunApp
+    input = lps_single_substepping.i
+    cli_args = 'AD="" use_ad=false dt=0.1 Materials/stress/tangent_operator=nonlinear Materials/lps/adaptive_substepping=false Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=review_substep_tangent_smooth_perf Outputs/csv=false Executioner/num_steps=1'
+    expect_out = 'substep 2/'
+    prereq = review_substep_tangent_smooth_clean
+    requirement = 'A smooth generic non-AD fixed-multi-substep FULL tangent shall explicitly exercise more than one local substep and expose the cost of complete-path numerical replay without leaving the accepted constitutive branch.'
+  []
+  [review_substep_tangent_smooth_verify]
+    type = RunCommand
+    command = 'python3 check_substep_tangent_diagnostics.py smooth review_substep_tangent_smooth_perf'
+    prereq = review_substep_tangent_smooth_diagnostics
+    requirement = 'Each smooth generic multi-substep tangent shall use twelve perturbed and one restoration replay, with six centered accepted-branch directions and no branch fallback.'
+  []
+
+  [negative]
+    requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor, when automatic differentiaton is requested,'
+    [zero]
+      type = CSVDiff
+      input = 'lps_single_negative_porosity.i'
+      rel_err = 1e-4
+      csvdiff = 'lps_single_negative_porosity_out.csv'
+      detail = ' by setting the porosity to zero;'
+    []
+    [initial]
+      type = CSVDiff
+      input = 'lps_single_negative_porosity.i'
+      csvdiff = 'lps_single_negative_porosity_initial_out.csv'
+      rel_err = 1e-4
+      cli_args = 'Materials/lps/negative_behavior=INITIAL_CONDITION Materials/lps/initial_porosity=0 Outputs/file_base=lps_single_negative_porosity_initial_out'
+      detail = ' or by setting the porosity to the initial condition;'
+    []
+    [exception]
+      type = RunException
+      input = 'lps_single_negative_porosity.i'
+      expect_err = 'porosity is negative'
+      cli_args = 'Materials/lps/negative_behavior=EXCEPTION'
+      detail = ' or by throwing an exception.'
+    []
+  []
+
+  [local_substepping_preserves_global_dt]
+    type = RunApp
+    input = preserve_global_dt.i
+    cli_args = 'Materials/lps/verbose=true dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'global_dt = 0.1 shared_dt = 0.1'
+    requirement = 'The porous viscoplastic stress update shall perform local constitutive substepping without modifying the FEProblem global timestep.'
+  []
+
+  [local_substepping_preserves_global_dt_threaded]
+    type = RunApp
+    input = preserve_global_dt.i
+    cli_args = 'Materials/lps/verbose=true dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'global_dt = 0.1 shared_dt = 0.1'
+    min_threads = 2
+    max_threads = 2
+    prereq = local_substepping_preserves_global_dt
+    requirement = 'The porous viscoplastic stress update shall preserve the FEProblem global timestep when constitutive substepping executes with multiple threads.'
+  []
+  [review_equal_power_reference]
+    type = RunApp
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient=coef_sum Materials/lps/power=3 Materials/lps/local_newton_tolerance=1e-11 Materials/lps/local_newton_stagnation_tolerance=1e-10 Outputs/file_base=review_reference/review_equal_power'
+    requirement = 'A summed single-power creep coefficient shall provide the reference for algebraically equivalent split mechanisms.'
+  []
+  [review_equal_power_split]
+    type = CSVDiff
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/local_newton_tolerance=1e-11 Materials/lps/local_newton_stagnation_tolerance=1e-10 Outputs/file_base=review_equal_power'
+    csvdiff = review_equal_power.csv
+    gold_dir = review_reference
+    prereq = review_equal_power_reference
+    rel_err = 1e-8
+    abs_zero = 1e-12
+    requirement = 'Splitting a coefficient into two equal-power mechanisms shall preserve stress, strain, displacement, porosity, and time histories.'
+  []
+  [review_mixed_power_reference]
+    type = RunApp
+    input = lps_multi.i
+    cli_args = 'Materials/lps/local_newton_tolerance=1e-11 Materials/lps/local_newton_stagnation_tolerance=1e-10 Outputs/file_base=review_reference/review_mixed_power'
+    requirement = 'Simultaneous linear, cubic, and power-4.5 mechanisms shall provide a mixed-law trajectory for permutation verification.'
+  []
+  [review_mixed_power_reordered]
+    type = CSVDiff
+    input = lps_multi.i
+    cli_args = 'Materials/lps/coefficient="coef_45 coef_linear coef_cubic" Materials/lps/power="4.5 1 3" Materials/lps/local_newton_tolerance=1e-11 Materials/lps/local_newton_stagnation_tolerance=1e-10 Outputs/file_base=review_mixed_power'
+    csvdiff = review_mixed_power.csv
+    gold_dir = review_reference
+    prereq = review_mixed_power_reference
+    rel_err = 1e-8
+    abs_zero = 1e-12
+    requirement = 'Reordering simultaneous distinct-power creep mechanisms shall preserve the complete physical output history.'
+  []
+
+  # Generic multi-law edge behavior belongs to solid_mechanics rather than the BISON gas model.
+  [review_zero_law_reference]
+    type = RunApp
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient=coef_linear Materials/lps/power=1 Outputs/file_base=review_zero_law_reference'
+    requirement = 'A single active linear porous-LPS mechanism shall provide the reference trajectory for an otherwise identical model containing an exactly inactive creep law.'
+  []
+  [review_zero_law_candidate]
+    type = RunApp
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient="coef_zero coef_linear" Materials/lps/power="3 1" Outputs/file_base=review_zero_law_candidate'
+    prereq = review_zero_law_reference
+    requirement = 'An exactly zero porous-LPS creep coefficient shall disable that mechanism without altering the integrated mechanical response.'
+  []
+  [review_zero_law_compare]
+    type = RunCommand
+    command = 'python3 compare_lps_multi.py review_zero_law_reference.csv review_zero_law_candidate.csv 1e-12'
+    prereq = review_zero_law_candidate
+    requirement = 'Adding an exactly inactive porous-LPS mechanism shall preserve the complete generic mechanics history on the same time grid.'
+  []
+  [review_leading_zero_gauge]
+    type = RunApp
+    input = lps_multi_zero_gauge.i
+    prereq = review_zero_law_compare
+    requirement = 'For multiple porous-LPS laws, an exactly inactive leading mechanism shall report zero per-law gauge stress while the legacy gauge_stress diagnostic follows the first active mechanism.'
+  []
+  [review_negative_coefficient]
+    type = RunException
+    input = lps_multi_equivalence.i
+    cli_args = 'Materials/lps/coefficient=coef_negative Materials/lps/power=3 Outputs/csv=false'
+    expect_err = 'must be finite and nonnegative'
+    requirement = 'A negative Norton coefficient supplied to the generic porous-LPS model shall be rejected rather than interpreted as a signed creep rate.'
+  []
+  [review_multi_law_timestep_limit]
+    type = RunApp
+    input = lps_multi_timestep_limit.i
+    requirement = 'The generic porous-LPS material timestep recommendation shall use the admitted effective strain rate summed over all simultaneously active creep laws.'
+  []
+  [review_multi_law_pure_deviatoric]
+    type = RunApp
+    input = lps_multi_pure_deviatoric.i
+    requirement = 'Simultaneous n=1, n=3, and n=4.5 porous-LPS mechanisms shall accumulate inelastic strain under pure-deviatoric loading without producing a significant net porosity change, while retaining distinct positive gauge stresses.'
+  []
+  # Generic adaptive-substep history and floor-aware admitted-motion controls belong to MOOSE.
+  [review_adaptive_substepping_relaxed_increment]
+    type = RunApp
+    input = lps_adaptive_substepping.i
+    expect_out = 'substep 2/2 dt_sub = 0.5 global_dt = 1 shared_dt = 1'
+    requirement = 'Generic adaptive porous-LPS substepping shall reject an oversized converged local increment, refine the constitutive subdivision, and complete the unchanged global timestep.'
+  []
+  [review_adaptive_substepping_history_predictor]
+    type = RunApp
+    input = lps_adaptive_substepping.i
+    expect_out = 'adaptive history substep predictor'
+    prereq = review_adaptive_substepping_relaxed_increment
+    requirement = 'After an accepted global step, generic adaptive porous-LPS substepping shall initialize its local subdivision from the previous accepted admitted substep-control rate.'
+  []
+  [review_adaptive_substepping_history_cutback]
+    type = RunApp
+    input = lps_adaptive_history_cutback.i
+    custom_evaluation_script = check_adaptive_history_cutback.py
+    prereq = review_adaptive_substepping_history_predictor
+    requirement = 'A failed global timestep shall not advance generic porous-LPS adaptive history, and the retry prediction shall rescale the previous accepted admitted controller rate using the current global timestep.'
+  []
+  [review_floor_substep_budget]
+    type = RunApp
+    input = lps_floor_controls.i
+    cli_args = 'Materials/lps/use_substepping=INCREMENT_BASED Materials/lps/adaptive_substepping=true Materials/lps/maximum_number_substeps=2 Executioner/dtmin=0.1'
+    requirement = 'A stationary generic scalar porosity floor with zero admitted inelastic motion shall not exhaust the local adaptive refinement budget solely because unconstrained creep remains nonzero.'
+  []
+  [review_floor_global_timestep_limit]
+    type = RunApp
+    input = lps_floor_controls.i
+    requirement = 'A stationary generic scalar porosity floor with zero admitted inelastic motion shall not restrict the global material timestep through blocked creep.'
+  []
+  [review_floor_mixed_timestep_limit]
+    type = RunApp
+    input = lps_floor_mixed_controls.i
+    requirement = 'Mixed loading at the generic scalar porosity floor shall retain a finite material timestep recommendation from admitted deviatoric creep while blocking volumetric collapse.'
+  []
+
+  # Generic scalar reduced-porosity globalization and convergence-acceptance behavior.
+  [review_reduced_porosity_root_acceptance]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = lps_reduced_porosity_opening.i
+    expect_out = 'Reduced porosity root: converged by'
+    requirement = 'A generic porosity-dependent scalar pressure closure shall recover and certify an opening FREE root through reduced-porosity globalization after the coupled Newton iteration budget is exhausted.'
+  []
+  [review_porosity_merit_scale_cap]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = lps_reduced_porosity_opening.i
+    expect_out = 'porosity_variable_scale = [^ ]+ porosity_merit_scale = 1e-05 porosity_convergence_scale = 1e-06'
+    prereq = review_reduced_porosity_root_acceptance
+    requirement = 'At very small porosity, the generic coupled local line-search merit shall remain within one decade of the physical porosity convergence scale while retaining a separately conditioned porosity variable scale.'
+  []
+  [review_reduced_porosity_downward]
+    type = RunApp
+    input = lps_reduced_porosity_downward.i
+    expect_out = 'Reduced porosity downward probe:'
+    requirement = 'The generic scalar porous-LPS solver shall recover a FREE collapse root below an under-iterated coupled state by searching downward on the mechanically equilibrated reduced porosity residual.'
+  []
+  [review_reduced_porosity_downward_jacobian]
+    type = PetscJacobianTester
+    input = lps_reduced_porosity_downward.i
+    cli_args = 'Mesh/nx=2 Mesh/ny=2 -snes_test_err 1e-11 Executioner/num_steps=1'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 1e-6
+    difference_tol = 1e8
+    prereq = review_reduced_porosity_downward
+    requirement = 'The generic AD Jacobian shall remain consistent after reduced-porosity globalization reconstructs a converged scalar p-q-f state from raw bracket coordinates.'
+  []
+  [review_adaptive_defers_reduced_porosity_recovery]
+    type = RunApp
+    input = lps_reduced_porosity_downward.i
+    cli_args = 'Materials/lps/use_substepping=INCREMENT_BASED Materials/lps/adaptive_substepping=true Materials/lps/maximum_number_substeps=2'
+    expect_out = 'deferring reduced-porosity recovery after the coupled Newton iteration limit to finer adaptive substeps'
+    prereq = review_reduced_porosity_downward
+    requirement = 'A failed coarse generic porous-LPS constitutive attempt shall request cheaper adaptive local refinement before paying for reduced-porosity globalization.'
+  []
+  [review_stagnation_acceptance_contract]
+    type = RunApp
+    input = lps_convergence_acceptance.i
+    custom_evaluation_script = check_convergence_acceptance.py
+    requirement = 'An iteration-limited generic scalar solve shall use the stagnation tolerance for fallback acceptance while the same state still fails the stricter ordinary local convergence tolerance.'
+  []
+  [review_nonfinite_local_state]
+    type = RunException
+    input = lps_nonfinite_local_state.i
+    expect_err = 'nonfinite .*inelastic increment'
+    requirement = 'A nonfinite generic porous-LPS constitutive trial shall raise a recoverable MooseException before nonfinite strain or stress can be committed.'
+  []
+
+  [prescribed_two_population_nonad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = 'AD="" use_ad=false Materials/stress/tangent_operator=nonlinear Outputs/file_base=prescribed_two_population_nonad'
+    requirement = 'The generic non-AD porous-LPS material shall solve two independently evolving pore populations with prescribed pressure closures without relying on BISON gas physics.'
+  []
+  [prescribed_two_population_ad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = 'Outputs/file_base=prescribed_two_population_ad'
+    prereq = prescribed_two_population_nonad
+    requirement = 'The generic AD porous-LPS material shall solve the same prescribed independent two-population problem as the non-AD path.'
+  []
+  [prescribed_two_population_compare]
+    type = RunCommand
+    command = 'python3 compare_prescribed_two_population.py prescribed_two_population_nonad.csv prescribed_two_population_ad.csv'
+    prereq = prescribed_two_population_ad
+    requirement = 'The generic AD and non-AD independent two-population implementations shall produce equivalent mechanical and pore-population histories.'
+  []
+  [prescribed_two_population_ad_jacobian]
+    type = PetscJacobianTester
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population.i
+    cli_args = '-snes_test_err 1e-11 Executioner/num_steps=1 Outputs/csv=false'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 2e-6
+    difference_tol = 1e8
+    prereq = prescribed_two_population_compare
+    requirement = 'The AD Jacobian shall include the generic independent pore-population pressure and porosity sensitivities.'
+  []
+  [prescribed_two_population_active_floor]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_active_floor.i
+    cli_args = 'Outputs/csv=false'
+    prereq = prescribed_two_population_ad_jacobian
+    requirement = 'The generic independent two-population active set shall hold both explicit pore-population floors while retaining a finite deviatoric viscoplastic response.'
+  []
+
+  [prescribed_fixed_porosity_recovery_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Outputs/file_base=prescribed_fixed_porosity_recovery Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    recover = false
+    restep = false
+    requirement = 'The generic non-AD independent-pore fixture shall checkpoint a state with both explicit population porosity floors active.'
+  []
+  [prescribed_fixed_porosity_recovery_clean]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --clean prescribed_fixed_porosity_recovery_perf'
+    prereq = prescribed_fixed_porosity_recovery_setup
+    requirement = 'The generic fixed-porosity recovery regression shall remove stale per-instance performance diagnostics before measuring the continuation.'
+  []
+  [prescribed_fixed_porosity_recovery]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/stress/tangent_operator=nonlinear Materials/lps/local_newton_max_iterations=1 Materials/lps/local_newton_relaxation=0.75 Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=prescribed_fixed_porosity_recovery_perf Outputs/file_base=prescribed_fixed_porosity_recovery Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    expect_out = 'independent fixed-porosity mechanical recovery converged at the finest constitutive subdivision'
+    prereq = prescribed_fixed_porosity_recovery_clean
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A deliberately under-iterated generic non-AD independent-pore solve at two active population floors shall recover p-q equilibrium at fixed porosities with the nonlinear tangent without cutting the global timestep.'
+  []
+  [prescribed_fixed_porosity_recovery_verify]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py prescribed_fixed_porosity_recovery_perf prescribed_fixed_porosity_recovery.csv'
+    prereq = prescribed_fixed_porosity_recovery
+    requirement = 'The generic non-AD fixed-porosity recovery shall be attempted and accepted in exactly one nominal 0.1-s continuation step with both population floors retained.'
+  []
+  [prescribed_fixed_porosity_reference_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Outputs/file_base=prescribed_fixed_porosity_reference Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    prereq = prescribed_fixed_porosity_recovery_verify
+    recover = false
+    restep = false
+    requirement = 'The generic recovery regression shall create an independently named checkpoint for a normally converged non-AD reference continuation.'
+  []
+  [prescribed_fixed_porosity_reference]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'AD="" use_ad=false Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/stress/tangent_operator=nonlinear Materials/lps/verbose=true Outputs/file_base=prescribed_fixed_porosity_reference Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    absent_out = 'independent fixed-porosity mechanical recovery converged'
+    prereq = prescribed_fixed_porosity_reference_setup
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A normally converged generic non-AD continuation shall provide an independent reference state for the forced fixed-porosity recovery path.'
+  []
+  [prescribed_fixed_porosity_recovery_compare]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --compare prescribed_fixed_porosity_recovery.csv prescribed_fixed_porosity_reference.csv'
+    prereq = prescribed_fixed_porosity_reference
+    requirement = 'The forced generic non-AD fixed-porosity recovery shall reproduce the normally converged terminal mechanics and pore-population state.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_setup]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'Outputs/file_base=prescribed_fixed_porosity_recovery_ad Outputs/checkpoint=true Outputs/exodus=false Outputs/csv=true'
+    prereq = prescribed_fixed_porosity_recovery_compare
+    recover = false
+    restep = false
+    requirement = 'The generic AD independent-pore fixture shall checkpoint the same two-active-floor state used by the non-AD recovery qualification.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_clean]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --clean prescribed_fixed_porosity_recovery_ad_perf'
+    prereq = prescribed_fixed_porosity_recovery_ad_setup
+    requirement = 'The generic AD fixed-porosity recovery regression shall remove stale per-instance performance diagnostics before measuring the continuation.'
+  []
+  [prescribed_fixed_porosity_recovery_ad]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_two_population_fixed_porosity_recovery.i
+    cli_args = 'Executioner/end_time=1.1 dt=0.1 Executioner/reset_dt=true Materials/lps/local_newton_max_iterations=1 Materials/lps/local_newton_relaxation=0.75 Materials/lps/verbose=true Materials/lps/enable_performance_diagnostics=true Materials/lps/performance_diagnostics_file_base=prescribed_fixed_porosity_recovery_ad_perf Outputs/file_base=prescribed_fixed_porosity_recovery_ad Outputs/checkpoint=false Outputs/exodus=false Outputs/csv=true --recover'
+    expect_out = 'independent fixed-porosity mechanical recovery converged at the finest constitutive subdivision'
+    prereq = prescribed_fixed_porosity_recovery_ad_clean
+    delete_output_before_running = false
+    recover = false
+    restep = false
+    requirement = 'A deliberately under-iterated generic AD independent-pore solve at active population floors shall exercise and accept the fixed-porosity p-q recovery without cutting the global timestep.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_verify]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py prescribed_fixed_porosity_recovery_ad_perf prescribed_fixed_porosity_recovery_ad.csv'
+    prereq = prescribed_fixed_porosity_recovery_ad
+    requirement = 'The generic AD fixed-porosity recovery shall be attempted and accepted in exactly one nominal 0.1-s continuation step with both population floors retained.'
+  []
+  [prescribed_fixed_porosity_recovery_ad_compare]
+    type = RunCommand
+    command = 'python3 check_prescribed_fixed_porosity_recovery.py --compare prescribed_fixed_porosity_recovery_ad.csv prescribed_fixed_porosity_reference.csv'
+    prereq = prescribed_fixed_porosity_recovery_ad_verify
+    requirement = 'The forced generic AD fixed-porosity recovery shall reproduce the normally converged non-AD terminal mechanics and pore-population state within the declared regression tolerances.'
+  []
+
+  # Test the generic transactional rollback guard directly in solid_mechanics. Unexpected C++
+  # exceptions must restore caller tensors and generic constitutive trial state and must not be
+  # reinterpreted as recoverable local convergence failures.
+  [prescribed_unexpected_exception_preparation_rollback]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=preparation Materials/lps/youngs_modulus_porosity_factor=0.1'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at preparation'
+    requirement = 'An unexpected C++ exception during generic porosity-dependent substep preparation shall restore caller and porous-LPS trial state and propagate without adaptive refinement.'
+  []
+  [prescribed_unexpected_exception_estimation_rollback]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=estimation Materials/lps/adaptive_substepping=false'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at estimation'
+    requirement = 'An unexpected C++ exception during generic porous-LPS substep estimation shall restore caller and constitutive trial state and propagate without adaptive refinement.'
+  []
+  [prescribed_unexpected_exception_adaptive_no_retry]
+    type = RunException
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=adaptive_attempt'
+    expect_err = 'Injected nonrecoverable porous-LPS test failure at adaptive_attempt'
+    requirement = 'With adaptive constitutive retries enabled, an unexpected C++ exception from the first generic local attempt shall restore trial state and escape immediately rather than being converted into a finer-substep retry.'
+  []
+  [prescribed_unexpected_exception_post_accept_rollback]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=post_accept Materials/lps/adaptive_substepping=false Materials/lps/max_inelastic_increment=1e-4 Materials/lps/substep_strain_tolerance=1.5e-3 Materials/stress/tangent_operator=elastic Executioner/num_steps=1'
+    expect_out = 'Verified generic unexpected-exception rollback at post_accept'
+    requirement = 'After one generic local substep has committed independent pore and strain state, an unexpected exception before the next local solve shall restore the global-step trial state and escape the constitutive update without a local retry; the transient executioner may recover by cutting the global time step.'
+  []
+  [prescribed_unexpected_exception_tangent_replay_rollback]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = prescribed_unexpected_exception_rollback.i
+    cli_args = 'Materials/lps/failure_point=tangent_replay Materials/lps/adaptive_substepping=false Materials/lps/max_inelastic_increment=4e-4 Materials/lps/substep_strain_tolerance=1.5e-3 Materials/stress/tangent_operator=nonlinear Executioner/num_steps=1'
+    expect_out = 'Verified generic unexpected-exception rollback at tangent_replay'
+    requirement = 'An unexpected C++ exception on the first accepted state of a generic non-AD multi-substep tangent replay shall restore the accepted-path trial state and escape the constitutive update without a local retry; the transient executioner may recover by cutting the global time step.'
+  []
+
+  [implementation_kernels]
+    type = RunApp
+    allow_test_objects = true
+    executable_pattern = 'solid_mechanics-\w+$'
+    input = implementation_kernels.i
+    cli_args = 'AD="" use_ad=false Executioner/num_steps=1'
+    expect_out = 'Porous LPS implementation kernel checks passed'
+    requirement = 'The generic porous-LPS implementation shall retain its signed zero-pressure derivatives, optimized/general kernel equivalence, independent-population derivatives, and no/one/two-floor population projection algebra.'
+  []
+[]
