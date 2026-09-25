@@ -76,6 +76,10 @@ area = '${fparse 3.14159* ${R}^2}'
     g = ${gravity}
     is_implicit = True
   []
+  [pipe1_DT]
+    type = ODETimeDerivative
+    variable = 'm1'
+  []
   [temp1]
     type = IncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
@@ -89,6 +93,10 @@ area = '${fparse 3.14159* ${R}^2}'
     reference_pressure = ${Pin}
     variable = T1
     is_implicit = True
+  []
+  [temp1_DT]
+    type = ODETimeDerivative
+    variable = 'T1'
   []
   [temp0]
     type = ParsedODEKernel

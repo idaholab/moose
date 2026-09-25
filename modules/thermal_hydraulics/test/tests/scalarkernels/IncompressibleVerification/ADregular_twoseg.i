@@ -69,6 +69,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     g = ${gravity}
     is_implicit = True
   []
+  [pipe1_DT]
+    type = ODETimeDerivative
+    variable = 'm1'
+  []
   [temp]
     type = ParsedODEKernel
     expression = 'T1 - ${Tin}'

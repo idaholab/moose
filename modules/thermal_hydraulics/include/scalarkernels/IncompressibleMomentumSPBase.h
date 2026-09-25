@@ -9,25 +9,30 @@
 
 #pragma once
 
-#include "ODETimeDerivative.h"
-#include "ADScalarTimeDerivative.h"
+#include "ScalarKernel.h"
+#include "ADScalarKernel.h"
 #include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class IncompressibleMomentumSPBaseTempl
-  : public std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type,
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
     public FunctorInterface
 {
-  using Base = typename std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type;
+  using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 
 public:
   IncompressibleMomentumSPBaseTempl(const InputParameters & parameters);
   virtual bool isADObject() const override { return is_ad; };
+  virtual void reinit() override;
   static InputParameters validParams();
 
 protected:
+  virtual GenericReal<is_ad> computeFrictionFactor(const GenericReal<is_ad> mu,
+                                                   const GenericReal<is_ad> G,
+                                                   const GenericReal<is_ad> Dh,
+                                                   const int j);
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables

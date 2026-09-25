@@ -96,16 +96,24 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpResidual()
   auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
   auto _q = _h * _perimeter(_qp, _state) / 2.0 * (2.0 * _Tw[_i] - Base::_u[_i] - _in);
   // Advection component
-  energy_residual += (_m[_i] / 2.0 * (1 - abs(_m[_i]) / _m[_i]) * _cp * _Tdown[_i] -
-                      _m[_i] / 2.0 * (1 + abs(_m[_i]) / _m[_i]) * _cp * _Tup[_i] +
-                      abs(_m[_i]) * _cp * Base::_u[_i]) /
-                     _length(_qp, _state);
+  energy_residual +=
+      (_m[_i] / 2.0 * (1 - abs(_m[_i]) / _m[_i]) * _Tdown[_i] -
+       _m[_i] / 2.0 * (1 + abs(_m[_i]) / _m[_i]) * _Tup[_i] + abs(_m[_i]) * Base::_u[_i]) /
+      _length(_qp, _state) / _area(_qp, _state) / _rho;
   // Wall heat transfer
-  energy_residual -= _q;
-  // Transient term
-  energy_residual += _area(_qp, _state) * _rho * _cp * Base::_u_dot[_i];
+  energy_residual -= _q / _area(_qp, _state) / _rho / _cp;
 
   return energy_residual;
+}
+
+template <bool is_ad>
+void
+IncompressibleEnergySPScalarKernelTempl<is_ad>::reinit()
+{
+  // ADScalarKernel::reinit() resets its cached-Jacobian flag; ScalarKernel has no reinit()
+  // for the non-AD case, so nothing needs to happen there.
+  if constexpr (is_ad)
+    Base::reinit();
 }
 
 template <bool is_ad>
@@ -135,11 +143,9 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
     auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
     auto _q = -_h * _perimeter(_qp, _state) / 2.0;
     // Advection component
-    energy_jacob += abs(_m[_i]) * _cp / _length(_qp, _state);
+    energy_jacob += abs(_m[_i]) / _length(_qp, _state) / _area(_qp, _state) / _rho;
     // Wall heat transfer
-    energy_jacob -= _q;
-    // Transient term
-    energy_jacob += _area(_qp, _state) * _rho * _cp * Base::_du_dot_du[_i];
+    energy_jacob -= _q / _area(_qp, _state) / _rho / _cp;
 
     return energy_jacob;
   }

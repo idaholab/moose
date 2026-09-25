@@ -100,6 +100,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     g = ${gravity}
     is_implicit = True
   []
+  [pipe1_DT]
+    type = ODETimeDerivative
+    variable = 'm1'
+  []
   [temp0]
     type = ParsedODEKernel
     expression = 'T0 - ${Tin}'
@@ -119,6 +123,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     variable = T1
     is_implicit = True
   []
+  [temp1_DT]
+    type = ODETimeDerivative
+    variable = 'T1'
+  []
   [temp2]
     type = IncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
@@ -133,6 +141,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     variable = T2
     is_implicit = True
   []
+  [temp2_DT]
+    type = ODETimeDerivative
+    variable = 'T2'
+  []
   [temp3]
     type = IncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
@@ -146,6 +158,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     reference_pressure = ${Pin}
     variable = T3
     is_implicit = True
+  []
+  [temp3_DT]
+    type = ODETimeDerivative
+    variable = 'T3'
   []
   [temp4]
     type = ParsedODEKernel

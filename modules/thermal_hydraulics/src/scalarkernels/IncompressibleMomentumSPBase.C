@@ -113,5 +113,47 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
   }
 }
 
+template <bool is_ad>
+void
+IncompressibleMomentumSPBaseTempl<is_ad>::reinit()
+{
+  // ADScalarKernel::reinit() resets its cached-Jacobian flag; ScalarKernel has no reinit()
+  // for the non-AD case, so nothing needs to happen there.
+  if constexpr (is_ad)
+    Base::reinit();
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericReal<is_ad> mu,
+                                                                const GenericReal<is_ad> G,
+                                                                const GenericReal<is_ad> Dh,
+                                                                const int j)
+{
+  const Moose::ElemArg _qp = Moose::ElemArg();
+  const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
+  auto _Re = abs(G) * Dh / mu;
+  auto _lam = 64.0 / _Re;
+  auto _turb =
+      0.25 / pow((log10((*(_roughnesses[j]))(_qp, _state) / (Dh * 3.7) + 5.74 / pow(_Re, 0.9))), 2);
+  auto _fd = 64.0 / _Re;
+  auto _pfd = &_fd;
+  if (_Re < 2300.0) // laminar
+  {
+    *_pfd = _lam;
+  }
+  else if (_Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
+  {
+    *_pfd = _turb;
+  }
+  else // transition, conservative interpolation between the two
+  {
+    *_pfd = (_turb - _lam) / 1700 * _Re + _lam;
+    *_pfd = std::max(*_pfd, std::max(_lam, _turb));
+  }
+
+  return _fd;
+}
+
 template class IncompressibleMomentumSPBaseTempl<false>;
 template class IncompressibleMomentumSPBaseTempl<true>;

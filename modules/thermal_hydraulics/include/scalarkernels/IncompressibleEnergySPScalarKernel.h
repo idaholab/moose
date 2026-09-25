@@ -17,14 +17,15 @@ class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class IncompressibleEnergySPScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type,
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
     public FunctorInterface
 {
-  using Base = typename std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type;
+  using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 
 public:
   IncompressibleEnergySPScalarKernelTempl(const InputParameters & parameters);
   virtual bool isADObject() const override { return is_ad; };
+  virtual void reinit() override;
   static InputParameters validParams();
 
 protected:
