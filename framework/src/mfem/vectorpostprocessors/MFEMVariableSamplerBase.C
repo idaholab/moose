@@ -15,6 +15,25 @@
 #include "MooseEnum.h"
 #include "SubProblem.h"
 
+namespace Moose::MFEM
+{
+std::vector<Point>
+generateLinePoints(const Point & start_point, const Point & end_point, unsigned int num_points)
+{
+  // initialize and populate vector with linearly-spaced points along line
+  std::vector<Point> points;
+  points.reserve(num_points);
+  for (const auto i_point : make_range(num_points))
+  {
+    // fractional distance along line [0, 1]
+    Real t = static_cast<Real>(i_point) / static_cast<Real>(num_points - 1);
+    points.push_back(t * end_point + (1 - t) * start_point);
+  }
+
+  return points;
+}
+}
+
 namespace
 {
 CreateMooseEnumClass(L2AverageType, NONE, ARITHMETIC, HARMONIC);

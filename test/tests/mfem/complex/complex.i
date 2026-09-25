@@ -100,10 +100,19 @@ kappa_i = -7.86151377757423297509831172647
   assembly_level = legacy
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMComplexVariableLineValueSampler
+    variable = 'u'
+    start_point = '0 0 0'
+    end_point = '1 1 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Complex2DQuad
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/complex_2d_quad
   []
 []
