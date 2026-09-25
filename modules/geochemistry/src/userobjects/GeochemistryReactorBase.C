@@ -172,7 +172,7 @@ GeochemistryReactorBase::validParams()
 
 GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & parameters)
   : NodalUserObject(parameters),
-    _num_my_nodes(_subproblem.mesh().getMesh().n_local_nodes()),
+    _num_my_nodes(countMyNodes()),
     _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
     _pgs(getUserObject<GeochemicalModelDefinition>("model_definition")
              .getPertinentGeochemicalSystem()),
@@ -193,4 +193,29 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _tot_iter(_num_my_nodes, 0),
     _abs_residual(_num_my_nodes, 0.0)
 {
+}
+
+bool
+GeochemistryReactorBase::actsOnNode(const Node & node) const
+{
+  if (!blockRestricted())
+    return true;
+  // the same predicate MOOSE uses to decide whether a NodalUserObject fires at a node
+  for (const auto & id : _subproblem.mesh().getNodeBlockIds(node))
+    if (hasBlocks(id))
+      return true;
+  return false;
+}
+
+unsigned
+GeochemistryReactorBase::countMyNodes() const
+{
+  const MeshBase & msh = _subproblem.mesh().getMesh();
+  if (!blockRestricted())
+    return msh.n_local_nodes();
+  unsigned num_nodes = 0;
+  for (const auto & node : as_range(msh.local_nodes_begin(), msh.local_nodes_end()))
+    if (actsOnNode(*node))
+      num_nodes += 1;
+  return num_nodes;
 }

@@ -1,5 +1,5 @@
 [Tests]
-  [./except1]
+  [except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -8,8 +8,8 @@
     requirement = 'An error will be thrown when trying to set AuxVariable information for species that do not exist'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2a]
+  []
+  [except2a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -19,8 +19,8 @@
     requirement = 'An error will be thrown when trying to set free-mg AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2b]
+  []
+  [except2b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -30,8 +30,8 @@
     requirement = 'An error will be thrown when trying to set free-cm3 AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2c]
+  []
+  [except2c]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -41,8 +41,8 @@
     requirement = 'An error will be thrown when trying to set surface-charge AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2d]
+  []
+  [except2d]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -52,8 +52,8 @@
     requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2g]
+  []
+  [except2g]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -63,8 +63,8 @@
     requirement = 'An error will be thrown when trying to set dumped-moles information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2e]
+  []
+  [except2e]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -74,8 +74,8 @@
     requirement = 'An error will be thrown when trying to set kinetic-moles AuxVariable information for a non-kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except2f]
+  []
+  [except2f]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -85,8 +85,8 @@
     requirement = 'An error will be thrown when trying to set kinetic-rate AuxVariable information for a non-kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except3a]
+  []
+  [except3a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -96,8 +96,8 @@
     requirement = 'An error will be thrown when trying to set molal AuxVariable information for a mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except3b]
+  []
+  [except3b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -107,8 +107,8 @@
     requirement = 'An error will be thrown when trying to set mg/kg AuxVariable information for a mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except4a]
+  []
+  [except4a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -118,8 +118,8 @@
     requirement = 'An error will be thrown when trying to set surface-charge AuxVariable information for a mineral species not involved in sorption'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except4b]
+  []
+  [except4b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -129,8 +129,8 @@
     requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a mineral species not involved in sorption'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except5a]
+  []
+  [except5a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -140,8 +140,8 @@
     requirement = 'An error will be thrown when trying to set molal AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except5b]
+  []
+  [except5b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -151,8 +151,8 @@
     requirement = 'An error will be thrown when trying to set mg/kg AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except5c]
+  []
+  [except5c]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -162,8 +162,8 @@
     requirement = 'An error will be thrown when trying to set log10activity AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except5d]
+  []
+  [except5d]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -173,8 +173,8 @@
     requirement = 'An error will be thrown when trying to set activity AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./except5e]
+  []
+  [except5e]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -184,8 +184,8 @@
     requirement = 'An error will be thrown when trying to set bulk-moles AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./surface_charge]
+  []
+  [surface_charge]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -195,8 +195,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to surface charge'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./surface_potential]
+  []
+  [surface_potential]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -206,8 +206,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to surface potential'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./free_cm3]
+  []
+  [free_cm3]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -216,8 +216,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to free-cm3'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./free_mg]
+  []
+  [free_mg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -226,8 +226,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to free-mg'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./molal]
+  []
+  [molal]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -236,8 +236,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to molality'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./mg_per_kg]
+  []
+  [mg_per_kg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -246,8 +246,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to mg/kg'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./neglog10a]
+  []
+  [neglog10a]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -256,8 +256,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to -log10(activity)'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./activity]
+  []
+  [activity]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -266,8 +266,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to activity'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./bulk_moles]
+  []
+  [bulk_moles]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -276,8 +276,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to bulk mole number'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -286,8 +286,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to aqueous-solution temperature'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./kinetic_moles]
+  []
+  [kinetic_moles]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -296,8 +296,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to kinetic mole number'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./kinetic_free_mg]
+  []
+  [kinetic_free_mg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -307,8 +307,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to free mg for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./kinetic_free_cm3]
+  []
+  [kinetic_free_cm3]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -318,8 +318,8 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to free cm3 for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
-  [../]
-  [./kinetic_rate]
+  []
+  [kinetic_rate]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -328,5 +328,5 @@
     requirement = 'It shall be possible to set an AuxVariable corresponding to the kinetic-rate for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
-  [../]
+  []
 []
