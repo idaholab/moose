@@ -29,6 +29,10 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::validParams()
                                           "User object managing the execution of the NEML2 model");
   params.addRequiredParam<MaterialPropertyName>("to_moose", "Kokkos material property to write to");
   params.addRequiredParam<std::string>("from_neml2", "NEML2 output variable to read from");
+  params.addParam<std::string>(
+      "neml2_input_derivative",
+      "If supplied, read the derivative of the NEML2 output variable with respect to this instead of "
+      "the variable itself");
   return params;
 }
 
@@ -38,7 +42,12 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::KokkosNEML2ToMOOSEMaterialProperty(
   : Moose::Kokkos::Material(parameters),
     _execute_neml2_model(getUserObject<NEML2ModelExecutor>("neml2_executor")),
     _value(
-        _execute_neml2_model.getOutput(neml2::VariableName(getParam<std::string>("from_neml2")))),
+        isParamValid("neml2_input_derivative")
+            ? _execute_neml2_model.getOutputDerivative(
+                  neml2::VariableName(getParam<std::string>("from_neml2")),
+                  neml2::VariableName(getParam<std::string>("neml2_input_derivative")))
+            : _execute_neml2_model.getOutput(
+                  neml2::VariableName(getParam<std::string>("from_neml2")))),
     _prop(declareKokkosProperty<T>("to_moose"))
 {
 }
@@ -56,13 +65,26 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
                "' is not resident on the device. Set the NEML2 'device' and 'output_device' to a "
                "CUDA device so that this material can read it without a host transfer.");
 
-  // A NEML2 output is a view whenever it is a slice of the model's state axis or a broadcast
-  // produced by dynamic_expand(). Aliasing needs contiguous storage, so a view is compacted on the
-  // device and the copy is held for as long as it is aliased.
-  if (!_value.is_contiguous())
+  if (_value.dynamic_dim() != 1)
+    mooseError("The NEML2 output '",
+               getParam<std::string>("from_neml2"),
+               "' has ",
+               _value.dynamic_dim(),
+               " batch dimensions, and this material reads a flat batch. An input that supplies the "
+               "model through NEML2FEInterpolation produces a batch shaped per element and per "
+               "quadrature point, which this material cannot index.");
+
+  // A derivative that does not vary along the batch arrives as a broadcast: one set of components with
+  // a batch stride of zero. Compacting it would duplicate that set once per batch entry, so it is
+  // aliased as it is and every quadrature point reads entry zero. A strided view that is not a
+  // broadcast, such as a state variable sliced out of the model's state axis, is compacted instead,
+  // which copies only the values actually needed.
+  _broadcast = isBatchBroadcast();
+
+  if (!_broadcast && !_value.is_contiguous())
     _contiguous = _value.contiguous();
 
-  const auto & tensor = _value.is_contiguous() ? _value : _contiguous;
+  const auto & tensor = (_broadcast || _value.is_contiguous()) ? _value : _contiguous;
 
   // The numbering depends only on the mesh and the model's block coverage
   if (!_layout.built())
@@ -84,17 +106,32 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
     _layout.build(kokkosAssembly(), kokkosMesh(), blockIDs());
   }
 
-  const auto n_reals = static_cast<dof_id_type>(tensor.numel());
-
-  if (n_reals != _layout.size() * _n_components)
+  if (static_cast<dof_id_type>(_value.size(0)) != _layout.size())
     mooseError("The NEML2 output '",
                getParam<std::string>("from_neml2"),
                "' has ",
-               n_reals / _n_components,
+               _value.size(0),
                " batch entries, but this material covers ",
                _layout.size(),
                " quadrature points. The NEML2 model and this material must be restricted to the "
                "same blocks.");
+
+  // Storing one value per subdomain or per element only reproduces the output if the output is the
+  // same for every quadrature point, which is exactly what a broadcast is
+  if (!_broadcast)
+    for (const auto block : blockIDs())
+      if (_prop.constantOption(block) != Moose::Kokkos::PropertyConstantOption::NONE)
+        mooseError("This material stores '",
+                   getParam<MaterialPropertyName>("to_moose"),
+                   "' more coarsely than per quadrature point, but the NEML2 output '",
+                   getParam<std::string>("from_neml2"),
+                   "' varies along the batch, so the stored value would be one arbitrary quadrature "
+                   "point's. Leave constant_on at NONE unless the output is a quantity NEML2 "
+                   "broadcasts, such as the tangent of a model whose tangent does not vary.");
+
+  // A broadcast aliases one set of components rather than one per batch entry
+  const auto n_reals =
+      _broadcast ? _n_components : static_cast<dof_id_type>(tensor.numel());
 
   if (!_source.isAlloc())
     _source.init(n_reals);
@@ -103,6 +140,40 @@ KokkosNEML2ToMOOSEMaterialProperty<T>::computeProperties()
   _source.aliasDevice(const_cast<Real *>(tensor.template data_ptr<Real>()));
 
   Moose::Kokkos::Material::computeProperties();
+}
+
+template <typename T>
+bool
+KokkosNEML2ToMOOSEMaterialProperty<T>::isBatchBroadcast() const
+{
+  if (_value.size(0) < 2 || _value.stride(0) != 0)
+    return false;
+
+  // Only the batch dimension may be broadcast; the components of one entry must be packed so that
+  // they can be read as a contiguous block
+  int64_t packed = 1;
+
+  for (int64_t d = _value.dim() - 1; d >= 1; --d)
+  {
+    if (_value.stride(d) != packed)
+      mooseError("The NEML2 output '",
+                 getParam<std::string>("from_neml2"),
+                 "' does not vary along the batch but its components are not packed, so neither "
+                 "aliasing nor compacting it would read the right values.");
+
+    packed *= _value.size(d);
+  }
+
+  if (packed != static_cast<int64_t>(_n_components))
+    mooseError("The NEML2 output '",
+               getParam<std::string>("from_neml2"),
+               "' has ",
+               packed,
+               " components per batch entry, but the material property it is read into holds ",
+               _n_components,
+               ".");
+
+  return true;
 }
 
 template class KokkosNEML2ToMOOSEMaterialProperty<Real>;
