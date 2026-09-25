@@ -332,17 +332,18 @@ FEProblemBase::initKokkos()
 
   // Error on unsupported options
 
-  if (haveDisplaced())
-    mooseError("Kokkos does not support displaced mesh yet.");
-
   if (adaptivity().isOn())
     mooseError("Kokkos does not support adaptivity yet.");
 
   // Initialize Kokkos mesh
   _mesh.getKokkosMesh()->update();
+  if (haveDisplaced())
+    _displaced_mesh->getKokkosMesh()->init(*_mesh.getKokkosMesh());
 
-  // Initialize Kokkos assembly
+  // Initialize Kokkos assemblies
   _kokkos_assembly.init();
+  if (haveDisplaced())
+    _displaced_problem->kokkosAssembly().init(_kokkos_assembly);
 
   // Call functions that require Kokkos mesh to be initialized first
   for (auto hook : _kokkos_mesh_initialization_hooks)
@@ -406,7 +407,7 @@ FEProblemBase::initKokkos()
       // FV kernels write through Kokkos::System; FE/QP kernels read and write
       // through FESystem; shared device pointers keep them consistent.
       _kokkos_systems.emplace({sys_num}, sys);
-      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num], sys);
+      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num]);
     }
     else
       // Pure FE/QP (or FE/QP + scalar): FESystem inherits Kokkos::System, so a standalone

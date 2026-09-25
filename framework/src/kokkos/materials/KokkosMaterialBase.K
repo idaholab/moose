@@ -9,6 +9,7 @@
 
 #include "KokkosMaterialBase.h"
 
+#include "DisplacedProblem.h"
 #include "FEProblemBase.h"
 
 namespace Moose::Kokkos
@@ -27,7 +28,6 @@ MaterialBase::validParams()
       "element/face or subdomain, respectively. Material properties will be only stored for each "
       "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
 
-  params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");
   params.suppressParameter<std::vector<OutputName>>("outputs");
   params.suppressParameter<std::vector<std::string>>("output_properties");
@@ -40,8 +40,10 @@ MaterialBase::validParams()
 
 MaterialBase::MaterialBase(const InputParameters & parameters)
   : ::MaterialBase(parameters),
-    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
-    AssemblyHolder(_fe_problem.kokkosAssembly()),
+    MeshHolder(*_subproblem.mesh().getKokkosMesh()),
+    AssemblyHolder(getParam<bool>("use_displaced_mesh")
+                       ? _fe_problem.getDisplacedProblem()->kokkosAssembly()
+                       : _fe_problem.kokkosAssembly()),
     FESystemHolder(_fe_problem.getKokkosFESystems()),
     _constant_option(getParam<MooseEnum>("constant_on").getEnum<PropertyConstantOption>()),
     _t(TransientInterface::_t),

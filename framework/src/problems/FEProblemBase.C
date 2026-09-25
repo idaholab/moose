@@ -452,7 +452,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_assembly(*this),
+    _kokkos_assembly(*this, _mesh),
 #endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -9192,6 +9192,17 @@ FEProblemBase::notifyWhenMeshDisplaces(MeshDisplacedInterface * mdi)
 void
 FEProblemBase::meshDisplaced()
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_has_kokkos_objects)
+  {
+    if (_mesh.getKokkosMesh()->initialized())
+    {
+      _displaced_mesh->getKokkosMesh()->updateGeometry();
+      _displaced_problem->kokkosAssembly().update();
+    }
+  }
+#endif
+
   for (const auto & mdi : _notify_when_mesh_displaces)
     mdi->meshDisplaced();
 }

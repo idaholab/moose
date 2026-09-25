@@ -31,6 +31,7 @@ KokkosHeatConductionTimeDerivative::validParams()
   params.addParam<MaterialPropertyName>(
       "d_density_dT",
       "Name of material property for the derivative of the density with respect to the variable.");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

@@ -27,6 +27,7 @@ System::System(SystemBase & system)
     _mesh(system.mesh()),
     _dof_map(system.dofMap()),
     _comm(system.dofMap().comm()),
+    _number(system.number()),
     _num_vars(system.system().n_vars()),
     _num_local_dofs(system.system().n_local_dofs()),
     _num_ghost_dofs(system.dofMap().get_send_list().size())
@@ -118,8 +119,10 @@ System::setupDofs()
         }
       }
 
-      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+      for (const auto ghost_elem : kokkosMesh().getGhostElements())
       {
+        const auto ghost_id = kokkosMesh().getContiguousElementID(ghost_elem);
+
         if (!_dof_map.is_evaluable(*ghost_elem, var))
           continue;
 

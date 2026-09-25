@@ -23,16 +23,16 @@
 namespace Moose::Kokkos
 {
 
-Assembly::Assembly(FEProblemBase & problem)
-  : MeshHolder(*problem.mesh().getKokkosMesh()),
-    _problem(problem),
-    _mesh(problem.mesh()),
-    _dimension(_mesh.dimension())
+Assembly::Assembly(FEProblemBase & problem, MooseMesh & mesh)
+  : MeshHolder(*mesh.getKokkosMesh()),
+    _problem(&problem),
+    _mesh(&mesh),
+    _dimension(_mesh->dimension())
 {
 }
 
 void
-Assembly::init()
+Assembly::initSharedData()
 {
   // Cache mesh information
 
@@ -40,29 +40,29 @@ Assembly::init()
 
   _coord_type.create(num_subdomains);
 
-  for (auto subdomain : _mesh.meshSubdomains())
-    _coord_type[kokkosMesh().getContiguousSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
+  for (auto subdomain : _mesh->meshSubdomains())
+    _coord_type[kokkosMesh().getContiguousSubdomainID(subdomain)] =
+        _mesh->getCoordSystem(subdomain);
 
   _coord_type.copyToDevice();
 
-  if (_mesh.usingGeneralAxisymmetricCoordAxes())
+  if (_mesh->usingGeneralAxisymmetricCoordAxes())
   {
     _rz_axis.create(num_subdomains);
 
-    for (auto subdomain : _mesh.meshSubdomains())
+    for (auto subdomain : _mesh->meshSubdomains())
       _rz_axis[kokkosMesh().getContiguousSubdomainID(subdomain)] =
-          _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
+          _mesh->getGeneralAxisymmetricCoordAxis(subdomain);
 
     _rz_axis.copyToDevice();
   }
   else
-    _rz_radial_coord = _mesh.getAxisymmetricRadialCoord();
+    _rz_radial_coord = _mesh->getAxisymmetricRadialCoord();
 
   // Initialize quadrature and shape data
 
   initQuadrature();
   initShape();
-  cachePhysicalMap();
 }
 
 void
@@ -79,7 +79,7 @@ Assembly::initQuadrature()
   // Find boundaries where material properties should be computed
 
   auto & boundary_objects =
-      _problem.getKokkosMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA);
+      _problem->getKokkosMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA);
 
   for (auto object : boundary_objects)
   {
@@ -96,11 +96,11 @@ Assembly::initQuadrature()
 
   _max_qps_per_elem = 0;
 
-  for (auto subdomain : _mesh.meshSubdomains())
+  for (auto subdomain : _mesh->meshSubdomains())
   {
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
-    auto & assembly = _problem.assembly(0, 0);
+    auto & assembly = _problem->assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
@@ -145,7 +145,7 @@ Assembly::initQuadrature()
     }
   }
 
-  const auto num_elems = _mesh.nActiveLocalElem();
+  const auto num_elems = _mesh->nActiveLocalElem();
 
   _n_subdomain_qps.create(num_subdomains);
   _n_subdomain_qps_face.create(num_subdomains);
@@ -153,20 +153,20 @@ Assembly::initQuadrature()
   _n_subdomain_qps_face = 0;
 
   _n_qps.create(num_elems);
-  _n_qps_face.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _n_qps_face.create(_mesh->getMaxSidesPerElem(), num_elems);
   _n_qps_face = 0;
 
   _qp_offset.create(num_elems);
-  _qp_offset_face.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _qp_offset_face.create(_mesh->getMaxSidesPerElem(), num_elems);
   _qp_offset_face = libMesh::DofObject::invalid_id;
 
-  _elem_face_property_idx.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _elem_face_property_idx.create(_mesh->getMaxSidesPerElem(), num_elems);
   _elem_face_property_idx = libMesh::DofObject::invalid_id;
 
   _n_elem_face_properties.create(num_subdomains);
   _n_elem_face_properties = 0;
 
-  for (auto elem : *_mesh.getActiveLocalElementRange())
+  for (auto elem : *_mesh->getActiveLocalElementRange())
   {
     auto eid = kokkosMesh().getContiguousElementID(elem);
     auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
@@ -181,15 +181,15 @@ Assembly::initQuadrature()
   }
 
   for (auto boundary : _material_boundaries)
-    for (auto elem_id : _mesh.getBoundaryActiveSemiLocalElemIds(boundary))
+    for (auto elem_id : _mesh->getBoundaryActiveSemiLocalElemIds(boundary))
     {
-      auto elem = _mesh.elemPtr(elem_id);
+      auto elem = _mesh->elemPtr(elem_id);
 
-      if (elem->processor_id() == _problem.processor_id())
+      if (elem->processor_id() == _problem->processor_id())
       {
         auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
         auto eid = kokkosMesh().getContiguousElementID(elem);
-        auto side = _mesh.sideWithBoundaryID(elem, boundary);
+        auto side = _mesh->sideWithBoundaryID(elem, boundary);
 
         _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
         _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
@@ -246,13 +246,13 @@ Assembly::initShape()
     }
   };
 
-  for (const auto nl : make_range(_problem.numNonlinearSystems()))
-    getFETypes(_problem.getNonlinearSystemBase(nl).system());
+  for (const auto nl : make_range(_problem->numNonlinearSystems()))
+    getFETypes(_problem->getNonlinearSystemBase(nl).system());
 
-  for (const auto linear : make_range(_problem.numLinearSystems()))
-    getFETypes(_problem.getLinearSystem(linear).system());
+  for (const auto linear : make_range(_problem->numLinearSystems()))
+    getFETypes(_problem->getLinearSystem(linear).system());
 
-  getFETypes(_problem.getAuxiliarySystem().system());
+  getFETypes(_problem->getAuxiliarySystem().system());
 
   _fe_type_map.clear();
 
@@ -305,11 +305,11 @@ Assembly::initShape()
     return elem;
   };
 
-  for (auto subdomain : _mesh.meshSubdomains())
+  for (auto subdomain : _mesh->meshSubdomains())
   {
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
-    auto & assembly = _problem.assembly(0, 0);
+    auto & assembly = _problem->assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
@@ -564,16 +564,210 @@ Assembly::initShape()
 }
 
 void
+Assembly::init()
+{
+  initSharedData();
+  cachePhysicalMap();
+}
+
+void
+Assembly::init(const Assembly & assembly)
+{
+  auto * const mesh = _mesh;
+  *this = assembly;
+  _mesh = mesh;
+
+  cachePhysicalMap();
+}
+
+void
+Assembly::update()
+{
+  const auto num_elems = kokkosMesh().getNumLocalElements();
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, num_elems);
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
+Assembly::reinit(const FESystem & system)
+{
+  const unsigned int number = system.number();
+  const unsigned int num_systems = _problem->es().n_systems();
+  const unsigned int num_subdomains = kokkosMesh().getNumSubdomains();
+  const unsigned int num_variables = system.getNumVariables();
+
+  if (!_qp_solutions.isAlloc())
+  {
+    _qp_solutions.create(num_systems, MAX_TAG);
+    _qp_solutions_grad.create(num_systems, MAX_TAG);
+    _qp_vector_solutions.create(num_systems, MAX_TAG);
+    _qp_vector_solutions_grad.create(num_systems, MAX_TAG);
+    _qp_vector_solutions_curl.create(num_systems, MAX_TAG);
+  }
+
+  for (auto tag : system.getActiveSolutionTags())
+  {
+    auto & qp_solutions = _qp_solutions(number, tag);
+    auto & qp_solutions_grad = _qp_solutions_grad(number, tag);
+    auto & qp_vector_solutions = _qp_vector_solutions(number, tag);
+    auto & qp_vector_solutions_grad = _qp_vector_solutions_grad(number, tag);
+    auto & qp_vector_solutions_curl = _qp_vector_solutions_curl(number, tag);
+
+    if (!qp_solutions.isAlloc())
+      qp_solutions.create(num_subdomains, num_variables);
+
+    if (!qp_solutions_grad.isAlloc())
+      qp_solutions_grad.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions.isAlloc())
+      qp_vector_solutions.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions_grad.isAlloc())
+      qp_vector_solutions_grad.create(num_subdomains, num_variables);
+
+    if (!qp_vector_solutions_curl.isAlloc())
+      qp_vector_solutions_curl.create(num_subdomains, num_variables);
+
+    for (auto subdomain : _mesh->meshSubdomains())
+    {
+      auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
+
+      for (auto var : system.getActiveVariables())
+      {
+        if (!system.isVariableActive(var, sid))
+          continue;
+
+        if (system.isVectorVariable(var))
+        {
+          if (!qp_vector_solutions(sid, var).isAlloc())
+            qp_vector_solutions(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_vector_solutions_grad(sid, var).isAlloc())
+            qp_vector_solutions_grad(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_vector_solutions_curl(sid, var).isAlloc())
+            qp_vector_solutions_curl(sid, var).createDevice(getNumQps(sid));
+        }
+        else if (!system.isScalarVariable(var))
+        {
+          if (!qp_solutions(sid, var).isAlloc())
+            qp_solutions(sid, var).createDevice(getNumQps(sid));
+
+          if (!qp_solutions_grad(sid, var).isAlloc())
+            qp_solutions_grad(sid, var).createDevice(getNumQps(sid));
+        }
+      }
+    }
+
+    qp_solutions.copyToDevice();
+    qp_solutions_grad.copyToDevice();
+    qp_vector_solutions.copyToDevice();
+    qp_vector_solutions_grad.copyToDevice();
+    qp_vector_solutions_curl.copyToDevice();
+  }
+
+  _qp_solutions.copyToDevice();
+  _qp_solutions_grad.copyToDevice();
+  _qp_vector_solutions.copyToDevice();
+  _qp_vector_solutions_grad.copyToDevice();
+  _qp_vector_solutions_curl.copyToDevice();
+
+  _thread.resize(getMaxQpsPerElem(),
+                 kokkosMesh().getNumLocalElements(),
+                 system.getActiveVariables().size(),
+                 system.getActiveSolutionTags().size());
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
+  ::Kokkos::parallel_for(
+      policy, KOKKOS_CLASS_LAMBDA(const ThreadID tid) { cacheSolutionQpValues(tid, system); });
+  ::Kokkos::fence();
+}
+
+KOKKOS_FUNCTION void
+Assembly::cacheSolutionQpValues(const ThreadID tid, const FESystem & system) const
+{
+  auto qp = _thread(tid, 0);
+  auto elem = _thread(tid, 1);
+  auto var = system.getActiveVariables()(_thread(tid, 2));
+  auto tag = system.getActiveSolutionTags()(_thread(tid, 3));
+
+  if (system.isScalarVariable(var))
+    return;
+
+  auto info = kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+  auto elem_type = info.type;
+
+  if (!system.isVariableActive(var, sid))
+    return;
+
+  auto fe_type = system.getFETypeID(var);
+  auto num_dofs = getNumDofs(elem_type, fe_type);
+  auto num_qps = getNumQps(info);
+  auto qp_offset = getQpOffset(info);
+
+  if (qp >= num_qps)
+    return;
+
+  if (system.isVectorVariable(var))
+  {
+    auto & phi = getVectorPhi(sid, elem_type, fe_type);
+    auto & grad_phi = getVectorGradPhi(sid, elem_type, fe_type);
+    auto jacobian = getJacobian(info, qp).transpose();
+
+    Real3 value = 0;
+    Real33 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = system.getVectorDofValue(system.getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * grad_phi(i, qp);
+    }
+
+    grad = grad * jacobian;
+
+    getSolutionQpVectorValue(system, info, qp_offset + qp, var, tag) = value;
+    getSolutionQpVectorGrad(system, info, qp_offset + qp, var, tag) = grad;
+    getSolutionQpVectorCurl(system, info, qp_offset + qp, var, tag) =
+        curlFromVectorGradient(grad, kokkosMesh().getDimension());
+  }
+  else
+  {
+    auto & phi = getPhi(sid, elem_type, fe_type);
+    auto & grad_phi = getGradPhi(sid, elem_type, fe_type);
+    auto jacobian = getJacobian(info, qp);
+
+    Real value = 0;
+    Real3 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = system.getVectorDofValue(system.getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * grad_phi(i, qp);
+    }
+
+    grad = jacobian * grad;
+
+    getSolutionQpValue(system, info, qp_offset + qp, var, tag) = value;
+    getSolutionQpGrad(system, info, qp_offset + qp, var, tag) = grad;
+  }
+}
+
+void
 Assembly::cachePhysicalMap()
 {
   const auto num_subdomains = kokkosMesh().getNumSubdomains();
-  const auto num_elems = kokkosMesh().getNumLocalElements();
-
   _jacobian.create(num_subdomains);
   _jxw.create(num_subdomains);
   _xyz.create(num_subdomains);
 
-  for (auto subdomain : _mesh.meshSubdomains())
+  for (auto subdomain : _mesh->meshSubdomains())
   {
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
@@ -586,9 +780,7 @@ Assembly::cachePhysicalMap()
   _jxw.copyToDeviceNested();
   _xyz.copyToDeviceNested();
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, num_elems);
-  ::Kokkos::parallel_for(policy, *this);
-  ::Kokkos::fence();
+  update();
 }
 
 KOKKOS_FUNCTION void
