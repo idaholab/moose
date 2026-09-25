@@ -11,3 +11,5 @@
 #include "ExecFlagRegistry.h"
 
 const ExecFlagType EXEC_XFEM_MARK = registerDefaultExecFlag("XFEM_MARK");
+const ExecFlagType EXEC_XFEM_SUBDOMAIN_MODIFIER =
+    registerDefaultExecFlag("XFEM_SUBDOMAIN_MODIFIER");
