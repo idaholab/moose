@@ -186,9 +186,11 @@ Material property output is not supported by Kokkos-MOOSE yet.
 ### Evaluation of Material Properties on Element Faces
 
 Analogously to the original MOOSE, Kokkos-MOOSE also creates three copies of materials for element and face material properties, which are distinguished by the combination of boolean flags `_bnd` and `_neighbor`.
-For Kokkos-MOOSE, it is crucial to optimize your material by switching off the declaration and evaluation of material properties that are not used on faces, because of the full storage of material properties.
-You can save a considerable amount of memory as well as computing time by switching off unused material properties.
-You can also leverage on-demand material properties to achieve the same effect.
+Only the copies whose data type some consumer actually reads are evaluated: the material property IDs a consumer needs are collected separately for element, face and neighbor data, so a property read by a volume kernel no longer causes the face and neighbor copies of its material to be computed.
+Which data type a consumer reads is not inferred from the kind of object it is: every consumer is already registered against its material data type when it obtains its material data, and that registration is what the split is derived from, so a kind of consumer that does not exist yet needs no special handling.
+
+Storage is still allocated from declarations rather than from what is consumed, so switching off the *declaration* of material properties that are not used on faces still saves memory, and on-demand material properties achieve the same effect.
+What is no longer necessary is guarding their *evaluation* by hand.
 
 ### Unsupported Material Types
 

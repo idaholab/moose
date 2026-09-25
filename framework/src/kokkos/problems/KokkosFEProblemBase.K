@@ -15,6 +15,7 @@
 #include "KokkosReporter.h"
 
 #include "FEProblemBase.h"
+
 #include "DisplacedProblem.h"
 #include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
@@ -487,15 +488,87 @@ FEProblemBase::initKokkosStatefulProps()
   }
 }
 
+FEProblemBase::KokkosNeededMatProps
+FEProblemBase::splitKokkosMatPropsByDataType(
+    const std::unordered_set<unsigned int> & needed_mat_props) const
+{
+  KokkosNeededMatProps split;
+
+  // Every consumer of a Kokkos material property is registered against the material data type it reads,
+  // by MaterialPropertyInterface when it obtains its material data. That registration is the authority
+  // on which copy of a material a property is wanted from, so the split is derived from it rather than
+  // from the kind of each consuming object: a kind of consumer that does not exist yet needs nothing
+  // added here.
+  //
+  // The registration is not per evaluation, so a property that some consumer of this data type wants is
+  // credited to it whenever the property is needed at all, even if that particular consumer is inactive.
+  // That errs toward evaluating a material copy rather than skipping one that is wanted.
+  auto credit = [this, &needed_mat_props, &split](const Moose::MaterialDataType registered,
+                                                 const Moose::MaterialDataType material)
+  {
+    for (const auto object : getKokkosMaterialPropertyStorageConsumers(registered))
+      if (const auto consumer = dynamic_cast<const MaterialPropertyInterface *>(object))
+        for (const auto prop : consumer->getMatPropDependencies())
+          if (needed_mat_props.count(prop))
+            split[material].insert(prop);
+  };
+
+  credit(Moose::BLOCK_MATERIAL_DATA, Moose::BLOCK_MATERIAL_DATA);
+  credit(Moose::NEIGHBOR_MATERIAL_DATA, Moose::NEIGHBOR_MATERIAL_DATA);
+
+  // The boundary, face and interface data types share one storage, and the face copy of a material is
+  // what serves all three
+  credit(Moose::BOUNDARY_MATERIAL_DATA, Moose::FACE_MATERIAL_DATA);
+  credit(Moose::FACE_MATERIAL_DATA, Moose::FACE_MATERIAL_DATA);
+  credit(Moose::INTERFACE_MATERIAL_DATA, Moose::FACE_MATERIAL_DATA);
+
+  return split;
+}
+
 void
 FEProblemBase::prepareKokkosMaterials(
     const std::unordered_set<unsigned int> & consumer_needed_mat_props)
 {
-  auto needed_mat_props = consumer_needed_mat_props;
+  auto needed_mat_props = splitKokkosMatPropsByDataType(consumer_needed_mat_props);
 
-  _kokkos_materials.updateMatPropDependency(needed_mat_props, 0, true);
+  // Close each set over material-to-material dependencies against the materials that could supply it, so
+  // that what a face material consumes is resolved against face data. A boundary-restricted material is
+  // not copied per data type but lives in the default warehouse while serving face consumers, so the
+  // face set is closed against that warehouse as well.
+  _kokkos_materials.updateMatPropDependency(needed_mat_props[Moose::BLOCK_MATERIAL_DATA], 0, true);
 
-  setActiveMaterialProperties(needed_mat_props, 0);
+  _kokkos_materials[Moose::FACE_MATERIAL_DATA].updateMatPropDependency(
+      needed_mat_props[Moose::FACE_MATERIAL_DATA], 0, true);
+  _kokkos_materials.updateMatPropDependency(needed_mat_props[Moose::FACE_MATERIAL_DATA], 0, true);
+
+  _kokkos_materials[Moose::NEIGHBOR_MATERIAL_DATA].updateMatPropDependency(
+      needed_mat_props[Moose::NEIGHBOR_MATERIAL_DATA], 0, true);
+
+  setActiveKokkosMaterialProperties(needed_mat_props);
+}
+
+void
+FEProblemBase::setActiveKokkosMaterialProperties(const KokkosNeededMatProps & mat_prop_ids)
+{
+  const auto & block = mat_prop_ids[Moose::BLOCK_MATERIAL_DATA];
+  const auto & face = mat_prop_ids[Moose::FACE_MATERIAL_DATA];
+  const auto & neighbor = mat_prop_ids[Moose::NEIGHBOR_MATERIAL_DATA];
+
+  // A boundary-restricted material is a single object in the default warehouse serving face consumers,
+  // so it is judged against the face set
+  for (auto & material : _kokkos_materials.getObjects(0))
+    material->setActiveProperties(material->boundaryRestricted() ? face : block);
+
+  for (auto & material : _kokkos_materials[Moose::FACE_MATERIAL_DATA].getObjects(0))
+    material->setActiveProperties(face);
+
+  for (auto & material : _kokkos_materials[Moose::NEIGHBOR_MATERIAL_DATA].getObjects(0))
+    material->setActiveProperties(neighbor);
+
+  _has_active_material_properties[0] =
+      std::any_of(mat_prop_ids.begin(),
+                  mat_prop_ids.end(),
+                  [](const auto & props) { return !props.empty(); });
 }
 
 void
