@@ -4,11 +4,16 @@
 
 ## Overview
 
-This object implements the time-dependent, globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
+This object implements non-transient terms for a globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
 single variable fluid mass flow rate. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable characteristic pressure drop and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
 !equation
-\sum_{i=1}^{N} \frac{L_i}{A_i} \frac{du}{dt} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{u|u|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
+0 = F + \frac{1}{\sum_{i=1}^{n} \frac{L_i}{A_i}} \left [ \Delta P_c + \sum_{i=1}^{N} \left ( \frac{f_i L_i}{D_{h,i}} \frac{u|u|}{2 \rho_c A_i^2} + K_i \frac{u|u|}{2 \rho_c A_i^2} + \rho_i g L_i \sin{\alpha_i} - \Delta P_p \right) \right] \,
+
+Note, use of this kernel also necessitates the use of a [ODETimeDerivative.md], which includes the time derivative term, $\frac{du}{dt}$, with $u$ being the mass flow rate, which adds the time derivative of the mass flow rate to the residual:
+
+!equation
+\frac{d\dot{m}}{dt} = F \,
 
 Rather than using [ParsedODEKernel.md] and [ODETimeDerivative.md] kernels, the scalar kernels block can be simplified.
 

@@ -4,10 +4,15 @@
 
 ## Overview
 
-This object implements the time-dependent, globally compressible, locally incompressible, single-phase, energy-transport solve along a single 1D segment for a single variable fluid temperature. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as (coupled [ScalarVariables](syntax/Variables/index.md)).
+This object implements non-transient terms for a globally compressible, locally incompressible, single-phase, energy-transport solve along a single 1D segment for a single variable fluid temperature. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
 !equation
-A \rho c_p \frac{du}{dt} + \frac{\dot{m}}{2 L} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) c_p T_d - \frac{\dot{m}}{2 L} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) c_p T_u + \frac{|\dot{m}| c_p}{L} u = \frac{h P_w}{2} \left( 2 T_w - u - \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d - \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u \right) \,
+0 = F + \frac{\dot{m}}{2 L A \rho} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) T_d - \frac{\dot{m}}{2 L A \rho} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) T_u + \frac{|\dot{m}|}{L A \rho} u - \frac{h P_w}{2 A \rho c_p} \left[ 2 T_w - u - \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d - \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u \right] \,
+
+Note, use of this kernel also necessitates the use of a [ODETimeDerivative.md], which includes the time derivative term, $\frac{du}{dt}$, with $u$ being the segment temeprature, which adds the time derivative of the segment temperature to the residual:
+
+!equation
+\frac{dT}{dt} = F \,
 
 This kernel takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
 It also takes functor inputs for flow area, perimeter, and length.

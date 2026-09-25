@@ -4,11 +4,11 @@
 
 ## Overview
 
-This object implements the time-dependent, globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
+This object implements the non-transient terms for a globally compressible, locally incompressible, single-phase, momentum-transport 1D path integration with an arbitrary number of segments for a
 single variable characteristic pressure drop. See the theory manual for more details [theory manual](modules/thermal_hydraulics/theory_manual/index.md). It requires a coupled variable characteristic mass flow rate and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)).
 
 !equation
-F = - \sum_{i=1}^{N} \frac{A_i}{L_i} u - \sum_{i=1}^{N} \frac{f_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i L_i} - \sum_{i=1}^{N} \rho_i g A_i \sin{\alpha_i} + \sum_{i=1}^{N} \frac{A_i}{L_i} \Delta P_p \,
+0 = F + \frac{1}{\sum_{i=1}^{n} \frac{L_i}{A_i}} \left [ - u + \sum_{i=1}^{N} \left ( \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} + K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} + \rho_i g L_i \sin{\alpha_i} - \Delta P_p \right) \right] \,
 
 This kernel is intended for the use case of creating a closed loop flow path with one or more complementary instances of [IncompressibleMomentumSPScalarKernel.md] and a [ParsedODEKernel.md] defining the relationship between mass flow rates in the different flow paths.
 Please note, due to the intended use, the pressure gradient term in the residual is opposite that of the [IncompressibleMomentumSPScalarKernel.md].
@@ -16,8 +16,6 @@ Furthermore, use of this kernel also necessitates the use of a [CoupledODETimeDe
 
 !equation
 \frac{d\dot{m}}{dt} = F \,
-
-This may be a temporary requirement if an ADCoupledODETimeDerivative (or similar) object becomes available as a base class for this kernel.
 
 Rather than using [ParsedODEKernel.md], the scalar kernels block can be simplified.
 
