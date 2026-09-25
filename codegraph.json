@@ -34,5 +34,10 @@
     "test",
     "tutorials",
     "unit"
-  ]
+  ],
+  "extensions": {
+    ".C": "cpp",
+    ".K": "cpp",
+    ".h": "cpp"
+  }
 }
