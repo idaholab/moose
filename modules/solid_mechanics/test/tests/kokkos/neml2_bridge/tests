@@ -17,4 +17,32 @@
     abs_zero = 1e-12
     rel_err = 1e-6
   []
+
+  [tangent]
+    type = CSVDiff
+    input = 'tangent.i'
+    csvdiff = 'tangent_out.csv'
+    requirement = 'The system shall read a NEML2 tangent that does not vary along the batch into a '
+                  'Kokkos material property stored once per subdomain, aliasing the single set of '
+                  'components NEML2 broadcasts rather than duplicating it, and reproducing the values '
+                  'the non-Kokkos bridge obtains per quadrature point.'
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+    abs_zero = 1e-12
+    rel_err = 1e-6
+  []
+
+  [coarse_storage_of_varying_output]
+    type = RunException
+    input = 'bridge.i'
+    cli_args = 'Materials/kokkos_stress/constant_on=SUBDOMAIN Outputs/csv=false'
+    expect_err = 'varies along the batch, so the stored value would be one arbitrary quadrature'
+    requirement = 'The system shall report an error when a Kokkos material property storing a NEML2 '
+                  'output more coarsely than per quadrature point reads an output that varies along '
+                  'the batch.'
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+  []
 []
