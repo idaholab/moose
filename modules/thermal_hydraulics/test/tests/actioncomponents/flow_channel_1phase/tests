@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'FlowChannel1PhaseAC.md Outlet1PhaseAC.md InletMassFlowRateTemperature1PhaseAC.md'
+
+  [mesh]
+    type = Exodiff
+    input = 'mesh.i'
+    exodiff = 'mesh_in.e'
+    cli_args = '--mesh-only mesh_in.e'
+    requirement = 'The system shall be able to generate the mesh of a 1D single-phase flow '
+                  'channel as a native ActionComponent, using the MeshGenerator system rather '
+                  'than the hand-built mesh of the classic FlowChannel1Phase Component, with the '
+                  'inlet/outlet boundaries renamed to match the classic naming convention.'
+    # mesh generation test
+    recover = false
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the mass, momentum, and energy '
+                  'kernels of the single-phase flow channel physics that a native ActionComponent '
+                  'creates and attaches to itself, excluding wall friction and wall heat transfer.'
+  []
+  [steady]
+    type = Exodiff
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The system shall be able to solve a steady-state, single-phase flow channel '
+                  'problem with a prescribed mass flow rate and temperature inlet and a '
+                  'prescribed pressure outlet, all defined as native ActionComponents connected '
+                  'by boundary name, regardless of their declaration order in the input file.'
+  []
+  [friction]
+    type = Exodiff
+    input = 'friction.i'
+    exodiff = 'friction_out.e'
+    requirement = 'The system shall be able to apply wall friction to a single-phase flow channel '
+                  'ActionComponent through a Closures object, the same as a classic '
+                  'FlowChannel1Phase Component.'
+  []
+  [friction_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'friction_jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the wall friction kernel and '
+                  'closures materials of a single-phase flow channel ActionComponent.'
+  []
+[]

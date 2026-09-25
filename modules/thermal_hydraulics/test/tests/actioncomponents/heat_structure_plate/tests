@@ -1,0 +1,35 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'HeatStructurePlateAC.md'
+
+  [mesh]
+    type = Exodiff
+    input = 'mesh.i'
+    exodiff = 'mesh_in.e'
+    cli_args = '--mesh-only mesh_in.e'
+    requirement = 'The system shall be able to generate the multi-region 2D mesh of a plate heat '
+                  'structure as a native ActionComponent, using the MeshGenerator system rather '
+                  'than the hand-built mesh of the classic HeatStructurePlate Component, with the '
+                  'inner/outer/start/end boundaries named to match the classic naming convention.'
+    recover = false
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the heat conduction physics that a '
+                  'plate heat structure native ActionComponent creates and attaches to itself.'
+  []
+  [transient]
+    type = CSVDiff
+    input = 'transient.i'
+    csvdiff = 'transient_out.csv'
+    requirement = 'The system shall conserve energy when solving transient heat conduction in a '
+                  'plate heat structure defined as a native ActionComponent with a non-uniform '
+                  'initial temperature and insulated boundaries.'
+  []
+[]
