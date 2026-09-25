@@ -24,6 +24,73 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMCurlCurlNL]
+    type = CSVDiff
+    issues = '#33579'
+    input = curlcurl_nl.i
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMCurlCurlPartialNL_LinearKernel]
+    type = CSVDiff
+    issues = '#33579'
+    input = curlcurl_nl.i
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients with the linear kernel.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMCurlCurlKernel'
+    recover = false
+  []
+  [MFEMCurlCurlNLPartial]
+    type = CSVDiff
+    issues = '#33579'
+    input = curlcurl_nl.i
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # SumOperatorExtension assembles its diagonal on local rather than true DoFs, which reads beyond the end of the diag vector in parallel.
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
+  [MFEMNLCurlCurlMMS]
+    type = CSVDiff
+    input = nl_curlcurl_MMS.i
+    csvdiff = 'OutputData/NLCurlCurlMMS.csv '
+              'OutputData/NLCurlCurlMMS_legacy_line_sample_h_field_0001.csv'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel, as measured by the L2 error '
+                  'against the exact solution.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    cli_args = 'Outputs/line_sample/file_base_suffix=legacy'
+    recover = false
+  []
+  [MFEMNLCurlCurlMMSPartial]
+    type = CSVDiff
+    input = nl_curlcurl_MMS.i
+    csvdiff = 'OutputData/NLCurlCurlMMS.csv '
+              'OutputData/NLCurlCurlMMS_partial_line_sample_h_field_0001.csv'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel with partial assembly, as '
+                  'measured by the L2 error against the exact solution.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # SumOperatorExtension assembles its diagonal on local rather than true DoFs, which reads beyond the end of the diag vector in parallel.
+    cli_args = 'Executioner/assembly_level=partial '
+               'Outputs/line_sample/file_base_suffix=partial'
+    recover = false
+  []
   [MFEMDiffusion]
     type = CSVDiff
     input = diffusion.i

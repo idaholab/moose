@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#33579'
+
+  [jacobian_matches_analytic_linearization]
+    type = GoogleTest
+    unit_test = CheckData.NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization
+    design = '/MFEMNLCurlCurlKernel.md'
+    requirement = 'The system shall assemble an element Jacobian for the nonlinear curl-curl operator that matches the analytic linearization of its residual at every quadrature point.'
+  []
+  [partial_assembly_matches_legacy]
+    type = GoogleTest
+    unit_test = CheckData.NLCurlCurlIntegratorPartialAssemblyMatchesLegacy
+    design = '/MFEMNLCurlCurlKernel.md'
+    requirement = 'The system shall produce the same residual and the same Jacobian action for the nonlinear curl-curl operator under partial assembly as under legacy assembly, when both integrate on the same quadrature rule.'
+  []
+  [partial_assembly_reassembles_at_current_state]
+    type = GoogleTest
+    unit_test = CheckData.NLCurlCurlIntegratorPartialAssemblyNeedsSetupAfterStateChange
+    design = '/MFEMNLCurlCurlKernel.md'
+    requirement = 'The system shall re-assemble solution-dependent partial assembly data when the nonlinear form is set up at a new state, and shall not apply data assembled at a previous state.'
+  []
+  [sum_operator_diagonal_matches_action]
+    type = GoogleTest
+    unit_test = CheckData.SumOperatorExtensionDiagonalMatchesItsAction
+    design = '/SumOperatorExtension.md'
+    requirement = 'The system shall assemble a diagonal for the combined nonlinear and linear partially assembled operator that agrees with the action of that operator, and shall impose a unit diagonal on essential rows.'
+  []
+[]

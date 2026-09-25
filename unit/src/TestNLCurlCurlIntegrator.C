@@ -5,6 +5,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
+#include "SumOperatorExtension.h"
 
 TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 {
@@ -30,11 +31,15 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double u) { return u * u; });
   mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
                                                      [](double u) { return 2.0 * u * u; });
+  // This unit test is for the element level assembly. The constructor needs a function
+  // to represent dk/ds for the partial assembly route. Since we don't need to test that
+  // here, we just pass a dummy function in.
+  mfem::TransformedCoefficient dk_ds_coeff(&curl_u_norm_coeff, [](double /*u*/) { return 2; });
 
   const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
 
   Moose::MFEM::NLCurlCurlIntegrator integ(
-      k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir);
+      k_coeff, curlu_dk_dcurlu_coeff, dk_ds_coeff, curl_gf_coeff, 1e-32, &ir);
 
   const auto & el = *fespace.GetFE(0);
   auto & T = *mesh.GetElementTransformation(0);
@@ -91,6 +96,268 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 
   jacobian_numeric -= jacobian_expected;
   EXPECT_NEAR(jacobian_numeric.MaxMaxNorm(), 0.0, 1e-12);
+}
+
+TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyMatchesLegacy)
+{
+  // Partial assembly requires tensor-product elements - PreAssemblySetup rejects anything that
+  // is not a VectorTensorFiniteElement - so this uses hexes rather than the tets above.
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
+  mfem::ND_FECollection fec(1, mesh.Dimension());
+  mfem::FiniteElementSpace fespace(&mesh, &fec);
+
+  // A state with a spatially varying curl, so k(|curl u|) is not effectively constant and the
+  // rank-one term in the gradient is actually exercised.
+  mfem::GridFunction gf(&fespace);
+  mfem::VectorFunctionCoefficient seed(3,
+                                       [](const mfem::Vector & p, mfem::Vector & v)
+                                       {
+                                         v(0) = std::sin(p(1));
+                                         v(1) = std::cos(p(2));
+                                         v(2) = std::sin(p(0));
+                                       });
+  gf.ProjectCoefficient(seed);
+
+  // k(s) = 1 + s^2, so k >= 1 everywhere and the curl-curl block stays non-degenerate.
+  // Then s k'(s) = 2 s^2 and k'(s)/s = 2.
+  mfem::CurlGridFunctionCoefficient curl_gf_coeff(&gf);
+  MFEMVectorMagnitudeCoefficient curl_u_norm_coeff(curl_gf_coeff);
+  mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
+  mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
+                                                     [](double s) { return 2.0 * s * s; });
+  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0);
+
+  // Both forms must integrate on the same rule, or this measures quadrature rather than
+  // assembly: the legacy path uses order 2p, while AssemblePA defaults to
+  // MassIntegrator::GetRule, which is 2p + Trans.OrderW().
+  const auto & ir = mfem::IntRules.Get(mfem::Geometry::CUBE, 2 * fec.GetOrder());
+
+  auto add_integrator = [&](mfem::NonlinearForm & form)
+  {
+    form.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
+        k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
+  };
+
+  mfem::NonlinearForm legacy(&fespace);
+  add_integrator(legacy);
+  legacy.SetAssemblyLevel(mfem::AssemblyLevel::LEGACY);
+  legacy.Setup();
+
+  mfem::NonlinearForm partial(&fespace);
+  add_integrator(partial);
+  partial.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
+  partial.Setup();
+
+  mfem::Vector x(fespace.GetTrueVSize());
+  x = gf;
+
+  // Residual action: AssemblePA and AddMultPA against the legacy element loop.
+  mfem::Vector r_legacy(x.Size()), r_partial(x.Size());
+  legacy.Mult(x, r_legacy);
+  partial.Mult(x, r_partial);
+  ASSERT_GT(r_legacy.Norml2(), 0.0);
+  mfem::Vector r_diff(r_legacy);
+  r_diff -= r_partial;
+  EXPECT_LT(r_diff.Norml2(), 1e-10 * r_legacy.Norml2());
+
+  // Gradient: compared column by column rather than by a few random probes. The partially
+  // assembled gradient is never formed as a matrix, so each column is recovered by applying
+  // it to a unit vector; the mesh is small enough that this is cheap and it catches errors
+  // that random directions can miss.
+  mfem::Operator & g_legacy = legacy.GetGradient(x);
+  mfem::Operator & g_partial = partial.GetGradient(x);
+
+  mfem::Vector e(x.Size()), col_legacy(x.Size()), col_partial(x.Size());
+  mfem::real_t max_entry = 0.0, max_diff = 0.0;
+  for (const auto j : make_range(x.Size()))
+  {
+    e = 0.0;
+    e(j) = 1.0;
+    g_legacy.Mult(e, col_legacy);
+    g_partial.Mult(e, col_partial);
+    max_entry = std::max(max_entry, col_legacy.Normlinf());
+    col_partial -= col_legacy;
+    max_diff = std::max(max_diff, col_partial.Normlinf());
+  }
+  ASSERT_GT(max_entry, 0.0);
+  EXPECT_LT(max_diff, 1e-10 * max_entry);
+}
+
+TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
+{
+  if (mfem::Mpi::WorldSize() > 1)
+    GTEST_SKIP() << "SumOperatorExtension assembles its diagonal on local rather than true DoFs, "
+                    "and overruns diag vector in parallel.";
+
+  mfem::Mesh serial = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
+  mfem::ParMesh mesh(MPI_COMM_WORLD, serial);
+  mfem::ND_FECollection fec(1, mesh.Dimension());
+  mfem::ParFiniteElementSpace fespace(&mesh, &fec);
+
+  mfem::ParGridFunction gf(&fespace);
+  mfem::VectorFunctionCoefficient seed(3,
+                                       [](const mfem::Vector & p, mfem::Vector & v)
+                                       {
+                                         v(0) = std::sin(p(1));
+                                         v(1) = std::cos(p(2));
+                                         v(2) = std::sin(p(0));
+                                       });
+  gf.ProjectCoefficient(seed);
+
+  // k(s) = 1 + s^2, so s k'(s) = 2 s^2 and k'(s)/s = 2.
+  mfem::CurlGridFunctionCoefficient curl_gf_coeff(&gf);
+  MFEMVectorMagnitudeCoefficient curl_u_norm_coeff(curl_gf_coeff);
+  mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
+  mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
+                                                     [](double s) { return 2.0 * s * s; });
+  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0), one(1.0);
+
+  mfem::Array<int> ess_bdr(mesh.bdr_attributes.Max()), ess_tdofs;
+  ess_bdr = 1;
+  fespace.GetEssentialTrueDofs(ess_bdr, ess_tdofs);
+  ASSERT_GT(ess_tdofs.Size(), 0);
+
+  // A: the nonlinear form's partially assembled gradient, carrying the DIAG_ZERO policy that
+  // EquationSystem::GetGradient sets on it.
+  mfem::ParNonlinearForm nlf(&fespace);
+  nlf.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
+      k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32));
+  nlf.SetEssentialTrueDofs(ess_tdofs);
+  nlf.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
+  nlf.Setup();
+
+  mfem::Vector x(fespace.GetTrueVSize());
+  gf.GetTrueDofs(x);
+
+  auto * const nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(&nlf.GetGradient(x));
+  ASSERT_NE(nlf_grad, nullptr);
+  nlf_grad->SetDiagonalPolicy(mfem::Operator::DIAG_ZERO);
+
+  // B: the partially assembled linear operator, which picks up DIAG_ONE on the essential rows
+  // from FormSystemMatrix - the same elimination EquationSystem::FormSystemOperator relies on.
+  mfem::ParBilinearForm blf(&fespace);
+  blf.AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
+  blf.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
+  blf.Assemble();
+  mfem::OperatorHandle linear_op;
+  blf.FormSystemMatrix(ess_tdofs, linear_op);
+
+  Moose::MFEM::SumOperatorExtension sum(nlf_grad, linear_op.Ptr(), &nlf);
+
+  mfem::Vector assembled(x.Size());
+  sum.AssembleDiagonal(assembled);
+
+  // Recover the true diagonal from the action. Probing by global true DoF rather than local
+  // index, so that the vector really is a unit vector across all ranks.
+  mfem::Vector e(x.Size()), column(x.Size()), probed(x.Size());
+  probed = 0.0;
+  const HYPRE_BigInt offset = fespace.GetMyTDofOffset();
+  for (HYPRE_BigInt g = 0; g < fespace.GlobalTrueVSize(); ++g)
+  {
+    const HYPRE_BigInt shifted = g - offset;
+    const bool mine = shifted >= 0 && shifted < x.Size();
+    e = 0.0;
+    if (mine)
+      e(shifted) = 1.0;
+    sum.Mult(e, column);
+    if (mine)
+      probed(shifted) = column(shifted);
+  }
+
+  ASSERT_GT(probed.Normlinf(), 0.0);
+  mfem::Vector difference(assembled);
+  difference -= probed;
+  EXPECT_LT(difference.Normlinf(), 1e-10 * probed.Normlinf());
+
+  // The DIAG_ZERO nonlinear gradient and the DIAG_ONE linear operator must sum to exactly one
+  // on essential rows. A diagonal of two is the bug FormJacobianMatrix fixes on the legacy path,
+  // and a diagonal of zero makes OperatorJacobiSmoother abort.
+  for (const auto tdof : ess_tdofs)
+    EXPECT_DOUBLE_EQ(assembled(tdof), 1.0);
+}
+
+TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyNeedsSetupAfterStateChange)
+{
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
+  mfem::ND_FECollection fec(1, mesh.Dimension());
+  mfem::FiniteElementSpace fespace(&mesh, &fec);
+
+  // The integrator reads its coefficients from this grid function rather than from the vector
+  // passed to Mult(), so moving it is what makes previously assembled PA data stale.
+  mfem::GridFunction gf(&fespace);
+  auto project_state = [&](mfem::real_t phase)
+  {
+    mfem::VectorFunctionCoefficient field(3,
+                                          [phase](const mfem::Vector & p, mfem::Vector & v)
+                                          {
+                                            v(0) = std::sin(p(1) + phase);
+                                            v(1) = std::cos(p(2) + phase);
+                                            v(2) = std::sin(p(0) + phase);
+                                          });
+    gf.ProjectCoefficient(field);
+  };
+
+  mfem::CurlGridFunctionCoefficient curl_gf_coeff(&gf);
+  MFEMVectorMagnitudeCoefficient curl_u_norm_coeff(curl_gf_coeff);
+  mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
+  mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
+                                                     [](double s) { return 2.0 * s * s; });
+  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0);
+
+  // Pinned so that legacy assembly is an exact reference rather than a nearby one; see
+  // NLCurlCurlIntegratorPartialAssemblyMatchesLegacy.
+  const auto & ir = mfem::IntRules.Get(mfem::Geometry::CUBE, 2 * fec.GetOrder());
+
+  auto add_integrator = [&](mfem::NonlinearForm & form)
+  {
+    form.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
+        k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
+  };
+
+  mfem::NonlinearForm partial(&fespace);
+  add_integrator(partial);
+  partial.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
+
+  // Assemble at the first state, then hold the evaluation point fixed so that the state the
+  // coefficients are read at is the only thing that varies.
+  project_state(0.0);
+  partial.Setup();
+
+  mfem::Vector x(fespace.GetTrueVSize());
+  x = gf;
+
+  project_state(1.3);
+
+  mfem::Vector stale(x.Size());
+  partial.Mult(x, stale);
+
+  mfem::Vector refreshed(x.Size());
+  partial.Setup();
+  partial.Mult(x, refreshed);
+
+  // Legacy assembly evaluates the coefficients on every Mult(), so it is the reference for the
+  // second state.
+  mfem::NonlinearForm legacy(&fespace);
+  add_integrator(legacy);
+  legacy.SetAssemblyLevel(mfem::AssemblyLevel::LEGACY);
+  legacy.Setup();
+
+  mfem::Vector reference(x.Size());
+  legacy.Mult(x, reference);
+  ASSERT_GT(reference.Norml2(), 0.0);
+
+  // Setup() brings the partially assembled data back to the current state.
+  mfem::Vector refreshed_error(refreshed);
+  refreshed_error -= reference;
+  EXPECT_LT(refreshed_error.Norml2(), 1e-10 * reference.Norml2());
+
+  // Without it the residual is visibly wrong. This is not merely a sanity check on the
+  // assertion above: it pins the fact that NonlinearForm::Mult() does not refresh
+  // solution-dependent PA data by itself, which is the assumption
+  // EquationSystem::ComputeNonlinearResidual relies on when it calls Setup().
+  mfem::Vector stale_error(stale);
+  stale_error -= reference;
+  EXPECT_GT(stale_error.Norml2(), 0.01 * reference.Norml2());
 }
 
 #endif

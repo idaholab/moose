@@ -21,6 +21,7 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 #include "NLScaleIntegrator.h"
+#include "SumOperatorExtension.h"
 
 namespace Moose::MFEM
 {
@@ -329,6 +330,14 @@ protected:
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
+
+  // We use this to combine nonlinear + linear operators when using partial
+  // assembly.
+  mutable std::unique_ptr<SumOperatorExtension> _sum_operator;
+
+  // Store the op that comes out of FormLinearSystem
+  mfem::Operator * _system_operator = nullptr;
+
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;
