@@ -88,6 +88,26 @@ Material::initStatefulProperties(unsigned int)
 void
 Material::computeProperties()
 {
+  // The coarser granularities are evaluated first, each over its own index set, so that a finer
+  // property may read a coarser one. Successive dispatches on one execution space are ordered, which
+  // is the same guarantee the framework already relies on between materials.
+  if (_has_subdomain_constant_property)
+  {
+    if (!DispatcherRegistry::hasUserMethod<SubdomainConstantCompute>(type()))
+      mooseError("This material declares a property with constant_on = SUBDOMAIN, which is coarser "
+                 "than its own constant_on, but does not define computeSubdomainProperties(). That "
+                 "property would never be filled. Define the hook, or declare the property at the "
+                 "material's own granularity.");
+
+    Policy policy(0, numKokkosSubdomains());
+
+    if (!_subdomain_constant_dispatcher)
+      _subdomain_constant_dispatcher =
+          DispatcherRegistry::build<SubdomainConstantCompute>(this, type());
+
+    _subdomain_constant_dispatcher->parallelFor(policy);
+  }
+
   if ((!_bnd && !_neighbor) || _constant_option == PropertyConstantOption::SUBDOMAIN)
   {
     Policy policy(0, numKokkosElements());

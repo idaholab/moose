@@ -25,7 +25,9 @@ MaterialBase::validParams()
       constant_option,
       "When ELEMENT or SUBDOMAIN, computeQpProperties() will be only called once for each "
       "element/face or subdomain, respectively. Material properties will be only stored for each "
-      "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
+      "element/face or subdomain accordingly. The 'qp' argument wlll be ignored. This is the "
+      "default granularity of every property the material declares; a material may declare an "
+      "individual property coarser than this, which it then fills from a separate hook.");
 
   params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");
@@ -60,6 +62,7 @@ MaterialBase::MaterialBase(const MaterialBase & object)
     AssemblyHolder(object),
     FESystemHolder(object),
     _constant_option(object._constant_option),
+    _has_subdomain_constant_property(object._has_subdomain_constant_property),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
@@ -68,26 +71,37 @@ MaterialBase::MaterialBase(const MaterialBase & object)
 {
   _element_ids = object._element_ids;
   _element_side_ids = object._element_side_ids;
+  _subdomain_element_ids = object._subdomain_element_ids;
+}
+
+std::set<ContiguousElementID>
+MaterialBase::subdomainRepresentativeElements() const
+{
+  auto & restricted_blocks = boundaryRestricted() ? meshBlockIDs() : blockIDs();
+
+  std::set<ContiguousElementID> element_ids;
+
+  for (auto block : restricted_blocks)
+  {
+    auto first_elem = *_mesh.getKokkosMesh()->getSubdomainContiguousElementIDRange(block).begin();
+    if (first_elem != libMesh::DofObject::invalid_id)
+      element_ids.insert(first_elem);
+  }
+
+  return element_ids;
 }
 
 void
 MaterialBase::initializeMaterialRestrictable()
 {
+  // One representative element per subdomain, so that a subdomain-constant property is written by
+  // exactly one thread per subdomain. Built whenever such a property was declared, and reused as the
+  // whole index set by a material that is subdomain-constant throughout.
+  if (_has_subdomain_constant_property)
+    _subdomain_element_ids = subdomainRepresentativeElements();
+
   if (_constant_option == PropertyConstantOption::SUBDOMAIN)
-  {
-    auto & restricted_blocks = boundaryRestricted() ? meshBlockIDs() : blockIDs();
-
-    std::set<ContiguousElementID> element_ids;
-
-    for (auto block : restricted_blocks)
-    {
-      auto first_elem = *_mesh.getKokkosMesh()->getSubdomainContiguousElementIDRange(block).begin();
-      if (first_elem != libMesh::DofObject::invalid_id)
-        element_ids.insert(first_elem);
-    }
-
-    _element_ids = element_ids;
-  }
+    _element_ids = subdomainRepresentativeElements();
   else if (materialDataType() == Moose::BLOCK_MATERIAL_DATA)
   {
     std::set<ContiguousElementID> element_ids;

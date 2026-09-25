@@ -16,6 +16,8 @@
 
 #include "MaterialBase.h"
 
+#include <optional>
+
 namespace Moose::Kokkos
 {
 
@@ -64,6 +66,9 @@ public:
   struct NeighborCompute
   {
   };
+  struct SubdomainConstantCompute
+  {
+  };
   ///@}
 
 protected:
@@ -76,8 +81,10 @@ protected:
    * @returns The material property
    */
   template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> declareKokkosProperty(const std::string & name,
-                                                       const std::vector<unsigned int> & dims = {});
+  MaterialProperty<T, dimension>
+  declareKokkosProperty(const std::string & name,
+                        const std::vector<unsigned int> & dims = {},
+                        std::optional<PropertyConstantOption> constant_option = {});
   /**
    * Declare an on-demand material property
    * @tparam T The property data type
@@ -89,7 +96,8 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosOnDemandProperty(const std::string & name,
-                                const std::vector<unsigned int> & dims = {});
+                                const std::vector<unsigned int> & dims = {},
+                                std::optional<PropertyConstantOption> constant_option = {});
   /**
    * Declare a material property by property name
    * @tparam T The property data type
@@ -101,9 +109,10 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosPropertyByName(const std::string & prop_name,
-                              const std::vector<unsigned int> & dims = {})
+                              const std::vector<unsigned int> & dims = {},
+                              std::optional<PropertyConstantOption> constant_option = {})
   {
-    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, false);
+    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, false, constant_option);
   }
   /**
    * Declare an on-demand material property by property name
@@ -117,9 +126,10 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosOnDemandPropertyByName(const std::string & prop_name,
-                                      const std::vector<unsigned int> & dims = {})
+                                      const std::vector<unsigned int> & dims = {},
+                                      std::optional<PropertyConstantOption> constant_option = {})
   {
-    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, true);
+    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, true, constant_option);
   }
 
   /**
@@ -147,6 +157,21 @@ protected:
    * @returns The contiguous element ID - side index pair
    */
   KOKKOS_FUNCTION auto kokkosElementSideID(ThreadID tid) const { return _element_side_ids[tid]; }
+  /**
+   * Get the number of subdomains this material operates on for subdomain-constant material property
+   * evaluation, which is also the number of threads that pass dispatches over
+   * @returns The number of subdomains
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosSubdomains() const { return _subdomain_element_ids.size(); }
+  /**
+   * Get the contiguous ID of the element representing a subdomain for a thread
+   * @param tid The thread ID
+   * @returns The contiguous element ID
+   */
+  KOKKOS_FUNCTION ContiguousElementID kokkosSubdomainElementID(ThreadID tid) const
+  {
+    return _subdomain_element_ids[tid];
+  }
 
   /**
    * Kokkos functor dispatchers
@@ -154,12 +179,20 @@ protected:
   ///@{
   std::unique_ptr<DispatcherBase> _init_dispatcher;
   std::unique_ptr<DispatcherBase> _compute_dispatcher;
+  std::unique_ptr<DispatcherBase> _subdomain_constant_dispatcher;
   ///@}
 
   /**
-   * Whether the properties declared by this material are constant over element or subdomain
+   * The default granularity of the properties declared by this material, and the finest granularity
+   * it evaluates. An individual property may be declared coarser than this but not finer.
    */
   const PropertyConstantOption _constant_option;
+
+  /**
+   * Whether this material declared a property constant over each subdomain while being finer itself,
+   * which adds an evaluation pass over one element per subdomain
+   */
+  bool _has_subdomain_constant_property = false;
 
   /**
    * TODO: Move to TransientInterface
@@ -198,6 +231,12 @@ private:
   void initializeMaterialRestrictable();
 
   /**
+   * Get one contiguous element ID per subdomain this material operates on
+   * @returns The representative element IDs
+   */
+  std::set<ContiguousElementID> subdomainRepresentativeElements() const;
+
+  /**
    * Internal method for declaring a material property
    * @tparam T The property data type
    * @tparam dimension The property dimension
@@ -206,8 +245,11 @@ private:
    * @param on_demand Whether the property is an on-demand property
    */
   template <typename T, unsigned int dimension>
-  MaterialProperty<T, dimension> declareKokkosPropertyInternal(
-      const std::string & prop_name, const std::vector<unsigned int> & dims, const bool on_demand);
+  MaterialProperty<T, dimension>
+  declareKokkosPropertyInternal(const std::string & prop_name,
+                                const std::vector<unsigned int> & dims,
+                                const bool on_demand,
+                                std::optional<PropertyConstantOption> constant_option);
 
   /**
    * Contiguous element IDs this material operates on for element material property evaluation
@@ -218,37 +260,46 @@ private:
    * evaluation
    */
   Array<Pair<ContiguousElementID, unsigned int>> _element_side_ids;
+  /**
+   * One contiguous element ID per subdomain this material operates on, used for subdomain-constant
+   * material property evaluation. Having exactly one entry per subdomain is what makes the subdomain
+   * storage slot single-writer.
+   */
+  Array<ContiguousElementID> _subdomain_element_ids;
 };
 
 template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>
 MaterialBase::declareKokkosProperty(const std::string & name,
-                                    const std::vector<unsigned int> & dims)
+                                    const std::vector<unsigned int> & dims,
+                                    std::optional<PropertyConstantOption> constant_option)
 {
   std::string prop_name = name;
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
+  return declareKokkosPropertyByName<T, dimension>(prop_name, dims, constant_option);
 }
 
 template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>
 MaterialBase::declareKokkosOnDemandProperty(const std::string & name,
-                                            const std::vector<unsigned int> & dims)
+                                            const std::vector<unsigned int> & dims,
+                                            std::optional<PropertyConstantOption> constant_option)
 {
   std::string prop_name = name;
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return declareKokkosOnDemandPropertyByName<T, dimension>(prop_name, dims);
+  return declareKokkosOnDemandPropertyByName<T, dimension>(prop_name, dims, constant_option);
 }
 
 template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>
 MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
                                             const std::vector<unsigned int> & dims,
-                                            const bool on_demand)
+                                            const bool on_demand,
+                                            std::optional<PropertyConstantOption> constant_option)
 {
   if (dims.size() != dimension)
     mooseError("The declared Kokkos material property '",
@@ -264,8 +315,49 @@ MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
           ? prop_name
           : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
+  const auto option = constant_option.value_or(_constant_option);
+
+  if (option != _constant_option)
+  {
+    static const std::unordered_map<PropertyConstantOption, std::string> name = {
+        {PropertyConstantOption::NONE, "NONE"},
+        {PropertyConstantOption::ELEMENT, "ELEMENT"},
+        {PropertyConstantOption::SUBDOMAIN, "SUBDOMAIN"}};
+
+    // The enumerators are ordered from finest to coarsest, so a property coarser than the material's
+    // granularity compares greater. A finer one cannot be filled: the material evaluates over the
+    // index set its own granularity implies, which does not resolve the finer entities.
+    if (option < _constant_option)
+      mooseError("The Kokkos material property '",
+                 prop_name_modified,
+                 "' is declared with constant_on = ",
+                 libmesh_map_find(name, option),
+                 ", which is finer than this material's constant_on = ",
+                 libmesh_map_find(name, _constant_option),
+                 ". A material evaluates its properties over the entities its own constant_on "
+                 "implies, so it cannot fill a property that varies more finely than that. Declare "
+                 "the property at the material's granularity or coarser, or set the material's "
+                 "constant_on to the finest granularity any of its properties needs.");
+
+    // An ELEMENT-constant pass would have to run over elements for a block material and over element
+    // faces for the face and neighbor copies the framework creates alongside it, since a face
+    // material has no element index set. Only SUBDOMAIN is supported until that is worked out, and a
+    // subdomain-constant value needs no such distinction because it does not depend on position.
+    if (option != PropertyConstantOption::SUBDOMAIN)
+      mooseError("The Kokkos material property '",
+                 prop_name_modified,
+                 "' is declared with constant_on = ",
+                 libmesh_map_find(name, option),
+                 ", which is coarser than this material's constant_on = ",
+                 libmesh_map_find(name, _constant_option),
+                 ", but only SUBDOMAIN is supported as a coarser per-property granularity. Declare "
+                 "the property at the material's own granularity or at SUBDOMAIN.");
+
+    _has_subdomain_constant_property = true;
+  }
+
   auto prop = materialData().declareKokkosProperty<T, dimension>(
-      prop_name_modified, dims, this, isBoundaryMaterial(), on_demand, _constant_option);
+      prop_name_modified, dims, this, isBoundaryMaterial(), on_demand, option);
 
   registerPropName(prop_name_modified, false, 0);
 

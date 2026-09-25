@@ -645,6 +645,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
     DispatcherRegistry::addDispatcher<classname::ElementCompute, classname>(objectname);           \
     DispatcherRegistry::addDispatcher<classname::SideCompute, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
+    DispatcherRegistry::addDispatcher<classname::SubdomainConstantCompute, classname>(objectname);  \
                                                                                                    \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
         objectname,                                                                                \
@@ -658,6 +659,10 @@ registerResidualObjectDispatchers(const std::string & objectname)
         objectname,                                                                                \
         &classname::initQpStatefulProperties<classname> !=                                         \
             classname::defaultInitStateful<classname>());                                          \
+    DispatcherRegistry::hasUserMethod<classname::SubdomainConstantCompute>(                        \
+        objectname,                                                                                \
+        &classname::computeSubdomainProperties<classname> !=                                       \
+            classname::defaultComputeSubdomain<classname>());                                      \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

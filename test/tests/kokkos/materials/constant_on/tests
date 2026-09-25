@@ -39,4 +39,49 @@
       compute_devices = 'cpu cuda xpu'
     []
   []
+
+  [per_property]
+    issues = '#33855'
+    requirement = 'The Kokkos system shall support a single material declaring one property constant '
+                  'on subdomains alongside another varying per quadrature point, and shall'
+    [granularity]
+      type = 'CSVDiff'
+      input = 'kokkos_per_property_constant_on.i'
+      csvdiff = 'kokkos_per_property_constant_on_out.csv'
+      detail = 'evaluate the subdomain-constant property before the finer one so that the finer one '
+               'may be computed from it;'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [finer_than_material]
+      type = 'RunException'
+      input = 'kokkos_per_property_constant_on.i'
+      cli_args = 'Materials/mat/constant_on=SUBDOMAIN Materials/mat/coarse_constant_on=NONE
+                  Outputs/csv=false'
+      expect_err = 'is finer than this material'
+      detail = 'report an error when a property is declared finer than the granularity the material '
+               'evaluates over;'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [unsupported_granularity]
+      type = 'RunException'
+      input = 'kokkos_per_property_constant_on.i'
+      cli_args = 'Materials/mat/coarse_constant_on=ELEMENT Outputs/csv=false'
+      expect_err = 'only SUBDOMAIN is supported as a coarser per-property granularity'
+      detail = 'report an error for a coarser granularity it does not yet evaluate; and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [missing_hook]
+      type = 'RunException'
+      input = 'kokkos_per_property_constant_on.i'
+      cli_args = 'Materials/mat/type=KokkosMissingGranularityHookTest Outputs/csv=false'
+      expect_err = 'does not define computeSubdomainProperties'
+      detail = 'report an error when the material declares such a property but defines no hook to '
+               'fill it.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
 []
