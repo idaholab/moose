@@ -13,6 +13,10 @@
 
 /**
  * Stress computed from a small strain through linear elasticity.
+ *
+ * The tangent equals the elasticity tensor, so it is stored at that tensor's granularity rather than
+ * per quadrature point. For the common case of one set of elastic constants per block that is one
+ * rank-four tensor per subdomain instead of one per quadrature point.
  */
 class KokkosComputeLinearElasticStress : public Moose::Kokkos::Material
 {
@@ -23,6 +27,19 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeSubdomainProperties(const unsigned int qp, Datum & datum) const
+  {
+    _Jacobian_mult(datum, qp) = _elasticity_tensor(datum, qp);
+  }
+
+  /**
+   * Verify that the elasticity tensor is stored at the granularity the tangent is declared with.
+   * Deferred past construction because MOOSE constructs materials in input order, so the elasticity
+   * tensor's declaration may not have happened yet.
+   */
+  void checkElasticityTensorGranularity();
 
 private:
   /// Base name prefixing the property names
@@ -35,7 +52,7 @@ private:
 
   /// Stress
   Moose::Kokkos::MaterialProperty<Moose::Kokkos::Real33> _stress;
-  /// Derivative of the stress with respect to the strain
+  /// Derivative of the stress with respect to the strain, stored per subdomain
   Moose::Kokkos::MaterialProperty<Moose::Kokkos::Real3333> _Jacobian_mult;
 };
 
@@ -47,5 +64,4 @@ KokkosComputeLinearElasticStress::computeQpProperties(const unsigned int qp, Dat
   const Moose::Kokkos::Real33 & mechanical_strain = _mechanical_strain(datum, qp);
 
   _stress(datum, qp) = elasticity_tensor * mechanical_strain;
-  _Jacobian_mult(datum, qp) = elasticity_tensor;
 }
