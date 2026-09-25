@@ -12,6 +12,7 @@
 #pragma once
 
 #include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchObservationHistoryHelper.h"
 #include "Control.h"
 
 /**
@@ -29,6 +30,9 @@ public:
 
   /// Construct using input parameters
   LibtorchNeuralNetControl(const InputParameters & parameters);
+
+  /// Load any file-backed controller state after full object construction
+  virtual void initialSetup() override;
 
   /// Execute neural network to determine the controllable parameter values
   virtual void execute() override;
@@ -48,13 +52,18 @@ public:
    * when copying the neural network from a main app which trains it.
    * @param input_nn Reference to a neural network which will be copied into this object
    */
-  void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
+  virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
+
+  /**
+   * Load the controller neural network from the configured checkpoint file.
+   */
+  virtual void loadControlNeuralNetFromFile();
 
   /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
   /// Return true if the object already has a neural netwok
-  bool hasControlNeuralNet() const { return (_nn != NULL); };
+  bool hasControlNeuralNet() const { return _nn != nullptr; };
 
 protected:
   /**
@@ -68,40 +77,43 @@ protected:
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);
 
-  /// Function that updates the values of the current response
-  void updateCurrentResponse();
+  /// Refresh the current observation values from the linked postprocessors.
+  void updateCurrentObservation();
 
   /// Function that prepares the input tensor for the controller neural network
   torch::Tensor prepareInputTensor();
 
   /// The values of the current observed postprocessor values
-  std::vector<Real> _current_response;
-  /// This variable is populated if the controller needs acess to older values of the
+  std::vector<Real> _current_observation;
+  /// This variable is populated if the controller needs access to older values of the
   /// observed postprocessor values
-  std::vector<std::vector<Real>> & _old_responses;
+  std::vector<std::vector<Real>> & _old_observations;
 
   /// The names of the controllable parameters
   const std::vector<std::string> & _control_names;
-  /// The control signals from the last evaluation of the controller
-  std::vector<Real> _current_control_signals;
+  /// The control signals from the last evaluation of the controller, saved for recover/restart.
+  std::vector<Real> & _current_control_signals;
 
   /// Names of the postprocessors which contain the observations of the system
-  const std::vector<PostprocessorName> & _response_names;
+  const std::vector<PostprocessorName> & _observation_names;
 
-  /// Links to the current response postprocessor values. This is necessary so that we can check
+  /// Links to the current observation postprocessor values. This is necessary so that we can check
   /// if the postprocessors exist.
-  std::vector<const Real *> _response_values;
+  std::vector<const Real *> _observation_values;
 
   /// Number of timesteps to use as input data from the reporters (this influences how many past
-  /// results are used, e.g. the size of _old_responses)
+  /// results are used, e.g. the size of _old_observations)
   const unsigned int _input_timesteps;
 
-  /// Shifting constants for the responses
-  const std::vector<Real> _response_shift_factors;
-  /// Scaling constants (multipliers) for the responses
-  const std::vector<Real> _response_scaling_factors;
+  /// Shifting constants for the observations
+  const std::vector<Real> _observation_shift_factors;
+  /// Scaling constants (multipliers) for the observations
+  const std::vector<Real> _observation_scaling_factors;
   /// Multipliers for the actions
   const std::vector<Real> _action_scaling_factors;
+
+  /// Shared observation history stacking and factor-expansion helper
+  const LibtorchObservationHistoryHelper _observation_history;
 
   /// Pointer to the neural net object which is supposed to be used to control
   /// the parameter values. The controller owns this object, but it can be read

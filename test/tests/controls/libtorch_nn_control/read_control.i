@@ -97,7 +97,7 @@ cp = 1.0
   [src_control]
     type = LibtorchNeuralNetControl
     parameters = "Kernels/anti_source/value"
-    responses = 'T_max'
+    observations = 'T_max'
     execute_on = 'TIMESTEP_BEGIN'
   []
 []
