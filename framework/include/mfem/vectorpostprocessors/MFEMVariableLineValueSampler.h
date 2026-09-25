@@ -13,7 +13,7 @@
 
 #include "MFEMVariableValueSamplerBase.h"
 
-/*
+/**
  * Samples a real-valued MFEM variable at a set of points evenly
  * distributed along a line.
  */

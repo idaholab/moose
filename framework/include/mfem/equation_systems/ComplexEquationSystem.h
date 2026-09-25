@@ -22,7 +22,7 @@
 
 namespace Moose::MFEM
 {
-/*
+/**
 Class to store weak form components (bilinear and linear forms, and optionally
 mixed and nonlinear forms) and build methods
 */
