@@ -32,8 +32,8 @@ One directory per case, holding everything the case needs:
 
 ```
 test/tests/<area>/<case>/tests                 # spec file, literally named "tests" (HIT format)
-test/tests/<area>/<case>/<case>.i              # the input that drives it
-test/tests/<area>/<case>/gold/<case>_out.e     # the reference output
+test/tests/<area>/<case>/<case>.i              # the input that drives the case
+test/tests/<area>/<case>/gold/<case>_out.e/.csv/.json # the reference output
 ```
 
 `<area>` is usually the system the object belongs to and `<case>` the object or behavior under
@@ -117,7 +117,8 @@ was invoked with:
 A diff tester's `rel_err` and `abs_zero` come from `FileTester`'s defaults unless the spec sets
 them. Set them as tight as the physics allows: a loose tolerance makes the test unable to fail.
 When a single column or variable needs slack, give it its own tolerance instead of widening the
-whole test - `CSVDiff` has `override_columns`, `Exodiff` has a `custom_cmp` command file.
+whole test - `CSVDiff` has `override_columns` or a `comparison_file`, `Exodiff` has a `custom_cmp`
+command file.
 `references/tolerances.md` holds the default values and the mechanics for both.
 
 ## Before calling the test done
