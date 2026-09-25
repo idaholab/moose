@@ -12,8 +12,7 @@
 # field golded here.
 #
 # The displacement field is prescribed through an auxiliary variable rather than solved, because only
-# the gather, the constitutive update and the retrieve are under test. A solved displacement field
-# would bring in a displaced mesh, which the Kokkos problem does not support.
+# the gather, the constitutive update and the retrieve are under test.
 
 [Mesh]
   [gmg]
