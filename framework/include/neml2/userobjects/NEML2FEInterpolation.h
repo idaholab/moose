@@ -95,6 +95,18 @@ public:
    */
   const neml2::Tensor & getDofMap(const std::string & var_name);
 
+  /**
+   * Get the per-element nodal values of a variable, shape (nelem, ndofe).
+   * Unlike getValue, no interpolation to quadrature points is performed.
+   */
+  const neml2::Tensor & getNodalValue(const std::string & var_name);
+
+  /**
+   * Get the reference-configuration node coordinates per element, shape (nelem, nnodes, 3).
+   * Only valid for meshes where all elements share one node count (enforced at runtime).
+   */
+  const neml2::Tensor & getNodeCoordinates();
+
   /// Similar to getDofMap, but returns the global dof map (as a flattened vector of dof_id_type)
   const std::vector<dof_id_type> & getGlobalDofMap(const std::string & var_name);
 
@@ -123,6 +135,7 @@ protected:
   virtual void updateDofMap();
   virtual void updatePhi();
   virtual void updateGradPhi();
+  virtual void updateNodeCoordinates();
   virtual void updateInterpolations();
 
   /// Assembly
@@ -139,6 +152,21 @@ protected:
 
   /// coupled variables (by gradient) requested by other objects
   std::unordered_map<std::string, neml2::Tensor> _grad_vars;
+
+  /// per-element nodal values of the variables, no interpolation (nelem, ndofe)
+  std::unordered_map<std::string, neml2::Tensor> _nodal_vars;
+
+  /// whether reference node coordinates were requested
+  bool _need_node_coords = false;
+
+  /// number of nodes per element (must be uniform when node coordinates are requested)
+  std::size_t _nnodes = 0;
+
+  /// flattened reference node coordinates gathered during the element loop
+  std::vector<Real> _moose_node_coords;
+
+  /// reference node coordinates per element (nelem, nnodes, 3)
+  neml2::Tensor _neml2_node_coords;
 
   /// moose variables that have been coupled
   std::unordered_map<std::string, const MooseVariableFE<Real> *> _moose_vars;
