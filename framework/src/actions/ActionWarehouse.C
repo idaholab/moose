@@ -12,6 +12,7 @@
 #include "Parser.h"
 #include "MooseObjectAction.h"
 #include "PhysicsBase.h"
+#include "ActionComponent.h"
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
@@ -27,27 +28,83 @@
 
 #include "libmesh/simple_range.h"
 
-std::vector<UserObjectName>
-ActionWarehouse::getUserObjectParamDependencies(const InputParameters & params) const
+template <typename NameType>
+std::vector<NameType>
+ActionWarehouse::getNameParamDependencies(const InputParameters & params) const
 {
-  std::vector<UserObjectName> dependencies;
+  std::vector<NameType> dependencies;
   for (const auto & [_, param] : params)
   {
     if (const auto dependency =
-            dynamic_cast<const libMesh::Parameters::Parameter<UserObjectName> *>(param.get()))
+            dynamic_cast<const libMesh::Parameters::Parameter<NameType> *>(param.get()))
     {
-      const auto & uo_name = dependency->get();
-      if (!uo_name.empty())
-        dependencies.push_back(uo_name);
+      const auto & name = dependency->get();
+      if (!name.empty())
+        dependencies.push_back(name);
     }
     else if (const auto vector_dependency =
-                 dynamic_cast<const libMesh::Parameters::Parameter<std::vector<UserObjectName>> *>(
+                 dynamic_cast<const libMesh::Parameters::Parameter<std::vector<NameType>> *>(
                      param.get()))
-      for (const auto & uo_name : vector_dependency->get())
-        if (!uo_name.empty())
-          dependencies.push_back(uo_name);
+      for (const auto & name : vector_dependency->get())
+        if (!name.empty())
+          dependencies.push_back(name);
   }
   return dependencies;
+}
+
+template <typename NameType>
+void
+ActionWarehouse::sortActionsByDependency(
+    std::list<Action *> & actions,
+    const std::map<std::string, Action *> & action_for_name,
+    const std::function<std::vector<NameType>(Action *)> & extra_deps) const
+{
+  // Seed the resolver in the current (input-file) order so that independent actions keep their
+  // input order (DependencyResolver resolves in insertion order modulo dependencies).
+  DependencyResolver<Action *> resolver;
+  for (const auto act : actions)
+    resolver.addItem(act);
+
+  for (const auto act : actions)
+  {
+    // A MooseObjectAction carries its dependencies in the parameters of the object it builds. Any
+    // other action that consumes a referenced name (e.g. a Physics that programmatically adds a
+    // UserObject) names it in the action's own parameters, so the dependency is ordered against
+    // just the same.
+    const auto moose_object_action = dynamic_cast<MooseObjectAction *>(act);
+    const auto & relevant_params =
+        moose_object_action ? moose_object_action->getObjectParams() : act->parameters();
+    auto dep_names = getNameParamDependencies<NameType>(relevant_params);
+    // A dependency embedded in a compound parameter (e.g. a component name embedded in a
+    // boundary name) cannot be found by scanning parameter types, so it is provided explicitly.
+    if (extra_deps)
+    {
+      const auto extra = extra_deps(act);
+      dep_names.insert(dep_names.end(), extra.begin(), extra.end());
+    }
+    for (const auto & dep_name : dep_names)
+    {
+      const auto it = action_for_name.find(dep_name);
+      if (it != action_for_name.end() && it->second != act)
+        // act references the object built by it->second, which must be constructed first
+        resolver.addEdge(it->second, act);
+    }
+  }
+
+  // A NameType parameter does not necessarily denote a construction-time dependency: many
+  // objects only resolve a referenced name during initialSetup(), execution, or a later task.
+  // Mutually referencing actions therefore form a cycle here even though they construct fine in
+  // input order. So a cycle is not an error - fall back to the original input order, which is the
+  // behavior prior to this sorting. A genuine construction-time cycle still surfaces as the usual
+  // "not found" error when the referenced object is actually dereferenced.
+  try
+  {
+    const auto & sorted = resolver.getSortedValues();
+    actions.assign(sorted.begin(), sorted.end());
+  }
+  catch (const CyclicDependencyException<Action *> &)
+  {
+  }
 }
 
 void
@@ -67,43 +124,33 @@ ActionWarehouse::sortUserObjectActions(std::list<Action *> & actions) const
       for (const auto & uo_name : physics->getSuppliedUserObjects())
         action_for_uo_name.emplace(uo_name, act);
 
-  // Seed the resolver in the current (input-file) order so that independent UserObjects keep their
-  // input order (DependencyResolver resolves in insertion order modulo dependencies).
-  DependencyResolver<Action *> resolver;
-  for (const auto act : actions)
-    resolver.addItem(act);
+  // An ActionComponent that internally builds a MooseObject referencing another action's
+  // UserObject (e.g. a boundary condition component referencing the numerical flux UserObject a
+  // separately-created Physics builds) cannot express that dependency through a UserObjectName
+  // parameter of its own (its own declared parameters, e.g. 'input', don't name the UserObject
+  // directly) - ActionComponent::dependsOnUserObjects() lets it declare that dependency explicitly.
+  const std::function<std::vector<UserObjectName>(Action *)> extra_deps = [](Action * act)
+  {
+    if (const auto component = dynamic_cast<const ActionComponent *>(act))
+      return component->dependsOnUserObjects();
+    return std::vector<UserObjectName>();
+  };
 
-  for (const auto act : actions)
-  {
-    // A MooseObjectAction carries its dependencies in the parameters of the object it builds. Any
-    // other action that consumes a UserObject (e.g. a Physics that programmatically adds one) names
-    // it in the action's own parameters, so the dependency is ordered against just the same.
-    const auto moose_object_action = dynamic_cast<MooseObjectAction *>(act);
-    const auto & relevant_params =
-        moose_object_action ? moose_object_action->getObjectParams() : act->parameters();
-    for (const auto & dep_name : getUserObjectParamDependencies(relevant_params))
-    {
-      const auto it = action_for_uo_name.find(dep_name);
-      if (it != action_for_uo_name.end() && it->second != act)
-        // act references the UserObject built by it->second, which must be constructed first
-        resolver.addEdge(it->second, act);
-    }
-  }
+  sortActionsByDependency<UserObjectName>(actions, action_for_uo_name, extra_deps);
+}
 
-  // A UserObjectName parameter does not necessarily denote a construction-time dependency: many
-  // UserObjects only resolve a referenced UserObject during initialSetup() or execution. Mutually
-  // referencing UserObjects therefore form a cycle here even though they construct fine in input
-  // order. So a cycle is not an error - fall back to the original input order, which is the
-  // behavior prior to this sorting. A genuine construction-time cycle still surfaces as the usual
-  // "UserObject not found" error when the object is constructed.
-  try
-  {
-    const auto & sorted = resolver.getSortedValues();
-    actions.assign(sorted.begin(), sorted.end());
-  }
-  catch (const CyclicDependencyException<Action *> &)
-  {
-  }
+void
+ActionWarehouse::sortActionComponentActions(std::list<Action *> & actions) const
+{
+  // An ActionComponent is constructed under its own component name (it is not wrapped by a
+  // MooseObjectAction the way a UserObject is), so a ComponentName parameter value matches the
+  // action that builds the referenced component directly.
+  std::map<std::string, Action *> action_for_component_name;
+  for (const auto act : actions)
+    if (dynamic_cast<ActionComponent *>(act))
+      action_for_component_name.emplace(act->name(), act);
+
+  sortActionsByDependency<ComponentName>(actions, action_for_component_name);
 }
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory)
@@ -459,6 +506,12 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
   // to declare a referenced UserObject before the UserObject that uses it.
   if (task == "add_user_object")
     sortUserObjectActions(_action_blocks[task]);
+  // ActionComponents may reference other ActionComponents (e.g. through a ComponentName
+  // parameter, as ComponentJunction's "first_component"/"second_component" do). Construct them in
+  // dependency order so the input file does not have to declare a referenced component before the
+  // component that uses it.
+  else if (task == "add_mesh_generator")
+    sortActionComponentActions(_action_blocks[task]);
 
   for (auto it = actionBlocksWithActionBegin(task); it != actionBlocksWithActionEnd(task); ++it)
   {
