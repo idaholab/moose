@@ -128,6 +128,16 @@ public:
    * @returns The size of the dimension
    */
   unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
+  /**
+   * Get the storage granularity this property was declared with on a subdomain
+   *
+   * Only meaningful once every declaring material has been constructed, because MOOSE constructs
+   * materials in input order rather than dependency order.
+   *
+   * @param subdomain The subdomain ID
+   * @returns The property's constant option
+   */
+  PropertyConstantOption constantOption(SubdomainID subdomain) const;
 
   /**
    * Get the property type index for load/store functions
@@ -225,6 +235,15 @@ MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
                "'.");
 
   return libmesh_map_find(_record->dims, subdomain)[i];
+}
+
+inline PropertyConstantOption
+MaterialPropertyBase::constantOption(SubdomainID subdomain) const
+{
+  if (!_record)
+    mooseError("Cannot get the storage granularity of an uninitialized material property.");
+
+  return libmesh_map_find(_record->constant_option, subdomain);
 }
 
 template <typename T, unsigned int dimension>

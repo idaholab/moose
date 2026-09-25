@@ -90,6 +90,26 @@ public:
         "Default initQpStatefulProperties() should never be called. Make sure you properly "
         "redefined this method in your class without typos.");
   }
+  /**
+   * Evaluate the properties this material declared with constant_on = SUBDOMAIN, when that is coarser
+   * than the material's own constant_on.
+   *
+   * Called once per subdomain, before computeQpProperties(), so a per-quadrature-point property may
+   * read a subdomain-constant one. The datum identifies the subdomain but refers to an arbitrary
+   * element of it, so element and quadrature point data must not be read through it. The quadrature
+   * point index is always zero and is present so that a property write reads the same as elsewhere.
+   *
+   * @tparam Derived The object type
+   * @param qp The local quadrature point index, always zero
+   * @param datum The Datum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeSubdomainProperties(const unsigned int /* qp */,
+                                                  Datum & /* datum */) const
+  {
+    ::Kokkos::abort("Default computeSubdomainProperties() should never be called. Make sure you "
+                    "properly redefined this method in your class without typos.");
+  }
   ///@}
 
   /**
@@ -102,6 +122,11 @@ public:
   static auto defaultInitStateful()
   {
     return &Material::initQpStatefulProperties<Derived>;
+  }
+  template <typename Derived>
+  static auto defaultComputeSubdomain()
+  {
+    return &Material::computeSubdomainProperties<Derived>;
   }
   ///@}
 
@@ -123,6 +148,9 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(NeighborCompute, const ThreadID tid, const Derived & material) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(SubdomainConstantCompute, const ThreadID tid, const Derived & material) const;
   ///@}
 
 protected:
@@ -256,6 +284,19 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
     material.template computeQpProperties<Derived>(qp, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material::operator()(SubdomainConstantCompute, const ThreadID tid, const Derived & material) const
+{
+  // One thread per subdomain, so elem is an arbitrary element of it and datum is valid only for the
+  // subdomain it identifies
+  auto elem = kokkosSubdomainElementID(tid);
+
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
+
+  material.template computeSubdomainProperties<Derived>(0, datum);
 }
 
 } // namespace Moose::Kokkos

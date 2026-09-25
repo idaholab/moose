@@ -145,6 +145,38 @@ In this case, you can set the `constant_on` parameter of a material to `ELEMENT`
 This can help save both computational cost and memory usage.
 However, note that a material property declared by boundary-restricted materials should have identical `constant_on` option across the entire domain.
 
+### Per-Property Granularity
+
+`constant_on` sets the default granularity for every property a material declares, and also the finest granularity the material evaluates.
+A material whose outputs do not all vary the same way can declare an individual property coarser than that default, by passing a `Moose::Kokkos::PropertyConstantOption` as the third argument to `declareKokkosProperty<type, dimension>(name, dims, constant_option)` or to its by-name and on-demand variants.
+This matters most for large properties: a rank-four tensor that is genuinely one value per subdomain occupies 648 bytes stored that way, against 648 bytes for every quadrature point in the mesh otherwise.
+
+A property declared coarser than the material's own `constant_on` is filled from a separate hook rather than from `computeQpProperties()`, because it is evaluated over a different set of entities.
+For `SUBDOMAIN` that hook is:
+
+```cpp
+template <typename Derived>
+KOKKOS_FUNCTION void computeSubdomainProperties(const unsigned int qp, Datum & datum) const
+```
+
+which is called once per subdomain, before `computeQpProperties()`, so that a per-quadrature-point property may be computed from a subdomain-constant one.
+Exactly one thread runs it per subdomain, which is what makes writing to the single subdomain storage slot free of races.
+Its `datum` identifies the subdomain but refers to an arbitrary element of it, so element and quadrature point data must not be read through it, and its `qp` argument is always zero.
+
+The following are reported as errors rather than producing a property that is never filled or is filled by racing threads:
+
+- declaring a property finer than the material's `constant_on`,
+- declaring a property coarser without defining the corresponding hook, and
+- declaring a property with `ELEMENT` as the coarser granularity, which is not yet evaluated separately.
+
+See the following source codes of `KokkosMixedGranularityTest` for an example:
+
+!listing test/include/kokkos/materials/KokkosMixedGranularityTest.h id=kokkos-mixed-granularity-mat-header
+         caption=The `KokkosMixedGranularityTest` header file.
+
+!listing test/src/kokkos/materials/KokkosMixedGranularityTest.K id=kokkos-mixed-granularity-mat-source language=cpp
+         caption=The `KokkosMixedGranularityTest` source file.
+
 ## Material Property Output
 
 Material property output is not supported by Kokkos-MOOSE yet.
