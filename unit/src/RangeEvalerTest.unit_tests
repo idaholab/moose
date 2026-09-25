@@ -1,0 +1,60 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#33818'
+
+  [expansion]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansion
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end.'
+  []
+  [expansionProvideStep]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansionProvideStep
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end, with a step size separating each entry.'
+  []
+  [expansionProvideNegStep]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansionProvideNegStep
+    requirement = 'The system shall be able to expand a given start and end integer into a string containing all integers between start and end, with a negative step size separating each entry.'
+  []
+  [expansionNegVals]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.expansionNegVals
+    requirement = 'The system shall be able to expand a given negative start and end integer into a string containing all negative integers between start and end.'
+  []
+  [mixedWithLiterals]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.mixedWithLiterals
+    requirement = 'The system shall support the case where a range is mixed with other numerals in a string.'
+  []
+  [wrongArgCountLess]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.wrongArgCountLess
+    requirement = 'The system shall error if fewer than two arguments are provided to a range.'
+  []
+  [wrongArgCountGreater]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.wrongArgCountGreater
+    requirement = 'The system shall error if more than three arguments are provided to a range.'
+  []
+  [nonInteger]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.nonInteger
+    requirement = 'The system shall error if non-integers are provided to a range.'
+  []
+  [posStepSmallerEnd]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.posStepSmallerEnd
+    requirement = 'The system shall error if a positive step value is provided to a range where the end point is larger than the start point.'
+  []
+  [negStepLargerEnd]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.negStepLargerEnd
+    requirement = 'The system shall error if a negative step value is provided to a range where the start point is larger than the end point.'
+  []
+  [zeroStep]
+    type = GoogleTest
+    unit_test = RangeEvalerTest.zeroStep
+    requirement = 'The system shall error if a zero step value is provided to a range.'
+  []
+[]
