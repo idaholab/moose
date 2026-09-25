@@ -1,7 +1,7 @@
 [Tests]
   [NIST_csvdiff]
     type = CSVDiff
-    input = '../thermal_solid_properties.i'
+    input = '../../thermal_solid_properties.i'
     cli_args = "
       solid_properties_class=ThermalCopperProperties
       file_base=copper
