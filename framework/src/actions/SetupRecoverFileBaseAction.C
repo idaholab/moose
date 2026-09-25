@@ -46,7 +46,7 @@ SetupRecoverFileBaseAction::act()
   if (_current_task == "setup_recover_file_base")
   {
     _app.setRestartRecoverFileBase(
-        MooseUtils::convertLatestCheckpoint(_app.getRestartRecoverFileBase()));
+        MooseUtils::convertLatestCheckpoint(_app.getRestartRecoverFileBase(), "recovery"));
 
     // Set the recover file base in the App
     mooseInfo("Using ", _app.getRestartRecoverFileBase(), " for recovery.");

@@ -217,18 +217,35 @@ replaceAll(std::string str, const std::string & from, const std::string & to)
 }
 
 std::string
-convertLatestCheckpoint(std::string orig)
+convertLatestCheckpoint(std::string orig, const std::string & context)
 {
   auto slash_pos = orig.find_last_of("/");
-  auto path = orig.substr(0, slash_pos);
-  auto file = orig.substr(slash_pos + 1);
+  // No directory component means "look in the current directory"
+  auto path = slash_pos == std::string::npos ? "." : orig.substr(0, slash_pos);
+  auto file = slash_pos == std::string::npos ? orig : orig.substr(slash_pos + 1);
   if (file != "LATEST")
     return orig;
 
   auto converted = MooseUtils::getLatestCheckpointFilePrefix(MooseUtils::listDir(path));
 
   if (converted.empty())
-    mooseError("Unable to find suitable recovery file!");
+  {
+    const auto files_in_dir = MooseUtils::listDir(path, true);
+    std::string existing_files;
+    for (const auto & existing_file : files_in_dir)
+      existing_files += (existing_files.empty() ? "" : ", ") + existing_file;
+    if (existing_files.empty())
+      existing_files = "(no files found)";
+
+    mooseError("Unable to find a suitable ",
+               context,
+               " file: no '*.rd' checkpoint file exists in directory '",
+               path,
+               "' (searched because of the 'LATEST' setting in '",
+               orig,
+               "').\nFiles found in that directory: ",
+               existing_files);
+  }
 
   return converted;
 }
