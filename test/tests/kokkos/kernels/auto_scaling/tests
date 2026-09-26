@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#'
+  issues = '#33864'
   design = 'NonlinearSystem.md'
 
   [automatic_scaling]
