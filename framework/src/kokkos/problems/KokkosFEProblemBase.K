@@ -531,6 +531,21 @@ FEProblemBase::prepareKokkosMaterials(
 {
   auto needed_mat_props = splitKokkosMatPropsByDataType(consumer_needed_mat_props);
 
+  // The current value of a stateful property becomes its old value when the step is accepted, so it is
+  // evaluated whenever the materials of its data type are, whether or not a consumer of this evaluation
+  // reads it. A stateful property read only through its old value would otherwise keep whatever was
+  // last evaluated for another consumer, possibly before the quantities it depends on were final, and
+  // carry that stale value into the next step.
+  auto add_stateful = [](std::unordered_set<unsigned int> & props,
+                         const Moose::Kokkos::MaterialPropertyStorage & storage)
+  {
+    if (!props.empty())
+      props.insert(storage.statefulProps().begin(), storage.statefulProps().end());
+  };
+  add_stateful(needed_mat_props[Moose::BLOCK_MATERIAL_DATA], _kokkos_material_props);
+  add_stateful(needed_mat_props[Moose::FACE_MATERIAL_DATA], _kokkos_bnd_material_props);
+  add_stateful(needed_mat_props[Moose::NEIGHBOR_MATERIAL_DATA], _kokkos_neighbor_material_props);
+
   // Close each set over material-to-material dependencies against the materials that could supply it, so
   // that what a face material consumes is resolved against face data. A boundary-restricted material is
   // not copied per data type but lives in the default warehouse while serving face consumers, so the

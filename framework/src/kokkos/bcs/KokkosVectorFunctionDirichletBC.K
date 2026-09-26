@@ -9,7 +9,7 @@
 
 #include "KokkosVectorFunctionDirichletBC.h"
 
-registerKokkosResidualObject("MooseTestApp", KokkosVectorFunctionDirichletBC);
+registerKokkosResidualObject("MooseApp", KokkosVectorFunctionDirichletBC);
 
 InputParameters
 KokkosVectorFunctionDirichletBC::validParams()
