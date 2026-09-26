@@ -64,13 +64,14 @@
                   'surface mesh.'
   []
   [error_tests]
+    requirement = 'The system shall throw an error '
     [invalid_leaf_max_size]
       type = RunException
       input = 'outside_grains.i'
       cli_args = 'Mesh/grains/leaf_max_size=0'
       expect_err = 'Range check failed for parameter Mesh/grains/leaf_max_size'
       mesh_mode = REPLICATED
-      requirement = 'The system shall reject a nonpositive maximum KD-tree leaf size.'
+      detail = 'if the maximum KD-tree leaf size is nonpositive.'
     []
     [surface_mesh_count_mismatch]
       type = RunException
@@ -78,8 +79,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='grain1_grain2'"
       expect_err = 'The number of surface meshes must match the boundaries.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall require one saved surface mesh for each shifted cohesive zone '
-                    'boundary.'
+      detail = 'if a saved surface mesh is not provided for each shifted cohesive zone boundary.'
     []
     [duplicate_surface_mesh]
       type = RunException
@@ -87,8 +87,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain1_grain2'"
       expect_err = 'Each saved surface mesh may only be used once.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall reject reuse of one saved surface mesh for multiple shifted '
-                    'cohesive zone boundaries.'
+      detail = 'if one saved surface mesh is reused for multiple shifted cohesive zone boundaries.'
     []
     [complete_interface_pair_count]
       type = RunException
@@ -96,7 +95,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
       expect_err = 'Provide exactly one subdomain pair per boundary.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall require one explicit subdomain pair for each surrogate boundary.'
+      detail = 'if one explicit subdomain pair is not provided for each surrogate boundary.'
     []
     [complete_interface_pair_size]
       type = RunException
@@ -104,7 +103,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1; 1 4; 1 5; 2 4; 3 4; 3 5; 4 5'"
       expect_err = 'Each interface entry must contain two distinct subdomain IDs.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall require each explicit interface entry to contain two subdomain IDs.'
+      detail = 'if an explicit interface entry does not contain two subdomain IDs.'
     []
     [complete_interface_distinct_pair]
       type = RunException
@@ -112,8 +111,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 1; 1 4; 1 5; 2 4; 3 4; 3 5; 4 5'"
       expect_err = 'Each interface entry must contain two distinct subdomain IDs.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall require the two subdomain IDs in each explicit interface entry '
-                    'to be distinct.'
+      detail = 'if the two subdomain IDs in an explicit interface entry are not distinct.'
     []
     [ambiguous_distance_source]
       type = RunException
@@ -121,8 +119,7 @@
       cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/sbm_distance_uo=unused'
       expect_err = "Specify only one of 'sbm_distance_uo', 'generate_sbm_distance', and 'complete_interface_mesh'."
       mesh_mode = REPLICATED
-      requirement = 'The system shall reject simultaneous explicit and automatically generated '
-                    'distance sources.'
+      detail = 'if explicit and automatically generated distance sources are both specified.'
     []
     [unknown_manager_pair]
       type = RunException
@@ -130,8 +127,7 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 99; 1 4; 1 5; 2 4; 3 4; 3 5; 4 5'"
       expect_err = 'maps to an interface not detected by the manager.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall reject an explicit subdomain pair that is absent from the '
-                    'detected complete interface.'
+      detail = 'if an explicit subdomain pair is absent from the detected complete interface.'
     []
     [nonconformal_interface]
       type = RunException
@@ -140,8 +136,7 @@
                  "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
       expect_err = 'maps to an interface not detected by the manager.'
       mesh_mode = REPLICATED
-      requirement = 'The system shall reject partially overlapping interface faces when the complete '
-                    'interface mesh is nonconformal.'
+      detail = 'if partially overlapping interface faces are found in a nonconformal complete interface mesh.'
     []
   []
 []

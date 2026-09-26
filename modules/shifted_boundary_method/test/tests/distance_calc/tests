@@ -135,54 +135,52 @@
                'that was configured without a KDTree.'
     []
 
-    [unsigned_distance_error_tests]
-      [missing_source]
-        type = RunException
-        input = '2D_distance_refine.i'
-        cli_args = "nx=2 Functions/inactive=dist_star"
-        expect_err = "Specify exactly one of 'builder' and 'manager'."
-        mesh_mode = REPLICATED
-        detail = 'if an UnsignedDistanceToSurfaceMesh function has neither a surface builder nor an '
-                 'interface manager.'
-      []
+    [missing_source]
+      type = RunException
+      input = '2D_distance_refine.i'
+      cli_args = "nx=2 Functions/inactive=dist_star"
+      expect_err = "Specify exactly one of 'builder' and 'manager'."
+      mesh_mode = REPLICATED
+      detail = 'if an UnsignedDistanceToSurfaceMesh function has neither a surface builder nor an '
+               'interface manager.'
+    []
 
-      [ambiguous_source]
-        type = RunException
-        input = '2D_distance_refine.i'
-        cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/builder=TreeBuilder Functions/constructor_test/manager=TreeBuilder'
-        expect_err = "Specify exactly one of 'builder' and 'manager'."
-        mesh_mode = REPLICATED
-        detail = 'if an UnsignedDistanceToSurfaceMesh function has both a surface builder and an '
-                 'interface manager.'
-      []
+    [ambiguous_source]
+      type = RunException
+      input = '2D_distance_refine.i'
+      cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/builder=TreeBuilder Functions/constructor_test/manager=TreeBuilder'
+      expect_err = "Specify exactly one of 'builder' and 'manager'."
+      mesh_mode = REPLICATED
+      detail = 'if an UnsignedDistanceToSurfaceMesh function has both a surface builder and an '
+               'interface manager.'
+    []
 
-      [manager_missing_ids]
-        type = RunException
-        input = '2D_distance_refine.i'
-        cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/manager=TreeBuilder'
-        expect_err = 'Manager mode requires subdomain_id_1 and subdomain_id_2.'
-        mesh_mode = REPLICATED
-        detail = 'if manager mode does not identify both subdomains forming the interface.'
-      []
+    [manager_missing_ids]
+      type = RunException
+      input = '2D_distance_refine.i'
+      cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/manager=TreeBuilder'
+      expect_err = 'Manager mode requires subdomain_id_1 and subdomain_id_2.'
+      mesh_mode = REPLICATED
+      detail = 'if manager mode does not identify both subdomains forming the interface.'
+    []
 
-      [builder_with_ids]
-        type = RunException
-        input = '2D_distance_refine.i'
-        cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/builder=TreeBuilder Functions/constructor_test/subdomain_id_1=1'
-        expect_err = 'Subdomain IDs are only valid in manager mode.'
-        mesh_mode = REPLICATED
-        detail = 'if interface subdomain IDs are supplied in surface-builder mode.'
-      []
+    [builder_with_ids]
+      type = RunException
+      input = '2D_distance_refine.i'
+      cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/builder=TreeBuilder Functions/constructor_test/subdomain_id_1=1'
+      expect_err = 'Subdomain IDs are only valid in manager mode.'
+      mesh_mode = REPLICATED
+      detail = 'if interface subdomain IDs are supplied in surface-builder mode.'
+    []
 
-      [manager_same_ids]
-        type = RunException
-        input = '2D_distance_refine.i'
-        cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/manager=TreeBuilder '
-                   'Functions/constructor_test/subdomain_id_1=1 Functions/constructor_test/subdomain_id_2=1'
-        expect_err = 'The interface subdomain IDs must be distinct.'
-        mesh_mode = REPLICATED
-        detail = 'if manager mode identifies an interface using the same subdomain twice.'
-      []
+    [manager_same_ids]
+      type = RunException
+      input = '2D_distance_refine.i'
+      cli_args = 'nx=2 Functions/inactive=dist_star Functions/constructor_test/manager=TreeBuilder '
+                 'Functions/constructor_test/subdomain_id_1=1 Functions/constructor_test/subdomain_id_2=1'
+      expect_err = 'The interface subdomain IDs must be distinct.'
+      mesh_mode = REPLICATED
+      detail = 'if manager mode identifies an interface using the same subdomain twice.'
     []
 
     [signed_distance_invalid_strategy]
