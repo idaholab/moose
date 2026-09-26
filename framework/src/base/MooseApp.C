@@ -416,11 +416,6 @@ MooseApp::validParams()
       "error_unused", "-e --error-unused", "Error when encountering unused input file options");
   params.setGlobalCommandLineParam("error_unused");
   params.addCommandLineParam<bool>(
-      "error_override",
-      "-o --error-override",
-      "Error when encountering overridden or parameters supplied multiple times");
-  params.setGlobalCommandLineParam("error_override");
-  params.addCommandLineParam<bool>(
       "error_deprecated", "--error-deprecated", "Turn deprecated code messages into Errors");
   params.setGlobalCommandLineParam("error_deprecated");
 
@@ -1039,9 +1034,6 @@ MooseApp::setupOptions()
     setCheckUnusedFlag(true);
   else if (getParam<bool>("allow_unused"))
     setCheckUnusedFlag(false);
-
-  if (getParam<bool>("error_override"))
-    setErrorOverridden();
 
   if (getParam<bool>("trap_fpe"))
   {

@@ -60,7 +60,6 @@ Global Options:
   --distributed-mesh                  Forces the use of a distributed finite element mesh
   --error                             Turn all warnings into errors
   --error-deprecated                  Turn deprecated code messages into Errors
-  -o --error-override                 Error when encountering overridden or parameters supplied multiple times
   -e --error-unused                   Error when encountering unused input file options
   --keep-cout                         Keep standard output from all processors when running in parallel
   --n-threads=<n>                     Runs the specified number of threads per process
