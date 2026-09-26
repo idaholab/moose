@@ -44,6 +44,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
+  _var_scaling_factor.create(_num_vars);
 
   for (unsigned int var = 0; var < _num_vars; ++var)
     for (auto subdomain : _mesh.meshSubdomains())
@@ -51,6 +52,22 @@ System::setupVariables()
           sys.variable(var).active_on_subdomain(subdomain);
 
   _var_subdomain_active.copyToDevice();
+  updateVariableScalingFactors();
+}
+
+void
+System::updateVariableScalingFactors()
+{
+  auto & sys = _system.system();
+  for (const auto var : make_range(_num_vars))
+  {
+    const auto & moose_var =
+        sys.variable_type(var).family == libMesh::FEFamily::SCALAR
+            ? static_cast<const MooseVariableBase &>(_system.getScalarVariable(0, var))
+            : static_cast<const MooseVariableBase &>(_system.getVariable(0, var));
+    _var_scaling_factor[var] = moose_var.arrayScalingFactor()[var - moose_var.number()];
+  }
+  _var_scaling_factor.copyToDevice();
 }
 
 void
@@ -291,6 +308,8 @@ System::sync(const MemcpyType dir)
 {
   if (dir == MemcpyType::HOST_TO_DEVICE)
   {
+    updateVariableScalingFactors();
+
     for (auto tag : _active_solution_tags)
     {
       auto & vector = _system.getVector(tag);

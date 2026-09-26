@@ -25,6 +25,7 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_vector.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/petsc_solver_exception.h"
@@ -357,6 +358,48 @@ NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 void
 NonlinearSystem::computeScalingJacobian()
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // The Kokkos assembler writes Jacobian contributions directly into the underlying PETSc
+  // Mat (see Moose::Kokkos::Matrix::create), which requires the matrix to be a
+  // PetscMatrix rather than the DiagonalMatrix/LumpedMassMatrix used to store scaling
+  // factors.
+  if (_fe_problem.hasKokkosResidualObjects())
+  {
+    // Assemble the Jacobian into the system libMesh matrix, which is a PetscMatrix, so that the
+    // Kokkos kernels can write directly into its Mat.
+    auto & jacobian = _nl_implicit_sys.get_system_matrix();
+    _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, jacobian);
+
+    auto & petsc_matrix = cast_ref<PetscMatrix<Number> &>(jacobian);
+
+    // Create the Petsc reduction vector with the layout of the matrix so that extracting the
+    // reduction values matches the matrix's vector type on device or host.
+    Vec scaling_vec = nullptr;
+    LibmeshPetscCall(MatCreateVecs(petsc_matrix.mat(), nullptr, &scaling_vec));
+
+    {
+      libMesh::PetscVector<Number> scaling_vector(scaling_vec, this->comm());
+
+      // For off-diagonal scaling, sum the absolute values of the assembled matrix entries.
+      // The host LumpedMassMatrix instead takes the absolute value of each element contribution
+      // before assembling it. The results differ if contributions from local element matrices to
+      // the same global matrix entry cancel because they have opposite signs. MatGetDiagonal runs
+      // on the device for Kokkos matrices, but MatGetRowSumAbs currently synchronizes the matrix
+      // data to the host.
+      if (_off_diagonals_in_auto_scaling)
+        LibmeshPetscCall(MatGetRowSumAbs(petsc_matrix.mat(), scaling_vec));
+      else
+        LibmeshPetscCall(MatGetDiagonal(petsc_matrix.mat(), scaling_vec));
+
+      *_scaling_matrix = scaling_vector;
+      _scaling_matrix->close();
+    }
+
+    LibmeshPetscCall(VecDestroy(&scaling_vec));
+    return;
+  }
+#endif
+
   _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, *_scaling_matrix);
 }
 

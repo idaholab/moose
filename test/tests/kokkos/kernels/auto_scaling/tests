@@ -1,0 +1,59 @@
+[Tests]
+  issues = '#33864'
+  design = 'NonlinearSystem.md'
+
+  [automatic_scaling]
+    requirement = 'The system shall be able to automatically compute scaling factors based on the Jacobian'
+
+    [default]
+      type = Exodiff
+      input = 'kokkos_auto_scaling.i'
+      exodiff = 'kokkos_auto_scaling_out.e'
+      detail = 'with Kokkos kernels, from the diagonal of the assembled system matrix,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+
+    # OffDiagonalScalingMatrix/LumpedMassMatrix
+    [off_diagonals]
+      type = Exodiff
+      input = 'kokkos_auto_scaling.i'
+      exodiff = 'kokkos_auto_scaling_off_diag.e'
+      cli_args = 'Executioner/off_diagonals_in_auto_scaling=true Outputs/file_base=kokkos_auto_scaling_off_diag'
+      detail = 'with Kokkos kernels, including off-diagonal contributions when requested,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+
+    [recompute]
+      type = Exodiff
+      input = 'kokkos_auto_scaling.i'
+      exodiff = 'kokkos_auto_scaling_recompute.e'
+      cli_args = 'Executioner/num_steps=2 Executioner/compute_scaling_once=false Outputs/file_base=kokkos_auto_scaling_recompute'
+      detail = 'with Kokkos kernels, when the scaling factors are recomputed on a later time step,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+
+    [poorly_scaled]
+      type = Exodiff
+      input = 'kokkos_auto_scaling_iterations.i'
+      exodiff = 'kokkos_auto_scaling_iterations.e'
+      cli_args = 'Outputs/file_base=kokkos_auto_scaling_iterations'
+      detail = 'with Kokkos kernels for a poorly scaled problem,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+
+    [poorly_scaled_disabled]
+      type = Exodiff
+      input = 'kokkos_auto_scaling_iterations_disabled.i'
+      exodiff = 'kokkos_auto_scaling_iterations_disabled.e'
+      cli_args = 'Executioner/automatic_scaling=false Outputs/file_base=kokkos_auto_scaling_iterations_disabled'
+      detail = 'and producing the same solution when scaling is disabled,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+
+  []
+[]
