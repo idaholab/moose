@@ -31,10 +31,45 @@ public:
   dofToWeightedVelocities() const;
 
   /**
+   * Return contact tangents for the supplied lower-dimensional secondary element node.
+   * Raw values are the stored mechanical-contact nodal tangents; derivatives are included when the
+   * internal quasistatic normal-derivative path and AD derivative recording are enabled.
+   */
+  const std::array<ADRealVectorValue, 2> & contactTangents(const Elem & lower_secondary_elem,
+                                                           unsigned int nodal_index) const;
+
+  /**
    * @return The contact force at quadrature points on the mortar segment
    */
   virtual const ADVariableValue & contactTangentialPressureDirOne() const = 0;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const = 0;
+
+  /**
+   * @param node Secondary node of the current secondary lower-dimensional element
+   * @param direction Tangent direction, 0 or 1
+   * @return The nodal frictional pressure at that node, expressed in that node's local tangent
+   * frame and carrying its derivatives
+   *
+   * Consumers interpolate each nodal pressure with that node's tangent to form the frictional
+   * traction vector and preserve the discrete transpose relation; see
+   * \p WeightedGapUserObject::nodalContactPressure. The default reports that this operation is not
+   * available.
+   */
+  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const;
+
+  /**
+   * @param direction Tangent direction, 0 or 1
+   * @return The basis belonging to the Lagrange multiplier variable representing the tangential
+   * contact pressure in that direction. Consumers use this basis for both the interpolation loop
+   * and the coefficient lookup performed by \p nodalTangentialPressure. The default returns
+   * \p tractionBasis() for formulations that share one basis across normal and tangential
+   * directions. Formulations with distinct tangential Lagrange multipliers, such as
+   * \p LMWeightedVelocitiesUserObject, override it.
+   */
+  virtual const VariableTestValue & tangentialTractionBasis(unsigned int /*direction*/) const
+  {
+    return tractionBasis();
+  }
 
 protected:
   /**
@@ -101,6 +136,10 @@ protected:
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;
+
+  /// AD contact tangent frames, keyed on the secondary node and reused by every test function and
+  /// quadrature point that interpolates the frictional traction.
+  mutable std::unordered_map<const Node *, std::array<ADRealVectorValue, 2>> _ad_nodal_tangents;
 };
 
 inline const std::unordered_map<const DofObject *, std::array<ADReal, 2>> &

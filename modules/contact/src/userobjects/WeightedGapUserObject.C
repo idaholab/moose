@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
 #include "AutomaticMortarGeneration.h"
+#include "ADUtils.h"
 
 #include "libmesh/quadrature.h"
 
@@ -30,6 +31,7 @@ WeightedGapUserObject::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
+  params.addPrivateParam<bool>("use_nodal_normal_derivatives", false);
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
@@ -54,6 +56,63 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
+
+  if (getParam<bool>("use_nodal_normal_derivatives"))
+  {
+    if (getParam<bool>("interpolate_normals"))
+      paramError(
+          "interpolate_normals",
+          "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
+          "combined with quadrature-point normal interpolation.");
+
+    const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
+        {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
+    for (const auto & [variable, parameter_name] : displacement_variables)
+      if (variable)
+      {
+        if (!variable->isNodal())
+          paramError(parameter_name,
+                     "Nodal-normal derivatives require a nodal displacement variable.");
+        if (&variable->sys() != &_sys)
+          paramError(parameter_name,
+                     "Nodal-normal derivatives require displacement variables in the nonlinear "
+                     "system assembled by this contact object.");
+      }
+  }
+}
+
+ADReal
+WeightedGapUserObject::nodalContactPressure(const Node & /*node*/) const
+{
+  mooseError("Nodal contact pressure is not available for user object '", name(), "'.");
+}
+
+const VariableTestValue &
+WeightedGapUserObject::tractionBasis() const
+{
+  return test();
+}
+
+bool
+WeightedGapUserObject::shouldRecordNodalNormalDerivatives() const
+{
+  return usesNodalNormalDerivatives() && Moose::doDerivatives(_subproblem, _sys);
+}
+
+const MooseVariable *
+WeightedGapUserObject::dispVar(unsigned int component) const
+{
+  switch (component)
+  {
+    case 0:
+      return _disp_x_var;
+    case 1:
+      return _disp_y_var;
+    case 2:
+      return _disp_z_var;
+    default:
+      mooseError("Invalid displacement component '", component, "' requested.");
+  }
 }
 
 void
@@ -61,6 +120,28 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
+
+  if (!usesNodalNormalDerivatives())
+    return;
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
+
+  const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
+      {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
+  for (const auto & [variable, parameter_name] : displacement_variables)
+    if (variable)
+    {
+      if (!variable->isNodal())
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require a nodal displacement variable.");
+      if (&variable->sys() != &_sys)
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require displacement variables in the nonlinear "
+                   "system assembled by this contact object.");
+    }
 }
 
 void
@@ -122,22 +203,75 @@ void
 WeightedGapUserObject::computeQpIProperties()
 {
   mooseAssert(_normals.size() == _lower_secondary_elem->n_nodes(),
-              "Making sure that _normals is the expected size");
+              "The nodal normals and secondary element must have the same number of nodes.");
 
   // Get the _dof_to_weighted_gap map
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
 
-  weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  if (shouldRecordNodalNormalDerivatives())
+    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * contactNormal(*_lower_secondary_elem, _i);
+  else
+    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+
   normalization += (*_test)[_i][_qp] * _qp_factor;
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
 }
 
+const ADRealVectorValue &
+WeightedGapUserObject::contactNormal(const Elem & lower_secondary_elem,
+                                     const unsigned int nodal_index) const
+{
+  mooseAssert(nodal_index < lower_secondary_elem.n_nodes(),
+              "Nodal normal index must refer to a node on the secondary element.");
+  mooseAssert(shouldRecordNodalNormalDerivatives(),
+              "AD contact normals should only be requested while recording nodal-normal "
+              "derivatives.");
+  const Node * const node = lower_secondary_elem.node_ptr(nodal_index);
+  const auto normal_it = _ad_nodal_normals.find(node);
+  if (normal_it != _ad_nodal_normals.end())
+    return normal_it->second;
+
+  amg().computeADNodalNormals([this](const Node & coordinate_node)
+                              { return nodalCoordinate(coordinate_node); },
+                              _ad_nodal_normals);
+  return libmesh_map_find(_ad_nodal_normals, node);
+}
+
+ADPoint
+WeightedGapUserObject::nodalCoordinate(const Node & node) const
+{
+  mooseAssert(shouldRecordNodalNormalDerivatives(),
+              "AD nodal coordinates should only be requested while recording nodal-normal "
+              "derivatives.");
+  mooseAssert(Moose::doDerivatives(_subproblem, _sys),
+              "AD nodal coordinates require derivative recording.");
+  ADPoint point = node;
+
+  const std::array<std::pair<const MooseVariable *, unsigned int>, 3> displacement_variables{
+      {{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
+  for (const auto & [variable, component] : displacement_variables)
+    if (variable)
+    {
+      const auto sys_num = variable->sys().number();
+      const auto var_num = variable->number();
+      // Enriched elements can have mapping nodes without independent displacement degrees of
+      // freedom. Their positions enter the geometric map, but they contribute no independent
+      // displacement derivative.
+      if (node.n_dofs(sys_num, var_num))
+        Moose::derivInsert(
+            point(component).derivatives(), node.dof_number(sys_num, var_num, 0), 1.0);
+    }
+
+  return point;
+}
+
 void
 WeightedGapUserObject::initialize()
 {
+  _ad_nodal_normals.clear();
   _dof_to_weighted_gap.clear();
   _dof_to_weighted_displacements.clear();
 }

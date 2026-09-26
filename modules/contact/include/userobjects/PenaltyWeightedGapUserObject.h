@@ -31,6 +31,9 @@ public:
   virtual void timestepSetup() override;
 
   virtual const ADVariableValue & contactPressure() const override;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
+  virtual bool usesNodalNormalDerivatives() const override { return !_augmented_lagrange_problem; }
+  virtual const VariableTestValue & tractionBasis() const override;
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void reinit() override;

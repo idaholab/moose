@@ -41,21 +41,71 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
     _direction(getParam<MooseEnum>("direction")),
-    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
-        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")))
+    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))
 {
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses tangents derived from normalized secondary nodal "
+               "normals and cannot be combined with quadrature-point normal interpolation.");
+}
+
+void
+TangentialMortarMechanicalContact::initialSetup()
+{
+  ADMortarLagrangeConstraint::initialSetup();
+
+  if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
+    return;
+
+  if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must be defined on the same secondary/primary subdomain "
+               "pair as this constraint when nodal-normal derivatives are enabled.");
+
+  if (&_secondary_var != _weighted_velocities_uo.dispVar(_component))
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must use the same displacement variable as this "
+               "constraint's 'variable' when nodal-normal derivatives are enabled.");
+
+  if (getParam<bool>("use_displaced_mesh") !=
+      _weighted_velocities_uo.parameters().get<bool>("use_displaced_mesh"))
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must use the same 'use_displaced_mesh' setting as this "
+               "constraint when nodal-normal derivatives are enabled.");
 }
 
 ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
-  MooseEnum direction("direction_1 direction_2", "direction_1");
+  // Interpolate each nodal tangential pressure with its own Householder tangent frame.
+  const auto direction = static_cast<unsigned int>(_direction);
+  // The interpolation basis and nodal coefficient lookup both belong to this direction's tangential
+  // Lagrange multiplier, preserving their node-for-node correspondence.
+  const auto & phi = _weighted_velocities_uo.tangentialTractionBasis(direction);
+  const bool ad_tangents = _weighted_velocities_uo.shouldRecordNodalNormalDerivatives();
 
-  const auto tangential_pressure =
-      _direction.compareCurrent(direction)
-          ? _weighted_velocities_uo.contactTangentialPressureDirOne()[_qp]
-          : _weighted_velocities_uo.contactTangentialPressureDirTwo()[_qp];
+  ADReal traction_component = 0;
+  if (ad_tangents)
+    for (const auto j : index_range(phi))
+    {
+      const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
+          _lower_secondary_elem->node_ref(j), direction);
+      // householderTangents() applies a Householder reflection to two Cartesian basis vectors, so
+      // the frame it returns is already orthonormal and needs no normalization here.
+      const auto & tangents = _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, j);
+      traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
+    }
+  else
+  {
+    const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+    for (const auto j : index_range(phi))
+    {
+      const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
+          _lower_secondary_elem->node_ref(j), direction);
+      traction_component += phi[j][_qp] * nodal_pressure * nodal_tangents[direction][j](_component);
+    }
+  }
 
   switch (type)
   {
@@ -68,19 +118,11 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      {
-        const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        return _test_secondary[_i][_qp] * tangential_pressure *
-               nodal_tangents[_direction][tangent_index](_component) /
-               nodal_tangents[_direction][tangent_index].norm();
-      }
+      return _test_secondary[_i][_qp] * traction_component;
+
     case Moose::MortarType::Primary:
-    {
-      const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-      return -_test_primary[_i][_qp] * tangential_pressure *
-             nodal_tangents[_direction][tangent_index](_component) /
-             nodal_tangents[_direction][tangent_index].norm();
-    }
+      return -_test_primary[_i][_qp] * traction_component;
+
     default:
       return 0;
   }

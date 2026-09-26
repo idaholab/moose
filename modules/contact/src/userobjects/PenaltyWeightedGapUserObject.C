@@ -20,6 +20,32 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.set<bool>("ghost_point_neighbors") = true;
+  params.suppressParameter<bool>("ghost_point_neighbors");
+  // The weighted-gap object supplies penalty contact's nodal-normal point-neighbor matrix coupling.
+  // MortarConsumerInterface supplies the geometric and algebraic relationship manager.
+  const auto configure_point_neighbors =
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+  {
+    rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+    rm_params.set<BoundaryName>("secondary_boundary") =
+        obj_params.get<BoundaryName>("secondary_boundary");
+    rm_params.set<BoundaryName>("primary_boundary") =
+        obj_params.get<BoundaryName>("primary_boundary");
+    rm_params.set<SubdomainName>("secondary_subdomain") =
+        obj_params.get<SubdomainName>("secondary_subdomain");
+    rm_params.set<SubdomainName>("primary_subdomain") =
+        obj_params.get<SubdomainName>("primary_subdomain");
+    rm_params.set<bool>("ghost_point_neighbors") =
+        obj_params.get<bool>("use_nodal_normal_derivatives") &&
+        !obj_params.isParamValid("penetration_tolerance");
+  };
+  // Coupling relationship managers are attached through a separate system lifecycle from geometric
+  // and algebraic relationship managers.
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                configure_point_neighbors);
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -109,6 +135,13 @@ PenaltyWeightedGapUserObject::test() const
   return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
 }
 
+const VariableTestValue &
+PenaltyWeightedGapUserObject::tractionBasis() const
+{
+  // Penalty contact interpolates traction and weighted gap with the same basis.
+  return test();
+}
+
 const ADVariableValue &
 PenaltyWeightedGapUserObject::contactPressure() const
 {
@@ -196,6 +229,15 @@ PenaltyWeightedGapUserObject::reinit()
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_pressure[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
   }
+}
+
+ADReal
+PenaltyWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  // A node only enters this map once it has received a weighted-gap contribution, so a node on a
+  // partially integrated element may be absent. Absent means no contact pressure, matching how the
+  // interpolated pressure in reinit() treats it.
+  return findValue(_dof_to_normal_pressure, static_cast<const DofObject *>(&node), ADReal(0));
 }
 
 void

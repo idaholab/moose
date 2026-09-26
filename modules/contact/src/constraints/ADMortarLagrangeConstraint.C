@@ -191,5 +191,8 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   }
 
+  // cacheJacobian() uses the first row's column layout. Every row here has that same derivative
+  // support because the interpolated quadrature-point traction is independent of the test-function
+  // index and multiplication by a Real preserves the AD sparsity pattern.
   addResidualsAndJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
 }

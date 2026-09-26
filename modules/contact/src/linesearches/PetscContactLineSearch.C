@@ -101,6 +101,7 @@ PetscContactLineSearch::lineSearch()
   }
 
   size_t ls_its = 0;
+  bool rejected_trial = false;
   while (ls_its < _allowed_lambda_cuts)
   {
     _contact_lambda *= 0.5;
@@ -131,7 +132,11 @@ PetscContactLineSearch::lineSearch()
       ++ls_its;
     }
     else
+    {
+      rejected_trial = true;
+      _current_contact_state.clear();
       break;
+    }
   }
 
   LibmeshPetscCall(VecScale(Y, _contact_lambda));
@@ -141,7 +146,7 @@ PetscContactLineSearch::lineSearch()
   if (changed_y)
     LibmeshPetscCall(VecWAXPY(W, -1., Y, X));
 
-  if (changed_w || changed_y)
+  if (rejected_trial || changed_w || changed_y)
   {
     LibmeshPetscCall(SNESComputeFunction(snes, W, F));
 #if PETSC_VERSION_LESS_THAN(3, 25, 0)

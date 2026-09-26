@@ -63,6 +63,9 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
+  // needs the secondary face one-ring ghosted and coupled.
+  params.set<bool>("ghost_point_neighbors") = true;
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
@@ -87,10 +90,36 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
     _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
+  if (!_weighted_gap_uo.usesNodalNormalDerivatives())
+    paramError("weighted_gap_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_gap_uo.name(),
+               "'.");
+
+  // The user object and constraint must assemble the same interface and displacement variables.
+  if (secondarySubdomain() != _weighted_gap_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_gap_uo.primarySubdomain())
+    paramError("weighted_gap_uo",
+               "'weighted_gap_uo' must be defined on the same secondary/primary subdomain pair as "
+               "this constraint when nodal-normal derivatives are enabled.");
+
+  const std::array<std::pair<const MooseVariable *, unsigned int>, 3> displacement_variables{
+      {{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
+  for (const auto & [variable, component] : displacement_variables)
+    if (variable != _weighted_gap_uo.dispVar(component))
+      paramError("weighted_gap_uo",
+                 "'weighted_gap_uo' must use the same displacement variables as this constraint "
+                 "when nodal-normal derivatives are enabled.");
+
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
 
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))
