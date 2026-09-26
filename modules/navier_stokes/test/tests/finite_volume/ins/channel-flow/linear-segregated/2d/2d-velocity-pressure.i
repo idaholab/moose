@@ -4,6 +4,7 @@ advected_interp_method = 'average'
 pressure_gradient_method = 'green-gauss'
 
 [Mesh]
+  allow_renumbering = false # Keep IDs stable for the ID-sorted ElementValueSampler output.
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
@@ -52,6 +53,11 @@ pressure_gradient_method = 'green-gauss'
 [FVGradientMethods]
   [gg]
     type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 
@@ -164,6 +170,15 @@ pressure_gradient_method = 'green-gauss'
     variable = vel_y
     use_two_term_expansion = false
     boundary = right
+  []
+[]
+
+[VectorPostprocessors]
+  [solution]
+    type = ElementValueSampler
+    variable = 'vel_x vel_y pressure'
+    sort_by = id
+    execute_on = TIMESTEP_END
   []
 []
 

@@ -31,6 +31,46 @@ such as those with high Reynolds numbers, complex geometries, viscous flows in n
 multiphase flows, problems with rapidly varying thermophysical properties, and,
 in general, when using high-resolution grids.
 
+### Reconstructed Pressure Gradient
+
+The `reconstructed` pressure-gradient option uses the Aguerre reconstruction
+([!cite](aguerre2018oscillation)) implemented by [FVReconstructedPressureGradient.md]. It is useful
+when the conservative Rhie-Chow face flux is smooth, but the cell-centered velocity still exhibits
+oscillations because its pressure gradient is not fully consistent with that face flux.
+
+After a pressure correction, the method reconstructs a cell velocity that is compatible with the
+corrected conservative face flux and then determines the pressure gradient required by the cell
+momentum balance. The newly reconstructed gradient corrects the velocity immediately so that the
+cell velocity and continuity-preserving face flux remain consistent. A relaxed version of that
+gradient is used by the next momentum predictor to avoid introducing an abrupt change into the
+pressure-velocity coupling. The accepted gradient is carried between time steps and is preserved
+through time-step retries and restarts.
+
+The following options control the reconstruction:
+
+- [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) controls how
+  strongly the newly reconstructed gradient changes the gradient used by the next momentum solve.
+  The default value of `0.1` is deliberately conservative. Smaller values provide more damping and
+  can improve robustness, but usually require more outer iterations. Values closer to `1` respond
+  more quickly to the latest pressure correction, but can strengthen pressure-velocity oscillations.
+- [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method) selects the
+  ordinary pressure-gradient method used before the first reconstructed gradient is available. The
+  default is `green-gauss`.
+
+For example, the following tested input selects the reconstructed method through an input-file
+variable and uses that selection for the pressure variable:
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/reconstructed-force-channel.i line=pressure_gradient_method
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/reconstructed-force-channel.i block=Variables/pressure FVGradientMethods/reconstructed
+
+Use the same reconstructed pressure-gradient definition for every [LinearFVMomentumPressure.md]
+component coupled to this pressure equation. Mixing gradient definitions among velocity components
+would make the reconstructed cell velocity inconsistent with the coupled momentum balance. Other
+equations and diagnostic quantities should continue to use an ordinary gradient method.
+
+### Pressure Diffusion Interpolation
+
 The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
 whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,
 the $A^{-1}$ diffusion tensor in the pressure correction diffusion term. When using

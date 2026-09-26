@@ -1514,7 +1514,14 @@ public:
                                    InputParameters & parameters);
 
   /**
-   * Retrieve an FV gradient method
+   * Retrieve a writable FV gradient method owned by this problem
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  FVGradientMethod & getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid = 0);
+
+  /**
+   * Retrieve a read-only FV gradient method owned by this problem
    * @param name The name of the method.
    * @param tid The thread ID.
    */
@@ -3382,6 +3389,9 @@ protected:
   void checkDisplacementOrders();
 
   void checkUserObjects();
+
+  /// Let every FVGradientMethod resolve its dependencies on other gradient methods.
+  void checkGradientMethods();
 
   /**
    * Helper method for checking Material object dependency.

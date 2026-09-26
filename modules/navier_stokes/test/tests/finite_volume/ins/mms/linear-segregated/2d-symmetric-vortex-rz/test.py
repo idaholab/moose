@@ -2,6 +2,8 @@ import mms
 import unittest
 from mooseutils import fuzzyAbsoluteEqual
 
+RECONSTRUCTED_GRADIENT_ARGS = ("pressure_gradient_method=reconstructed",)
+
 
 def run_spatial(*args, **kwargs):
     try:
@@ -41,6 +43,40 @@ class TestSymmetricVortexRZOrthogonal(unittest.TestCase):
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.25))
             elif key == "L2v":
                 self.assertTrue(fuzzyAbsoluteEqual(value, 3.0, 0.25))
+            else:
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.25))
+
+
+class TestSymmetricVortexRZOrthogonalReconstructed(unittest.TestCase):
+    def test(self):
+        velocity_labels = ["L2u", "L2v"]
+        pressure_labels = ["L2p"]
+        labels = velocity_labels + pressure_labels
+        df1 = run_spatial(
+            "2d-symmetric-vortex-rz.i",
+            4,
+            *RECONSTRUCTED_GRADIENT_ARGS,
+            y_pp=labels,
+            mpi=2,
+            file_base="2d-symmetric-vortex-rz-reconstructed",
+        )
+
+        fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
+        fig.plot(
+            df1,
+            label=labels,
+            marker="o",
+            markersize=8,
+            num_fitted_points=2,
+            slope_precision=1,
+        )
+        fig.save("symmetric-vortex-rz-reconstructed.png")
+        for key, value in fig.label_to_slope.items():
+            print(f"{key}, {value}")
+            if key == "L2u":
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.25))
+            elif key == "L2v":
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.25))
             else:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.25))
 
