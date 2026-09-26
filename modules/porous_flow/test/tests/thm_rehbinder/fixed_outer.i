@@ -242,14 +242,15 @@
   [smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_rtol'
-    petsc_options_value = 'gmres      asm      lu           1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type'
+    petsc_options_value = 'gmres asm lu'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = Newton
+  nl_rel_tol = 1E-10
 []
 
 [Outputs]

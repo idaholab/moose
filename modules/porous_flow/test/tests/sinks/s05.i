@@ -217,8 +217,8 @@
   [andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_max_it -sub_pc_factor_shift_type -pc_asm_overlap'
-    petsc_options_value = 'gmres asm lu 10000 NONZERO 2'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
+    petsc_options_value = 'gmres asm lu NONZERO 2'
   []
 []
 
@@ -229,6 +229,7 @@
   end_time = 6E-2
   nl_rel_tol = 1E-12
   nl_abs_tol = 1E-12
+  nl_max_its = 10000
 []
 
 [Outputs]
