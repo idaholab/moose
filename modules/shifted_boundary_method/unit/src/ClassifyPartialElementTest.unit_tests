@@ -4,27 +4,49 @@
 
   [fully_active_or_inactive]
     type = GoogleTest
-    unit_test = ClassifyPartialElementTest.FullyInsideOrOutside
+    unit_test = ClassifySubdomainFromOccupancyTest.FullyInsideOrOutside
     requirement = 'The system shall classify fully active and fully inactive elements independently of partial-element options.'
   []
+
   [mark_intercepted]
     type = GoogleTest
-    unit_test = ClassifyPartialElementTest.MarkIntercepted
+    unit_test = ClassifySubdomainFromOccupancyTest.MarkIntercepted
     requirement = 'The system shall assign the intercepted subdomain to partial elements when intercepted-element marking is enabled.'
   []
+
   [lambda_threshold]
     type = GoogleTest
-    unit_test = ClassifyPartialElementTest.LambdaThreshold
+    unit_test = ClassifySubdomainFromOccupancyTest.LambdaThreshold
     requirement = 'The system shall classify partial elements by comparing their inactive fraction with the lambda threshold.'
   []
+
   [enclosed_surface]
     type = GoogleTest
-    unit_test = ClassifyPartialElementTest.EnclosedSurfaceEndpoints
+    unit_test = ClassifySubdomainFromOccupancyTest.EnclosedSurfaceEndpoints
     requirement = 'The system shall apply partial-element classification when all nodes are active but the active fraction is not one.'
   []
+
   [inactive_predicate]
     type = GoogleTest
-    unit_test = ClassifyPartialElementTest.IsInactive
+    unit_test = ClassifySubdomainFromOccupancyTest.IsInactive
     requirement = 'The system shall determine element inactivity from active fraction and the endpoint and interior values of the lambda threshold.'
+  []
+
+  [fully_occupied_precedence]
+    type = GoogleTest
+    unit_test = SelectSubdomainFromOccupanciesTest.FullyOccupiedTakesPrecedence
+    requirement = 'The system shall prefer a fully occupied candidate subdomain over partial candidates and resolve multiple fully occupied candidates by lowest subdomain ID.'
+  []
+
+  [partial_selection]
+    type = GoogleTest
+    unit_test = SelectSubdomainFromOccupanciesTest.PartialSelection
+    requirement = 'The system shall select the largest partial subdomain occupancy, resolve fuzzy ties by lowest subdomain ID, and apply intercepted and lambda policies.'
+  []
+
+  [no_occupied_candidate]
+    type = GoogleTest
+    unit_test = SelectSubdomainFromOccupanciesTest.NoOccupiedCandidate
+    requirement = 'The system shall select no subdomain when no candidate occupies any part of an element.'
   []
 []

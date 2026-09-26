@@ -33,7 +33,7 @@
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = open_surface
+    interface_mesh = open_surface
     check_watertightness = true # exercises the not-watertight log branch
   []
 []
