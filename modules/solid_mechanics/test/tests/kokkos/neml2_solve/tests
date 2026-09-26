@@ -1,0 +1,62 @@
+[Tests]
+  issues = '#33859'
+  design = 'KokkosSymmetricVectorStressDivergence.md KokkosMOOSEQuantityToNEML2.md '
+           'KokkosNEML2ToMOOSEMaterialProperty.md'
+
+  [neml2_solve]
+    requirement = 'The system shall solve for the displacement field of an isotropic hardening '
+                  'elastoplastic solid under small strains, with the stress, its tangent and the '
+                  'evolution of the plastic state evaluated by NEML2, reaching the same result '
+                  'whether the constitutive chain is assembled'
+    [reference]
+      type = CSVDiff
+      input = 'host_neml2_solve.i'
+      cli_args = 'Outputs/file_base=neml2_solve_out'
+      csvdiff = 'neml2_solve_out.csv'
+      detail = 'from three scalar displacement variables through the non-Kokkos objects,'
+      capabilities = 'neml2 & libtorch'
+      # Runs alongside the Kokkos case, which requires a CUDA device, so that the prerequisite is met.
+      # The input evaluates NEML2 on the CPU whatever the compute device.
+      compute_devices = 'cpu cuda'
+      # The two chains agree to roundoff. An old state carried over from an earlier Newton iterate
+      # instead of the converged one shifts the plastic quantities by far more than this, and the
+      # default tolerance would not detect it.
+      rel_err = 1e-8
+    []
+    [kokkos]
+      type = CSVDiff
+      input = 'kokkos_neml2_solve.i'
+      cli_args = 'Outputs/file_base=neml2_solve_out'
+      csvdiff = 'neml2_solve_out.csv'
+      detail = 'or from a single vector displacement variable through the Kokkos objects, with the '
+               'quantities entering and leaving NEML2 kept on the device.'
+      # The gatherers and retrievers alias Kokkos device storage, so they require a CUDA device
+      capabilities = 'kokkos & neml2 & libtorch & cuda'
+      compute_devices = 'cuda'
+      allow_test_objects = true
+      prereq = 'neml2_solve/reference'
+      rel_err = 1e-8
+    []
+  []
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_neml2_solve.i'
+    # Every Newton iteration of the elastic first step and of the second step, in which the material
+    # yields, so that the plastic tangent is compared as well as the elastic one
+    cli_args = 'Outputs/csv=false Executioner/num_steps=2'
+    run_sim = true
+    # The complementarity condition of the return map is not smooth at the onset of yield, so a finite
+    # difference there departs from the consistent tangent by a small relative amount, equally when
+    # the non-Kokkos chain assembles the same tangent. A tangent that is inconsistent, or paired with
+    # another quadrature point's strain, departs by order one. The difference tolerance corresponds to
+    # this ratio for a Jacobian whose norm is set by the elastic modulus of 1e5.
+    ratio_tol = 1e-4
+    difference_tol = 50
+    requirement = 'The Kokkos stress divergence kernel shall compute the Jacobian of a vector '
+                  'displacement variable from the elastoplastic tangent NEML2 evaluates on the device.'
+    capabilities = 'kokkos & neml2 & libtorch & cuda'
+    compute_devices = 'cuda'
+    allow_test_objects = true
+  []
+[]
