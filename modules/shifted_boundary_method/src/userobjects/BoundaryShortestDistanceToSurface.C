@@ -54,6 +54,8 @@ BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
   const bool has_manager = isParamValid("manager");
   if (has_manager == !function_names.empty())
     paramError("surfaces", "Specify exactly one of 'surfaces' and 'manager'.");
+  if (!has_manager && isParamSetByUser("interface_subdomain_pairs"))
+    paramError("interface_subdomain_pairs", "This parameter is only valid with 'manager'.");
 
   const auto boundary_names = getParam<std::vector<BoundaryName>>("boundary");
   for (const auto i : index_range(boundary_names))
@@ -112,8 +114,6 @@ BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
     _distance_functions = SBMUtils::buildDistanceFunctions(function_names, *this);
     if (_distance_functions.size() != 1 && boundary_names.size() != _distance_functions.size())
       paramError("surfaces", "Number of surfaces must match number of boundaries.");
-    if (isParamSetByUser("interface_subdomain_pairs"))
-      paramError("interface_subdomain_pairs", "Interface pairs are only valid in manager mode.");
   }
 
   _true_interface_measures.resize(boundary_names.size(), 0.0);

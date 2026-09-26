@@ -20,6 +20,35 @@
     requirement = 'The system shall solve a small-strain shifted cohesive zone problem on an '
                   'angled, non-interface-fitted interface with an elastic traction-separation law.'
   []
+  [angled_ad_elastic_jacobian]
+    type = PetscJacobianTester
+    input = 'angled_sczm_ad_elastic.i'
+    cli_args = "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The system shall compute an automatic-differentiation Jacobian consistent with '
+                  'its residual for a small-strain shifted cohesive zone problem.'
+  []
+  [angled_ad_elastic_no_directional_correction_jacobian]
+    type = PetscJacobianTester
+    input = 'angled_sczm_ad_elastic.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm/directional_correction=false "
+               "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The system shall compute an automatic-differentiation Jacobian consistent with '
+                  'its residual when the shifted cohesive zone directional correction is disabled.'
+  []
+  [angled_ad_elastic_no_shifted_jacobian]
+    type = PetscJacobianTester
+    input = 'angled_sczm_ad_elastic.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm/no_shifted=true "
+               "UserObjects/active='' Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The system shall compute an automatic-differentiation Jacobian consistent with '
+                  'its residual when shifted cohesive zone evaluation is disabled.'
+  []
   [angled_nonad_salehani]
     type = CSVDiff
     input = 'angled_sczm_nonad_salehani.i'
@@ -117,17 +146,18 @@
                   'small-strain shifted cohesive zone problem when volumetric locking correction is '
                   'inherited and automatic differentiation is disabled.'
   []
-  [volumetric_locking_mismatch]
-    type = 'RunException'
+  [rectangle_sczm_tri_material_explicit_volumetric_locking_jacobian]
+    type = 'PetscJacobianTester'
     input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true '
-               'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/volumetric_locking_correction=false'
-    expect_err = "'volumetric_locking_correction' value in ShiftedCohesiveZone block is different"
-    requirement = 'The system shall report an error when explicitly specified volumetric locking '
-                  'correction settings differ between shifted cohesive zone and solid mechanics '
-                  'Physics blocks.'
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
+               "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/volumetric_locking_correction=true "
+               "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    requirement = 'The system shall compute a Jacobian consistent with its residual when matching '
+                  'volumetric locking correction settings are explicitly provided to the shifted '
+                  'cohesive zone and solid mechanics Physics blocks.'
   []
-
   [no_shifted]
     type = Exodiff
     input = 'rectangle_sczm_tri_material.i'
@@ -138,7 +168,6 @@
     recover = false
     requirement = 'The system shall solve a cohesive zone problem without distance data when '
                   'shifted evaluation is disabled.'
-    issues = '#33397'
   []
   [named_properties]
     type = Exodiff
@@ -149,7 +178,6 @@
     recover = false
     requirement = 'The system shall use user-selected stress and constitutive-tangent properties '
                   'with a common base-name prefix.'
-    issues = '#33397'
   []
   [pk1_tangent]
     type = Exodiff
@@ -170,24 +198,42 @@
     requirement = 'The system shall contract the derivative of first Piola-Kirchhoff stress with '
                   'respect to deformation gradient into a Jacobian consistent with its residual.'
   []
-  [custom_tangent_requires_definition]
-    type = RunException
-    input = 'named_properties.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent_definition=auto'
-    expect_err = "Cannot infer the mathematical definition of custom tangent property 'bulk_tangent'"
-    requirement = 'The system shall require an explicit mathematical definition for a custom '
-                  'constitutive-tangent property.'
-    issues = '#33397'
+  [explicit_pk1_tangent_definition_jacobian]
+    type = PetscJacobianTester
+    input = 'pk1_tangent.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent_definition=pk1_wrt_deformation_gradient "
+               "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The system shall compute a Jacobian consistent with its residual when the '
+                  'first Piola-Kirchhoff tangent definition is specified explicitly.'
   []
-  [ad_tangent_rejected]
-    type = RunException
-    input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/use_automatic_differentiation=true '
-               'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent=Jacobian_mult'
-    expect_err = 'This parameter applies only to the non-AD SCZM interface kernel.'
-    requirement = 'The system shall reject explicit tangent-property configuration when automatic '
-                  'differentiation is enabled.'
-    issues = '#33397'
+  [tangent_error_tests]
+    [custom_tangent_requires_definition]
+      type = RunException
+      input = 'named_properties.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent_definition=auto'
+      expect_err = "Cannot infer the mathematical definition of custom tangent property 'bulk_tangent'"
+      requirement = 'The system shall require an explicit mathematical definition for a custom '
+                    'constitutive-tangent property.'
+    []
+    [ad_tangent_rejected]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/use_automatic_differentiation=true '
+                 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent=Jacobian_mult'
+      expect_err = 'This parameter applies only to the non-AD SCZM interface kernel.'
+      requirement = 'The system shall reject explicit tangent-property configuration when automatic '
+                    'differentiation is enabled.'
+    []
+    [ad_tangent_definition_rejected]
+      type = RunException
+      input = 'angled_sczm_ad_elastic.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm/tangent_definition=stress_wrt_strain'
+      expect_err = 'This parameter applies only to the non-AD SCZM interface kernel.'
+      requirement = 'The system shall reject an explicit constitutive-tangent definition when '
+                    'automatic differentiation is enabled.'
+    []
   []
   [ad_named_stress]
     type = Exodiff
@@ -203,38 +249,126 @@
     recover = false
     requirement = 'The system shall use a stress property with a user-selected base-name prefix '
                   'when automatic differentiation is enabled.'
-    issues = '#33397'
   []
-  [finite_strain_rejected]
-    type = RunException
-    input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/strain=FINITE'
-    expect_err = 'Shifted cohesive zone models currently support only small strain.'
-    requirement = 'The system shall reject unsupported finite-strain cohesive zone kinematics.'
-    issues = '#33397'
+  [action_error_tests]
+    [volumetric_locking_mismatch]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true '
+                 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/volumetric_locking_correction=false'
+      expect_err = "'volumetric_locking_correction' value in ShiftedCohesiveZone block is different"
+      requirement = 'The system shall report an error when explicitly specified volumetric locking '
+                    'correction settings differ between shifted cohesive zone and solid mechanics '
+                    'Physics blocks.'
+    []
+    [finite_strain_rejected]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/strain=FINITE'
+      expect_err = 'Shifted cohesive zone models currently support only small strain.'
+      requirement = 'The system shall reject unsupported finite-strain cohesive zone kinematics.'
+    []
+    [surface_meshes_without_generation]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='interface'"
+      expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
+      requirement = 'The system shall reject surface meshes when automatic distance generation is disabled.'
+    []
+    [displacement_dimension_mismatch]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'GlobalParams/displacements=disp_x'
+      expect_err = 'Number of displacements must match problem dimension.'
+      requirement = 'The system shall require the number of shifted cohesive zone displacement '
+                    'variables to match the mesh dimension.'
+    []
+    [watertightness_without_generation]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/check_surface_watertightness=true'
+      expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
+      requirement = 'The system shall reject surface watertightness checks when automatic distance '
+                    'generation is disabled.'
+    []
+    [matching_tolerance_without_complete_mesh]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_matching_tolerance=1e-6'
+      expect_err = "This parameter is only valid with 'complete_interface_mesh'."
+      requirement = 'The system shall reject interface matching tolerances when no complete interface '
+                    'mesh is supplied.'
+    []
+    [subdomain_pairs_without_complete_mesh]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
+      expect_err = "This parameter is only valid with 'complete_interface_mesh'."
+      requirement = 'The system shall reject interface subdomain pairs when no complete interface mesh '
+                    'is supplied.'
+    []
   []
-  [surface_meshes_without_generation]
-    type = RunException
-    input = 'rectangle_sczm_tri_material.i'
-    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='interface'"
-    expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
-    requirement = 'The system shall reject surface meshes when automatic distance generation is disabled.'
-  []
-  [watertightness_without_generation]
-    type = RunException
-    input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/check_surface_watertightness=true'
-    expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
-    requirement = 'The system shall reject surface watertightness checks when automatic distance '
-                  'generation is disabled.'
-  []
-  [matching_tolerance_without_complete_mesh]
-    type = RunException
-    input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_matching_tolerance=1e-6'
-    expect_err = "This parameter is only valid with 'complete_interface_mesh'."
-    requirement = 'The system shall reject interface matching tolerances when no complete interface '
-                  'mesh is supplied.'
+  [distance_error_tests]
+    [distance_source_missing]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "UserObjects/sbm_distance_uo/surfaces=''"
+      expect_err = "Specify exactly one of 'surfaces' and 'manager'."
+      requirement = 'The system shall require a surface function or interface manager as the source '
+                    'of boundary distance data.'
+    []
+    [distance_source_ambiguous]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'UserObjects/sbm_distance_uo/manager=unused'
+      expect_err = "Specify exactly one of 'surfaces' and 'manager'."
+      requirement = 'The system shall reject simultaneous surface-function and interface-manager '
+                    'sources of boundary distance data.'
+    []
+    [subdomain_pairs_without_manager]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "UserObjects/sbm_distance_uo/interface_subdomain_pairs='1 2'"
+      expect_err = "This parameter is only valid with 'manager'."
+      requirement = 'The system shall reject interface subdomain pairs when boundary distances are '
+                    'provided by surface functions instead of an interface manager.'
+    []
+    [duplicate_distance_boundary]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "UserObjects/sbm_distance_uo/boundary='Block1_Block2 Block1_Block2' "
+                 "UserObjects/sbm_distance_uo/surfaces='signed_dist_func signed_dist_func'"
+      expect_err = "Boundary 'Block1_Block2' is configured more than once."
+      requirement = 'The system shall reject duplicate boundary assignments in a boundary distance '
+                    'user object.'
+    []
+    [surface_boundary_count_mismatch]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "UserObjects/sbm_distance_uo/surfaces='signed_dist_func signed_dist_func'"
+      expect_err = 'Number of surfaces must match number of boundaries.'
+      requirement = 'The system shall require one surface function for each configured surrogate '
+                    'boundary.'
+    []
+    [missing_distance_data]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "UserObjects/sbm_distance_uo/boundary=left Executioner/num_steps=1 Outputs/active=''"
+      expect_err = 'BoundaryShortestDistanceToSurface::surrogateDistance missing distance data'
+      requirement = 'The system shall report an error when shifted cohesive zone evaluation requests '
+                    'distance data for a boundary on which distance data were not computed.'
+    []
+    [large_distance_warning]
+      type = RunException
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = "Functions/signed_dist_func/expression='x-10' "
+                 "UserObjects/sbm_distance_uo/suppress_distance_warning=false "
+                 "Executioner/num_steps=1 Outputs/active=''"
+      expect_err = 'Distance exceeds the estimated element scale.'
+      mesh_mode = REPLICATED
+      requirement = 'The system shall warn when a computed boundary distance exceeds the estimated '
+                    'element scale.'
+    []
   []
   [reversed_function_normal]
     type = CSVDiff
@@ -250,7 +384,6 @@
     recover = false
     requirement = 'The system shall orient true-interface normals so their integrated area '
                   'correction factor is positive across processes and threads.'
-    issues = '#33397'
   []
 
   [rectangle_sczm_tri_material_exodus]

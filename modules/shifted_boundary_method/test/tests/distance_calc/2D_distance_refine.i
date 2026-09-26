@@ -44,9 +44,13 @@ nx = 64
 []
 
 [Functions]
+  inactive = 'constructor_test'
   [dist_star]
     type = UnsignedDistanceToSurfaceMesh
     builder = TreeBuilder
+  []
+  [constructor_test]
+    type = UnsignedDistanceToSurfaceMesh
   []
 []
 
