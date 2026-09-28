@@ -326,6 +326,12 @@ SurrogateTrainer::crossValidate()
         skipped_row++;
       }
     }
+
+    // gatherSum() requires equal-sized vectors; a rank with no skipped rows this split
+    // never resizes split_mse above.
+    dof_id_type mse_size = split_mse.size();
+    _communicator.max(mse_size);
+    split_mse.resize(mse_size, 0.0);
     gatherSum(split_mse);
 
     // Expand cv_score if necessary.
