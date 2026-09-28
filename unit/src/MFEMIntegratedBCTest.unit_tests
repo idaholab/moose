@@ -3,40 +3,37 @@
 
   [boundary_linear_forms]
     requirement = 'The system shall provide MFEM integrated boundary conditions that add only a boundary integrator for a linear form, and no bilinear form integrator, involving'
+    design = 'MFEMBoundaryLFIntegratedBC.md MFEMBoundaryNormalLFIntegratedBC.md
+              MFEMVectorBoundaryLFIntegratedBC.md MFEMBoundaryTangentialLFIntegratedBC.md
+              MFEMVectorBoundaryFluxLFIntegratedBC.md MFEMVectorFEBoundaryNormalLFIntegratedBC.md'
     [boundary_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMBoundaryLFIntegratedBC
-      design = 'MFEMBoundaryLFIntegratedBC.md'
       detail = 'a scalar coefficient given by a functor material, tested against a scalar test function,'
     []
     [boundary_normal_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMBoundaryNormalLFIntegratedBC
-      design = 'MFEMBoundaryNormalLFIntegratedBC.md'
       detail = 'the normal component of a vector coefficient given by a function, tested against a scalar test function,'
     []
     [vector_boundary_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMVectorBoundaryLFIntegratedBC
-      design = 'MFEMVectorBoundaryLFIntegratedBC.md'
       detail = 'a vector coefficient given by a function, tested against a vector test function,'
     []
     [boundary_tangential_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMBoundaryTangentialLFIntegratedBC
-      design = 'MFEMBoundaryTangentialLFIntegratedBC.md'
       detail = 'the tangential component of a vector coefficient in 2D, tested against a scalar test function,'
     []
     [vector_boundary_flux_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMVectorBoundaryFluxLFIntegratedBC
-      design = 'MFEMVectorBoundaryFluxLFIntegratedBC.md'
       detail = 'a scalar coefficient tested against the normal component of a vector test function with H1 components, and'
     []
     [vector_fe_boundary_normal_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMVectorFEBoundaryNormalLFIntegratedBC
-      design = 'MFEMVectorFEBoundaryNormalLFIntegratedBC.md'
       detail = 'the normal component of a vector coefficient tested against the normal component of an H(div) test function.'
     []
   []
@@ -50,40 +47,37 @@
 
   [dg_boundary_faces]
     requirement = 'The system shall provide MFEM integrated boundary conditions that add boundary face integrators for discontinuous Galerkin discretizations of'
+    design = 'MFEMDGTraceIntegratedBC.md MFEMNonconservativeDGTraceIntegratedBC.md
+              MFEMBoundaryFlowIntegratedBC.md MFEMDGElasticityIntegratedBC.md
+              MFEMDGElasticityDirichletLFIntegratedBC.md MFEMDGDiffusionBR2IntegratedBC.md'
     [dg_trace]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMDGTraceIntegratedBC
-      design = 'MFEMDGTraceIntegratedBC.md'
       detail = 'the boundary flux of the conservative form of convection,'
     []
     [nonconservative_dg_trace]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMNonconservativeDGTraceIntegratedBC
-      design = 'MFEMNonconservativeDGTraceIntegratedBC.md'
       detail = 'the boundary flux of the non-conservative form of convection,'
     []
     [boundary_flow]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMBoundaryFlowIntegratedBC
-      design = 'MFEMBoundaryFlowIntegratedBC.md'
       detail = 'the inflow value of a convected variable,'
     []
     [dg_elasticity]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMDGElasticityIntegratedBC
-      design = 'MFEMDGElasticityIntegratedBC.md'
       detail = 'the boundary terms of isotropic linear elasticity,'
     []
     [dg_elasticity_dirichlet_lf]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMDGElasticityDirichletLFIntegratedBC
-      design = 'MFEMDGElasticityDirichletLFIntegratedBC.md'
       detail = 'Dirichlet data for isotropic linear elasticity, and'
     []
     [dg_diffusion_br2]
       type = GoogleTest
       unit_test = MFEMIntegratedBCTest.MFEMDGDiffusionBR2IntegratedBC
-      design = 'MFEMDGDiffusionBR2IntegratedBC.md'
       detail = 'the boundary stabilization of the second method of Bassi and Rebay for diffusion.'
     []
   []
