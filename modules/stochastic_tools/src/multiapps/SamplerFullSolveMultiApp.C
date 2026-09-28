@@ -111,8 +111,7 @@ SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
     _number_of_sampler_rows = num_rows;
     // Batch-reset rebuilds apps in solveStepBatch(), except for the first local row before any
     // solve (e.g. after recovering), whose app would otherwise stay on the old communicator.
-    initial_setup_required =
-        _mode != StochasticTools::MultiAppMode::BATCH_RESET || !_solved_once;
+    initial_setup_required = _mode != StochasticTools::MultiAppMode::BATCH_RESET || !_solved_once;
   }
   else if (_solved_once || _app.isRecovering())
     initial_setup_required = _mode == StochasticTools::MultiAppMode::NORMAL;

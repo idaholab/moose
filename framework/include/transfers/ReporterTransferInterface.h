@@ -191,7 +191,8 @@ protected:
    * @param problem FEProblem that contains the reporter value
    * @param root Processor to broadcast from
    */
-  void broadcastReporter(const ReporterName & name, FEProblemBase & problem, processor_id_type root);
+  void
+  broadcastReporter(const ReporterName & name, FEProblemBase & problem, processor_id_type root);
 
   /*
    * Helper for declaring reporter names when transfer is cloning values.
