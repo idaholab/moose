@@ -146,6 +146,39 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMDGDiffusionBR2]
+    type = CSVDiff
+    input = dg_diffusion_br2.i
+    csvdiff = 'OutputData/DGDiffusionBR2/dg_diffusion_br2.csv'
+    requirement = 'The system shall have the ability to solve a DG diffusion problem with the stabilization of the second method of Bassi and Rebay using MFEM.'
+    design = 'MFEMDGDiffusionBR2Kernel.md MFEMDGDiffusionBR2IntegratedBC.md'
+    issues = '#33884'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMDGElasticity]
+    type = CSVDiff
+    input = dg_elasticity.i
+    csvdiff = 'OutputData/DGElasticity/dg_elasticity.csv'
+    requirement = 'The system shall have the ability to solve a DG linear elasticity problem with weakly imposed Dirichlet conditions using MFEM.'
+    design = 'MFEMDGElasticityKernel.md MFEMDGElasticityIntegratedBC.md MFEMDGElasticityDirichletLFIntegratedBC.md'
+    issues = '#33884'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMDGAdvection]
+    type = CSVDiff
+    input = dg_advection.i
+    csvdiff = 'OutputData/DGAdvection/dg_advection.csv'
+    requirement = 'The system shall have the ability to solve a transient DG advection problem in non-conservative form with upwind fluxes and inflow boundary conditions using MFEM.'
+    design = 'MFEMConvectionKernel.md MFEMNonconservativeDGTraceKernel.md MFEMNonconservativeDGTraceIntegratedBC.md MFEMBoundaryFlowIntegratedBC.md'
+    issues = '#33884'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
   [MFEMGradDiv]
     type = CSVDiff
     input = graddiv.i
