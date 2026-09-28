@@ -245,11 +245,11 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
   mooseAssert(el, "Only VectorTensorFiniteElement is supported!");
   mooseAssert(el->GetDerivType() == mfem::FiniteElement::CURL, "Unknown kernel type");
 
-  // Match mfem::CurlCurlIntegrator::AssemblePA: honour a prescribed rule, otherwise fall back
-  // to the mass-integrator rule the PA kernels were written against.
+  // Pick integration rule: either the one that was passed into the constructor,
+  // or the default found in mfem::CurlCurlIntegrator::AssembleElementMatrix. This
+  // is so that we can make sure it matches the legacy version.
   const mfem::IntegrationRule * rule =
-      IntRule ? IntRule
-              : &mfem::MassIntegrator::GetRule(*el, *el, *mesh->GetTypicalElementTransformation());
+      IntRule ? IntRule : &mfem::IntRules.Get(el->GetGeomType(), 2 * el->GetOrder());
   mooseAssert(el->GetDim() == 3, "Following methods are only implemented in 3D");
 
   _nq = rule->GetNPoints();
