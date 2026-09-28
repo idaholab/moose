@@ -118,11 +118,21 @@ DirectPerturbationReporterContext<DataType>::finalize()
   // the reference value. So the process that has that will communicate it
   // to everybody. We reuse the initialization function for the reference
   // value as well
-  auto reference_value = initializeDataType(_data[0]);
+  // _data can be empty on a rank with zero local rows.
+  auto reference_value = _data.empty() ? DataType() : initializeDataType(_data[0]);
   if (_relative_sensitivity)
   {
-    if (_sampler.getLocalRowBegin() == 0)
+    // getLocalRowBegin() == 0 can be true on more than one rank; only one has data.
+    if (!_data.empty() && _sampler.getLocalRowBegin() == 0)
       reference_value = _data[0];
+
+    // comm().sum() requires equal-sized vectors across ranks.
+    if constexpr (is_std_vector<DataType>::value)
+    {
+      dof_id_type size = reference_value.size();
+      this->comm().max(size);
+      reference_value.resize(size);
+    }
 
     this->comm().sum(reference_value);
   }
