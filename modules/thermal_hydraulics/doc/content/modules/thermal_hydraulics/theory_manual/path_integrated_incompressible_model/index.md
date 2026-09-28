@@ -91,7 +91,7 @@ f = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.7
 For $2300 < Re < 4000$ the flow is deemed be transitioning and a conservative interpolation between turbulent and laminar predictions is used:
 
 !equation id=transition_friction
-f = \max(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb}, f_{lam})) \,
+f = \max\left(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb}, f_{lam})\right) \,
 
 The heat transfer coefficient is computed using the Dittus-Boelter correlation:
 
