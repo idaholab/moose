@@ -83,7 +83,7 @@ The friction factor of each segment is computed differently for laminar, turbule
 !equation id=laminar_friction
 f = \frac{64}{Re} \,
 
-For $Re > 4000$ the flow is deemed turbulent and the Swamee-Jain approximation of the Colebrook-White equation is used:
+For $Re > 4000$ the flow is deemed turbulent and the Swamee-Jain approximation of the Colebrook-White equation is used [!citep](swamee_jain1976):
 
 !equation id=swamee_jain_friction
 f = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{Re^{0.9}} \right) \right)^2} \,
@@ -93,7 +93,7 @@ For $2300 < Re < 4000$ the flow is deemed be transitioning and a conservative in
 !equation id=transition_friction
 f = \max\left(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb}, f_{lam})\right) \,
 
-The heat transfer coefficient is computed using the Dittus-Boelter correlation:
+The heat transfer coefficient is computed using the Dittus-Boelter correlation [!citep](dittus1930heat):
 
 !equation id=dittus_boelter
 h = 0.023 Re^{0.8} Pr^{0.4} \,
