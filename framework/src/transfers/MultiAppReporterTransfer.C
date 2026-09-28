@@ -201,13 +201,23 @@ MultiAppReporterTransfer::executeFromMultiapp()
                                      getFromMultiApp()->problemBase(),
                                      ind);
         }
-        else
+        // Limit to one write per app index when ind is cooperatively run by more than one
+        // rank, matching the equivalent guard in
+        // MultiAppVectorPostprocessorTransfer::executeFromMultiapp().
+        else if (hasToMultiApp() || getFromMultiApp()->isFirstLocalRank())
           transferReporter(_from_reporter_names[n],
                            _to_reporter_names[n],
                            getFromMultiApp()->appProblemBase(ind),
                            hasToMultiApp() ? getToMultiApp()->appProblemBase(ind) // !
                                            : getFromMultiApp()->problemBase());
       }
+
+  // Reconcile the no-to_multi_app write above across the parent problem's other ranks; a
+  // no-op when it has a single rank, which is the common case.
+  if (!_distribute_reporter_vector && !hasToMultiApp() &&
+      getFromMultiApp()->problemBase().n_processors() > 1)
+    for (const auto n : index_range(_to_reporter_names))
+      sumVectorReporter(_to_reporter_names[n], getFromMultiApp()->problemBase());
 
   if (_distribute_reporter_vector)
     for (const auto n : index_range(_to_reporter_names))
