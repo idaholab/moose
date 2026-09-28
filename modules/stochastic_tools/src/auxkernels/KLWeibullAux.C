@@ -1,9 +1,17 @@
-// KLWeibullAux.C
-#include "KLWeibullAux.h"
-#include "KLE_uo.h"
-#include <cmath>
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-registerMooseObject("MooseApp", KLWeibullAux);
+#include "KLWeibullAux.h"
+#include "KLExpansionUserObject.h"
+#include "Weibull.h"
+
+registerMooseObject("StochasticToolsApp", KLWeibullAux);
 
 InputParameters
 KLWeibullAux::validParams()
@@ -12,8 +20,8 @@ KLWeibullAux::validParams()
   params.addClassDescription("Generates a sample of correlated Weibull-distributed random field.");
   params.addRequiredParam<UserObjectName>("kl_user_object",
                                           "Name of the KLExpansionUserObject to sample");
-  params.addRequiredParam<Real>("shape", "Weibull shape parameter (k > 0)");
-  params.addRequiredParam<Real>("scale", "Weibull scale parameter (lambda > 0)");
+  params.addRequiredRangeCheckedParam<Real>("shape", "shape > 0", "Weibull shape parameter k");
+  params.addRequiredRangeCheckedParam<Real>("scale", "scale > 0", "Weibull scale parameter lambda");
   return params;
 }
 
@@ -23,10 +31,6 @@ KLWeibullAux::KLWeibullAux(const InputParameters & parameters)
     _shape(getParam<Real>("shape")),
     _scale(getParam<Real>("scale"))
 {
-  if (_shape <= 0.0)
-    mooseError("KLWeibullAux: 'shape' must be > 0, got ", _shape);
-  if (_scale <= 0.0)
-    mooseError("KLWeibullAux: 'scale' must be > 0, got ", _scale);
 }
 
 Real
@@ -34,6 +38,5 @@ KLWeibullAux::computeValue()
 {
   // inverse transform of correlated uniform from KLExpansionUserObject
   const Point & p = isNodal() ? *_current_node : _q_point[_qp];
-  const Real u = _kl_uo.getCopulaUniform(p);
-  return _scale * std::pow(-std::log(1.0 - u), 1.0 / _shape);
+  return Weibull::quantile(_kl_uo.getCopulaUniform(p), 0.0, _scale, _shape);
 }

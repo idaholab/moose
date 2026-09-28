@@ -1,81 +1,20 @@
-// KLExpansion.C
-#include "KLE_uo.h"
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "KLExpansionUserObject.h"
+#include "KLCovarianceBase.h"
+#include "Normal.h"
 
 #include <Eigen/Dense>
 #include "MooseRandom.h"
 
-// KLCovarianceBase
-InputParameters
-KLCovarianceBase::validParams()
-{
-  InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription(
-      "Base class for 1D covariance marginals used by KLExpansionUserObject.");
-  return params;
-}
-
-KLCovarianceBase::KLCovarianceBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
-{
-}
-
-// KLExponentialCovariance
-registerMooseObject("MooseApp", KLExponentialCovariance);
-
-InputParameters
-KLExponentialCovariance::validParams()
-{
-  InputParameters params = KLCovarianceBase::validParams();
-  params.addClassDescription(
-      "Exponential covariance kernel: variance * exp(-|x1-x2|/length_scale).");
-  params.addRequiredParam<Real>("variance", "Marginal variance");
-  params.addRequiredParam<Real>("length_scale", "Correlation length");
-  return params;
-}
-
-KLExponentialCovariance::KLExponentialCovariance(const InputParameters & parameters)
-  : KLCovarianceBase(parameters),
-    _variance(getParam<Real>("variance")),
-    _length_scale(getParam<Real>("length_scale"))
-{
-}
-
-Real
-KLExponentialCovariance::computeCovariance(Real x1, Real x2) const
-{
-  return _variance * std::exp(-std::abs(x1 - x2) / _length_scale);
-}
-
-// KLSquaredExponentialCovariance
-registerMooseObject("MooseApp", KLSquaredExponentialCovariance);
-
-InputParameters
-KLSquaredExponentialCovariance::validParams()
-{
-  InputParameters params = KLCovarianceBase::validParams();
-  params.addClassDescription("Squared-exponential (Gaussian/RBF) covariance kernel: "
-                             "variance * exp(-(x1-x2)^2 / (2*length_scale^2)).");
-  params.addRequiredParam<Real>("variance", "Marginal variance");
-  params.addRequiredParam<Real>("length_scale", "Correlation length");
-  return params;
-}
-
-KLSquaredExponentialCovariance::KLSquaredExponentialCovariance(const InputParameters & parameters)
-  : KLCovarianceBase(parameters),
-    _variance(getParam<Real>("variance")),
-    _length_scale(getParam<Real>("length_scale"))
-{
-}
-
-Real
-KLSquaredExponentialCovariance::computeCovariance(Real x1, Real x2) const
-{
-  const Real diff = x1 - x2;
-  return _variance * std::exp(-(diff * diff) / (2.0 * _length_scale * _length_scale));
-}
-
-// KLExpansionUserObject
-registerMooseObject("MooseApp", KLExpansionUserObject);
+registerMooseObject("StochasticToolsApp", KLExpansionUserObject);
 
 InputParameters
 KLExpansionUserObject::validParams()
@@ -90,20 +29,20 @@ KLExpansionUserObject::validParams()
       "lower_bounds", "Domain lower bound, one entry per active dimension (1-3)");
   params.addRequiredParam<std::vector<Real>>("upper_bounds",
                                              "Domain upper bound, one entry per active dimension");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "n_grid", "Reference grid size, one entry per active dimension");
+  params.addRequiredRangeCheckedParam<std::vector<unsigned int>>(
+      "n_grid", "n_grid > 0", "Reference grid size, one entry per active dimension");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "covariance_functions", "One 1D covariance marginal UserObject name per active dimension");
-  params.addParam<unsigned int>(
+  params.addRangeCheckedParam<unsigned int>(
       "n_terms",
-      0,
+      "n_terms > 0",
       "Number of joint KL terms to retain. Specify this OR variance_fraction, not both.");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "variance_fraction",
-      -1,
+      "variance_fraction > 0 & variance_fraction <= 1",
       "Fraction (0,1] of total spectral trace to retain (the fewest joint modes whose cumulative "
       "eigenvalue sum reaches this fraction are kept). Specify this OR n_terms, not both.");
-  params.addParam<unsigned int>("seed", 0, "RNG seed - MUST be identical across all MPI ranks");
+  params.addParam<unsigned int>("seed", 0, "Seed for sampling the random KL coefficients");
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
@@ -111,26 +50,15 @@ KLExpansionUserObject::validParams()
 KLExpansionUserObject::KLExpansionUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _dim(getParam<std::vector<Real>>("lower_bounds").size()),
-    _n_terms_param(getParam<unsigned int>("n_terms")),
-    _variance_fraction(getParam<Real>("variance_fraction")),
+    _n_terms_param(isParamValid("n_terms") ? getParam<unsigned int>("n_terms") : 0),
+    _variance_fraction(isParamValid("variance_fraction") ? getParam<Real>("variance_fraction") : 0),
     _seed(getParam<unsigned int>("seed"))
 {
   if (_dim < 1 || _dim > 3)
-    mooseError("KLExpansionUserObject supports 1 to 3 separable dimensions, got ", _dim);
+    paramError("lower_bounds", "Must have 1 to 3 entries (separable dimensions), got ", _dim, ".");
 
-  const bool have_n_terms = parameters.isParamSetByUser("n_terms");
-  const bool have_fraction = parameters.isParamSetByUser("variance_fraction");
-
-  if (have_n_terms == have_fraction) // both false or both true
-    mooseError("KLExpansionUserObject: specify EXACTLY ONE of 'n_terms' or "
-               "'variance_fraction', not both and not neither.");
-
-  if (have_n_terms && _n_terms_param == 0)
-    mooseError("KLExpansionUserObject: 'n_terms' must be greater than 0, got ", _n_terms_param);
-
-  if (have_fraction && (_variance_fraction <= 0.0 || _variance_fraction > 1.0))
-    mooseError("KLExpansionUserObject: 'variance_fraction' must be in the range (0, 1], got ",
-               _variance_fraction);
+  if (isParamValid("n_terms") == isParamValid("variance_fraction"))
+    paramError("n_terms", "Specify exactly one of 'n_terms' or 'variance_fraction'.");
 
   const auto & low = getParam<std::vector<Real>>("lower_bounds");
   const auto & high = getParam<std::vector<Real>>("upper_bounds");
@@ -143,8 +71,10 @@ KLExpansionUserObject::KLExpansionUserObject(const InputParameters & parameters)
                _dim,
                ").");
 
-  for (unsigned int d = 0; d < _dim; ++d)
+  for (const auto d : make_range(_dim))
   {
+    if (high[d] <= low[d])
+      paramError("upper_bounds", "Each entry must be greater than the matching 'lower_bounds'.");
     _low[d] = low[d];
     _high[d] = high[d];
     _n_grid[d] = ng[d];
@@ -157,7 +87,7 @@ KLExpansionUserObject::KLExpansionUserObject(const InputParameters & parameters)
 void
 KLExpansionUserObject::buildBasis()
 {
-  for (unsigned int d = 0; d < _dim; ++d)
+  for (const auto d : make_range(_dim))
   {
     _grid[d] = buildReferenceGrid(_low[d], _high[d], _n_grid[d]);
     solveMarginalEigenproblem(d);
@@ -176,7 +106,7 @@ KLExpansionUserObject::buildReferenceGrid(Real low, Real high, unsigned int n) c
     return grid;
   }
   const Real step = (high - low) / (n - 1);
-  for (unsigned int i = 0; i < n; ++i)
+  for (const auto i : make_range(n))
     grid[i] = low + i * step;
   return grid;
 }
@@ -189,8 +119,8 @@ KLExpansionUserObject::solveMarginalEigenproblem(unsigned int d)
   const auto * cov = _covariance[d];
 
   Eigen::MatrixXd C(n, n);
-  for (unsigned int k = 0; k < n; ++k)
-    for (unsigned int l = 0; l < n; ++l)
+  for (const auto k : make_range(n))
+    for (const auto l : make_range(n))
       C(k, l) = cov->computeCovariance(grid[k], grid[l]);
 
   Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(C);
@@ -200,17 +130,36 @@ KLExpansionUserObject::solveMarginalEigenproblem(unsigned int d)
   const auto & eigenvalues = solver.eigenvalues(); // ascending order, guaranteed real
   const auto & eigenvectors = solver.eigenvectors();
 
-  _lambda[d].resize(n);
-  _eigvec[d].resize(n);
+  // Eigenvalues at or below the symmetric eigensolver's backward error bound, n * epsilon *
+  // lambda_max, are roundoff and their eigenvectors carry no information. They are discarded
+  // because the Nystrom extension divides by sqrt(lambda).
+  const Real tol = n * std::numeric_limits<Real>::epsilon() * eigenvalues(n - 1);
+
+  _lambda[d].clear();
+  _eigvec[d].clear();
 
   // eigenvalues() is ascending -> walk backwards from the end for descending order
-  for (unsigned int m = 0; m < n; ++m)
+  for (const auto m : make_range(n))
   {
     const unsigned int idx = n - 1 - m;
-    _lambda[d][m] = std::max(eigenvalues(idx), 0.0); // guard tiny negative roundoff
-    _eigvec[d][m].resize(n);
-    for (unsigned int l = 0; l < n; ++l)
-      _eigvec[d][m][l] = eigenvectors(l, idx);
+    if (eigenvalues(idx) <= tol)
+      break;
+
+    // Eigenvectors are defined only up to sign, and the solver's choice can differ between
+    // platforms, which would flip the sign of the corresponding term in the sampled field. Make
+    // the first entry whose magnitude is at least half the largest magnitude positive; entries
+    // that large are far from roundoff, so the choice does not depend on rounding.
+    const auto v = eigenvectors.col(idx);
+    const Real half_max = 0.5 * v.cwiseAbs().maxCoeff();
+    unsigned int l0 = 0;
+    while (std::abs(v(l0)) < half_max)
+      ++l0;
+    const Real sign = v(l0) > 0 ? 1.0 : -1.0;
+
+    _lambda[d].push_back(eigenvalues(idx));
+    _eigvec[d].emplace_back(n);
+    for (const auto l : make_range(n))
+      _eigvec[d].back()[l] = sign * v(l);
   }
 }
 
@@ -225,22 +174,32 @@ KLExpansionUserObject::sortJointModes()
   candidates.reserve(static_cast<std::size_t>(n0) * n1 * n2);
 
   Real total_trace = 0.0;
-  for (unsigned int i = 0; i < n0; ++i)
-    for (unsigned int j = 0; j < n1; ++j)
-      for (unsigned int k = 0; k < n2; ++k)
+  for (const auto i : make_range(n0))
+    for (const auto j : make_range(n1))
+      for (const auto k : make_range(n2))
       {
-        Real eig = _lambda[0][i];
-        if (_dim >= 2)
-          eig *= _lambda[1][j];
-        if (_dim >= 3)
-          eig *= _lambda[2][k];
-        candidates.push_back({eig, {i, j, k}});
+        const std::array<unsigned int, 3> modes{i, j, k};
+        // Multiply the marginal eigenvalues in ascending order so that permutations of the same
+        // factors, which occur when dimensions share a covariance and reference grid, give
+        // exactly equal joint eigenvalues and are ordered by the tie break below.
+        std::array<Real, 3> factors{};
+        for (const auto d : make_range(_dim))
+          factors[d] = _lambda[d][modes[d]];
+        std::sort(factors.begin(), factors.begin() + _dim);
+        Real eig = 1.0;
+        for (const auto d : make_range(_dim))
+          eig *= factors[d];
+        candidates.push_back({eig, modes});
         total_trace += eig;
       }
 
+  // Descending eigenvalue order. Ties are broken by the marginal mode indices because the order
+  // of equal elements from std::sort differs between standard library implementations, and the
+  // order determines which random coefficient multiplies each mode.
   std::sort(candidates.begin(),
             candidates.end(),
-            [](const auto & a, const auto & b) { return a.first > b.first; });
+            [](const auto & a, const auto & b)
+            { return a.first > b.first || (a.first == b.first && a.second < b.second); });
 
   unsigned int keep = 0;
   if (_n_terms_param > 0)
@@ -250,7 +209,7 @@ KLExpansionUserObject::sortJointModes()
                    _n_terms_param,
                    " exceeds the total number of available joint modes (",
                    candidates.size(),
-                   " = product of marginal grid sizes). "
+                   " = product of the numbers of marginal eigenvalues above roundoff). "
                    "Retaining all ",
                    candidates.size(),
                    " available modes instead. "
@@ -277,9 +236,12 @@ KLExpansionUserObject::sortJointModes()
   }
 
   _joint_index.resize(keep);
-  for (unsigned int m = 0; m < keep; ++m)
+  _n_used_modes.fill(0);
+  for (const auto m : make_range(keep))
   {
     _joint_index[m] = candidates[m].second;
+    for (const auto d : make_range(_dim))
+      _n_used_modes[d] = std::max(_n_used_modes[d], _joint_index[m][d] + 1);
   }
 }
 
@@ -303,7 +265,7 @@ KLExpansionUserObject::nystromExtend(Real s_star, unsigned int d, unsigned int m
   const auto * cov = _covariance[d];
 
   Real sum = 0.0;
-  for (unsigned int l = 0; l < grid.size(); ++l)
+  for (const auto l : index_range(grid))
     sum += cov->computeCovariance(s_star, grid[l]) * vec[l];
 
   return sum / std::sqrt(_lambda[d][mode]);
@@ -312,12 +274,21 @@ KLExpansionUserObject::nystromExtend(Real s_star, unsigned int d, unsigned int m
 void
 KLExpansionUserObject::computeModeValues(const Point & p, std::vector<Real> & mode_vals) const
 {
+  // Joint modes share marginal modes, so extend each marginal mode once per dimension
+  std::array<std::vector<Real>, 3> marginal_vals;
+  for (const auto d : make_range(_dim))
+  {
+    marginal_vals[d].resize(_n_used_modes[d]);
+    for (const auto mode : make_range(_n_used_modes[d]))
+      marginal_vals[d][mode] = nystromExtend(p(d), d, mode);
+  }
+
   mode_vals.resize(_joint_index.size());
-  for (unsigned int m = 0; m < _joint_index.size(); ++m)
+  for (const auto m : index_range(_joint_index))
   {
     Real a = 1.0;
-    for (unsigned int d = 0; d < _dim; ++d)
-      a *= nystromExtend(p(d), d, _joint_index[m][d]);
+    for (const auto d : make_range(_dim))
+      a *= marginal_vals[d][_joint_index[m][d]];
     mode_vals[m] = a;
   }
 }
@@ -329,7 +300,7 @@ KLExpansionUserObject::getValue(const Point & p) const
   computeModeValues(p, a);
 
   Real value = 0.0;
-  for (unsigned int m = 0; m < a.size(); ++m)
+  for (const auto m : index_range(a))
     value += a[m] * _xi[m];
   return value;
 }
@@ -341,7 +312,7 @@ KLExpansionUserObject::getStandardizedValue(const Point & p) const
   computeModeValues(p, a);
 
   Real raw = 0.0, var = 0.0;
-  for (unsigned int m = 0; m < a.size(); ++m)
+  for (const auto m : index_range(a))
   {
     raw += a[m] * _xi[m];
     var += a[m] * a[m];
@@ -357,9 +328,7 @@ KLExpansionUserObject::getStandardizedValue(const Point & p) const
 Real
 KLExpansionUserObject::getCopulaUniform(const Point & p) const
 {
-  const Real z = getStandardizedValue(p);
-  // Standard normal CDF via erf: Phi(z) = 0.5*(1 + erf(z/sqrt(2)))
-  Real u = 0.5 * (1.0 + std::erf(z / std::sqrt(2.0)));
+  Real u = Normal::cdf(getStandardizedValue(p), 0.0, 1.0);
 
   // eps <= u <= 1-eps for numerical reasons. If u =1, inverse transform for weibull will have
   // issues.

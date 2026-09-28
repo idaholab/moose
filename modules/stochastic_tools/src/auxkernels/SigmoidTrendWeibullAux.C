@@ -1,8 +1,17 @@
-#include "SigmoidTrendWeibullAux.h"
-#include "KLE_uo.h"
-#include <cmath>
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-registerMooseObject("MooseApp", SigmoidTrendWeibullAux);
+#include "SigmoidTrendWeibullAux.h"
+#include "KLExpansionUserObject.h"
+#include "Weibull.h"
+
+registerMooseObject("StochasticToolsApp", SigmoidTrendWeibullAux);
 
 InputParameters
 SigmoidTrendWeibullAux::validParams()
@@ -10,15 +19,18 @@ SigmoidTrendWeibullAux::validParams()
   InputParameters params = SigmoidTrendAuxBase::validParams();
   params.addClassDescription("Weibull field via Gaussian copula, with a position-dependent scale "
                              "which depends on the distance from the centerline");
-  params.addRequiredParam<Real>("shape", "Weibull shape parameter (k > 0), spatially constant");
+  params.addRequiredRangeCheckedParam<Real>(
+      "shape", "shape > 0", "Weibull shape parameter k, spatially constant");
   return params;
 }
 
 SigmoidTrendWeibullAux::SigmoidTrendWeibullAux(const InputParameters & parameters)
   : SigmoidTrendAuxBase(parameters), _shape(getParam<Real>("shape"))
 {
-  if (_shape <= 0.0)
-    mooseError("SigmoidTrendWeibullAux: 'shape' must be > 0, got ", _shape);
+  if (_scale_hi <= 0.0)
+    paramError("scale_max", "The Weibull scale must be positive.");
+  if (_scale_lo <= 0.0)
+    paramError("scale_min", "The Weibull scale must be positive.");
 }
 
 Real
@@ -28,6 +40,5 @@ SigmoidTrendWeibullAux::computeValue()
   const Real d = distanceToSegment(p);
   const Real scale = trendValue(d);
 
-  const Real u = _kl_uo.getCopulaUniform(p);
-  return scale * std::pow(-std::log(1.0 - u), 1.0 / _shape);
+  return Weibull::quantile(_kl_uo.getCopulaUniform(p), 0.0, scale, _shape);
 }
