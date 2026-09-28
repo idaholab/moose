@@ -22,7 +22,8 @@ public:
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual GenericReal<is_ad> massFlowRate() override;
+  virtual GenericReal<is_ad> pressureDrop() override;
   virtual Real computeQpJacobian() override;
   /// Coupled reference pressure drop from inlet to outlet of the path
   const VariableValue & _dPc;

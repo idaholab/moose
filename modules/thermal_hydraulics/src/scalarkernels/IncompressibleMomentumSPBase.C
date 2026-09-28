@@ -12,6 +12,7 @@
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
+#include "PhysicalConstants.h"
 
 template <bool is_ad>
 InputParameters
@@ -60,7 +61,8 @@ IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
       "roughnesses",
       std::vector<MooseFunctorName>({}),
       "Component wall roughnesses per segment [m]. Takes a vector of functors.");
-  params.addParam<MooseFunctorName>("g", 9.81, "Gravitational acceleration [m/s]");
+  params.addParam<MooseFunctorName>(
+      "g", PhysicalConstants::acceleration_of_gravity, "Gravitational acceleration [m/s]");
 
   return params;
 }
@@ -100,7 +102,7 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     mooseError(
         "Must provide consistent number of segments for each parameter! Including temperatures!");
   }
-  for (size_t j = 0; j < _n_segments; ++j)
+  for (const auto j : make_range(_n_segments))
   {
     _T[j] = &(ScalarCoupleable::coupledScalarValue("temperatures", j));
     _areas[j] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[j]));
@@ -125,34 +127,181 @@ IncompressibleMomentumSPBaseTempl<is_ad>::reinit()
 
 template <bool is_ad>
 GenericReal<is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericReal<is_ad> mu,
-                                                                const GenericReal<is_ad> G,
-                                                                const GenericReal<is_ad> Dh,
-                                                                const int j)
+IncompressibleMomentumSPBaseTempl<is_ad>::massFlowRate()
 {
-  const Moose::ElemArg _qp = Moose::ElemArg();
-  const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
-  auto _Re = abs(G) * Dh / mu;
-  auto _lam = 64.0 / _Re;
-  auto _turb =
-      0.25 / pow((log10((*(_roughnesses[j]))(_qp, _state) / (Dh * 3.7) + 5.74 / pow(_Re, 0.9))), 2);
-  auto _fd = 64.0 / _Re;
-  auto _pfd = &_fd;
-  if (_Re < 2300.0) // laminar
+  return 0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+IncompressibleMomentumSPBaseTempl<is_ad>::pressureDrop()
+{
+  return 0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
+{
+  GenericReal<is_ad> momentum_residual = 0;
+  const Moose::ElemArg qp = Moose::ElemArg();
+  const int i = 0;
+  const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
+  // start by getting global fluid properties
+  const auto Tave = ((*(_T[0]))[i] + (*(_T[_n_temps - 1]))[i]) / 2;
+  const auto mu = _fp.mu_from_p_T(_Pref(qp, state), Tave);
+  const auto rhog = _fp.rho_from_p_T(_Pref(qp, state), Tave);
+  // Global rescale factor so the mass flow rate's transient term has a unit coefficient,
+  // matching the coefficient of ODETimeDerivative kernel: the path's lumped L_over_A_sum is
+  // Sum_j(length_j / area_j), so the whole equation is divided through by that single sum.
+  GenericReal<is_ad> L_over_A_sum = 0;
+  for (const auto j : make_range(_n_segments))
+    L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+  const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
+  // loop over segments
+  for (const auto j : make_range(_n_segments))
   {
-    *_pfd = _lam;
+    // Decide flow regime for friction factor
+    auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
+    auto G = massFlowRate() / (*(_areas[j]))(qp, state);
+    auto fd = computeFrictionFactor(mu, G, Dh, j);
+    // Friction
+    momentum_residual += fd * (*(_lengths[j]))(qp, state) / Dh * G * abs(G) / 2.0 / rhog;
+    // Form losses
+    momentum_residual += (*(_forms_losses[j]))(qp, state) * G * abs(G) / 2.0 / rhog;
+    // Gravity
+    // get local density for natural circulation aspect
+    auto rhol = _fp.rho_from_p_T(_Pref(qp, state), (*(_T[j]))[i]);
+    momentum_residual +=
+        rhol * _gravity(qp, state) * (*(_lengths[j]))(qp, state) * sin((*(_alphas[j]))(qp, state));
+    // Pump pressure
+    momentum_residual -= (*(_dPps[j]))(qp, state);
   }
-  else if (_Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
+  // Pressure drop (single path-wide unknown, applied once)
+  momentum_residual += pressureDrop();
+
+  return momentum_residual * inv_L_over_A_sum;
+}
+
+template <bool is_ad>
+Real
+IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobianMDot()
+{
+  if constexpr (!is_ad)
   {
-    *_pfd = _turb;
+    Real momentum_jacob = 0;
+    const Moose::ElemArg qp = Moose::ElemArg();
+    const int i = 0;
+    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
+    // start by getting global fluid properties
+    const auto Tave = ((*(_T[0]))[i] + (*(_T[_n_temps - 1]))[i]) / 2;
+    const auto mu = _fp.mu_from_p_T(_Pref(qp, state), Tave);
+    const auto rhog = _fp.rho_from_p_T(_Pref(qp, state), Tave);
+    // Global rescale factor, see computeQpResidual()
+    Real L_over_A_sum = 0;
+    for (const auto j : make_range(_n_segments))
+      L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+    const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
+    // loop over segments
+    for (const auto j : make_range(_n_segments))
+    {
+      // Decide flow regime for friction factor
+      auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
+      auto G = massFlowRate() / (*(_areas[j]))(qp, state);
+      auto fd = computeFrictionFactor(mu, G, Dh, j);
+      // Friction
+      momentum_jacob +=
+          fd * (*(_lengths[j]))(qp, state) / Dh * G / rhog / (*(_areas[j]))(qp, state);
+      // Form losses
+      momentum_jacob += (*(_forms_losses[j]))(qp, state) * G / rhog / (*(_areas[j]))(qp, state);
+    }
+
+    return momentum_jacob * inv_L_over_A_sum;
+  }
+  else
+  {
+    mooseError("computeQpJacobian() should not be called in AD mode");
+    return 0;
+  }
+}
+
+template <bool is_ad>
+Real
+IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobianDP()
+{
+  if constexpr (!is_ad)
+  {
+    const Moose::ElemArg qp = Moose::ElemArg();
+    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
+    // Global rescale factor, see computeQpResidual()
+    Real L_over_A_sum = 0;
+    for (const auto j : make_range(_n_segments))
+      L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+    const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
+    // reference pressure drop is subtracted once, scaled by inv_L_over_A_sum, so its derivative is
+    // -inv_L_over_A_sum
+    return -inv_L_over_A_sum;
+  }
+  else
+  {
+    mooseError("computeQpJacobian() should not be called in AD mode");
+    return 0;
+  }
+}
+
+template <bool is_ad>
+Real
+IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobian()
+{
+  if constexpr (!is_ad)
+  {
+    return 0;
+  }
+  else
+  {
+    mooseError("computeQpJacobian() should not be called in AD mode");
+    return 0;
+  }
+}
+
+template <>
+Real
+IncompressibleMomentumSPBaseTempl<true>::computeQpJacobian()
+{
+  mooseError("Internal error, calling computeQpJacobian in AD class.");
+  return 0.0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericReal<is_ad> & mu,
+                                                                const GenericReal<is_ad> & G,
+                                                                const GenericReal<is_ad> & Dh,
+                                                                const unsigned int j)
+{
+  const Moose::ElemArg qp = Moose::ElemArg();
+  const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
+  const auto Re = abs(G) * Dh / mu;
+  const auto lam = 64.0 / Re;
+  const auto turb =
+      0.25 / pow((log10((*(_roughnesses[j]))(qp, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))), 2);
+  auto fd = 64.0 / Re;
+  auto pfd = &fd;
+  if (Re < 2300.0) // laminar
+  {
+    *pfd = lam;
+  }
+  else if (Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
+  {
+    *pfd = turb;
   }
   else // transition, conservative interpolation between the two
   {
-    *_pfd = (_turb - _lam) / 1700 * _Re + _lam;
-    *_pfd = std::max(*_pfd, std::max(_lam, _turb));
+    *pfd = (turb - lam) / 1700 * Re + lam;
+    *pfd = std::max(*pfd, std::max(lam, turb));
   }
 
-  return _fd;
+  return fd;
 }
 
 template class IncompressibleMomentumSPBaseTempl<false>;

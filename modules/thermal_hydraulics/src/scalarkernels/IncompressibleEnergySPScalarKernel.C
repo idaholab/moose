@@ -76,32 +76,31 @@ GenericReal<is_ad>
 IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpResidual()
 {
   GenericReal<is_ad> energy_residual = 0;
-  const Moose::ElemArg _qp = Moose::ElemArg();
-  const int _i = 0;
-  const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
+  const Moose::ElemArg qp = Moose::ElemArg();
+  const int i = 0;
+  const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting fluid properties
-  auto _in = 1.0 / 2.0 * (1 - abs(_m[_i]) / _m[_i]) * _Tdown[_i] +
-             1.0 / 2.0 * (1 + abs(_m[_i]) / _m[_i]) * _Tup[_i];
-  auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-  auto _rho = _fp.rho_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-  auto _cp = _fp.cp_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-  auto _k = _fp.k_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
+  const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
+                  1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
+  const auto mu = _fp.mu_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  const auto rho = _fp.rho_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  const auto cp = _fp.cp_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  const auto k = _fp.k_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
 
   // Compute HTC quantities
-  auto _Dh = 4.0 * _area(_qp, _state) / _perimeter(_qp, _state);
-  auto _G = abs(_m[_i]) / _area(_qp, _state);
-  auto _Re = _G * _Dh / _mu;
-  auto _Pr = _mu * _cp / _k;
+  const auto Dh = 4.0 * _area(qp, state) / _perimeter(qp, state);
+  const auto G = abs(_m[i]) / _area(qp, state);
+  const auto Re = G * Dh / mu;
+  const auto Pr = mu * cp / k;
   // Heat transfer to fluid (Dittus-Boelter)
-  auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
-  auto _q = _h * _perimeter(_qp, _state) / 2.0 * (2.0 * _Tw[_i] - Base::_u[_i] - _in);
+  const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * k / Dh;
+  const auto q = h * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
   // Advection component
-  energy_residual +=
-      (_m[_i] / 2.0 * (1 - abs(_m[_i]) / _m[_i]) * _Tdown[_i] -
-       _m[_i] / 2.0 * (1 + abs(_m[_i]) / _m[_i]) * _Tup[_i] + abs(_m[_i]) * Base::_u[_i]) /
-      _length(_qp, _state) / _area(_qp, _state) / _rho;
+  energy_residual += (_m[i] / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] -
+                      _m[i] / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i] + abs(_m[i]) * Base::_u[i]) /
+                     _length(qp, state) / _area(qp, state) / rho;
   // Wall heat transfer
-  energy_residual -= _q / _area(_qp, _state) / _rho / _cp;
+  energy_residual -= q / _area(qp, state) / rho / cp;
 
   return energy_residual;
 }
@@ -123,29 +122,29 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
   if constexpr (!is_ad)
   {
     Real energy_jacob = 0;
-    const Moose::ElemArg _qp = Moose::ElemArg();
-    const int _i = 0;
-    const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
+    const Moose::ElemArg qp = Moose::ElemArg();
+    const int i = 0;
+    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
     // start by getting fluid properties
-    auto _in = 1.0 / 2.0 * (1 - abs(_m[_i]) / _m[_i]) * _Tdown[_i] +
-               1.0 / 2.0 * (1 + abs(_m[_i]) / _m[_i]) * _Tup[_i];
-    auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-    auto _rho = _fp.rho_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-    auto _cp = _fp.cp_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
-    auto _k = _fp.k_from_p_T(_Pref(_qp, _state), (Base::_u[_i] + _in) / 2);
+    const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
+                    1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
+    const auto mu = _fp.mu_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+    const auto rho = _fp.rho_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+    const auto cp = _fp.cp_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+    const auto k = _fp.k_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
 
     // Decide flow regime for HTC
-    auto _Dh = 4.0 * _area(_qp, _state) / _perimeter(_qp, _state);
-    auto _G = abs(_m[_i]) / _area(_qp, _state);
-    auto _Re = _G * _Dh / _mu;
-    auto _Pr = _mu * _cp / _k;
+    const auto Dh = 4.0 * _area(qp, state) / _perimeter(qp, state);
+    const auto G = abs(_m[i]) / _area(qp, state);
+    const auto Re = G * Dh / mu;
+    const auto Pr = mu * cp / k;
     // Heat transfer to fluid (Dittus-Boelter)
-    auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
-    auto _q = -_h * _perimeter(_qp, _state) / 2.0;
+    const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * k / Dh;
+    const auto q = -h * _perimeter(qp, state) / 2.0;
     // Advection component
-    energy_jacob += abs(_m[_i]) / _length(_qp, _state) / _area(_qp, _state) / _rho;
+    energy_jacob += abs(_m[i]) / _length(qp, state) / _area(qp, state) / rho;
     // Wall heat transfer
-    energy_jacob -= _q / _area(_qp, _state) / _rho / _cp;
+    energy_jacob -= q / _area(qp, state) / rho / cp;
 
     return energy_jacob;
   }
