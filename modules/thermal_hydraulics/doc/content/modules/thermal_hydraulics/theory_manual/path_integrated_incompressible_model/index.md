@@ -71,7 +71,7 @@ Most closure quantities in the governing equations are user-supplied quantities,
 
 A few notable closure quantities are not user-specified inputs, and are worth some discussion.
 
-The thermophysical properties ($\rho$, $\mu$, $k$, & $c_p$) are computed from the coupled temperature values and the reference pressure using a supplied [SinglePhaseFluidProperties.md] object. Most terms in the momentum equation utilize the average temperature from inlet to outlet of the flow path to compute the fluid properties, except for the gravitational term, which uses local temperature to model natural circulation effects. Since the temperature equation is solved on a segment-local basis, local temperature is used to compute the thermophysical properties.
+The thermophysical properties ($\rho$, $\mu$, $k$, and $c_p$) are computed from the coupled temperature values and the reference pressure using a supplied [SinglePhaseFluidProperties.md] object. Most terms in the momentum equation utilize the average temperature from inlet to outlet of the flow path to compute the fluid properties, except for the gravitational term, which uses local temperature to model natural circulation effects. Since the temperature equation is solved on a segment-local basis, local temperature is used to compute the thermophysical properties.
 
 The hydraulic diameter of each segment is computed using the closure relation:
 
