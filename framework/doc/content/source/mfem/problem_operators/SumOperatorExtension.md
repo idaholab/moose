@@ -4,7 +4,7 @@
 
 ## Summary
 
-This operator forms $ \alpha A + \beta B $, where $A$ is the gradient of a partially-assembled nonlinear form,
+This operator forms $ A + B $, where $A$ is the gradient of a partially-assembled nonlinear form,
 and $B$ is the constrained linear system operator.
 
 The order in which these two are passed to the constructor is crucial, since we call `B->AssembleDiagonal`
