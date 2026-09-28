@@ -201,10 +201,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
                                      getFromMultiApp()->problemBase(),
                                      ind);
         }
-        // Limit to one write per app index when ind is cooperatively run by more than one
-        // rank, matching the equivalent guard in
-        // MultiAppVectorPostprocessorTransfer::executeFromMultiapp().
-        else if (hasToMultiApp() || getFromMultiApp()->isFirstLocalRank())
+        else
           transferReporter(_from_reporter_names[n],
                            _to_reporter_names[n],
                            getFromMultiApp()->appProblemBase(ind),
@@ -212,12 +209,23 @@ MultiAppReporterTransfer::executeFromMultiapp()
                                            : getFromMultiApp()->problemBase());
       }
 
-  // Reconcile the no-to_multi_app write above across the parent problem's other ranks; a
-  // no-op when it has a single rank, which is the common case.
-  if (!_distribute_reporter_vector && !hasToMultiApp() &&
-      getFromMultiApp()->problemBase().n_processors() > 1)
-    for (const auto n : index_range(_to_reporter_names))
-      sumVectorReporter(_to_reporter_names[n], getFromMultiApp()->problemBase());
+  // With no to_multi_app, only the ranks owning the sub-app wrote above; if some ranks of
+  // this app do not own it, share the value from the lowest owning rank.
+  if (!_distribute_reporter_vector && !hasToMultiApp())
+    for (const auto ind : indices)
+    {
+      const bool owns_app = getFromMultiApp()->hasLocalApp(ind);
+      bool all_own_app = owns_app;
+      _communicator.min(all_own_app);
+      if (all_own_app)
+        continue;
+
+      processor_id_type root =
+          owns_app ? processor_id() : std::numeric_limits<processor_id_type>::max();
+      _communicator.min(root);
+      for (const auto n : index_range(_to_reporter_names))
+        broadcastReporter(_to_reporter_names[n], getFromMultiApp()->problemBase(), root);
+    }
 
   if (_distribute_reporter_vector)
     for (const auto n : index_range(_to_reporter_names))
