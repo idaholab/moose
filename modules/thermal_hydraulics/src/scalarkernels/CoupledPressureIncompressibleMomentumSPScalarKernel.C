@@ -56,7 +56,7 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidu
   // path's lumped inertia is Sum_j(length_j / area_j), so the whole equation is divided through by
   // that single sum.
   GenericReal<is_ad> _inertia = 0;
-  for (size_t j = 0; j < Base::_n_segments; ++j)
+  for (const auto j : make_range(Base::_n_segments))
     _inertia += (*(Base::_lengths[j]))(_qp, _state) / (*(Base::_areas[j]))(_qp, _state);
   auto _invC = 1.0 / _inertia;
   // loop over segments
