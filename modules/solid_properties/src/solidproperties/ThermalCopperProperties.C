@@ -290,7 +290,7 @@ ThermalCopperProperties::cp_integral(const Real & T) const
   const Real dT = (T - T_min) / static_cast<Real>(n_intervals);
   Real integral = 0.0;
 
-  // Trapezoidal rule: ∫f(x)dx ≈ Δx * [f(x0)/2 + f(x1) + f(x2) + ... + f(xn-1) + f(xn)/2]
+  // Trapezoidal integration rule
   for (unsigned int i = 0; i <= n_intervals; ++i)
   {
     const Real T_i = T_min + static_cast<Real>(i) * dT;
