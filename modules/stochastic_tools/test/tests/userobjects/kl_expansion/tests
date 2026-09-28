@@ -1,0 +1,90 @@
+[Tests]
+  issues = '#33889'
+  design = 'random_fields.md'
+
+  [normal]
+    requirement = 'The system shall sample a correlated Gaussian random field from a separable Karhunen-Loeve expansion'
+    design = 'KLExpansionUserObject.md KLExponentialCovariance.md KLSquaredExponentialCovariance.md KLNormalAux.md'
+    [1d]
+      type = Exodiff
+      input = normal_1d.i
+      exodiff = normal_1d_out.e
+      detail = 'in one dimension with a fixed number of expansion terms,'
+    []
+    [2d]
+      type = Exodiff
+      input = normal_2d.i
+      exodiff = normal_2d_out.e
+      detail = 'in two dimensions at nodes and elements with the number of terms set by a retained variance fraction, and'
+    []
+    [3d]
+      type = Exodiff
+      input = normal_3d.i
+      exodiff = normal_3d_out.e
+      detail = 'in three dimensions with a different covariance in each direction.'
+    []
+  []
+
+  [weibull]
+    type = Exodiff
+    input = weibull_2d.i
+    exodiff = weibull_2d_out.e
+    design = 'KLWeibullAux.md SigmoidTrendWeibullAux.md'
+    requirement = 'The system shall transform a correlated Gaussian random field into a correlated Weibull random field with a constant scale and with a scale that varies with distance from a line segment.'
+  []
+
+  [errors]
+    requirement = 'The system shall report an error when building a Karhunen-Loeve expansion if'
+    design = 'KLExpansionUserObject.md'
+    [no_truncation]
+      type = RunException
+      input = errors.i
+      expect_err = "Specify exactly one of 'n_terms' or 'variance_fraction'."
+      detail = 'neither the number of terms nor the retained variance fraction is given,'
+    []
+    [both_truncations]
+      type = RunException
+      input = errors.i
+      cli_args = 'UserObjects/kl_field/n_terms=5 UserObjects/kl_field/variance_fraction=0.9'
+      expect_err = "Specify exactly one of 'n_terms' or 'variance_fraction'."
+      detail = 'both the number of terms and the retained variance fraction are given,'
+    []
+    [too_many_dims]
+      type = RunException
+      input = errors.i
+      cli_args = "UserObjects/kl_field/n_terms=5 UserObjects/kl_field/lower_bounds='0 0 0 0'"
+      expect_err = 'Must have 1 to 3 entries \(separable dimensions\), got 4.'
+      detail = 'more than three dimensions are requested,'
+    []
+    [size_mismatch]
+      type = RunException
+      input = errors.i
+      cli_args = 'UserObjects/kl_field/n_terms=5 UserObjects/kl_field/n_grid=5'
+      expect_err = 'lower_bounds, upper_bounds, n_grid, and covariance_functions must all have the same length'
+      detail = 'the per-dimension inputs have different lengths,'
+    []
+    [bad_bounds]
+      type = RunException
+      input = errors.i
+      cli_args = "UserObjects/kl_field/n_terms=5 UserObjects/kl_field/upper_bounds='1 0'"
+      expect_err = "Each entry must be greater than the matching 'lower_bounds'."
+      detail = 'an upper bound does not exceed its lower bound, or'
+    []
+    [too_many_terms]
+      type = RunException
+      input = errors.i
+      cli_args = 'UserObjects/kl_field/n_terms=100'
+      expect_err = 'requested n_terms = 100 exceeds the total number of available joint modes \(25'
+      detail = 'more terms are requested than the reference grids support.'
+    []
+  []
+
+  [trend_scale_error]
+    type = RunException
+    input = errors.i
+    cli_args = 'UserObjects/kl_field/n_terms=5 AuxKernels/weibull/scale_min=0'
+    expect_err = 'The Weibull scale must be positive.'
+    design = 'SigmoidTrendWeibullAux.md'
+    requirement = 'The system shall report an error if the trending Weibull scale is not positive.'
+  []
+[]
