@@ -98,8 +98,6 @@ The heat transfer coefficient is computed using the Dittus-Boelter correlation:
 !equation id=dittus_boelter
 h = 0.023 Re^{0.8} Pr^{0.4} \,
 
-Future iterations of these kernels will see expanded options for closure correlations. Stay tuned!
-
 ## Junctions
 
 The above equations are valid for 1D flow paths only; for a flow junction, the mass conservation equation is as follows:
