@@ -29,10 +29,10 @@ public:
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> computeFrictionFactor(const GenericReal<is_ad> mu,
-                                                   const GenericReal<is_ad> G,
-                                                   const GenericReal<is_ad> Dh,
-                                                   const int j);
+  virtual GenericReal<is_ad> computeFrictionFactor(const GenericReal<is_ad> & mu,
+                                                   const GenericReal<is_ad> & G,
+                                                   const GenericReal<is_ad> & Dh,
+                                                   const unsigned int j);
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables
