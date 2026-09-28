@@ -207,6 +207,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _bulk_Re(1.0),
+    _bulk_V(1.0),
     _P_tol(getParam<Real>("P_tol")),
     _P_maxit(getParam<int>("P_maxit")),
     _T_tol(getParam<Real>("T_tol")),
@@ -417,25 +418,30 @@ SubChannel1PhaseProblem::initialSetup()
 void
 SubChannel1PhaseProblem::computeBulkReynoldsNumber()
 {
-  if (processor_id() != 0)
-    return;
-  Real viscosity_in = 0.0;
-  Real volumetric_flow_in = 0.0;
-  Real mass_flow_in = 0.0;
-  for (const auto i_ch : make_range(_n_channels))
+  if (processor_id() == 0)
   {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    const Real mdot_in = (*_mdot_soln)(node_in);
-    const Real rho_in = (*_rho_soln)(node_in);
-    viscosity_in += mdot_in * (*_mu_soln)(node_in);
-    volumetric_flow_in += mdot_in / rho_in;
-    mass_flow_in += mdot_in;
+    Real viscosity_in = 0.0;
+    Real volumetric_flow_in = 0.0;
+    Real mass_flow_in = 0.0;
+    for (const auto i_ch : make_range(_n_channels))
+    {
+      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+      const Real mdot_in = (*_mdot_soln)(node_in);
+      const Real rho_in = (*_rho_soln)(node_in);
+      viscosity_in += mdot_in * (*_mu_soln)(node_in);
+      volumetric_flow_in += mdot_in / rho_in;
+      mass_flow_in += mdot_in;
+    }
+    const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+    const Real flow_area = _subchannel_mesh.getAssemblyFlowArea();
+    const Real inlet_mu = viscosity_in / mass_flow_in;
+    _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * flow_area);
+    _bulk_V = volumetric_flow_in / flow_area;
   }
-  const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
-  const Real flow_area = _subchannel_mesh.getAssemblyFlowArea();
-  const Real inlet_mu = viscosity_in / mass_flow_in;
-  _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * flow_area);
-  _bulk_V = volumetric_flow_in / flow_area;
+  // Only rank 0 owns the subchannel DOFs (SingleRankPartitioner), so share the result
+  _communicator.broadcast(_bulk_Re);
+  _communicator.broadcast(_bulk_V);
+
   if (MooseUtils::absoluteFuzzyEqual(_bulk_Re, 0.0))
     mooseError("The computed bulk Reynolds number is zero.");
 
@@ -3041,6 +3047,9 @@ SubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
   _aux->update();
 
+  // Called before the rank-0 early return since it broadcasts to all ranks
+  computeBulkReynoldsNumber();
+
   if (processor_id() != 0)
     return;
   Real power_in = 0.0;
@@ -3061,7 +3070,6 @@ SubChannel1PhaseProblem::externalSolve()
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
   const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
-  computeBulkReynoldsNumber();
   if (_verbose_subchannel)
   {
     _console << " ======================================= " << std::endl;

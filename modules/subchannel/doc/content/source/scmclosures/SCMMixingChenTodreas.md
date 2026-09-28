@@ -6,7 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This closure class is used to model the turbulent mixing coefficient $\beta$ using the Cheng-Todreas correlations for triangular assemblies with wire-wrapped pins. Two mixing-model parameterizations are available: the original Cheng-Todreas (1986) model and the Pacio-Chen-Todreas model.
+This closure class is used to model the turbulent mixing coefficient $\beta$ using the Chen-Todreas correlations for triangular assemblies with wire-wrapped pins. Two mixing-model parameterizations are available: the original Cheng-Todreas (1986) model and the Pacio-Chen-Todreas model.
 
 The implementation is based on:
 

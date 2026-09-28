@@ -10,6 +10,10 @@
 #include "SCMMixingChenTodreas.h"
 
 registerMooseObject("SubChannelApp", SCMMixingChenTodreas);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMMixingChengTodreas,
+                           "09/30/2027 24:00",
+                           SCMMixingChenTodreas);
 
 InputParameters
 SCMMixingChenTodreas::validParams()
@@ -46,37 +50,35 @@ SCMMixingChenTodreas::SCMMixingChenTodreas(const InputParameters & parameters)
   const auto wire_lead_to_diameter = _tri_sch_mesh->getWireLeadLength() / pin_diameter;
   const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
   const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
-  const auto Reb = _scm_problem.getBulkReynoldsNumber();
 
+  // Cheng and Todreas (1986), Table 3, reports the mixing parameter data range as
+  // 1.07 <= P/D <= 1.30, 4 <= H/D <= 52, and 400 <= Reb <= 1.0e6. Their Tables 1 and 2 list
+  // the mixing experiments, which span 7 <= Npin <= 217.
+  // Pacio et al. (2022), Table 1, reports the PCTD range of validity as
+  // 19 <= Npin <= 217, 1.02 <= P/D <= 1.42, 7.5 <= H/D <= 54, and 10 <= Reb <= 3.0e5.
   if (_mixing_model == "1986")
   {
     if (p_over_d < 1.07 || p_over_d > 1.30)
       flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the 1986 "
-                          "Chen-Todreas friction correlation data range.");
+                          "Cheng-Todreas mixing correlation data range.");
     if (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0)
       flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the 1986 "
-                          "Chen-Todreas friction correlation data range.");
+                          "Cheng-Todreas mixing correlation data range.");
     if (num_pins < 7 || num_pins > 217)
-      flagSolutionWarning("Number of pins outside the 1986 Chen-Todreas friction correlation "
+      flagSolutionWarning("Number of pins outside the 1986 Cheng-Todreas mixing correlation "
                           "data range.");
-    if (Reb < 400.0 || Reb > 1.0e6)
-      flagSolutionWarning("Bulk Reynolds number (Reb) outside the 1986 Chen-Todreas friction "
-                          "correlation data range.");
   }
   else
   {
     if (p_over_d < 1.02 || p_over_d > 1.42)
       flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the "
-                          "Pacio-Chen-Todreas friction correlation data range.");
+                          "Pacio-Chen-Todreas mixing correlation data range.");
     if (wire_lead_to_diameter < 7.5 || wire_lead_to_diameter > 54.0)
       flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the "
-                          "Pacio-Chen-Todreas friction correlation data range.");
+                          "Pacio-Chen-Todreas mixing correlation data range.");
     if (num_pins < 19 || num_pins > 217)
-      flagSolutionWarning("Number of pins outside the Pacio-Chen-Todreas friction correlation "
+      flagSolutionWarning("Number of pins outside the Pacio-Chen-Todreas mixing correlation "
                           "data range.");
-    if (Reb < 10.0 || Reb > 3.0e5)
-      flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas friction "
-                          "correlation data range.");
   }
 }
 
@@ -115,6 +117,18 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
 
   const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
+  // The bulk Reynolds number is computed from the solution during the solve, so its
+  // applicability range (see constructor) can only be checked here rather than at construction
+  if (_mixing_model == "1986")
+  {
+    if (bulk_Re < 400.0 || bulk_Re > 1.0e6)
+      flagSolutionWarning("Bulk Reynolds number (Reb) outside the 1986 Cheng-Todreas mixing "
+                          "correlation data range.");
+  }
+  else if (bulk_Re < 10.0 || bulk_Re > 3.0e5)
+    flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas mixing "
+                        "correlation data range.");
+
   const Real theta = std::acos(
       wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
                                    Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
@@ -129,7 +143,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
       (subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE);
 
   // Pacio defines the mixing treatment across center-edge and edge-corner gaps.
-  // For all other applicable gaps, we retain the original Chen-Todreas (1986) model.
+  // For all other applicable gaps, we retain the original Cheng-Todreas (1986) model.
   if (_mixing_model == "Pacio" && (center_edge || edge_corner))
   {
     const Real ReL = 700.0;
@@ -204,7 +218,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
   else if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
   {
     //
-    // Original Chen-Todreas (1986) mixing correlation.
+    // Original Cheng-Todreas (1986) mixing correlation.
     //
     // This remains active for center-center gaps even when Pacio is selected,
     // while center-edge gaps and edge-corner gaps are replaced by the Pacio treatment above.
@@ -284,7 +298,7 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
 
   const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
-  // Sweep flow always uses the original Chen-Todreas (1986) correlation.
+  // Sweep flow always uses the original Cheng-Todreas (1986) correlation.
   const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
   const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
 

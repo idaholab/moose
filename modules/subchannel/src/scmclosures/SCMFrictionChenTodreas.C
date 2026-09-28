@@ -10,6 +10,10 @@
 #include "SCMFrictionChenTodreas.h"
 
 registerMooseObject("SubChannelApp", SCMFrictionChenTodreas);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMFrictionUpgradedChengTodreas,
+                           "09/30/2027 24:00",
+                           SCMFrictionChenTodreas);
 
 InputParameters
 SCMFrictionChenTodreas::validParams()
@@ -51,8 +55,10 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
     const auto wire_lead_to_diameter = _tri_sch_mesh->getWireLeadLength() / pin_diameter;
     const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
     const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
-    const auto Reb = _scm_problem.getBulkReynoldsNumber();
 
+    // Reported ranges of validity from Table 1 of Pacio et al. (2022):
+    // UCTD: 7 <= Npin <= 217, 1.00 <= P/D <= 1.42, 8 <= H/D <= 52, 50 <= Reb <= 1.0e6
+    // PCTD: 19 <= Npin <= 217, 1.02 <= P/D <= 1.42, 7.5 <= H/D <= 54, 10 <= Reb <= 3.0e5
     if (_friction_model == "Upgraded")
     {
       if (p_over_d < 1.0 || p_over_d > 1.42)
@@ -64,9 +70,6 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
       if (num_pins < 7 || num_pins > 217)
         flagSolutionWarning("Number of pins outside the Upgraded Chen-Todreas friction correlation "
                             "data range.");
-      if (Reb < 50.0 || Reb > 1.0e6)
-        flagSolutionWarning("Bulk Reynolds number (Reb) outside the Upgraded Chen-Todreas friction "
-                            "correlation data range.");
     }
     else
     {
@@ -79,9 +82,6 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
       if (num_pins < 19 || num_pins > 217)
         flagSolutionWarning("Number of pins outside the Pacio-Chen-Todreas friction correlation "
                             "data range.");
-      if (Reb < 10.0 || Reb > 3.0e5)
-        flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas friction "
-                            "correlation data range.");
     }
   }
 }
@@ -176,6 +176,18 @@ SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & f
   const auto ReT = std::pow(10, CbT2 * (p_over_d - 1)) * CbT1;
   const auto Reb = _scm_problem.getBulkReynoldsNumber();
   const auto psi = std::log(Reb / ReL) / std::log(ReT / ReL);
+
+  // The bulk Reynolds number is computed from the solution during the solve, so its
+  // applicability range (see constructor) can only be checked here rather than at construction
+  if (_friction_model == "Upgraded")
+  {
+    if (Reb < 50.0 || Reb > 1.0e6)
+      flagSolutionWarning("Bulk Reynolds number (Reb) outside the Upgraded Chen-Todreas friction "
+                          "correlation data range.");
+  }
+  else if (Reb < 10.0 || Reb > 3.0e5)
+    flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas friction "
+                        "correlation data range.");
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems

@@ -8,16 +8,16 @@
 
 This class is used to model the axial friction factor for a subchannel assembly with wire-wrapped/bare fuel pins in a triangular lattice or bare fuel pins in a quadrilateral lattice.
 
-For triangular lattices, two Cheng-Todreas friction-factor parameterizations are available:
+For triangular lattices, two Chen-Todreas friction-factor parameterizations are available:
 
-- `Upgraded`, based on the upgraded Cheng-Todreas correlation [!cite](todreas2021nuclear1), [!cite](chen2018upgraded);
+- `Upgraded`, based on the upgraded Chen-Todreas correlation [!cite](todreas2021nuclear1), [!cite](chen2018upgraded);
 - `Pacio`, based on the Pacio-Chen-Todreas parameterization [!cite](pacio2022analysis).
 
 The desired triangular-lattice parameterization is selected using the `friction_model` parameter. The default is `Upgraded`.
 
 The two models use the same general form of the Cheng-Todreas detailed subchannel friction correlation but use different empirical coefficients for the flow-regime transition, wire-drag and wire-sweep terms, and intermittent-regime interpolation.
 
-### Upgraded Cheng-Todreas parameterization
+### Upgraded Chen-Todreas parameterization
 
 For `friction_model = Upgraded`, the laminar and turbulent transition Reynolds numbers are
 
