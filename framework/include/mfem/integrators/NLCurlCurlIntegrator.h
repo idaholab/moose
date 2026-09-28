@@ -53,7 +53,6 @@ public:
 
   NLCurlCurlIntegrator(mfem::Coefficient & k,
                        mfem::Coefficient & curlu_dk_dcurlu,
-                       mfem::Coefficient & dk_dcurlu,
                        mfem::VectorCoefficient & curlu_vec,
                        mfem::real_t curlu_zero_tol = 1e-32,
                        const mfem::IntegrationRule * ir = nullptr);
@@ -99,10 +98,13 @@ protected:
 
   /// Coefficient for k(s)
   mfem::Coefficient & _k_coef;
-  /// Coefficient for k'(s) / s, with s = |curl u|
-  mfem::Coefficient & _dk_dcurlu_coef;
+  /// Coefficient for s*k'(s), with s = |curl u|
+  mfem::Coefficient & _curlu_dk_dcurlu_coef;
   /// Coefficient for the curl of u
   mfem::VectorCoefficient & _curlu_vec;
+
+  /// Tolerance for zero-ing out 1.0 / |curl u| when forming jacobian operator
+  mfem::real_t _curlu_zero_tol;
 
   /// Quadrature space the solution-dependent coefficients are projected onto. Owned, and
   /// rebuilt whenever the mesh or integration rule it was built from changes.
