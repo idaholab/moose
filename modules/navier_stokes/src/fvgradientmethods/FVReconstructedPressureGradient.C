@@ -592,7 +592,7 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(const RhieCho
     const auto reconstructed_quantity = solveFaceProjection(matrix, projection_rhs);
 
     const auto pressure_dof =
-        elem_info->dofIndices()[rc.pressureSystem().number()][rc.pressureVariableNumber()];
+        elem_info->dofIndices()[rc.pressureSystem().number()][_pressure_variable_number];
     for (const auto component : make_range(dimension))
     {
       const auto reconstructed_gradient =
