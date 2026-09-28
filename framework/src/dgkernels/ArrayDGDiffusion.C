@@ -42,9 +42,15 @@ ArrayDGDiffusion::ArrayDGDiffusion(const InputParameters & parameters)
 void
 ArrayDGDiffusion::initQpResidual(Moose::DGResidualType type)
 {
-  mooseAssert(_diff[_qp].size() == _count && _diff_neighbor[_qp].size() == _count,
-              "'diff' size is inconsistent with the number of components of array "
-              "variable");
+  if (_diff[_qp].size() != _count || _diff_neighbor[_qp].size() != _count)
+    mooseError("'diff' size (",
+               _diff[_qp].size(),
+               " on the element, ",
+               _diff_neighbor[_qp].size(),
+               " on the neighbor) is inconsistent with the number of components of array "
+               "variable (",
+               _count,
+               ")");
 
   const int elem_b_order = std::max(libMesh::Order(1), _var.order());
   const Real h_elem =

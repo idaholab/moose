@@ -49,7 +49,25 @@ ADArrayReaction::computeQpResidual(ADRealEigenVector & residual)
   if (_r)
     residual = (*_r)[_qp] * _u[_qp] * _test[_i][_qp];
   else if (_r_array)
+  {
+    if ((*_r_array)[_qp].size() != _count)
+      mooseError("reaction_coefficient size (",
+                 (*_r_array)[_qp].size(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _count,
+                 ")");
     residual.noalias() = (*_r_array)[_qp].cwiseProduct(_u[_qp]) * _test[_i][_qp];
+  }
   else
+  {
+    if ((*_r_2d_array)[_qp].rows() != _count || (*_r_2d_array)[_qp].cols() != _count)
+      mooseError("reaction_coefficient size (",
+                 (*_r_2d_array)[_qp].rows(),
+                 "x",
+                 (*_r_2d_array)[_qp].cols(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _count,
+                 ")");
     residual.noalias() = (*_r_2d_array)[_qp] * _u[_qp] * _test[_i][_qp];
+  }
 }

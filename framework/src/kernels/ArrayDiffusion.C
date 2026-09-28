@@ -48,18 +48,23 @@ ArrayDiffusion::initQpResidual()
 {
   if (_d_array)
   {
-    mooseAssert((*_d_array)[_qp].size() == _var.count(),
-                "diffusion_coefficient size is inconsistent with the number of components of array "
-                "variable");
+    if ((*_d_array)[_qp].size() != _var.count())
+      mooseError("diffusion_coefficient size (",
+                 (*_d_array)[_qp].size(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _var.count(),
+                 ")");
   }
   else if (_d_2d_array)
   {
-    mooseAssert((*_d_2d_array)[_qp].cols() == _var.count(),
-                "diffusion_coefficient size is inconsistent with the number of components of array "
-                "variable");
-    mooseAssert((*_d_2d_array)[_qp].rows() == _var.count(),
-                "diffusion_coefficient size is inconsistent with the number of components of array "
-                "variable");
+    if ((*_d_2d_array)[_qp].rows() != _var.count() || (*_d_2d_array)[_qp].cols() != _var.count())
+      mooseError("diffusion_coefficient size (",
+                 (*_d_2d_array)[_qp].rows(),
+                 "x",
+                 (*_d_2d_array)[_qp].cols(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _var.count(),
+                 ")");
   }
 }
 

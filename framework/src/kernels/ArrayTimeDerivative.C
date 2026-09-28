@@ -54,20 +54,26 @@ ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
     residual = (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   else if (_coeff_array)
   {
-    mooseAssert((*_coeff_array)[_qp].size() == _var.count(),
-                "time_derivative_coefficient size is inconsistent with the number of components "
-                "in array variable");
+    if ((*_coeff_array)[_qp].size() != _var.count())
+      mooseError("time_derivative_coefficient size (",
+                 (*_coeff_array)[_qp].size(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _var.count(),
+                 ")");
     // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_coeff_array)[_qp].asDiagonal() * _u_dot[_qp] * _test[_i][_qp];
   }
   else
   {
-    mooseAssert((*_coeff_2d_array)[_qp].cols() == _var.count(),
-                "time_derivative_coefficient size is inconsistent with the number of components "
-                "in array variable");
-    mooseAssert((*_coeff_2d_array)[_qp].rows() == _var.count(),
-                "time_derivative_coefficient size is inconsistent with the number of components "
-                "in array variable");
+    if ((*_coeff_2d_array)[_qp].rows() != _var.count() ||
+        (*_coeff_2d_array)[_qp].cols() != _var.count())
+      mooseError("time_derivative_coefficient size (",
+                 (*_coeff_2d_array)[_qp].rows(),
+                 "x",
+                 (*_coeff_2d_array)[_qp].cols(),
+                 ") is inconsistent with the number of components of array variable (",
+                 _var.count(),
+                 ")");
     // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   }
