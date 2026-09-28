@@ -18,9 +18,7 @@ This term arises from the weak form of the curl curl operator
 !equation
 \vec\nabla \times \left(k(|\vec\nabla \times \vec u|) \vec\nabla \times \vec u\right)
 
-Partial assembly is now supported for 3D problems and on CPU only. The user must supply
-a correct function in the input file that corresponds to $ k'(s) / s $, where $ s = | \vec\nabla \times \vec u | $.
-This goes into `dk_dcurlu_over_curlu_coefficient`.
+Partial assembly is now supported for 3D problems and on CPU only.
 
 ## Example Input File Syntax
 
