@@ -1,7 +1,7 @@
 [Tests]
   issues = '#21885'
   design = 'Optimize.md'
-  [taolmvm]
+  [taobqnls]
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
