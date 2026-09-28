@@ -1,6 +1,6 @@
 [Tests]
   design = 'Residual.md'
-  issues = '#28765 #32506'
+  issues = '#28765 #32506 #33882'
 
   [test]
     type = CSVDiff
@@ -26,5 +26,21 @@
     rel_err = 1
     capabilities = 'slepc'
     requirement = 'The system shall be able to report the final nonlinear residual for a nonlinear eigenvalue problem.'
+  []
+  [multi_system_compute]
+    type = CSVDiff
+    input = 'multi_system_compute.i'
+    csvdiff = 'multi_system_compute_out.csv'
+    requirement = 'The system shall be able to select, with a user parameter, which nonlinear '
+                  'system a computed residual norm is reported for, in a problem with multiple nonlinear '
+                  'systems.'
+  []
+  [multi_system_initial]
+    type = CSVDiff
+    input = 'multi_system_initial.i'
+    csvdiff = 'multi_system_initial_out.csv'
+    requirement = 'The system shall be able to select, with a user parameter, which nonlinear '
+                  'system the pre- and post-preset initial residual norms are reported for, in a problem '
+                  'with multiple nonlinear systems.'
   []
 []
