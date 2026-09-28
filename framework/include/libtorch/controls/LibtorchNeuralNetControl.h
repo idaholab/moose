@@ -26,15 +26,24 @@
 class LibtorchNeuralNetControl : public Control
 {
 public:
+  /**
+   * Return the input parameters supported by this control.
+   */
   static InputParameters validParams();
 
-  /// Construct using input parameters
+  /**
+   * Construct using input parameters.
+   */
   LibtorchNeuralNetControl(const InputParameters & parameters);
 
-  /// Load any file-backed controller state after full object construction
+  /**
+   * Load any file-backed controller state after full object construction.
+   */
   virtual void initialSetup() override;
 
-  /// Execute neural network to determine the controllable parameter values
+  /**
+   * Execute the neural network to determine the controllable parameter values.
+   */
   virtual void execute() override;
 
   /**
@@ -44,7 +53,9 @@ public:
    */
   Real getSignal(const unsigned int signal_index) const;
 
-  /// Get the number of controls this object is computing
+  /**
+   * Get the number of controls this object is computing.
+   */
   unsigned int numberOfControlSignals() const { return _control_names.size(); }
 
   /**
@@ -59,10 +70,14 @@ public:
    */
   virtual void loadControlNeuralNetFromFile();
 
-  /// Return a reference to the stored neural network
+  /**
+   * Return a reference to the stored neural network.
+   */
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
-  /// Return true if the object already has a neural netwok
+  /**
+   * Return true if the object already has a neural network.
+   */
   bool hasControlNeuralNet() const { return _nn != nullptr; };
 
 protected:
@@ -77,10 +92,14 @@ protected:
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);
 
-  /// Refresh the current observation values from the linked postprocessors.
+  /**
+   * Refresh the current observation values from the linked postprocessors.
+   */
   void updateCurrentObservation();
 
-  /// Function that prepares the input tensor for the controller neural network
+  /**
+   * Prepare the input tensor for the controller neural network.
+   */
   torch::Tensor prepareInputTensor();
 
   /// The values of the current observed postprocessor values

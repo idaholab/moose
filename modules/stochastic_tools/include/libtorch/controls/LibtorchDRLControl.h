@@ -26,15 +26,24 @@
 class LibtorchDRLControl : public LibtorchNeuralNetControl
 {
 public:
+  /**
+   * Return the input parameters supported by this control.
+   */
   static InputParameters validParams();
 
-  /// Construct using input parameters
+  /**
+   * Construct using input parameters.
+   */
   LibtorchDRLControl(const InputParameters & parameters);
 
-  /// Restore any restartable controller state after base setup completes.
+  /**
+   * Restore any restartable controller state after base setup completes.
+   */
   virtual void initialSetup() override;
 
-  /// We compute the actions in this function together with the corresponding logarithmic probabilities.
+  /**
+   * Compute the actions and their corresponding logarithmic probabilities.
+   */
   virtual void execute() override;
 
   /**
@@ -50,18 +59,33 @@ public:
    */
   void loadControlNeuralNet(const Moose::LibtorchActorNeuralNet & input_nn);
 
+  /**
+   * Reject loading a plain artificial neural network into this actor-based controller.
+   * @param input_nn Artificial neural network passed through the base-class interface.
+   */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
 
+  /**
+   * Load the actor neural network from the configured checkpoint file.
+   */
   virtual void loadControlNeuralNetFromFile() override;
 
-  /// Reset the owned policy-sampling generator to a known seed.
+  /**
+   * Reset the owned policy-sampling generator to a known seed.
+   * @param seed Seed assigned to the policy-sampling generator.
+   */
   void setPolicySampleSeed(uint64_t seed);
 
 protected:
-  /// Apply the current smoothed control signals, including optional offsets.
+  /**
+   * Apply the current smoothed control signals, including optional offsets.
+   */
   void applyControlSignals();
 
-  /// Return the offset to add to a control signal at the current time.
+  /**
+   * Return the offset to add to a control signal at the current time.
+   * @param control_i Index of the control signal.
+   */
   Real computeControlOffset(unsigned int control_i) const;
 
   /// The log probability of control signals from the last evaluation of the controller
@@ -94,13 +118,19 @@ protected:
   const bool _stochastic;
 
 private:
-  /// Advance the reuse schedule and report whether this execution should evaluate the policy.
+  /**
+   * Advance the reuse schedule and report whether this execution should evaluate the policy.
+   */
   bool shouldEvaluatePolicy();
 
-  /// Restore the owned libtorch generator state from restartable storage.
+  /**
+   * Restore the owned libtorch generator state from restartable storage.
+   */
   void restorePolicyGeneratorState();
 
-  /// Mirror the owned libtorch generator state into restartable storage.
+  /**
+   * Mirror the owned libtorch generator state into restartable storage.
+   */
   void savePolicyGeneratorState();
 };
 

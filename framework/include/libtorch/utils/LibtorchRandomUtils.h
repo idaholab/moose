@@ -18,7 +18,9 @@
 namespace Moose
 {
 
-/// Create an owned CPU generator using libtorch's default seed behavior.
+/**
+ * Create an owned CPU generator using libtorch's default seed behavior.
+ */
 at::Generator makeLibtorchCPUGenerator();
 
 /**

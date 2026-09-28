@@ -24,6 +24,9 @@
 class LibtorchRLValueEstimator
 {
 public:
+  /**
+   * Generalized-advantage estimates and critic targets for one trajectory.
+   */
   struct Targets
   {
     /// Generalized-advantage estimates.

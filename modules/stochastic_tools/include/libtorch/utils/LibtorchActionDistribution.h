@@ -43,7 +43,10 @@ public:
                              torch::ScalarType scalar_type = torch::kDouble,
                              const std::vector<Real> & output_scaling_factors = {});
 
-  /// Initialize the trainable distribution parameters.
+  /**
+   * Initialize the trainable distribution parameters.
+   * @param generator Optional random-number generator used for reproducible initialization.
+   */
   virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) = 0;
 
   /**
@@ -58,7 +61,9 @@ public:
    */
   virtual torch::Tensor sample(c10::optional<at::Generator> generator = c10::nullopt) const = 0;
 
-  /// Return the deterministic action used for evaluation.
+  /**
+   * Return the deterministic action used for evaluation.
+   */
   virtual torch::Tensor deterministicAction() const = 0;
 
   /**
@@ -67,13 +72,19 @@ public:
    */
   virtual torch::Tensor logProbability(const torch::Tensor & action) const = 0;
 
-  /// Compute the entropy of the current distribution.
+  /**
+   * Compute the entropy of the current distribution.
+   */
   virtual torch::Tensor entropy() const = 0;
 
-  /// Tell callers whether the distribution enforces explicit action bounds.
+  /**
+   * Tell callers whether the distribution enforces explicit action bounds.
+   */
   virtual bool isBounded() const = 0;
 
-  /// Sync cached scaling metadata from the registered buffers after loading state.
+  /**
+   * Sync cached scaling metadata from the registered buffers after loading state.
+   */
   void synchronizeScalingFactorsFromBuffer();
 
 protected:
@@ -87,7 +98,9 @@ protected:
    * @param action Raw action tensor.
    */
   torch::Tensor prepareAction(const torch::Tensor & action) const;
-  /// Return the registered tensor that stores per-action scaling factors.
+  /**
+   * Return the registered tensor that stores per-action scaling factors.
+   */
   const torch::Tensor & actionScaleTensor() const { return _action_scale_tensor; }
 
   /// Module name used for registration and serialization.
@@ -133,36 +146,80 @@ public:
                                      const std::vector<Real> & output_scaling_factors = {},
                                      bool state_independent_std = true);
 
+  /**
+   * Initialize the trainable Gaussian distribution parameters.
+   * @param generator Optional random-number generator used for reproducible initialization.
+   */
   virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) override;
 
+  /**
+   * Refresh the Gaussian distribution parameters from the latest actor features.
+   * @param input Feature tensor coming from the actor body.
+   */
   virtual void reset(const torch::Tensor & input) override;
 
+  /**
+   * Draw a stochastic Gaussian action sample in physical units.
+   * @param generator Optional random-number generator used for sampling.
+   */
   virtual torch::Tensor
   sample(c10::optional<at::Generator> generator = c10::nullopt) const override;
 
+  /**
+   * Return the Gaussian mean action used for deterministic evaluation.
+   */
   virtual torch::Tensor deterministicAction() const override;
 
+  /**
+   * Evaluate the log-probability of an action under the current Gaussian distribution.
+   * @param action Action tensor in physical units.
+   */
   virtual torch::Tensor logProbability(const torch::Tensor & action) const override;
 
+  /**
+   * Compute the entropy of the current Gaussian distribution.
+   */
   virtual torch::Tensor entropy() const override;
 
+  /**
+   * Return false because the Gaussian distribution is unbounded.
+   */
   virtual bool isBounded() const override { return false; }
 
-  /// Return whether the Gaussian std ignores the current actor features.
+  /**
+   * Return whether the Gaussian standard deviation ignores the current actor features.
+   */
   bool stateIndependentStd() const { return _state_independent_std; }
-  /// Return the Gaussian mean head.
+
+  /**
+   * Return the Gaussian mean head.
+   */
   torch::nn::Linear & meanModule() { return _mean_module; }
-  /// Return the Gaussian mean head.
+
+  /**
+   * Return the Gaussian mean head.
+   */
   const torch::nn::Linear & meanModule() const { return _mean_module; }
-  /// Return the Gaussian std head.
+
+  /**
+   * Return the Gaussian standard-deviation head.
+   */
   torch::nn::Linear & stdModule() { return _std_module; }
-  /// Return the Gaussian std head.
+
+  /**
+   * Return the Gaussian standard-deviation head.
+   */
   const torch::nn::Linear & stdModule() const { return _std_module; }
-  /// Return the cached Gaussian standard deviation tensor.
+
+  /**
+   * Return the cached Gaussian standard-deviation tensor.
+   */
   const torch::Tensor & stdTensor() const { return _std_tensor; }
 
 private:
-  /// Build and register the Gaussian distribution heads.
+  /**
+   * Build and register the Gaussian distribution heads.
+   */
   void constructDistribution();
 
   /// Whether the Gaussian std ignores the current actor features.
@@ -207,36 +264,80 @@ public:
                                  bool build_on_construct = true,
                                  const std::vector<Real> & output_scaling_factors = {});
 
+  /**
+   * Initialize the trainable Beta distribution parameters.
+   * @param generator Optional random-number generator used for reproducible initialization.
+   */
   virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) override;
 
+  /**
+   * Refresh the Beta distribution parameters from the latest actor features.
+   * @param input Feature tensor coming from the actor body.
+   */
   virtual void reset(const torch::Tensor & input) override;
 
+  /**
+   * Draw a stochastic Beta action sample in physical units.
+   * @param generator Optional random-number generator used for sampling.
+   */
   virtual torch::Tensor
   sample(c10::optional<at::Generator> generator = c10::nullopt) const override;
 
+  /**
+   * Return the Beta mean action used for deterministic evaluation.
+   */
   virtual torch::Tensor deterministicAction() const override;
 
+  /**
+   * Evaluate the log-probability of an action under the current Beta distribution.
+   * @param action Action tensor in physical units.
+   */
   virtual torch::Tensor logProbability(const torch::Tensor & action) const override;
 
+  /**
+   * Compute the entropy of the current Beta distribution.
+   */
   virtual torch::Tensor entropy() const override;
 
+  /**
+   * Return true because the Beta distribution enforces action bounds.
+   */
   virtual bool isBounded() const override { return true; }
 
-  /// Return the Beta alpha head.
+  /**
+   * Return the Beta alpha head.
+   */
   torch::nn::Linear & alphaModule() { return _alpha_module; }
-  /// Return the Beta alpha head.
+
+  /**
+   * Return the Beta alpha head.
+   */
   const torch::nn::Linear & alphaModule() const { return _alpha_module; }
-  /// Return the Beta beta head.
+
+  /**
+   * Return the Beta beta head.
+   */
   torch::nn::Linear & betaModule() { return _beta_module; }
-  /// Return the Beta beta head.
+
+  /**
+   * Return the Beta beta head.
+   */
   const torch::nn::Linear & betaModule() const { return _beta_module; }
-  /// Return the cached Beta alpha tensor.
+
+  /**
+   * Return the cached Beta alpha tensor.
+   */
   const torch::Tensor & alphaTensor() const { return _alpha_tensor; }
-  /// Return the cached Beta beta tensor.
+
+  /**
+   * Return the cached Beta beta tensor.
+   */
   const torch::Tensor & betaTensor() const { return _beta_tensor; }
 
 private:
-  /// Build and register the Beta distribution heads.
+  /**
+   * Build and register the Beta distribution heads.
+   */
   void constructDistribution();
 
   /// Lower action bounds in physical units.

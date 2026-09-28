@@ -17,9 +17,15 @@
 #include "StochasticToolsTransfer.h"
 #include "SurrogateModelInterface.h"
 
+/**
+ * Transfers a trained DRL controller from a trainer to controls on sampler subapps.
+ */
 class SamplerDRLControlTransfer : public StochasticToolsTransfer, public SurrogateModelInterface
 {
 public:
+  /**
+   * Return the input parameters supported by this transfer.
+   */
   static InputParameters validParams();
 
   /**
@@ -28,22 +34,45 @@ public:
    */
   SamplerDRLControlTransfer(const InputParameters & parameters);
 
-  /// Execute the transfer in the standard non-batch path.
+  /**
+   * Execute the transfer in the standard non-batch path.
+   */
   virtual void execute() override;
 
-  ///@{
   /**
-   * Methods used when running in batch mode (see SamplerFullSolveMultiApp).
+   * Prepare the transfer for batch-mode execution.
    */
   virtual void initialSetup() override;
+
+  /**
+   * Initialize a batch transfer from the multiapp.
+   */
   virtual void initializeFromMultiapp() override;
+
+  /**
+   * Execute a batch transfer from the multiapp.
+   */
   virtual void executeFromMultiapp() override;
+
+  /**
+   * Finalize a batch transfer from the multiapp.
+   */
   virtual void finalizeFromMultiapp() override;
 
+  /**
+   * Initialize a batch transfer to the multiapp.
+   */
   virtual void initializeToMultiapp() override;
+
+  /**
+   * Execute a batch transfer to the multiapp.
+   */
   virtual void executeToMultiapp() override;
+
+  /**
+   * Finalize a batch transfer to the multiapp.
+   */
   virtual void finalizeToMultiapp() override;
-  ///@}
 
 protected:
   /// The name of the control object on the other app where we want to copy our neural net

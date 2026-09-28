@@ -28,7 +28,9 @@ public:
    */
   LibtorchObservationHistoryHelper(unsigned int input_timesteps);
 
-  /// Return the number of timesteps stacked into each flattened input.
+  /**
+   * Return the number of timesteps stacked into each flattened input.
+   */
   unsigned int inputTimesteps() const { return _input_timesteps; }
 
   /**
@@ -75,7 +77,9 @@ public:
                              unsigned int time_index) const;
 
 private:
-  /// Check that all observation-component trajectories have a consistent shape.
+  /**
+   * Check that all observation-component trajectories have a consistent shape.
+   */
   void validateTrajectoryShape(const std::vector<std::vector<Real>> & component_trajectories) const;
 
   /// Number of timesteps stacked into each flattened observation.

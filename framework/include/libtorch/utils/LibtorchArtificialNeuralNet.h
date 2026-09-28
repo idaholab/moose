@@ -77,32 +77,58 @@ public:
    */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
-  /// Return the name of the neural network
+  /**
+   * Return the name of the neural network.
+   */
   const std::string & name() const { return _name; }
-  /// Return the number of neurons on the input layer
+  /**
+   * Return the number of neurons on the input layer.
+   */
   unsigned int numInputs() const { return _num_inputs; }
-  /// Return the number of neurons on the output layer
+  /**
+   * Return the number of neurons on the output layer.
+   */
   unsigned int numOutputs() const { return _num_outputs; }
-  /// Return the number of hidden layers
+  /**
+   * Return the number of hidden layers.
+   */
   unsigned int numHiddenLayers() const { return _num_neurons_per_layer.size(); }
-  /// Return the hidden layer architecture
+  /**
+   * Return the hidden layer architecture.
+   */
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
-  /// Return the multi enum containing the activation functions
+  /**
+   * Return the multi enum containing the activation functions.
+   */
   const MultiMooseEnum & activationFunctions() const { return _activation_function; }
-  /// Return the device which is used by this neural network
+  /**
+   * Return the device used by this neural network.
+   */
   torch::DeviceType deviceType() const { return _device_type; }
-  /// Return the data type which is used by this neural network
+  /**
+   * Return the data type used by this neural network.
+   */
   torch::ScalarType dataType() const { return _data_type; }
-  /// Return the affine input shift factors used before evaluation
+  /**
+   * Return the affine input shift factors used before evaluation.
+   */
   const std::vector<Real> & inputShiftFactors() const { return _input_shift_factors; }
-  /// Return the affine input scaling factors used before evaluation
+  /**
+   * Return the affine input scaling factors used before evaluation.
+   */
   const std::vector<Real> & inputScalingFactors() const { return _input_scaling_factors; }
-  /// Return the output scaling factors applied after evaluation
+  /**
+   * Return the output scaling factors applied after evaluation.
+   */
   const std::vector<Real> & outputScalingFactors() const { return _output_scaling_factors; }
-  /// Construct the neural network
+  /**
+   * Construct the neural network.
+   */
   virtual void constructNeuralNetwork();
 
-  /// Update cached affine metadata vectors from the registered libtorch buffers.
+  /**
+   * Update cached affine metadata vectors from the registered libtorch buffers.
+   */
   void synchronizeAffineFactorsFromBuffers();
 
   /**
@@ -117,7 +143,10 @@ public:
    */
   virtual void initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt);
 
-  /// Store the network architecture in a json file (for debugging, visualization)
+  /**
+   * Store the network architecture in a JSON object for debugging or visualization.
+   * @param json JSON object that receives the network architecture.
+   */
   void store(nlohmann::json & json) const;
 
 protected:
@@ -133,7 +162,9 @@ protected:
                                             Real default_value,
                                             const std::string & factor_name);
 
-  /// Initialize the registered affine metadata buffers used by serialization.
+  /**
+   * Initialize the registered affine metadata buffers used by serialization.
+   */
   void initializeAffineBuffers();
 
   /**
@@ -153,7 +184,7 @@ protected:
   /// Submodules that hold linear operations and the corresponding
   /// weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
-  // Number of neurons on the input layer
+  /// Number of neurons on the input layer
   const unsigned int _num_inputs;
   /// Number of neurons on the output layer
   const unsigned int _num_outputs;
@@ -180,18 +211,40 @@ protected:
   torch::Tensor _output_scale_tensor;
 };
 
+/**
+ * Dump an artificial neural network into JSON for reporter output and debugging.
+ * @param json JSON object that receives the serialized state.
+ * @param network Artificial neural network pointer to serialize.
+ */
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
 
+/**
+ * Load an artificial-neural-network checkpoint written as a native libtorch state archive.
+ * @param nn Artificial neural network that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ */
 void loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
                                           const std::string & filename);
 }
 
+/**
+ * Serialize the artificial-neural-network metadata needed for restart.
+ * @param stream Stream that receives the serialized data.
+ * @param nn Artificial neural network shared pointer to serialize.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchArtificialNeuralNet>(
     std::ostream & stream,
     std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
     void * context);
 
+/**
+ * Deserialize the artificial-neural-network metadata needed for restart.
+ * @param stream Stream that provides the serialized data.
+ * @param nn Artificial neural network shared pointer to populate.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchArtificialNeuralNet>(
     std::istream & stream,
@@ -201,10 +254,22 @@ void dataLoad<Moose::LibtorchArtificialNeuralNet>(
 // This is needed because the reporter which is used to ouput the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
 // we are only interested in the JSON output and we don't want to output everything
+/**
+ * Placeholder serializer for reporter-only artificial-neural-network pointers.
+ * @param stream Stream that would receive the serialized data.
+ * @param nn Reporter neural network pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchArtificialNeuralNet const>(
     std::ostream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);
 
+/**
+ * Placeholder deserializer for reporter-only artificial-neural-network pointers.
+ * @param stream Stream that would provide the serialized data.
+ * @param nn Reporter neural network pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchArtificialNeuralNet const>(
     std::istream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);

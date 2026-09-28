@@ -64,6 +64,10 @@ public:
   LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
                          const bool build_on_construct = true);
 
+  /**
+   * Run a forward pass through the actor body.
+   * @param x Input tensor for the evaluation.
+   */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
   /**
@@ -82,36 +86,74 @@ public:
    */
   virtual torch::Tensor sample(c10::optional<at::Generator> generator = c10::nullopt);
 
+  /**
+   * Construct the actor body and action-distribution modules.
+   */
   virtual void constructNeuralNetwork() override;
 
-  /// Return the active action distribution as the common base type.
+  /**
+   * Return the active action distribution as the common base type.
+   */
   const LibtorchActionDistribution & actionDistribution() const { return *_action_distribution; }
-  /// Return the active action distribution as the common base type.
+
+  /**
+   * Return the active action distribution as the common base type.
+   */
   LibtorchActionDistribution & actionDistribution() { return *_action_distribution; }
 
-  /// Return the Gaussian action distribution pointer, or nullptr for bounded actors.
+  /**
+   * Return the Gaussian action distribution pointer, or nullptr for bounded actors.
+   */
   const LibtorchGaussianActionDistribution * gaussianActionDistributionPtr() const;
-  /// Return the Gaussian action distribution pointer, or nullptr for bounded actors.
+
+  /**
+   * Return the Gaussian action distribution pointer, or nullptr for bounded actors.
+   */
   LibtorchGaussianActionDistribution * gaussianActionDistributionPtr();
-  /// Return the Gaussian action distribution reference. Errors if the actor is bounded.
+
+  /**
+   * Return the Gaussian action distribution reference. Errors if the actor is bounded.
+   */
   const LibtorchGaussianActionDistribution & gaussianActionDistribution() const;
-  /// Return the Gaussian action distribution reference. Errors if the actor is bounded.
+
+  /**
+   * Return the Gaussian action distribution reference. Errors if the actor is bounded.
+   */
   LibtorchGaussianActionDistribution & gaussianActionDistribution();
 
-  /// Return the Beta action distribution pointer, or nullptr for Gaussian actors.
+  /**
+   * Return the Beta action distribution pointer, or nullptr for Gaussian actors.
+   */
   const LibtorchBetaActionDistribution * betaActionDistributionPtr() const;
-  /// Return the Beta action distribution pointer, or nullptr for Gaussian actors.
+
+  /**
+   * Return the Beta action distribution pointer, or nullptr for Gaussian actors.
+   */
   LibtorchBetaActionDistribution * betaActionDistributionPtr();
-  /// Return the Beta action distribution reference. Errors if the actor is unbounded.
+
+  /**
+   * Return the Beta action distribution reference. Errors if the actor is unbounded.
+   */
   const LibtorchBetaActionDistribution & betaActionDistribution() const;
-  /// Return the Beta action distribution reference. Errors if the actor is unbounded.
+
+  /**
+   * Return the Beta action distribution reference. Errors if the actor is unbounded.
+   */
   LibtorchBetaActionDistribution & betaActionDistribution();
 
-  /// Return whether the Gaussian std ignores the current actor features.
+  /**
+   * Return whether the Gaussian standard deviation ignores the current actor features.
+   */
   bool stateIndependentStd() const { return _state_independent_std; }
-  /// Return the configured lower action bounds.
+
+  /**
+   * Return the configured lower action bounds.
+   */
   const std::vector<Real> & minValues() const { return _minimum_values; }
-  /// Return the configured upper action bounds.
+
+  /**
+   * Return the configured upper action bounds.
+   */
   const std::vector<Real> & maxValues() const { return _maximum_values; }
 
   /**
@@ -126,9 +168,15 @@ public:
    */
   torch::Tensor logProbability(const torch::Tensor & other);
 
-  /// Compute the entropy of the current action distribution.
+  /**
+   * Compute the entropy of the current action distribution.
+   */
   torch::Tensor entropy();
 
+  /**
+   * Initialize the actor body and action-distribution parameters.
+   * @param generator Optional random-number generator used for reproducible initialization.
+   */
   virtual void
   initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt) override;
 

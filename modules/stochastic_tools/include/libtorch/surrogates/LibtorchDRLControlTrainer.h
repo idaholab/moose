@@ -30,6 +30,9 @@
 class LibtorchDRLControlTrainer : public SurrogateTrainerBase
 {
 public:
+  /**
+   * Return the input parameters supported by this trainer.
+   */
   static InputParameters validParams();
 
   /**
@@ -38,7 +41,9 @@ public:
    */
   LibtorchDRLControlTrainer(const InputParameters & parameters);
 
-  /// Pull fresh rollout data from the reporters and trigger training when ready.
+  /**
+   * Pull fresh rollout data from the reporters and trigger training when ready.
+   */
   virtual void execute() override;
 
   /**
@@ -46,12 +51,19 @@ public:
    * @return Average episodic reward over the latest training window.
    */
   Real averageEpisodeReward() { return _average_episode_reward; }
-  /// Return the current episodic reward standard deviation.
+  /**
+   * Return the current episodic reward standard deviation.
+   */
   Real stdEpisodeReward() { return _std_episode_reward; }
 
-  /// Return per-sample mean episodic rewards from the latest update window.
+  /**
+   * Return per-sample mean episodic rewards from the latest update window.
+   */
   std::vector<Real> sampleAverageEpsiodeRewards() { return _sample_average_episode_reward; }
-  /// Return per-sample episodic reward standard deviations from the latest update window.
+
+  /**
+   * Return per-sample episodic reward standard deviations from the latest update window.
+   */
   std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
   /**
@@ -60,16 +72,25 @@ public:
    */
   void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
 
-  /// Return the current actor network.
+  /**
+   * Return the current actor network.
+   */
   const Moose::LibtorchActorNeuralNet & controlNeuralNet() const { return *_control_nn; }
-  /// Return the trainer seed used for sampling and shuffling.
+
+  /**
+   * Return the trainer seed used for sampling and shuffling.
+   */
   unsigned int seed() const { return _seed; }
 
 protected:
-  /// Compute the average episodic reward statistics for the latest samples.
+  /**
+   * Compute the average episodic reward statistics for the latest samples.
+   */
   void computeEpisodeRewardStatistics();
 
-  /// Reset the stored rollout data after an update.
+  /**
+   * Reset the stored rollout data after an update.
+   */
   void resetData();
 
   /// Observation reporter names
@@ -207,7 +228,9 @@ private:
   void getReporterPointers(const std::vector<ReporterName> & reporter_names,
                            std::vector<const std::vector<std::vector<Real>> *> & pointer_storage);
 
-  /// Pull trajectories out of the reporters and append them to the trajectory buffer.
+  /**
+   * Pull trajectories out of the reporters and append them to the trajectory buffer.
+   */
   void collectTrajectoriesFromReporters();
 
   /**

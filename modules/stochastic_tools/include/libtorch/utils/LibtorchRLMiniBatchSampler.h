@@ -18,6 +18,9 @@
 #include <cstdint>
 #include <vector>
 
+/**
+ * Tensor data for one PPO mini-batch.
+ */
 struct LibtorchRLMiniBatch
 {
   /// Flattened observation rows for the mini-batch.
@@ -31,7 +34,9 @@ struct LibtorchRLMiniBatch
   /// Advantage estimates aligned with the sampled observations.
   torch::Tensor advantages;
 
-  /// Return the number of rows stored in the mini-batch.
+  /**
+   * Return the number of rows stored in the mini-batch.
+   */
   std::int64_t size() const { return observations.defined() ? observations.size(0) : 0; }
 };
 

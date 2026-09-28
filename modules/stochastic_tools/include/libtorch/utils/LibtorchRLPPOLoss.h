@@ -15,6 +15,9 @@
 #include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchRLMiniBatchSampler.h"
 
+/**
+ * Actor, critic, and entropy terms produced by one PPO loss evaluation.
+ */
 struct LibtorchRLPPOLossOutput
 {
   /// Clipped actor loss for the current mini-batch.

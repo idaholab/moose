@@ -24,6 +24,9 @@
 class LibtorchRLTrajectoryBuffer
 {
 public:
+  /**
+   * Vector data for one on-policy trajectory.
+   */
   struct Trajectory
   {
     /// Observations for each transition.
@@ -44,6 +47,9 @@ public:
     std::vector<Real> advantages;
   };
 
+  /**
+   * Flattened tensor data assembled from the stored trajectories.
+   */
   struct TensorBatch
   {
     /// Flattened observation matrix.
@@ -61,7 +67,9 @@ public:
     /// Flattened advantages.
     torch::Tensor advantages;
 
-    /// Return the number of transitions represented by the batch.
+    /**
+     * Return the number of transitions represented by the batch.
+     */
     std::int64_t size() const { return observations.defined() ? observations.size(0) : 0; }
   };
 
@@ -71,11 +79,19 @@ public:
    */
   void addTrajectory(Trajectory trajectory);
 
-  /// Clear every stored trajectory.
+  /**
+   * Clear every stored trajectory.
+   */
   void clear();
 
+  /**
+   * Return true if the buffer contains no trajectories.
+   */
   bool empty() const { return _trajectories.empty(); }
 
+  /**
+   * Return the number of stored trajectories.
+   */
   std::size_t numTrajectories() const { return _trajectories.size(); }
 
   /**
@@ -84,7 +100,14 @@ public:
    */
   std::size_t numTransitions() const;
 
+  /**
+   * Return mutable access to the stored trajectories.
+   */
   std::vector<Trajectory> & trajectories() { return _trajectories; }
+
+  /**
+   * Return read-only access to the stored trajectories.
+   */
   const std::vector<Trajectory> & trajectories() const { return _trajectories; }
 
   /**
@@ -100,6 +123,7 @@ private:
    */
   static void validateTrajectory(const Trajectory & trajectory);
 
+  /// Stored on-policy trajectories.
   std::vector<Trajectory> _trajectories;
 };
 
