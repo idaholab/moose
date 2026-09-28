@@ -44,11 +44,10 @@ reg_kernel = DisplacementRegularization
 
 [BCs]
   [boundary_value]
-    type = FunctionPenaltyDirichletBC
+    type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = u_func
-    penalty = 1e8
   []
 []
 
