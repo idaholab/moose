@@ -17,7 +17,17 @@
 #include "MFEMBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMBoundaryNormalIntegratedBC.h"
+#include "MFEMBoundaryFlowIntegratedBC.h"
+#include "MFEMBoundaryTangentialLFIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
+#include "MFEMDGDiffusionBR2IntegratedBC.h"
+#include "MFEMDGElasticityDirichletLFIntegratedBC.h"
+#include "MFEMDGElasticityIntegratedBC.h"
+#include "MFEMDGTraceIntegratedBC.h"
+#include "MFEMNonconservativeDGTraceIntegratedBC.h"
+#include "MFEMVectorBoundaryFluxLFIntegratedBC.h"
+#include "MFEMVectorFEBoundaryFluxIntegratedBC.h"
+#include "MFEMVectorFEBoundaryNormalLFIntegratedBC.h"
 #include "NLBoundaryConvectiveHeatFluxIntegrator.h"
 #include "MFEMDiffusionKernel.h"
 #include "MFEMIntegratedBC.h"
@@ -400,6 +410,281 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
   auto blf_integrator = bc.createBFIntegrator();
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
+}
+
+/**
+ * Test MFEMVectorFEBoundaryFluxIntegratedBC creates an mfem::VectorFEBoundaryFluxIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFEBoundaryFluxIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFEBoundaryFluxIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  auto & bc = addObject<MFEMVectorFEBoundaryFluxIntegratedBC>(
+      "MFEMVectorFEBoundaryFluxIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMVectorFEBoundaryFluxIntegratedBC returns an integrator of the expected type
+  auto blf_integrator =
+      dynamic_cast<mfem::VectorFEBoundaryFluxIntegrator *>(bc.createBFIntegrator());
+  ASSERT_NE(blf_integrator, nullptr);
+  delete blf_integrator;
+
+  auto lf_integrator = bc.createLFIntegrator();
+  ASSERT_EQ(lf_integrator, nullptr);
+  delete lf_integrator;
+}
+
+/**
+ * Test MFEMBoundaryTangentialLFIntegratedBC creates an mfem::BoundaryTangentialLFIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMBoundaryTangentialLFIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMBoundaryTangentialLFIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2.";
+  auto & bc = addObject<MFEMBoundaryTangentialLFIntegratedBC>(
+      "MFEMBoundaryTangentialLFIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMBoundaryTangentialLFIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::BoundaryTangentialLFIntegrator *>(bc.createLFIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBFIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMVectorBoundaryFluxLFIntegratedBC creates an mfem::VectorBoundaryFluxLFIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryFluxLFIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryFluxLFIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  auto & bc = addObject<MFEMVectorBoundaryFluxLFIntegratedBC>(
+      "MFEMVectorBoundaryFluxLFIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMVectorBoundaryFluxLFIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::VectorBoundaryFluxLFIntegrator *>(bc.createLFIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBFIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMVectorFEBoundaryNormalLFIntegratedBC creates an mfem::VectorFEBoundaryNormalLFIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFEBoundaryNormalLFIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFEBoundaryNormalLFIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  auto & bc = addObject<MFEMVectorFEBoundaryNormalLFIntegratedBC>(
+      "MFEMVectorFEBoundaryNormalLFIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMVectorFEBoundaryNormalLFIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::VectorFEBoundaryNormalLFIntegrator *>(bc.createLFIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBFIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMDGTraceIntegratedBC creates an mfem::DGTraceIntegrator successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMDGTraceIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMDGTraceIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  auto & bc = addObject<MFEMDGTraceIntegratedBC>("MFEMDGTraceIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMDGTraceIntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMDGTraceIntegratedBC returns an integrator of the expected type
+  auto blf_integrator = dynamic_cast<mfem::DGTraceIntegrator *>(bc.createBFIntegrator());
+  ASSERT_NE(blf_integrator, nullptr);
+  delete blf_integrator;
+
+  auto lf_integrator = bc.createLFIntegrator();
+  ASSERT_EQ(lf_integrator, nullptr);
+  delete lf_integrator;
+}
+
+/**
+ * Test MFEMNonconservativeDGTraceIntegratedBC creates an mfem::NonconservativeDGTraceIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMNonconservativeDGTraceIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMNonconservativeDGTraceIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<mfem::real_t>("alpha") = -1.0;
+  auto & bc = addObject<MFEMNonconservativeDGTraceIntegratedBC>(
+      "MFEMNonconservativeDGTraceIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMNonconservativeDGTraceIntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMNonconservativeDGTraceIntegratedBC returns an integrator of the expected type
+  auto blf_integrator =
+      dynamic_cast<mfem::NonconservativeDGTraceIntegrator *>(bc.createBFIntegrator());
+  ASSERT_NE(blf_integrator, nullptr);
+  delete blf_integrator;
+
+  auto lf_integrator = bc.createLFIntegrator();
+  ASSERT_EQ(lf_integrator, nullptr);
+  delete lf_integrator;
+}
+
+/**
+ * Test MFEMBoundaryFlowIntegratedBC creates an mfem::BoundaryFlowIntegrator successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMBoundaryFlowIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMBoundaryFlowIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<mfem::real_t>("beta") = -0.25;
+  auto & bc =
+      addObject<MFEMBoundaryFlowIntegratedBC>("MFEMBoundaryFlowIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMBoundaryFlowIntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMBoundaryFlowIntegratedBC returns an integrator of the expected type
+  auto lf_integrator = dynamic_cast<mfem::BoundaryFlowIntegrator *>(bc.createLFIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBFIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMDGElasticityIntegratedBC creates an mfem::DGElasticityIntegrator successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMDGElasticityIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMDGElasticityIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("lambda") = "2.0";
+  bc_params.set<MFEMScalarCoefficientName>("mu") = "3.0";
+  auto & bc =
+      addObject<MFEMDGElasticityIntegratedBC>("MFEMDGElasticityIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMDGElasticityIntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMDGElasticityIntegratedBC returns an integrator of the expected type
+  auto blf_integrator = dynamic_cast<mfem::DGElasticityIntegrator *>(bc.createBFIntegrator());
+  ASSERT_NE(blf_integrator, nullptr);
+  delete blf_integrator;
+
+  auto lf_integrator = bc.createLFIntegrator();
+  ASSERT_EQ(lf_integrator, nullptr);
+  delete lf_integrator;
+}
+
+/**
+ * Test MFEMDGElasticityDirichletLFIntegratedBC creates an mfem::DGElasticityDirichletLFIntegrator
+ * successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMDGElasticityDirichletLFIntegratedBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMDGElasticityDirichletLFIntegratedBC");
+  bc_params.set<VariableName>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<MFEMScalarCoefficientName>("lambda") = "2.0";
+  bc_params.set<MFEMScalarCoefficientName>("mu") = "3.0";
+  bc_params.set<mfem::real_t>("kappa") = 10.0;
+  auto & bc = addObject<MFEMDGElasticityDirichletLFIntegratedBC>(
+      "MFEMDGElasticityDirichletLFIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMDGElasticityDirichletLFIntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMDGElasticityDirichletLFIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::DGElasticityDirichletLFIntegrator *>(bc.createLFIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBFIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMDGDiffusionBR2IntegratedBC creates an mfem::DGDiffusionBR2Integrator successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMDGDiffusionBR2IntegratedBC)
+{
+  // The BR2 integrator requires a DG space, so register a variable on an L2 space
+  auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+  auto * fec = new mfem::L2_FECollection(1, pm->Dimension());
+  auto gf = std::make_shared<mfem::ParGridFunction>(new mfem::ParFiniteElementSpace(pm, fec));
+  // Transfer ownership of the collection and the space to the grid function
+  gf->MakeOwner(fec);
+  _mfem_problem->getProblemData().gridfunctions.Register("dg_variable_name", gf);
+
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMDGDiffusionBR2IntegratedBC");
+  bc_params.set<VariableName>("variable") = "dg_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  auto & bc =
+      addObject<MFEMDGDiffusionBR2IntegratedBC>("MFEMDGDiffusionBR2IntegratedBC", "bc1", bc_params);
+
+  // Test MFEMDGDiffusionBR2IntegratedBC is applied to boundary faces
+  EXPECT_TRUE(bc.isDGBC());
+
+  // Test MFEMDGDiffusionBR2IntegratedBC returns an integrator of the expected type
+  auto blf_integrator = dynamic_cast<mfem::DGDiffusionBR2Integrator *>(bc.createBFIntegrator());
+  ASSERT_NE(blf_integrator, nullptr);
+  delete blf_integrator;
+
+  auto lf_integrator = bc.createLFIntegrator();
+  ASSERT_EQ(lf_integrator, nullptr);
+  delete lf_integrator;
 }
 
 TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuildingEquationSystem)
