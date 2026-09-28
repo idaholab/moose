@@ -14,6 +14,7 @@
     type = CheckFiles
     input = parent_full_solve.i
     check_files = 'parent_full_solve_out_runner0.e parent_full_solve_out_runner1.e parent_full_solve_out_runner2.e parent_full_solve_out_runner3.e parent_full_solve_out_runner4.e'
+    prereq = normal
     requirement = "The system shall support running sub-applications in batches."
   []
 
@@ -26,7 +27,7 @@
       input = parent_full_solve.i
       csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 1
-      prereq = normal
+      prereq = batch
 
       detail = 'on a single processor,'
     []
