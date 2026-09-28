@@ -31,15 +31,11 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double u) { return u * u; });
   mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
                                                      [](double u) { return 2.0 * u * u; });
-  // This unit test is for the element level assembly. The constructor needs a function
-  // to represent dk/ds for the partial assembly route. Since we don't need to test that
-  // here, we just pass a dummy function in.
-  mfem::TransformedCoefficient dk_ds_coeff(&curl_u_norm_coeff, [](double /*u*/) { return 2; });
 
   const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
 
   Moose::MFEM::NLCurlCurlIntegrator integ(
-      k_coeff, curlu_dk_dcurlu_coeff, dk_ds_coeff, curl_gf_coeff, 1e-32, &ir);
+      k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir);
 
   const auto & el = *fespace.GetFE(0);
   auto & T = *mesh.GetElementTransformation(0);
@@ -119,12 +115,10 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyMatchesLegacy)
   gf.ProjectCoefficient(seed);
 
   // k(s) = 1 + s^2, so k >= 1 everywhere and the curl-curl block stays non-degenerate.
-  // Then s k'(s) = 2 s^2 and k'(s)/s = 2.
+  // Then s k'(s) = 2 s^2
   mfem::CurlGridFunctionCoefficient curl_gf_coeff(&gf);
   MFEMVectorMagnitudeCoefficient curl_u_norm_coeff(curl_gf_coeff);
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
-  mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
-                                                     [](double s) { return 2.0 * s * s; });
   mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0);
 
   // Both forms must integrate on the same rule, or this measures quadrature rather than
@@ -135,7 +129,7 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyMatchesLegacy)
   auto add_integrator = [&](mfem::NonlinearForm & form)
   {
     form.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
-        k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
+        k_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
   };
 
   mfem::NonlinearForm legacy(&fespace);
@@ -210,7 +204,7 @@ TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
   mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
                                                      [](double s) { return 2.0 * s * s; });
-  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0), one(1.0);
+  mfem::ConstantCoefficient one(1.0);
 
   mfem::Array<int> ess_bdr(mesh.bdr_attributes.Max()), ess_tdofs;
   ess_bdr = 1;
@@ -220,8 +214,8 @@ TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
   // A: the nonlinear form's partially assembled gradient, carrying the DIAG_ZERO policy that
   // EquationSystem::GetGradient sets on it.
   mfem::ParNonlinearForm nlf(&fespace);
-  nlf.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
-      k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32));
+  nlf.AddDomainIntegrator(
+      new Moose::MFEM::NLCurlCurlIntegrator(k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32));
   nlf.SetEssentialTrueDofs(ess_tdofs);
   nlf.SetAssemblyLevel(mfem::AssemblyLevel::PARTIAL);
   nlf.Setup();
@@ -302,7 +296,6 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyNeedsSetupAfterStateChange)
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double s) { return 1.0 + s * s; });
   mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
                                                      [](double s) { return 2.0 * s * s; });
-  mfem::ConstantCoefficient dk_ds_over_s_coeff(2.0);
 
   // Pinned so that legacy assembly is an exact reference rather than a nearby one; see
   // NLCurlCurlIntegratorPartialAssemblyMatchesLegacy.
@@ -311,7 +304,7 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyNeedsSetupAfterStateChange)
   auto add_integrator = [&](mfem::NonlinearForm & form)
   {
     form.AddDomainIntegrator(new Moose::MFEM::NLCurlCurlIntegrator(
-        k_coeff, curlu_dk_dcurlu_coeff, dk_ds_over_s_coeff, curl_gf_coeff, 1e-32, &ir));
+        k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir));
   };
 
   mfem::NonlinearForm partial(&fespace);

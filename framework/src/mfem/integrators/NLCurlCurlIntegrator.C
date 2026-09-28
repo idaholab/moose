@@ -30,7 +30,7 @@ namespace Moose::MFEM
 // const Vector& c - this is the curl, evaluated at each qpoint
 // Vector & k_coeff  - reference to the vector of k(s) evaluated at each quadpoint. length is
 //    one per quadpoint per element
-// Vector & dk_coeff - ditto for k'(s) / s
+// Vector & dk_coeff - ditto for s * k'(s)
 // Vector & op - this is the diagonal operator
 static void NLCurlCurlGradPASetup(const int Q1D,
                                   const int NE,
@@ -39,7 +39,8 @@ static void NLCurlCurlGradPASetup(const int Q1D,
                                   const mfem::Vector & c,
                                   mfem::Vector & k_coeff,
                                   mfem::Vector & dk_coeff,
-                                  mfem::Vector & op);
+                                  mfem::Vector & op,
+                                  mfem::real_t curlu_zero_tol);
 
 // Same, but creates the op used for AddMultPA
 // const int Q1D - the number of quadpoints in each dimension
@@ -100,7 +101,6 @@ NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
 
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
                                            mfem::Coefficient & curlu_dk_dcurlu,
-                                           mfem::Coefficient & dk_dcurlu,
                                            mfem::VectorCoefficient & curlu_vec,
                                            mfem::real_t curlu_zero_tol,
                                            const mfem::IntegrationRule * ir)
@@ -109,8 +109,9 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
     _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir),
     _k_coef(k),
-    _dk_dcurlu_coef(dk_dcurlu),
-    _curlu_vec(curlu_vec)
+    _curlu_dk_dcurlu_coef(curlu_dk_dcurlu),
+    _curlu_vec(curlu_vec),
+    _curlu_zero_tol(curlu_zero_tol)
 {
 }
 
@@ -143,15 +144,22 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
   mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   k_coeff.Project(_k_coef);
   mfem::CoefficientVector dk_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  dk_coeff.Project(_dk_dcurlu_coef);
+  dk_coeff.Project(_curlu_dk_dcurlu_coef);
   mfem::CoefficientVector curl_coeff(*_qspace, mfem::CoefficientStorage::FULL);
   curl_coeff.Project(_curlu_vec);
 
   // This doesn't clear out what's in the array
   _pa_grad_data.SetSize(_ndata * _nq * _ne, mfem::Device::GetMemoryType());
 
-  NLCurlCurlGradPASetup(
-      _quad1D, _ne, ir->GetWeights(), _geom->J, curl_coeff, k_coeff, dk_coeff, _pa_grad_data);
+  NLCurlCurlGradPASetup(_quad1D,
+                        _ne,
+                        ir->GetWeights(),
+                        _geom->J,
+                        curl_coeff,
+                        k_coeff,
+                        dk_coeff,
+                        _pa_grad_data,
+                        _curlu_zero_tol);
 }
 
 // This mirrors AssembleGradPA exactly. We are performing redundant work here, and we
@@ -287,7 +295,8 @@ NLCurlCurlGradPASetup(const int Q1D,
                       const mfem::Vector & c,
                       mfem::Vector & k_coeff,
                       mfem::Vector & dk_coeff,
-                      mfem::Vector & op)
+                      mfem::Vector & op,
+                      mfem::real_t curlu_zero_tol)
 {
 
   // number of quadpoints per element total
@@ -333,9 +342,16 @@ NLCurlCurlGradPASetup(const int Q1D,
       const mfem::real_t k = K(0, q, e);
 
       // load the c_i - elements of the curl vector
-      const mfem::real_t c1 = C(0, q, e);
-      const mfem::real_t c2 = C(1, q, e);
-      const mfem::real_t c3 = C(2, q, e);
+      mfem::real_t c1 = C(0, q, e);
+      mfem::real_t c2 = C(1, q, e);
+      mfem::real_t c3 = C(2, q, e);
+
+      // Unit curl vector
+      const mfem::real_t curl_mag = std::sqrt(c1 * c1 + c2 * c2 + c3 * c3);
+      const mfem::real_t inv_curl_mag = curl_mag > curlu_zero_tol ? 1.0 / curl_mag : 0.0;
+      c1 *= inv_curl_mag;
+      c2 *= inv_curl_mag;
+      c3 *= inv_curl_mag;
 
       // next compute the g_i
       const mfem::real_t g1 = J11 * c1 + J21 * c2 + J31 * c3;
