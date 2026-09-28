@@ -24,7 +24,7 @@ namespace
  * @param archive Archive being read.
  * @param key Serialized tensor name.
  * @param tensor Tensor that receives the loaded data.
- * @return True when the tensor was found and loaded.
+ * @return whether the tensor was found and loaded.
  */
 bool
 readArchiveTensor(torch::serialize::InputArchive & archive,
@@ -65,7 +65,7 @@ isOptionalArtificialNeuralNetBuffer(const std::string & key)
  * @param tensors Torch named tensor list.
  * @param key Tensor name to search for.
  * @param tensor Tensor that receives the match.
- * @return True when the requested tensor exists.
+ * @return whether the requested tensor exists.
  */
 template <typename NamedTensorList>
 bool
@@ -86,7 +86,7 @@ findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch:
  * @param nn Neural network that receives the loaded state.
  * @param filename Checkpoint file to read.
  * @param error Human-readable error string filled on failure.
- * @return True when the network was loaded successfully.
+ * @return whether the network was loaded successfully.
  */
 bool
 loadArtificialNeuralNetStateFromArchive(Moose::LibtorchArtificialNeuralNet & nn,
@@ -140,7 +140,7 @@ loadArtificialNeuralNetStateFromArchive(Moose::LibtorchArtificialNeuralNet & nn,
  * @param nn Neural network that receives the loaded state.
  * @param filename Checkpoint file to read.
  * @param error Human-readable error string filled on failure.
- * @return True when the network was loaded successfully.
+ * @return whether the network was loaded successfully.
  */
 bool
 loadArtificialNeuralNetStateFromTorchScript(Moose::LibtorchArtificialNeuralNet & nn,
@@ -281,7 +281,7 @@ LibtorchArtificialNeuralNet::determineGain(const std::string & activation)
 void
 LibtorchArtificialNeuralNet::initializeNeuralNetwork(const c10::optional<at::Generator> generator)
 {
-  for (unsigned int i = 0; i < numHiddenLayers(); ++i)
+  for (const auto i : make_range(numHiddenLayers()))
   {
     const auto & activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];

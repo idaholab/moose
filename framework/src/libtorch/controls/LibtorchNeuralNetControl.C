@@ -108,8 +108,8 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
 void
 LibtorchNeuralNetControl::initialSetup()
 {
-  // File-backed controllers are loaded after full construction so derived controls can override
-  // the loader without constructor-time type checks.
+// Defer file loading until derived construction is complete so virtual dispatch invokes the
+// appropriate loader and constructs the correct network type directly.
   if (isParamSetByUser("filename"))
     loadControlNeuralNetFromFile();
 }
