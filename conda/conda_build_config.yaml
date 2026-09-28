@@ -56,10 +56,6 @@ libfabric:
 # conda-forge packages
 #
 
-# The clang version here must match clang_tools in
-# conda/tools/conda_build_config.yaml, which provides git clang-format. Bump the
-# two together, and note that a clang-format major bump reformats the entire
-# tree, so the reformat itself belongs in its own update.
 c_compiler:
   - gcc                                                     # [linux]
   - clang                                                   # [osx]
