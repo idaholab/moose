@@ -1,4 +1,4 @@
-# MFEMVectorBoundaryIntegratedBC
+# MFEMVectorBoundaryLFIntegratedBC
 
 !if! function=hasCapability('mfem')
 
@@ -15,11 +15,11 @@ where $v \in \vec H^1$ and $\vec f$ is a vector coefficient of the same dimensio
 
 !listing test/tests/mfem/kernels/linearelasticity.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorBoundaryIntegratedBC
+!syntax parameters /BCs/MFEMVectorBoundaryLFIntegratedBC
 
-!syntax inputs /BCs/MFEMVectorBoundaryIntegratedBC
+!syntax inputs /BCs/MFEMVectorBoundaryLFIntegratedBC
 
-!syntax children /BCs/MFEMVectorBoundaryIntegratedBC
+!syntax children /BCs/MFEMVectorBoundaryLFIntegratedBC
 
 !if-end!
 

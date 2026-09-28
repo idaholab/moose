@@ -1,4 +1,4 @@
-# MFEMVectorFEBoundaryTangentIntegratedBC
+# MFEMVectorFEBoundaryTangentLFIntegratedBC
 
 !if! function=hasCapability('mfem')
 
@@ -16,11 +16,11 @@ outward facing unit normal vector on the boundary.
 
 !listing test/tests/mfem/complex/complex_waveguide.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFEBoundaryTangentIntegratedBC
+!syntax parameters /BCs/MFEMVectorFEBoundaryTangentLFIntegratedBC
 
-!syntax inputs /BCs/MFEMVectorFEBoundaryTangentIntegratedBC
+!syntax inputs /BCs/MFEMVectorFEBoundaryTangentLFIntegratedBC
 
-!syntax children /BCs/MFEMVectorFEBoundaryTangentIntegratedBC
+!syntax children /BCs/MFEMVectorFEBoundaryTangentLFIntegratedBC
 
 !if-end!
 

@@ -1,4 +1,4 @@
-# MFEMBoundaryIntegratedBC
+# MFEMBoundaryLFIntegratedBC
 
 !if! function=hasCapability('mfem')
 
@@ -12,11 +12,11 @@ Adds the boundary integrator for integrating the linear form
 where the test variable $v \in H^1$ and $f$ is a scalar coefficient. Often used for representing
 Neumann-type boundary conditions.
 
-!syntax parameters /BCs/MFEMBoundaryIntegratedBC
+!syntax parameters /BCs/MFEMBoundaryLFIntegratedBC
 
-!syntax inputs /BCs/MFEMBoundaryIntegratedBC
+!syntax inputs /BCs/MFEMBoundaryLFIntegratedBC
 
-!syntax children /BCs/MFEMBoundaryIntegratedBC
+!syntax children /BCs/MFEMBoundaryLFIntegratedBC
 
 !if-end!
 

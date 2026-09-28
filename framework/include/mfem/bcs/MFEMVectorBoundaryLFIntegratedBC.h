@@ -13,12 +13,12 @@
 
 #include "MFEMIntegratedBC.h"
 
-class MFEMVectorBoundaryIntegratedBC : public MFEMIntegratedBC
+class MFEMVectorBoundaryLFIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters);
+  MFEMVectorBoundaryLFIntegratedBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() override;

@@ -9,32 +9,36 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMVectorFEBoundaryTangentIntegratedBC.h"
+#include "MFEMBoundaryNormalLFIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMVectorFEBoundaryTangentIntegratedBC);
+registerMooseObject("MooseApp", MFEMBoundaryNormalLFIntegratedBC);
 
 InputParameters
-MFEMVectorFEBoundaryTangentIntegratedBC::validParams()
+MFEMBoundaryNormalLFIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
-                             "$(\\vec n \\times \\vec f, \\vec v)_{\\partial\\Omega}$");
+                             "$(\\vec f \\cdot \\hat n, v)_{\\partial\\Omega}$");
   params.addParam<MFEMVectorCoefficientName>(
-      "vector_coefficient", "1. 1. 1.", "Vector coefficient used in the boundary integrator");
+      "vector_coefficient",
+      "1. 1. 1.",
+      "Vector coefficient whose normal component will be used in the integrated BC");
   return params;
 }
 
-MFEMVectorFEBoundaryTangentIntegratedBC::MFEMVectorFEBoundaryTangentIntegratedBC(
+// TODO: Currently assumes the vector function coefficient is 3D
+MFEMBoundaryNormalLFIntegratedBC::MFEMBoundaryNormalLFIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 
-// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+// Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
+// caller.
 mfem::LinearFormIntegrator *
-MFEMVectorFEBoundaryTangentIntegratedBC::createLFIntegrator()
+MFEMBoundaryNormalLFIntegratedBC::createLFIntegrator()
 {
-  return new mfem::VectorFEBoundaryTangentLFIntegrator(_vec_coef);
+  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
 }
 
 #endif
