@@ -466,10 +466,6 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
           _test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
           "Non-legacy assembly is only supported for single test and trial variable systems");
 
-      // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
-      const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
-      SetTrialVariablesFromTrueVectors(block_solution);
-
       const auto & test_var_name = _test_var_names.at(0);
       auto nlf = _nlfs.Get(test_var_name);
 
@@ -491,12 +487,14 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
       return *_sum_operator;
     }
+    else if (_assembly_level == mfem::AssemblyLevel::LEGACY)
+    {
+      const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    }
     else
     {
-      if (_assembly_level != mfem::AssemblyLevel::LEGACY)
-        mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
-                   "assembly in EquationSystem.");
-      const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
+                 "assembly in EquationSystem.");
     }
   }
   else
@@ -560,13 +558,9 @@ EquationSystem::BuildNonlinearForms()
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
 
-    // These two are necessary for nonstandard assembly levels, but also
-    // cause segfaults if there are no integrators.
-    if (nlf->GetDNFI()->Size() || nlf->GetBNFI()->Size())
-    {
+    if (_assembly_level != mfem::AssemblyLevel::FULL &&
+        _assembly_level != mfem::AssemblyLevel::ELEMENT)
       nlf->SetAssemblyLevel(_assembly_level);
-      nlf->Setup();
-    }
   }
 }
 
