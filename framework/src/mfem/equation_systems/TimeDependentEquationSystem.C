@@ -181,13 +181,9 @@ TimeDependentEquationSystem::BuildNonlinearForms()
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, _dt);
 
-    // These two are necessary for nonstandard assembly levels, but also
-    // cause segfaults if there are no integrators.
-    if (nlf->GetDNFI()->Size() || nlf->GetBNFI()->Size())
-    {
+    if (_assembly_level != mfem::AssemblyLevel::FULL &&
+        _assembly_level != mfem::AssemblyLevel::ELEMENT)
       nlf->SetAssemblyLevel(_assembly_level);
-      nlf->Setup();
-    }
   }
 }
 

@@ -61,31 +61,16 @@ public:
   // underlying bilinearform instead)
   void AssembleDiagOnNonlinearForm(mfem::Vector & diag) const
   {
-    // firstly, the dnfi
-    mfem::Array<mfem::NonlinearFormIntegrator *> & dnfi = *_nlf->GetDNFI();
-    mfem::Array<mfem::NonlinearFormIntegrator *> & bnfi = *_nlf->GetBNFI();
-
-    mfem::FiniteElementSpace * fes = _nlf->FESpace();
-
     const mfem::Operator * elemR =
-        fes->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
-
-    const int ye_size = elemR->Height();
-
-    mfem::Vector ye(ye_size);
+        _nlf->FESpace()->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
+    mfem::Vector ye(elemR->Height());
     ye = 0.0;
-
     // assemble grad diag on each of the domain integrators
-    for (int i = 0; i < dnfi.Size(); i++)
-    {
-      dnfi[i]->AssembleGradDiagonalPA(ye);
-    }
-
+    for (auto & dnfi : *_nlf->GetDNFI())
+      dnfi->AssembleGradDiagonalPA(ye);
     // ditto for the boundary integrators
-    for (int i = 0; i < bnfi.Size(); i++)
-    {
-      bnfi[i]->AssembleGradDiagonalPA(ye);
-    }
+    for (auto & bnfi : *_nlf->GetBNFI())
+      bnfi->AssembleGradDiagonalPA(ye);
 
     // ElementRestriction applies orientation sign flips, which H(curl) and H(div) spaces carry
     // on shared DoFs. A diagonal needs those signs squared, so the unsigned transpose is the
@@ -111,14 +96,8 @@ public:
     // for loop) and the bilinear form has a diag_policy
     // of 1 (default). This means when we combine at the end, we have 1s
     // on essential rows.
-    const mfem::Array<int> & ess_tdofs = _nlf->GetEssentialTrueDofs();
-    const int csz = ess_tdofs.Size();
-    auto idx = ess_tdofs.HostRead();
-    auto d_diag = nlf_diag.HostReadWrite();
-    for (int i = 0; i < csz; i++)
-      d_diag[idx[i]] = 0.0;
+    nlf_diag.SetSubVector(_nlf->GetEssentialTrueDofs(), 0.);
 
-    // ditto for B
     mfem::Vector b_diag(diag.Size());
     _B->AssembleDiagonal(b_diag);
 
