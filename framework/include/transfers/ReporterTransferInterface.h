@@ -185,6 +185,15 @@ protected:
   void sumVectorReporter(const ReporterName & name, FEProblemBase & problem);
 
   /*
+   * Broadcast reporter value from processor \p root
+   *
+   * @param name Name of reporter
+   * @param problem FEProblem that contains the reporter value
+   * @param root Processor to broadcast from
+   */
+  void broadcastReporter(const ReporterName & name, FEProblemBase & problem, processor_id_type root);
+
+  /*
    * Helper for declaring reporter names when transfer is cloning values.
    * The result names will be:
    *      names[i] = obj_name/prefix:rep_name[i].getObjectName():rep_name[i].getValueName()
