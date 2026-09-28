@@ -38,6 +38,8 @@ public:
 
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
 
+  virtual Real cp_integral(const Real & T) const override;
+
 protected:
   /// Enumeration for selecting the residual resistivity ratio (RRR)
   enum RRRValue

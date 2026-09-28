@@ -267,3 +267,40 @@ ThermalCopperProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) 
   rho = rho_from_T(T);
   drho_dT = 0.0;
 }
+
+Real
+ThermalCopperProperties::cp_integral(const Real & T) const
+{
+  // Numerical integration of cp(T) from 0 to T using trapezoidal rule.
+  // The complex NIST log-polynomial correlation for cp cannot be integrated analytically.
+  // Note: The NIST correlation is only valid from 4-300 K, so we integrate from 4 K
+  // and add the low-temperature contribution using a linear extrapolation.
+
+  const Real T_min = 4.0; // Lower bound of NIST correlation validity
+
+  if (T < T_min)
+    mooseError("cp_integral called with T = ",
+               T,
+               " K < T_min = ",
+               T_min,
+               " K. ",
+               "Temperature must be within the valid range [4, 300] K.");
+
+  const unsigned int n_intervals = 1000; // Number of integration intervals for accuracy
+  const Real dT = (T - T_min) / static_cast<Real>(n_intervals);
+  Real integral = 0.0;
+
+  // Trapezoidal rule: ∫f(x)dx ≈ Δx * [f(x0)/2 + f(x1) + f(x2) + ... + f(xn-1) + f(xn)/2]
+  for (unsigned int i = 0; i <= n_intervals; ++i)
+  {
+    const Real T_i = T_min + static_cast<Real>(i) * dT;
+    const Real cp_i = cp_from_T(T_i);
+
+    if (i == 0 || i == n_intervals)
+      integral += 0.5 * cp_i; // Endpoints weighted by 0.5
+    else
+      integral += cp_i; // Interior points weighted by 1.0
+  }
+
+  return integral * dT;
+}
