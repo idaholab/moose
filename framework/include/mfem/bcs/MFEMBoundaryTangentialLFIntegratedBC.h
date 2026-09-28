@@ -15,21 +15,21 @@
 
 /**
  * \f[
- * (k \vec u \cdot \hat n, \vec v \cdot \hat n)
+ * (\vec g \cdot \hat \tau, v)
  * \f]
  */
-class MFEMVectorFEBoundaryFluxIntegratedBC : public MFEMIntegratedBC
+class MFEMBoundaryTangentialLFIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEBoundaryFluxIntegratedBC(const InputParameters & parameters);
+  MFEMBoundaryTangentialLFIntegratedBC(const InputParameters & parameters);
 
-  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
 protected:
-  mfem::Coefficient & _coef;
+  mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif

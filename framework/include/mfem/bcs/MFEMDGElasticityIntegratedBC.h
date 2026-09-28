@@ -13,23 +13,24 @@
 
 #include "MFEMIntegratedBC.h"
 
-/**
- * \f[
- * (k \vec u \cdot \hat n, \vec v \cdot \hat n)
- * \f]
- */
-class MFEMVectorFEBoundaryFluxIntegratedBC : public MFEMIntegratedBC
+class MFEMDGElasticityIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEBoundaryFluxIntegratedBC(const InputParameters & parameters);
+  MFEMDGElasticityIntegratedBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
+  virtual bool isDGBC() const override { return true; }
+
 protected:
-  mfem::Coefficient & _coef;
+  int _fe_order;
+  mfem::Coefficient & _lambda;
+  mfem::Coefficient & _mu;
+  mfem::real_t _alpha;
+  mfem::real_t _kappa;
 };
 
 #endif

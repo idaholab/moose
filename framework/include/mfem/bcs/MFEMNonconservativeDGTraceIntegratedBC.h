@@ -11,25 +11,17 @@
 
 #pragma once
 
-#include "MFEMIntegratedBC.h"
+#include "MFEMDGTraceIntegratedBC.h"
 
-/**
- * \f[
- * (k \vec u \cdot \hat n, \vec v \cdot \hat n)
- * \f]
- */
-class MFEMVectorFEBoundaryFluxIntegratedBC : public MFEMIntegratedBC
+class MFEMNonconservativeDGTraceIntegratedBC : public MFEMDGTraceIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEBoundaryFluxIntegratedBC(const InputParameters & parameters);
+  MFEMNonconservativeDGTraceIntegratedBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
-
-protected:
-  mfem::Coefficient & _coef;
 };
 
 #endif
