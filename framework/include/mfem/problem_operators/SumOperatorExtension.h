@@ -44,7 +44,7 @@ public:
     _z.SetSize(_A->Height());
     _A->Mult(x, _z);
     _B->Mult(x, y);
-    add(_alpha, _z, _beta, y, y);
+    add(_z, y, y);
   }
 
   void MultTranspose(const mfem::Vector & x, mfem::Vector & y) const override
@@ -52,7 +52,7 @@ public:
     _z.SetSize(_A->Width());
     _A->MultTranspose(x, _z);
     _B->MultTranspose(x, y);
-    add(_alpha, _z, _beta, y, y);
+    add(_z, y, y);
   }
 
   // This mostly copies the method taken by a BilinearForm/PABilinearFormExtension.
@@ -122,12 +122,11 @@ public:
     mfem::Vector b_diag(diag.Size());
     _B->AssembleDiagonal(b_diag);
 
-    add(_alpha, nlf_diag, _beta, b_diag, diag);
+    add(nlf_diag, b_diag, diag);
   }
 
 private:
   const mfem::Operator *_A, *_B;
-  const mfem::real_t _alpha = 1.0, _beta = 1.0;
   mutable mfem::Vector _z;
   mfem::ParNonlinearForm * _nlf; // not owned
 };

@@ -297,10 +297,6 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
 
   op.Reset(aux_a.Ptr());
 
-  // Keep the pointer to the linear system's operator so we can
-  // use it to form SumOperatorExtension later (for partial assembly)
-  _system_operator = aux_a.Ptr();
-
   aux_a.SetOperatorOwner(false);
 }
 
@@ -488,10 +484,10 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
       // ComplexEquationSystem::FormSystemOperator does not store aux_a. So we
       // guard against dereferencing nullptr here.
-      mooseAssert(_system_operator, "Bilinear Operator is null!");
+      mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
 
       // The returned operators are owned by nlf/blf, so SumOperatorExtension must not delete them.
-      _sum_operator = std::make_unique<SumOperatorExtension>(nlf_grad, _system_operator, nlf);
+      _sum_operator = std::make_unique<SumOperatorExtension>(nlf_grad, _linear_operator.Ptr(), nlf);
 
       return *_sum_operator;
     }
