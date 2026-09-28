@@ -201,6 +201,9 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     }
     if (!run)
     {
+      // Keep every rank's showStatusMessage() point-to-point send/receive in sync even
+      // when skipping the solve.
+      showStatusMessage(0);
       _local_batch_app_index++;
       continue;
     }
