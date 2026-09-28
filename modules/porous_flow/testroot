@@ -1,4 +1,3 @@
 app_name = porous_flow
 allow_warnings = false
 allow_unused = false
-allow_override = false
