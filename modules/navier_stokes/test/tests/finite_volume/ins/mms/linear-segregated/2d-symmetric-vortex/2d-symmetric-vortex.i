@@ -1,6 +1,7 @@
 mu = 1.2
 rho = 1.5
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -27,6 +28,12 @@ advected_interp_method = 'average'
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
@@ -45,9 +52,11 @@ advected_interp_method = 'average'
   []
 []
 
-[FVInterpolationMethods]
-  [average]
-    type = FVGeometricAverage
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 
@@ -79,12 +88,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -146,9 +157,9 @@ advected_interp_method = 'average'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = ${rho}
     u = vel_x
     v = vel_y
-    rho = ${rho}
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
