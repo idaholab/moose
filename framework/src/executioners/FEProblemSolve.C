@@ -542,7 +542,12 @@ FEProblemSolve::solve()
         const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
         converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
         if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
+        {
+          _console << "Multisystem iteration diverged at iteration " << n_fp_iter << std::endl;
           break;
+        }
+        if (converged)
+          _console << "Multisystem iteration converged at iteration " << n_fp_iter << std::endl;
       }
       fp_iter++;
     }
