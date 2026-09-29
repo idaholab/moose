@@ -37,8 +37,8 @@ protected:
                                                    const GenericReal<is_ad> & G,
                                                    const GenericReal<is_ad> & Dh,
                                                    const unsigned int j);
-  virtual GenericReal<is_ad> massFlowRate();
-  virtual GenericReal<is_ad> pressureDrop();
+  virtual GenericReal<is_ad> massFlowRate() const = 0;
+  virtual GenericReal<is_ad> pressureDrop() const = 0;
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables
