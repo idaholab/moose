@@ -194,6 +194,8 @@ and the intermittent-regime interpolation, Eq. (4) of UCTD, uses
 \qquad
 \gamma = \frac{1}{3} .
 
+Plots of the friction factor versus Reynolds number for all SCM friction closures are given in [Friction Factor Closures Verification](subchannel/v&v/friction_factor_closures.md).
+
 !syntax parameters /SCMClosures/SCMFrictionChenTodreas
 
 !syntax inputs /SCMClosures/SCMFrictionChenTodreas
