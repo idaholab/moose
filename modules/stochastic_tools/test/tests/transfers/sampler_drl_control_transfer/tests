@@ -10,6 +10,17 @@
                   "multiple seeded rollouts that evaluate the policy once per control period."
     capabilities = 'libtorch'
   []
+  [training-ignores-executions-without-trajectories]
+    type = JSONDiff
+    input = trainer.i
+    # No trajectories have been transferred on INITIAL, so training matches the TIMESTEP_END run.
+    cli_args = "Trainers/nn_trainer/execute_on='INITIAL TIMESTEP_END'"
+    jsondiff = 'trainer_json_out.json'
+    min_parallel = 2
+    requirement = "The system shall not count DRL trainer executions that collect no trajectories "
+                  "toward the number of rollouts collected between policy updates."
+    capabilities = 'libtorch'
+  []
   [mismatch]
     requirement = "The system shall report an error when a DRL trainer and the DRL controller that "
                   "receives its policy differ in"

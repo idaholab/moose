@@ -251,8 +251,9 @@ private:
 
   /**
    * Pull trajectories out of the reporters and append them to the trajectory buffer.
+   * @return whether any trajectories were collected on this rank.
    */
-  void collectTrajectoriesFromReporters();
+  bool collectTrajectoriesFromReporters();
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;

@@ -292,14 +292,15 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
 void
 LibtorchDRLControlTrainer::execute()
 {
-  collectTrajectoriesFromReporters();
+  // Only executions that collect trajectories count toward update_frequency, so an execution
+  // without complete trajectories, such as on INITIAL, neither triggers nor delays training.
+  bool collected_trajectories = collectTrajectoriesFromReporters();
+  _communicator.max(collected_trajectories);
+  if (!collected_trajectories)
+    return;
 
-  _update_counter--;
-
-  bool has_trajectory_data = !_trajectory_buffer.empty();
-  _communicator.max(has_trajectory_data);
-
-  if (_update_counter != 0 || !has_trajectory_data)
+  mooseAssert(_update_counter > 0, "The update counter is reset after every training.");
+  if (--_update_counter != 0)
     return;
 
   computeEpisodeRewardStatistics();
@@ -406,7 +407,7 @@ LibtorchDRLControlTrainer::resetData()
   _update_counter = _update_frequency;
 }
 
-void
+bool
 LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
 {
   auto trajectories = _trajectory_assembler.assemble(_state_value_pointers,
@@ -415,6 +416,7 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
                                                      *_reward_value_pointer);
   for (auto & trajectory : trajectories)
     _trajectory_buffer.addTrajectory(std::move(trajectory));
+  return !trajectories.empty();
 }
 
 void
