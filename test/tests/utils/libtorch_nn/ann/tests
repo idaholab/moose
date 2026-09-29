@@ -9,7 +9,7 @@
       type = RunException
       input = 'test_ann.i'
       cli_args = 'VectorPostprocessors/test/activation_functions=sad'
-      expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
+      expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear tanh\".'
       detail = 'an unsupported activation function;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda mps'
