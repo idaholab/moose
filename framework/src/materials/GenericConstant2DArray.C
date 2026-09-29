@@ -32,10 +32,21 @@ GenericConstant2DArrayTempl<is_ad>::validParams()
 template <bool is_ad>
 GenericConstant2DArrayTempl<is_ad>::GenericConstant2DArrayTempl(const InputParameters & parameters)
   : Material(parameters),
+    VariableSizeMaterialPropertiesInterface(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealEigenMatrix>("prop_value")),
     _property(declareGenericProperty<RealEigenMatrix, is_ad>(_prop_name))
 {
+}
+
+template <bool is_ad>
+std::pair<std::size_t, std::size_t>
+GenericConstant2DArrayTempl<is_ad>::getMatrixPropertySize(
+    const MaterialPropertyName & prop_name) const
+{
+  if (prop_name != _prop_name)
+    return {0, 0};
+  return {_prop_value.rows(), _prop_value.cols()};
 }
 
 template <bool is_ad>

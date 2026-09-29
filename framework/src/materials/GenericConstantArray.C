@@ -31,10 +31,17 @@ GenericConstantArray::validParams()
 
 GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
   : Material(parameters),
+    VariableSizeMaterialPropertiesInterface(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealEigenVector>("prop_value")),
     _property(declareProperty<RealEigenVector>(_prop_name))
 {
+}
+
+std::size_t
+GenericConstantArray::getVectorPropertySize(const MaterialPropertyName & prop_name) const
+{
+  return prop_name == _prop_name ? _prop_value.size() : 0;
 }
 
 void

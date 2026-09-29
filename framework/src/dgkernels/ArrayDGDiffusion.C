@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayDGDiffusion.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 // MOOSE includes
 #include "MooseVariableFE.h"
@@ -40,17 +42,22 @@ ArrayDGDiffusion::ArrayDGDiffusion(const InputParameters & parameters)
 }
 
 void
+ArrayDGDiffusion::initialSetup()
+{
+  Moose::checkArrayMaterialPropertySize(*this,
+                                        _fe_problem.getMaterialWarehouse(),
+                                        blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                        "diff",
+                                        _count,
+                                        false);
+}
+
+void
 ArrayDGDiffusion::initQpResidual(Moose::DGResidualType type)
 {
-  if (_diff[_qp].size() != _count || _diff_neighbor[_qp].size() != _count)
-    mooseError("'diff' size (",
-               _diff[_qp].size(),
-               " on the element, ",
-               _diff_neighbor[_qp].size(),
-               " on the neighbor) is inconsistent with the number of components of array "
-               "variable (",
-               _count,
-               ")");
+  mooseAssert(_diff[_qp].size() == _count && _diff_neighbor[_qp].size() == _count,
+              "'diff' size is inconsistent with the number of components of array "
+              "variable");
 
   const int elem_b_order = std::max(libMesh::Order(1), _var.order());
   const Real h_elem =

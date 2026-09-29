@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayTimeDerivative.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 registerMooseObject("MooseApp", ArrayTimeDerivative);
 
@@ -46,6 +48,18 @@ ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
 }
 
 void
+ArrayTimeDerivative::initialSetup()
+{
+  if (_coeff_array || _coeff_2d_array)
+    Moose::checkArrayMaterialPropertySize(*this,
+                                          _fe_problem.getMaterialWarehouse(),
+                                          blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                          "time_derivative_coefficient",
+                                          _var.count(),
+                                          _coeff_2d_array);
+}
+
+void
 ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
   if (!_has_coefficient)
@@ -54,26 +68,20 @@ ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
     residual = (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   else if (_coeff_array)
   {
-    if ((*_coeff_array)[_qp].size() != _var.count())
-      mooseError("time_derivative_coefficient size (",
-                 (*_coeff_array)[_qp].size(),
-                 ") is inconsistent with the number of components of array variable (",
-                 _var.count(),
-                 ")");
+    mooseAssert((*_coeff_array)[_qp].size() == _var.count(),
+                "time_derivative_coefficient size is inconsistent with the number of components "
+                "in array variable");
     // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_coeff_array)[_qp].asDiagonal() * _u_dot[_qp] * _test[_i][_qp];
   }
   else
   {
-    if ((*_coeff_2d_array)[_qp].rows() != _var.count() ||
-        (*_coeff_2d_array)[_qp].cols() != _var.count())
-      mooseError("time_derivative_coefficient size (",
-                 (*_coeff_2d_array)[_qp].rows(),
-                 "x",
-                 (*_coeff_2d_array)[_qp].cols(),
-                 ") is inconsistent with the number of components of array variable (",
-                 _var.count(),
-                 ")");
+    mooseAssert((*_coeff_2d_array)[_qp].cols() == _var.count(),
+                "time_derivative_coefficient size is inconsistent with the number of components "
+                "in array variable");
+    mooseAssert((*_coeff_2d_array)[_qp].rows() == _var.count(),
+                "time_derivative_coefficient size is inconsistent with the number of components "
+                "in array variable");
     // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   }
