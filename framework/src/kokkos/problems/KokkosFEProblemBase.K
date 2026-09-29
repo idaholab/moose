@@ -204,7 +204,7 @@ FEProblemBase::getKokkosFunction(const std::string & name)
   const auto & function = getKokkosFunction<Moose::FunctionBase>(name);
 
   std::shared_ptr<Moose::Kokkos::FunctionWrapperHostBase> wrapper =
-      Moose::Kokkos::FunctorRegistry::buildFunction(&function, function.type());
+      Moose::Kokkos::FunctorWrapperRegistry::buildFunction(&function, function.type());
 
   return Moose::Kokkos::Function(wrapper);
 }
