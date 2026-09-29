@@ -296,7 +296,6 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   trueRHS.SyncFromBlocks();
 
   op.Reset(aux_a.Ptr());
-
   aux_a.SetOperatorOwner(false);
 }
 
@@ -554,13 +553,12 @@ EquationSystem::BuildNonlinearForms()
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
-    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
-
     if (_assembly_level != mfem::AssemblyLevel::FULL &&
         _assembly_level != mfem::AssemblyLevel::ELEMENT)
       nlf->SetAssemblyLevel(_assembly_level);
+    nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
+    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
   }
 }
 
