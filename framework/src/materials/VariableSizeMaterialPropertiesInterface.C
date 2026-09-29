@@ -10,6 +10,24 @@
 #include "VariableSizeMaterialPropertiesInterface.h"
 #include "MaterialWarehouse.h"
 
+std::size_t
+VariableSizeMaterialPropertiesInterface::getVectorPropertySize(
+    const MaterialPropertyName & prop_name) const
+{
+  mooseError("getVectorPropertySize() is not implemented for the material declaring property '",
+             prop_name,
+             "'");
+}
+
+std::pair<std::size_t, std::size_t>
+VariableSizeMaterialPropertiesInterface::getMatrixPropertySize(
+    const MaterialPropertyName & prop_name) const
+{
+  mooseError("getMatrixPropertySize() is not implemented for the material declaring property '",
+             prop_name,
+             "'");
+}
+
 void
 Moose::checkArrayMaterialPropertySize(const MooseObject & object,
                                       const MaterialWarehouse & warehouse,
@@ -35,7 +53,7 @@ Moose::checkArrayMaterialPropertySize(const MooseObject & object,
       if (is_matrix)
       {
         const auto [rows, cols] = vsmi->getMatrixPropertySize(prop_name);
-        if (rows && cols && (rows != count || cols != count))
+        if (rows != count || cols != count)
           object.paramError(param_name,
                             "The size (",
                             rows,
@@ -53,7 +71,7 @@ Moose::checkArrayMaterialPropertySize(const MooseObject & object,
       else
       {
         const auto size = vsmi->getVectorPropertySize(prop_name);
-        if (size && size != count)
+        if (size != count)
           object.paramError(param_name,
                             "The size (",
                             size,

@@ -41,7 +41,9 @@ GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
 std::size_t
 GenericConstantArray::getVectorPropertySize(const MaterialPropertyName & prop_name) const
 {
-  return prop_name == _prop_name ? _prop_value.size() : 0;
+  if (prop_name != _prop_name)
+    paramError("prop_name", "Property '" + prop_name + "' was not defined");
+  return _prop_value.size();
 }
 
 void

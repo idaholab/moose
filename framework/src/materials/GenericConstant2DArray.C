@@ -45,7 +45,7 @@ GenericConstant2DArrayTempl<is_ad>::getMatrixPropertySize(
     const MaterialPropertyName & prop_name) const
 {
   if (prop_name != _prop_name)
-    return {0, 0};
+    paramError("prop_name", "Property '" + prop_name + "' was not defined");
   return {_prop_value.rows(), _prop_value.cols()};
 }
 

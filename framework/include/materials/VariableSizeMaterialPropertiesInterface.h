@@ -21,20 +21,15 @@ class VariableSizeMaterialPropertiesInterface
 public:
   VariableSizeMaterialPropertiesInterface(const InputParameters & /*params*/) {}
 
-  /// Return the size of the variable size vector material property that the material defines,
-  /// or 0 if the material does not define a vector property with that name
-  virtual std::size_t getVectorPropertySize(const MaterialPropertyName & /*prop_name*/) const
-  {
-    return 0;
-  }
+  /// Return the size of the variable size vector material property that the material defines.
+  /// Materials that declare such a property must override this; the default errors.
+  virtual std::size_t getVectorPropertySize(const MaterialPropertyName & prop_name) const;
 
   /// Return the number of rows and columns of the variable size matrix material property that the
-  /// material defines, or (0, 0) if the material does not define a matrix property with that name
+  /// material defines. Materials that declare such a property must override this; the default
+  /// errors.
   virtual std::pair<std::size_t, std::size_t>
-  getMatrixPropertySize(const MaterialPropertyName & /*prop_name*/) const
-  {
-    return {0, 0};
-  }
+  getMatrixPropertySize(const MaterialPropertyName & prop_name) const;
 };
 
 namespace Moose
