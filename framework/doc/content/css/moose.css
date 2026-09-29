@@ -259,7 +259,7 @@ img.moose-image{
 .table-of-contents
 {
   height: 95vh;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
