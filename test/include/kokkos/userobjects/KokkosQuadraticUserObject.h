@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "KokkosPolymorphicUserObjectBase.h"
+#include "KokkosAffineUserObject.h"
 
-class KokkosQuadraticUserObject : public KokkosPolymorphicUserObjectBase
+class KokkosQuadraticUserObject : public KokkosAffineUserObject
 {
 public:
   static InputParameters validParams();
@@ -23,6 +23,8 @@ public:
 
   KOKKOS_FUNCTION Real value(Real input) const { return _coefficient * input * input + _offset; }
 
+  KOKKOS_FUNCTION Real scale(Real input) const { return _factor * input; }
+
   KOKKOS_FUNCTION Real combine(Real left, Real right, unsigned int component) const
   {
     return value(left) - component * right;
@@ -30,5 +32,4 @@ public:
 
 private:
   const Real _coefficient;
-  const Real _offset;
 };

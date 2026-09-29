@@ -9,6 +9,7 @@
 #pragma once
 
 #include "KokkosAuxKernel.h"
+#include "KokkosAffineUserObject.h"
 #include "KokkosPolymorphicUserObjectBase.h"
 
 class KokkosPolymorphicUserObjectAux : public Moose::Kokkos::AuxKernel
@@ -21,12 +22,14 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int, Datum &) const
   {
-    return _first.value(2.0) + _second.combine(3.0, 4.0, 2);
+    return _first.value(2.0) + _second.combine(3.0, 4.0, 2) + _intermediate.scale(5.0);
   }
 
 private:
   using UserObject = Moose::Kokkos::VirtualUserObject<KokkosPolymorphicUserObjectBase>;
+  using IntermediateUserObject = Moose::Kokkos::VirtualUserObject<KokkosAffineUserObject>;
 
   const UserObject _first;
   const UserObject _second;
+  const IntermediateUserObject _intermediate;
 };

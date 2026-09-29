@@ -23,12 +23,16 @@ public:
 
   KOKKOS_FUNCTION Real value(Real input) const { return _factor * input + _offset; }
 
+  KOKKOS_FUNCTION Real scale(Real input) const { return _factor * input; }
+
   KOKKOS_FUNCTION Real combine(Real left, Real right, unsigned int component) const
   {
     return value(left) + component * right;
   }
 
-private:
+protected:
   const Real _factor;
   const Real _offset;
 };
+
+registerVirtualKokkosUserObjectBase(KokkosAffineUserObject, value, combine, scale);
