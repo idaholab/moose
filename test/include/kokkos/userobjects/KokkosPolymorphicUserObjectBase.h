@@ -9,7 +9,6 @@
 #pragma once
 
 #include "KokkosGeneralUserObject.h"
-#include "KokkosUserObjectRegistry.h"
 
 class KokkosPolymorphicUserObjectBase : public Moose::Kokkos::GeneralUserObject
 {
