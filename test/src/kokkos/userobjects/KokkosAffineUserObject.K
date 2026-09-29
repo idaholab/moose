@@ -9,7 +9,7 @@
 #include "KokkosAffineUserObject.h"
 
 registerMooseObject("MooseTestApp", KokkosAffineUserObject);
-registerVirtualKokkosUserObject(KokkosAffineUserObject);
+registerVirtualKokkosUserObject(KokkosAffineUserObject, KokkosPolymorphicUserObjectBase);
 
 InputParameters
 KokkosAffineUserObject::validParams()

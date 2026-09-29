@@ -9,20 +9,18 @@
 #include "KokkosQuadraticUserObject.h"
 
 registerMooseObject("MooseTestApp", KokkosQuadraticUserObject);
-registerVirtualKokkosUserObject(KokkosQuadraticUserObject);
+registerVirtualKokkosUserObject(KokkosQuadraticUserObject, KokkosPolymorphicUserObjectBase);
+registerVirtualKokkosUserObject(KokkosQuadraticUserObject, KokkosAffineUserObject);
 
 InputParameters
 KokkosQuadraticUserObject::validParams()
 {
-  InputParameters params = KokkosPolymorphicUserObjectBase::validParams();
+  InputParameters params = KokkosAffineUserObject::validParams();
   params.addRequiredParam<Real>("coefficient", "Coefficient applied to the squared input.");
-  params.addRequiredParam<Real>("offset", "Offset added to the result.");
   return params;
 }
 
 KokkosQuadraticUserObject::KokkosQuadraticUserObject(const InputParameters & parameters)
-  : KokkosPolymorphicUserObjectBase(parameters),
-    _coefficient(getParam<Real>("coefficient")),
-    _offset(getParam<Real>("offset"))
+  : KokkosAffineUserObject(parameters), _coefficient(getParam<Real>("coefficient"))
 {
 }
