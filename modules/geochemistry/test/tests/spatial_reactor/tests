@@ -251,4 +251,14 @@
     issues = '#15693 #33427'
     design = 'GeochemistrySpatialReactor.md'
   []
+  [two_facies]
+    type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = two_facies.i
+    csvdiff = 'two_facies_out.csv'
+    requirement = 'Two block-restricted spatial reaction solvers shall run side by side on adjoining blocks, each holding its own chemistry at the node they share on the block boundary, and block-restricted nodal void volumes shall partition that node exactly between them'
+    issues = '#15693 #33427'
+    design = 'GeochemistrySpatialReactor.md NodalVoidVolume.md'
+  []
 []
