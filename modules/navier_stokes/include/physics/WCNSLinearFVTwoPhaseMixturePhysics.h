@@ -27,6 +27,7 @@ public:
 
 private:
   virtual void addFVKernels() override;
+
   virtual void addMaterials() override;
   virtual void checkIntegrity() const override;
 
@@ -66,6 +67,15 @@ private:
   /// Creates the material that closes the interfacial mass transfer rate on the transported
   /// interfacial area concentration, for the case where it was not prescribed
   void addInterfacialMassTransferRateMaterial();
+
+  /// Declares a ParsedFunctorMaterial from an expression over named functors, the pattern every
+  /// derived quantity of this Physics is built with
+  void addParsedFunctorMaterial(const std::string & object_name,
+                                const std::string & property_name,
+                                const std::string & expression,
+                                const std::vector<std::string> & functor_names,
+                                const std::vector<std::string> & functor_symbols,
+                                bool output);
 
   /// Adds the latent heat absorbed or released by the interfacial mass transfer
   void addLatentHeatTransferTerm();

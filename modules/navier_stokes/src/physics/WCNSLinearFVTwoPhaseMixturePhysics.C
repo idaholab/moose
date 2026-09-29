@@ -432,16 +432,13 @@ WCNSLinearFVTwoPhaseMixturePhysics::addLatentHeatTransferTerm()
   // single energy equation for the mixture, so what the term supports is a transfer at, or close
   // to, thermal equilibrium.
   const auto latent_source = prefix() + "latent_heat_source";
-  {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::string>("expression") = "gamma * h_lat";
-    params.set<std::vector<std::string>>("functor_names") = {
-        _interfacial_mass_transfer, getParam<MooseFunctorName>("interfacial_latent_heat")};
-    params.set<std::vector<std::string>>("functor_symbols") = {"gamma", "h_lat"};
-    params.set<std::string>("property_name") = latent_source;
-    getProblem().addMaterial("ParsedFunctorMaterial", latent_source + "_mat", params);
-  }
+  addParsedFunctorMaterial(
+      latent_source + "_mat",
+      latent_source,
+      "gamma * h_lat",
+      {_interfacial_mass_transfer, getParam<MooseFunctorName>("interfacial_latent_heat")},
+      {"gamma", "h_lat"},
+      false);
   {
     auto params = getFactory().getValidParams("LinearFVSource");
     assignBlocks(params, _blocks);
@@ -482,27 +479,22 @@ WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityTimeDerivative()
     params.set<std::vector<MooseFunctorName>>("prop_values") = {_phase_2_fraction_name};
     getProblem().addMaterial("GenericFunctorTimeDerivativeMaterial", alpha_dot + "_mat", params);
   }
-  {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::string>("expression") =
-        "(rho_d - rho_c) * alpha_dot + alpha * drho_d_dt + (1 - alpha) * drho_c_dt";
-    params.set<std::vector<std::string>>("functor_names") = {
-        _phase_2_density,
-        _phase_1_density,
-        alpha_dot,
-        _phase_2_fraction_name,
-        isParamValid("phase_2_density_time_derivative")
-            ? getParam<MooseFunctorName>("phase_2_density_time_derivative")
-            : MooseFunctorName("0"),
-        isParamValid("phase_1_density_time_derivative")
-            ? getParam<MooseFunctorName>("phase_1_density_time_derivative")
-            : MooseFunctorName("0")};
-    params.set<std::vector<std::string>>("functor_symbols") = {
-        "rho_d", "rho_c", "alpha_dot", "alpha", "drho_d_dt", "drho_c_dt"};
-    params.set<std::string>("property_name") = drho_m_dt;
-    getProblem().addMaterial("ParsedFunctorMaterial", drho_m_dt + "_mat", params);
-  }
+  addParsedFunctorMaterial(
+      drho_m_dt + "_mat",
+      drho_m_dt,
+      "(rho_d - rho_c) * alpha_dot + alpha * drho_d_dt + (1 - alpha) * drho_c_dt",
+      {_phase_2_density,
+       _phase_1_density,
+       alpha_dot,
+       _phase_2_fraction_name,
+       isParamValid("phase_2_density_time_derivative")
+           ? getParam<MooseFunctorName>("phase_2_density_time_derivative")
+           : MooseFunctorName("0"),
+       isParamValid("phase_1_density_time_derivative")
+           ? getParam<MooseFunctorName>("phase_1_density_time_derivative")
+           : MooseFunctorName("0")},
+      {"rho_d", "rho_c", "alpha_dot", "alpha", "drho_d_dt", "drho_c_dt"},
+      false);
 
   _built_drho_m_dt = true;
   return drho_m_dt;
@@ -532,24 +524,20 @@ WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityPressureDerivative()
   if (_built_drho_m_dp)
     return drho_m_dp;
 
-  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-  assignBlocks(params, _blocks);
-  params.set<std::string>("expression") =
-      "alpha * rho_c / rho_d * drho_d_dp + (1 - alpha) * drho_c_dp";
-  params.set<std::vector<std::string>>("functor_names") = {
-      _phase_2_fraction_name,
-      _phase_1_density,
-      _phase_2_density,
-      isParamValid("phase_2_density_pressure_derivative")
-          ? getParam<MooseFunctorName>("phase_2_density_pressure_derivative")
-          : MooseFunctorName("0"),
-      isParamValid("phase_1_density_pressure_derivative")
-          ? getParam<MooseFunctorName>("phase_1_density_pressure_derivative")
-          : MooseFunctorName("0")};
-  params.set<std::vector<std::string>>("functor_symbols") = {
-      "alpha", "rho_c", "rho_d", "drho_d_dp", "drho_c_dp"};
-  params.set<std::string>("property_name") = drho_m_dp;
-  getProblem().addMaterial("ParsedFunctorMaterial", drho_m_dp + "_mat", params);
+  addParsedFunctorMaterial(drho_m_dp + "_mat",
+                           drho_m_dp,
+                           "alpha * rho_c / rho_d * drho_d_dp + (1 - alpha) * drho_c_dp",
+                           {_phase_2_fraction_name,
+                            _phase_1_density,
+                            _phase_2_density,
+                            isParamValid("phase_2_density_pressure_derivative")
+                                ? getParam<MooseFunctorName>("phase_2_density_pressure_derivative")
+                                : MooseFunctorName("0"),
+                            isParamValid("phase_1_density_pressure_derivative")
+                                ? getParam<MooseFunctorName>("phase_1_density_pressure_derivative")
+                                : MooseFunctorName("0")},
+                           {"alpha", "rho_c", "rho_d", "drho_d_dp", "drho_c_dp"},
+                           false);
 
   _built_drho_m_dp = true;
   return drho_m_dp;
@@ -643,15 +631,12 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMassDensityTransientTerm()
 
     // R = d(rho_m)/dt - (d(rho_m)/dp) dp/dt, the part that is genuinely explicit.
     source_density = prefix() + "drho_m_dt_explicit";
-    {
-      auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-      assignBlocks(params, _blocks);
-      params.set<std::string>("expression") = "drho_m_dt - drho_m_dp * p_dot";
-      params.set<std::vector<std::string>>("functor_names") = {drho_m_dt, drho_m_dp, p_dot};
-      params.set<std::vector<std::string>>("functor_symbols") = {"drho_m_dt", "drho_m_dp", "p_dot"};
-      params.set<std::string>("property_name") = source_density;
-      getProblem().addMaterial("ParsedFunctorMaterial", source_density + "_mat", params);
-    }
+    addParsedFunctorMaterial(source_density + "_mat",
+                             source_density,
+                             "drho_m_dt - drho_m_dp * p_dot",
+                             {drho_m_dt, drho_m_dp, p_dot},
+                             {"drho_m_dt", "drho_m_dp", "p_dot"},
+                             false);
 
     // The pressure driven part, implicit. Non-conservative form: the coefficient is a partial
     // derivative held outside the time derivative, not a density being transported, so
@@ -689,17 +674,12 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
   // dispersed phase density along with every other term of that equation. Built as a functor
   // rather than folded into the coefficient so that a non-uniform density is handled correctly.
   const auto scaled_exchange = prefix() + "phase_exchange_coeff";
-  {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::string>("expression") = "rho_d_exchange * alpha_exchange_coeff";
-    params.set<std::vector<std::string>>("functor_names") = {
-        _phase_2_density, getParam<MooseFunctorName>(NS::alpha_exchange)};
-    params.set<std::vector<std::string>>("functor_symbols") = {"rho_d_exchange",
-                                                               "alpha_exchange_coeff"};
-    params.set<std::string>("property_name") = scaled_exchange;
-    getProblem().addMaterial("ParsedFunctorMaterial", scaled_exchange + "_mat", params);
-  }
+  addParsedFunctorMaterial(scaled_exchange + "_mat",
+                           scaled_exchange,
+                           "rho_d_exchange * alpha_exchange_coeff",
+                           {_phase_2_density, getParam<MooseFunctorName>(NS::alpha_exchange)},
+                           {"rho_d_exchange", "alpha_exchange_coeff"},
+                           false);
   {
     auto params = getFactory().getValidParams("LinearFVReaction");
     assignBlocks(params, _blocks);
@@ -729,22 +709,18 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeCoefficientMaterial()
   // The 6 is the integral of x (1 - x) between 0 and 1, and the max() clamps the term outside the
   // mushy zone. The liquid fraction is computed from the temperature, as the nonlinear kernel does
   // rather than from its 'liquid_fraction' parameter.
-  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-  assignBlocks(params, _blocks);
-  params.set<std::string>("expression") =
+  addParsedFunctorMaterial(
+      prefix() + "phase_change_coefficient",
+      "phase_change_coefficient",
       "max(6 * ((T - T_sol) / (T_liq - T_sol)) * (1 - ((T - T_sol) / (T_liq - T_sol))), 0) * L * "
-      "rho_m / (T_liq - T_sol)";
-  params.set<std::vector<std::string>>("functor_names") = {
-      _fluid_energy_physics->getFluidTemperatureName(),
-      NS::T_solidus,
-      NS::T_liquidus,
-      NS::latent_heat,
-      "rho_mixture"};
-  params.set<std::vector<std::string>>("functor_symbols") = {"T", "T_sol", "T_liq", "L", "rho_m"};
-  params.set<std::string>("property_name") = "phase_change_coefficient";
-  if (getParam<bool>("output_all_properties"))
-    params.set<std::vector<OutputName>>("outputs") = {"all"};
-  getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_change_coefficient", params);
+      "rho_m / (T_liq - T_sol)",
+      {_fluid_energy_physics->getFluidTemperatureName(),
+       NS::T_solidus,
+       NS::T_liquidus,
+       NS::latent_heat,
+       "rho_mixture"},
+      {"T", "T_sol", "T_liq", "L", "rho_m"},
+      getParam<bool>("output_all_properties"));
 }
 
 void
@@ -862,22 +838,18 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMixtureSpecificHeatMaterial()
   // the mixture density is the mass-weighted average, not the volume-weighted average used for the
   // density, the viscosity and the conductivity. See Fluent Theory Guide equation 16.4-7. The
   // phase fraction is clamped to match the mixture property material.
-  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-  assignBlocks(params, _blocks);
-  params.set<std::string>("expression") =
-      "(min(max(fd, 0), 1) * rho_d * cp_d + (1 - min(max(fd, 0), 1)) * rho_c * cp_c) / rho_m";
-  params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name,
-                                                           _phase_2_density,
-                                                           _phase_2_specific_heat,
-                                                           _phase_1_density,
-                                                           _phase_1_specific_heat,
-                                                           "rho_mixture"};
-  params.set<std::vector<std::string>>("functor_symbols") = {
-      "fd", "rho_d", "cp_d", "rho_c", "cp_c", "rho_m"};
-  params.set<std::string>("property_name") = "cp_mixture";
-  if (getParam<bool>("output_all_properties"))
-    params.set<std::vector<OutputName>>("outputs") = {"all"};
-  getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "mixture_specific_heat", params);
+  addParsedFunctorMaterial(
+      prefix() + "mixture_specific_heat",
+      "cp_mixture",
+      "(min(max(fd, 0), 1) * rho_d * cp_d + (1 - min(max(fd, 0), 1)) * rho_c * cp_c) / rho_m",
+      {_phase_2_fraction_name,
+       _phase_2_density,
+       _phase_2_specific_heat,
+       _phase_1_density,
+       _phase_1_specific_heat,
+       "rho_mixture"},
+      {"fd", "rho_d", "cp_d", "rho_c", "cp_c", "rho_m"},
+      getParam<bool>("output_all_properties"));
 }
 
 void
@@ -895,14 +867,12 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   // Add the phase fraction variable, for output purposes mostly
   if (!getProblem().hasFunctor(_phase_1_fraction_name, /*thread_id=*/0))
   {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::string>("expression") = "1 - " + _phase_2_fraction_name;
-    params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name};
-    params.set<std::string>("property_name") = _phase_1_fraction_name;
-    params.set<std::vector<std::string>>("output_properties") = {_phase_1_fraction_name};
-    params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_1_fraction", params);
+    addParsedFunctorMaterial(prefix() + "phase_1_fraction",
+                             _phase_1_fraction_name,
+                             "1 - " + _phase_2_fraction_name,
+                             {_phase_2_fraction_name},
+                             {},
+                             true);
 
     // One of the phase fraction should exist though (either as a variable or set by a
     // NSLiquidFractionAux)
@@ -910,16 +880,12 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       paramError("Phase 2 fraction should be defined as a variable or auxiliary variable");
   }
   if (!getProblem().hasFunctor(_phase_2_fraction_name, /*thread_id=*/0))
-  {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::string>("expression") = "1 - " + _phase_1_fraction_name;
-    params.set<std::vector<std::string>>("functor_names") = {_phase_1_fraction_name};
-    params.set<std::string>("property_name") = _phase_2_fraction_name;
-    params.set<std::vector<std::string>>("output_properties") = {_phase_2_fraction_name};
-    params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_2_fraction", params);
-  }
+    addParsedFunctorMaterial(prefix() + "phase_2_fraction",
+                             _phase_2_fraction_name,
+                             "1 - " + _phase_1_fraction_name,
+                             {_phase_1_fraction_name},
+                             {},
+                             true);
 
   // Compute mixture properties
   if (!_use_external_mixture_properties)
@@ -1053,4 +1019,28 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       params.set<std::vector<OutputName>>("outputs") = {"all"};
     getProblem().addMaterial(drag_type, prefix() + "dispersed_drag", params);
   }
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::addParsedFunctorMaterial(
+    const std::string & object_name,
+    const std::string & property_name,
+    const std::string & expression,
+    const std::vector<std::string> & functor_names,
+    const std::vector<std::string> & functor_symbols,
+    const bool output)
+{
+  auto params = getFactory().getValidParams("ParsedFunctorMaterial");
+  assignBlocks(params, _blocks);
+  params.set<std::string>("expression") = expression;
+  params.set<std::vector<std::string>>("functor_names") = functor_names;
+  if (!functor_symbols.empty())
+    params.set<std::vector<std::string>>("functor_symbols") = functor_symbols;
+  params.set<std::string>("property_name") = property_name;
+  if (output)
+  {
+    params.set<std::vector<std::string>>("output_properties") = {property_name};
+    params.set<std::vector<OutputName>>("outputs") = {"all"};
+  }
+  getProblem().addMaterial("ParsedFunctorMaterial", object_name, params);
 }
