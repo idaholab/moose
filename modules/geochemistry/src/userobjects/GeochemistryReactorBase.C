@@ -155,6 +155,10 @@ GeochemistryReactorBase::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
   params += GeochemistryReactorBase::sharedParams();
+  // each execute() time-steps the chemistry at the node, so a node shared between blocks must not
+  // be visited once per block
+  params.set<bool>("unique_node_execute") = true;
+  params.suppressParameter<bool>("unique_node_execute");
 
   params.addRequiredParam<UserObjectName>(
       "model_definition", "The name of the GeochemicalModelDefinition user object.");

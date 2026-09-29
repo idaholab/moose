@@ -261,4 +261,14 @@
     issues = '#15693 #33427'
     design = 'GeochemistrySpatialReactor.md NodalVoidVolume.md'
   []
+  [shared_node]
+    type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = shared_node.i
+    csvdiff = 'shared_node_out.csv'
+    requirement = 'The spatial reaction solver shall time-step each node exactly once per time step, including nodes shared between blocks'
+    issues = '#15693 #33427'
+    design = 'GeochemistrySpatialReactor.md'
+  []
 []
