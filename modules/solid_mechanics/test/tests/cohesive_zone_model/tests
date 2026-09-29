@@ -346,6 +346,23 @@
                  "Outputs/file_base=bilinear_mixed_energy_mixed"
       detail = 'and conserve the BK fracture energy under proportional mixed-mode loading.'
     []
+    [rotation_3d_aligned]
+      type = CSVDiff
+      input = 'bilinear_mixed_rotation_3d.i'
+      csvdiff = 'bilinear_mixed_rotation_3d_aligned.csv'
+      cli_args = 'Outputs/file_base=bilinear_mixed_rotation_3d_aligned'
+      detail = 'and satisfy rotational invariance under 3D shear aligned with a tangential axis.'
+    []
+    [rotation_3d_diagonal]
+      type = CSVDiff
+      input = 'bilinear_mixed_rotation_3d.i'
+      csvdiff = 'bilinear_mixed_rotation_3d_diagonal.csv'
+      cli_args = "BCs/right_y/function='(3/sqrt(2))*t' BCs/right_z/function='(3/sqrt(2))*t' "
+                 "Postprocessors/energy_rate/expression='abs(traction_y)*(3/sqrt(2))+abs(traction_z)*(3/sqrt(2))' "
+                 "Postprocessors/energy_rate/pp_names='traction_y traction_z' "
+                 "Outputs/file_base=bilinear_mixed_rotation_3d_diagonal"
+      detail = 'and satisfy rotational invariance under 3D shear at 45 degrees across tangential components.'
+    []
   []
 
   [material_3DC]
