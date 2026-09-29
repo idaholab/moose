@@ -35,10 +35,12 @@ LibtorchNeuralNetControl::validParams()
       "observation_scaling_factors",
       {},
       "Optional multipliers applied after shifting the observation values.");
-  params.addParam<std::string>("filename", "Checkpoint file to load for the controller network.");
+  params.addParam<std::string>("filename", "File containing the controller network.");
   params.addParam<bool>("torch_script_format",
                         false,
-                        "Whether the checkpoint should be read as a scripted Torch module.");
+                        "Whether 'filename' is a TorchScript module to evaluate as-is. Otherwise, "
+                        "a network is built from 'num_neurons_per_layer' and "
+                        "'activation_function', and only its parameters are read from the file.");
   params.addRangeCheckedParam<unsigned int>(
       "input_timesteps",
       1,
@@ -161,8 +163,6 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile()
           e.msg());
     }
   }
-
-  execute();
 }
 
 void
@@ -186,8 +186,14 @@ LibtorchNeuralNetControl::execute()
     torch::Tensor action = _nn->forward(input_tensor);
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+    const bool is_torch_script =
+        dynamic_cast<const Moose::TorchScriptModule *>(_nn.get()) != nullptr;
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
+      // Plain networks apply their serialized output scaling in forward().
+      if (is_torch_script)
+        _current_control_signals[control_i] *= _action_scaling_factors[control_i];
+
       setControllableValueByName<Real>(_control_names[control_i],
                                        _current_control_signals[control_i]);
     }
@@ -244,6 +250,19 @@ LibtorchNeuralNetControl::prepareInputTensor()
 {
   auto raw_input =
       _observation_history.stackCurrentObservation(_current_observation, _old_observations);
+  if (dynamic_cast<const Moose::TorchScriptModule *>(_nn.get()))
+  {
+    const auto input_shift_factors =
+        _observation_history.expandObservationFactors(_observation_shift_factors);
+    const auto input_scaling_factors =
+        _observation_history.expandObservationFactors(_observation_scaling_factors);
+
+    // Plain networks apply their serialized input transformation in forward().
+    for (const auto input_i : index_range(raw_input))
+      raw_input[input_i] =
+          (raw_input[input_i] - input_shift_factors[input_i]) * input_scaling_factors[input_i];
+  }
+
   torch::Tensor input_tensor;
   LibtorchUtils::vectorToTensor(raw_input, input_tensor);
 
