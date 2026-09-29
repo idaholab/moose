@@ -329,6 +329,62 @@ solveSlipSpeed(const T & stokes_speed, const T & reynolds_per_speed)
 }
 
 /**
+ * The bubble interaction sources of the one-group interfacial area transport equation in the
+ * closure of Hibiki and Ishii, Int. J. Heat Mass Transfer 43 (2000) 2711: coalescence by random
+ * collision and breakage by turbulent impact. There is no wake entrainment term in this closure.
+ *
+ * Both share the prefactor
+ * \f[
+ *   \Pi = \left(\frac{\alpha_g}{\chi_p}\right)^{2}
+ *         \frac{u_t}{d_b^{11/3}\left(\alpha_{g,max}-\alpha_g\right)}
+ * \f]
+ * in which the packing factor divides: both terms grow without bound as the dispersed phase
+ * approaches its maximum, which is what crowding does to collision. The reference forms the
+ * turbulent velocity scale as \f$ u_t = \epsilon^{1/3} \f$ from the dissipation; it is taken as an
+ * argument here so that a caller estimating it another way still evaluates the same closure.
+ *
+ * Written once and called from both discretizations, so that they cannot disagree on it.
+ *
+ * @param f_d volume fraction of the dispersed phase
+ * @param f_d_over_xi that fraction divided by the interfacial area concentration, guarded by the
+ *   caller however it sees fit
+ * @param d_b averaged particle size
+ * @param u_t turbulent velocity scale
+ * @param packing the margin to the maximum packing fraction, floored by the caller
+ * @param rho_f continuous phase density
+ * @param sigma surface tension
+ * @param gamma_c, k_c coalescence coefficients
+ * @param gamma_b, k_b breakage coefficients
+ * @return the pair (S_RC, S_TI) as sources of the area equation: the coalescence sink, which is
+ *   non-positive, and the breakage source, which is non-negative
+ */
+template <typename T>
+std::pair<T, T>
+hibikiIshiiAreaSources(const T & f_d,
+                       const T & f_d_over_xi,
+                       const T & d_b,
+                       const T & u_t,
+                       const T & packing,
+                       const T & rho_f,
+                       const T & sigma,
+                       const Real gamma_c,
+                       const Real k_c,
+                       const Real gamma_b,
+                       const Real k_b)
+{
+  using std::exp;
+  using std::pow;
+  using std::sqrt;
+
+  const T prefactor = Utility::pow<2>(f_d_over_xi) * u_t / (pow(d_b, 11. / 3.) * packing);
+  const T s_rc = -prefactor * gamma_c * Utility::pow<2>(f_d) *
+                 exp(-k_c * pow(d_b, 5. / 6.) * sqrt(rho_f / sigma) * u_t);
+  const T s_ti = prefactor * gamma_b * f_d * (1.0 - f_d) *
+                 exp(-k_b * sigma / (rho_f * pow(d_b, 5. / 3.) * Utility::pow<2>(u_t)));
+  return {s_rc, s_ti};
+}
+
+/**
  * The linear drag function of a distorted fluid particle, the deformed-bubble regime in which the
  * drag coefficient grows with size rather than falling with Reynolds number. Substituted into the
  * closure it gives Ishii's terminal velocity for bubbly flow, independent of the particle size; the

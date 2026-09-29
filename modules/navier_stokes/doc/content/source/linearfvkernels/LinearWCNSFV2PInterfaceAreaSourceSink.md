@@ -137,9 +137,12 @@ the discretization. The computed steady states agree with roots obtained indepen
 bracketing solver to twelve significant figures.
 
 !alert note
-This object no longer follows [WCNSFV2PInterfaceAreaSourceSink.md]. The nonlinear implementation
-uses a different set of source terms, so the two discretizations do not solve the same interfacial
-area equation.
+The Hibiki and Ishii interaction sources are shared with
+[WCNSFV2PInterfaceAreaSourceSink.md] through `NS::hibikiIshiiAreaSources()`, so the two
+discretizations cannot disagree on that closure. The rest of the equation still differs: the
+nonlinear kernel has no wake entrainment model and forms the area added by new dispersed phase
+from a nucleation diameter below a cutoff fraction, where this kernel takes the phase change
+source alone.
 
 !syntax parameters /LinearFVKernels/LinearWCNSFV2PInterfaceAreaSourceSink
 

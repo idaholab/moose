@@ -137,18 +137,14 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
       pow(velocity_norm * _characheristic_length(elem_arg, state) * pressure_grad_norm / rho_m,
           1. / 3.);
 
-  const auto interaction_prefactor =
-      Utility::pow<2>(f_d_o_xi) * u_eps / (pow(db, 11. / 3.) / complement_fd);
+  // The Hibiki and Ishii interaction sources, shared with the linear finite volume kernel so
+  // that the two discretizations cannot disagree on the closure. The packing factor divides in
+  // the prefactor, as the reference has it. Returned as sources of the area equation: s_rc is the
+  // coalescence sink, non-positive, and s_ti the breakage source, non-negative.
+  const auto sources = NS::hibikiIshiiAreaSources(
+      f_d, f_d_o_xi, db, u_eps, complement_fd, rho_l, sigma, _gamma_c, _Kc, _gamma_b, _Kb);
+  const auto & s_rc = sources.first;
+  const auto & s_ti = sources.second;
 
-  // Adding coalescence term
-  const auto f_c = interaction_prefactor * _gamma_c * Utility::pow<2>(f_d);
-  const auto exp_c = exp(-_Kc * pow(db, 5. / 6.) * sqrt(rho_l / sigma) * u_eps);
-  const auto s_rc = f_c * exp_c;
-
-  // Adding breakage term
-  const auto f_b = interaction_prefactor * _gamma_b * f_d * (1. - f_d);
-  const auto exp_b = exp(-_Kb * sigma / (rho_l * pow(db, 5. / 3.) * Utility::pow<2>(u_eps)));
-  const auto s_rb = f_b * exp_b;
-
-  return -bubble_added_mass + bubble_compressibility + s_rc - s_rb;
+  return -bubble_added_mass + bubble_compressibility - s_rc - s_ti;
 }
