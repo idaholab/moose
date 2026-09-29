@@ -374,6 +374,79 @@ TEST(LibtorchRLCoreTest, TrajectoryBufferRewardStatisticsIncludeSpreadBetweenTra
   EXPECT_TRUE(empty_statistics.trajectory_means.empty());
 }
 
+TEST(LibtorchRLCoreTest, TrajectoryBufferFlattensTrajectoriesInOrder)
+{
+  const auto options = torch::TensorOptions().dtype(torch::kDouble);
+
+  // Values in the tens come from the first trajectory and values in the twenties from the second,
+  // so the flattened rows show that trajectories of different lengths are stacked in order.
+  auto first = trajectoryWithRewards({10.0, 11.0});
+  first.observations = {{10.0, 10.5}, {11.0, 11.5}};
+  first.actions = {{-10.0}, {-11.0}};
+  first.value_targets = {0.10, 0.11};
+  first.advantages = {1.0, 1.1};
+  auto second = trajectoryWithRewards({20.0});
+  second.observations = {{20.0, 20.5}};
+  second.actions = {{-20.0}};
+  second.value_targets = {0.20};
+  second.advantages = {2.0};
+
+  LibtorchRLTrajectoryBuffer buffer;
+  buffer.addTrajectory(first);
+  buffer.addTrajectory(second);
+  EXPECT_EQ(buffer.numTrajectories(), 2u);
+  EXPECT_EQ(buffer.numTransitions(), 3u);
+
+  const auto batch = buffer.flatten();
+  ASSERT_EQ(batch.size(), 3);
+  EXPECT_TRUE(torch::equal(batch.observations,
+                           torch::tensor({{10.0, 10.5}, {11.0, 11.5}, {20.0, 20.5}}, options)));
+  EXPECT_TRUE(torch::equal(batch.next_observations, torch::zeros({3, 1}, options)));
+  EXPECT_TRUE(torch::equal(batch.actions, torch::tensor({{-10.0}, {-11.0}, {-20.0}}, options)));
+  EXPECT_TRUE(torch::equal(batch.log_probabilities, torch::zeros({3, 1}, options)));
+  EXPECT_TRUE(torch::equal(batch.rewards, torch::tensor({{10.0}, {11.0}, {20.0}}, options)));
+  EXPECT_TRUE(
+      torch::equal(batch.value_targets, torch::tensor({{0.10}, {0.11}, {0.20}}, options)));
+  EXPECT_TRUE(torch::equal(batch.advantages, torch::tensor({{1.0}, {1.1}, {2.0}}, options)));
+
+  buffer.clear();
+  EXPECT_EQ(buffer.flatten().size(), 0);
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryBufferRejectsMismatchedTrajectoryLengths)
+{
+  const auto expect_rejected =
+      [](const LibtorchRLTrajectoryBuffer::Trajectory & trajectory, const std::string & message)
+  {
+    LibtorchRLTrajectoryBuffer buffer;
+    EXPECT_THROW(
+        {
+          try
+          {
+            buffer.addTrajectory(trajectory);
+          }
+          catch (const std::exception & e)
+          {
+            EXPECT_EQ(std::string(e.what()), message);
+            throw;
+          }
+        },
+        std::exception);
+    EXPECT_TRUE(buffer.empty());
+  };
+
+  // Required fields must match the reward length.
+  auto short_actions = trajectoryWithRewards({1.0, 2.0});
+  short_actions.actions.pop_back();
+  expect_rejected(short_actions, "RL trajectory actions must match the reward sequence length.");
+
+  // Optional fields may be empty, but must match the reward length when given.
+  auto short_value_targets = trajectoryWithRewards({1.0, 2.0});
+  short_value_targets.value_targets = {1.0};
+  expect_rejected(short_value_targets,
+                  "RL trajectory value targets must match the reward sequence length.");
+}
+
 } // namespace
 
 #endif
