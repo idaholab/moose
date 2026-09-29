@@ -2,7 +2,7 @@
 
 ## Overview
 
-This class derives from [IncompressibleMomentumSPBase.md] and implements the steady-state residual of the momentum equation for the [Path-integrated incompressible flow model](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md). It implements the right-hand side of [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_momentum). It requires a coupled variable characteristic pressure drop and N coupled fluid temperature variables for each segment, given as (coupled [ScalarVariables](syntax/Variables/index.md)). It operates on the mass flow rate, $\dot{m}$.
+This class derives from [IncompressibleMomentumSPBase.md] and implements the steady-state residual of the momentum equation for the [Path-integrated incompressible flow model](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md), the right-hand side of [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_momentum). It requires a coupled variable characteristic pressure drop and $N$ coupled fluid temperature variables for each segment, given as coupled [ScalarVariables](syntax/Variables/index.md). It operates on the mass flow rate, $\dot{m}$:
 
 !equation
 0 = \frac{1}{\sum_{i=1}^{n} \frac{L_i}{A_i}} \left [ \Delta P_c + \sum_{i=1}^{N} \left ( \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} + K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} + \rho_i g L_i \sin{\alpha_i} - \Delta P_p \right) \right] \,
