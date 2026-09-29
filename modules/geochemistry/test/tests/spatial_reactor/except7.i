@@ -1,6 +1,6 @@
-# The spatial reactor may be restricted to a subset of the mesh using "block".  The AuxVariables
-# and AuxKernels that the action adds are restricted to the same blocks, since the reactor only
-# knows about the nodes it visits.
+# A block-restricted reactor knows only about the nodes in its blocks, so an AuxKernel that queries
+# it elsewhere is an error.  The AuxKernels added by the action are restricted automatically; this
+# one is written by hand without a block restriction.
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -35,25 +35,23 @@
   block = 1
 []
 
+[AuxVariables]
+  [unrestricted]
+  []
+[]
+
+[AuxKernels]
+  [unrestricted]
+    type = GeochemistryQuantityAux
+    variable = unrestricted
+    species = H2O
+    quantity = molal
+    reactor = geochemistry_reactor
+    execute_on = timestep_end
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 1
-[]
-
-[Postprocessors]
-  [pH_inside]
-    type = PointValue
-    point = '0.25 0 0'
-    variable = pH
-  []
-  [pH_outside]
-    # pH is restricted to block 1, the reactor's block, so it has no value here and this reads zero
-    type = PointValue
-    point = '0.75 0 0'
-    variable = pH
-  []
-[]
-
-[Outputs]
-  csv = true
 []

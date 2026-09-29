@@ -275,6 +275,10 @@ GeochemistrySpatialReactor::buildMyNodeNumber()
   unsigned num_nodes_inserted = 0;
   for (const auto & node : as_range(msh.local_nodes_begin(), msh.local_nodes_end()))
   {
+    // the nodes recorded here must be exactly those that execute() will visit, which MOOSE
+    // restricts to this object's blocks
+    if (!actsOnNode(*node))
+      continue;
     if (_my_node_number.count(node->id()) == 0)
       _my_node_number[node->id()] = num_nodes_inserted;
     else
