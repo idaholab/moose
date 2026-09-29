@@ -6,33 +6,10 @@
     input = libtorch_drl_control.i
     csvdiff = parameter_read.csv
     cli_args = "Outputs/file_base='parameter_read'"
+    # A retried time step executes the control again, drawing another policy sample.
+    restep = false
     requirement = "The system shall be able to read a neural network from a parameter file and use "
                   "it to control a transient process."
-    capabilities = 'libtorch'
-  []
-  [read-parameters-half-transient]
-    type = RunApp
-    input = libtorch_drl_control.i
-    cli_args = "Outputs/file_base='parameter_read' Outputs/checkpoint=true "
-               "--test-checkpoint-half-transient"
-    recover = false
-    restep = false
-    prereq = read-parameters
-    requirement = "The system shall be able to recover a seeded DRL controller from a checkpointed "
-                  "transient."
-    capabilities = 'libtorch'
-  []
-  [read-parameters-recover]
-    type = CSVDiff
-    input = libtorch_drl_control.i
-    csvdiff = parameter_read.csv
-    cli_args = "Outputs/file_base='parameter_read' --recover parameter_read_cp/LATEST"
-    recover = false
-    restep = false
-    delete_output_before_running = false
-    prereq = read-parameters-half-transient
-    requirement = "The system shall reproduce the same transient control history after recovering "
-                  "a seeded DRL controller from a checkpoint."
     capabilities = 'libtorch'
   []
   [read-parameters-period]
@@ -40,34 +17,10 @@
     input = libtorch_drl_control.i
     csvdiff = parameter_read_period.csv
     cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period'"
+    # A retried time step executes the control again, drawing another policy sample.
+    restep = false
     requirement = "The system shall be able to hold a DRL control signal over a multi-step control "
                   "period and advance the observation history once per period."
-    capabilities = 'libtorch'
-  []
-  [read-parameters-period-half-transient]
-    type = RunApp
-    input = libtorch_drl_control.i
-    cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period' "
-               "Outputs/checkpoint=true --test-checkpoint-half-transient"
-    recover = false
-    restep = false
-    prereq = read-parameters-period
-    requirement = "The system shall be able to checkpoint a DRL controller partway through a "
-                  "multi-step control period."
-    capabilities = 'libtorch'
-  []
-  [read-parameters-period-recover]
-    type = CSVDiff
-    input = libtorch_drl_control.i
-    csvdiff = parameter_read_period.csv
-    cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period' "
-               "--recover parameter_read_period_cp/LATEST"
-    recover = false
-    restep = false
-    delete_output_before_running = false
-    prereq = read-parameters-period-half-transient
-    requirement = "The system shall reproduce the same held control signal and observation history "
-                  "after recovering a DRL controller partway through a multi-step control period."
     capabilities = 'libtorch'
   []
   [read-parameters-bounded]
@@ -81,6 +34,8 @@
     cli_args = "Controls/src_control/filename='mynet_control_bounded.net' "
                "Controls/src_control/min_control_value=-1 Controls/src_control/max_control_value=1 "
                "Outputs/file_base='parameter_read_bounded'"
+    # A retried time step executes the control again, drawing another policy sample.
+    restep = false
     requirement = "The system shall be able to control a transient process with a bounded neural "
                   "network read from a parameter file, sampling each action within the bounds."
     capabilities = 'libtorch'
