@@ -105,6 +105,41 @@ TEST(LibtorchActorNeuralNetTest, boundedBetaLogProbability)
   EXPECT_NEAR(actual, expected, 1e-12);
 }
 
+TEST(LibtorchActorNeuralNetTest, boundedBetaStaysFiniteForLargeLogits)
+{
+  constexpr Real min_value = -2.0;
+  constexpr Real max_value = 4.0;
+  // exp(800) overflows a double, so log(exp(x) + 1) would return inf for this logit.
+  constexpr Real large_logit = 800.0;
+  constexpr Real action_value = 3.9;
+
+  TestableLibtorchActorNeuralNet network(
+      "test_beta", 1, 1, {1}, {"linear"}, {min_value}, {max_value});
+
+  ASSERT_EQ(network._weights.size(), 1u);
+
+  network._weights[0]->weight.data().fill_(0.0);
+  network._weights[0]->bias.data().fill_(1.0);
+  auto & distribution = network.betaActionDistribution();
+  distribution.alphaModule()->weight.data().fill_(large_logit);
+  distribution.alphaModule()->bias.data().fill_(0.0);
+  distribution.betaModule()->weight.data().fill_(0.0);
+  distribution.betaModule()->bias.data().fill_(0.0);
+
+  auto input = torch::zeros({1, 1}, at::kDouble);
+  const Real deterministic_action = network.evaluate(input, false).item<Real>();
+
+  EXPECT_NEAR(distribution.alphaTensor().item<Real>(), large_logit + 1.0, 1e-12);
+  EXPECT_NEAR(distribution.betaTensor().item<Real>(), std::log(2.0) + 1.0, 1e-12);
+  EXPECT_TRUE(std::isfinite(deterministic_action));
+
+  auto log_probability = network.logProbability(torch::tensor({{action_value}}, at::kDouble));
+  EXPECT_TRUE(std::isfinite(log_probability.item<Real>()));
+
+  log_probability.backward();
+  EXPECT_TRUE(torch::isfinite(distribution.alphaModule()->weight.grad()).all().item<bool>());
+}
+
 TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateIndependentStd)
 {
   constexpr Real input_shift = 1.0;

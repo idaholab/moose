@@ -258,10 +258,10 @@ void
 LibtorchBetaActionDistribution::reset(const torch::Tensor & input)
 {
   const auto features = prepareFeatures(input);
-  const auto alpha = _alpha_module->forward(features);
-  _alpha_tensor = torch::log(torch::exp(alpha) + 1.0) + 1.0;
-  const auto beta = _beta_module->forward(features);
-  _beta_tensor = torch::log(torch::exp(beta) + 1.0) + 1.0;
+  // softplus(x) + 1 keeps alpha, beta > 1 so the Beta density stays unimodal. torch::softplus
+  // switches to the identity for large logits, where log(exp(x) + 1) would overflow to inf.
+  _alpha_tensor = torch::softplus(_alpha_module->forward(features)) + 1.0;
+  _beta_tensor = torch::softplus(_beta_module->forward(features)) + 1.0;
 
   _alpha_beta_tensor = torch::clamp_min(_alpha_tensor + _beta_tensor, 1e-8);
   _mean = _alpha_tensor / _alpha_beta_tensor;
