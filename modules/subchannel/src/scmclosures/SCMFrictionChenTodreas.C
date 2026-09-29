@@ -14,6 +14,10 @@ registerMooseObjectRenamed("SubChannelApp",
                            SCMFrictionUpgradedChengTodreas,
                            "09/30/2027 24:00",
                            SCMFrictionChenTodreas);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMFrictionUpdatedChengTodreas,
+                           "09/30/2027 24:00",
+                           SCMFrictionChenTodreas);
 
 InputParameters
 SCMFrictionChenTodreas::validParams()
