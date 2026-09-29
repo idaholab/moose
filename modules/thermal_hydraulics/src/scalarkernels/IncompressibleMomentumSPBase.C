@@ -127,20 +127,6 @@ IncompressibleMomentumSPBaseTempl<is_ad>::reinit()
 
 template <bool is_ad>
 GenericReal<is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::massFlowRate()
-{
-  return 0;
-}
-
-template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::pressureDrop()
-{
-  return 0;
-}
-
-template <bool is_ad>
-GenericReal<is_ad>
 IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
 {
   GenericReal<is_ad> momentum_residual = 0;

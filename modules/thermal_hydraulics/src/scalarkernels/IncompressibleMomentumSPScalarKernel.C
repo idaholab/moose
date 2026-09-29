@@ -39,20 +39,6 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::IncompressibleMomentumSPScalar
 }
 
 template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumSPScalarKernelTempl<is_ad>::massFlowRate()
-{
-  return Base::_u[0];
-}
-
-template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumSPScalarKernelTempl<is_ad>::pressureDrop()
-{
-  return _dPc[0];
-}
-
-template <bool is_ad>
 Real
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobian()
 {

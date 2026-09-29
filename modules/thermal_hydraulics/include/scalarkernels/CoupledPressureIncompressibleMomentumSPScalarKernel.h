@@ -23,8 +23,8 @@ public:
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> massFlowRate() override;
-  virtual GenericReal<is_ad> pressureDrop() override;
+  virtual GenericReal<is_ad> massFlowRate() const override { return _mc[0]; };
+  virtual GenericReal<is_ad> pressureDrop() const override { return -Base::_u[0]; };
   virtual Real computeQpJacobian() override;
   /// Coupled mass flow rate through the flow path
   const VariableValue & _mc;
