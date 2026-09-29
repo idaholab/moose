@@ -25,7 +25,6 @@ class IncompressibleMomentumSPBaseTempl
 public:
   IncompressibleMomentumSPBaseTempl(const InputParameters & parameters);
   virtual bool isADObject() const override { return is_ad; };
-  virtual void reinit() override;
   static InputParameters validParams();
 
 protected:

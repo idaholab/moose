@@ -106,16 +106,6 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpResidual()
 }
 
 template <bool is_ad>
-void
-IncompressibleEnergySPScalarKernelTempl<is_ad>::reinit()
-{
-  // ADScalarKernel::reinit() resets its cached-Jacobian flag; ScalarKernel has no reinit()
-  // for the non-AD case, so nothing needs to happen there.
-  if constexpr (is_ad)
-    Base::reinit();
-}
-
-template <bool is_ad>
 Real
 IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
 {

@@ -25,7 +25,6 @@ class IncompressibleEnergySPScalarKernelTempl
 public:
   IncompressibleEnergySPScalarKernelTempl(const InputParameters & parameters);
   virtual bool isADObject() const override { return is_ad; };
-  virtual void reinit() override;
   static InputParameters validParams();
 
 protected:

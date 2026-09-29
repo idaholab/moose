@@ -116,16 +116,6 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
 }
 
 template <bool is_ad>
-void
-IncompressibleMomentumSPBaseTempl<is_ad>::reinit()
-{
-  // ADScalarKernel::reinit() resets its cached-Jacobian flag; ScalarKernel has no reinit()
-  // for the non-AD case, so nothing needs to happen there.
-  if constexpr (is_ad)
-    Base::reinit();
-}
-
-template <bool is_ad>
 GenericReal<is_ad>
 IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
 {
