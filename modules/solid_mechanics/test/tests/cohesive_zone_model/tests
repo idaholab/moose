@@ -264,6 +264,13 @@
     design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md'
     requirement = 'The system shall be able to model decohesion of composites using cohesive zone model'
     issues = '#18611 #18763'
+    [bilinear_mixed_jacobian]
+      type = PetscJacobianTester
+      input = 'bilinear_mixed_jacobian.i'
+      ratio_tol = 1e-6
+      difference_tol = 2.0
+      detail = 'and accurately compute the hand-coded Jacobian under mixed-mode loading.'
+    []
     [normal]
       type = Exodiff
       input = 'bilinear_mixed.i'
