@@ -17,6 +17,7 @@
 #include "LibtorchRandomUtils.h"
 #include "LibtorchRLMiniBatchSampler.h"
 #include "LibtorchRLPPOLoss.h"
+#include "LibtorchRLTrajectoryAssembler.h"
 #include "LibtorchRLTrajectoryBuffer.h"
 #include "LibtorchRLValueEstimator.h"
 
@@ -24,6 +25,15 @@
 
 namespace
 {
+
+std::vector<Real>
+linearSequence(const unsigned int size, const Real offset, const Real slope)
+{
+  std::vector<Real> values(size);
+  for (const auto i : make_range(size))
+    values[i] = offset + slope * i;
+  return values;
+}
 
 TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
 {
@@ -219,6 +229,116 @@ TEST(LibtorchRLCoreTest, MiniBatchSamplerUsesExplicitGeneratorForDeterministicSh
                                 /* rtol = */ 0.0,
                                 /* atol = */ 0.0));
   }
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryAssemblerDownsamplesWithWindowStride)
+{
+  // Raw index i holds 0 + i for observations, 100 + i for actions, -i for log probabilities, and
+  // 10 * i for rewards, so each assembled value identifies the raw index it came from.
+  const std::vector<std::vector<Real>> observations = {linearSequence(16, 0.0, 1.0)};
+  const std::vector<std::vector<Real>> actions = {linearSequence(16, 100.0, 1.0)};
+  const std::vector<std::vector<Real>> log_probabilities = {linearSequence(16, 0.0, -1.0)};
+  const std::vector<std::vector<Real>> rewards = {linearSequence(16, 0.0, 10.0)};
+
+  LibtorchRLTrajectoryAssembler assembler(2, 5, true, false);
+  const auto trajectories =
+      assembler.assemble({&observations}, {&actions}, {&log_probabilities}, rewards);
+
+  ASSERT_EQ(trajectories.size(), 1u);
+  const auto & trajectory = trajectories[0];
+  // History lags span one window, and lags before the initial entry repeat raw index 0.
+  EXPECT_EQ(trajectory.observations,
+            std::vector<std::vector<Real>>({{0.0, 0.0}, {5.0, 0.0}, {10.0, 5.0}}));
+  EXPECT_EQ(trajectory.next_observations,
+            std::vector<std::vector<Real>>({{5.0, 0.0}, {10.0, 5.0}, {15.0, 10.0}}));
+  EXPECT_EQ(trajectory.actions, std::vector<std::vector<Real>>({{101.0}, {106.0}, {111.0}}));
+  EXPECT_EQ(trajectory.log_probabilities,
+            std::vector<std::vector<Real>>({{-1.0}, {-6.0}, {-11.0}}));
+  EXPECT_EQ(trajectory.rewards, std::vector<Real>({50.0, 100.0, 150.0}));
+  EXPECT_EQ(trajectory.terminals, std::vector<bool>({false, false, true}));
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryAssemblerAveragesRewardsWithoutShift)
+{
+  const std::vector<std::vector<Real>> observations = {linearSequence(16, 0.0, 1.0)};
+  const std::vector<std::vector<Real>> actions = {linearSequence(16, 100.0, 1.0)};
+  const std::vector<std::vector<Real>> log_probabilities = {linearSequence(16, 0.0, -1.0)};
+  const std::vector<std::vector<Real>> rewards = {linearSequence(16, 0.0, 10.0)};
+
+  LibtorchRLTrajectoryAssembler assembler(1, 5, false, true);
+  const auto trajectories =
+      assembler.assemble({&observations}, {&actions}, {&log_probabilities}, rewards);
+
+  ASSERT_EQ(trajectories.size(), 1u);
+  const auto & trajectory = trajectories[0];
+  EXPECT_EQ(trajectory.observations, std::vector<std::vector<Real>>({{0.0}, {5.0}, {10.0}}));
+  EXPECT_EQ(trajectory.actions, std::vector<std::vector<Real>>({{100.0}, {105.0}, {110.0}}));
+  EXPECT_EQ(trajectory.log_probabilities, std::vector<std::vector<Real>>({{0.0}, {-5.0}, {-10.0}}));
+  // Means of raw indices 1-5, 6-10, and 11-15.
+  EXPECT_EQ(trajectory.rewards, std::vector<Real>({30.0, 80.0, 130.0}));
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryAssemblerCountsCompleteWindows)
+{
+  LibtorchRLTrajectoryAssembler assembler(1, 5, true, false);
+  EXPECT_EQ(assembler.numTransitions(0), 0u);
+  EXPECT_EQ(assembler.numTransitions(1), 0u);
+  EXPECT_EQ(assembler.numTransitions(5), 0u);
+  EXPECT_EQ(assembler.numTransitions(6), 1u);
+  EXPECT_EQ(assembler.numTransitions(16), 3u);
+
+  // A sample without a complete window produces no trajectory.
+  const std::vector<std::vector<Real>> observations = {linearSequence(16, 0.0, 1.0),
+                                                       linearSequence(5, 0.0, 1.0)};
+  const std::vector<std::vector<Real>> rewards = {linearSequence(16, 0.0, 1.0),
+                                                  linearSequence(5, 0.0, 1.0)};
+  const auto trajectories = assembler.assemble({&observations}, {}, {}, rewards);
+  ASSERT_EQ(trajectories.size(), 1u);
+  EXPECT_EQ(trajectories[0].rewards.size(), 3u);
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryAssemblerRejectsMismatchedSampleCounts)
+{
+  const std::vector<std::vector<Real>> first_observations = {linearSequence(3, 0.0, 1.0),
+                                                             linearSequence(3, 0.0, 1.0)};
+  const std::vector<std::vector<Real>> second_observations = {linearSequence(3, 0.0, 1.0)};
+  const std::vector<std::vector<Real>> rewards = {linearSequence(3, 0.0, 1.0),
+                                                  linearSequence(3, 0.0, 1.0)};
+
+  LibtorchRLTrajectoryAssembler assembler(1, 1, true, false);
+  EXPECT_THROW(
+      {
+        try
+        {
+          assembler.assemble({&first_observations, &second_observations}, {}, {}, rewards);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Entry 1 of the observation reporters holds 1 samples, but the reward "
+                    "reporter holds 2 samples.");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryAssemblerRejectsZeroTimestepWindow)
+{
+  EXPECT_THROW(
+      {
+        try
+        {
+          LibtorchRLTrajectoryAssembler assembler(1, 0, true, false);
+          static_cast<void>(assembler);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()), "The RL trajectory timestep window must be at least 1.");
+          throw;
+        }
+      },
+      std::exception);
 }
 
 } // namespace

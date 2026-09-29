@@ -16,6 +16,7 @@
 #include "LibtorchObservationHistoryHelper.h"
 #include "LibtorchRLMiniBatchSampler.h"
 #include "LibtorchRLPPOLoss.h"
+#include "LibtorchRLTrajectoryAssembler.h"
 #include "LibtorchRLTrajectoryBuffer.h"
 #include "LibtorchRLValueEstimator.h"
 
@@ -253,41 +254,11 @@ private:
    */
   void collectTrajectoriesFromReporters();
 
-  /**
-   * Figure out how many aligned transitions a raw reporter sequence contains.
-   * @param raw_sequence_size Number of raw time entries in the reporter sequence.
-   * @return Number of valid transitions after history stacking and downsampling.
-   */
-  unsigned int computeNumTransitions(std::size_t raw_sequence_size) const;
-
-  /**
-   * Downsample one raw reporter sequence into the aligned rollout sequence we train on.
-   * @param sample Raw reporter sequence.
-   * @param offset Starting offset used for the aligned sequence.
-   * @param num_entries Number of aligned entries to extract.
-   * @return Downsampled sequence.
-   */
-  std::vector<Real> extractDownsampledSequence(const std::vector<Real> & sample,
-                                               unsigned int offset,
-                                               unsigned int num_entries) const;
-
-  /**
-   * Average one raw reporter sequence over aligned timestep windows.
-   * @param sample Raw reporter sequence.
-   * @param num_entries Number of action-window reward entries to compute.
-   * @return Window-averaged sequence.
-   */
-  std::vector<Real> extractWindowAveragedSequence(const std::vector<Real> & sample,
-                                                  unsigned int num_entries) const;
-
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
 
-  /// Reporter downsampling stride used while assembling rollout trajectories
-  unsigned int _timestep_window;
-
-  /// Shared observation history stacking and factor-expansion helper
-  const LibtorchObservationHistoryHelper _observation_history;
+  /// Builds rollout trajectories from the raw reporter sequences
+  const LibtorchRLTrajectoryAssembler _trajectory_assembler;
   /// Accumulated on-policy rollout data waiting to be flattened and trained on
   LibtorchRLTrajectoryBuffer _trajectory_buffer;
   /// Mini-batch sampler used to split flattened rollout data for PPO updates

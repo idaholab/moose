@@ -127,8 +127,13 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<Real>(
       "entropy_coeff", 0.01, "Entropy bonus coefficient used in the PPO actor loss.");
 
-  params.addParam<unsigned int>(
-      "timestep_window", 1, "Use every nth reporter timestep when assembling trajectories.");
+  params.addRangeCheckedParam<unsigned int>(
+      "timestep_window",
+      1,
+      "1<=timestep_window",
+      "Use every nth reporter timestep when assembling trajectories. Observation history lags "
+      "also span this many timesteps, so it should match the controller's "
+      "'num_steps_in_period'.");
   params.addParam<bool>("average_reward_over_timestep_window",
                         false,
                         "Average reward reporter values over each timestep_window interval instead "
@@ -180,8 +185,10 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _highest_reward(-1e8),
     _entropy_coeff(getParam<Real>("entropy_coeff")),
     _update_counter(_update_frequency),
-    _timestep_window(getParam<unsigned int>("timestep_window")),
-    _observation_history(_input_timesteps),
+    _trajectory_assembler(_input_timesteps,
+                          getParam<unsigned int>("timestep_window"),
+                          _shift_outputs,
+                          _average_reward_over_timestep_window),
     _sampler(LibtorchRLMiniBatchSampler()),
     _value_estimator(_decay_factor, _lambda_factor),
     _ppo_loss(_clip_param, _entropy_coeff)
@@ -211,10 +218,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   getReporterPointers(_log_probability_names, _log_probability_value_pointers);
 
   bool filename_valid = isParamValid("filename_base");
+  const LibtorchObservationHistoryHelper observation_history(_input_timesteps);
   const auto input_shift_factors =
-      _observation_history.expandObservationFactors(_state_shift_factors);
+      observation_history.expandObservationFactors(_state_shift_factors);
   const auto input_scaling_factors =
-      _observation_history.expandObservationFactors(_state_scaling_factors);
+      observation_history.expandObservationFactors(_state_scaling_factors);
 
   // Initializing the control neural net so that the control can grab it right away
   _control_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
@@ -447,115 +455,12 @@ LibtorchDRLControlTrainer::resetData()
 void
 LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
 {
-  for (const auto sample_i : index_range(*_reward_value_pointer))
-  {
-    const auto & reward_sample = (*_reward_value_pointer)[sample_i];
-    const auto num_transitions = computeNumTransitions(reward_sample.size());
-    if (!num_transitions)
-      continue;
-
-    std::vector<std::vector<Real>> component_trajectories(_state_names.size());
-    for (const auto state_i : index_range(_state_value_pointers))
-      component_trajectories[state_i] = extractDownsampledSequence(
-          (*_state_value_pointers[state_i])[sample_i], 0, num_transitions + 1);
-
-    LibtorchRLTrajectoryBuffer::Trajectory trajectory;
-    trajectory.observations.reserve(num_transitions);
-    trajectory.next_observations.reserve(num_transitions);
-    trajectory.actions.assign(num_transitions, std::vector<Real>());
-    trajectory.log_probabilities.assign(num_transitions, std::vector<Real>());
-
-    for (auto & action_row : trajectory.actions)
-      action_row.reserve(_action_names.size());
-    for (auto & log_probability_row : trajectory.log_probabilities)
-      log_probability_row.reserve(_log_probability_names.size());
-
-    for (const auto step_i : make_range(num_transitions))
-    {
-      trajectory.observations.push_back(
-          _observation_history.stackTrajectoryObservation(component_trajectories, step_i));
-      trajectory.next_observations.push_back(
-          _observation_history.stackTrajectoryObservation(component_trajectories, step_i + 1));
-    }
-
-    for (const auto action_i : index_range(_action_value_pointers))
-    {
-      const auto action_sequence = extractDownsampledSequence(
-          (*_action_value_pointers[action_i])[sample_i], _shift_outputs, num_transitions);
-      const auto log_probability_sequence = extractDownsampledSequence(
-          (*_log_probability_value_pointers[action_i])[sample_i], _shift_outputs, num_transitions);
-
-      for (const auto step_i : make_range(num_transitions))
-      {
-        trajectory.actions[step_i].push_back(action_sequence[step_i]);
-        trajectory.log_probabilities[step_i].push_back(log_probability_sequence[step_i]);
-      }
-    }
-
-    trajectory.rewards =
-        _average_reward_over_timestep_window
-            ? extractWindowAveragedSequence(reward_sample, num_transitions)
-            : extractDownsampledSequence(reward_sample, _timestep_window, num_transitions);
-    // Full-solve rollout states are discarded after transfer, so GAE must stop at the boundary.
-    trajectory.terminals.assign(num_transitions, false);
-    trajectory.terminals.back() = true;
-
+  auto trajectories = _trajectory_assembler.assemble(_state_value_pointers,
+                                                     _action_value_pointers,
+                                                     _log_probability_value_pointers,
+                                                     *_reward_value_pointer);
+  for (auto & trajectory : trajectories)
     _trajectory_buffer.addTrajectory(std::move(trajectory));
-  }
-}
-
-unsigned int
-LibtorchDRLControlTrainer::computeNumTransitions(const std::size_t raw_sequence_size) const
-{
-  unsigned int num_transitions = 0;
-  for (std::size_t raw_index = 0; raw_index + _timestep_window < raw_sequence_size;
-       raw_index += _timestep_window)
-    ++num_transitions;
-
-  return num_transitions;
-}
-
-std::vector<Real>
-LibtorchDRLControlTrainer::extractDownsampledSequence(const std::vector<Real> & sample,
-                                                      const unsigned int offset,
-                                                      const unsigned int num_entries) const
-{
-  std::vector<Real> values;
-  values.reserve(num_entries);
-
-  for (const auto entry_i : make_range(num_entries))
-  {
-    const auto raw_index = offset + entry_i * _timestep_window;
-    if (raw_index >= sample.size())
-      mooseError("Reporter data is shorter than required by the configured timestep window and "
-                 "history stacking.");
-    values.push_back(sample[raw_index]);
-  }
-
-  return values;
-}
-
-std::vector<Real>
-LibtorchDRLControlTrainer::extractWindowAveragedSequence(const std::vector<Real> & sample,
-                                                         const unsigned int num_entries) const
-{
-  std::vector<Real> values;
-  values.reserve(num_entries);
-
-  for (const auto entry_i : make_range(num_entries))
-  {
-    const auto window_begin = 1 + entry_i * _timestep_window;
-    const auto window_end = window_begin + _timestep_window;
-    if (window_end > sample.size())
-      mooseError(
-          "Reporter reward data is shorter than required by the configured timestep window.");
-
-    const Real sum =
-        std::accumulate(sample.begin() + window_begin, sample.begin() + window_end, 0.0);
-    values.push_back(sum / _timestep_window);
-  }
-
-  return values;
 }
 
 void
