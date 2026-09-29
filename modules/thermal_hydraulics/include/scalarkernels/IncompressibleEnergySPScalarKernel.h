@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "ODETimeDerivative.h"
-#include "ADScalarTimeDerivative.h"
+#include "ADScalarKernel.h"
+#include "ScalarKernel.h"
 #include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;

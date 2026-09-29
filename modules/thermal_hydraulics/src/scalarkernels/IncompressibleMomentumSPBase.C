@@ -18,8 +18,7 @@ template <bool is_ad>
 InputParameters
 IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
 {
-  InputParameters params =
-      is_ad ? ADScalarTimeDerivative::validParams() : ODETimeDerivative::validParams();
+  InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
   params += FunctorInterface::validParams();
   params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
   params.addCoupledVar("temperatures",
