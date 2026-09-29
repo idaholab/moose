@@ -67,19 +67,19 @@ class TestTemplate(MooseDocsTestCase):
         self.assertHTMLTag(res(0), "h1", size=3)
         self.assertEqual(res(0).text(), "Template Extension")
         self.assertHTMLTag(res(1), "p", size=10)
-        self.assertEqual(res(1).text(), "The MOOSE project is amazing !")
+        self.assertEqual(res(1).text(), "The MOOSE project is amazing!")
 
         self.assertHTMLTag(res(2), "h2", size=5)
         self.assertEqual(res(2).text(), "Field with Defaults")
         self.assertHTMLTag(res(3), "p", size=17)
-        self.assertEqual(res(3).text(), "This is the default message , it is great .")
+        self.assertEqual(res(3).text(), "This is the default message, it is great.")
 
         self.assertHTMLTag(res(4), "h2", size=5)
         self.assertEqual(res(4).text(), "Field with Replacement")
         self.assertHTMLTag(res(5), "p", size=22)
         self.assertEqual(
             res(5).text(),
-            "This is some content that should be below the second heading .",
+            "This is some content that should be below the second heading.",
         )
 
         self.assertHTMLTag(res(6), "h2", size=7)
