@@ -35,6 +35,18 @@ linearSequence(const unsigned int size, const Real offset, const Real slope)
   return values;
 }
 
+LibtorchRLTrajectoryBuffer::Trajectory
+trajectoryWithRewards(const std::vector<Real> & rewards)
+{
+  LibtorchRLTrajectoryBuffer::Trajectory trajectory;
+  trajectory.observations.assign(rewards.size(), {0.0});
+  trajectory.next_observations.assign(rewards.size(), {0.0});
+  trajectory.actions.assign(rewards.size(), {0.0});
+  trajectory.log_probabilities.assign(rewards.size(), {0.0});
+  trajectory.rewards = rewards;
+  return trajectory;
+}
+
 TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
 {
   LibtorchObservationHistoryHelper history(3);
@@ -339,6 +351,27 @@ TEST(LibtorchRLCoreTest, TrajectoryAssemblerRejectsZeroTimestepWindow)
         }
       },
       std::exception);
+}
+
+TEST(LibtorchRLCoreTest, TrajectoryBufferRewardStatisticsIncludeSpreadBetweenTrajectories)
+{
+  LibtorchRLTrajectoryBuffer buffer;
+  buffer.addTrajectory(trajectoryWithRewards({1.0, 3.0}));
+  buffer.addTrajectory(trajectoryWithRewards({5.0}));
+
+  const auto statistics = buffer.rewardStatistics();
+
+  // The overall mean is 3, so the squared deviations are 4, 0, and 4.
+  EXPECT_NEAR(statistics.mean, 3.0, 1e-12);
+  EXPECT_NEAR(statistics.std, std::sqrt(8.0 / 3.0), 1e-12);
+  EXPECT_EQ(statistics.trajectory_means, std::vector<Real>({2.0, 5.0}));
+  EXPECT_EQ(statistics.trajectory_stds, std::vector<Real>({1.0, 0.0}));
+
+  buffer.clear();
+  const auto empty_statistics = buffer.rewardStatistics();
+  EXPECT_EQ(empty_statistics.mean, 0.0);
+  EXPECT_EQ(empty_statistics.std, 0.0);
+  EXPECT_TRUE(empty_statistics.trajectory_means.empty());
 }
 
 } // namespace

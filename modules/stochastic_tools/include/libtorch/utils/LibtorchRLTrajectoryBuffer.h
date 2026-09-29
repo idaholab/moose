@@ -74,6 +74,21 @@ public:
   };
 
   /**
+   * Reward statistics over the stored trajectories.
+   */
+  struct RewardStatistics
+  {
+    /// Mean reward over every stored transition.
+    Real mean = 0.0;
+    /// Standard deviation of every stored transition reward about the overall mean.
+    Real std = 0.0;
+    /// Mean reward of each non-empty trajectory.
+    std::vector<Real> trajectory_means;
+    /// Reward standard deviation of each non-empty trajectory about its own mean.
+    std::vector<Real> trajectory_stds;
+  };
+
+  /**
    * Append one trajectory to the on-policy buffer.
    * @param trajectory Trajectory to store.
    */
@@ -115,6 +130,12 @@ public:
    * @return Tensor batch ready for mini-batch sampling.
    */
   TensorBatch flatten() const;
+
+  /**
+   * Compute reward statistics over the stored trajectories.
+   * @return Overall and per-trajectory reward means and standard deviations.
+   */
+  RewardStatistics rewardStatistics() const;
 
 private:
   /**

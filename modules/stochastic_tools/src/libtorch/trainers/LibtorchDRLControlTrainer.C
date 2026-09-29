@@ -12,9 +12,6 @@
 #include "LibtorchDRLControlTrainer.h"
 #include "LibtorchRandomUtils.h"
 
-#include <cmath>
-#include <numeric>
-
 registerMooseObject("StochasticToolsApp", LibtorchDRLControlTrainer);
 
 InputParameters
@@ -177,6 +174,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _shift_outputs(getParam<bool>("shift_outputs")),
     _average_reward_over_timestep_window(getParam<bool>("average_reward_over_timestep_window")),
     _average_episode_reward(0.0),
+    _std_episode_reward(0.0),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
     _seed(getParam<unsigned int>("seed")),
@@ -326,55 +324,11 @@ LibtorchDRLControlTrainer::execute()
 void
 LibtorchDRLControlTrainer::computeEpisodeRewardStatistics()
 {
-  if (_trajectory_buffer.empty())
-  {
-    _average_episode_reward = 0.0;
-    _std_episode_reward = 0.0;
-    _sample_average_episode_reward.clear();
-    _sample_std_episode_reward.clear();
-    return;
-  }
-
-  _average_episode_reward = 0.0;
-  _std_episode_reward = 0.0;
-  unsigned int combined_sizes = 0;
-
-  _sample_average_episode_reward.clear();
-  _sample_std_episode_reward.clear();
-
-  for (const auto & trajectory : _trajectory_buffer.trajectories())
-  {
-    const auto & sample = trajectory.rewards;
-    const unsigned int sample_size = sample.size();
-    if (!sample_size)
-      continue;
-
-    const Real sum = std::accumulate(sample.begin(), sample.end(), 0.0);
-    const Real mean = sum / sample_size;
-    _sample_average_episode_reward.push_back(mean);
-
-    const Real variance =
-        std::transform_reduce(sample.begin(),
-                              sample.end(),
-                              0.0,
-                              std::plus<>(),
-                              [mean](const Real value) { return (value - mean) * (value - mean); });
-    _sample_std_episode_reward.push_back(std::sqrt(variance / sample_size));
-
-    _average_episode_reward += sum;
-    _std_episode_reward += variance;
-    combined_sizes += sample_size;
-  }
-
-  if (!combined_sizes)
-  {
-    _average_episode_reward = 0.0;
-    _std_episode_reward = 0.0;
-    return;
-  }
-
-  _average_episode_reward /= combined_sizes;
-  _std_episode_reward = std::sqrt(_std_episode_reward / combined_sizes);
+  const auto statistics = _trajectory_buffer.rewardStatistics();
+  _average_episode_reward = statistics.mean;
+  _std_episode_reward = statistics.std;
+  _sample_average_episode_reward = statistics.trajectory_means;
+  _sample_std_episode_reward = statistics.trajectory_stds;
 }
 
 void

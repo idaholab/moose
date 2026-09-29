@@ -15,6 +15,10 @@
 
 #include "libmesh/utility.h"
 
+#include <cmath>
+#include <functional>
+#include <numeric>
+
 namespace
 {
 
@@ -137,6 +141,50 @@ LibtorchRLTrajectoryBuffer::flatten() const
   batch.advantages = bufferVectorToColumnTensor(advantages);
 
   return batch;
+}
+
+LibtorchRLTrajectoryBuffer::RewardStatistics
+LibtorchRLTrajectoryBuffer::rewardStatistics() const
+{
+  RewardStatistics statistics;
+
+  const auto num_transitions = numTransitions();
+  if (!num_transitions)
+    return statistics;
+
+  const auto squared_deviation_sum = [](const std::vector<Real> & values, const Real mean)
+  {
+    return std::transform_reduce(values.begin(),
+                                 values.end(),
+                                 0.0,
+                                 std::plus<>(),
+                                 [mean](const Real value)
+                                 { return (value - mean) * (value - mean); });
+  };
+
+  Real reward_sum = 0.0;
+  for (const auto & trajectory : _trajectories)
+  {
+    const auto & rewards = trajectory.rewards;
+    if (rewards.empty())
+      continue;
+
+    const Real trajectory_sum = std::accumulate(rewards.begin(), rewards.end(), 0.0);
+    const Real trajectory_mean = trajectory_sum / rewards.size();
+    statistics.trajectory_means.push_back(trajectory_mean);
+    statistics.trajectory_stds.push_back(
+        std::sqrt(squared_deviation_sum(rewards, trajectory_mean) / rewards.size()));
+    reward_sum += trajectory_sum;
+  }
+  statistics.mean = reward_sum / num_transitions;
+
+  // The deviations are taken about the overall mean so the spread between trajectories counts.
+  Real overall_squared_deviation_sum = 0.0;
+  for (const auto & trajectory : _trajectories)
+    overall_squared_deviation_sum += squared_deviation_sum(trajectory.rewards, statistics.mean);
+  statistics.std = std::sqrt(overall_squared_deviation_sum / num_transitions);
+
+  return statistics;
 }
 
 void
