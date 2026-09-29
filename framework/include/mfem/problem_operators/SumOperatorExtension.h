@@ -72,6 +72,13 @@ public:
     for (auto & bnfi : *_nlf->GetBNFI())
       bnfi->AssembleGradDiagonalPA(ye);
 
+    // The element restriction transposes onto local dofs, instead of true dofs. So if we are
+    // running on multiple ranks we're likely to get that elemR->Width() is the size of the
+    // locals dofs, and in general larger than diag.Size(), which is the size of the true dofs.
+    // So, when we run with multiple ranks, we may have to prolongate before we do the final
+    // element restriction.
+    mfem::Vector local_diag(elemR->Width());
+
     // ElementRestriction applies orientation sign flips, which H(curl) and H(div) spaces carry
     // on shared DoFs. A diagonal needs those signs squared, so the unsigned transpose is the
     // correct one here; restrictions without signs need no such correction.
@@ -79,9 +86,19 @@ public:
         dynamic_cast<const mfem::ElementRestriction *>(elemR);
 
     if (signed_restriction)
-      signed_restriction->AbsMultTranspose(ye, diag);
+      signed_restriction->AbsMultTranspose(ye, local_diag);
     else
-      elemR->MultTranspose(ye, diag);
+      elemR->MultTranspose(ye, local_diag);
+
+    const mfem::Operator * P = _nlf->FESpace()->GetProlongationMatrix();
+    if (!P || mfem::IsIdentityProlongation(P))
+      diag = local_diag;
+
+    else if (_nlf->FESpace()->Conforming())
+      P->MultTranspose(local_diag, diag);
+
+    else
+      mooseError("Nonconforming mesh unsupported!");
   }
 
   void AssembleDiagonal(mfem::Vector & diag) const override
