@@ -70,6 +70,21 @@
                   "after recovering a DRL controller partway through a multi-step control period."
     capabilities = 'libtorch'
   []
+  [read-parameters-bounded]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = parameter_read_bounded.csv
+    # mynet_control_bounded.net is an untrained Beta actor with the architecture of src_control,
+    # saved by the LibtorchDRLControlTrainer in transfers/sampler_drl_control_transfer/trainer.i.
+    # With action_scaling_factors = 100, the bounds limit left_flux to [-100, 100], narrower than
+    # the range the unbounded controller reaches in parameter_read.csv.
+    cli_args = "Controls/src_control/filename='mynet_control_bounded.net' "
+               "Controls/src_control/min_control_value=-1 Controls/src_control/max_control_value=1 "
+               "Outputs/file_base='parameter_read_bounded'"
+    requirement = "The system shall be able to control a transient process with a bounded neural "
+                  "network read from a parameter file, sampling each action within the bounds."
+    capabilities = 'libtorch'
+  []
   [without-nn]
     type = CSVDiff
     input = libtorch_drl_control.i
