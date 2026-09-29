@@ -26,9 +26,15 @@ when a new policy action is needed.
 If [!param](/Controls/LibtorchDRLControl/stochastic) is `true`, the action is
 sampled from the actor distribution and the corresponding log probabilities are
 stored for PPO training. If it is `false`, the deterministic actor output is
-used instead. The policy evaluation can be reused across multiple controller
-executions with [!param](/Controls/LibtorchDRLControl/num_steps_in_period), so a
-new action is only sampled every configured number of executions.
+used instead. The policy evaluation can be reused across multiple time steps
+with [!param](/Controls/LibtorchDRLControl/num_steps_in_period). For
+`num_steps_in_period = P`, the actor is evaluated on steps
+$1, P+1, 2P+1, \ldots$, and the action is held in between. A transfer that
+executes the control before the first time step also triggers an evaluation at
+step 0. The observation history only advances when the actor is evaluated, so
+consecutive entries of the stacked input are one control period apart. Set
+[!param](/Trainers/LibtorchDRLControlTrainer/timestep_window) on the trainer to
+the same value so that it rebuilds the observations the controller used.
 
 The applied control can also be relaxed with
 [!param](/Controls/LibtorchDRLControl/smoother):

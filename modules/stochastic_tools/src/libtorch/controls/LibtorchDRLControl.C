@@ -34,7 +34,8 @@ LibtorchDRLControl::validParams()
       "num_steps_in_period",
       1,
       "1<=num_steps_in_period",
-      "Number of controller executions between policy evaluations.");
+      "Number of time steps between policy evaluations. The observation history advances once "
+      "per period, so the trainer's 'timestep_window' should match this value.");
   params.addParam<Real>(
       "smoother", 1.0, "Relaxation factor applied when smoothing control updates.");
 
@@ -77,8 +78,6 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _policy_generator(Moose::makeLibtorchCPUGenerator()),
     _policy_generator_state(declareRestartableData<std::vector<std::uint8_t>>(
         "policy_generator_state", std::vector<std::uint8_t>())),
-    _executions_until_next_policy_evaluation(
-        declareRestartableData<unsigned int>("executions_until_next_policy_evaluation", 0)),
     _num_steps_in_period(getParam<unsigned int>("num_steps_in_period")),
     _smoother(getParam<Real>("smoother")),
     _stochastic(getParam<bool>("stochastic"))
@@ -156,8 +155,10 @@ LibtorchDRLControl::execute()
     return;
   }
 
-  mooseAssert(_current_execute_flag == EXEC_TIMESTEP_BEGIN,
-              "LibtorchDRLControl should only execute on TIMESTEP_BEGIN.");
+  // Transfers also execute the control once at step 0, before the transient starts.
+  mooseAssert(_current_execute_flag == EXEC_TIMESTEP_BEGIN || _t_step == 0,
+              "LibtorchDRLControl should only execute on TIMESTEP_BEGIN or from a transfer "
+              "before the first time step.");
 
   const unsigned int n_controls = _control_names.size();
   const bool first_control_execution = _old_observations.empty();
@@ -186,6 +187,10 @@ LibtorchDRLControl::execute()
       _current_control_signal_log_probabilities.assign(n_controls, 0.0);
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+
+    // The history only advances on evaluations, so each lag spans one period. This matches the
+    // trainer, which stacks observations sampled every timestep_window steps.
+    _observation_history.advanceHistory(_current_observation, _old_observations);
   }
 
   _previous_control_signal = _current_smoothed_signal;
@@ -196,8 +201,6 @@ LibtorchDRLControl::execute()
         _smoother * (_current_control_signals[i] - _previous_control_signal[i]);
 
   applyControlSignals();
-
-  _observation_history.advanceHistory(_current_observation, _old_observations);
 }
 
 Real
@@ -244,16 +247,13 @@ LibtorchDRLControl::setPolicySampleSeed(const uint64_t seed)
 }
 
 bool
-LibtorchDRLControl::shouldEvaluatePolicy()
+LibtorchDRLControl::shouldEvaluatePolicy() const
 {
-  if (_executions_until_next_policy_evaluation == 0)
-  {
-    _executions_until_next_policy_evaluation = _num_steps_in_period - 1;
+  // Evaluate at step 0 and on the first step of every period: 1, P + 1, 2P + 1, ... Tying the
+  // schedule to the time step keeps it aligned with the trainer's reporter downsampling.
+  if (_t_step <= 0)
     return true;
-  }
-
-  --_executions_until_next_policy_evaluation;
-  return false;
+  return (static_cast<unsigned int>(_t_step) - 1) % _num_steps_in_period == 0;
 }
 
 void

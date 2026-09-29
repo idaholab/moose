@@ -35,6 +35,41 @@
                   "a seeded DRL controller from a checkpoint."
     capabilities = 'libtorch'
   []
+  [read-parameters-period]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = parameter_read_period.csv
+    cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period'"
+    requirement = "The system shall be able to hold a DRL control signal over a multi-step control "
+                  "period and advance the observation history once per period."
+    capabilities = 'libtorch'
+  []
+  [read-parameters-period-half-transient]
+    type = RunApp
+    input = libtorch_drl_control.i
+    cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period' "
+               "Outputs/checkpoint=true --test-checkpoint-half-transient"
+    recover = false
+    restep = false
+    prereq = read-parameters-period
+    requirement = "The system shall be able to checkpoint a DRL controller partway through a "
+                  "multi-step control period."
+    capabilities = 'libtorch'
+  []
+  [read-parameters-period-recover]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = parameter_read_period.csv
+    cli_args = "Controls/src_control/num_steps_in_period=2 Outputs/file_base='parameter_read_period' "
+               "--recover parameter_read_period_cp/LATEST"
+    recover = false
+    restep = false
+    delete_output_before_running = false
+    prereq = read-parameters-period-half-transient
+    requirement = "The system shall reproduce the same held control signal and observation history "
+                  "after recovering a DRL controller partway through a multi-step control period."
+    capabilities = 'libtorch'
+  []
   [without-nn]
     type = CSVDiff
     input = libtorch_drl_control.i

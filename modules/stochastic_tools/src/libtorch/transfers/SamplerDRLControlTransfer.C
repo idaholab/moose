@@ -12,6 +12,8 @@
 #include "SamplerDRLControlTransfer.h"
 #include "LibtorchDRLControl.h"
 
+#include <numeric>
+
 registerMooseObject("StochasticToolsApp", SamplerDRLControlTransfer);
 
 InputParameters
@@ -57,18 +59,11 @@ SamplerDRLControlTransfer::execute()
       // Get the control neural net from the trainer
       const Moose::LibtorchActorNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
-      // Get the control object from the other app
-      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      auto & control_warehouse = app_problem.getControlWarehouse();
-      std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
-      LibtorchDRLControl * control_object = dynamic_cast<LibtorchDRLControl *>(control_ptr.get());
-
-      if (!control_object)
-        paramError("control_name", "The given control is not a LibtorchDRLControl!");
+      LibtorchDRLControl & control_object = getDRLControl(i);
 
       // Copy and the neural net and execute it to get the initial values
-      control_object->loadControlNeuralNet(trainer_nn);
-      control_object->execute();
+      control_object.loadControlNeuralNet(trainer_nn);
+      control_object.execute();
     }
   }
 }
@@ -108,20 +103,86 @@ SamplerDRLControlTransfer::executeToMultiapp()
     // Get the control neural net from the trainer
     const Moose::LibtorchActorNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
-    // Get the control object from the other app
-    FEProblemBase & app_problem = _multi_app->appProblemBase(_app_index);
-    auto & control_warehouse = app_problem.getControlWarehouse();
-    std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
-    LibtorchDRLControl * control_object = dynamic_cast<LibtorchDRLControl *>(control_ptr.get());
-
-    if (!control_object)
-      paramError("control_name", "The given control is not a LibtorchDRLControl!");
+    LibtorchDRLControl & control_object = getDRLControl(_app_index);
 
     // Copy and the neural net and execute it to get the initial values
-    control_object->loadControlNeuralNet(trainer_nn);
-    control_object->setPolicySampleSeed(sample_seed);
-    control_object->execute();
+    control_object.loadControlNeuralNet(trainer_nn);
+    control_object.setPolicySampleSeed(sample_seed);
+    control_object.execute();
   }
+}
+
+LibtorchDRLControl &
+SamplerDRLControlTransfer::getDRLControl(const unsigned int app_index)
+{
+  // Get the control object from the other app
+  FEProblemBase & app_problem = _multi_app->appProblemBase(app_index);
+  auto & control_warehouse = app_problem.getControlWarehouse();
+  std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
+  LibtorchDRLControl * control_object = dynamic_cast<LibtorchDRLControl *>(control_ptr.get());
+
+  if (!control_object)
+    paramError("control_name", "The given control is not a LibtorchDRLControl!");
+
+  // The trainer builds one transition and one history lag per timestep_window steps, so any
+  // other window mixes held actions or skips policy evaluations made by the control.
+  const unsigned int timestep_window = _trainer.timestepWindow();
+  const unsigned int num_steps_in_period = control_object->numStepsInPeriod();
+  if (timestep_window != num_steps_in_period)
+  {
+    const auto divisor = std::gcd(timestep_window, num_steps_in_period);
+    const auto numerator = std::to_string(timestep_window / divisor);
+    const auto denominator = num_steps_in_period / divisor;
+    const std::string ratio = denominator == 1
+                                  ? numerator + " times"
+                                  : numerator + "/" + std::to_string(denominator) + " of";
+    paramError("control_name",
+               "The trainer '",
+               _trainer.name(),
+               "' has timestep_window = ",
+               timestep_window,
+               ", which is ",
+               ratio,
+               " this control's num_steps_in_period = ",
+               num_steps_in_period,
+               ". They must be equal so that each training transition corresponds to exactly one "
+               "policy evaluation.");
+  }
+
+  if (_trainer.inputTimesteps() != control_object->inputTimesteps())
+    paramError("control_name",
+               "The trainer '",
+               _trainer.name(),
+               "' has input_timesteps = ",
+               _trainer.inputTimesteps(),
+               ", but this control has input_timesteps = ",
+               control_object->inputTimesteps(),
+               ". They must be equal so that the control stacks the same observation history "
+               "that the actor was trained on.");
+
+  if (_trainer.numberOfObservations() != control_object->numberOfObservations())
+    paramError("control_name",
+               "The trainer '",
+               _trainer.name(),
+               "' reads ",
+               _trainer.numberOfObservations(),
+               " observation(s), but this control reads ",
+               control_object->numberOfObservations(),
+               ". They must be equal so that the actor receives the observations it was trained "
+               "on.");
+
+  if (_trainer.numberOfControlSignals() != control_object->numberOfControlSignals())
+    paramError("control_name",
+               "The trainer '",
+               _trainer.name(),
+               "' produces ",
+               _trainer.numberOfControlSignals(),
+               " control signal(s), but this control sets ",
+               control_object->numberOfControlSignals(),
+               " parameter(s). They must be equal so that each actor output drives exactly one "
+               "controllable parameter.");
+
+  return *control_object;
 }
 
 void

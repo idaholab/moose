@@ -82,6 +82,26 @@ public:
    */
   unsigned int seed() const { return _seed; }
 
+  /**
+   * Return the number of raw reporter entries per training transition.
+   */
+  unsigned int timestepWindow() const { return getParam<unsigned int>("timestep_window"); }
+
+  /**
+   * Return the number of observation time levels stacked into the network inputs.
+   */
+  unsigned int inputTimesteps() const { return _input_timesteps; }
+
+  /**
+   * Return the number of observation reporters read at each time level.
+   */
+  unsigned int numberOfObservations() const { return _state_names.size(); }
+
+  /**
+   * Return the number of control signals produced by the actor.
+   */
+  unsigned int numberOfControlSignals() const { return _action_names.size(); }
+
 protected:
   /**
    * Compute the average episodic reward statistics for the latest samples.

@@ -29,6 +29,10 @@ control is applied at the beginning of a time step and the reward is measured at
 the end of that step. The
 [!param](/Trainers/LibtorchDRLControlTrainer/timestep_window) option can be used
 to downsample long reporter trajectories before these transitions are assembled.
+For `timestep_window = W`, the trainer keeps every $W$-th reporter entry, so
+consecutive entries of the stacked history $o_t$ are $W$ time steps apart. $W$
+should match [!param](/Controls/LibtorchDRLControl/num_steps_in_period) on the
+controller, which advances its observation history once per control period.
 
 The critic is first evaluated on $o_t$ and $o_{t+1}$, and the temporal-difference
 residual is computed as

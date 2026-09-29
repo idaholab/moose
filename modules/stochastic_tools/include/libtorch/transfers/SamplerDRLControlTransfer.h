@@ -17,6 +17,8 @@
 #include "StochasticToolsTransfer.h"
 #include "SurrogateModelInterface.h"
 
+class LibtorchDRLControl;
+
 /**
  * Transfers a trained DRL controller from a trainer to controls on sampler subapps.
  */
@@ -75,6 +77,14 @@ public:
   virtual void finalizeToMultiapp() override;
 
 protected:
+  /**
+   * Find the DRL control on a local subapp and check that its control period, observation
+   * history length, number of observations, and number of control signals match the trainer's.
+   * @param app_index Global index of the local subapp.
+   * @return The DRL control on the subapp.
+   */
+  LibtorchDRLControl & getDRLControl(unsigned int app_index);
+
   /// The name of the control object on the other app where we want to copy our neural net
   const std::string _control_name;
 

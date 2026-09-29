@@ -1,0 +1,63 @@
+[Tests]
+  issues = '#19571'
+  design = 'LibtorchDRLControlTrainer.md DRLRewardReporter.md'
+  [mismatch]
+    requirement = "The system shall report an error when a DRL trainer and the DRL controller that "
+                  "receives its policy differ in"
+    [period-multiple]
+      type = RunException
+      input = trainer.i
+      cli_args = "Trainers/nn_trainer/timestep_window=4"
+      expect_err = "The trainer 'nn_trainer' has timestep_window = 4, which is 2 times this "
+                   "control's num_steps_in_period = 2."
+      detail = "the timestep window and control period, stating the window as a multiple of the "
+               "period,"
+      capabilities = 'libtorch'
+    []
+    [period-fraction]
+      type = RunException
+      input = trainer.i
+      cli_args = "Trainers/nn_trainer/timestep_window=1"
+      expect_err = "The trainer 'nn_trainer' has timestep_window = 1, which is 1/2 of this "
+                   "control's num_steps_in_period = 2."
+      detail = "the timestep window and control period, stating the window as a fraction of the "
+               "period,"
+      capabilities = 'libtorch'
+    []
+    [input-timesteps]
+      type = RunException
+      input = trainer.i
+      cli_args = "Trainers/nn_trainer/input_timesteps=3"
+      expect_err = "The trainer 'nn_trainer' has input_timesteps = 3, but this control has "
+                   "input_timesteps = 2."
+      detail = "the number of stacked observation time steps,"
+      capabilities = 'libtorch'
+    []
+    [observation-count]
+      type = RunException
+      input = trainer.i
+      cli_args = "Trainers/nn_trainer/observation='storage/r_transfer:T_reporter:center_temp_tend:value "
+                 "storage/r_transfer:T_reporter:reward:value' "
+                 "Trainers/nn_trainer/observation_scaling_factors='0.03 1' "
+                 "Trainers/nn_trainer/observation_shift_factors='270 0'"
+      expect_err = "The trainer 'nn_trainer' reads 2 observation\(s\), but this control reads 1."
+      detail = "the number of observations, or"
+      capabilities = 'libtorch'
+    []
+    [control-count]
+      type = RunException
+      input = trainer.i
+      cli_args = "Trainers/nn_trainer/control='storage/r_transfer:T_reporter:left_flux:value "
+                 "storage/r_transfer:T_reporter:left_flux:value' "
+                 "Trainers/nn_trainer/log_probability='storage/r_transfer:T_reporter:log_prob_left_flux:value "
+                 "storage/r_transfer:T_reporter:log_prob_left_flux:value' "
+                 "Trainers/nn_trainer/action_scaling_factors='100 100' "
+                 "Trainers/nn_trainer/min_control_value='0 0' "
+                 "Trainers/nn_trainer/max_control_value='2 2'"
+      expect_err = "The trainer 'nn_trainer' produces 2 control signal\(s\), but this control sets 1 "
+                   "parameter\(s\)."
+      detail = "the number of control signals."
+      capabilities = 'libtorch'
+    []
+  []
+[]

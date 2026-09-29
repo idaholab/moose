@@ -76,6 +76,21 @@ public:
    */
   void setPolicySampleSeed(uint64_t seed);
 
+  /**
+   * Return the number of time steps between policy evaluations.
+   */
+  unsigned int numStepsInPeriod() const { return _num_steps_in_period; }
+
+  /**
+   * Return the number of observation time levels stacked into the actor input.
+   */
+  unsigned int inputTimesteps() const { return _input_timesteps; }
+
+  /**
+   * Return the number of observations read at each time level.
+   */
+  unsigned int numberOfObservations() const { return _observation_names.size(); }
+
 protected:
   /**
    * Apply the current smoothed control signals, including optional offsets.
@@ -108,9 +123,7 @@ protected:
   /// Restartable serialized state for the owned policy-sampling generator.
   std::vector<std::uint8_t> & _policy_generator_state;
 
-  /// Number of controller executions remaining before the next policy evaluation.
-  unsigned int & _executions_until_next_policy_evaluation;
-  /// Number of controller executions between policy evaluations.
+  /// Number of time steps between policy evaluations.
   const unsigned int _num_steps_in_period;
   /// Relaxation factor applied while smoothing control updates.
   const Real _smoother;
@@ -119,9 +132,9 @@ protected:
 
 private:
   /**
-   * Advance the reuse schedule and report whether this execution should evaluate the policy.
+   * Report whether the policy is evaluated at the current time step.
    */
-  bool shouldEvaluatePolicy();
+  bool shouldEvaluatePolicy() const;
 
   /**
    * Restore the owned libtorch generator state from restartable storage.
