@@ -78,22 +78,24 @@ X_j = \frac{V_j}{\bar{V}},
 
 where $V_i$ and $V_j$ are the axial velocities of the neighboring subchannels and $\bar{V}$ is the bundle bulk velocity.
 
-For the turbulent regime, the flow-split dependence is evaluated from
+For the turbulent regime, the flow-split dependence is evaluated from Eq. (31) of [!cite](pacio2022analysis):
 
 !equation
 W_{mT} =
 \frac{8.8}{Re^{0.18}}
 \frac{X_i^{\,2-0.18}-X_j^{\,2-0.18}}
-     {X_i-X_j} .
+     {X_i^2-X_j^2} .
+
+The denominator is $X_i^2-X_j^2$ rather than the $X_i-X_j$ of Eq. (32) of [!cite](pacio2022analysis), which is the effective crossflow and already includes the mean velocity of the two subchannels. SCM applies that mean velocity to the mixing parameter through the average mass flux of the gap.
 
 When $X_i = X_j$, the limiting value of the fractional term is used to avoid division by zero:
 
 !equation
 \lim_{X_j\rightarrow X_i}
 \frac{X_i^{1.82}-X_j^{1.82}}
-     {X_i-X_j}
+     {X_i^2-X_j^2}
 =
-1.82 X_i^{0.82} .
+0.91 X_i^{-0.18} .
 
 For the Pacio parameterization, the transition limits are
 
@@ -127,7 +129,15 @@ For both center-edge and edge-corner interfaces, the Pacio mixing parameter uses
 \beta =
 C_m
 \left(\frac{A_{r2}}{A'_2}\right)^{1/2}
-\tan\theta .
+\tan\theta
+\frac{\Pi_{gap}}{g} .
+
+The last factor adapts the lumped crossflow of [!cite](pacio2022analysis) to the gaps of SCM. In the PCTD model, the effective crossflow between all subchannels of two types is $\beta$ times the contact perimeter $\Pi_{ij}$ between them, Eqs. (30), (A.24), and (A.25) of [!cite](pacio2022analysis), while SCM multiplies $\beta$ by the width $g$ of each gap. $\Pi_{gap}$ is the contact perimeter per gap, so that the sum over the gaps of SCM gives the crossflow of PCTD:
+
+- center-edge gaps: $\Pi_{12} = 6 n \left(P - D - D_w/6\right)$ over the $6 n$ pin-pin gaps of width $g = P - D$, so $\Pi_{gap} = P - D - D_w/6$;
+- edge-corner gaps: $\Pi_{23} = \left[12 \left(W - D\right) - D_w/6\right]/2$ over the 12 pin-duct gaps of width $g = W - D$, so $\Pi_{gap} = \left(W - D\right)/2 - D_w/144$,
+
+where $n$ is the number of pin rings around the center pin and $W - D$ is the pin-to-duct gap. The text of [!cite](pacio2022analysis) states that half of the geometric perimeter is used for $\Pi_{12}$, while its Eqs. (A.24) and (A.25) apply the factor of one half to $\Pi_{23}$; the equations are used here.
 
 The Pacio mixing treatment is therefore applied according to the following interface behavior:
 

@@ -12,13 +12,21 @@ subchannel-opt -i tri_bare.i
 subchannel-opt -i tri_wire.i
 subchannel-opt -i tri_wire.i SCMClosures/Chen/friction_model=Pacio \
     Outputs/file_base=tri_wire_pacio_out
+subchannel-opt -i XX09_SS17.i
+subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio \
+    Outputs/file_base=XX09_SS17_pacio_out
+python dassh_XX09_SS17.py
 
 Three figures are written next to this script:
 
 1. scm_friction_quad_bare.png: MATRA and Chen-Todreas, bare pins in a square lattice.
 2. scm_friction_tri_bare.png: Upgraded Chen-Todreas, bare pins in a triangular lattice.
-3. scm_friction_tri_wire.png: Upgraded and Pacio Chen-Todreas, wire-wrapped pins in a triangular
-   lattice.
+3. scm_friction_tri_wire.png: Upgraded and Pacio Chen-Todreas in SCM and Upgraded Chen-Todreas in
+   DASSH, wire-wrapped pins in a triangular lattice.
+4. scm_XX09_SS17_mdot.png, scm_XX09_SS17_T.png: subchannel mass flow rate and temperature along the
+   TTC traverse of EBR-II XX09 for SHRT-17 from SCM and DASSH.
+
+The friction factors at the Reynolds numbers of the table in the verification page are printed.
 """
 
 from pathlib import Path
@@ -91,4 +99,84 @@ save(fig, ax, "scm_friction_tri_bare.png")
 fig, ax = new_axes("Triangular lattice, wire-wrapped pins")
 plot_channels(ax, "tri_wire_out.csv", "black", "UCTD")
 plot_channels(ax, "tri_wire_pacio_out.csv", "red", "PCTD")
+plot_channels(ax, "dassh_tri_wire_out.csv", "green", "DASSH UCTD")
 save(fig, ax, "scm_friction_tri_wire.png")
+
+
+def interpolate_ff(csv, channel, Re):
+    """Friction factor of a subchannel at the local Reynolds numbers Re, interpolated in log-log"""
+    data = np.genfromtxt(DATA / csv, delimiter=",", names=True)
+    # Skip the initial condition and Re < 1, as in plot_channels
+    keep = data[f"Re_{channel}"] >= 1.0
+    return np.exp(
+        np.interp(
+            np.log(Re),
+            np.log(data[f"Re_{channel}"][keep]),
+            np.log(data[f"ff_{channel}"][keep]),
+        )
+    )
+
+
+# Rows of the friction factor comparison table in the verification page
+TABLE_RE = np.array([1.0e2, 1.0e3, 1.0e4])
+for channel in CHANNELS:
+    for csv, name in (
+        ("tri_wire_out.csv", "SCM UCTD"),
+        ("tri_wire_pacio_out.csv", "SCM PCTD"),
+        ("dassh_tri_wire_out.csv", "DASSH UCTD"),
+    ):
+        ff = interpolate_ff(csv, channel, TABLE_RE)
+        print(
+            f"| {LABELS[channel]} | {name} | "
+            + " | ".join(f"{f:.4f}" for f in ff)
+            + " |"
+        )
+
+# EBR-II XX09 SHRT-17 steady state along the TTC traverse at the TTC height
+TTC = np.arange(27, 36)
+scm_uctd = np.genfromtxt(DATA / "XX09_SS17_out.csv", delimiter=",", names=True)
+scm_pctd = np.genfromtxt(DATA / "XX09_SS17_pacio_out.csv", delimiter=",", names=True)
+dassh = np.genfromtxt(
+    DATA / "dassh_XX09_SS17_out.csv",
+    delimiter=",",
+    names=True,
+    dtype=None,
+    encoding=None,
+)
+# DASSH orients the hexagonal lattice 30 degrees apart from SCM; rotate the DASSH subchannel
+# positions and take the DASSH subchannel closest to each TTC subchannel of SCM
+angle = np.pi / 6
+rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+dassh_xy = np.column_stack((dassh["x"], dassh["y"])) @ rotation.T
+dassh_ttc = [
+    np.argmin(np.hypot(*(dassh_xy - [scm_uctd[f"x{n}"][-1], scm_uctd[f"y{n}"][-1]]).T))
+    for n in TTC
+]
+
+
+def plot_ttc(scm_name, dassh_name, ylabel, name):
+    fig, ax = plt.subplots(figsize=(7.0, 5.0))
+    ax.plot(
+        TTC,
+        [scm_uctd[f"{scm_name}{n}"][-1] for n in TTC],
+        "o-",
+        color="black",
+        label="SCM UCTD",
+    )
+    ax.plot(
+        TTC,
+        [scm_pctd[f"{scm_name}{n}"][-1] for n in TTC],
+        "s--",
+        color="red",
+        label="SCM PCTD",
+    )
+    ax.plot(TTC, dassh[dassh_name][dassh_ttc], "^:", color="green", label="DASSH UCTD")
+    ax.set_xlabel("TTC thermocouple")
+    ax.set_ylabel(ylabel)
+    ax.set_title("EBR-II XX09, SHRT-17 steady state, $z = 0.322$ m")
+    ax.grid(True, color="0.85", linewidth=0.5)
+    save(fig, ax, name)
+
+
+plot_ttc("mdot", "mdot", "Subchannel mass flow rate [kg/s]", "scm_XX09_SS17_mdot.png")
+plot_ttc("TTC", "T", "Subchannel temperature [K]", "scm_XX09_SS17_T.png")

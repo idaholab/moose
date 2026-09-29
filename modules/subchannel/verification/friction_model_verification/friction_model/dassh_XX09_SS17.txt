@@ -1,0 +1,63 @@
+########################################################################
+# DASSH model of EBR-II XX09, SHRT-17 steady state, matching
+# modules/subchannel/validation/EBR-II/XX09_SCM_SS17.i: 61 wire-wrapped
+# pins, uniform radial pin power, the same axial power shape, inlet
+# temperature, and mass flow rate. The thimble region is not modeled.
+# dassh_XX09_SS17.py writes the pin power file and runs this input.
+########################################################################
+
+[Setup]
+    [[AssemblyTables]]
+        [[[TTC]]]
+            type = coolant_subchannel
+            assemblies = 1
+            # Height of the TTC thermocouples in XX09_SCM_SS17.i
+            axial_positions = 0.322
+
+########################################################################
+
+[Power]
+    user_power = dassh_XX09_SS17_power.csv
+    # Power_initial in XX09_SCM_SS17.i
+    total_power = 486200.0
+
+########################################################################
+
+[Core]
+    # T_in in XX09_SCM_SS17.i
+    coolant_inlet_temp = 624.70556
+    coolant_material = sodium
+    # heated_length + unheated_length_exit in XX09_SCM_SS17.i
+    length = 0.612
+    # Assembly pitch of EBR-II; only sets the unused inter-assembly gap
+    assembly_pitch = 0.05893
+    # Single assembly with an adiabatic duct, as in SCM
+    gap_model = none
+    bypass_fraction = 0.0
+
+########################################################################
+
+[Assembly]
+    [[XX09]]
+        num_rings = 5
+        pin_pitch = 0.005664
+        pin_diameter = 0.004419
+        # Only used for pin temperatures, which are not compared
+        clad_thickness = 0.000381
+        wire_pitch = 0.1524
+        wire_diameter = 0.001244
+        # Inner flat-to-flat distance from XX09_SCM_SS17.i; the 1 mm wall
+        # thickness only affects conduction around the adiabatic duct
+        duct_ftf = 0.0464, 0.0484
+        duct_material = ss316
+        corr_friction = UCTD
+        corr_flowsplit = UCTD
+        corr_mixing = UCTD
+        corr_nusselt = DB
+
+########################################################################
+
+[Assignment]
+    [[ByPosition]]
+        # Mass_In in XX09_SCM_SS17.i
+        XX09 = 1, 1, 1, FLOWRATE=2.45

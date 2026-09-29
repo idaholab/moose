@@ -165,6 +165,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
 
     constexpr Real flow_split_exponent = 2.0 - 0.18;
 
+    // Flow-split term of the mixing parameter, Pacio et al. (2022) Eq. (31).
     Real fraction;
     if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
     {
@@ -174,7 +175,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
         mooseError("The Pacio mixing correlation does not support negative flow splits "
                    "when evaluating the fractional flow-split exponent.");
 
-      fraction = flow_split_exponent * std::pow(Xavg, flow_split_exponent - 1.0);
+      fraction = 0.5 * flow_split_exponent * std::pow(Xavg, flow_split_exponent - 2.0);
     }
     else
     {
@@ -182,8 +183,8 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
         mooseError("The Pacio mixing correlation does not support negative flow splits "
                    "when evaluating the fractional flow-split exponent.");
 
-      fraction =
-          (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) / (Xi - Xj);
+      fraction = (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) /
+                 (Utility::pow<2>(Xi) - Utility::pow<2>(Xj));
     }
 
     const Real WmL = 0.0;
@@ -213,7 +214,17 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
     const Real A2prime =
         pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
 
-    beta = Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta);
+    // Pacio et al. (2022) Eq. (30) multiplies beta by the contact perimeter between all subchannels
+    // of two types, Eqs. (A.24) and (A.25), while SCM multiplies beta by the width of each gap.
+    // Scale beta by the ratio of the contact perimeter per gap to the gap width, so that the sum
+    // over the gaps of SCM gives the crossflow of Pacio:
+    // - center-edge: Pi12 = 6 n (P - D - Dw / 6) over the 6 n pin-pin gaps of width P - D;
+    // - edge-corner: Pi23 = [6 (W - D) 2 - Dw / 6] / 2 over the 12 pin-duct gaps of width W - D.
+    const Real perimeter_ratio =
+        center_edge ? (pitch - pin_diameter - wire_diameter / 6.0) / (pitch - pin_diameter)
+                    : (0.5 * dpgap - wire_diameter / 144.0) / dpgap;
+
+    beta = Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta) * perimeter_ratio;
   }
   else if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
   {
