@@ -27,7 +27,8 @@ HEATED_LENGTH = 0.343
 LENGTH = 0.612
 ALPHA = 1.8012
 N_PINS = 61
-# Axial regions of constant pin power in the heated length, as the 50 axial cells of SCM
+# Axial regions of constant pin power in the heated length, finer than the SCM axial cells
+# (50 cells over 0.612 m, about 28 in the heated length)
 N_HEATED_REGIONS = 50
 
 # UCTD transition exponent lambda of Chen et al. (2018), as used by flowsplit_uctd

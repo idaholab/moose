@@ -1,7 +1,9 @@
 # EBR-II XX09 SHRT-17 steady state of validation/EBR-II/XX09_SCM_SS17.i, with the mass flow rate
 # and the position of the TTC subchannels at the TTC height for the comparison with DASSH.
-# The default friction closure is UCTD. For PCTD run:
-# subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio Outputs/file_base=XX09_SS17_pacio_out
+# The default closures are UCTD friction and Chen-Todreas (1986) mixing. For Pacio-Chen-Todreas (PCTD)
+# friction and mixing run:
+# subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio
+#   SCMClosures/Chen_Todreas/mixing_model=Pacio Outputs/file_base=XX09_SS17_pacio_out
 
 !include ../../../validation/EBR-II/XX09_SCM_SS17.i
 
@@ -9,6 +11,14 @@
 [ICs]
   [q_prime_IC]
     filename := '../../../validation/EBR-II/pin_power_profile61_uniform.txt'
+  []
+[]
+
+# Turbulent momentum exchange of the mixing crossflow without the CT = 2.6 enhancement of
+# XX09_SCM_SS17.i
+[SCMClosures]
+  [Chen_Todreas]
+    CT := 1.0
   []
 []
 

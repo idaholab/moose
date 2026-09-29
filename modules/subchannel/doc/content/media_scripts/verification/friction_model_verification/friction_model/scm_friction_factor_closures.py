@@ -14,10 +14,10 @@ subchannel-opt -i tri_wire.i SCMClosures/Chen/friction_model=Pacio \
     Outputs/file_base=tri_wire_pacio_out
 subchannel-opt -i XX09_SS17.i
 subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio \
-    Outputs/file_base=XX09_SS17_pacio_out
+    SCMClosures/Chen_Todreas/mixing_model=Pacio Outputs/file_base=XX09_SS17_pacio_out
 python dassh_XX09_SS17.py
 
-Three figures are written next to this script:
+Five figures are written next to this script:
 
 1. scm_friction_quad_bare.png: MATRA and Chen-Todreas, bare pins in a square lattice.
 2. scm_friction_tri_bare.png: Upgraded Chen-Todreas, bare pins in a triangular lattice.
@@ -118,7 +118,7 @@ def interpolate_ff(csv, channel, Re):
 
 
 # Rows of the friction factor comparison table in the verification page
-TABLE_RE = np.array([1.0e2, 1.0e3, 1.0e4])
+TABLE_RE = np.array([1.0e2, 3.0e3, 1.0e4])
 for channel in CHANNELS:
     for csv, name in (
         ("tri_wire_out.csv", "SCM UCTD"),
@@ -143,7 +143,8 @@ dassh = np.genfromtxt(
     dtype=None,
     encoding=None,
 )
-# DASSH orients the hexagonal lattice 30 degrees apart from SCM; rotate the DASSH subchannel
+# DASSH orients the hexagonal lattice 30 degrees apart from SCM, and both codes sweep the wire-wrap
+# flow counterclockwise, so rotate (not reflect) the DASSH subchannel
 # positions and take the DASSH subchannel closest to each TTC subchannel of SCM
 angle = np.pi / 6
 rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
@@ -154,7 +155,7 @@ dassh_ttc = [
 ]
 
 
-def plot_ttc(scm_name, dassh_name, ylabel, name):
+def plot_ttc(scm_name, dassh_name, ylabel, name, dassh_ctd=None, experiment=None):
     fig, ax = plt.subplots(figsize=(7.0, 5.0))
     ax.plot(
         TTC,
@@ -171,6 +172,22 @@ def plot_ttc(scm_name, dassh_name, ylabel, name):
         label="SCM PCTD",
     )
     ax.plot(TTC, dassh[dassh_name][dassh_ttc], "^:", color="green", label="DASSH UCTD")
+    if dassh_ctd is not None:
+        ax.plot(
+            TTC,
+            dassh_ctd,
+            "v-.",
+            color="limegreen",
+            label="DASSH CTD, published",
+        )
+    if experiment is not None:
+        ax.plot(
+            TTC,
+            experiment,
+            "D",
+            color="blue",
+            label="Experiment",
+        )
     ax.set_xlabel("TTC thermocouple")
     ax.set_ylabel(ylabel)
     ax.set_title("EBR-II XX09, SHRT-17 steady state, $z = 0.322$ m")
@@ -179,4 +196,20 @@ def plot_ttc(scm_name, dassh_name, ylabel, name):
 
 
 plot_ttc("mdot", "mdot", "Subchannel mass flow rate [kg/s]", "scm_XX09_SS17_mdot.png")
-plot_ttc("TTC", "T", "Subchannel temperature [K]", "scm_XX09_SS17_T.png")
+# Published DASSH temperatures (DASSH Example-3, CTD friction and flow split) of the EBR-II
+# validation, in Celsius, one row per TTC thermocouple 27 to 35
+dassh_published = np.genfromtxt(
+    DATA / "../../../validation/EBR-II/TTC_DASSH.csv", delimiter=",", skip_header=1
+)
+# Measured TTC temperatures of the EBR-II validation, in Celsius
+experiment = np.genfromtxt(
+    DATA / "../../../validation/EBR-II/TTC_EXP.csv", delimiter=",", skip_header=1
+)
+plot_ttc(
+    "TTC",
+    "T",
+    "Subchannel temperature [K]",
+    "scm_XX09_SS17_T.png",
+    dassh_ctd=dassh_published[:, 1] + 273.15,
+    experiment=experiment[:, 1] + 273.15,
+)
