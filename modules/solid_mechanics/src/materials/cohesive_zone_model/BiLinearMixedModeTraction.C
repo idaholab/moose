@@ -180,7 +180,7 @@ BiLinearMixedModeTraction::computeFinalDisplacementJump()
   const RealVectorValue delta =
       _lag_mode_mixity ? _interface_displacement_jump_old[_qp] : _interface_displacement_jump[_qp];
 
-  _delta_final[_qp] = std::sqrt(2) * 2 * _GII_c[_qp] / _S[_qp];
+  _delta_final[_qp] = 2 * _GII_c[_qp] / _S[_qp];
   _ddelta_final_ddelta = RealVectorValue(0, 0, 0);
   if (delta(0) > 0)
   {
