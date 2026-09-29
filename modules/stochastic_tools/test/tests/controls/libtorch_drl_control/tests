@@ -40,6 +40,23 @@
                   "network read from a parameter file, sampling each action within the bounds."
     capabilities = 'libtorch'
   []
+  [read-parameters-smoothed]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = parameter_read_smoothed.csv
+    # The control drives a ConstantPostprocessor instead of the BC so that the smoothed value
+    # applied_flux is output next to the policy action left_flux.
+    cli_args = "Controls/src_control/control_smoothing_factor=0.5 "
+               "Controls/src_control/parameters='Postprocessors/applied_flux/value' "
+               "Postprocessors/applied_flux/type=ConstantPostprocessor "
+               "Postprocessors/applied_flux/execute_on='INITIAL TIMESTEP_END' "
+               "Outputs/file_base='parameter_read_smoothed'"
+    # A retried time step executes the control again, drawing another policy sample.
+    restep = false
+    requirement = "The system shall be able to exponentially smooth the control signal applied by a "
+                  "DRL controller."
+    capabilities = 'libtorch'
+  []
   [without-nn]
     type = CSVDiff
     input = libtorch_drl_control.i

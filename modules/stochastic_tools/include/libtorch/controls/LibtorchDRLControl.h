@@ -125,8 +125,8 @@ protected:
 
   /// Number of time steps between policy evaluations.
   const unsigned int _num_steps_in_period;
-  /// Relaxation factor applied while smoothing control updates.
-  const Real _smoother;
+  /// Exponential smoothing factor in (0, 1] applied to the control signal at each time step.
+  const Real _control_smoothing_factor;
   /// Whether to sample actions stochastically instead of using the deterministic actor output.
   const bool _stochastic;
 

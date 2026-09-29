@@ -36,14 +36,23 @@ consecutive entries of the stacked input are one control period apart. Set
 [!param](/Trainers/LibtorchDRLControlTrainer/timestep_window) on the trainer to
 the same value so that it rebuilds the observations the controller used.
 
-The applied control can also be relaxed with
-[!param](/Controls/LibtorchDRLControl/smoother):
+The applied control can also be smoothed exponentially with
+[!param](/Controls/LibtorchDRLControl/control_smoothing_factor):
 \begin{equation}
 u_t^{\mathrm{applied}} = u_{t-1}^{\mathrm{applied}} +
 \alpha\left(u_t^{\mathrm{policy}} - u_{t-1}^{\mathrm{applied}}\right),
 \end{equation}
-where $\alpha$ is the `smoother` value. Setting `smoother = 1` applies the raw
-policy action directly.
+where $\alpha \in (0, 1]$ is the `control_smoothing_factor` value. Setting
+`control_smoothing_factor = 1` applies the raw policy action directly. Because
+each applied value lies between the previous applied value and the policy action,
+smoothing does not overshoot the action or leave the range set by
+[!param](/Controls/LibtorchDRLControl/min_control_value) and
+[!param](/Controls/LibtorchDRLControl/max_control_value), provided the starting
+value lies in that range. The smoothed signal starts from zero, so with $\alpha < 1$
+the first applied values lie between zero and the policy action. The smoothing is
+applied every time step, including the steps within a control period that reuse
+the previous action. [LibtorchControlValuePostprocessor.md] reports the policy
+action $u_t^{\mathrm{policy}}$, not the applied value.
 
 The controller stores the observation history, smoothed signal, and the libtorch
 CPU random-number-generator state as restartable data. This keeps stochastic

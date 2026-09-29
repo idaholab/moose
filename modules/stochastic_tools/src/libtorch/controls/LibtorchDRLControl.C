@@ -36,8 +36,13 @@ LibtorchDRLControl::validParams()
       "1<=num_steps_in_period",
       "Number of time steps between policy evaluations. The observation history advances once "
       "per period, so the trainer's 'timestep_window' should match this value.");
-  params.addParam<Real>(
-      "smoother", 1.0, "Relaxation factor applied when smoothing control updates.");
+  params.addRangeCheckedParam<Real>(
+      "control_smoothing_factor",
+      1.0,
+      "control_smoothing_factor>0 & control_smoothing_factor<=1",
+      "Exponential smoothing factor for the applied control signal: the fraction of the change "
+      "from the previously applied signal toward the new policy action that is applied at each "
+      "time step. A value of 1 applies the policy action directly.");
 
   params.addParam<std::vector<Real>>(
       "control_offsets",
@@ -79,7 +84,7 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _policy_generator_state(declareRestartableData<std::vector<std::uint8_t>>(
         "policy_generator_state", std::vector<std::uint8_t>())),
     _num_steps_in_period(getParam<unsigned int>("num_steps_in_period")),
-    _smoother(getParam<Real>("smoother")),
+    _control_smoothing_factor(getParam<Real>("control_smoothing_factor")),
     _stochastic(getParam<bool>("stochastic"))
 {
   const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
@@ -198,7 +203,7 @@ LibtorchDRLControl::execute()
   for (const auto i : index_range(_current_smoothed_signal))
     _current_smoothed_signal[i] =
         _previous_control_signal[i] +
-        _smoother * (_current_control_signals[i] - _previous_control_signal[i]);
+        _control_smoothing_factor * (_current_control_signals[i] - _previous_control_signal[i]);
 
   applyControlSignals();
 }
