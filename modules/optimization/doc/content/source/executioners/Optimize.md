@@ -14,8 +14,6 @@ This is executioner performs optimization using the [TAO](https://petsc.org/rele
 | Bounded Conjugate Gradient | `taobncg` | [TAOBNCG](https://petsc.org/release/docs/manualpages/Tao/TAOBNCG/) | `bncg` |
 | Newton Line Search | `taonls` | [TAONLS](https://petsc.org/release/docs/manualpages/Tao/TAONLS/) | `nls` |
 | Bounded Newton Line Search | `taobnls` | [TAOBNLS](https://petsc.org/release/docs/manualpages/Tao/TAOBNLS/) | `bnls` |
-| Limited Memory Variable Metric | `taolmvm` | [TAOLMVM](https://petsc.org/release/docs/manualpages/Tao/TAOLMVM/) | `lmvm` |
-| Bounded Limited Memory Variable Metric | `taoblmvm` | [TAOBLMVM](https://petsc.org/release/docs/manualpages/Tao/TAOBLMVM/) | `blmvm` |
 | Nelder-Mead | `taonm` | [TAONM](https://petsc.org/release/docs/manualpages/Tao/TAONM/) | `nm` |
 | Bounded Quasi-Newton Line Search | `taobqnls` | [TAOBQNLS](https://petsc.org/release/docs/manualpages/Tao/TAOBQNLS/) | `bqnls` |
 | Orthant-wise Limited Memory | `taoowlqn` | [TAOOWLQN](https://petsc.org/release/docs/manualpages/Tao/TAOOWLQN/) | `taoowlqn` |
@@ -26,9 +24,9 @@ This is executioner performs optimization using the [TAO](https://petsc.org/rele
 This executioner relies on a
 [OptimizationReporter](OptimizationReporter/index.md) to define the constraints,
 bounds, objective, and gradient of the form function. The objective is defined by the
-`computeObjective` member in the [!file text=OptimizationReporter](OptimizationReporter.h)
+`computeObjective` member in the [!file text=OptimizationReporterBase](OptimizationReporterBase.h)
 class. The gradient is defined by `computeGradient` and the bounds are defined
-by `getUpperBounds` and `getLowerBounds`. Whether it is necessary to define each
+by `getUpperBound` and `getLowerBound`. Whether it is necessary to define each
 of these members is based on whether the selected algorithm needs it, see
 [Summary of Tao Solvers](https://petsc.org/release/overview/tao_solve_table/)
 for more information. The Hessian is computed using a matrix-free method, where

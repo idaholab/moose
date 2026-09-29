@@ -80,6 +80,10 @@ private:
   std::vector<BoundaryName> _watertight_boundary_names;
   /// IDs of boundaries to be checked in watertight checks
   std::vector<BoundaryID> _watertight_boundaries;
+  /// Names of blocks whose envelope forms the region checked in the watertight checks
+  std::vector<SubdomainName> _watertight_block_names;
+  /// IDs of blocks whose envelope forms the region checked in the watertight checks
+  std::set<SubdomainID> _watertight_blocks;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// minimum size for element volume to be counted as a tiny element

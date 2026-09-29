@@ -12,10 +12,12 @@
 #include "KokkosTypes.h"
 
 #include "MooseTypes.h"
-#include "MooseVariableBase.h"
+#include "MooseVariableFieldBase.h"
+#include "MooseVariableScalar.h"
 #include "MoosePassKey.h"
 
 class Coupleable;
+class ScalarCoupleable;
 
 namespace Moose::Kokkos
 {
@@ -27,6 +29,7 @@ class Variable
 {
 public:
   using CoupleableKey = ::Moose::PassKey<::Coupleable>;
+  using ScalarCoupleableKey = ::Moose::PassKey<::ScalarCoupleable>;
 
   /**
    * Default constructor
@@ -38,14 +41,14 @@ public:
    * @param variable The MOOSE variable
    * @param tag The vector tag ID
    */
-  Variable(const MooseVariableFieldBase & variable, const TagID tag) { init(variable, tag); }
+  Variable(const MooseVariableBase & variable, const TagID tag) { init(variable, tag); }
   /**
    * Constructor
    * Initialize the variable with a MOOSE variable and vector tag name
    * @param variable The MOOSE variable
    * @param tag_name The vector tag name
    */
-  Variable(const MooseVariableFieldBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
+  Variable(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
   {
     init(variable, tag_name);
   }
@@ -56,11 +59,27 @@ public:
    * @param tag The vector tag ID
    */
   ///@{
+  Variable(const std::vector<const MooseVariableBase *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
+  Variable(const std::vector<MooseVariableBase *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
   Variable(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
   {
     init(variables, tag);
   }
   Variable(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
+  Variable(const std::vector<const MooseVariableScalar *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
+  Variable(const std::vector<MooseVariableScalar *> & variables, const TagID tag)
   {
     init(variables, tag);
   }
@@ -72,6 +91,16 @@ public:
    * @param tag The vector tag ID
    */
   ///@{
+  Variable(const std::vector<const MooseVariableBase *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
+  Variable(const std::vector<MooseVariableBase *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
   Variable(const std::vector<const MooseVariableFieldBase *> & variables,
            const TagName & tag_name = Moose::SOLUTION_TAG)
   {
@@ -82,28 +111,56 @@ public:
   {
     init(variables, tag_name);
   }
+  Variable(const std::vector<const MooseVariableScalar *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
+  Variable(const std::vector<MooseVariableScalar *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
   ///@}
   /**
    * Initialize the variable with a MOOSE variable and vector tag ID
    * @param variable The MOOSE variable
    * @param tag The vector tag ID
    */
-  void init(const MooseVariableFieldBase & variable, const TagID tag);
+  void init(const MooseVariableBase & variable, const TagID tag);
   /**
    * Initialize the variable with a MOOSE variable and vector tag name
    * @param variable The MOOSE variable
    * @param tag_name The vector tag name
    */
-  void init(const MooseVariableFieldBase & variable,
-            const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG);
   /**
    * Initialize the variable with multiple MOOSE variables and vector tag ID
    * @param variables The MOOSE variables
    * @param tag The vector tag ID
    */
   ///@{
-  void init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag);
-  void init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag);
+  void init(const std::vector<const MooseVariableBase *> & variables, const TagID tag);
+  void init(const std::vector<MooseVariableBase *> & variables, const TagID tag)
+  {
+    init(std::vector<const MooseVariableBase *>(variables.begin(), variables.end()), tag);
+  }
+  void init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
+  {
+    init(std::vector<const MooseVariableBase *>(variables.begin(), variables.end()), tag);
+  }
+  void init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
+  {
+    init(std::vector<const MooseVariableBase *>(variables.begin(), variables.end()), tag);
+  }
+  void init(const std::vector<const MooseVariableScalar *> & variables, const TagID tag)
+  {
+    init(std::vector<const MooseVariableBase *>(variables.begin(), variables.end()), tag);
+  }
+  void init(const std::vector<MooseVariableScalar *> & variables, const TagID tag)
+  {
+    init(std::vector<const MooseVariableBase *>(variables.begin(), variables.end()), tag);
+  }
   ///@}
   /**
    * Initialize the variable with multiple MOOSE variables and vector tag name
@@ -111,16 +168,27 @@ public:
    * @param tag_name The vector tag name
    */
   ///@{
+  void init(const std::vector<const MooseVariableBase *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const std::vector<MooseVariableBase *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
   void init(const std::vector<const MooseVariableFieldBase *> & variables,
             const TagName & tag_name = Moose::SOLUTION_TAG);
   void init(const std::vector<MooseVariableFieldBase *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const std::vector<const MooseVariableScalar *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const std::vector<MooseVariableScalar *> & variables,
             const TagName & tag_name = Moose::SOLUTION_TAG);
   ///@}
   /**
    * Initialize the variable with default coupled values
    * @param values The default coupled values
    */
+  ///@{
   void init(const std::vector<Real> & values, CoupleableKey);
+  void init(const std::vector<Real> & values, ScalarCoupleableKey);
+  ///@}
   /**
    * Initialize the variable with default coupled vector values
    * @param values The default coupled vector values
@@ -132,10 +200,22 @@ public:
    * @param comp The variable component
    * @returns The MOOSE variable
    */
-  const MooseVariableFieldBase * mooseVar(unsigned int comp = 0)
+  ///@{
+  const MooseVariableBase * mooseVar(unsigned int comp = 0)
   {
     return _moose_var.size() ? _moose_var[comp] : nullptr;
   }
+  const MooseVariableFieldBase * mooseFieldVar(unsigned int comp = 0)
+  {
+    return _moose_var.size() ? dynamic_cast<const MooseVariableFieldBase *>(_moose_var[comp])
+                             : nullptr;
+  }
+  const MooseVariableScalar * mooseScalarVar(unsigned int comp = 0)
+  {
+    return _moose_var.size() ? dynamic_cast<const MooseVariableScalar *>(_moose_var[comp])
+                             : nullptr;
+  }
+  ///@}
 
   /**
    * Get whether the variable is initialized
@@ -152,6 +232,11 @@ public:
    * @returns Whether the variable is nodal
    */
   KOKKOS_FUNCTION bool nodal() const { return _nodal; }
+  /**
+   * Get whether the variable is scalar
+   * @returns Whether the variable is scalar
+   */
+  KOKKOS_FUNCTION bool scalar() const { return _scalar; }
   /**
    * Get whether the tag is time derivative
    * @returns Whether the tag is time derivative
@@ -226,6 +311,10 @@ private:
    */
   bool _nodal = false;
   /**
+   * Whether the variable is scalar
+   */
+  bool _scalar = false;
+  /**
    * Whether the tag is time derivative
    */
   bool _dot = false;
@@ -248,7 +337,7 @@ private:
   /**
    * MOOSE variable of each component
    */
-  Array<const MooseVariableFieldBase *> _moose_var;
+  Array<const MooseVariableBase *> _moose_var;
   /**
    * Variable number of each component
    */

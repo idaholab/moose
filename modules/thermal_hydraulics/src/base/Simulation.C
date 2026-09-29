@@ -47,7 +47,7 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     _thm_app(*pars.get<MooseApp *>(MooseBase::app_param)),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
-    _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
+    _flow_fe_type(FEType(CONSTANT, MONOMIAL).set_p_refinement(false)),
     _implicit_time_integration(true),
     _check_jacobian(false),
     _output_vector_velocity(true),
@@ -707,15 +707,31 @@ Simulation::setupInitialConditionsFromFile()
     }
     else
     {
-      std::string class_name = "SolutionIC";
+      const std::string class_name = "SolutionIC";
       InputParameters params = _thm_factory.getValidParams(class_name);
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
+      if (_thm_pars.isParamSetByUser("initial_from_file_weighting_type"))
+        params.set<MooseEnum>("weighting_type") =
+            _thm_pars.get<MooseEnum>("initial_from_file_weighting_type");
+
       if (vi._params.isParamValid("block"))
-        params.set<std::vector<SubdomainName>>("block") =
-            vi._params.get<std::vector<SubdomainName>>("block");
-      _fe_problem.addInitialCondition(class_name, genName(var_name, "ic"), params);
+      {
+        const auto & block_names = vi._params.get<std::vector<SubdomainName>>("block");
+
+        for (const auto & block_name : block_names)
+        {
+          InputParameters block_params = params;
+          block_params.set<std::vector<SubdomainName>>("block") = {block_name};
+          block_params.set<std::vector<SubdomainName>>("from_subdomains") = {block_name};
+
+          _fe_problem.addInitialCondition(
+              class_name, genName(var_name, block_name, "ic"), block_params);
+        }
+      }
+      else
+        _fe_problem.addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
   }
 }

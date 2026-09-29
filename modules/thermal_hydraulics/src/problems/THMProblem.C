@@ -9,6 +9,7 @@
 
 #include "THMProblem.h"
 #include "AddPostprocessorAction.h"
+#include "SolutionUserObjectBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", THMProblem);
 
@@ -26,6 +27,11 @@ THMProblem::validParams()
       "LATEST",
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
+  params.addParam<MooseEnum>(
+      "initial_from_file_weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique initial value when data imported from a file is "
+      "multivalued.");
 
   params.set<bool>("boundary_restricted_elem_integrity_check") = false;
 

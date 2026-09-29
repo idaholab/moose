@@ -24,7 +24,8 @@ IndependentMHDecision::validParams()
 IndependentMHDecision::IndependentMHDecision(const InputParameters & parameters)
   : PMCMCDecision(parameters),
     _igmh(dynamic_cast<const IndependentGaussianMH *>(&_sampler)),
-    _seed_input(declareValue<std::vector<Real>>("seed_input"))
+    _seed_input(declareValue<std::vector<Real>>("seed_input")),
+    _seed_outputs(declareRestartableData<std::vector<Real>>("seed_outputs"))
 {
   // Check whether the selected sampler is a M-H sampler or not
   if (!_igmh)

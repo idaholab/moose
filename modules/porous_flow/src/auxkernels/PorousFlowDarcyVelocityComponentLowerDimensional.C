@@ -53,14 +53,15 @@ PorousFlowDarcyVelocityComponentLowerDimensional::computeValue()
   // but we need to project gravity in that direction too
 
   // tang_xi is the element's tangent vector in xi direction
-  const std::vector<RealGradient> & tang_xi = _assembly.getFE(FEType(), elem_dim)->get_dxyzdxi();
+  const std::vector<RealGradient> & tang_xi =
+      _assembly.getFE(FEType().set_p_refinement(false), elem_dim)->get_dxyzdxi();
   RealVectorValue tangential_gravity =
       (_gravity * tang_xi[_qp] / tang_xi[_qp].norm_sq()) * tang_xi[_qp];
   if (elem_dim == 2)
   {
     // tang_eta is the element's tangent vector in eta direction
     const std::vector<RealGradient> & tang_eta =
-        _assembly.getFE(FEType(), elem_dim)->get_dxyzdeta();
+        _assembly.getFE(FEType().set_p_refinement(false), elem_dim)->get_dxyzdeta();
     const RealGradient normal_to_xi =
         tang_eta[_qp] - (tang_eta[_qp] * tang_xi[_qp] / tang_xi[_qp].norm_sq()) * tang_xi[_qp];
     tangential_gravity += (_gravity * normal_to_xi / normal_to_xi.norm_sq()) * normal_to_xi;

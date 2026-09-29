@@ -175,4 +175,16 @@
     issues = '#18175'
     absent_out = 'inverse_map of physical point.*is not on element'
   []
+
+  [ad_multisystem_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_multisystem.i'
+    run_sim = True
+    cli_args = '-u_sys_snes_test_jacobian -v_sys_snes_test_jacobian'
+    requirement = "The system shall compute correct Jacobians for both nonlinear systems when an "
+                  "automatic differentiation interface kernel couples variables that belong to "
+                  "different nonlinear systems."
+    design = 'InterfaceKernels/index.md Problem/index.md'
+    issues = '#33795'
+  []
 []

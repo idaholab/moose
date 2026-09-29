@@ -9,7 +9,7 @@ Before reading this documentation, consider reading the following materials firs
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE.
 
 !alert note
-Kokkos-MOOSE materials do not support automatic differention yet.
+Kokkos-MOOSE materials do not support automatic differentiation yet.
 
 A Kokkos-MOOSE material can be created by subclassing `Moose::Kokkos::Material`.
 Note that it should now be registered with `registerKokkosMaterial()` instead of `registerMooseObject()`.

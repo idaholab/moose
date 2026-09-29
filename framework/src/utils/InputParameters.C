@@ -1038,13 +1038,28 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 
   for (const auto & param_name : elements)
     if (_params.count(param_name) > 0)
-      _params[param_name]._group = group_name;
+    {
+      std::string & group = _params[param_name]._group;
+      if (!group.empty() && group == group_name)
+        mooseError(
+            "The parameter '", param_name, "' has already been added to the group '", group, "'.");
+      group = group_name;
+    }
     else
       mooseError("Unable to find a parameter with name: ",
                  param_name,
                  " when adding to group ",
                  group_name,
                  '.');
+}
+
+void
+InputParameters::moveParamToGroup(const std::string & name, const std::string & group_name)
+{
+  if (_params.count(name) == 0)
+    mooseError(
+        "Unable to find a parameter with name: ", name, " when moving to group ", group_name, '.');
+  _params[name]._group = group_name;
 }
 
 void

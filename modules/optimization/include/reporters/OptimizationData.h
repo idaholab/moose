@@ -20,20 +20,12 @@
 #include "DelimitedFileReader.h"
 #include "SystemBase.h"
 #include "GeneralReporter.h"
-#include "OptimizationReporterBase.h"
 
-// Forward Declarations
-template <typename T>
-class OptimizationDataTempl;
-
-typedef OptimizationDataTempl<GeneralReporter> OptimizationData;
-
-template <typename T>
-class OptimizationDataTempl : public T
+class OptimizationData : public GeneralReporter
 {
 public:
   static InputParameters validParams();
-  OptimizationDataTempl(const InputParameters & parameters);
+  OptimizationData(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override;

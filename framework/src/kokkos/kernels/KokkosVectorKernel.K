@@ -65,7 +65,7 @@ VectorKernel::computeJacobian()
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
     _thread.resize(_num_local_jacobian_threads,
-                   sys.getCoupling(_kokkos_var.var()).size(),
+                   sys.getFieldCoupling(_kokkos_var.var()).size(),
                    numKokkosBlockElements());
 
     Policy policy(0, _thread.size());

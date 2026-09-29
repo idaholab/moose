@@ -94,7 +94,6 @@
   [p_level]
     family = MONOMIAL
     order = CONSTANT
-    disable_p_refinement = true
   []
 []
 

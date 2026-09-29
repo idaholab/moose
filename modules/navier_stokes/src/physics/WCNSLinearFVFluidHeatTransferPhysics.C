@@ -31,7 +31,7 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
   // We could split between discretization and solver here.
-  params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
+  params.addParamNamesToGroup("use_nonorthogonal_correction", "Numerical scheme");
 
   // Not implemented
   params.suppressParameter<bool>("effective_conductivity");

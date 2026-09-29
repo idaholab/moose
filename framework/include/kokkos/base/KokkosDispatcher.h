@@ -426,6 +426,7 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
   {
     DispatcherRegistry::addDispatcher<typename Object::RightHandSideLoop, Object>(objectname);
     DispatcherRegistry::addDispatcher<typename Object::MatrixLoop, Object>(objectname);
+
     DispatcherRegistry::hasUserMethod<typename Object::MatrixLoop>(
         objectname, hasLinearFVMatrixContribution<Object>());
   }
@@ -439,27 +440,46 @@ namespace Moose::Kokkos
 {
 
 template <typename Object>
-bool
-hasUserJacobianHook()
+void
+registerResidualObjectDispatchers(const std::string & objectname)
 {
-  if constexpr (Object::use_precompute_hooks)
-    return &Object::template precomputeQpJacobian<Object> !=
-           Object::template defaultJacobian<Object>();
-  else
-    return &Object::template computeQpJacobian<Object> !=
-           Object::template defaultJacobian<Object>();
-}
+  using namespace Moose::Kokkos;
 
-template <typename Object>
-bool
-hasUserOffDiagJacobianHook()
-{
-  if constexpr (Object::use_precompute_hooks)
-    return &Object::template precomputeQpOffDiagJacobian<Object> !=
-           Object::template defaultOffDiagJacobian<Object>();
+  DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
+  DispatcherRegistry::addDispatcher<typename Object::JacobianLoop, Object>(objectname);
+  DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
+
+  if constexpr (Object::uses_precompute_hooks)
+  {
+    DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(
+        objectname,
+        &Object::template precomputeQpJacobian<Object> !=
+            Object::template defaultJacobian<Object>());
+    DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianLoop>(
+        objectname,
+        &Object::template precomputeQpOffDiagJacobian<Object> !=
+            Object::template defaultOffDiagJacobian<Object>());
+  }
   else
-    return &Object::template computeQpOffDiagJacobian<Object> !=
-           Object::template defaultOffDiagJacobian<Object>();
+  {
+    DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(
+        objectname,
+        &Object::template computeQpJacobian<Object> != Object::template defaultJacobian<Object>());
+    DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianLoop>(
+        objectname,
+        &Object::template computeQpOffDiagJacobian<Object> !=
+            Object::template defaultOffDiagJacobian<Object>());
+  }
+
+  if constexpr (Object::supports_scalar_jacobian)
+  {
+    DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianScalarLoop, Object>(
+        objectname);
+    DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianScalarLoop>(
+        objectname,
+        &Object::template computeQpOffDiagJacobianScalar<Object> !=
+            Object::template defaultOffDiagJacobianScalar<Object>());
+  }
 }
 
 } // namespace Moose::Kokkos
@@ -469,13 +489,7 @@ hasUserOffDiagJacobianHook()
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
-    DispatcherRegistry::addDispatcher<classname::JacobianLoop, classname>(objectname);             \
-    DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
-    DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(objectname,                         \
-                                                               hasUserJacobianHook<classname>());  \
-    DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
-        objectname, hasUserOffDiagJacobianHook<classname>());                                      \
+    registerResidualObjectDispatchers<classname>(objectname);                                      \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -544,6 +558,7 @@ hasUserOffDiagJacobianHook()
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::BoundaryValueLoop, classname>(objectname);        \
     DispatcherRegistry::addDispatcher<classname::BoundaryNormalGradientLoop, classname>(           \
+                                                                                                   \
         objectname);                                                                               \
     DispatcherRegistry::hasUserMethod<classname::BoundaryValueLoop>(                               \
         objectname,                                                                                \
@@ -581,6 +596,7 @@ hasUserOffDiagJacobianHook()
     DispatcherRegistry::addDispatcher<classname::ElementCompute, classname>(objectname);           \
     DispatcherRegistry::addDispatcher<classname::SideCompute, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
+                                                                                                   \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
         objectname,                                                                                \
         &classname::initQpStatefulProperties<classname> !=                                         \
@@ -641,6 +657,7 @@ hasUserOffDiagJacobianHook()
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::DefaultLoop, classname>(objectname);              \
     DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
+                                                                                                   \
     DispatcherRegistry::hasUserMethod<classname::DefaultLoop>(                                     \
         objectname, &classname::execute<classname> != classname::defaultExecute<classname>());     \
     DispatcherRegistry::hasUserMethod<classname::ReducerLoop>(                                     \

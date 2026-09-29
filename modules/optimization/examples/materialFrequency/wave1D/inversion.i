@@ -12,7 +12,7 @@
 []
 [Executioner]
   type = Optimize
-  tao_solver = taoblmvm
+  tao_solver = taobqnls
   petsc_options_iname = '-tao_gatol -tao_max_it -tao_ls_type'
   petsc_options_value = '1e-8 100 unit'
   verbose = true

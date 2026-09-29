@@ -24,8 +24,8 @@ ArrayVariableValueVolumeHistogram::validParams()
                              "values of an array variable.");
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
   params.addCoupledVar("variable", "Variable to bin the volume of");
-  params.addRequiredParam<Real>("min_value", "Minimum variable value");
-  params.addRequiredParam<Real>("max_value", "Maximum variable value");
+  params.addRequiredParam<PostprocessorName>("min_value", "Minimum variable value");
+  params.addRequiredParam<PostprocessorName>("max_value", "Maximum variable value");
   return params;
 }
 
@@ -33,9 +33,8 @@ ArrayVariableValueVolumeHistogram::ArrayVariableValueVolumeHistogram(
     const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _nbins(getParam<unsigned int>("bin_number")),
-    _min_value(getParam<Real>("min_value")),
-    _max_value(getParam<Real>("max_value")),
-    _deltaV((_max_value - _min_value) / _nbins),
+    _min_value(getPostprocessorValue("min_value")),
+    _max_value(getPostprocessorValue("max_value")),
     _value(coupledArrayValue("variable")),
     _var(*getArrayVar("variable", 0)),
     _bin_center(declareVector("value"))
@@ -49,7 +48,7 @@ ArrayVariableValueVolumeHistogram::ArrayVariableValueVolumeHistogram(
   // initialize the bin center value vector
   _bin_center.resize(_nbins);
   for (const unsigned int i : make_range(_nbins))
-    _bin_center[i] = (i + 0.5) * _deltaV + _min_value;
+    _bin_center[i] = (i + 0.5) * binWidth() + _min_value;
 }
 
 void
@@ -58,6 +57,14 @@ ArrayVariableValueVolumeHistogram::initialize()
   // reset the histogram
   for (auto & volume : _volumes)
     volume->assign(_nbins, 0.0);
+
+  if (_max_value <= _min_value)
+    mooseError("max_value is less than or equal to min_value! Please ensure the "
+               "post-processors supplied to this object yield valid bounds for a histogram.");
+
+  // reset the bin centers as the postprocessors may have changed
+  for (const unsigned int i : make_range(_nbins))
+    _bin_center[i] = (i + 0.5) * binWidth() + _min_value;
 }
 
 void
@@ -69,7 +76,7 @@ ArrayVariableValueVolumeHistogram::execute()
     for (const unsigned int i : make_range(_var.count()))
     {
       // compute target bin
-      int bin = (_value[_qp](i) - _min_value) / _deltaV;
+      int bin = (_value[_qp](i) - _min_value) / binWidth();
 
       // add the volume contributed by the current quadrature point
       if (bin >= 0 && static_cast<unsigned int>(bin) < _nbins)

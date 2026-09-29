@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "OptimizationReporter.h"
+#include "GeneralOptimization.h"
 
 /**
  * This form function simply represents a quadratic objective function:
  *    f(x) = val + \sum_{i=1}^N (x_i - a_i)^2
  * where val is the input objective value and a_i is the input solution.
  */
-class QuadraticMinimize : public OptimizationReporter
+class QuadraticMinimize : public GeneralOptimization
 {
 public:
   static InputParameters validParams();

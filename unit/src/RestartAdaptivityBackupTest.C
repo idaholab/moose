@@ -11,6 +11,7 @@
 
 #include "Executioner.h"
 #include "FEProblemBase.h"
+#include "MooseAppTestUtils.h"
 #include "MooseMain.h"
 #include "MultiApp.h"
 #include "NonlinearSystem.h"
@@ -22,20 +23,7 @@
 
 namespace
 {
-struct Args
-{
-  Args(const std::vector<std::string> & args) : _args(args)
-  {
-    _args.insert(_args.begin(), "unused");
-    for (auto & arg : _args)
-      _argv.push_back(arg.data());
-    _argv.push_back(nullptr);
-  }
-  int argc() const { return static_cast<int>(_argv.size()) - 1; }
-  char ** argv() { return _argv.data(); }
-  std::vector<std::string> _args;
-  std::vector<char *> _argv;
-};
+using MooseAppTestUtils::Args;
 
 struct ScopedTempDir
 {

@@ -14,6 +14,9 @@
 #include "AuxiliarySystem.h"
 
 #include "libmesh/system.h"
+#include "libmesh/int_range.h"
+
+#include <algorithm>
 
 namespace Moose::Kokkos
 {
@@ -67,10 +70,14 @@ System::setupDofs()
   _matrices.create(MAX_TAG);
 
   _local_elem_dof_index.create(_num_vars);
+  _scalar_dof_index.create(_num_vars);
   _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
 
   _max_dofs_per_elem.create(_num_vars);
   _max_dofs_per_elem = 0;
+
+  _var_is_scalar.create(_num_vars);
+  _var_is_scalar = false;
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
@@ -80,50 +87,73 @@ System::setupDofs()
 #endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    _var_is_scalar[var] = sys.variable_type(var).family == libMesh::FEFamily::SCALAR;
+
     std::vector<dof_id_type> dof_indices;
 
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+    if (!_var_is_scalar[var])
     {
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      _max_dofs_per_elem[var] =
-          std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
-    }
-
-    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
-    _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
-
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
-    {
-      const auto id = kokkosMesh().getContiguousElementID(elem);
-
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
       {
-        _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        _max_dofs_per_elem[var] =
+            std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
+      }
+
+      _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
+      _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
+
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+      {
+        const auto id = kokkosMesh().getContiguousElementID(elem);
+
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
+      }
+
+      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+      {
+        if (!_dof_map.is_evaluable(*ghost_elem, var))
+          continue;
+
+        _dof_map.dof_indices(ghost_elem, dof_indices, var);
+
+        for (const auto dof : index_range(dof_indices))
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
       }
     }
-
-    for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+    else if (num_total_elems)
     {
-      if (!_dof_map.is_evaluable(*ghost_elem, var))
-        continue;
-      _dof_map.dof_indices(ghost_elem, dof_indices, var);
+      _dof_map.SCALAR_dof_indices(dof_indices, var);
+      _scalar_dof_index[var].create(dof_indices.size());
+
       for (const auto dof : index_range(dof_indices))
       {
         const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+        _scalar_dof_index[var][dof] = local_idx;
         _local_to_global_dof_index[local_idx] = dof_indices[dof];
       }
     }
   }
 
   _local_elem_dof_index.copyToDeviceNested();
+  _scalar_dof_index.copyToDeviceNested();
   _local_to_global_dof_index.copyToDevice();
 
   _max_dofs_per_elem.copyToDevice();
+
+  _var_is_scalar.copyToDevice();
 
   // Setup DOF communication maps
 
@@ -174,18 +204,17 @@ System::setupSparsity()
     return;
 
   std::vector<PetscInt> col_idx;
-  std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};
 
+  // The rows are laid out as the locally owned rows in ascending order followed by the ghost rows
+  // in send list order.  buildCooIndices() recovers each row's global index from that ordering, so
+  // the two must be kept consistent.
   for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
   {
     auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
 
     for (auto col : cols)
-    {
       col_idx.push_back(col);
-      row_idx.push_back(r);
-    }
 
     row_ptr.push_back(col_idx.size());
   }
@@ -218,17 +247,43 @@ System::setupSparsity()
     auto n_cols = recv_num_cols[proc][row[proc]++];
 
     for (PetscInt c = 0; c < n_cols; ++c)
-    {
       col_idx.push_back(recv_cols[proc][col[proc]++]);
-      row_idx.push_back(r);
-    }
 
     row_ptr.push_back(col_idx.size());
   }
 
   _sparsity.col_idx = col_idx;
-  _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
+}
+
+void
+System::buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const
+{
+  const auto & col_idx = _sparsity.col_idx;
+  const auto & row_ptr = _sparsity.row_ptr;
+
+  coo_i.resize(col_idx.size());
+  coo_j.assign(&col_idx.begin(), &col_idx.end());
+
+  // Every nonzero of a row carries that row's global index, which setupSparsity() leaves implicit
+  // in the row ordering.  The two loops below walk the rows in the order it wrote them.
+  dof_id_type row = 0;
+
+  auto fill_row = [&](const PetscInt global_row)
+  {
+    std::fill(coo_i.begin() + row_ptr[row], coo_i.begin() + row_ptr[row + 1], global_row);
+    ++row;
+  };
+
+  for (const auto global_row : make_range(_dof_map.first_dof(), _dof_map.end_dof()))
+    fill_row(global_row);
+
+  for (const auto global_row : _dof_map.get_send_list())
+    fill_row(global_row);
+
+  mooseAssert(row == row_ptr.size() - 1,
+              "Kokkos system error: the DOF map no longer describes the rows that setupSparsity() "
+              "recorded.");
 }
 
 void
@@ -252,16 +307,23 @@ System::sync(const MemcpyType dir)
       _vectors[tag].copyToDevice();
     }
 
-    for (auto tag : _active_matrix_tags)
     {
-      auto & matrix = _system.getMatrix(tag);
+      // PETSc consumes the COO index arrays destructively, so each matrix needs its own copy of
+      // them.  Holding the storage here lets one allocation serve every matrix tag, and releases it
+      // once the last one is preallocated.
+      std::vector<PetscInt> coo_i, coo_j;
 
+      for (auto tag : _active_matrix_tags)
       {
-        TIME_SECTION("MatSetPreallocation", 1);
-        _matrices[tag].create(matrix, *this);
-      }
+        auto & matrix = _system.getMatrix(tag);
 
-      _matrices[tag] = 0;
+        {
+          TIME_SECTION("MatSetPreallocation", 1);
+          _matrices[tag].create(matrix, *this, coo_i, coo_j);
+        }
+
+        _matrices[tag] = 0;
+      }
     }
 
     _vectors.copyToDevice();

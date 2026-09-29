@@ -4,6 +4,8 @@ The `WebServerControl` object is designed to allow an external process to contro
 
 The server can either listen on a port via the [!param](/Controls/WebServerControl/port) parameter, or on a unix file socket via the [!param](/Controls/WebServerControl/file_socket) parameter. One of these two parameters must be provided.
 
+Setting [!param](/Controls/WebServerControl/port) to zero has the operating system choose a free port. The chosen port is reported in the console output, and is written to the path given by [!param](/Controls/WebServerControl/port_file) if one is provided. A client that does not need a particular port should prefer this: a client cannot reserve a free port and pass the number here, because it has to release the port before the server can bind it.
+
 It can then be managed via the [MooseControl](moosecontrol/index.md optional=true) python utility.
 
 ## API

@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "FEProblemBase.h"
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
@@ -50,10 +51,12 @@ ODEKernel::computeJacobian()
 
   accumulateTaggedLocalMatrix();
 
-  // compute off-diagonal jacobians wrt scalar variables
+  // compute off-diagonal jacobians wrt scalar variables that are actually coupled in the
+  // preconditioner (otherwise the value is zero)
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
   for (const auto & var : scalar_vars)
-    computeOffDiagJacobianScalar(var->number());
+    if (_fe_problem.areCoupled(_var.number(), var->number(), _sys.number()))
+      computeOffDiagJacobianScalar(var->number());
 }
 
 void

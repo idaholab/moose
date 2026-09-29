@@ -29,12 +29,14 @@
       type = MMSTest
       input = test.py
       test_case = TestNonlinearFV
+      min_slots = 2 # memory heavy
     []
     [linear]
       detail = 'linear implementation.'
       type = MMSTest
       input = test.py
       test_case = TestLinearFV
+      max_threads = 1 # see libmesh issue #3808
     []
   []
 

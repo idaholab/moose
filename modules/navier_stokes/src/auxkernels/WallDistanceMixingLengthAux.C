@@ -41,7 +41,7 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
     mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
-  if (_var.feType() != FEType(CONSTANT, MONOMIAL))
+  if (_var.feType().order != CONSTANT || _var.feType().family != MONOMIAL)
     paramError("variable",
                "'",
                name(),
@@ -49,6 +49,9 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
                "centroid; only a single dof is required to hold this value. Consequently users "
                "should always use a constant monomial finite element type (this is what finite "
                "volume variables implicitly use) for the auxiliary variables.");
+  if (_var.feType().p_refinement && _subproblem.doingPRefinement())
+    paramError("variable",
+               "p_refinement can push the MONOMIAL order above CONSTANT, which is not supported");
 }
 
 Real

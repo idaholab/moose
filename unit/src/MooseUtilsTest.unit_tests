@@ -6,4 +6,18 @@
     design = 'MooseUtils.md'
     issues = '#33325'
   []
+  [variable_fe_type_defaults]
+    type = GoogleTest
+    unit_test = MooseUtils.variableFETypeDefaults
+    requirement = 'The system shall apply a default p-refinement setting for a variable based on its finite element order and family when the setting is not explicitly specified.'
+    design = 'MooseUtils.md'
+    issues = '#31563 #33467'
+  []
+  [variable_fe_type_p_refinement_overrides]
+    type = GoogleTest
+    unit_test = MooseUtils.variableFETypePRefinementOverrides
+    requirement = 'The system shall allow a variable to have its default p-refinement setting explicitly overridden.'
+    design = 'MooseUtils.md'
+    issues = '#31563 #33467'
+  []
 []

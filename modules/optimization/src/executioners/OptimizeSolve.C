@@ -18,9 +18,8 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum(
-      "taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
-      "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
+  MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl "
+                            "taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -120,13 +119,6 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::BOUNDED_NEWTON_TRUST_LINE:
       LibmeshPetscCallQ(TaoSetType(_tao, TAOBNTL));
       break;
-    case TaoSolverEnum::QUASI_NEWTON:
-      LibmeshPetscCallQ(TaoSetType(_tao, TAOLMVM));
-      break;
-    case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
-      LibmeshPetscCallQ(TaoSetType(_tao, TAOBLMVM));
-      break;
-
     case TaoSolverEnum::NELDER_MEAD:
       LibmeshPetscCallQ(TaoSetType(_tao, TAONM));
       break;
@@ -453,8 +445,9 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
-  _obj_function->setMisfitToSimulatedValues();
-
+  // The adjoint solve below applies the misfit as its source. For the Hessian action, that source
+  // is the simulated values from the homogeneous forward solve, so the input must transfer
+  // 'simulation_values' from the homogeneous forward sub-app into 'misfit_values'.
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);

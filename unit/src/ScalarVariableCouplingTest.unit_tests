@@ -1,0 +1,9 @@
+[Tests]
+  design = 'SingleMatrixPreconditioner.md ScalarLagrangeMultiplier.md'
+  [default_diagonal_coupling_omits_scalar_off_diagonal]
+    type = GoogleTest
+    unit_test = ScalarVariableCoupling.DefaultDiagonalCouplingOmitsScalarOffDiagonal
+    requirement = 'The system shall assemble the Jacobian blocks coupling a field variable to a scalar variable only when the coupling matrix requests them.'
+    issues = '#33709'
+  []
+[]

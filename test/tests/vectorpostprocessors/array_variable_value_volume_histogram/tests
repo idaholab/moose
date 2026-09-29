@@ -7,4 +7,21 @@
     issues = '#32978'
     design = 'ArrayVariableValueVolumeHistogram.md'
   []
+  [variable_bnds]
+    type = CSVDiff
+    input = pp_bounds.i
+    csvdiff = 'pp_bounds_out_histo_0002.csv'
+    requirement = "The system shall be able to change the bounds of the histogram computed for each component of an array variable."
+    issues = '#33787'
+    design = 'ArrayVariableValueVolumeHistogram.md'
+  []
+  [valid_bnds]
+    type = RunException
+    input = pp_bounds.i
+    cli_args = 'VectorPostprocessors/histo/min_value=1.0 VectorPostprocessors/histo/max_value=0.0'
+    expect_err = 'max_value is less than or equal to min_value!'
+    requirement = "The system shall ensure that the bounds of the histogram computed for each component of an array variable are valid."
+    issues = '#33787'
+    design = 'ArrayVariableValueVolumeHistogram.md'
+  []
 []

@@ -4,7 +4,7 @@
 
 ## Summary
 
-Base class which can interpolate scalar and vector quantities at a set of
+Base class which can interpolate scalar and vector variables at a set of
 points. Derived classes control where those points come from, for example a
 list of points or a line.
 

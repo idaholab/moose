@@ -39,6 +39,11 @@ protected:
   void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const;
 
   const bool & _constant_mass;
+
+  /// Whether the cached mass matrix has been rebuilt yet on the first time step after a recover.
+  /// Not restartable data: it only needs to survive within the recovered run itself, and starts
+  /// false again (as intended) if that run is later recovered from a further along checkpoint.
+  bool _recomputed_mass_matrix_after_recover = false;
 };
 
 template <typename T, typename T2>

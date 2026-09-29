@@ -124,7 +124,7 @@ LinearFVFluxKernel::initialSetup()
   std::vector<FaceID> internal_face_ids;
   std::vector<BoundaryFaceID> boundary_face_ids;
 
-  const auto * const variable = _var.mooseVar();
+  const auto * const variable = _var.mooseFieldVar();
   for (const auto block : blockIDs())
     for (const auto elem : mesh.getMesh().active_local_subdomain_elements_ptr_range(block))
     {

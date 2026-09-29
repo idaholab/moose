@@ -274,7 +274,7 @@ Coupleable::kokkosCoupledVectorTagValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagValueByName(var_name, tag_name, comp);
 }
@@ -286,7 +286,7 @@ Coupleable::kokkosCoupledVectorTagValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagValuesByName(var_name, tag_name);
 }
@@ -299,7 +299,7 @@ Coupleable::kokkosCoupledVectorTagGradient(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagGradientByName(var_name, tag_name, comp);
 }
@@ -311,7 +311,7 @@ Coupleable::kokkosCoupledVectorTagGradients(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagGradientsByName(var_name, tag_name);
 }
@@ -324,7 +324,7 @@ Coupleable::kokkosCoupledVectorTagNodalValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagNodalValueByName(var_name, tag_name, comp);
 }
@@ -336,7 +336,7 @@ Coupleable::kokkosCoupledVectorTagNodalValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagNodalValuesByName(var_name, tag_name);
 }
@@ -349,7 +349,7 @@ Coupleable::kokkosCoupledVectorTagDofValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagDofValueByName(var_name, tag_name, comp);
 }
@@ -361,7 +361,7 @@ Coupleable::kokkosCoupledVectorTagDofValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagDofValuesByName(var_name, tag_name);
 }
@@ -460,7 +460,7 @@ Coupleable::kokkosCoupledVectorTagVectorValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorValueByName(var_name, tag_name, comp);
 }
@@ -472,7 +472,7 @@ Coupleable::kokkosCoupledVectorTagVectorValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorValuesByName(var_name, tag_name);
 }
@@ -485,7 +485,7 @@ Coupleable::kokkosCoupledVectorTagVectorGradient(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorGradientByName(var_name, tag_name, comp);
 }
@@ -497,7 +497,7 @@ Coupleable::kokkosCoupledVectorTagVectorGradients(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorGradientsByName(var_name, tag_name);
 }
@@ -510,7 +510,7 @@ Coupleable::kokkosCoupledVectorTagVectorNodalValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorNodalValueByName(var_name, tag_name, comp);
 }
@@ -522,7 +522,7 @@ Coupleable::kokkosCoupledVectorTagVectorNodalValues(const std::string & var_name
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorNodalValuesByName(var_name, tag_name);
 }
@@ -535,7 +535,7 @@ Coupleable::kokkosCoupledVectorTagVectorDofValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorDofValueByName(var_name, tag_name, comp);
 }
@@ -547,7 +547,7 @@ Coupleable::kokkosCoupledVectorTagVectorDofValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosCoupledVectorTagVectorDofValuesByName(var_name, tag_name);
 }
@@ -1048,7 +1048,7 @@ Coupleable::kokkosADCoupledVectorTagValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagValueByName(var_name, tag_name, comp);
 }
@@ -1060,7 +1060,7 @@ Coupleable::kokkosADCoupledVectorTagValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagValuesByName(var_name, tag_name);
 }
@@ -1073,7 +1073,7 @@ Coupleable::kokkosADCoupledVectorTagGradient(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagGradientByName(var_name, tag_name, comp);
 }
@@ -1085,7 +1085,7 @@ Coupleable::kokkosADCoupledVectorTagGradients(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagGradientsByName(var_name, tag_name);
 }
@@ -1098,7 +1098,7 @@ Coupleable::kokkosADCoupledVectorTagNodalValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagNodalValueByName(var_name, tag_name, comp);
 }
@@ -1110,7 +1110,7 @@ Coupleable::kokkosADCoupledVectorTagNodalValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagNodalValuesByName(var_name, tag_name);
 }
@@ -1123,7 +1123,7 @@ Coupleable::kokkosADCoupledVectorTagDofValue(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagDofValueByName(var_name, tag_name, comp);
 }
@@ -1135,7 +1135,7 @@ Coupleable::kokkosADCoupledVectorTagDofValues(const std::string & var_name,
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+  const TagName & tag_name = _c_parameters.get<TagName>(tag_param_name);
 
   return kokkosADCoupledVectorTagDofValuesByName(var_name, tag_name);
 }

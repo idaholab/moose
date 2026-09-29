@@ -19,6 +19,7 @@
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "Output.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/explicit_system.h"
@@ -906,13 +907,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // will not be considered in mortar thermomechanical contact.
     if (!orientation1_valid && !orientation2_valid)
     {
-      mooseDoOnce(mooseWarning(
-          "AutomaticMortarGeneration: Unable to determine valid secondary-primary orientation. "
-          "Consequently we will consider projection of the primary node invalid and not split the "
-          "mortar segment. "
-          "This situation can indicate there are very oblique projections between primary (mortar) "
-          "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
-          "time step is too large. This message is only printed once."));
+      static const auto invalid_orientation_id =
+          moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
+              "AutomaticMortarGeneration",
+              "Unable to determine valid secondary-primary orientation. Consequently we will "
+              "consider projection of the primary node invalid and not split the mortar segment. "
+              "This situation can indicate there are very oblique projections between primary "
+              "(mortar) and secondary (non-mortar) surfaces for a good problem set up. It can also "
+              "mean your time step is too large.",
+              true);
+      _app.solutionInvalidity().flagInvalidSolutionInternal(invalid_orientation_id);
       continue;
     }
 

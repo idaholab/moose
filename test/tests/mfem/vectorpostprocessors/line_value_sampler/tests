@@ -5,7 +5,7 @@
     type = RunException
     input = ../../kernels/diffusion.i
     cli_args = 'VectorPostprocessors/line_sample/num_points=1'
-    expect_err = 'In MFEMVariableLineValueSampler "line_sample": line must have at least 2 points'
+    expect_err = 'Range check failed for parameter VectorPostprocessors/line_sample/num_points; expression = \'num_points >= 2\', value = 1'
     requirement = 'The system shall identify the input block when a line variable sampler is '
                   'configured with fewer than two points.'
     capabilities = 'mfem'

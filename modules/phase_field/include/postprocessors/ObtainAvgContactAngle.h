@@ -12,8 +12,11 @@
 #include "SidePostprocessor.h"
 
 /**
- * This postprocessor computes displacements normal to a provided
- * set of boundaries
+ * Computes the average contact angle that the phase field interface makes with a boundary.
+ *
+ * The angle is obtained from a weighted average of cos(theta) = grad(pf).n/|grad(pf)| over the
+ * boundary. The weight |grad(pf)| * (1 - pf^2) removes the pointwise division and vanishes in the
+ * bulk phases, so the average reduces to a ratio of two boundary integrals.
  */
 class ObtainAvgContactAngle : public SidePostprocessor
 {
@@ -30,18 +33,18 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  /// Gradient of coupled variable
+  /// Value of the phase field variable, used to localize the average to the interface
   const VariableValue & _pf;
 
-  /// Gradient of coupled variable
+  /// Gradient of the phase field variable
   const VariableGradient & _grad_pf;
 
-  /// Average contact angle
+  /// Average contact angle, in degrees
   Real _contact_angle;
 
-  /// cos theta value
+  /// Boundary integral of (1 - pf^2) * grad(pf).n, the numerator of the averaged cos(theta)
   Real _cos_theta_val;
 
-  /// total weight
+  /// Boundary integral of (1 - pf^2) * |grad(pf)|, the normalization of _cos_theta_val
   Real _total_weight;
 };

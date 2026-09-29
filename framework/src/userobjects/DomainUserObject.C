@@ -107,7 +107,7 @@ DomainUserObject::getInterfaceFieldVar(const std::string & var_name,
 }
 
 void
-DomainUserObject::checkVariable(const MooseVariableFieldBase & variable) const
+DomainUserObject::checkVariable(const MooseVariableBase & variable) const
 {
   auto it = _var_interfaces.find(variable.name());
   if (it != _var_interfaces.end())

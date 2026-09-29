@@ -17,6 +17,8 @@
 
 #include "libmesh/petsc_matrix.h"
 
+#include <vector>
+
 namespace Moose::Kokkos
 {
 
@@ -53,10 +55,20 @@ public:
   bool isAlloc() const { return _is_alloc; }
   /**
    * Create the matrix from a libMesh PetscMatrix
+   *
+   * The COO index arrays are supplied by the caller so that a single allocation can serve every
+   * matrix sharing the sparsity pattern.  Their contents on entry are irrelevant; this call
+   * overwrites them.
+   *
    * @param matrix The libMesh PetscMatrix
    * @param system The Kokkos system
+   * @param coo_i Scratch storage for the COO row indices
+   * @param coo_j Scratch storage for the COO column indices
    */
-  void create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system);
+  void create(libMesh::SparseMatrix<PetscScalar> & matrix,
+              const System & system,
+              std::vector<PetscInt> & coo_i,
+              std::vector<PetscInt> & coo_j);
   /**
    * Assemble the underlying PETSc matrix
    */
@@ -121,7 +133,6 @@ private:
    */
   ///@{
   Array<PetscInt> _col_idx;
-  Array<PetscInt> _row_idx;
   Array<PetscInt> _row_ptr;
   Array<PetscScalar> _val;
   ///@}

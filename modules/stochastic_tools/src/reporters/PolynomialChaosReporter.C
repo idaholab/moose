@@ -127,9 +127,10 @@ PolynomialChaosReporter::execute()
               " does not have the same number of columns as the number of dimensions in model ",
               pc.name(),
               ".");
+        auto global_p = _loc_sampler[i]->getLocalRowBegin();
         for (const auto & p : make_range(_loc_sampler[i]->getNumberOfLocalRows()))
           (*_loc_sampler_sense[i])[p] =
-              computeLocalSensitivity(pc, _loc_sampler[i]->getNextLocalRow());
+              computeLocalSensitivity(pc, _loc_sampler[i]->getSampleRow(global_p++));
       }
     }
   }

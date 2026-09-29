@@ -25,6 +25,14 @@ PorousFlowLineSink::validParams()
       "SumQuantityUO",
       "User Object of type=PorousFlowSumQuantity in which to place the total "
       "outflow from the line sink for each time step.");
+  params.addParam<UserObjectName>(
+      "PointFluxUO",
+      "Optional UserObject of type=PorousFlowPointFluxQuantity in which to record the "
+      "instantaneous flux (eg kg.s^-1 for fluid, J.s^-1 for heat) at each individual Dirac "
+      "point of this line sink, as computed during the most recent residual evaluation.  Use a "
+      "PorousFlowPlotPointFluxQuantity VectorPostprocessor to output the recorded values.  "
+      "Unlike SumQuantityUO, this is not multiplied by the timestep size.  Use a separate "
+      "UserObject for each line sink.");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<unsigned int>(
@@ -55,6 +63,10 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _total_outflow_mass(
         const_cast<PorousFlowSumQuantity &>(getUserObject<PorousFlowSumQuantity>("SumQuantityUO"))),
+    _point_fluxes(isParamValid("PointFluxUO")
+                      ? &const_cast<PorousFlowPointFluxQuantity &>(
+                            getUserObject<PorousFlowPointFluxQuantity>("PointFluxUO"))
+                      : nullptr),
 
     _has_porepressure(
         hasMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp") &&
@@ -220,6 +232,8 @@ PorousFlowLineSink::addPoints()
   // This function gets called just before the DiracKernel is evaluated
   // so this is a handy place to zero this out.
   _total_outflow_mass.zero();
+  if (_point_fluxes)
+    _point_fluxes->zero(*_x_coord, *_y_coord, *_z_coord);
 
   PorousFlowLineGeometry::addPoints();
 }
@@ -253,6 +267,8 @@ PorousFlowLineSink::computeQpResidual()
 
   _total_outflow_mass.add(
       outflow * _dt); // this is not thread safe, but DiracKernel's aren't currently threaded
+  if (_point_fluxes)
+    _point_fluxes->add(current_dirac_ptid, outflow);
 
   return outflow;
 }

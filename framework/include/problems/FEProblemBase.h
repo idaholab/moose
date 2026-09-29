@@ -249,6 +249,8 @@ public:
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
+  fieldScalarCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num) const;
 
   virtual bool hasVariable(const std::string & var_name) const override;
   // NOTE: hasAuxiliaryVariable defined in parent class
@@ -609,6 +611,21 @@ public:
   virtual void advanceState();
 
   virtual void restoreSolutions();
+
+  /**
+   * Snapshot geometric search state (both on the regular and, if present, the displaced mesh) so
+   * it can be restored with restoreGeometricSearchState() if this step is later rejected. Called
+   * from advanceState(), i.e. before this step's timestepSetup() has run.
+   */
+  void backupGeometricSearchState();
+
+  /**
+   * Restore geometric search state captured by the most recent backupGeometricSearchState().
+   * Called from TimeStepper::rejectStep(), which must call this before restoreSolutions() so that
+   * the geometric search re-projects from the restored, accepted-state seeds rather than from the
+   * discarded attempt's converged state.
+   */
+  void restoreGeometricSearchState();
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -1497,7 +1514,14 @@ public:
                                    InputParameters & parameters);
 
   /**
-   * Retrieve an FV gradient method
+   * Retrieve a writable FV gradient method owned by this problem
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  FVGradientMethod & getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid = 0);
+
+  /**
+   * Retrieve a read-only FV gradient method owned by this problem
    * @param name The name of the method.
    * @param tid The thread ID.
    */
@@ -3365,6 +3389,9 @@ protected:
   void checkDisplacementOrders();
 
   void checkUserObjects();
+
+  /// Let every FVGradientMethod resolve its dependencies on other gradient methods.
+  void checkGradientMethods();
 
   /**
    * Helper method for checking Material object dependency.

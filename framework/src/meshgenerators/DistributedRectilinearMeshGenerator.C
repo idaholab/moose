@@ -1086,6 +1086,10 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
     for (auto neighbor : neighbors)
       if (neighbor != Elem::invalid_id)
         row.push_back(neighbor);
+    // PETSc documentation requires that rows be sorted. We've seen this matter for
+    // ptscotch, e.g. it crashes when the rows are not sorted even though its developers say in
+    // theory this shouldn't matter but in practice they admit it might.
+    std::sort(row.begin(), row.end());
   }
 
   // Partition the distributed graph

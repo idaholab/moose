@@ -231,7 +231,6 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     inputs = 'aq_bottom_fine cap_bottom_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'bottom top'
-    merge_boundaries_with_same_name = false
   []
   [aq_and_cap_fine]
     type = StitchMeshGenerator
@@ -656,6 +655,13 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
 []
 
 [Preconditioning]
+  active = basic
+  [mumps]
+    type = SMP
+    full = true
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+    petsc_options_value = 'lu mumps'
+  []
   [basic]
     type = SMP
     full = true
@@ -685,6 +691,7 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
   # ~1Pa and ~0.1K in the first metre around the borehole
   nl_abs_tol = 1E-4
   nl_rel_tol = 1E-5
+  nl_max_its = 20
 []
 
 [Outputs]
@@ -697,4 +704,5 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     type = CSV
     execute_postprocessors_on = 'initial timestep_end'
   []
+  print_linear_residuals = false
 []

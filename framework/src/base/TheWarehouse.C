@@ -15,7 +15,13 @@
 #include "GeneralUserObject.h"
 #include "DependencyResolverInterface.h"
 #include "BlockRestrictable.h"
+#include "ScalarCoupleable.h"
+#include "ScalarKernelBase.h"
+#include "MooseVariableScalar.h"
+#include "Conversion.h"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 
 class WarehouseStorage
@@ -290,17 +296,77 @@ TheWarehouse::readAttribs(const MooseObject * obj,
   }
 }
 
+/**
+ * Check the scalar variables coupled into a scalar kernel. The kernel assembles the matrix entries
+ * pairing its own variable's dofs with the coupled variable's dofs, and those entries are
+ * preallocated only on the elements where both variables exist. A scalar kernel carries no block
+ * restriction of its own to compare against, so the condition is a relation between the two
+ * variables: they must share at least one block.
+ */
+void
+checkCoupledScalarVariableBlocks(ScalarKernelBase & scalar_kernel)
+{
+  const auto & var = scalar_kernel.variable();
+  const auto & subdomains = var.activeSubdomains();
+
+  // An empty set of active subdomains means the variable lives on the whole mesh
+  if (subdomains.empty())
+    return;
+
+  for (const MooseVariableScalar * const coupled_var : scalar_kernel.getCoupledMooseScalarVars())
+  {
+    const auto & coupled_subdomains = coupled_var->activeSubdomains();
+    if (coupled_subdomains.empty())
+      continue;
+
+    std::set<SubdomainID> shared_subdomains;
+    std::set_intersection(subdomains.begin(),
+                          subdomains.end(),
+                          coupled_subdomains.begin(),
+                          coupled_subdomains.end(),
+                          std::inserter(shared_subdomains, shared_subdomains.begin()));
+
+    if (shared_subdomains.empty())
+      mooseError("The 'block' parameter of the scalar variable '",
+                 coupled_var->name(),
+                 "' coupled into the object '",
+                 scalar_kernel.name(),
+                 "' must overlap the 'block' parameter of the variable '",
+                 var.name(),
+                 "' that the object acts on:\n    Variable '",
+                 var.name(),
+                 "': ",
+                 Moose::stringify(subdomains, ", "),
+                 "\n    Variable '",
+                 coupled_var->name(),
+                 "': ",
+                 Moose::stringify(coupled_subdomains, ", "));
+  }
+}
+
 void
 isValid(MooseObject * obj)
 {
   auto blk = dynamic_cast<BlockRestrictable *>(obj);
   if (!blk)
+  {
+    // Scalar kernels are not block restrictable, so their coupled scalar variables are checked
+    // against the variable the kernel acts on
+    if (auto scalar_kernel = dynamic_cast<ScalarKernelBase *>(obj))
+      checkCoupledScalarVariableBlocks(*scalar_kernel);
     return;
+  }
 
   // Check variables
   auto c_ptr = dynamic_cast<Coupleable *>(obj);
   if (c_ptr)
     for (MooseVariableFEBase * var : c_ptr->getCoupledMooseVars())
+      blk->checkVariable(*var);
+
+  // Check scalar variables
+  auto sc_ptr = dynamic_cast<ScalarCoupleable *>(obj);
+  if (sc_ptr)
+    for (MooseVariableScalar * var : sc_ptr->getCoupledMooseScalarVars())
       blk->checkVariable(*var);
 
   const InputParameters & parameters = obj->parameters();

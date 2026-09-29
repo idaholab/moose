@@ -46,7 +46,7 @@ LinearSystem::addKokkosBoundaryCondition(const std::string & bc_name,
   _fe_problem.theWarehouse().add(bc);
 
   const auto & boundary_ids = bc->boundaryIDs();
-  const auto * const bc_var = bc->variable().mooseVar();
+  const auto * const bc_var = bc->variable().mooseFieldVar();
   _vars[0].addBoundaryVar(boundary_ids, bc_var);
 }
 

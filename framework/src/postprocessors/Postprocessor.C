@@ -19,7 +19,6 @@ Postprocessor::validParams()
   InputParameters params = OutputInterface::validParams();
   params += NonADFunctorInterface::validParams();
 
-  params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("Postprocessor");
   return params;
 }

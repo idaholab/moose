@@ -12,6 +12,7 @@
 # ruff: noqa: E402
 
 import os
+import socket
 from subprocess import PIPE, Popen
 from time import sleep
 from typing import Tuple
@@ -63,27 +64,39 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assertIsInstance(session, Session)
         session.close()
 
-    def test_find_available_port(self):
-        """Test find_available_port()."""
-        port = PortRunner.find_available_port()
-        self.assertTrue(PortRunner.port_is_available(port))
+    def test_port_is_available(self):
+        """Test port_is_available() against a port that is being listened on."""
+        # Held open for the duration of the check, so that the port is occupied
+        # no matter what else the machine is doing
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("", 0))
+            s.listen(1)
+            self.assertFalse(PortRunner.port_is_available(s.getsockname()[1]))
 
     def setup_live(self) -> Tuple[PortRunner, Popen]:
         """Set up a live test."""
         input_path = os.path.join(self.directory.name, "input.i")
-        port = PortRunner.find_available_port()
+        port_path = os.path.join(self.directory.name, "server.port")
 
-        # Spawn the MOOSE process
+        # Spawn the MOOSE process, letting it bind a port of the operating
+        # system's choosing and report which one in port_file
         with open(input_path, "w") as f:
             f.write(BASE_INPUT)
         command = [
             self.moose_exe,
             "-i",
             input_path,
-            f"Controls/web_server/port={port}",
+            "Controls/web_server/port=0",
+            f"Controls/web_server/port_file={port_path}",
             "--color=off",
         ]
         process = Popen(command, stdout=PIPE, stderr=PIPE, text=True)
+
+        # The file is renamed into place once the socket is listening
+        while not os.path.exists(port_path):
+            sleep(0.001)
+        with open(port_path) as f:
+            port = int(f.read().strip())
 
         # Initialize; wait for connection
         runner = PortRunner(port, **LIVE_BASERUNNER_KWARGS)

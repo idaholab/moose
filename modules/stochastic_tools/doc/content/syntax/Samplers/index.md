@@ -6,20 +6,19 @@ any number of Distribution objects.
 The sampler operators by returning a vector (`std::vector<Real>`) or matrix
 (`libMesh::DenseMatrix<Real>`) from one of three methods:
 
-- +`getNextLocalRow`+\\
+- +`getSampleRow`+\\
   This method returns a single row from the complete sample matrix. +This is the preferred method for
   accessing sample data, since the memory footprint is limited to a single row+ rather than
   potentially large matrices as in the other methods. This method should be used as follows:
 
   ```c++
   for (dof_id_type i = getLocalRowBegin(); i < getLocalRowEnd(); ++i)
-      std::vector<Real> row = getNextLocalRow();
+      std::vector<Real> row = getSampleRow(i);
   ```
 
 - +`getLocalSamples`+\\
   This method returns a subset of rows from the sample matrix for the current processor. This matrix
-  is populated on demand and should not be stored to ensure a low memory footprint. This is the
-  preferred method for accessing sample data.
+  is populated on demand and should not be stored to ensure a low memory footprint.
 
 - +`getSamples`+\\
   This method returns the complete sample matrix from the Sampler object, the matrix is populated

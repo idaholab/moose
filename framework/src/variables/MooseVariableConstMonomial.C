@@ -24,6 +24,7 @@ MooseVariableConstMonomial::validParams()
   params.addClassDescription("Specialization for constant monomials that avoids unnecessary loops");
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
+  params.set<bool>("p_refinement") = false;
   return params;
 }
 
@@ -36,6 +37,8 @@ MooseVariableConstMonomial::MooseVariableConstMonomial(const InputParameters & p
                Utility::enum_to_string(_fe_type.family),
                " family and order ",
                Utility::enum_to_string(Order(_fe_type.order)));
+  if (_fe_type.p_refinement)
+    mooseError("MooseVariableConstMonomial requires 'p_refinement = false'");
 }
 
 void

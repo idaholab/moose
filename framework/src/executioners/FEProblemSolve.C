@@ -497,6 +497,11 @@ FEProblemSolve::solve()
             if (_perform_multi_sys_fp_relaxation[sys_i])
               sys->applyFixedPointRelaxation(_multi_sys_fp_relax_factors[sys_i],
                                              Moose::SolutionIterationType::MultiSystemFixedPoint);
+
+            // Store the accepted, possibly relaxed LinearFV solution for nonlinear lagging.
+            if (!is_nonlinear)
+              sys->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
+
             _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
                      << std::endl;
           }
@@ -537,7 +542,12 @@ FEProblemSolve::solve()
         const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
         converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
         if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
+        {
+          _console << "Multisystem iteration diverged at iteration " << n_fp_iter << std::endl;
           break;
+        }
+        if (converged)
+          _console << "Multisystem iteration converged at iteration " << n_fp_iter << std::endl;
       }
       fp_iter++;
     }

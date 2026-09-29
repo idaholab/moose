@@ -26,6 +26,7 @@
       input = parent_full_solve.i
       csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 1
+      prereq = normal
 
       detail = 'on a single processor,'
     []
@@ -35,6 +36,7 @@
       csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 2
       min_parallel = 2
+      prereq = batch_csv/n1
 
       detail = 'on multiple processors, and'
     []
@@ -45,6 +47,7 @@
       max_parallel = 2
       min_parallel = 2
       cli_args = "MultiApps/runner/mode=batch-restore"
+      prereq = batch_csv/n2
 
       detail = 'on multiple processors using in-memory backup.'
     []

@@ -44,7 +44,7 @@ MechanicsBasePD::MechanicsBasePD(const InputParameters & parameters)
 void
 MechanicsBasePD::initialSetup()
 {
-  _orientation = &_assembly.getFE(FEType(), 1)->get_dxyzdxi();
+  _orientation = &_assembly.getFE(FEType().set_p_refinement(false), 1)->get_dxyzdxi();
 }
 
 void

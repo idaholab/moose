@@ -472,9 +472,9 @@
     abs_zero = 1.0e-5
     allow_warnings = true
     max_parallel = 1
-    restep = false # Issue #31054
     # not running any time step, just examining nodal geometry
     recover = false
+    restep = false
   []
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'

@@ -118,6 +118,7 @@
     type = SolutionFunction
     from_variable = power_density
     solution = reactor_power_density_uo
+    weighting_type = average
   []
 []
 

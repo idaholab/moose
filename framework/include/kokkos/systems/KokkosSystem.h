@@ -48,7 +48,6 @@ public:
   struct Sparsity
   {
     Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
     Array<PetscInt> row_ptr;
   };
 
@@ -161,6 +160,25 @@ public:
   const Sparsity & getSparsity() const { return _sparsity; }
 
   /**
+   * Build the COO index arrays describing the sparsity pattern
+   *
+   * PETSc consumes these arrays destructively, so a fresh pair is needed for each matrix
+   * preallocated from this system.  The arrays are resized to the number of nonzeros and fully
+   * overwritten, which lets one allocation be reused across the matrices.
+   *
+   * @param coo_i The row index of each nonzero
+   * @param coo_j The column index of each nonzero
+   */
+  void buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const;
+
+  /**
+   * Check whether a variable is scalar
+   * @param var The variable number
+   * @returns Whether the variable is scalar
+   */
+  KOKKOS_FUNCTION bool isScalarVariable(unsigned int var) const { return _var_is_scalar[var]; }
+
+  /**
    * Check whether a variable is active on a subdomain
    * @param var The variable number
    * @param subdomain The contiguous subdomain ID
@@ -198,6 +216,16 @@ public:
   KOKKOS_FUNCTION dof_id_type getNumGhostDofs() const { return _num_ghost_dofs; }
 
   /**
+   * Get the number of DOFs of a scalar variable
+   * @param var The variable number
+   * @returns The number of scalar DOFs
+   */
+  KOKKOS_FUNCTION unsigned int getNumScalarDofs(unsigned int var) const
+  {
+    return _scalar_dof_index[var].size();
+  }
+
+  /**
    * Get the local DOF index of a variable for an element
    * @param elem The contiguous element ID
    * @param i The element-local DOF index
@@ -212,6 +240,17 @@ public:
   }
 
   /**
+   * Get the local DOF index of a scalar variable
+   * @param i The scalar DOF index
+   * @param var The variable number
+   * @returns The local DOF index
+   */
+  KOKKOS_FUNCTION dof_id_type getScalarLocalDofIndex(unsigned int i, unsigned int var) const
+  {
+    return _scalar_dof_index[var][i];
+  }
+
+  /**
    * Get the global DOF index of a variable for an element
    * @param elem The contiguous element ID
    * @param i The element-local DOF index
@@ -222,7 +261,18 @@ public:
                                                     unsigned int i,
                                                     unsigned int var) const
   {
-    return _local_to_global_dof_index[_local_elem_dof_index[var](i, elem)];
+    return _local_to_global_dof_index[getElemLocalDofIndex(elem, i, var)];
+  }
+
+  /**
+   * Get the global DOF index of a scalar variable
+   * @param i The scalar DOF index
+   * @param var The variable number
+   * @returns The global DOF index
+   */
+  KOKKOS_FUNCTION dof_id_type getScalarGlobalDofIndex(unsigned int i, unsigned int var) const
+  {
+    return _local_to_global_dof_index[getScalarLocalDofIndex(i, var)];
   }
 
   /**
@@ -324,6 +374,11 @@ protected:
   Array<Array2D<dof_id_type>> _local_elem_dof_index;
 
   /**
+   * DOF indices of each scalar variable
+   */
+  Array<Array<dof_id_type>> _scalar_dof_index;
+
+  /**
    * Map from local DOF index to global DOF index
    */
   Array<dof_id_type> _local_to_global_dof_index;
@@ -332,6 +387,11 @@ protected:
    * Maximum number of DOFs per element for each variable
    */
   Array<unsigned int> _max_dofs_per_elem;
+
+  /**
+   * Whether each variable is scalar
+   */
+  Array<bool> _var_is_scalar;
 
   /**
    * Whether each variable is active on subdomains

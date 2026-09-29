@@ -15,14 +15,20 @@ registerMooseObject("OptimizationTestApp", QuadraticMinimize);
 InputParameters
 QuadraticMinimize::validParams()
 {
-  InputParameters params = OptimizationReporter::validParams();
+  InputParameters params = GeneralOptimization::validParams();
+  params.addClassDescription("Test object that minimizes a quadratic objective function computed "
+                             "directly on the main application.");
   params.addRequiredParam<Real>("objective", "Desired value of objective function.");
   params.addRequiredParam<std::vector<Real>>("solution", "Desired solution to optimization.");
+  // This object computes the objective itself, so the reporter value declared by
+  // GeneralOptimization is never populated by a sub-application transfer.
+  params.set<ReporterValueName>("objective_name") = "objective_value";
+  params.suppressParameter<ReporterValueName>("objective_name");
   return params;
 }
 
 QuadraticMinimize::QuadraticMinimize(const InputParameters & parameters)
-  : OptimizationReporter(parameters),
+  : GeneralOptimization(parameters),
     _result(getParam<Real>("objective")),
     _solution(getParam<std::vector<Real>>("solution"))
 {

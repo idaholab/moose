@@ -21,6 +21,11 @@ BoundaryMaterialReinitTest::validParams()
       "coupled_property", "An optional material property to add to the supplied property.");
   params.addParam<bool>(
       "error_on_face", false, "Whether to error if the face copy of this material is computed.");
+  params.addParam<bool>(
+      "error_on_boundary", false, "Whether to error if this material is computed on a boundary.");
+  params.addParam<bool>("error_on_neighbor",
+                        false,
+                        "Whether to error if the neighbor copy of this material is computed.");
   return params;
 }
 
@@ -31,7 +36,9 @@ BoundaryMaterialReinitTest::BoundaryMaterialReinitTest(const InputParameters & p
     _coupled_property(isParamValid("coupled_property")
                           ? &getMaterialProperty<Real>("coupled_property")
                           : nullptr),
-    _error_on_face(getParam<bool>("error_on_face"))
+    _error_on_face(getParam<bool>("error_on_face")),
+    _error_on_boundary(getParam<bool>("error_on_boundary")),
+    _error_on_neighbor(getParam<bool>("error_on_neighbor"))
 {
 }
 
@@ -40,6 +47,12 @@ BoundaryMaterialReinitTest::computeQpProperties()
 {
   if (_error_on_face && materialDataType() == Moose::FACE_MATERIAL_DATA)
     mooseError("The face copy of ", name(), " should not have been computed.");
+
+  if (_error_on_boundary && materialDataType() == Moose::BOUNDARY_MATERIAL_DATA)
+    mooseError(name(), " should not have been computed on the boundary.");
+
+  if (_error_on_neighbor && materialDataType() == Moose::NEIGHBOR_MATERIAL_DATA)
+    mooseError("The neighbor copy of ", name(), " should not have been computed.");
 
   _property[_qp] = _value;
   if (_coupled_property)

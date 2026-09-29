@@ -19,6 +19,8 @@
 #include "SubProblem.h"
 #include "MooseApp.h"
 
+#include <sstream>
+
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
@@ -145,22 +147,6 @@ PenetrationLocator::detectPenetration()
 
     Threads::parallel_reduce(recheck_secondary_node_range, pt);
   }
-
-  if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
-    mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
-                             "detected for one or more secondary nodes. This could be because "
-                             "those secondary nodes simply do not project to faces on the primary "
-                             "surface. However, this could also be because contact should be "
-                             "enforced on those nodes, but the faces that they project to "
-                             "are outside the contact patch, which will give an erroneous "
-                             "result. Use appropriate options for 'patch_size' and "
-                             "'patch_update_strategy' in the Mesh block to avoid this issue. "
-                             "Setting 'patch_update_strategy=iteration' is recommended because "
-                             "it completely avoids this potential issue. Also note that this "
-                             "warning is printed only once, so a similar situation could occur "
-                             "multiple times during the simulation but this warning is printed "
-                             "only at the first occurrence."));
 }
 
 void
@@ -178,6 +164,31 @@ PenetrationLocator::reinit()
   _has_penetrated.clear();
 
   detectPenetration();
+}
+
+std::string
+PenetrationLocator::backup()
+{
+  std::ostringstream stream;
+  dataStore(stream, _penetration_info, &_mesh);
+  dataStore(stream, _has_penetrated, &_mesh);
+  dataStore(stream, _update_location, &_mesh);
+  return stream.str();
+}
+
+void
+PenetrationLocator::restore(const std::string & data)
+{
+  // Delete the PenetrationInfo objects we own before dataLoad clears the map, or we have a
+  // memory leak: the generic std::map dataLoad clears without deleting owned pointers.
+  for (auto & it : _penetration_info)
+    delete it.second;
+  _penetration_info.clear();
+
+  std::istringstream stream(data);
+  dataLoad(stream, _penetration_info, &_mesh);
+  dataLoad(stream, _has_penetrated, &_mesh);
+  dataLoad(stream, _update_location, &_mesh);
 }
 
 Real
