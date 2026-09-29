@@ -42,10 +42,6 @@ Function::Function(const Function & function)
 
 Function::~Function()
 {
-  // Free device wrapper
-  if (_wrapper_host && _wrapper_host.use_count() == 1)
-    ::Kokkos::kokkos_free<ExecSpace::memory_space>(_wrapper_device);
-
   // Free host copy of function
   if (_wrapper_host)
     _wrapper_host->freeFunction();
