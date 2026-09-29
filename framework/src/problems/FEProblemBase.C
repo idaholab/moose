@@ -4298,26 +4298,25 @@ FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consume
                                 const THREAD_ID tid)
 {
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::unordered_set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props(consumer_needed_mat_props);
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   {
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
-    _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid);
+    _all_materials.updateBlockMatPropDependency(
+        blk_id, needed_mat_props, tid, /*producer_only=*/true);
   }
 
   const auto & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto id : ids)
   {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
-    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid, /*producer_only=*/true);
   }
 
   const auto & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(),
                            current_active_elemental_moose_variables.end());
-
-  needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
 
   setActiveElementalMooseVariables(needed_moose_vars, tid);
   setActiveMaterialProperties(needed_mat_props, tid);
