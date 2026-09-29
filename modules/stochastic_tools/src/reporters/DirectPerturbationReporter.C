@@ -122,19 +122,10 @@ DirectPerturbationReporterContext<DataType>::finalize()
   auto reference_value = _data.empty() ? DataType() : initializeDataType(_data[0]);
   if (_relative_sensitivity)
   {
-    // getLocalRowBegin() == 0 can be true on more than one rank; only one has data.
-    if (!_data.empty() && _sampler.getLocalRowBegin() == 0)
+    // The reference point is sampler row 0, which is always local to rank 0.
+    if (this->processor_id() == 0)
       reference_value = _data[0];
-
-    // comm().sum() requires equal-sized vectors across ranks.
-    if constexpr (is_std_vector<DataType>::value)
-    {
-      dof_id_type size = reference_value.size();
-      this->comm().max(size);
-      reference_value.resize(size);
-    }
-
-    this->comm().sum(reference_value);
+    this->comm().broadcast(reference_value);
   }
 
   for (const auto param_i : make_range(num_columns))
