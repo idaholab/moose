@@ -27,6 +27,9 @@ InputParameters
 AddTimeDependentReactionSolverAction::validParams()
 {
   InputParameters params = AddGeochemistrySolverAction::validParams();
+  // this action builds its own single-node mesh, so restricting the reactor to a subset of it is
+  // meaningless
+  params.suppressParameter<std::vector<SubdomainName>>("block");
   params += GeochemistryTimeDependentReactor::sharedParams();
   params.addClassDescription(
       "Action that sets up a time-dependent equilibrium reaction solver.  This creates creates a "
@@ -79,9 +82,6 @@ AddTimeDependentReactionSolverAction::act()
     const std::string class_name = "GeochemistryTimeDependentReactor";
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
     if (isParamValid("boundary"))
       params.set<std::vector<BoundaryName>>("boundary") =
           getParam<std::vector<BoundaryName>>("boundary");
