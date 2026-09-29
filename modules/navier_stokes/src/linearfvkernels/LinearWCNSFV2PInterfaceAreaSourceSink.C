@@ -188,16 +188,13 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
   }
   else if (_model == ModelEnum::HIBIKI_ISHII)
   {
-    // Hibiki and Ishii. The packing factor divides, so both terms grow without bound
-    // as the dispersed phase approaches its maximum.
+    // Hibiki and Ishii, shared with the nonlinear kernel. The packing factor divides, so both
+    // terms grow without bound as the dispersed phase approaches its maximum.
     const auto packing = std::max(_f_d_max - f_d, libMesh::TOLERANCE);
-    const auto prefactor =
-        Utility::pow<2>(f_d / xi) * cbrt(epsilon) / (pow(db, 11. / 3.) * packing);
-
-    s_rc = -prefactor * _gamma_c * Utility::pow<2>(f_d) *
-           exp(-_kc * pow(db, 5. / 6.) * sqrt(rho_f) * cbrt(epsilon) / sqrt(sigma));
-    s_ti = prefactor * _gamma_b * f_d * (1.0 - f_d) *
-           exp(-_kb * sigma / (rho_f * pow(db, 5. / 3.) * Utility::pow<2>(cbrt(epsilon))));
+    const auto sources = NS::hibikiIshiiAreaSources(
+        f_d, f_d / xi, db, cbrt(epsilon), packing, rho_f, sigma, _gamma_c, _kc, _gamma_b, _kb);
+    s_rc = sources.first;
+    s_ti = sources.second;
     // No wake entrainment model in this formulation
   }
   else
