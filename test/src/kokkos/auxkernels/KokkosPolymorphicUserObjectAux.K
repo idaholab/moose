@@ -22,6 +22,7 @@ KokkosPolymorphicUserObjectAux::validParams()
 KokkosPolymorphicUserObjectAux::KokkosPolymorphicUserObjectAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _first(getVirtualKokkosUserObject<KokkosPolymorphicUserObjectBase>("first")),
-    _second(getVirtualKokkosUserObject<KokkosPolymorphicUserObjectBase>("second"))
+    _second(getVirtualKokkosUserObject<KokkosPolymorphicUserObjectBase>("second")),
+    _intermediate(getVirtualKokkosUserObject<KokkosAffineUserObject>("second"))
 {
 }
