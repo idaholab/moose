@@ -227,6 +227,6 @@
     csvdiff = 'ADheat_threeseg_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp3/type=ADIncompressibleEnergySPScalarKernel'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of 3 segments.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical temperature of 3 segments.'
   []
 []
