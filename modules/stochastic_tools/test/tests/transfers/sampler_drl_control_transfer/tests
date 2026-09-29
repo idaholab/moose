@@ -1,6 +1,15 @@
 [Tests]
   issues = '#19571'
   design = 'LibtorchDRLControlTrainer.md DRLRewardReporter.md'
+  [bounded-multi-sample-training]
+    type = JSONDiff
+    input = trainer.i
+    jsondiff = 'trainer_json_out.json'
+    min_parallel = 2
+    requirement = "The system shall be able to train a bounded DRL controller in parallel from "
+                  "multiple seeded rollouts that evaluate the policy once per control period."
+    capabilities = 'libtorch'
+  []
   [mismatch]
     requirement = "The system shall report an error when a DRL trainer and the DRL controller that "
                   "receives its policy differ in"
