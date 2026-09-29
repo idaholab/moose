@@ -285,8 +285,7 @@ SurrogateTrainer::crossValidate()
 
     auto first = std::lower_bound(
         split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowBegin());
-    auto last = std::upper_bound(
-        split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowEnd());
+    auto last = std::lower_bound(first, split_ids_buffer.end(), _sampler.getLocalRowEnd());
     _skip_indices.insert(_skip_indices.begin(), first, last);
 
     _local_sample_size = _sampler.getNumberOfLocalRows() - _skip_indices.size();
