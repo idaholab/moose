@@ -33,6 +33,16 @@
     requirement = 'The system shall transform a correlated Gaussian random field into a correlated Weibull random field with a constant scale and with a scale that varies with distance from a line segment.'
   []
 
+  [weibull_small_variance]
+    type = Exodiff
+    input = weibull_2d.i
+    exodiff = weibull_2d_out.e
+    cli_args = 'UserObjects/cov_x/variance=1e-20 UserObjects/cov_y/variance=1e-20'
+    prereq = weibull
+    design = 'KLExpansionUserObject.md KLWeibullAux.md'
+    requirement = 'The system shall produce correlated non-Gaussian random fields that do not depend on the variance of the underlying Gaussian field, even when that variance is very small.'
+  []
+
   [errors]
     requirement = 'The system shall report an error when building a Karhunen-Loeve expansion if'
     design = 'KLExpansionUserObject.md'

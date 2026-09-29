@@ -26,6 +26,8 @@ public:
 protected:
   /// Shortest distance from p to the segment between start_point and end_point
   Real distanceToSegment(const Point & p) const;
+  /// Logistic function of the distance from the segment, centered at _midpoint_of_sigmoid
+  Real sigmoid(Real distance) const;
   /// Trend value at the given distance from the segment
   Real trendValue(Real distance) const;
 
@@ -40,7 +42,7 @@ protected:
   const Real _scale_hi;
   /// Trend value far from the segment
   const Real _scale_lo;
-  /// Distance at which the trend is halfway between _scale_hi and _scale_lo
+  /// Distance at which the sigmoid is 1/2, its inflection point
   const Real _midpoint_of_sigmoid;
   /// Sigmoid steepness
   const Real _slope_at_midpoint;

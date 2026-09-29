@@ -214,6 +214,15 @@ structure is preserved, while the values follow the Weibull distribution.
 - The cost of evaluating the field at a point grows with the number of reference grid points
   times the number of marginal modes used in each direction, plus the number of retained joint
   modes. Short length scales in three dimensions can require thousands of joint modes.
+
+!alert warning title=Memory use for large reference grids
+Before truncation, every candidate joint mode is stored and sorted on each process, whatever the
+values of [!param](/UserObjects/KLExpansionUserObject/n_terms) or
+[!param](/UserObjects/KLExpansionUserObject/variance_fraction). The number of candidates is the
+product of the numbers of marginal modes, which approaches the product of the
+[!param](/UserObjects/KLExpansionUserObject/n_grid) entries for slowly decaying spectra such as the
+exponential covariance. Each candidate takes 24 bytes, so a three-dimensional expansion with
+`n_grid = '500 500 500'` needs about 3 GB per process.
 - Use [KLWeibullAux](KLWeibullAux.md) or [SigmoidTrendWeibullAux](SigmoidTrendWeibullAux.md),
   not [KLNormalAux](KLNormalAux.md), for quantities that must remain positive, such as an elastic
   modulus.

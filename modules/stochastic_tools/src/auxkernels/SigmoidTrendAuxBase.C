@@ -19,8 +19,10 @@ SigmoidTrendAuxBase::validParams()
   params.addRequiredParam<Point>("end_point", "Ending point of the centerline segment");
   params.addRequiredParam<Real>("scale_max", "Trend value at distance = 0 (on the centerline)");
   params.addRequiredParam<Real>("scale_min", "Trend value far from the centerline");
-  params.addRequiredParam<Real>("midpoint_of_sigmoid", "Distance at the sigmoid's midpoint");
-  params.addParam<Real>("slope_at_midpoint", 1.0, "Steepness of the transition");
+  params.addRequiredRangeCheckedParam<Real>(
+      "midpoint_of_sigmoid", "midpoint_of_sigmoid >= 0", "Distance at the sigmoid's midpoint");
+  params.addRangeCheckedParam<Real>(
+      "slope_at_midpoint", 1.0, "slope_at_midpoint > 0", "Steepness of the transition");
   return params;
 }
 
@@ -52,23 +54,28 @@ SigmoidTrendAuxBase::distanceToSegment(const Point & p) const
 }
 
 Real
-SigmoidTrendAuxBase::trendValue(Real d) const
+SigmoidTrendAuxBase::sigmoid(Real d) const
 {
   const Real z = _slope_at_midpoint * (d - _midpoint_of_sigmoid);
 
-  Real sigmoid_scale;
   // this is written to prevent overflow
-
   if (z >= 0.0)
   {
     const Real e = std::exp(-z);
-    sigmoid_scale = 1.0 / (1.0 + e);
+    return 1.0 / (1.0 + e);
   }
   else
   {
     const Real e = std::exp(z);
-    sigmoid_scale = e / (1.0 + e);
+    return e / (1.0 + e);
   }
+}
 
-  return _scale_lo + (_scale_hi - _scale_lo) * (1.0 - sigmoid_scale);
+Real
+SigmoidTrendAuxBase::trendValue(Real d) const
+{
+  // Normalized by the value on the centerline so that the trend is exactly _scale_hi at d = 0 and
+  // approaches _scale_lo far from it. The denominator is at least 1/2 because
+  // _midpoint_of_sigmoid >= 0 and _slope_at_midpoint > 0.
+  return _scale_lo + (_scale_hi - _scale_lo) * (1.0 - sigmoid(d)) / (1.0 - sigmoid(0.0));
 }

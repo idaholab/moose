@@ -33,6 +33,10 @@ neither are given:
 - [!param](/UserObjects/KLExpansionUserObject/variance_fraction) retains the fewest joint modes
   whose eigenvalues sum to at least this fraction of the total.
 
+All candidate joint modes are stored and sorted before truncation, so memory use grows with the
+product of the numbers of marginal modes in each direction; see the memory warning in
+[random_fields.md#practical-guidance].
+
 The random coefficients of the retained modes are drawn from standard normal distributions using
 [!param](/UserObjects/KLExpansionUserObject/seed). Each seed defines one realization, which does
 not depend on the number of processors. The expansion and its coefficients are computed once,

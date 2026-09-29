@@ -29,15 +29,19 @@ The scale follows a logistic transition from $\lambda_{\max}$ on the segment to 
 far from it,
 
 \begin{equation}
-\lambda(\mathbf{p}) = \lambda_{\min} + \frac{\lambda_{\max} - \lambda_{\min}}{1 + \exp \left( s \left( d(\mathbf{p}) - d_0 \right) \right)},
+\lambda(\mathbf{p}) = \lambda_{\min} + \left( \lambda_{\max} - \lambda_{\min} \right)
+  \frac{g\left(d(\mathbf{p})\right)}{g(0)},
+\qquad
+g(d) = \frac{1}{1 + \exp \left( s \left( d - d_0 \right) \right)},
 \end{equation}
 
 where $\lambda_{\max}$ is [!param](/AuxKernels/SigmoidTrendWeibullAux/scale_max), $\lambda_{\min}$
-is [!param](/AuxKernels/SigmoidTrendWeibullAux/scale_min), $d_0$ is
-[!param](/AuxKernels/SigmoidTrendWeibullAux/midpoint_of_sigmoid), the distance at which the scale
-is halfway between the two values, and $s$ is
+is [!param](/AuxKernels/SigmoidTrendWeibullAux/scale_min), $d_0 \ge 0$ is
+[!param](/AuxKernels/SigmoidTrendWeibullAux/midpoint_of_sigmoid), the distance at which the
+logistic function $g$ is 1/2 and the transition is steepest, and $s > 0$ is
 [!param](/AuxKernels/SigmoidTrendWeibullAux/slope_at_midpoint), which controls how sharp the
-transition is. Both scales must be positive. The sampled field is
+transition is. Dividing by $g(0)$ makes the scale exactly $\lambda_{\max}$ on the segment for any
+$d_0$ and $s$. Both scales must be positive. The sampled field is
 
 \begin{equation}
 W(\mathbf{p}) = \lambda(\mathbf{p}) \left[ -\ln \left( 1 - U(\mathbf{p}) \right) \right]^{1/k},
@@ -53,7 +57,8 @@ where $U(\mathbf{p})$ is the correlated uniform field obtained through a Gaussia
        id=fig-trend
        caption=Weibull random fields on the unit square with a scale that trends from
        $\lambda_{\max} = 10$ on the vertical centerline to $\lambda_{\min} = 3$, with $k = 8$,
-       $d_0 = 0.1$, and a steepness $s$ of (a) 1, (b) 5, and (c) 10.
+       $d_0 = 0.1$, and a steepness $s$ of (a) 1, (b) 5, and (c) 10. The Gaussian field has a
+       squared-exponential covariance of unit variance and a length scale of 0.1 in both directions.
 
 ## Example Input Syntax
 

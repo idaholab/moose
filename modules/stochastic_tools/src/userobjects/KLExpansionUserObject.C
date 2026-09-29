@@ -318,9 +318,17 @@ KLExpansionUserObject::getStandardizedValue(const Point & p) const
     var += a[m] * a[m];
   }
 
+  // Nominal pointwise variance of the untruncated separable covariance, prod_d C_d(p_d, p_d)
+  Real nominal_var = 1.0;
+  for (const auto d : make_range(_dim))
+    nominal_var *= _covariance[d]->computeCovariance(p(d), p(d));
+
+  // Degenerate point (e.g. far outside reference-grid support), where the truncated expansion
+  // retains a negligible part of the nominal standard deviation: return 0 to avoid 0/0. The
+  // relative threshold makes the standardized field independent of the covariance variances.
   const Real sigma = std::sqrt(var);
-  if (sigma < 1e-14)
-    return 0.0; // degenerate point (e.g. far outside reference-grid support). return 0 to avoid 0/0
+  if (sigma < 1e-14 * std::sqrt(nominal_var))
+    return 0.0;
 
   return raw / sigma;
 }
