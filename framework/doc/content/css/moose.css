@@ -1029,6 +1029,12 @@ div.moose-mega-menu-content{
 
 /* Text and background color for dark mode */
 @media (prefers-color-scheme: dark), (prefers-dark-interface) {
+  /* Hints the browser to draw native UI (including the page scrollbar) in dark colors,
+     so the scrollbar background matches the page instead of defaulting to light. */
+  html {
+    color-scheme: dark;
+  }
+
   body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control, .sidenav, .sidenav > li a {
     background: var(--darkmode-back);
     color: var(--darkmode-fore);
