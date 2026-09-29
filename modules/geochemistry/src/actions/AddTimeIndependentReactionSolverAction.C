@@ -96,9 +96,6 @@ AddTimeIndependentReactionSolverAction::act()
     const std::string class_name = "GeochemistryTimeIndependentReactor";
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
-    if (isParamValid("boundary"))
-      params.set<std::vector<BoundaryName>>("boundary") =
-          getParam<std::vector<BoundaryName>>("boundary");
     params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
     if (isParamValid("swap_out_of_basis"))
       params.set<std::vector<std::string>>("swap_out_of_basis") =

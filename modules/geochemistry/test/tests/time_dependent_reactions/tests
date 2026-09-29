@@ -289,4 +289,16 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'flush.md'
   []
+  [except_boundary]
+    type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = 'simple_no_action.i'
+    cli_args = 'UserObjects/reactor/boundary=left'
+    expect_err = "parameter 'UserObjects/reactor/boundary' is private and cannot be set"
+    match_literal = true
+    requirement = 'An error will be thrown if a geochemistry reactor is given a boundary restriction'
+    issues = '#33427'
+    design = 'GeochemistrySpatialReactor.md GeochemistryTimeDependentReactor.md GeochemistryTimeIndependentReactor.md'
+  []
 []

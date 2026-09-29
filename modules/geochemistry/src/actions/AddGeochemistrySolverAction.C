@@ -13,7 +13,6 @@
 #include "NearestNodeNumber.h"
 #include "GeochemistryConsoleOutput.h"
 #include "BlockRestrictable.h"
-#include "BoundaryRestrictable.h"
 
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_output");
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_user_object");
@@ -41,7 +40,6 @@ AddGeochemistrySolverAction::validParams()
   params += GeochemistryReactorBase::sharedParams();
 
   params += BlockRestrictable::validParams();
-  params += BoundaryRestrictable::validParams();
 
   params.addRangeCheckedParam<Real>(
       "stoichiometry_tolerance",
@@ -147,9 +145,6 @@ AddGeochemistrySolverAction::act()
     if (isParamValid("block"))
       params.set<std::vector<SubdomainName>>("block") =
           getParam<std::vector<SubdomainName>>("block");
-    if (isParamValid("boundary"))
-      params.set<std::vector<BoundaryName>>("boundary") =
-          getParam<std::vector<BoundaryName>>("boundary");
     params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL; // NOTE: adaptivity not active yet
     _problem->addUserObject(class_name, "geochemistry_nearest_node_number", params);
   }

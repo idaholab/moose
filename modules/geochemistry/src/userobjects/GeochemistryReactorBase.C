@@ -166,6 +166,10 @@ GeochemistryReactorBase::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
+  // MOOSE would execute a boundary-restricted reactor only at the boundary nodes, while its
+  // per-node state and any AuxVariables querying it span the whole mesh.  Features such as
+  // lower-dimensional fractures are blocks, so restrict the reactor using "block" instead
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.addClassDescription("Base class for UserObject to solve geochemistry reactions");
   return params;
 }
