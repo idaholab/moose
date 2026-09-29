@@ -251,5 +251,69 @@
       detail = 'a mixture model is used with buoyancy and a skewed mesh, as buoyancy forces reconstruction has not yet been implemented.'
       max_threads = 1 # see libmesh issue #3808
     []
+    [mass_transfer_prescribed_and_closed]
+      type = RunException
+      input = 'interfacial-mass-transfer-verification.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_mass_transfer=1"
+      expect_err = 'The transfer rate cannot be both prescribed and closed on the interfacial area'
+      detail = 'the interfacial mass transfer rate is both prescribed and closed on the interfacial area, since the phase equation can only be driven by one rate.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_saturation]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_latent_heat=1"
+      expect_err = 'needs a saturation temperature for the transfer to be driven by'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without a saturation temperature, since the closure is driven by the departure from saturation.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_latent_heat]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/T_saturation=1"
+      expect_err = 'needs the latent heat of the transition'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without a latent heat, since that is what converts the heat crossing the interface into mass.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_energy_equation]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/T_saturation=1 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_latent_heat=1"
+      expect_err = 'needs an energy equation, since the transfer is driven by the departure of the mixture temperature from saturation'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without an energy equation to supply the mixture temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [phase_change_energy_with_exchange_coefficient]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_phase_change_energy_term=true"
+      expect_err = 'A phase exchange coefficient cannot be specified if the phase change is handled with a phase change heat loss model'
+      detail = 'a phase exchange coefficient is given together with the phase change energy term, as the two describe the phase change inconsistently.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [phase_change_energy_with_enthalpy]
+      type = RunException
+      input = 'rayleigh-bernard-two-phase-physics_heated.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_phase_change_energy_term=true"
+      expect_err = 'The phase change energy term is currently only implemented for an energy equation solved for the temperature'
+      detail = 'the phase change energy term is requested with an energy equation solved for the specific enthalpy, since the term multiplies the time derivative of the temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [energy_drift_flux_with_enthalpy]
+      type = RunException
+      input = 'rayleigh-bernard-two-phase-physics_heated.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_drift_flux_momentum_terms=true"
+      expect_err = 'The enthalpy carried by the relative motion of the phases is currently only implemented for an energy equation solved for the temperature'
+      detail = 'the drift flux terms are requested with an energy equation solved for the specific enthalpy, since the enthalpy drift flux is assembled against the temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [drag_model_with_prescribed_drag]
+      type = RunException
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/slip_drag_x/linear_coef_name=1"
+      expect_err = "A prescribed drag function cannot be combined with 'use_dispersed_phase_drag_model'"
+      detail = 'a drag function is prescribed on the slip closure while the drag model is also asked to compute one, since a drag function formed from the slip velocity cannot also be an input to it.'
+      max_threads = 1 # see libmesh issue #3808
+    []
   []
 []
