@@ -10,7 +10,7 @@ The governing flow equations for incompressible flow within a 1D flow path are a
 \pd{\dot{m}}{x} = 0 \,
 
 !equation id=momentum_conservation
-\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}^2}{2\rho A^2} - \sum_{j} K_j \delta(z-z_j) \frac{\dot{m}^2}{2 \rho A^2} - \rho g \sin{\alpha} + \Delta P_p \,
+\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}^2}{2\rho A^2} - \sum_{j} K_j \delta(z-z_j) \frac{\dot{m}^2}{2 \rho A^2} - \rho g \sin{\alpha} + \pd{P_p}{x} \,
 
 !equation id=energy_conservation
 A \rho c_p \pd{T}{t} + \dot{m} c_p \pd{T}{x} = q_w^{''} P_w \,
