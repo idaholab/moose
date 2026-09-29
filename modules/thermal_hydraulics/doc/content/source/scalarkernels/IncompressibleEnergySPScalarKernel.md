@@ -2,7 +2,7 @@
 
 ## Overview
 
-This class implements the steady-state residual of the energy equation for the [Path-integrated incompressible flow model](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md). It implements the right-hand side of [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_energy). It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as (coupled [ScalarVariables](syntax/Variables/index.md)). It operates on the segment temperature, $T$.
+This class implements the steady-state residual of the energy equation for the [Path-integrated incompressible flow model](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md), the right-hand side of [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_energy). It requires a coupled variable mass flow rate, a coupled variable upstream fluid temperature, a coupled variable downstream fluid temperature, and a coupled variable wall temperature, all given as coupled [ScalarVariables](syntax/Variables/index.md). It operates on the segment temperature, $T$:
 
 !equation
 0 = F + \frac{\dot{m}}{2 L A \rho} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) T_d - \frac{\dot{m}}{2 L A \rho} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) T_u + \frac{|\dot{m}|}{L A \rho} T - \frac{h P_w}{2 A \rho c_p} \left[ 2 T_w - T - \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d - \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u \right] \,
