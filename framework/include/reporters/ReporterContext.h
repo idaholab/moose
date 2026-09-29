@@ -304,7 +304,7 @@ public:
                                   dof_id_type index,
                                   unsigned int time_index = 0) const override;
 
-  virtual void broadcast(processor_id_type root = 0) override
+  virtual void broadcast([[maybe_unused]] processor_id_type root = 0) override
   {
     if constexpr (MooseUtils::canBroadcast<T>::value)
       this->comm().broadcast(this->_state.value(), root);
