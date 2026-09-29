@@ -202,14 +202,24 @@ public:
   const torch::nn::Linear & meanModule() const { return _mean_module; }
 
   /**
-   * Return the Gaussian standard-deviation head.
+   * Return the state-dependent Gaussian standard-deviation head.
    */
   torch::nn::Linear & stdModule() { return _std_module; }
 
   /**
-   * Return the Gaussian standard-deviation head.
+   * Return the state-dependent Gaussian standard-deviation head.
    */
   const torch::nn::Linear & stdModule() const { return _std_module; }
+
+  /**
+   * Return the state-independent Gaussian log-standard-deviation parameter.
+   */
+  torch::Tensor & logStd() { return _log_std_parameter; }
+
+  /**
+   * Return the state-independent Gaussian log-standard-deviation parameter.
+   */
+  const torch::Tensor & logStd() const { return _log_std_parameter; }
 
   /**
    * Return the cached Gaussian standard-deviation tensor.
@@ -226,8 +236,10 @@ private:
   const bool _state_independent_std;
   /// Linear head that produces the Gaussian action mean.
   torch::nn::Linear _mean_module{nullptr};
-  /// Linear head that produces the Gaussian log-std inputs or bias-only std state.
+  /// Linear head that produces state-dependent Gaussian log-std inputs.
   torch::nn::Linear _std_module{nullptr};
+  /// Trainable state-independent Gaussian log-std.
+  torch::Tensor _log_std_parameter;
   /// Cached Gaussian action mean from the latest reset.
   torch::Tensor _mean;
   /// Cached Gaussian action standard deviation from the latest reset.

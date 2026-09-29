@@ -121,11 +121,19 @@ LibtorchGaussianActionDistribution::constructDistribution()
 {
   _mean_module = register_module(
       "mean", torch::nn::Linear(torch::nn::LinearOptions(_num_inputs, _num_outputs).bias(true)));
-  _std_module = register_module(
-      "std", torch::nn::Linear(torch::nn::LinearOptions(_num_inputs, _num_outputs).bias(true)));
-
   _mean_module->to(_device_type, _data_type);
-  _std_module->to(_device_type, _data_type);
+
+  if (_state_independent_std)
+    _log_std_parameter = register_parameter(
+        "log_std",
+        torch::zeros({_num_outputs},
+                     torch::TensorOptions().dtype(_data_type).device(_device_type)));
+  else
+  {
+    _std_module = register_module(
+        "std", torch::nn::Linear(torch::nn::LinearOptions(_num_inputs, _num_outputs).bias(true)));
+    _std_module->to(_device_type, _data_type);
+  }
 }
 
 void
@@ -136,8 +144,7 @@ LibtorchGaussianActionDistribution::initialize(const c10::optional<at::Generator
 
   if (_state_independent_std)
   {
-    _std_module->weight.data().zero_();
-    torch::nn::init::zeros_(_std_module->bias);
+    torch::nn::init::zeros_(_log_std_parameter);
     return;
   }
 
@@ -154,9 +161,9 @@ LibtorchGaussianActionDistribution::reset(const torch::Tensor & input)
   if (_state_independent_std)
   {
     if (_mean.dim() <= 1)
-      _log_std_tensor = _std_module->bias;
+      _log_std_tensor = _log_std_parameter;
     else
-      _log_std_tensor = _std_module->bias.view({1, -1}).expand(_mean.sizes());
+      _log_std_tensor = _log_std_parameter.view({1, -1}).expand(_mean.sizes());
   }
   else
     _log_std_tensor = _std_module->forward(features);

@@ -20,11 +20,7 @@
                         -0.41325949248157023,
                         -0.9106133053463885
                     ],
-                    "action_head.std.bias": [
-                        0.0
-                    ],
-                    "action_head.std.weight": [
-                        0.0,
+                    "action_head.log_std": [
                         0.0
                     ],
                     "hidden_layer_1.bias": [

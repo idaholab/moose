@@ -165,8 +165,7 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateI
 
   network.gaussianActionDistribution().meanModule()->weight.data().fill_(1.5);
   network.gaussianActionDistribution().meanModule()->bias.data().fill_(0.0);
-  network.gaussianActionDistribution().stdModule()->weight.data().fill_(123.0);
-  network.gaussianActionDistribution().stdModule()->bias.data().fill_(log_std);
+  network.gaussianActionDistribution().logStd().data().fill_(log_std);
 
   auto input = torch::tensor({{2.0}}, at::kDouble);
   const Real deterministic_action = network.evaluate(input, false).item<Real>();
@@ -244,8 +243,7 @@ TEST(LibtorchActorNeuralNetTest, explicitGeneratorKeepsGaussianSamplingStableAcr
 
   original.gaussianActionDistribution().meanModule()->weight.data().fill_(0.75);
   original.gaussianActionDistribution().meanModule()->bias.data().fill_(1.25);
-  original.gaussianActionDistribution().stdModule()->weight.data().fill_(0.0);
-  original.gaussianActionDistribution().stdModule()->bias.data().fill_(std::log(0.5));
+  original.gaussianActionDistribution().logStd().data().fill_(std::log(0.5));
 
   TestableLibtorchActorNeuralNet copied(original);
 
@@ -326,9 +324,7 @@ TEST(LibtorchActorNeuralNetTest, loadActorStateAcceptsTorchSaveArchive)
   saved.gaussianActionDistribution().meanModule()->weight.data() =
       torch::tensor({{7.0, 8.0}}, at::kDouble);
   saved.gaussianActionDistribution().meanModule()->bias.data() = torch::tensor({9.0}, at::kDouble);
-  saved.gaussianActionDistribution().stdModule()->weight.data() =
-      torch::tensor({{-1.5, 2.5}}, at::kDouble);
-  saved.gaussianActionDistribution().stdModule()->bias.data() = torch::tensor({-3.5}, at::kDouble);
+  saved.gaussianActionDistribution().logStd().data() = torch::tensor({-3.5}, at::kDouble);
 
   Moose::UnitUtils::TempFile archive;
   torch::save(std::make_shared<Moose::LibtorchActorNeuralNet>(saved), archive.path().string());
