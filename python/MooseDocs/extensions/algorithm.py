@@ -258,6 +258,11 @@ class IfThenComponent(AlgorithmComponentBase):
         settings = AlgorithmComponentBase.defaultSettings()
 
         def validation_condition(setting: str) -> str:
+            if setting.lower() == 'true':
+                return True
+            if setting.lower() == 'false':
+                return False
+
             return setting
         settings["condition"] = (
             "", "If and if else condition", validation_condition)

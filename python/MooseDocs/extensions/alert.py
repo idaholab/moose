@@ -99,6 +99,10 @@ class AlertCommand(command.CommandComponent):
                                     "Center the title.", validation.boolean)
 
         def validation_prefix(setting: str) -> str:
+            if setting.lower() == 'true':
+                return True
+            if setting.lower() == 'false':
+                return False
             return setting
         settings["prefix"] = (
             None,

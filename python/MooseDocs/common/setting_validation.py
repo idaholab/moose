@@ -110,8 +110,10 @@ def number_of_columns(setting: str) -> int:
         if the value cannot be parsed as an unsigned integer or
         if the value is not within the range [1,12]
     """
-    value = unsigned_integer(setting)
+    value = int(setting)
 
-    if value < 1 or value > 12:
+    if value < 1.0 or value > 12.0:
         raise MooseDocsException(f"The number of columns provided '{
                                  value}' but be in the range [1,12].")
+
+    return value
