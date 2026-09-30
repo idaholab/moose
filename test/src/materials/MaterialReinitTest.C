@@ -6,12 +6,12 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 
-#include "BoundaryMaterialReinitTest.h"
+#include "MaterialReinitTest.h"
 
-registerMooseObject("MooseTestApp", BoundaryMaterialReinitTest);
+registerMooseObject("MooseTestApp", MaterialReinitTest);
 
 InputParameters
-BoundaryMaterialReinitTest::validParams()
+MaterialReinitTest::validParams()
 {
   auto params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("property",
@@ -31,7 +31,7 @@ BoundaryMaterialReinitTest::validParams()
   return params;
 }
 
-BoundaryMaterialReinitTest::BoundaryMaterialReinitTest(const InputParameters & parameters)
+MaterialReinitTest::MaterialReinitTest(const InputParameters & parameters)
   : Material(parameters),
     _property(declareProperty<Real>("property")),
     _value(getParam<Real>("value")),
@@ -46,7 +46,7 @@ BoundaryMaterialReinitTest::BoundaryMaterialReinitTest(const InputParameters & p
 }
 
 void
-BoundaryMaterialReinitTest::computeQpProperties()
+MaterialReinitTest::computeQpProperties()
 {
   if (_error_on_volume && materialDataType() == Moose::BLOCK_MATERIAL_DATA)
     mooseError("The block copy of ", name(), " should not have been computed.");

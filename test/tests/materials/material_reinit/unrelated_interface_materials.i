@@ -21,13 +21,13 @@
 
 [Materials]
   [volume]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = volume_property
     error_on_face = true
     error_on_neighbor = true
   []
   [boundary]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = boundary_property
     boundary = interface
     error_on_boundary = true
