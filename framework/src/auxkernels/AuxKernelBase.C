@@ -100,6 +100,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     NonADFunctorInterface(this),
 
     _var(getVariableHelper(parameters)),
+    _is_nodal_kernel(_var.isNodal()),
     _bnd(boundaryRestricted()),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -153,6 +154,7 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     NonADFunctorInterface(object, key),
 
     _var(object._var),
+    _is_nodal_kernel(object._is_nodal_kernel),
     _bnd(object._bnd),
     _check_boundary_restricted(object._check_boundary_restricted),
     _subproblem(object._subproblem),

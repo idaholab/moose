@@ -840,6 +840,11 @@ MooseApp::MooseApp(const InputParameters & parameters)
   _the_warehouse->registerAttribute<AttribBoundaries>("boundaries", 0);
   _the_warehouse->registerAttribute<AttribThread>("thread", 0);
   _the_warehouse->registerAttribute<AttribExecutionOrderGroup>("execution_order_group", 0);
+  _the_warehouse->registerAttribute<AttribAuxKernelNodal>("aux_kernel_nodal", false);
+  _the_warehouse->registerAttribute<AttribAuxKernelMortar>("aux_kernel_mortar", false);
+  _the_warehouse->registerAttribute<AttribAuxKernelValueType>("aux_kernel_value_type", "");
+  _the_warehouse->registerAttribute<AttribAuxKernelBoundaryRestricted>(
+      "aux_kernel_boundary_restricted", false);
   _the_warehouse->registerAttribute<AttribPreIC>("pre_ic", 0);
   _the_warehouse->registerAttribute<AttribPreAux>("pre_aux");
   _the_warehouse->registerAttribute<AttribPostAux>("post_aux");

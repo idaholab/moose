@@ -16,6 +16,8 @@
 #include "MooseVariableInterface.h"
 #include "MooseVariableFE.h"
 #include "AuxKernelBase.h"
+#include "AuxKernel.h"
+#include "MortarNodalAuxKernel.h"
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
@@ -287,11 +289,12 @@ AttribThread::isEqual(const Attribute & other) const
 void
 AttribExecutionOrderGroup::initFrom(const MooseObject * obj)
 {
-  const auto * uo = dynamic_cast<const UserObjectBase *>(obj);
-  _val = uo ? uo->getParam<int>("execution_order_group") : 0;
-  // Not used for now since auxkernels don't use theWarehouse queries
-  const auto * aux = dynamic_cast<const AuxKernelBase *>(obj);
-  _val = aux ? aux->getParam<int>("execution_order_group") : 0;
+  if (const auto * uo = dynamic_cast<const UserObjectBase *>(obj))
+    _val = uo->getParam<int>("execution_order_group");
+  else if (const auto * aux = dynamic_cast<const AuxKernelBase *>(obj))
+    _val = aux->getParam<int>("execution_order_group");
+  else
+    _val = 0;
 }
 bool
 AttribExecutionOrderGroup::isMatch(const Attribute & other) const
@@ -301,6 +304,85 @@ AttribExecutionOrderGroup::isMatch(const Attribute & other) const
 }
 bool
 AttribExecutionOrderGroup::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribAuxKernelNodal::initFrom(const MooseObject * obj)
+{
+  const auto * aux = dynamic_cast<const AuxKernelBase *>(obj);
+  _val = aux && aux->isNodal();
+}
+bool
+AttribAuxKernelNodal::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelNodal *>(&other);
+  return a && (a->_val == _val);
+}
+bool
+AttribAuxKernelNodal::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribAuxKernelMortar::initFrom(const MooseObject * obj)
+{
+  _val = dynamic_cast<const MortarNodalAuxKernelTempl<Real> *>(obj) ||
+         dynamic_cast<const MortarNodalAuxKernelTempl<RealVectorValue> *>(obj) ||
+         dynamic_cast<const MortarNodalAuxKernelTempl<RealEigenVector> *>(obj);
+}
+bool
+AttribAuxKernelMortar::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelMortar *>(&other);
+  return a && (a->_val == _val);
+}
+bool
+AttribAuxKernelMortar::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribAuxKernelValueType::initFrom(const MooseObject * obj)
+{
+  if (dynamic_cast<const AuxKernel *>(obj))
+    _val = "Real";
+  else if (dynamic_cast<const VectorAuxKernel *>(obj))
+    _val = "Vector";
+  else if (dynamic_cast<const ArrayAuxKernel *>(obj))
+    _val = "Array";
+  else
+    _val = "";
+}
+bool
+AttribAuxKernelValueType::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelValueType *>(&other);
+  return a && (a->_val == _val);
+}
+bool
+AttribAuxKernelValueType::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribAuxKernelBoundaryRestricted::initFrom(const MooseObject * obj)
+{
+  const auto * bnd = dynamic_cast<const BoundaryRestrictable *>(obj);
+  _val = bnd && bnd->boundaryRestricted();
+}
+bool
+AttribAuxKernelBoundaryRestricted::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelBoundaryRestricted *>(&other);
+  return a && (a->_val == _val);
+}
+bool
+AttribAuxKernelBoundaryRestricted::isEqual(const Attribute & other) const
 {
   return isMatch(other);
 }
