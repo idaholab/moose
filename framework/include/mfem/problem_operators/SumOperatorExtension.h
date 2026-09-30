@@ -106,13 +106,10 @@ public:
     mfem::Vector nlf_diag(diag.Size());
     AssembleDiagOnNonlinearForm(nlf_diag);
 
-    // Ultimately, we want the diag that we assemble here to have 1s
-    // on all essential rows. Since we combine diagonal values from
-    // the nonlinear form and the bilinear form here, we choose to
-    // make sure the nonlinear form has a diag_policy of 0 (see the
-    // for loop) and the bilinear form has a diag_policy
-    // of 1 (default). This means when we combine at the end, we have 1s
-    // on essential rows.
+    // Ensure that the final diag has 1s on all the essential
+    // rows. _B->AssembleDiagonal will hand over to ConstrainedOperator,
+    // which has default of DiagonalPolicy::DIAG_ONE. So here
+    // we make sure these rows are set to 0 so the sum is correct.
     nlf_diag.SetSubVector(_nlf->GetEssentialTrueDofs(), 0.);
 
     mfem::Vector b_diag(diag.Size());
