@@ -146,8 +146,6 @@ public:
   void clearScalarVariableCoupleableTags();
 
   const ExecuteMooseObjectWarehouse<AuxKernel> & mortarNodalAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & nodalVectorAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & nodalArrayAuxWarehouse() const;
 
   const ExecuteMooseObjectWarehouse<AuxKernel> & elemAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
@@ -208,11 +206,9 @@ protected:
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
   // Storage for VectorAuxKernel objects
-  ExecuteMooseObjectWarehouse<VectorAuxKernel> _nodal_vec_aux_storage;
   ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
 
   // Storage for ArrayAuxKernel objects
-  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _nodal_array_aux_storage;
   ExecuteMooseObjectWarehouse<ArrayAuxKernel> _elemental_array_aux_storage;
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -239,18 +235,6 @@ inline const ExecuteMooseObjectWarehouse<AuxKernel> &
 AuxiliarySystem::mortarNodalAuxWarehouse() const
 {
   return _mortar_nodal_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
-AuxiliarySystem::nodalVectorAuxWarehouse() const
-{
-  return _nodal_vec_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
-AuxiliarySystem::nodalArrayAuxWarehouse() const
-{
-  return _nodal_array_aux_storage;
 }
 
 inline const ExecuteMooseObjectWarehouse<AuxKernel> &
