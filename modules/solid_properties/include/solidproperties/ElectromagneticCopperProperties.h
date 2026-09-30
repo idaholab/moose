@@ -60,28 +60,28 @@ protected:
   /// Residual resistivity ratio (user parameter, default 100)
   const Real _rrr;
 
-  /// Residual resistivity rho_0 = 1.553e-8 / RRR [Ohm·m]
+  /// Residual resistivity rho_0 = 1.553e-8 / RRR [Ohm*m]
   const Real _rho_0;
 
   /// NIST copper electrical resistivity coefficients (SI units)
-  const Real _P1;    // 1.171e-17 [Ohm·m · K^(-P2)]
+  const Real _P1;    // 1.171e-17 [Ohm*m * K^(-P2)]
   const Real _P2;    // 4.49 [dimensionless]
-  const Real _P3;    // 3.841e10 [(Ohm·m)^(-1) · K^P4]
+  const Real _P3;    // 3.841e10 [(Ohm*m)^(-1) * K^P4]
   const Real _P4;    // 1.14 [dimensionless]
   const Real _P5;    // 50 [K]
   const Real _P6;    // 6.428 [dimensionless]
   const Real _P7;    // 0.4531 [dimensionless]
-  const Real _rho_c; // 0.0 [Ohm·m] (copper-specific correction)
+  const Real _rho_c; // 0.0 [Ohm*m] (copper-specific correction)
 
-  /// Magnetic permeability (constant: mu_0 = 4π × 10^-7 H/m)
+  /// Magnetic permeability (constant: mu_0 = 4*pi * 10^-7 H/m)
   const Real _mu_const;
 
 private:
   /**
    * Helper function to compute electrical resistivity components from NIST correlation
    * PLACEHOLDER - Will implement NIST equation (8-1) when user provides analytical expressions
-   * Computes rho_i(T) and rho_i0(T) in nOhm·m, then converts to Ohm·m
+   * Computes rho_i(T) and rho_i0(T) in nOhm*m, then converts to Ohm*m
    */
   void computeElectricalResistivity(
-      const Real & T, Real & rho_i, Real & rho_i0, Real & drho_i_dT, Real & drho_i0_dT) const;
+      Real T, Real & rho_i, Real & rho_i0, Real & drho_i_dT, Real & drho_i0_dT) const;
 };

@@ -39,9 +39,9 @@ ElectromagneticCopperProperties::ElectromagneticCopperProperties(const InputPara
     _T_max(900.0),
     _rrr(getParam<Real>("rrr")),
     // NIST zero-field copper electrical-resistivity correlation
-    // rho_0 = 1.553e-8 / RRR [Ohm·m]
+    // rho_0 = 1.553e-8 / RRR [Ohm*m]
     _rho_0(1.553e-8 / _rrr),
-    // NIST copper coefficients (SI units, already in Ohm·m)
+    // NIST copper coefficients (SI units, already in Ohm*m)
     _P1(1.171e-17),
     _P2(4.49),
     _P3(3.841e10),
@@ -50,7 +50,7 @@ ElectromagneticCopperProperties::ElectromagneticCopperProperties(const InputPara
     _P6(6.428),
     _P7(0.4531),
     _rho_c(0.0),
-    // Magnetic permeability: mu_0 = 4π × 10^-7 H/m
+    // Magnetic permeability: mu_0 = 4*pi * 10^-7 H/m
     _mu_const(1.25663706212e-6)
 {
 }
@@ -101,7 +101,7 @@ ElectromagneticCopperProperties::electrical_conductivity_from_T(const Real & T,
 
   sigma = 1.0 / rho;
 
-  // d(1/rho)/dT = -1/rho^2 × drho/dT (chain rule)
+  // d(1/rho)/dT = -1/rho^2 * drho/dT (chain rule)
   dsigma_dT = -drho_dT / (rho * rho);
 }
 
@@ -122,10 +122,10 @@ ElectromagneticCopperProperties::magnetic_permeability_from_T(const Real & T,
 
 void
 ElectromagneticCopperProperties::computeElectricalResistivity(
-    const Real & T, Real & rho_i, Real & rho_i0, Real & drho_i_dT, Real & drho_i0_dT) const
+    Real T, Real & rho_i, Real & rho_i0, Real & drho_i_dT, Real & drho_i0_dT) const
 {
   // NIST zero-field copper electrical-resistivity correlation
-  // All values in SI units (Ohm·m) - NO unit conversion needed
+  // All values in SI units (Ohm*m) - NO unit conversion needed
   //
   // rho_i(T) = (P1 * T^P2) / (1 + P1 * P3 * T^(P2-P4) * exp(-(P5/T)^P6)) + rho_c
   //
@@ -141,7 +141,7 @@ ElectromagneticCopperProperties::computeElectricalResistivity(
   const Real numer = _P1 * T_P2;                                 // Numerator
   const Real denom = 1.0 + _P1 * _P3 * T_P2_minus_P4 * exp_term; // Denominator
 
-  rho_i = numer / denom + _rho_c; // [Ohm·m]
+  rho_i = numer / denom + _rho_c; // [Ohm*m]
 
   // ===== Compute drho_i/dT using quotient rule =====
   // d/dT[f/g] = (f' * g - f * g') / g^2
@@ -168,7 +168,7 @@ ElectromagneticCopperProperties::computeElectricalResistivity(
   // ===== Compute rho_i0(T) =====
   // rho_i0 = P7 * rho_i * rho_0 / (rho_i + rho_0)
   const Real sum_rho = rho_i + _rho_0;
-  rho_i0 = _P7 * rho_i * _rho_0 / sum_rho; // [Ohm·m]
+  rho_i0 = _P7 * rho_i * _rho_0 / sum_rho; // [Ohm*m]
 
   // ===== Compute drho_i0/dT using quotient rule =====
   // rho_i0 = (P7 * rho_0 * rho_i) / (rho_i + rho_0)
