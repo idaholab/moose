@@ -331,6 +331,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
             .query()
             .condition<AttribSystem>("AuxKernel")
             .condition<AttribAuxKernelValueType>("Real")
+            .condition<AttribAuxKernelMortar>(false)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -494,7 +495,6 @@ BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
   // Custom warehouses below are not covered by theWarehouse() queries. Nodal (non-mortar)
   // AuxKernels are covered by the generic query above since they are added to theWarehouse().
   const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.mortarNodalAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemVectorAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemArrayAuxWarehouse());
@@ -564,7 +564,8 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
       // AuxKernels are treated like the "custom warehouse" objects below: only boundary-restricted
       // ones belong in these groups, since unrestricted (block-only) ones are already represented
       // in the block-restriction groups.
-      if (!boundary_restrictable->boundaryRestricted() && dynamic_cast<const AuxKernelBase *>(object))
+      if (!boundary_restrictable->boundaryRestricted() &&
+          dynamic_cast<const AuxKernelBase *>(object))
         continue;
 
       const auto & ids = boundary_restrictable->boundaryRestricted()
@@ -578,7 +579,6 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
   // already represented in the block groups. Nodal (non-mortar) AuxKernels are covered by the
   // generic query above since they are added to theWarehouse().
   const auto & aux_system = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.mortarNodalAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemVectorAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemArrayAuxWarehouse(), false);

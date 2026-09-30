@@ -10,10 +10,9 @@
 #pragma once
 
 #include "ThreadedNodeLoop.h"
+#include "TheWarehouse.h"
 
 // Forward declarations
-template <typename T>
-class MooseObjectWarehouse;
 class AuxiliarySystem;
 
 /**
@@ -25,7 +24,7 @@ class ComputeMortarNodalAuxBndThread
 {
 public:
   ComputeMortarNodalAuxBndThread(FEProblemBase & fe_problem,
-                                 const MooseObjectWarehouse<AuxKernelType> & storage,
+                                 const TheWarehouse::Query & query,
                                  BoundaryID bnd_id,
                                  std::size_t object_container_index);
   // Splitting Constructor
@@ -38,13 +37,15 @@ protected:
   /// The auxiliary system
   AuxiliarySystem & _aux_sys;
 
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernelType> & _storage;
+  /// Warehouse to retrieve the auxkernel
+  const TheWarehouse::Query _query;
+  TheWarehouse::QueryCache<AttribThread, AttribBoundaries> _query_boundary;
 
   /// The boundary ID for whose nodes we will evaluate the aux kernel on
   const BoundaryID _bnd_id;
 
-  /// The index at which we should index the aux kernel containers, e.g. this data member helper
-  /// ensures we get the correct mortar nodal aux kernel to evaluate
+  /// The index at which we should index the per-boundary, dependency-sorted list of mortar nodal
+  /// aux kernels queried for this boundary, e.g. this data member helper ensures we get the
+  /// correct mortar nodal aux kernel to evaluate
   const std::size_t _object_container_index;
 };
