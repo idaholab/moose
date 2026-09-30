@@ -11,7 +11,7 @@
 #include "Material.h"
 
 /**
- * Test material for checking selective material reinitialization on boundaries.
+ * Test material for checking selective material reinitialization, on boundaries and blocks.
  */
 class BoundaryMaterialReinitTest : public Material
 {
@@ -38,4 +38,6 @@ protected:
   const bool _error_on_boundary;
   /// Whether computing the automatically-created neighbor material is an error for this test
   const bool _error_on_neighbor;
+  /// Whether computing the block copy of this material is an error for this test
+  const bool _error_on_volume;
 };
