@@ -44,14 +44,33 @@ class StyleCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_halign(setting: str) -> str:
+            return setting
         settings["halign"] = (
             None,
             "The horizontal alignment ('center', 'left', or 'right')",
-        )
-        settings["border"] = (None, "The size of the border in pixels")
-        settings["color"] = (None, "Set the color of content.")
-        settings["fontsize"] = (None, "Set the font size.")
-        settings["fontweight"] = (None, "Set the font weight.")
+            validation_halign)
+
+        def validation_border(setting: str) -> str:
+            return setting
+        settings["border"] = (
+            None, "The size of the border in pixels", validation_border)
+
+        def validation_color(setting: str) -> str:
+            return setting
+        settings["color"] = (
+            None, "Set the color of content.", validation_color)
+
+        def validation_fontsize(setting: str) -> str:
+            return setting
+        settings["fontsize"] = (
+            None, "Set the font size.", validation_fontsize)
+
+        def validation_fontweight(setting: str) -> str:
+            return setting
+        settings["fontweight"] = (
+            None, "Set the font weight.", validation_fontweight)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -80,7 +99,8 @@ class RenderStyleToken(components.RenderComponent):
 
             style.append("text-align:{}".format(token["halign"]))
         if token["border"]:
-            style.append("border-width:{}px;border-style:solid".format(token["border"]))
+            style.append(
+                "border-width:{}px;border-style:solid".format(token["border"]))
         if token["color"]:
             style.append("color:{}".format(token["color"]))
         if token["fontsize"]:
