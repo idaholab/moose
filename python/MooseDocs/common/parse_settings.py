@@ -77,6 +77,12 @@ def parse_settings(defaults, local, error_on_unknown=True):
                                 in the default list.
     """
     known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).items())
+    for k, v in defaults.items():
+        try:
+            v[2]
+        except Exception:
+            raise MooseDocsException(f"{k} is missing validator")
+    # validators = dict((k, v[2]) for k, v in copy.deepcopy(defaults).items())
     settings, unknown = match_settings(known, local)
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"

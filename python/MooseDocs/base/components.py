@@ -98,7 +98,7 @@ class ReaderComponent(Component, mixins.ReaderObject):
 
         def validation_id(setting: str) -> str:
             return setting
-        settings["id"] = (None, "Identifier to link against this object.")
+        settings["id"] = (None, "Identifier to link against this object.", validation_id)
         return settings
 
     def __init__(self):

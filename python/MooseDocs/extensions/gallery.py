@@ -12,6 +12,7 @@ from ..common import exceptions
 from ..base import components, LatexRenderer
 from ..tree import tokens, html, latex
 from . import command, core, media
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -71,7 +72,10 @@ class CardComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["title"] = (None, "Title of the card.")
+
+        def validation_title(setting: str) -> str:
+            return setting
+        settings["title"] = (None, "Title of the card.", validation_title)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -81,14 +85,17 @@ class CardComponent(command.CommandComponent):
         img = CardImage(card)
         src = info["subcommand"]
         if src.endswith((".ogg", ".webm", ".mp4")):
-            media.Video(img, src=src, class_="activator", alt=settings["title"])
+            media.Video(img, src=src, class_="activator",
+                        alt=settings["title"])
         else:
-            media.Image(img, src=src, class_="activator", alt=settings["title"])
+            media.Image(img, src=src, class_="activator",
+                        alt=settings["title"])
 
         # A title is required
         title = settings["title"]
         if title is None:
-            raise exceptions.MooseDocsException("The 'title' option is required.")
+            raise exceptions.MooseDocsException(
+                "The 'title' option is required.")
 
         # Content (the title when the card is not showing the detailed content)
         card_content = CardContent(card)
@@ -121,9 +128,12 @@ class GalleryComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["large"] = (4, "Number of columns on large screens (1-12).")
-        settings["medium"] = (6, "Number of columns on medium screens (1-12).")
-        settings["small"] = (12, "Number of columns on small screens (1-12).")
+        settings["large"] = (
+            4, "Number of columns on large screens (1-12).", validation.number_of_columns)
+        settings["medium"] = (
+            6, "Number of columns on medium screens (1-12).", validation.number_of_columns)
+        settings["small"] = (
+            12, "Number of columns on small screens (1-12).", validation.number_of_columns)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -219,7 +229,8 @@ class RenderCardTitle(components.RenderComponent):
             self.renderer.render(span, child, page)
         if token["activator"]:
             span.addClass("activator")
-            html.Tag(span, "i", class_="material-icons right", string="more_vert")
+            html.Tag(span, "i", class_="material-icons right",
+                     string="more_vert")
         elif token["deactivator"]:
             html.Tag(span, "i", class_="material-icons right", string="close")
         return None
