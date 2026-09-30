@@ -145,10 +145,6 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
-  const ExecuteMooseObjectWarehouse<AuxKernel> & elemAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
-
 #ifdef MOOSE_KOKKOS_ENABLED
   const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosNodalAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosElemAuxWarehouse() const;
@@ -173,7 +169,7 @@ protected:
   void computeElementalArrayVars(ExecFlagType type, int group);
 
   template <typename AuxKernelType>
-  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
+  void computeElementalVarsHelper(const TheWarehouse::Query & query);
 
   template <typename AuxKernelType>
   void computeNodalVarsHelper(const TheWarehouse::Query & query);
@@ -199,15 +195,6 @@ protected:
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
-  // Storage for AuxKernel objects
-  ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
-
-  // Storage for VectorAuxKernel objects
-  ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
-
-  // Storage for ArrayAuxKernel objects
-  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _elemental_array_aux_storage;
-
 #ifdef MOOSE_KOKKOS_ENABLED
   // Storage for KokkosAuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_nodal_aux_storage;
@@ -227,24 +214,6 @@ protected:
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 };
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::elemAuxWarehouse() const
-{
-  return _elemental_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
-AuxiliarySystem::elemVectorAuxWarehouse() const
-{
-  return _elemental_vec_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
-AuxiliarySystem::elemArrayAuxWarehouse() const
-{
-  return _elemental_array_aux_storage;
-}
 
 #ifdef MOOSE_KOKKOS_ENABLED
 inline const ExecuteMooseObjectWarehouse<AuxKernelBase> &
