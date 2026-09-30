@@ -201,7 +201,14 @@ ADComputeSmearedCrackingStress::initialSetup()
     ADSmearedCrackSofteningBase * scsb =
         dynamic_cast<ADSmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
     if (scsb)
+    {
       _softening_models.push_back(scsb);
+
+      // scsb is called directly rather than through the normal material property system, so its
+      // own dependencies must be added to ours for them to stay active
+      const auto & scsb_deps = scsb->getMatPropDependencies();
+      _material_property_dependencies.insert(scsb_deps.begin(), scsb_deps.end());
+    }
     else
       paramError("softening_models", "Model " + soft_matl + " is not a softening model");
   }

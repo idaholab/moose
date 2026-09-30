@@ -160,6 +160,11 @@ ComputeMultipleCrystalPlasticityStress::initialSetup()
     {
       _models.push_back(model);
       // TODO: check to make sure that the material model is compatible with this class
+
+      // model is called directly rather than through the normal material property system, so its
+      // own dependencies must be added to ours for them to stay active
+      const auto & model_deps = model->getMatPropDependencies();
+      _material_property_dependencies.insert(model_deps.begin(), model_deps.end());
     }
     else
       mooseError("Model " + model_names[i] +
@@ -177,7 +182,14 @@ ComputeMultipleCrystalPlasticityStress::initialSetup()
             &getMaterialByName(eigenstrain_names[i]));
 
     if (eigenstrain)
+    {
       _eigenstrains.push_back(eigenstrain);
+
+      // eigenstrain is called directly rather than through the normal material property system,
+      // so its own dependencies must be added to ours for them to stay active
+      const auto & eigenstrain_deps = eigenstrain->getMatPropDependencies();
+      _material_property_dependencies.insert(eigenstrain_deps.begin(), eigenstrain_deps.end());
+    }
     else
       mooseError("Eigenstrain" + eigenstrain_names[i] +
                  " is not compatible with ComputeMultipleCrystalPlasticityStress");
