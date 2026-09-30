@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesTestUtils.h"
-#include "MechanicalCopperPropertiesTest.h"
+#include "MechanicalCryogenicOFHCCopperPropertiesTest.h"
 
 /**
  * Test Young's modulus and its derivatives at multiple temperatures.
  * Golden values generated from calculate_mechanical_golden_values.py
  */
-TEST_F(MechanicalCopperPropertiesTest, E)
+TEST_F(MechanicalCryogenicOFHCCopperPropertiesTest, E)
 {
   Real T;
 
@@ -38,7 +38,7 @@ TEST_F(MechanicalCopperPropertiesTest, E)
  * Test Poisson's ratio and its derivatives at multiple temperatures.
  * Golden values generated from calculate_mechanical_golden_values.py
  */
-TEST_F(MechanicalCopperPropertiesTest, nu)
+TEST_F(MechanicalCryogenicOFHCCopperPropertiesTest, nu)
 {
   Real T;
 
@@ -69,7 +69,7 @@ TEST_F(MechanicalCopperPropertiesTest, nu)
  * This matches the approach used for cp in ThermalCopperProperties (both use the
  * same NIST logarithmic polynomial form).
  */
-TEST_F(MechanicalCopperPropertiesTest, alpha)
+TEST_F(MechanicalCryogenicOFHCCopperPropertiesTest, alpha)
 {
   Real T;
 

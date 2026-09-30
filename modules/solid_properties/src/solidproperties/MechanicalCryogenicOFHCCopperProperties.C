@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MechanicalCopperProperties.h"
+#include "MechanicalCryogenicOFHCCopperProperties.h"
 #include "libmesh/utility.h"
 #include <cmath>
 
-registerMooseObject("SolidPropertiesApp", MechanicalCopperProperties);
+registerMooseObject("SolidPropertiesApp", MechanicalCryogenicOFHCCopperProperties);
 
 InputParameters
-MechanicalCopperProperties::validParams()
+MechanicalCryogenicOFHCCopperProperties::validParams()
 {
   InputParameters params = MechanicalSolidProperties::validParams();
   params.addClassDescription(
@@ -22,7 +22,8 @@ MechanicalCopperProperties::validParams()
   return params;
 }
 
-MechanicalCopperProperties::MechanicalCopperProperties(const InputParameters & parameters)
+MechanicalCryogenicOFHCCopperProperties::MechanicalCryogenicOFHCCopperProperties(
+    const InputParameters & parameters)
   : MechanicalSolidProperties(parameters),
     _T_min(4.0),
     _T_max(300.0),
@@ -44,7 +45,7 @@ MechanicalCopperProperties::MechanicalCopperProperties(const InputParameters & p
 }
 
 Real
-MechanicalCopperProperties::E_from_T(const Real & T) const
+MechanicalCryogenicOFHCCopperProperties::E_from_T(const Real & T) const
 {
   Real E, dE_dT;
   E_from_T(T, E, dE_dT);
@@ -52,7 +53,7 @@ MechanicalCopperProperties::E_from_T(const Real & T) const
 }
 
 void
-MechanicalCopperProperties::E_from_T(const Real & T, Real & E, Real & dE_dT) const
+MechanicalCryogenicOFHCCopperProperties::E_from_T(const Real & T, Real & E, Real & dE_dT) const
 {
   if ((T < _T_min) || (T > _T_max))
     flagInvalidSolution("Young's modulus evaluated outside valid range [4, 300] K");
@@ -66,7 +67,7 @@ MechanicalCopperProperties::E_from_T(const Real & T, Real & E, Real & dE_dT) con
 }
 
 Real
-MechanicalCopperProperties::nu_from_T(const Real & T) const
+MechanicalCryogenicOFHCCopperProperties::nu_from_T(const Real & T) const
 {
   Real nu, dnu_dT;
   nu_from_T(T, nu, dnu_dT);
@@ -74,7 +75,7 @@ MechanicalCopperProperties::nu_from_T(const Real & T) const
 }
 
 void
-MechanicalCopperProperties::nu_from_T(const Real & T, Real & nu, Real & dnu_dT) const
+MechanicalCryogenicOFHCCopperProperties::nu_from_T(const Real & T, Real & nu, Real & dnu_dT) const
 {
   if ((T < _T_min) || (T > _T_max))
     flagInvalidSolution("Poisson's ratio evaluated outside valid range [4, 300] K");
@@ -88,7 +89,7 @@ MechanicalCopperProperties::nu_from_T(const Real & T, Real & nu, Real & dnu_dT) 
 }
 
 Real
-MechanicalCopperProperties::alpha_from_T(const Real & T) const
+MechanicalCryogenicOFHCCopperProperties::alpha_from_T(const Real & T) const
 {
   Real alpha, dalpha_dT;
   alpha_from_T(T, alpha, dalpha_dT);
@@ -96,7 +97,9 @@ MechanicalCopperProperties::alpha_from_T(const Real & T) const
 }
 
 void
-MechanicalCopperProperties::alpha_from_T(const Real & T, Real & alpha, Real & dalpha_dT) const
+MechanicalCryogenicOFHCCopperProperties::alpha_from_T(const Real & T,
+                                                      Real & alpha,
+                                                      Real & dalpha_dT) const
 {
   if ((T < _T_min) || (T > _T_max))
     flagInvalidSolution(

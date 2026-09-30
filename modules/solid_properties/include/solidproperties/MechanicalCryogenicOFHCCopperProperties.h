@@ -23,12 +23,12 @@
  *
  * Valid temperature range: 4-300 K
  */
-class MechanicalCopperProperties : public MechanicalSolidProperties
+class MechanicalCryogenicOFHCCopperProperties : public MechanicalSolidProperties
 {
 public:
   static InputParameters validParams();
 
-  MechanicalCopperProperties(const InputParameters & parameters);
+  MechanicalCryogenicOFHCCopperProperties(const InputParameters & parameters);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"

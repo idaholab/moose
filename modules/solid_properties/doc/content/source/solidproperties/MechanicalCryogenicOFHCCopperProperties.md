@@ -1,6 +1,6 @@
-# MechanicalCopperProperties
+# MechanicalCryogenicOFHCCopperProperties
 
-!syntax description /SolidProperties/MechanicalCopperProperties
+!syntax description /SolidProperties/MechanicalCryogenicOFHCCopperProperties
 
 ## Description
 
@@ -57,7 +57,7 @@ All properties are valid for temperatures from 4 K to 300 K, covering cryogenic 
 ```
 [SolidProperties]
   [copper_mechanical]
-    type = MechanicalCopperProperties
+    type = MechanicalCryogenicOFHCCopperProperties
   []
 []
 
@@ -70,10 +70,10 @@ All properties are valid for temperatures from 4 K to 300 K, covering cryogenic 
 []
 ```
 
-!syntax parameters /SolidProperties/MechanicalCopperProperties
+!syntax parameters /SolidProperties/MechanicalCryogenicOFHCCopperProperties
 
-!syntax inputs /SolidProperties/MechanicalCopperProperties
+!syntax inputs /SolidProperties/MechanicalCryogenicOFHCCopperProperties
 
-!syntax children /SolidProperties/MechanicalCopperProperties
+!syntax children /SolidProperties/MechanicalCryogenicOFHCCopperProperties
 
 !bibtex bibliography
