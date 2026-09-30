@@ -53,16 +53,16 @@ protected:
   const Real _T_max;
 
   /// Young's modulus coefficients (NIST Monograph 177, p. 6-1)
-  /// E(T) = 1e9 × (137 - 1.27e-4 × T²) [Pa]
+  /// E(T) = 1e9 * (137 - 1.27e-4 * T^2) [Pa]
   const Real _E_c0;
   const Real _E_c2;
 
   /// Poisson's ratio coefficients (NIST Monograph 177, p. 6-23)
-  /// ν(T) = 0.339 + 7.03e-8 × T²
+  /// nu(T) = 0.339 + 7.03e-8 * T^2
   const Real _nu_c0;
   const Real _nu_c2;
 
   /// Thermal expansion coefficient (NIST Cryogenic Database)
-  /// log₁₀(α [10⁻⁶/K]) = Σ cᵢ × [log₁₀(T)]ⁱ for i=0..6
+  /// log10(alpha [10^-6/K]) = sum(c_i * log10(T)^i) for i=0..6
   const Real _alpha_c0, _alpha_c1, _alpha_c2, _alpha_c3, _alpha_c4, _alpha_c5, _alpha_c6;
 };
