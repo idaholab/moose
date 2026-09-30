@@ -19,20 +19,23 @@ class Closures1PhaseSimple : public Closures1PhaseBase
 public:
   Closures1PhaseSimple(const InputParameters & params);
 
-  virtual void checkFlowChannel(const FlowChannelBase & flow_channel) const override;
-  virtual void checkHeatTransfer(const HeatTransferBase & heat_transfer,
-                                 const FlowChannelBase & flow_channel) const override;
-  virtual void addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel) override;
-  virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
-                                           const FlowChannelBase & flow_channel) override;
+  virtual void checkFlowChannel(const FlowChannelClosuresInterface & flow_channel) const override;
+  virtual void checkHeatTransfer(const HeatTransferClosuresInterface & heat_transfer,
+                                 const FlowChannelClosuresInterface & flow_channel) const override;
+  virtual void
+  addMooseObjectsFlowChannel(const FlowChannelClosuresInterface & flow_channel) override;
+  virtual void
+  addMooseObjectsHeatTransfer(const HeatTransferClosuresInterface & heat_transfer,
+                              const FlowChannelClosuresInterface & flow_channel) override;
 
 protected:
   /**
    * Adds material to compute wall temperature from heat flux
    *
-   * @param[in] flow_channel   Flow channel component
+   * @param[in] flow_channel   Flow channel
    */
-  void addWallTemperatureFromHeatFluxMaterial(const FlowChannel1Phase & flow_channel) const;
+  void
+  addWallTemperatureFromHeatFluxMaterial(const FlowChannelClosuresInterface & flow_channel) const;
 
 public:
   static InputParameters validParams();

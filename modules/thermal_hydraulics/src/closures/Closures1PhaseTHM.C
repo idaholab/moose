@@ -8,9 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Closures1PhaseTHM.h"
+#include "FlowChannelClosuresInterface.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
-#include "HeatTransfer1PhaseBase.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", Closures1PhaseTHM);
 
@@ -38,43 +38,40 @@ Closures1PhaseTHM::Closures1PhaseTHM(const InputParameters & params)
 }
 
 void
-Closures1PhaseTHM::checkFlowChannel(const FlowChannelBase & /*flow_channel*/) const
+Closures1PhaseTHM::checkFlowChannel(const FlowChannelClosuresInterface & /*flow_channel*/) const
 {
 }
 
 void
-Closures1PhaseTHM::checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                     const FlowChannelBase & /*flow_channel*/) const
+Closures1PhaseTHM::checkHeatTransfer(const HeatTransferClosuresInterface & /*heat_transfer*/,
+                                     const FlowChannelClosuresInterface & /*flow_channel*/) const
 {
 }
 
 void
-Closures1PhaseTHM::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
+Closures1PhaseTHM::addMooseObjectsFlowChannel(const FlowChannelClosuresInterface & flow_channel)
 {
-  const FlowChannel1Phase & flow_channel_1phase =
-      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
-
   // wall friction material
-  if (flow_channel.isParamValid("f"))
-    addWallFrictionFunctionMaterial(flow_channel_1phase);
+  if (flow_channel.hasClosuresWallFrictionFactorFunction())
+    addWallFrictionFunctionMaterial(flow_channel);
   else
-    addWallFFMaterial(flow_channel_1phase);
+    addWallFFMaterial(flow_channel);
 
-  const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
-  if (n_ht_connections > 0 && flow_channel.getTemperatureMode())
+  const unsigned int n_ht_connections = flow_channel.getClosuresNumberOfHeatTransferConnections();
+  if (n_ht_connections > 0 && flow_channel.getClosuresTemperatureMode())
   {
     for (unsigned int i = 0; i < n_ht_connections; i++)
     {
       // wall heat transfer coefficient material
-      addWallHTCMaterial(flow_channel_1phase, i);
+      addWallHTCMaterial(flow_channel, i);
 
       // wall temperature material
-      addWallTemperatureFromAuxMaterial(flow_channel_1phase, i);
+      addWallTemperatureFromAuxMaterial(flow_channel, i);
     }
   }
 }
 void
-Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseTHM::addWallFFMaterial(const FlowChannelClosuresInterface & flow_channel) const
 {
   switch (_wall_ff_closure)
   {
@@ -82,79 +79,83 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
     {
       const std::string class_name = "ADWallFrictionChurchillMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
       params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
       params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
       params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
       params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
       params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-      params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
-      const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
-      _sim.addMaterial(class_name, obj_name, params);
-      flow_channel.connectObject(params, obj_name, "roughness");
+      params.set<Real>("roughness") = flow_channel.getClosuresRoughness();
+      const std::string obj_name = genName(flow_channel.getClosuresName(), "wall_friction_mat");
+      _problem.addMaterial(class_name, obj_name, params);
+      flow_channel.connectClosuresObject(params, obj_name, "roughness");
       break;
     }
     case WallFFClosureType::CHENG_TODREAS:
     {
       const std::string class_name = "ADWallFrictionChengMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
       params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
-      params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
-      if (flow_channel.getParam<Real>("PoD") == 1.0)
+      params.set<Real>("PoD") = flow_channel.getClosuresPoD();
+      if (flow_channel.getClosuresPoD() == 1.0)
       {
         mooseDoOnce(mooseWarning(
             "You are using a rod bundle correlation with the default Pitch-to-Diameter "
             "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
             "FlowChannel1Phase component"));
       }
-      if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
+      if (flow_channel.getClosuresHeatTransferGeometry() ==
+          FlowChannelClosuresInterface::HeatTransferGeometry::PIPE)
       {
         mooseError("The Cheng-Todreas correlation was made to be used in rod bundles, your "
                    "geometry type is "
                    "PIPE, please change heat_transfer_geom to ROD_BUNDLE or HEX_ROD_BUNDLE, or "
                    "choose a correlation valid for PIPES");
       }
-      else if (flow_channel.getHeatTransferGeometry() ==
-               FlowChannelBase::EConvHeatTransGeom::ROD_BUNDLE)
+      else if (flow_channel.getClosuresHeatTransferGeometry() ==
+               FlowChannelClosuresInterface::HeatTransferGeometry::ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "SQUARE";
       }
-      else if (flow_channel.getHeatTransferGeometry() ==
-               FlowChannelBase::EConvHeatTransGeom::HEX_ROD_BUNDLE)
+      else if (flow_channel.getClosuresHeatTransferGeometry() ==
+               FlowChannelClosuresInterface::HeatTransferGeometry::HEX_ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "HEXAGONAL";
       }
-      if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::INTERIOR)
+      if (flow_channel.getClosuresPipeLocation() ==
+          FlowChannelClosuresInterface::PipeLocation::INTERIOR)
       {
         params.set<MooseEnum>("subchannel_type") = "INTERIOR";
       }
-      else if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::EDGE)
+      else if (flow_channel.getClosuresPipeLocation() ==
+               FlowChannelClosuresInterface::PipeLocation::EDGE)
       {
         params.set<MooseEnum>("subchannel_type") = "EDGE";
       }
-      else if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::CORNER)
+      else if (flow_channel.getClosuresPipeLocation() ==
+               FlowChannelClosuresInterface::PipeLocation::CORNER)
       {
         params.set<MooseEnum>("subchannel_type") = "CORNER";
       }
-      const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
-      _sim.addMaterial(class_name, obj_name, params);
+      const std::string obj_name = genName(flow_channel.getClosuresName(), "wall_friction_mat");
+      _problem.addMaterial(class_name, obj_name, params);
       break;
     }
     case WallFFClosureType::COLEBROOK_WHITE:
     {
       const std::string class_name = "ADWallFrictionColebrookWhiteMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
       params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
       params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
       params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
       params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
       params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-      params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
-      const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
-      _sim.addMaterial(class_name, obj_name, params);
-      flow_channel.connectObject(params, obj_name, "roughness");
+      params.set<Real>("roughness") = flow_channel.getClosuresRoughness();
+      const std::string obj_name = genName(flow_channel.getClosuresName(), "wall_friction_mat");
+      _problem.addMaterial(class_name, obj_name, params);
+      flow_channel.connectClosuresObject(params, obj_name, "roughness");
       break;
     }
     default:
@@ -163,7 +164,8 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
 }
 
 void
-Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, unsigned int i) const
+Closures1PhaseTHM::addWallHTCMaterial(const FlowChannelClosuresInterface & flow_channel,
+                                      unsigned int i) const
 {
 
   switch (_wall_htc_closure)
@@ -172,7 +174,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
     {
       const std::string class_name = "ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
       params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
       params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
       params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
@@ -181,9 +183,11 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
       params.set<MaterialPropertyName>("cp") =
           FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
 
       break;
     }
@@ -191,10 +195,12 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
     {
       const std::string class_name = "ADWallHeatTransferCoefficientWolfMcCarthyMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
 
       break;
     }
@@ -203,11 +209,12 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
 
       const std::string class_name = "ADWallHeatTransferCoefficientWeismanMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
-      if (flow_channel.getParam<Real>("PoD") == 1.0)
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      params.set<Real>("PoD") = flow_channel.getClosuresPoD();
+      if (flow_channel.getClosuresPoD() == 1.0)
       {
         mooseDoOnce(mooseWarning(
             "You are using a rod bundle correlation with the default Pitch-to-Diameter "
@@ -215,33 +222,37 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
             "FlowChannel1Phase component"));
       }
 
-      if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
+      if (flow_channel.getClosuresHeatTransferGeometry() ==
+          FlowChannelClosuresInterface::HeatTransferGeometry::PIPE)
       {
         mooseError("Weiman's correlation was made to be used in rod bundles, your geometry type is "
                    "PIPE, please change heat_transfer_geom to ROD_BUNDLE or HEX_ROD_BUNDLE, or "
                    "choose a correlation valid for PIPES");
       }
-      else if (flow_channel.getHeatTransferGeometry() ==
-               FlowChannelBase::EConvHeatTransGeom::ROD_BUNDLE)
+      else if (flow_channel.getClosuresHeatTransferGeometry() ==
+               FlowChannelClosuresInterface::HeatTransferGeometry::ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "SQUARE";
       }
-      else if (flow_channel.getHeatTransferGeometry() ==
-               FlowChannelBase::EConvHeatTransGeom::HEX_ROD_BUNDLE)
+      else if (flow_channel.getClosuresHeatTransferGeometry() ==
+               FlowChannelClosuresInterface::HeatTransferGeometry::HEX_ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "TRIANGULAR";
       }
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     case WallHTCClosureType::LYON:
     {
       const std::string class_name = "ADWallHeatTransferCoefficientLyonMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     case WallHTCClosureType::KAZIMI_CARELLI:
@@ -249,18 +260,20 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
 
       const std::string class_name = "ADWallHeatTransferCoefficientKazimiMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
-      if (flow_channel.getParam<Real>("PoD") == 1.0)
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      params.set<Real>("PoD") = flow_channel.getClosuresPoD();
+      if (flow_channel.getClosuresPoD() == 1.0)
       {
         mooseDoOnce(mooseWarning(
             "You are using a rod bundle correlation with the default Pitch-to-Diameter "
             "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
             "FlowChannel1Phase component"));
       }
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     case WallHTCClosureType::MIKITYUK:
@@ -268,18 +281,20 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
 
       const std::string class_name = "ADWallHeatTransferCoefficientMikityukMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
-      if (flow_channel.getParam<Real>("PoD") == 1.0)
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      params.set<Real>("PoD") = flow_channel.getClosuresPoD();
+      if (flow_channel.getClosuresPoD() == 1.0)
       {
         mooseDoOnce(mooseWarning(
             "You are using a rod bundle correlation with the default Pitch-to-Diameter "
             "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
             "FlowChannel1Phase component"));
       }
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     case WallHTCClosureType::SCHAD:
@@ -287,29 +302,32 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
 
       const std::string class_name = "ADWallHeatTransferCoefficientSchadMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
-      if (flow_channel.getParam<Real>("PoD") == 1.0)
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      params.set<Real>("PoD") = flow_channel.getClosuresPoD();
+      if (flow_channel.getClosuresPoD() == 1.0)
       {
         mooseDoOnce(mooseWarning(
             "You are using a rod bundle correlation with the default Pitch-to-Diameter "
             "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
             "FlowChannel1Phase component"));
       }
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     case WallHTCClosureType::GNIELINSKI:
     {
-
       const std::string class_name = "ADWallHeatTransferCoefficientGnielinskiMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
-      params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
+      params.set<MaterialPropertyName>("Hw") = flow_channel.getClosuresWallHTCNames()[i];
+      params.set<MaterialPropertyName>("T_wall") =
+          flow_channel.getClosuresWallTemperatureNames()[i];
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+      _problem.addMaterial(
+          class_name, genName(flow_channel.getClosuresName(), "whtc_mat", i), params);
       break;
     }
     default:

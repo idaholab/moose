@@ -104,6 +104,12 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   s.addDependency("add_bc", "THM:flush_shared_variables");
   s.addDependency("add_aux_kernel", "THM:flush_shared_variables");
 
+  // Closures objects (see ClosuresBase/ClosuresRegistry) must exist before a Physics that
+  // consumes them (e.g. FlowChannel1PhasePhysics) looks them up.
+  s.addDependency("init_component_physics", "THM:add_closures");
+  s.addDependency("add_material", "THM:add_closures");
+  s.addDependency("check_integrity", "THM:add_closures");
+
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
 
