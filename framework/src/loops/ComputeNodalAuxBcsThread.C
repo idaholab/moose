@@ -16,8 +16,8 @@
 #include "AuxKernel.h"
 
 template <typename AuxKernelType>
-ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
-    FEProblemBase & fe_problem, const TheWarehouse::Query & query)
+ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
+                                                                  const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _query(query),
