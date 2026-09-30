@@ -85,6 +85,7 @@
     type = EigenDecompositionMaterial
     rank_two_tensor = deformation_gradient
     base_name = nonSym
+    outputs = exodus
   []
 []
 
