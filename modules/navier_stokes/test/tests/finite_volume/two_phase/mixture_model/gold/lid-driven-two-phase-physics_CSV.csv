@@ -1,1 +1,2 @@
-lid-driven-two-phase_CSV.csv
+time,average_void,max_drag_coefficient,max_x_slip_velocity,max_x_velocity,max_y_slip_velocity,max_y_velocity,min_x_velocity,min_y_velocity
+100000000,0.50167790746106,1.0743287324753,0.0017397110796327,0.17597907917884,0.035875915297565,0.21281615664149,-0.19671082508932,-0.16106072806513
