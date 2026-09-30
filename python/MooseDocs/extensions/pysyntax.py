@@ -252,7 +252,8 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = PySyntaxCommandBase.defaultSettings()
-        settings["heading-level"] = (2, settings["heading-level"][1], validation.unsigned_integer)
+        settings["heading-level"] = (2, settings["heading-level"]
+                                     [1], validation.unsigned_integer)
         return settings
 
     def createToken(self, parent, info, page, settings):
