@@ -11,6 +11,7 @@
 
 #include "Component1D.h"
 #include "GravityInterface.h"
+#include "FlowChannelClosuresInterface.h"
 
 class ClosuresBase;
 
@@ -19,7 +20,9 @@ class ClosuresBase;
  *
  * A flow channel is defined by its position, direction, length and area.
  */
-class FlowChannelBase : public Component1D, public GravityInterface
+class FlowChannelBase : public Component1D,
+                        public GravityInterface,
+                        public FlowChannelClosuresInterface
 {
 public:
   FlowChannelBase(const InputParameters & params);
@@ -151,6 +154,41 @@ public:
    * Gets wall heat flux names for connected heat transfers
    */
   std::vector<MaterialPropertyName> getWallHeatFluxNames() const { return _q_wall_names; }
+
+  // FlowChannelClosuresInterface implementation ----
+  virtual const std::vector<SubdomainName> & getClosuresBlocks() const override
+  {
+    return getSubdomainNames();
+  }
+  virtual const std::string & getClosuresName() const override { return name(); }
+  virtual bool getClosuresTemperatureMode() const override { return getTemperatureMode(); }
+  virtual unsigned int getClosuresNumberOfHeatTransferConnections() const override
+  {
+    return getNumberOfHeatTransferConnections();
+  }
+  virtual std::vector<VariableName> getClosuresHeatedPerimeterNames() const override
+  {
+    return getHeatedPerimeterNames();
+  }
+  virtual std::vector<VariableName> getClosuresWallTemperatureNames() const override
+  {
+    return getWallTemperatureNames();
+  }
+  virtual HeatTransferGeometry getClosuresHeatTransferGeometry() const override;
+  virtual PipeLocation getClosuresPipeLocation() const override;
+  virtual bool hasClosuresWallFrictionFactorFunction() const override { return isParamValid("f"); }
+  virtual const FunctionName & getClosuresWallFrictionFactorFunction() const override
+  {
+    return getParam<FunctionName>("f");
+  }
+  virtual Real getClosuresRoughness() const override { return _roughness; }
+  virtual Real getClosuresPoD() const override { return _PoD; }
+  virtual void connectClosuresObject(const InputParameters & obj_params,
+                                     const std::string & obj_name,
+                                     const std::string & param) const override
+  {
+    connectObject(obj_params, obj_name, param);
+  }
 
   /**
    * Adds the name of a heat transfer component to the flow channel's list.

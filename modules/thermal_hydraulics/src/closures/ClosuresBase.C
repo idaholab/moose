@@ -8,14 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ClosuresBase.h"
-#include "FlowChannelBase.h"
+#include "FlowChannelClosuresInterface.h"
+#include "FEProblemBase.h"
 
 InputParameters
 ClosuresBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
 
-  params.addPrivateParam<THMProblem *>("_thm_problem");
+  params.addPrivateParam<FEProblemBase *>("_problem");
   params.addPrivateParam<Logger *>("_logger");
 
   params.registerBase("Closures");
@@ -28,25 +29,26 @@ ClosuresBase::ClosuresBase(const InputParameters & params)
     LoggingInterface(*params.getCheckedPointerParam<Logger *>("_logger")),
     NamingInterface(),
 
-    _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
+    _problem(*params.getCheckedPointerParam<FEProblemBase *>("_problem")),
     _factory(_app.getFactory())
 {
 }
 
 void
-ClosuresBase::addZeroMaterial(const FlowChannelBase & flow_channel,
+ClosuresBase::addZeroMaterial(const FlowChannelClosuresInterface & flow_channel,
                               const std::string & property_name) const
 {
   const std::string class_name = "ADConstantMaterial";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
   params.set<std::string>("property_name") = property_name;
   params.set<Real>("value") = 0;
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "const_mat", property_name), params);
+  _problem.addMaterial(
+      class_name, genName(flow_channel.getClosuresName(), "const_mat", property_name), params);
 }
 
 void
-ClosuresBase::addWeightedAverageMaterial(const FlowChannelBase & flow_channel,
+ClosuresBase::addWeightedAverageMaterial(const FlowChannelClosuresInterface & flow_channel,
                                          const std::vector<MaterialPropertyName> & values,
                                          const std::vector<VariableName> & weights,
                                          const MaterialPropertyName & property_name) const
@@ -54,21 +56,24 @@ ClosuresBase::addWeightedAverageMaterial(const FlowChannelBase & flow_channel,
   const std::string class_name = "ADWeightedAverageMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<MaterialPropertyName>("prop_name") = property_name;
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
   params.set<std::vector<MaterialPropertyName>>("values") = values;
   params.set<std::vector<VariableName>>("weights") = weights;
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "wavg_mat", property_name), params);
+  _problem.addMaterial(
+      class_name, genName(flow_channel.getClosuresName(), "wavg_mat", property_name), params);
 }
 
 void
-ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_channel,
+ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannelClosuresInterface & flow_channel,
                                                 unsigned int i) const
 {
   const std::string class_name = "ADCoupledVariableValueMaterial";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-  params.set<MaterialPropertyName>("prop_name") = {flow_channel.getWallTemperatureNames()[i]};
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+  params.set<MaterialPropertyName>("prop_name") = {
+      flow_channel.getClosuresWallTemperatureNames()[i]};
   params.set<std::vector<VariableName>>("coupled_variable") = {
-      flow_channel.getWallTemperatureNames()[i]};
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "coupled_var_mat", i), params);
+      flow_channel.getClosuresWallTemperatureNames()[i]};
+  _problem.addMaterial(
+      class_name, genName(flow_channel.getClosuresName(), "coupled_var_mat", i), params);
 }
