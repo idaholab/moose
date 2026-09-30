@@ -76,7 +76,7 @@ ComputeIndicatorThread::subdomainChanged()
   // Only prepare (and therefore reinit) materials if an indicator actually consumes a material
   // property. Otherwise skip the material system entirely to avoid recomputing the whole stack.
   if (!needed_mat_props.empty())
-    _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
+    _fe_problem.resolveMaterialDependencies(needed_mat_props, _subdomain, _tid);
   else
     _fe_problem.clearActiveMaterialProperties(_tid);
 }

@@ -770,7 +770,7 @@ RayTracingStudy::segmentSubdomainSetup(const SubdomainID subdomain,
       var->prepareAux();
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
-  _fe_problem.prepareMaterials(needed_mat_props, subdomain, tid);
+  _fe_problem.resolveMaterialDependencies(needed_mat_props, subdomain, tid);
 }
 
 void

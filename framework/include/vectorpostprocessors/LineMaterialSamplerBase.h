@@ -160,7 +160,6 @@ LineMaterialSamplerBase<T>::execute()
   std::unordered_set<unsigned int> needed_mat_props;
   const auto & mp_deps = getMatPropDependencies();
   needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
   for (const auto & elem : intersected_elems)
   {
@@ -173,6 +172,8 @@ LineMaterialSamplerBase<T>::execute()
     _subproblem.setCurrentSubdomainID(elem, _tid);
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
+
+    _fe_problem.prepareMaterialProperties(needed_mat_props, elem->subdomain_id(), _tid);
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.

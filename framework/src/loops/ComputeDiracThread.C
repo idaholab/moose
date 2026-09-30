@@ -67,7 +67,7 @@ ComputeDiracThread::subdomainChanged()
   _dirac_kernels.updateMatPropDependency(needed_mat_props, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  _fe_problem.resolveMaterialDependencies(needed_mat_props, _subdomain, _tid);
 
   // The combined path always operates on the full suite of residual and Jacobian tags, so there's
   // no need for (and no single tag set to do) tag-based warehouse selection
