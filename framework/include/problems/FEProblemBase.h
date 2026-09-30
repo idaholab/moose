@@ -3595,6 +3595,11 @@ protected:
 
 private:
   /**
+   * Store a caught exception so it can be communicated in checkExceptionAndStopSolve().
+   */
+  void setCaughtException(const std::string & calling_method);
+
+  /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
    * caller of this method must determine how to handle the thrown exception
    */
