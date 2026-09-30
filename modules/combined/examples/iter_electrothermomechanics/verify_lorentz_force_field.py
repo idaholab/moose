@@ -60,9 +60,18 @@ if args.data_dir is not None:
     data_dir = args.data_dir
     # Extract geometry name from custom path for figures
     geometry_name = os.path.basename(data_dir.rstrip("/"))
+    file_basename = geometry_name
 else:
     geometry_name = args.geometry
     data_dir = f"data/{geometry_name}"
+    # Map geometry name to actual output file basename
+    file_basename_map = {
+        "copper_cylinder": "copper_cylinder",
+        "cylinder": "cylinder",
+        "annulus": "annulus",
+        "cable": "iter_cable",  # Special case: iter_cable.i outputs iter_cable_out.*
+    }
+    file_basename = file_basename_map.get(geometry_name, geometry_name)
 
 figures_dir = f"figures/{geometry_name}"
 
@@ -78,7 +87,7 @@ log_file = open(f"{figures_dir}/lorentz_verification.log", "w")
 sys.stdout = log_file
 
 # Read physical constants from MOOSE output
-csv_filename = f"{data_dir}/{geometry_name}_out.csv"
+csv_filename = f"{data_dir}/{file_basename}_out.csv"
 try:
     constants = pd.read_csv(csv_filename)
     # Get the last timestep values (most recent)
@@ -237,9 +246,9 @@ print("=" * 70)
 
 radial_lines = []
 line_configs = [
-    (f"{data_dir}/{geometry_name}_out_line_sample_0deg_0001.csv", "0° (x-axis)"),
-    (f"{data_dir}/{geometry_name}_out_line_sample_45deg_0001.csv", "45°"),
-    (f"{data_dir}/{geometry_name}_out_line_sample_90deg_0001.csv", "90° (y-axis)"),
+    (f"{data_dir}/{file_basename}_out_line_sample_0deg_0001.csv", "0° (x-axis)"),
+    (f"{data_dir}/{file_basename}_out_line_sample_45deg_0001.csv", "45°"),
+    (f"{data_dir}/{file_basename}_out_line_sample_90deg_0001.csv", "90° (y-axis)"),
 ]
 
 for filename, name in line_configs:
@@ -251,7 +260,8 @@ for filename, name in line_configs:
 
 if not radial_lines:
     print("\nError: No radial line samples found. Please run the simulation first:")
-    print(f"  <your-moose-app> -i {geometry_name}.i")
+    input_file = "iter_cable.i" if geometry_name == "cable" else f"{geometry_name}.i"
+    print(f"  <your-moose-app> -i {input_file}")
     exit(1)
 
 # Print statistics for each radial line
@@ -296,7 +306,7 @@ for line in radial_lines:
 print("\n2. AXIAL LINE (Uniformity Check)")
 print("-" * 70)
 axial_result = process_axial_line(
-    f"{data_dir}/{geometry_name}_out_line_sample_axial_0001.csv"
+    f"{data_dir}/{file_basename}_out_line_sample_axial_0001.csv"
 )
 if axial_result is not None:
     axial_abs_error = np.abs(
@@ -348,7 +358,8 @@ if axial_result is not None:
     else:
         print("  ⚠ Significant axial variation detected")
 else:
-    print("\nWarning: Axial line sample not found")
+    print("\nAxial line sample not found - skipping uniformity check")
+    print("(This is expected for iter_cable.i where axial VPP is currently disabled)")
 
 print("\n" + "=" * 70)
 

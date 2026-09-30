@@ -108,7 +108,15 @@ def load_geometry_data(geometry_name, data_dir):
         pandas.DataFrame with postprocessor data, or None if file not found
 
     """
-    csv_path = data_dir / geometry_name / f"{geometry_name}_out.csv"
+    # Map geometry name to actual output file basename
+    file_basename_map = {
+        "copper_cylinder": "copper_cylinder",
+        "cylinder": "cylinder",
+        "annulus": "annulus",
+        "cable": "iter_cable",  # Special case: iter_cable.i outputs iter_cable_out.*
+    }
+    file_basename = file_basename_map.get(geometry_name, geometry_name)
+    csv_path = data_dir / geometry_name / f"{file_basename}_out.csv"
 
     if not csv_path.exists():
         print(f"Warning: CSV file not found for {geometry_name}: {csv_path}")

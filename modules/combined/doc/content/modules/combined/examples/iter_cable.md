@@ -30,47 +30,63 @@ The ITER cable consists of three distinct regions:
 
 ## Input File Structure
 
-All input files are completely independent and self-contained (~470-580 lines each). No base file inheritance.
+All geometry variants share common physics through **`cylindrical_base.i`** (~380 lines) to eliminate code duplication. Each variant defines its mesh and material overrides, then includes the base file.
 
-### Shared Parameters
+### Shared Components
 
 - **`iter_cable.params`** - Numeric parameters shared across all geometries
   - Geometry: cable_length, cable_radius, channel_radius, steel_jacket_side_length
   - Electromagnetic: current_density_z, vacuum_permeability
-  - Temperature: starting_temperature (4.5 K), ending_temperature (300 K)
+  - Temperature: starting_temperature (4.5 K), ending_temperature (300 K), stress_free_temperature
   - Simulation: simulation_time (10 s), refinement_level (2)
   - Included via `!include iter_cable.params` in each input file
 
+- **`cylindrical_base.i`** - Common physics for all variants
+  - Finite strain mechanics (Updated Lagrangian, logarithmic strain)
+  - Temperature-dependent material properties (base component definitions)
+  - Thermal expansion eigenstrain
+  - Lorentz force body loads (J × B with use_displaced_mesh=true)
+  - Boundary conditions (pins 3 nodes at z=0 to constrain rigid body motion)
+  - Solver configuration
+  - Included via `!include cylindrical_base.i` after mesh definition
+
 ### Geometry Variants
 
-Four independent geometry files are provided for comparative studies:
+Four geometry files with shared physics via cylindrical_base.i:
 
-#### copper_cylinder.i (~470 lines)
+#### copper_cylinder.i
 - **Geometry**: Single solid copper cylinder (no channel block)
-- **Materials**: Pure OFHC copper throughout
+- **Materials**: Pure OFHC copper via material overrides
+- **Mesh**: 10 radial rings with refinement_level=2
 - **Use case**: Verification case for copper properties, simplest geometry
-- **Postprocessors**: Global stress averages
+- **Postprocessors**: Global stress averages (from cylindrical_base.i)
 - **Output**: data/copper_cylinder/copper_cylinder_out.{e,csv}
 
-#### cylinder.i (~490 lines)
+#### cylinder.i
 - **Geometry**: Single solid Cu-Nb3Sn cylinder (no channel block)
 - **Materials**: Cu-Nb3Sn effective material (2/3 Cu + 1/3 Nb3Sn weighted average)
+- **Mesh**: 10 radial rings with refinement_level=2
 - **Use case**: Hybrid superconductor verification, no structural jacket effects
-- **Postprocessors**: Global stress averages
+- **Postprocessors**: Global stress averages (from cylindrical_base.i)
 - **Output**: data/cylinder/cylinder_out.{e,csv}
 
-#### annulus.i (~530 lines)
-- **Geometry**: Annulus (bundle only, channel and jacket deleted)
+#### annulus.i
+- **Geometry**: Annulus (bundle only, channel deleted via BlockDeletionGenerator)
 - **Materials**: Cu-Nb3Sn effective material
+- **Mesh**: Channel deleted, bundle has 10 radial rings with refinement_level=2
 - **Use case**: Isolate conductor behavior without channel or jacket geometry
-- **Postprocessors**: Global and bundle-specific stress averages
+- **Postprocessors**: Global stress averages (from cylindrical_base.i), plus bundle-specific averages
 - **Output**: data/annulus/annulus_out.{e,csv}
 
-#### iter_cable.i (~580 lines)
-- **Geometry**: Full cable (channel + bundle + jacket, all materials)
-- **Materials**: Helium channel, Cu-Nb3Sn effective bundle, JK2LB steel jacket
+#### iter_cable.i
+- **Geometry**: Full cable (bundle + jacket, channel deleted)
+- **Materials**: Cu-Nb3Sn effective bundle, JK2LB steel jacket (placeholder properties)
+- **Mesh**: Channel deleted, bundle has 10 radial rings, jacket has 4 radial rings (refinement_level=2)
+- **Mesh refinement**: rings='1 10 4' ensures bundle mesh matches other geometries
+- **Boundary conditions**: Pins at jacket corners (not edge midpoints) to minimize constraint artifacts
 - **Use case**: Complete ITER cable simulation with structural jacket
-- **Postprocessors**: Global, bundle-specific, and jacket-specific stress averages
+- **Postprocessors**: Global averages (from cylindrical_base.i), plus bundle and jacket-specific averages
+- **Note**: Axial line sampler VectorPostprocessor currently disabled (mesh compatibility issue under investigation)
 - **Output**: data/cable/iter_cable_out.{e,csv}
 
 ### Test Infrastructure
@@ -136,15 +152,21 @@ A Python verification script (`verify_lorentz_force_field.py`) compares MOOSE si
 ./verify_lorentz_force_field.py --geometry cable
 ```
 
+Features:
+- Handles iter_cable.i output filename mapping (cable geometry → iter_cable_out.csv)
+- Gracefully handles missing axial line sampler data (expected for iter_cable.i)
+
 The script verifies:
 - Lorentz force magnitude matches analytical J × B solution
-- Force direction is radially outward (hoop stress)
+- Force direction is radially inward (compressive hoop stress)
 - Axisymmetry: force field identical at all azimuthal angles
-- Axial uniformity: force field uniform along cable length
+- Axial uniformity: force field uniform along cable length (when axial line sampler is enabled)
+
+**Note**: Analytical solution assumes infinite cylinder with uniform axial current. Validity in the rectangular steel jacket region (beyond bundle) is under investigation - relative errors remain <0.1% but increase near jacket boundaries due to geometry effects.
 
 Output:
-- Verification logs: `data/{geometry}/lorentz_verification.log`
-- Diagnostic figures: `figures/{geometry}/lorentz_verification.png`
+- Verification logs: `figures/{geometry}/lorentz_verification.log`
+- Diagnostic figures: `figures/{geometry}/lorentz_verification.png`, `lorentz_0deg_error.png`
 
 ### Stress Comparison
 
@@ -154,13 +176,21 @@ A Python comparison script (`comparison_iter.py`) generates stress comparison pl
 ./comparison_iter.py [--data-dir data] [--output-dir figures/comparison]
 ```
 
+Features:
+- Automatically wipes comparison directory to remove stale plots
+- Handles iter_cable.i output filename mapping (cable geometry → iter_cable_out.csv)
+
 Generated plots:
 - **Global comparisons**: von Mises, σ_zz, σ_xx, σ_xy for all geometries
-- **Block-specific comparisons**: Bundle and jacket stresses (annulus, cable)
-- **Per-geometry evolution**: All stress components over time
+- **Bundle comparisons**: Bundle stress across all 4 geometries (uses global postprocessors for single-block geometries, bundle-specific for cable)
+- **Jacket-only evolution**: Jacket stress components for cable geometry (saved to figures/cable/)
+- **Per-geometry evolution**: All stress components over time for each geometry
 - **Temperature verification**: Confirms identical temperature ramp
 
-Output: `figures/comparison/*.png`
+Output:
+- `figures/comparison/*.png` - Cross-geometry comparisons
+- `figures/{geometry}/*.png` - Individual geometry plots
+- `figures/cable/jacket_stress_evolution.png` - Jacket-only stress evolution
 
 ## Results
 

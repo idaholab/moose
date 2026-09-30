@@ -44,25 +44,26 @@ channel_radius = ${units 4.5 mm}
     bottom_boundary = 'axial_start'
     top_boundary = 'axial_end'
   []
+  # Pin at jacket corners instead of edge midpoints to minimize constraint effects
   [pin_bottom_0_deg]
     type = ExtraNodesetGenerator
     input = stabilizer
     new_boundary = pin_bottom_0_deg
-    coord = '${fparse steel_jacket_side_length / 2} 0 0'
+    coord = '${fparse steel_jacket_side_length / 2} ${fparse steel_jacket_side_length / 2} 0'
     use_closest_node = true
   []
   [pin_bottom_90_deg]
     type = ExtraNodesetGenerator
     input = pin_bottom_0_deg
     new_boundary = pin_bottom_90_deg
-    coord = '0 ${fparse steel_jacket_side_length / 2} 0'
+    coord = '${fparse -steel_jacket_side_length / 2} ${fparse steel_jacket_side_length / 2} 0'
     use_closest_node = true
   []
   [pin_bottom_180_deg]
     type = ExtraNodesetGenerator
     input = pin_bottom_90_deg
     new_boundary = pin_bottom_180_deg
-    coord = '${fparse -steel_jacket_side_length / 2} 0 0'
+    coord = '${fparse -steel_jacket_side_length / 2} ${fparse -steel_jacket_side_length / 2} 0'
     use_closest_node = true
   []
 []
