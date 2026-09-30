@@ -43,7 +43,7 @@ packages:
       - conda/libmesh-vtk
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.25.5
+    version: 3.26.0
     build_number: 0
     conda: conda/petsc
     templates:
