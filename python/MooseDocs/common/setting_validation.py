@@ -62,3 +62,30 @@ def unsigned_integer(setting: str) -> int:
             f"Expected an unsigned int and a negative value '{value}' was provided")
 
     return value
+
+
+def floating_point(setting: str) -> float:
+    """
+    Checks if the provided setting is a valid floating point value and ensures
+    that it is also positive
+
+    Parameters
+    ----------
+    setting : str
+        The string containing the user supplied value for the setting
+
+    Returns
+    -------
+    out : floating point value
+
+    Raises
+    ------
+    MooseDocsException :
+        if the value cannot be parsed as a float
+    """
+
+    try:
+        return float(setting)
+    except Exception:
+        raise MooseDocsException(f"Unable to parse input '{
+                                 setting}' as an int.")
