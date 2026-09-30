@@ -41,8 +41,9 @@ GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
 std::size_t
 GenericConstantArray::getVectorPropertySize(const MaterialPropertyName & prop_name) const
 {
-  if (prop_name != _prop_name)
-    paramError("prop_name", "Property '" + prop_name + "' was not defined");
+  libmesh_ignore(prop_name);
+  mooseAssert(prop_name == _prop_name,
+              "Property '" + prop_name + "' is not declared by this material");
   return _prop_value.size();
 }
 
