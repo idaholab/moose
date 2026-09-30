@@ -44,7 +44,11 @@ class TodayCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["format"] = ("%Y-%m-%d", "The date format (see python datetime).")
+
+        def validation_format(setting: str) -> str:
+            return setting
+        settings["format"] = (
+            "%Y-%m-%d", "The date format (see python datetime).", validation_format)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -75,5 +79,6 @@ class RenderDateTime(components.RenderComponent):
         return parent
 
     def createLatex(self, parent, token, page):
-        latex.String(parent, content=token["datetime"].strftime(token["format"]))
+        latex.String(
+            parent, content=token["datetime"].strftime(token["format"]))
         return parent
