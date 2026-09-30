@@ -151,7 +151,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() con
           << " on " << execute_on << std::endl;
   console << "[DBG] Ordering of the kernels on each block they are defined on:" << std::endl;
   // TODO Check that all objects are active at this point
-  printExecutionOrdering<AuxKernelType>(all_kernels, "auxiliary kernels");
+  printExecutionOrdering<AuxKernelType>(all_kernels, /*print_header=*/false);
 }
 
 template class ComputeNodalAuxVarsThread<AuxKernel>;

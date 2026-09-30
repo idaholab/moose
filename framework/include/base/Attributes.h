@@ -271,6 +271,117 @@ private:
 };
 
 /**
+ * Distinguishes AuxKernels that compute a nodal variable (AuxKernelBase::isNodal()) from those
+ * that compute an elemental one. Needed because both share the same AttribSystem tag.
+ */
+class AttribAuxKernelNodal : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelNodal(TheWarehouse & w) : Attribute(w, "aux_kernel_nodal"), _val(false) {}
+  AttribAuxKernelNodal(TheWarehouse & w, bool is_nodal)
+    : Attribute(w, "aux_kernel_nodal"), _val(is_nodal)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribAuxKernelNodal);
+
+private:
+  bool _val;
+};
+
+/**
+ * Distinguishes mortar nodal AuxKernels (MortarNodalAuxKernelTempl) from plain nodal ones, both of
+ * which are nodal AuxKernels sharing the same AttribSystem tag and AttribAuxKernelNodal value.
+ */
+class AttribAuxKernelMortar : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelMortar(TheWarehouse & w) : Attribute(w, "aux_kernel_mortar"), _val(false) {}
+  AttribAuxKernelMortar(TheWarehouse & w, bool is_mortar)
+    : Attribute(w, "aux_kernel_mortar"), _val(is_mortar)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribAuxKernelMortar);
+
+private:
+  bool _val;
+};
+
+/**
+ * Distinguishes the AuxKernel value type (Real/Vector/Array) by its actual C++ type.
+ * AttribSystem intentionally groups all three under the same "AuxKernel" system-attribute tag
+ * (registerSystemAttributeName groups objects that execute through the same machinery, unlike
+ * registerBase which associates input file syntax), so it cannot be used to select a single value
+ * type for queries that queryInto<AuxKernel>/<VectorAuxKernel>/<ArrayAuxKernel> specifically.
+ */
+class AttribAuxKernelValueType : public Attribute
+{
+public:
+  typedef std::string Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelValueType(TheWarehouse & w) : Attribute(w, "aux_kernel_value_type") {}
+  AttribAuxKernelValueType(TheWarehouse & w, const std::string & value_type)
+    : Attribute(w, "aux_kernel_value_type"), _val(value_type)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribAuxKernelValueType);
+
+private:
+  std::string _val;
+};
+
+/**
+ * Whether an AuxKernel is boundary restricted (BoundaryRestrictable::boundaryRestricted()).
+ * The old ExecuteMooseObjectWarehouse-based dispatch treated block and boundary restriction as
+ * mutually exclusive (MooseObjectWarehouseBase::addObject's if/else-if): a boundary-restricted
+ * nodal AuxKernel is handled entirely by the boundary-node loop, never by the block-based one -
+ * unlike AttribSubdomains, which (correctly, for its own purpose) treats a block-unrestricted
+ * object as matching every block. Without this, a boundary-restricted-but-block-unrestricted
+ * AuxKernel would incorrectly also run once per node in the general block-based sweep.
+ */
+class AttribAuxKernelBoundaryRestricted : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelBoundaryRestricted(TheWarehouse & w)
+    : Attribute(w, "aux_kernel_boundary_restricted"), _val(false)
+  {
+  }
+  AttribAuxKernelBoundaryRestricted(TheWarehouse & w, bool is_boundary_restricted)
+    : Attribute(w, "aux_kernel_boundary_restricted"), _val(is_boundary_restricted)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribAuxKernelBoundaryRestricted);
+
+private:
+  bool _val;
+};
+
+/**
  * Tracks the libmesh system number that a \p MooseObject is associated with
  */
 class AttribSysNum : public Attribute
