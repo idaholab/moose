@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WallTemperature1PhaseClosures.h"
-#include "FlowChannel1Phase.h"
-#include "HeatTransfer1PhaseBase.h"
+#include "FlowChannelClosuresInterface.h"
 
 registerMooseObject("ThermalHydraulicsApp", WallTemperature1PhaseClosures);
 
@@ -27,35 +26,36 @@ WallTemperature1PhaseClosures::WallTemperature1PhaseClosures(const InputParamete
 }
 
 void
-WallTemperature1PhaseClosures::checkFlowChannel(const FlowChannelBase & /*flow_channel*/) const
+WallTemperature1PhaseClosures::checkFlowChannel(
+    const FlowChannelClosuresInterface & /*flow_channel*/) const
 {
 }
 
 void
-WallTemperature1PhaseClosures::checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                                 const FlowChannelBase & /*flow_channel*/) const
+WallTemperature1PhaseClosures::checkHeatTransfer(
+    const HeatTransferClosuresInterface & /*heat_transfer*/,
+    const FlowChannelClosuresInterface & /*flow_channel*/) const
 {
 }
 
 void
-WallTemperature1PhaseClosures::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
+WallTemperature1PhaseClosures::addMooseObjectsFlowChannel(
+    const FlowChannelClosuresInterface & flow_channel)
 {
-  const FlowChannel1Phase & flow_channel_1phase =
-      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
-
-  const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
-  if ((n_ht_connections > 0) && (flow_channel.getTemperatureMode()))
+  const unsigned int n_ht_connections = flow_channel.getClosuresNumberOfHeatTransferConnections();
+  if ((n_ht_connections > 0) && (flow_channel.getClosuresTemperatureMode()))
   {
     for (unsigned int i = 0; i < n_ht_connections; i++)
-      addWallTemperatureFromAuxMaterial(flow_channel_1phase, i);
+      addWallTemperatureFromAuxMaterial(flow_channel, i);
 
-    if (flow_channel.getNumberOfHeatTransferConnections() > 1)
-      addAverageWallTemperatureMaterial(flow_channel_1phase);
+    if (n_ht_connections > 1)
+      addAverageWallTemperatureMaterial(flow_channel);
   }
 }
 
 void
 WallTemperature1PhaseClosures::addMooseObjectsHeatTransfer(
-    const HeatTransferBase & /*heat_transfer*/, const FlowChannelBase & /*flow_channel*/)
+    const HeatTransferClosuresInterface & /*heat_transfer*/,
+    const FlowChannelClosuresInterface & /*flow_channel*/)
 {
 }

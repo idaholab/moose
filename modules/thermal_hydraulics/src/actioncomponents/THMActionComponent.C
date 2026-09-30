@@ -9,6 +9,7 @@
 
 #include "THMActionComponent.h"
 #include "Control.h"
+#include "ClosuresRegistry.h"
 
 InputParameters
 THMActionComponent::validParams()
@@ -57,8 +58,9 @@ THMActionComponent::addClosuresObject(const std::string & class_name,
                                       InputParameters & params)
 {
   auto & thm_problem = getTHMProblem();
-  params.set<THMProblem *>("_thm_problem") = &thm_problem;
-  params.set<Logger *>("_logger") = &(thm_problem.log());
+  params.set<FEProblemBase *>("_problem") = &thm_problem;
+  params.set<Logger *>("_logger") =
+      &ClosuresRegistry::findOrCreate(_awh, _action_factory).getLogger();
   thm_problem.addClosures(class_name, obj_name, params);
 }
 

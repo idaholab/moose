@@ -400,9 +400,6 @@ protected:
   /// Map of loop name to model type
   std::map<std::string, THM::FlowModelID> _loop_name_to_model_id;
 
-  /// Map of closures by their names
-  std::map<std::string, std::shared_ptr<ClosuresBase>> _closures_by_name;
-
   /// variables for this simulation (name and info about the var)
   std::map<VariableName, VariableInfo> _vars;
 
