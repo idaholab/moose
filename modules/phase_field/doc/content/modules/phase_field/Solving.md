@@ -2,7 +2,7 @@
 
 Once you have developed a phase field model using implicit time integration, you need to solve your
 system of nonlinear equations using MOOSE. MOOSE uses the
-[PETSc package](http://www.mcs.anl.gov/petsc/documentation/) to solve the equations, therefore PETSc
+[PETSc package](https://petsc.org/main/) to solve the equations, therefore PETSc
 options that we have found to work well for phase field modeling are provided here.
 
 ## Solution Methods
