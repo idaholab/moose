@@ -1211,11 +1211,44 @@ public:
    * @param tid The thread ID we are preparing the requirements for
    *
    * This MUST be done after the moose variable dependency list has been set for all the other
-   * objects using the \p setActiveElementalMooseVariables API!
+   * objects using the \p setActiveElementalMooseVariables API! Callers that also reinit
+   * InterfaceMaterials should first extend consumer_needed_mat_props with \p
+   * resolveMaterialDependenciesInterface.
    */
-  void prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
-                        const SubdomainID blk_id,
-                        const THREAD_ID tid);
+  void
+  resolveMaterialDependencies(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                              const SubdomainID blk_id,
+                              const THREAD_ID tid);
+
+  /**
+   * Add the material properties that the current materials depend on to the dependency list, and
+   * mark the result as the active material properties. This is the material-property-only half
+   * of \p resolveMaterialDependencies, for callers that only need that and must not disturb the
+   * active elemental MooseVariable list (e.g. a per-element loop that runs outside the
+   * setActiveElementalMooseVariables calling convention resolveMaterialDependencies relies on).
+   * @param consumer_needed_mat_props The material properties needed by consumer objects (other
+   * than the materials themselves)
+   * @param blk_id The subdomain ID for which we are preparing our list of needed props
+   * @param tid The thread ID we are preparing the requirements for
+   */
+  void prepareMaterialProperties(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                                 const SubdomainID blk_id,
+                                 const THREAD_ID tid);
+
+  /**
+   * Extend needed_mat_props, in place, with the dependencies of any InterfaceMaterial on \p
+   * blk_id's boundaries whose supplied property is already in needed_mat_props (transitively).
+   * Call this before resolveMaterialDependencies or prepareMaterialProperties for a loop that
+   * also reinits InterfaceMaterials (i.e. calls reinitMaterialsInterface), so their producers stay
+   * active too.
+   * @param needed_mat_props The set to extend; also the consumer's directly-needed properties on
+   * input
+   * @param blk_id The subdomain ID whose boundaries we are inspecting
+   * @param tid The thread ID we are preparing the requirements for
+   */
+  void resolveMaterialDependenciesInterface(std::unordered_set<unsigned int> & needed_mat_props,
+                                            const SubdomainID blk_id,
+                                            const THREAD_ID tid);
 
   void reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful = true);
 

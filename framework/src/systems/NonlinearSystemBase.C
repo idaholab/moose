@@ -1178,6 +1178,16 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
 
   _fe_problem.reinitNeighborPhys(
       undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
+
+  std::unordered_set<unsigned int> needed_mat_props;
+  for (const auto & constraint :
+       _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced))
+  {
+    const auto & mp_deps = constraint->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+  _fe_problem.prepareMaterialProperties(needed_mat_props, primary_elem->subdomain_id(), 0);
+
   // Stateful material properties are only initialized for neighbor material data for internal faces
   // for discontinuous Galerkin methods or for conforming interfaces for interface kernels. We don't
   // have either of those use cases here where we likely have disconnected meshes
@@ -1215,13 +1225,6 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     {
       const auto & constraints =
           _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
-      std::unordered_set<unsigned int> needed_mat_props;
-      for (const auto & constraint : constraints)
-      {
-        const auto & mp_deps = constraint->getMatPropDependencies();
-        needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-      }
-      _fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
 
       for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
