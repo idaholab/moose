@@ -101,7 +101,11 @@ class TemplateLoadCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["file"] = (None, "The filename of the template to load.")
+
+        def validation_file(setting: str) -> str:
+            return setting
+        settings["file"] = (
+            None, "The filename of the template to load.", validation_file)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -135,11 +139,18 @@ class TemplateFieldCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_key(setting: str) -> str:
+            return setting
         settings["key"] = (
             None,
             "The name of the template item which the content is to replace.",
-        )
-        settings["required"] = (True, "The section is required.")
+            validation_key)
+
+        def validation_required(setting: str) -> str:
+            return setting
+        settings["required"] = (
+            True, "The section is required.", validation_required)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -153,10 +164,13 @@ class TemplateItemCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_key(setting: str) -> str:
+            return setting
         config["key"] = (
             None,
             "The name of the template item which the content is to replace.",
-        )
+            validation_key)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -169,7 +183,8 @@ class TemplateItemCommand(command.CommandComponent):
         kwargs = self.extension.getConfig(page, "args")
         content = mooseutils.apply_template_arguments(info[group], **kwargs)
         if content:
-            self.reader.tokenize(item, content, page, line=info.line, group=group)
+            self.reader.tokenize(item, content, page,
+                                 line=info.line, group=group)
         return parent
 
 
@@ -189,7 +204,7 @@ class RenderTemplateField(components.RenderComponent):
 
         # Locate the replacement
         key = token["key"]
-        func = lambda n: (n.name == "TemplateItem") and (n["key"] == key)
+        def func(n): return (n.name == "TemplateItem") and (n["key"] == key)
         replacement = moosetree.find(token.root, func)
 
         if replacement:
