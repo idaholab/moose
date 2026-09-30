@@ -27,7 +27,7 @@ AuxiliarySystem::addKokkosKernel(const std::string & kernel_name,
 }
 
 void
-AuxiliarySystem::kokkosCompute(ExecFlagType type)
+AuxiliarySystem::kokkosCompute(ExecFlagType type, int /*group*/)
 {
   TIME_SECTION("computeKokkosAuxKernel", 3);
 
