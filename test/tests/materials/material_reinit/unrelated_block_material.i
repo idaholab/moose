@@ -23,12 +23,12 @@
 
 [Materials]
   [needed_mat]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = needed_prop
     value = 2
   []
   [unrelated_mat]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = unrelated_prop
     value = 3
     error_on_volume = true

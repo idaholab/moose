@@ -13,12 +13,12 @@
 /**
  * Test material for checking selective material reinitialization, on boundaries and blocks.
  */
-class BoundaryMaterialReinitTest : public Material
+class MaterialReinitTest : public Material
 {
 public:
   static InputParameters validParams();
 
-  BoundaryMaterialReinitTest(const InputParameters & parameters);
+  MaterialReinitTest(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
