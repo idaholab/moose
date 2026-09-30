@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElectromagneticCopperProperties.h"
+#include "ElectromagneticOFHCCopperProperties.h"
 #include "libmesh/utility.h"
 #include <cmath>
 
-registerMooseObject("SolidPropertiesApp", ElectromagneticCopperProperties);
+registerMooseObject("SolidPropertiesApp", ElectromagneticOFHCCopperProperties);
 
 InputParameters
-ElectromagneticCopperProperties::validParams()
+ElectromagneticOFHCCopperProperties::validParams()
 {
   InputParameters params = ElectromagneticSolidProperties::validParams();
 
@@ -33,7 +33,8 @@ ElectromagneticCopperProperties::validParams()
   return params;
 }
 
-ElectromagneticCopperProperties::ElectromagneticCopperProperties(const InputParameters & parameters)
+ElectromagneticOFHCCopperProperties::ElectromagneticOFHCCopperProperties(
+    const InputParameters & parameters)
   : ElectromagneticSolidProperties(parameters),
     _T_min(2.0),
     _T_max(900.0),
@@ -56,7 +57,7 @@ ElectromagneticCopperProperties::ElectromagneticCopperProperties(const InputPara
 }
 
 Real
-ElectromagneticCopperProperties::electrical_resistivity_from_T(const Real & T) const
+ElectromagneticOFHCCopperProperties::electrical_resistivity_from_T(const Real & T) const
 {
   Real rho, drho_dT;
   electrical_resistivity_from_T(T, rho, drho_dT);
@@ -64,9 +65,9 @@ ElectromagneticCopperProperties::electrical_resistivity_from_T(const Real & T) c
 }
 
 void
-ElectromagneticCopperProperties::electrical_resistivity_from_T(const Real & T,
-                                                               Real & rho,
-                                                               Real & drho_dT) const
+ElectromagneticOFHCCopperProperties::electrical_resistivity_from_T(const Real & T,
+                                                                   Real & rho,
+                                                                   Real & drho_dT) const
 {
   if ((T < _T_min) || (T > _T_max))
     flagInvalidSolution("Electrical resistivity evaluated outside valid range [2, 900] K");
@@ -80,7 +81,7 @@ ElectromagneticCopperProperties::electrical_resistivity_from_T(const Real & T,
 }
 
 Real
-ElectromagneticCopperProperties::electrical_conductivity_from_T(const Real & T) const
+ElectromagneticOFHCCopperProperties::electrical_conductivity_from_T(const Real & T) const
 {
   Real sigma, dsigma_dT;
   electrical_conductivity_from_T(T, sigma, dsigma_dT);
@@ -88,9 +89,9 @@ ElectromagneticCopperProperties::electrical_conductivity_from_T(const Real & T) 
 }
 
 void
-ElectromagneticCopperProperties::electrical_conductivity_from_T(const Real & T,
-                                                                Real & sigma,
-                                                                Real & dsigma_dT) const
+ElectromagneticOFHCCopperProperties::electrical_conductivity_from_T(const Real & T,
+                                                                    Real & sigma,
+                                                                    Real & dsigma_dT) const
 {
   if ((T < _T_min) || (T > _T_max))
     flagInvalidSolution("Electrical conductivity evaluated outside valid range [2, 900] K");
@@ -106,22 +107,22 @@ ElectromagneticCopperProperties::electrical_conductivity_from_T(const Real & T,
 }
 
 Real
-ElectromagneticCopperProperties::magnetic_permeability_from_T(const Real & /* T */) const
+ElectromagneticOFHCCopperProperties::magnetic_permeability_from_T(const Real & /* T */) const
 {
   return _mu_const;
 }
 
 void
-ElectromagneticCopperProperties::magnetic_permeability_from_T(const Real & T,
-                                                              Real & mu,
-                                                              Real & dmu_dT) const
+ElectromagneticOFHCCopperProperties::magnetic_permeability_from_T(const Real & T,
+                                                                  Real & mu,
+                                                                  Real & dmu_dT) const
 {
   mu = magnetic_permeability_from_T(T);
   dmu_dT = 0.0; // Constant property
 }
 
 void
-ElectromagneticCopperProperties::computeElectricalResistivity(
+ElectromagneticOFHCCopperProperties::computeElectricalResistivity(
     Real T, Real & rho_i, Real & rho_i0, Real & drho_i_dT, Real & drho_i0_dT) const
 {
   // NIST zero-field copper electrical-resistivity correlation

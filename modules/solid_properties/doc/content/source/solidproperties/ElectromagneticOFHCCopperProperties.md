@@ -1,6 +1,6 @@
-# ElectromagneticCopperProperties
+# ElectromagneticOFHCCopperProperties
 
-!syntax description /SolidProperties/ElectromagneticCopperProperties
+!syntax description /SolidProperties/ElectromagneticOFHCCopperProperties
 
 ## Description
 
@@ -71,14 +71,14 @@ This property is constant and independent of temperature.
 
 ## Range of Validity
 
-The electrical properties are valid for 2 K $\le$ T $\le$ 900 K (-271 °C to 627 °C).
+The electrical properties are valid for 2 K $\le$ T $\le$ 900 K (-271 C to 627 C).
 This range is broader than the thermal and mechanical properties (4-300 K) to accommodate
 high-temperature electromagnetic simulations.
 
-!syntax parameters /SolidProperties/ElectromagneticCopperProperties
+!syntax parameters /SolidProperties/ElectromagneticOFHCCopperProperties
 
-!syntax inputs /SolidProperties/ElectromagneticCopperProperties
+!syntax inputs /SolidProperties/ElectromagneticOFHCCopperProperties
 
-!syntax children /SolidProperties/ElectromagneticCopperProperties
+!syntax children /SolidProperties/ElectromagneticOFHCCopperProperties
 
 !bibtex bibliography

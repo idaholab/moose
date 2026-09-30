@@ -25,12 +25,12 @@
  *
  * Valid temperature range: 2-900 K
  */
-class ElectromagneticCopperProperties : public ElectromagneticSolidProperties
+class ElectromagneticOFHCCopperProperties : public ElectromagneticSolidProperties
 {
 public:
   static InputParameters validParams();
 
-  ElectromagneticCopperProperties(const InputParameters & parameters);
+  ElectromagneticOFHCCopperProperties(const InputParameters & parameters);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"

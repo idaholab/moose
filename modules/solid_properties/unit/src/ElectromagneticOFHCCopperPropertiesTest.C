@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesTestUtils.h"
-#include "ElectromagneticCopperPropertiesTest.h"
+#include "ElectromagneticOFHCCopperPropertiesTest.h"
 
 /**
  * Test electrical resistivity and its derivatives at multiple temperatures.
@@ -16,7 +16,7 @@
  * using compute_electromagnetic_golden_values.C (machine precision, 17 significant digits).
  * Valid range: 2-900 K
  */
-TEST_F(ElectromagneticCopperPropertiesTest, electrical_resistivity)
+TEST_F(ElectromagneticOFHCCopperPropertiesTest, electrical_resistivity)
 {
   Real T;
 
@@ -50,7 +50,7 @@ TEST_F(ElectromagneticCopperPropertiesTest, electrical_resistivity)
  * Test electrical conductivity and its derivatives at multiple temperatures.
  * Golden values: sigma = 1/rho from NIST correlation (machine precision).
  */
-TEST_F(ElectromagneticCopperPropertiesTest, electrical_conductivity)
+TEST_F(ElectromagneticOFHCCopperPropertiesTest, electrical_conductivity)
 {
   Real T;
 
@@ -72,9 +72,9 @@ TEST_F(ElectromagneticCopperPropertiesTest, electrical_conductivity)
 
 /**
  * Test magnetic permeability (constant property).
- * Golden value: mu_0 = 4π × 10^-7 H/m = 1.25663706212e-6 H/m
+ * Golden value: mu_0 = 4*pi * 10^-7 H/m = 1.25663706212e-6 H/m
  */
-TEST_F(ElectromagneticCopperPropertiesTest, magnetic_permeability)
+TEST_F(ElectromagneticOFHCCopperPropertiesTest, magnetic_permeability)
 {
   Real T;
 
@@ -100,7 +100,7 @@ TEST_F(ElectromagneticCopperPropertiesTest, magnetic_permeability)
  * Test reciprocal relationship: sigma = 1/rho
  * This verifies numerical consistency between the two properties.
  */
-TEST_F(ElectromagneticCopperPropertiesTest, resistivity_conductivity_reciprocal)
+TEST_F(ElectromagneticOFHCCopperPropertiesTest, resistivity_conductivity_reciprocal)
 {
   Real T;
 
@@ -123,20 +123,22 @@ TEST_F(ElectromagneticCopperPropertiesTest, resistivity_conductivity_reciprocal)
 
 /**
  * Test RRR parameter effect on residual resistivity.
- * Higher RRR → lower residual resistivity → lower total resistivity at low T.
+ * Higher RRR => lower residual resistivity => lower total resistivity at low T.
  */
-TEST_F(ElectromagneticCopperPropertiesTest, rrr_effect)
+TEST_F(ElectromagneticOFHCCopperPropertiesTest, rrr_effect)
 {
   // Create objects with different RRR values
-  InputParameters uo_pars_rrr50 = _factory.getValidParams("ElectromagneticCopperProperties");
+  InputParameters uo_pars_rrr50 = _factory.getValidParams("ElectromagneticOFHCCopperProperties");
   uo_pars_rrr50.set<Real>("rrr") = 50.0;
-  _fe_problem->addUserObject("ElectromagneticCopperProperties", "sp_rrr50", uo_pars_rrr50);
-  const auto & sp_rrr50 = _fe_problem->getUserObject<ElectromagneticCopperProperties>("sp_rrr50");
+  _fe_problem->addUserObject("ElectromagneticOFHCCopperProperties", "sp_rrr50", uo_pars_rrr50);
+  const auto & sp_rrr50 =
+      _fe_problem->getUserObject<ElectromagneticOFHCCopperProperties>("sp_rrr50");
 
-  InputParameters uo_pars_rrr300 = _factory.getValidParams("ElectromagneticCopperProperties");
+  InputParameters uo_pars_rrr300 = _factory.getValidParams("ElectromagneticOFHCCopperProperties");
   uo_pars_rrr300.set<Real>("rrr") = 300.0;
-  _fe_problem->addUserObject("ElectromagneticCopperProperties", "sp_rrr300", uo_pars_rrr300);
-  const auto & sp_rrr300 = _fe_problem->getUserObject<ElectromagneticCopperProperties>("sp_rrr300");
+  _fe_problem->addUserObject("ElectromagneticOFHCCopperProperties", "sp_rrr300", uo_pars_rrr300);
+  const auto & sp_rrr300 =
+      _fe_problem->getUserObject<ElectromagneticOFHCCopperProperties>("sp_rrr300");
 
   // At low temperature (2K), resistivity dominated by residual resistivity
   Real T = 2.0;
@@ -144,7 +146,7 @@ TEST_F(ElectromagneticCopperPropertiesTest, rrr_effect)
   Real rho_100 = _sp->electrical_resistivity_from_T(T); // Default RRR=100
   Real rho_300 = sp_rrr300.electrical_resistivity_from_T(T);
 
-  // Higher RRR → lower resistivity
+  // Higher RRR => lower resistivity
   EXPECT_LT(rho_300, rho_100);
   EXPECT_LT(rho_100, rho_50);
 
