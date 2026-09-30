@@ -257,26 +257,15 @@ IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericRea
   const Moose::ElemArg qp = Moose::ElemArg();
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   const auto Re = abs(G) * Dh / mu;
-  const auto lam = 64.0 / Re;
-  const auto turb =
+  const auto f_lam = 64.0 / Re;
+  const auto f_turb =
       0.25 / pow((log10((*(_roughnesses[j]))(qp, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))), 2);
-  auto fd = 64.0 / Re;
-  auto pfd = &fd;
   if (Re < 2300.0) // laminar
-  {
-    *pfd = lam;
-  }
+    return f_lam;
   else if (Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
-  {
-    *pfd = turb;
-  }
+    return f_turb;
   else // transition, conservative interpolation between the two
-  {
-    *pfd = (turb - lam) / 1700 * Re + lam;
-    *pfd = std::max(*pfd, std::max(lam, turb));
-  }
-
-  return fd;
+    return std::max((f_turb - f_lam) / 1700 * Re + f_lam, std::max(f_lam, f_turb));
 }
 
 template class IncompressibleMomentumSPBaseTempl<false>;
