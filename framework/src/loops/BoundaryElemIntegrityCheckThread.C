@@ -111,11 +111,15 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
     auto check_aux_from_the_warehouse =
         [elem, boundary_id, &bnd_name, tid, &mesh, side, this](auto & system_type)
     {
+      // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
+      // boundaries they couple across, but their coupled variables are only required to be
+      // defined on the mortar segment mesh, not on every element of those boundaries.
       std::vector<AuxKernelBase *> auxkernels;
       _fe_problem.theWarehouse()
           .query()
           .template condition<AttribSystem>(system_type)
           .template condition<AttribThread>(tid)
+          .template condition<AttribAuxKernelMortar>(false)
           .template condition<AttribBoundaries>(boundary_id, true)
           .queryInto(auxkernels);
       if (auxkernels.empty())
