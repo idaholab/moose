@@ -4312,6 +4312,9 @@ FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consume
   {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
     _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid, /*producer_only=*/true);
+    _interface_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+    _interface_materials.updateBoundaryMatPropDependency(
+        id, needed_mat_props, tid, /*producer_only=*/true);
   }
 
   const auto & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
