@@ -137,9 +137,9 @@ IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
   for (const auto j : make_range(_n_segments))
   {
     // Decide flow regime for friction factor
-    auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
-    auto G = massFlowRate() / (*(_areas[j]))(qp, state);
-    auto fd = computeFrictionFactor(mu, G, Dh, j);
+    const auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
+    const auto G = massFlowRate() / (*(_areas[j]))(qp, state);
+    const auto fd = computeFrictionFactor(mu, G, Dh, j);
     // Friction
     momentum_residual += fd * (*(_lengths[j]))(qp, state) / Dh * G * abs(G) / 2.0 / rhog;
     // Form losses
