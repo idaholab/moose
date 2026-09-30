@@ -16,7 +16,7 @@ where $\vec u, \vec v \in H(\mathrm{curl})$ and $\alpha$ and $\beta$ are scalar 
 
 The number of CG iterations to use for inner solves on the auxiliary spaces associated with the
 Nédélec interpolation operator $\Pi$ and the gradient operator $G$ can be controlled by the
-`inner_pi_iterations` and `inner_g_iterations` parameters, which default to 0 and 1, respectively.
+`inner_pi_iterations` and `inner_g_iterations` parameters, which both default to 2.
 Increasing these may aid convergence when $\alpha$ and/or $\beta$ are highly discontinuous.
 
 The method used corresponds to a matrix-free version of Hypre's AMS preconditioner (with default
@@ -25,13 +25,6 @@ cycle 1), as described in Hypre's [AMS documentation](https://hypre.readthedocs.
 Implementation details for the `mfem::MatrixFreeAMS` preconditioner, along with some performance
 comparisons against Hypre's AMS preconditioner for 2D problems, can be found in
 [this paper](https://www.osti.gov/servlets/purl/1835018).
-
-## Nonlinear problems
-
-For nonlinear systems `MFEMMatrixFreeAMS` builds the Jacobi smoother from the operator
-being preconditioned rather than from the bilinear form, so that the nonlinear contribution is
-included. Linear systems keep MFEM's default smoother, for which the bilinear form already is the
-full operator.
 
 ## Example Input File Syntax
 
