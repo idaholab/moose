@@ -35,7 +35,8 @@ class ConfigExtension(command.CommandExtension):
             for match in command.BlockInlineCommand.RE.finditer(content):
                 if match.group("command") == "config":
                     subcommand = match.group("subcommand")
-                    _, settings = common.match_settings(dict(), match.group("settings"))
+                    _, settings = common.match_settings(
+                        dict(), match.group("settings"))
                     if subcommand == "disable":
                         self.__configPageDisable(page, settings)
                     else:
@@ -76,10 +77,13 @@ class ConfigPageActiveCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_extensions(setting: str) -> str:
+            return setting
         settings["extensions"] = (
             [],
             "If the output extension matches the page is disabled from " "translation.",
-        )
+            validation_extensions)
         return settings
 
     def createToken(self, parent, info, page, settings):
