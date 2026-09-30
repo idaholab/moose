@@ -1,5 +1,9 @@
 mu = 1.0
 rho = 10.0
+# The slip and drag materials carry parameters named 'rho' and 'mu', and MOOSE resolves ${...}
+# against the enclosing block first, so the continuous phase properties need unshadowed names
+rho_continuous = 10.0
+mu_continuous = 1.0
 mu_d = 0.1
 rho_d = 1.0
 l = 2
@@ -105,6 +109,7 @@ k_d = 1
     momentum_component = x
     rhie_chow_user_object = ins_rhie_chow_interpolator
     rho_d = ${rho_d}
+    rho_c = ${rho}
     u_slip = vel_slip_x
     v_slip = vel_slip_y
     variable = vel_x
@@ -116,6 +121,7 @@ k_d = 1
     momentum_component = y
     rhie_chow_user_object = ins_rhie_chow_interpolator
     rho_d = ${rho_d}
+    rho_c = ${rho}
     u_slip = vel_slip_x
     v_slip = vel_slip_y
     variable = vel_y
@@ -152,8 +158,11 @@ k_d = 1
     type = LinearFVScalarAdvection
     advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
-    u_slip = vel_slip_x
-    v_slip = vel_slip_y
+    u_slip = vel_drift_x
+    v_slip = vel_drift_y
+    # The dispersed phase crosses the inlet and the outlet, but not the walls. The Physics based
+    # counterpart of this input sets this automatically from the flow inlets and outlets.
+    slip_boundaries = 'left right'
     variable = phase_2
   []
   [mixture_phase_interface_reaction]
@@ -281,32 +290,38 @@ k_d = 1
     prop_names = 'rho_mixture mu_mixture cp_mixture k_mixture'
   []
   [mixture_slip_x]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
     execute_on = ALWAYS
     gravity = '0 0 0'
-    linear_coef_name = Darcy_coefficient
+    use_dispersed_phase_drag_model = true
+    rho_c = ${rho_continuous}
     momentum_component = x
-    mu = mu_mixture
+    mu = ${mu_continuous}
     outputs = all
     particle_diameter = 0.01
-    rho = ${rho}
+    rho = rho_mixture
     rho_d = ${rho_d}
+    fraction_dispersed = phase_2
     slip_velocity_name = vel_slip_x
+    drift_velocity_name = vel_drift_x
     u = vel_x
     v = vel_y
   []
   [mixture_slip_y]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
     execute_on = ALWAYS
     gravity = '0 0 0'
-    linear_coef_name = Darcy_coefficient
+    use_dispersed_phase_drag_model = true
+    rho_c = ${rho_continuous}
     momentum_component = y
-    mu = mu_mixture
+    mu = ${mu_continuous}
     outputs = all
     particle_diameter = 0.01
-    rho = ${rho}
+    rho = rho_mixture
     rho_d = ${rho_d}
+    fraction_dispersed = phase_2
     slip_velocity_name = vel_slip_y
+    drift_velocity_name = vel_drift_y
     u = vel_x
     v = vel_y
   []
@@ -314,12 +329,12 @@ k_d = 1
     type = NSFVDispersePhaseDragFunctorMaterial
     drag_coef_name = Darcy_coefficient
     execute_on = ALWAYS
-    mu = mu_mixture
+    mu = ${mu_continuous}
     outputs = all
     particle_diameter = 0.01
-    rho = rho_mixture
-    u = vel_x
-    v = vel_y
+    rho = ${rho_continuous}
+    u = vel_slip_x
+    v = vel_slip_y
   []
 []
 

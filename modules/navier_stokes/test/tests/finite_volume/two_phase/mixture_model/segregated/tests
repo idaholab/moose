@@ -12,11 +12,13 @@
     type = CSVDiff
     input = 'rayleigh-bernard-two-phase-physics.i'
     csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
-    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a two phase mixture using the linear finite volume discretization.'
+    # Four steps of the early transient, at a step of 0.1 s. Marched to steady state this
+    # configuration has at least three steady states, and which one a solver reaches depends on its
+    # time step: the nonlinear counterpart returns a peak vertical velocity of 0.213, 0.325 or
+    # 0.122 for a step of 0.1, 0.2 and 0.5 s respectively. That is why the nonlinear test is a
+    # RunApp, and why this one compares the transient rather than a steady state.
+    requirement = 'The system shall be able to solve two phase Rayleigh Benard convection with the mixture model using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
-    # Times out
-    heavy = True
-    capabilities = 'method=opt'
   []
   [rayleigh-benard_heated]
     type = CSVDiff
@@ -24,6 +26,11 @@
     csvdiff = 'rayleigh-bernard-two-phase-physics_heated_out.csv'
     requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a heated two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
+    # Marched to steady state this configuration has more than one attractor, and which one it
+    # reaches depends on the path the solver takes to get there. Partitioning changes that path:
+    # the peak velocity agrees to 4e-5 on two processes and lands on a different state entirely
+    # on four. The golded answer is the serial one, so the comparison is pinned to it.
+    max_parallel = 1
     # Times out
     heavy = True
     capabilities = 'method=opt'
