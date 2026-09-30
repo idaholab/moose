@@ -30,6 +30,7 @@ from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from . import core, command, floats, autolink, civet, appsyntax, table, modal
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -55,16 +56,22 @@ SQARequirementDesign = tokens.newToken(
 SQARequirementIssues = tokens.newToken(
     "SQARequirementIssues", issues=[], line=None, filename=None, url=None
 )
-SQARequirementCollections = tokens.newToken("SQARequirementCollections", collections=[])
+SQARequirementCollections = tokens.newToken(
+    "SQARequirementCollections", collections=[])
 SQARequirementTypes = tokens.newToken("SQARequirementTypes", types=[])
-SQARequirementPrerequisites = tokens.newToken("SQARequirementPrerequisites", specs=[])
+SQARequirementPrerequisites = tokens.newToken(
+    "SQARequirementPrerequisites", specs=[])
 SQARequirementDetails = tokens.newToken("SQARequirementDetails")
-SQARequirementDetailItem = tokens.newToken("SQARequirementDetailItem", label=None)
+SQARequirementDetailItem = tokens.newToken(
+    "SQARequirementDetailItem", label=None)
 
 # use 'Token' suffix to avoid confusion with moosesqa.SQAReport object
-SQADocumentReportToken = tokens.newToken("SQADocumentReportToken", reports=None)
-SQAMooseAppReportToken = tokens.newToken("SQAMooseAppReportToken", reports=None)
-SQARequirementReportToken = tokens.newToken("SQARequirementReportToken", reports=None)
+SQADocumentReportToken = tokens.newToken(
+    "SQADocumentReportToken", reports=None)
+SQAMooseAppReportToken = tokens.newToken(
+    "SQAMooseAppReportToken", reports=None)
+SQARequirementReportToken = tokens.newToken(
+    "SQARequirementReportToken", reports=None)
 
 
 LATEX_REQUIREMENT = """
@@ -183,7 +190,8 @@ class SQAExtension(command.CommandExtension):
 
             # Create requirement database from tests
             self.__requirements[category] = moosesqa.get_requirements_from_tests(
-                directories, specs, self.get("include_non_testable_requirements")
+                directories, specs, self.get(
+                    "include_non_testable_requirements")
             )
 
             # Create dependency database
@@ -204,7 +212,8 @@ class SQAExtension(command.CommandExtension):
         # Report for the entire app (e.g, moose/modules/doc)
         general_reports = self.get("reports")
         if general_reports is not None:
-            self.__reports["_empty_"] = moosesqa.get_sqa_reports(general_reports)
+            self.__reports["_empty_"] = moosesqa.get_sqa_reports(
+                general_reports)
 
         # The following attempts to save computation time by avoiding re-computing the application
         # syntax for each report. This is done by extracting the syntax from the appsyntax extension
@@ -218,7 +227,8 @@ class SQAExtension(command.CommandExtension):
             if isinstance(ext, appsyntax.AppSyntaxExtension):
                 app_syntax = ext.syntax
                 exe_dir, exe_name = (
-                    os.path.split(ext.executable) if ext.executable else (None, None)
+                    os.path.split(ext.executable) if ext.executable else (
+                        None, None)
                 )
                 break
 
@@ -324,19 +334,24 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQARecordCommand())
 
         renderer.add("SQARequirementMatrix", RenderSQARequirementMatrix())
-        renderer.add("SQARequirementMatrixItem", RenderSQARequirementMatrixItem())
+        renderer.add("SQARequirementMatrixItem",
+                     RenderSQARequirementMatrixItem())
         renderer.add(
             "SQARequirementMatrixListItem", RenderSQARequirementMatrixListItem()
         )
-        renderer.add("SQARequirementMatrixHeading", RenderSQARequirementMatrixHeading())
+        renderer.add("SQARequirementMatrixHeading",
+                     RenderSQARequirementMatrixHeading())
         renderer.add("SQARequirementText", RenderSQARequirementText())
         renderer.add("SQARequirementDesign", RenderSQARequirementDesign())
         renderer.add("SQARequirementIssues", RenderSQARequirementIssues())
-        renderer.add("SQARequirementCollections", RenderSQARequirementCollections())
+        renderer.add("SQARequirementCollections",
+                     RenderSQARequirementCollections())
         renderer.add("SQARequirementTypes", RenderSQARequirementTypes())
-        renderer.add("SQARequirementPrerequisites", RenderSQARequirementPrerequisites())
+        renderer.add("SQARequirementPrerequisites",
+                     RenderSQARequirementPrerequisites())
         renderer.add("SQARequirementDetails", RenderSQARequirementDetails())
-        renderer.add("SQARequirementDetailItem", RenderSQARequirementDetailItem())
+        renderer.add("SQARequirementDetailItem",
+                     RenderSQARequirementDetailItem())
         renderer.add("SQADocumentReportToken", RenderSQADocumentReport())
         renderer.add("SQARequirementReportToken", RenderSQARequirementReport())
         renderer.add("SQAMooseAppReportToken", RenderSQAMooseAppReport())
@@ -357,51 +372,70 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_category(setting: str) -> str:
+            return setting
         config["category"] = (
             None,
             "Provide the category, as listed in the extension 'categories' configuration.",
-        )
+            validation_category)
+
+        def validation_collections(setting: str) -> str:
+            return setting
         config["collections"] = (
             None,
             "Limit the Requirement list to the specified collections (e.g., 'FUNCTIONAL FAILURE_ANALYSIS').",
-        )
+            validation_collections)
+
+        def validation_types(setting: str) -> str:
+            return setting
         config["types"] = (
             None,
             "Limit the Requirement list to the specified test types (e.g., 'RunException Exodiff').",
-        )
+            validation_types)
 
         config["link"] = (
             True,
             "Enable/disable the linking of test specifications and " "test files.",
+            validation.boolean
         )
         config["link-spec"] = (
             True,
             "Enable/disable the link of the test specification only, "
             "the 'link' setting must be true.",
+            validation.boolean
         )
         config["link-design"] = (
             True,
             "Enable/disable the link of the test design only, "
             "the 'link' setting must be true.",
+            validation.boolean
         )
         config["link-issues"] = (
             True,
             "Enable/disable the link of the test issues only, "
             "the 'link' setting must be true.",
+            validation.boolean
         )
         config["link-prerequisites"] = (
             True,
             "Enable/disable the link of the test prerequisites, "
             "the 'link' setting must be true.",
+            validation.boolean
         )
-        config["link-results"] = (True, "Enable/disable the link to the test results.")
-        config["link-collections"] = (True, "Enable/disable the collections badge(s).")
-        config["link-types"] = (True, "Enable/disable the types badge(s).")
+        config["link-results"] = (True,
+                                  "Enable/disable the link to the test results.", validation.boolean)
+        config["link-collections"] = (True,
+                                      "Enable/disable the collections badge(s).", validation.boolean)
+        config["link-types"] = (True,
+                                "Enable/disable the types badge(s).", validation.boolean)
         config["link-verification"] = (
             True,
             "Enable/disable the verification file link.",
+            validation.boolean
         )
-        config["link-validation"] = (True, "Enable/disable the validation file link.")
+        config["link-validation"] = (True,
+                                     "Enable/disable the validation file link.", validation.boolean)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -419,7 +453,8 @@ class SQARequirementsCommand(command.CommandComponent):
         for group, requirements in self.extension.requirements(category).items():
             group = group_map.get(group, group.replace("_", " ").title())
             matrix = SQARequirementMatrix(parent)
-            SQARequirementMatrixHeading(matrix, category=category, string=str(group))
+            SQARequirementMatrixHeading(
+                matrix, category=category, string=str(group))
             for req in requirements:
                 self._addRequirement(
                     matrix, info, page, req, requirements, category, settings
@@ -515,7 +550,8 @@ class SQARequirementsCommand(command.CommandComponent):
                     if p.count > 2:
                         tokens.String(p, content=", ")
                     s = modal.ModalLink(
-                        p, string=spec.name, content=core.Code(None, content=spec.text)
+                        p, string=spec.name, content=core.Code(
+                            None, content=spec.text)
                     )
 
             if settings.get("link-design", False) and req.design:
@@ -667,8 +703,16 @@ class SQADependenciesCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["suffix"] = (None, "Provide the filename suffix to include.")
-        config["category"] = (None, "Provide the category.")
+
+        def validation_suffix(setting: str) -> str:
+            return setting
+        config["suffix"] = (
+            None, "Provide the filename suffix to include.", validation_suffix)
+
+        def validation_category(setting: str) -> str:
+            return setting
+        config["category"] = (
+            None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -703,8 +747,16 @@ class SQADocumentCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["suffix"] = (None, "Provide the filename suffix to include.")
-        config["category"] = (None, "Provide the category.")
+
+        def validation_suffix(setting: str) -> str:
+            return setting
+        config["suffix"] = (
+            None, "Provide the filename suffix to include.", validation_suffix)
+
+        def validation_category(setting: str) -> str:
+            return setting
+        config["category"] = (
+            None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -728,13 +780,19 @@ class SQAReportCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["category"] = (None, "Provide the category.")
+
+        def validation_category(setting: str) -> str:
+            return setting
+        config["category"] = (
+            None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
         category = settings.get("category") or "_empty_"
-        doc_reports, req_reports, app_reports = self.extension.reports(category)
-        core.Heading(parent, string="Software Quality Status Report(s)", level=2)
+        doc_reports, req_reports, app_reports = self.extension.reports(
+            category)
+        core.Heading(
+            parent, string="Software Quality Status Report(s)", level=2)
         SQADocumentReportToken(parent, reports=doc_reports)
         SQARequirementReportToken(parent, reports=req_reports)
         SQAMooseAppReportToken(parent, reports=app_reports)
@@ -802,7 +860,8 @@ class SQAReportCommand(command.CommandComponent):
                 for spec in req.specifications:
                     p = SQARequirementSpecification(item, spec_name=req.name)
                     s = modal.ModalSourceLink(
-                        p, string=spec.name, content=core.Code(None, content=content)
+                        p, string=spec.name, content=core.Code(
+                            None, content=content)
                     )
 
             if token["link_design"] and req.design:
@@ -857,7 +916,11 @@ class SQARecordCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["category"] = (None, "Provide the category.")
+
+        def validation_category(setting: str) -> str:
+            return setting
+        config["category"] = (
+            None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -872,7 +935,8 @@ class SQARecordCommand(command.CommandComponent):
                     if document.filename is not None:
                         split_name = document.filename.split("#", maxsplit=1)
                         fname = split_name[0]
-                        bookmark = split_name[1] if len(split_name) > 1 else None
+                        bookmark = split_name[1] if len(
+                            split_name) > 1 else None
                         autolink.AutoLink(
                             li, page=fname, bookmark=bookmark, string=document.title
                         )
@@ -1070,7 +1134,8 @@ class RenderSQARequirementIssues(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
 
-        p = html.Tag(parent, "p", string="Issue(s): ", class_="moose-sqa-items")
+        p = html.Tag(parent, "p", string="Issue(s): ",
+                     class_="moose-sqa-items")
         for issue in token["issues"]:
 
             url = self.getURL(issue, token)
@@ -1104,7 +1169,8 @@ class RenderSQARequirementIssues(components.RenderComponent):
 
 class RenderSQARequirementCollections(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        p = html.Tag(parent, "p", string="Collection(s): ", class_="moose-sqa-items")
+        p = html.Tag(parent, "p", string="Collection(s): ",
+                     class_="moose-sqa-items")
         for item in token["collections"]:
             html.Tag(p, "span", string=str(item))
 
@@ -1148,7 +1214,8 @@ class RenderSQARequirementTypes(components.RenderComponent):
 
 class RenderSQARequirementPrerequisites(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        p = html.Tag(parent, "p", string="Prerequisite(s): ", class_="moose-sqa-items")
+        p = html.Tag(parent, "p", string="Prerequisite(s): ",
+                     class_="moose-sqa-items")
 
         for label in token["specs"]:
             url = "#{}".format(label[0])
@@ -1205,7 +1272,8 @@ class RenderSQAReport(components.RenderComponent):
 
             # Header
             li = html.Tag(ul, "li")
-            hdr = html.Tag(li, "div", class_="collapsible-header", string=report.title)
+            hdr = html.Tag(li, "div", class_="collapsible-header",
+                           string=report.title)
             if report.status == report.Status.WARNING:
                 badge = ("WARNING", "yellow")
             elif report.status == report.Status.ERROR:
