@@ -24,7 +24,11 @@ ElementGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
+  // Unlike GeneratedMesh/GeneratedMeshGenerator (which build a structured grid of elements, for
+  // which a 0-D element is meaningless), ElementGenerator builds one element at a time from
+  // explicit nodal positions, so a single-node NodeElem is a valid (if degenerate) choice here -
+  // widen only this class's own enum, not the shared LIST_GEOM_ELEM constant.
+  MooseEnum elem_types(LIST_GEOM_ELEM + " NODEELEM"); // no default
 
   params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
 
