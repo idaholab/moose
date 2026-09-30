@@ -36,7 +36,10 @@ SCMMixingChenTodreas::SCMMixingChenTodreas(const InputParameters & parameters)
     _mixing_model(getParam<MooseEnum>("mixing_model")),
     _S_soln(_subproblem.getVariable(0, "S")),
     _mdot_soln(_subproblem.getVariable(0, "mdot")),
-    _rho_soln(_subproblem.getVariable(0, "rho"))
+    _rho_soln(_subproblem.getVariable(0, "rho")),
+    // Not a number until computeBulkMixingParameters, so that the problem rejects any use before
+    _beta_1986(std::numeric_limits<Real>::quiet_NaN()),
+    _beta_sweep(std::numeric_limits<Real>::quiet_NaN())
 {
   if (!_is_tri_lattice)
     mooseError("This correlation applies only for triangular assemblies");
@@ -82,11 +85,9 @@ SCMMixingChenTodreas::SCMMixingChenTodreas(const InputParameters & parameters)
   }
 }
 
-Real
-SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const
+void
+SCMMixingChenTodreas::computeBulkMixingParameters() const
 {
-  Real beta = 0.0;
-
   const Real pitch = _subchannel_mesh.getPitch();
   const Real pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real p_over_d = pitch / pin_diameter;
@@ -94,26 +95,6 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
   const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
-
-  const auto chans = _subchannel_mesh.getGapChannels(i_gap);
-  const unsigned int i_ch = chans.first;
-  const unsigned int j_ch = chans.second;
-
-  const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
-  const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
-
-  const Node * const node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-  const Node * const node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-  const Node * const node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-  const Node * const node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-
-  // Surface area
-  const Real Si_in = _S_soln(node_in_i);
-  const Real Sj_in = _S_soln(node_in_j);
-  const Real Si_out = _S_soln(node_out_i);
-  const Real Sj_out = _S_soln(node_out_j);
-  const Real Si = 0.5 * (Si_in + Si_out);
-  const Real Sj = 0.5 * (Sj_in + Sj_out);
 
   const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
@@ -133,118 +114,18 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
       wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
                                    Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
 
-  // Pacio applicability
-  const bool center_edge =
-      (subch_type_i == EChannelType::CENTER && subch_type_j == EChannelType::EDGE) ||
-      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CENTER);
+  const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
 
-  const bool edge_corner =
-      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER) ||
-      (subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE);
+  const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
 
-  // Pacio defines the mixing treatment across center-edge and edge-corner gaps.
-  // For all other applicable gaps, we retain the original Cheng-Todreas (1986) model.
-  if (_mixing_model == "Pacio" && (center_edge || edge_corner))
+  //
+  // Original Cheng-Todreas (1986) mixing correlation.
+  //
+  // This remains active for center-center gaps even when Pacio is selected,
+  // while center-edge gaps and edge-corner gaps are replaced by the Pacio treatment.
+  // When Pacio is not selected: beta is defined for center-center, center-edge gaps.
+  // In edge-edge, edge-corner beta = zero.
   {
-    const Real ReL = 700.0;
-    const Real ReT = 10000.0;
-
-    const Real rho_i_in = _rho_soln(node_in_i);
-    const Real rho_j_in = _rho_soln(node_in_j);
-    const Real rho_i_out = _rho_soln(node_out_i);
-    const Real rho_j_out = _rho_soln(node_out_j);
-
-    const Real rho_i = 0.5 * (rho_i_in + rho_i_out);
-    const Real rho_j = 0.5 * (rho_j_in + rho_j_out);
-
-    const Real Vi = 0.5 * (_mdot_soln(node_in_i) + _mdot_soln(node_out_i)) / (rho_i * Si);
-    const Real Vj = 0.5 * (_mdot_soln(node_in_j) + _mdot_soln(node_out_j)) / (rho_j * Sj);
-    const Real bulk_V = _scm_problem.getBulkVelocity();
-    const Real Xi = Vi / bulk_V;
-    const Real Xj = Vj / bulk_V;
-
-    constexpr Real flow_split_exponent = 2.0 - 0.18;
-
-    // Flow-split term of the mixing parameter, Pacio et al. (2022) Eq. (31).
-    Real fraction;
-    if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
-    {
-      const Real Xavg = 0.5 * (Xi + Xj);
-
-      if (Xavg < 0.0)
-        mooseError("The Pacio mixing correlation does not support negative flow splits "
-                   "when evaluating the fractional flow-split exponent.");
-
-      // The flow-split term diverges as X^(-m) at zero flow; the crossflow is zero there because
-      // SCM multiplies beta by the average mass flux of the gap, so any finite value works
-      if (MooseUtils::absoluteFuzzyEqual(Xavg, 0.0))
-        fraction = 0.0;
-      else
-        fraction = 0.5 * flow_split_exponent * std::pow(Xavg, flow_split_exponent - 2.0);
-    }
-    else
-    {
-      if (Xi < 0.0 || Xj < 0.0)
-        mooseError("The Pacio mixing correlation does not support negative flow splits "
-                   "when evaluating the fractional flow-split exponent.");
-
-      fraction = (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) /
-                 (Utility::pow<2>(Xi) - Utility::pow<2>(Xj));
-    }
-
-    const Real WmL = 0.0;
-    const Real WmT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
-
-    Real Cm;
-
-    if (bulk_Re < ReL)
-      Cm = WmL;
-    else if (bulk_Re > ReT)
-      Cm = WmT;
-    else
-    {
-      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
-
-      const Real gamma = 2.0 / 3.0;
-
-      Cm = WmL + (WmT - WmL) * std::pow(psi, gamma);
-    }
-
-    // Pacio uses the edge-subchannel projected wire area and bare flow area.
-    const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
-    const Real w = pin_diameter + dpgap;
-
-    const Real Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
-
-    const Real A2prime =
-        pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
-
-    // Pacio et al. (2022) Eq. (30) multiplies beta by the contact perimeter between all subchannels
-    // of two types, Eqs. (A.24) and (A.25), while SCM multiplies beta by the width of each gap.
-    // Scale beta by the ratio of the contact perimeter per gap to the gap width, so that the sum
-    // over the gaps of SCM gives the crossflow of Pacio:
-    // - center-edge: Pi12 = 6 n (P - D - Dw / 6) over the 6 n pin-pin gaps of width P - D;
-    // - edge-corner: Pi23 = [6 (W - D) 2 - Dw / 6] / 2 over the 12 pin-duct gaps of width W - D.
-    const Real perimeter_ratio =
-        center_edge ? (pitch - pin_diameter - wire_diameter / 6.0) / (pitch - pin_diameter)
-                    : (0.5 * dpgap - wire_diameter / 144.0) / dpgap;
-
-    beta = Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta) * perimeter_ratio;
-  }
-  else if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
-  {
-    //
-    // Original Cheng-Todreas (1986) mixing correlation.
-    //
-    // This remains active for center-center gaps even when Pacio is selected,
-    // while center-edge gaps and edge-corner gaps are replaced by the Pacio treatment above.
-    // When Pacio is not selected: beta is defined for center-center, center-edge gaps.
-    // In edge-edge, edge-corner beta = zero.
-
-    const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
-
-    const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
-
     // projected area of wire on center subchannel
     const Real Ar1 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
 
@@ -285,47 +166,11 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
       Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
     }
 
-    beta = Cm * std::sqrt(Ar1 / A1prime) * std::tan(theta);
+    _beta_1986 = Cm * std::sqrt(Ar1 / A1prime) * std::tan(theta);
   }
 
-  return beta;
-}
-
-Real
-SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
-                                                      const unsigned int /* iz */) const
-{
-  Real beta = 0.0;
-
-  const Real pitch = _subchannel_mesh.getPitch();
-  const Real pin_diameter = _subchannel_mesh.getPinDiameter();
-  const Real p_over_d = pitch / pin_diameter;
-
-  const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
-  const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
-  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
-
-  const auto chans = _subchannel_mesh.getGapChannels(i_gap);
-  const unsigned int i_ch = chans.first;
-  const unsigned int j_ch = chans.second;
-
-  const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
-  const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
-
-  const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
-
   // Sweep flow always uses the original Cheng-Todreas (1986) correlation.
-  const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
-  const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
-
-  if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
-      (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
   {
-    const Real theta =
-        std::acos(wire_lead_length /
-                  std::sqrt(Utility::pow<2>(wire_lead_length) +
-                            Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
-
     // distance from pin surface to duct
     const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
 
@@ -368,8 +213,184 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     }
 
     // Sweep-flow coefficient used only by the peripheral enthalpy calculation.
-    beta = Cs * std::sqrt(Ar2 / A2prime) * std::tan(theta);
+    _beta_sweep = Cs * std::sqrt(Ar2 / A2prime) * std::tan(theta);
+  }
+}
+
+void
+SCMMixingChenTodreas::computeBlockMixingParameters(const unsigned int first_node,
+                                                   const unsigned int last_node) const
+{
+  if (_mixing_model != "Pacio")
+    return;
+
+  if (_beta_pacio_center_edge.size() < last_node + 1)
+  {
+    _beta_pacio_center_edge.resize(last_node + 1);
+    _beta_pacio_edge_corner.resize(last_node + 1);
   }
 
-  return beta;
+  const Real pitch = _subchannel_mesh.getPitch();
+  const Real pin_diameter = _subchannel_mesh.getPinDiameter();
+  const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
+  const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
+  const Real bulk_V = _scm_problem.getBulkVelocity();
+
+  // Pacio et al. (2022) Eq. (30) multiplies beta by the contact perimeter between all subchannels
+  // of two types, Eqs. (A.24) and (A.25), while SCM multiplies beta by the width of each gap.
+  // Scale beta by the ratio of the contact perimeter per gap to the gap width, so that the sum
+  // over the gaps of SCM gives the crossflow of Pacio:
+  // - center-edge: Pi12 = 6 n (P - D - Dw / 6) over the 6 n pin-pin gaps of width P - D;
+  // - edge-corner: Pi23 = [6 (W - D) 2 - Dw / 6] / 2 over the 12 pin-duct gaps of width W - D.
+  const Real perimeter_ratio_center_edge =
+      (pitch - pin_diameter - wire_diameter / 6.0) / (pitch - pin_diameter);
+  const Real perimeter_ratio_edge_corner = (0.5 * dpgap - wire_diameter / 144.0) / dpgap;
+
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    // Flow split of each subchannel type lumped over the axial cell, as in the PCTD model,
+    // where the flow split is defined per subchannel type: sum of the mass flow rates over sum of
+    // the density times flow area, averaged over the inlet and outlet of the cell
+    Real mdot_sum[3] = {0.0, 0.0, 0.0};
+    Real rhoS_sum[3] = {0.0, 0.0, 0.0};
+    for (const auto i_ch : make_range(_subchannel_mesh.getNumOfChannels()))
+    {
+      const Node * const node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      const Node * const node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      const auto type = _subchannel_mesh.getSubchannelType(i_ch);
+      const unsigned int i_type =
+          type == EChannelType::CENTER ? 0 : (type == EChannelType::EDGE ? 1 : 2);
+      mdot_sum[i_type] += 0.5 * (_mdot_soln(node_in) + _mdot_soln(node_out));
+      rhoS_sum[i_type] += 0.25 * (_rho_soln(node_in) + _rho_soln(node_out)) *
+                          (_S_soln(node_in) + _S_soln(node_out));
+    }
+    const Real X_center = mdot_sum[0] / rhoS_sum[0] / bulk_V;
+    const Real X_edge = mdot_sum[1] / rhoS_sum[1] / bulk_V;
+    const Real X_corner = mdot_sum[2] / rhoS_sum[2] / bulk_V;
+
+    _beta_pacio_center_edge[iz] =
+        computePacioMixingParameter(X_center, X_edge, perimeter_ratio_center_edge);
+    _beta_pacio_edge_corner[iz] =
+        computePacioMixingParameter(X_edge, X_corner, perimeter_ratio_edge_corner);
+  }
+}
+
+Real
+SCMMixingChenTodreas::computePacioMixingParameter(const Real Xi,
+                                                  const Real Xj,
+                                                  const Real perimeter_ratio) const
+{
+  const Real pitch = _subchannel_mesh.getPitch();
+  const Real pin_diameter = _subchannel_mesh.getPinDiameter();
+  const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
+  const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
+  const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
+
+  const Real theta = std::acos(
+      wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
+                                   Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
+
+  const Real ReL = 700.0;
+  const Real ReT = 10000.0;
+
+  constexpr Real flow_split_exponent = 2.0 - 0.18;
+
+  // Flow-split term of the mixing parameter, Pacio et al. (2022) Eq. (31).
+  Real fraction;
+  if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
+  {
+    const Real Xavg = 0.5 * (Xi + Xj);
+
+    if (Xavg < 0.0)
+      mooseError("The Pacio mixing correlation does not support negative flow splits "
+                 "when evaluating the fractional flow-split exponent.");
+
+    // The flow-split term diverges as X^(-m) at zero flow; the crossflow is zero there because
+    // SCM multiplies beta by the average mass flux of the gap, so any finite value works
+    if (MooseUtils::absoluteFuzzyEqual(Xavg, 0.0))
+      fraction = 0.0;
+    else
+      fraction = 0.5 * flow_split_exponent * std::pow(Xavg, flow_split_exponent - 2.0);
+  }
+  else
+  {
+    if (Xi < 0.0 || Xj < 0.0)
+      mooseError("The Pacio mixing correlation does not support negative flow splits "
+                 "when evaluating the fractional flow-split exponent.");
+
+    fraction = (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) /
+               (Utility::pow<2>(Xi) - Utility::pow<2>(Xj));
+  }
+
+  const Real WmL = 0.0;
+  const Real WmT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
+
+  Real Cm;
+
+  if (bulk_Re < ReL)
+    Cm = WmL;
+  else if (bulk_Re > ReT)
+    Cm = WmT;
+  else
+  {
+    const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
+
+    const Real gamma = 2.0 / 3.0;
+
+    Cm = WmL + (WmT - WmL) * std::pow(psi, gamma);
+  }
+
+  // Pacio uses the edge-subchannel projected wire area and bare flow area.
+  const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
+  const Real w = pin_diameter + dpgap;
+
+  const Real Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
+
+  const Real A2prime =
+      pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
+
+  return Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta) * perimeter_ratio;
+}
+
+Real
+SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const
+{
+  const auto chans = _subchannel_mesh.getGapChannels(i_gap);
+  const auto subch_type_i = _subchannel_mesh.getSubchannelType(chans.first);
+  const auto subch_type_j = _subchannel_mesh.getSubchannelType(chans.second);
+
+  // Pacio applicability
+  const bool center_edge =
+      (subch_type_i == EChannelType::CENTER && subch_type_j == EChannelType::EDGE) ||
+      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CENTER);
+
+  const bool edge_corner =
+      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER) ||
+      (subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE);
+
+  // Pacio defines the mixing treatment across center-edge and edge-corner gaps.
+  // For all other applicable gaps, we retain the original Cheng-Todreas (1986) model.
+  if (_mixing_model == "Pacio" && center_edge)
+    return _beta_pacio_center_edge[iz];
+  else if (_mixing_model == "Pacio" && edge_corner)
+    return _beta_pacio_edge_corner[iz];
+  else if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
+    return _beta_1986;
+  else
+    return 0.0;
+}
+
+Real
+SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
+                                                      const unsigned int /* iz */) const
+{
+  const auto chans = _subchannel_mesh.getGapChannels(i_gap);
+  const auto subch_type_i = _subchannel_mesh.getSubchannelType(chans.first);
+  const auto subch_type_j = _subchannel_mesh.getSubchannelType(chans.second);
+
+  if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
+      (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
+    return _beta_sweep;
+  else
+    return 0.0;
 }

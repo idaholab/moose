@@ -69,14 +69,14 @@ When `mixing_model = Pacio` is selected, the Pacio formulation is applied specif
 
 Thus, selecting `Pacio` does not globally replace the original Cheng-Todreas mixing model. Instead, it replaces or supplements the mixing treatment at the interfaces for which the Pacio formulation is applied.
 
-The Pacio mixing coefficient depends on the local flow-split parameters
+The Pacio mixing coefficient depends on the flow-split parameters
 
 !equation
 X_i = \frac{V_i}{\bar{V}},
 \qquad
 X_j = \frac{V_j}{\bar{V}},
 
-where $V_i$ and $V_j$ are the axial velocities of the neighboring subchannels and $\bar{V}$ is the bundle bulk velocity.
+where $V_i$ and $V_j$ are the axial velocities of the two types of subchannels on either side of the gap and $\bar{V}$ is the bundle bulk velocity. As in the PCTD model, where the flow split is defined per type of subchannel, the velocity of each type (interior, edge, or corner) is lumped over all subchannels of that type in each axial cell: the sum of their mass flow rates divided by the sum of their density times flow area. The Pacio mixing coefficients are therefore computed once per axial cell for the center-edge and edge-corner gaps, before the turbulent crossflow is computed. The Cheng-Todreas (1986) mixing and sweep-flow coefficients depend only on the geometry and the bulk Reynolds number and are computed once per solve.
 
 For the turbulent regime, the flow-split dependence is evaluated from Eq. (31) of [!cite](pacio2022analysis):
 

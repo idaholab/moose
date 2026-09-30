@@ -447,6 +447,8 @@ SubChannel1PhaseProblem::computeBulkReynoldsNumber()
 
   if (MooseUtils::absoluteFuzzyEqual(_bulk_V, 0.0))
     mooseError("The computed bulk velocity is zero.");
+
+  _mixing_closure->computeBulkMixingParameters();
 }
 
 void
@@ -1948,6 +1950,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   const unsigned int last_node = (iblock + 1) * _block_size;
   const unsigned int first_node = iblock * _block_size + 1;
+  _mixing_closure->computeBlockMixingParameters(first_node, last_node);
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     auto dz = _z_grid[iz] - _z_grid[iz - 1];
