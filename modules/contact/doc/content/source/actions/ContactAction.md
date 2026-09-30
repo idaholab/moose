@@ -50,6 +50,11 @@ distance will create a contact pair. Repeated contact pairs are automatically el
 activate this feature, in addition to `automatic_pairing_boundaries` and `automatic_pairing_distance`, the
 user needs to set the input parameter `automatic_pairing_method = NODE`.
 
+For either method, the boundary with the larger area in each automatically generated pair is
+assigned as the primary surface. See
+[ContactPairLowerDBlockGenerator](/ContactPairLowerDBlockGenerator.md) for details of the pairing
+and primary/secondary assignment.
+
 ## References
 
 !bibtex bibliography
