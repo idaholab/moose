@@ -113,7 +113,11 @@ class AlgorithmComponentBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["comment"] = (None, "Comment placed to right of algorithm component.")
+
+        def validation_comment(setting: str) -> str:
+            return setting
+        settings["comment"] = (
+            None, "Comment placed to right of algorithm component.", validation_comment)
         return settings
 
     def createTokenHelper(
@@ -161,8 +165,14 @@ class FunctionComponent(AlgorithmComponentBase):
     @staticmethod
     def defaultSettings():
         settings = AlgorithmComponentBase.defaultSettings()
-        settings["name"] = (None, "Function name")
-        settings["param"] = (None, "Function parameters")
+
+        def validation_name(setting: str) -> str:
+            return setting
+        settings["name"] = (None, "Function name", validation_name)
+
+        def validation_param(setting: str) -> str:
+            return setting
+        settings["param"] = (None, "Function parameters", validation_param)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -194,7 +204,10 @@ class LoopComponent(AlgorithmComponentBase):
     @staticmethod
     def defaultSettings():
         settings = AlgorithmComponentBase.defaultSettings()
-        settings["condition"] = ("", "Loop condition")
+
+        def validation_condition(setting: str) -> str:
+            return setting
+        settings["condition"] = ("", "Loop condition", validation_condition)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -202,7 +215,8 @@ class LoopComponent(AlgorithmComponentBase):
         if is_end:
             content = "+end {}+".format(info["command"])
         else:
-            content = "+{}+ {} +do+".format(info["command"], settings["condition"])
+            content = "+{}+ {} +do+".format(info["command"],
+                                            settings["condition"])
 
         return AlgorithmComponentBase.createTokenHelper(
             self,
@@ -223,7 +237,10 @@ class StatementComponent(AlgorithmComponentBase):
     @staticmethod
     def defaultSettings():
         settings = AlgorithmComponentBase.defaultSettings()
-        settings["text"] = ("", "Statement text")
+
+        def validation_text(setting: str) -> str:
+            return setting
+        settings["text"] = ("", "Statement text", validation_text)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -239,7 +256,11 @@ class IfThenComponent(AlgorithmComponentBase):
     @staticmethod
     def defaultSettings():
         settings = AlgorithmComponentBase.defaultSettings()
-        settings["condition"] = ("", "If and if else condition")
+
+        def validation_condition(setting: str) -> str:
+            return setting
+        settings["condition"] = (
+            "", "If and if else condition", validation_condition)
         return settings
 
     def createToken(self, parent, info, page, settings):
