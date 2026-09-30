@@ -23,6 +23,7 @@ from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import tokens, html, latex
 from . import core, command
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger("MooseDocs.extensions.bibtex")
 
@@ -177,7 +178,8 @@ class BibtexExtension(command.CommandExtension):
             True,
             "Show a warning when duplicate entries detected.",
         )
-        config["duplicates"] = (list(), "A list of duplicates that are allowed.")
+        config["duplicates"] = (
+            list(), "A list of duplicates that are allowed.")
         config["citation_style"] = (
             "author-year",
             "The inline citation style: 'author-year' (e.g. 'Smith et al. (2024)') "
@@ -193,7 +195,8 @@ class BibtexExtension(command.CommandExtension):
         self.__bib_file_database = dict()
 
     def preExecute(self):
-        set_strict_mode(False)  # allow incorrectly formatted author/editor names
+        # allow incorrectly formatted author/editor names
+        set_strict_mode(False)
 
         # If this is invoked during a live serve, we need to recompile the list of '.bib' files and
         # read them again, otherwise there's no way to distinguish existing entries from duplicates
@@ -293,21 +296,31 @@ class BibtexCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_style(setting: str) -> str:
+            return setting
         config["style"] = (
             "plain",
             "The BibTeX style (plain, unsrt, alpha, unsrtalpha).",
-        )
-        config["title"] = ("References", "The section title for the references.")
+            validation_style)
+
+        def validation_title(setting: str) -> str:
+            return setting
+        config["title"] = (
+            "References", "The section title for the references.", validation_title)
+
         config["title-level"] = (
             2,
             "The heading level for the section title for the references.",
+            validation.unsigned_integer
         )
         return config
 
     def createToken(self, parent, token, page, settings):
         if settings["title"]:
             h = core.Heading(parent, level=int(settings["title-level"]))
-            self.reader.tokenize(h, settings["title"], page, MarkdownReader.INLINE)
+            self.reader.tokenize(
+                h, settings["title"], page, MarkdownReader.INLINE)
         BibtexBibliography(parent, bib_style=settings["style"])
         return parent
 
@@ -319,10 +332,13 @@ class BibtexListCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_bib_files(setting: str) -> str:
+            return setting
         config["bib_files"] = (
             None,
             "The list of *.bib files to use for a complete citation list.",
-        )
+            validation_bib_files)
         return config
 
     def createToken(self, parent, token, page, settings):
@@ -448,7 +464,8 @@ class RenderBibtexCite(components.RenderComponent):
             elif textual:
                 entry = self.extension.database().entries[key]
                 html.String(
-                    parent, content="{} ".format(self._authorString(key, entry))
+                    parent, content="{} ".format(
+                        self._authorString(key, entry))
                 )
                 html.Tag(
                     parent,
@@ -512,7 +529,8 @@ class RenderBibtexBibliography(components.RenderComponent):
         for placeholder, tex in replacements.items():
             rendered = self._inlineKatexHTML(tex)
             text = text.replace(
-                '<span class="bibtex-protected">{}</span>'.format(placeholder), rendered
+                '<span class="bibtex-protected">{}</span>'.format(
+                    placeholder), rendered
             )
             text = text.replace(placeholder, rendered)
         return text.replace(r"\$", "$")
@@ -541,16 +559,19 @@ class RenderBibtexBibliography(components.RenderComponent):
             entries = list(formatted_bibliography)
             if self.extension.get("citation_style") == "number":
                 numbers = self.extension.citationNumbers(page)
-                entries.sort(key=lambda e: numbers.get(e.key, len(numbers) + 1))
+                entries.sort(key=lambda e: numbers.get(
+                    e.key, len(numbers) + 1))
             for entry in entries:
                 text = entry.text.render(backend)
-                text = self._renderInlineMath(text, page, style.math_placeholders)
+                text = self._renderInlineMath(
+                    text, page, style.math_placeholders)
                 html.Tag(ol, "li", id_=entry.key, string=text)
 
             return ol
 
         else:
-            html.String(parent, content="No citations exist within this document.")
+            html.String(
+                parent, content="No citations exist within this document.")
 
     def createMaterialize(self, parent, token, page):
         ol = self.createHTML(parent, token, page)
@@ -599,7 +620,8 @@ class RenderBibtexBibliography(components.RenderComponent):
     def _plainText(self, key, bib_style):
         """Render a single citation as a plain-text reference string."""
         style = find_plugin("pybtex.style.formatting", bib_style or "plain")
-        formatted = style().format_bibliography(self.extension.database(), [key])
+        formatted = style().format_bibliography(
+            self.extension.database(), [key])
         backend = find_plugin("pybtex.backends", "plaintext")(encoding="utf-8")
         for entry in formatted:
             return entry.text.render(backend)
