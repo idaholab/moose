@@ -11,6 +11,8 @@ advantage estimation (GAE) [!cite](schulman2015gae). Reporter trajectories are
 assembled into transitions, flattened across samples, shuffled into mini-batches,
 and then used to update separate actor and critic neural networks.
 
+!if! function=hasCapability('libtorch')
+
 ## Algorithm Summary
 
 For `input_timesteps = H`, the observation passed to the actor and critic is the
@@ -83,8 +85,6 @@ broadcasts the updated parameters so all MPI ranks hold the same networks after
 each PPO update.
 
 ## Example Input File Syntax
-
-!if! function=hasCapability('libtorch')
 
 !syntax parameters /Trainers/LibtorchDRLControlTrainer
 

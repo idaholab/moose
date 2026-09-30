@@ -1,6 +1,7 @@
 # LibtorchDRLControl
 
-!if function=hasCapability('libtorch')
+!if! function=hasCapability('libtorch')
+
 !syntax description /Controls/LibtorchDRLControl
 
 ## Overview
@@ -58,8 +59,6 @@ The controller stores the observation history, smoothed signal, and the libtorch
 CPU random-number-generator state as restartable data. This keeps stochastic
 recovered runs aligned with uninterrupted runs, provided the same controller
 state is recovered.
-
-!if! function=hasCapability('libtorch')
 
 !syntax parameters /Controls/LibtorchDRLControl
 
