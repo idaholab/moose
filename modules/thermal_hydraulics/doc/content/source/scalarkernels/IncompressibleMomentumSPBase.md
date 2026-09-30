@@ -9,5 +9,5 @@ It also takes vector-of-functor inputs for flow area, perimeter, length, angle w
 All parameters are defined as functors,
 which should allow versatility in accepting a variety of input arguments. Furthermore, being functors, it is possible for them to be controlled via [Controls](syntax/Controls/index.md) as supplied [Postprocessors](syntax/Postprocessors/index.md), for example.
 
-Some consideration should be given to the [!param](/ScalarKernels/IncompressibleMomentumSPBase/is_implicit) parameter. This term allows the user to select whether the solve
+Some consideration should be given to the `is_implicit` parameter. This term allows the user to select whether the solve
 should be done with the current or the previous state values of functor properties. This may allow the system to evolve more slowly which may avoid some issues with respect to divergence of particularly unstable systems.
