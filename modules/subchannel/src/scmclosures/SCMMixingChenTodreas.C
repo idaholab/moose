@@ -175,7 +175,12 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
         mooseError("The Pacio mixing correlation does not support negative flow splits "
                    "when evaluating the fractional flow-split exponent.");
 
-      fraction = 0.5 * flow_split_exponent * std::pow(Xavg, flow_split_exponent - 2.0);
+      // The flow-split term diverges as X^(-m) at zero flow; the crossflow is zero there because
+      // SCM multiplies beta by the average mass flux of the gap, so any finite value works
+      if (MooseUtils::absoluteFuzzyEqual(Xavg, 0.0))
+        fraction = 0.0;
+      else
+        fraction = 0.5 * flow_split_exponent * std::pow(Xavg, flow_split_exponent - 2.0);
     }
     else
     {
