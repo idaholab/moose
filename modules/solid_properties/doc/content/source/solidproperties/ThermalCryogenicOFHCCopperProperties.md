@@ -1,6 +1,6 @@
-# ThermalCopperProperties
+# ThermalCryogenicOFHCCopperProperties
 
-!syntax description /SolidProperties/ThermalCopperProperties
+!syntax description /SolidProperties/ThermalCryogenicOFHCCopperProperties
 
 ## Description
 
@@ -45,10 +45,10 @@ Density is assumed constant at 8940 kg/m$^3$ from [!cite](asm_copper).
 
 The properties are valid for 4 K $\le$ T $\le$ 300 K.
 
-!syntax parameters /SolidProperties/ThermalCopperProperties
+!syntax parameters /SolidProperties/ThermalCryogenicOFHCCopperProperties
 
-!syntax inputs /SolidProperties/ThermalCopperProperties
+!syntax inputs /SolidProperties/ThermalCryogenicOFHCCopperProperties
 
-!syntax children /SolidProperties/ThermalCopperProperties
+!syntax children /SolidProperties/ThermalCryogenicOFHCCopperProperties
 
 !bibtex bibliography

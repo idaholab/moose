@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ThermalCopperProperties.h"
+#include "ThermalCryogenicOFHCCopperProperties.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("SolidPropertiesApp", ThermalCopperProperties);
+registerMooseObject("SolidPropertiesApp", ThermalCryogenicOFHCCopperProperties);
 
 InputParameters
-ThermalCopperProperties::validParams()
+ThermalCryogenicOFHCCopperProperties::validParams()
 {
   InputParameters params = ThermalSolidProperties::validParams();
 
@@ -32,7 +32,8 @@ ThermalCopperProperties::validParams()
   return params;
 }
 
-ThermalCopperProperties::ThermalCopperProperties(const InputParameters & parameters)
+ThermalCryogenicOFHCCopperProperties::ThermalCryogenicOFHCCopperProperties(
+    const InputParameters & parameters)
   : ThermalSolidProperties(parameters),
     _rrr(getParam<MooseEnum>("rrr").getEnum<RRRValue>()),
     _rrr_index(static_cast<unsigned int>(_rrr)),
@@ -52,7 +53,7 @@ ThermalCopperProperties::ThermalCopperProperties(const InputParameters & paramet
 }
 
 Real
-ThermalCopperProperties::k_from_T(const Real & T) const
+ThermalCryogenicOFHCCopperProperties::k_from_T(const Real & T) const
 {
   Real k, dk_dT;
   k_from_T(T, k, dk_dT);
@@ -60,7 +61,7 @@ ThermalCopperProperties::k_from_T(const Real & T) const
 }
 
 void
-ThermalCopperProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) const
+ThermalCryogenicOFHCCopperProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) const
 {
   if ((T < 4.0) || (T > 300.0))
     flagInvalidSolution("Thermal conductivity evaluated outside valid range [4, 300] K");
@@ -69,18 +70,18 @@ ThermalCopperProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) const
 }
 
 void
-ThermalCopperProperties::computeThermalConductivity(Real T,
-                                                    Real a,
-                                                    Real b,
-                                                    Real c,
-                                                    Real d,
-                                                    Real e,
-                                                    Real f,
-                                                    Real g,
-                                                    Real h,
-                                                    Real i,
-                                                    Real & k,
-                                                    Real & dk_dT) const
+ThermalCryogenicOFHCCopperProperties::computeThermalConductivity(Real T,
+                                                                 Real a,
+                                                                 Real b,
+                                                                 Real c,
+                                                                 Real d,
+                                                                 Real e,
+                                                                 Real f,
+                                                                 Real g,
+                                                                 Real h,
+                                                                 Real i,
+                                                                 Real & k,
+                                                                 Real & dk_dT) const
 {
   // NIST correlation: log10(k) = numerator / denominator
   // where numerator = a + c*T^0.5 + e*T + g*T^1.5 + i*T^2
@@ -112,7 +113,7 @@ ThermalCopperProperties::computeThermalConductivity(Real T,
 }
 
 Real
-ThermalCopperProperties::cp_from_T(const Real & T) const
+ThermalCryogenicOFHCCopperProperties::cp_from_T(const Real & T) const
 {
   Real cp, dcp_dT;
   cp_from_T(T, cp, dcp_dT);
@@ -120,7 +121,7 @@ ThermalCopperProperties::cp_from_T(const Real & T) const
 }
 
 void
-ThermalCopperProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
+ThermalCryogenicOFHCCopperProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
 {
   if ((T < 4.0) || (T > 300.0))
     flagInvalidSolution("Specific heat evaluated outside valid range [4, 300] K");
@@ -151,20 +152,20 @@ ThermalCopperProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) con
 }
 
 Real
-ThermalCopperProperties::rho_from_T(const Real & /* T */) const
+ThermalCryogenicOFHCCopperProperties::rho_from_T(const Real & /* T */) const
 {
   return _rho_const;
 }
 
 void
-ThermalCopperProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
+ThermalCryogenicOFHCCopperProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
   drho_dT = 0.0;
 }
 
 Real
-ThermalCopperProperties::cp_integral(const Real & T) const
+ThermalCryogenicOFHCCopperProperties::cp_integral(const Real & T) const
 {
   // Numerical integration of cp(T) from 4 K to T using trapezoidal rule.
   // The complex NIST log-polynomial correlation for cp cannot be integrated analytically.
@@ -188,7 +189,7 @@ ThermalCopperProperties::cp_integral(const Real & T) const
     const Real T_i = T_min + static_cast<Real>(i) * dT;
     const Real cp_i = cp_from_T(T_i);
 
-    if (i == 0 || i == n_intervals)
+    if (i == 0 || i == _cp_integral_n_intervals)
       integral += 0.5 * cp_i; // Endpoints weighted by 0.5
     else
       integral += cp_i; // Interior points weighted by 1.0

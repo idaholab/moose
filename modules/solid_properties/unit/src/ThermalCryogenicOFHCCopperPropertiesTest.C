@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesTestUtils.h"
-#include "ThermalCopperPropertiesTest.h"
+#include "ThermalCryogenicOFHCCopperPropertiesTest.h"
 
 /**
  * Test that the thermal conductivity and its derivatives are
  * correctly computed for default RRR = 100.
  * Golden values calculated from NIST correlations.
  */
-TEST_F(ThermalCopperPropertiesTest, k_rrr100)
+TEST_F(ThermalCryogenicOFHCCopperPropertiesTest, k_rrr100)
 {
   Real T;
 
@@ -34,7 +34,7 @@ TEST_F(ThermalCopperPropertiesTest, k_rrr100)
  * Test that the isobaric specific heat capacity and its derivatives are
  * correctly computed. Golden values calculated from NIST correlations.
  */
-TEST_F(ThermalCopperPropertiesTest, cp)
+TEST_F(ThermalCryogenicOFHCCopperPropertiesTest, cp)
 {
   Real T;
 
@@ -54,7 +54,7 @@ TEST_F(ThermalCopperPropertiesTest, cp)
  * Test that the specific internal energy and its derivatives are
  * correctly computed. Golden value calculated by integrating NIST cp correlation.
  */
-TEST_F(ThermalCopperPropertiesTest, e)
+TEST_F(ThermalCryogenicOFHCCopperPropertiesTest, e)
 {
   const Real T = 100.0;
   REL_TEST(_sp->e_from_T(T), -59299.070699572505, REL_TOL_SAVED_VALUE);
@@ -65,7 +65,7 @@ TEST_F(ThermalCopperPropertiesTest, e)
  * Test that the density and its derivatives are
  * correctly computed (constant density from ASM Handbook).
  */
-TEST_F(ThermalCopperPropertiesTest, rho)
+TEST_F(ThermalCryogenicOFHCCopperPropertiesTest, rho)
 {
   Real T;
 

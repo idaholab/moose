@@ -16,12 +16,12 @@
  * Data from NIST Cryogenic Materials Database for UNS C10100/C10200.
  * Valid range: 4-300 K.
  */
-class ThermalCopperProperties : public ThermalSolidProperties
+class ThermalCryogenicOFHCCopperProperties : public ThermalSolidProperties
 {
 public:
   static InputParameters validParams();
 
-  ThermalCopperProperties(const InputParameters & parameters);
+  ThermalCryogenicOFHCCopperProperties(const InputParameters & parameters);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
