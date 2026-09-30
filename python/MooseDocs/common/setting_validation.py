@@ -89,3 +89,29 @@ def floating_point(setting: str) -> float:
     except Exception:
         raise MooseDocsException(f"Unable to parse input '{
                                  setting}' as an int.")
+
+
+def number_of_columns(setting: str) -> int:
+    """
+    Checks if the value provided is an unsigned integer in the range [1,12]
+
+    Parameters
+    ----------
+    setting : str
+        The string containing the user supplied value for the setting
+
+    Returns
+    -------
+    out : unsigned integer in the range [1,12]
+
+    Raises
+    ------
+    MooseDocsException:
+        if the value cannot be parsed as an unsigned integer or
+        if the value is not within the range [1,12]
+    """
+    value = unsigned_integer(setting)
+
+    if value < 1 or value > 12:
+        raise MooseDocsException(f"The number of columns provided '{
+                                 value}' but be in the range [1,12].")

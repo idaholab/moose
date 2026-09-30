@@ -11,13 +11,15 @@ from ..common import exceptions
 from ..base import components
 from ..tree import tokens, html, latex
 from . import core, command, materialicon
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
     return LayoutExtension(**kwargs)
 
 
-ColumnToken = tokens.newToken("ColumnToken", width="", small=12, medium=12, large=12)
+ColumnToken = tokens.newToken(
+    "ColumnToken", width="", small=12, medium=12, large=12)
 RowToken = tokens.newToken("RowToken")
 
 
@@ -65,19 +67,29 @@ class ColumnCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_width(setting: str) -> str:
+            return setting
         settings["width"] = (
             None,
             "The default width of the column (HTML output only).",
-        )
-        settings["icon"] = (None, "Material icon to place at top of column.")
-        settings["small"] = (12, "The number of columns for small displays (1-12).")
+            validation_width)
+
+        def validation_icon(setting: str) -> str:
+            return setting
+        settings["icon"] = (
+            None, "Material icon to place at top of column.", validation_icon)
+        settings["small"] = (
+            12, "The number of columns for small displays (1-12).", validation.number_of_columns)
         settings["medium"] = (
             12,
             "The number of columns for medium displays (1-12), "
             "this is used by the LaTeX output for determining the number "
             "of columns.",
+            validation.number_of_columns
         )
-        settings["large"] = (12, "The number of columns for large displays (1-12).")
+        settings["large"] = (
+            12, "The number of columns for large displays (1-12).", validation.number_of_columns)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -142,7 +154,8 @@ class RenderColumnToken(components.RenderComponent):
         env = latex.Environment(
             parent,
             "minipage",
-            args=[latex.Bracket(string="t"), latex.Brace(string=width, escape=False)],
+            args=[latex.Bracket(string="t"), latex.Brace(
+                string=width, escape=False)],
         )
         if token is not token.parent.children[-1]:
             latex.Command(parent, "hfill")
