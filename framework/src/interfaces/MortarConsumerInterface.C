@@ -82,8 +82,8 @@ MortarConsumerInterface::validParams()
 
   params.addParam<bool>("ghost_point_neighbors",
                         false,
-                        "Whether we should ghost point neighbors of secondary face elements, and "
-                        "consequently also their mortar interface couples.");
+                        "Whether we should ghost point neighbors of secondary face elements, their "
+                        "interior parents, and their mortar interface couples.");
   params.addParam<Real>(
       "minimum_projection_angle",
       40.0,
