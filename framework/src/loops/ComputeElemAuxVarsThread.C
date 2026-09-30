@@ -20,13 +20,13 @@
 #include "libmesh/threads.h"
 
 template <typename AuxKernelType>
-ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(
-    FEProblemBase & problem,
-    const MooseObjectWarehouse<AuxKernelType> & storage,
-    bool need_materials)
+ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(FEProblemBase & problem,
+                                                                  const TheWarehouse::Query & query,
+                                                                  bool need_materials)
   : ThreadedElementLoop<ConstElemRange>(problem),
     _aux_sys(problem.getAuxiliarySystem()),
-    _aux_kernels(storage),
+    _query(query),
+    _query_subdomain(_query),
     _need_materials(need_materials)
 {
 }
@@ -37,7 +37,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(ComputeElemAux
                                                                   Threads::split /*split*/)
   : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
-    _aux_kernels(x._aux_kernels),
+    _query(x._query),
+    _query_subdomain(x._query_subdomain),
     _need_materials(x._need_materials)
 {
 }
@@ -60,24 +61,22 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
 
   _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
       _subdomain, needed_fe_var_vector_tags, _tid);
-  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+
+  std::vector<AuxKernelType *> kernels;
+  _query_subdomain.queryInto(kernels, _tid, _subdomain);
+  for (const auto & aux : kernels)
   {
-    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
-        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & aux : kernels)
-    {
-      aux->subdomainSetup();
-      const auto & mv_deps = aux->getMooseVariableDependencies();
-      const auto & mp_deps = aux->getMatPropDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    aux->subdomainSetup();
+    const auto & mv_deps = aux->getMooseVariableDependencies();
+    const auto & mp_deps = aux->getMatPropDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
 
-      auto & fe_var_coup_vtags = aux->getFEVariableCoupleableVectorTags();
-      needed_fe_var_vector_tags.insert(fe_var_coup_vtags.begin(), fe_var_coup_vtags.end());
+    auto & fe_var_coup_vtags = aux->getFEVariableCoupleableVectorTags();
+    needed_fe_var_vector_tags.insert(fe_var_coup_vtags.begin(), fe_var_coup_vtags.end());
 
-      auto & fe_var_coup_mtags = aux->getFEVariableCoupleableMatrixTags();
-      needed_fe_var_matrix_tags.insert(fe_var_coup_mtags.begin(), fe_var_coup_mtags.end());
-    }
+    auto & fe_var_coup_mtags = aux->getFEVariableCoupleableMatrixTags();
+    needed_fe_var_matrix_tags.insert(fe_var_coup_mtags.begin(), fe_var_coup_mtags.end());
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
@@ -90,10 +89,10 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
 {
-  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  std::vector<AuxKernelType *> kernels;
+  _query_subdomain.queryInto(kernels, _tid, _subdomain);
+  if (kernels.size())
   {
-    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
-        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
@@ -142,7 +141,13 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_aux_kernels.hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  std::vector<AuxKernelType *> all_kernels;
+  // clone the query until we have a const query, see #32362
+  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  if (all_kernels.empty())
     return;
 
   const auto & console = _fe_problem.console();
@@ -154,12 +159,15 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain) ||
-      !_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain))
+    return;
+
+  std::vector<AuxKernelType *> kernels;
+  _query_subdomain.queryInto(kernels, _tid, _subdomain);
+  if (kernels.empty())
     return;
 
   const auto & console = _fe_problem.console();
-  const auto & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
   console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
   printExecutionOrdering<AuxKernelType>(kernels, false);
   _blocks_exec_printed.insert(_subdomain);

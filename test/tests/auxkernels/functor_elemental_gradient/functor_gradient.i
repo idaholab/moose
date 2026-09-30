@@ -134,35 +134,41 @@
   []
 
   # Output a component, line sampler does not do vector variables
+  # Needs to be executed after the vector auxkernels that set the *_x source variables
   [funcGrad_u_x]
     type = VectorVariableComponentAux
     variable = funcGrad_u_x
     vector_variable = funcGrad_u
     component = 'x'
+    execution_order_group = 1
   []
   [auxGrad_u_x]
     type = VectorVariableComponentAux
     variable = auxGrad_u_x
     vector_variable = auxGrad_u
     component = 'x'
+    execution_order_group = 1
   []
   [auxGrad_v_x]
     type = VectorVariableComponentAux
     variable = auxGrad_v_x
     vector_variable = auxGrad_v
     component = 'x'
+    execution_order_group = 1
   []
   [funcGrad_fv_x]
     type = VectorVariableComponentAux
     variable = auxGrad_fv_x
     vector_variable = auxGrad_fv
     component = 'x'
+    execution_order_group = 1
   []
   [auxGrad_function_x]
     type = VectorVariableComponentAux
     variable = auxGrad_function_x
     vector_variable = auxGrad_function
     component = 'x'
+    execution_order_group = 1
   []
 []
 

@@ -13,7 +13,7 @@
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "MooseObjectWarehouse.h"
+#include "TheWarehouse.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -24,7 +24,7 @@ class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   ComputeElemAuxVarsThread(FEProblemBase & problem,
-                           const MooseObjectWarehouse<AuxKernelType> & storage,
+                           const TheWarehouse::Query & query,
                            bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
@@ -46,8 +46,10 @@ protected:
 
   AuxiliarySystem & _aux_sys;
 
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernelType> & _aux_kernels;
+  /// Warehouse to retrieve the auxkernels
+  const TheWarehouse::Query _query;
+  /// mutable since printBlockExecutionInformation() is const but the query cache still mutates
+  mutable TheWarehouse::QueryCache<AttribThread, AttribSubdomains> _query_subdomain;
 
   bool _need_materials;
 };
