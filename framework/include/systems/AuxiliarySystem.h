@@ -108,7 +108,7 @@ public:
   virtual void compute(ExecFlagType type) override;
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void kokkosCompute(ExecFlagType type);
+  void kokkosCompute(ExecFlagType type, int group);
 #endif
 
   /**

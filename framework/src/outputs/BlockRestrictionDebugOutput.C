@@ -507,8 +507,8 @@ BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
   // Custom warehouses below are not covered by theWarehouse() queries. All
   // AuxKernel/VectorAuxKernel/ArrayAuxKernel (nodal, mortar, and elemental) are covered by the
   // generic query above since they are added to theWarehouse().
-  const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
 #ifdef MOOSE_KOKKOS_ENABLED
+  const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosNodalAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosElemAuxWarehouse());
 #endif
@@ -589,8 +589,8 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
   // already represented in the block groups. All AuxKernel/VectorAuxKernel/ArrayAuxKernel (nodal,
   // mortar, and elemental) are covered by the generic query above since they are added to
   // theWarehouse().
-  const auto & aux_system = _problem_ptr->getAuxiliarySystem();
 #ifdef MOOSE_KOKKOS_ENABLED
+  const auto & aux_system = _problem_ptr->getAuxiliarySystem();
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosNodalAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosElemAuxWarehouse(), false);
 #endif
