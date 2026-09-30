@@ -44,7 +44,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum(), numThreads()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
     _elemental_aux_storage(_app.getExecuteOnEnum(), numThreads()),
     _elemental_vec_aux_storage(_app.getExecuteOnEnum(), numThreads()),
     _elemental_array_aux_storage(_app.getExecuteOnEnum(), numThreads())
@@ -118,9 +117,6 @@ AuxiliarySystem::initialSetup()
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->initialSetup();
-
-    _mortar_nodal_aux_storage.sort(tid);
-    _mortar_nodal_aux_storage.initialSetup(tid);
 
     _elemental_aux_storage.sort(tid);
     _elemental_aux_storage.initialSetup(tid);
@@ -200,7 +196,6 @@ AuxiliarySystem::timestepSetup()
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->timestepSetup();
 
-    _mortar_nodal_aux_storage.timestepSetup(tid);
     _elemental_aux_storage.timestepSetup(tid);
     _elemental_vec_aux_storage.timestepSetup(tid);
     _elemental_array_aux_storage.timestepSetup(tid);
@@ -250,7 +245,6 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->customSetup(exec_type);
 
-    _mortar_nodal_aux_storage.customSetup(exec_type, tid);
     _elemental_aux_storage.customSetup(exec_type, tid);
     _elemental_vec_aux_storage.customSetup(exec_type, tid);
     _elemental_array_aux_storage.customSetup(exec_type, tid);
@@ -300,7 +294,6 @@ AuxiliarySystem::subdomainSetup()
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->subdomainSetup();
 
-    _mortar_nodal_aux_storage.subdomainSetup(tid);
     _elemental_aux_storage.subdomainSetup(tid);
     _elemental_vec_aux_storage.subdomainSetup(tid);
     _elemental_array_aux_storage.subdomainSetup(tid);
@@ -345,7 +338,6 @@ AuxiliarySystem::jacobianSetup()
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->jacobianSetup();
 
-    _mortar_nodal_aux_storage.jacobianSetup(tid);
     _elemental_aux_storage.jacobianSetup(tid);
     _elemental_vec_aux_storage.jacobianSetup(tid);
     _elemental_array_aux_storage.jacobianSetup(tid);
@@ -395,7 +387,6 @@ AuxiliarySystem::residualSetup()
     for (auto & nodal_aux : nodal_array_auxkernels)
       nodal_aux->residualSetup();
 
-    _mortar_nodal_aux_storage.residualSetup(tid);
     _elemental_aux_storage.residualSetup(tid);
     _elemental_vec_aux_storage.residualSetup(tid);
     _elemental_array_aux_storage.residualSetup(tid);
@@ -411,9 +402,8 @@ void
 AuxiliarySystem::updateActive(THREAD_ID tid)
 {
   _aux_scalar_storage.updateActive(tid);
-  // Nodal (non-mortar) AuxKernels are queried from theWarehouse(), which filters out disabled
-  // objects on every query, so there is no cached active list to refresh here.
-  _mortar_nodal_aux_storage.updateActive(tid);
+  // Nodal AuxKernels (nodal and mortar) are queried from theWarehouse(), which filters out
+  // disabled objects on every query, so there is no cached active list to refresh here.
   _elemental_aux_storage.updateActive(tid);
   _elemental_vec_aux_storage.updateActive(tid);
   _elemental_array_aux_storage.updateActive(tid);
@@ -493,12 +483,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
       std::shared_ptr<AuxKernel> kernel =
           _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
       if (kernel->isNodal())
-      {
-        if (kernel->isMortar())
-          _mortar_nodal_aux_storage.addObject(kernel, tid);
-        else
-          _fe_problem.theWarehouse().add(kernel);
-      }
+        _fe_problem.theWarehouse().add(kernel);
       else
         _elemental_aux_storage.addObject(kernel, tid);
     }
@@ -693,7 +678,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
-  // Nodal AuxKernels
+  // AuxKernels (nodal and mortar)
   {
     std::vector<AuxKernel *> nodal_auxkernels;
     _fe_problem.theWarehouse()
@@ -704,17 +689,6 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(nodal_auxkernels);
     for (const auto & aux : nodal_auxkernels)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Mortar Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _mortar_nodal_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
@@ -820,7 +794,7 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
-  // Nodal AuxKernels
+  // AuxKernels (nodal and mortar)
   {
     std::vector<AuxKernel *> nodal_auxkernels;
     _fe_problem.theWarehouse()
@@ -830,17 +804,6 @@ AuxiliarySystem::getDependObjects()
         .condition<AttribThread>(0)
         .queryIntoUnsorted(nodal_auxkernels);
     for (const auto & aux : nodal_auxkernels)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Mortar Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _mortar_nodal_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
@@ -984,6 +947,8 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type, int group)
                                   .query()
                                   .condition<AttribSystem>("AuxKernel")
                                   .condition<AttribAuxKernelValueType>("Real")
+                                  .condition<AttribAuxKernelNodal>(true)
+                                  .condition<AttribAuxKernelMortar>(false)
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<AuxKernel>(query);
@@ -998,6 +963,7 @@ AuxiliarySystem::computeNodalVecVars(ExecFlagType type, int group)
                                   .query()
                                   .condition<AttribSystem>("AuxKernel")
                                   .condition<AttribAuxKernelValueType>("Vector")
+                                  .condition<AttribAuxKernelNodal>(true)
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<VectorAuxKernel>(query);
@@ -1012,6 +978,7 @@ AuxiliarySystem::computeNodalArrayVars(ExecFlagType type, int group)
                                   .query()
                                   .condition<AttribSystem>("AuxKernel")
                                   .condition<AttribAuxKernelValueType>("Array")
+                                  .condition<AttribAuxKernelNodal>(true)
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<ArrayAuxKernel>(query);
@@ -1022,57 +989,70 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type, int group)
 {
   TIME_SECTION("computeMortarNodalVars", 3);
 
-  const MooseObjectWarehouse<AuxKernel> & mortar_nodal_warehouse = _mortar_nodal_aux_storage[type];
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Real")
+                                  .condition<AttribAuxKernelMortar>(true)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
 
-  mooseAssert(!mortar_nodal_warehouse.hasActiveBlockObjects(),
-              "We don't allow creation of block restricted mortar nodal aux kernels.");
+  // Use thread 0's dependency-sorted list to determine which boundaries have mortar nodal aux
+  // kernels and how many. The sort order does not depend on the thread, so
+  // ComputeMortarNodalAuxBndThread re-resolves the same (boundary, index) pair against its own
+  // thread's copy of the kernels.
+  std::vector<AuxKernel *> mortar_nodal_auxs;
+  query.clone().condition<AttribThread>(0).queryInto(mortar_nodal_auxs);
 
-  if (mortar_nodal_warehouse.hasActiveBoundaryObjects())
-  {
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & [bnd_id, mortar_nodal_auxes] :
-         mortar_nodal_warehouse.getActiveBoundaryObjects())
-      for (const auto index : index_range(mortar_nodal_auxes))
+  if (mortar_nodal_auxs.empty())
+    return;
+
+  std::map<BoundaryID, std::size_t> num_kernels_by_boundary;
+  for (auto * aux : mortar_nodal_auxs)
+    for (const auto bnd_id : aux->boundaryIDs())
+      ++num_kernels_by_boundary[bnd_id];
+
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (const auto & [bnd_id, num_kernels] : num_kernels_by_boundary)
+    for (const auto index : make_range(num_kernels))
+    {
+      PARALLEL_TRY
       {
-        PARALLEL_TRY
+        try
         {
-          try
-          {
-            ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
-                _fe_problem, mortar_nodal_warehouse, bnd_id, index);
-            Threads::parallel_reduce(bnd_nodes, mnabt, this->numThreads());
-          }
-          catch (MooseException & e)
-          {
-            _fe_problem.setException("The following MooseException was raised during mortar nodal "
-                                     "Auxiliary variable computation:\n" +
-                                     std::string(e.what()));
-          }
-          catch (MetaPhysicL::LogicError & e)
-          {
-            moose::translateMetaPhysicLError(e);
-          }
-          catch (std::exception & e)
-          {
-            // Continue if we find a libMesh degenerate map exception, but
-            // just re-throw for any real error
-            if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-                !strstr(e.what(), "det != 0"))
-              throw;
-
-            _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
-                                     "nodal Auxiliary variable computation:\n" +
-                                     std::string(e.what()));
-          }
+          ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(_fe_problem, query, bnd_id, index);
+          Threads::parallel_reduce(bnd_nodes, mnabt, this->numThreads());
         }
-        PARALLEL_CATCH;
+        catch (MooseException & e)
+        {
+          _fe_problem.setException("The following MooseException was raised during mortar nodal "
+                                   "Auxiliary variable computation:\n" +
+                                   std::string(e.what()));
+        }
+        catch (MetaPhysicL::LogicError & e)
+        {
+          moose::translateMetaPhysicLError(e);
+        }
+        catch (std::exception & e)
+        {
+          // Continue if we find a libMesh degenerate map exception, but
+          // just re-throw for any real error
+          if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+              !strstr(e.what(), "det != 0"))
+            throw;
 
-        // We need to make sure we propagate exceptions to all processes before trying to close
-        // here, which is a parallel operation
-        solution().close();
-        _sys.update();
+          _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
+                                   "nodal Auxiliary variable computation:\n" +
+                                   std::string(e.what()));
+        }
       }
-  }
+      PARALLEL_CATCH;
+
+      // We need to make sure we propagate exceptions to all processes before trying to close
+      // here, which is a parallel operation
+      solution().close();
+      _sys.update();
+    }
 }
 
 void

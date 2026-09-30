@@ -18,12 +18,13 @@
 template <typename AuxKernelType>
 ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     FEProblemBase & fe_problem,
-    const MooseObjectWarehouse<AuxKernelType> & storage,
+    const TheWarehouse::Query & query,
     const BoundaryID bnd_id,
     const std::size_t object_container_index)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage),
+    _query(query),
+    _query_boundary(_query),
     _bnd_id(bnd_id),
     _object_container_index(object_container_index)
 {
@@ -35,7 +36,8 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     ComputeMortarNodalAuxBndThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage),
+    _query(x._query),
+    _query_boundary(x._query_boundary),
     _bnd_id(x._bnd_id),
     _object_container_index(x._object_container_index)
 {
@@ -54,8 +56,12 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::onNode(ConstBndNodeRange::const_i
 
   if (node->processor_id() == _fe_problem.processor_id())
   {
-    const auto & kernel = _storage.getActiveBoundaryObjects(_bnd_id, _tid)[_object_container_index];
-    mooseAssert(dynamic_cast<MortarNodalAuxKernel *>(kernel.get()),
+    std::vector<AuxKernelType *> kernels;
+    _query_boundary.queryInto(kernels, _tid, std::make_tuple(_bnd_id, /*must_be_restricted=*/true));
+    mooseAssert(_object_container_index < kernels.size(),
+                "The mortar nodal aux kernel index is out of range for this boundary.");
+    auto * kernel = kernels[_object_container_index];
+    mooseAssert(dynamic_cast<MortarNodalAuxKernel *>(kernel),
                 "This should be a mortar nodal aux kernel");
     _fe_problem.reinitNodeFace(node, _bnd_id, _tid);
     kernel->compute();
