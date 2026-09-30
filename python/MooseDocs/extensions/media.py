@@ -14,6 +14,7 @@ from ..common import exceptions, report_error
 from ..base import components, Extension, LatexRenderer
 from ..tree import tokens, html, latex, pages
 from . import command, floats
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -101,7 +102,8 @@ class MediaExtension(command.CommandExtension):
         if width:
             if width.endswith("%"):
                 width = "{}\\textwidth".format(int(width[:-1]) / 100.0)
-            args.append(latex.Bracket(string="width={}".format(width), escape=False))
+            args.append(latex.Bracket(
+                string="width={}".format(width), escape=False))
 
         if style.get("text-align", None) == "center":
             env = latex.Environment(parent, "center")
@@ -123,10 +125,27 @@ class ImageCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["latex_src"] = (None, "Image to utilize when rendering with LaTeX")
-        settings["dark_src"] = (None, "Image to utilize with dark HTML theme")
-        settings["link"] = (None, "Anchor URL to navigate to upon being clicked")
-        settings["alt"] = (None, "Alt text describing image (defaults to caption)")
+
+        def validation_latex_src(setting: str) -> str:
+            return setting
+        settings["latex_src"] = (
+            None, "Image to utilize when rendering with LaTeX", validation_latex_src)
+
+        def validation_dark_src(setting: str) -> str:
+            return setting
+        settings["dark_src"] = (
+            None, "Image to utilize with dark HTML theme", validation_dark_src)
+
+        def validation_link(setting: str) -> str:
+            return setting
+        settings["link"] = (
+            None, "Anchor URL to navigate to upon being clicked", validation_link)
+
+        def validation_alt(setting: str) -> str:
+            return setting
+        settings["alt"] = (
+            None, "Alt text describing image (defaults to caption)", validation_alt)
+
         settings.update(floats.caption_settings())
         return settings
 
@@ -152,7 +171,8 @@ class ImageCommand(command.CommandComponent):
         if not (settings["alt"] or settings["caption"]):
             msg = "Image has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
             LOG.warning(
-                report_error(msg, page.source, info.line, info[0], prefix="WARNING")
+                report_error(msg, page.source, info.line,
+                             info[0], prefix="WARNING")
             )
 
         if flt is parent:
@@ -167,11 +187,19 @@ class ScriptCommand(ImageCommand):
     @staticmethod
     def defaultSettings():
         settings = ImageCommand.defaultSettings()
+
+        def validation_image_name(setting: str) -> str:
+            return setting
         settings["image_name"] = (
             None,
             "Name of image created by the Python plot script, defaults to the name of the script with .png extension",
-        )
-        settings["alt"] = (None, "Alt text describing image (defaults to caption)")
+            validation_image_name)
+
+        def validation_alt(setting: str) -> str:
+            return setting
+        settings["alt"] = (
+            None, "Alt text describing image (defaults to caption)", validation_alt)
+
         settings.update(floats.caption_settings())
         return settings
 
@@ -188,7 +216,8 @@ class ScriptCommand(ImageCommand):
         this_dir = os.path.dirname(os.path.abspath(__file__))
         python_dir = os.path.abspath(os.path.join(this_dir, "..", ".."))
         run_env = os.environ.copy()
-        run_env["PYTHONPATH"] = f"{python_dir}:" + os.environ.get("PYTHONPATH", "")
+        run_env["PYTHONPATH"] = f"{python_dir}:" + \
+            os.environ.get("PYTHONPATH", "")
         # Don't allow threads in python scripts
         run_env["OMP_NUM_THREADS"] = "1"
 
@@ -199,7 +228,8 @@ class ScriptCommand(ImageCommand):
         )
         if result.returncode != 0:
             msg = "Failed to execute python script '{}':\n{}"
-            raise exceptions.MooseDocsException(msg, script_path, result.stderr)
+            raise exceptions.MooseDocsException(
+                msg, script_path, result.stderr)
 
         # Currently the plot is assumed to reside in the same directory as the plot script.
         plot_name = settings["image_name"] or os.path.basename(script_path).replace(
@@ -238,7 +268,8 @@ class ScriptCommand(ImageCommand):
         if not (settings["alt"] or settings["caption"]):
             msg = "Image has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
             LOG.warning(
-                report_error(msg, page.source, info.line, info[0], prefix="WARNING")
+                report_error(msg, page.source, info.line,
+                             info[0], prefix="WARNING")
             )
         if flt is parent:
             img.attributes.update(**self.attributes(settings))
@@ -252,28 +283,60 @@ class VideoCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["latex_src"] = (None, "Image to utilize when rendering with LaTeX")
+
+        def validation_latex_src(setting: str) -> str:
+            return setting
+        settings["latex_src"] = (
+            None, "Image to utilize when rendering with LaTeX", validation_latex_src)
+
         settings["controls"] = (
             True,
             "Display the video player controls (not compatible with YouTube).",
+            validation.boolean
         )
         settings["loop"] = (
             False,
             "Automatically loop the video (not compatible with YouTube).",
+            validation.boolean
         )
+
         settings["autoplay"] = (
             False,
             "Automatically start playing the video (not compatible with YouTube).",
+            validation.boolean
         )
-        settings["tstart"] = (None, "Time (sec) to start video.")
-        settings["tstop"] = (None, "Time (sec) to stop video.")
-        settings["poster"] = (None, "Add a 'poster' image the the video")
+
+        def validation_tstart(setting: str) -> str:
+            return setting
+        settings["tstart"] = (
+            None, "Time (sec) to start video.", validation_tstart)
+
+        def validation_tstop(setting: str) -> str:
+            return setting
+        settings["tstop"] = (
+            None, "Time (sec) to stop video.", validation_tstop)
+
+        def validation_poster(setting: str) -> str:
+            return setting
+        settings["poster"] = (
+            None, "Add a 'poster' image the the video", validation_poster)
+
+        def validation_quicktime(setting: str) -> str:
+            return setting
         settings["quicktime"] = (
             None,
             "Video to utilize Macintosh codecs (for alpha transparencies)",
-        )
-        settings["dark_src"] = (None, "Image to utilize with dark HTML theme")
-        settings["alt"] = (None, "Alt text describing image (defaults to caption)")
+            validation_quicktime)
+
+        def validation_dark_src(setting: str) -> str:
+            return setting
+        settings["dark_src"] = (
+            None, "Image to utilize with dark HTML theme", validation_dark_src)
+
+        def validation_alt(setting: str) -> str:
+            return setting
+        settings["alt"] = (
+            None, "Alt text describing image (defaults to caption)", validation_alt)
         settings.update(floats.caption_settings())
         return settings
 
@@ -307,7 +370,8 @@ class VideoCommand(command.CommandComponent):
         if not (settings["alt"] or settings["caption"]):
             msg = "Video has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
             LOG.warning(
-                report_error(msg, page.source, info.line, info[0], prefix="WARNING")
+                report_error(msg, page.source, info.line,
+                             info[0], prefix="WARNING")
             )
 
         if flt is parent:
@@ -353,7 +417,8 @@ class RenderImage(components.RenderComponent):
 
         if token["href"]:
             # Remove any styles being set for the img tag so it does not pollute the anchor tag
-            pic_link = html.Tag(parent, "a", token, href=token["href"], style=None)
+            pic_link = html.Tag(parent, "a", token,
+                                href=token["href"], style=None)
             pic = html.Tag(pic_link, "picture")
         else:
             pic = html.Tag(parent, "picture")
@@ -469,7 +534,8 @@ class RenderVideo(components.RenderComponent):
             )
 
         if token["quicktime"]:
-            html.Tag(video, "source", src=token["quicktime"], type="video/quicktime")
+            html.Tag(video, "source",
+                     src=token["quicktime"], type="video/quicktime")
 
         source = html.Tag(video, "source", src=src)
 
@@ -478,7 +544,8 @@ class RenderVideo(components.RenderComponent):
         # Set attributes for HTML video element
         video["width"] = "100%"
         if token["poster"] is not None:
-            video["poster"] = "/" + self.translator.findPage(token["poster"]).local
+            video["poster"] = "/" + \
+                self.translator.findPage(token["poster"]).local
 
         # Ensure that bool flags are boolean
         for key in ["controls", "loop", "autoplay"]:
