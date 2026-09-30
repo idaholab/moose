@@ -15,6 +15,7 @@ from .. import common
 from ..base import components
 from ..tree import tokens, latex, html
 from . import command, core, floats, heading, modal
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -51,7 +52,8 @@ class AutoLinkExtension(command.CommandExtension):
         self.addCommand(reader, FileLinkCommand())
 
         reader.addInline(PageLinkComponent(), location="=LinkInline")
-        reader.addInline(PageShortcutLinkComponent(), location="=ShortcutLinkInline")
+        reader.addInline(PageShortcutLinkComponent(),
+                         location="=ShortcutLinkInline")
 
         renderer.add("LocalLink", RenderLocalLink())
         renderer.add("AutoLink", RenderAutoLink())
@@ -64,12 +66,23 @@ class FileLinkCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_language(setting: str) -> str:
+            return setting
         settings["language"] = (
             None,
             "The language used for source file syntax highlighting.",
-        )
-        settings["text"] = (None, "The text to display for the source file link.")
-        settings["title"] = (None, "The title to use for the source file modal.")
+            validation_language)
+
+        def validation_text(setting: str) -> str:
+            return setting
+        settings["text"] = (
+            None, "The text to display for the source file link.", validation_text)
+
+        def validation_title(setting: str) -> str:
+            return setting
+        settings["title"] = (
+            None, "The title to use for the source file modal.", validation_title)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -122,15 +135,21 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
     @staticmethod
     def defaultSettings():
         settings = core.ShortcutLinkInline.defaultSettings()
+
+        def validation_alternative(setting: str) -> str:
+            return setting
         settings["alternative"] = (
             None,
             "An alternative link to use when the file doesn't exist.",
-        )
+            validation_alternative)
+
         settings["optional"] = (
             False,
             "Toggle the link as optional when the file doesn't exist.",
+            validation.boolean
         )
-        settings["exact"] = (False, "Enable/disable exact match for the markdown file.")
+        settings["exact"] = (
+            False, "Enable/disable exact match for the markdown file.", validation.boolean)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -148,15 +167,21 @@ class PageLinkComponent(core.LinkInline):
     @staticmethod
     def defaultSettings():
         settings = core.LinkInline.defaultSettings()
+
+        def validation_alternative(setting: str) -> str:
+            return setting
         settings["alternative"] = (
             None,
             "An alternative link to use when the file doesn't exist.",
-        )
+            validation_alternative)
         settings["optional"] = (
             False,
             "Toggle the link as optional when the file doesn't exist.",
+            validation.boolean
         )
-        settings["exact"] = (False, "Enable/disable exact match for the markdown file.")
+
+        settings["exact"] = (
+            False, "Enable/disable exact match for the markdown file.", validation.boolean)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -187,7 +212,8 @@ class RenderLinkBase(components.RenderComponent):
             else:
                 link["class"] = "moose-error"
                 tokens.String(link, content=url)
-                msg = "Unable to locate local heading with URL '{}'".format(url)
+                msg = "Unable to locate local heading with URL '{}'".format(
+                    url)
                 LOG.error(
                     common.report_error(
                         msg,
@@ -203,7 +229,7 @@ class RenderLinkBase(components.RenderComponent):
         return None
 
     def createLatexHelper(self, parent, token, page, desired):
-        func = lambda p, t, u, l: latex.Command(
+        def func(p, t, u, l): return latex.Command(
             p, "hyperref", token=t, args=[latex.Bracket(string=l, escape=False)]
         )
         # Create optional content
@@ -290,7 +316,8 @@ class RenderAutoLink(RenderLinkBase):
             token = token.copy(info=True)
             match = PAGE_LINK_RE.search(alternative)
             token["bookmark"] = (
-                match.group("bookmark")[1:] if match.group("bookmark") else None
+                match.group("bookmark")[1:] if match.group(
+                    "bookmark") else None
             )
             token["page"] = match.group("filename")
 
