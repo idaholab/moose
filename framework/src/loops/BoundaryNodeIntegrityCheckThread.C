@@ -62,6 +62,9 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
     if (uo->checkVariableBoundaryIntegrity())
       boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*node), bnd_name);
 
+  // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
+  // boundaries they couple across, but their coupled variables are only required to be defined
+  // on the mortar segment mesh, not on every node of those boundaries.
   auto check_aux_from_the_warehouse = [node, boundary_id, &bnd_name, this](auto & system_type)
   {
     std::vector<AuxKernelBase *> auxkernels;
@@ -69,6 +72,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
         .query()
         .template condition<AttribSystem>(system_type)
         .template condition<AttribThread>(_tid)
+        .template condition<AttribAuxKernelMortar>(false)
         .template condition<AttribBoundaries>(boundary_id, true)
         .queryInto(auxkernels);
     if (auxkernels.empty())
