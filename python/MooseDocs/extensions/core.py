@@ -154,7 +154,11 @@ class CodeBlock(components.ReaderComponent):
     @staticmethod
     def defaultSettings():
         settings = components.ReaderComponent.defaultSettings()
-        settings["language"] = ("text", "The code language to use for highlighting.")
+
+        def validation_language(setting: str) -> str:
+            return setting
+        settings["language"] = (
+            "text", "The code language to use for highlighting.", validation_language)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -243,7 +247,8 @@ class ListBlock(components.ReaderComponent):
 
         for item in self.ITEM_RE.finditer(info["items"]):
             content = " " * n + item.group("item")
-            indent = re.search(r"^\S", content, flags=re.MULTILINE | re.UNICODE)
+            indent = re.search(
+                r"^\S", content, flags=re.MULTILINE | re.UNICODE)
             if indent:
                 msg = (
                     "List item content must be indented by {} to match the list item "
@@ -252,7 +257,8 @@ class ListBlock(components.ReaderComponent):
                 raise exceptions.MooseDocsException(msg, n, marker)
 
             content = strip_regex.sub(r"\1", content)
-            self.reader.tokenize(ListItem(token), content, page, line=info.line)
+            self.reader.tokenize(ListItem(token), content,
+                                 page, line=info.line)
 
         return token
 
@@ -261,7 +267,8 @@ class UnorderedListBlock(ListBlock):
     RE = re.compile(
         r"(?:\A|\n{2,})"  # start of string or empty line
         r"(?P<items>(?P<marker>^- ).*?)"  # all items
-        r"(?=\n{3,}|\n*\Z|\n{2}^[^-\s])",  # stop with 2 empty or 1 not with marker
+        # stop with 2 empty or 1 not with marker
+        r"(?=\n{3,}|\n*\Z|\n{2}^[^-\s])",
         flags=re.MULTILINE | re.DOTALL | re.UNICODE,
     )
     ITEM_RE = re.compile(
@@ -276,7 +283,8 @@ class OrderedListBlock(ListBlock):
     RE = re.compile(
         r"(?:\A|\n{2,})"  # start of string or empty line
         r"(?P<items>(?P<marker>^[0-9]+\. ).*?)"  # all items
-        r"(?=\n{3,}|\n*\Z|\n{2}^[^[0-9\s])",  # stop with 2 empty or 1 not with marker
+        # stop with 2 empty or 1 not with marker
+        r"(?=\n{3,}|\n*\Z|\n{2}^[^[0-9\s])",
         flags=re.MULTILINE | re.DOTALL | re.UNICODE,
     )
     ITEM_RE = re.compile(
@@ -292,7 +300,11 @@ class OrderedListBlock(ListBlock):
     @staticmethod
     def defaultSettings():
         settings = ListBlock.defaultSettings()
-        settings["type"] = ("1", "The list type (1, A, a, i, or I).")
+
+        def validation_type(setting: str) -> str:
+            return setting
+        settings["type"] = (
+            "1", "The list type (1, A, a, i, or I).", validation_type)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -507,7 +519,8 @@ class RenderCode(components.RenderComponent):
     def createHTML(self, parent, token, page, style="", style_in_pre=True):
         language = "language-{}".format(token["language"])
         style = f'max-height:{token["max_height"]};{style}'
-        pre = html.Tag(parent, "pre", token, style=(style if style_in_pre else ""))
+        pre = html.Tag(parent, "pre", token, style=(
+            style if style_in_pre else ""))
         code = html.Tag(
             pre, "code", class_=language, style=("" if style_in_pre else style)
         )
@@ -539,8 +552,10 @@ class RenderShortcutLink(components.RenderComponent):
         node = self._getShortcut(page, token["key"])
         link = node["link"].lstrip("#")
         if len(node) == 0:
-            latex.String(parent, content="{}~".format(node["prefix"]), escape=False)
-            h = latex.Command(parent, "ref", string=link, info=token.info, escape=False)
+            latex.String(parent, content="{}~".format(
+                node["prefix"]), escape=False)
+            h = latex.Command(parent, "ref", string=link,
+                              info=token.info, escape=False)
         else:
             h = latex.Command(
                 parent,
@@ -558,7 +573,8 @@ class RenderShortcutLink(components.RenderComponent):
         if node is not None:
             return node
 
-        raise exceptions.MooseDocsException("Shortcut link key '{}' not found.", key)
+        raise exceptions.MooseDocsException(
+            "Shortcut link key '{}' not found.", key)
 
 
 class RenderShortcut(components.RenderComponent):
@@ -803,7 +819,8 @@ class RenderError(components.RenderComponent):
             html.String(code, content=token.info[0], escape=True)
 
         footer = html.Tag(modal, "div", class_="modal-footer grey lighten-3")
-        done = html.Tag(footer, "a", class_="modal-action modal-close btn-flat")
+        done = html.Tag(
+            footer, "a", class_="modal-action modal-close btn-flat")
         html.String(done, content="Done")
 
         trace = token.get("traceback", None)
