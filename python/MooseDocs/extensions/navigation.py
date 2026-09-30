@@ -1,4 +1,4 @@
-# This file is part of the MOOSE framework
+# This file is part of the MOOSE frameworkSetting
 # https://mooseframework.inl.gov
 #
 # All rights reserved, see COPYRIGHT for full restrictions
@@ -54,8 +54,10 @@ class NavigationExtension(Extension):
             True,
             "Toggle for the breadcrumb links at the top of page.",
         )
-        config["sections"] = (True, "Group heading content into <section> tags.")
-        config["scrollspy"] = (True, "Enable/disable the scrolling table of contents.")
+        config["sections"] = (
+            True, "Group heading content into <section> tags.")
+        config["scrollspy"] = (
+            True, "Enable/disable the scrolling table of contents.")
         config["collapsible-sections"] = (
             [None, None, None, None, None, None],
             "Collapsible setting for the six heading level "
@@ -90,7 +92,8 @@ class NavigationExtension(Extension):
             cx = self.get("google-cse", None)
             if cx is not None:
                 renderer.addJavaScript(
-                    "google_cse", "https://cse.google.com/cse.js?cx={}".format(cx)
+                    "google_cse", "https://cse.google.com/cse.js?cx={}".format(
+                        cx)
                 )
 
             elif self.get("search", False):
@@ -121,8 +124,10 @@ class NavigationExtension(Extension):
 
         root = result.root
         header = moosetree.find(root, lambda n: n.name == "header")
-        nav = html.Tag(html.Tag(header, "nav"), "div", class_="nav-wrapper container")
-        container = moosetree.find(root, lambda n: n.name == "main").children[0]
+        nav = html.Tag(html.Tag(header, "nav"), "div",
+                       class_="nav-wrapper container")
+        container = moosetree.find(
+            root, lambda n: n.name == "main").children[0]
 
         row = container(0)
         col = container(0)(0)
@@ -205,7 +210,8 @@ class NavigationExtension(Extension):
 
             for data in page.get("search", list()):
                 url = "{}#{}".format(location, data["bookmark"])
-                items.append(dict(title=data["title"], text=data["text"], location=url))
+                items.append(
+                    dict(title=data["title"], text=data["text"], location=url))
 
         if not os.path.isdir(os.path.dirname(iname)):
             os.makedirs(os.path.dirname(iname))
@@ -313,7 +319,8 @@ class NavigationExtension(Extension):
     def _addSearch(self, parent, page):
 
         # Search button
-        btn = html.Tag(parent, "a", class_="modal-trigger", href="#moose-search")
+        btn = html.Tag(parent, "a", class_="modal-trigger",
+                       href="#moose-search")
         html.Tag(btn, "i", string="search", class_="material-icons")
 
         # Search modal
@@ -349,7 +356,8 @@ class NavigationExtension(Extension):
             )
 
         footer = html.Tag(div, "div", class_="modal-footer")
-        html.Tag(footer, "a", href="#!", class_="modal-close btn-flat", string="Close")
+        html.Tag(footer, "a", href="#!",
+                 class_="modal-close btn-flat", string="Close")
 
     def _addTopNavigation(self, parent, page):
         """Create navigation in the top bar."""
@@ -378,7 +386,8 @@ class NavigationExtension(Extension):
             if isinstance(ext, content.ContentExtension):
                 link = ext.get("source_links", {}).get(name)
                 if link:
-                    target = self.translator.findPage(link, throw_on_zero=False)
+                    target = self.translator.findPage(
+                        link, throw_on_zero=False)
                     if target is not None:
                         return target.relativeDestination(page)
                 return None
@@ -424,7 +433,8 @@ class NavigationExtension(Extension):
                     # "source/actions/Action.md") so the breadcrumb is still clickable.
                     link_url = self._sourceLinkURL(current.name, page)
                     if link_url is not None:
-                        tag = html.Tag(div, "a", href=link_url, class_="breadcrumb")
+                        tag = html.Tag(div, "a", href=link_url,
+                                       class_="breadcrumb")
                     else:
                         tag = html.Tag(div, "span", class_="breadcrumb")
                     html.String(tag, content=current.name)
@@ -492,7 +502,8 @@ class NavigationExtension(Extension):
                 summary = html.Tag(None, "summary")
                 node(0).parent = summary
 
-                details = html.Tag(None, "details", class_="moose-section-content")
+                details = html.Tag(
+                    None, "details", class_="moose-section-content")
                 if status.lower() == "open":
                     details["open"] = "open"
                 details.children = node.children
@@ -544,7 +555,8 @@ class NavigationExtension(Extension):
 
             elif isinstance(value, str):
                 href = (
-                    value if value.startswith("http") else self._findPath(page, value)
+                    value if value.startswith(
+                        "http") else self._findPath(page, value)
                 )
                 html.Tag(li, "a", href=href, string=key)
 
@@ -599,12 +611,14 @@ class NavigationExtension(Extension):
         ul = html.Tag(parent, "ul", id_=tag_id, class_="dropdown-content")
         for key, value in items.items():
             li = html.Tag(ul, "li")
-            href = value if value.startswith("http") else self._findPath(page, value)
+            href = value if value.startswith(
+                "http") else self._findPath(page, value)
             html.Tag(li, "a", href=href, string=str(key))
 
     def _findPath(self, page, path):
         """Locates page based on supplied path."""
-        node = self.translator.findPage(path.lstrip("/"), exact=path.startswith("/"))
+        node = self.translator.findPage(
+            path.lstrip("/"), exact=path.startswith("/"))
         if node is None:
             msg = "Failed to locate navigation item: {}.".format(path)
             LOG.error(msg)
