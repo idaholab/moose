@@ -146,4 +146,14 @@ void
 MoosePreconditioner::initialSetup()
 {
   Moose::PetscSupport::storePetscOptions(_fe_problem, _nl.prefix(), *this);
+
+  // Preconditioners that are also libMesh preconditioners (PBP, VCP) are attached to the
+  // nonlinear solver, which installs them as a PCSHELL before calling SNESSetFromOptions. An
+  // explicit '-pc_type' is applied afterwards and silently replaces them. The check is done here
+  // rather than in the constructor so that options set in this Preconditioning block are stored.
+  if (dynamic_cast<const libMesh::Preconditioner<Number> *>(this) &&
+      _fe_problem.getPetscOptions().user_set_options.contains(_nl.prefix() + "-pc_type"))
+    mooseError("The '-pc_type' PETSc option was set explicitly through 'petsc_options_iname' "
+               "and 'petsc_options_value', which overrides the preconditioner set up in this "
+               "Preconditioning block. Remove '-pc_type' to use this preconditioner.");
 }

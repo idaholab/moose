@@ -18,6 +18,17 @@
                   "matrix."
     mesh_mode = 'replicated'
   []
+  [pc_type_conflict]
+    type = 'RunException'
+    input = 'vcp_test.i'
+    cli_args = "Executioner/petsc_options_iname='-pc_type' Executioner/petsc_options_value='lu'"
+    expect_err = "overrides the preconditioner set up in this Preconditioning block"
+    mesh_mode = 'replicated'
+    issues = '#18190'
+    requirement = "The system shall error if a variable condensation preconditioner is set up "
+                  "alongside an explicit '-pc_type' PETSc option, since the option would silently "
+                  "override and disable the preconditioner."
+  []
   [no-condense_amg_test]
     type = 'CSVDiff'
     input = 'no_condense_test.i'

@@ -25,14 +25,27 @@
   []
 
   [pc_type_conflict]
-    type = 'RunException'
-    input = 'pbp_pc_type_conflict.i'
-    expect_err = "overrides the Physics-Based Preconditioner \(PBP\)"
-    issues = '#18190'
-
     requirement = "The system shall error if a physics based preconditioner is set up alongside "
                   "an explicit '-pc_type' PETSc option, since the option would silently override "
-                  "and disable the preconditioner."
+                  "and disable the preconditioner, when the option is set in the"
+    issues = '#18190'
+    [executioner]
+      type = 'RunException'
+      input = 'pbp_test.i'
+      cli_args = "Executioner/petsc_options_iname='-pc_type' Executioner/petsc_options_value='lu'"
+      expect_err = "overrides the preconditioner set up in this Preconditioning block"
+
+      detail = "executioner or"
+    []
+    [preconditioning]
+      type = 'RunException'
+      input = 'pbp_test.i'
+      cli_args = "Preconditioning/PBP/petsc_options_iname='-pc_type' "
+                 "Preconditioning/PBP/petsc_options_value='lu'"
+      expect_err = "overrides the preconditioner set up in this Preconditioning block"
+
+      detail = "preconditioning block."
+    []
   []
 
   [check_petsc_options_test]
