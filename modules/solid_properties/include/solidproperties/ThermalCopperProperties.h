@@ -51,26 +51,33 @@ protected:
     RRR_500
   } _rrr;
 
+  /// Integer index corresponding to _rrr for array access
+  const unsigned int _rrr_index;
+
   /// Constant density [kg/m^3]
   const Real & _rho_const;
 
-  /// Thermal conductivity coefficients for RRR = 50
-  const Real _k50_a, _k50_b, _k50_c, _k50_d, _k50_e, _k50_f, _k50_g, _k50_h, _k50_i;
+  /// Number of intervals for cp_integral numerical integration
+  const unsigned int _cp_integral_n_intervals;
 
-  /// Thermal conductivity coefficients for RRR = 100
-  const Real _k100_a, _k100_b, _k100_c, _k100_d, _k100_e, _k100_f, _k100_g, _k100_h, _k100_i;
+  /// Static arrays of thermal conductivity coefficients for each RRR value
+  /// Indices: [RRR_50, RRR_100, RRR_150, RRR_300, RRR_500]
+  static constexpr Real _ka_values[5] = {1.8743, 2.2154, 2.3797, 1.357, 2.8075};
+  static constexpr Real _kb_values[5] = {-0.41538, -0.47461, -0.4918, 0.3981, -0.54074};
+  static constexpr Real _kc_values[5] = {-0.6018, -0.88068, -0.98615, 2.669, -1.2777};
+  static constexpr Real _kd_values[5] = {0.13294, 0.13871, 0.13942, -0.1346, 0.15362};
+  static constexpr Real _ke_values[5] = {0.26426, 0.29505, 0.30475, -0.6683, 0.36444};
+  static constexpr Real _kf_values[5] = {-0.0219, -0.02043, -0.019713, 0.01342, -0.02105};
+  static constexpr Real _kg_values[5] = {-0.051276, -0.04831, -0.046897, 0.05773, -0.051727};
+  static constexpr Real _kh_values[5] = {0.0014871, 0.001281, 0.0011969, 0.0002147, 0.0012226};
+  static constexpr Real _ki_values[5] = {0.003723, 0.003207, 0.0029988, 0.0, 0.0030964};
 
-  /// Thermal conductivity coefficients for RRR = 150
-  const Real _k150_a, _k150_b, _k150_c, _k150_d, _k150_e, _k150_f, _k150_g, _k150_h, _k150_i;
-
-  /// Thermal conductivity coefficients for RRR = 300
-  const Real _k300_a, _k300_b, _k300_c, _k300_d, _k300_e, _k300_f, _k300_g, _k300_h, _k300_i;
-
-  /// Thermal conductivity coefficients for RRR = 500
-  const Real _k500_a, _k500_b, _k500_c, _k500_d, _k500_e, _k500_f, _k500_g, _k500_h, _k500_i;
+  /// Thermal conductivity coefficients for this instance's RRR
+  const Real _k_a, _k_b, _k_c, _k_d, _k_e, _k_f, _k_g, _k_h, _k_i;
 
   /// Specific heat coefficients (RRR-independent)
-  const Real _cp_a, _cp_b, _cp_c, _cp_d, _cp_e, _cp_f, _cp_g, _cp_h;
+  static constexpr Real _cp_coeff[8] = {
+      -1.91844, -0.15973, 8.61013, -18.996, 21.9661, -12.7328, 3.54322, -0.3797};
 
 private:
   /**
@@ -78,16 +85,16 @@ private:
    * log10(k) = (a + c*T^0.5 + e*T + g*T^1.5 + i*T^2) / (1 + b*T^0.5 + d*T + f*T^1.5 + h*T^2)
    * k [W/(m K)], T [K]
    */
-  void computeThermalConductivity(const Real & T,
-                                  const Real & a,
-                                  const Real & b,
-                                  const Real & c,
-                                  const Real & d,
-                                  const Real & e,
-                                  const Real & f,
-                                  const Real & g,
-                                  const Real & h,
-                                  const Real & i,
+  void computeThermalConductivity(Real T,
+                                  Real a,
+                                  Real b,
+                                  Real c,
+                                  Real d,
+                                  Real e,
+                                  Real f,
+                                  Real g,
+                                  Real h,
+                                  Real i,
                                   Real & k,
                                   Real & dk_dT) const;
 };
