@@ -31,18 +31,16 @@ class TestParseSettings(unittest.TestCase):
         self.assertEqual(unknown, dict())
 
     def testSpace(self):
-        defaults = dict(year=(1980, "doc", validation.unsigned_integer),
-                        month=("june", "doc", validation_do_nothing),
-                        day=(24, "doc", validation.unsigned_integer))
-        raw = "year=the year I was born"
+        defaults = dict(phrase=("", "doc", validation_do_nothing))
+        raw = "phrase=the year I was born"
         known, _ = common.parse_settings(defaults, raw)
-        self.assertEqual(known["year"], "the year I was born")
+        self.assertEqual(known["phrase"], "the year I was born")
 
     def testFloat(self):
-        defaults = dict(year=(1980, "doc", validation.unsigned_integer))
-        raw = "year=2003"
+        defaults = dict(value=(1980, "doc", validation.floating_point))
+        raw = "value=2003"
         known, _ = common.parse_settings(defaults, raw)
-        self.assertIsInstance(known["year"], float)
+        self.assertIsInstance(known["value"], float)
 
     def testUnknown(self):
         defaults = dict(year=(1980, "doc", validation.unsigned_integer))

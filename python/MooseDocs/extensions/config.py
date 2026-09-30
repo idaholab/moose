@@ -36,7 +36,7 @@ class ConfigExtension(command.CommandExtension):
                 if match.group("command") == "config":
                     subcommand = match.group("subcommand")
                     _, settings = common.match_settings(
-                        dict(), match.group("settings"))
+                        dict(), match.group("settings"), None)
                     if subcommand == "disable":
                         self.__configPageDisable(page, settings)
                     else:

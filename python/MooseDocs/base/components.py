@@ -15,6 +15,10 @@ from ..common import exceptions, parse_settings, mixins
 from ..tree import tokens
 
 
+SETTING_INDEX_VALUE = 0
+SETTING_INDEX_VALIDATOR = 2
+
+
 class Component(mixins.TranslatorObject):
     """
     Each extension is made up of components, both for tokenizing and rendering. The components
@@ -98,7 +102,8 @@ class ReaderComponent(Component, mixins.ReaderObject):
 
         def validation_id(setting: str) -> str:
             return setting
-        settings["id"] = (None, "Identifier to link against this object.", validation_id)
+        settings["id"] = (
+            None, "Identifier to link against this object.", validation_id)
         return settings
 
     def __init__(self):

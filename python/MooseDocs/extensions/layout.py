@@ -96,7 +96,7 @@ class ColumnCommand(command.CommandComponent):
 
         sml = []
         for s in ["small", "medium", "large"]:
-            sml.append(int(settings[s]))
+            sml.append(settings[s])
             if sml[-1] < 1 or sml[-1] > 12:
                 msg = "The '{}' setting must be an integer between 1 and 12."
                 raise exceptions.MooseDocsException(msg, s)

@@ -20,6 +20,7 @@ from ..base import components, Executioner, MarkdownReader
 from ..extensions import core, command, include, alert, floats, materialicon
 from ..tree import tokens
 
+
 LOG = logging.getLogger(__name__)
 
 TemplateContent = tokens.newToken("TemplateContent", kwargs=None)
@@ -110,8 +111,12 @@ class TemplateLoadCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page, settings):
+        defaults = self.defaultSettings()
+        known = dict((k, v[0]) for k, v in defaults.items())
+        validators = dict((k, v[2])
+                          for k, v in defaults.items())
         settings, t_args = common.match_settings(
-            self.defaultSettings(), info["settings"]
+            known, info["settings"], validators
         )
 
         location = self.translator.findPage(settings["file"])
