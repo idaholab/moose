@@ -38,9 +38,9 @@ public:
   }
 
 protected:
+  std::unique_ptr<MooseMesh> _mesh;
   std::shared_ptr<MooseApp> _app;
   Factory & _factory;
-  std::unique_ptr<MooseMesh> _mesh;
   std::shared_ptr<FEProblem> _problem;
 };
 
@@ -55,10 +55,14 @@ TEST_F(AssemblyReinitDualTest, ReinitOnlyRequestedTypes)
   const std::vector<Point> points = {Point(-1), Point(1)};
   const std::vector<Real> weights(2, 1);
 
+  // The endpoint rule leaves the quadratic midpoint shape unsupported, so recomputing dual
+  // coefficients for the unrequested SECOND LAGRANGE helper would fail. Only the requested FIRST
+  // LAGRANGE coefficients should be recomputed, giving the endpoint Kronecker values checked below.
   EXPECT_NO_THROW(assembly.reinitDual(side.get(), points, weights));
   assembly.reinitLowerDElem(side.get(), &points, &weights);
 
   ASSERT_EQ(dual_phi.size(), 2);
-  for (const auto qp : make_range(points.size()))
-    EXPECT_DOUBLE_EQ(dual_phi[0][qp] + dual_phi[1][qp], 1);
+  for (const auto i : make_range(dual_phi.size()))
+    for (const auto qp : make_range(points.size()))
+      EXPECT_NEAR(dual_phi[i][qp], i == qp, libMesh::TOLERANCE);
 }
