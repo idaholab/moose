@@ -141,6 +141,6 @@
 [Outputs]
   [CSV]
     type = CSV
-    file_base = OutputData/NLCurlCurlMMS
+    file_base = OutputData/MFEMNonlinearCurlCurl
   []
 []

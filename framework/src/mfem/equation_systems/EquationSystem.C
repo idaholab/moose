@@ -460,18 +460,13 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   if (IsNonlinear())
   {
     if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
-    {
-      return FormJacobianOperator(u);
-    }
+      FormJacobianOperator(u);
     else if (_assembly_level == mfem::AssemblyLevel::LEGACY)
-    {
       const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
-    }
     else
-    {
-      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
-                 "assembly in EquationSystem.");
-    }
+      mooseError(
+          "MFEM nonlinear solvers that require GetGradient() currently require legacy or partial "
+          "assembly in EquationSystem.");
   }
   else
     _jacobian = _linear_operator;
@@ -479,7 +474,7 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   return *_jacobian;
 }
 
-mfem::Operator &
+void
 EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
 {
   mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
@@ -501,10 +496,7 @@ EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
   // guard against dereferencing nullptr here.
   mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
 
-  // The returned operators are owned by nlf/blf, so SumOperatorExtension must not delete them.
-  _sum_operator = std::make_unique<SumOperatorExtension>(nlf_grad, _linear_operator.Ptr(), nlf);
-
-  return *_sum_operator;
+  _jacobian.Reset(new SumOperatorExtension(nlf_grad, _linear_operator.Ptr(), nlf));
 }
 
 void
