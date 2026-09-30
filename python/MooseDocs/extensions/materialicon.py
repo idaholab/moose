@@ -10,6 +10,7 @@
 from ..base import components, LatexRenderer
 from ..tree import html, tokens, latex
 from . import command, core
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -46,13 +47,16 @@ class IconCommand(command.CommandComponent):
         settings["tight"] = (
             False,
             "Use the same font size and line height of the parent element.",
+            validation.boolean
         )
+
+        def validation_faicon(setting: str) -> str:
+            return setting
         settings["faicon"] = (
             None,
             "When the LaTeX renderer is used, this will override the "
             "supplied subcommand item. The name should exist in the "
-            "LaTeX fontawesome package.",
-        )
+            "LaTeX fontawesome package.", validation_faicon)
         return settings
 
     def createToken(self, parent, info, page, settings):
