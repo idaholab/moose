@@ -20,6 +20,11 @@ class FEProblemBase;
 #define registerActionComponent(app_name, component_name)                                          \
   registerMooseAction(app_name, component_name, "list_component")
 
+/// Register an ActionComponent under an alternate alias/name (quoted string) instead of the
+/// classname.
+#define registerActionComponentAliased(app_name, component_name, alias)                            \
+  registerMooseActionAliased(app_name, component_name, alias, "list_component")
+
 /**
  * Base class for components that are defined using an action
  */
