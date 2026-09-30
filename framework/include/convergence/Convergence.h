@@ -50,12 +50,14 @@ public:
   /**
    * Method that gets called before each iteration loop
    */
-  virtual void initialize() {}
+  virtual void preLoop() {}
 
   /**
-   * Method that gets called in each iteration before the solve
+   * Method that gets called before each iteration in a loop that this convergence object is
+   * checking. For example, for fixed-point convergence, this is called once per fixed-point
+   * iteration, before that iteration's sub-solve(s).
    */
-  virtual void preSolve() {}
+  virtual void preIteration() {}
 
   /**
    * Returns convergence status.

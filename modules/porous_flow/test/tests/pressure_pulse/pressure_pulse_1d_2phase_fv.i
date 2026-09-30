@@ -154,8 +154,8 @@
   [smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol'
-    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-12'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
+    petsc_options_value = 'gmres asm lu NONZERO 2'
   []
 []
 
@@ -164,6 +164,7 @@
   solve_type = Newton
   dt = 1E3
   end_time = 1E4
+  nl_abs_tol = 1E-12
 []
 
 [Postprocessors]

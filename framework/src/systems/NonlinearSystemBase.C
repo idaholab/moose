@@ -4301,7 +4301,7 @@ NonlinearSystemBase::preSolve()
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
 
-  convergence().preSolve();
+  convergence().preLoop();
 
   return true;
 }
