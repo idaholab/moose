@@ -14,7 +14,7 @@ from MooseDocs.base import components
 from MooseDocs.common import exceptions
 from MooseDocs.tree import tokens, html
 from . import core, command
-
+from ..common import setting_validation as validation
 LOG = logging.getLogger(__name__)
 
 PyClass = tokens.newToken("PyClass")
@@ -34,16 +34,19 @@ class PySyntax(object):
 
         def __init__(self, name, member):
             self.name = name
-            self.internal = self.name.startswith("__") and self.name.endswith("__")
+            self.internal = self.name.startswith(
+                "__") and self.name.endswith("__")
             self.private = (
                 (not self.internal)
                 and self.name.startswith("_")
                 and ("__" in self.name)
             )
             self.protected = (
-                (not self.private) and (not self.internal) and self.name.startswith("_")
+                (not self.private) and (
+                    not self.internal) and self.name.startswith("_")
             )
-            self.public = not any([self.internal, self.private, self.protected])
+            self.public = not any(
+                [self.internal, self.private, self.protected])
             self.function = inspect.isfunction(member)
             self.signature = (
                 re.sub(r"self[, ]*", "", str(inspect.signature(member)))
@@ -130,7 +133,8 @@ class PySyntax(object):
         if mod:
             object = getattr(mod, parts[-1])
             return (
-                object if inspect.isclass(object) or inspect.isfunction(object) else cls
+                object if inspect.isclass(
+                    object) or inspect.isfunction(object) else cls
             )
 
 
@@ -150,17 +154,27 @@ class PySyntaxCommandBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_name(setting: str) -> str:
+            return setting
         settings["name"] = (
             None,
             "The name python object/function to extract documentation.",
-        )
+            validation_name)
         settings["heading-level"] = (
             2,
             "The heading level to use for class documentation.",
+            validation.unsigned_integer
         )
-        settings["show-internal"] = (True, "Whether or not to show internal methods")
-        settings["show-private"] = (True, "Whether or not to show private methods")
-        settings["show-protected"] = (True, "Whether or not to show protected methods")
+        settings["show-internal"] = (True,
+                                     "Whether or not to show internal methods",
+                                     validation.boolean)
+        settings["show-private"] = (True,
+                                    "Whether or not to show private methods",
+                                    validation.boolean)
+        settings["show-protected"] = (True,
+                                      "Whether or not to show protected methods",
+                                      validation.boolean)
         return settings
 
     def _addDocumentation(self, parent, page, doc, settings, h_level, **kwargs):
@@ -218,11 +232,13 @@ class PySyntaxClassCommand(PySyntaxCommandBase):
         h_level = int(settings["heading-level"])
         obj = settings.get("name", None)
         if obj is None:
-            raise exceptions.MooseDocsException("The 'name' setting is required.")
+            raise exceptions.MooseDocsException(
+                "The 'name' setting is required.")
 
         doc = PySyntax(obj)
         if not doc.is_class:
-            raise exceptions.MooseDocsException("'%s' is not a python class.", obj)
+            raise exceptions.MooseDocsException(
+                "'%s' is not a python class.", obj)
 
         self._addClassDocumentation(
             parent, page, obj, doc, settings, h_level, public=True, protected=True
@@ -236,18 +252,20 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = PySyntaxCommandBase.defaultSettings()
-        settings["heading-level"] = (2, settings["heading-level"][1])
+        settings["heading-level"] = (2, settings["heading-level"][1], validation.unsigned_integer)
         return settings
 
     def createToken(self, parent, info, page, settings):
         h_level = int(settings["heading-level"])
         obj = settings.get("name", None)
         if obj is None:
-            raise exceptions.MooseDocsException("The 'name' setting is required.")
+            raise exceptions.MooseDocsException(
+                "The 'name' setting is required.")
 
         doc = PySyntax(obj)
         if not doc.is_function:
-            raise exceptions.MooseDocsException("'%s' is not a python function.", obj)
+            raise exceptions.MooseDocsException(
+                "'%s' is not a python function.", obj)
 
         self._addFunctionDocumentation(parent, page, doc, settings, h_level)
         return parent
