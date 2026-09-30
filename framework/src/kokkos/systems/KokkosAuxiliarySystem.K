@@ -73,7 +73,7 @@ AuxiliarySystem::buildKokkosAuxStages()
 }
 
 void
-AuxiliarySystem::kokkosCompute(ExecFlagType type)
+AuxiliarySystem::kokkosCompute(ExecFlagType type, int /*group*/)
 {
   TIME_SECTION("computeKokkosAuxKernel", 3);
 

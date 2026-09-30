@@ -108,7 +108,7 @@ public:
   virtual void compute(ExecFlagType type) override;
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void kokkosCompute(ExecFlagType type);
+  void kokkosCompute(ExecFlagType type, int group);
 
   /**
    * Group the active Kokkos auxiliary kernels of each execution flag into stages that can each be
