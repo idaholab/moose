@@ -86,13 +86,13 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     _roughnesses(this->template getParam<std::vector<MooseFunctorName>>("roughnesses").size()),
     _gravity(this->template getFunctor<GenericReal<is_ad>>("g"))
 {
-  auto & area_names = MooseBase::getParam<std::vector<MooseFunctorName>>("areas");
-  auto & perimeter_names = MooseBase::getParam<std::vector<MooseFunctorName>>("perimeters");
-  auto & length_names = MooseBase::getParam<std::vector<MooseFunctorName>>("lengths");
-  auto & alpha_names = MooseBase::getParam<std::vector<MooseFunctorName>>("alphas");
-  auto & forms_loss_names = MooseBase::getParam<std::vector<MooseFunctorName>>("forms_losses");
-  auto & dPp_names = MooseBase::getParam<std::vector<MooseFunctorName>>("pump_pressures");
-  auto & roughness_names = MooseBase::getParam<std::vector<MooseFunctorName>>("roughnesses");
+  const auto & area_names = MooseBase::getParam<std::vector<MooseFunctorName>>("areas");
+  const auto & perimeter_names = MooseBase::getParam<std::vector<MooseFunctorName>>("perimeters");
+  const auto & length_names = MooseBase::getParam<std::vector<MooseFunctorName>>("lengths");
+  const auto & alpha_names = MooseBase::getParam<std::vector<MooseFunctorName>>("alphas");
+  const auto & forms_loss_names = MooseBase::getParam<std::vector<MooseFunctorName>>("forms_losses");
+  const auto & dPp_names = MooseBase::getParam<std::vector<MooseFunctorName>>("pump_pressures");
+  const auto & roughness_names = MooseBase::getParam<std::vector<MooseFunctorName>>("roughnesses");
   if (_n_segments != area_names.size() || _n_segments != perimeter_names.size() ||
       _n_segments != length_names.size() || _n_segments != alpha_names.size() ||
       _n_segments != forms_loss_names.size() || _n_segments != dPp_names.size() ||
