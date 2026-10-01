@@ -10,8 +10,10 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "NonADFunctorInterface.h"
 #include "FaceCenteredMapFunctor.h"
 #include "SystemBase.h"
+#include "MooseLinearVariableFV.h"
 #include "NS.h"
 
 class LinearFVFluxKernel;
@@ -26,7 +28,7 @@ namespace FV
  * This class provides an interface for managing  conjugate heat transfer (CHT)
  * between fluid and solid domains.
  */
-class CHTHandler : public MooseObject
+class CHTHandler : public MooseObject, public NonADFunctorInterface
 {
 public:
   /// Constructor with initialization parameters
@@ -89,6 +91,12 @@ protected:
   /// The solid energy system
   std::vector<SystemBase *> _pm_radiation_systems;
 
+  /// The fluid-side temperature variable.
+  const MooseLinearVariableFVReal * _fluid_variable = nullptr;
+
+  /// The solid-side temperature variable.
+  const MooseLinearVariableFVReal * _solid_variable = nullptr;
+
   /// The names of the CHT boundaries
   std::vector<BoundaryName> _cht_boundary_names;
 
@@ -100,6 +108,9 @@ protected:
 
   /// Tolerance for heat flux at the CHT interfaces
   const Real _cht_heat_flux_tolerance;
+
+  /// Thermal resistance functors, one per CHT interface
+  std::vector<const Moose::Functor<Real> *> _thermal_resistance;
 
   /// The relaxation factors for flux fields for the CHT boundaries
   /// first index is solid/fluid second is the interface
@@ -138,10 +149,15 @@ protected:
   /// Integrated flux for the boundaries, first index is the boundary second is solid/fluid.
   std::vector<std::vector<Real>> _integrated_boundary_heat_flux;
 
-  /// Functors describing the heat flux on the conjugate heat transfer interfaces.
+  /// Functors describing the raw wall temperatures on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
   std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_temperature;
+
+  /// Functors describing the effective wall temperatures after applying thermal resistance.
+  /// Two functors per sideset, first is the temperature seen by the solid, second by the fluid.
+  std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
+      _boundary_effective_temperature;
 
 private:
   /// CHT fixed point iteration counter
