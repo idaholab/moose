@@ -6,17 +6,17 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 
-#include "KokkosDispatcher.h"
+#include "KokkosUserObjectWrapperRegistry.h"
 
 namespace Moose::Kokkos
 {
 
-DispatcherRegistry &
-DispatcherRegistry::getRegistry()
+UserObjectWrapperRegistry &
+UserObjectWrapperRegistry::getRegistry()
 {
-  static DispatcherRegistry * registry = nullptr;
+  static UserObjectWrapperRegistry * registry = nullptr;
   if (!registry)
-    registry = new DispatcherRegistry();
+    registry = new UserObjectWrapperRegistry();
   return *registry;
 }
 

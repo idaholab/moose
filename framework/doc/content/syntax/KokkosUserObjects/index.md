@@ -110,19 +110,97 @@ See the following example of `KokkosExtraIDIntegralVectorPostprocessor`, which i
 !listing framework/src/kokkos/vectorpostprocessors/KokkosExtraIDIntegralVectorPostprocessor.K id=kokkos-extra-id-vpp-source language=cpp
          caption=The `KokkosExtraIDIntegralVectorPostprocessor` source file.
 
-## User-defined APIs and Virtual Functions
+## Virtual User Objects id=virtual_user_objects
 
-While user objects are intended to embrace user-defined APIs, Kokkos-MOOSE user objects currently require GPU APIs to not rely on virtual dispatch.
-Namely, you should always retrieve your user objects in their concrete types if you intend to use your own GPU APIs.
-Using virtual functions on GPU has two prerequisites: enabling the relocatable device code (RDC) option and constructing objects on GPU.
-The RDC option is currently disabled in Kokkos-MOOSE due to the restrictions imposed by upstream packages (see [the discussions on this page](syntax/KokkosFunctions/index.md#kokkos_rdc)), and its resolution is being actively worked on.
-Even with the RDC option, however, the object vtables are populated with CPU function pointers as all objects in MOOSE are constructed on CPU.
-As a result, you still cannot call virtual functions of your user objects on GPU unless you directly construct them on GPU (see [this page](syntax/Kokkos/index.md#kokkos_crtp)).
+Kokkos-MOOSE user objects can provide dynamic polymorphism through `Moose::Kokkos::VirtualUserObject<Base>`.
+This allows a consuming Kokkos object to depend on a common user object base while selecting the concrete user object type from the input file.
+Unlike ordinary C++ virtual functions, the user object hook methods remain non-virtual methods on the host-constructed MOOSE objects.
+Kokkos-MOOSE generates the Kokkos virtual interface from the hook names registered for the base class.
 
-In order to realize virtual dispatch with your user objects, therefore, you need to implement a wrapper with virtual functions that can be easily constructed on GPU, and call your own APIs through the wrapper.
-This wrapper will hold the GPU copy of your user object in its concrete type and the virtual functions that call the corresponding user object functions statically.
-This approach is implemented in `Moose::Kokkos::Function` using a registry design pattern and can be found across framework source files such as [!file text=KokkosFunctionWrapper.h](include/kokkos/functions/KokkosFunctionWrapper.h) and [!file text=KokkosFunction.h](include/kokkos/functions/KokkosFunction.h), but it requires a deep understanding of dynamic polymorphism and GPU backends.
-Therefore, we plan to explore developing base classes for the wrapper that the users can easily derive from and providing programming guidelines, once the RDC option is in place.
+Virtual user objects are useful when several user objects implement the same application-specific API but the consuming object should not know their concrete types.
+Concrete typed access remains preferable when runtime polymorphism is unnecessary because it permits direct calls and compiler inlining.
+
+!alert warning
+Virtual Kokkos user objects are currently supported only by CPU execution backends.
+Calling `getVirtualKokkosUserObject()` in a build configured with GPU backends produces an error.
+Also see [this page](syntax/KokkosFunctions/index.md#kokkos_rdc).
+
+### Defining the Virtual Base
+
+The base class declares each hook as a public, `const`, `KOKKOS_FUNCTION` method.
+The declarations do not use the C++ `virtual` keyword and do not require definitions.
+After the complete class definition, `registerVirtualKokkosUserObjectBase()` registers the base and lists the hook names.
+The macro infers each complete signature from its declaration, so hooks may use different return types and argument lists.
+
+The following test base registers the `value()` and `combine()` hooks:
+
+!listing test/include/kokkos/userobjects/KokkosPolymorphicUserObjectBase.h
+         id=kokkos-virtual-user-object-base
+         caption=A virtual Kokkos user object base with two user-defined hooks.
+
+The base registration must remain in the header after the class definition.
+This makes the hook interface visible wherever a concrete implementation or a `VirtualUserObject` is instantiated.
+Hook names must be unique within the base because overloaded hook names cannot be identified by the registration macro.
+
+### Defining Concrete Implementations
+
+Each concrete user object derives from the registered base and defines every registered hook as a public, `const`, `KOKKOS_FUNCTION` method with exactly the signature declared by the base.
+The methods are ordinary non-virtual methods.
+The concrete type is registered with both its normal MOOSE registration macro and `registerVirtualKokkosUserObject(Derived, Base)` in its source file.
+The first argument identifies the concrete derived type and the second argument explicitly identifies its registered virtual base.
+This explicit relationship allows an intermediate class to be a concrete implementation of one virtual base while also serving as a virtual base for further derived classes.
+A concrete type can implement multiple registered bases in its inheritance chain by invoking `registerVirtualKokkosUserObject(Derived, Base)` once for each base.
+The registry uses both the concrete MOOSE type name and the requested base type, so each registration remains independent.
+
+For example, `KokkosQuadraticUserObject` derives from the intermediate `KokkosAffineUserObject`, which derives from `KokkosPolymorphicUserObjectBase`.
+The quadratic object is registered with both bases:
+
+```cpp
+registerVirtualKokkosUserObject(KokkosQuadraticUserObject, KokkosPolymorphicUserObjectBase);
+registerVirtualKokkosUserObject(KokkosQuadraticUserObject, KokkosAffineUserObject);
+```
+
+The affine implementation supplies both hooks as follows:
+
+!listing test/include/kokkos/userobjects/KokkosAffineUserObject.h
+         id=kokkos-virtual-user-object-affine-header
+         caption=An affine implementation of the virtual Kokkos user object interface.
+
+!listing test/src/kokkos/userobjects/KokkosAffineUserObject.K
+         id=kokkos-virtual-user-object-affine-source language=cpp
+         caption=Registration and construction of the affine implementation.
+
+The same base can have any number of registered concrete implementations.
+For example, the quadratic implementation provides different behavior through the same hook signatures:
+
+!listing test/include/kokkos/userobjects/KokkosQuadraticUserObject.h
+         id=kokkos-virtual-user-object-quadratic-header
+         caption=A quadratic implementation of the same virtual Kokkos user object interface.
+
+!listing test/src/kokkos/userobjects/KokkosQuadraticUserObject.K
+         id=kokkos-virtual-user-object-quadratic-source language=cpp
+         caption=Registration and construction of the quadratic implementation.
+
+### Acquiring and Calling a Virtual User Object
+
+A consuming Kokkos-MOOSE object stores the user object as `Moose::Kokkos::VirtualUserObject<Base>` and acquires it with `getVirtualKokkosUserObject<Base>()`.
+The returned object exposes the registered hook names directly, so device code calls `value()` and `combine()` rather than a generic call operator.
+
+The following auxiliary kernel stores two virtual user objects and calls both registered hooks from `computeValue()`:
+
+!listing test/include/kokkos/auxkernels/KokkosPolymorphicUserObjectAux.h
+         id=kokkos-virtual-user-object-aux-header
+         caption=A Kokkos auxiliary kernel that calls virtual user object hooks during Kokkos execution.
+
+!listing test/src/kokkos/auxkernels/KokkosPolymorphicUserObjectAux.K
+         id=kokkos-virtual-user-object-aux-source language=cpp
+         caption=Acquiring virtual user objects through user object parameters.
+
+The input file can then select different concrete types for each user object parameter without changing the consuming auxiliary kernel:
+
+!listing test/tests/kokkos/userobjects/polymorphic_wrapper/polymorphic_wrapper.i
+         id=kokkos-virtual-user-object-input
+         caption=Selecting affine and quadratic implementations of one virtual user object base.
 
 !syntax list /UserObjects objects=True actions=False subsystems=False
 
