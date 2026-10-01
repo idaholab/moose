@@ -19,7 +19,7 @@ is therefore
 \sum_f \frac{\phi_f}{\epsilon_P} U_{i,f} |S_f|.
 \end{equation}
 
-[PorousLinearWCNSFVMomentumFlux](PorousLinearWCNSFVMomentumFlux.md) applies the $1/\epsilon_P$
+[LinearPWCNSFVMomentumFlux](LinearPWCNSFVMomentumFlux.md) applies the $1/\epsilon_P$
 factor to each cell row. On a
 porous baffle where pressure-gradient reconstruction is one-sided, it also uses the local velocity
 state on each side instead of sharing an interpolated state across the jump.
