@@ -1,0 +1,28 @@
+[Tests]
+  design = 'NonlinearSystemBase.md'
+
+  [kokkos_auto_scaling_diagonal]
+    type = GoogleTest
+    unit_test = KokkosAutoScaling.Diagonal
+    requirement = 'The system shall allow Kokkos matrix to be scaled by maximum diagonal value to each variable.'
+    issues = '#33864'
+  []
+  [kokkos_auto_scaling_absolute_row_sum]
+    type = GoogleTest
+    unit_test = KokkosAutoScaling.AbsoluteRowSum
+    requirement = 'The system shall allow Kokkos matrix to be scaled by absolute row sum to each variable.'
+    issues = '#33864'
+  []
+  [kokkos_auto_scaling_separate_variables]
+    type = GoogleTest
+    unit_test = KokkosAutoScaling.SeparateVariables
+    requirement = 'The system shall allow Kokkos matrix to be scaled by maximum diagonal value to each variable separately.'
+    issues = '#33864'
+  []
+  [kokkos_auto_scaling_group_variables]
+    type = GoogleTest
+    unit_test = KokkosAutoScaling.GroupVariables
+    requirement = 'The system shall allow Kokkos matrix to be scaled by maximum diagonal value to each variable group.'
+    issues = '#33864'
+  []
+[]

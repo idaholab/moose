@@ -17,6 +17,8 @@
 #include "MooseMain.h"
 #include "MooseVariableBase.h"
 
+#include <utility>
+
 using MooseAppTestUtils::Args;
 
 namespace
@@ -33,6 +35,29 @@ computeScalingFactor(const bool include_off_diagonals)
   const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
   app->run();
   return app->getExecutioner()->feProblem().getVariable(0, "u").scalingFactor();
+}
+
+std::pair<Real, Real>
+computeTwoVariableScalingFactors(const bool group_variables)
+{
+  std::vector<std::string> arg_list = {"-i",
+                                       "files/KokkosAutoScalingTest/scaling.i",
+                                       "Executioner/off_diagonals_in_auto_scaling=false",
+                                       "Variables/v/family=LAGRANGE",
+                                       "NodalKernels/reaction_v/type=KokkosReactionNodalKernel",
+                                       "NodalKernels/reaction_v/variable=v",
+                                       "NodalKernels/reaction_v/coeff=12"};
+
+  if (group_variables)
+    arg_list.push_back("Executioner/scaling_group_variables=u v");
+
+  Args args(arg_list);
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  app->run();
+
+  const auto & fe_problem = app->getExecutioner()->feProblem();
+  return {fe_problem.getVariable(0, "u").scalingFactor(),
+          fe_problem.getVariable(0, "v").scalingFactor()};
 }
 }
 
@@ -55,6 +80,56 @@ TEST(KokkosAutoScaling, AbsoluteRowSum)
   // An interior row is (1 / h) * [-1 2 -1], whose absolute row sum is
   // (1 + 2 + 1) / h = 4 / h = 12.
   EXPECT_NEAR(computeScalingFactor(true), 1.0 / 12.0, 1e-12);
+}
+
+TEST(KokkosAutoScaling, SeparateVariables)
+{
+  // For u, the diffusion kernel gives
+  //
+  //        [ 3 -3  0  0]
+  //        [-3  6 -3  0]
+  //   Ju = [ 0 -3  6 -3].
+  //        [ 0  0 -3  3]
+  //
+  // The maximum diagonal is therefore 6.
+  //
+  // For v, KokkosReactionNodalKernel with coeff = 12 contributes directly
+  // to the diagonal at each node:
+  //
+  //        [12  0  0  0]
+  //        [ 0 12  0  0]
+  //   Jv = [ 0  0 12  0].
+  //        [ 0  0  0 12]
+  //
+  // The maximum diagonal is therefore 12.
+  const auto [u_factor, v_factor] = computeTwoVariableScalingFactors(false);
+
+  EXPECT_NEAR(u_factor, 1.0 / 6.0, 1e-12);
+  EXPECT_NEAR(v_factor, 1.0 / 12.0, 1e-12);
+}
+
+TEST(KokkosAutoScaling, GroupVariables)
+{
+  // Since u and v are uncoupled, the two-variable Jacobian has the block form
+  //
+  //       [Ju  0]
+  //   J = [     ],
+  //       [ 0 Jv]
+  //
+  // where
+  //
+  //        [ 3 -3  0  0]               [12  0  0  0]
+  //        [-3  6 -3  0]               [ 0 12  0  0]
+  //   Ju = [ 0 -3  6 -3],         Jv = [ 0  0 12  0].
+  //        [ 0  0 -3  3]               [ 0  0  0 12]
+  //
+  // Therefore max(diag(Ju)) = 6 and max(diag(Jv)) = 12.
+  // When u and v are in the same scaling group, both variables use
+  // the largest diagonal value in the group, max(6, 12) = 12.
+  const auto [u_factor, v_factor] = computeTwoVariableScalingFactors(true);
+
+  EXPECT_NEAR(u_factor, 1.0 / 12.0, 1e-12);
+  EXPECT_NEAR(v_factor, 1.0 / 12.0, 1e-12);
 }
 
 #endif // MOOSE_KOKKOS_ENABLED
