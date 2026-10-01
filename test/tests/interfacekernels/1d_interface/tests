@@ -185,6 +185,6 @@
                   "automatic differentiation interface kernel couples variables that belong to "
                   "different nonlinear systems."
     design = 'InterfaceKernels/index.md Problem/index.md'
-    issues = '#33795'
+    issues = '#33795 #33822'
   []
 []
