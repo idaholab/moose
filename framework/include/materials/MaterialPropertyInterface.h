@@ -444,6 +444,11 @@ public:
     return _material_property_dependencies;
   }
 
+  virtual void addMatPropDependencyById(const unsigned int prop_id)
+  {
+    _material_property_dependencies.insert(prop_id);
+  }
+
   /// resolve all optional properties
   virtual void resolveOptionalProperties();
 
