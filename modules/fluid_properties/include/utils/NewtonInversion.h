@@ -235,6 +235,17 @@ NewtonSolve2D(const T & f,
       Moose::out << "Current Jacobian:\n" << J << std::endl;
     }
 
+    // Check for NaNs in the Jacobian before proceeding
+    // NOTE: we cannot use std::max to detect a NaN reliably
+    // The solve with a NaN in the matrix would crash, not trigger the desired exception
+    for (const auto i : make_range(system_size))
+      for (const auto j : make_range(system_size))
+        if (isnan(J(i, j)))
+        {
+          assign_solution();
+          mooseException(caller_name + ": NaN or infinity detected in Jacobian in NewtonSolve2D");
+        }
+
     // Do some Jacobi (rowmax) preconditioning and check for an empty row
     int degenerate_row = -1;
     for (const auto i : make_range(system_size))
