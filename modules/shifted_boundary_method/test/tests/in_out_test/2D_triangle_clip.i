@@ -34,7 +34,7 @@
   [surface_builder]
     type = SBMSurfaceMeshBuilder
     check_watertightness = true
-    surface_mesh = surface
+    interface_mesh = surface
   []
   [in_out_test]
     type = PointInPolyhedronCheckUO
