@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "ComputeElemAuxBcsThread.h"
 #include "AuxiliarySystem.h"
+#include "Attributes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
