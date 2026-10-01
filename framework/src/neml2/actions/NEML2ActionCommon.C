@@ -60,6 +60,43 @@ NEML2ActionCommon::commonParams()
       "List of pairs of NEML2 variables to take derivatives (i.e., first in the pair w.r.t. the "
       "second in the pair).");
 
+  // Parameter derivative vector-Jacobian products
+  params.addParam<std::string>(
+      "parameter_vjp_variable",
+      "NEML2 output variable whose parameter derivatives are contracted with the cotangent "
+      "gathered from parameter_vjp_cotangent. Required when parameter_vjp_parameters is not "
+      "empty.");
+  params.addParam<MaterialPropertyName>(
+      "parameter_vjp_cotangent",
+      "MOOSE material property supplying the cotangent of parameter_vjp_variable, e.g. the adjoint "
+      "strain. Note that the gatherer created for this property writes under the name of the NEML2 "
+      "OUTPUT VARIABLE the cotangent is paired with (parameter_vjp_variable), not under the name "
+      "of a NEML2 input variable. Required when parameter_vjp_parameters is not empty.");
+  params.addParam<std::vector<std::string>>(
+      "parameter_vjp_parameters",
+      {},
+      "List of NEML2 model parameters whose derivative of parameter_vjp_variable is contracted "
+      "with the gathered cotangent. Each contraction is retrieved as a Real MOOSE material "
+      "property named 'vjp_<parameter_vjp_variable>_<parameter>'. Every listed model parameter "
+      "must be gathered from a MOOSE function so that it is batched per quadrature point.");
+
+  // Execution scheduling of the objects this action creates
+  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
+  execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
+  params.addParam<ExecFlagEnum>(
+      "execute_on",
+      execute_options,
+      "Execution flags for the NEML2 model executor and for the MOOSEToNEML2 gatherers it depends "
+      "on. Leave this unset unless the NEML2 model must also be evaluated outside the forward "
+      "solve, for example on an adjoint execution flag when computing parameter derivative "
+      "vector-Jacobian products.");
+  params.addParam<int>(
+      "execution_order_group",
+      0,
+      "Execution order group of the user objects created by this action. Execution order groups "
+      "are executed in increasing order, so a negative number runs the NEML2 executor ahead of "
+      "objects that consume its material properties in the default (0) group.");
+
   // Error checking, logging, etc
   params.addParam<std::vector<std::string>>(
       "skip_input_variables",
