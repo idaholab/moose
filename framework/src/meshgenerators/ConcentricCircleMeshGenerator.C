@@ -991,7 +991,7 @@ ConcentricCircleMeshGenerator::generate()
     const auto & subdomain_names = getParam<std::vector<SubdomainName>>("subdomain_name");
     if (subdomain_names.size() == subdomainIDs.size())
       for (const auto i : index_range(subdomain_names))
-        mesh->subdomain_name(subdomainIDs[i], subdomain_names[i], true);
+        mesh->set_subdomain_name(subdomainIDs[i], subdomain_names[i], true);
     else
       paramError("subdomain_name",
                  "Parameter (size: " + std::to_string(subdomain_names.size()) +
