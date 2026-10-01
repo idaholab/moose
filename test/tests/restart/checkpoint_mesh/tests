@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Restartable.md FileMeshGenerator.md'
+  design = 'Restartable.md FEProblem.md'
   issues = '#30008'
 
   [checkpoint_mesh_base]
@@ -13,7 +13,26 @@
     input = checkpoint_mesh_restart.i
     csvdiff = checkpoint_mesh_restart.csv
     prereq = checkpoint_mesh_base
-    requirement = 'The system shall construct the mesh for a checkpoint restart from the checkpoint file instead of the Mesh block in the restart input.'
+    requirement = 'The system shall construct the mesh for a checkpoint restart from the checkpoint file instead of the Mesh block in the restart input when requested.'
+  []
+
+  [checkpoint_mesh_lowerd_base]
+    type = RunApp
+    input = checkpoint_mesh_base.i
+    cli_args = 'Mesh/uniform_refine=0 Mesh/build_all_side_lowerd_mesh=true '
+               'Outputs/file_base=checkpoint_mesh_lowerd_base'
+    requirement = 'The system shall create a checkpoint restart file with a mesh that contains lower-dimensional side elements.'
+  []
+
+  [checkpoint_mesh_lowerd_restart]
+    type = CSVDiff
+    input = checkpoint_mesh_restart.i
+    cli_args = 'Mesh/uniform_refine=0 Mesh/build_all_side_lowerd_mesh=true '
+               'Problem/restart_file_base=checkpoint_mesh_lowerd_base_cp/LATEST '
+               'Outputs/file_base=checkpoint_mesh_lowerd_restart'
+    csvdiff = checkpoint_mesh_lowerd_restart.csv
+    prereq = checkpoint_mesh_lowerd_base
+    requirement = 'The system shall not rebuild lower-dimensional side elements on a mesh read from the checkpoint file for restart.'
   []
 
   [checkpoint_mesh_initial_adapt_base]
@@ -41,6 +60,14 @@
     input = checkpoint_mesh_parent_restart.i
     csvdiff = checkpoint_mesh_parent_restart_sub0.csv
     prereq = checkpoint_mesh_parent_base
-    requirement = 'The system shall still uniformly refine a rebuilt subapp mesh when the parent application is restarted from checkpoint.'
+    requirement = 'The system shall still uniformly refine a rebuilt subapp mesh when the parent application is restarted with its mesh from the checkpoint file.'
+  []
+
+  [checkpoint_mesh_without_restart_file]
+    type = RunException
+    input = checkpoint_mesh_initial_adapt_base.i
+    cli_args = 'Problem/restart_use_checkpoint_mesh=true'
+    expect_err = "Reading the mesh from a checkpoint requires 'restart_file_base'"
+    requirement = 'The system shall report an error if reading the restart mesh from a checkpoint is requested without a checkpoint to restart from.'
   []
 []

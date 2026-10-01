@@ -16,7 +16,6 @@
 #include "Factory.h"
 #include "AddMeshGeneratorAction.h"
 #include "CreateProblemAction.h"
-#include "MeshGeneratorSystem.h"
 
 #include <functional>
 #include <algorithm>
@@ -191,56 +190,35 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
 }
 
 std::string
-SetupMeshAction::checkpointRestartFileBase() const
+SetupMeshAction::checkpointMeshRestartFileBase() const
 {
   if (_app.isRecovering())
     return "";
 
+  // The Problem is created after the mesh, so read its parameters from the input directly
+  const auto read_params = [](const InputParameters & params)
+  {
+    if (!params.have_parameter<bool>("restart_use_checkpoint_mesh") ||
+        !params.get<bool>("restart_use_checkpoint_mesh") ||
+        !params.isParamValid("restart_file_base"))
+      return std::string();
+    return std::string(params.get<FileNameNoExtension>("restart_file_base"));
+  };
+
   std::string restart_file_base;
   if (const auto problem_action = _awh.getActionByTask<CreateProblemAction>("create_problem"))
-  {
-    const auto & params = problem_action->getObjectParams();
-    if (params.isParamValid("restart_file_base"))
-      restart_file_base = params.get<FileNameNoExtension>("restart_file_base");
-  }
+    restart_file_base = read_params(problem_action->getObjectParams());
   else
   {
     auto params = _factory.getValidParams("FEProblem");
     _app.builder().extractParams("Problem", params);
-    if (params.isParamValid("restart_file_base"))
-      restart_file_base = params.get<FileNameNoExtension>("restart_file_base");
+    restart_file_base = read_params(params);
   }
 
   if (restart_file_base.empty())
     return "";
 
   return MooseUtils::convertLatestCheckpoint(restart_file_base);
-}
-
-void
-SetupMeshAction::useCheckpointRestartMesh(const std::string & restart_file_base)
-{
-  _app.setRestart(true);
-  _app.setRestartRecoverFileBase(restart_file_base);
-
-  auto original_params = _moose_object_pars;
-  _type = "MeshGeneratorMesh";
-  _moose_object_pars = _factory.getValidParams(_type);
-  _moose_object_pars.applyParameters(original_params);
-}
-
-void
-SetupMeshAction::addCheckpointRestartMeshGenerator(const std::string & restart_file_base)
-{
-  auto file_mesh_generator_params = _factory.getValidParams("FileMeshGenerator");
-  file_mesh_generator_params.set<MooseMesh *>("_moose_mesh") = _mesh.get();
-  file_mesh_generator_params.set<MeshFileName>("file") =
-      restart_file_base + MooseApp::checkpointSuffix();
-  file_mesh_generator_params.set<bool>("skip_partitioning") = true;
-  file_mesh_generator_params.set<bool>("allow_renumbering") = false;
-  _app.addMeshGenerator("FileMeshGenerator",
-                        MeshGeneratorSystem::mainMeshGeneratorName(),
-                        file_mesh_generator_params);
 }
 
 std::string
@@ -294,10 +272,16 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
-    const auto restart_file_base =
-        _app.useMasterMesh() ? std::string() : checkpointRestartFileBase();
-    if (!restart_file_base.empty())
-      useCheckpointRestartMesh(restart_file_base);
+    // Read the mesh from the restart checkpoint the same way recovery does: mesh generators are
+    // still constructed so that their mesh meta-data can be restored, but they are not executed
+    if (!_app.useMasterMesh())
+      if (const auto restart_file_base = checkpointMeshRestartFileBase();
+          !restart_file_base.empty())
+      {
+        _app.setRestart(true);
+        _app.setRestartRecoverFileBase(restart_file_base);
+        _app.setRestartFromCheckpointMesh(true);
+      }
 
     const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
 
@@ -307,7 +291,7 @@ SetupMeshAction::act()
     // setup_mesh. We do this even when cloning the parent app mesh so that MeshGeneratorMesh-only
     // parameters set in this [Mesh] block (e.g. "data_driven_generator") are not reported unused,
     // even though the generators themselves are never built in that case.
-    if (!generator_actions.empty() && restart_file_base.empty())
+    if (!generator_actions.empty())
     {
       // Check for whether type has been set or whether for the default type (FileMesh) a file has
       // been provided
@@ -354,12 +338,10 @@ SetupMeshAction::act()
     else
     {
       // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
-      if (_use_split && restart_file_base.empty())
+      if (_use_split)
         _type = modifyParamsForUseSplit(_moose_object_pars);
 
       _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
-      if (!restart_file_base.empty())
-        addCheckpointRestartMeshGenerator(restart_file_base);
     }
   }
 
@@ -373,9 +355,11 @@ SetupMeshAction::act()
       // conditions are met:
       // 1. We have mesh generators
       // 2. We are not using the pre-split mesh
-      // 3. We are not: recovering and we are the master application
+      // 3. We are not: recovering/restarting and we are the master application
+      // 4. We are not reading the mesh from the restart checkpoint
       if (!_app.getMeshGeneratorNames().empty() && !_use_split &&
-          !(_app.isRecovering() && _app.isUltimateMaster()))
+          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()) &&
+          !_app.isRestartingFromCheckpointMesh())
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();
         auto mesh_base =

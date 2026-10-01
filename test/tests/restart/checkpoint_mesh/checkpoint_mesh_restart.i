@@ -44,6 +44,7 @@
 [Problem]
   solve = false
   restart_file_base = checkpoint_mesh_base_cp/LATEST
+  restart_use_checkpoint_mesh = true
 []
 
 [Executioner]

@@ -7,6 +7,7 @@
 [Problem]
   solve = false
   restart_file_base = checkpoint_mesh_parent_base_cp/0001
+  restart_use_checkpoint_mesh = true
 []
 
 [Executioner]
