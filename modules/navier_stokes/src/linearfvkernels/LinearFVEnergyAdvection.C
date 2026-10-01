@@ -23,7 +23,10 @@ LinearFVEnergyAdvection::validParams()
                              "override what quantity is advected, but the default is temperature.");
   MooseEnum advected_quantity("enthalpy temperature", "enthalpy");
   params.addParam<MooseEnum>("advected_quantity", advected_quantity, "The advected quantity");
-  params.addParam<Real>("cp", "Constant specific heat value");
+  params.addParam<MooseFunctorName>(
+      "cp",
+      "Specific heat, only used when advecting the temperature. May be a constant or a "
+      "functor, e.g. the specific heat of a mixture.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -34,7 +37,8 @@ LinearFVEnergyAdvection::validParams()
 LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params),
     _advected_quantity(getParam<MooseEnum>("advected_quantity").getEnum<AdvectedQuantityEnum>()),
-    _cp(isParamValid("cp") ? getParam<Real>("cp") : 1.0),
+    _cp(isParamValid("cp") ? &getFunctor<Real>("cp") : nullptr),
+    _face_cp(1.0),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0)
@@ -51,13 +55,13 @@ LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
 Real
 LinearFVEnergyAdvection::computeElemMatrixContribution()
 {
-  return _cp * _advected_interp_coeffs.first * _face_mass_flux * _current_face_area;
+  return _face_cp * _advected_interp_coeffs.first * _face_mass_flux * _current_face_area;
 }
 
 Real
 LinearFVEnergyAdvection::computeNeighborMatrixContribution()
 {
-  return _cp * _advected_interp_coeffs.second * _face_mass_flux * _current_face_area;
+  return _face_cp * _advected_interp_coeffs.second * _face_mass_flux * _current_face_area;
 }
 
 Real
@@ -83,7 +87,7 @@ LinearFVEnergyAdvection::computeBoundaryMatrixContribution(const LinearFVBoundar
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return _cp * boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
+  return _face_cp * boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
 }
 
 Real
@@ -96,7 +100,7 @@ LinearFVEnergyAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCo
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -_cp * boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
+  return -_face_cp * boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
 }
 
 void
@@ -112,4 +116,14 @@ LinearFVEnergyAdvection::setupFaceData(const FaceInfo * face_info)
   // side terms
   _advected_interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+
+  // The specific heat is evaluated from the previous iterate's fields, so the equation stays
+  // linear in the advected variable even when it is a functor such as a mixture specific heat
+  if (_cp)
+  {
+    const bool on_boundary = Moose::FV::onBoundary(*this, *face_info);
+    const auto face_arg =
+        on_boundary ? singleSidedFaceArg(face_info) : makeCDFace(*_current_face_info);
+    _face_cp = (*_cp)(face_arg, determineState());
+  }
 }

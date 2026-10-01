@@ -304,6 +304,7 @@ private:
   virtual GradientType evaluateGradient(const FaceArg & face,
                                         const StateArg &) const override final;
   virtual DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
+  virtual DotType evaluateDot(const FaceArg & face, const StateArg &) const override final;
 
   /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
   /// because the solution might not exist at the time that this variable is constructed, so we
@@ -604,6 +605,9 @@ MooseLinearVariableFV<OutputType>::adError() const
 // Declare all the specializations, as the template specialization declarations below must know
 template <>
 ADReal MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem, const StateArg & state) const;
+
+template <>
+ADReal MooseLinearVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state) const;
 
 // Prevent implicit instantiation in other translation units where these classes are used
 extern template class MooseLinearVariableFV<Real>;
