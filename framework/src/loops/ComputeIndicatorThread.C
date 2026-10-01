@@ -57,7 +57,6 @@ ComputeIndicatorThread::subdomainChanged()
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _indicator_whs.updateVariableDependency(needed_moose_vars, _tid);
   _internal_side_indicators.updateVariableDependency(needed_moose_vars, _tid);
-  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 
   // Update variable coupleable vector tags
   std::set<TagID> needed_var_vector_tags;
@@ -76,9 +75,14 @@ ComputeIndicatorThread::subdomainChanged()
   // Only prepare (and therefore reinit) materials if an indicator actually consumes a material
   // property. Otherwise skip the material system entirely to avoid recomputing the whole stack.
   if (!needed_mat_props.empty())
-    _fe_problem.resolveMaterialDependencies(needed_mat_props, _subdomain, _tid);
+  {
+    _fe_problem.resolveMaterialDependencies(needed_moose_vars, needed_mat_props, _subdomain, _tid);
+    _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  }
   else
     _fe_problem.clearActiveMaterialProperties(_tid);
+
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 
 void
