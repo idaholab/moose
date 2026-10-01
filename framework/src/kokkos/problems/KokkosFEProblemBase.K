@@ -406,7 +406,7 @@ FEProblemBase::initKokkos()
       // FV kernels write through Kokkos::System; FE/QP kernels read and write
       // through FESystem; shared device pointers keep them consistent.
       _kokkos_systems.emplace({sys_num}, sys);
-      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num], sys);
+      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num]);
     }
     else
       // Pure FE/QP (or FE/QP + scalar): FESystem inherits Kokkos::System, so a standalone
