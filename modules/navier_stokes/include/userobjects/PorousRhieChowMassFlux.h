@@ -75,9 +75,6 @@ protected:
   /// Whether the face is governed by one of the configured pressure-jump models.
   bool isBaffleFace(const FaceInfo & fi) const override;
 
-  /// Whether flux-based cell-velocity reconstruction enforces zero normal flux on this face.
-  bool isReconstructionZeroFluxFace(const FaceInfo & fi) const override;
-
   /// Multiply a pressure-system vector pointwise by the cached cell porosity.
   void applyCellPorosityScaling(NumericVector<Number> & vec) const override;
 
@@ -93,9 +90,6 @@ private:
 
   /// Sidesets using one-term pressure-gradient reconstruction.
   std::unordered_set<BoundaryID> _pressure_gradient_limiter_ids;
-
-  /// Sidesets enforcing zero normal flux in flux-based cell-velocity reconstruction.
-  std::unordered_set<BoundaryID> _reconstruction_zero_flux_boundary_ids;
 
   /// Pressure-jump models with mutually disjoint boundary sets.
   std::vector<const PressureJumpModel *> _pressure_jump_models;

@@ -87,7 +87,6 @@ q = 20000000
     pressure_jump_models = pressure_jump
     pressure_gradient_limiter = 'baffle baffle2'
     pressure_jump_relaxation = 0.01
-    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
   []
 []
 

@@ -34,11 +34,6 @@ PorousRhieChowMassFlux::validParams()
                                     "0.0<pressure_jump_relaxation<=1.0",
                                     "Under-relaxation factor for pressure jump updates.");
   params.addParam<std::vector<BoundaryName>>(
-      "flux_velocity_reconstruction_zero_flux_sidesets",
-      {},
-      "Boundary sidesets where the flux-based cell velocity reconstruction enforces zero normal "
-      "velocity (symmetry/slip).");
-  params.addParam<std::vector<BoundaryName>>(
       "pressure_gradient_limiter",
       {},
       "Sidesets on which the pressure gradient uses a one-term expansion.");
@@ -55,12 +50,8 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
             "baffle_jump", _moose_mesh, blockIDs(), "baffle_jump"))
 {
   const auto & limiter_names = getParam<std::vector<BoundaryName>>("pressure_gradient_limiter");
-  const auto & zero_flux_names =
-      getParam<std::vector<BoundaryName>>("flux_velocity_reconstruction_zero_flux_sidesets");
   const auto limiter_ids = _moose_mesh.getBoundaryIDs(limiter_names);
   _pressure_gradient_limiter_ids.insert(limiter_ids.begin(), limiter_ids.end());
-  const auto zero_flux_ids = _moose_mesh.getBoundaryIDs(zero_flux_names);
-  _reconstruction_zero_flux_boundary_ids.insert(zero_flux_ids.begin(), zero_flux_ids.end());
 
   std::unordered_set<BoundaryID> pressure_jump_boundary_ids;
   for (const auto & model_name : getParam<std::vector<UserObjectName>>("pressure_jump_models"))
@@ -202,19 +193,6 @@ PorousRhieChowMassFlux::isPressureGradientLimited(const FaceInfo & fi) const
 
   for (const auto & bnd_id : fi.boundaryIDs())
     if (_pressure_gradient_limiter_ids.count(bnd_id))
-      return true;
-
-  return false;
-}
-
-bool
-PorousRhieChowMassFlux::isReconstructionZeroFluxFace(const FaceInfo & fi) const
-{
-  if (_reconstruction_zero_flux_boundary_ids.empty())
-    return false;
-
-  for (const auto & bnd_id : fi.boundaryIDs())
-    if (_reconstruction_zero_flux_boundary_ids.count(bnd_id))
       return true;
 
   return false;

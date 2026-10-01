@@ -202,8 +202,6 @@ advected_interp_method = 'upwind'
     pressure_projection_method = consistent
     pressure_jump_models = pressure_jump
     pressure_jump_relaxation = 0.1
-    flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_clean top_clean bottom_porous top_porous'
-
   []
 []
 

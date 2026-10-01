@@ -107,11 +107,6 @@ public:
   /// Whether reconstruction should use the current cell's velocity gradient on this face.
   virtual bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
 
-  /// Whether the reconstructed face-normal quantity should be forced to zero on this
-  /// (necessarily boundary) face, e.g. because the raw corrected flux is not physically
-  /// meaningful there (edge of the Rhie-Chow block restriction) or is user-asserted to be zero.
-  virtual bool isReconstructionZeroFluxFace(const FaceInfo & fi) const;
-
   /// Whether a face is a porous pressure baffle.
   bool faceIsBaffle(const FaceInfo & fi) const { return isBaffleFace(fi); }
 

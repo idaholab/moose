@@ -1285,12 +1285,6 @@ RhieChowMassFlux::applyCellPorosityScaling(NumericVector<Number> & /*vec*/) cons
 }
 
 bool
-RhieChowMassFlux::isReconstructionZeroFluxFace(const FaceInfo &) const
-{
-  return false;
-}
-
-bool
 RhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo &) const
 {
   return false;
