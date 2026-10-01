@@ -306,8 +306,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
                                                   NonlinearSystemBase & system,
                                                   const Real relaxation_factor,
                                                   libMesh::SolverConfiguration & solver_config,
-                                                  const Real absolute_tol,
-                                                  const Real field_relaxation)
+                                                  const Real absolute_tol)
 {
   _problem.setCurrentNonlinearSystem(system_num);
 
@@ -359,13 +358,6 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   // Solve the system and update current local solution
   auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
   ni_system.update();
-
-  if (field_relaxation != 1.0)
-  {
-    auto & old_local_solution = *system.solutionPreviousNewton();
-    NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
-    old_local_solution = current_local_solution;
-  }
 
   if (_print_fields)
   {
@@ -425,14 +417,6 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 
   auto its_res_pair = se_solver.solve(mat, mat, solution, rhs);
   se_system.update();
-
-  if (_solid_energy_field_relaxation != 1.0)
-  {
-    auto & old_local_solution = *_solid_energy_system->solutionPreviousNewton();
-    NS::FV::relaxSolutionUpdate(
-        current_local_solution, old_local_solution, _solid_energy_field_relaxation);
-    old_local_solution = current_local_solution;
-  }
 
   if (_print_fields)
   {
@@ -579,8 +563,7 @@ SIMPLESolveNonlinearAssembly::solve()
                                                              *_energy_system,
                                                              _energy_equation_relaxation,
                                                              _energy_linear_control,
-                                                             _energy_l_abs_tol,
-                                                             _energy_field_relaxation);
+                                                             _energy_l_abs_tol);
 
       if (_has_solid_energy_system)
       {

@@ -23,7 +23,6 @@ public:
 
   void addMatrixContribution() override;
 
-  void setupFaceData(const FaceInfo * face_info) override;
   Real computeElemMatrixContribution() override;
   Real computeNeighborMatrixContribution() override;
   Real computeElemRightHandSideContribution() override;
@@ -37,9 +36,5 @@ private:
   bool isInternalBaffleFace() const;
   bool needsInternalBaffleAdvectionCorrection() const;
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
-
-  /// Whether to include porosity outside the divergence in the advection term
-  const bool _porosity_outside_divergence;
-  /// Whether to force a one-sided velocity break in the advection term on internal baffle faces
-  const bool _use_baffle_velocity_break;
+  Real inversePorosity(bool elem_side) const;
 };

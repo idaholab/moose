@@ -9,27 +9,31 @@
 
 #pragma once
 
-#include "LinearFVAnisotropicDiffusion.h"
+#include "LinearFVPressureCorrectionDiffusion.h"
 
 class RhieChowMassFlux;
+class FVReconstructedPressureGradient;
 
 /**
  * Diffusion kernel that adds a per-face jump contribution to the RHS, used to
  * enforce porous baffle pressure jumps.
  */
-class LinearFVAnisotropicDiffusionJump : public LinearFVAnisotropicDiffusion
+class LinearFVAnisotropicDiffusionJump : public LinearFVPressureCorrectionDiffusion
 {
 public:
   static InputParameters validParams();
   LinearFVAnisotropicDiffusionJump(const InputParameters & params);
 
-  virtual Real computeElemRightHandSideContribution() override;
-  virtual Real computeNeighborRightHandSideContribution() override;
+  Real computeElemMatrixContribution() override;
+  Real computeNeighborMatrixContribution() override;
+  Real computeElemRightHandSideContribution() override;
+  Real computeNeighborRightHandSideContribution() override;
 
 protected:
-  /// Compute the internal-face RHS using jump-corrected pressure gradients
-  Real computeJumpAwareInternalFluxRHSContribution();
+  /// Compute the baffle transmissibility from the lagged two-term pressure expansion.
+  Real computeJumpAwareFluxMatrixContribution();
 
   const RhieChowMassFlux & _rc_uo;
-  const bool _debug_baffle_jump;
+  const FVReconstructedPressureGradient * const _reconstructed_pressure_gradient_method;
+  const bool _use_two_term_pressure_expansion;
 };

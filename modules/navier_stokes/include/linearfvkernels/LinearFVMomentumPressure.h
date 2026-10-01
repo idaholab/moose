@@ -58,4 +58,7 @@ protected:
 
   /// Pressure gradient field used by this kernel.
   const LinearFVGradientReader & _pressure_gradient_field;
+
+  /// Porosity multiplying the pressure-gradient contribution.
+  const Moose::Functor<Real> & _porosity;
 };

@@ -97,8 +97,26 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
-  /// Whether flux-based velocity reconstruction is enabled
-  virtual bool useFluxVelocityReconstruction() const { return false; }
+  /// Get porosity on one side of a face.
+  virtual Real
+  getFaceSidePorosity(const FaceInfo & fi, bool elem_side, const Moose::StateArg & time) const;
+
+  /// Get the signed pressure jump seen from one side of a baffle face.
+  virtual Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
+
+  /// Whether reconstruction should use the current cell's velocity gradient on this face.
+  virtual bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
+
+  /// Whether the reconstructed face-normal quantity should be forced to zero on this
+  /// (necessarily boundary) face, e.g. because the raw corrected flux is not physically
+  /// meaningful there (edge of the Rhie-Chow block restriction) or is user-asserted to be zero.
+  virtual bool isReconstructionZeroFluxFace(const FaceInfo & fi) const;
+
+  /// Whether a face is a porous pressure baffle.
+  bool faceIsBaffle(const FaceInfo & fi) const { return isBaffleFace(fi); }
+
+  /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
+  Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -111,7 +129,7 @@ public:
   /// Initialize the coupling fields (HbyA and Ainv)
   virtual void initCouplingField();
   /// Update the values of the face velocities in the containers
-  void computeFaceMassFlux();
+  virtual void computeFaceMassFlux();
 
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
@@ -148,9 +166,6 @@ public:
   virtual void execute() override {}
   virtual void finalize() override {}
   virtual void initialSetup() override;
-
-  /// Recompute corrected pressure gradients (dispatches to derived implementation)
-  void recomputeCorrectedPressureGradient();
 
   /**
    * Prepare reconstructed-gradient state once per attempted time step. Accepted coupling feedback
@@ -193,9 +208,6 @@ protected:
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
 
-  /// Store pressure-gradient face flux values (no-op in base class)
-  virtual void storePressureGradientFlux(const FaceInfo & fi, Real p_grad_flux);
-
   /// Compute the pressure-gradient flux contribution for a single face
   Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
 
@@ -205,34 +217,16 @@ protected:
   /// Update baffle jump values based on current face mass fluxes
   virtual void updateBaffleJumps();
 
-  /// Compute corrected pressure gradient values (Gauss) with baffle jumps
-  virtual void computeCorrectedPressureGradient();
-
   /// Check whether a face is a pressure baffle face
   virtual bool isBaffleFace(const FaceInfo & fi) const;
 
-  /// Determine whether the FaceInfo elem side is the baffle owner side
-  virtual bool elemIsBaffleOwner(const FaceInfo & fi) const;
-
-  /// Check whether a face should be limited for pressure gradient construction
-  virtual bool isPressureGradientLimited(const FaceInfo & fi) const;
-
   /// Apply porosity scaling to a cell-based vector (no-op for non-porous cases)
   virtual void applyCellPorosityScaling(NumericVector<Number> & vec) const;
-
-  /// Whether to use harmonic interpolation for pressure-coupling coefficients
-  virtual bool useHarmonicAinvInterp() const { return false; }
-
-  /// Whether to emit baffle debug output
-  virtual bool debugBaffle() const { return false; }
 
   /// Populate the face values of the H/A and 1/A fields
   void
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
-
-  /// Update face superficial velocities from the current superficial mass flux
-  void updateFaceVelocityFromMassFlux();
 
   /// Get the prescribed velocity value on a Dirichlet boundary face
   Real velocityBoundaryValue(unsigned int component,
@@ -285,10 +279,6 @@ protected:
    * for the momentum equation.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
-
-  /// Face superficial velocity reconstructed from the superficial mass flux
-  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
-      _face_velocity;
 
   /**
    * We hold on to the cell-based 1/A vectors so that we can easily reconstruct the
@@ -352,7 +342,6 @@ protected:
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
 
-private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;

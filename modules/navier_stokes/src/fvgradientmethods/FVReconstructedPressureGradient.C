@@ -372,10 +372,12 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 {
   const auto dimension = rc.dimension();
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
-  // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
+  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a face where
+  // reconstruction is one-sided (e.g. a baffle with a porosity jump), use the owned cell's
   // gradient (zero Hessian approximation). Otherwise interpolate the two lagged cell gradients to
   // the face.
-  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
+  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
+      rc.faceUsesOneSidedReconstruction(fi))
     return elem_gradient;
 
   const auto & velocity = rc.velocityVariable(velocity_component);
@@ -416,16 +418,24 @@ FVReconstructedPressureGradient::assembleFaceProjection(
   if (surface_area == 0.0)
     return;
 
-  const auto pressure_face_type =
-      fi->faceType({_pressure_variable_number, _pressure_system->number()});
-  // On one-sided pressure faces, RhieChow stores the flux outward from the pressure cell. On
-  // two-sided faces, it stores the flux relative to FaceInfo::normal(), so only the neighbor cell
-  // needs the opposite orientation.
-  const Real normal_alignment =
-      pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
-  const Real face_flux = rc.getVolumetricFaceFlux(*fi);
-  mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
-  Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
+  // A user-asserted or block-restriction boundary face has no physically meaningful corrected
+  // flux to read; force the reconstructed quantity to zero there instead.
+  Real face_normal_reconstructed_quantity;
+  if (!fi->neighborPtr() && rc.isReconstructionZeroFluxFace(*fi))
+    face_normal_reconstructed_quantity = 0.0;
+  else
+  {
+    const auto pressure_face_type =
+        fi->faceType({_pressure_variable_number, _pressure_system->number()});
+    // On one-sided pressure faces, RhieChow stores the flux outward from the pressure cell. On
+    // two-sided faces, it stores the flux relative to FaceInfo::normal(), so only the neighbor
+    // cell needs the opposite orientation.
+    const Real normal_alignment =
+        pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
+    const Real face_flux = rc.getVolumetricFaceFlux(*fi);
+    mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
+    face_normal_reconstructed_quantity = face_flux * normal_alignment;
+  }
 
   // First-order expansion at the face gives
   //   u_f.n_f = u_P.n_f + ((grad u)_f d_Pf).n_f.

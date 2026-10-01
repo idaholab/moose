@@ -53,8 +53,7 @@ protected:
                                                     NonlinearSystemBase & system,
                                                     const Real relaxation_factor,
                                                     libMesh::SolverConfiguration & solver_config,
-                                                    const Real abs_tol,
-                                                    const Real field_relaxation = 1.0);
+                                                    const Real abs_tol);
 
   /// Solve the solid energy conservation equation.
   /// @return The normalized residual norm of the solid equation.
