@@ -258,14 +258,14 @@ advected_interp_method = 'upwind'
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressure
+    type = LinearPWCNSFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
     porosity = porosity
     pressure = pressure
   []
   [v_pressure]
-    type = LinearFVMomentumPressure
+    type = LinearPWCNSFVMomentumPressure
     variable = superficial_v
     momentum_component = 'y'
     porosity = porosity

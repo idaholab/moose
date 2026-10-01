@@ -47,9 +47,9 @@ reversible term uses side densities or a common interpolated face density. The
 [LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md) inserts the
 relaxed jump into the pressure-correction equation. The same jump-aware operator is then used to
 recompute the Rhie-Chow face flux, while
-[LinearFVMomentumPressure](LinearFVMomentumPressure.md) uses the corresponding reconstructed
-pressure gradient in the next momentum predictor. This keeps the pressure solve, face flux, and
-cell momentum equation on one discrete definition of the interface jump.
+[LinearPWCNSFVMomentumPressure](LinearPWCNSFVMomentumPressure.md) uses the corresponding
+reconstructed pressure gradient in the next momentum predictor. This keeps the pressure solve,
+face flux, and cell momentum equation on one discrete definition of the interface jump.
 
 The tested setup below shows the porous Rhie-Chow object and the coupled pressure and momentum
 kernels:
