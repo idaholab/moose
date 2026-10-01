@@ -181,10 +181,22 @@
     input = 'ad_multisystem.i'
     run_sim = True
     cli_args = '-u_sys_snes_test_jacobian -v_sys_snes_test_jacobian'
-    requirement = "The system shall compute correct Jacobians for both nonlinear systems when an "
-                  "automatic differentiation interface kernel couples variables that belong to "
-                  "different nonlinear systems."
+    requirement = "The system shall limit each nonlinear system's kernel coverage check to blocks "
+                  "where that system has field variables and shall compute correct Jacobians for "
+                  "both systems when an automatic differentiation interface kernel couples "
+                  "variables belonging to different nonlinear systems."
     design = 'InterfaceKernels/index.md Problem/index.md'
-    issues = '#33795'
+    issues = '#33795 #33822'
+  []
+
+  [ad_multisystem_missing_kernel_coverage]
+    type = RunException
+    input = 'ad_multisystem.i'
+    cli_args = 'Kernels/diff_v/enable=false Outputs/exodus=false'
+    expect_err = "The following block\(s\) lack an active kernel:"
+    requirement = "The system shall report an error when a nonlinear system lacks an active "
+                  "kernel on a block containing one of its field variables."
+    design = 'Problem/index.md'
+    issues = '#33822'
   []
 []
