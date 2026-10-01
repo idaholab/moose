@@ -27,7 +27,7 @@ def boolean(setting: str) -> bool:
     if setting.lower() == 'false':
         return False
     raise MooseDocsException(f"Unable to parse provided input '{
-                             setting}' as a bool.")
+                             setting}' as a bool.\nPlease provide 'true' of 'false'.")
 
 
 def unsigned_integer(setting: str) -> int:
@@ -59,7 +59,7 @@ def unsigned_integer(setting: str) -> int:
 
     if value < 0:
         raise MooseDocsException(
-            f"Expected an unsigned int and a negative value '{value}' was provided")
+            f"Expected an unsigned int and a negative value '{value}' was provided.")
 
     return value
 
@@ -114,6 +114,6 @@ def number_of_columns(setting: str) -> int:
 
     if value < 1.0 or value > 12.0:
         raise MooseDocsException(f"The number of columns provided '{
-                                 value}' but be in the range [1,12].")
+                                 value}' is not in the range [1,12].")
 
     return value
