@@ -239,7 +239,7 @@ class GraphHistogram(command.CommandComponent):
         settings["ylabel"] = ("Probability", "y-axis label", validation_ylabel)
 
         settings["legend"] = (
-            "legend", True, "True|False toggle for legend.", validation.boolean)
+            True, "True|False toggle for legend.", validation.boolean)
 
         settings.update(floats.caption_settings())
 
