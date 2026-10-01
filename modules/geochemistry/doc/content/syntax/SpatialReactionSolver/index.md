@@ -8,3 +8,7 @@ An simple example input file is:
 
 !listing modules/geochemistry/test/tests/spatial_reactor/spatial_1.i
 
+The reactor may be restricted to part of the mesh using the `block` parameter, in which case the AuxVariables and AuxKernels added by this Action are restricted to the same blocks.  See [GeochemistrySpatialReactor](GeochemistrySpatialReactor.md#block-restriction) for details, including how to give different blocks different chemistry.
+
+!listing modules/geochemistry/test/tests/spatial_reactor/spatial_block.i block=SpatialReactionSolver
+
