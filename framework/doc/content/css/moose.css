@@ -833,6 +833,60 @@ footer.page-footer {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
+/* Size each slide to its content rather than Materialize's 100% of the carousel, so that
+   carousel.js can set the carousel height from the tallest slide (measuring a 100%-height
+   slide would just return the carousel height). The column layout centers the image
+   horizontally with any caption and block content beneath it. */
+.carousel.carousel-slider.moose-slideshow .carousel-item {
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* Box as wide as the slide image, so an overlay is bounded by the image. */
+.moose-slide {
+    position: relative;
+    max-width: 100%;
+}
+/* MOOSE wraps a slide image in a <picture>, so Materialize's '.carousel-item>img' rule
+   (which targets a direct <img> child) never sizes it. 'display: block' removes the inline
+   baseline gap beneath the image, which would otherwise show under an overlay. */
+.moose-slideshow .carousel-item img {
+    display: block;
+    max-width: 100%;
+}
+.moose-slide-content {
+    width: 100%;
+    text-align: center;
+}
+/* The drop shadow above is for text over an image; beneath the image it only blurs. */
+.moose-slide-content .carousel-caption {
+    text-shadow: none;
+}
+/* Optional overlay of the caption and block content on the bottom of the slide image. */
+.moose-slide-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2rem 1rem 1rem;
+    color: #fff;
+    /* Darken the bottom of the image so the text stays legible over a busy image. */
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+}
+.moose-slide-overlay .carousel-caption {
+    text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
+}
+/* The indicator dots sit beneath the slides, on the page background rather than over an
+   image, so Materialize's white dots would be invisible on a light page. */
+.moose-slideshow .indicators .indicator-item {
+    background-color: var(--gray);
+}
+.moose-slideshow .indicators .indicator-item.active {
+    background-color: var(--inl-blue);
+}
+
 
 li p {
   margin-top: 0;
