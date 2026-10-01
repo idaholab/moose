@@ -317,9 +317,9 @@ void
 CHTHandler::setupConjugateHeatTransferContainers()
 {
   // We already error in initialSetup if we have more variables
-  const auto * fluid_variable =
+  _fluid_variable =
       dynamic_cast<const MooseLinearVariableFVReal *>(&_energy_system->getVariable(0, 0));
-  const auto * solid_variable =
+  _solid_variable =
       dynamic_cast<const MooseLinearVariableFVReal *>(&_solid_energy_system->getVariable(0, 0));
 
   _cht_face_info.clear();
@@ -342,10 +342,10 @@ CHTHandler::setupConjugateHeatTransferContainers()
     // We do this because the coupling functors should be evaluated on both sides
     // of the interface and there are rigorous checks if the functors don't support a subdomain
     std::set<SubdomainID> combined_set;
-    std::set_union(solid_variable->blockIDs().begin(),
-                   solid_variable->blockIDs().end(),
-                   fluid_variable->blockIDs().begin(),
-                   fluid_variable->blockIDs().end(),
+    std::set_union(_solid_variable->blockIDs().begin(),
+                   _solid_variable->blockIDs().end(),
+                   _fluid_variable->blockIDs().begin(),
+                   _fluid_variable->blockIDs().end(),
                    std::inserter(combined_set, combined_set.begin()));
 
     // We instantiate the coupling fuctors for heat flux and temperature
@@ -398,27 +398,29 @@ CHTHandler::setupConjugateHeatTransferContainers()
 void
 CHTHandler::initializeCHTCouplingFields()
 {
+  // We seed the coupling fields directly from the current solution field on each side of the
+  // interface, using the raw cell value adjacent to the face.
+
   for (const auto bd_index : index_range(_cht_boundary_ids))
   {
     const auto & bd_fi_container = _cht_face_info[bd_index];
     auto & temperature_container = _boundary_temperature[bd_index];
 
-    // Do two passes because one CHT BC may depend on a functor initialized by the other side.
-    for (unsigned int init_pass = 0; init_pass < 2; ++init_pass)
-      for (const auto region_index : make_range(2))
-      {
-        auto bc = _cht_boundary_conditions[bd_index][region_index];
+    for (const auto & fi : bd_fi_container)
+    {
+      const bool solid_on_elem = _solid_variable->hasFaceSide(*fi, true);
+      const auto & solid_elem_info = solid_on_elem ? *fi->elemInfo() : *fi->neighborInfo();
+      const Real solid_face_value =
+          _solid_variable->getElemValue(solid_elem_info, Moose::currentState());
 
-        for (const auto & fi : bd_fi_container)
-        {
-          bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[region_index])));
+      const bool fluid_on_elem = _fluid_variable->hasFaceSide(*fi, true);
+      const auto & fluid_elem_info = fluid_on_elem ? *fi->elemInfo() : *fi->neighborInfo();
+      const Real fluid_face_value =
+          _fluid_variable->getElemValue(fluid_elem_info, Moose::currentState());
 
-          const auto boundary_temperature = bc->computeBoundaryValue();
-
-          // region_index is the source side, so initialize the functor used by the other side.
-          temperature_container[1 - region_index][fi->id()] = boundary_temperature;
-        }
-      }
+      temperature_container[NS::CHTSide::FLUID][fi->id()] = solid_face_value;
+      temperature_container[NS::CHTSide::SOLID][fi->id()] = fluid_face_value;
+    }
   }
 }
 
