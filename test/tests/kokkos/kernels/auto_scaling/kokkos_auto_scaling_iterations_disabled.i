@@ -1,1 +1,0 @@
-kokkos_auto_scaling_iterations.i
