@@ -72,6 +72,12 @@ protected:
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalStressRHSContribution();
 
+  /// Computes the implicit internal-face stress transmissibility.
+  virtual Real computeInternalStressTransmissibility() const;
+
+  /// Computes the explicit internal-face stress correction.
+  virtual Real computeInternalStressExplicitCorrection() const;
+
   /// Computes the matrix contributions of the boundary conditions resulting from the stress tensor
   /// @param bc The boundary condition whose contributions should be used
   Real computeStressBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
@@ -119,9 +125,6 @@ protected:
   VectorValue<Real> _elem_grad_storage;
   VectorValue<Real> _neighbor_grad_storage;
 
-  /// Use two-point transmissibility for stress fluxes (jump-safe)
-  const bool _use_two_point_stress_transmissibility;
-
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _face_mass_flux;
@@ -154,9 +157,6 @@ protected:
 
   /// Axisymmetric radial coordinate index (only used when in RZ)
   const unsigned int _rz_radial_coord;
-
-  /// Compute two-point transmissibility for the stress flux
-  Real stressTransmissibility(const Moose::StateArg & state) const;
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
