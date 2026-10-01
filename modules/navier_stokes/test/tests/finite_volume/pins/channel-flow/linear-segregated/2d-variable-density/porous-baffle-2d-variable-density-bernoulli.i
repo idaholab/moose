@@ -81,6 +81,13 @@ advected_interp_method = 'average'
 []
 
 [UserObjects]
+  [pressure_jump]
+    type = BernoulliFormLossPressureJump
+    boundary = baffle
+    porosity = porosity
+    density = rho_aux
+    use_interpolated_density = true
+  []
   [rc]
     type = PorousRhieChowMassFlux
     u = superficial_u
@@ -90,13 +97,12 @@ advected_interp_method = 'average'
     porosity = 'porosity'
     p_diffusion_kernel = p_diffusion
 
-    pressure_baffle_sidesets = 'baffle'
-    pressure_baffle_relaxation = 0.1
+    pressure_jump_models = pressure_jump
+    pressure_jump_relaxation = 0.1
 
 
     flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
 
-    use_interpolated_density_in_bernoulli_jump = true
   []
 []
 

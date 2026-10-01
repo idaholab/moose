@@ -183,6 +183,14 @@ advected_interp_method = 'upwind'
 []
 
 [UserObjects]
+  [pressure_jump]
+    type = BernoulliFormLossPressureJump
+    boundary = 'clean_to_porous diagonal_baffle porous_to_clean'
+    porosity = porosity
+    density = ${rho}
+    form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
+    reference_velocity_side = 'lower_porosity lower_porosity lower_porosity'
+  []
   [rc]
     type = PorousRhieChowMassFlux
     u = superficial_u
@@ -192,10 +200,8 @@ advected_interp_method = 'upwind'
     porosity = porosity
     p_diffusion_kernel = p_diffusion
     pressure_projection_method = consistent
-    pressure_baffle_sidesets = 'clean_to_porous diagonal_baffle porous_to_clean'
-    baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
-    velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
-    pressure_baffle_relaxation = 0.1
+    pressure_jump_models = pressure_jump
+    pressure_jump_relaxation = 0.1
     flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_clean top_clean bottom_porous top_porous'
 
   []
