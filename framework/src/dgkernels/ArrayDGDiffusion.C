@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayDGDiffusion.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 // MOOSE includes
 #include "MooseVariableFE.h"
@@ -37,6 +39,17 @@ ArrayDGDiffusion::ArrayDGDiffusion(const InputParameters & parameters)
     _res1(_count),
     _res2(_count)
 {
+}
+
+void
+ArrayDGDiffusion::initialSetup()
+{
+  Moose::checkArrayMaterialPropertySize(*this,
+                                        _fe_problem.getMaterialWarehouse(),
+                                        blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                        "diff",
+                                        _count,
+                                        false);
 }
 
 void
