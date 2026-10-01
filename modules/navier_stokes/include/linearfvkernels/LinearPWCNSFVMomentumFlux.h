@@ -12,35 +12,70 @@
 #include "LinearWCNSFVMomentumFlux.h"
 
 /**
- * Momentum flux kernel with porous-specific advection handling.
+ * Momentum flux kernel for porous equations written in superficial velocity.
+ *
+ * The advective contribution is divided by the porosity on each side of a face. Internal baffle
+ * faces may use one-sided advected states, and the stress contribution may use a two-point
+ * transmissibility.
  */
 class LinearPWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
 {
 public:
   static InputParameters validParams();
 
+  /**
+   * Construct the porous momentum flux kernel.
+   * @param params The input parameters for the kernel
+   */
   LinearPWCNSFVMomentumFlux(const InputParameters & params);
 
+  /// Assemble the internal-face matrix with side-specific porosity scaling of advection.
   void addMatrixContribution() override;
 
+  /// Compute the element-row internal-face matrix contribution.
   Real computeElemMatrixContribution() override;
+
+  /// Compute the neighbor-row internal-face matrix contribution.
   Real computeNeighborMatrixContribution() override;
+
+  /// Compute the element-row internal-face right-hand-side contribution.
   Real computeElemRightHandSideContribution() override;
+
+  /// Compute the neighbor-row internal-face right-hand-side contribution.
   Real computeNeighborRightHandSideContribution() override;
 
 protected:
+  /// Compute the stress transmissibility, optionally using the two-point harmonic form.
   Real computeInternalStressTransmissibility() const override;
+
+  /// Compute the explicit stress correction, which vanishes for the two-point treatment.
   Real computeInternalStressExplicitCorrection() const override;
 
+  /// Compute the boundary advection matrix contribution with local porosity scaling.
   Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc) override;
+
+  /// Compute the boundary advection right-hand-side contribution with local porosity scaling.
   Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
 private:
   /// Whether to use a two-point harmonic transmissibility for the stress term.
   const bool _use_two_point_stress_transmissibility;
 
+  /// Whether the current face is an internal face represented by a pressure-jump model.
   bool isInternalBaffleFace() const;
+
+  /// Whether the current baffle face requires a one-sided advected state on each side.
   bool needsInternalBaffleAdvectionCorrection() const;
+
+  /**
+   * Compute the correction that replaces the shared advected state with a one-sided state.
+   * @param elem_side Whether to compute the correction for the element side
+   */
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
+
+  /**
+   * Return the inverse porosity on one side of the current face.
+   * @param elem_side Whether to evaluate porosity on the element side
+   */
   Real inversePorosity(bool elem_side) const;
 };
