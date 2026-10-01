@@ -1,166 +1,54 @@
-## Relevant discrete forms
+# Porous Rhie-Chow pressure coupling
 
-Notation (cell P, face f):
+The linear finite volume porous-flow formulation solves for superficial velocity
+$\mathbf{U}=\epsilon\mathbf{u}$, where $\epsilon$ is porosity and $\mathbf{u}$ is
+interstitial velocity. [PorousRhieChowMassFlux.md] extends the [SIMPLE.md] pressure-velocity
+coupling so this definition remains consistent across discontinuous porosity interfaces.
 
-- $P$: owner cell for face $f$
-- $N$: neighbor cell across face $f$
-- $S_f$: outward face area vector (points from $P$ to $N$)
-- $V_P$: cell volume
-- $\rho$: density
-- $\epsilon$: porosity
-- $u$: velocity unknown (superficial form unless otherwise stated)
-- $\phi_f$: face mass flux
-- $\alpha_P, \alpha_N$: face interpolation coefficients (from the selected advection scheme)
-
-Continuity (finite volume):
+For a face $f$, the Rhie-Chow object supplies the mass flux
 
 \begin{equation}
-\sum_f \phi_f = 0
+\phi_f = (\rho \mathbf{U}\cdot\mathbf{n})_f.
 \end{equation}
 
-Face mass flux (Rhie-Chow form, schematic):
+The momentum advection operator transports interstitial velocity. Its contribution to cell $P$
+is therefore
 
 \begin{equation}
-\phi_f = HbyA_f - \left(A^{-1}_f S_f\right) \cdot (\nabla p)_f
+\sum_f \frac{\phi_f}{\epsilon_P} U_{i,f} |S_f|.
 \end{equation}
 
-Momentum advection (component $i$, finite volume):
+[PorousLinearWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$ factor to each cell row. On a
+porous baffle where pressure-gradient reconstruction is one-sided, it also uses the local velocity
+state on each side instead of sharing an interpolated state across the jump.
+
+## Pressure jump
+
+A sideset listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_baffle_sidesets) carries the reversible
+Bernoulli jump
 
 \begin{equation}
-\sum_f \left(\phi_f \, u_{i,f}\right) = 0
+J = \frac{1}{2}\left(\rho_o u_{n,o}^2-\rho_n u_{n,n}^2\right),
+\qquad
+u_{n,s}=\frac{\phi_f}{\rho_s\epsilon_s},
 \end{equation}
 
-Face value for advection (two equivalent porous placements):
+where $o$ and $n$ denote the owner and non-owner sides. An optional form-loss term adds
+$-\operatorname{sign}(\phi_f)K\rho_f u_{ref}^2/2$. The reference side is selected with
+[!param](/UserObjects/PorousRhieChowMassFlux/velocity_form_loss).
+[!param](/UserObjects/PorousRhieChowMassFlux/use_interpolated_density_in_bernoulli_jump) selects
+whether the reversible term uses side densities or a common interpolated face density.
 
-Porosity outside divergence:
+[LinearFVAnisotropicDiffusionJump.md] inserts the relaxed jump into the pressure-correction
+equation. The same jump-aware operator is then used to recompute the Rhie-Chow face flux, while
+[LinearFVMomentumPressure.md] uses the corresponding reconstructed pressure gradient in the next
+momentum predictor. This keeps the pressure solve, face flux, and cell momentum equation on one
+discrete definition of the interface jump.
 
-\begin{equation}
-u_{i,f} = \alpha_P u_{i,P} + \alpha_N u_{i,N}
-\end{equation}
+The tested setup below shows the porous Rhie-Chow object and the coupled pressure and momentum
+kernels:
 
-Advection term scaled by $\epsilon_f$.
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=UserObjects/rc
 
-Porosity inside divergence:
-
-\begin{equation}
-u_{i,f} = \alpha_P \left(\frac{u_{i,P}}{\epsilon_P}\right) + \alpha_N \left(\frac{u_{i,N}}{\epsilon_N}\right)
-\end{equation}
-
-No additional $\epsilon_f$ scaling.
-
-Pressure gradient in momentum (cell-centered Gauss):
-
-\begin{equation}
-(\nabla p)_P = \frac{1}{V_P} \sum_f \left(p_f S_f\right)
-\end{equation}
-
-Pressure equation (schematic FV Poisson):
-
-\begin{equation}
-\sum_f \left(A^{-1}_f S_f\right) \cdot (\nabla p)_f = \sum_f HbyA_f
-\end{equation}
-
-Baffle jump enforcement (face-based):
-
-\begin{equation}
-J = \frac{1}{2}\left(\rho_{P} u^2_{n,P} - \rho_{N} u^2_{n,N}\right)
-\end{equation}
-
-\begin{equation}
-u_{n,P} = \frac{U_n}{\epsilon_{P}}, \quad
-u_{n,N} = \frac{U_n}{\epsilon_{N}}, \quad
-U_n = \frac{\phi_f}{\rho_f}
-\end{equation}
-
-Jump-aware face pressure interpolation:
-
-\begin{equation}
-p_f = \alpha_P p_P + \alpha_N \left(p_N + J_{\text{side}}\right)
-\end{equation}
-
-\begin{equation}
-J_{\text{side}} =
-\begin{cases}
-J, & \text{N side} \\
--J, & \text{P side}
-\end{cases}
-\end{equation}
-
-Optional flux-based velocity reconstruction (least-squares, schematic):
-
-\begin{equation}
-M = \sum_f \frac{S_f \otimes S_f}{|S_f|}, \quad
-b = \sum_f \left(\frac{F_f - \text{corr}_f}{|S_f|}\right) S_f, \quad
-u_P = M^{-1} b
-\end{equation}
-
-with $\text{corr}_f$ built from the previous-corrector gradients to avoid re-introducing oscillations.
-
-## Major Design Choices
-
-### 1) Porous-specific Rhie-Chow UserObject
-
-A dedicated porous Rhie-Chow mass-flux provider is introduced as a specialization that augments the base Rhie-Chow object with porous and baffle behavior. The Rhie-Chow interpolation is the central point where pressure and momentum communicate. For porous flow, it is the most natural location to:
-
-- Compute face mass fluxes consistent with porosity.
-- Store and update pressure jump data across porous interfaces.
-- Provide corrected pressure gradients back to pressure kernels.
-
-The pressure jump should be tied to mass-flux-derived normal velocity so
-the discontinuity is consistent with the actual flux that enforces
-continuity. This reduces mismatch between pressure correction and
-momentum advection. The jump update is also under-relaxed, reflecting
-the stiff coupling between pressure and flux at sharp porosity changes.
-
-### 2) Pressure equation with a baffle-jump source
-
-A specialized diffusion kernel adds a jump contribution on internal
-faces tagged as baffles The Bernoulli jump is a pressure discontinuity
-and must be represented in the pressure solve, not just in
-post-processing. Injecting the jump into the Poisson equation enforces
-it in the global pressure field.
-- Makes the discontinuity explicit and stable.
-- Ensures the correction step enforces the right total pressure drop at the baffle.
-
-### 3) Momentum pressure term uses a Rhie-Chow-Consistent gradient
-
-A dedicated momentum kernel takes the pressure gradient from the Rhie-Chow provider, optionally using the baffle-corrected gradient.
-The momentum equation must see the same discontinuity as the pressure equation to avoid cancellation errors or oscillations.
-The result is a closed, self-consistent pressure-velocity coupling across porous interfaces.
-
-### 4) Porosity treatment in advection
-
-The momentum advection kernel includes a switch that determines whether porosity is applied outside the divergence (i.e., scale the flux) or absorbed into the advected interpolation (i.e., scale by \(1/\varepsilon\)). This flexibility is essential when transitioning between discontinuous baffle-type porosity and smoothly varying porosity fields.
-
-### 5) Optional Flux-Based Velocity Reconstruction
-
-What changed: An optional reconstruction step recovers cell velocities from corrected face fluxes.
-
-Why: Classic pressure correction can re-introduce checkerboarding in cell velocities even when face fluxes are smooth. Reconstructing from fluxes suppresses this back-projection of oscillations.
-
-Physics/Numerics rationale: Using corrected face fluxes as the primary source of truth ensures the reconstructed velocity is mass-consistent and reduces pressure-velocity decoupling.
-
-### 6) Pressure gradient limiting at selected sidesets
-
-The porous Rhie-Chow object supports limiting the gradient reconstruction on specific sidesets (e.g., to a one-term expansion).
-Limiting reconstruction locally preserves global accuracy while stabilizing baffle-adjacent cells.
-
-### 7) Robust Face Coupling Across Porosity Jumps
-
-The pressure-coupling coefficients can use harmonic
-interpolation when porosity is active.
-Discontinuous coefficients are better handled by harmonic averaging
-to prevent overly diffusive or unstable fluxes.
-This improves stability and accuracy when sharp porosity changes dominate the pressure correction.
-
-## Consistency and coupling strategy
-
-The design makes a deliberate consistency effort for the following steps:
-
-1) Pressure solve includes the jump,
-2) Rhie-Chow flux uses that jump,
-3) Momentum pressure term uses the corrected gradient.
-
-This ensures the discontinuity is not double-counted or accidentally
-canceled and that the flux field remains compatible with the pressure
-field.
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=LinearFVKernels

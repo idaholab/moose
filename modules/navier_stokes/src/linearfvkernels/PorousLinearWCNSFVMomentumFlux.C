@@ -18,43 +18,18 @@ PorousLinearWCNSFVMomentumFlux::validParams()
 {
   InputParameters params = LinearWCNSFVMomentumFlux::validParams();
   params.addClassDescription("Momentum flux kernel with porous-specific advection handling.");
-  // params.set<bool>("use_two_point_stress_transmissibility") = false;
-  params.addParam<bool>("porosity_outside_divergence",
-                        false,
-                        "Scale the advection term by 1/porosity outside the divergence operator "
-                        "(i.e. do not scale the advected interpolation by 1/eps).");
-  params.addParam<bool>(
-      "use_baffle_velocity_break",
-      false,
-      "Force the advection term on internal porous baffle faces to use a one-sided velocity "
-      "state on each side of the baffle instead of the shared interpolated face state.");
   return params;
 }
 
 PorousLinearWCNSFVMomentumFlux::PorousLinearWCNSFVMomentumFlux(const InputParameters & params)
-  : LinearWCNSFVMomentumFlux(params),
-    _porosity_outside_divergence(getParam<bool>("porosity_outside_divergence")),
-    _use_baffle_velocity_break(getParam<bool>("use_baffle_velocity_break"))
+  : LinearWCNSFVMomentumFlux(params)
 {
-  _var.computeCellGradients();
-}
-
-void
-PorousLinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
-{
-  LinearWCNSFVMomentumFlux::setupFaceData(face_info);
-
-  _advected_interp_coeffs = _mass_flux_provider.getAdvectedInterpolationCoeffs(
-      *_current_face_info,
-      _advected_interp_method,
-      _face_mass_flux,
-      /*apply_porosity_scaling=*/!_porosity_outside_divergence);
 }
 
 void
 PorousLinearWCNSFVMomentumFlux::addMatrixContribution()
 {
-  if (!_porosity_outside_divergence || _current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
+  if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
   {
     LinearFVFluxKernel::addMatrixContribution();
     return;
@@ -65,16 +40,10 @@ PorousLinearWCNSFVMomentumFlux::addMatrixContribution()
 
   const Real adv_elem = computeInternalAdvectionElemMatrixContribution();
   const Real adv_neighbor = computeInternalAdvectionNeighborMatrixContribution();
-  const Real stress =
-      needsInternalBaffleAdvectionCorrection() ? 0.0 : computeInternalStressMatrixContribution();
+  const Real stress = computeInternalStressMatrixContribution();
 
-  const auto time_arg = determineState();
-  const Real eps_elem =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, /*elem_side=*/true, time_arg);
-  const Real eps_neighbor =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, /*elem_side=*/false, time_arg);
-  const Real scale_elem = eps_elem != 0.0 ? 1.0 / eps_elem : 0.0;
-  const Real scale_neighbor = eps_neighbor != 0.0 ? 1.0 / eps_neighbor : 0.0;
+  const Real scale_elem = inversePorosity(/*elem_side=*/true);
+  const Real scale_neighbor = inversePorosity(/*elem_side=*/false);
 
   if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
   {
@@ -95,35 +64,44 @@ PorousLinearWCNSFVMomentumFlux::addMatrixContribution()
 Real
 PorousLinearWCNSFVMomentumFlux::computeElemMatrixContribution()
 {
-  const Real stress =
-      needsInternalBaffleAdvectionCorrection() ? 0.0 : computeInternalStressMatrixContribution();
-  return (computeInternalAdvectionElemMatrixContribution() + stress) * _current_face_area;
+  const Real stress = computeInternalStressMatrixContribution();
+  return (computeInternalAdvectionElemMatrixContribution() * inversePorosity(/*elem_side=*/true) +
+          stress) *
+         _current_face_area;
 }
 
 Real
 PorousLinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 {
-  const Real stress =
-      needsInternalBaffleAdvectionCorrection() ? 0.0 : computeInternalStressMatrixContribution();
-  return (computeInternalAdvectionNeighborMatrixContribution() - stress) * _current_face_area;
+  const Real stress = computeInternalStressMatrixContribution();
+  return (computeInternalAdvectionNeighborMatrixContribution() *
+              inversePorosity(/*elem_side=*/false) -
+          stress) *
+         _current_face_area;
 }
 
 Real
 PorousLinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  const Real stress_rhs = needsInternalBaffleAdvectionCorrection()
-                              ? 0.0
-                              : LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution();
-  return stress_rhs + computeBaffleAdvectionExplicitCorrection(/*elem_side=*/true);
+  const bool correct_baffle = needsInternalBaffleAdvectionCorrection();
+  const Real stress_rhs = computeInternalStressRHSContribution() * _current_face_area;
+  const Real advection_rhs = correct_baffle
+                                 ? 0.0
+                                 : _adv_interp_result.rhs_face_value * _face_mass_flux *
+                                       inversePorosity(/*elem_side=*/true) * _current_face_area;
+  return stress_rhs + advection_rhs + computeBaffleAdvectionExplicitCorrection(/*elem_side=*/true);
 }
 
 Real
 PorousLinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  const Real stress_rhs = needsInternalBaffleAdvectionCorrection()
-                              ? 0.0
-                              : LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution();
-  return stress_rhs + computeBaffleAdvectionExplicitCorrection(/*elem_side=*/false);
+  const bool correct_baffle = needsInternalBaffleAdvectionCorrection();
+  const Real stress_rhs = -computeInternalStressRHSContribution() * _current_face_area;
+  const Real advection_rhs = correct_baffle
+                                 ? 0.0
+                                 : -_adv_interp_result.rhs_face_value * _face_mass_flux *
+                                       inversePorosity(/*elem_side=*/false) * _current_face_area;
+  return stress_rhs + advection_rhs + computeBaffleAdvectionExplicitCorrection(/*elem_side=*/false);
 }
 
 Real
@@ -131,11 +109,8 @@ PorousLinearWCNSFVMomentumFlux::computeAdvectionBoundaryMatrixContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_matrix_contrib = bc->computeBoundaryValueMatrixContribution();
-  const bool elem_side = (_current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR);
-  const Real eps =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, elem_side, determineState());
-  const Real scale = eps != 0.0 ? 1.0 / eps : 0.0;
-  return boundary_value_matrix_contrib * _face_mass_flux * scale;
+  const bool elem_side = _current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR;
+  return boundary_value_matrix_contrib * _face_mass_flux * inversePorosity(elem_side);
 }
 
 Real
@@ -143,36 +118,29 @@ PorousLinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
-  const bool elem_side = (_current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR);
-  const Real eps =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, elem_side, determineState());
-  const Real scale = eps != 0.0 ? 1.0 / eps : 0.0;
-  return -boundary_value_rhs_contrib * _face_mass_flux * scale;
+  const bool elem_side = _current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR;
+  return -boundary_value_rhs_contrib * _face_mass_flux * inversePorosity(elem_side);
 }
 
 Real
 PorousLinearWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_side) const
 {
-  if (!_porosity_outside_divergence || !needsInternalBaffleAdvectionCorrection())
+  if (!needsInternalBaffleAdvectionCorrection())
     return 0.0;
 
   const auto state_arg = determineState();
-  const Real eps =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, elem_side, state_arg);
-  if (eps == 0.0)
-    return 0.0;
 
   const Real u_elem = _var.getElemValue(*_current_face_info->elemInfo(), state_arg);
   const Real u_neighbor = _var.getElemValue(*_current_face_info->neighborInfo(), state_arg);
   // Keep the shared internal-face stencil, then explicitly cancel the interpolated part on
   // one-sided baffle faces so each side advects with its local state only.
-  const Real shared_advected_state =
-      _advected_interp_coeffs.first * u_elem + _advected_interp_coeffs.second * u_neighbor;
+  const Real shared_advected_state = _adv_interp_result.weights_matrix.first * u_elem +
+                                     _adv_interp_result.weights_matrix.second * u_neighbor;
   const Real one_sided_advected_state = elem_side ? u_elem : u_neighbor;
   const Real factor = elem_side ? 1.0 : -1.0;
 
-  return factor * _face_mass_flux / eps * (shared_advected_state - one_sided_advected_state) *
-         _current_face_area;
+  return factor * _face_mass_flux * inversePorosity(elem_side) *
+         (shared_advected_state - one_sided_advected_state) * _current_face_area;
 }
 
 bool
@@ -186,6 +154,16 @@ bool
 PorousLinearWCNSFVMomentumFlux::needsInternalBaffleAdvectionCorrection() const
 {
   return isInternalBaffleFace() &&
-         (_use_baffle_velocity_break ||
-          _mass_flux_provider.faceUsesOneSidedReconstruction(*_current_face_info));
+         _mass_flux_provider.faceUsesOneSidedReconstruction(*_current_face_info);
+}
+
+Real
+PorousLinearWCNSFVMomentumFlux::inversePorosity(const bool elem_side) const
+{
+  const Real porosity =
+      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, elem_side, determineState());
+  if (porosity <= 0.0)
+    mooseError(name(), ": porosity must be positive on face ", _current_face_info->id(), ".");
+
+  return 1.0 / porosity;
 }
