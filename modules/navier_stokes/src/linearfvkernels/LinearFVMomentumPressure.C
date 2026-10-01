@@ -29,8 +29,6 @@ LinearFVMomentumPressure::validParams()
       "gradient_method",
       "Gradient method to use for the pressure gradient in this kernel. If omitted, the pressure "
       "variable's default gradient method is used.");
-  params.addParam<MooseFunctorName>(
-      NS::porosity, "1", "Porosity multiplying the pressure-gradient contribution.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -43,8 +41,7 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
-    _pressure_gradient_field(registerPressureGradientField()),
-    _porosity(getFunctor<Real>(NS::porosity))
+    _pressure_gradient_field(registerPressureGradientField())
 {
 }
 
@@ -84,6 +81,5 @@ Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
   const Real pressure_gradient = _pressure_gradient_field.component(*_current_elem_info, _index);
-  return -_porosity(makeElemArg(_current_elem_info->elem()), determineState()) * pressure_gradient *
-         _current_elem_volume;
+  return -pressure_gradient * _current_elem_volume;
 }

@@ -94,7 +94,7 @@ inlet_u = 0.1
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressure
+    type = LinearPWCNSFVMomentumPressure
     variable = superficial_u
     momentum_component = 'x'
     porosity = porosity
