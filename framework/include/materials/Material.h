@@ -205,6 +205,10 @@ public:
   {
     return MaterialPropertyInterface::getMatPropDependencies();
   }
+  virtual void addMatPropDependencyById(const unsigned int prop_id) override
+  {
+    MaterialPropertyInterface::addMatPropDependencyById(prop_id);
+  }
   virtual void subdomainSetup() override;
 
   CreateMooseEnumClass(ConstantTypeEnum, NONE, ELEMENT, SUBDOMAIN);

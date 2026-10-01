@@ -231,6 +231,15 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const = 0;
 
   /**
+   * Record a dependency on the material property with the given ID. Called by
+   * getGenericZeroMaterialPropertyByName() when the "optional" property it looked up turns out to
+   * be supplied by another material, so that dependency is still reflected in
+   * getMatPropDependencies() even though this access went through the zero-default API. No-op by
+   * default; overridden where getMatPropDependencies() is backed by a real container.
+   */
+  virtual void addMatPropDependencyById(const unsigned int /*prop_id*/) {}
+
+  /**
    * @return Whether this material has stateful properties
    */
   bool hasStatefulProperties() const { return _has_stateful_property; }
@@ -476,6 +485,14 @@ const GenericMaterialProperty<T, is_ad> &
 MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
 {
   checkExecutionStage();
+
+  // This "optional" property may actually be supplied by another material (declareProperty vs.
+  // getProperty share the same registry), in which case this object must depend on it so that
+  // supplier is reinited before this one; getProperty() below does not distinguish that case from
+  // one where the property is genuinely never supplied and defaults to zero.
+  if (materialData().haveGenericProperty<T, is_ad>(prop_name))
+    addMatPropDependencyById(materialData().getPropertyId(prop_name));
+
   auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);
 
   _requested_props.insert(prop_name);
