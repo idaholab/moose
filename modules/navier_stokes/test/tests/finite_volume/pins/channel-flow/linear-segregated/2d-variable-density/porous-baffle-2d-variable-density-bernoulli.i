@@ -99,10 +99,6 @@ advected_interp_method = 'average'
 
     pressure_jump_models = pressure_jump
     pressure_jump_relaxation = 0.1
-
-
-    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
-
   []
 []
 
