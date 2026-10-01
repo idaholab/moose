@@ -1,0 +1,20 @@
+[Tests]
+  design = 'ElectromagneticCryogenicJK2LBProperties.md'
+  issues = '#33677'
+
+  [electrical_resistivity]
+    type = GoogleTest
+    unit_test = ElectromagneticCryogenicJK2LBPropertiesTest.electrical_resistivity
+    requirement = 'The system shall compute electrical resistivity for JK2LB steel using a quintic polynomial fit to data from Lu et al. (2009) and verify analytical derivatives against finite differences.'
+  []
+  [electrical_conductivity]
+    type = GoogleTest
+    unit_test = ElectromagneticCryogenicJK2LBPropertiesTest.electrical_conductivity
+    requirement = 'The system shall compute electrical conductivity for JK2LB steel as the reciprocal of resistivity and verify analytical derivatives against finite differences.'
+  []
+  [magnetic_permeability]
+    type = GoogleTest
+    unit_test = ElectromagneticCryogenicJK2LBPropertiesTest.magnetic_permeability
+    requirement = 'The system shall compute magnetic permeability for JK2LB steel as constant mu_0 (non-magnetic austenitic steel) and verify analytical derivatives against finite differences.'
+  []
+[]
