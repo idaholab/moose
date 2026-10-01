@@ -359,6 +359,12 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
+  /// Names requested through getGenericZeroMaterialPropertyByName(). Whether each one is actually
+  /// supplied by another material can only be checked once every material has been constructed,
+  /// so that is deferred to resolveZeroMaterialPropertyDependencies() instead of being done
+  /// immediately: a supplier declared later than this object would otherwise look unsupplied.
+  std::set<std::string> _zero_optional_mat_prop_names;
+
   /// The ids of the supplied properties, i.e. the indices where they
   /// are stored in the _material_data->props().  Note: these ids ARE
   /// NOT IN THE SAME ORDER AS THE _supplied_props set, which is
@@ -387,6 +393,14 @@ protected:
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
   void registerPropName(const std::string & prop_name, bool is_get, const unsigned int state);
+
+  /**
+   * Check each name recorded in _zero_optional_mat_prop_names and, for those that turned out to
+   * be supplied by another material, record the dependency via addMatPropDependencyById(). Must
+   * be called only after every material has been constructed, e.g. from
+   * resolveOptionalProperties().
+   */
+  void resolveZeroMaterialPropertyDependencies();
 
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
@@ -486,12 +500,12 @@ MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name
 {
   checkExecutionStage();
 
-  // This "optional" property may actually be supplied by another material (declareProperty vs.
-  // getProperty share the same registry), in which case this object must depend on it so that
-  // supplier is reinited before this one; getProperty() below does not distinguish that case from
-  // one where the property is genuinely never supplied and defaults to zero.
-  if (materialData().haveGenericProperty<T, is_ad>(prop_name))
-    addMatPropDependencyById(materialData().getPropertyId(prop_name));
+  // This "optional" property may turn out to be supplied by another material (declareProperty
+  // vs. getProperty share the same registry), in which case this object must depend on it so
+  // that supplier is reinited before this one. A supplier constructed after this object would
+  // look unsupplied if checked right now, so the check is deferred until every material has been
+  // constructed; see resolveZeroMaterialPropertyDependencies().
+  _zero_optional_mat_prop_names.insert(prop_name);
 
   auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);
 
