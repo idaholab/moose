@@ -23,7 +23,8 @@ current face mass flux and under-relaxed with
 
 This is the user object expected by
 [LinearPWCNSFVMomentumFlux](LinearPWCNSFVMomentumFlux.md),
-[LinearFVAnisotropicDiffusionJump](LinearFVAnisotropicDiffusionJump.md), and porous uses of
+[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md), and porous
+uses of
 [LinearFVEnergyAdvection](LinearFVEnergyAdvection.md).
 
 In this example, `PorousRhieChowMassFlux` uses a separately configured pressure-jump model on two
