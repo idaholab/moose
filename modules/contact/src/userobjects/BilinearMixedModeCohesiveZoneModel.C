@@ -236,7 +236,7 @@ BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * co
   const auto normalized_GII_c = normalizeQuantity(_dof_to_GII_c, node);
 
   _dof_to_delta_final[node] =
-      sqrt(2.0) * 2.0 * normalized_GII_c / normalizeQuantity(_dof_to_shear_strength, node);
+      2.0 * normalized_GII_c / normalizeQuantity(_dof_to_shear_strength, node);
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {

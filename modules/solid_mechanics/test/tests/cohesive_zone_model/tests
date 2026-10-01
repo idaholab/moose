@@ -264,6 +264,13 @@
     design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md'
     requirement = 'The system shall be able to model decohesion of composites using cohesive zone model'
     issues = '#18611 #18763'
+    [bilinear_mixed_jacobian]
+      type = PetscJacobianTester
+      input = 'bilinear_mixed_jacobian.i'
+      ratio_tol = 1e-6
+      difference_tol = 2.0
+      detail = 'and accurately compute the hand-coded Jacobian under mixed-mode loading.'
+    []
     [normal]
       type = Exodiff
       input = 'bilinear_mixed.i'
@@ -310,6 +317,51 @@
       abs_zero = 1e-6
       rel_err = 1e-5
       detail = "under mode I loading with power law propagation criterion."
+    []
+    [energy_mode_I]
+      type = CSVDiff
+      input = 'bilinear_mixed_energy.i'
+      csvdiff = 'bilinear_mixed_energy_mode_I.csv'
+      cli_args = 'Outputs/file_base=bilinear_mixed_energy_mode_I'
+      detail = 'and conserve the prescribed fracture energy under pure mode I loading.'
+    []
+    [energy_mode_II]
+      type = CSVDiff
+      input = 'bilinear_mixed_energy.i'
+      csvdiff = 'bilinear_mixed_energy_mode_II.csv'
+      # A negligible compression avoids roundoff selecting the delta_normal > 0 mixed-mode branch.
+      cli_args = "BCs/top_x/function='3*t' BCs/top_y/function='-1e-8*t' "
+                 "Postprocessors/energy_rate/expression='abs(traction_x)*3' "
+                 "Postprocessors/prescribed_energy/function=2 "
+                 "Outputs/file_base=bilinear_mixed_energy_mode_II"
+      detail = 'and report energy consistency and the final-separation limit under pure mode II loading.'
+    []
+    [energy_mixed]
+      type = CSVDiff
+      input = 'bilinear_mixed_energy.i'
+      csvdiff = 'bilinear_mixed_energy_mixed.csv'
+      cli_args = "BCs/top_x/function='3*t' "
+                 "Postprocessors/energy_rate/expression='(abs(traction_x)+abs(traction_y))*3' "
+                 "Postprocessors/prescribed_energy/function=1.25 "
+                 "Outputs/file_base=bilinear_mixed_energy_mixed"
+      detail = 'and conserve the BK fracture energy under proportional mixed-mode loading.'
+    []
+    [rotation_3d_aligned]
+      type = CSVDiff
+      input = 'bilinear_mixed_rotation_3d.i'
+      csvdiff = 'bilinear_mixed_rotation_3d_aligned.csv'
+      cli_args = 'Outputs/file_base=bilinear_mixed_rotation_3d_aligned'
+      detail = 'and satisfy rotational invariance under 3D shear aligned with a tangential axis.'
+    []
+    [rotation_3d_diagonal]
+      type = CSVDiff
+      input = 'bilinear_mixed_rotation_3d.i'
+      csvdiff = 'bilinear_mixed_rotation_3d_diagonal.csv'
+      cli_args = "BCs/right_y/function='(3/sqrt(2))*t' BCs/right_z/function='(3/sqrt(2))*t' "
+                 "Postprocessors/energy_rate/expression='abs(traction_y)*(3/sqrt(2))+abs(traction_z)*(3/sqrt(2))' "
+                 "Postprocessors/energy_rate/pp_names='traction_y traction_z' "
+                 "Outputs/file_base=bilinear_mixed_rotation_3d_diagonal"
+      detail = 'and satisfy rotational invariance under 3D shear at 45 degrees across tangential components.'
     []
   []
 
