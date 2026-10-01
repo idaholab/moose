@@ -7,8 +7,8 @@
       type = 'Exodiff'
       input = 'kokkos_piecewise_constant.i'
       exodiff = 'kokkos_piecewise_constant_out.e'
-      capabilities = 'kokkos & !cuda'
-      compute_devices = 'cpu'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
       detail = 'provided separately as two vectors in the input,'
     []
     [xy_data]
@@ -16,8 +16,8 @@
       input = 'kokkos_piecewise_constant.i'
       cli_args = 'Kernels/diff/coef=func_xy_data AuxKernels/coef_aux/function=func_xy_data'
       exodiff = 'kokkos_piecewise_constant_out.e'
-      capabilities = 'kokkos & !cuda'
-      compute_devices = 'cpu'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
       detail = 'provided as a table in the input,'
     []
     [csv]
@@ -25,8 +25,8 @@
       input = 'kokkos_piecewise_constant.i'
       cli_args = 'Kernels/diff/coef=func_csv AuxKernels/coef_aux/function=func_csv'
       exodiff = 'kokkos_piecewise_constant_out.e'
-      capabilities = 'kokkos & !cuda'
-      compute_devices = 'cpu'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
       detail = 'provided as a CSV file,'
     []
     [json]
@@ -34,8 +34,8 @@
       input = 'kokkos_piecewise_constant.i'
       cli_args = 'Kernels/diff/coef=func_json AuxKernels/coef_aux/function=func_json'
       exodiff = 'kokkos_piecewise_constant_out.e'
-      capabilities = 'kokkos & !cuda'
-      compute_devices = 'cpu'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
       detail = 'provided as a JSON file.'
     []
   []
