@@ -18,6 +18,7 @@ from ..common import exceptions
 from ..base import LatexRenderer, HTMLRenderer
 from ..tree import html, tokens, latex, pages
 from . import core, command, floats, modal, appsyntax
+from ..common import setting_validation as validation
 
 Listing = tokens.newToken("Listing", floats.Float)
 ListingCode = tokens.newToken("ListingCode", core.Code, syntaxes=None)
@@ -82,7 +83,10 @@ class ListingExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         """Only add the moose input parser JavaScript if the page needs it."""
-        find_moose_code_token = lambda token: token.get("language", None) == "moose"
+
+        def find_moose_code_token(token):
+            return token.get("language", None) == "moose"
+
         if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
             self.translator.renderer.addJavaScript(
                 "moose_input_parser", "js/moose_input_parser.js", page
@@ -102,14 +106,24 @@ class LocalListingCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
+
+        def validation_max_height(setting: str) -> str:
+            return setting
+
         settings["max-height"] = (
             f"{LocalListingCommand.DEFAULT_MAX_HEIGHT}px",
             "The default height for listing content.",
+            validation_max_height,
         )
+
+        def validation_language(setting: str) -> str:
+            return setting
+
         settings["language"] = (
             None,
             "The language to use for highlighting, if not supplied it "
             "will be inferred from the extension (if possible).",
+            validation_language,
         )
         return settings
 
@@ -298,18 +312,33 @@ class FileListingCommand(LocalListingCommand):
     @staticmethod
     def defaultSettings():
         settings = LocalListingCommand.defaultSettings()
-        settings["diff"] = (None, "Path to a file to diff against")
+
+        def validation_diff(setting: str) -> str:
+            return setting
+
+        settings["diff"] = (None, "Path to a file to diff against", validation_diff)
+
+        def validation_before_link_prefix(setting: str) -> str:
+            return setting
+
         settings["before_link_prefix"] = (
             FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX,
             'Prefix for the modal link to the diffed "before" file',
+            validation_before_link_prefix,
         )
+
+        def validation_after_link_prefix(setting: str) -> str:
+            return setting
+
         settings["after_link_prefix"] = (
             FileListingCommand.DEFAULT_AFTER_LINK_PREFIX,
             'Prefix for the modal link to the diffed "after" file',
+            validation_after_link_prefix,
         )
         settings["link"] = (
             True,
             "Show the complete file via a link; overridden by SourceExtension",
+            validation.boolean,
         )
         settings.update(common.extractContentSettings())
         return settings
@@ -425,15 +454,25 @@ class InputListingCommand(FileListingCommand):
     @staticmethod
     def defaultSettings():
         settings = FileListingCommand.defaultSettings()
+
+        def validation_block(setting: str) -> str:
+            return setting
+
         settings["block"] = (
             None,
             "Space separated list of input file block names to include.",
+            validation_block,
         )
+
+        def validation_remove(setting: str) -> str:
+            return setting
+
         settings["remove"] = (
             None,
             "Space separated list of input file block and/or parameter "
             "names to remove. The full path to parameters must be used, "
             "e.g., `Kernels/diffusion/variable`.",
+            validation_remove,
         )
         return settings
 

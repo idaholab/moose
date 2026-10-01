@@ -14,6 +14,14 @@ and converting tokens to rendered HTML.
 from ..common import exceptions, parse_settings, mixins
 from ..tree import tokens
 
+"""
+In the dict that stores settings the tuples store a value, a description and then a
+function that will do validation/conversion of the parameter.
+These variables are for accessing each of those elements
+"""
+SETTING_INDEX_VALUE = 0
+SETTING_INDEX_VALIDATOR = 2
+
 
 class Component(mixins.TranslatorObject):
     """
@@ -81,15 +89,33 @@ class ReaderComponent(Component, mixins.ReaderObject):
         the default settings for the component, see core.py for examples.
         """
         settings = dict()
+
+        def validation_style(setting: str) -> str:
+            return setting
+
         settings["style"] = (
             None,
             "The style settings that are passed to rendered HTML tag.",
+            validation_style,
         )
+
+        def validation_class(setting: str) -> str:
+            return setting
+
         settings["class"] = (
             None,
             "The class settings to be passed to rendered HTML tag.",
+            validation_class,
         )
-        settings["id"] = (None, "Identifier to link against this object.")
+
+        def validation_id(setting: str) -> str:
+            return setting
+
+        settings["id"] = (
+            None,
+            "Identifier to link against this object.",
+            validation_id,
+        )
         return settings
 
     def __init__(self):
