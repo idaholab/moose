@@ -68,6 +68,14 @@ q = 20000000
 []
 
 [UserObjects]
+  [pressure_jump]
+    type = BernoulliFormLossPressureJump
+    boundary = 'baffle baffle2'
+    porosity = porosity
+    density = ${rho}
+    form_loss = ${bf}
+    reference_velocity_side = 'lower_porosity higher_porosity'
+  []
   [rc]
     type = PorousRhieChowMassFlux
     u = superficial_u
@@ -76,11 +84,9 @@ q = 20000000
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
-    pressure_baffle_sidesets = 'baffle baffle2'
+    pressure_jump_models = pressure_jump
     pressure_gradient_limiter = 'baffle baffle2'
-    baffle_form_loss = ${bf}
-    velocity_form_loss = 'lower_epsilon higher_epsilon'
-    pressure_baffle_relaxation = 0.01
+    pressure_jump_relaxation = 0.01
     flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
   []
 []

@@ -5,7 +5,7 @@
     input = porous-baffle-2d-variable-density-bernoulli.i
     csvdiff = 'porous-baffle-2d-variable-density-bernoulli_out.csv porous-baffle-2d-variable-density-bernoulli_out_centerline_solution_0001.csv'
     requirement = 'The system shall preserve the variable-density Bernoulli baffle pressure jump, density profile, porosity profile, and superficial velocity profile.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md PorousLinearWCNSFVMomentumFlux.md'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md PorousLinearWCNSFVMomentumFlux.md'
     cli_args = ''
     recover = false
     max_threads = 1
@@ -15,7 +15,7 @@
     input = porous-baffle-2d-variable-density-bernoulli.i
     csvdiff = 'porous-baffle-2d-variable-density-bernoulli-pressure-two-term_out.csv'
     requirement = 'The system shall preserve the variable-density porous baffle integral response when using the two-term pressure expansion.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md FVReconstructedPressureGradient.md'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md'
     cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
                "Outputs/file_base=porous-baffle-2d-variable-density-bernoulli-pressure-two-term_out"
     recover = false
