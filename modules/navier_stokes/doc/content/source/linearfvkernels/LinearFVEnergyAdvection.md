@@ -25,9 +25,8 @@ The face mass flux $(\rho \vec{u}\cdot \vec{n})_{RC}$ is provided by the [RhieCh
 gradients and the discrete momentum equation to compute face velocities and mass fluxes.
 For more information on the expression that is used, see [SIMPLE.md].
 
-When the Rhie-Chow provider is [PorousRhieChowMassFlux.md], this same kernel can
-be used for porous-medium energy transport. In that case only specific
-enthalpy advection is supported.
+The same kernel supports porous-medium energy transport when its mass flux is
+provided by [PorousRhieChowMassFlux.md].
 
 !syntax parameters /LinearFVKernels/LinearFVEnergyAdvection
 
