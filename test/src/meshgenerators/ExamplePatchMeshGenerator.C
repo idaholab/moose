@@ -23,8 +23,8 @@
 #include "libmesh/cell_hex20.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("MooseApp", ExamplePatchMeshGenerator);
-registerMooseObjectRenamed("MooseApp",
+registerMooseObject("MooseTestApp", ExamplePatchMeshGenerator);
+registerMooseObjectRenamed("MooseTestApp",
                            PatchMeshGenerator,
                            "06/30/2025 24:00",
                            ExamplePatchMeshGenerator);
