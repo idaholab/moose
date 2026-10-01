@@ -668,7 +668,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     // set "restart_file_base=", you'll get a "No checkpoint file found" error
     if (restart_file_base.size())
     {
-      restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
+      restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base, "restart");
       setRestartFile(restart_file_base);
     }
   }
