@@ -14,9 +14,7 @@
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 
-#ifdef NEML2_ENABLED
-#include "neml2/tensors/TensorBase.h"
-#endif
+// at::Tensor is available via NEML2Utils.h (which includes ATen) when NEML2 is enabled.
 
 class NEML2ModelExecutor;
 
@@ -44,7 +42,7 @@ protected:
   const MaterialProperty<T> * _prop0;
 
   /// Reference to the requested output (or its derivative) value
-  const neml2::Tensor & _value;
+  const at::Tensor & _value;
 #endif
 };
 

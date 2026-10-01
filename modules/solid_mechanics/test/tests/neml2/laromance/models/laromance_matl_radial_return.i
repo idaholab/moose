@@ -70,6 +70,10 @@
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_ep'
     output_rate = 'equivalent_plastic_strain_rate'
+    # Forward-Euler dislocation densities are explicit: evaluate the rate at the
+    # old state so the densities stay inputs, not the integrators' new outputs.
+    cell_dislocation_density = 'cell_dislocation_density~1'
+    wall_dislocation_density = 'wall_dislocation_density~1'
   []
   [integrate_ep]
     type = ScalarBackwardEulerTimeIntegration
@@ -120,12 +124,16 @@
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_cell'
     output_rate = 'cell_dislocation_density_rate'
+    cell_dislocation_density = 'cell_dislocation_density~1'
+    wall_dislocation_density = 'wall_dislocation_density~1'
   []
   [rom_wall]
     type = LAROMANCE6DInterpolation
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_wall'
     output_rate = 'wall_dislocation_density_rate'
+    cell_dislocation_density = 'cell_dislocation_density~1'
+    wall_dislocation_density = 'wall_dislocation_density~1'
   []
   [cell_dd]
     type = ScalarForwardEulerTimeIntegration
@@ -141,8 +149,7 @@
   #####################################################################################
   [model]
     type = ComposedModel
-    models = 'trial_state radial_return plastic_update stress_update vonmises rom_ep rom_cell rom_wall cell_dd wall_dd'
-    priority = 'trial_state radial_return plastic_update stress_update vonmises rom_ep rom_cell rom_wall cell_dd wall_dd'
+    models = 'trial_state radial_return plastic_update stress_update vonmises rom_cell rom_wall cell_dd wall_dd'
     additional_outputs = 'von_mises_stress equivalent_plastic_strain neml2_stress plastic_strain cell_dislocation_density wall_dislocation_density'
   []
 []
