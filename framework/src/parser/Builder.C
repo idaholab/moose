@@ -263,19 +263,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
       {
         auto & object_params = object_action->getObjectParams();
         object_params.setHitNode(*n, {});
-        std::set<std::string> skip_required_params;
-        if (params.have_parameter<std::vector<std::string>>("_object_params_set_by_action"))
-        {
-          const auto & object_params_set_by_action =
-              params.get<std::vector<std::string>>("_object_params_set_by_action");
-          skip_required_params.insert(object_params_set_by_action.begin(),
-                                      object_params_set_by_action.end());
-        }
-
-        const bool skip_required_param_errors =
-            params.have_parameter<bool>("_defer_object_required_param_check") &&
-            params.get<bool>("_defer_object_required_param_check");
-        extractParams(n, object_params, skip_required_params, skip_required_param_errors);
+        extractParams(n, object_params);
         object_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
@@ -673,10 +661,7 @@ Builder::buildFullTree(const std::string & search_string)
 }
 
 void
-Builder::extractParams(const hit::Node * const section_node,
-                       InputParameters & p,
-                       const std::set<std::string> & skip_required_params,
-                       bool skip_required_param_errors)
+Builder::extractParams(const hit::Node * const section_node, InputParameters & p)
 {
   if (section_node)
     mooseAssert(section_node->type() == hit::NodeType::Section, "Node type should be a section");
@@ -877,13 +862,15 @@ Builder::extractParams(const hit::Node * const section_node,
     }
   }
 
-  if (!skip_required_param_errors)
+  // Required parameters are normally checked when the object is constructed, because actions may
+  // still set them after parsing. A parameter error in this section aborts the run before that
+  // happens, so report missing required parameters here, ahead of the parameter errors, because
+  // a missing required parameter is often the fix for them (e.g. a suppressed parameter that was
+  // replaced by a required one).
+  if (!param_errors.empty())
   {
-    auto missing_required_skip_params = skip_required_params;
-    missing_required_skip_params.insert(params_with_errors.begin(), params_with_errors.end());
-
     for (const auto & error : p.missingRequiredParamErrors(
-             section_node ? section_node->fullpath() : "", missing_required_skip_params, true))
+             section_node ? section_node->fullpath() : "", params_with_errors, true))
     {
       if (section_node)
         _errors.emplace_back(error, section_node);

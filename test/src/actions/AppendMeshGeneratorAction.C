@@ -20,8 +20,6 @@ InputParameters
 AppendMeshGeneratorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  // appendMeshGenerator() fills the input from the current final generator after parsing.
-  params.set<std::vector<std::string>>("_object_params_set_by_action") = {"input", "inputs"};
   return params;
 }
 
