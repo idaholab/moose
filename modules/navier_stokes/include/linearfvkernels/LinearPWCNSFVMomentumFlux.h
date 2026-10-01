@@ -29,10 +29,16 @@ public:
   Real computeNeighborRightHandSideContribution() override;
 
 protected:
+  Real computeInternalStressTransmissibility() const override;
+  Real computeInternalStressExplicitCorrection() const override;
+
   Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc) override;
   Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
 private:
+  /// Whether to use a two-point harmonic transmissibility for the stress term.
+  const bool _use_two_point_stress_transmissibility;
+
   bool isInternalBaffleFace() const;
   bool needsInternalBaffleAdvectionCorrection() const;
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
