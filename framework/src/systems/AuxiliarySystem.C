@@ -1048,9 +1048,12 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
 {
-  // Get all elemental aux-kernels of this type/group/exec-flag, regardless of restriction
+  // Get all elemental aux-kernels of this type/group/exec-flag, regardless of restriction. This
+  // is only used as a non-emptiness check below, and spans every thread's copy of each kernel (no
+  // AttribThread condition), so it must stay unsorted - sorting would run dependency/cyclic
+  // resolution across per-thread duplicates of the same kernel, which can falsely detect a cycle.
   std::vector<AuxKernelType *> auxs;
-  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryInto(auxs);
+  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
 
   if (auxs.size())
   {
@@ -1118,10 +1121,13 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
 {
-  // Get all block restricted aux-kernels
-  std::vector<AuxKernelType *> auxs;
-  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryInto(auxs);
+  // Get all block restricted aux-kernels. This is only used as a non-emptiness check below, and
+  // spans every thread's copy of each kernel (no AttribThread condition), so it must stay
+  // unsorted - sorting would run dependency/cyclic resolution across per-thread duplicates of the
+  // same kernel, which can falsely detect a cycle.
   // NOTE: we should use this query to pass to the loop instead
+  std::vector<AuxKernelType *> auxs;
+  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
 
   if (auxs.size())
   {
