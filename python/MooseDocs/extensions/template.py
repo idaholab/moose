@@ -18,6 +18,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, Executioner, MarkdownReader
 from ..extensions import core, command, include, alert, floats, materialicon
+from ..common import setting_validation as validation
 from ..tree import tokens
 
 
@@ -112,7 +113,7 @@ class TemplateLoadCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page, settings):
         defaults = self.defaultSettings()
-        known = dict((k, v[0]) for k, v in defaults.items())
+        known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
         validators = dict((k, v[2])
                           for k, v in defaults.items())
         settings, t_args = common.match_settings(
@@ -153,10 +154,8 @@ class TemplateFieldCommand(command.CommandComponent):
             "The name of the template item which the content is to replace.",
             validation_key)
 
-        def validation_required(setting: str) -> str:
-            return setting
         settings["required"] = (
-            True, "The section is required.", validation_required)
+            True, "The section is required.", validation.boolean)
         return settings
 
     def createToken(self, parent, info, page, settings):

@@ -50,8 +50,6 @@ def match_settings(known, raw, validators):
 
         if value.lower() == "none":
             value = None
-        elif value and all([v.isdigit() for v in value]):
-            value = float(value)
 
         if key in known:
             try:
@@ -76,7 +74,7 @@ def parse_settings(defaults, local, error_on_unknown=True):
         error_on_unknown[bool]: If True through an exception if values are provided that are not
                                 in the default list.
     """
-    known = dict((k, v[0]) for k, v in defaults.items())
+    known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
     validators = dict((k, v[2])
                       for k, v in defaults.items())
     settings, unknown = match_settings(known, local, validators)

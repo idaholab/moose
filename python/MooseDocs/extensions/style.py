@@ -11,7 +11,7 @@ from ..base import components, renderers
 from ..common import exceptions
 from ..tree import tokens, html, latex
 from . import command
-
+from ..common import setting_validation as validation
 
 def make_extension(**kwargs):
     return StyleExtension(**kwargs)
@@ -52,10 +52,8 @@ class StyleCommand(command.CommandComponent):
             "The horizontal alignment ('center', 'left', or 'right')",
             validation_halign)
 
-        def validation_border(setting: str) -> str:
-            return setting
         settings["border"] = (
-            None, "The size of the border in pixels", validation_border)
+            None, "The size of the border in pixels", validation.floating_point)
 
         def validation_color(setting: str) -> str:
             return setting
