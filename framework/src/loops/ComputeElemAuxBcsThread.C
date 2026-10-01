@@ -111,7 +111,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
           }
           _fe_problem.resolveMaterialDependenciesInterface(needed_mat_props, sub_id, _tid);
-          _fe_problem.prepareMaterialProperties(needed_mat_props, sub_id, _tid);
+          _fe_problem.resolveMaterialDependencies(needed_mat_props, sub_id, _tid);
+          _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
           _fe_problem.reinitMaterialsFaceOnBoundary(boundary_id, sub_id, _tid);
 

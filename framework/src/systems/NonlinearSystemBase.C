@@ -1186,7 +1186,8 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
     const auto & mp_deps = constraint->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   }
-  _fe_problem.prepareMaterialProperties(needed_mat_props, primary_elem->subdomain_id(), 0);
+  _fe_problem.resolveMaterialDependencies(needed_mat_props, primary_elem->subdomain_id(), 0);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, 0);
 
   // Stateful material properties are only initialized for neighbor material data for internal faces
   // for discontinuous Galerkin methods or for conforming interfaces for interface kernels. We don't

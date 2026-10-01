@@ -140,7 +140,8 @@ Sampler1DBase<T>::execute()
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
 
-    _fe_problem.prepareMaterialProperties(needed_mat_props, elem->subdomain_id(), _tid);
+    _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
+    _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.
