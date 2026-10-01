@@ -12,14 +12,21 @@
 #include "LinearFVMomentumPressure.h"
 
 /**
- * Pressure-gradient kernel for porous momentum equations written in superficial velocity.
+ * Adds the porosity-weighted pressure gradient to a momentum equation written in superficial
+ * velocity.
  */
 class LinearPWCNSFVMomentumPressure : public LinearFVMomentumPressure
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Construct the porous momentum pressure kernel.
+   * @param params The input parameters for the kernel
+   */
   LinearPWCNSFVMomentumPressure(const InputParameters & params);
 
+  /// Compute the pressure-gradient source multiplied by the cell porosity.
   Real computeRightHandSideContribution() override;
 
 private:
