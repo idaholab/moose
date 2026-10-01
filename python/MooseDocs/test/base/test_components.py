@@ -65,8 +65,7 @@ class TestReaderComponent(unittest.TestCase):
         for key in ["id", "class", "style"]:
             self.assertIn(key, defaults)
             self.assertIsInstance(defaults[key], tuple)
-            # TODO : Comeback to this and update it once all extensions work
-            # self.assertEqual(len(defaults[key]), 2)
+            self.assertEqual(len(defaults[key]), 3)
             self.assertEqual(defaults[key][0], None)
             self.assertIsInstance(defaults[key][1], str)
 
