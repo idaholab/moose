@@ -83,7 +83,7 @@ inlet_u = 0.1
 
 [LinearFVKernels]
   [u_advection]
-    type = PorousLinearWCNSFVMomentumFlux
+    type = LinearPWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}

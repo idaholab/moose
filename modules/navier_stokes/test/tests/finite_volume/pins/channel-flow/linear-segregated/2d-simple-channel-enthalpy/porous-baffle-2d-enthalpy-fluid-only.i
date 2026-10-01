@@ -117,7 +117,7 @@ q = 20000000
 
 [LinearFVKernels]
   [u_advection]
-    type = PorousLinearWCNSFVMomentumFlux
+    type = LinearPWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
@@ -129,7 +129,7 @@ q = 20000000
     use_two_point_stress_transmissibility = true
   []
   [v_advection]
-    type = PorousLinearWCNSFVMomentumFlux
+    type = LinearPWCNSFVMomentumFlux
     variable = superficial_v
     advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
