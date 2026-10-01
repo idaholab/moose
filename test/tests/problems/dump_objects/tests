@@ -8,6 +8,7 @@
     requirement = "The system shall have a capability to dump the equivalent input file syntax for "
                   "all objects added by a given action."
     capture_perf_graph = false
+    max_threads = 1
   []
   [add_all]
     type = RunApp
@@ -18,5 +19,6 @@
     requirement = "The system shall have a capability to dump the equivalent input file syntax for "
                   "all objects created by the problem."
     capture_perf_graph = false
+    max_threads = 1
   []
 []
