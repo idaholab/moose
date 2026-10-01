@@ -24,6 +24,11 @@ AuxiliarySystem::addKokkosKernel(const std::string & kernel_name,
     _kokkos_nodal_aux_storage.addObject(kernel, 0);
   else
     _kokkos_elemental_aux_storage.addObject(kernel, 0);
+
+  // Kokkos aux kernels do not use execution_order_group (suppressed at 0 in validParams()), but
+  // compute() only calls kokkosCompute() while iterating _execution_order_groups, so group 0 must
+  // be present or Kokkos aux kernels would never execute.
+  _execution_order_groups.insert(0);
 }
 
 void

@@ -17,6 +17,11 @@ AuxKernel::validParams()
 {
   InputParameters params = AuxKernelBase::validParams();
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
+  // Kokkos aux kernels are not yet migrated to TheWarehouse-based execution_order_group
+  // filtering, so this parameter would have no effect; suppress it rather than silently
+  // ignoring a user-supplied value.
+  params.set<int>("execution_order_group") = 0;
+  params.suppressParameter<int>("execution_order_group");
   return params;
 }
 
