@@ -203,7 +203,7 @@ NewtonSolve2D(const T & f,
   if (debug)
     Moose::out << "Target values for 2D Newton inversion:\n" << targets << std::endl;
 
-  using std::isnan, std::max, std::abs;
+  using std::isnan, std::max, std::abs, std::isfinite;
 
   do
   {
@@ -234,6 +234,17 @@ NewtonSolve2D(const T & f,
       Moose::out << "Current (minus) residual:\n" << minus_R << std::endl;
       Moose::out << "Current Jacobian:\n" << J << std::endl;
     }
+
+    // Check for NaNs in the Jacobian before proceeding
+    // NOTE: we cannot use std::max to detect a NaN reliably
+    // The solve with a NaN in the matrix would crash, not trigger the desired exception
+    for (const auto i : make_range(system_size))
+      for (const auto j : make_range(system_size))
+        if (!isfinite(J(i, j)))
+        {
+          assign_solution();
+          mooseException(caller_name + ": NaN or infinity detected in Jacobian in NewtonSolve2D");
+        }
 
     // Do some Jacobi (rowmax) preconditioning and check for an empty row
     int degenerate_row = -1;
