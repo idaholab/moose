@@ -22,7 +22,7 @@ current face mass flux and under-relaxed with
 [porous_rhie_chow_baffle.md] for the discrete coupling.
 
 This is the user object expected by
-[PorousLinearWCNSFVMomentumFlux](PorousLinearWCNSFVMomentumFlux.md),
+[LinearPWCNSFVMomentumFlux](LinearPWCNSFVMomentumFlux.md),
 [LinearFVAnisotropicDiffusionJump](LinearFVAnisotropicDiffusionJump.md), and porous uses of
 [LinearFVEnergyAdvection](LinearFVEnergyAdvection.md).
 

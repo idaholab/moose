@@ -14,12 +14,12 @@
 /**
  * Momentum flux kernel with porous-specific advection handling.
  */
-class PorousLinearWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
+class LinearPWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
 {
 public:
   static InputParameters validParams();
 
-  PorousLinearWCNSFVMomentumFlux(const InputParameters & params);
+  LinearPWCNSFVMomentumFlux(const InputParameters & params);
 
   void addMatrixContribution() override;
 

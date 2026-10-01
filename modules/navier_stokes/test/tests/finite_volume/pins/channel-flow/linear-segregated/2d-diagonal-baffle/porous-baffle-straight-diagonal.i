@@ -234,7 +234,7 @@ advected_interp_method = 'upwind'
 
 [LinearFVKernels]
   [u_advection]
-    type = PorousLinearWCNSFVMomentumFlux
+    type = LinearPWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
@@ -246,7 +246,7 @@ advected_interp_method = 'upwind'
     use_two_point_stress_transmissibility = true
   []
   [v_advection]
-    type = PorousLinearWCNSFVMomentumFlux
+    type = LinearPWCNSFVMomentumFlux
     variable = superficial_v
     advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
