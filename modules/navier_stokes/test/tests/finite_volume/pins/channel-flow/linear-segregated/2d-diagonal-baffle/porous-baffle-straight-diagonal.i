@@ -294,7 +294,7 @@ advected_interp_method = 'upwind'
     block = 'porous_zone_1 porous_zone_2'
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusionJump
+    type = LinearFVPressureCorrectionDiffusionJump
     variable = pressure
     diffusion_tensor = Ainv
     rhie_chow_user_object = rc

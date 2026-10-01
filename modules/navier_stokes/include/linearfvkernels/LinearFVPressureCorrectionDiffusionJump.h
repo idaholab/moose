@@ -18,11 +18,11 @@ class FVReconstructedPressureGradient;
  * Diffusion kernel that adds a per-face jump contribution to the RHS, used to
  * enforce porous baffle pressure jumps.
  */
-class LinearFVAnisotropicDiffusionJump : public LinearFVPressureCorrectionDiffusion
+class LinearFVPressureCorrectionDiffusionJump : public LinearFVPressureCorrectionDiffusion
 {
 public:
   static InputParameters validParams();
-  LinearFVAnisotropicDiffusionJump(const InputParameters & params);
+  LinearFVPressureCorrectionDiffusionJump(const InputParameters & params);
 
   Real computeElemMatrixContribution() override;
   Real computeNeighborMatrixContribution() override;

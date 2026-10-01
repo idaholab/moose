@@ -111,7 +111,7 @@ inlet_u = 0.1
     block = 2
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusionJump
+    type = LinearFVPressureCorrectionDiffusionJump
     variable = pressure
     diffusion_tensor = Ainv
     rhie_chow_user_object = rc

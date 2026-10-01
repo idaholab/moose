@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVAnisotropicDiffusionJump.h"
+#include "LinearFVPressureCorrectionDiffusionJump.h"
 #include "FVReconstructedPressureGradient.h"
 #include "MooseUtils.h"
 #include "RhieChowMassFlux.h"
 
-registerMooseObject("NavierStokesApp", LinearFVAnisotropicDiffusionJump);
+registerMooseObject("NavierStokesApp", LinearFVPressureCorrectionDiffusionJump);
 
 InputParameters
-LinearFVAnisotropicDiffusionJump::validParams()
+LinearFVPressureCorrectionDiffusionJump::validParams()
 {
   InputParameters params = LinearFVPressureCorrectionDiffusion::validParams();
   params.addClassDescription("Pressure correction diffusion kernel that adds a baffle jump "
@@ -30,7 +30,8 @@ LinearFVAnisotropicDiffusionJump::validParams()
   return params;
 }
 
-LinearFVAnisotropicDiffusionJump::LinearFVAnisotropicDiffusionJump(const InputParameters & params)
+LinearFVPressureCorrectionDiffusionJump::LinearFVPressureCorrectionDiffusionJump(
+    const InputParameters & params)
   : LinearFVPressureCorrectionDiffusion(params),
     _rc_uo(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _reconstructed_pressure_gradient_method(
@@ -43,7 +44,7 @@ LinearFVAnisotropicDiffusionJump::LinearFVAnisotropicDiffusionJump(const InputPa
 }
 
 Real
-LinearFVAnisotropicDiffusionJump::computeJumpAwareFluxMatrixContribution()
+LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution()
 {
   const Real base_matrix_contribution = computeFluxMatrixContribution();
   if (!_use_two_term_pressure_expansion || !_current_face_info ||
@@ -89,19 +90,19 @@ LinearFVAnisotropicDiffusionJump::computeJumpAwareFluxMatrixContribution()
 }
 
 Real
-LinearFVAnisotropicDiffusionJump::computeElemMatrixContribution()
+LinearFVPressureCorrectionDiffusionJump::computeElemMatrixContribution()
 {
   return computeJumpAwareFluxMatrixContribution();
 }
 
 Real
-LinearFVAnisotropicDiffusionJump::computeNeighborMatrixContribution()
+LinearFVPressureCorrectionDiffusionJump::computeNeighborMatrixContribution()
 {
   return -computeJumpAwareFluxMatrixContribution();
 }
 
 Real
-LinearFVAnisotropicDiffusionJump::computeElemRightHandSideContribution()
+LinearFVPressureCorrectionDiffusionJump::computeElemRightHandSideContribution()
 {
   Real rhs = (_current_face_info && _current_face_info->neighborPtr())
                  ? computeFluxRHSContribution()
@@ -118,7 +119,7 @@ LinearFVAnisotropicDiffusionJump::computeElemRightHandSideContribution()
 }
 
 Real
-LinearFVAnisotropicDiffusionJump::computeNeighborRightHandSideContribution()
+LinearFVPressureCorrectionDiffusionJump::computeNeighborRightHandSideContribution()
 {
   Real rhs = (_current_face_info && _current_face_info->neighborPtr())
                  ? -computeFluxRHSContribution()
