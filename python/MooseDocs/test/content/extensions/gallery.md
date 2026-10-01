@@ -15,3 +15,16 @@ qui officia deserunt mollit anim id est laborum.
 
 !card level_set/vortex_out.mp4 title=Image 3
 !gallery-end!
+
+
+!slideshow! interval=3 overlay_default=True
+!slide testing/Flag_of_Idaho.svg caption=Idaho flag
+
+!slide! testing/Flag_of_Michigan.svg caption=Michigan flag overlay=False
+[Michigan](https://www.michigan.gov)
+
+More text
+!slide-end!
+
+!slide testing/Flag_of_Washington.svg
+!slideshow-end!
