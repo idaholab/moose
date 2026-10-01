@@ -45,8 +45,7 @@ class TestExtension(unittest.TestCase):
         ext = ExtTester()
         self.assertFalse(ext.called)
         content = pages.Page("foo", source="foo")
-        t = Translator([content], Reader(
-            RecursiveLexer("foo")), Renderer(), [ext])
+        t = Translator([content], Reader(RecursiveLexer("foo")), Renderer(), [ext])
         t.init()
         self.assertTrue(ext.called)
 

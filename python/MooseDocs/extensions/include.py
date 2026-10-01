@@ -44,7 +44,7 @@ class IncludeCommand(command.CommandComponent):
         settings["optional"] = (
             False,
             "Toggle the include as optional when the file doesn't exist.",
-            validation.boolean
+            validation.boolean,
         )
         return settings
 
@@ -57,8 +57,7 @@ class IncludeCommand(command.CommandComponent):
         )
         if include_page is None and settings["optional"]:
             return parent
-        content, line = common.extractContent(
-            self.reader.read(include_page), settings)
+        content, line = common.extractContent(self.reader.read(include_page), settings)
 
         self.reader.tokenize(parent, content, page, line=line)
         page["dependencies"].add(include_page.uid)
@@ -73,7 +72,7 @@ class IncludeSlides(IncludeCommand):
         settings["vertical"] = (
             True,
             "Included content will be included as vertical slides.",
-            validation.boolean
+            validation.boolean,
         )
         return settings
 

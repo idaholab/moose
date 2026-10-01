@@ -71,10 +71,12 @@ class SubmoduleHashCommand(command.CommandComponent):
 
         def validation_url(setting: str) -> str:
             return setting
+
         settings["url"] = (
             None,
             "If provided, prefix the hash with the url to create a link.",
-            validation_url)
+            validation_url,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -108,5 +110,4 @@ class SubmoduleHashCommand(command.CommandComponent):
                 return parent
 
         msg = "The submodule '{}' was not located, the available submodules are: {}"
-        raise exceptions.MooseDocsException(
-            msg, name, ", ".join(status.keys()))
+        raise exceptions.MooseDocsException(msg, name, ", ".join(status.keys()))

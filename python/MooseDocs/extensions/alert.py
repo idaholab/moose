@@ -71,11 +71,9 @@ class AlertExtension(command.CommandExtension):
 
             renderer.addPreamble("\\definecolor{alert-error}{RGB}{153,0,0}")
             renderer.addPreamble("\\definecolor{alert-note}{RGB}{0,88,151}")
-            renderer.addPreamble(
-                "\\definecolor{alert-warning}{RGB}{220,200,100}")
+            renderer.addPreamble("\\definecolor{alert-warning}{RGB}{220,200,100}")
             renderer.addPreamble("\\definecolor{alert-info}{RGB}{0,128,21}")
-            renderer.addPreamble(
-                "\\definecolor{alert-construction}{RGB}{255,114,33}")
+            renderer.addPreamble("\\definecolor{alert-construction}{RGB}{255,114,33}")
             renderer.addPreamble(ALERT_LATEX)
 
         if isinstance(renderer, HTMLRenderer):
@@ -92,32 +90,34 @@ class AlertCommand(command.CommandComponent):
 
         def validation_title(setting: str) -> str:
             return setting
-        settings["title"] = (
-            None, "The optional alert title.", validation_title)
 
-        settings["center-title"] = (False,
-                                    "Center the title.", validation.boolean)
+        settings["title"] = (None, "The optional alert title.", validation_title)
+
+        settings["center-title"] = (False, "Center the title.", validation.boolean)
 
         def validation_prefix(setting: str) -> str:
-            if setting.lower() == 'true':
+            if setting.lower() == "true":
                 return True
-            if setting.lower() == 'false':
+            if setting.lower() == "false":
                 return False
             return setting
+
         settings["prefix"] = (
             None,
             "Enable/disable the title being prefixed with the alert brand.",
-            validation_prefix)
+            validation_prefix,
+        )
 
-        settings["icon"] = (
-            True, "Enable/disable the title icon.", validation.boolean)
+        settings["icon"] = (True, "Enable/disable the title icon.", validation.boolean)
 
         def validation_icon_name(setting: str) -> str:
             return setting
+
         settings["icon-name"] = (
             None,
             "Set the icon name, see material icon for available options.",
-            validation_icon_name)
+            validation_icon_name,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -152,8 +152,7 @@ class AlertCommand(command.CommandComponent):
         )
 
         if title:
-            self.reader.tokenize(title_token, title, page,
-                                 MarkdownReader.INLINE)
+            self.reader.tokenize(title_token, title, page, MarkdownReader.INLINE)
 
         return AlertContent(alert_token, brand=brand)
 

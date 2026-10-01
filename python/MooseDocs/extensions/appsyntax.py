@@ -47,8 +47,7 @@ InputParametersToken = tokens.newToken(
 )
 
 SyntaxList = tokens.newToken("SyntaxList")
-SyntaxListItem = tokens.newToken(
-    "SyntaxListItem", syntax="", group="", header=False)
+SyntaxListItem = tokens.newToken("SyntaxListItem", syntax="", group="", header=False)
 SyntaxLink = tokens.newToken("SyntaxLink", core.Link)
 
 LATEX_PARAMETER = """
@@ -120,10 +119,8 @@ class AppSyntaxExtension(command.CommandExtension):
             [],
             "List of directories to interrogate for input files using an object.",
         )
-        config["allow-test-objects"] = (False,
-                                        "Enable documentation for test objects.")
-        config["remove"] = (
-            None, "List or Dictionary of lists of syntax to remove.")
+        config["allow-test-objects"] = (False, "Enable documentation for test objects.")
+        config["remove"] = (None, "List or Dictionary of lists of syntax to remove.")
         config["visible"] = (
             ["required", "optional"],
             "Parameter groups to show as un-collapsed.",
@@ -182,8 +179,7 @@ class AppSyntaxExtension(command.CommandExtension):
 
         exe = self.executable
         if exe is None:
-            LOG.error("Failed to locate a valid executable in %s.",
-                      self["executable"])
+            LOG.error("Failed to locate a valid executable in %s.", self["executable"])
         else:
             try:
                 self._app_syntax = moosesyntax.get_moose_syntax_tree(
@@ -226,8 +222,7 @@ class AppSyntaxExtension(command.CommandExtension):
             for node in moosetree.iterate(self._app_syntax):
                 node.test = False
 
-        LOG.info(
-            "MOOSE application syntax complete [%s sec.]", time.time() - start)
+        LOG.info("MOOSE application syntax complete [%s sec.]", time.time() - start)
 
     def __initClassDatabase(self):
         """Initialize the class database for faster searching."""
@@ -319,13 +314,11 @@ class AppSyntaxExtension(command.CommandExtension):
                 icon_name=self.get("external_icon"),
                 string="Disabled Object Syntax",
             )
-            alert.AlertContent(
-                tok, string=self.EXTERNAL_MESSAGE.format(self.apptype))
+            alert.AlertContent(tok, string=self.EXTERNAL_MESSAGE.format(self.apptype))
             ast.insert(0, tok)
 
     def extend(self, reader, renderer):
-        self.requires(core, floats, table, autolink,
-                      materialicon, modal, alert)
+        self.requires(core, floats, table, autolink, materialicon, modal, alert)
 
         self.addCommand(reader, SyntaxDescriptionCommand())
         self.addCommand(reader, SyntaxParametersCommand())
@@ -357,12 +350,14 @@ class SyntaxCommandBase(command.CommandComponent):
 
         def validation_syntax(setting: str) -> str:
             return setting
+
         settings["syntax"] = (
             None,
             "The name of the syntax to extract. If the name of the syntax "
             "is the first item in the settings the 'syntax=' may be "
             "omitted, e.g., `!syntax parameters /Kernels/Diffusion`.",
-            validation_syntax)
+            validation_syntax,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -396,13 +391,18 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
 
         def validation_heading(setting: str) -> str:
             return setting
+
         settings["heading"] = (
             "Input Parameters",
             "The heading title for the input parameters table, use 'None' to "
             "remove the heading.",
-            validation_heading)
-        settings["heading-level"] = (2, "Heading level for section title.",
-                                     validation.unsigned_integer)
+            validation_heading,
+        )
+        settings["heading-level"] = (
+            2,
+            "Heading level for section title.",
+            validation.unsigned_integer,
+        )
         return settings
 
     def createHeading(self, parent, page, settings):
@@ -431,8 +431,7 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
 
         else:
             p = core.Paragraph(parent)
-            self.reader.tokenize(p, str(obj.description),
-                                 page, MarkdownReader.INLINE)
+            self.reader.tokenize(p, str(obj.description), page, MarkdownReader.INLINE)
             return parent
 
 
@@ -446,32 +445,40 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
         def validation_groups(setting: str) -> str:
             return setting
+
         settings["groups"] = (
             None,
             "Space separated list of groups, in desired order, to output.",
-            validation_groups)
+            validation_groups,
+        )
 
         def validation_hide(setting: str) -> str:
             return setting
+
         settings["hide"] = (
             None,
             "Space separated list of parameters to remove from output.",
-            validation_hide)
+            validation_hide,
+        )
 
         def validation_show(setting: str) -> str:
             return setting
+
         settings["show"] = (
             None,
             "Space separated list of parameters to display in output.",
-            validation_show)
+            validation_show,
+        )
 
         def validation_visible(setting: str) -> str:
             return setting
+
         settings["visible"] = (
             None,
             "Space separated list of parameter groups to display with "
             "un-collapsed sections.",
-            validation_visible)
+            validation_visible,
+        )
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -494,16 +501,13 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
             parent, syntax=obj.name, parameters=parameters, **self.attributes(settings)
         )
         if settings["groups"]:
-            token["groups"] = [group.strip()
-                               for group in settings["groups"].split(" ")]
+            token["groups"] = [group.strip() for group in settings["groups"].split(" ")]
 
         if settings["hide"]:
-            token["hide"] = [param.strip()
-                             for param in settings["hide"].split(" ")]
+            token["hide"] = [param.strip() for param in settings["hide"].split(" ")]
 
         if settings["show"]:
-            token["show"] = [param.strip()
-                             for param in settings["show"].split(" ")]
+            token["show"] = [param.strip() for param in settings["show"].split(" ")]
 
         if settings["visible"] is not None:
             token["visible"] = [
@@ -559,8 +563,7 @@ class SyntaxParameterCommand(SyntaxCommandBase):
             return tokens.String(parent, content="{}/{}".format(obj_syntax, param_name))
 
         if param_name not in parameters and not param_external:
-            results = mooseutils.levenshteinDistance(
-                param_name, parameters.keys(), 5)
+            results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(
                 obj_syntax, param_name
             )
@@ -593,10 +596,12 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
 
         def validation_heading(setting: str) -> str:
             return setting
+
         settings["heading"] = (
             "Child Objects",
             "Heading to include for sections, use 'None' to remove the title.",
-            validation_heading)
+            validation_heading,
+        )
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -628,8 +633,12 @@ class SyntaxInputsCommand(SyntaxChildrenCommand):
 
         def validation_heading(setting: str) -> str:
             return setting
+
         settings["heading"] = (
-            "Input Files", settings["heading"][1], validation_heading)
+            "Input Files",
+            settings["heading"][1],
+            validation_heading,
+        )
         return settings
 
 
@@ -643,29 +652,42 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
         def validation_heading(setting: str) -> str:
             return setting
+
         settings["heading"] = (
             "AUTO",
             "The heading title for the input parameters table, use 'None' to "
             "remove the heading.",
-            validation_heading)
-        settings["group-headings"] = (True,
-                                      "Display group headings.", validation.boolean)
+            validation_heading,
+        )
+        settings["group-headings"] = (
+            True,
+            "Display group headings.",
+            validation.boolean,
+        )
 
         def validation_groups(setting: str) -> str:
             return setting
+
         settings["groups"] = (
             None,
             "List of groups (apps) to include in the complete syntax list.",
-            validation_groups)
+            validation_groups,
+        )
 
         settings["actions"] = (
-            True, "Include a list of Action objects in syntax.", validation.boolean)
+            True,
+            "Include a list of Action objects in syntax.",
+            validation.boolean,
+        )
         settings["objects"] = (
-            True, "Include a list of MooseObject objects in syntax.", validation.boolean)
+            True,
+            "Include a list of MooseObject objects in syntax.",
+            validation.boolean,
+        )
         settings["subsystems"] = (
             True,
             "Include a list of sub system syntax in the output.",
-            validation.boolean
+            validation.boolean,
         )
 
         return settings
@@ -700,8 +722,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
                     primary, info, page, group, obj.objects(), "MooseObject"
                 )
             if settings["subsystems"]:
-                count += self._addItems(primary, info,
-                                        page, group, obj.syntax())
+                count += self._addItems(primary, info, page, group, obj.syntax())
 
             if count == 0:
                 header.parent = None
@@ -715,8 +736,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     def createHeading(self, parent, page, settings, **kwargs):
         if settings["heading"] == "AUTO":
             h = ["Objects", "Actions", "Subsystems"]
-            idx = [settings["objects"],
-                   settings["actions"], settings["subsystems"]]
+            idx = [settings["objects"], settings["actions"], settings["subsystems"]]
             names = [h[i] for i, v in enumerate(idx) if v]
             if len(names) == 1:
                 settings["heading"] = "Available {}".format(*names)
@@ -774,13 +794,12 @@ class SyntaxCompleteCommand(SyntaxListCommand):
     @staticmethod
     def defaultSettings():
         settings = SyntaxListCommand.defaultSettings()
-        settings["level"] = (2, "Beginning heading level.",
-                             validation.unsigned_integer)
+        settings["level"] = (2, "Beginning heading level.", validation.unsigned_integer)
 
         def validation_heading(setting: str) -> str:
             return setting
-        settings["heading"] = (None, settings["heading"]
-                               [1], validation_heading)
+
+        settings["heading"] = (None, settings["heading"][1], validation_heading)
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -795,8 +814,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
     def _addList(
         self, parent, info, page, obj, settings, *, level=None, recursive=False
     ):
-        groups = set(settings["groups"].split()
-                     ) if settings["groups"] else None
+        groups = set(settings["groups"].split()) if settings["groups"] else None
         h_id = settings["id"]
         for child in obj.syntax():
             if child.removed or child.test:
@@ -810,8 +828,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             if (groups is None) or (cgs.intersection(groups)):
                 url = os.path.join("syntax", child.markdown)
                 h = core.Heading(parent, level=level, id_=h_id)
-                autolink.AutoLink(h, page=url, string=str(
-                    child.fullpath().strip("/")))
+                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip("/")))
 
             SyntaxListCommand.createTokenFromSyntax(
                 self, parent, info, page, child, settings
@@ -880,8 +897,7 @@ class RenderSyntaxListItem(components.RenderComponent):
         token(0).parent = None
         env = latex.Environment(parent, "ObjectDescription", args=args)
         if len(token) == 0:
-            latex.String(
-                env, content="\\textcolor{red}{No Description.}", escape=False)
+            latex.String(env, content="\\textcolor{red}{No Description.}", escape=False)
         return env
 
 
@@ -994,8 +1010,7 @@ class RenderParameterToken(components.RenderComponent):
             body = parent
 
         if default:
-            p = html.Tag(
-                body, "p", class_="moose-parameter-description-default")
+            p = html.Tag(body, "p", class_="moose-parameter-description-default")
             html.Tag(p, "span", string="Default:")
             html.String(p, content=default)
 
@@ -1015,8 +1030,7 @@ class RenderParameterToken(components.RenderComponent):
             or "Funct" in cpp_type
             or "MaterialProperty" in cpp_type
         ):
-            p = html.Tag(
-                body, "p", class_="moose-parameter-description-doc-unit")
+            p = html.Tag(body, "p", class_="moose-parameter-description-doc-unit")
             html.Tag(p, "span", string="Unit:")
             # If a unit was specified, always display it
             if doc_unit:
@@ -1025,19 +1039,16 @@ class RenderParameterToken(components.RenderComponent):
                 html.String(p, content="(no unit assumed)")
 
         if param["doc_range"]:
-            p = html.Tag(
-                body, "p", class_="moose-parameter-description-doc-range")
+            p = html.Tag(body, "p", class_="moose-parameter-description-doc-range")
             html.Tag(p, "span", string="Range:")
             html.String(p, content=param["doc_range"])
 
         if param["options"]:
-            p = html.Tag(
-                body, "p", class_="moose-parameter-description-options")
+            p = html.Tag(body, "p", class_="moose-parameter-description-options")
             html.Tag(p, "span", string="Options:")
             html.String(p, content=", ".join(param["options"].split()))
 
-        p = html.Tag(
-            body, "p", class_="moose-parameter-description-controllable")
+        p = html.Tag(body, "p", class_="moose-parameter-description-controllable")
         html.Tag(p, "span", string="Controllable:")
         html.String(p, content=("Yes" if param["controllable"] else "No"))
 
@@ -1059,8 +1070,7 @@ class RenderParameterToken(components.RenderComponent):
         elif not group and not param["required"]:
             group = "Optional"
 
-        args = [latex.Brace(string=name), latex.Bracket(
-            string=group), latex.Bracket()]
+        args = [latex.Brace(string=name), latex.Bracket(string=group), latex.Bracket()]
         latex.Command(args[2], "texttt", string=param["cpp_type"])
         default = _format_default(param) or ""
         if default:

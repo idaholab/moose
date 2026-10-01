@@ -72,8 +72,7 @@ class TestTemplate(MooseDocsTestCase):
         self.assertHTMLTag(res(2), "h2", size=5)
         self.assertEqual(res(2).text(), "Field with Defaults")
         self.assertHTMLTag(res(3), "p", size=17)
-        self.assertEqual(
-            res(3).text(), "This is the default message , it is great .")
+        self.assertEqual(res(3).text(), "This is the default message , it is great .")
 
         self.assertHTMLTag(res(4), "h2", size=5)
         self.assertEqual(res(4).text(), "Field with Replacement")

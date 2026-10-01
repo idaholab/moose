@@ -21,115 +21,146 @@ def extractContentSettings():
 
     def validation_prepend(setting: str) -> str:
         return setting
+
     settings["prepend"] = (
         None,
         "Text to include prior to each line of the included text.",
-        validation_prepend)
+        validation_prepend,
+    )
 
     def validation_append(setting: str) -> str:
         return setting
+
     settings["append"] = (
-        "", "Text to include after each line of the included text.", validation_append)
+        "",
+        "Text to include after each line of the included text.",
+        validation_append,
+    )
 
     def validation_header(setting: str) -> str:
         return setting
+
     settings["header"] = (
-        None, "Text to include prior to the included text.", validation_header)
-    settings["header-newlines"] = (1,
-                                   "The number of newlines after the header.", validation.unsigned_integer)
+        None,
+        "Text to include prior to the included text.",
+        validation_header,
+    )
+    settings["header-newlines"] = (
+        1,
+        "The number of newlines after the header.",
+        validation.unsigned_integer,
+    )
 
     def validation_footer(setting: str) -> str:
         return setting
-    settings["footer"] = (
-        "", "Text to include after the included text.", validation_footer)
 
-    settings["footer-newlines"] = (1,
-                                   "The number of newlines before the footer.",
-                                   validation.unsigned_integer)
+    settings["footer"] = (
+        "",
+        "Text to include after the included text.",
+        validation_footer,
+    )
+
+    settings["footer-newlines"] = (
+        1,
+        "The number of newlines before the footer.",
+        validation.unsigned_integer,
+    )
     settings["indent"] = (
-        0, "The level of indenting to apply to the included text.", validation.unsigned_integer)
+        0,
+        "The level of indenting to apply to the included text.",
+        validation.unsigned_integer,
+    )
     settings["strip-header"] = (
         True,
         "When True the MOOSE header is removed for display.",
-        validation.boolean
+        validation.boolean,
     )
     settings["fix-moose-header"] = (
         True,
         "In C/h files within MOOSE the '//*' is used for the "
         "header at the top. This breaks the highlighting, this "
         "option removes these and replaces them with '//'.",
-        validation.boolean
+        validation.boolean,
     )
     settings["strip-extra-newlines"] = (
         True,
         "Removes extraneous new lines from the text.",
-        validation.boolean
+        validation.boolean,
     )
     settings["strip-leading-whitespace"] = (
         False,
         "When True leading white-space is removed " "from the included text.",
-        validation.boolean
+        validation.boolean,
     )
 
     def validation_line(setting: str) -> str:
         return setting
+
     settings["line"] = (
         None,
         "A portion of text that unique identifies a single line to " "include.",
-        validation_line)
+        validation_line,
+    )
 
     def validation_re(setting: str) -> str:
         return setting
+
     settings["re"] = (
         None,
         "Extract content via a regex, if the 'content' group exists it "
         "is used as the desired content; if 'remove' group exists it is extracted; otherwise group 0 is used for the content.",
-        validation_re
+        validation_re,
     )
 
     def validation_re_flags(setting: str) -> str:
         return setting
-    settings["re-flags"] = ("re.M|re.S|re.U",
-                            "Python re flags.", validation_re_flags)
+
+    settings["re-flags"] = ("re.M|re.S|re.U", "Python re flags.", validation_re_flags)
 
     def validation_start(setting: str) -> str:
         return setting
+
     settings["start"] = (
         None,
         "A portion of text that unique identifies the starting "
         "location for including text, if not provided the beginning "
         "of the file is utilized.",
-        validation_start)
+        validation_start,
+    )
 
     def validation_end(setting: str) -> str:
         return setting
+
     settings["end"] = (
         None,
         "A portion of text that unique identifies the ending location "
         "for including text, if not provided the end of the file is "
         "used. By default this line is not included in the display.",
-        validation_end)
+        validation_end,
+    )
 
     settings["include-start"] = (
         True,
         "When False the text captured by the 'start' setting "
         "is excluded in the displayed text.",
-        validation.boolean
+        validation.boolean,
     )
     settings["include-end"] = (
         False,
         "When True the text captured by the 'end' setting is "
         "included in the displayed text.",
-        validation.boolean
+        validation.boolean,
     )
 
     def validation_replace(setting: str) -> str:
         return setting
+
     settings["replace"] = (
         None,
         "List of replacement string pairs: ['foo','bar', 'boom','baam'] "
         "replaces 'foo' with 'bar' and 'boom' with 'baam'.",
-        validation_replace)
+        validation_replace,
+    )
     return settings
 
 
@@ -189,8 +220,7 @@ def prepareContent(content, settings):
 
     # Strip header
     if settings["strip-header"]:
-        content = re.sub(r"^((#\*)|(\/{2}\*)).*?\n",
-                         "", content, flags=re.MULTILINE)
+        content = re.sub(r"^((#\*)|(\/{2}\*)).*?\n", "", content, flags=re.MULTILINE)
 
     # Strip leading/trailing white-space
     if settings["strip-leading-whitespace"]:
@@ -199,19 +229,16 @@ def prepareContent(content, settings):
     # Add indent
     if settings["indent"] > 0:
         replace = r"{}\1".format(" " * int(settings["indent"]))
-        content = re.sub(r"^(.*?)$", replace, content,
-                         flags=re.MULTILINE | re.UNICODE)
+        content = re.sub(r"^(.*?)$", replace, content, flags=re.MULTILINE | re.UNICODE)
 
     # prepend/append
     if settings["prepend"] is not None:
         replace = r"{}\1".format(settings["prepend"])
-        content = re.sub(r"^(.*?)$", replace, content,
-                         flags=re.MULTILINE | re.UNICODE)
+        content = re.sub(r"^(.*?)$", replace, content, flags=re.MULTILINE | re.UNICODE)
 
     if settings["append"] is not None:
         replace = r"\1{}".format(settings["append"])
-        content = re.sub(r"^(.*?)$", replace, content,
-                         flags=re.MULTILINE | re.UNICODE)
+        content = re.sub(r"^(.*?)$", replace, content, flags=re.MULTILINE | re.UNICODE)
 
     if settings["header"] is not None:
         content = "{}{}{}".format(
@@ -225,8 +252,7 @@ def prepareContent(content, settings):
 
     if settings["fix-moose-header"]:
         content = fix_moose_header(content)
-        content = re.sub(r"^//\*", "//", content,
-                         flags=re.MULTILINE | re.UNICODE)
+        content = re.sub(r"^//\*", "//", content, flags=re.MULTILINE | re.UNICODE)
 
     if settings["replace"]:
         pairs = eval(settings["replace"])

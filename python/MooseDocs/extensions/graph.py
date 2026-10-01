@@ -95,38 +95,44 @@ class GraphScatter(command.CommandComponent):
 
         def validation_data(setting: str) -> str:
             return setting
+
         settings["data"] = (
             None,
             "Directly supply a list of dict items (i.e., JSON data) to the "
             "plotly plot command, see "
             "https://plot.ly/javascript/line-and-scatter"
             "for additional details.",
-            validation_data)
+            validation_data,
+        )
 
         def validation_layout(setting: str) -> str:
             return setting
+
         settings["layout"] = (
             "dict()",
             "Plotly layout settings for the chart, refer to "
             "https://plot.ly/javascript/reference/#layout "
             "for available options.",
-            validation_layout)
+            validation_layout,
+        )
 
         def validation_filename(setting: str) -> str:
             return setting
+
         settings["filename"] = (
             None,
             "The name of a CSV file for extracting data, when used the "
             "'x' and 'y' fields of the 'data' setting should be replaced by "
             "column names or numbers.",
-            validation_filename)
+            validation_filename,
+        )
 
         settings.update(floats.caption_settings())
 
         def validation_prefix(setting: str) -> str:
             return setting
-        settings["prefix"] = ("Figure", settings["prefix"]
-                              [1], validation_prefix)
+
+        settings["prefix"] = ("Figure", settings["prefix"][1], validation_prefix)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -174,79 +180,96 @@ class GraphHistogram(command.CommandComponent):
 
         def validation_data(setting: str) -> str:
             return setting
+
         settings["data"] = (
             None,
             "Directly supply a list of dict items (i.e., JSON data) to the "
             "plotly plot command, see "
             "https://plot.ly/javascript/line-and-scatter"
             "for additional details.",
-            validation_data)
+            validation_data,
+        )
 
         def validation_layout(setting: str) -> str:
             return setting
+
         settings["layout"] = (
             None,
             "Plotly layout settings for the chart, refer to "
             "https://plot.ly/javascript/reference/#layout "
             "for available options.",
-            validation_layout)
+            validation_layout,
+        )
 
         def validation_filename(setting: str) -> str:
             return setting
+
         settings["filename"] = (
             None,
             "The name of a CSV file for extracting data, when used the "
             "'x' and 'y' fields of the 'data' setting should be replaced by "
             "column names or numbers.",
-            validation_filename)
+            validation_filename,
+        )
 
         def validation_vectors(setting: str) -> str:
             return setting
+
         settings["vectors"] = (
             None,
             "Name of postprocessor vector names to plot, default is all.",
-            validation_vectors)
+            validation_vectors,
+        )
 
         def validation_names(setting: str) -> str:
             return setting
+
         settings["names"] = (
             None,
             "Name to show on legend, by default the vector names are used.",
-            validation_names)
+            validation_names,
+        )
 
         settings["probability"] = (
             True,
             "True to plot with probability density normalization.",
-            validation.boolean
+            validation.boolean,
         )
         settings["bins"] = (
-            0, "Number of bins to use, set to 0 for auto calculation.",
-            validation.unsigned_integer)
+            0,
+            "Number of bins to use, set to 0 for auto calculation.",
+            validation.unsigned_integer,
+        )
 
         settings["alpha"] = (
-            1.0, "Set chart opacity alpha setting.", validation.floating_point)
+            1.0,
+            "Set chart opacity alpha setting.",
+            validation.floating_point,
+        )
 
         def validation_title(setting: str) -> str:
             return setting
+
         settings["title"] = ("", "Plot title", validation_title)
 
         def validation_xlabel(setting: str) -> str:
             return setting
+
         settings["xlabel"] = ("Value", "x-axis label", validation_xlabel)
 
         def validation_ylabel(setting: str) -> str:
             return setting
+
         settings["ylabel"] = ("Probability", "y-axis label", validation_ylabel)
 
-        settings["legend"] = (
-            True, "True|False toggle for legend.", validation.boolean)
+        settings["legend"] = (True, "True|False toggle for legend.", validation.boolean)
 
         settings.update(floats.caption_settings())
 
         def validation_prefix(setting: str) -> str:
             return setting
-        settings["prefix"] = ("Figure", settings["prefix"]
-                              [1], validation_prefix)
+
+        settings["prefix"] = ("Figure", settings["prefix"][1], validation_prefix)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -284,8 +307,7 @@ class GraphHistogram(command.CommandComponent):
             data = [dict() for i in range(len(vectors))]
             for i in range(len(vectors)):
                 if not vectors[i] in reader.variables():
-                    string = "The vector " + \
-                        vectors[i] + " is not in " + filename
+                    string = "The vector " + vectors[i] + " is not in " + filename
                     raise common.exceptions.MooseDocsException(string)
                 data[i]["type"] = "histogram"
                 data[i]["x"] = reader[vectors[i]].tolist()
@@ -383,8 +405,7 @@ class RenderScatter(components.RenderComponent):
         else:
             layout = token["layout"]
             layout.setdefault(
-                "font", dict(family="Computer Modern",
-                             size=12, color="#000000")
+                "font", dict(family="Computer Modern", size=12, color="#000000")
             )
             layout.setdefault("xaxis", dict())
             layout["xaxis"].setdefault("linewidth", 1)
@@ -431,8 +452,7 @@ class RenderHistogram(components.RenderComponent):
         else:
             layout = token["layout"]
             layout.setdefault(
-                "font", dict(family="Computer Modern",
-                             size=12, color="#000000")
+                "font", dict(family="Computer Modern", size=12, color="#000000")
             )
             layout.setdefault("xaxis", dict())
             layout["xaxis"].setdefault("linewidth", 1)

@@ -22,9 +22,9 @@ def boolean(setting: str) -> bool:
         if the value is not either 'True' of 'False', case insensitive
     """
 
-    if setting.lower() == 'true':
+    if setting.lower() == "true":
         return True
-    if setting.lower() == 'false':
+    if setting.lower() == "false":
         return False
     raise MooseDocsException(f"Unable to parse provided input '{
                              setting}' as a bool.\nPlease provide 'true' of 'false'.")
@@ -59,7 +59,8 @@ def unsigned_integer(setting: str) -> int:
 
     if value < 0:
         raise MooseDocsException(
-            f"Expected an unsigned int and a negative value '{value}' was provided.")
+            f"Expected an unsigned int and a negative value '{value}' was provided."
+        )
 
     return value
 

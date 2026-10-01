@@ -20,6 +20,7 @@ from ..base import components, renderers, LatexRenderer
 from ..tree import pages, tokens, html, latex
 from . import core, command, heading
 from ..common import setting_validation as validation
+
 LOG = logging.getLogger(__name__)
 
 
@@ -29,8 +30,7 @@ def make_extension(**kwargs):
 
 ContentToken = tokens.newToken("ContentToken", location="", level=None)
 AtoZToken = tokens.newToken("AtoZToken", location="", level=None, buttons=True)
-TableOfContents = tokens.newToken(
-    "TableOfContents", levels=list(), columns=1, hide=[])
+TableOfContents = tokens.newToken("TableOfContents", levels=list(), columns=1, hide=[])
 ContentOutline = tokens.newToken(
     "ContentOutline",
     location=None,
@@ -101,8 +101,10 @@ class ContentExtension(command.CommandExtension):
         """
 
         location = location
-        def func(p): return p.local.startswith(
-            location) and isinstance(p, pages.Source)
+
+        def func(p):
+            return p.local.startswith(location) and isinstance(p, pages.Source)
+
         nodes = self.translator.findPages(func)
         nodes.sort(key=lambda n: n.local)
 
@@ -121,8 +123,7 @@ class ContentExtension(command.CommandExtension):
                     key = label[0]
                 elif method == ContentExtension.FOLDER:
                     parts = tuple(
-                        node.local.replace(location, "").strip(
-                            os.sep).split(os.sep)
+                        node.local.replace(location, "").strip(os.sep).split(os.sep)
                     )
                     key = parts[0] if len(parts) > 1 else ""
                 else:
@@ -146,16 +147,22 @@ class ContentCommand(command.CommandComponent):
 
         def validation_location(setting: str) -> str:
             return setting
+
         settings["location"] = (
-            "", "The markdown content directory to build contents.", validation_location)
+            "",
+            "The markdown content directory to build contents.",
+            validation_location,
+        )
 
         settings["level"] = (
-            2, "Heading level for top-level headings.", validation.unsigned_integer)
+            2,
+            "Heading level for top-level headings.",
+            validation.unsigned_integer,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
-        ContentToken(
-            parent, location=settings["location"], level=settings["level"])
+        ContentToken(parent, location=settings["location"], level=settings["level"])
         return parent
 
 
@@ -169,15 +176,22 @@ class AtoZCommand(command.CommandComponent):
 
         def validation_location(setting: str) -> str:
             return setting
+
         settings["location"] = (
-            "", "The markdown content directory to build contents.", validation_location)
+            "",
+            "The markdown content directory to build contents.",
+            validation_location,
+        )
 
         settings["level"] = (
-            2, "Heading level for A, B,... headings.", validation.unsigned_integer)
+            2,
+            "Heading level for A, B,... headings.",
+            validation.unsigned_integer,
+        )
         settings["buttons"] = (
             True,
             "Display buttons linking to the A, B,... headings.",
-            validation.boolean
+            validation.boolean,
         )
         return settings
 
@@ -201,16 +215,19 @@ class TableOfContentsCommand(command.CommandComponent):
 
         def validation_levels(setting: str) -> str:
             return setting
-        settings["levels"] = (
-            [1], "Heading level(s) to display.", validation_levels)
+
+        settings["levels"] = ([1], "Heading level(s) to display.", validation_levels)
 
         settings["columns"] = (
-            1, "The number of columns to display.", validation.unsigned_integer)
+            1,
+            "The number of columns to display.",
+            validation.unsigned_integer,
+        )
 
         def validation_hide(setting: str) -> str:
             return setting
-        settings["hide"] = (
-            "", "A list of heading ids to hide.", validation_hide)
+
+        settings["hide"] = ("", "A list of heading ids to hide.", validation_hide)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -236,44 +253,55 @@ class ContentOutlineCommand(command.CommandComponent):
 
         def validation_location(setting: str) -> str:
             return setting
+
         settings["location"] = (
             None,
             "The markdown content directory to build outline.",
-            validation_location)
+            validation_location,
+        )
         settings["recursive"] = (
             False,
             "Include content from the location subdirectories recursively.",
-            validation.boolean
+            validation.boolean,
         )
 
         def validation_pages(setting: str) -> str:
             return setting
+
         settings["pages"] = (
             "",
             "The pages to include in outline in desired order of appearance.",
-            validation_pages)
+            validation_pages,
+        )
 
         settings["max_level"] = (
-            1, "Maximum heading level to display.", validation.unsigned_integer)
+            1,
+            "Maximum heading level to display.",
+            validation.unsigned_integer,
+        )
 
         def validation_hide(setting: str) -> str:
             return setting
-        settings["hide"] = (
-            "", "A list of heading ids to hide.", validation_hide)
+
+        settings["hide"] = ("", "A list of heading ids to hide.", validation_hide)
 
         def validation_no_prefix(setting: str) -> str:
             return setting
+
         settings["no_prefix"] = (
             "",
             "A list of heading levels and/or ids to not show the prefixes for.",
-            validation_no_prefix)
+            validation_no_prefix,
+        )
 
         def validation_no_count(setting: str) -> str:
             return setting
+
         settings["no_count"] = (
             "",
             "A list of heading levels and/or ids to not count the indices for.",
-            validation_no_count)
+            validation_no_count,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -325,28 +353,44 @@ class PaginationCommand(command.CommandComponent):
 
         def validation_previous(setting: str) -> str:
             return setting
+
         settings["previous"] = (
-            None, "The previous markdown page to navigate to.", validation_previous)
+            None,
+            "The previous markdown page to navigate to.",
+            validation_previous,
+        )
 
         def validation_next(setting: str) -> str:
             return setting
+
         settings["next"] = (
-            None, "The next markdown page to navigate to.", validation_next)
+            None,
+            "The next markdown page to navigate to.",
+            validation_next,
+        )
         settings["use_title"] = (
             False,
             "Use the title of the page for the hyperlink text.",
-            validation.boolean
+            validation.boolean,
         )
 
         def validation_margin_top(setting: str) -> str:
             return setting
-        settings["margin-top"] = ("24px",
-                                  "The top margin of the buttons.", validation_margin_top)
+
+        settings["margin-top"] = (
+            "24px",
+            "The top margin of the buttons.",
+            validation_margin_top,
+        )
 
         def validation_margin_bottom(setting: str) -> str:
             return setting
-        settings["margin-bottom"] = ("24px",
-                                     "The bottom margin of the buttons.", validation_margin_bottom)
+
+        settings["margin-bottom"] = (
+            "24px",
+            "The bottom margin of the buttons.",
+            validation_margin_bottom,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -392,8 +436,7 @@ class RenderContentToken(components.RenderComponent):
                 ul = html.Tag(col, "ul", class_="moose-a-to-z")
                 for text, path, _ in chunk:
                     li = html.Tag(ul, "li")
-                    html.Tag(li, "a", href=path, string=str(
-                        text.replace(".md", "")))
+                    html.Tag(li, "a", href=path, string=str(text.replace(".md", "")))
 
     def createLatex(self, parent, token, page):
 
@@ -408,8 +451,7 @@ class RenderContentToken(components.RenderComponent):
                     latex.Brace(string=path, escape=False),
                     latex.Brace(string=label, escape=False),
                 ]
-                latex.Command(parent, "ContentItem", start="\n",
-                              args=args, string=text)
+                latex.Command(parent, "ContentItem", start="\n", args=args, string=text)
             latex.Command(parent, "par", start="\n")
 
 
@@ -481,8 +523,7 @@ class RenderAtoZ(components.RenderComponent):
                     latex.Brace(string=path, escape=False),
                     latex.Brace(string=label, escape=False),
                 ]
-                latex.Command(parent, "ContentItem", start="\n",
-                              args=args, string=text)
+                latex.Command(parent, "ContentItem", start="\n", args=args, string=text)
             latex.Command(parent, "par", start="\n")
 
 
@@ -523,15 +564,20 @@ class RenderContentOutline(components.RenderComponent):
     def createHTMLHelper(self, parent, token, page):
         if token["location"] is not None and not token["pages"]:
             if token["recursive"]:
-                def func(p): return p.local.startswith(token["location"]) and isinstance(
-                    p, pages.Source
-                )
+
+                def func(p):
+                    return p.local.startswith(token["location"]) and isinstance(
+                        p, pages.Source
+                    )
+
             else:
                 location = token["location"].rstrip("/")
 
-                def func(p): return os.path.dirname(p.local) == location and isinstance(
-                    p, pages.Source
-                )
+                def func(p):
+                    return os.path.dirname(p.local) == location and isinstance(
+                        p, pages.Source
+                    )
+
             nodes = self.translator.findPages(func)
         elif token["pages"] and token["location"] is None:
             nodes = [self.translator.findPage(p) for p in token["pages"]]
@@ -599,8 +645,7 @@ class RenderContentOutline(components.RenderComponent):
 class RenderPagination(components.RenderComponent):
     def createHTML(self, parent, token, page):
         style = "margin-top:{};margin-bottom:{};".format(*token["margins"])
-        div = html.Tag(
-            parent, "div", class_="moose-content-pagination", style=style)
+        div = html.Tag(parent, "div", class_="moose-content-pagination", style=style)
 
         if token["previous"] is not None:
             link = self.createHTMLHelper(div, token, page, "previous")
@@ -609,19 +654,16 @@ class RenderPagination(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
         style = "margin-top:{};margin-bottom:{};".format(*token["margins"])
-        div = html.Tag(
-            parent, "div", class_="moose-content-pagination", style=style)
+        div = html.Tag(parent, "div", class_="moose-content-pagination", style=style)
 
         if token["previous"] is not None:
             link = self.createHTMLHelper(div, token, page, "previous")
             link.addClass("btn")
-            html.Tag(link, "i", class_="material-icons left",
-                     string="arrow_back")
+            html.Tag(link, "i", class_="material-icons left", string="arrow_back")
         if token["next"] is not None:
             link = self.createHTMLHelper(div, token, page, "next")
             link.addClass("btn")
-            html.Tag(link, "i", class_="material-icons right",
-                     string="arrow_forward")
+            html.Tag(link, "i", class_="material-icons right", string="arrow_forward")
 
     def createHTMLHelper(self, parent, token, page, direction):
         node = self.translator.findPage(token[direction])

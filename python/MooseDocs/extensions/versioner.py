@@ -21,6 +21,7 @@ from . import core, command
 sys.path.append(os.path.join(MooseDocs.MOOSE_DIR, "scripts"))
 from versioner import *
 
+
 def make_extension(**kwargs):
     return VersionerExtension(**kwargs)
 
@@ -62,8 +63,7 @@ class VersionerExtension(command.CommandExtension):
         package = self.getPackages().get(package_name)
         if package is None:
             if must_exist:
-                raise exceptions.MooseDocsException(
-                    f'Unknown package "{package_name}"')
+                raise exceptions.MooseDocsException(f'Unknown package "{package_name}"')
             return None
         value = package
         for key in versioner_keys:
@@ -95,16 +95,22 @@ class VersionerCodeReplace(command.CommandComponent):
 
         def validation_max_height(setting: str) -> str:
             return setting
-        settings["max-height"] = ("350px",
-                                  "The default height for listing content.", validation_max_height)
+
+        settings["max-height"] = (
+            "350px",
+            "The default height for listing content.",
+            validation_max_height,
+        )
 
         def validation_language(setting: str) -> str:
             return setting
+
         settings["language"] = (
             "bash",
             "The language to use for highlighting, if not supplied "
             "it will be inferred from the extension (if possible).",
-            validation_language)
+            validation_language,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -116,8 +122,7 @@ class VersionerCodeReplace(command.CommandComponent):
                 return self.extension.getVersion(package_dashed, versioner_keys)
 
             return re.sub(
-                r"__VERSIONER_" +
-                re.escape(prefix) + r"_(?P<package>[A-Z][A-Z_]+)__",
+                r"__VERSIONER_" + re.escape(prefix) + r"_(?P<package>[A-Z][A-Z_]+)__",
                 sub_function,
                 content,
                 flags=re.UNICODE,
@@ -144,15 +149,18 @@ class VersionerReplaceBase(command.CommandComponent):
 
         def validation_package(setting: str) -> str:
             return setting
+
         settings["package"] = (
-            None, "The package to get the version of", validation_package)
+            None,
+            "The package to get the version of",
+            validation_package,
+        )
         return settings
 
     def createTokenBase(self, parent, info, package, settings, versioner_keys):
         package = settings.get("package")
         if package is None:
-            raise exceptions.MooseDocsException(
-                'Missing required option "package"')
+            raise exceptions.MooseDocsException('Missing required option "package"')
         version = self.extension.getVersion(package, versioner_keys, True)
         tokens.String(parent, content=str(version))
         return parent

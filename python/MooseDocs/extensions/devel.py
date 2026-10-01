@@ -69,23 +69,24 @@ class ExampleCommand(command.CommandComponent):
 
         def validation_prefix(setting: str) -> str:
             return setting
-        settings["prefix"] = (
-            "Example", settings["prefix"][1], validation_prefix)
+
+        settings["prefix"] = ("Example", settings["prefix"][1], validation_prefix)
 
         def validation_requires_extension(setting: str) -> str:
             return setting
+
         settings["requires_extension"] = (
             None,
             "The dotted module name of an extension (e.g. 'MooseDocs.extensions.civet') that "
             "this example's content depends on. If that extension is not loaded for the "
             "current documentation build, the raw command text is shown but not "
             "tokenized/executed, and a note is displayed explaining why.",
-            validation_requires_extension)
+            validation_requires_extension,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
-        flt = floats.create_float(
-            parent, self.extension, self.reader, page, settings)
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings)
 
         required = settings["requires_extension"]
         available = required is None or any(
@@ -120,32 +121,36 @@ class SettingsCommand(command.CommandComponent):
 
         def validation_module(setting: str) -> str:
             return setting
+
         settings["module"] = (
-            None, "The name of the module containing the object.", validation_module)
+            None,
+            "The name of the module containing the object.",
+            validation_module,
+        )
 
         def validation_object(setting: str) -> str:
             return setting
+
         settings["object"] = (
             None,
             "The name of the object to import from the 'module'.",
-            validation_object)
+            validation_object,
+        )
         settings.update(floats.caption_settings())
 
         def validation_prefix(setting: str) -> str:
             return setting
-        settings["prefix"] = ("Table", settings["prefix"]
-                              [1], validation_prefix)
+
+        settings["prefix"] = ("Table", settings["prefix"][1], validation_prefix)
 
         return settings
 
     def createToken(self, parent, info, page, settings):
         if settings["module"] is None:
-            raise exceptions.MooseDocsException(
-                "The 'module' setting is required.")
+            raise exceptions.MooseDocsException("The 'module' setting is required.")
 
         if settings["object"] is None:
-            raise exceptions.MooseDocsException(
-                "The 'object' setting is required.")
+            raise exceptions.MooseDocsException("The 'object' setting is required.")
 
         primary = floats.create_float(
             parent,
@@ -180,8 +185,7 @@ class SettingsCommand(command.CommandComponent):
             )
             raise exceptions.MooseDocsException(msg, mod, obj)
 
-        rows = [[key, value[0], value[1]]
-                for key, value in obj_settings.items()]
+        rows = [[key, value[0], value[1]] for key, value in obj_settings.items()]
         tbl = table.builder(rows, headings=["Key", "Default", "Description"])
         tbl.parent = primary
 
@@ -214,16 +218,14 @@ class RenderExample(components.RenderComponent):
         )
 
         # Render the content within the tabs
-        div_code = html.Tag(div, "div", id_=cid,
-                            class_="moose-devel-example-code")
+        div_code = html.Tag(div, "div", id_=cid, class_="moose-devel-example-code")
         self.translator.renderer.render(
             html.Tag(div_code, "pre"),
             tokens.String(None, content=token(0)["content"]),
             page,
         )
 
-        div_out = html.Tag(div, "div", id_=oid,
-                           class_="moose-devel-example-html")
+        div_out = html.Tag(div, "div", id_=oid, class_="moose-devel-example-html")
         for child in [c for c in token.children[1:]] if len(token) > 1 else list():
             self.translator.renderer.render(div_out, child, page)
 

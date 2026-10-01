@@ -69,15 +69,21 @@ def caption_settings():
 
     def validation_caption(setting: str) -> str:
         return setting
+
     settings["caption"] = (
-        None, "The caption text for the float object.", validation_caption)
+        None,
+        "The caption text for the float object.",
+        validation_caption,
+    )
 
     def validation_prefix(setting: str) -> str:
         return setting
+
     settings["prefix"] = (
         None,
         "The numbered caption label to include prior to the caption text.",
-        validation_prefix)
+        validation_prefix,
+    )
     return settings
 
 
@@ -133,16 +139,14 @@ class FloatExtension(command.CommandExtension):
             key = node.get("key")
             if key:
                 floats[key] = node.copy()
-                shortcut = core.Shortcut(
-                    ast.root, key=key, link="#{}".format(key))
+                shortcut = core.Shortcut(ast.root, key=key, link="#{}".format(key))
 
                 # TODO: This is a bit of a hack to get Figure~\ref{} etc. working in general
                 if isinstance(self.translator.renderer, LatexRenderer):
                     shortcut["prefix"] = prefix.title()
                 else:
                     tokens.String(
-                        shortcut, content="{} {}".format(
-                            prefix.title(), node["number"])
+                        shortcut, content="{} {}".format(prefix.title(), node["number"])
                     )
 
         page["counts"] = counts
@@ -152,8 +156,7 @@ class FloatExtension(command.CommandExtension):
 class FloatReferenceCommand(command.CommandComponent):
     COMMAND = "ref"
     SUBCOMMAND = None
-    LABEL_RE = re.compile(
-        r"((?P<filename>.*?\.md)#)?(?P<label>.+)", flags=re.UNICODE)
+    LABEL_RE = re.compile(r"((?P<filename>.*?\.md)#)?(?P<label>.+)", flags=re.UNICODE)
 
     @staticmethod
     def defaultSettings():
@@ -234,8 +237,7 @@ class RenderFloatCaption(components.RenderComponent):
         prefix = token.get("prefix", None)
         if prefix:
             heading = html.Tag(caption, "span", class_="moose-caption-heading")
-            html.String(heading, content="{} {}: ".format(
-                prefix, token["number"]))
+            html.String(heading, content="{} {}: ".format(prefix, token["number"]))
 
         return html.Tag(caption, "span", class_="moose-caption-text", id_=token["key"])
 

@@ -116,8 +116,12 @@ class AlgorithmComponentBase(command.CommandComponent):
 
         def validation_comment(setting: str) -> str:
             return setting
+
         settings["comment"] = (
-            None, "Comment placed to right of algorithm component.", validation_comment)
+            None,
+            "Comment placed to right of algorithm component.",
+            validation_comment,
+        )
         return settings
 
     def createTokenHelper(
@@ -168,10 +172,12 @@ class FunctionComponent(AlgorithmComponentBase):
 
         def validation_name(setting: str) -> str:
             return setting
+
         settings["name"] = (None, "Function name", validation_name)
 
         def validation_param(setting: str) -> str:
             return setting
+
         settings["param"] = (None, "Function parameters", validation_param)
         return settings
 
@@ -207,6 +213,7 @@ class LoopComponent(AlgorithmComponentBase):
 
         def validation_condition(setting: str) -> str:
             return setting
+
         settings["condition"] = ("", "Loop condition", validation_condition)
         return settings
 
@@ -215,8 +222,7 @@ class LoopComponent(AlgorithmComponentBase):
         if is_end:
             content = "+end {}+".format(info["command"])
         else:
-            content = "+{}+ {} +do+".format(info["command"],
-                                            settings["condition"])
+            content = "+{}+ {} +do+".format(info["command"], settings["condition"])
 
         return AlgorithmComponentBase.createTokenHelper(
             self,
@@ -240,6 +246,7 @@ class StatementComponent(AlgorithmComponentBase):
 
         def validation_text(setting: str) -> str:
             return setting
+
         settings["text"] = ("", "Statement text", validation_text)
         return settings
 
@@ -258,14 +265,14 @@ class IfThenComponent(AlgorithmComponentBase):
         settings = AlgorithmComponentBase.defaultSettings()
 
         def validation_condition(setting: str) -> str:
-            if setting.lower() == 'true':
+            if setting.lower() == "true":
                 return True
-            if setting.lower() == 'false':
+            if setting.lower() == "false":
                 return False
 
             return setting
-        settings["condition"] = (
-            "", "If and if else condition", validation_condition)
+
+        settings["condition"] = ("", "If and if else condition", validation_condition)
         return settings
 
     def createToken(self, parent, info, page, settings):

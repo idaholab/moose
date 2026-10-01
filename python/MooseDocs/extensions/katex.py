@@ -27,8 +27,7 @@ def make_extension(**kwargs):
 Equation = tokens.newToken(
     "Equation", tex=r"", inline=False, label=None, number=None, bookmark=None
 )
-EquationReference = tokens.newToken(
-    "EquationReference", label=None, filename=None)
+EquationReference = tokens.newToken("EquationReference", label=None, filename=None)
 
 
 class KatexExtension(command.CommandExtension):
@@ -78,7 +77,10 @@ class KatexExtension(command.CommandExtension):
     def postTokenize(self, page, ast):
         labels = dict()
         count = 0
-        def func(n): return (n.name == "Equation") and (n["label"] is not None)
+
+        def func(n):
+            return (n.name == "Equation") and (n["label"] is not None)
+
         for node in moosetree.iterate(ast, func):
             count += 1
             node["number"] = count
@@ -121,11 +123,12 @@ class EquationCommand(command.CommandComponent):
 
         def validation_id(setting: str) -> str:
             return setting
+
         settings["id"] = (
             None,
             "The equation label for referencing within text, if provided "
             "the equation is numbered.",
-            validation_id
+            validation_id,
         )
         return settings
 
@@ -152,8 +155,7 @@ class EquationCommand(command.CommandComponent):
         eq_id = "moose-equation-{}".format(uuid.uuid4())
 
         # Build the token
-        Equation(parent, tex=tex, bookmark=eq_id,
-                 label=settings["id"], inline=inline)
+        Equation(parent, tex=tex, bookmark=eq_id, label=settings["id"], inline=inline)
         return parent
 
 
@@ -225,8 +227,7 @@ class KatexInlineEquationComponent(components.ReaderComponent):
 class EquationReferenceCommand(command.CommandComponent):
     COMMAND = "eqref"
     SUBCOMMAND = None
-    LABEL_RE = re.compile(
-        r"((?P<filename>.*?\.md)#)?(?P<label>.+)", flags=re.UNICODE)
+    LABEL_RE = re.compile(r"((?P<filename>.*?\.md)#)?(?P<label>.+)", flags=re.UNICODE)
 
     @staticmethod
     def defaultSettings():
@@ -243,8 +244,7 @@ class EquationReferenceCommand(command.CommandComponent):
         content = info["inline"]
         match = self.LABEL_RE.search(content)
         if match is None:
-            raise common.exceptions.MooseDocsException(
-                "Invalid equation label format.")
+            raise common.exceptions.MooseDocsException("Invalid equation label format.")
 
         EquationReference(
             parent, label=match.group("label"), filename=match.group("filename")
@@ -279,8 +279,7 @@ class RenderEquation(components.RenderComponent):
                 id_=token["bookmark"],
             )
             if token["label"] is not None:
-                num = html.Tag(
-                    div, "span", class_="moose-katex-equation-number")
+                num = html.Tag(div, "span", class_="moose-katex-equation-number")
                 html.String(num, content="({})".format(token["number"]))
 
         # Build the KaTeX script
@@ -308,8 +307,7 @@ class RenderEquation(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         if token["inline"]:
-            latex.String(parent, content="${}$".format(
-                token["tex"]), escape=False)
+            latex.String(parent, content="${}$".format(token["tex"]), escape=False)
         else:
             cmd = "equation" if token["number"] else "equation*"
             env = latex.Environment(parent, cmd)
@@ -327,8 +325,7 @@ class RenderEquationLink(core.RenderShortcutLink):
     def createLatex(self, parent, token, page):
         key = token["key"]
         if key in page.get("labels"):
-            latex.String(
-                parent, content=self.extension["prefix"] + "~", escape=False)
+            latex.String(parent, content=self.extension["prefix"] + "~", escape=False)
             latex.Command(parent, "eqref", string=key, escape=False)
             return parent
         return core.RenderShortcutLink.createLatex(self, parent, token, page)
@@ -361,19 +358,16 @@ class RenderEquationReference(core.RenderShortcutLink):
 
         if num is None:
             a["class"] = "moose-error"
-            html.String(a, content="{}#{}".format(
-                eq_page.local, token["label"]))
+            html.String(a, content="{}#{}".format(eq_page.local, token["label"]))
             msg = "Could not find equation with key {} on page {}".format(
                 token["label"], eq_page.local
             )
             raise common.exceptions.MooseDocsException(msg)
         else:
-            html.String(a, content="{} ({})".format(
-                self.extension["prefix"], num))
+            html.String(a, content="{} ({})".format(self.extension["prefix"], num))
 
     def createLatex(self, parent, token, page):
         key = token["label"]
-        latex.String(
-            parent, content=self.extension["prefix"] + "~", escape=False)
+        latex.String(parent, content=self.extension["prefix"] + "~", escape=False)
         latex.Command(parent, "eqref", string=key, escape=False)
         return parent

@@ -13,6 +13,7 @@ from ..tree import tokens, html, latex
 from . import command
 from ..common import setting_validation as validation
 
+
 def make_extension(**kwargs):
     return StyleExtension(**kwargs)
 
@@ -47,28 +48,33 @@ class StyleCommand(command.CommandComponent):
 
         def validation_halign(setting: str) -> str:
             return setting
+
         settings["halign"] = (
             None,
             "The horizontal alignment ('center', 'left', or 'right')",
-            validation_halign)
+            validation_halign,
+        )
 
         settings["border"] = (
-            None, "The size of the border in pixels", validation.floating_point)
+            None,
+            "The size of the border in pixels",
+            validation.floating_point,
+        )
 
         def validation_color(setting: str) -> str:
             return setting
-        settings["color"] = (
-            None, "Set the color of content.", validation_color)
+
+        settings["color"] = (None, "Set the color of content.", validation_color)
 
         def validation_fontsize(setting: str) -> str:
             return setting
-        settings["fontsize"] = (
-            None, "Set the font size.", validation_fontsize)
+
+        settings["fontsize"] = (None, "Set the font size.", validation_fontsize)
 
         def validation_fontweight(setting: str) -> str:
             return setting
-        settings["fontweight"] = (
-            None, "Set the font weight.", validation_fontweight)
+
+        settings["fontweight"] = (None, "Set the font weight.", validation_fontweight)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -97,8 +103,7 @@ class RenderStyleToken(components.RenderComponent):
 
             style.append("text-align:{}".format(token["halign"]))
         if token["border"]:
-            style.append(
-                "border-width:{}px;border-style:solid".format(token["border"]))
+            style.append("border-width:{}px;border-style:solid".format(token["border"]))
         if token["color"]:
             style.append("color:{}".format(token["color"]))
         if token["fontsize"]:

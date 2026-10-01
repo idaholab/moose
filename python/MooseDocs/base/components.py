@@ -92,22 +92,30 @@ class ReaderComponent(Component, mixins.ReaderObject):
 
         def validation_style(setting: str) -> str:
             return setting
+
         settings["style"] = (
             None,
             "The style settings that are passed to rendered HTML tag.",
-            validation_style)
+            validation_style,
+        )
 
         def validation_class(setting: str) -> str:
             return setting
+
         settings["class"] = (
             None,
             "The class settings to be passed to rendered HTML tag.",
-            validation_class)
+            validation_class,
+        )
 
         def validation_id(setting: str) -> str:
             return setting
+
         settings["id"] = (
-            None, "Identifier to link against this object.", validation_id)
+            None,
+            "Identifier to link against this object.",
+            validation_id,
+        )
         return settings
 
     def __init__(self):

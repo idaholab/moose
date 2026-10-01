@@ -59,10 +59,8 @@ class TaggingExtension(command.CommandExtension):
             "List of tag keys allowed in documentation pages. If empty, all "
             "keys allowed.",
         )
-        config["js_file"] = (
-            None, "Javascript file used for filtering / search page.")
-        config["csv_file"] = (
-            None, "CSV file used for examining the tag database")
+        config["js_file"] = (None, "Javascript file used for filtering / search page.")
+        config["csv_file"] = (None, "CSV file used for examining the tag database")
         # Disable by default
         config["active"] = (False, config["active"][1])
         return config
@@ -125,8 +123,7 @@ class TaggingExtension(command.CommandExtension):
 
                     # Remove single quotes around entry
                     regex_replace = f"'{entry}':"
-                    tag_dict_str = re.sub(
-                        regex_replace, entry + ":", tag_dict_str)
+                    tag_dict_str = re.sub(regex_replace, entry + ":", tag_dict_str)
 
                     # add relative link built from the path at the end of the tagging entry
                     if entry == "path":
@@ -146,8 +143,7 @@ class TaggingExtension(command.CommandExtension):
                         # Find the relative path from the filter page (assumed at filter/index.html)
                         # Check that there is no ambiguity
                         target_page = self.translator.findPages(path_value_cut)
-                        filter_page = self.translator.findPages(
-                            "filter/index.html")
+                        filter_page = self.translator.findPages("filter/index.html")
                         if len(target_page) != 1:
                             LOG.error(
                                 str(len(target_page))
@@ -163,13 +159,11 @@ class TaggingExtension(command.CommandExtension):
                         # We did not find the pages, thus cannot search for their relative path
                         # So we simply take the full path value and use it to create the link
                         if len(target_page) == 0 or len(filter_page) == 0:
-                            link_value = "/" + \
-                                path_value_cut.replace(".md", ".html")
+                            link_value = "/" + path_value_cut.replace(".md", ".html")
                         else:
                             target_page = target_page[0]
                             filter_page = filter_page[0]
-                            link_value = target_page.relativeDestination(
-                                filter_page)
+                            link_value = target_page.relativeDestination(filter_page)
 
                         # Insert the link into the dictionary string
                         index = tag_dict_str.find(", key_vals")
@@ -202,16 +196,14 @@ class TaggingExtension(command.CommandExtension):
 
         # Setup path to write content
         js_dest_partpath = "js/" + os.path.basename(js_path)
-        js_dest_path = os.path.join(
-            self.translator.destination, js_dest_partpath)
+        js_dest_path = os.path.join(self.translator.destination, js_dest_partpath)
 
         # Find and replace 'data:' dict structure within supplied javascript template file content,
         # save to javascript file in destination.
         with open(js_path, "r", encoding="utf-8") as f:
             content = f.readlines()
             f.close()
-        content[-1] = re.sub(r"\{data:\[\{.+\}\}\]\}",
-                             str(replace_str), content[-1])
+        content[-1] = re.sub(r"\{data:\[\{.+\}\}\]\}", str(replace_str), content[-1])
         with open(js_dest_path, "w", encoding="utf-8") as f:
             f.writelines(content)
             f.close()
@@ -257,27 +249,39 @@ class TaggingCommand(command.CommandComponent):
 
         def validation_name(setting: str) -> str:
             return setting
+
         settings["name"] = (
             None,
             "ID name for page and associated key:value category:label pairs.",
-            validation_name)
+            validation_name,
+        )
 
         def validation_pairs(setting: str) -> str:
             return setting
+
         settings["pairs"] = (
             None,
             "Key:value pairs representing categories and page-specific labels for each category.",
-            validation_pairs)
+            validation_pairs,
+        )
 
         def validation_image(setting: str) -> str:
             return setting
+
         settings["image"] = (
-            None, "Link to an image to display for this entry", validation_image)
+            None,
+            "Link to an image to display for this entry",
+            validation_image,
+        )
 
         def validation_description(setting: str) -> str:
             return setting
+
         settings["description"] = (
-            None, "Description of the entry", validation_description)
+            None,
+            "Description of the entry",
+            validation_description,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):

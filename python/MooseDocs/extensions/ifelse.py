@@ -29,8 +29,7 @@ LOG = logging.getLogger(__name__)
 # A token for keeping track of if/elif/else statements. If the token has children than the statement
 # is True and the content within the token should be tokenized and displayed
 Statement = tokens.newToken("Statement")
-Condition = tokens.newToken(
-    "Condition", command=None, content=None, function=None)
+Condition = tokens.newToken("Condition", command=None, content=None, function=None)
 
 
 def make_extension(**kwargs):
@@ -147,8 +146,7 @@ class IfElseExtension(command.CommandExtension):
     def hasSubmodule(self, name, recursive):
         """Helper for the 'hasSubmodule' function."""
         if recursive:
-            status = mooseutils.git_submodule_info(
-                MooseDocs.ROOT_DIR, "--recursive")
+            status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, "--recursive")
         else:
             status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR)
         return any([repo.endswith(name) for repo in status.keys()])
@@ -201,10 +199,12 @@ class IfCommandBase(command.CommandComponent):
 
         def validation_function(setting: str) -> str:
             return setting
+
         settings["function"] = (
             None,
             "The function---with arguments---to evaluate. This setting is +required+.",
-            validation_function)
+            validation_function,
+        )
 
         return settings
 

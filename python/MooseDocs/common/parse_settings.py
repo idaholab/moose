@@ -55,8 +55,7 @@ def match_settings(known, raw, validators):
             try:
                 known[key] = validators[key](value)
             except Exception as e:
-                raise MooseDocsException(
-                    f"\nFailed to parse parameter '{key}'\n{e}")
+                raise MooseDocsException(f"\nFailed to parse parameter '{key}'\n{e}")
         else:
             unknown[key] = value
 
@@ -75,8 +74,7 @@ def parse_settings(defaults, local, error_on_unknown=True):
                                 in the default list.
     """
     known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
-    validators = dict((k, v[2])
-                      for k, v in defaults.items())
+    validators = dict((k, v[2]) for k, v in defaults.items())
     settings, unknown = match_settings(known, local, validators)
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"

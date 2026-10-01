@@ -20,9 +20,11 @@ def validation_do_nothing(setting: str) -> str:
 
 class TestParseSettings(unittest.TestCase):
     def testBasic(self):
-        defaults = dict(year=(1980, "doc", validation.unsigned_integer),
-                        month=("june", "doc", validation_do_nothing),
-                        day=(24, "doc", validation.unsigned_integer))
+        defaults = dict(
+            year=(1980, "doc", validation.unsigned_integer),
+            month=("june", "doc", validation_do_nothing),
+            day=(24, "doc", validation.unsigned_integer),
+        )
         raw = "year=2003"
         known, unknown = common.parse_settings(defaults, raw)
         self.assertEqual(known["year"], 2003)
@@ -45,8 +47,7 @@ class TestParseSettings(unittest.TestCase):
     def testUnknown(self):
         defaults = dict(year=(1980, "doc", validation.unsigned_integer))
         raw = "year=2003 month=june"
-        known, unknown = common.parse_settings(
-            defaults, raw, error_on_unknown=False)
+        known, unknown = common.parse_settings(defaults, raw, error_on_unknown=False)
         self.assertEqual(known["year"], 2003)
         self.assertNotIn("month", known)
         self.assertIn("month", unknown)

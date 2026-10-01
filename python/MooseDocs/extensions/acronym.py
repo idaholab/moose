@@ -38,8 +38,7 @@ class AcronymExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config["acronyms"] = (
-            dict(), "Complete dict (or dict of dict) of acronyms.")
+        config["acronyms"] = (dict(), "Complete dict (or dict of dict) of acronyms.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -69,7 +68,10 @@ class AcronymExtension(command.CommandExtension):
         """
         Adds a list of valid acronyms to the page attributes.
         """
-        def func(n): return (n.name == "AcronymToken")
+
+        def func(n):
+            return n.name == "AcronymToken"
+
         for node in moosetree.iterate(ast.root, func):
             acro = node.get("acronym")
             if acro in self.__acronyms.keys() and acro not in page["acronyms"].keys():
@@ -127,32 +129,45 @@ class AcronymListComponent(command.CommandComponent):
 
         def validation_complete(setting: str) -> str:
             return setting
+
         settings["complete"] = (
             False,
             "Show the complete list of acronyms regardless of use on " "current page.",
-            validation.boolean)
+            validation.boolean,
+        )
 
         def validation_location(setting: str) -> str:
             return setting
+
         settings["location"] = (
             None,
             "The markdown content directory to build the list from.",
-            validation_location)
+            validation_location,
+        )
 
         settings["heading"] = (
-            True, "Display the headings row of the acronym table.", validation.boolean)
+            True,
+            "Display the headings row of the acronym table.",
+            validation.boolean,
+        )
 
         def validation_prefix(setting: str) -> str:
             return setting
+
         settings["prefix"] = (
             "Table",
             "Prefix to use when a caption and id are provided.",
-            validation_prefix)
+            validation_prefix,
+        )
 
         def validation_caption(setting: str) -> str:
             return setting
+
         settings["caption"] = (
-            None, "The caption to use for the acronym table.", validation_caption)
+            None,
+            "The caption to use for the acronym table.",
+            validation_caption,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -194,8 +209,7 @@ class RenderAcronymToken(components.RenderComponent):
 
         else:
             content = (
-                str(acro.key) if acro.used else "{} ({})".format(
-                    acro.name, acro.key)
+                str(acro.key) if acro.used else "{} ({})".format(acro.name, acro.key)
             )
             tag = html.Tag(parent, "span", string=content)
 
@@ -214,8 +228,7 @@ class RenderAcronymToken(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         acro = self.extension.getAcronym(token["acronym"])
-        content = str(acro.key) if acro.used else "{} ({})".format(
-            acro.name, acro.key)
+        content = str(acro.key) if acro.used else "{} ({})".format(acro.name, acro.key)
         latex.String(parent, content=content)
 
 
@@ -232,9 +245,11 @@ class RenderAcronymListToken(components.RenderComponent):
         elif not token["complete"]:
             listed = []  # keeps track of which acronyms have already been listed
 
-            def func(p): return p.local.startswith(token["location"]) and isinstance(
-                p, pages.Source
-            )
+            def func(p):
+                return p.local.startswith(token["location"]) and isinstance(
+                    p, pages.Source
+                )
+
             for node in self.translator.findPages(func):
                 for key, value in self.extension.getAcronyms(node, False).items():
                     if key not in listed:
@@ -266,15 +281,16 @@ class RenderAcronymListToken(components.RenderComponent):
             for key, value in self.extension.getAcronyms(
                 page, token["complete"]
             ).items():
-                latex.String(env, content="{}&{}\\\\".format(
-                    key, value), escape=False)
+                latex.String(env, content="{}&{}\\\\".format(key, value), escape=False)
 
         elif not token["complete"]:
             listed = []  # keeps track of which acronyms have already been listed
 
-            def func(p): return p.local.startswith(token["location"]) and isinstance(
-                p, pages.Source
-            )
+            def func(p):
+                return p.local.startswith(token["location"]) and isinstance(
+                    p, pages.Source
+                )
+
             for node in self.translator.findPages(func):
                 for key, value in self.extension.getAcronyms(node, False).items():
                     if key not in listed:

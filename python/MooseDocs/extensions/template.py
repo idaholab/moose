@@ -21,7 +21,6 @@ from ..extensions import core, command, include, alert, floats, materialicon
 from ..common import setting_validation as validation
 from ..tree import tokens
 
-
 LOG = logging.getLogger(__name__)
 
 TemplateContent = tokens.newToken("TemplateContent", kwargs=None)
@@ -107,18 +106,19 @@ class TemplateLoadCommand(command.CommandComponent):
 
         def validation_file(setting: str) -> str:
             return setting
+
         settings["file"] = (
-            None, "The filename of the template to load.", validation_file)
+            None,
+            "The filename of the template to load.",
+            validation_file,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
         defaults = self.defaultSettings()
         known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
-        validators = dict((k, v[2])
-                          for k, v in defaults.items())
-        settings, t_args = common.match_settings(
-            known, info["settings"], validators
-        )
+        validators = dict((k, v[2]) for k, v in defaults.items())
+        settings, t_args = common.match_settings(known, info["settings"], validators)
 
         location = self.translator.findPage(settings["file"])
         page["dependencies"].add(location.uid)
@@ -149,13 +149,14 @@ class TemplateFieldCommand(command.CommandComponent):
 
         def validation_key(setting: str) -> str:
             return setting
+
         settings["key"] = (
             None,
             "The name of the template item which the content is to replace.",
-            validation_key)
+            validation_key,
+        )
 
-        settings["required"] = (
-            True, "The section is required.", validation.boolean)
+        settings["required"] = (True, "The section is required.", validation.boolean)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -172,10 +173,12 @@ class TemplateItemCommand(command.CommandComponent):
 
         def validation_key(setting: str) -> str:
             return setting
+
         config["key"] = (
             None,
             "The name of the template item which the content is to replace.",
-            validation_key)
+            validation_key,
+        )
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -188,8 +191,7 @@ class TemplateItemCommand(command.CommandComponent):
         kwargs = self.extension.getConfig(page, "args")
         content = mooseutils.apply_template_arguments(info[group], **kwargs)
         if content:
-            self.reader.tokenize(item, content, page,
-                                 line=info.line, group=group)
+            self.reader.tokenize(item, content, page, line=info.line, group=group)
         return parent
 
 
@@ -209,7 +211,10 @@ class RenderTemplateField(components.RenderComponent):
 
         # Locate the replacement
         key = token["key"]
-        def func(n): return (n.name == "TemplateItem") and (n["key"] == key)
+
+        def func(n):
+            return (n.name == "TemplateItem") and (n["key"] == key)
+
         replacement = moosetree.find(token.root, func)
 
         if replacement:

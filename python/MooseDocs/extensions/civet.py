@@ -120,28 +120,23 @@ class CivetExtension(command.CommandExtension):
         for name, category in self.get("remotes").items():
             LOG.info("Gathering CIVET results for '%s'.", name)
             if category.get(
-                "download_test_results", self.get(
-                    "download_test_results", True)
+                "download_test_results", self.get("download_test_results", True)
             ):
-                repo_url = category.get(
-                    "repo_url", "https://github.com").rstrip("/")
+                repo_url = category.get("repo_url", "https://github.com").rstrip("/")
                 repo_url += "/{}".format(category.get("repo"))
 
                 remote = remotes.get(repo_url, None)
                 if remote is None:
                     remote = "__MooseDocs.extensions.civet__"
-                    mooseutils.git_add_and_fetch_remote(
-                        repo_url, remote, branch)
+                    mooseutils.git_add_and_fetch_remote(repo_url, remote, branch)
                 else:
                     mooseutils.get_fetch_remote(remote, branch)
 
-                self.__hashes = mooseutils.get_civet_hashes(
-                    f"{remote}/{branch}")
+                self.__hashes = mooseutils.get_civet_hashes(f"{remote}/{branch}")
                 LOG.info("Downloading CIVET results for '%s' category.", name)
 
             local = mooseutils.eval_path(
-                category.get("test_results_cache",
-                             self.get("test_results_cache"))
+                category.get("test_results_cache", self.get("test_results_cache"))
             )
             site = (category["url"], category["repo"])
             local_db = mooseutils.get_civet_results(
@@ -153,8 +148,7 @@ class CivetExtension(command.CommandExtension):
                 logger=LOG,
             )
             self.__database.update(local_db)
-        LOG.info(
-            "Collecting CIVET results complete [%s sec.]", time.time() - start)
+        LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get("generate_test_reports", True):
             LOG.info(
@@ -174,8 +168,7 @@ class CivetExtension(command.CommandExtension):
             if not self.translator.findPage(
                 report_root, exact=True, throw_on_zero=False
             ):
-                result_pages.append(pages.Directory(
-                    report_root, source=report_root))
+                result_pages.append(pages.Directory(report_root, source=report_root))
 
             result_pages.append(
                 pages.Source(
@@ -203,8 +196,7 @@ class CivetExtension(command.CommandExtension):
             self.translator.executioner.initPages(result_pages)
 
             LOG.info(
-                "Creating CIVET result pages complete [%s sec.]", time.time(
-                ) - start
+                "Creating CIVET result pages complete [%s sec.]", time.time() - start
             )
 
     def postTokenize(self, page, ast):
@@ -242,24 +234,30 @@ class CivetCommandBase(command.CommandComponent):
 
         def validation_remote(setting: str) -> str:
             return setting
+
         settings["remote"] = (
             None,
             "The category to utilize for remote result lookup, see CivetExtension.",
-            validation_remote)
+            validation_remote,
+        )
 
         def validation_url(setting: str) -> str:
             return setting
+
         settings["url"] = (
             None,
             "Override for the repository url provided in the 'category' option, e.g. 'https://civet.inl.gov'.",
-            validation_url)
+            validation_url,
+        )
 
         def validation_repo(setting: str) -> str:
             return setting
+
         settings["repo"] = (
             None,
             "Override for the repository name provided in the 'category' option, e.g. 'idaholab/moose'.",
-            validation_repo)
+            validation_repo,
+        )
         return settings
 
     def getCivetInfo(self, settings):
@@ -285,7 +283,7 @@ class CivetMergeResultsCommand(CivetCommandBase):
         settings["use_current_hash"] = (
             True,
             "Use the hash for the current version of the documentation build, otherwise use the most up-to-date hash from the git remote.",
-            validation.boolean
+            validation.boolean,
         )
         return settings
 
@@ -332,8 +330,8 @@ class CivetTestBadgesCommand(CivetCommandBase):
 
         def validation_tests(setting: str) -> str:
             return setting
-        config["tests"] = (
-            None, "The name of the test(s) to report.", validation_tests)
+
+        config["tests"] = (None, "The name of the test(s) to report.", validation_tests)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -349,8 +347,8 @@ class CivetTestReportCommand(CivetCommandBase):
 
         def validation_tests(setting: str) -> str:
             return setting
-        config["tests"] = (
-            None, "The name of the test(s) to report.", validation_tests)
+
+        config["tests"] = (None, "The name of the test(s) to report.", validation_tests)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -370,8 +368,7 @@ class RenderCivetTestBadges(components.RenderComponent):
         div = html.Tag(parent, "div", class_="moose-civet-badges")
         prefix = token["prefix"]
         for test in token["tests"]:
-            tname = "{}.{}".format(prefix, test) if (
-                prefix is not None) else test
+            tname = "{}.{}".format(prefix, test) if (prefix is not None) else test
             counts = collections.defaultdict(int)
             results = self.extension.results(tname)
             if results:
@@ -383,18 +380,15 @@ class RenderCivetTestBadges(components.RenderComponent):
             if self.extension.hasTestReports() and (base is not None):
                 report_root = self.extension.get("test_reports_location")
                 fname = os.path.join(
-                    self.translator.get(
-                        "destination"), report_root, base + ".html"
+                    self.translator.get("destination"), report_root, base + ".html"
                 )
-                location = os.path.relpath(
-                    fname, os.path.dirname(page.destination))
+                location = os.path.relpath(fname, os.path.dirname(page.destination))
                 a = html.Tag(div, "a", href=location)
             else:
                 a = html.Tag(div, "span")
 
             for key, count in counts.items():
-                badge = html.Tag(
-                    a, "span", class_="new badge", string=str(count))
+                badge = html.Tag(a, "span", class_="new badge", string=str(count))
                 badge["data-badge-caption"] = key
                 badge["data-status"] = key.lower()
 
@@ -414,8 +408,7 @@ class RenderCivetTestReport(components.RenderComponent):
 
         prefix = token["prefix"]
         for key in token["tests"]:
-            tname = "{}.{}".format(prefix, key) if (
-                prefix is not None) else key
+            tname = "{}.{}".format(prefix, key) if (prefix is not None) else key
             results = self.extension.results(tname)
 
             div = html.Tag(parent, "div", class_="moose-civet-test-report")
