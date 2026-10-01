@@ -146,7 +146,7 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::computeQpProperties()
       {
         const Real c = log(a / (a - b));
         const Real expx = exp(-decay / c);
-        const Real dc = (a - b) * (da * b / a - db) / pow(a, 2);
+        const Real dc = (a - b) * (da * b / a - db) / Utility::pow<2>(a);
         (*_dporosity_dvar)[_qp][v] += (b - a) * exp_term * dc * (1 - expx - expx / c);
       }
     }
