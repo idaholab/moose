@@ -4,7 +4,7 @@
 
 ## Overview
 
-`PorousRhieChowMassFlux` extends [RhieChowMassFlux.md] for porous-medium and
+`PorousRhieChowMassFlux` extends [RhieChowMassFlux](RhieChowMassFlux.md) for porous-medium and
 porous-baffle calculations in the linear finite volume SIMPLE workflow.
 
 Compared with the base object, it adds:
@@ -14,15 +14,22 @@ Compared with the base object, it adds:
 - corrected and optionally reconstructed pressure gradients consistent with the
   porous/baffle pressure operator.
 
-The pressure jump is updated from the current face mass flux and under-relaxed with
-[!param](/UserObjects/PorousRhieChowMassFlux/pressure_baffle_relaxation). Optional form losses are
-specified with [!param](/UserObjects/PorousRhieChowMassFlux/baffle_form_loss). See
+Pressure jumps are supplied by the models listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models), such as
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md). The jump is updated from the
+current face mass flux and under-relaxed with
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_relaxation). See
 [porous_rhie_chow_baffle.md] for the discrete coupling.
 
-This is the user object expected by [PorousLinearWCNSFVMomentumFlux.md],
-[LinearFVAnisotropicDiffusionJump.md], and porous uses of [LinearFVEnergyAdvection.md].
+This is the user object expected by
+[PorousLinearWCNSFVMomentumFlux](PorousLinearWCNSFVMomentumFlux.md),
+[LinearFVAnisotropicDiffusionJump](LinearFVAnisotropicDiffusionJump.md), and porous uses of
+[LinearFVEnergyAdvection](LinearFVEnergyAdvection.md).
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=UserObjects/rc
+In this example, `PorousRhieChowMassFlux` uses a separately configured pressure-jump model on two
+porous interfaces.
+
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=UserObjects
 
 !syntax parameters /UserObjects/PorousRhieChowMassFlux
 

@@ -42,6 +42,12 @@ inlet_u = 0.1
 []
 
 [UserObjects]
+  [pressure_jump]
+    type = BernoulliFormLossPressureJump
+    boundary = 'baffle baffle2'
+    porosity = porosity
+    density = ${rho}
+  []
   [rc]
     type = PorousRhieChowMassFlux
     u = superficial_u
@@ -49,9 +55,9 @@ inlet_u = 0.1
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
-    pressure_baffle_sidesets = 'baffle baffle2'
+    pressure_jump_models = pressure_jump
     pressure_gradient_limiter = 'baffle baffle2'
-    pressure_baffle_relaxation = 0.1
+    pressure_jump_relaxation = 0.1
   []
 []
 
