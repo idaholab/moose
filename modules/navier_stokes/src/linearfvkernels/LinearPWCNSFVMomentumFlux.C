@@ -18,12 +18,47 @@ LinearPWCNSFVMomentumFlux::validParams()
 {
   InputParameters params = LinearWCNSFVMomentumFlux::validParams();
   params.addClassDescription("Momentum flux kernel with porous-specific advection handling.");
+  params.addParam<bool>(
+      "use_two_point_stress_transmissibility",
+      false,
+      "Use two-point harmonic transmissibility for the stress term instead of a face-interpolated "
+      "gradient.");
   return params;
 }
 
 LinearPWCNSFVMomentumFlux::LinearPWCNSFVMomentumFlux(const InputParameters & params)
-  : LinearWCNSFVMomentumFlux(params)
+  : LinearWCNSFVMomentumFlux(params),
+    _use_two_point_stress_transmissibility(getParam<bool>("use_two_point_stress_transmissibility"))
 {
+}
+
+Real
+LinearPWCNSFVMomentumFlux::computeInternalStressTransmissibility() const
+{
+  if (!_use_two_point_stress_transmissibility)
+    return LinearWCNSFVMomentumFlux::computeInternalStressTransmissibility();
+
+  const auto & fi = *_current_face_info;
+  const auto state = determineState();
+  const Real elem_viscosity = _mu(makeElemArg(fi.elemPtr()), state);
+  const Real neighbor_viscosity = _mu(makeElemArg(fi.neighborPtr()), state);
+  if (elem_viscosity == 0.0 || neighbor_viscosity == 0.0)
+    return 0.0;
+
+  const Real elem_distance = (fi.faceCentroid() - fi.elemCentroid()).norm();
+  const Real neighbor_distance = (fi.neighborCentroid() - fi.faceCentroid()).norm();
+  if (elem_distance == 0.0 || neighbor_distance == 0.0)
+    return 0.0;
+
+  return 1.0 / (elem_distance / elem_viscosity + neighbor_distance / neighbor_viscosity);
+}
+
+Real
+LinearPWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
+{
+  return _use_two_point_stress_transmissibility
+             ? 0.0
+             : LinearWCNSFVMomentumFlux::computeInternalStressExplicitCorrection();
 }
 
 void
