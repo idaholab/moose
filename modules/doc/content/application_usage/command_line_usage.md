@@ -63,7 +63,7 @@ Global Options:
   -o --error-override                 Error when encountering overridden or parameters supplied multiple times
   -e --error-unused                   Error when encountering unused input file options
   --keep-cout                         Keep standard output from all processors when running in parallel
-  --n-threads=<n>                     Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the maximum number of threads, notably setting the OpenMP number of threads.
+  --n-threads=<n>                     Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the maximum number of threads and sets the OpenMP number of threads
   --no-color                          Disable coloring of all Console outputs
   --no-gdb-backtrace                  Disables gdb backtraces.
   --no-timing                         Disabled performance logging; overrides -t or --timing

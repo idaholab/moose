@@ -17,7 +17,6 @@
 #include "MFEMExecutedObject.h"
 #include "MFEMVectorUtils.h"
 #include "MFEMFESpaceHierarchy.h"
-#include "MFEMRefinementMarker.h"
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"

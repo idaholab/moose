@@ -406,7 +406,7 @@ MooseApp::validParams()
       "n_threads",
       "--n-threads=<n>",
       "Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the "
-      "maximum number of threads and setting the OpenMP number of threads");
+      "maximum number of threads and sets the OpenMP number of threads");
   // This probably shouldn't be global, but the implications of removing this are currently
   // unknown and we need to manage it with libmesh better
   params.setGlobalCommandLineParam("n_threads");
@@ -626,7 +626,7 @@ MooseApp::validParams()
   return params;
 }
 
-std::optional<int>
+std::optional<THREAD_ID>
 MooseApp::requestedNumThreads() const
 {
   // Read straight from the parsed input tree: the [Application] block is not applied to the app's
@@ -637,32 +637,24 @@ MooseApp::requestedNumThreads() const
   const hit::Node * const node = root->find("Application/num_threads");
   if (!node || node->type() != hit::NodeType::Field)
     return std::nullopt;
-  return node->param<int>();
+  return node->param<THREAD_ID>();
 }
 
 THREAD_ID
 MooseApp::determineNumThreads() const
 {
   const THREAD_ID max_threads = libMesh::n_threads();
-  const auto requested = requestedNumThreads();
-  if (!requested)
-    return max_threads;
-
   // A per-application count can only cap down from the process-wide count (the thread pool is
   // sized once at launch), and a request of zero (or less) is meaningless, so treat it as a single
   // thread. An over-request is warned about later during setup, where the console is available.
-  if (*requested < 1)
-    return 1;
-  if (cast_int<THREAD_ID>(*requested) > max_threads)
-    return max_threads;
-  return cast_int<THREAD_ID>(*requested);
+  return std::clamp(requestedNumThreads().value_or(max_threads), THREAD_ID(1), max_threads);
 }
 
 void
 MooseApp::setNumThreads(THREAD_ID num_threads)
 {
   // Assert a valid range
-  mooseAssert(num_threads > 0 && num_threads < libMesh::n_threads(),
+  mooseAssert(num_threads > 0 && num_threads <= libMesh::n_threads(),
               "Should be below maximum number of threads set by --n-threads: " +
                   std::to_string(libMesh::n_threads()));
   _num_threads = num_threads;
@@ -1154,10 +1146,9 @@ MooseApp::setupOptions()
   // A per-application num_threads can only cap down from the process-wide --n-threads count; warn
   // (and cap, see determineNumThreads()) if the user asked for more than the process was launched
   // with.
-  if (const auto requested = requestedNumThreads();
-      requested && *requested > cast_int<int>(libMesh::n_threads()))
+  if (requestedNumThreads().value_or(0) > libMesh::n_threads())
     mooseWarning("[Application] num_threads=",
-                 *requested,
+                 *requestedNumThreads(),
                  " exceeds the process-wide thread count (--n-threads=",
                  libMesh::n_threads(),
                  "); this application is capped to ",
