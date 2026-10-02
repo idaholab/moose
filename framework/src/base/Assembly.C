@@ -2314,12 +2314,15 @@ Assembly::reinitDual(const Elem * elem,
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
 
-  for (const auto & it : _fe_lower[elem_dim])
+  for (const auto & [fe_type, fe_lower] : _fe_lower[elem_dim])
   {
-    FEBase & fe_lower = *it.second;
+    const auto dual_shape_data = _fe_shape_data_dual_lower.find(fe_type);
+    if (dual_shape_data == _fe_shape_data_dual_lower.end() || !dual_shape_data->second)
+      continue;
+
     // We use customized quadrature rule for integration along the mortar segment elements
-    fe_lower.set_calculate_default_dual_coeff(false);
-    fe_lower.reinit_dual_shape_coeffs(elem, pts, JxW);
+    fe_lower->set_calculate_default_dual_coeff(false);
+    fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
   }
 }
 
