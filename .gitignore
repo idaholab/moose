@@ -75,6 +75,9 @@ temp_print_trace.*
 *.outp
 *.patch
 *.txt
+# CMake's canonical file name is CMakeLists.txt; do not let *.txt swallow it
+!CMakeLists.txt
+!**/CMakeLists.txt
 *.bib.bak
 *.out
 *.vtk
