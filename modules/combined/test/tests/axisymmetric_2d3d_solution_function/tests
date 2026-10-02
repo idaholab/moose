@@ -5,12 +5,17 @@
     type = 'Exodiff'
     input = '2d.i'
     exodiff = '2d_out.e'
+    requirement = 'The system shall solve a 2D axisymmetric (RZ) thermomechanical problem and '
+                   'produce a solution file for use as the source solution of an '
+                   'Axisymmetric2D3DSolutionFunction mapping.'
   [../]
   [./axisymmetric_2d3d_solution_function_3dy]
     type = 'Exodiff'
     input = '3dy.i'
     exodiff = '3dy_out.e'
     prereq = 'axisymmetric_2d3d_solution_function_2d'
+    requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
+                   'onto a full 3D mesh whose axis of symmetry is the y-axis.'
   [../]
   [./axisymmetric_2d3d_solution_function_3dy_scale]
     type = 'Exodiff'
@@ -18,6 +23,9 @@
     cli_args = 'Mesh/file=3dy_scale.e Functions/soln_func_temp/axial_dimension_ratio=2.0 Functions/soln_func_disp_x/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/scale_factor=2.0 Functions/soln_func_disp_z/axial_dimension_ratio=2.0 Outputs/file_base=3dy_scale_out'
     exodiff = '3dy_scale_out.e'
     prereq = 'axisymmetric_2d3d_solution_function_3dy'
+    requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
+                   'onto a full 3D mesh whose axis of symmetry is the y-axis while stretching '
+                   'the axial dimension and scaling the mapped axial displacement.'
   [../]
   [./axisymmetric_2d3d_solution_function_3dz]
     type = 'Exodiff'
@@ -25,6 +33,8 @@
     cli_args = "Mesh/file=3dz.e Functions/soln_func_temp/3d_axis_point2='0 0 1' Functions/soln_func_disp_x/3d_axis_point2='0 0 1' Functions/soln_func_disp_y/3d_axis_point2='0 0 1' Functions/soln_func_disp_z/3d_axis_point2='0 0 1' AuxKernels/hoop_stress/point2='0 0 1' Outputs/file_base=3dz_out"
     exodiff = '3dz_out.e'
     prereq = 'axisymmetric_2d3d_solution_function_3dy_scale'
+    requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
+                   'onto a full 3D mesh whose axis of symmetry is the z-axis.'
   [../]
   [./axisymmetric_2d3d_solution_function_3dz_scale]
     type = 'Exodiff'
@@ -32,5 +42,8 @@
     cli_args = "Mesh/file=3dz_scale.e Functions/soln_func_temp/3d_axis_point2='0 0 1' Functions/soln_func_temp/axial_dimension_ratio=2.0 Functions/soln_func_disp_x/3d_axis_point2='0 0 1' Functions/soln_func_disp_x/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/3d_axis_point2='0 0 1' Functions/soln_func_disp_y/axial_dimension_ratio=2.0 Functions/soln_func_disp_z/3d_axis_point2='0 0 1' Functions/soln_func_disp_z/axial_dimension_ratio=2.0 Functions/soln_func_disp_z/scale_factor=2.0 AuxKernels/hoop_stress/point2='0 0 1' Outputs/file_base=3dz_scale_out"
     exodiff = '3dz_scale_out.e'
     prereq = 'axisymmetric_2d3d_solution_function_3dz'
+    requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
+                   'onto a full 3D mesh whose axis of symmetry is the z-axis while stretching '
+                   'the axial dimension and scaling the mapped axial displacement.'
   [../]
 []

@@ -4,12 +4,20 @@
     input = 'heat_convection_3d_tf_test.i'
     exodiff = 'out_3d_tf.e'
     abs_zero = 1e-10
+    requirement = 'The system shall apply a convective flux boundary condition with a '
+                  'ramped fluid temperature and a large heat transfer coefficient to verify '
+                  'that the solid surface temperature of a 3D body tracks the ramping fluid '
+                  'temperature.'
+    design = 'ConvectiveFluxBC.md'
   [../]
 
   [./test_function]
     type = 'Exodiff'
     input = 'heat_convection_function.i'
     exodiff = 'heat_convection_function_out.e'
+    requirement = 'The system shall apply a convective flux boundary condition whose fluid '
+                  'temperature and heat transfer coefficient are each given by a function.'
+    design = 'ConvectiveFluxFunction.md'
   [../]
 
   [./test_rz]
@@ -17,6 +25,10 @@
     input = 'heat_convection_rz_test.i'
     exodiff = 'out_rz.e'
     abs_zero = 1e-10
+    requirement = 'The system shall apply a convective flux boundary condition with a ramped '
+                  'fluid temperature and a natural-convection heat transfer coefficient to '
+                  'model the thermal soak of an axisymmetric body.'
+    design = 'ConvectiveFluxBC.md'
   [../]
 
   [./test_3d]
@@ -24,6 +36,10 @@
     input = 'heat_convection_3d_test.i'
     exodiff = 'out_3d.e'
     abs_zero = 1e-10
+    requirement = 'The system shall apply a convective flux boundary condition with a ramped '
+                  'fluid temperature and a natural-convection heat transfer coefficient to '
+                  'model the thermal soak of a 3D body.'
+    design = 'ConvectiveFluxBC.md'
   [../]
 
   [./test_rz_tf]
@@ -31,5 +47,10 @@
     input = 'heat_convection_rz_tf_test.i'
     exodiff = 'out_rz_tf.e'
     abs_zero = 1e-10
+    requirement = 'The system shall apply a convective flux boundary condition with a '
+                  'ramped fluid temperature and a large heat transfer coefficient to verify '
+                  'that the solid surface temperature of an axisymmetric body tracks the '
+                  'ramping fluid temperature.'
+    design = 'ConvectiveFluxBC.md'
   [../]
 []
