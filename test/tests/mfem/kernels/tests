@@ -10,6 +10,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMCurlCurlPartial]
     type = CSVDiff
@@ -23,6 +24,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusion]
     type = CSVDiff
@@ -33,6 +35,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusion1D]
     type = CSVDiff
@@ -50,6 +53,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*1.*Spatial Dimension.*1.*Elems.*32.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionAMR]
     design = 'MFEMRefinementMarker.md MFEMIndicator.md MFEML2ZienkiewiczZhuIndicator.md'
@@ -63,6 +67,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       detail = 'h-refinement, '
+      max_threads = 1 # no threads in MFEM
     []
     [pRefinement]
       type = CSVDiff
@@ -74,6 +79,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       detail = 'and p-refinement.'
+      max_threads = 1 # no threads in MFEM
     []
   []
   [MFEMDiffusionPartial]
@@ -87,6 +93,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionMatFree]
     type = CSVDiff
@@ -100,6 +107,7 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
     type = CSVDiff
@@ -117,6 +125,7 @@
     compute_devices = 'cuda'
     min_parallel = 2
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionPartialMultiGPUNoAwareMPI]
     type = CSVDiff
@@ -134,6 +143,7 @@
     compute_devices = 'cuda'
     min_parallel = 2
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionDG]
     type = XMLDiff
@@ -145,6 +155,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMGradDiv]
     type = CSVDiff
@@ -156,6 +167,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMHeatConduction]
     type = CSVDiff
@@ -172,6 +184,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMHeatConductionElement]
     type = CSVDiff
@@ -192,6 +205,7 @@
     valgrind = none
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMHeatConductionMatFree]
     type = CSVDiff
@@ -213,6 +227,7 @@
     valgrind = none
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMHeatTransfer]
     type = CSVDiff
@@ -225,6 +240,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMTransientScheme]
     type = RunException
@@ -234,6 +250,7 @@
     requirement = 'The system shall report an error if the user specifies an unsupported time integration scheme.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMixedHeatTransfer]
     type = CSVDiff
@@ -249,6 +266,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMLinearElasticityByComponentAMG]
     type = CSVDiff
@@ -261,6 +279,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMLinearElasticityRigidBodyModesAMG]
     type = CSVDiff
@@ -273,6 +292,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMBoomerAMGVectorTreatmentErrors]
     requirement = 'The system shall report an error when a BoomerAMG treatment for vector '
@@ -284,6 +304,7 @@
       expect_err = "'by_component' and 'rigid_body_modes' require fespace to be set."
       detail = 'without the space of the unknown,'
       capabilities = 'mfem'
+      max_threads = 1 # no threads in MFEM
     []
     [nodes_ordering]
       type = RunException
@@ -294,6 +315,7 @@
                    "'rigid_body_modes'."
       detail = 'on a space ordered by nodes, and'
       capabilities = 'mfem'
+      max_threads = 1 # no threads in MFEM
     []
     [unused_fespace]
       type = RunException
@@ -302,6 +324,7 @@
       expect_err = "is only used when vector_treatment is 'by_component' or 'rigid_body_modes'."
       detail = 'when a space is given that a scalar treatment would not use.'
       capabilities = 'mfem'
+      max_threads = 1 # no threads in MFEM
     []
   []
   [MFEMGravity]
@@ -328,6 +351,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMIrrotational]
     type = CSVDiff
@@ -339,6 +363,7 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDarcy]
     type = CSVDiff
@@ -348,6 +373,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionEigenproblem]
     type = CSVDiff
@@ -357,6 +383,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMaxwellEigenproblem]
     type = CSVDiff
@@ -366,6 +393,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMaxwellAnisotropicEigenproblem]
     type = CSVDiff
@@ -375,5 +403,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
 []

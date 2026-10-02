@@ -12,6 +12,7 @@
         compute_devices = 'cpu cuda'
         recover = false
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -33,6 +34,7 @@
       cli_args = recv_app:Executioner/device=cpu
       capabilities = mfem
       compute_devices = cuda
+      max_threads = 1 # no threads in MFEM
     []
   []
 []

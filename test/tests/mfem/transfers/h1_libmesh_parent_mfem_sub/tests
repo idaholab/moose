@@ -11,6 +11,7 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
+      max_threads = 1 # no threads in MFEM
     []
     [H1QuadSecondOrder]
       type = CSVDiff
@@ -25,6 +26,7 @@
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_quads_order_2 '
+      max_threads = 1 # no threads in MFEM
     []
     [H1Tri]
       type = CSVDiff
@@ -37,6 +39,7 @@
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TriSecondOrder]
       type = CSVDiff
@@ -53,6 +56,7 @@
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TriToQuad]
       type = CSVDiff
@@ -65,6 +69,7 @@
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TriToQuadSecondOrder]
       type = CSVDiff
@@ -80,6 +85,7 @@
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+      max_threads = 1 # no threads in MFEM
     []
     [H1Hex]
       type = CSVDiff
@@ -93,6 +99,7 @@
                 'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_hexes '
                 'mfem_app0:Mesh/file=../../mesh/cube.e '
+      max_threads = 1 # no threads in MFEM
     []
     [H1HexSecondOrder]
       type = CSVDiff
@@ -109,6 +116,7 @@
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:Mesh/file=../../mesh/cube.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+      max_threads = 1 # no threads in MFEM
     []
     [H1Tet]
       type = CSVDiff
@@ -122,6 +130,7 @@
                 'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TetSecondOrder]
       type = CSVDiff
@@ -139,6 +148,7 @@
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets_order_2 '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TetToHex]
       type = CSVDiff
@@ -152,6 +162,7 @@
                 'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
+      max_threads = 1 # no threads in MFEM
     []
     [H1TetToHexSecondOrder]
       type = CSVDiff
@@ -168,6 +179,7 @@
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex_order_2 '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+      max_threads = 1 # no threads in MFEM
     []
   []
 []

@@ -12,6 +12,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       restep = false
+      max_threads = 1 # no threads in MFEM
     []
     [MFEM_sub_cycling]
       type = CSVDiff
@@ -22,6 +23,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       restep = false
+      max_threads = 1 # no threads in MFEM
     []
   []
   [MFEMFullSolveMultiApps]
@@ -35,6 +37,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       restep = false
+      max_threads = 1 # no threads in MFEM
     []
   []
 []

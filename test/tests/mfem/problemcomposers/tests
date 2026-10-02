@@ -10,6 +10,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [TimeDependentWeakFormProblemComposer]
     type = CSVDiff
@@ -23,6 +24,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [CustomProblemComposer]
     type = CSVDiff
@@ -34,5 +36,6 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
 []

@@ -11,6 +11,7 @@
     compute_devices = 'cpu'
     recover = false
     abs_zero = 1e-6
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPMGRejectsNonlinear]
     type = RunException
@@ -19,6 +20,7 @@
     requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
                   'nonlinear equation system.'
     capabilities = 'mfem'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPMGRejectsComplex]
     type = RunException
@@ -31,5 +33,6 @@
     requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
                   'complex equation system.'
     capabilities = 'mfem'
+    max_threads = 1 # no threads in MFEM
   []
 []

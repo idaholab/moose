@@ -12,6 +12,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMScalarTimeAverageAux]
     type = CSVDiff
@@ -31,6 +32,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMInnerProductAux]
     type = CSVDiff
@@ -45,6 +47,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMCrossProductAux]
     type = CSVDiff
@@ -59,6 +62,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMNDtoRTAux]
     type = CSVDiff
@@ -71,5 +75,6 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
 []

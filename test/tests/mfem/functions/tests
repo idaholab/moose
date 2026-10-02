@@ -9,6 +9,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMScalarQuadratureFunction]
     type = CSVDiff
@@ -21,6 +22,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMScalarQuadratureFunctionOrderMismatch]
     type = RunException
@@ -33,6 +35,7 @@
                   'quadrature function coefficient is evaluated by an integrator using a different '
                   'integration rule.'
     capabilities = 'mfem'
+    max_threads = 1 # no threads in MFEM
   []
   [CylindricalCoefficients]
     type = CSVDiff
@@ -44,5 +47,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
 []

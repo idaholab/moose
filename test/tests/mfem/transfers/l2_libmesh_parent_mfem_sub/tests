@@ -11,6 +11,7 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
+      max_threads = 1 # no threads in MFEM
     []
     [L2Tri]
       type = CSVDiff
@@ -23,6 +24,7 @@
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
+      max_threads = 1 # no threads in MFEM
     []
     [L2TriToQuad]
       type = CSVDiff
@@ -35,6 +37,7 @@
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
+      max_threads = 1 # no threads in MFEM
     []
     [L2Hex]
       type = CSVDiff
@@ -47,6 +50,7 @@
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_hexes '
                 'mfem_app0:Mesh/file=../../mesh/cube.e '
+      max_threads = 1 # no threads in MFEM
     []
     [L2Tet]
       type = CSVDiff
@@ -59,6 +63,7 @@
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
+      max_threads = 1 # no threads in MFEM
     []
     [L2TetToHex]
       type = CSVDiff
@@ -71,6 +76,7 @@
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
+      max_threads = 1 # no threads in MFEM
     []
   []
 []

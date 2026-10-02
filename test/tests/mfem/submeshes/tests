@@ -9,6 +9,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMBoundarySubMeshTransfer]
     type = XMLDiff
@@ -20,6 +21,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDomainSubMeshTransfer]
     type = CSVDiff
@@ -29,6 +31,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMCoupledVariableSource]
     type = CSVDiff
@@ -38,6 +41,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMCoupledCoefficientSource]
     type = XMLDiff
@@ -54,6 +58,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
@@ -67,6 +72,7 @@
     recover = false
     valgrind = heavy
     min_slots = 3 # memory heavy, needs extra slot for -p 2
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMBoundaryFluxCutTransitionSubMesh]
     design = 'MFEMVectorBoundaryFluxIntegralPostprocessor.md'
@@ -87,6 +93,7 @@
     recover = false
     valgrind = heavy
     min_slots = 3 # memory heavy
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMVacuumCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
@@ -99,6 +106,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     min_slots = 2
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDomainSubMeshBoundary]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
@@ -113,6 +121,7 @@
     valgrind = heavy
     rel_err = 7e-5
     min_slots = 2
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMNLDomainSubMeshBoundary]
     design = 'MFEMNLCurlCurlKernel.md'
@@ -127,5 +136,6 @@
     restep = false
     valgrind = heavy
     min_slots = 3 # memory heavy
+    max_threads = 1 # no threads in MFEM
   []
 []

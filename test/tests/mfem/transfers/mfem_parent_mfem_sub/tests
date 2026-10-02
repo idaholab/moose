@@ -13,6 +13,7 @@
         recover = false
         cli_args = 'Transfers/active=general_transfer_from_sub '
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -36,6 +37,7 @@
         recover = false
         cli_args = 'Transfers/active=general_transfer_from_sub'
         detail = 'running the inputs, and '
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -60,6 +62,7 @@
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
+        max_threads = 1 # no threads in MFEM
       []
       [Tetra]
         type = CSVDiff
@@ -72,6 +75,7 @@
         cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                   'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
+        max_threads = 1 # no threads in MFEM
       []
       [TetToHex]
         type = CSVDiff
@@ -84,6 +88,7 @@
         cli_args = 'Mesh/file=../../mesh/cube.e '
                   'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
+        max_threads = 1 # no threads in MFEM
       []
     []
     [OutOfMesh]
@@ -97,6 +102,7 @@
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
+        max_threads = 1 # no threads in MFEM
       []
     []
   []
@@ -113,6 +119,7 @@
         compute_devices = 'cpu cuda'
         recover = false
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -137,6 +144,7 @@
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -159,6 +167,7 @@
         compute_devices = 'cpu cuda'
         recover = false
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
@@ -184,6 +193,7 @@
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
         detail = 'running the inputs, and'
+        max_threads = 1 # no threads in MFEM
       []
       [verify]
         type = RunCommand
