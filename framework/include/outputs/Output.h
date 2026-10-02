@@ -21,6 +21,7 @@
 #include "ReporterInterface.h"
 #include "AdvancedOutputUtils.h"
 #include "PerfGraphInterface.h"
+#include "DependencyResolverInterface.h"
 #include "FunctionInterface.h"
 
 class MooseMesh;
@@ -48,7 +49,8 @@ class Output : public MooseObject,
                public PostprocessorInterface,
                public VectorPostprocessorInterface,
                public ReporterInterface,
-               public PerfGraphInterface
+               public PerfGraphInterface,
+               public DependencyResolverInterface
 {
 public:
   static InputParameters validParams();
@@ -149,6 +151,10 @@ public:
    */
   virtual bool supportsMaterialPropertyOutput() const { return false; }
 
+  virtual const std::set<std::string> & getRequestedItems() override { return _depend_obj; }
+
+  virtual const std::set<std::string> & getSuppliedItems() override { return _supplied_obj; }
+
 protected:
   /**
    * Overload this function with the desired output activities
@@ -180,6 +186,13 @@ protected:
    *
    */
   void setWallTimeIntervalFromCommandLineParam();
+
+  /**
+   * Function to add output objects when users on an output to depend on another output.
+   * @param object_name The name of the output object to be dependent on
+   *
+   */
+  void addOutputDependency(const OutputName & object_name) { _depend_obj.insert(object_name); }
 
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
@@ -284,6 +297,12 @@ protected:
 
   /// time in seconds since last output
   Real _wall_time_since_last_output;
+
+  /// Set of dependency
+  std::set<std::string> _depend_obj;
+
+  /// Set containing the declared object
+  std::set<std::string> _supplied_obj;
 
   friend class OutputWarehouse;
 };
