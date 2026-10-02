@@ -421,11 +421,6 @@ public:
   THREAD_ID numThreads() const { return _num_threads; }
 
   /**
-   * Sets the number of threads this application uses
-   */
-  void setNumThreads(THREAD_ID num_threads);
-
-  /**
    * Get the command line
    * @return The reference to the command line object
    * Setup options based on InputParameters.
