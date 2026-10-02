@@ -77,6 +77,19 @@ void polyhedronElemSplitter(MeshBase & mesh,
                             std::vector<dof_id_type> & converted_elems_ids);
 
 /**
+ * Split a C0POLYGON element into TRI3 elements using the polygon's existing internal
+ * triangulation.
+ * @param mesh The mesh to be modified
+ * @param bdry_side_list A list that contains the boundary information of the original mesh
+ * @param elem_id The id of the element to be split
+ * @param converted_elems_ids a vector to record the ids of the newly created TRI3 elements
+ */
+void polygonElemSplitter(MeshBase & mesh,
+                         const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                         const dof_id_type elem_id,
+                         std::vector<dof_id_type> & converted_elems_ids);
+
+/**
  * Rotate a HEX8 element's nodes to ensure that the node with the minimum id is the first node;
  * and the node among its three neighboring nodes with the minimum id is the second node.
  * @param min_id_index The index of the node with the minimum id
@@ -230,6 +243,13 @@ void convert3DMeshToAllTet4(MeshBase & mesh,
  * @param mesh The mesh to be converted
  */
 void convert3DMeshToAllTet4(MeshBase & mesh);
+
+/**
+ * Convert all the elements in a 2D mesh consisting of only linear elements into TRI3 elements.
+ * Supported element types are TRI3 (kept as-is), QUAD4, and C0POLYGON.
+ * @param mesh The mesh to be converted
+ */
+void convert2DMeshToAllTri3(MeshBase & mesh);
 
 /**
  * Collect the boundary information of the given element in a mesh.
