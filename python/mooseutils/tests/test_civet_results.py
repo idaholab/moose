@@ -9,8 +9,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
+import sys
 import unittest
-import platform
 import mooseutils
 import mooseutils.civet_results as cr
 
@@ -23,37 +23,58 @@ SHAS = [
 
 
 class Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
+
+    def testProcessResultsFormats(self):
+        """
+        Non-network regression test for TEST_RE/_process_results, covering test output
+        lines both without and with the optional memory field.
+        """
+        job = cr.Job(1, "results_1_recipe.tar.gz", cr.JobFileStatus.LOCAL, None)
+
+        content_without_memory = (
+            "[0.530s]       OK  kernels/simple_diffusion.test [recover]\n"
+        )
+        content_with_memory = (
+            "[0.530s] [ 123MB]       OK  kernels/simple_diffusion.test [recover]\n"
+        )
+        for content in (content_without_memory, content_with_memory):
+            database = collections.defaultdict(lambda: collections.defaultdict(list))
+            cr._process_results(database, job, "06_Test_-p_3", content, None)
+            tests = database["kernels/simple_diffusion.test"][1]
+            self.assertEqual(len(tests), 1)
+            self.assertEqual(tests[0].status, "OK")
+            self.assertEqual(tests[0].caveats, ["recover"])
+
     def testGetCivetJobs(self):
-        jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
+        jobs = self.jobs
         self.assertEqual(len(jobs), 67)
         self.assertEqual(jobs[0].number, 443457)
         self.assertTrue(jobs[0].filename.endswith("results_443457.tar.gz"))
         self.assertEqual(jobs[0].url, SITE)
 
-    def testUpdateDatabaseFromJob(self):
-        jobs = cr._get_remote_civet_jobs(SHAS, SITE, REPO)
-        database = collections.defaultdict(lambda: collections.defaultdict(list))
-        cr._update_database_from_job(jobs[42], database, None)
-
+    def assertKnownTest(self, database):
+        """Assert the known kernels/simple_diffusion.test entry for job 443499 is present."""
         tests = database["kernels/simple_diffusion.test"][443499]
         self.assertEqual(tests[1].recipe, "06_Test_-p_3")
         self.assertEqual(tests[1].status, "OK")
         self.assertEqual(tests[1].caveats, ["recover"])
         self.assertEqual(tests[1].url, SITE)
         self.assertEqual(tests[1].reason, "")
+
+    def testUpdateDatabaseFromJob(self):
+        jobs = self.jobs
+        database = collections.defaultdict(lambda: collections.defaultdict(list))
+        cr._update_database_from_job(jobs[42], database, None)
+        self.assertKnownTest(database)
 
     def testGetCivetResults(self):
         database = cr.get_civet_results(hashes=SHAS, site=(SITE, REPO))
-        tests = database["kernels/simple_diffusion.test"][443499]
-        self.assertEqual(tests[1].recipe, "06_Test_-p_3")
-        self.assertEqual(tests[1].status, "OK")
-        self.assertEqual(tests[1].caveats, ["recover"])
-        self.assertEqual(tests[1].url, SITE)
-        self.assertEqual(tests[1].reason, "")
+        self.assertKnownTest(database)
 
-    @unittest.skipIf(
-        platform.python_version() < "3.7.0", "Python 3.7 or greater required."
-    )
+    @unittest.skipIf(sys.version_info < (3, 7), "Python 3.7 or greater required.")
     def testGetCivetHashes(self):
 
         # Release 2021-05-18
