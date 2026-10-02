@@ -17,6 +17,7 @@ import json
 import os
 import platform
 import re
+import resource
 import shutil
 import socket
 import subprocess
@@ -434,6 +435,10 @@ class TestHarness:
 
         # Parse arguments
         self.options: argparse.Namespace = self.parseCLArgs(argv)
+
+        # Disable system coredumps
+        if not self.options.no_disable_coredumps:
+            resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
         # Determine the executable if we have an application
         try:
@@ -1773,6 +1778,11 @@ class TestHarness:
 
         envgroup = parser.add_argument_group(
             "Environment Options", "Control the runtime environment"
+        )
+        envgroup.add_argument(
+            "--no-disable-coredumps",
+            action="store_true",
+            help="Do not disable system core dumps when running tests",
         )
         envgroup.add_argument(
             "--no-hwloc-topology",
