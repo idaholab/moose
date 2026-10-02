@@ -34,6 +34,7 @@ public:
   {
     _ess_bdr_markers = ess_bdr_markers;
   }
+
   void SetOperator(const mfem::Operator & op) override;
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
