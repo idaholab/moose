@@ -39,6 +39,7 @@ class SystemBase;
 class TimeIntegrator;
 class InputParameters;
 class FEProblemBase;
+class RestartableEquationSystems;
 
 // libMesh forward declarations
 namespace libMesh
@@ -899,6 +900,19 @@ public:
   virtual void computeVariables(const NumericVector<Number> & /*soln*/) {}
 
   void copyVars(libMesh::ExodusII_IO & io);
+
+  /**
+   * Registers the variables queued via addVariableToCopy() as variable copies on \p res, so that
+   * they are restored from a checkpoint's stored solution into this system's solution during the
+   * next res.load(). This is the checkpoint-file analog of copyVars(ExodusII_IO&).
+   */
+  void addCheckpointVariableCopyRequests(RestartableEquationSystems & res);
+
+  /**
+   * Closes and updates this system's solution after variables have been copied into it (from a
+   * checkpoint). Called after the checkpoint copy has populated the solution vector.
+   */
+  void closeVarCopySolution();
 
   /**
    * Copy current solution into old and older

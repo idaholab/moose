@@ -449,6 +449,25 @@ public:
   libMesh::ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
 
   /**
+   * Set the checkpoint folder base (up to the time step, e.g. "foo_cp/0010", without the
+   * "-mesh.cpa.gz" suffix) from which variables should be restarted. Set during mesh
+   * construction when the mesh is read from a checkpoint and variables request an initial
+   * condition from the file.
+   */
+  void setCheckpointFileBaseForRestart(const std::string & folder_base)
+  {
+    _var_restart_checkpoint_base = folder_base;
+  }
+
+  /**
+   * Get the checkpoint folder base from which variables should be restarted (empty if none).
+   */
+  const std::string & getCheckpointFileBaseForRestart() const
+  {
+    return _var_restart_checkpoint_base;
+  }
+
+  /**
    * Actually build everything in the input file.
    */
   virtual void runInputFile();
@@ -1414,6 +1433,11 @@ protected:
 
   /// The Exodus reader when _initial_from_file is set to true
   std::shared_ptr<libMesh::ExodusII_IO> _ex_reader;
+
+  /// Checkpoint folder base (up to the time step) to restart variables from, when the mesh is
+  /// read from a checkpoint and variables request an initial condition from the file. Empty
+  /// when there is no such checkpoint variable restart.
+  std::string _var_restart_checkpoint_base;
 
   /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
   const bool _distributed_mesh_on_command_line;

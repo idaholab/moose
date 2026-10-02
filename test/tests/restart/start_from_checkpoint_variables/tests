@@ -1,0 +1,31 @@
+[Tests]
+  design = 'MooseVariableBase.md CopyNodalVarsAction.md'
+  issues = '#33706'
+  [checkpoint_restart]
+    requirement = 'The system shall be able to set the initial condition of nodal, high-order '
+                  'elemental and scalar variables from a checkpoint file by'
+    [write]
+      type = CSVDiff
+      input = part1.i
+      csvdiff = part1_out.csv
+      detail = 'writing a checkpoint that holds the solution and'
+    []
+    [read]
+      type = CSVDiff
+      input = part2.i
+      csvdiff = part2_out.csv
+      prereq = checkpoint_restart/write
+      detail = 'reading the requested variables back from that checkpoint.'
+    []
+  []
+  [timestep_error]
+    type = RunException
+    input = part2.i
+    cli_args = 'Variables/u/initial_from_file_timestep=1'
+    prereq = checkpoint_restart/write
+    expect_err = 'initial_from_file_timestep.*must be .*LATEST'
+    requirement = 'The system shall report an error when a specific time step is requested for a '
+                  'variable initial condition read from a checkpoint file, because a checkpoint '
+                  'file holds a single state.'
+  []
+[]

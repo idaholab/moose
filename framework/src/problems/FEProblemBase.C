@@ -13,6 +13,8 @@
 
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
+#include "RestartableDataReader.h"
+#include "RestartableDataMap.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
 #include "Factory.h"
@@ -946,8 +948,11 @@ FEProblemBase::initialSetup()
 
   SubProblem::initialSetup();
 
-  if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
-    mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
+  if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) +
+          bool(_app.getCheckpointFileBaseForRestart().size()) >
+      1)
+    mooseError("Checkpoint recovery, restart, exodus variable restart and checkpoint variable "
+               "restart are all mutually exclusive.");
 
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
@@ -1080,12 +1085,19 @@ FEProblemBase::initialSetup()
         sys->copyVars(*reader);
       _aux->copyVars(*reader);
     }
+    else if (_app.getCheckpointFileBaseForRestart().size())
+    {
+      TIME_SECTION("copyingFromCheckpoint", 3, "Copying Variables From Checkpoint");
+
+      copyVarsFromCheckpoint(_app.getCheckpointFileBaseForRestart());
+    }
     else
     {
       if (_solver_systems[0]->hasVarCopy() || _aux->hasVarCopy())
-        mooseError("Need Exodus reader to restart variables but the reader is not available\n"
-                   "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
-                   "Exodus mesh file and with use_for_exodus_restart equal to true");
+        mooseError(
+            "Need an Exodus reader or a checkpoint mesh to restart variables but neither is "
+            "available.\nUse either FileMesh/FileMeshGenerator with an Exodus mesh file (with "
+            "use_for_exodus_restart = true for the generator), or with a checkpoint mesh file.");
     }
   }
 
@@ -3758,6 +3770,58 @@ FEProblemBase::checkICRestartError(const std::string & ic_name,
           ".\nThis is only allowed if you specify 'allow_initial_conditions_with_restart' to "
           "the [Problem], as initial conditions can override restarted fields");
   }
+}
+
+void
+FEProblemBase::copyVarsFromCheckpoint(const std::string & folder_base)
+{
+  // Per-rank restart data folder holding the stored equation systems for this checkpoint
+  const auto rank_base = _app.restartFolderBase(folder_base);
+  if (!RestartableDataReader::isAvailable(rank_base))
+    mooseError("Cannot restart variables from the checkpoint '",
+               folder_base,
+               "': no stored solution data was found.\n'initial_from_file_var' requires a full "
+               "solution checkpoint, not a mesh-only checkpoint (such as a split mesh).");
+
+  // Build a standalone RestartableEquationSystems on the current mesh and configure it with the
+  // requested variable copies. We deliberately do NOT add any systems/variables to its
+  // EquationSystems: that would clobber the live systems' dof indexing on the shared mesh.
+  // Instead, load() writes the requested source variables' data directly into the live solution
+  // vectors (by stream offset). This mirrors MooseApp::possiblyLoadRestartableMetaData: a local
+  // data map + reader restores a single named object without an app-wide restart/recover.
+  std::vector<RestartableDataMap> maps(libMesh::n_threads());
+  const auto es_data_name = restartableName("equation_systems");
+  auto & value = maps[0].addData(std::make_unique<RestartableData<RestartableEquationSystems>>(
+      es_data_name, nullptr, _mesh.getMesh()));
+  auto & source_res = static_cast<RestartableData<RestartableEquationSystems> &>(value).set();
+
+  for (auto & sys : _solver_systems)
+    sys->addCheckpointVariableCopyRequests(source_res);
+  _aux->addCheckpointVariableCopyRequests(source_res);
+
+  RestartableDataReader reader(_app, maps);
+  reader.setInput(rank_base);
+  reader.restore();
+
+  // If the checkpoint's stored equation systems could not be found under this problem's name,
+  // load() was never invoked and no copies happened; surface that clearly.
+  for (const auto & copy : source_res.getVariableCopies())
+    if (!source_res.wasVariableCopied(copy.to_system->name(), copy.to_variable->name()))
+      mooseError("Failed to restart variable '",
+                 copy.to_variable->name(),
+                 "' from the checkpoint '",
+                 folder_base,
+                 "': the checkpoint does not contain stored equation systems for this problem "
+                 "(the problem name of the run that wrote the checkpoint may differ from '",
+                 name(),
+                 "').");
+
+  // Finalize the solution vectors we wrote into
+  for (auto & sys : _solver_systems)
+    if (sys->hasVarCopy())
+      sys->closeVarCopySolution();
+  if (_aux->hasVarCopy())
+    _aux->closeVarCopySolution();
 }
 
 void
