@@ -1,47 +1,69 @@
 [Tests]
+  issues = '#7877'
   [./unity]
     type = 'CSVDiff'
     input = 'unity.i'
     csvdiff = 'unity_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityConst.md'
+    requirement = 'The system shall provide a perfectly-mobile relative permeability relationship, equal to one for all saturations.'
   [../]
   [./corey1]
     type = 'CSVDiff'
     input = 'corey1.i'
     csvdiff = 'corey1_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityCorey.md'
+    requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation using a Corey exponent of one, with no residual saturation in either phase.'
   [../]
   [./corey2]
     type = 'CSVDiff'
     input = 'corey2.i'
     csvdiff = 'corey2_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityCorey.md'
+    requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation using a Corey exponent of two, with no residual saturation in either phase.'
   [../]
   [./corey3]
     type = 'CSVDiff'
     input = 'corey3.i'
     csvdiff = 'corey3_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityCorey.md'
+    requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation with nonzero residual saturations in both phases.'
   [../]
   [./corey4]
     type = 'CSVDiff'
     input = 'corey4.i'
     csvdiff = 'corey4_out_vpp_0001.csv'
+    issues = '#7877 #8886'
+    design = 'PorousFlowRelativePermeabilityCorey.md'
+    requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation with nonzero residual saturations and an overall scaling factor applied to each phase.'
   [../]
   [./vangenuchten1]
     type = 'CSVDiff'
     input = 'vangenuchten1.i'
     csvdiff = 'vangenuchten1_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityVG.md'
+    requirement = 'The system shall be able to compute the van Genuchten relative permeability as a function of saturation, with no residual saturation in either phase.'
   [../]
   [./vangenuchten2]
     type = 'CSVDiff'
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
+    design = 'PorousFlowRelativePermeabilityVG.md'
+    requirement = 'The system shall be able to compute the van Genuchten relative permeability as a function of saturation, with nonzero residual saturations in both phases.'
   [../]
   [./brookscorey1]
     type = 'CSVDiff'
     input = 'brooks_corey1.i'
     csvdiff = 'brooks_corey1_out_vpp_0001.csv'
+    issues = '#9537'
+    design = 'PorousFlowRelativePermeabilityBC.md'
+    requirement = 'The system shall be able to compute the Brooks-Corey relative permeability as a function of saturation, with no residual saturation in either phase.'
   [../]
   [./brookscorey2]
     type = 'CSVDiff'
     input = 'brooks_corey2.i'
     csvdiff = 'brooks_corey2_out_vpp_0001.csv'
+    issues = '#9537'
+    design = 'PorousFlowRelativePermeabilityBC.md'
+    requirement = 'The system shall be able to compute the Brooks-Corey relative permeability as a function of saturation, with nonzero residual saturations in both phases.'
   [../]
 []

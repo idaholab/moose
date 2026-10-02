@@ -1,12 +1,16 @@
 [Tests]
+  issues = '#7998'
+  design = 'MovingPlanarFront.md'
   [./mpf_except1]
     type = 'RunException'
     input = 'mpf_except1.i'
     expect_err = 'MovingPlanarFront: start_posn and end_posn must be different points'
+    requirement = 'The system shall report an error if the MovingPlanarFront function is given identical start and end points.'
   [../]
   [./mpf1]
     type = Exodiff
     input = 'mpf1.i'
     exodiff = 'mpf1.e'
+    requirement = 'The system shall provide a function whose value changes from one side of a user-defined moving planar front to the other.'
   [../]
 []
