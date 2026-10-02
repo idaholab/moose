@@ -2,8 +2,8 @@ mu = 1.0
 epsilon = 1.0
 sigma = 20.0
 omega = 10.0
-kappa_r = 12.7201964951406889525742371916
-kappa_i = -7.86151377757423297509831172647
+kappa_i = '${fparse -sqrt(mu*omega*sqrt(epsilon^2*omega^2+sigma^2)-epsilon*mu*omega^2)/sqrt(2)}'
+kappa_r = '${fparse -mu*omega*sigma/kappa_i/2}'
 
 [Mesh]
   type = MFEMFileMesh
