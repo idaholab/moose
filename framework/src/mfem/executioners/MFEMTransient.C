@@ -11,7 +11,6 @@
 
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
-#include "TimeDependentEquationSystemProblemOperator.h"
 #include "TimeStepper.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
@@ -28,17 +27,10 @@ MFEMTransient::validParams()
 MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(*this, getProblemOperators())
+    _mfem_problem_solve(*this, _mfem_problem.getProblemOperators())
 {
-  // If no ProblemOperators have been added by the user, add a default
-  if (!_mfem_problem.getProblemComposer())
-  {
-    std::string name = "__DefaultWeakFormProblemComposer";
-    InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
-    _mfem_problem.addMFEMProblemComposer("MFEMTimeDependentWeakFormProblemComposer", name, params);
-  }
-  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
+  _mfem_problem.setDefaultAssemblyLevel(
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 }
 
 void
@@ -51,27 +43,6 @@ MFEMTransient::init()
     paramError("scheme",
                "Time Integration scheme \"" + stringify(getTimeScheme()) +
                    "\" is not supported by MFEMTransient Executioner.");
-
-  if (_mfem_problem_data.eqn_system)
-  {
-    if (_mfem_problem_data.nonlinear_solver)
-      _mfem_problem_data.eqn_system->SetGradientRequired(
-          _mfem_problem_data.nonlinear_solver->RequiresGradient());
-
-    _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
-
-    // Set up initial conditions
-    _mfem_problem_data.eqn_system->Init(
-        _mfem_problem_data.gridfunctions,
-        _mfem_problem_data.cmplx_gridfunctions,
-        getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-  }
-
-  for (const auto & problem_operator : getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.true_solution);
-  }
 }
 
 void

@@ -21,14 +21,26 @@ LinearSolverBase::validParams()
   InputParameters params = SolverBase::validParams();
   params.addClassDescription(
       "Base class for defining linear mfem::Solver derived classes for Moose.");
+  params.addParam<MFEMWeakFormName>(
+      "weak_form",
+      "",
+      "Name of the weak form in the WeakForms block whose equation system provides context for "
+      "this solver. May be omitted only if the problem has a single weak form, whose equation "
+      "system is then used.");
   return params;
 }
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
-  : SolverBase(parameters),
-    _preconditioner{nullptr},
-    _equation_system(getMFEMProblem().getProblemData().eqn_system)
+  : SolverBase(parameters), _preconditioner{nullptr}
 {
+  const auto & weak_form_name = getParam<MFEMWeakFormName>("weak_form");
+  if (!weak_form_name.empty() && !getMFEMProblem().getProblemData().eqn_systems.Has(weak_form_name))
+    paramError("weak_form",
+               "No weak form named '",
+               weak_form_name,
+               "' has been added to the problem. Weak forms are added in the 'WeakForms' block.");
+
+  _equation_system = getMFEMProblem().getEquationSystem(weak_form_name);
 }
 
 template <typename T>

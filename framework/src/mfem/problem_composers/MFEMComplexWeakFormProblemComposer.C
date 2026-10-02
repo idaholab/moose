@@ -11,12 +11,13 @@
 
 #include "MFEMComplexWeakFormProblemComposer.h"
 #include "ComplexEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMComplexWeakFormProblemComposer);
 
 MFEMComplexWeakFormProblemComposer::MFEMComplexWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 
@@ -26,8 +27,8 @@ MFEMComplexWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_pro
   if (mfem_problem.getNumericType() != MFEMProblem::NumericType::COMPLEX)
     mooseError("Wrong numeric type. Please set the Problem numeric type to 'complex'.");
 
-  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-  return std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem,
+                                                                             _weak_form_name);
 }
 
 #endif
