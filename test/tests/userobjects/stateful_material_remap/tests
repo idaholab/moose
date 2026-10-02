@@ -9,6 +9,13 @@
                   'positions and subdomain information to a binary file.'
   []
 
+  [export_mixed_blocks]
+    type = 'RunApp'
+    input = 'export_mixed_blocks.i'
+    requirement = 'The system shall export stateful material property data when some subdomains '
+                  'have materials without stateful properties.'
+  []
+
   [import]
     type = 'RunApp'
     input = 'import.i'

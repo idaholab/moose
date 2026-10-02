@@ -87,7 +87,10 @@ StatefulMaterialPropertyExporter::execute()
 
   for (const auto & elem : mesh.getMesh().active_local_element_ptr_range())
   {
-    if (props_map.find(elem) == props_map.end())
+    // MaterialPropertyStorage::swapBack() can leave an element entry with no side entries for
+    // elements that carry no stateful data (e.g. on subdomains without stateful materials)
+    const auto elem_it = props_map.find(elem);
+    if (elem_it == props_map.end() || elem_it->second.find(0) == elem_it->second.end())
       continue;
 
     auto subdomain_name = mesh.getSubdomainName(elem->subdomain_id());
