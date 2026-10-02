@@ -583,6 +583,7 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "PiecewiseFunction",
                                                "TimeRampFunction"},
                                VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"},
+                               MATRIX_FUNCS = {"MFEMPerfectlyMatchedLayerFunction"},
                                MFEM_FUNCS = {"MFEMParsedFunction",
                                              "MFEMCoordinateTransformations",
                                              "MFEMScalarQuadratureFunction",
@@ -619,6 +620,11 @@ MFEMProblem::addFunction(const std::string & type,
             u[i] = vector_value(i);
           }
         });
+  }
+  else if (std::find(MATRIX_FUNCS.begin(), MATRIX_FUNCS.end(), type) != MATRIX_FUNCS.end())
+  {
+    // These functions declare their own MFEM coefficient on construction, as a matrix is not a
+    // value a MOOSE function can return.
   }
   else if (std::find(MFEM_FUNCS.begin(), MFEM_FUNCS.end(), type) != MFEM_FUNCS.end())
   {
