@@ -134,7 +134,7 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   }
 
   if (_old_block.size() != _new_block.size())
-    paramError(new_block_param_name, "Must be the same length as '", _old_block_param_name, "'");
+    paramError(new_block_param_name, "Length (" + std::to_string(_new_block.size()) + ") must be the same length as '", _old_block_param_name, "' (" + std::to_string(_old_block.size()) + ")");
 }
 
 std::unique_ptr<MeshBase>
