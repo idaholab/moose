@@ -14,6 +14,14 @@
 
 registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
 
+InputParameters
+MFEMEigenWeakFormProblemComposer::validParams()
+{
+  InputParameters params = MFEMProblemComposer::validParams();
+  params.addClassDescription("Creates an eigenproblem operator.");
+  return params;
+}
+
 MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
     const InputParameters & parameters)
   : MFEMProblemComposer(parameters)
