@@ -19,6 +19,7 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
+  params += MFEMTopology::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -42,7 +43,10 @@ MFEMMesh::validParams()
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters)
+  : MooseMesh(parameters), MFEMTopology(parameters)
+{
+}
 
 void
 MFEMMesh::init()
@@ -77,6 +81,10 @@ MFEMMesh::buildMesh()
 
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh = buildSerialMFEMMesh();
+
+  if (isPeriodic())
+    mfem_ser_mesh = mfem::Mesh::MakePeriodic(mfem_ser_mesh,
+                                             CreateTopologicallyEquivalentVertexMap(mfem_ser_mesh));
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError("serial_refine",
