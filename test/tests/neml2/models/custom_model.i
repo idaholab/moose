@@ -38,6 +38,9 @@
     error = true
     jit = false
   []
+  [interface_source]
+    type = NEML2TestModel2
+  []
 []
 
 [Schedulers]
