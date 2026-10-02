@@ -36,8 +36,7 @@ EigenproblemEquationSystem::ApplyEssentialConstraints()
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
   _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
-  trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+  ApplyEssentialConstraint(_trial_var_names.at(0), trial_gf, _ess_markers.at(0), _ess_tdof_lists.at(0));
   CheckProblemIsHomogeneous();
 }
 
