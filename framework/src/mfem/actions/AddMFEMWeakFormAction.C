@@ -18,7 +18,7 @@ InputParameters
 AddMFEMWeakFormAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a MFEM WeakForm object to the simulation.");
+  params.addClassDescription("Add an MFEM WeakForm object to the simulation.");
   return params;
 }
 
@@ -31,7 +31,7 @@ void
 AddMFEMWeakFormAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addWeakForm(_type, _name, _moose_object_pars);
+    cast_ref<MFEMProblem &>(*_problem).addWeakForm(_type, _name, _moose_object_pars);
 }
 
 #endif

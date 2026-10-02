@@ -207,7 +207,7 @@ public:
   /**
    * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
-  void addMFEMProblemComposer(const std::string & user_object_name,
+  void addMFEMProblemComposer(const std::string & composer_type,
                               const std::string & name,
                               InputParameters & parameters);
 

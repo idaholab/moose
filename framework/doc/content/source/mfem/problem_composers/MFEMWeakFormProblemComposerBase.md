@@ -7,7 +7,7 @@
 `MFEMWeakFormProblemComposerBase` is the base class of those [MFEMProblemComposer.md] classes whose
 [ProblemOperator.md] solves an [EquationSystem.md] built by an object in the
 [`WeakForms`](syntax/WeakForms/index.md) block. It adds the `weak_form` parameter naming that
-object, and is the parent of `MFEMWeakFormProblemComposer`,
+object, and is the parent of [MFEMWeakFormProblemComposer.md],
 [MFEMComplexWeakFormProblemComposer.md], [MFEMTimeDependentWeakFormProblemComposer.md] and
 [MFEMEigenWeakFormProblemComposer.md].
 

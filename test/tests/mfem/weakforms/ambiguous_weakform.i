@@ -1,4 +1,3 @@
-# Include mfem/kernels/darcy.i
 !include ../kernels/darcy.i
 
 # Two weak forms, but nothing names which one the default problem composer should use.

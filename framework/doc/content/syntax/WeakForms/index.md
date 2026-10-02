@@ -11,7 +11,7 @@ object will be added to the system, based on the `NumericType` (real or complex)
 Each weak form selects the kernels and boundary conditions that contribute to its equation system
 through its `kernels` and `bcs` parameters, which name blocks in the `Kernels` and `BCs` blocks
 respectively. If either parameter is omitted, *all* kernels or boundary conditions added in the
-input file are used, which is the behaviour of the default weak form.
+input file are used, which is the behavior of the default weak form.
 
 !listing test/tests/mfem/weakforms/steady_weakform.i block=WeakForms
 

@@ -149,7 +149,7 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
 }
 
 void
-MFEMProblem::addMFEMProblemComposer(const std::string & type,
+MFEMProblem::addMFEMProblemComposer(const std::string & composer_type,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
@@ -469,15 +469,9 @@ MFEMProblem::setEquationSystems()
   std::vector<MFEMWeakFormBase *> weak_forms;
   theWarehouse().query().condition<AttribSystem>("MFEMWeakFormBase").queryInto(weak_forms);
 
-  // Add a default MFEMWeakForm if none has been added by the user. The shared pointer is held
-  // for the duration of this method because the object it owns is registered in the warehouse
-  // only once addObject() returns.
-  std::shared_ptr<MFEMWeakFormBase> default_weak_form;
+  // Add a default MFEMWeakForm if none has been added by the user.
   if (weak_forms.empty())
-  {
-    default_weak_form = addDefaultWeakForm();
-    weak_forms.push_back(default_weak_form.get());
-  }
+    weak_forms.push_back(addDefaultWeakForm().get());
 
   for (auto & weak_form : weak_forms)
     _problem_data.eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
@@ -539,12 +533,6 @@ MFEMProblem::getProblemOperators()
 }
 
 void
-MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator)
-{
-  _problem_operators.push_back(std::move(problem_operator));
-}
-
-void
 MFEMProblem::setMFEMProblemOperators()
 {
   std::vector<MFEMProblemComposer *> problem_composers;
@@ -553,17 +541,12 @@ MFEMProblem::setMFEMProblemOperators()
       .condition<AttribSystem>("MFEMProblemComposer")
       .queryInto(problem_composers);
 
-  // Add a default MFEMProblemComposer if none has been added by the user. See the note in
-  // setEquationSystems() on why the shared pointer is held here.
-  std::shared_ptr<MFEMProblemComposer> default_problem_composer;
+  // Add a default MFEMProblemComposer if none has been added by the user.
   if (problem_composers.empty())
-  {
-    default_problem_composer = addDefaultProblemComposer();
-    problem_composers.push_back(default_problem_composer.get());
-  }
+    problem_composers.push_back(addDefaultProblemComposer().get());
 
   for (auto & problem_composer : problem_composers)
-    addProblemOperator(problem_composer->createProblemOperator(*this));
+    _problem_operators.push_back(problem_composer->createProblemOperator(*this));
 
   for (const auto & problem_operator : getProblemOperators())
     problem_operator->Init();
