@@ -185,6 +185,14 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 
     _elem_index_helper(_mesh.getMesh(), name() + "_elem_index")
 {
+  // Ray tracing's per-thread data structures (below) are always sized to the process-wide
+  // libMesh/OpenMP thread count, not this application's (possibly smaller) thread count, so the
+  // two must match or ray tracing threads would run with no corresponding per-thread storage.
+  if (_fe_problem.numThreads() != libMesh::n_threads())
+    mooseError("Ray tracing requires that this application's number of threads "
+               "(Application/num_threads) match the number of threads used by libMesh/OpenMP "
+               "(set by --n-threads).");
+
   // Initialize a tracing object for each thread
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
