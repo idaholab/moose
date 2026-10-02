@@ -15,7 +15,7 @@
 #include "ComplexEquationSystem.h"
 
 /**
- * Constructs and stores an Moose::MFEM::ComplexEquationSystem object.
+ * Constructs and stores a Moose::MFEM::ComplexEquationSystem object.
  */
 class MFEMComplexWeakForm : public MFEMWeakFormBase
 {

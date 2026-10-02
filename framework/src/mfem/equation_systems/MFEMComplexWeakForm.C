@@ -33,26 +33,17 @@ MFEMComplexWeakForm::MFEMComplexWeakForm(const InputParameters & parameters)
 Moose::MFEM::ComplexEquationSystem &
 MFEMComplexWeakForm::complexEquationSystem()
 {
-  mooseAssert(std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_equation_system),
-              "The equation system built by MFEMComplexWeakForm is not a ComplexEquationSystem.");
-  return static_cast<Moose::MFEM::ComplexEquationSystem &>(*_equation_system);
+  return cast_ref<Moose::MFEM::ComplexEquationSystem &>(*_equation_system);
 }
 
 void
 MFEMComplexWeakForm::addBoundaryCondition(const std::string & name,
                                           std::shared_ptr<MFEMBoundaryCondition> bc)
 {
-  const auto & mfem_bc = *bc;
-  if (dynamic_cast<const MFEMComplexIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc);
+  if (auto integrated_bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc))
     complexEquationSystem().AddComplexIntegratedBC(std::move(integrated_bc));
-  }
-  else if (dynamic_cast<const MFEMComplexEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(bc);
+  else if (auto essential_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(bc))
     complexEquationSystem().AddComplexEssentialBCs(std::move(essential_bc));
-  }
   else
     mooseError("Unsupported bc of name '", name, "' detected.");
 }
@@ -60,10 +51,10 @@ MFEMComplexWeakForm::addBoundaryCondition(const std::string & name,
 void
 MFEMComplexWeakForm::addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel)
 {
-  auto complex_kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel);
-  if (!complex_kernel)
+  if (auto complex_kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel))
+    complexEquationSystem().AddComplexKernel(std::move(complex_kernel));
+  else
     mooseError("Unsupported kernel of name '", name, "' detected.");
-  complexEquationSystem().AddComplexKernel(std::move(complex_kernel));
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>

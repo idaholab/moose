@@ -30,17 +30,10 @@ void
 MFEMWeakForm::addBoundaryCondition(const std::string & name,
                                    std::shared_ptr<MFEMBoundaryCondition> bc)
 {
-  const auto & mfem_bc = *bc;
-  if (dynamic_cast<const MFEMIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc);
+  if (auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc))
     _equation_system->AddIntegratedBC(std::move(integrated_bc));
-  }
-  else if (dynamic_cast<const MFEMEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc);
+  else if (auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc))
     _equation_system->AddEssentialBC(std::move(essential_bc));
-  }
   else
     mooseError("Unsupported bc of name '", name, "' detected.");
 }
