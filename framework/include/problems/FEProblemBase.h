@@ -1259,6 +1259,28 @@ public:
                                             const SubdomainID blk_id,
                                             const THREAD_ID tid);
 
+  /**
+   * Add the MooseVariables and the material properties that the current materials depend on to the
+   * dependency list.
+   * @param consumer_needed_mat_props The material properties needed by consumer objects (other than
+   * the materials themselves)
+   * @param blk_id The subdomain ID for which we are preparing our list of needed vars and props
+   * @param tid The thread ID we are preparing the requirements for
+   *
+   * This MUST be done after the moose variable dependency list has been set for all the other
+   * objects using the \p setActiveElementalMooseVariables API!
+   *
+   * \deprecated Use resolveMaterialDependencies(), resolveMaterialDependenciesInterface(), and
+   * setActiveElementalMooseVariables()/setActiveMaterialProperties() instead. Those let a loop
+   * extend the needed sets from multiple sources (e.g. InterfaceMaterials) before activating once,
+   * which this routine cannot do: it always widens needed_mat_props from every active material's
+   * own dependencies (not just producers of what is actually needed) and activates immediately,
+   * exactly as it did before that split.
+   */
+  void prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                        const SubdomainID blk_id,
+                        const THREAD_ID tid);
+
   void reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful = true);
 
   /**
