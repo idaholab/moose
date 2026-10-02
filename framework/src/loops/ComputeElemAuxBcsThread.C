@@ -16,6 +16,7 @@
 #include "Assembly.h"
 #include "AuxKernel.h"
 #include "SwapBackSentinel.h"
+#include "TheWarehouse.h"
 
 #include "libmesh/threads.h"
 
