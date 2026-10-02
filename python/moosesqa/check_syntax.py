@@ -31,6 +31,7 @@ def check_syntax(
     kwargs.setdefault("log_missing_description", log_default)
     kwargs.setdefault("log_missing_markdown", log_default)
     kwargs.setdefault("log_duplicate_files", log_default)
+    kwargs.setdefault("log_deprecated_stub_marker", log_default)
     logger = LogHelper(__name__, **kwargs)
 
     for node in app_syntax.descendants:
@@ -91,6 +92,16 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
         )
         logger.log("log_stub_files", msg)
 
+    # WARNING: object uses the legacy (no longer detected) stub marker
+    if (not is_missing) and (not node.removed) and _has_deprecated_stub_marker(md_file):
+        msg = (
+            "{} uses the deprecated '!! MOOSE Documentation Stub' marker; migrate this "
+            "page to the current stub convention (an '!alert construction "
+            "title=Undocumented' marker, as used in the generated moose_object/"
+            "moose_action/moose_system templates)."
+        ).format(node.fullpath())
+        logger.log("log_deprecated_stub_marker", msg)
+
     # ERROR: object does not have a markdown file and is not removed
     if (not node.removed) and is_missing:
         msg = "{} is missing a markdown file.\n".format(node.fullpath())
@@ -145,16 +156,30 @@ def file_is_stub(filename):
     # Empty is considered a stub
     if not content:
         return True
-    # Old template method
-    elif re.search(r"stubs/.*\.md\.template", content):
+
+    # Whole page is a load of a canonical stub template. Require this to be the
+    # *entire* page, since !template is also used to include non-stub content.
+    if re.fullmatch(
+        r"!template load file=\S*stubs/\S*\.md\.template(\s+\S+)*", content.strip()
+    ):
         return True
-    # Even older comment method
-    elif "!! MOOSE Documentation Stub (remove this when content is added)" in content:
+
+    # Alert marker (block "!alert!" and inline "!alert" forms). Strip fenced code
+    # blocks first so pages merely showing this marker as an example aren't flagged;
+    # require it at the start of a line so it's an actual command, not prose.
+    content_outside_fences = re.sub(r"```.*?```", "", content, flags=re.DOTALL)
+    if re.search(
+        r"^!alert!? construction title=Undocumented",
+        content_outside_fences,
+        flags=re.MULTILINE,
+    ):
         return True
-    # Current alert method
-    elif "!alert! construction title=Undocumented" in content:
-        return True
-    # Even more current alert method
-    elif "!alert construction title=Undocumented" in content:
-        return True
+
     return False
+
+
+def _has_deprecated_stub_marker(filename):
+    """Helper for detecting the legacy '!! MOOSE Documentation Stub' marker"""
+    with open(filename, "r") as fid:
+        content = fid.read()
+    return "!! MOOSE Documentation Stub" in content
