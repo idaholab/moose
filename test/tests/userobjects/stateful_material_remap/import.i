@@ -51,8 +51,9 @@
 
 [Materials]
   [stateful]
-    type = SpatialStatefulMaterial
-    initial_diffusivity = 1.0
+    # Errors at the first timestep if diffusivity_old was not overwritten by the import
+    type = ImportCheckStatefulMaterial
+    initial_diffusivity = 10.0
   []
 []
 

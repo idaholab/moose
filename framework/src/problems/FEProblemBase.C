@@ -10466,3 +10466,10 @@ FEProblemBase::getMaterialPropertyStorageForRemap(const MaterialPropertyStorageR
 {
   return _material_props;
 }
+
+MaterialPropertyStorage &
+FEProblemBase::getBndMaterialPropertyStorageForRemap(
+    const MaterialPropertyStorageRemapKey /* key */)
+{
+  return _bnd_material_props;
+}

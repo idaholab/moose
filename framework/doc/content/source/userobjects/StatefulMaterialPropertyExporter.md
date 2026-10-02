@@ -4,9 +4,9 @@
 
 ## Description
 
-`StatefulMaterialPropertyExporter` serializes all stateful material property data — together
-with the physical coordinates and subdomain names of every quadrature point — to a set of
-binary `.smatprop` files at the end of a simulation.  The exported data can later be loaded
+`StatefulMaterialPropertyExporter` serializes all volumetric and boundary stateful material
+property data — together with the physical coordinates and grouping information of every
+quadrature point — to a set of binary `.smatprop` files at the end of a simulation.  The exported data can later be loaded
 by [StatefulMaterialPropertyImporter](StatefulMaterialPropertyImporter.md) to initialize the
 old/older material states of a new simulation on a *different* mesh, using closest-point
 mapping.
@@ -30,12 +30,19 @@ a previous run with a different rank count are automatically excluded.
 
 Each `.smatprop` file contains:
 
-1. **Header** — magic number, format version, total rank count, and a property registry
-   (property name, internal C++ type identifier, maximum state index for each stateful
-   property).
-2. **Data** — organized by subdomain name.  For every quadrature point within a subdomain:
-   the physical coordinates followed by the serialized value for every stateful property at
-   every state (current, old, older).
+1. **Header** — magic number, format version, and total rank count.
+2. **Volumetric section** and **boundary section**, in that order.  Each section holds a
+   property registry (property name, internal C++ type identifier, maximum state index for
+   each stateful property of that storage) followed by the data, organized in groups.  For
+   every quadrature point within a group: the physical coordinates followed by the serialized
+   value for every stateful property at every state (current, old, older).
+
+A group is identified by the subdomain name of the element, the sorted names of the boundaries
+that contain the element side, and the subdomain name of the neighbor element across the side.
+Volumetric data is grouped by subdomain name alone.  Boundary data covers face material
+properties on exterior boundaries, internal sidesets, and interfaces, and is grouped by all
+three names so that the importer never matches quadrature points across different boundaries
+or across the two sides of an interface.
 
 Serialization uses MOOSE's `dataStore`/`dataLoad` framework, which correctly handles
 heap-allocated property types such as `std::vector<Real>`.
@@ -44,9 +51,9 @@ heap-allocated property types such as `std::vector<Real>`.
 Only properties for which an "old" or "older" state has been requested somewhere in the
 simulation are exported.  Non-stateful (current-only) properties are not written.
 
-!alert note title=Volumetric properties only
-The current implementation exports volumetric (interior) properties only (`side = 0`).
-Boundary/face material properties are not yet supported.
+!alert note title=Neighbor properties are not exported
+Stateful properties stored for the neighbor side of internal faces and interfaces are not
+exported.
 
 !alert note title=Current-state data is also written
 The exporter writes state `0` (current), `1` (old), and `2` (older, if present)
@@ -56,6 +63,12 @@ transient shift preserves the imported history.
 ## Example Input Syntax
 
 !listing test/tests/userobjects/stateful_material_remap/export.i block=UserObjects
+
+Boundary stateful data is exported by the same object whenever face material properties are
+stateful, for example on the exterior boundary `right` and the internal sideset `interface`
+here:
+
+!listing test/tests/userobjects/stateful_material_remap/export_boundary.i block=Postprocessors
 
 The [!param](/UserObjects/StatefulMaterialPropertyExporter/file_base) parameter sets the base
 name used for all output files.  The default
@@ -75,8 +88,7 @@ The intended workflow is:
 
 ## Limitations
 
-- Volumetric properties only (`side = 0`); boundary/face material properties are not yet
-  supported.
+- Stateful neighbor material properties are not exported.
 
 !syntax parameters /UserObjects/StatefulMaterialPropertyExporter
 

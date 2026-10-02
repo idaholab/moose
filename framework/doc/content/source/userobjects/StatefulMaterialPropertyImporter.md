@@ -6,8 +6,8 @@
 
 `StatefulMaterialPropertyImporter` reads a set of `.smatprop` binary files written by
 [StatefulMaterialPropertyExporter](StatefulMaterialPropertyExporter.md) and remaps the
-exported stateful material property data onto the current simulation mesh using per-subdomain
-closest-point matching.  This allows the converged material history of one simulation to be
+exported volumetric and boundary stateful material property data onto the current simulation
+mesh using closest-point matching within matching subdomains and boundaries.  This allows the converged material history of one simulation to be
 used as the initial history for a subsequent simulation on a *different* mesh — for example
 after remeshing, mesh refinement, or mesh transfer between application codes.
 
@@ -23,6 +23,18 @@ Subdomains are matched by name.  If the current mesh contains a subdomain whose 
 not appear in any of the export files, the elements in that subdomain are silently skipped
 and their stateful properties are initialized by the material's `initStatefulProperties()`
 as normal.
+
+### Boundary Data
+
+Boundary (face) stateful data is matched the same way, but within groups of element sides that
+share the subdomain name of the element, the sorted names of the boundaries that contain the
+side, and the subdomain name of the neighbor element across the side.  Including the boundary
+names keeps quadrature points near a corner from matching a different boundary of the same
+subdomain, and including both subdomain names keeps the two sides of an interface apart.
+Element sides whose group does not appear in the export files are initialized as normal.
+
+Data is staged for every element side whose group appears in the export files.  Sides on which
+the current simulation does not initialize stateful boundary data leave the staged data unused.
 
 !alert note title=Imported properties may be skipped
 Properties present in the export files but not declared as stateful properties in the
@@ -58,7 +70,7 @@ all properties, and the second pass reloads only the imported ones through the r
 
 The importer reads all rank files written by the exporter
 (`{file_base}.0.smatprop`, `{file_base}.1.smatprop`, …) and merges their quadrature point
-data into the per-subdomain KDTrees before performing any search.  The number of files to
+data into the per-group KDTrees before performing any search.  The number of files to
 read is determined from the rank count stored in `{file_base}.0.smatprop`, so the import
 works correctly when the current simulation uses a different number of MPI ranks than the
 export simulation.
@@ -79,10 +91,14 @@ the export file — is also supported:
 
 !listing test/tests/userobjects/stateful_material_remap/import_partial.i block=UserObjects
 
+Boundary data needs no additional input; it is imported whenever the export files contain it
+and the current simulation declares the same stateful face properties:
+
+!listing test/tests/userobjects/stateful_material_remap/import_boundary.i block=UserObjects
+
 ## Limitations
 
-- Volumetric properties only (`side = 0`); boundary/face material properties are not yet
-  supported.
+- Stateful neighbor material properties are not remapped.
 - Nearest-point copy only; there is no interpolation or distance-based acceptance criterion.
 - Every rank reads and stores the full exported point cloud before remapping, so import
   memory use and file I/O scale with the global export size on every rank.

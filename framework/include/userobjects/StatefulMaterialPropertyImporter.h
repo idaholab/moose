@@ -11,14 +11,18 @@
 
 #include "GeneralUserObject.h"
 #include "MaterialPropertyStorage.h"
+#include "StatefulMaterialPropertyExporter.h"
 #include "KDTree.h"
 
+#include <array>
 #include <map>
 
 /**
  * Imports stateful material property data from a binary file (.smatprop) written
  * by StatefulMaterialPropertyExporter and remaps it onto the current mesh using
- * closest-point matching within each subdomain.
+ * closest-point matching. Volumetric data is matched within each subdomain; boundary data is
+ * matched within each group of element sides that share the subdomain, the set of boundary
+ * names, and the neighbor subdomain (see StatefulMaterialPropertyExporter::GroupKey).
  *
  * Timing: execute_on = EXEC_INITIAL. execute() runs during FEProblemBase::initialSetup()
  * after the first initElementStatefulProps() pass but before a second pass that reinitializes
@@ -47,6 +51,8 @@ protected:
   /// Base name for the set of .smatprop files (rank suffix is appended automatically)
   const std::string & _file_base;
 
+  using GroupKey = StatefulMaterialPropertyExporter::GroupKey;
+
   /// Property metadata from file
   struct FilePropRecord
   {
@@ -54,7 +60,6 @@ protected:
     std::string type_str;
     unsigned int max_state;
   };
-  std::vector<FilePropRecord> _file_props;
 
   /// Per-qp stored data
   struct StoredQpRecord
@@ -64,28 +69,52 @@ protected:
     std::vector<std::vector<std::string>> blobs;
   };
 
-  /// Stored data organized by subdomain name
-  std::map<std::string, std::vector<StoredQpRecord>> _stored_data;
+  /// Data read from file for one material property storage (volumetric or boundary)
+  struct StorageData
+  {
+    /// Property metadata from file
+    std::vector<FilePropRecord> file_props;
+    /// Stored data organized by group
+    std::map<GroupKey, std::vector<StoredQpRecord>> stored_data;
+    /// Per-group KDTree and point list
+    std::map<GroupKey, std::unique_ptr<KDTree>> kdtrees;
+    std::map<GroupKey, std::vector<Point>> kdtree_points;
+    /// Mapping from file stateful_id to current simulation stateful_id
+    std::vector<std::optional<unsigned int>> file_to_current_sid;
+  };
 
-  /// Per-subdomain KDTree and point list
-  std::map<std::string, std::unique_ptr<KDTree>> _kdtrees;
-  std::map<std::string, std::vector<Point>> _kdtree_points;
+  /// Imported volumetric (index 0) and boundary (index 1) data, in file order
+  std::array<StorageData, 2> _storage_data;
 
-  /// Mapping from file stateful_id to current simulation stateful_id
-  std::vector<std::optional<unsigned int>> _file_to_current_sid;
+  /// The storage that _storage_data[\p index] is imported into
+  MaterialPropertyStorage & remapStorage(unsigned int index);
 
   /// Read all rank files ({base}.0.smatprop … {base}.{n_ranks-1}.smatprop)
   void readAllFiles();
 
-  /// Read and merge one rank file into _stored_data / _file_props
+  /// Read and merge one rank file into _storage_data
   void readSingleFile(const std::string & filename, bool first);
 
-  /// Build one KDTree per subdomain
-  void buildKDTrees();
+  /// Read and merge the section for one storage from \p in into \p data
+  void readStorage(std::istream & in, const std::string & filename, StorageData & data, bool first);
+
+  /// Build one KDTree per group
+  void buildKDTrees(StorageData & data);
 
   /// Build the property name mapping from file IDs to current simulation stateful IDs
-  void buildPropertyMapping();
+  void buildPropertyMapping(StorageData & data, const MaterialPropertyStorage & storage);
 
   /// Populate MaterialPropertyStorage::_restartable_map with remapped data for later loading
   void populateRestartableMap();
+
+  /**
+   * Stage remapped data for the quadrature points \p q_points of side \p side of \p elem
+   * (side 0 for volumetric data) from the group \p key into \p storage
+   */
+  void stageRemappedData(const StorageData & data,
+                         MaterialPropertyStorage & storage,
+                         const GroupKey & key,
+                         const Elem * elem,
+                         unsigned int side,
+                         const MooseArray<Point> & q_points);
 };

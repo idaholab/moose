@@ -2116,11 +2116,15 @@ public:
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
 
   /**
-   * Return a non-const reference to the material property storage for remap.
+   * Return a non-const reference to the volume or boundary material property storage for remap.
    * Access is restricted via the RemapKey friend class pattern.
    */
-  MaterialPropertyStorage & getMaterialPropertyStorageForRemap(
-      const MaterialPropertyStorageRemapKey key);
+  ///@{
+  MaterialPropertyStorage &
+  getMaterialPropertyStorageForRemap(const MaterialPropertyStorageRemapKey key);
+  MaterialPropertyStorage &
+  getBndMaterialPropertyStorageForRemap(const MaterialPropertyStorageRemapKey key);
+  ///@}
   const MaterialPropertyStorage & getNeighborMaterialPropertyStorage()
   {
     return _neighbor_material_props;
