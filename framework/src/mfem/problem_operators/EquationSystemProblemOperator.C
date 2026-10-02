@@ -27,12 +27,12 @@ EquationSystemProblemOperator::Solve()
   auto * const es = GetEquationSystem();
 
   {
-    TIME_SECTION("FormSystem", 2, "Assembling MFEM System");
+    TIME_SECTION("EquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
     FormEquationSystemOperator();
   }
 
   {
-    TIME_SECTION("SolveSystem", 2, "Solving MFEM System");
+    TIME_SECTION("EquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
     SolveWithOperator(*es, _true_rhs, _true_x);
   }
 

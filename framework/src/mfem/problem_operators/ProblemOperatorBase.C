@@ -17,7 +17,7 @@ namespace Moose::MFEM
 {
 
 ProblemOperatorBase::ProblemOperatorBase(MFEMProblem & problem)
-  : PerfGraphInterface(problem.getMooseApp().perfGraph(), "MFEMProblemOperator"),
+  : PerfGraphInterface(problem.getMooseApp()),
     _problem(problem),
     _problem_data(problem.getProblemData())
 {
