@@ -136,7 +136,10 @@ class NavigationExtension(Extension):
         if self.getConfig(page, "sections"):
             self._addSections(col, page)
 
-        if self.getConfig(page, "scrollspy"):
+        # Activate scrollspy only for pages with at least one level-2 heading
+        if self.getConfig(page, "scrollspy") and moosetree.find(
+            col, lambda n: n.get("data-section-level", None) == 2
+        ):
             col.addClass("col", "s12", "m12", "l10")
             toc = html.Tag(row, "div", class_="col hide-on-med-and-down l2")
             self._addContents(toc, col, page)
