@@ -1215,11 +1215,18 @@ public:
    * input
    * @param blk_id The subdomain ID for which we are preparing our list of needed vars and props
    * @param tid The thread ID we are preparing the requirements for
+   * @param producer_only Walk the producer chain transitively (true, the default) rather than
+   * widening to every active material's own dependencies regardless of relevance (false). Pass
+   * false for a loop that only runs once a solve has already converged (e.g. a Postprocessor
+   * loop), where a material invoking a compute=false sub-model via getMaterialByName must be
+   * re-run with the final, converged solution even if nothing in that loop directly needs the
+   * material's own declared properties.
    */
   void resolveMaterialDependencies(std::set<MooseVariableFEBase *> & needed_moose_vars,
                                    std::unordered_set<unsigned int> & needed_mat_props,
                                    const SubdomainID blk_id,
-                                   const THREAD_ID tid);
+                                   const THREAD_ID tid,
+                                   bool producer_only = true);
 
   /**
    * Extend needed_mat_props, in place, with the material property dependencies of the materials
