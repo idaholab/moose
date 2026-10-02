@@ -1482,7 +1482,7 @@ private:
    * from the parser (the block is not applied to the app's InputParameters), or std::nullopt if
    * unset. May be out of range; determineNumThreads() clamps it.
    */
-  std::optional<int> requestedNumThreads() const;
+  std::optional<THREAD_ID> requestedNumThreads() const;
 
   /**
    * Determines the number of threads this application should use from the [Application] block's

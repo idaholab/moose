@@ -62,7 +62,7 @@ Global Options:
   --error-deprecated                  Turn deprecated code messages into Errors
   -e --error-unused                   Error when encountering unused input file options
   --keep-cout                         Keep standard output from all processors when running in parallel
-  --n-threads=<n>                     Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the maximum number of threads, notably setting the OpenMP number of threads.
+  --n-threads=<n>                     Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the maximum number of threads and sets the OpenMP number of threads
   --no-color                          Disable coloring of all Console outputs
   --no-gdb-backtrace                  Disables gdb backtraces.
   --no-timing                         Disabled performance logging; overrides -t or --timing
