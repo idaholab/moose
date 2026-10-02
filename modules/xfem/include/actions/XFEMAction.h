@@ -30,9 +30,12 @@ protected:
   bool _xfem_use_crack_growth_increment;
   Real _xfem_crack_growth_increment;
   bool _use_crack_tip_enrichment;
+  bool _use_AD;
   UserObjectName _crack_front_definition;
   std::vector<VariableName> _enrich_displacements;
   std::vector<VariableName> _displacements;
   std::vector<BoundaryName> _cut_off_bc;
+  bool _has_cut_off_radius;
   Real _cut_off_radius;
+  std::vector<SubdomainName> _blocks;
 };
