@@ -12,13 +12,9 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "TheWarehouse.h"
-#include "AuxKernel.h"
 
-class AuxiliarySystem;
 template <typename>
 class MooseObjectTagWarehouse;
-template <typename>
-class ExecuteMooseObjectWarehouse;
 class IntegratedBCBase;
 
 /**
@@ -44,18 +40,6 @@ public:
 protected:
   /// the finite element (or volume) problem
   FEProblemBase & _fe_problem;
-
-  /// The auxiliary system to whom we'll delegate the boundary variable dependency integrity check
-  const AuxiliarySystem & _aux_sys;
-
-  /// Elemental auxiliary kernels acting on standard field variables
-  const ExecuteMooseObjectWarehouse<AuxKernel> & _elem_aux;
-
-  /// Elemental auxiliary kernels acting on vector field variables
-  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & _elem_vec_aux;
-
-  /// Elemental auxiliary kernels acting on array field variables
-  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & _elem_array_aux;
 
   /// A warehouse query that we will use to obtain user objects for boundary variable dependency
   /// integrity checks

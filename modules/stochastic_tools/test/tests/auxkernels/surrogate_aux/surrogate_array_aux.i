@@ -124,6 +124,7 @@
     array_variable = u
     component = 0
     execute_on = 'INITIAL TIMESTEP_END'
+    execution_order_group = 1
   []
   [u1_aux]
     type = ArrayVariableComponent
@@ -131,6 +132,7 @@
     array_variable = u
     component = 1
     execute_on = 'INITIAL TIMESTEP_END'
+    execution_order_group = 1
   []
 []
 
