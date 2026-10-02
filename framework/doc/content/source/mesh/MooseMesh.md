@@ -31,6 +31,12 @@ Mesh/construct_side_list_from_node_list=false
 If you have a mesh that is missing a side set (but it has a node set) you may be able to get around that issue by setting
 the second parameter (from above) to true. The construction will happen at the end of the mesh generation process.
 
+Because a side is converted whenever all of its nodes are in the node set, regardless of whether that side lies
+on the exterior of the mesh, sides interior to a block can be spuriously added to the side set (for example on a
+mesh only one element layer deep). Setting `Mesh/construct_side_list_from_node_list_exterior_only=true`
+(the default) excludes any such side whose neighboring element is in the same subdomain, while still allowing
+sides on an interface between two different subdomains.
+
 !alert note
 You could also use the [SideSetsFromNodeSetsGenerator.md] class to construct side sets from node
 sets (or the [NodeSetsFromSideSetsGenerator.md] for vice versa). These objects allow you to manually
