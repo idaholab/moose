@@ -5,12 +5,20 @@
     exodiff = 'out_3d_tf.e'
     abs_zero = 1e-10
     allow_test_objects = true
+    requirement = 'The system shall apply a convective flux boundary condition with a '
+                  'ramped fluid temperature and a large heat transfer coefficient to verify '
+                  'that the solid surface temperature of a 3D body tracks the ramping fluid '
+                  'temperature.'
+    design = 'HeatConduction.md'
   [../]
 
   [./test_function]
     type = 'Exodiff'
     input = 'heat_convection_function.i'
     exodiff = 'heat_convection_function_out.e'
+    requirement = 'The system shall apply a convective flux boundary condition whose fluid '
+                  'temperature and heat transfer coefficient are each given by a function.'
+    design = 'ConvectiveFluxFunction.md'
   [../]
 
   [./test_rz]
@@ -19,6 +27,10 @@
     exodiff = 'out_rz.e'
     abs_zero = 1e-10
     allow_test_objects = true
+    requirement = 'The system shall apply a convective flux boundary condition with a ramped '
+                  'fluid temperature and a natural-convection heat transfer coefficient to '
+                  'model the thermal soak of an axisymmetric body.'
+    design = 'HeatConduction.md'
   [../]
 
   [./test_3d]
@@ -27,6 +39,10 @@
     exodiff = 'out_3d.e'
     abs_zero = 1e-10
     allow_test_objects = true
+    requirement = 'The system shall apply a convective flux boundary condition with a ramped '
+                  'fluid temperature and a natural-convection heat transfer coefficient to '
+                  'model the thermal soak of a 3D body.'
+    design = 'HeatConduction.md'
   [../]
 
   [./test_rz_tf]
@@ -35,5 +51,10 @@
     exodiff = 'out_rz_tf.e'
     abs_zero = 1e-10
     allow_test_objects = true
+    requirement = 'The system shall apply a convective flux boundary condition with a '
+                  'ramped fluid temperature and a large heat transfer coefficient to verify '
+                  'that the solid surface temperature of an axisymmetric body tracks the '
+                  'ramping fluid temperature.'
+    design = 'HeatConduction.md'
   [../]
 []
