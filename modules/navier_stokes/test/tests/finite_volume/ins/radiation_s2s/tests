@@ -9,8 +9,9 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
-    max_threads = 1 # Linear FV doesn't support threading at the moment
+    max_threads = 1
     recover = false # We don't support recover for SIMPLE at the moment
+
   []
 
   [parallel_plates_convergence]
