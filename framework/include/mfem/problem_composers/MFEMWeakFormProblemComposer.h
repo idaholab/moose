@@ -20,6 +20,8 @@
 class MFEMWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
+  static InputParameters validParams();
+
   MFEMWeakFormProblemComposer(const InputParameters & parameters);
 
   /// Returns a pointer to a freshly minted problem operator.

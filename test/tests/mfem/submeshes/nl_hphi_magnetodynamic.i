@@ -73,7 +73,6 @@ e_c = 1.0
     variable = j_field
     source = coil_induced_h_field
     scale_factor = 1.0
-    execute_on = TIMESTEP_END
   []
 []
 

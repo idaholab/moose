@@ -16,7 +16,7 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMComplexAuxKernel.h"
 
-/*
+/**
  * Class to scale and sum an arbitrary number of MFEM complex variables into an auxiliary variable.
  */
 class MFEMComplexSumAux : public MFEMComplexAuxKernel

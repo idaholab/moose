@@ -1,27 +1,7 @@
-[Mesh]
-  type = MFEMFileMesh
-  file = ../mesh/beam-tet.mesh
-[]
+!include maxwell_eigenproblem.i
 
 [Problem]
-  type = MFEMEigenproblem
-  num_modes = 5
   rhs_matrix_coefficient = epsilon
-[]
-
-[FESpaces]
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
-[]
-
-[Variables]
-  [E]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []
 []
 
 [FunctorMaterials]
@@ -32,50 +12,6 @@
   []
 []
 
-[BCs]
-  [all]
-    type = MFEMVectorTangentialDirichletBC
-    variable = E
-    vector_coefficient = '0 0 0'
-  []
-[]
-
-[Kernels]
-  [diff]
-    type = MFEMCurlCurlKernel
-    variable = E
-  []
-[]
-
-[Solvers]
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
-    print_level = 0
-    singular = true
-  []
-  [AME]
-    type = MFEMHypreAME
-    preconditioner = ams
-    print_level = 0
-    l_tol = 1e-8
-    l_max_its = 100
-  []
-[]
-
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-[]
-
-[VectorPostprocessors]
-  [eigenvalues]
-    type = MFEMEigenvaluesPostprocessor
-  []
-[]
-
 [Outputs]
-  execute_on = 'timestep_end'
-  csv = true
-  file_base = OutputData/MaxwellAnisotropicEigenproblem
+  file_base := OutputData/MaxwellAnisotropicEigenproblem
 []

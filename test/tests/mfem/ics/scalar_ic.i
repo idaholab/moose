@@ -78,7 +78,6 @@
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'timestep_end'
     file_base = OutputData/ScalarIC/scalar_ic
   []
 []
