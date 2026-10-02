@@ -1,0 +1,63 @@
+[Tests]
+  issues = '#22570'
+  design = 'source/timesteppers/PIDAdaptiveDT.md'
+  [PID_time_adaptation]
+    requirement = "The system shall be able to adapt the time step size to control the estimated local time discretization error with a PID (proportional-integral-derivative) control logic"
+
+    [initial_dt]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      csvdiff = 'pid_adapt_dt_out.csv'
+      detail = " with an initial time step size"
+    []
+    [var]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'AuxVariables/v/order=FIRST AuxKernels/v/type=ParsedAux AuxKernels/v/variable=v AuxKernels/v/expression=u*u AuxKernels/v/coupled_variables=u Executioner/TimeStepper/variables=v Outputs/file_base=pid_adapt_dt_var_out'
+      csvdiff = 'pid_adapt_dt_var_out.csv'
+      detail = " based on specified field variables"
+    []
+    [progportional_gain]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Executioner/TimeStepper/proportional_gain=5e-4 Outputs/file_base=pid_adapt_dt_p_out'
+      csvdiff = 'pid_adapt_dt_p_out.csv'
+      detail = " with an adjustable proportional gain"
+    []
+    [integral_derivative_gains]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Executioner/TimeStepper/proportional_gain=5e-4 Executioner/TimeStepper/integral_gain=1e-4 Executioner/TimeStepper/derivative_gain=1e-4 Outputs/file_base=pid_adapt_dt_pid_out'
+      csvdiff = 'pid_adapt_dt_pid_out.csv'
+      detail = " with adjustable integral/derivative gains"
+    []
+    [prescribed_error_tolerance]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Executioner/TimeStepper/proportional_gain=5e-4 Executioner/TimeStepper/local_error_tolerance=1e-2 Outputs/file_base=pid_adapt_dt_err_out'
+      csvdiff = 'pid_adapt_dt_err_out.csv'
+      detail = " with a prescribed tolerance on the local error"
+    []
+    [with_limiters]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Executioner/TimeStepper/max_increase_factor=1.01 Executioner/TimeStepper/min_decrease_factor=0.99 Outputs/file_base=pid_adapt_dt_lim_out'
+      csvdiff = 'pid_adapt_dt_lim_out.csv'
+      detail = " with time limitters to prevent undesired sharp time step size increase or decrease"
+    []
+    [with_pp_limiter]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Executioner/TimeStepper/timestep_limiting_postprocessor=tlim Postprocessors/tlim/type=ConstantPostprocessor Postprocessors/tlim/value=0.105 Outputs/file_base=pid_adapt_dt_plim_out'
+      csvdiff = 'pid_adapt_dt_plim_out.csv'
+      detail = " with a time limitter based on a postprocessor value"
+    []
+    [with_initial_null_transient]
+      type = CSVDiff
+      input = 'pid_adapt_dt.i'
+      cli_args = 'Functions/exact_fn/expression=if(t>1,(t-1)*(t-1)*(x*x+y*y),0) Functions/forcing_fn/expression=if(t>1,2*(t-1)*(x*x+y*y)-4*(t-1)*(t-1),0) Executioner/num_steps=20 Outputs/file_base=pid_adapt_dt_null_out'
+      csvdiff = 'pid_adapt_dt_null_out.csv'
+      detail = " for a problem with an initial null transient"
+    []
+  []
+[]
