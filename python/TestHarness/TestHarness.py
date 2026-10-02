@@ -44,6 +44,22 @@ from TestHarness.capability_util import (
 # Directory the test harness is in
 testharness_dir = os.path.dirname(os.path.realpath(__file__))
 
+MINIMUM_PYTHON_VERSION = (3, 10)
+
+
+def checkPythonVersion(version_info=None):
+    if version_info is None:
+        version_info = sys.version_info
+
+    if tuple(version_info[:2]) < MINIMUM_PYTHON_VERSION:
+        required = ".".join(str(value) for value in MINIMUM_PYTHON_VERSION)
+        found = ".".join(str(value) for value in version_info[:3])
+        raise RuntimeError(
+            f"MOOSE TestHarness requires Python {required} or newer; "
+            f"found Python {found}. Activate a current MOOSE environment "
+            "or run with a newer python3."
+        )
+
 
 def readTestRoot(fname):
 
@@ -283,6 +299,8 @@ class TestHarness:
         moose_python: Optional[str] = None,
         skip_testroot: bool = False,
     ) -> "TestHarness":
+        checkPythonVersion()
+
         # Cannot skip the testroot if we don't have an application name
         if skip_testroot and not app_name:
             raise ValueError(f'Must provide "app_name" when skip_testroot=True')
