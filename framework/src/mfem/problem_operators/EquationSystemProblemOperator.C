@@ -24,10 +24,17 @@ EquationSystemProblemOperator::SetGridFunctions()
 void
 EquationSystemProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
-
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION("FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator();
+  }
+
+  {
+    TIME_SECTION("SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
