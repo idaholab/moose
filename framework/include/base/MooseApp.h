@@ -1118,8 +1118,10 @@ public:
 
 #ifdef MOOSE_MFEM_ENABLED
   /**
-   * Create/configure the MFEM device with the provided \p executioner_device. More than one device
-   * can be configured. If supplying multiple devices, they should be comma separated.
+   * Create/configure the MFEM device. If the application-level \p compute_device parameter was
+   * explicitly set, it takes precedence over \p executioner_device; otherwise,
+   * \p executioner_device is used. More than one device can be configured. If supplying multiple
+   * devices, they should be comma separated.
    */
   void setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi);
 #endif
