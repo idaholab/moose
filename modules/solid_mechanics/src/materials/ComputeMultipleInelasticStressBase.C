@@ -141,6 +141,13 @@ ComputeMultipleInelasticStressBase::initialSetup()
       // own dependencies must be added to ours for them to stay active
       const auto & rrr_deps = rrr->getMatPropDependencies();
       _material_property_dependencies.insert(rrr_deps.begin(), rrr_deps.end());
+
+      // rrr is compute=false, so it is never reinited on its own; it is only ever updated when we
+      // call it directly from computeQpStress(). Claim its supplied properties as our own too, so
+      // that whoever needs one of them (e.g. an AuxKernel reading plastic_strain) also marks us
+      // active and causes rrr to be re-run with the current solution.
+      const auto & rrr_supplied = rrr->getSuppliedPropIDs();
+      _supplied_prop_ids.insert(rrr_supplied.begin(), rrr_supplied.end());
     }
     else
       mooseError("Model " + models[i] +
@@ -151,6 +158,10 @@ ComputeMultipleInelasticStressBase::initialSetup()
   {
     const auto & damage_deps = _damage_model->getMatPropDependencies();
     _material_property_dependencies.insert(damage_deps.begin(), damage_deps.end());
+
+    // Same reasoning as for the inelastic models above.
+    const auto & damage_supplied = _damage_model->getSuppliedPropIDs();
+    _supplied_prop_ids.insert(damage_supplied.begin(), damage_supplied.end());
   }
 
   // Check if tangent calculation methods are consistent. If all models have
