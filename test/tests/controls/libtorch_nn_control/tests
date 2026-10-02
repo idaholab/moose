@@ -8,9 +8,13 @@
     cli_args = "Controls/src_control/filename='model_2.pt'
                 Controls/src_control/torch_script_format=true
                 Controls/src_control/input_timesteps=2
+                Controls/src_control/observation_shift_factors='0.5'
+                Controls/src_control/observation_scaling_factors='0.5'
+                Controls/src_control/action_scaling_factors='2'
                 Outputs/file_base='torch_script_read'"
-    requirement = "The system shall be able to read a neural network from a torchscript file and use "
-                  "it to control a transient process."
+    requirement = "The system shall be able to read a neural network from a torchscript file, "
+                  "apply configured observation and action scaling, and use it to control a "
+                  "transient process."
     capabilities = 'libtorch'
   []
   [run-with-torch-parameters]

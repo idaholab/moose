@@ -12,6 +12,7 @@
                 Trainers/nn_trainer/update_frequency=1
                 Trainers/nn_trainer/num_epochs=100
                 Outputs/time_step_interval=1
+                Outputs/csv=true
                 Outputs/file_base='train_out'"
   []
 []
