@@ -3,36 +3,71 @@
     type = 'Exodiff'
     input = 'simpleeigenstrain.i'
     exodiff = 'simpleeigenstrain_out.e'
+    requirement = 'The system shall compute an eigenstrain whose magnitude varies with a '
+                  'coupled concentration variable in a single-phase mechanics model.'
+    design = 'ComputeVariableEigenstrain.md'
+    issues = '#4373'
   [../]
   [./elasticenergymaterial]
     type = 'Exodiff'
     input = 'elasticenergymaterial.i'
     exodiff = 'elasticenergymaterial_out.e'
+    requirement = 'The system shall compute the elastic free energy density of a phase field '
+                  'mechanics model in which the eigenstrain depends on a coupled concentration '
+                  'variable.'
+    design = 'ElasticEnergyMaterial.md'
+    issues = '#4269'
   [../]
   [./twophasestress]
     type = 'Exodiff'
     input = 'twophasestress.i'
     exodiff = 'twophasestress_out.e'
+    requirement = 'The system shall compute a global stress as the switching-function-weighted '
+                  'combination of the stresses of two phases, each with its own elasticity '
+                  'tensor and eigenstrain.'
+    design = 'TwoPhaseStressMaterial.md'
+    issues = '#4269'
   [../]
   [./multiphasestress]
     type = 'Exodiff'
     input = 'multiphasestress.i'
     exodiff = 'multiphasestress_out.e'
+    requirement = 'The system shall compute a global stress as the switching-function-weighted '
+                  'combination of the stresses of an arbitrary number of phases, each with its '
+                  'own elasticity tensor and eigenstrain.'
+    design = 'MultiPhaseStressMaterial.md'
+    issues = '#4886'
   [../]
   [./nonsplit_gradderiv]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv.i'
     exodiff = 'nonsplit_gradderiv_out.e'
+    requirement = 'The system shall provide the Jacobian contributions of the elastic driving '
+                  'force in a non-split Cahn-Hilliard model with a concentration-dependent '
+                  'elasticity tensor using explicitly declared displacement gradient component '
+                  'variables.'
+    design = 'GradientComponent.md StrainGradDispDerivatives.md ComputeConcentrationDependentElasticityTensor.md'
+    issues = '#5631'
   [../]
   [./nonsplit_gradderiv_action]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv_action.i'
     exodiff = 'nonsplit_gradderiv_out.e'
     prereq = nonsplit_gradderiv
+    requirement = 'The system shall reproduce the Jacobian contributions of the elastic driving '
+                  'force in a non-split Cahn-Hilliard model with a concentration-dependent '
+                  'elasticity tensor when the displacement gradient component variables are set '
+                  'up automatically by the DisplacementGradients action.'
+    design = 'DisplacementGradientsAction.md'
+    issues = '#5631'
   [../]
   [./gradientcomponent]
     type = 'Exodiff'
     input = 'gradientcomponent.i'
     exodiff = 'gradientcomponent_out.e'
+    requirement = 'The system shall compute a component of the gradient of a coupled variable '
+                  'as an auxiliary nonlinear variable.'
+    design = 'GradientComponent.md'
+    issues = '#5631'
   [../]
 []

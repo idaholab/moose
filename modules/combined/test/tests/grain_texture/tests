@@ -4,6 +4,10 @@
     input = 'grain_texture_test_1.i'
     csvdiff = 'grain_texture_test_1_out_textureInfo_0001.csv'
     recover = false
+    requirement = 'The system shall report the crystallographic texture of each tracked grain '
+                  'during 2D polycrystalline grain growth.'
+    design = 'GrainTextureVectorPostprocessor.md'
+    issues = '#6952'
   [../]
 
   [./3D]
@@ -11,23 +15,40 @@
     input = 'grain_texture_test_2.i'
     csvdiff = 'grain_texture_test_2_out_textureInfo_0001.csv'
     recover = false
+    requirement = 'The system shall report the crystallographic texture of each tracked grain '
+                  'during 3D polycrystalline grain growth.'
+    design = 'GrainTextureVectorPostprocessor.md'
+    issues = '#6952'
   [../]
 
   [./EulerAngleProvider2RGBAux]
     type = 'Exodiff'
     input = 'EulerAngleProvider2RGBAux_bicrystal.i'
     exodiff = 'EulerAngleProvider2RGBAux_bicrystal_out.e'
+    requirement = 'The system shall convert each grain Euler angle orientation to an RGB color '
+                  'component through an auxiliary kernel.'
+    design = 'EulerAngleProvider2RGBAux.md'
+    issues = '#7329'
   [../]
 
   [./EulerAngle2RGBAction]
     type = 'Exodiff'
     input = 'EulerAngle2RGBAction.i'
     exodiff = 'EulerAngle2RGBAction_out.e'
+    requirement = 'The system shall convert each grain Euler angle orientation to an RGB color '
+                  'vector when the auxiliary variables and kernels are set up automatically by '
+                  'the EulerAngles2RGB action.'
+    design = 'EulerAngles2RGB/index.md'
+    issues = '#7329'
   [../]
 
   [./random_orientation]
     type = 'Exodiff'
     input = 'random_grain_orientation.i'
     exodiff = 'random_grain_orientation_out.e'
+    requirement = 'The system shall assign a random Euler angle orientation to each tracked '
+                  'grain in a polycrystal.'
+    design = 'RandomEulerAngleProvider.md'
+    issues = '#7921'
   [../]
 []

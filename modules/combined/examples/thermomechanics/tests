@@ -3,5 +3,10 @@
     type = RunApp
     input = 'circle_thermal_expansion_stress.i'
     check_input = True
+    requirement = 'The system shall provide an example coupling heat conduction and solid '
+                   'mechanics to compute the radial and hoop stresses caused by non-uniform '
+                   'thermal expansion in a heated circular domain.'
+    design = 'ComputeThermalExpansionEigenstrain.md CylindricalRankTwoAux.md'
+    issues = '#7319'
   [../]
 []

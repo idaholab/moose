@@ -8,5 +8,8 @@
     capabilities = 'unique_id'
     # XFEM does not support recover (see #11567 notably)
     recover = false
+    requirement = 'The system shall block heat conduction across a stationary crack '
+                  'represented by XFEM.'
+    design = 'LineSegmentCutUserObject.md'
   []
 []

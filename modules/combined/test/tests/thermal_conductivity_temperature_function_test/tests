@@ -4,5 +4,7 @@
     input = 'thermal_conductivity_temperature_function_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    requirement = 'The system shall evaluate thermal conductivity as a function of temperature.'
+    design = 'HeatConductionMaterial.md'
   [../]
 []

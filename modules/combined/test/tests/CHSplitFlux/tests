@@ -3,10 +3,21 @@
     type = 'Exodiff'
     input = 'flux_gb.i'
     exodiff = 'flux_gb_out.e'
+    requirement = 'The system shall compute the diffusional flux of a split Cahn-Hilliard '
+                   'concentration field using a mobility tensor whose anisotropic diffusivity '
+                   'is enhanced at grain boundaries.'
+    design = 'CHSplitFlux.md GBDependentDiffusivity.md'
+    issues = '#6612'
   [../]
   [./simple_transient_diffusion_flux]
     type = 'Exodiff'
     input = 'simple_transient_diffusion_flux.i'
     exodiff = 'simple_transient_diffusion_flux_out.e'
+    requirement = 'The system shall reproduce a simple transient diffusion solution when the '
+                   'concentration equation is solved using the split Cahn-Hilliard '
+                   'concentration, chemical potential, and flux kernels with a constant '
+                   'mobility.'
+    design = 'CHSplitFlux.md CHSplitConcentration.md CHSplitChemicalPotential.md'
+    issues = '#6612'
   [../]
 []
