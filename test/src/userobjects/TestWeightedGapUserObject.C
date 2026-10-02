@@ -15,6 +15,8 @@
 #include "libmesh/quadrature.h"
 #include "timpi/parallel_sync.h"
 
+#include <stdexcept>
+
 registerMooseObject("MooseTestApp", TestWeightedGapUserObject);
 
 InputParameters
@@ -24,6 +26,9 @@ TestWeightedGapUserObject::validParams()
   params += MortarConsumerInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
   params.addRequiredCoupledVar("weighted_gap_aux_var", "The weighted gap auxiliary variable.");
+  params.addParam<processor_id_type>("throw_on_rank",
+                                     DofObject::invalid_processor_id,
+                                     "The rank on which to throw once from execute");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.set<bool>("force_preaux") = true;
@@ -36,7 +41,8 @@ TestWeightedGapUserObject::TestWeightedGapUserObject(const InputParameters & par
     _var(*getVar("weighted_gap_aux_var", 0)),
     _nodal(_var.isNodal()),
     _coord(_assembly.mortarCoordTransformation()),
-    _test(_var.phiLower())
+    _test(_var.phiLower()),
+    _throw_on_rank(getParam<processor_id_type>("throw_on_rank"))
 {
   if (!_var.isNodal())
     paramError("weighted_gap_aux_var",
@@ -131,6 +137,12 @@ TestWeightedGapUserObject::finalize()
 void
 TestWeightedGapUserObject::execute()
 {
+  if (!_has_thrown && _throw_on_rank == processor_id())
+  {
+    _has_thrown = true;
+    throw std::runtime_error("TestWeightedGapUserObject intentional execute exception");
+  }
+
   mooseAssert(_test.size() <= _normals.size(), "These should be less than or equal to each other.");
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)

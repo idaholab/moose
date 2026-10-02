@@ -51,6 +51,12 @@ protected:
 
   const VariableTestValue & _test;
 
+  /// The rank on which to throw from execute
+  const processor_id_type _throw_on_rank;
+
+  /// Whether the requested exception has already been thrown
+  bool _has_thrown = false;
+
   /// Quadrature point index for the mortar segments
   unsigned int _qp = 0;
 
