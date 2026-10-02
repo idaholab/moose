@@ -11,5 +11,6 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
 []

@@ -12,6 +12,7 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMTransferTolibMeshDisplaced]
     type = 'Exodiff'
@@ -22,5 +23,6 @@
     recover = false
     restep = false
     requirement = "The system shall be able to transfer from an MFEM source application to a displaced libMesh target application."
+    max_threads = 1 # no threads in MFEM
   []
 []

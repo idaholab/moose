@@ -13,6 +13,7 @@
       compute_devices = 'cpu'
       recover = false
       max_parallel = 15 # mfem/mfem#5375
+      max_threads = 1 # no threads in MFEM
     []
     [MFEMNewtonNonLinearDiffusion]
       type = CSVDiff
@@ -23,6 +24,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
+      max_threads = 1 # no threads in MFEM
     []
   []
   [line_search]
@@ -40,6 +42,7 @@
       capabilities = 'mfem'
       recover = false
       prereq = 'nl_solvers/MFEMNewtonNonLinearDiffusion'
+      max_threads = 1 # no threads in MFEM
     []
     [backtracking]
       type = CSVDiff
@@ -51,6 +54,7 @@
       capabilities = 'mfem'
       recover = false
       prereq = 'line_search/damped'
+      max_threads = 1 # no threads in MFEM
     []
     [backtracking_overshoot]
       type = CSVDiff
@@ -63,6 +67,7 @@
       capabilities = 'mfem'
       recover = false
       detail = 'a backtracking line search recovers from an initial guess whose full updates overshoot the solution, and'
+      max_threads = 1 # no threads in MFEM
     []
     [overshoot_without_line_search]
       type = RunApp
@@ -73,6 +78,7 @@
       capabilities = 'mfem'
       recover = false
       detail = 'the same solve reports its failure to converge within the iteration limit when no line search is used.'
+      max_threads = 1 # no threads in MFEM
     []
   []
   [MFEMNonLinearDiffusionNonZeroRHS]
@@ -88,6 +94,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMNonLinearHeatTransfer]
     design = 'EquationSystem.md'
@@ -103,6 +110,7 @@
       max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
       cli_args = 'BCs/active="linearized" '
                  'Outputs/CSV/file_base=NLHeatTransferLinearized '
+      max_threads = 1 # no threads in MFEM
     []
     [non-linear]
       detail = 'when the non-linear BC is given state-dependent coefficients.'
@@ -114,6 +122,7 @@
       restep = false
       max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
       prereq = 'MFEMNonLinearHeatTransfer/linearized'
+      max_threads = 1 # no threads in MFEM
     []
   []
   [MFEMNonLinearHeatConduction]
@@ -130,6 +139,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMNonLinearHeatConductionQuadratureFunction]
     design = 'MFEMScalarQuadratureFunction.md'
@@ -146,5 +156,6 @@
     compute_devices = 'cpu'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
 []

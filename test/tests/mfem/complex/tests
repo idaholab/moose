@@ -10,6 +10,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplex2DTri]
     type = CSVDiff
@@ -29,6 +30,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplexWaveguide]
     type = CSVDiff
@@ -39,6 +41,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     min_slots = 2 # memory heavy
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplexVariableRequiresComplexNumericType]
     type = RunException
@@ -49,6 +52,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMRealVariableRequiresRealNumericType]
     type = RunException
@@ -59,6 +63,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMixedSesquilinear]
     type = CSVDiff
@@ -68,6 +73,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMixedSesquilinearIC]
     type = CSVDiff
@@ -77,6 +83,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMMixedSesquilinearRealImag]
     type = CSVDiff
@@ -86,5 +93,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
 []

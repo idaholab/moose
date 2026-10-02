@@ -17,6 +17,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplexAuxVariableRecovery]
     type = CSVDiff
@@ -32,6 +33,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDisplacementState]
     type = CSVDiff
@@ -42,6 +44,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     restep = false
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMDiffusionAltSyntax]
     type = CSVDiff
@@ -59,5 +62,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
 []

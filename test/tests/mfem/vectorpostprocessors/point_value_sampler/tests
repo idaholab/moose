@@ -10,6 +10,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPointVariableValueSamplerCurlCurl]
     type = CSVDiff
@@ -22,6 +23,7 @@
     compute_devices = 'cpu cuda'
     # The sampled points include element interfaces in an H(curl) space.
     allow_warnings = true
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMVariableValueSamplerPointNotFoundError]
     type = RunException
@@ -31,6 +33,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningRT]
     type = RunException
@@ -44,6 +47,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningND]
     type = RunException
@@ -57,6 +61,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningL2]
     type = RunException
@@ -67,6 +72,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplexVariableValueSamplerPointNotFoundError]
     type = RunException
@@ -81,6 +87,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMComplexVariableValueSamplerBoundaryDiscontinuousWarning]
     type = RunException
@@ -94,6 +101,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMVariableValueSamplerBoundaryTolNotOnBoundary]
     type = RunApp
@@ -102,6 +110,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMVariableValueSamplerBoundaryTolOnBoundary]
     type = RunException
@@ -112,6 +121,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPointVariableValueSamplerAvgTypeNone]
     type = CSVDiff
@@ -126,6 +136,7 @@
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPointVariableValueSamplerAvgTypeArithmetic]
     type = CSVDiff
@@ -140,6 +151,7 @@
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPointVariableValueSamplerAvgTypeHarmonic]
     type = CSVDiff
@@ -154,6 +166,7 @@
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
+    max_threads = 1 # no threads in MFEM
   []
   [MFEMPointVariableValueSamplerSubMesh]
     type = CSVDiff
@@ -164,5 +177,6 @@
                   'mesh belonging to its submesh finite element space.'
     capabilities = 'mfem'
     recover = false
+    max_threads = 1 # no threads in MFEM
   []
 []

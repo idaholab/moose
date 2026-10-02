@@ -176,7 +176,7 @@ MultiAppFXTransfer::execute()
       for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); ++i)
       {
         if (getToMultiApp()->hasLocalApp(i))
-          for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
+          for (THREAD_ID t = 0; t < getToMultiApp()->appProblemBase(i).numThreads(); ++t)
           {
             // Get a reference to the object in each MultiApp
             MutableCoefficientsInterface & to_object = (this->*getSubAppObject)(
@@ -209,7 +209,7 @@ MultiAppFXTransfer::execute()
         const MutableCoefficientsInterface & from_object = (this->*getSubAppObject)(
             getFromMultiApp()->appProblemBase(0), _multi_app_object_name, 0);
 
-        for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
+        for (THREAD_ID t = 0; t < getFromMultiApp()->problemBase().numThreads(); ++t)
         {
           // Get a reference to the object in each LocalApp instance
           MutableCoefficientsInterface & to_object = (this->*getMultiAppObject)(

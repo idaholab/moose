@@ -11,6 +11,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       restep = false
+      max_threads = 1 # no threads in MFEM
     []
     [multiple_time_sequences]
       type = CSVDiff
@@ -20,6 +21,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       restep = false
+      max_threads = 1 # no threads in MFEM
     []
   []
 []

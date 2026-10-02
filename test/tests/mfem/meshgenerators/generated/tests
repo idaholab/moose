@@ -10,6 +10,7 @@
       detail = 'one dimensional line,'
       capabilities = 'mfem'
       recover = false
+      max_threads = 1 # no threads in MFEM
     []
     [2d]
       type = CSVDiff
@@ -20,6 +21,7 @@
       capabilities = 'mfem'
       recover = false
       prereq = 'test/1d'
+      max_threads = 1 # no threads in MFEM
     []
     [3d]
       type = CSVDiff
@@ -30,6 +32,7 @@
       capabilities = 'mfem'
       recover = false
       prereq = 'test/2d'
+      max_threads = 1 # no threads in MFEM
     []
   []
 []
