@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 #include <set>
 #include <vector>
@@ -471,6 +472,32 @@ public:
   virtual void augmentSparsity(libMesh::SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) = 0;
+
+  /// Signature of a callback registered via addExtraSparsityCallback().
+  using ExtraSparsityCallback = std::function<void(libMesh::SparsityPattern::Graph & sparsity,
+                                                   std::vector<dof_id_type> & n_nz,
+                                                   std::vector<dof_id_type> & n_oz)>;
+
+  /**
+   * Register a callback to run during DofMap sparsity construction, in addition
+   * to `augmentSparsity()`.  The callback fires from the free `extraSparsity`
+   * function that MOOSE already attaches to this system's DofMap via
+   * `attach_extra_sparsity_function`, so registering here (rather than calling
+   * `DofMap::attach_extra_sparsity_object` directly) coexists cleanly with
+   * MOOSE's attachment -- libMesh warns if both the function *and* object
+   * slots are set on the same DofMap.
+   */
+  void addExtraSparsityCallback(ExtraSparsityCallback cb)
+  {
+    _extra_sparsity_callbacks.emplace_back(std::move(cb));
+  }
+
+  /// Callbacks registered via addExtraSparsityCallback(), fired from the free
+  /// `extraSparsity` function after `augmentSparsity()`.
+  const std::vector<ExtraSparsityCallback> & extraSparsityCallbacks() const
+  {
+    return _extra_sparsity_callbacks;
+  }
 
   /**
    * Canonical method for adding a variable
@@ -1147,6 +1174,9 @@ private:
   std::vector<NumericVector<Number> *> _saved_solution_states;
   /// Whether to skip the next copy from the solution to the old vector
   bool _skip_next_solution_to_old_copy;
+
+  /// Callbacks registered via addExtraSparsityCallback(); see the accessor.
+  std::vector<ExtraSparsityCallback> _extra_sparsity_callbacks;
 };
 
 inline const std::vector<NumericVector<Number> *> &

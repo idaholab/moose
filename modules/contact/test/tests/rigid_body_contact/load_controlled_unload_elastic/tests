@@ -1,0 +1,26 @@
+[Tests]
+  design = 'RigidBodyLoadControl.md LevelSetContactor.md'
+  issues = '#33801'
+  [hertz_unload]
+    type = 'CSVDiff'
+    input = 'hertz_unload.i'
+    csvdiff = 'hertz_unload_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'Newton shall drive a rigid contactor via a Scalar Lagrange multiplier so the '
+                  'integrated normal contact reaction matches a triangle-wave target force '
+                  '(load then unload), reducing lambda_i to zero as each contact node disengages '
+                  'and returning the contactor to its point of first contact at zero force.'
+  []
+  [hertz_unload_parallel]
+    type = 'RunApp'
+    input = 'hertz_unload.i'
+    min_parallel = 4
+    cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/end_time=0.05'
+    requirement = 'The RigidBodyContactSparsity augmentation shall preallocate the (scalar, LM), '
+                  '(LM, scalar), and cross-node (LM, disp) Jacobian entries needed by '
+                  'RigidBodyLoadControl and RigidBodyNormalMechanicalContact on all ranks '
+                  'correctly.  A four-rank run with error_on_jacobian_nonzero_reallocation must '
+                  'not fire a malloc during Jacobian assembly.'
+  []
+[]
