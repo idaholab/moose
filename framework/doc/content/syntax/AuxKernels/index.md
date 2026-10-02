@@ -115,7 +115,7 @@ Setup operations, such as the initial setup and the time step setup, are not cur
 
 !alert note title=When in doubt...
 When you want to check in which order the auxiliary kernels and/or other objects are being executed, the
-[!param](Debug/SetupDebugAction/show_execution_order) parameter may be set to `ALWAYS` to have console output
+[!param](/Debug/SetupDebugAction/show_execution_order) parameter may be set to `ALWAYS` to have console output
 of the ordering of execution.
 
 ## Populating lower-dimensional auxiliary variables

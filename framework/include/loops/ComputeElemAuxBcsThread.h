@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "TheWarehouse.h"
+#include "Attributes.h"
 
 // Forward declarations
 class FEProblemBase;
