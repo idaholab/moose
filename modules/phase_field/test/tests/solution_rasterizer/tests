@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#3972'
+  design = 'SolutionRasterizer.md'
   [./prepare]
     type = 'RunApp'
     input = 'diffuse.i'
+    requirement = 'The system shall be able to generate a diffuse solution field to be rasterized onto an xyz atom coordinate file.'
   [../]
   [./test]
     type = 'CheckFiles'
@@ -9,5 +12,6 @@
     check_files = 'out.xyz'
     prereq = 'prepare'
     input = 'raster.i'
+    requirement = 'The system shall be able to map a solution field onto an xyz atom coordinate file using the SolutionRasterizer user object.'
   []
 []

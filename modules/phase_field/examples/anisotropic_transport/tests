@@ -3,5 +3,8 @@
     type = RunApp
     input = 'diffusion.i'
     check_input = True
+    issues = '#7319'
+    design = 'MatAnisoDiffusion.md'
+    requirement = 'The system shall be able to syntax check an example of anisotropic mass transport using a material-dependent anisotropic mobility tensor.'
   [../]
 []

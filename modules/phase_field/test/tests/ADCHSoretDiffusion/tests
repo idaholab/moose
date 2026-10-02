@@ -15,7 +15,7 @@
     difference_tol = 1e-7
     cli_args = 'Outputs/exodus=false'
     allow_test_objects = true
-    requirement = 'The Jacobians for the automatic differentiation ADCHSplitChemicalPotential and '
-                  'ADCHSplitConcentration kernels shall be accurate.'
+    requirement = 'The Jacobian for the automatic differentiation split Cahn-Hilliard kernels '
+                  'shall be accurate when a temperature-gradient driving force for diffusion is added.'
   [../]
 []

@@ -5,6 +5,9 @@
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
+    issues = '#7319'
+    design = 'InterfaceOrientationMaterial.md'
+    requirement = 'The system shall be able to syntax check a dendritic snowflake growth example using an orientation-dependent anisotropic interface energy.'
   [../]
   [./echebarria_iso]
       type = RunApp
@@ -12,5 +15,8 @@
       cli_args = 'Mesh/nx=6 Mesh/ny=15'
       capabilities = 'method!=dbg'
       check_input = True
+      issues = '#27171'
+      design = 'AntitrappingCurrent.md'
+      requirement = 'The system shall be able to syntax check an isothermal Echebarria solidification example using an antitrapping current.'
   [../]
 []

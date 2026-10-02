@@ -31,7 +31,7 @@
     prereq = 'material'
     recover = false
     restep = false # Restep isn't compatible with recover tests
-    requirement = "The nucleation system shall recoverable"
+    requirement = "The DiscreteNucleation material's nucleation state shall be checkpointed so that a simulation can be recovered."
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
   [../]
@@ -44,7 +44,7 @@
     prereq = 'material_recover1'
     delete_output_before_running = false
     recover = false
-    requirement = "The nucleation system shall recoverable"
+    requirement = "The DiscreteNucleation material's nucleation state shall be recoverable from a checkpoint, reproducing the result of an uninterrupted run."
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
   [../]
@@ -60,7 +60,7 @@
     prereq = 'parallel'
     recover = false
     restep = false # Restep isn't compatible with recover tests
-    requirement = "The nucleation system shall recoverable"
+    requirement = "The DiscreteNucleationInserter user object's nucleation state shall be checkpointed so that a parallel simulation can be recovered."
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
   [../]
@@ -74,7 +74,7 @@
     prereq = 'parallel_recover1'
     delete_output_before_running = false
     recover = false
-    requirement = "The nucleation system shall recoverable"
+    requirement = "The DiscreteNucleationInserter user object's nucleation state shall be recoverable from a checkpoint, reproducing the result of an uninterrupted parallel run."
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
   [../]
