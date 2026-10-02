@@ -17,6 +17,7 @@ public:
   static InputParameters validParams();
 
   ScalarKernel(const InputParameters & parameters);
+  virtual void reinit() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
