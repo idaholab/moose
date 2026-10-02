@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Closures1PhaseBase.h"
+#include "FlowChannelClosuresInterface.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
+#include "FEProblemBase.h"
 
 InputParameters
 Closures1PhaseBase::validParams()
@@ -21,29 +22,35 @@ Closures1PhaseBase::validParams()
 Closures1PhaseBase::Closures1PhaseBase(const InputParameters & params) : ClosuresBase(params) {}
 
 void
-Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseBase::addWallFrictionFunctionMaterial(
+    const FlowChannelClosuresInterface & flow_channel) const
 {
-  const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
+  const FunctionName & f_D_fn_name = flow_channel.getClosuresWallFrictionFactorFunction();
 
   const std::string class_name = "ADWallFrictionFunctionMaterial";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
   params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
   params.set<FunctionName>("function") = f_D_fn_name;
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "f_wall_fn_mat"), params);
+  _problem.addMaterial(
+      class_name, genName(flow_channel.getClosuresName(), "f_wall_fn_mat"), params);
 }
 
 void
-Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseBase::addAverageWallTemperatureMaterial(
+    const FlowChannelClosuresInterface & flow_channel) const
 {
   const std::string class_name = "ADAverageWallTemperature3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-  params.set<std::vector<VariableName>>("T_wall_sources") = flow_channel.getWallTemperatureNames();
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
+  params.set<std::vector<VariableName>>("T_wall_sources") =
+      flow_channel.getClosuresWallTemperatureNames();
   params.set<std::vector<MaterialPropertyName>>("Hw_sources") =
-      flow_channel.getWallHTCNames1Phase();
-  params.set<std::vector<VariableName>>("P_hf_sources") = flow_channel.getHeatedPerimeterNames();
+      flow_channel.getClosuresWallHTCNames();
+  params.set<std::vector<VariableName>>("P_hf_sources") =
+      flow_channel.getClosuresHeatedPerimeterNames();
   params.set<std::vector<VariableName>>("P_hf_total") = {FlowModel::HEAT_FLUX_PERIMETER};
   params.set<std::vector<VariableName>>("T_fluid") = {FlowModelSinglePhase::TEMPERATURE};
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "avg_T_wall_3eqn_mat"), params);
+  _problem.addMaterial(
+      class_name, genName(flow_channel.getClosuresName(), "avg_T_wall_3eqn_mat"), params);
 }
