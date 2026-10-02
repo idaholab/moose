@@ -76,9 +76,10 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
-  // Reduce this application's thread count so MOOSE-side consumers (which read
-  // MooseApp::n_threads()) run single-threaded to match.
-  getMooseApp().setNumThreads(1);
+  // Check that the requested number of threads is actually supported and used
+  if (numThreads() > 1)
+    mooseError("Threads are not currently supported in a MFEM solve. "
+               "Make sure to set Application/num_threads=1 if you need threads in a coupled solve");
   setMesh();
 }
 
