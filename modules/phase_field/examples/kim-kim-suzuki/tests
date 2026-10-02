@@ -18,4 +18,16 @@
     check_input = True
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
   [../]
+  [./kks_example_3phase_ternary_global]
+    type = RunApp
+    input = 'kks_example_3phase_ternary_global.i'
+    # Run a single step on a coarse mesh: this only confirms the example
+    # assembles and takes a solve step, not the full interface evolution.
+    cli_args = 'Mesh/nx=8 Mesh/ny=8 Executioner/num_steps=1 Outputs/exodus/enable=false Outputs/csv/enable=false'
+  [../]
+  [./kks_example_3phase_ternary_nested]
+    type = RunApp
+    input = 'kks_example_3phase_ternary_nested.i'
+    cli_args = 'Mesh/nx=8 Mesh/ny=8 Executioner/num_steps=1 Outputs/exodus/enable=false Outputs/csv/enable=false'
+  [../]
 []

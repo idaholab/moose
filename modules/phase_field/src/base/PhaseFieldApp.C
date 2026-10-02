@@ -70,6 +70,7 @@ PhaseFieldApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
   registerSyntax("GrandPotentialKernelAction", "Modules/PhaseField/GrandPotential");
+  registerSyntax("KKSAction", "Modules/PhaseField/KKS");
 }
 
 void
