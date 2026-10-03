@@ -1,12 +1,36 @@
 [Tests]
-  issues = '#27295'
-  design = '1d_elastic_waves.md'
+  issues = '#27295 #33779'
+  design = '1d_elastic_waves.md Eigenvalues.md'
   [modal]
     type = Exodiff
     input = 'modal.i'
     exodiff = 'modal_out.e'
     exodiff_opts = '-eigen_relative'
     abs_zero = 1e-10
-    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+    requirement = 'The system shall perform modal analysis of a cantilever beam with the Eigenvalue executioner using a mass term driven by a density material property.'
+  []
+  [bar_consistent]
+    type = CSVDiff
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    csvdiff = 'fixed_fixed_bar_out_eigenvalues_0001.csv'
+    requirement = 'The system shall compute the first three longitudinal natural frequencies of a fixed-fixed elastic bar and report them in Hz within one percent of the analytic values.'
+  []
+  [negative_eigenvalue_warning]
+    type = RunApp
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    cli_args = 'Problem/negative_sign_eigen_kernel=false Outputs/csv=false Outputs/exodus=false'
+    allow_warnings = true
+    expect_out = 'eigenvalue\(s\) have a negative real part'
+    requirement = 'The system shall warn when a natural frequency is requested for an eigenvalue with a negative real part.'
+  []
+  [frequency_inverse_conflict]
+    type = RunException
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    cli_args = 'VectorPostprocessors/eigenvalues/inverse_eigenvalue=true'
+    expect_err = "'natural_frequency' cannot be used together with 'inverse_eigenvalue'"
+    requirement = 'The system shall report an error when both the natural frequency and the inverse eigenvalue options are requested on the Eigenvalues vectorpostprocessor.'
   []
 []
