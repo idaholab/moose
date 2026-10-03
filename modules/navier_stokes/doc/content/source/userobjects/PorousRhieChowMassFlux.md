@@ -4,7 +4,7 @@
 
 ## Overview
 
-`PorousRhieChowMassFlux` extends [RhieChowMassFlux](RhieChowMassFlux.md) for porous-medium and
+`PorousRhieChowMassFlux` extends [RhieChowMassFlux.md] for porous-medium and
 porous-baffle calculations in the linear finite volume SIMPLE workflow.
 
 Compared with the base object, it adds:
@@ -16,16 +16,16 @@ Compared with the base object, it adds:
 
 Pressure jumps are supplied by the models listed in
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models), such as
-[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md). The jump is updated from the
+[BernoulliFormLossPressureJump.md]. The jump is updated from the
 current face mass flux and under-relaxed with
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_relaxation). See
 [porous_rhie_chow_baffle.md] for the discrete coupling.
 
 This is the user object expected by
-[LinearPWCNSFVMomentumFlux](LinearPWCNSFVMomentumFlux.md),
-[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md), and porous
+[LinearPWCNSFVMomentumFlux.md],
+[LinearFVPressureCorrectionDiffusionJump.md], and porous
 uses of
-[LinearFVEnergyAdvection](LinearFVEnergyAdvection.md).
+[LinearFVEnergyAdvection.md].
 
 In this example, `PorousRhieChowMassFlux` uses a separately configured pressure-jump model on two
 porous interfaces.

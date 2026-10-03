@@ -8,7 +8,7 @@
 $-\epsilon\nabla p$ to a porous momentum equation written in superficial velocity. The
 [!param](/LinearFVKernels/LinearPWCNSFVMomentumPressure/porosity) functor supplies $\epsilon$.
 The pressure gradient is evaluated in the same way as in
-[LinearFVMomentumPressure](LinearFVMomentumPressure.md), including support for reconstructed
+[LinearFVMomentumPressure.md], including support for reconstructed
 pressure gradients.
 
 ## Example Input Syntax

@@ -5,18 +5,18 @@
 ## Description
 
 `LinearFVPressureCorrectionDiffusionJump` extends
-[LinearFVPressureCorrectionDiffusion](LinearFVPressureCorrectionDiffusion.md) with the pressure
-jump supplied by a [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) object. On a porous baffle
+[LinearFVPressureCorrectionDiffusion.md] with the pressure
+jump supplied by a [PorousRhieChowMassFlux.md] object. On a porous baffle
 face, a transmissibility $T_f$ and signed jump $J_f$ add $T_f J_f$ to the right-hand side. Ordinary
 internal and boundary faces retain the base pressure-correction discretization.
 
 Set
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/rhie_chow_user_object) to the
-same user object used by the [SIMPLE](SIMPLE.md) executioner. When
+same user object used by the [SIMPLE.md] executioner. When
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
 is enabled, the baffle transmissibility is evaluated from the lagged two-term reconstructed
 pressure expansion; this option requires
-[FVReconstructedPressureGradient](FVReconstructedPressureGradient.md).
+[FVReconstructedPressureGradient.md].
 
 ## Example Input Syntax
 
