@@ -26,4 +26,173 @@
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions while using automatic differentiation.'
     capabilities = 'superlu & method!=dbg'
   []
+
+  # Every leaf below runs one of the two rows inputs, which are the penalty inputs above with the
+  # InclinedNoDisplacementBC action replaced by InclinedNoDisplacementConstraint on the same
+  # boundaries. They write the same exodus file names as the penalty tests, so each has a prereq on
+  # its penalty twin and the exodus leaf runs before the csv leaf of the same dimension.
+  #
+  # The exodus tolerances are the PENALTY gold's own error, measured rather than assumed, and they
+  # are loose on purpose. The largest absolute difference between the rows run and
+  # gold/inclined_bc_2d_out.e is 4.321691e-05 against a peak displacement of 8.916063e-03. That
+  # difference is entirely the penalty's O(1/penalty) error and not a disagreement about the
+  # answer: re-running inclined_bc_2d.i with the penalty raised from 1e8 to 1e10 and to 1e12 drops
+  # it to 4.3217e-07 and 4.3226e-09, exactly one hundredfold per decade of penalty, so the rows
+  # solution is the limit the penalty method converges to.
+  # exodiff ignores a value pair only when BOTH values are below abs_zero, so the two tolerances
+  # are tied by abs_zero >= max_absolute_difference / rel_err. At abs_zero = 1e-3 the measured
+  # worst relative difference is 4.2483e-02 and 260 of the 540 nodal values are still compared;
+  # rel_err = 8.5e-2 is twice that measured worst case. Tightening either one only shrinks how much
+  # of the field is compared, because the penalty gold is not more accurate than this.
+  # This exodiff therefore only asserts "no worse than the penalty method". The sharp assertion is
+  # the un_max leaf, where abs_zero = 1e-12 requires max|u . n| to be at machine zero, which a
+  # penalty run can never reach and only exact constraint rows can.
+  [rows]
+    issues = '#13128 #33821'
+    design = 'InclinedNoDisplacementConstraint.md PenaltyInclinedNoDisplacementBC.md'
+    requirement = 'The system shall enforce a no-normal-displacement condition on an inclined '
+                  'boundary with degree of freedom constraint rows and reproduce the penalty '
+                  'solution in two and three dimensions,'
+    [2D]
+      type = Exodiff
+      input = 'inclined_rows_2d.i'
+      exodiff = 'inclined_bc_2d_out.e'
+      abs_zero = 1e-3
+      rel_err = 8.5e-2
+      capabilities = 'superlu'
+      prereq = '2D'
+      detail = 'reproducing the penalty solution of a rotated two dimensional block,'
+    []
+    [2D_un_max]
+      type = CSVDiff
+      input = 'inclined_rows_2d.i'
+      csvdiff = 'inclined_rows_2d_out.csv'
+      # max|u . n| over both supports, measured at 3.08e-16 and below on every step, so this floor
+      # reads the whole column as zero and fails the moment a support is not enforced exactly
+      abs_zero = 1e-12
+      capabilities = 'superlu'
+      prereq = 'rows/2D'
+      detail = 'holding the normal displacement of that two dimensional block at machine zero,'
+    []
+    [3D]
+      type = Exodiff
+      input = 'inclined_rows_3d.i'
+      exodiff = 'inclined_bc_3d_out.e'
+      # Same construction as the 2D leaf. The largest absolute difference from
+      # gold/inclined_bc_3d_out.e away from the four nodes that lay on more than one support is
+      # 1.271254e-04, three supports carrying more reaction than the two of the 2D case; at
+      # abs_zero = 1e-3 the measured worst relative difference over those nodes is 6.9614e-02 and
+      # rel_err = 1.4e-1 is twice it. Those four nodes were left out of that derivation because
+      # when it was made their difference, up to 5.562792e-04, was the shared-node defect
+      # described on the 3D_un_max leaf rather than penalty error. The defect is fixed and this
+      # leaf passes at the pair above, which is the whole point of deriving it from the sound part
+      # of the field: the looser pair that the contaminated field would have justified,
+      # abs_zero = 2e-3 with rel_err = 7.7e-2, floored those four nodes and passed the defect.
+      # Do not retune these two values now that the leaf is green
+      abs_zero = 1e-3
+      rel_err = 1.4e-1
+      capabilities = 'superlu'
+      prereq = '3D'
+      detail = 'reproducing the penalty solution of a rotated three dimensional block, and'
+    []
+    [3D_un_max]
+      type = CSVDiff
+      input = 'inclined_rows_3d.i'
+      csvdiff = 'inclined_rows_3d_out.csv'
+      # max|u . n| over all three supports, measured at 6.0715321659188e-18, so this floor reads
+      # the whole column as zero and fails the moment a support stops being enforced exactly.
+      # Same floor and same purpose as the 2D_un_max leaf.
+      #
+      # Worth keeping as history, because this leaf is what found it: written before the rows were
+      # eliminated across objects, it failed, with un_max at 4.566584e-05 and growing linearly
+      # with the load. Every node that violated u . n = 0 lay on two or more of the three supports
+      # (nodes 0, 1, 10 and 34 of this mesh) and no node on a single support was violated. The
+      # rows of two objects meeting at a shared node were mutually recursive - one plane gives y
+      # in terms of x and z while the other gives x in terms of y and z - a cycle that
+      # substitution cannot resolve, so one of the pair was lost. A second defect was fixed at the
+      # same time: the per-node normal map was keyed by node id alone, which merged two
+      # intersecting support planes into a single normal wherever one object owned both
+      # boundaries. Rows are now eliminated against the rows already held by the DofMap, so all
+      # three objects of inclined_rows_3d.i hold at a shared node and every support plane is
+      # satisfied. The 2D case, whose two supports share one node, was exact throughout.
+      # Do NOT raise this floor to make the leaf pass: 1e-12 is the assertion
+      abs_zero = 1e-12
+      capabilities = 'superlu'
+      prereq = 'rows/3D'
+      detail = 'holding the normal displacement of that three dimensional block at machine zero.'
+    []
+  []
+
+  # The three leaves below run one eigenvalue problem on the same 1x2 block, rollers on the bottom
+  # and the left, switching only the support: axis-aligned DirichletBC on the un-rotated mesh, the
+  # constraint on the mesh rotated thirty degrees, and the penalty action on that same rotated mesh.
+  # A rigid rotation of the whole problem cannot change an eigenvalue, so the reference and the rows
+  # leaf share one gold and their agreement is the assertion. Measured: 240.4577335938 un-rotated
+  # against 240.4577335971 rotated with rows, a relative difference of 1.4e-11, so rel_err = 1e-8 is
+  # about three orders of magnitude above the measured agreement and still far below any shift a
+  # wrong normal produces. A rows leaf that emitted no row would instead let a rigid mode through and
+  # collapse the eigenvalue toward zero.
+  #
+  # The block is the 1x2 rectangle of the rest of this directory rather than a square on purpose. On
+  # a square, the two perpendicular rollers make the mesh symmetric under exchanging x and y, the
+  # fundamental mode is then doubly degenerate, and the eigen solve stalls instead of converging: it
+  # crawls around 1583.634 and reports 'Solve Did NOT Converge' at eigen_tol = 1e-8. The rectangle
+  # has a simple fundamental mode and converges in sixteen iterations or fewer.
+  #
+  # The Young's modulus is this directory's 1e6 rather than the stiffer plate of the rbe eigen
+  # tests, so that the penalty of 1e6 below is comparable to the stiffness of the block. Against
+  # a modulus of 68e9 that penalty would be numerically invisible and the penalty leaf would
+  # silently become a second copy of the reference, proving nothing.
+  #
+  # The penalty leaf has its own gold because a penalty support is a spring of finite stiffness: it
+  # lets the block move into the support, which the constraint rows forbid exactly, and that extra
+  # compliance lowers the fundamental eigenvalue to 110.80718956591, a factor of 2.2 away. The shift
+  # is the penalty's O(1/penalty) error and not a disagreement about the answer. Measured on this
+  # mesh with the penalty raised decade by decade, the eigenvalue is 238.0215857267 at 1e8,
+  # 240.4331922042 at 1e10 and 240.4574881667 at 1e12: the remaining difference from the rows
+  # eigenvalue falls exactly one hundredfold per decade, 2.454e-2 then 2.454e-4, so the rows result
+  # is the limit the penalty method converges to.
+  [rows_eigen]
+    issues = '#13128 #33821'
+    design = 'InclinedNoDisplacementConstraint.md PenaltyInclinedNoDisplacementBC.md'
+    requirement = 'The system shall produce the same fundamental eigenvalue for a block on two '
+                  'inclined roller supports enforced with constraint rows as for the same block '
+                  'un-rotated on axis-aligned Dirichlet rollers, while the penalty support shifts '
+                  'it, where '
+    [reference]
+      type = CSVDiff
+      input = 'inclined_rows_eigen.i'
+      cli_args = "BCs/inactive='InclinedNoDisplacementBC' Constraints/inactive='bottom left' "
+                 "Mesh/rotate/vector_value='0 0 0'"
+      csvdiff = 'inclined_rows_eigen_out_omega_squared_0001.csv'
+      rel_err = 1e-8
+      capabilities = 'slepc & mumps'
+      # The Eigenvalue executioner takes a single step, so there is no transient to recover
+      recover = false
+      detail = 'the un-rotated block on axis-aligned Dirichlet rollers sets the eigenvalue,'
+    []
+    [rows]
+      type = CSVDiff
+      input = 'inclined_rows_eigen.i'
+      csvdiff = 'inclined_rows_eigen_out_omega_squared_0001.csv'
+      rel_err = 1e-8
+      capabilities = 'slepc & mumps'
+      recover = false
+      # Writes the file name of the reference leaf so that the two diff against one gold
+      prereq = 'rows_eigen/reference'
+      detail = 'the block rotated thirty degrees with both supports enforced by constraint rows '
+               'reproduces that eigenvalue, and'
+    []
+    [penalty]
+      type = CSVDiff
+      input = 'inclined_rows_eigen.i'
+      cli_args = "BCs/inactive='roller_x roller_y roller_x_eigen roller_y_eigen' "
+                 "Constraints/inactive='bottom left' "
+                 "Outputs/file_base=inclined_rows_eigen_penalty"
+      csvdiff = 'inclined_rows_eigen_penalty_omega_squared_0001.csv'
+      capabilities = 'slepc & mumps'
+      recover = false
+      detail = 'the same rotated block on penalty supports gives a different eigenvalue.'
+    []
+  []
 []

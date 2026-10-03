@@ -17,13 +17,19 @@ EqualValueNodalConstraint::validParams()
   InputParameters params = NodalConstraint::validParams();
   params.addRequiredParam<unsigned int>("primary", "The ID of the primary node");
   params.addRequiredParam<unsigned int>("secondary", "The ID of the secondary node");
-  params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
+  params.addParam<Real>("penalty",
+                        "The penalty used for the boundary term. It is required with the penalty "
+                        "and kinematic formulations and unused with the rows formulation");
+  params.addClassDescription("Constrains the value of a variable to be the same at two nodes, with "
+                             "a penalty term or with a degree of freedom constraint row.");
   return params;
 }
 
 EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & parameters)
-  : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
+  : NodalConstraint(parameters), _penalty(isParamValid("penalty") ? getParam<Real>("penalty") : 0.0)
 {
+  checkPenaltyParam();
+
   _connected_nodes.push_back(getParam<unsigned int>("secondary"));
   _primary_node_vector.push_back(getParam<unsigned int>("primary"));
 }

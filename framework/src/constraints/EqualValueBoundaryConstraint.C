@@ -18,21 +18,26 @@ InputParameters
 EqualValueBoundaryConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
-  params.addClassDescription(
-      "Constraint for enforcing that variables on each side of a boundary are equivalent.");
+  params.addClassDescription("Constraint for enforcing that variables on each side of a boundary "
+                             "are equivalent, with a penalty term or with degree of freedom "
+                             "constraint rows.");
   params.addParam<unsigned int>(
       "primary",
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
   params.addParam<Point>("primary_node_coord", "Coordinates of the primary node to locate.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
   params.addParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
-  params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
+  params.addParam<Real>("penalty",
+                        "The penalty used for the boundary term. It is required with the penalty "
+                        "and kinematic formulations and unused with the rows formulation");
   return params;
 }
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
-  : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
+  : NodalConstraint(parameters), _penalty(isParamValid("penalty") ? getParam<Real>("penalty") : 0.0)
 {
+  checkPenaltyParam();
+
   updateConstrainedNodes();
 }
 
@@ -40,6 +45,21 @@ void
 EqualValueBoundaryConstraint::meshChanged()
 {
   updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::addConstraintRows(libMesh::DofMap & dof_map) const
+{
+  if (!isParamValid("secondary"))
+  {
+    NodalConstraint::addConstraintRows(dof_map);
+    return;
+  }
+
+  // The secondary boundary is read at call time so that the rows follow an adapted mesh:
+  // updateConstrainedNodes() has not run for this mesh yet. The primary node, which is still in
+  // this list, is skipped by addTieRows()
+  addTieRows(dof_map, ownedBoundaryNodes(getParam<BoundaryName>("secondary")));
 }
 
 void

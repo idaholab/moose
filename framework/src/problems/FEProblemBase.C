@@ -3336,15 +3336,18 @@ FEProblemBase::addConstraint(const std::string & c_name,
       return "variable";
     else
     {
-      // must be a mortar constraint
+      // must be a mortar constraint or a multipoint constraint
       const bool has_secondary_var = parameters.isParamValid("secondary_variable");
       const bool has_primary_var = parameters.isParamValid("primary_variable");
-      if (!has_secondary_var && !has_primary_var)
-        mooseError(
-            "Either a 'secondary_variable' or 'primary_variable' parameter must be supplied for '",
-            parameters.getObjectName(),
-            "'");
-      return has_secondary_var ? "secondary_variable" : "primary_variable";
+      const bool has_displacements = parameters.isParamValid("displacements");
+      if (!has_secondary_var && !has_primary_var && !has_displacements)
+        mooseError("Either a 'secondary_variable', 'primary_variable' or 'displacements' parameter "
+                   "must be supplied for '",
+                   parameters.getObjectName(),
+                   "'");
+      if (has_secondary_var)
+        return "secondary_variable";
+      return has_primary_var ? "primary_variable" : "displacements";
     }
   };
 

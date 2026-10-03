@@ -36,6 +36,11 @@ NodalStickConstraint::NodalStickConstraint(const InputParameters & parameters)
     _secondary_boundary_id(getParam<BoundaryName>("secondary")),
     _penalty(getParam<Real>("penalty"))
 {
+  if (_formulation == Moose::Rows)
+    paramError("formulation",
+               "The rows formulation is not supported: a stick constraint pairs its nodes by "
+               "proximity, so its rows would not be a fixed tie.");
+
   if (_var.number() != _var_secondary.number())
     paramError("variable_secondary",
                "Primary variable must be identical to secondary variable. "
@@ -130,6 +135,9 @@ NodalStickConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
     _j = _primary_conn[_i];
     switch (_formulation)
     {
+      case Moose::Rows:
+        mooseError("The rows formulation is rejected in the constructor");
+        break;
       case Moose::Penalty:
         Kee(_j, _j) += computeQpJacobian(Moose::PrimaryPrimary);
         Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
@@ -167,6 +175,9 @@ NodalStickConstraint::computeResidual(const NumericVector<Number> & residual)
     _j = _primary_conn[_i];
     switch (_formulation)
     {
+      case Moose::Rows:
+        mooseError("The rows formulation is rejected in the constructor");
+        break;
       case Moose::Penalty:
         re(_j) += computeQpResidual(Moose::Primary) * _var.scalingFactor();
         neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var.scalingFactor();
