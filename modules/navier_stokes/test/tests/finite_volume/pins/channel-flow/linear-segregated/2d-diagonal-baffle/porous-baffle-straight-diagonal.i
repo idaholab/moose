@@ -1,6 +1,10 @@
 # Straight-channel hydraulic-only porous-baffle showcase.
 # Flow enters from the left, crosses a diagonal porous baffle in a straight section,
 # and exits to the right through a channel with slip walls.
+# The solution should conserve the imposed unit superficial flow, produce positive pressure
+# drops across the clean-to-porous, diagonal, and porous-to-clean interfaces, and keep the
+# transverse velocity smooth on both sides of the diagonal. The skew geometry and porous drag
+# preclude a useful closed-form pressure distribution, so the profiles provide the reference.
 
 inlet_velocity = 1.0
 rho = 998.2
