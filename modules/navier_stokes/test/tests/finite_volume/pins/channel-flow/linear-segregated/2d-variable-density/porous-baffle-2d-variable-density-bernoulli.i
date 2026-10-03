@@ -1,10 +1,19 @@
+# Manufactured variable-density porous-baffle solution. The exact fields are
+# rho = 1 - 0.05 x, rho * superficial_u = 1, porosity = 1 for x < 5 and 0.5
+# otherwise, and p_right = 0. The exact pressure solution gives p_left = delta_p =
+# 4.99973888889. Its block averages are p_block_1 = 4.84902726575 and
+# p_block_2 = 1.51242493694, so p_block_jump = 3.33660232881. The exact velocity
+# averages are u_block_1 = 1.15072828981 and u_block_2 = 1.62186043243.
+# L2_rho and L2_porosity should be zero; the velocity and pressure errors measure
+# discretization of their nonconstant exact profiles.
+
 length_left = 5.0
 length_right = 5.0
 height = 1.0
 
 nx_left = 30
 nx_right = 30
-ny = 11
+ny = 5
 
 epsilon_left = 1.0
 epsilon_right = 0.5

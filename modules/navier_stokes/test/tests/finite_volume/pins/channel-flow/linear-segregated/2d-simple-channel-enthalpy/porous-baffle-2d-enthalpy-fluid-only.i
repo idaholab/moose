@@ -1,3 +1,8 @@
+# Steady fluid-only enthalpy transport through a 0.5-m heated porous block.
+# With rho = 1000, u = 2, cp = 4200, and q = 20 MW/m^3, conservation gives
+# u_block_2 = 2, T_fluid_out = 301.19047619048, and h_fluid_out = 1265000.
+# For 10 upwind cells in the heated block, T_fluid_block_2 = 300.65476190476.
+
 mu = 2e-3
 rho = 1000
 advected_interp_method = 'upwind'
@@ -26,8 +31,8 @@ q = 20000000
     dim = 2
     dx = '0.5 0.5 0.5'
     dy = '0.5'
-    ix = '21 21 21'
-    iy = '21'
+    ix = '10 10 10'
+    iy = '3'
     subdomain_id = '1 2 3'
   []
   [baffle]
@@ -86,7 +91,7 @@ q = 20000000
     p_diffusion_kernel = p_diffusion
     pressure_jump_models = pressure_jump
     pressure_gradient_limiter = 'baffle baffle2'
-    pressure_jump_relaxation = 0.01
+    pressure_jump_relaxation = 0.1
   []
 []
 
@@ -392,7 +397,7 @@ q = 20000000
     variable = 'superficial_u T_fluid'
     start_point = '0.0119047619047619 0.25 0'
     end_point = '1.4880952380952381 0.25 0'
-    num_points = 63
+    num_points = 30
     sort_by = x
   []
 []
@@ -409,7 +414,7 @@ q = 20000000
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
   energy_system = energy_system
-  momentum_equation_relaxation = 0.4
+  momentum_equation_relaxation = 0.2
   pressure_variable_relaxation = 0.2
   energy_equation_relaxation = 0.7
   num_iterations = 1000

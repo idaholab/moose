@@ -1,3 +1,10 @@
+# One-dimensional verification of Bernoulli jumps, porous drag, and form loss.
+# Mass conservation gives u_block_1 = u_block_2 = 0.1 and u_block_jump = 0.
+# Without drag or form loss, the two pressure jumps (right minus left) are 0.03 and -0.03,
+# so p_left = p_right = p_jump = 0. With mu = 1 and Forchheimer = 50, the porous block
+# adds a pressure drop of 0.25. A form-loss coefficient of 10 adds 0.4 at each baffle,
+# giving p_jump = p_left - p_right = 1.05 and baffle jumps of -0.37 and -0.43.
+
 mu = 0.0 # 1e-2
 rho = 2.0
 advected_interp_method = 'average'
