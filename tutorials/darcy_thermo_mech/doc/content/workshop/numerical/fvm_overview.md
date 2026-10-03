@@ -52,17 +52,17 @@ Error analysis is done using Taylor expansions, we prefer second-order discretiz
 +(1)+ Write the strong form of the equation:
 
 !equation
--\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u + cu - f = 0
+-\nabla\cdot\left(k\nabla u\right) + \nabla\cdot\left(\vec{\beta} u\right) + cu - f = 0
 
 +(2)+ Integrate the equation over the domain $\Omega$:
 
 !equation
-\int_\Omega \left(-\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u +cu -f \right) dV = 0
+\int_\Omega \left(-\nabla\cdot\left(k\nabla u\right) + \nabla\cdot\left(\vec{\beta} u\right) + cu - f \right) dV = 0
 
 +(3)+ Split the integral into different terms:
 
 !equation
--\int_\Omega \nabla\cdot k\nabla u dV + \int_\Omega \vec{\beta} \cdot \nabla u dV + \int_\Omega cu dV -\int_\Omega f dV = 0
+-\int_\Omega \nabla\cdot\left(k\nabla u\right) dV + \int_\Omega \nabla\cdot\left(\vec{\beta} u\right) dV + \int_\Omega cu dV - \int_\Omega f dV = 0
 
 !---
 
@@ -120,7 +120,7 @@ Split into cell-wise integrals and use the divergence theorem:
 
 !style fontsize=80%
 !equation
-\int_\Omega\nabla\cdot k\nabla u dV = \sum_i^{N_c}\int_{\Omega_i}\nabla\cdot k\nabla u dV = \sum_i^{N_c}\int_{\partial\Omega_i} k\nabla u \cdot \hat{n} dS
+\int_\Omega\nabla\cdot\left(k\nabla u\right) dV = \sum_i^{N_c}\int_{\Omega_i}\nabla\cdot\left(k\nabla u\right) dV = \sum_i^{N_c}\int_{\partial\Omega_i} k\nabla u \cdot \hat{n} dS
 
 !style fontsize=80%
 On an internal cell (let's say on cell C):
@@ -208,16 +208,16 @@ From the two equations:
 !col! width=60%
 
 !style fontsize=90%
-Split to integral to cell-wise integrals and use the divergence theorem:
+Split the integral into cell-wise integrals and use the divergence theorem:
 
 !equation
-\int_\Omega \vec{\beta} \cdot \nabla u~ dV = \sum_i^N\int_{\Omega_i}\vec{\beta} \cdot \nabla u~ dV = \sum_i^N\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS
+\int_\Omega \nabla\cdot\left(\vec{\beta} u\right)~ dV = \sum_i^{N_c}\int_{\Omega_i}\nabla\cdot\left(\vec{\beta} u\right)~ dV = \sum_i^{N_c}\int_{\partial\Omega_i} \left(\vec{\beta}~u\right) \cdot \hat{n}~ dS
 
 !style fontsize=90%
-On an internal cell (let's say on cell C), assuming that $\beta$ is constant:
+On an internal cell (let's say on cell C):
 
 !equation
-\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} (\vec{\beta}~u) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} (\vec{\beta}_f~ u_f) \cdot \hat{n}_f |S_f|
+\int_{\partial\Omega_C} \left(\vec{\beta}~u\right) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} \left(\vec{\beta}~u\right) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} \left(\vec{\beta}_f~ u_f\right) \cdot \hat{n}_f |S_f|
 
 !col-end!
 

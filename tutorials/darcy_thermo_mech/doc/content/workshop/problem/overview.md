@@ -26,7 +26,7 @@ Conservation of Mass:
 Conservation of Energy:
 
 !equation id=darcy_energy
-C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
+\rho c_p \left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
 
 Darcy's Law:
 
@@ -34,8 +34,8 @@ Darcy's Law:
 \vec{u} = -\frac{\mathbf{K}}{\mu} (\nabla p - \rho \vec{g})
 
 where $\vec{u}$ is the fluid velocity, $\epsilon$ is porosity, $\mathbf{K}$ is the permeability
-tensor, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\c_p$ is the specific heat, $\vec{g}$ is the
-gravity vector, and $T$ is the temperature.
+tensor, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $c_p$ is the
+specific heat capacity, $\vec{g}$ is the gravity vector, and $T$ is the temperature.
 
 !---
 
@@ -51,18 +51,19 @@ $p$ and $T$:
 
 !---
 
-The parameters $\rho$, $c_p$, and $k$ are the porosity-dependent density, specific heat capacity, and thermal
-conductivity of the combined fluid/solid medium, defined by:
+The coefficient $\rho c_p$ is the volumetric heat capacity, or density times specific heat
+capacity. The parameters $\rho$, $c_p$, and $k$ are the porosity-dependent density, specific
+heat capacity, and thermal conductivity of the combined fluid/solid medium, defined by:
 
 !equation
 \rho \equiv \epsilon \rho_f + (1-\epsilon) \rho_s
 \\
-\rho c_p \equiv \epsilon \rho_f {c_p}_f + (1-\epsilon) \rho_s {c_p}_s
+c_p \equiv \epsilon c_{p,f} + (1-\epsilon) c_{p,s}
 \\
 k \equiv \epsilon k_f + (1-\epsilon) k_s
 
- where $\epsilon$ is the porosity, $c_p$ is the specific heat, and the subscripts $f$ and $s$ refer
- to fluid and solid, respectively.
+where $\epsilon$ is the porosity and the subscripts $f$ and $s$ refer to fluid and solid,
+respectively.
 
 !---
 
@@ -75,5 +76,5 @@ k \equiv \epsilon k_f + (1-\epsilon) k_s
 | Density of steel, $\rho_s$ | 8000 | $\textrm{kg}/\textrm{m}^3$ |
 | Thermal conductivity of water, $k_f$ | 0.6 | $\textrm{W}/\textrm{m}\,\textrm{K}$ |
 | Thermal conductivity of steel, $k_s$ | 18 | $\textrm{W}/\textrm{m}\,\textrm{K}$ |
-| Specific heat capacity of water, $c_p{_f}$ | 4181.3 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
-| Specific heat capacity of steel, $c_p{_s}$ | 466 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
+| Specific heat capacity of water, $c_{p,f}$ | 4181.3 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
+| Specific heat capacity of steel, $c_{p,s}$ | 466 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
