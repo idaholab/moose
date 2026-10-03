@@ -1,3 +1,10 @@
+# Steady conjugate heat transfer from a heated solid to fluid in a 0.5-m porous block.
+# The solid fraction scales the 20 MW/m^3 source to 10 MW/m^3. Conservation therefore gives
+# u_block_2 = 2, T_fluid_out = 300.59523809524, and h_fluid_out = 1262500.
+# For 10 upwind cells, T_fluid_block_2 = 300.32738095238. The local balance gives
+# T_solid_block_2 - T_fluid_block_2 = 10e6 / 30000 = 333.33333333333,
+# hence T_solid_block_2 = 633.66071428571.
+
 mu = 2e-3
 rho = 1000
 advected_interp_method = 'upwind'
@@ -28,8 +35,8 @@ T_initial = 300
     dim = 2
     dx = '0.5 0.5 0.5'
     dy = '0.5'
-    ix = '21 21 21'
-    iy = '21'
+    ix = '10 10 10'
+    iy = '3'
     subdomain_id = '1 2 3'
   []
   [baffle]
@@ -87,7 +94,7 @@ T_initial = 300
     porosity = porosity
     p_diffusion_kernel = p_diffusion
     pressure_jump_models = pressure_jump
-    pressure_jump_relaxation = 0.01
+    pressure_jump_relaxation = 0.1
   []
 []
 
@@ -463,7 +470,7 @@ T_initial = 300
     variable = 'superficial_u T_fluid T_solid'
     start_point = '0.0119047619047619 0.25 0'
     end_point = '1.4880952380952381 0.25 0'
-    num_points = 63
+    num_points = 30
     sort_by = x
   []
 []
@@ -483,7 +490,7 @@ T_initial = 300
   pressure_system = pressure_system
   energy_system = energy_system
   solid_energy_system = solid_energy_system
-  momentum_equation_relaxation = 0.4
+  momentum_equation_relaxation = 0.2
   pressure_variable_relaxation = 0.1
   energy_equation_relaxation = 0.8
   num_iterations = 1000
