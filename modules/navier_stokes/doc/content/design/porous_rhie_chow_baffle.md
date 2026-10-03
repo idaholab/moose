@@ -1,9 +1,9 @@
-# Porous Rhie-Chow pressure coupling
+# Porous Media Weakly Compressible Linear Finite Volume
 
 The linear finite volume porous-flow formulation solves for superficial velocity
 $\mathbf{U}=\epsilon\mathbf{u}$, where $\epsilon$ is porosity and $\mathbf{u}$ is
-interstitial velocity. [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) extends the
-[SIMPLE](SIMPLE.md) pressure-velocity coupling so this definition remains consistent across
+interstitial velocity. [PorousRhieChowMassFlux.md] extends the
+[SIMPLE.md] pressure-velocity coupling so this definition remains consistent across
 discontinuous porosity interfaces.
 
 For a face $f$, the Rhie-Chow object supplies the mass flux
@@ -19,7 +19,7 @@ is therefore
 \sum_f \frac{\phi_f}{\epsilon_P} U_{i,f} |S_f|.
 \end{equation}
 
-[LinearPWCNSFVMomentumFlux](LinearPWCNSFVMomentumFlux.md) applies the $1/\epsilon_P$
+[LinearPWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$
 factor to each cell row. On a
 porous baffle where pressure-gradient reconstruction is one-sided, it also uses the local velocity
 state on each side instead of sharing an interpolated state across the jump.
@@ -40,14 +40,14 @@ $-\operatorname{sign}(\phi_f)K\rho_f u_{ref}^2/2$. The reference side is selecte
 [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side).
 [!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) selects whether the
 reversible term uses side densities or a common interpolated face density. The
-[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model provides this jump to the
-[PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) object named by
+[BernoulliFormLossPressureJump.md] model provides this jump to the
+[PorousRhieChowMassFlux.md] object named by
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models).
 
-[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md) inserts the
+[LinearFVPressureCorrectionDiffusionJump.md] inserts the
 relaxed jump into the pressure-correction equation. The same jump-aware operator is then used to
 recompute the Rhie-Chow face flux, while
-[LinearPWCNSFVMomentumPressure](LinearPWCNSFVMomentumPressure.md) uses the corresponding
+[LinearPWCNSFVMomentumPressure.md] uses the corresponding
 reconstructed pressure gradient in the next momentum predictor. This keeps the pressure solve,
 face flux, and cell momentum equation on one discrete definition of the interface jump.
 
