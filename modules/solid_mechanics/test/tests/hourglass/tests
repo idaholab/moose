@@ -1,0 +1,135 @@
+[Tests]
+  issues = 'b09561d81b0'
+  design = 'HourglassCorrectionQuad4.md HourglassCorrectionHex8.md'
+
+  [mode]
+    requirement = 'The system shall stabilize QUAD4 hourglass deformation'
+    [g1]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1.i'
+      csvdiff = 'hourglass_residual_g1_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      detail = 'using the analytic rotation-invariant residual scale.'
+    []
+    [g1_rot37]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1_rot37.i'
+      csvdiff = 'hourglass_residual_g1_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      detail = 'with unchanged residual magnitude on a mesh rotated by 37 degrees.'
+    []
+    [scaled]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1.i'
+      cli_args = 'Mesh/gen/xmax=2 Mesh/gen/ymax=2 ICs/u/function="(1-x)*(1-y)"'
+      csvdiff = 'hourglass_residual_g1_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'mode/g1'
+      detail = 'with the expected residual magnitude under uniform in-plane scaling.'
+    []
+  []
+
+  [affine]
+    requirement = 'The system shall produce zero QUAD4 hourglass residual for affine displacement fields'
+    [rot0_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot0.i'
+      csvdiff = 'affine_rot0_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      detail = 'on an unrotated mesh.'
+    []
+    [rot37_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot37.i'
+      csvdiff = 'affine_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      detail = 'on a mesh rotated by 37 degrees.'
+    []
+  []
+
+  [hex_mode]
+    requirement = 'The system shall stabilize the four HEX8 hourglass modes with a '
+                  'rotation-invariant residual scale'
+    # all four Flanagan-Belytschko modes give the same analytic residual norm
+    # sqrt(8*4^2) = 11.313708... on the unit cube (A = 2I, h^2 = 2, V = 1)
+    [g1]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      detail = 'for the xi-eta mode.'
+    []
+    [g2]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="(1-2*y)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g1'
+      detail = 'for the eta-zeta mode.'
+    []
+    [g3]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="(1-2*x)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g2'
+      detail = 'for the xi-zeta mode.'
+    []
+    [g4]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="-(1-2*x)*(1-2*y)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g3'
+      detail = 'for the xi-eta-zeta mode.'
+    []
+    [scaled]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'Mesh/gen/xmax=2 Mesh/gen/ymax=2 Mesh/gen/zmax=2 '
+                 'ICs/u/function="(1-x)*(1-y)" Kernels/hourglass_x/penalty=0.5 '
+                 'Kernels/hourglass_y/penalty=0.5 Kernels/hourglass_z/penalty=0.5'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g4'
+      detail = 'under uniform element scaling with a corresponding penalty change.'
+    []
+  []
+  [hex_affine]
+    requirement = 'The system shall produce zero HEX8 hourglass residual for affine displacement fields'
+    [rot37]
+      type = 'CSVDiff'
+      input = 'affine_hex_rot37.i'
+      csvdiff = 'affine_hex_rot37_out.csv'
+      abs_zero = 1.0E-12
+      detail = 'on a mesh rotated by 37 degrees.'
+    []
+  []
+  [hex_lagrangian]
+    requirement = 'The system shall run reduced-integration total-Lagrangian explicit dynamics '
+                  'on HEX8 elements'
+    [expdyn]
+      type = 'CSVDiff'
+      input = 'hex_lagrangian_expdyn.i'
+      csvdiff = 'hex_lagrangian_expdyn_out.csv'
+      rel_err = 1.0E-10
+      abs_zero = 1.0E-12
+      restep = false
+      recover = false
+      detail = 'with hourglass stabilization.'
+    []
+  []
+[]

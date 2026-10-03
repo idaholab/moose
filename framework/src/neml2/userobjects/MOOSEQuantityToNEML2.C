@@ -125,8 +125,12 @@ MOOSEQuantityToNEML2<T, state>::gatheredData() const
     switch (_type)
     {
       case NEML2Utils::MOOSEIOType::TIME:
+        // The old time is computed as _t - _dt rather than _t_old: the two are identical for
+        // implicit solves, but explicit time integrators (ExplicitMixedOrder) evaluate the
+        // residual with the problem time rewound to the old time, where _t == _t_old would make
+        // NEML2 rate terms divide by zero.
         return state == 0 ? neml2::Scalar::full(_t, neml2::kFloat64)
-                          : neml2::Scalar::full(_t_old, neml2::kFloat64);
+                          : neml2::Scalar::full(_t - _dt, neml2::kFloat64);
       case NEML2Utils::MOOSEIOType::SCALAR:
         return state == 0 ? neml2::Scalar::full((*_var_scalar)[0], neml2::kFloat64)
                           : neml2::Scalar::full((*_var_scalar_old)[0], neml2::kFloat64);

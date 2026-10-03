@@ -93,8 +93,13 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
 
   // look up start index for current element
   const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    if (_value.batch_dim())
+  const auto nqp = _qrule->n_points();
+  for (_qp = 0; _qp < nqp; ++_qp)
+    if (_value.batch_dim() == 2)
+      // FE-interpolation path gives a 2D (nelem, nqp) batch; element index is i / nqp.
+      NEML2Utils::copyTensorToMOOSEData(
+          _value.batch_index({neml2::Size(i / nqp), neml2::Size(_qp)}), _prop[_qp]);
+    else if (_value.batch_dim())
       NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
     else
       NEML2Utils::copyTensorToMOOSEData(_value, _prop[_qp]);
