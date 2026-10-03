@@ -1,0 +1,47 @@
+[Tests]
+  issues = '#31995'
+  [linear-bernoulli-no-visc]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-no-visc.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli jumps and constant superficial velocity without volumetric friction.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = 'forchheimer_value=0 Outputs/file_base=linear-bernoulli-no-visc'
+    recover = false
+    max_threads = 1
+  []
+  [linear-bernoulli-forchheimer]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forchheimer.csv'
+    requirement = 'The system shall add the one-dimensional Forchheimer pressure drop while preserving the porous baffle jumps and constant superficial velocity.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = 'forchheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forchheimer'
+    recover = false
+    max_threads = 1
+  []
+  [linear-bernoulli-forchheimer-form-loss]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forchheimer-form-loss.csv'
+    requirement = 'The system shall add Forchheimer and irreversible baffle form losses while preserving constant one-dimensional superficial velocity.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forchheimer-form-loss "
+               "UserObjects/pressure_jump/form_loss='10 10'"
+    recover = false
+    max_threads = 1
+  []
+
+  [linear-bernoulli-forchheimer-form-loss-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forchheimer-form-loss-pressure-two-term.csv'
+    requirement = 'The system shall recover the exact combined one-dimensional Forchheimer and baffle form-loss pressure drop when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = "forchheimer_value=50 mu=1 UserObjects/pressure_jump/form_loss='10 10' "
+               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=linear-bernoulli-forchheimer-form-loss-pressure-two-term"
+    recover = false
+    max_threads = 1
+  []
+[]

@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#31995'
+  [straight-diagonal]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal_out.csv porous-baffle-straight-diagonal_out_horizontal_profile_0001.csv porous-baffle-straight-diagonal_out_skew_pressure_profile_0001.csv porous-baffle-straight-diagonal_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal_out_v_y_right_of_interface_0001.csv'
+    requirement = 'The system shall preserve pressure and velocity profiles across a straight channel with a diagonal porous baffle form-loss jump without introducing transverse velocity oscillations.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = ''
+    recover = false
+    max_threads = 1
+    abs_zero = 1e-8
+  []
+  [straight-diagonal-pressure-two-term]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal-pressure-two-term_out.csv'
+    requirement = 'The system shall preserve the integral pressure and velocity response across a diagonal porous baffle when using the two-term pressure expansion.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md LinearPWCNSFVMomentumPressure.md'
+    cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
+               "Outputs/file_base=porous-baffle-straight-diagonal-pressure-two-term_out"
+    recover = false
+    max_threads = 1
+    abs_zero = 1e-8
+  []
+[]
