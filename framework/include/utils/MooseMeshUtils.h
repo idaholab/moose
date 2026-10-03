@@ -11,6 +11,7 @@
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/elem_range.h"
 
 #include "MooseUtils.h"
 #include "MooseTypes.h"
@@ -628,4 +629,80 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Builds an element range over \p elems. StoredRange copies the pointers out of the vector, so
+ * the caller only has to keep \p elems alive for the duration of this call.
+ *
+ * @param elems The elements the range covers
+ * @return A range over the elements of \p elems, in their order in the vector
+ */
+libMesh::ConstElemRange buildElemRange(const std::vector<libMesh::Elem *> & elems);
+
+/**
+ * Restores a mesh whose elements or nodes were added or deleted in place, by resynchronizing the
+ * parallel id bookkeeping and then re-preparing it. Renumbering and repartitioning are disabled so
+ * that ids stay valid for callers holding on to them across the change.
+ * This function takes ownership of the mesh's allow_renumbering and skip_partitioning flags for
+ * the remainder of the simulation: both are turned off permanently, because the node-id-keyed
+ * bookkeeping of the remeshing engine cannot survive a renumbering or a repartition.
+ *
+ * @param mesh The mesh that was operated on
+ */
+void rebuildAfterElementSurgery(MeshBase & mesh);
+
+/**
+ * Deletes the ghost copies this rank holds of entities whose owner has just deleted them.
+ *
+ * libMesh requires a topology change to be performed by every rank that holds the entity, so a rank
+ * that only replaces the elements it owns leaves the other ranks holding copies of ids that no
+ * longer exist anywhere. Every parallel consistency sync then asks an owner about an id it has
+ * already freed. This restores the invariant that no rank references an id its owner deleted.
+ *
+ * The entities this rank owns are expected to be gone by the time this is called, which is why an
+ * id that is not in the mesh is skipped rather than being an error.
+ *
+ * @param mesh The distributed mesh the entities were deleted from
+ * @param deleted_elem_ids Ids of every element the change deleted, on every rank
+ * @param deleted_node_ids Ids of every node the change deleted, on every rank
+ */
+void deleteGhostCopies(MeshBase & mesh,
+                       const std::vector<dof_id_type> & deleted_elem_ids,
+                       const std::vector<dof_id_type> & deleted_node_ids);
+
+/**
+ * Sends every other rank the elements this rank owns that the ghosting functors ask that rank to
+ * hold, together with the nodes those elements are built on.
+ *
+ * MeshCommunication::gather_neighboring_elements restores one layer of adjacency and never consults
+ * the ghosting functors, and nothing else on the re-preparation path adds a ghost element back:
+ * MeshCommunication::redistribute is the only functor aware path libMesh offers and it is reachable
+ * only through the partitioner. A functor that asks for more than that one layer therefore needs
+ * the elements pushed to it explicitly, which is what this does.
+ *
+ * Each rank can only answer for the elements of another rank it already knows of, so this widens
+ * the ghost layer by what the functors ask for around that knowledge rather than rebuilding it from
+ * nothing. Sending an element a rank already has is harmless: the unpacking updates the copy it has
+ * instead of adding a second one.
+ *
+ * @param mesh The distributed mesh whose ghost layer is being restored
+ */
+void restoreGhostedElements(MeshBase & mesh);
+
+/**
+ * Restores a distributed mesh on which every rank added and deleted only the entities it owns.
+ *
+ * This is the distributed mesh counterpart of rebuildAfterElementSurgery, and it is one sequence
+ * because the order of its steps is what makes it correct: the stale ghosts have to go before
+ * anything queries an owner about them, the new entities exist only on their owner until they are
+ * gathered, and the parallel id counts that rebuildAfterElementSurgery resynchronizes are only
+ * right once both of those are done.
+ *
+ * @param mesh The distributed mesh that was operated on
+ * @param deleted_elem_ids Ids of every element the surgery deleted, on every rank
+ * @param deleted_node_ids Ids of every node the surgery deleted, on every rank
+ */
+void rebuildAfterParallelElementSurgery(MeshBase & mesh,
+                                        const std::vector<dof_id_type> & deleted_elem_ids,
+                                        const std::vector<dof_id_type> & deleted_node_ids);
 }

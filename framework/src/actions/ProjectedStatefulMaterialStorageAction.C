@@ -83,3 +83,10 @@ ProjectedStatefulMaterialStorageAction::getTypeEnum()
 {
   return getTypeEnum(SupportedTypes{});
 }
+
+VariableName
+ProjectedStatefulMaterialStorageAction::projectedVariableName(
+    const MaterialPropertyName & prop_name, const unsigned int component)
+{
+  return "_var_" + prop_name + "_" + Moose::stringify(component);
+}
