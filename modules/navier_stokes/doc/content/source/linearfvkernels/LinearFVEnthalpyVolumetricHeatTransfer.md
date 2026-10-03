@@ -13,7 +13,7 @@ with the current-side temperature linearized about the latest auxiliary
 temperature as
 
 \begin{equation}
-T_{current}^{n+1} \approx T_{current}^{k} + \frac{h_{current}^{n+1} - h_{current}^{k}}{c_p}.
+T_{current}^{k+1} \approx T_{current}^{k} + \frac{h_{current}^{k+1} - h_{current}^{k}}{c_p}.
 \end{equation}
 
 This yields the matrix contribution

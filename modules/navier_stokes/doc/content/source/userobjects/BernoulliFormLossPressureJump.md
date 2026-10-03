@@ -6,7 +6,7 @@
 
 `BernoulliFormLossPressureJump` defines pressure jumps on the interfaces selected by
 [!param](/UserObjects/BernoulliFormLossPressureJump/boundary). It is not executed by MOOSE.
-Instead, a [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) named by
+Instead, a [PorousRhieChowMassFlux.md] named by
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models) calls it when updating the
 pressure jump from the current face mass flux.
 

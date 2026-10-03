@@ -5,8 +5,8 @@
 ## Description
 
 `LinearPWCNSFVMomentumFlux` specializes
-[LinearWCNSFVMomentumFlux](LinearWCNSFVMomentumFlux.md) for momentum equations whose unknown is
-superficial velocity. The [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) user object provides
+[LinearWCNSFVMomentumFlux.md] for momentum equations whose unknown is
+superficial velocity. The [PorousRhieChowMassFlux.md] user object provides
 the face mass flux and the porosity on each side of the face. The advection contribution assembled
 into a cell row is scaled by that cell's inverse porosity, so the mass flux transports interstitial
 velocity.
