@@ -145,12 +145,6 @@ NodalPatchRecovery::reinitPatch()
   _A.resize(_multi_index.size(), _multi_index.size());
   _B.resize(_multi_index.size());
   _coef.resize(_multi_index.size());
-
-  // activate dependent material properties
-  std::unordered_set<unsigned int> needed_mat_props;
-  const auto & mp_deps = getMatPropDependencies();
-  needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 }
 
 void
@@ -206,6 +200,12 @@ NodalPatchRecovery::compute()
 
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
+
+    std::unordered_set<unsigned int> needed_mat_props;
+    const auto & mp_deps = getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
+    _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.

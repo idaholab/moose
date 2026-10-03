@@ -160,6 +160,18 @@ ComputeMultipleCrystalPlasticityStress::initialSetup()
     {
       _models.push_back(model);
       // TODO: check to make sure that the material model is compatible with this class
+
+      // model is called directly rather than through the normal material property system, so its
+      // own dependencies must be added to ours for them to stay active
+      const auto & model_deps = model->getMatPropDependencies();
+      _material_property_dependencies.insert(model_deps.begin(), model_deps.end());
+
+      // model is compute=false, so it is never reinited on its own; it is only ever updated when
+      // we call it directly from computeQpStress(). Claim its supplied properties as our own too,
+      // so that whoever needs one of them (e.g. an AuxKernel reading twin_system_volume_fraction)
+      // also marks us active and causes model to be re-run with the current solution.
+      const auto & model_supplied = model->getSuppliedPropIDs();
+      _supplied_prop_ids.insert(model_supplied.begin(), model_supplied.end());
     }
     else
       mooseError("Model " + model_names[i] +
@@ -177,7 +189,19 @@ ComputeMultipleCrystalPlasticityStress::initialSetup()
             &getMaterialByName(eigenstrain_names[i]));
 
     if (eigenstrain)
+    {
       _eigenstrains.push_back(eigenstrain);
+
+      // eigenstrain is called directly rather than through the normal material property system,
+      // so its own dependencies must be added to ours for them to stay active
+      const auto & eigenstrain_deps = eigenstrain->getMatPropDependencies();
+      _material_property_dependencies.insert(eigenstrain_deps.begin(), eigenstrain_deps.end());
+
+      // eigenstrain is compute=false and only ever updated when we call it directly; claim its
+      // supplied properties as our own too, same reason as for crystal_plasticity_models above.
+      const auto & eigenstrain_supplied = eigenstrain->getSuppliedPropIDs();
+      _supplied_prop_ids.insert(eigenstrain_supplied.begin(), eigenstrain_supplied.end());
+    }
     else
       mooseError("Eigenstrain" + eigenstrain_names[i] +
                  " is not compatible with ComputeMultipleCrystalPlasticityStress");

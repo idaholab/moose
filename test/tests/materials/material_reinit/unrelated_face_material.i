@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 1
+  nx = 8
+  ny = 8
 []
 
 [AuxVariables]
@@ -12,17 +12,23 @@
 
 [Materials]
   [volume]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = volume_property
+    value = 2
     error_on_face = true
-    error_on_neighbor = true
   []
 []
 
-[UserObjects]
-  [internal_side]
-    type = InsideUserObject
+[Postprocessors]
+  [volume_average]
+    type = ElementAverageMaterialProperty
+    mat_prop = volume_property
+    execute_on = TIMESTEP_END
+  []
+  [side_average]
+    type = SideAverageValue
     variable = u
+    boundary = left
     execute_on = TIMESTEP_END
   []
 []
@@ -33,6 +39,6 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1
+  num_steps = 2
   dt = 1
 []

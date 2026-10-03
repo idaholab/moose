@@ -443,7 +443,8 @@ void
 MaterialData::reinit(const MatContainer & mats)
 {
   for (const auto & mat : mats)
-    mat->computeProperties();
+    if (mat->hasActiveProperties())
+      mat->computeProperties();
 }
 
 #ifdef MOOSE_KOKKOS_SCOPE

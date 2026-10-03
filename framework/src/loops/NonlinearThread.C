@@ -120,9 +120,12 @@ NonlinearThread::subdomainChanged()
   _subdomain_has_dg = _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
   _subdomain_has_hdg = _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
 
+  _fe_problem.resolveMaterialDependenciesInterface(needed_mat_props, _subdomain, _tid);
+  _fe_problem.resolveMaterialDependencies(needed_moose_vars, needed_mat_props, _subdomain, _tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
-  _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 }
 
 void

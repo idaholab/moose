@@ -6,12 +6,12 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 
-#include "BoundaryMaterialReinitTest.h"
+#include "MaterialReinitTest.h"
 
-registerMooseObject("MooseTestApp", BoundaryMaterialReinitTest);
+registerMooseObject("MooseTestApp", MaterialReinitTest);
 
 InputParameters
-BoundaryMaterialReinitTest::validParams()
+MaterialReinitTest::validParams()
 {
   auto params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("property",
@@ -26,10 +26,12 @@ BoundaryMaterialReinitTest::validParams()
   params.addParam<bool>("error_on_neighbor",
                         false,
                         "Whether to error if the neighbor copy of this material is computed.");
+  params.addParam<bool>(
+      "error_on_volume", false, "Whether to error if the block copy of this material is computed.");
   return params;
 }
 
-BoundaryMaterialReinitTest::BoundaryMaterialReinitTest(const InputParameters & parameters)
+MaterialReinitTest::MaterialReinitTest(const InputParameters & parameters)
   : Material(parameters),
     _property(declareProperty<Real>("property")),
     _value(getParam<Real>("value")),
@@ -38,13 +40,17 @@ BoundaryMaterialReinitTest::BoundaryMaterialReinitTest(const InputParameters & p
                           : nullptr),
     _error_on_face(getParam<bool>("error_on_face")),
     _error_on_boundary(getParam<bool>("error_on_boundary")),
-    _error_on_neighbor(getParam<bool>("error_on_neighbor"))
+    _error_on_neighbor(getParam<bool>("error_on_neighbor")),
+    _error_on_volume(getParam<bool>("error_on_volume"))
 {
 }
 
 void
-BoundaryMaterialReinitTest::computeQpProperties()
+MaterialReinitTest::computeQpProperties()
 {
+  if (_error_on_volume && materialDataType() == Moose::BLOCK_MATERIAL_DATA)
+    mooseError("The block copy of ", name(), " should not have been computed.");
+
   if (_error_on_face && materialDataType() == Moose::FACE_MATERIAL_DATA)
     mooseError("The face copy of ", name(), " should not have been computed.");
 

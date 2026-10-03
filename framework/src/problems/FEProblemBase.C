@@ -4293,10 +4293,61 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 }
 
 void
+FEProblemBase::resolveMaterialDependencies(std::set<MooseVariableFEBase *> & needed_moose_vars,
+                                           std::unordered_set<unsigned int> & needed_mat_props,
+                                           const SubdomainID blk_id,
+                                           const THREAD_ID tid,
+                                           bool producer_only)
+{
+  if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  {
+    _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid, producer_only);
+  }
+
+  const auto & ids = _mesh.getSubdomainBoundaryIds(blk_id);
+  for (const auto id : ids)
+  {
+    _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid, producer_only);
+  }
+}
+
+void
+FEProblemBase::resolveMaterialDependencies(std::unordered_set<unsigned int> & needed_mat_props,
+                                           const SubdomainID blk_id,
+                                           const THREAD_ID tid)
+{
+  if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+    _all_materials.updateBlockMatPropDependency(
+        blk_id, needed_mat_props, tid, /*producer_only=*/true);
+
+  const auto & ids = _mesh.getSubdomainBoundaryIds(blk_id);
+  for (const auto id : ids)
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid, /*producer_only=*/true);
+}
+
+void
+FEProblemBase::resolveMaterialDependenciesInterface(
+    std::unordered_set<unsigned int> & needed_mat_props,
+    const SubdomainID blk_id,
+    const THREAD_ID tid)
+{
+  const auto & ids = _mesh.getSubdomainBoundaryIds(blk_id);
+  for (const auto id : ids)
+    _interface_materials.updateBoundaryMatPropDependency(
+        id, needed_mat_props, tid, /*producer_only=*/true);
+}
+
+void
 FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
                                 const SubdomainID blk_id,
                                 const THREAD_ID tid)
 {
+  mooseDeprecated("FEProblemBase::prepareMaterials() is deprecated, use "
+                  "resolveMaterialDependencies(), resolveMaterialDependenciesInterface(), and "
+                  "setActiveElementalMooseVariables()/setActiveMaterialProperties() instead.");
+
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::unordered_set<unsigned int> needed_mat_props;
 
