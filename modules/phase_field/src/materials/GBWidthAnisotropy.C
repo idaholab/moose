@@ -48,6 +48,7 @@ GBWidthAnisotropy::GBWidthAnisotropy(const InputParameters & parameters)
     for (unsigned int n = m + 1; n < _op_num; ++n) // m<n
     {
       g2 = _sigma[m][n] * _sigma[m][n] / (_kappa * _mu_qp);
+      checkFitRange(g2);
       y = MoelansInterfaceFits::inverseGamma(g2, _interface_fit);
       gamma = 1 / y;
       f_interf = MoelansInterfaceFits::f0Interf(y, _interface_fit);

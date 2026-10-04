@@ -91,6 +91,14 @@ GrandPotentialInterface::GrandPotentialInterface(const InputParameters & paramet
       continue;
 
     const Real g = _sigma[i] / std::sqrt(_mu * _kappa);
+    if (!MoelansInterfaceFits::inRange(g * g, fit))
+      paramError("sigma",
+                 "The interfacial free energy ",
+                 _sigma[i],
+                 " gives g = ",
+                 g,
+                 ", which is outside the range 0.098 <= g <= 0.766 (0.53 <= gamma <= 40) covered "
+                 "by interface_fit = moelans2022.");
 
     // estimate for gamma from polynomial expansion
     _gamma[i] = 1.0 / MoelansInterfaceFits::inverseGamma(g * g, fit);

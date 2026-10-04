@@ -150,6 +150,7 @@ GBAnisotropyBase::computeQpProperties()
         f_mob = 1.0 + _delta_mob * cos_4phi;
 
         Real g2 = _a_g2[n][m] * f_sigma;
+        checkFitRange(g2);
         gamma_value = 1.0 / MoelansInterfaceFits::inverseGamma(g2, _interface_fit);
       }
 
@@ -174,4 +175,14 @@ GBAnisotropyBase::computeQpProperties()
       _M_V / (_length_scale * _length_scale * _length_scale); // m^3/mol converted to ls^3/mol
   _entropy_diff[_qp] = 9.5 * _JtoeV;                          // J/(K mol) converted to eV(K mol)
   _act_wGB[_qp] = 0.5e-9 / _length_scale;                     // 0.5 nm
+}
+
+void
+GBAnisotropyBase::checkFitRange(Real g2) const
+{
+  if (!MoelansInterfaceFits::inRange(g2, _interface_fit))
+    mooseError("The grain boundary energies give g = ",
+               std::sqrt(g2),
+               ", which is outside the range 0.098 <= g <= 0.766 (0.53 <= gamma <= 40) covered by "
+               "interface_fit = moelans2022.");
 }

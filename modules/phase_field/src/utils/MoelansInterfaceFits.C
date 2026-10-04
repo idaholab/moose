@@ -21,7 +21,7 @@ validParams()
 {
   InputParameters params = emptyInputParameters();
   // the enum values match the Fit enum class
-  MooseEnum fit("moelans2022=0 moelans2009=1", "moelans2009");
+  MooseEnum fit("moelans2022=0 moelans2009=1", "moelans2022");
   params.addParam<MooseEnum>(
       "interface_fit",
       fit,

@@ -29,6 +29,9 @@ public:
 protected:
   virtual void computeQpProperties();
 
+  /// Error if g^2 lies outside the range covered by the selected interface fit
+  void checkFitRange(Real g2) const;
+
   const unsigned int _mesh_dimension;
 
   const Real _length_scale;
