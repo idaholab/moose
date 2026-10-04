@@ -10,7 +10,7 @@
 #include "GrandPotentialInterface.h"
 #include "Conversion.h"
 #include "IndirectSort.h"
-#include "libmesh/utility.h"
+#include "MoelansInterfaceFits.h"
 
 registerMooseObject("PhaseFieldApp", GrandPotentialInterface);
 
@@ -18,6 +18,7 @@ InputParameters
 GrandPotentialInterface::validParams()
 {
   InputParameters params = Material::validParams();
+  params += MoelansInterfaceFits::validParams();
   params.addClassDescription("Calculate Grand Potential interface parameters for a specified "
                              "interfacial free energy and width");
   params.addRequiredParam<std::vector<Real>>("sigma", "Interfacial free energies");
@@ -80,6 +81,8 @@ GrandPotentialInterface::GrandPotentialInterface(const InputParameters & paramet
   _kappa = 3.0 / 4.0 * _sigma[median] * _width;
   _mu = 6.0 * _sigma[median] / _width;
 
+  const auto fit = getParam<MooseEnum>("interface_fit").getEnum<MoelansInterfaceFits::Fit>();
+
   // set all other gammas
   for (unsigned int i = 0; i < _n_pair; ++i)
   {
@@ -90,10 +93,7 @@ GrandPotentialInterface::GrandPotentialInterface(const InputParameters & paramet
     const Real g = _sigma[i] / std::sqrt(_mu * _kappa);
 
     // estimate for gamma from polynomial expansion
-    Real gamma = 1.0 / (-5.288 * Utility::pow<8>(g) - 0.09364 * Utility::pow<6>(g) +
-                        9.965 * Utility::pow<4>(g) - 8.183 * Utility::pow<2>(g) + 2.007);
-
-    _gamma[i] = gamma;
+    _gamma[i] = 1.0 / MoelansInterfaceFits::inverseGamma(g * g, fit);
   }
 }
 

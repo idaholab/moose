@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "MoelansInterfaceFits.h"
 
 // Forward Declarations
 
@@ -39,6 +40,9 @@ protected:
   const FileName _Anisotropic_GB_file_name;
 
   const bool _inclination_anisotropy;
+
+  /// Polynomial fits used to compute gamma and the diffuse interface width
+  const MoelansInterfaceFits::Fit _interface_fit;
 
   const VariableValue & _T;
 
