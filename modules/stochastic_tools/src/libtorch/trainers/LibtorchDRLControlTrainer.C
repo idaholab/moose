@@ -283,10 +283,15 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   else if (filename_valid)
     torch::save(_critic_nn, _critic_nn->name());
 
-  _control_nn->initializeNeuralNetwork(
-      Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed)));
-  _critic_nn->initializeNeuralNetwork(
-      Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed) + 1));
+  // A loaded checkpoint already contains initialized parameters. Reinitializing here would
+  // silently discard the actor and critic states requested with read_from_file.
+  if (!_read_from_file)
+  {
+    _control_nn->initializeNeuralNetwork(
+        Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed)));
+    _critic_nn->initializeNeuralNetwork(
+        Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed) + 1));
+  }
 }
 
 void
