@@ -60,6 +60,26 @@
     requirement = 'The system shall optionally compute grand potential model interface parameters '
                   'with the earlier 2009 polynomial fits of Moelans to reproduce earlier results'
   []
+  [GrandPotentialInterface_reference]
+    requirement = 'The system shall compute grand potential model interface parameters using as '
+                  'reference the interface with'
+    issues = '#33932'
+    design = '/GrandPotentialInterface.md'
+    [max]
+      type = 'CSVDiff'
+      input = 'GrandPotentialInterfaceReference.i'
+      csvdiff = 'GrandPotentialInterfaceReference_out_mat_0001.csv'
+      detail = 'the largest interfacial free energy by default, or'
+    []
+    [median]
+      type = 'CSVDiff'
+      input = 'GrandPotentialInterfaceReference.i'
+      csvdiff = 'GrandPotentialInterfaceReference_median_out_mat_0001.csv'
+      cli_args = 'Materials/iface/reference_sigma=median '
+                 'Outputs/file_base=GrandPotentialInterfaceReference_median_out'
+      detail = 'the median interfacial free energy.'
+    []
+  []
   [GrandPotentialInterface_out_of_range]
     type = 'RunException'
     input = 'GrandPotentialInterface.i'

@@ -12,6 +12,8 @@
 #include "IndirectSort.h"
 #include "MoelansInterfaceFits.h"
 
+#include <algorithm>
+
 registerMooseObject("PhaseFieldApp", GrandPotentialInterface);
 
 InputParameters
@@ -29,10 +31,16 @@ GrandPotentialInterface::validParams()
       "Interfacial / grain boundary gamma parameter names (leave empty for gamma0... gammaN)");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa", "Gradient interface parameter name");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "Grain growth bulk energy parameter name");
-  params.addParam<unsigned int>(
-      "sigma_index",
-      "Sigma index to choose gamma = 1.5 for. Omit this to automatically chose the median sigma.");
-  params.addParamNamesToGroup("mu_name sigma_index", "Advanced");
+  MooseEnum reference_sigma("max median", "max");
+  params.addParam<MooseEnum>(
+      "reference_sigma",
+      reference_sigma,
+      "Interface that is assigned gamma = 1.5 and the interfacial width 'width': the one with the "
+      "largest (max) or the median (median) interfacial free energy");
+  params.addParam<unsigned int>("sigma_index",
+                                "Sigma index to choose gamma = 1.5 for. Omit this to choose it "
+                                "according to reference_sigma.");
+  params.addParamNamesToGroup("mu_name reference_sigma sigma_index", "Advanced");
   return params;
 }
 
@@ -65,29 +73,32 @@ GrandPotentialInterface::GrandPotentialInterface(const InputParameters & paramet
   for (unsigned int i = 0; i < _n_pair; i++)
     _gamma_prop[i] = &declareProperty<Real>(_gamma_name[i]);
 
-  // determine median interfacial free energy (or use explicit user choice)
-  unsigned int median;
+  // determine the reference interfacial free energy (or use explicit user choice). With the
+  // largest one as reference all other interfaces have gamma < 1.5 and are wider than 'width'.
+  unsigned int reference;
   if (isParamValid("sigma_index"))
-    median = getParam<unsigned int>("sigma_index");
+    reference = getParam<unsigned int>("sigma_index");
+  else if (getParam<MooseEnum>("reference_sigma") == "max")
+    reference = std::max_element(_sigma.begin(), _sigma.end()) - _sigma.begin();
   else
   {
     std::vector<size_t> indices;
     Moose::indirectSort(_sigma.begin(), _sigma.end(), indices);
-    median = indices[(indices.size() - 1) / 2];
+    reference = indices[(indices.size() - 1) / 2];
   }
 
-  // set the median gamma to 1.5 and use analytical expression for kappa and mu (m)
-  _gamma[median] = 1.5;
-  _kappa = 3.0 / 4.0 * _sigma[median] * _width;
-  _mu = 6.0 * _sigma[median] / _width;
+  // set the reference gamma to 1.5 and use analytical expression for kappa and mu (m)
+  _gamma[reference] = 1.5;
+  _kappa = 3.0 / 4.0 * _sigma[reference] * _width;
+  _mu = 6.0 * _sigma[reference] / _width;
 
   const auto fit = getParam<MooseEnum>("interface_fit").getEnum<MoelansInterfaceFits::Fit>();
 
   // set all other gammas
   for (unsigned int i = 0; i < _n_pair; ++i)
   {
-    // skip the already calculated median value
-    if (i == median)
+    // skip the already calculated reference value
+    if (i == reference)
       continue;
 
     const Real g = _sigma[i] / std::sqrt(_mu * _kappa);

@@ -5,12 +5,13 @@
 
 [Materials]
   [iface]
-    # reproduce the parameters from GrandPotentialMultiphase.i
+    # interfacial free energies and width of cases 1 and 3 of Table 1 in N. Moelans,
+    # Mater. Des. 217, 110592 (2022), which with the largest interfacial free energy as
+    # reference give kappa = 0.3 and mu = 0.9375
     type = GrandPotentialInterface
-    gamma_names = 'gbb gab'
-    sigma = '0.4714  0.6161' # Ratio of 1:1.307 to obtain dihedral angle of 135deg
-    width = 2.8284
-    sigma_index = 0 # gbb = 1.5 as in GrandPotentialMultiphase.i
+    gamma_names = 'g15 g20 g25'
+    sigma = '0.15 0.2 0.25'
+    width = 1.6
   []
 []
 
