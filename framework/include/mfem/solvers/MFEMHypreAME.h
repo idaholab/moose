@@ -49,11 +49,11 @@ public:
 
 protected:
   /// Sets the operator for the eigensolver and propagates it to the preconditioner.
-  virtual void SetOperatorImpl(mfem::Operator & op) override
+  virtual void SetOperatorImpl(const mfem::Operator & op) override
   {
     if (_preconditioner)
       _preconditioner->SetOperator(op);
-    _eigensolver->SetOperator(cast_ref<mfem::HypreParMatrix &>(op));
+    _eigensolver->SetOperator(cast_ref<const mfem::HypreParMatrix &>(op));
   }
 
   /// Eigensolver to be used for the problem

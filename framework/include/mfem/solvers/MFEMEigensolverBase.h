@@ -36,7 +36,7 @@ public:
 
 protected:
   /// Sets the operator for the eigensolver in derived classes
-  virtual void SetOperatorImpl(mfem::Operator & op) override = 0;
+  virtual void SetOperatorImpl(const mfem::Operator & op) override = 0;
 
   /// Number of eigenmodes to compute
   int _num_modes;

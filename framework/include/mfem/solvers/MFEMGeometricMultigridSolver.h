@@ -59,7 +59,7 @@ public:
 
 protected:
   /// Rebuilds the multigrid hierarchy for the supplied finest-level operator.
-  void SetOperatorImpl(mfem::Operator & op) override;
+  void SetOperatorImpl(const mfem::Operator & op) override;
 
 private:
   /// Map assembly-level string ("legacy", "full", "element", "partial", "none")
