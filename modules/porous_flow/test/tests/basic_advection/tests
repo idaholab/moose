@@ -5,14 +5,14 @@
     input = except1.i
     expect_err = 'The Dictator proclaims that the maximum phase index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. The Dictator is watching you, to ensure your wellbeing.'
     design = 'PorousFlowBasicAdvection.md PorousFlowDictator.md'
-    requirement = 'The system shall report an error if the phase index given to PorousFlowBasicAdvection exceeds the maximum phase index known to the Dictator.'
+    requirement = 'The system shall report an error if the phase index given to the advection term exceeds the maximum phase index known to the Dictator.'
   [../]
   [./except2]
     type = RunException
     input = except2.i
     expect_err = 'PorousFlowDarcyVelocityMaterial is only defined for at_nodes = false'
     design = 'PorousFlowDarcyVelocityMaterial.md'
-    requirement = 'The system shall report an error if PorousFlowDarcyVelocityMaterial is requested to be evaluated at the nodes, which it does not support.'
+    requirement = 'The system shall report an error if the computation of the velocity is requested to be evaluated at the nodes, which it does not support.'
   [../]
 
   [./1phase]
@@ -20,13 +20,13 @@
     input = 1phase.i
     exodiff = 1phase_out.e
     design = 'PorousFlowBasicAdvection.md PorousFlowDarcyVelocityMaterial.md'
-    requirement = 'The system shall be able to advect a species using the Darcy velocity computed by PorousFlowDarcyVelocityMaterial in a single-phase simulation.'
+    requirement = 'The system shall be able to advect a species using the Darcy velocity in a single-phase simulation.'
   [../]
   [./2phase]
     type = Exodiff
     input = 2phase.i
     exodiff = 2phase_out.e
     design = 'PorousFlowBasicAdvection.md PorousFlowDarcyVelocityMaterial.md'
-    requirement = 'The system shall be able to advect a species using the Darcy velocity computed by PorousFlowDarcyVelocityMaterial in a two-phase simulation.'
+    requirement = 'The system shall be able to advect a species using the Darcy velocity in a two-phase simulation.'
   [../]
 []

@@ -5,7 +5,7 @@
     type = 'RunException'
     input = 'mpf_except1.i'
     expect_err = 'MovingPlanarFront: start_posn and end_posn must be different points'
-    requirement = 'The system shall report an error if the MovingPlanarFront function is given identical start and end points.'
+    requirement = 'The system shall report an error if the function describing the location of the moving planar front is given identical start and end points.'
   [../]
   [./mpf1]
     type = Exodiff

@@ -1,9 +1,9 @@
 [Tests]
-  issues = '#7877'
   [./unity]
     type = 'CSVDiff'
     input = 'unity.i'
     csvdiff = 'unity_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityConst.md'
     requirement = 'The system shall provide a perfectly-mobile relative permeability relationship, equal to one for all saturations.'
   [../]
@@ -11,6 +11,7 @@
     type = 'CSVDiff'
     input = 'corey1.i'
     csvdiff = 'corey1_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityCorey.md'
     requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation using a Corey exponent of one, with no residual saturation in either phase.'
   [../]
@@ -18,6 +19,7 @@
     type = 'CSVDiff'
     input = 'corey2.i'
     csvdiff = 'corey2_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityCorey.md'
     requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation using a Corey exponent of two, with no residual saturation in either phase.'
   [../]
@@ -25,6 +27,7 @@
     type = 'CSVDiff'
     input = 'corey3.i'
     csvdiff = 'corey3_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityCorey.md'
     requirement = 'The system shall be able to compute the Corey relative permeability as a function of saturation with nonzero residual saturations in both phases.'
   [../]
@@ -40,6 +43,7 @@
     type = 'CSVDiff'
     input = 'vangenuchten1.i'
     csvdiff = 'vangenuchten1_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityVG.md'
     requirement = 'The system shall be able to compute the van Genuchten relative permeability as a function of saturation, with no residual saturation in either phase.'
   [../]
@@ -47,6 +51,7 @@
     type = 'CSVDiff'
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
+    issues = '#7877'
     design = 'PorousFlowRelativePermeabilityVG.md'
     requirement = 'The system shall be able to compute the van Genuchten relative permeability as a function of saturation, with nonzero residual saturations in both phases.'
   [../]
