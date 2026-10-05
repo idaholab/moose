@@ -53,6 +53,7 @@
     input = 'grain_texture.i'
     capabilities = 'method!=dbg'
     check_input = True
+    issues = '#6952'
     requirement = 'The system shall provide an example that reports the crystallographic '
                    'texture (Euler angles) of each tracked grain during polycrystalline grain '
                    'growth.'

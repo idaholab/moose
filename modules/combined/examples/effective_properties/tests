@@ -7,6 +7,6 @@
                    'conductivity of a two-phase microstructure using both a direct flux '
                    'calculation and asymptotic expansion homogenization.'
     design = 'HomogenizedHeatConduction.md HomogenizedThermalConductivity.md ThermalConductivity.md'
-    issues = '#7319'
+    issues = '#5517'
   [../]
 []
