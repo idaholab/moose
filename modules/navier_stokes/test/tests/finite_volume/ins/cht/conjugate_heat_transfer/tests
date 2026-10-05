@@ -53,16 +53,17 @@
       max_threads = 1 # see libmesh issue #3808
     []
   []
-[Tests]
   [thermal_resistance_convergence]
-    type = MMSTest
-    input = mms_spatial.py
-    test_case = TestCHTThermalResistance
-    design = 'LinearFVRobinCHTBC.md LinearFVDirichletCHTBC.md'
-    requirement = 'The system shall demonstrate first-order spatial convergence toward the analytical heat flux and solid- and fluid-side interface temperatures for conjugate heat transfer with an area-normalized interface thermal resistance.'
-    recover = false
-    max_threads = 1 # see libMesh issue #3808
-    max_time = 300
+    design = 'linear_fv_cht.md'
+    issues = '#33371'
+    requirement = 'The system shall be able to solve conjugate heat transfer problems imposing a thermal resistance at the CHT interface '
+    [cht_thermalresistance_mms]
+      type = MMSTest
+      input = mms_spatial.py
+      detail = 'and demonstrate the expected spatial convergence.'
+      test_case = TestCHTThermalResistance
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
   []
-[]
 []
