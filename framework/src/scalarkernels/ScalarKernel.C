@@ -23,6 +23,11 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
 }
 
 void
+ScalarKernel::reinit()
+{
+}
+
+void
 ScalarKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
