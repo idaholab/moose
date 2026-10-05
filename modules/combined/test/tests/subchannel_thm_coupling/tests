@@ -13,7 +13,7 @@
     requirement = 'The system shall solve a steady-state single-phase subchannel flow problem '
                   'on a triangular lattice fuel assembly.'
     design = 'TriSubChannel1PhaseProblem.md'
-    issues = '#28497'
+    issues = '#29500'
   []
   [THM_pump]
     type = CSVDiff
@@ -31,7 +31,7 @@
                   'loop with a pump, pressurizer, and heat exchanger to a subchannel application of '
                   'the reactor core using postprocessor transfers.'
     design = 'FullSolveMultiApp.md MultiAppPostprocessorTransfer.md Pump1Phase.md'
-    issues = '#28497'
+    issues = '#29500'
   []
   [THM]
     type = CSVDiff
@@ -48,6 +48,6 @@
     requirement = 'The system shall couple a system-level thermal hydraulics model of the '
                   'reactor core to a subchannel application using postprocessor transfers.'
     design = 'FullSolveMultiApp.md MultiAppPostprocessorTransfer.md'
-    issues = '#28497'
+    issues = '#29500'
   []
 []
