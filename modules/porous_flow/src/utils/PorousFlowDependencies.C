@@ -126,6 +126,8 @@ PorousFlowDependencies::PorousFlowDependencies()
 
   _deps.insertDependency("PorousFlowDesorpedMassVolumetricExpansion", "porosity_qp");
   _deps.insertDependency("PorousFlowDesorpedMassVolumetricExpansion", "volumetric_strain_qp");
+  _deps.insertDependency("ADPorousFlowDesorpedMassVolumetricExpansion",
+                         "PorousFlowDesorpedMassVolumetricExpansion");
 
   _deps.insertDependency("PorousFlowDispersiveFlux", "density_qp");
   _deps.insertDependency("PorousFlowDispersiveFlux", "viscosity_qp");
@@ -194,6 +196,9 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "volumetric_strain_qp");
 
+  _deps.insertDependency("ADPorousFlowHeatVolumetricExpansion",
+                         "PorousFlowHeatVolumetricExpansion");
+
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "porosity_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "nearest_qp_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "density_nodal");
@@ -216,6 +221,9 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "mass_fraction_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "volumetric_strain_qp");
+
+  _deps.insertDependency("ADPorousFlowMassVolumetricExpansion",
+                         "PorousFlowMassVolumetricExpansion");
 
   _deps.insertDependency("PorousFlowPlasticHeatEnergy", "PlasticHeatEnergy");
   _deps.insertDependency("PorousFlowPlasticHeatEnergy", "nearest_qp_nodal");
