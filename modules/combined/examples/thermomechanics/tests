@@ -7,6 +7,6 @@
                    'mechanics to compute the radial and hoop stresses caused by non-uniform '
                    'thermal expansion in a heated circular domain.'
     design = 'ComputeThermalExpansionEigenstrain.md CylindricalRankTwoAux.md'
-    issues = '#7319'
+    issues = '#6038'
   [../]
 []
