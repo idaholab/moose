@@ -48,11 +48,11 @@ public:
   virtual void ConstructSolver() override;
 
 protected:
-  /// Sets the operator for the eigensolver and propagates it to the preconditioner.
+  virtual void SetPreconditionerImpl() override;
+
+  /// Sets the operator for the eigensolver w/ the necessary casting
   virtual void SetOperatorImpl(const mfem::Operator & op) override
   {
-    if (_preconditioner)
-      _preconditioner->SetOperator(op);
     _eigensolver->SetOperator(cast_ref<const mfem::HypreParMatrix &>(op));
   }
 

@@ -35,7 +35,7 @@ public:
   virtual void ConstructSolver() = 0;
 
   /// Updates the solver and any associated weak form context at the operator level
-  void SetOperator(const mfem::Operator & op);
+  virtual void SetOperator(const mfem::Operator & op);
 
   /// Solve the operator for the provided right-hand side and solution vector.
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) { GetSolver().Mult(rhs, x); }

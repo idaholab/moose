@@ -103,7 +103,6 @@ template <class MFEMSolverType>
 void
 LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor && GetPreconditioner())
     mooseError("LOR solver cannot take a preconditioner");
   if (_lor)
@@ -114,12 +113,6 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
         mooseError("LOR HypreAMS/ADS Solver only supports hex meshes.");
     SetLORSolver();
   }
-  else if constexpr (!is_any_of_v<MFEMSolverType,
-                                  mfem::OperatorJacobiSmoother,
-                                  mfem::HypreBoomerAMG,
-                                  mfem::HypreAMS,
-                                  mfem::HypreADS>)
-    SetPreconditioner(cast_ref<MFEMSolverType &>(GetSolver()));
 }
 
 template <class MFEMSolverType>

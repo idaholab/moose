@@ -28,20 +28,18 @@ public:
 
   LinearSolverBase(const InputParameters & parameters);
 
-  /// Retrieves the preconditioner userobject if present, sets the member pointer to
-  /// said object if still unset, and sets the solver to use this preconditioner.
-  template <typename T>
-  void SetPreconditioner(T & solver);
-
   /// Returns this solver's preconditioner
   LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
+
+  virtual void SetOperator(const mfem::Operator & op) override;
 
   /// For eigensolvers, this method calls the underlying Solve method
   virtual void Solve() { mooseError("'solve' method not used in this solver type."); }
 
 protected:
-  /// Update the solver following any changes to the EquationSystem it is responsible for solving.
-  virtual void UpdateEquationSystemContext() override;
+  /// Called once per SetOperator, only when a preconditioner is set.
+  /// Override in solvers that accept a preconditioner.
+  virtual void SetPreconditionerImpl() { mooseError("This solver does not support a preconditioner."); }
 
   /// Preconditioner to be used for the problem
   std::shared_ptr<LinearSolverBase> _preconditioner;

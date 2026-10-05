@@ -72,7 +72,6 @@ template <>
 void
 Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemContext()
 {
-  LinearSolverBase::UpdateEquationSystemContext();
   SetupLOR();
 }
 
