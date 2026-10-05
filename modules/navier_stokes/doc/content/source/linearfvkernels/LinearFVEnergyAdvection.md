@@ -1,8 +1,8 @@
 # LinearFVEnergyAdvection
 
 This kernel adds the contributions of the energy advection term to the matrix
-and right hand side of the energy equation system for the finite volume SIMPLE
-segregated solver [SIMPLE.md].
+and right hand side of the energy equation system for the finite volume [SIMPLE.md]
+segregated solver.
 
 This kernel currently supports the advection of specific enthalpy $h$ or
 temperature $T$. Important consideration: temperature advection is only

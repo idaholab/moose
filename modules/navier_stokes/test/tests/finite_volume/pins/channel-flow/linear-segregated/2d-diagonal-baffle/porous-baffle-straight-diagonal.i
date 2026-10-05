@@ -9,6 +9,7 @@
 inlet_velocity = 1.0
 rho = 998.2
 mu = 2e-3
+mu_zone_2 = ${mu}
 eps_zone_1 = 0.5
 eps_zone_2 = 0.7
 forch_zone_1 = 10
@@ -239,7 +240,7 @@ advected_interp_method = 'upwind'
     type = LinearPWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method_name = ${advected_interp_method}
-    mu = ${mu}
+    mu = dynamic_viscosity
     u = superficial_u
     v = superficial_v
     momentum_component = 'x'
@@ -251,7 +252,7 @@ advected_interp_method = 'upwind'
     type = LinearPWCNSFVMomentumFlux
     variable = superficial_v
     advected_interp_method_name = ${advected_interp_method}
-    mu = ${mu}
+    mu = dynamic_viscosity
     u = superficial_u
     v = superficial_v
     momentum_component = 'y'
@@ -375,6 +376,18 @@ advected_interp_method = 'upwind'
 []
 
 [FunctorMaterials]
+  [viscosity_clean_and_zone_1]
+    type = GenericFunctorMaterial
+    prop_names = 'dynamic_viscosity'
+    prop_values = '${mu}'
+    block = 'clean_inlet porous_zone_1 clean_outlet'
+  []
+  [viscosity_zone_2]
+    type = GenericFunctorMaterial
+    prop_names = 'dynamic_viscosity'
+    prop_values = '${mu_zone_2}'
+    block = 'porous_zone_2'
+  []
   [porosity_clean]
     type = GenericFunctorMaterial
     prop_names = 'porosity'
