@@ -52,7 +52,7 @@ MFEMVariableValueSamplerBase::execute()
 }
 
 void
-MFEMVariableValueSamplerBase::finalizeValues()
+MFEMVariableValueSamplerBase::finalize()
 {
   _interp_vals.HostReadWrite();
 

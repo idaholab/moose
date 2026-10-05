@@ -70,6 +70,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, blf, _td_kernels_map);
     // Assemble
     blf->Assemble();
+    blf->Finalize();
 
     // Apply kernels to td_blf
     _td_blfs.Register(test_var_name,
@@ -80,6 +81,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, td_blf, _td_kernels_map);
     // Assemble
     td_blf->Assemble();
+    td_blf->Finalize();
   }
 }
 
@@ -117,6 +119,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
           // Assemble mixed bilinear forms
           mblf->SetAssemblyLevel(_assembly_level);
           mblf->Assemble();
+          mblf->Finalize();
           // Register mixed bilinear forms associated with a single trial variable
           // for the current test variable
           test_mblfs->Register(coupled_var_name, mblf);
@@ -152,6 +155,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
         {
           td_mblf->SetAssemblyLevel(_assembly_level);
           td_mblf->Assemble();
+          td_mblf->Finalize();
           // Register mixed bilinear forms associated with a single trial variable
           // for the current test variable
           test_td_mblfs->Register(trial_var_name, td_mblf);

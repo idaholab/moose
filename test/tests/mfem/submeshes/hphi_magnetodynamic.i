@@ -88,7 +88,6 @@ vacuum_permeability = 1.0
     variable = j_field
     source = h_field
     scale_factor = 1.0
-    execute_on = TIMESTEP_END
   []
 []
 

@@ -51,7 +51,7 @@
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'timestep_end'
+    execute_on = TIMESTEP_END
     file_base = OutputData/custom_composer_and_operator/l2norm
   []
   [ParaViewDataCollection]

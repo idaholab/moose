@@ -114,7 +114,6 @@ alpha = 1e-2
     type = MFEMVariablePointValueSampler
     variable = 'temperature'
     points = '0.0 0.0 0.0'
-    execute_on = TIMESTEP_END
   []
 []
 

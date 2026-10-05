@@ -68,7 +68,6 @@
   [avg]
     type = MFEMElementAverageValue
     variable = u
-    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -76,6 +75,6 @@
   [out]
     type = CSV
     file_base = average
-    execute_on = 'TIMESTEP_END'
+    execute_on = TIMESTEP_END
   []
 []

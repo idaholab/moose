@@ -85,7 +85,6 @@
     type = MFEML2Error
     variable = mfem_scalar_var
     function = libmesh_scalar_var
-    execute_on = TIMESTEP_END
   []
 []
 

@@ -17,6 +17,7 @@ InputParameters
 CustomProblemComposer::validParams()
 {
   InputParameters params = MFEMProblemComposer::validParams();
+  params.addClassDescription("Creates a custom problem operator for testing.");
   params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Diffusion coefficient");
   return params;
 }
