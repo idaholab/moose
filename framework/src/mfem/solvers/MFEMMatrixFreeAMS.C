@@ -12,18 +12,38 @@
 #include "MFEMMatrixFreeAMS.h"
 #include "MFEMProblem.h"
 
+namespace
+{
+/// Forwards to a smoother owned elsewhere; mfem::MatrixFreeAMS deletes its smoother on destruction
+class SmootherReference : public mfem::Solver
+{
+public:
+  explicit SmootherReference(mfem::Solver & smoother)
+    : mfem::Solver(smoother.Height(), smoother.Width()), _smoother(smoother)
+  {
+  }
+  void SetOperator(const mfem::Operator & op) override { _smoother.SetOperator(op); }
+  void Mult(const mfem::Vector & x, mfem::Vector & y) const override { _smoother.Mult(x, y); }
+
+private:
+  mfem::Solver & _smoother;
+};
+}
+
 registerMooseObject("MooseApp", MFEMMatrixFreeAMS);
 
 namespace Moose::MFEM
 {
 MatrixFreeAMS::MatrixFreeAMS(mfem::Coefficient & alpha_coef,
                              mfem::Coefficient & beta_coef,
+                             mfem::Solver & smoother,
                              int inner_pi_its,
                              int inner_g_its)
   : _alpha_coef(alpha_coef),
     _beta_coef(beta_coef),
     _inner_pi_its(inner_pi_its),
-    _inner_g_its(inner_g_its)
+    _inner_g_its(inner_g_its),
+    _smoother(smoother)
 {
 }
 
@@ -33,14 +53,8 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
   height = op.Height();
   width = op.Width();
 
-  // Build the Jacobi smoother from op rather than letting mfem::MatrixFreeAMS build its own from
-  // _aform. For a nonlinear problem the gradient term belongs to the equation system's nonlinear
-  // form, so _aform, the bilinear form, is not the operator being preconditioned. The damping
-  // matches the value MFEM uses for its own smoother.
-  mfem::Solver * smoother = nullptr;
-  auto * jacobi = new mfem::OperatorJacobiSmoother(0.25);
-  jacobi->SetOperator(op);
-  smoother = jacobi;
+  _smoother.SetOperator(op);
+  auto * smoother_ref = new SmootherReference(_smoother);
 
   // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this
   // constructs the solver
@@ -53,7 +67,7 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
                                                                _ess_bdr_markers,
                                                                _inner_pi_its,
                                                                _inner_g_its,
-                                                               smoother);
+                                                               smoother_ref);
   _matrix_free_ams = std::move(matrix_free_ams);
 }
 } // namespace Moose::MFEM
@@ -76,6 +90,11 @@ MFEMMatrixFreeAMS::validParams()
       "inner_pi_iterations", 2, "Number of CG iterations on auxiliary Pi space.");
   params.addParam<unsigned int>(
       "inner_g_iterations", 2, "Number of CG iterations on auxiliary G space.");
+  params.addParam<MFEMSolverName>(
+      "smoother",
+      "Smoother for the mfem::MatrixFreeAMS solve. Must accept a matrix-free operator, e.g. "
+      "MFEMOperatorJacobiSmoother or MFEMOperatorChebyshevSmoother. Defaults to damped Jacobi on "
+      "the operator being preconditioned.");
   // mfem::MatrixFreeAMS is always an LOR solver
   params.setParameters("low_order_refined", true);
   params.suppressParameter<bool>("low_order_refined");
@@ -95,8 +114,35 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
 void
 MFEMMatrixFreeAMS::ConstructSolver()
 {
+  mfem::Solver * smoother = nullptr;
+  if (isParamSetByUser("smoother"))
+  {
+    auto & smoother_object = getMFEMProblem().getMFEMObject<LinearSolverBase>(
+        "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("smoother"));
+
+    // The smoother is driven through its mfem::Solver alone, so the LOR and preconditioner setup
+    // that its own UpdateEquationSystemContext() performs never runs
+    const auto & smoother_params = smoother_object.parameters();
+    if (smoother_params.have_parameter<bool>("low_order_refined") &&
+        smoother_params.get<bool>("low_order_refined"))
+      paramError("smoother", "Low-order-refined smoothers are not supported.");
+    if (smoother_params.have_parameter<MFEMSolverName>("preconditioner") &&
+        smoother_params.isParamSetByUser("preconditioner"))
+      paramError("smoother", "Smoothers with a preconditioner are not supported.");
+
+    smoother = &smoother_object.GetSolver();
+  }
+  else
+  {
+    // Jacobi on the operator being preconditioned rather than mfem::MatrixFreeAMS's own smoother
+    // built from _aform: for a nonlinear problem the gradient term belongs to the equation
+    // system's nonlinear form, so _aform is not that operator. The damping matches the value MFEM
+    // uses for its own smoother.
+    _default_smoother = std::make_unique<mfem::OperatorJacobiSmoother>(0.25);
+    smoother = _default_smoother.get();
+  }
   auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
-      _alpha_coef, _beta_coef, _inner_pi_its, _inner_g_its);
+      _alpha_coef, _beta_coef, *smoother, _inner_pi_its, _inner_g_its);
   _solver = std::move(solver);
 }
 

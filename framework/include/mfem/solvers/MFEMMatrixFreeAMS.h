@@ -24,6 +24,7 @@ class MatrixFreeAMS : public mfem::Solver
 public:
   MatrixFreeAMS(mfem::Coefficient & alpha_coef,
                 mfem::Coefficient & beta_coef,
+                mfem::Solver & smoother,
                 int inner_pi_its = 0,
                 int inner_g_its = 1);
 
@@ -50,9 +51,12 @@ private:
   mfem::Coefficient & _beta_coef;
   const int _inner_pi_its;
   const int _inner_g_its;
+  /// Smoother for mfem::MatrixFreeAMS, owned by the caller
+  mfem::Solver & _smoother;
   mfem::ParBilinearForm * _aform;
   mfem::Array<int> _ess_bdr_markers;
 };
+
 } // namespace Moose::MFEM
 
 /**
@@ -75,6 +79,8 @@ private:
   mfem::Coefficient & _beta_coef;
   const int _inner_pi_its;
   const int _inner_g_its;
+  /// Default smoother, used when "smoother" is not set
+  std::unique_ptr<mfem::Solver> _default_smoother;
 };
 
 #endif
