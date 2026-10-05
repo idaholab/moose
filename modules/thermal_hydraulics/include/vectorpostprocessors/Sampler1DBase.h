@@ -140,6 +140,7 @@ Sampler1DBase<T>::execute()
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
 
+    // TODO: this could be done only on a per-subdomain basis
     _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
     _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 

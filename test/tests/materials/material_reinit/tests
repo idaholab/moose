@@ -23,7 +23,7 @@
   [unrelated_block_material]
     type = 'RunApp'
     input = 'unrelated_block_material.i'
-    issues = 'bbc83b41aad3c69c9f2f31f9977b91adf4b12345'
+    issues = '#33918'
     design = 'syntax/Materials/index.md'
     requirement = 'The system shall not evaluate materials in the volume when executing auxiliary kernels that do not require or depend on their properties.'
   []

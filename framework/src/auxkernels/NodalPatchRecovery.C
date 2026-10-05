@@ -201,6 +201,7 @@ NodalPatchRecovery::compute()
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
+    // Note: we only need to do this on a per-subdomain basis, not for every element
     std::unordered_set<unsigned int> needed_mat_props;
     const auto & mp_deps = getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
