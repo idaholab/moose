@@ -1,4 +1,6 @@
 [Tests]
+  # Issue for moving the cut feature to user objects
+  issues = '#9463'
   [heat_conduction_xfem]
     type = Exodiff
     input = heat.i
