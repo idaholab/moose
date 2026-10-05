@@ -48,6 +48,7 @@ class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
 class Convergence;
+class MultiPointConstraintHub;
 
 // libMesh forward declarations
 namespace libMesh
@@ -655,6 +656,22 @@ public:
   const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; }
 
   /**
+   * Rebuild the degree of freedom constraint rows of this system, and of its displaced copy, from
+   * the rows the active constraints emit now. This is a no-op when no constraint of this system is
+   * enforced with rows.
+   *
+   * The framework calls this by itself at the beginning of a solve whose row providers report a
+   * change, so an object that changes its coefficients only has to answer
+   * Constraint::constraintRowsChanged(). It stays public for a caller that knows better, such as a
+   * Control or a UserObject that changes the coefficients at a point of its own.
+   *
+   * Only the coefficients of the rows may change. The sparsity pattern of the matrices was built
+   * once, from the rows of the first build, so tying a different set of degrees of freedom remains
+   * a mesh change.
+   */
+  void reinitConstraintRows();
+
+  /**
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
@@ -993,6 +1010,17 @@ protected:
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
+
+  /// The libMesh constraint object that applies the rows of our constraints that provide them to
+  /// this system. It is only built, and attached to the libMesh system, when a constraint whose
+  /// usesConstraintRows() is true is added
+  std::unique_ptr<MultiPointConstraintHub> _mpc_hub;
+
+  /// The libMesh constraint object that applies the same rows to the displaced copy of this system,
+  /// whose DofMap is the one that reduces the element vectors and matrices of every object using
+  /// the displaced mesh. Only built when a constraint providing rows is added to a displaced
+  /// problem
+  std::unique_ptr<MultiPointConstraintHub> _displaced_mpc_hub;
 
   /// increment vector
   NumericVector<Number> * _increment_vec;

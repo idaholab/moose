@@ -89,4 +89,123 @@
     cli_args = "Constraints/corner/primary_node_coord='0.5 0.5 0.0'"
     requirement = "The system shall report an error when multiple nodes are found for the specified node coordinates."
   []
+
+  # The blocks below generate their own gold with the kinematic formulation and then re-run the
+  # same inputs with the rows formulation against that gold. They deliberately do not reuse the
+  # penalty gold of the blocks above: a penalty tie satisfies u_secondary = u_primary only to
+  # residual/penalty, whereas a kinematic tie cancels the secondary node's own residual (the
+  # -res/n term of NodalConstraint::computeResidual(), with n = 1 for this constraint) and leaves
+  # penalty * (u_secondary - u_primary) as the whole secondary equation, so the tie holds to solver
+  # tolerance. The rows formulation enforces the same tie exactly through the DofMap, so the two
+  # agree far below the penalty's own error and the rows blocks compare at abs_zero = 1e-9.
+  # The one exception is [rows/adaptivity], which has no kinematic leg; its own comment says why.
+  [kinematic]
+    issues = '#617 #33821'
+    design = 'source/constraints/EqualValueBoundaryConstraint.md '
+             'source/constraints/NodalConstraint.md'
+    requirement = "The system shall enforce an equal value boundary constraint with the kinematic "
+                  "formulation, tying every node of a boundary to a single primary node,"
+    [test]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/y_top/primary=45 Constraints/y_top/formulation=kinematic "
+                 "Outputs/file_base=test_kinematic_out"
+      detail = "with the primary node selected by its node ID,"
+    []
+    [test_primary_node_coord]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_primary_node_coord_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0' "
+                 "Constraints/y_top/formulation=kinematic "
+                 "Outputs/file_base=test_primary_node_coord_kinematic_out"
+      detail = "with the primary node located by its coordinates, and"
+    []
+    [evbc_primary_element_ghosting]
+      type = 'Exodiff'
+      input = 'evbc_primary_element_ghosting.i'
+      exodiff = 'evbc_primary_element_ghosting_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/top/formulation=kinematic "
+                 "Outputs/file_base=evbc_primary_element_ghosting_kinematic_out"
+      detail = "with the element of the primary node retained when remote elements are deleted."
+    []
+  []
+  [rows]
+    issues = '#617 #33821'
+    design = 'source/constraints/EqualValueBoundaryConstraint.md '
+             'source/constraints/NodalConstraint.md'
+    requirement = "The system shall reproduce the solution of an equal value boundary constraint "
+                  "enforced with the kinematic formulation, or with a penalty where the kinematic "
+                  "formulation does not converge, including after mesh refinement, when the same "
+                  "constraint is enforced with degree of freedom constraint rows,"
+    [test]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/y_top/primary=45 Constraints/y_top/formulation=rows "
+                 "Outputs/file_base=test_kinematic_out"
+      # Runs the same input to the same file_base as its kinematic twin and compares against the
+      # gold that twin produced, so the two cannot write that output at the same time
+      prereq = 'kinematic/test'
+      detail = "with the primary node selected by its node ID,"
+    []
+    [test_primary_node_coord]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_primary_node_coord_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0' "
+                 "Constraints/y_top/formulation=rows "
+                 "Outputs/file_base=test_primary_node_coord_kinematic_out"
+      prereq = 'kinematic/test_primary_node_coord'
+      detail = "with the primary node located by its coordinates,"
+    []
+    # This case alone has no kinematic leg and is compared against the PENALTY gold of the
+    # [adaptivity] block above. The kinematic formulation does not converge on this input: it takes
+    # two steps and then fails with DIVERGED_LINE_SEARCH after the first refinement, so it never
+    # reaches the third step. That is a property of the kinematic formulation on this problem, not
+    # a regression, so do not restore a kinematic leg here without fixing that first.
+    # rel_err is the penalty's own error, measured on the penalty gold rather than assumed. In
+    # gold/adaptivity_out.e-s003 the tied top nodes sit 3.93e-08 away from the exact 0.5 that the
+    # rows formulation produces (7.29e-08, 7.75e-08 and 7.86e-08 of spread across the three steps,
+    # which is the expected residual/penalty with penalty = 1e7), and the smallest nonzero nodal
+    # value anywhere in that file is 4.20e-02. Charging the full 3.93e-08 against that smallest
+    # value bounds the relative difference at 9.4e-07, so 1e-05 leaves one decade of headroom.
+    # It stays five decades below the failures this case exists to catch: a row built from the
+    # stale node list leaves a refinement-created top node untied and moves it O(0.1) off 0.5.
+    # abs_zero is left at the exodiff default: the only near-zero values in this gold are the
+    # right-boundary nodes, which both formulations preset to exactly zero, and nothing else in
+    # the file falls between 1e-12 and 4.20e-02.
+    [adaptivity]
+      type = 'Exodiff'
+      input = 'adaptivity.i'
+      exodiff = 'adaptivity_out.e adaptivity_out.e-s002 adaptivity_out.e-s003'
+      rel_err = 1e-5
+      mesh_mode = REPLICATED
+      cli_args = "Constraints/y_top/formulation=rows"
+      # Writes the same output files as the penalty [adaptivity] block whose gold it reads, so the
+      # two cannot run at the same time
+      prereq = 'adaptivity'
+      # The rows are rebuilt inside EquationSystems::reinit(), which runs before the meshChanged()
+      # notification that refreshes the constraint's cached secondary node list. Rows built from
+      # the stale list leave the nodes that refinement adds to the top boundary untied, which shows
+      # up in the -s002 and -s003 steps
+      detail = "on a mesh that adaptivity refines during the solve, and"
+    []
+    [evbc_primary_element_ghosting]
+      type = 'Exodiff'
+      input = 'evbc_primary_element_ghosting.i'
+      exodiff = 'evbc_primary_element_ghosting_kinematic_out.e'
+      abs_zero = 1e-9
+      cli_args = "Constraints/top/formulation=rows "
+                 "Outputs/file_base=evbc_primary_element_ghosting_kinematic_out"
+      prereq = 'kinematic/evbc_primary_element_ghosting'
+      detail = "with the element of the primary node retained when remote elements are deleted."
+    []
+  []
 []

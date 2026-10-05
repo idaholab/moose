@@ -79,6 +79,17 @@ Specialized capabilities for particular problem classes:
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
 - [Isogeometric Analysis](solid_mechanics/examples/cframe_iga.md)
 
+## Multipoint Constraints
+
+Nastran-style rigid and interpolation elements, which tie degrees of freedom to each other through
+rows of the degree of freedom map rather than through a penalty or a Lagrange multiplier:
+
+- [RBE2 rigid element](/RBE2Constraint.md), which moves a set of dependent nodes rigidly with one
+  independent node that carries six degrees of freedom.
+- [RBE3 interpolation element](/RBE3Constraint.md), which ties a reference node to the weighted
+  least-squares fit of a set of independent nodes and distributes a load over them without adding
+  stiffness.
+
 ## Examples and Tutorials
 
 Get started with introductory tutorials and examples:
