@@ -14,6 +14,8 @@
 #include "NonlinearSystemBase.h"
 #include "NonlinearSystem.h"
 #include "NodalBCBase.h"
+#include "MooseVariableFieldBase.h"
+#include "MooseVariableScalar.h"
 #include "Executioner.h"
 
 #include "libmesh/dof_map.h"
@@ -56,11 +58,6 @@ AdjointSolve::AdjointSolve(Executioner & ex)
   // Adjoint system should never perform its own automatic scaling. Scaling factors from the forward
   // system are applied.
   _nl_adjoint.automaticScaling(false);
-
-  // We need to force the forward system to have a scaling vector. This is
-  // in case a user provides scaling for an individual variables but doesn't have any
-  // AD objects.
-  _nl_forward.addScalingVector();
 
   // Set the solver options for the adjoint system
   mooseAssert(_problem.numSolverSystems() > 1,
@@ -119,8 +116,27 @@ AdjointSolve::solve()
   // Solve the adjoint system
   solver.adjoint_solve(matrix, solution, rhs, tol, maxits);
 
-  // For scaling of the forward problem we need to apply correction factor
-  solution *= _nl_forward.getVector("scaling_factors");
+  // The forward Jacobian has its rows scaled by the variable scaling factors S, so the transposed
+  // solve returns mu with (S J)^T mu = -g. The adjoint is therefore lambda = S mu.
+  const auto & dof_map = _nl_forward.dofMap();
+  auto scaling = solution.zero_clone();
+  std::vector<dof_id_type> dof_indices;
+  const auto fill_scaling = [&](const MooseVariableBase & var)
+  {
+    const auto & factors = var.arrayScalingFactor();
+    for (const auto i : make_range(var.count()))
+    {
+      dof_map.local_variable_indices(dof_indices, _mesh.getMesh(), var.number() + i);
+      for (const auto dof : dof_indices)
+        scaling->set(dof, factors[i]);
+    }
+  };
+  for (const auto * const var : _nl_forward.getVariables(0))
+    fill_scaling(*var);
+  for (const auto * const var : _nl_forward.getScalarVariables(0))
+    fill_scaling(*var);
+  scaling->close();
+  solution *= *scaling;
 
   // Hanging-node (and other DofMap) constraints are not applied by the raw transpose solve above,
   // which leaves constrained dofs at zero, so back-substitute them here. The vector being
@@ -211,11 +227,6 @@ AdjointSolve::checkIntegrity()
       mooseError(
           "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
           "automatically by the forward system.");
-
-  // This is to prevent automatic scaling of the adjoint system. Scaling is
-  // taken from the forward system
-  if (_nl_adjoint.hasVector("scaling_factors"))
-    _nl_adjoint.removeVector("scaling_factors");
 
   // Main thing is that the number of dofs in each system is the same
   if (_nl_forward.system().n_dofs() != _nl_adjoint.system().n_dofs())

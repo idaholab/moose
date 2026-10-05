@@ -1172,13 +1172,6 @@ SubProblem::automaticScaling() const
 }
 
 void
-SubProblem::hasScalingVector(const unsigned int nl_sys_num)
-{
-  for (const THREAD_ID tid : make_range(libMesh::n_threads()))
-    assembly(tid, nl_sys_num).hasScalingVector();
-}
-
-void
 SubProblem::clearAllDofIndices()
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
