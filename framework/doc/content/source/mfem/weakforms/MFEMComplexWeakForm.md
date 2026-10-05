@@ -9,9 +9,6 @@ If no `MFEMWeakFormBase` object is specified by the user in a complex problem us
 executioner, a default `MFEMComplexWeakForm` object will be created to set up a
 `ComplexEquationSystem` using all kernels and boundary conditions added in the input file.
 
-This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
-linear or nonlinear system used downstream in MFEM solvers.
-
 ## Example Input File Syntax
 !listing test/tests/mfem/weakforms/complex_weakform.i block=WeakForms
 

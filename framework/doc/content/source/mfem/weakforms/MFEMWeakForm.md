@@ -10,9 +10,6 @@ in a real problem using an `MFEMSteady` executioner, a default `MFEMWeakForm` ob
 be created to set up an `EquationSystem` using all kernels and boundary conditions added in the
 input file.
 
-This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
-linear or nonlinear system used downstream in MFEM solvers.
-
 ## Example Input File Syntax
 !listing test/tests/mfem/weakforms/steady_weakform.i block=WeakForms
 

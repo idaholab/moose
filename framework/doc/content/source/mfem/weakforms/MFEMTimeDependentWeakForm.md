@@ -10,9 +10,6 @@ object is specified by the user in a real problem using an `MFEMTransient` execu
 `MFEMTimeDependentWeakForm` object will be created to set up a `TimeDependentEquationSystem` using
 all kernels and boundary conditions added in the input file.
 
-This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
-linear or nonlinear system used downstream in MFEM solvers.
-
 ## Example Input File Syntax
 !listing test/tests/mfem/weakforms/transient_weakform.i block=WeakForms
 

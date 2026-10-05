@@ -10,9 +10,6 @@ is specified by the user in a real `MFEMEigenproblem` using an `MFEMSteady` exec
 `MFEMEigenproblemWeakForm` object will be created to set up an `EigenproblemEquationSystem` using
 all kernels and boundary conditions added in the input file.
 
-This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
-linear or nonlinear system used downstream in MFEM solvers.
-
 !syntax parameters /WeakForms/MFEMEigenproblemWeakForm
 
 !syntax inputs /WeakForms/MFEMEigenproblemWeakForm
