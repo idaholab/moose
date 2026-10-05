@@ -182,9 +182,8 @@ where $C_s$ is the Cheng-Todreas sweep-flow coefficient evaluated according to t
 
 The closure flags a solution warning when $P/D$, $H/D$, the number of pins, or the bulk Reynolds number is outside the data range associated with the selected mixing correlation.
 
-Information about the use of $\beta$ can be found in [Turbulent crossflow](subchannel_theory.md#turbulent-crossflow).
-
-Additionally, the user may opt to provide the turbulent momentum mixing parameter `CT`. Information about the use of this parameter can be found in [Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer).
+!alert note
+Information about the use of $\beta$ can be found in [Turbulent crossflow](subchannel_theory.md#turbulent-crossflow). Additionally, the user may opt to provide the turbulent momentum mixing parameter `CT`. Information about the use of this parameter can be found in [Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer).
 
 !syntax parameters /SCMClosures/SCMMixingChenTodreas
 

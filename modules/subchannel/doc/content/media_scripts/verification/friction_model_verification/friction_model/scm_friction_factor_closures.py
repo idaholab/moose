@@ -22,11 +22,12 @@ Five figures are written next to this script:
 1. scm_friction_quad_bare.png: MATRA and Chen-Todreas, bare pins in a square lattice.
 2. scm_friction_tri_bare.png: Upgraded Chen-Todreas, bare pins in a triangular lattice.
 3. scm_friction_tri_wire.png: Upgraded and Pacio Chen-Todreas in SCM and Upgraded Chen-Todreas in
-   DASSH, wire-wrapped pins in a triangular lattice.
+   DASSH, wire-wrapped pins in a triangular lattice, next to the relative difference between the
+   SCM and DASSH Upgraded Chen-Todreas friction factors.
 4. scm_XX09_SS17_mdot.png, scm_XX09_SS17_T.png: subchannel mass flow rate and temperature along the
    TTC traverse of EBR-II XX09 for SHRT-17 from SCM and DASSH.
 
-The friction factors at the Reynolds numbers of the table in the verification page are printed.
+The rows of the friction factor and TTC temperature tables in the verification page are printed.
 """
 
 from pathlib import Path
@@ -96,12 +97,6 @@ fig, ax = new_axes("Triangular lattice, bare pins")
 plot_channels(ax, "tri_bare_out.csv", "black", "UCTD")
 save(fig, ax, "scm_friction_tri_bare.png")
 
-fig, ax = new_axes("Triangular lattice, wire-wrapped pins")
-plot_channels(ax, "tri_wire_out.csv", "black", "UCTD")
-plot_channels(ax, "tri_wire_pacio_out.csv", "red", "PCTD")
-plot_channels(ax, "dassh_tri_wire_out.csv", "green", "DASSH UCTD")
-save(fig, ax, "scm_friction_tri_wire.png")
-
 
 def interpolate_ff(csv, channel, Re):
     """Friction factor of a subchannel at the local Reynolds numbers Re, interpolated in log-log"""
@@ -115,6 +110,45 @@ def interpolate_ff(csv, channel, Re):
             np.log(data[f"ff_{channel}"][keep]),
         )
     )
+
+
+fig, (ax, ax_err) = plt.subplots(1, 2, figsize=(14.0, 5.0))
+ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_xlim(1.0, 1.0e6)
+ax.set_xlabel("Subchannel Reynolds number, $Re$")
+ax.set_ylabel("Friction factor, $f$")
+ax.set_title("Triangular lattice, wire-wrapped pins")
+ax.grid(True, which="both", color="0.85", linewidth=0.5)
+plot_channels(ax, "tri_wire_out.csv", "black", "UCTD")
+plot_channels(ax, "tri_wire_pacio_out.csv", "red", "PCTD")
+plot_channels(ax, "dassh_tri_wire_out.csv", "green", "DASSH UCTD")
+ax.legend(frameon=False)
+# Relative difference of SCM UCTD from DASSH UCTD at the local Reynolds numbers of the SCM sweep. The
+# DASSH curves are sampled more finely than the SCM sweep, so they are the ones interpolated.
+scm_wire = np.genfromtxt(DATA / "tri_wire_out.csv", delimiter=",", names=True)
+dassh_wire = np.genfromtxt(DATA / "dassh_tri_wire_out.csv", delimiter=",", names=True)
+for channel in CHANNELS:
+    Re = scm_wire[f"Re_{channel}"]
+    # Skip Re < 1, as in plot_channels, and Re outside the DASSH curve, where np.interp extrapolates
+    keep = (Re >= max(1.0, dassh_wire[f"Re_{channel}"].min())) & (
+        Re <= dassh_wire[f"Re_{channel}"].max()
+    )
+    ff_dassh = interpolate_ff("dassh_tri_wire_out.csv", channel, Re[keep])
+    ax_err.plot(
+        Re[keep],
+        100.0 * (scm_wire[f"ff_{channel}"][keep] / ff_dassh - 1.0),
+        color="black",
+        linestyle=LINESTYLES[channel],
+        label=LABELS[channel],
+    )
+ax_err.set_xscale("log")
+ax_err.set_xlim(1.0, 1.0e6)
+ax_err.set_xlabel("Subchannel Reynolds number, $Re$")
+ax_err.set_ylabel("$(f_{SCM} - f_{DASSH}) / f_{DASSH}$ [%]")
+ax_err.set_title("SCM UCTD relative to DASSH UCTD")
+ax_err.grid(True, which="both", color="0.85", linewidth=0.5)
+save(fig, ax_err, "scm_friction_tri_wire.png")
 
 
 # Rows of the friction factor comparison table in the verification page
@@ -212,4 +246,26 @@ plot_ttc(
     "scm_XX09_SS17_T.png",
     dassh_ctd=dassh_published[:, 1] + 273.15,
     experiment=experiment[:, 1] + 273.15,
+)
+
+# Rows of the TTC temperature table in the verification page, with the error against the experiment
+ttc_T = {
+    "SCM UCTD": np.array([scm_uctd[f"TTC{n}"][-1] for n in TTC]),
+    "SCM PCTD": np.array([scm_pctd[f"TTC{n}"][-1] for n in TTC]),
+    "DASSH UCTD": dassh["T"][dassh_ttc],
+    "DASSH CTD, published": dassh_published[:, 1] + 273.15,
+    "Experiment": experiment[:, 1] + 273.15,
+}
+for i, n in enumerate(TTC):
+    print(f"| TTC-{n} | " + " | ".join(f"{T[i]:.1f}" for T in ttc_T.values()) + " |")
+error = {
+    name: T - ttc_T["Experiment"] for name, T in ttc_T.items() if name != "Experiment"
+}
+print(
+    "| Mean error | " + " | ".join(f"{e.mean():.1f}" for e in error.values()) + " | |"
+)
+print(
+    "| Root mean square error | "
+    + " | ".join(f"{np.sqrt(np.mean(e**2)):.1f}" for e in error.values())
+    + " | |"
 )

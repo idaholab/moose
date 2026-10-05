@@ -19,6 +19,8 @@ The desired triangular-lattice parameterization is selected using the `friction_
 
 The two models use the same general form of the Cheng-Todreas detailed subchannel friction correlation but use different empirical coefficients for the flow-regime transition, wire-drag and wire-sweep terms, and intermittent-regime interpolation.
 
+## Triangular lattices
+
 ### Upgraded Chen-Todreas parameterization
 
 For `friction_model = Upgraded`, the laminar and turbulent transition Reynolds numbers are given by Eqs. (3) and (2) of UCTD,
@@ -176,7 +178,7 @@ and
 !equation
 10 \leq Re_b \leq 3\times10^5 .
 
-### Quadrilateral lattices
+## Quadrilateral lattices
 
 The `friction_model` selection applies only to triangular lattices.
 
@@ -194,6 +196,7 @@ and the intermittent-regime interpolation, Eq. (4) of UCTD, uses
 \qquad
 \gamma = \frac{1}{3} .
 
+!alert note
 Plots of the friction factor versus Reynolds number for all SCM friction closures are given in [Friction Factor Closures Verification](subchannel/v&v/friction_factor_closures.md).
 
 !syntax parameters /SCMClosures/SCMFrictionChenTodreas
