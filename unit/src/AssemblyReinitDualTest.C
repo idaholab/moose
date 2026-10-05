@@ -50,7 +50,8 @@ TEST_F(AssemblyReinitDualTest, ReinitOnlyRequestedTypes)
   const libMesh::FEType first_lagrange(libMesh::FIRST, libMesh::LAGRANGE);
   const auto & dual_phi = assembly.feDualPhiLower<Real>(first_lagrange);
 
-  const auto * elem = *_mesh->getMesh().active_local_element_ptr_range().begin();
+  // The replicated mesh gives every rank this element, and the dual reinit is local
+  const auto * elem = _mesh->getMesh().elem_ptr(0);
   const auto side = elem->build_side_ptr(0);
   const std::vector<Point> points = {Point(-1), Point(1)};
   const std::vector<Real> weights(2, 1);
@@ -65,4 +66,8 @@ TEST_F(AssemblyReinitDualTest, ReinitOnlyRequestedTypes)
   for (const auto i : make_range(dual_phi.size()))
     for (const auto qp : make_range(points.size()))
       EXPECT_NEAR(dual_phi[i][qp], i == qp, libMesh::TOLERANCE);
+
+  // Requesting SECOND LAGRANGE dual shapes adds its singular Gram matrix diag(1, 1, 0)
+  assembly.feDualPhiLower<Real>(libMesh::FEType(libMesh::SECOND, libMesh::LAGRANGE));
+  EXPECT_THROW(assembly.reinitDual(side.get(), points, weights), libMesh::LogicError);
 }
