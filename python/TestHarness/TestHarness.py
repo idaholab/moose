@@ -1172,6 +1172,24 @@ class TestHarness:
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
+            elif self.options.failed_tests:
+                # Replace only the entries of previously failing tests that now
+                # pass so that the next --failed-tests run is a smaller subset.
+                # Everything else in the previous results, including the stats
+                # of the original run, is kept.
+                updated = False
+                for job_group in all_jobs:
+                    for job in job_group:
+                        previous_status = job.previousTesterStatus()[0]
+                        if (
+                            job.isPass()
+                            and previous_status in job.job_status.getFailingStatuses()
+                        ):
+                            job.storeResults(self.scheduler)
+                            updated = True
+                if updated:
+                    storage = self.options.results_storage
+                    self.writeResults(stats=storage.get("stats"))
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
@@ -1273,10 +1291,10 @@ class TestHarness:
     def writeResults(self, complete=False, stats=None):
         """Forcefully write the current results to file
 
-        Will not do anything if using existing storage.
+        Should not be called when displaying a previous run.
         """
         # Not writing results
-        if self.useExistingStorage():
+        if self.options.show_last_run:
             raise Exception("Should not write results")
 
         storage = self.options.results_storage
@@ -1438,7 +1456,8 @@ class TestHarness:
         parser.add_argument(
             "--failed-tests",
             action="store_true",
-            help="Run tests that previously failed",
+            help="Run tests that previously failed; tests that now pass are"
+            " marked as passing in the previous results",
         )
         parser.add_argument(
             "--show-last-run",

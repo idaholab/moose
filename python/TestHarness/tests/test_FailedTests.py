@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+import json
+import os
 import tempfile
 from TestHarnessTestCase import TestHarnessTestCase
 
@@ -45,3 +47,48 @@ class TestHarnessTester(TestHarnessTestCase):
             # Does not having failing tests; failed tests summary not printed
             out = self.runTests(*args, "-i", "always_ok").output
             self.assertNotIn("Failed Tests:", out)
+
+    def testFailedTestsUpdate(self):
+        """
+        Tests that previously failing tests that pass with --failed-tests are
+        updated in the previous results and not ran by the next --failed-tests.
+        """
+        with tempfile.TemporaryDirectory() as output_dir:
+            # Each test fails while its marker file exists
+            markers = {name: os.path.join(output_dir, name) for name in ["a", "b"]}
+            tests = {
+                name: {"type": "RunCommand", "command": f"'test ! -e {marker}'"}
+                for name, marker in markers.items()
+            }
+            for marker in markers.values():
+                open(marker, "w").close()
+
+            results_file = os.path.join(output_dir, "results.json")
+            args = ["--no-color", "--results-file", results_file]
+            kwargs = {"tmp_output": False, "tests": tests}
+
+            # Both tests fail
+            stats = self.runTests(*args, exit_code=128, **kwargs).results["stats"]
+
+            # Only a fails; b is updated to passing
+            os.remove(markers["b"])
+            out = self.runTests(*args, "--failed-tests", exit_code=128, **kwargs).output
+            self.assertRegex(out, r"test\.a.*?FAILED")
+            self.assertRegex(out, r"test\.b.*?OK")
+            with open(results_file, "r") as f:
+                results = json.load(f)
+            entries = results["tests"]["test"]["tests"]
+            self.assertEqual(entries["a"]["status"]["status"], "FAIL")
+            self.assertEqual(entries["b"]["status"]["status"], "OK")
+            # Stats from the original run are kept
+            self.assertEqual(results["stats"], stats)
+
+            # Only a is ran again, and it now passes
+            os.remove(markers["a"])
+            out = self.runTests(*args, "--failed-tests", **kwargs).output
+            self.assertRegex(out, r"test\.a.*?OK")
+            self.assertNotRegex(out, r"test\.b")
+
+            # Nothing left to run
+            out = self.runTests(*args, "--failed-tests", **kwargs).output
+            self.assertNotRegex(out, r"test\.[ab]")
