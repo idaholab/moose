@@ -14,39 +14,6 @@
 
 registerMooseObject("MooseApp", MFEMMatrixFreeAMS);
 
-namespace Moose::MFEM
-{
-MatrixFreeAMS::MatrixFreeAMS(mfem::Coefficient & alpha_coef,
-                             mfem::Coefficient & beta_coef,
-                             int inner_pi_its,
-                             int inner_g_its)
-  : _alpha_coef(alpha_coef),
-    _beta_coef(beta_coef),
-    _inner_pi_its(inner_pi_its),
-    _inner_g_its(inner_g_its)
-{
-}
-
-void
-MatrixFreeAMS::SetOperator(const mfem::Operator & op)
-{
-  height = op.Height();
-  width = op.Width();
-  // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this
-  // constructs the solver
-  auto matrix_free_ams = std::make_unique<mfem::MatrixFreeAMS>(*_aform,
-                                                               const_cast<mfem::Operator &>(op),
-                                                               *_aform->ParFESpace(),
-                                                               &_alpha_coef,
-                                                               &_beta_coef,
-                                                               nullptr,
-                                                               _ess_bdr_markers,
-                                                               _inner_pi_its,
-                                                               _inner_g_its);
-  _matrix_free_ams = std::move(matrix_free_ams);
-}
-} // namespace Moose::MFEM
-
 InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
@@ -84,9 +51,21 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
 void
 MFEMMatrixFreeAMS::ConstructSolver()
 {
-  auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
-      _alpha_coef, _beta_coef, _inner_pi_its, _inner_g_its);
-  _solver = std::move(solver);
+  // Deferred: construction of the mfem::MatrixFreeAMS solver is postponed until the operator is set
+}
+
+void
+MFEMMatrixFreeAMS::SetOperatorImpl(const mfem::Operator & op)
+{
+  _solver = std::make_unique<mfem::MatrixFreeAMS>(*_a,
+                                                  const_cast<mfem::Operator &>(op),
+                                                  *_a->ParFESpace(),
+                                                  &_alpha_coef,
+                                                  &_beta_coef,
+                                                  nullptr,
+                                                  _ess_bdr_markers,
+                                                  _inner_pi_its,
+                                                  _inner_g_its);
 }
 
 template <>
@@ -95,11 +74,6 @@ Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemConte
 {
   LinearSolverBase::UpdateEquationSystemContext();
   SetupLOR();
-  // update the pointer to the bilinear form representing the curl-curl problem being
-  // preconditioned
-  auto & matrix_free_ams = cast_ref<Moose::MFEM::MatrixFreeAMS &>(*_solver);
-  matrix_free_ams.SetBilinearForm(*_a);
-  matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
 }
 
 #endif
