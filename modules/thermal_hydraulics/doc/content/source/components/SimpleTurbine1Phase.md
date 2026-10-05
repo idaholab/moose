@@ -14,7 +14,7 @@ must have the same direction.
 
 
 The user specifies  the power to be extracted by the turbine using the parameter [!param](/Components/SimpleTurbine1Phase/power).
-Power will be extracted if the parameter [!param](/Components/SimpleTurbine1Phase/on)  is set to true.
+Power will be extracted if the parameter [!param](/Components/SimpleTurbine1Phase/on) is set to 1 (0 maps to `false`, 1 maps to `true`).
 Both parameters are controllable.
 
 !syntax parameters /Components/SimpleTurbine1Phase

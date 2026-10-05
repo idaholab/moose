@@ -67,7 +67,7 @@
     volume = 1
     A_ref = 1.0
     K = 0
-    on = true
+    on = 1
     power = 0
   []
 

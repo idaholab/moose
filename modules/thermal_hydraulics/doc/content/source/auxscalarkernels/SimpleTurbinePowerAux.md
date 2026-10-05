@@ -2,7 +2,7 @@
 
 !syntax description /AuxScalarKernels/SimpleTurbinePowerScalarAux
 
-If the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is true, the power is
+If the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is equal to 1 (0 maps to `false`, 1 maps to `true`), the power is
 equal to [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/value), else it is 0.
 
 The [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is controllable,

@@ -50,7 +50,7 @@
     connections = 'pipe1:out pipe2:in'
     position = '1 0 0'
     volume = 1
-    on = true
+    on = 1
     power = 1000
   []
 

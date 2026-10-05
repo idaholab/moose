@@ -51,7 +51,7 @@
     volume = 1
     A_ref = 1.0
     K = 0
-    on = false
+    on = 0
     power = 1000
   []
 

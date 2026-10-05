@@ -18,7 +18,8 @@ SimpleTurbine1Phase::validParams()
   InputParameters params = JunctionParallelChannels1Phase::validParams();
 
   params.addRequiredParam<Real>("power", "Turbine power [W]");
-  params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not [-]");
+  params.addRequiredParam<Real>("on",
+                                "Value determining if turbine is operating (0=off, 1=on) [-]");
 
   params.declareControllable("power on");
 
@@ -30,7 +31,7 @@ SimpleTurbine1Phase::validParams()
 
 SimpleTurbine1Phase::SimpleTurbine1Phase(const InputParameters & params)
   : JunctionParallelChannels1Phase(params),
-    _on(getParam<bool>("on")),
+    _on(getParam<Real>("on")),
     _power(getParam<Real>("power")),
     _W_dot_var_name(junctionVariableName("W_dot"))
 {
@@ -73,7 +74,7 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<RealVectorValue>("dir_c0") = _directions[0];
     params.set<Real>("K") = _K;
     params.set<Real>("A_ref") = _A_ref;
-    params.set<bool>("on") = _on;
+    params.set<Real>("on") = _on;
     params.set<Real>("W_dot") = _power;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
@@ -95,7 +96,7 @@ SimpleTurbine1Phase::addMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _W_dot_var_name;
     params.set<Real>("value") = _power;
-    params.set<bool>("on") = _on;
+    params.set<Real>("on") = _on;
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     getTHMProblem().addAuxKernel(class_name, nm, params);
     connectObject(params, nm, "power", "value");

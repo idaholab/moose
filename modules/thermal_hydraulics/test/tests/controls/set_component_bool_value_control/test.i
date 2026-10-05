@@ -1,15 +1,11 @@
 # This is testing that the values set by SetComponentBoolValueControl are used.
-# The `trip_ctrl` component produces a boolean value that is set in the
-# `turbine` component to switch it on/off.
+# The `trip_ctrl` control produces a boolean value that is set into the
+# controllable boolean parameter of the `trip_target` component.
 
 [GlobalParams]
   initial_p = 100.e3
   initial_vel = 1.0
   initial_T = 350.
-  initial_vel_x = 0
-  initial_vel_y = 0
-  initial_vel_z = 0
-
   scaling_factor_1phase = '1 1e-2 1e-4'
   closures = simple_closures
 []
@@ -32,14 +28,7 @@
 []
 
 [Components]
-  [inlet]
-    type = InletStagnationPressureTemperature1Phase
-    input = 'fch1:in'
-    p0 = 100.e3
-    T0 = 350.
-  []
-
-  [fch1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -51,31 +40,21 @@
     f = 0.01
   []
 
-  [turbine]
-    type = SimpleTurbine1Phase
-    position = '1 0 0'
-    connections = 'fch1:out fch2:in'
-    volume = 1
-    on = false
-    power = 1
+  [inlet]
+    type = InletStagnationPressureTemperature1Phase
+    input = 'pipe1:in'
+    p0 = 100.e3
+    T0 = 350.
   []
-
-  [fch2]
-    type = FlowChannel1Phase
-    fp = fp
-    position = '1 0 0'
-    orientation = '1 0 0'
-    length = 1.0
-    n_elems = 10
-    A    = 0.01
-    D_h  = 0.1
-    f = 0.01
-  []
-
   [outlet]
     type = Outlet1Phase
-    input = 'fch2:out'
+    input = 'pipe1:out'
     p = 100.0e3
+  []
+
+  [trip_target]
+    type = BooleanValueTestComponent
+    value = false
   []
 []
 
@@ -98,8 +77,8 @@
 
   [set_comp_value]
     type = SetComponentBoolValueControl
-    component = turbine
-    parameter = on
+    component = trip_target
+    parameter = value
     value = trip_ctrl:state
   []
 []
@@ -107,8 +86,8 @@
 [Postprocessors]
   [on_ctrl]
     type = BoolComponentParameterValuePostprocessor
-    component = turbine
-    parameter = on
+    component = trip_target
+    parameter = value
   []
 []
 

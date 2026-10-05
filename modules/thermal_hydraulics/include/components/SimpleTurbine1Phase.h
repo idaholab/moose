@@ -27,8 +27,8 @@ public:
 protected:
   virtual void buildVolumeJunctionUserObject() override;
 
-  /// Flag that specifies if the turbine is operating or not
-  const bool & _on;
+  /// Value that specifies if the turbine is operating or not (0=false, 1=true)
+  const Real & _on;
   /// Turbine power [W]
   const Real & _power;
   /// Variable name that holds power

@@ -13,6 +13,7 @@
 #include "THMIndicesVACE.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
+#include "THMUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADSimpleTurbine1PhaseUserObject);
 
@@ -20,7 +21,7 @@ InputParameters
 ADSimpleTurbine1PhaseUserObject::validParams()
 {
   InputParameters params = ADJunctionParallelChannels1PhaseUserObject::validParams();
-  params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not");
+  params.addRequiredParam<Real>("on", "Value determining if turbine is operating (0=off, 1=on)");
   params.addRequiredParam<Real>("W_dot", "Power, [W]");
 
   params.addClassDescription("Computes and caches flux and residual vectors for a 1-phase turbine");
@@ -32,7 +33,7 @@ ADSimpleTurbine1PhaseUserObject::validParams()
 
 ADSimpleTurbine1PhaseUserObject::ADSimpleTurbine1PhaseUserObject(const InputParameters & params)
   : ADJunctionParallelChannels1PhaseUserObject(params),
-    _on(getParam<bool>("on")),
+    _on(getParam<Real>("on")),
     _W_dot(getParam<Real>("W_dot"))
 {
 }
@@ -44,7 +45,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 
   using std::pow;
 
-  if ((c == 0) && _on)
+  if ((c == 0) && THM::realToBool(_on))
   {
     const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
     const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];

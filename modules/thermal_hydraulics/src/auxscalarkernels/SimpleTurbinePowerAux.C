@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleTurbinePowerAux.h"
+#include "THMUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", SimpleTurbinePowerFieldAux);
 registerMooseObject("ThermalHydraulicsApp", SimpleTurbinePowerScalarAux);
@@ -21,7 +22,7 @@ InputParameters
 SimpleTurbinePowerAuxTempl<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not");
+  params.addRequiredParam<Real>("on", "Value determining if turbine is operating (0=off, 1=on)");
   params.addClassDescription("Computes turbine power for 1-phase flow for a simple on/off turbine");
   params.declareControllable("on");
   return params;
@@ -29,7 +30,7 @@ SimpleTurbinePowerAuxTempl<T>::validParams()
 
 template <typename T>
 SimpleTurbinePowerAuxTempl<T>::SimpleTurbinePowerAuxTempl(const InputParameters & parameters)
-  : T(parameters), _on(this->template getParam<bool>("on"))
+  : T(parameters), _on(this->template getParam<Real>("on"))
 {
 }
 
@@ -37,7 +38,7 @@ template <typename T>
 Real
 SimpleTurbinePowerAuxTempl<T>::computeValue()
 {
-  if (_on)
+  if (THM::realToBool(_on))
     return this->_value;
   else
     return 0.;
