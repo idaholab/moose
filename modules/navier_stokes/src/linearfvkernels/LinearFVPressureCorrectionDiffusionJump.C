@@ -127,18 +127,22 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   if (MooseUtils::absoluteFuzzyEqual(two_term_pressure_drop, 0.0))
     return base_matrix_contribution;
 
-  // Both q_p^lag and Delta p_PN^smooth,lag are known numbers here. Their ratio defines
+  // Both q_p^lag and Delta p_PN^smooth,lag are known numbers here. The assembled face relation is
   //
-  //   T_f^lag = q_p^lag / Delta p_PN^smooth,lag.
+  //   q_p = T_f Delta p_PN^smooth - R_f,
   //
-  // The face area is already included in q_p^lag, so T_f^lag is the complete area-integrated
-  // matrix coefficient. Both quantities have the same orientation, so a valid pressure-diffusion
-  // transmissibility is positive. Degenerate or inconsistent reconstructed data revert to the
-  // base discretization.
+  // so matching the reconstructed flux requires
+  //
+  //   T_f^lag = (q_p^lag + R_f^lag) / Delta p_PN^smooth,lag.
+  //
+  // The face area is already included in both flux terms, so T_f^lag is the complete
+  // area-integrated matrix coefficient. A valid pressure-diffusion transmissibility is positive.
+  // Degenerate or inconsistent reconstructed data revert to the base discretization.
   // The quotient is a frozen scalar. Returning it through compute*MatrixContribution() makes it a
   // coefficient of the current p_P and p_N unknowns; neither lagged gradient enters the matrix as
   // an unknown.
-  const Real two_term_matrix_contribution = two_term_flux / two_term_pressure_drop;
+  const Real two_term_matrix_contribution =
+      (two_term_flux + computeFluxRHSContribution()) / two_term_pressure_drop;
 
   // A negative or non-finite quotient would not define a diffusive matrix stencil.
   return std::isfinite(two_term_matrix_contribution) && two_term_matrix_contribution > 0.0
