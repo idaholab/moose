@@ -34,8 +34,9 @@ CylinderComponent::validParams()
   params.addRequiredParam<MooseEnum>("dimension",
                                      dims,
                                      "Dimension of the cylinder. 0 for a point (not implemented), "
-                                     "1 for an (axial) 1D line, 2 for a 2D-RZ cylinder, and 3 for "
+                                     "1 for an (axial) 1D line, 2 for a 2D cylinder, and 3 for "
                                      "a 3D cylinder");
+  params.addParam<bool>("use_RZ_coordinates", false, "Whether to use RZ coordinates");
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
   // Geometry
@@ -94,6 +95,12 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
 void
 CylinderComponent::addMeshGenerators()
 {
+  // Set outer boundaries
+  if (_dimension == 1)
+    _outer_boundaries = {name() + "_bottom_boundary", name() + "_top_boundary"};
+  else
+    _outer_boundaries = {name() + "_bottom_boundary", name() + "_outer", name() + "_top_boundary"};
+
   // Create the base mesh for the component using a mesh generator
   if (_dimension == 0)
     paramError("dimension", "0D cylinder not implemented");
@@ -103,11 +110,11 @@ CylinderComponent::addMeshGenerators()
     params.set<MooseEnum>("dim") = _dimension;
     params.set<Real>("xmax") = {getParam<Real>("length")};
     params.set<unsigned int>("nx") = {getParam<unsigned int>("n_axial")};
-    params.set<std::string>("boundary_name_prefix") = name();
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
-      params.set<Real>("ymin") = 0;
+      params.set<Real>("ymin") =
+          getParam<bool>("use_RZ_coordinates") ? 0 : -getParam<Real>("radius");
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = getParam<std::vector<unsigned int>>("n_radial")[0];
@@ -120,9 +127,14 @@ CylinderComponent::addMeshGenerators()
       params.set<SubdomainName>("subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "GeneratedMeshGenerator", name() + "_base", params);
-    _mg_names.push_back(name() + "_base");
+    // Set boundary names to keep them consistent between 1D, 2D and 3D
+    params.set<std::string>("boundary_name_prefix") = name();
+    if (_dimension == 1)
+      params.set<std::vector<BoundaryName>>("boundary_names") = {"bottom_boundary", "top_boundary"};
+    else
+      params.set<std::vector<BoundaryName>>("boundary_names") = {
+          "bottom_boundary", "outer", "top_boundary", "center"};
+    addMeshGenerator("GeneratedMeshGenerator", "base", params);
   }
   else if (_dimension == 3)
   {
@@ -151,13 +163,15 @@ CylinderComponent::addMeshGenerators()
     circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
     if (isParamValid("block"))
     {
-      const auto block_name = getParam<SubdomainName>("block");
-      circle_params.set<SubdomainName>("subdomain_name") = block_name;
-      _blocks.push_back(block_name);
+      std::vector<SubdomainName> blocks = {getParam<SubdomainName>("block")};
+      if (isParamValid("boundary_layer_width"))
+        blocks.push_back(blocks[0] + "_boundary_layer");
+      circle_params.set<std::vector<SubdomainName>>("subdomain_name") = blocks;
+      for (const auto & block : blocks)
+        _blocks.push_back(block);
     }
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
-    _mg_names.push_back(name() + "_circle_base");
+    circle_params.set<std::string>("boundary_name_prefix") = name() + "_";
+    addMeshGenerator("ConcentricCircleMeshGenerator", "circle_base", circle_params);
 
     // rotate to have extrusion axis be along x-axis
     // NOTE: this is re-rotated by the ComponentMeshTransformHelper
@@ -166,9 +180,7 @@ CylinderComponent::addMeshGenerators()
     rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
     RealVectorValue angles(-90, -90, 90);
     rotate_params.set<RealVectorValue>("vector_value") = angles;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", name() + "_3D_init_rotate", rotate_params);
-    _mg_names.push_back(name() + "_3D_init_rotate");
+    addMeshGenerator("TransformGenerator", "3D_init_rotate", rotate_params);
 
     // extrude the surface
     InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
@@ -178,21 +190,21 @@ CylinderComponent::addMeshGenerators()
     ext_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
     ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
 
+    // the output is rotated
     const Point default_direction(1, 0, 0);
     ext_params.set<Point>("direction") = default_direction;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AdvancedExtruderGenerator", name() + "_base", ext_params);
-    _mg_names.push_back(name() + "_base");
+    addMeshGenerator("AdvancedExtruderGenerator", "base", ext_params);
   }
   _top_mg_name = _mg_names.back();
 
   ComponentMeshTransformHelper::addMeshGenerators();
+  setOwnMeshMeshGeneratorName(_mg_names.back());
 }
 
 void
 CylinderComponent::setupComponent()
 {
-  if (_dimension == 2)
+  if (_dimension == 2 && getParam<bool>("use_RZ_coordinates"))
   {
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
     if (_direction)
@@ -215,7 +227,7 @@ Point
 CylinderComponent::translation() const
 {
   // The 1D or 2D RZ cylinders are naturally centered
-  if (!_offset_position_to_center || _dimension <= 2)
+  if (!_offset_position_to_center || (_dimension <= 2 || getParam<bool>("use_RZ_coordinates")))
     return ComponentMeshTransformHelper::translation();
 
   auto input_translation = ComponentMeshTransformHelper::translation();

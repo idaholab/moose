@@ -40,6 +40,24 @@ The direction is computed locally for every node as:
 !alert note
 When extruding along an line mesh curve, specifying the biases, heights, number of layers and directions is not currently supported.
 
+## Extrusion along node normals
+
+Instead of a fixed [!param](/Mesh/AdvancedExtruderGenerator/direction), each node can be extruded along the
+local surface normal by setting [!param](/Mesh/AdvancedExtruderGenerator/extrude_along_node_normals) to `true`.
+This is useful to grow boundary layers off of a curved surface. The [!param](/Mesh/AdvancedExtruderGenerator/heights),
+[!param](/Mesh/AdvancedExtruderGenerator/num_layers) and [!param](/Mesh/AdvancedExtruderGenerator/biases) parameters are
+used as usual to control the layer thicknesses and grading; only the extrusion direction changes.
+
+The direction at each node is computed as the average of the normals of all the elements connected to that node. Each
+element normal is itself the average of its per-vertex normals, so the result reduces to the face normal for triangles and
+planar quadrilaterals. The input surface mesh is expected to have consistently oriented elements. To flip the overall
+growth direction (inward versus outward), negate the [!param](/Mesh/AdvancedExtruderGenerator/heights).
+
+This option is only supported when extruding a 2D surface mesh into 3D, and is not currently implemented for distributed
+meshes.
+
+!listing test/tests/meshgenerators/advanced_extruder_generator/extrude_along_normals.i block=Mesh/extrude
+
 ## Radial growth during extrusion
 
 By setting the [!param](/Mesh/AdvancedExtruderGenerator/end_radial_extent), the radial extent of the extruded mesh can be expanded or
