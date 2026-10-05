@@ -6,8 +6,8 @@
     input = '2d.i'
     exodiff = '2d_out.e'
     requirement = 'The system shall solve a 2D axisymmetric (RZ) thermomechanical problem and '
-                   'produce a solution file for use as the source solution of an '
-                   'Axisymmetric2D3DSolutionFunction mapping.'
+                   'produce a solution file for use as the source solution which is then '
+                   'mapped between cylindrical and 3D cartesian coordinates.'
   [../]
   [./axisymmetric_2d3d_solution_function_3dy]
     type = 'Exodiff'
