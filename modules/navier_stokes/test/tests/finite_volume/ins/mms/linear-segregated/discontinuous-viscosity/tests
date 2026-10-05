@@ -10,4 +10,15 @@
     design = 'LinearPWCNSFVMomentumFlux.md SIMPLE.md'
     requirement = 'The system shall obtain second-order velocity and pressure convergence for a piecewise-linear manufactured solution with continuous total traction across a discontinuous-viscosity interface using harmonic two-point stress transmissibility with nonorthogonal and deviatoric corrections.'
   []
+  [porosity-jump]
+    type = MMSTest
+    input = test.py
+    test_case = TestDiscontinuousPorosityTraction
+    min_parallel = 2
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+    issues = '#31995'
+    design = 'LinearPWCNSFVMomentumFlux.md SIMPLE.md'
+    requirement = 'The system shall obtain second-order velocity and greater-than-first-order pressure convergence for a piecewise-quadratic superficial-velocity solution with continuous viscous traction and discontinuous interstitial velocity across a porosity jump.'
+  []
 []
