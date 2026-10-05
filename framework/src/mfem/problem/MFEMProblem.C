@@ -588,7 +588,17 @@ MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  ExternalProblem::addFunction(type, name, parameters);
+  // Add function to the warehouse, while avoiding the threading logic in FEProblemBase::addFunction
+  {
+    parallel_object_only();
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+
+    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters);
+    logAdd("Function", name, type, parameters);
+    _functions.addObject(func);
+  }
+
   auto & func = getFunction(name);
   // FIXME: Do we want to have optimised versions for when functions
   // are only of space or only of time.
