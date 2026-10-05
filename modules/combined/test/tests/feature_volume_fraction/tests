@@ -1,4 +1,6 @@
 [Tests]
+  # SVN issue r18100
+  issues = '#7769'
   [./volume_fraction_test]
     type = CSVDiff
     input = 'feature_volume_fraction.i'
