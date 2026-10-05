@@ -35,6 +35,10 @@ private:
   mfem::Coefficient & _beta_coef;
   const int _inner_pi_its;
   const int _inner_g_its;
+  /// Smoother for mfem::MatrixFreeAMS: the user's "smoother", or _default_smoother
+  mfem::Solver * _smoother = nullptr;
+  /// Default smoother, used when "smoother" is not set
+  std::unique_ptr<mfem::Solver> _default_smoother;
 };
 
 #endif
