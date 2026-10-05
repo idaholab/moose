@@ -10478,3 +10478,16 @@ FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {
   return _mortar_data->getMortarInterfaces(on_displaced);
 }
+
+MaterialPropertyStorage &
+FEProblemBase::getMaterialPropertyStorageForRemap(const MaterialPropertyStorageRemapKey /* key */)
+{
+  return _material_props;
+}
+
+MaterialPropertyStorage &
+FEProblemBase::getBndMaterialPropertyStorageForRemap(
+    const MaterialPropertyStorageRemapKey /* key */)
+{
+  return _bnd_material_props;
+}
