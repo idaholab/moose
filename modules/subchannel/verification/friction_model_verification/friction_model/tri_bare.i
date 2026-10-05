@@ -11,9 +11,9 @@ corner = 25
   [subchannel]
     type = SCMTriAssemblyMeshGenerator
     nrings = 3
-    n_cells = 10
+    n_cells = 30
     flat_to_flat = 0.05319936
-    heated_length = 1
+    heated_length = 3
     pin_diameter = 0.0082
     pitch = 0.01148
     dwire = 0.0

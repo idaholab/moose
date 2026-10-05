@@ -12,11 +12,11 @@ corner = 0
     type = SCMQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 10
+    n_cells = 30
     pitch = 0.0126
     pin_diameter = 0.00950
     side_gap = 0.00095
-    heated_length = 1
+    heated_length = 3
     spacer_z = '0.0'
     spacer_k = '0.0'
   []

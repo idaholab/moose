@@ -108,7 +108,7 @@ def write_friction_factor(reactor):
     Re_iL = Re_bl * de_ratio * rr.corr_constants["fs"]["fs"]["laminar"]
     Re_iT = Re_bt * de_ratio * rr.corr_constants["fs"]["fs"]["turbulent"]
     # Same bundle Reynolds number range as the SCM mass flux sweep in tri_wire.i
-    Re_bundle = np.geomspace(1.0, 3.0e5, 400)
+    Re_bundle = np.geomspace(1.0, 3.0e5, 4000)
     with open(SCRIPT_DIR / "dassh_tri_wire_out.csv", "w") as f:
         f.write("Re_bundle,Re_center,ff_center,Re_edge,ff_edge,Re_corner,ff_corner\n")
         for Re in Re_bundle:

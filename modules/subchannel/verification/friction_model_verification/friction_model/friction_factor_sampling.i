@@ -6,15 +6,22 @@
 
 T_in = 359.15 # K
 P_out = 4.923e6 # Pa
-# Inlet mass flux 10^(G_exp0 + 0.1 t) [kg/m^2-s]. The bulk Reynolds number is about 1 at t = 1 and
-# grows by 0.1 decades per step, so end_time = 56 stops the sweep just below the upper limit
+# Inlet mass flux 10^(G_exp0 + 0.1 n) [kg/m^2-s] at step n. The bulk Reynolds number is about 1 at
+# n = 1 and grows by 0.1 decades per step, so 56 steps stop the sweep just below the upper limit
 # Re = 3e5 of the Pacio-Chen-Todreas applicability range
 G_exp_rate = 0.1
+# Each sweep step is a time step of the transient solve. The time derivative of the axial momentum
+# equation, about dz (mdot - mdot_old) / dt, is about 9% of the laminar friction of the wire-wrapped
+# assembly for dt = 1 s and skews the laminar flow split, so each step lasts 1e4 s, which makes it
+# negligible
+dt_step = 1e4 # s
 
-# The closure at the outlet node of a cell uses the Reynolds number at the inlet node, so the
-# Reynolds number is sampled one cell (0.1 m) below the friction factor
-z_Re = 0.4
-z_ff = 0.5
+# The inlet mass flux is uniform, and the flow split develops over about 1.5 m, so the friction
+# factor is sampled near the outlet of the 3 m assembly, where the flow is developed. The closure
+# at the outlet node of a cell uses the Reynolds number at the inlet node, so the Reynolds number
+# is sampled one cell (0.1 m) below the friction factor
+z_Re = 2.8
+z_ff = 2.9
 
 [FluidProperties]
   [water]
@@ -41,7 +48,9 @@ z_ff = 0.5
   [constant_beta]
     type = SCMMixingConstantBeta
     beta = 0.006
-    CT = 1.8
+    # No turbulent exchange of axial momentum, so the developed flow split is set by the friction
+    # closure alone
+    CT = 0.0
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
@@ -95,7 +104,7 @@ z_ff = 0.5
 [Functions]
   [mass_flux_fn]
     type = ParsedFunction
-    expression = '10^(${G_exp0} + ${G_exp_rate} * t)'
+    expression = '10^(${G_exp0} + ${G_exp_rate} * t / ${dt_step})'
   []
 []
 
@@ -230,6 +239,6 @@ z_ff = 0.5
 [Executioner]
   type = Transient
   start_time = 0.0
-  end_time = 56
-  dt = 1.0
+  end_time = '${fparse 56 * dt_step}'
+  dt = ${dt_step}
 []
