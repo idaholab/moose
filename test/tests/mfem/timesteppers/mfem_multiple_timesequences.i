@@ -106,7 +106,6 @@
 [Postprocessors]
   [timestep]
     type = TimePostprocessor
-    execute_on = 'timestep_end'
   []
 []
 

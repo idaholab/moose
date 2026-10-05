@@ -72,7 +72,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taoblmvm #taolmvm#taonm #taolmvm
+  tao_solver = taobqnls #taonm
   petsc_options_iname = '-tao_gatol' # -tao_fd_gradient -tao_fd_delta'
   petsc_options_value = '1e-4' #1e-1 '#true 1e-4'
 []

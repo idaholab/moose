@@ -1,4 +1,4 @@
-# Fracture flow using a MultiApp approach: Porous flow in a single matrix system
+# Fracture flow using a MultiApp approach: Porous flow in a system with a single 1D fracture
 
 ## Background
 
@@ -9,10 +9,10 @@ PorousFlow can be used to simulate flow through fractured porous media in the ca
 - [Transfers](multiapp_fracture_flow_transfers.md)
 - [MultiApp primer](multiapp_fracture_flow_primer.md): the diffusion equation with no fractures, and quantifying the errors introduced by the MultiApp approach
 - [Diffusion in mixed dimensions](multiapp_fracture_flow_diffusion.md)
-- [Porous flow in a single matrix system](multiapp_fracture_flow_PorousFlow_2D.md)
+- [Porous flow in a system with a single 1D fracture](multiapp_fracture_flow_PorousFlow_2D.md)
 - [Porous flow in a small fracture network](multiapp_fracture_flow_PorousFlow_3D.md)
 
-## Porous flow in a single matrix system
+## Porous flow in a system with a single 1D fracture
 
 Consider a single 1D planar fracture within a 2D mesh.  Fluid flows along the fracture according to Darcy's equation, so may be modelled using [PorousFlowFullySaturated](PorousFlowFullySaturated.md)
 
@@ -45,6 +45,10 @@ The boundary conditions correspond to injection of 100$^{\circ}$C water at a rat
 The physics in the matrix is assumed to be the simple heat equation.  Note that this has no stabilization, so there are overshoots and undershoots in the solution.
 
 !listing single_fracture_heat_transfer/matrix_app.i block=Kernels
+
+The heat from from the fracture is transferred to the matrix and applied as Dirac sources:
+
+!listing single_fracture_heat_transfer/matrix_app.i block=DiracKernels
 
 The [Transfers](multiapp_fracture_flow_transfers.md) are identical to those used in the [diffusion-equation case](multiapp_fracture_flow_diffusion.md):
 

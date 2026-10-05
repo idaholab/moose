@@ -24,7 +24,7 @@ measurement_values = '293 304 315 320'
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
+  tao_solver = taobqnls
   petsc_options_iname = '-tao_gttol -tao_ls_type'
   petsc_options_value = '1e-5 unit'
   verbose = true

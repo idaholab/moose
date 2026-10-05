@@ -25,8 +25,11 @@ from MooseDocs.extensions import (
     sqa,
     table,
     modal,
+    template,
+    alert,
+    materialicon,
 )
-from MooseDocs import base
+from MooseDocs import base, common
 from MooseDocs.tree import pages
 
 logging.basicConfig()
@@ -387,6 +390,79 @@ class TestSQADocument(MooseDocsTestCase):
         self.assertToken(
             ast(0), "AutoLink", page="sqa/Demo_foo.md", optional=True, warning=True
         )
+
+
+class TestSQARecordsTemplate(MooseDocsTestCase):
+    """
+    Regression test for framework/doc/content/templates/sqa/app_index.md.template: the
+    'sqa-records' field must default to the category passed to '!template load', not the
+    general/'_empty_' category (see idaholab/moose#23649).
+    """
+
+    EXTENSIONS = [
+        core,
+        command,
+        floats,
+        autolink,
+        heading,
+        civet,
+        sqa,
+        table,
+        modal,
+        template,
+        alert,
+        materialicon,
+    ]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(
+                active=True,
+                categories=dict(
+                    Demo=dict(
+                        directories=["python/MooseDocs/test"],
+                        specs=["demo"],
+                        reports=dict(
+                            Documents=dict(
+                                software_requirements_specification="demo_srs.md"
+                            )
+                        ),
+                    )
+                ),
+                reports=dict(
+                    Documents=dict(software_requirements_specification="general_srs.md")
+                ),
+            )
+        elif ext == template:
+            return dict(active=True)
+
+    def setupContent(self):
+        config = [
+            dict(
+                root_dir="framework/doc/content",
+                content=["templates/sqa/app_index.md.template"],
+            )
+        ]
+        return common.get_content(config, ".md")
+
+    def testRecordsDefaultToLoadCategory(self):
+        text = (
+            "!template load file=sqa/app_index.md.template category=Demo app=Demo App"
+        )
+        ast = self.tokenize(text)
+
+        records = ast(0, 1)
+        self.assertToken(records, "TemplateField", key="sqa-records")
+        self.assertToken(records(0), "Heading", string="Software Quality Records")
+
+        ul = records(1)
+        self.assertToken(ul, "UnorderedList")
+        srs_items = [
+            li
+            for li in ul.children
+            if li(0).name == "AutoLink" and li(0)["page"] == "demo_srs.md"
+        ]
+        self.assertEqual(len(srs_items), 1)
 
 
 class TestSQARequirementsRender(MooseDocsTestCase):

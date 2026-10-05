@@ -1,6 +1,6 @@
 [Tests]
   design = FieldSplitPreconditioner.md
-  issues = '#1851 #22359'
+  issues = '#1851 #22359 #22860'
   [group]
     requirement = "The system shall support the use of field split preconditioner on"
 
@@ -40,6 +40,12 @@
     input = 'missing-var-in-split.i'
     type = RunException
     expect_err = 'Make sure that you have non-overlapping complete sets for variables'
+  []
+  [duplicate_var_in_split]
+    requirement = 'The system shall report an error if a user has specified the same variable in more than one of the sibling splits of a field split.'
+    input = 'duplicate-var-in-split.i'
+    type = RunException
+    expect_err = "Variable 'v' is specified in both split 'u' and split 'v', which are both part of split 'uv'"
   []
   [nested]
     requirement = 'The system shall support nested field splits.'

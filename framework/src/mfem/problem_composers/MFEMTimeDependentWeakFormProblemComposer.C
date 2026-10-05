@@ -14,6 +14,14 @@
 
 registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
 
+InputParameters
+MFEMTimeDependentWeakFormProblemComposer::validParams()
+{
+  InputParameters params = MFEMProblemComposer::validParams();
+  params.addClassDescription("Creates a time-dependent equation-system problem operator.");
+  return params;
+}
+
 MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakFormProblemComposer(
     const InputParameters & parameters)
   : MFEMProblemComposer(parameters)

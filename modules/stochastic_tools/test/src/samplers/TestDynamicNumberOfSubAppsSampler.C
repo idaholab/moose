@@ -21,7 +21,8 @@ TestDynamicNumberOfSubAppsSampler::validParams()
 
 TestDynamicNumberOfSubAppsSampler::TestDynamicNumberOfSubAppsSampler(
     const InputParameters & parameters)
-  : MonteCarloSampler(parameters)
+  : MonteCarloSampler(parameters),
+    _increment_rows(declareRecoverableData<dof_id_type>("increment_rows_state", 0))
 {
 }
 

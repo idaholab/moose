@@ -209,8 +209,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres bjacobi 1E-10 1E-10 10 1E-15 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -ksp_atol -ksp_rtol'
+    petsc_options_value = 'gmres bjacobi 1E-15 1E-10'
   [../]
 []
 
@@ -218,6 +218,9 @@
   type = Transient
   solve_type = Newton
   num_steps = 1
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-10
+  nl_max_its = 10
 []
 
 

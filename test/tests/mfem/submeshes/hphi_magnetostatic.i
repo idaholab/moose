@@ -123,20 +123,17 @@ vacuum_permeability = 1.0
     variable = background_h_field
     source = vacuum_magnetic_potential
     scale_factor = -1.0
-    execute_on = TIMESTEP_END
   []
   [update_transition_cut_function_field]
     type = MFEMGradAux
     variable = transition_cut_function_field
     source = transition_cut_potential
     scale_factor = -1.0
-    execute_on = TIMESTEP_END
   []
   [update_total_h_field]
     type = MFEMSumAux
     variable = vacuum_h_field
     source_variables = 'background_h_field cut_function_field'
-    execute_on = TIMESTEP_END
   []
 []
 

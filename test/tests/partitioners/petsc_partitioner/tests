@@ -22,7 +22,7 @@
     rel_err = '1e-1'
   [../]
 
-  [./ptscotch_weight_elment]
+  [./ptscotch_weight_element]
     requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'

@@ -178,8 +178,8 @@
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-8       1E-10 20'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
+    petsc_options_value = 'gmres asm lu NONZERO 2'
   []
 []
 
@@ -192,6 +192,9 @@
     dt = 10
     growth_factor = 2
   []
+  nl_abs_tol = 1E-8
+  nl_rel_tol = 1E-10
+  nl_max_its = 20
 []
 
 [VectorPostprocessors]

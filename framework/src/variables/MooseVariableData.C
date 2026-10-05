@@ -673,7 +673,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
           _grad_u_dotdot, *_current_grad_phi, _dof_values_dotdot, nqp, num_shapes);
   }
 
-  if (_need_ad)
+  // A variable whose AD was only ever requested through the face-scoped accessors has no
+  // consumer on element interiors, so seeding the derivatives there is wasted work. In the
+  // volume context _current_qrule is _qrule; see setGeometry().
+  if (_need_ad && (_need_ad_volume || _current_qrule != _qrule))
     computeAD<constant_monomial>(num_dofs, nqp);
 }
 

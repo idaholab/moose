@@ -33,6 +33,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    prereq = MFEMCurlCurlLOR # racing to create the OutputData directory
   []
   [MFEMGradDivLOR]
     type = CSVDiff
@@ -49,6 +50,7 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     recover = false
+    prereq = MFEMCurlCurlLOR # racing to create the OutputData directory
   []
   [MFEMHeatConductionLOR]
     type = CSVDiff
@@ -69,5 +71,6 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    prereq = MFEMCurlCurlLOR # racing to create the OutputData directory
   []
 []

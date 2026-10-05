@@ -123,8 +123,6 @@ MappingReporter::mapParallelStorageData()
   // too
   for (const auto sample_i : make_range(rank_config.num_local_sims))
   {
-    std::vector<Real> data = _sampler->getNextLocalRow();
-
     // Converting the local indexing to global sample indices
     const unsigned int global_i = sample_i + _sampler->getLocalRowBegin();
 

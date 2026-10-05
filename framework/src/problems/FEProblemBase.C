@@ -4857,6 +4857,13 @@ FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD
   return *(methods[0]);
 }
 
+FVGradientMethod &
+FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid)
+{
+  return const_cast<FVGradientMethod &>(
+      static_cast<const FEProblemBase &>(*this).getFVGradientMethod(name, tid));
+}
+
 bool
 FEProblemBase::hasFVGradientMethod(const GradientMethodName & name) const
 {
@@ -9361,6 +9368,8 @@ FEProblemBase::checkProblemIntegrity()
 
   checkUserObjects();
 
+  checkGradientMethods();
+
   // Verify that we don't have any Element type/Coordinate Type conflicts
   checkCoordinateSystems();
 
@@ -9458,6 +9467,15 @@ FEProblemBase::checkUserObjects()
       oss << id << "\n";
     mooseError(oss.str());
   }
+}
+
+void
+FEProblemBase::checkGradientMethods()
+{
+  std::vector<FVGradientMethod *> methods;
+  theWarehouse().query().condition<AttribSystem>("FVGradientMethod").queryInto(methods);
+  for (auto * method : methods)
+    method->resolveGradientMethodDependencies(*this);
 }
 
 void

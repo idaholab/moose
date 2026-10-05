@@ -173,6 +173,10 @@ class Parser:
                         params[key].append(value)
                     else:
                         params[key] = value
+                elif key == "allow_override":
+                    print(
+                        f'WARNING: {default_values.filename()}:{default_values.line(key)}: unused parameter "{key}"'
+                    )
 
             # Extract the parameters from the hit node
             self.extractParams(params, node)

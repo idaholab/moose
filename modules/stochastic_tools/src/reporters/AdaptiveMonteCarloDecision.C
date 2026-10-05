@@ -46,8 +46,14 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _sampler(getSampler("sampler")),
     _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
     _pss(dynamic_cast<const ParallelSubsetSimulation *>(&_sampler)),
-    _check_step(std::numeric_limits<int>::max()),
-    _local_comm(_sampler.getLocalComm()),
+    _check_step(declareRestartableData<int>("check_step", std::numeric_limits<int>::max())),
+    _prev_val(declareRestartableData<std::vector<std::vector<Real>>>("prev_val")),
+    _prev_val_out(declareRestartableData<std::vector<Real>>("prev_val_out")),
+    _inputs_sto(declareRestartableData<std::vector<std::vector<Real>>>("inputs_sto")),
+    _inputs_sorted(declareRestartableData<std::vector<std::vector<Real>>>("inputs_sorted")),
+    _outputs_sto(declareRestartableData<std::vector<Real>>("outputs_sto")),
+    _output_sorted(declareRestartableData<std::vector<Real>>("output_sorted")),
+    _output_limit(declareRestartableData<Real>("output_limit", 0.0)),
     _gp_used(isParamValid("gp_decision")),
 #ifdef MOOSE_LIBTORCH_ENABLED
     _gp_training_samples(
@@ -103,16 +109,20 @@ AdaptiveMonteCarloDecision::reinitChain()
 void
 AdaptiveMonteCarloDecision::execute()
 {
-  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _t_step)
-  {
-    _check_step = _t_step;
+  if (_check_step == _t_step)
     return;
-  }
 
   /* Decision step to whether or not to accept the proposed sample by the sampler.
      This decision step changes with the type of adaptive Monte Carlo sampling algorithm. */
   if (_ais)
   {
+    // This branch hard-codes row index 0, so a rank with zero local rows has no data here.
+    if (_sampler.getNumberOfLocalRows() == 0)
+    {
+      _check_step = _t_step;
+      return;
+    }
+
     const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
 
     /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed
@@ -133,7 +143,7 @@ AdaptiveMonteCarloDecision::execute()
         Here, it is decided whether or not to accept a proposed sample by the
         AdaptiveImportanceSampler.C sampler depending upon the model output_value. */
       _inputs = output_limit_reached
-                    ? StochasticTools::reshapeVector(_sampler.getNextLocalRow(), 1, true)
+                    ? StochasticTools::reshapeVector(_sampler.getSampleRow(0), 1, true)
                     : _prev_val;
       if (output_limit_reached)
         _prev_val = _inputs;
@@ -144,7 +154,7 @@ AdaptiveMonteCarloDecision::execute()
       /* This is the sampling phase of the Adaptive Importance Sampling algorithm.
         Here, all proposed samples by the AdaptiveImportanceSampler.C sampler are accepted since
         the importance distribution traning phase is finished. */
-      _inputs = StochasticTools::reshapeVector(_sampler.getNextLocalRow(), 1, true);
+      _inputs = StochasticTools::reshapeVector(_sampler.getSampleRow(0), 1, true);
       _prev_val_out[0] = tmp;
     }
   }
@@ -158,20 +168,16 @@ AdaptiveMonteCarloDecision::execute()
     const unsigned int offset = sub_ind * _sampler.getNumberOfRows();
     const unsigned int count_max = 1 / _pss->getSubsetProbability();
 
-    DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
-    for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
-    {
-      const auto data = _sampler.getNextLocalRow();
-      for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-        data_in(ss, j) = data[j];
-    }
-    _local_comm.sum(data_in.get_values());
+    DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
 
     // Get the accepted samples outputs across all the procs from the previous step
-    _output_required = (_pss->getUseAbsoluteValue())
-                           ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value)
-                           : _output_value;
-    _local_comm.allgather(_output_required);
+    mooseAssert(_output_value.size() >= _sampler.getNumberOfLocalRows(),
+                "Incorrectly sized outputs.");
+    _output_required.assign(_output_value.begin(),
+                            _output_value.begin() + _sampler.getNumberOfLocalRows());
+    if (_pss->getUseAbsoluteValue())
+      _output_required = AdaptiveMonteCarloUtils::computeVectorABS(_output_required);
+    _communicator.allgather(_output_required);
 
     // These are the subsequent subsets which use Markov Chain Monte Carlo sampling scheme
     if (subset > 0)

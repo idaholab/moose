@@ -86,7 +86,7 @@ PODSurrogateTester::execute()
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
-    std::vector<Real> data = _sampler.getNextLocalRow();
+    std::vector<Real> data = _sampler.getSampleRow(p);
 
     for (unsigned int m = 0; m < n_models; ++m)
     {

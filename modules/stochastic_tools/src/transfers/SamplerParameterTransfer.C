@@ -56,16 +56,26 @@ SamplerParameterTransfer::execute()
                   (_sampler_ptr->getNumberOfLocalRows() == getToMultiApp()->numLocalApps()),
               "The number of MultiApps and the number of sample rows must be the same.");
 
-  // Loop over all sub-apps
-  for (dof_id_type row_index = _sampler_ptr->getLocalRowBegin();
-       row_index < _sampler_ptr->getLocalRowEnd();
-       row_index++)
-  {
-    mooseAssert(getToMultiApp()->hasLocalApp(row_index),
-                "The current sample row index is not a valid global MultiApp index.");
+  if (!getToMultiApp()->hasApp())
+    return;
 
-    // Populate the row of data to transfer
-    std::vector<Real> row = _sampler_ptr->getNextLocalRow();
+  // Loop over the MultiApp's own local app range rather than the sampler's local row
+  // range: the latter is only nonempty on a slot's root rank.
+  libMesh::Parallel::Communicator slot_comm(getToMultiApp()->comm());
+  const dof_id_type first = getToMultiApp()->firstLocalApp();
+  const dof_id_type end = first + getToMultiApp()->numLocalApps();
+  for (dof_id_type row_index = first; row_index < end; ++row_index)
+  {
+    // Only the slot root has this row locally; share it with the rest of the slot.
+    std::vector<Real> row;
+    if (getToMultiApp()->isRootProcessor())
+    {
+      mooseAssert(row_index >= _sampler_ptr->getLocalRowBegin() &&
+                      row_index < _sampler_ptr->getLocalRowEnd(),
+                  "The current sample row index is not a valid local sampler row.");
+      row = _sampler_ptr->getSampleRow(row_index);
+    }
+    slot_comm.broadcast(row, 0);
 
     // Get the command line arguments
     const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(row, _parameter_names);
@@ -79,15 +89,20 @@ SamplerParameterTransfer::execute()
 void
 SamplerParameterTransfer::executeToMultiapp()
 {
-  if (getToMultiApp()->isRootProcessor())
-  {
-    // Get the command line arguments
-    const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(_row_data, _parameter_names);
+  if (!getToMultiApp()->hasApp())
+    return;
 
-    // Get the sub-app SamplerReceiver objects and transfer param-values map
-    for (auto & ptr : getReceivers(_app_index, args))
-      ptr.first->transfer(ptr.second);
-  }
+  // _row_data is only populated on the slot root; share it with the rest of the slot.
+  libMesh::Parallel::Communicator slot_comm(getToMultiApp()->comm());
+  std::vector<Real> row = _row_data;
+  slot_comm.broadcast(row, 0);
+
+  // Get the command line arguments
+  const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(row, _parameter_names);
+
+  // Get the sub-app SamplerReceiver objects and transfer param-values map
+  for (auto & ptr : getReceivers(_app_index, args))
+    ptr.first->transfer(ptr.second);
 }
 
 std::map<SamplerReceiver *, std::map<std::string, std::vector<Real>>>

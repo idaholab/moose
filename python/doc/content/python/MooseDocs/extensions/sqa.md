@@ -249,7 +249,7 @@ The available options for the "collections" settings are listed below.
 
 ## Extension Commands
 
-The following sections provide information regarding each of the
+The following sections provide information regarding each of the commands available to the extension.
 
 ### Requirement Cross-Reference List
 

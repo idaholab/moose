@@ -1,5 +1,5 @@
 ---
-name: moose-markdown-documentation
+name: moose-docs
 description: Write a documentation file for a MOOSE object
 ---
 

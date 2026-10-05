@@ -10,6 +10,12 @@
     recover = false
     abs_zero = 1e-6
     rel_err = 3e-5
+    # mdot-35 is the flow rate in a corner subchannel that is small relative to the assembly
+    # flow and set by the iteratively-relaxed inter-channel crossflow (Wij), so it is more
+    # sensitive to build/platform floating-point noise than the rest of the postprocessors
+    override_columns = 'mdot-35'
+    override_rel_err = '5e-5'
+    override_abs_zero = '1e-6'
     max_threads = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II case'
   []

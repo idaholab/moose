@@ -48,7 +48,6 @@ public:
   struct Sparsity
   {
     Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
     Array<PetscInt> row_ptr;
   };
 
@@ -161,11 +160,33 @@ public:
   const Sparsity & getSparsity() const { return _sparsity; }
 
   /**
+   * Build the COO index arrays describing the sparsity pattern
+   *
+   * PETSc consumes these arrays destructively, so a fresh pair is needed for each matrix
+   * preallocated from this system.  The arrays are resized to the number of nonzeros and fully
+   * overwritten, which lets one allocation be reused across the matrices.
+   *
+   * @param coo_i The row index of each nonzero
+   * @param coo_j The column index of each nonzero
+   */
+  void buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const;
+
+  /**
    * Check whether a variable is scalar
    * @param var The variable number
    * @returns Whether the variable is scalar
    */
   KOKKOS_FUNCTION bool isScalarVariable(unsigned int var) const { return _var_is_scalar[var]; }
+
+  /**
+   * Get the equation scaling factor of a variable
+   * @param var The variable number
+   * @returns The scaling factor
+   */
+  KOKKOS_FUNCTION Real getVariableScalingFactor(unsigned int var) const
+  {
+    return _var_scaling_factor[var];
+  }
 
   /**
    * Check whether a variable is active on a subdomain
@@ -383,6 +404,11 @@ protected:
   Array<bool> _var_is_scalar;
 
   /**
+   * Equation scaling factor of each variable
+   */
+  Array<Real> _var_scaling_factor;
+
+  /**
    * Whether each variable is active on subdomains
    */
   Array2D<bool> _var_subdomain_active;
@@ -422,6 +448,11 @@ private:
    * Setup variable data
    */
   void setupVariables();
+
+  /**
+   * Update variable scaling factors on device
+   */
+  void updateVariableScalingFactors();
 
   /**
    * Setup DOF data

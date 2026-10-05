@@ -266,4 +266,19 @@
     rel_err = 1.0e-4
     allow_warnings = true
   []
+  [three_blocks_automatic_pairing_mortar]
+    type = 'Exodiff'
+    input = 'three_blocks_automatic_pairing_mortar.i'
+    exodiff = 'three_blocks_automatic_pairing_mortar_out.e'
+    # The primary surface shared by two pairs has coincident lower-dimensional elements in two
+    # subdomains, which exodiff cannot distinguish by element midpoint
+    map = false
+    issues = '#33128'
+    design = 'ContactPairLowerDBlockGenerator.md'
+    requirement = 'The system shall be able to automatically pair boundaries and set up mortar '
+                  'contact between three blocks that each contact the other two, assigning the '
+                  'larger surface of each pair as the primary surface.'
+    # Automatic pairing method requires a serial mesh
+    mesh_mode = 'replicated'
+  []
 []

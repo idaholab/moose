@@ -8,6 +8,7 @@
       type = 'JSONDiff'
       input = main_adam.i
       jsondiff = 'single_proc_single_row_ufunction.json'
+      cli_args = 'Executioner/num_steps=30' # Ensure we recover during the timesteps
       detail = 'a single row in the sampler using the U learning function;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'

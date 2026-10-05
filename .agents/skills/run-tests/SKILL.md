@@ -59,28 +59,13 @@ once. If `-j` is less than a test's `-p` x `--n-threads`, that test is skipped w
 - Gold files live in `gold/` next to the input. Don't regold or relax test tolerances or parameters without understanding *why* the
   result changed — if the diff only appears under certain compiler flags/hardware/thread counts,
   use the brittle-numerics-root-cause skill instead of just re-golding.
-- Re-golding or relaxing tolerances or parameters is always a last resort measure, only to be used after confirming that any code changes leading to the diff undoubtedly improve the code's scientific correctness or accuracy. All tolerances need to be as tight as possible, a test with a loose tolerance is useless.
+- Re-golding or relaxing tolerances or parameters is always a last resort measure, only to be used after confirming that any code changes leading to the diff undoubtedly improve the code's scientific correctness or accuracy.
+- Changing a tolerance is a test-authoring decision and lives in other skills:
+  brittle-numerics-root-cause decides whether widening one is the right fix at all, and
+  `.agents/skills/write-regression-tests/references/tolerances.md` holds the mechanics for
+  `CSVDiff`'s `override_columns` and `Exodiff`'s `custom_cmp`.
 - For a CRASH/ERROR, rerun the input directly with the app binary (e.g. `./bison-opt -i
   <input>.i`) to get a full stack trace instead of TestHarness's summarized output.
-
-## CSVDiff tolerance overrides
-- `CSVDiff` tests support `override_columns`/`override_rel_err`/`override_abs_zero` (mapped to
-  `csvdiff.py`'s `--custom-columns`/`--custom-rel-err`/`--custom-abs-zero`) to give specific
-  columns a different tolerance than the test's own `rel_err`/`abs_zero`. Prefer this over
-  loosening the whole test's `rel_err` when only one or two columns need slack — e.g. a quantity
-  computed as the residual of much larger, comparable-magnitude terms that happens to be near a
-  physical zero (see brittle-numerics-root-cause's note on this).
-- All three lists must be the same length or the test fails with "Override inputs not the same
-  length" (`CSVDiff.py`'s `checkRunnable`) — even if you only want to widen `rel_err` for a column,
-  you must still supply a matching `override_abs_zero` entry for it.
-- The effective default `rel_err`/`abs_zero` for *non-overridden* columns comes from the Tester's
-  own `FileTester.validParams()` defaults (`rel_err=5.5e-6`, `abs_zero=1e-10`), which are always
-  passed explicitly to `csvdiff.py` (these match `csvdiff.py`'s own argparse defaults, which only
-  matter when it's run standalone outside the TestHarness).
-- `csvdiff.py` reports only the *first* mismatching row per column, then stops — it does not report
-  the true worst-case relative diff over the run. To size a tolerance correctly, replicate its
-  abs_zero/rel_diff logic over the full column yourself rather than trusting the reported value as
-  the max.
 
 ## Cross-repo notes
 The script and flags work the same whether you're in `moose/`, a module under
