@@ -9,7 +9,6 @@
 
 #include "LinearPWCNSFVMomentumFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "LinearFVGradientReader.h"
 #include "RhieChowMassFlux.h"
 
 #include <cmath>
@@ -79,20 +78,15 @@ LinearPWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
     return 0.0;
 
   const auto & fi = *_current_face_info;
-  const auto state = determineState();
   const auto stress_data = twoPointStressData();
   if (stress_data.transmissibility == 0.0)
     return 0.0;
 
-  Real elem_correction = 0.0;
-  Real neighbor_correction = 0.0;
+  RealVectorValue elem_correction_vector;
+  RealVectorValue neighbor_correction_vector;
 
   if (_dim > 1 && _use_nonorthogonal_correction)
   {
-    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
-
-    const auto grad_elem = _gradient_field->gradient(*fi.elemInfo());
-    const auto grad_neighbor = _gradient_field->gradient(*fi.neighborInfo());
     const auto elem_to_face = fi.faceCentroid() - fi.elemCentroid();
     const auto face_to_neighbor = fi.neighborCentroid() - fi.faceCentroid();
 
@@ -100,51 +94,14 @@ LinearPWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
     // corrections through the same series resistance as the normal two-point flux. This recovers
     // the exact normal gradient for a linear field without interpolating a gradient across a
     // material jump.
-    const auto elem_correction_vector = fi.normal() - elem_to_face / stress_data.elem_distance;
-    const auto neighbor_correction_vector =
-        fi.normal() - face_to_neighbor / stress_data.neighbor_distance;
-    elem_correction += grad_elem * elem_correction_vector;
-    neighbor_correction += grad_neighbor * neighbor_correction_vector;
+    elem_correction_vector = fi.normal() - elem_to_face / stress_data.elem_distance;
+    neighbor_correction_vector = fi.normal() - face_to_neighbor / stress_data.neighbor_distance;
   }
 
-  if (_use_deviatoric_terms)
-  {
-    RealGradient grad_elem[3];
-    RealGradient grad_neighbor[3];
-    Real trace_elem = 0.0;
-    Real trace_neighbor = 0.0;
-    RealVectorValue deviatoric_vector_elem;
-    RealVectorValue deviatoric_vector_neighbor;
-
-    for (const auto dir : make_range(_dim))
-    {
-      const auto & gradient_field = velocityGradientField(dir);
-      grad_elem[dir] = gradient_field.gradient(*fi.elemInfo());
-      grad_neighbor[dir] = gradient_field.gradient(*fi.neighborInfo());
-      trace_elem += grad_elem[dir](dir);
-      trace_neighbor += grad_neighbor[dir](dir);
-    }
-
-    if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
-    {
-      const auto & radial_var = velocityVar(_rz_radial_coord);
-      trace_elem += radial_var.getElemValue(*fi.elemInfo(), state) /
-                    fi.elemInfo()->centroid()(_rz_radial_coord);
-      trace_neighbor += radial_var.getElemValue(*fi.neighborInfo(), state) /
-                        fi.neighborInfo()->centroid()(_rz_radial_coord);
-    }
-
-    for (const auto dir : make_range(_dim))
-    {
-      grad_elem[dir](dir) -= 2.0 / 3.0 * trace_elem;
-      grad_neighbor[dir](dir) -= 2.0 / 3.0 * trace_neighbor;
-      deviatoric_vector_elem(dir) = grad_elem[dir](_index);
-      deviatoric_vector_neighbor(dir) = grad_neighbor[dir](_index);
-    }
-
-    elem_correction += deviatoric_vector_elem * fi.normal();
-    neighbor_correction += deviatoric_vector_neighbor * fi.normal();
-  }
+  const Real elem_correction =
+      computeCellStressExplicitCorrection(*fi.elemInfo(), elem_correction_vector);
+  const Real neighbor_correction =
+      computeCellStressExplicitCorrection(*fi.neighborInfo(), neighbor_correction_vector);
 
   // Eliminate the common face value while enforcing one total traction on both half-cells. Both
   // explicit corrections must participate in the same series-resistance balance as the normal
