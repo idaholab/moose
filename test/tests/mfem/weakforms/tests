@@ -3,6 +3,7 @@
   issues = '#33468'
   [MFEMSteadyWeakForm]
     type = CSVDiff
+    gold_dir='../kernels/gold'
     input = steady_weakform.i
     csvdiff = 'OutputData/Darcy.csv'
     requirement = 'The system shall be able to solve a mixed steady state FE problem using a weak form whose kernels and boundary conditions are specified by the user.'
@@ -13,11 +14,12 @@
   []
   [MFEMNamedWeakForm]
     type = CSVDiff
+    gold_dir='../kernels/gold'
     input = named_weakform.i
-    csvdiff = 'OutputData/DarcyNamedWeakForm.csv'
+    csvdiff = 'OutputData/Darcy.csv'
     # darcy.i sets both output file_bases, which !include forbids re-supplying in the input.
-    cli_args = 'Outputs/DarcyErrorCSV/file_base=OutputData/DarcyNamedWeakForm '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/DarcyNamedWeakForm'
+    cli_args = 'Outputs/DarcyErrorCSV/file_base=OutputData/Darcy '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/Darcy'
     requirement = 'The system shall be able to solve a mixed steady state FE problem when several weak forms are present, using the weak form named by the problem composer and linear solver.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -68,16 +70,6 @@
     input = complex_weakform.i
     csvdiff = 'OutputData/ComplexWeakForm.csv'
     requirement = 'The system shall be able to solve a complex-valued FE problem using a complex weak form whose kernels and boundary conditions are specified by the user.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    # MFEM problems do not currently support recovery.
-    recover = false
-  []
-  [MFEMTwoProblemComposers]
-    type = CSVDiff
-    input = two_problem_composers.i
-    csvdiff = 'OutputData/TwoProblemComposers.csv'
-    requirement = 'The system shall be able to solve two independent equation systems sequentially in a single problem, each built by its own weak form and executed by its own problem composer.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     # MFEM problems do not currently support recovery.

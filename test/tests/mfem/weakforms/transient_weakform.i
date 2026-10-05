@@ -1,4 +1,3 @@
-# Include mfem/kernels/heattransfer.i
 !include ../kernels/heattransfer.i
 
 # Naming every kernel and boundary condition explicitly must reproduce the default weak form,

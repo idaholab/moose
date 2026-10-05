@@ -31,7 +31,7 @@ void
 SetMFEMProblemOperatorsAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).setMFEMProblemOperators();
+    cast_ref<MFEMProblem &>(*_problem).setMFEMProblemOperators();
 }
 
 #endif

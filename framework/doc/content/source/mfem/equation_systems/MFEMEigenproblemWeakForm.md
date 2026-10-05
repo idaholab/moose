@@ -2,6 +2,7 @@
 
 !if! function=hasCapability('mfem')
 
+## Overview
 The `MFEMEigenproblemWeakForm` is a MOOSE object responsible for the construction of an initialised
 MFEM [EigenproblemEquationSystem.md], based
 on the set of kernels and boundary conditions provided by the user. If no `MFEMWeakFormBase` object

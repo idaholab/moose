@@ -14,7 +14,7 @@
 #include "MFEMWeakFormBase.h"
 
 /**
- * Constructs and stores an Moose::MFEM::EquationSystem object.
+ * Constructs and stores a Moose::MFEM::EquationSystem object.
  */
 class MFEMWeakForm : public MFEMWeakFormBase
 {

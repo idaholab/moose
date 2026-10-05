@@ -1,4 +1,3 @@
-# Include mfem/kernels/darcy.i
 !include ../kernels/darcy.i
 
 [WeakForms]

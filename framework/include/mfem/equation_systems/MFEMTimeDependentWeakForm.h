@@ -14,7 +14,7 @@
 #include "MFEMWeakForm.h"
 
 /**
- * Constructs and stores an Moose::MFEM::TimeDependentEquationSystem object.
+ * Constructs and stores a Moose::MFEM::TimeDependentEquationSystem object.
  */
 class MFEMTimeDependentWeakForm : public MFEMWeakForm
 {

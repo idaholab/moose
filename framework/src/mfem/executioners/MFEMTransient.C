@@ -29,7 +29,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_solve(*this, _mfem_problem.getProblemOperators())
 {
-  _mfem_problem.setDefaultAssemblyLevel(
+  _mfem_problem.setAssemblyLevel(
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 }
 

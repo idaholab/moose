@@ -207,11 +207,6 @@ public:
   getEquationSystem(const std::string & weak_form_name = "") const;
 
   /**
-   * Get vector of all ProblemOperators added to this problem.
-   */
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
-
-  /**
    * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
   void addMFEMProblemComposer(const std::string & composer_type,
@@ -224,14 +219,14 @@ public:
   virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer();
 
   /**
-   * Add an MFEM problem operator. Takes ownership.
-   */
-  void addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
-
-  /**
    * Set all MFEM ProblemOperators to solve in this problem
    */
   void setMFEMProblemOperators();
+
+  /**
+   * Get vector of all ProblemOperators added to this problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
@@ -434,17 +429,14 @@ public:
   /**
    * Return the default assembly level to use for EquationSystem assembly.
    */
-  mfem::AssemblyLevel defaultAssemblyLevel() const { return _default_assembly_level; }
+  mfem::AssemblyLevel assemblyLevel() const { return _assembly_level; }
 
   /**
    * Set the default assembly level to use for EquationSystem assembly. Called by the MFEM
    * executioners, which own the user-facing assembly_level parameter, during their construction;
    * weak forms read it back when building their EquationSystems in setEquationSystems().
    */
-  void setDefaultAssemblyLevel(mfem::AssemblyLevel assembly_level)
-  {
-    _default_assembly_level = assembly_level;
-  }
+  void setAssemblyLevel(mfem::AssemblyLevel assembly_level) { _assembly_level = assembly_level; }
 
 protected:
   /**
@@ -495,7 +487,7 @@ protected:
    * assembly_level parameter shared by the MFEM executioners, so that the value is well-defined
    * even if no MFEM executioner is in use.
    */
-  mfem::AssemblyLevel _default_assembly_level{mfem::AssemblyLevel::LEGACY};
+  mfem::AssemblyLevel _assembly_level{mfem::AssemblyLevel::LEGACY};
 };
 
 template <typename T>

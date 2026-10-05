@@ -1,4 +1,3 @@
-# Include mfem/kernels/darcy.i
 !include ../kernels/darcy.i
 
 # Two weak forms are present, so the problem composer and the solver must each name the one

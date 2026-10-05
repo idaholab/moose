@@ -14,7 +14,7 @@
 #include "MFEMWeakForm.h"
 
 /**
- * Constructs and stores an Moose::MFEM::EigenproblemEquationSystem object.
+ * Constructs and stores a Moose::MFEM::EigenproblemEquationSystem object.
  */
 class MFEMEigenproblemWeakForm : public MFEMWeakForm
 {

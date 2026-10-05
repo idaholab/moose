@@ -31,7 +31,7 @@ void
 SetMFEMEquationSystemsAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).setEquationSystems();
+    cast_ref<MFEMProblem &>(*_problem).setEquationSystems();
 }
 
 #endif

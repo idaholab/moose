@@ -77,7 +77,7 @@ MFEMWeakFormBase::initEquationSystem()
   // Set up initial conditions
   _equation_system->Init(problem_data.gridfunctions,
                          problem_data.cmplx_gridfunctions,
-                         getMFEMProblem().defaultAssemblyLevel());
+                         getMFEMProblem().assemblyLevel());
 }
 
 #endif
