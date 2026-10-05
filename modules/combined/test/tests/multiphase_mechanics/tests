@@ -57,7 +57,7 @@
     requirement = 'The system shall reproduce the Jacobian contributions of the elastic driving '
                   'force in a non-split Cahn-Hilliard model with a concentration-dependent '
                   'elasticity tensor when the displacement gradient component variables are set '
-                  'up automatically by the DisplacementGradients action.'
+                  'up automatically by an action.'
     design = 'DisplacementGradientsAction.md'
     issues = '#5631'
   [../]
@@ -66,7 +66,7 @@
     input = 'gradientcomponent.i'
     exodiff = 'gradientcomponent_out.e'
     requirement = 'The system shall compute a component of the gradient of a coupled variable '
-                  'as an auxiliary nonlinear variable.'
+                  'as an auxiliary variable.'
     design = 'GradientComponent.md'
     issues = '#5631'
   [../]
