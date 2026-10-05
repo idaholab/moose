@@ -1,4 +1,6 @@
 [Tests]
+  # Additional former Elk issues: r11177 r13135
+  issues = '#14418'
   [./test_3d_tf]
     type = 'Exodiff'
     input = 'heat_convection_3d_tf_test.i'
