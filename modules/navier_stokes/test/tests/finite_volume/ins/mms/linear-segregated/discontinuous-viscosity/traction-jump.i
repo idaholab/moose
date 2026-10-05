@@ -1,15 +1,20 @@
 rho = 1
 mu_left = 1
 mu_right = 4
+eps_left = 1
+eps_right = 1
 interface = 0.5
 skew = 0.35
 normal_velocity = 1
+tangential_velocity = 0
 tangential_gradient = 0.4
+tangential_curvature = 0
 shear_traction = 2
 
 # In interface-normal coordinates (r,t), the manufactured velocity is
 # v_n = normal_velocity + tangential_gradient*t and
-# v_t = (shear_traction/mu - tangential_gradient)*r. It is divergence-free and
+# v_t = tangential_velocity + (shear_traction/mu - tangential_gradient)*r
+#       + tangential_curvature*r^2. It is divergence-free and
 # mu*(d(v_t)/dr + d(v_n)/dt) = shear_traction on both sides of the viscosity jump.
 
 [Problem]
@@ -47,12 +52,14 @@ shear_traction = 2
 
 [UserObjects]
   [rc]
-    type = RhieChowMassFlux
+    type = PorousRhieChowMassFlux
     u = vel_x
     v = vel_y
     pressure = pressure
     rho = ${rho}
+    porosity = porosity
     p_diffusion_kernel = p_diffusion
+    pressure_projection_method = consistent
   []
 []
 
@@ -108,15 +115,17 @@ shear_traction = 2
     use_deviatoric_terms = true
   []
   [u_pressure]
-    type = LinearFVMomentumPressure
+    type = LinearPWCNSFVMomentumPressure
     variable = vel_x
     pressure = pressure
+    porosity = porosity
     momentum_component = x
   []
   [v_pressure]
-    type = LinearFVMomentumPressure
+    type = LinearPWCNSFVMomentumPressure
     variable = vel_y
     pressure = pressure
+    porosity = porosity
     momentum_component = y
   []
   [u_forcing]
@@ -178,6 +187,18 @@ shear_traction = 2
     prop_names = dynamic_viscosity
     prop_values = ${mu_right}
   []
+  [porosity_left]
+    type = GenericFunctorMaterial
+    block = left
+    prop_names = porosity
+    prop_values = ${eps_left}
+  []
+  [porosity_right]
+    type = GenericFunctorMaterial
+    block = right
+    prop_names = porosity
+    prop_values = ${eps_right}
+  []
 []
 
 [Functions]
@@ -201,22 +222,29 @@ shear_traction = 2
   []
   [exact_tangential_velocity]
     type = ParsedFunction
-    expression = '(q/if(x-skew*y<interface,mu_left,mu_right)-b)'
+    expression = 'Vt+(q/if(x-skew*y<interface,mu_left,mu_right)-b)'
                  '*(x-skew*y-interface)/sqrt(1+skew^2)'
-    symbol_names = 'interface skew mu_left mu_right q b'
-    symbol_values = '${interface} ${skew} ${mu_left} ${mu_right} ${shear_traction} ${tangential_gradient}'
+                 '+c*((x-skew*y-interface)/sqrt(1+skew^2))^2'
+    symbol_names = 'interface skew mu_left mu_right q b Vt c'
+    symbol_values = '${interface} ${skew} ${mu_left} ${mu_right} ${shear_traction} ${tangential_gradient} ${tangential_velocity} ${tangential_curvature}'
+  []
+  [tangential_velocity_derivative]
+    type = ParsedFunction
+    expression = 'q/mu-b+2*c*(x-skew*y-interface)/sqrt(1+skew^2)'
+    symbol_names = 'interface skew mu q b c'
+    symbol_values = '${interface} ${skew} viscosity ${shear_traction} ${tangential_gradient} ${tangential_curvature}'
   []
   [forcing_u]
     type = ParsedFunction
-    expression = '(b*vt+skew*(q/mu-b)*vn)/sqrt(1+skew^2)'
-    symbol_names = 'skew mu vn vt q b'
-    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity ${shear_traction} ${tangential_gradient}'
+    expression = '(b*vt+skew*(dvtdr*vn-2*mu*c))/sqrt(1+skew^2)'
+    symbol_names = 'skew mu vn vt dvtdr b c'
+    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
   []
   [forcing_v]
     type = ParsedFunction
-    expression = '(-skew*b*vt+(q/mu-b)*vn)/sqrt(1+skew^2)'
-    symbol_names = 'skew mu vn vt q b'
-    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity ${shear_traction} ${tangential_gradient}'
+    expression = '(-skew*b*vt+dvtdr*vn-2*mu*c)/sqrt(1+skew^2)'
+    symbol_names = 'skew mu vn vt dvtdr b c'
+    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
   []
   [viscosity]
     type = ParsedFunction
