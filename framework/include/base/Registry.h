@@ -42,6 +42,14 @@
                                             __COUNTER__) =                                         \
       Registry::addAction<classname>({app, #classname, "", task, __FILE__, __LINE__, "", ""})
 
+/// Add an Action to the registry with the given app name/label and task (quoted string), under an
+/// alternate alias/name (quoted string) instead of the classname. classname is the (unquoted) c++
+/// class. Register every task for a given Action under the same alias.
+#define registerMooseActionAliased(app, classname, alias, task)                                    \
+  [[maybe_unused]] static char combineNames(dummyvar_for_registering_action_##classname,           \
+                                            __COUNTER__) =                                         \
+      Registry::addAction<classname>({app, #classname, alias, task, __FILE__, __LINE__, "", ""})
+
 /// Add a MooseObject to the registry with the given app name/label.  classname is the (unquoted)
 /// c++ class.  Each object/class should only be registered once.
 #define registerMooseObject(app, classname)                                                        \

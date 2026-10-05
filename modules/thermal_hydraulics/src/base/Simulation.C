@@ -18,6 +18,7 @@
 #include "FlowJunction.h"
 
 #include "ClosuresBase.h"
+#include "ClosuresRegistry.h"
 #include "FluidProperties.h"
 #include "THMControl.h"
 #include "TerminateControl.h"
@@ -918,6 +919,12 @@ Simulation::integrityCheck() const
 
   _log.emitLoggedWarnings();
   _log.emitLoggedErrors();
+
+  // closures objects log into ClosuresRegistry's own Logger (not Simulation's), since that
+  // registry is shared with the ActionComponent/Physics path - see checkFlowChannel() calls made
+  // above via comp->executeCheck()
+  ClosuresRegistry::findOrCreate(_thm_app.actionWarehouse(), _thm_app.getActionFactory())
+      .emitLoggedMessages();
 }
 
 void
@@ -1021,27 +1028,22 @@ Simulation::hasComponent(const std::string & name) const
 void
 Simulation::addClosures(const std::string & type, const std::string & name, InputParameters params)
 {
-  std::shared_ptr<ClosuresBase> obj_ptr = _thm_factory.create<ClosuresBase>(type, name, params);
-  if (_closures_by_name.find(name) == _closures_by_name.end())
-    _closures_by_name[name] = obj_ptr;
-  else
-    logError("A closures object with the name '", name, "' already exists.");
+  ClosuresRegistry::findOrCreate(_thm_app.actionWarehouse(), _thm_app.getActionFactory())
+      .addClosures(type, name, params);
 }
 
 bool
 Simulation::hasClosures(const std::string & name) const
 {
-  return _closures_by_name.find(name) != _closures_by_name.end();
+  return ClosuresRegistry::findOrCreate(_thm_app.actionWarehouse(), _thm_app.getActionFactory())
+      .hasClosures(name);
 }
 
 std::shared_ptr<ClosuresBase>
 Simulation::getClosures(const std::string & name) const
 {
-  auto it = _closures_by_name.find(name);
-  if (it != _closures_by_name.end())
-    return it->second;
-  else
-    mooseError("The requested closures object '", name, "' does not exist.");
+  return ClosuresRegistry::findOrCreate(_thm_app.actionWarehouse(), _thm_app.getActionFactory())
+      .getClosures(name);
 }
 
 void

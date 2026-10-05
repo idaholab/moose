@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'VolumeJunction1PhaseAC.md'
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 60
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the user object, boundary '
+                  'conditions, and kernels that a VolumeJunction1Phase native ActionComponent '
+                  'creates and attaches to itself to couple two single-phase flow channels through '
+                  'a non-zero-volume junction.'
+  []
+  [transient]
+    type = CSVDiff
+    input = 'transient.i'
+    csvdiff = 'transient_out.csv'
+    requirement = 'The system shall be able to solve a transient, single-phase flow problem '
+                  'through two flow channels connected by a VolumeJunction1Phase ActionComponent, '
+                  'with a prescribed mass flow rate and temperature inlet and a prescribed pressure '
+                  'outlet, all defined as native ActionComponents, with the junction having its own '
+                  'mesh, variables, and kernels.'
+  []
+[]

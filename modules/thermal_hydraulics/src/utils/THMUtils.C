@@ -10,6 +10,8 @@
 #include "THMUtils.h"
 #include "MooseUtils.h"
 #include "MooseTypes.h"
+#include "MooseApp.h"
+#include "TransientBase.h"
 #include "libmesh/vector_value.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -71,5 +73,46 @@ allGatherADVectorMapSum(const Parallel::Communicator & comm,
         for (const auto i : index_range(existing))
           existing[i] += it.second[i];
       }
+}
+
+std::string
+parseConnectedComponentName(const BoundaryName & connection)
+{
+  const auto colon_pos = connection.rfind(':');
+  if (colon_pos == std::string::npos)
+    mooseError("Invalid connection '",
+               connection,
+               "'. Valid connection format is 'component_name:in' or 'component_name:out'.");
+  return connection.substr(0, colon_pos);
+}
+
+Real
+parseConnectionNormal(const BoundaryName & connection)
+{
+  const auto colon_pos = connection.rfind(':');
+  const auto end_type =
+      colon_pos == std::string::npos ? std::string() : connection.substr(colon_pos + 1);
+  if (end_type == "in")
+    return -1.0;
+  else if (end_type == "out")
+    return 1.0;
+  else
+    mooseError("Invalid connection '",
+               connection,
+               "'. The end type ('",
+               end_type,
+               "') must be 'in' or 'out'.");
+}
+
+bool
+implicitTimeIntegrationFlag(MooseApp & app)
+{
+  const auto trex = dynamic_cast<TransientBase *>(app.getExecutioner());
+  if (!trex)
+    return true;
+
+  const auto ti_type = trex->getTimeScheme();
+  return !(ti_type == Moose::TI_EXPLICIT_TVD_RK_2 || ti_type == Moose::TI_EXPLICIT_MIDPOINT ||
+           ti_type == Moose::TI_EXPLICIT_EULER);
 }
 }

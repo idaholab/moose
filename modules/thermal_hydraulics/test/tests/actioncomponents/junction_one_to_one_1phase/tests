@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'JunctionOneToOne1PhaseAC.md'
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 30
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the user object and boundary '
+                  'condition that a JunctionOneToOne1Phase native ActionComponent creates and '
+                  'attaches to itself to couple two single-phase flow channels, regardless of the '
+                  'declaration order of the junction relative to the flow channels it connects.'
+  []
+  [steady]
+    type = Exodiff
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The system shall be able to solve a steady-state, single-phase flow problem '
+                  'through two flow channels connected by a JunctionOneToOne1Phase ActionComponent, '
+                  'with a prescribed mass flow rate and temperature inlet and a prescribed pressure '
+                  'outlet, all defined as native ActionComponents sharing flow variables across the '
+                  'two channels.'
+  []
+[]
