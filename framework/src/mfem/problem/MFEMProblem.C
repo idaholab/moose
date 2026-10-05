@@ -499,7 +499,7 @@ MFEMProblem::getEquationSystem(const std::string & weak_form_name) const
   if (!weak_form_name.empty())
     return eqn_systems.GetShared(weak_form_name);
 
-  mooseAssert(eqn_systems.size() == 0, "No equation systems have been built for this problem");
+  mooseAssert(eqn_systems.size() != 0, "No equation systems have been built for this problem");
 
   if (eqn_systems.size() > 1)
     mooseError("This problem has ",
