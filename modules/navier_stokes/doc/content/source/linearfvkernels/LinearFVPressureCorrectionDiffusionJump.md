@@ -18,10 +18,7 @@ values and momentum-pressure coupling coefficients from the
 `Ainv` functor produced by the same Rhie-Chow object.
 
 The object acts on the cell-centered pressure variable selected by
-[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/variable). Although it is called a
-pressure-*correction* diffusion kernel, the linear implementation solves for the pressure field
-used to correct the face flux; it does not introduce an additional face pressure or interface
-Lagrange multiplier.
+[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/variable).
 
 ## Pressure equation and motivation
 
@@ -387,18 +384,92 @@ fixed during the current solve. Applying the two one-sided Taylor expansions to 
 \label{eq:pressure-jump-lagged-smooth-drop}
 \end{equation}
 
-The implemented coefficient is
+Because the assembled flux relation retains the explicit correction $R_f^{\ell}$, matching the
+reconstructed flux requires
 
 \begin{equation}
   T_f^{\ell}
-  =\frac{Q_f^{\ell}}
+  =\frac{Q_f^{\ell}+R_f^{\ell}}
          {\Delta p_f^{\mathrm{smooth},\ell}}.
 \label{eq:pressure-jump-two-term-transmissibility}
+\end{equation}
+
+Substitution into the lagged face relation verifies the construction:
+
+\begin{equation}
+  T_f^{\ell}\Delta p_f^{\mathrm{smooth},\ell}-R_f^{\ell}
+  =Q_f^{\ell}+R_f^{\ell}-R_f^{\ell}
+  =Q_f^{\ell}.
+\label{eq:pressure-jump-two-term-consistency}
 \end{equation}
 
 Although its inputs are lagged, $T_f^{\ell}$ is a matrix coefficient: it multiplies the current
 $p_P$ and $p_N$. No derivative of $T_f^{\ell}$ with respect to the current pressure is included,
 so this is a Picard rather than a Newton linearization.
+
+For clarity, the face equation assembled in the two-term case is
+
+\begin{equation}
+  T_f^{\ell}(p_P-p_N)
+  =R_f^{\ell}+T_f^{\ell}J_P,
+  \qquad
+  T_f^{\ell}
+  =\frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}}.
+\label{eq:pressure-jump-two-term-linear-equation}
+\end{equation}
+
+The superscript $\ell$ applies to the coefficient data, not to the two pressure unknowns on the
+left-hand side. Substitution of the secant coefficient makes the exact matrix and right-hand-side
+insertions
+
+\begin{equation}
+\begin{aligned}
+  A_{PP}&\mathrel{+}=
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}},
+  &
+  A_{PN}&\mathrel{+}=-
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}},\\
+  A_{NP}&\mathrel{+}=-
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}},
+  &
+  A_{NN}&\mathrel{+}=
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}},\\
+  b_P&\mathrel{+}=R_f^{\ell}+
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}}J_P,
+  &
+  b_N&\mathrel{+}=-R_f^{\ell}-
+    \frac{Q_f^{\ell}+R_f^{\ell}}
+         {\Delta p_f^{\mathrm{smooth},\ell}}J_P.
+\end{aligned}
+\label{eq:pressure-jump-two-term-entries}
+\end{equation}
+
+This split has several important consequences:
+
+- $p_P$ and $p_N$ are the only quantities in this face contribution that are unknown during the
+  current pressure solve.
+- $Q_f^{\ell}$ is not added to the right-hand side. It contributes only to the frozen scalar
+  $T_f^{\ell}$ that multiplies the current pressures in the matrix.
+- $\Delta p_f^{\mathrm{smooth},\ell}$ is likewise not an additional pressure unknown or source. It
+  is the known denominator used to construct $T_f^{\ell}$.
+- $R_f^{\ell}$ has two roles: it participates in the numerator that defines $T_f^{\ell}$, and the
+  same explicit correction is added with opposite signs to the two right-hand-side entries.
+  Omitting it from the numerator would make the reconstructed flux inconsistent with the retained
+  right-hand-side correction; adding $Q_f^{\ell}$ separately to the right-hand side would count the
+  reconstructed flux twice.
+- The prescribed jump remains explicit. Its right-hand-side flux is $T_f^{\ell}J_P$ for cell $P$
+  and its negative for cell $N$; no derivative of the jump law is placed in the matrix.
+
+If the two-term quotient cannot be used, $T_f^{\ell}$ is replaced by the baseline
+$T_f^{(0)}$ everywhere in this split: the four matrix entries use $T_f^{(0)}$, and the jump source
+uses $T_f^{(0)}J_P$. The explicit $R_f$ remains on the right-hand side. This common replacement is
+necessary so that the jump and pressure-difference terms use the same face transmissibility.
 
 The two-term coefficient is used only when all of the following conditions hold:
 
@@ -412,17 +483,6 @@ The two-term coefficient is used only when all of the following conditions hold:
 Otherwise, the kernel uses $T_f^{(0)}$. Selecting
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
 without [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md) is an input error.
-
-!alert warning title=Explicit-correction limitation
-The implemented two-term coefficient satisfies
-$T_f^{\ell}\Delta p_f^{\mathrm{smooth},\ell}=Q_f^{\ell}$. The complete flux relation nevertheless
-retains the explicit correction and evaluates
-$Q_f^p=T_f^{\ell}\Delta p_f^{\mathrm{smooth}}-R_f$. Consequently, at the lagged state the complete
-discrete flux is $Q_f^{\ell}-R_f^{\ell}$, not $Q_f^{\ell}$, unless $R_f^{\ell}=0$. Exact
-reproduction of the reconstructed flux therefore applies to orthogonal, isotropic cases or other
-cases in which the explicit correction vanishes. For a general nonorthogonal or anisotropic case,
-the coefficient consistent with the retained split would instead be
-$(Q_f^{\ell}+R_f^{\ell})/\Delta p_f^{\mathrm{smooth},\ell}$.
 
 ## Flux-dependent jump law
 

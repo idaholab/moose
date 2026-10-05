@@ -15,8 +15,8 @@
     type = 'CSVDiff'
     input = porous-baffle-straight-diagonal.i
     csvdiff = 'porous-baffle-straight-diagonal-pressure-two-term_out.csv'
-    requirement = 'The system shall preserve the integral pressure and velocity response across a diagonal porous baffle when using the two-term pressure expansion.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md LinearPWCNSFVMomentumPressure.md'
+    requirement = 'The system shall preserve the integral pressure and velocity response across a diagonal porous baffle when the two-term pressure transmissibility is combined with the explicit nonorthogonal pressure-flux correction.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md LinearFVPressureCorrectionDiffusionJump.md LinearPWCNSFVMomentumPressure.md'
     cli_args = "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
                "Outputs/file_base=porous-baffle-straight-diagonal-pressure-two-term_out"
     recover = false
