@@ -15,8 +15,11 @@ At a porous baffle, the Rhie-Chow object can require one-sided reconstruction. I
 kernel uses the local velocity state for each side of the advection operator. The viscous stress
 operator remains continuous across the interface. Set
 [!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_two_point_stress_transmissibility) to use
-the jump-safe harmonic two-point stress treatment instead of the standard face-interpolated
-gradient. Porosity must be positive on every active face.
+the jump-safe harmonic two-point normal-stress treatment instead of the standard
+face-interpolated stress. When nonorthogonal or deviatoric stress corrections are requested,
+this treatment includes their side-local gradient contributions in the same half-cell resistance
+balance, producing a single conservative face traction without interpolating a gradient across a
+material jump. Porosity must be positive on every active face.
 
 ## Example Input Syntax
 

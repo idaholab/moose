@@ -9,7 +9,10 @@
 
 #include "LinearPWCNSFVMomentumFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientReader.h"
 #include "RhieChowMassFlux.h"
+
+#include <cmath>
 
 registerMooseObject("NavierStokesApp", LinearPWCNSFVMomentumFlux);
 
@@ -21,8 +24,8 @@ LinearPWCNSFVMomentumFlux::validParams()
   params.addParam<bool>(
       "use_two_point_stress_transmissibility",
       false,
-      "Use two-point harmonic transmissibility for the stress term instead of a face-interpolated "
-      "gradient.");
+      "Use a harmonic two-point treatment for the normal stress term and side-local gradients "
+      "for the explicit nonorthogonal and deviatoric stress corrections.");
   return params;
 }
 
@@ -38,27 +41,117 @@ LinearPWCNSFVMomentumFlux::computeInternalStressTransmissibility() const
   if (!_use_two_point_stress_transmissibility)
     return LinearWCNSFVMomentumFlux::computeInternalStressTransmissibility();
 
+  return twoPointStressData().transmissibility;
+}
+
+LinearPWCNSFVMomentumFlux::TwoPointStressData
+LinearPWCNSFVMomentumFlux::twoPointStressData() const
+{
   const auto & fi = *_current_face_info;
   const auto state = determineState();
   const Real elem_viscosity = _mu(makeElemArg(fi.elemPtr()), state);
   const Real neighbor_viscosity = _mu(makeElemArg(fi.neighborPtr()), state);
   if (elem_viscosity == 0.0 || neighbor_viscosity == 0.0)
-    return 0.0;
+    return {0.0, 0.0, 0.0};
 
-  const Real elem_distance = (fi.faceCentroid() - fi.elemCentroid()).norm();
-  const Real neighbor_distance = (fi.neighborCentroid() - fi.faceCentroid()).norm();
+  const auto elem_to_face = fi.faceCentroid() - fi.elemCentroid();
+  const auto face_to_neighbor = fi.neighborCentroid() - fi.faceCentroid();
+  const Real elem_distance =
+      _use_nonorthogonal_correction ? std::abs(elem_to_face * fi.normal()) : elem_to_face.norm();
+  const Real neighbor_distance = _use_nonorthogonal_correction
+                                     ? std::abs(face_to_neighbor * fi.normal())
+                                     : face_to_neighbor.norm();
   if (elem_distance == 0.0 || neighbor_distance == 0.0)
-    return 0.0;
+    return {0.0, elem_distance, neighbor_distance};
 
-  return 1.0 / (elem_distance / elem_viscosity + neighbor_distance / neighbor_viscosity);
+  return {1.0 / (elem_distance / elem_viscosity + neighbor_distance / neighbor_viscosity),
+          elem_distance,
+          neighbor_distance};
 }
 
 Real
 LinearPWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
 {
-  return _use_two_point_stress_transmissibility
-             ? 0.0
-             : LinearWCNSFVMomentumFlux::computeInternalStressExplicitCorrection();
+  if (!_use_two_point_stress_transmissibility)
+    return LinearWCNSFVMomentumFlux::computeInternalStressExplicitCorrection();
+
+  if ((!_use_nonorthogonal_correction || _dim == 1) && !_use_deviatoric_terms)
+    return 0.0;
+
+  const auto & fi = *_current_face_info;
+  const auto state = determineState();
+  const auto stress_data = twoPointStressData();
+  if (stress_data.transmissibility == 0.0)
+    return 0.0;
+
+  Real elem_correction = 0.0;
+  Real neighbor_correction = 0.0;
+
+  if (_dim > 1 && _use_nonorthogonal_correction)
+  {
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+
+    const auto grad_elem = _gradient_field->gradient(*fi.elemInfo());
+    const auto grad_neighbor = _gradient_field->gradient(*fi.neighborInfo());
+    const auto elem_to_face = fi.faceCentroid() - fi.elemCentroid();
+    const auto face_to_neighbor = fi.neighborCentroid() - fi.faceCentroid();
+
+    // Apply a separate tangential reconstruction over each half-cell, then combine both
+    // corrections through the same series resistance as the normal two-point flux. This recovers
+    // the exact normal gradient for a linear field without interpolating a gradient across a
+    // material jump.
+    const auto elem_correction_vector = fi.normal() - elem_to_face / stress_data.elem_distance;
+    const auto neighbor_correction_vector =
+        fi.normal() - face_to_neighbor / stress_data.neighbor_distance;
+    elem_correction += grad_elem * elem_correction_vector;
+    neighbor_correction += grad_neighbor * neighbor_correction_vector;
+  }
+
+  if (_use_deviatoric_terms)
+  {
+    RealGradient grad_elem[3];
+    RealGradient grad_neighbor[3];
+    Real trace_elem = 0.0;
+    Real trace_neighbor = 0.0;
+    RealVectorValue deviatoric_vector_elem;
+    RealVectorValue deviatoric_vector_neighbor;
+
+    for (const auto dir : make_range(_dim))
+    {
+      const auto & gradient_field = velocityGradientField(dir);
+      grad_elem[dir] = gradient_field.gradient(*fi.elemInfo());
+      grad_neighbor[dir] = gradient_field.gradient(*fi.neighborInfo());
+      trace_elem += grad_elem[dir](dir);
+      trace_neighbor += grad_neighbor[dir](dir);
+    }
+
+    if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
+    {
+      const auto & radial_var = velocityVar(_rz_radial_coord);
+      trace_elem += radial_var.getElemValue(*fi.elemInfo(), state) /
+                    fi.elemInfo()->centroid()(_rz_radial_coord);
+      trace_neighbor += radial_var.getElemValue(*fi.neighborInfo(), state) /
+                        fi.neighborInfo()->centroid()(_rz_radial_coord);
+    }
+
+    for (const auto dir : make_range(_dim))
+    {
+      grad_elem[dir](dir) -= 2.0 / 3.0 * trace_elem;
+      grad_neighbor[dir](dir) -= 2.0 / 3.0 * trace_neighbor;
+      deviatoric_vector_elem(dir) = grad_elem[dir](_index);
+      deviatoric_vector_neighbor(dir) = grad_neighbor[dir](_index);
+    }
+
+    elem_correction += deviatoric_vector_elem * fi.normal();
+    neighbor_correction += deviatoric_vector_neighbor * fi.normal();
+  }
+
+  // Eliminate the common face value while enforcing one total traction on both half-cells. Both
+  // explicit corrections must participate in the same series-resistance balance as the normal
+  // two-point term; averaging them separately would not preserve an exact traction across a
+  // viscosity jump.
+  return stress_data.transmissibility * (stress_data.elem_distance * elem_correction +
+                                         stress_data.neighbor_distance * neighbor_correction);
 }
 
 void

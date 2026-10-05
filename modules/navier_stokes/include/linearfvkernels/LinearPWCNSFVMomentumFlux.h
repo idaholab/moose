@@ -48,7 +48,7 @@ protected:
   /// Compute the stress transmissibility, optionally using the two-point harmonic form.
   Real computeInternalStressTransmissibility() const override;
 
-  /// Compute the explicit stress correction, which vanishes for the two-point treatment.
+  /// Compute the explicit nonorthogonal and deviatoric corrections to the two-point stress.
   Real computeInternalStressExplicitCorrection() const override;
 
   /// Compute the boundary advection matrix contribution with local porosity scaling.
@@ -58,8 +58,18 @@ protected:
   Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
 private:
+  struct TwoPointStressData
+  {
+    Real transmissibility;
+    Real elem_distance;
+    Real neighbor_distance;
+  };
+
   /// Whether to use a two-point harmonic transmissibility for the stress term.
   const bool _use_two_point_stress_transmissibility;
+
+  /// Compute the geometry and material data used by the harmonic stress discretization.
+  TwoPointStressData twoPointStressData() const;
 
   /// Whether the current face is an internal face represented by a pressure-jump model.
   bool isInternalBaffleFace() const;
