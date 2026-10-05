@@ -49,8 +49,7 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   // The base coefficient is the usual two-point pressure-diffusion transmissibility. It is also
   // the fallback when the face is not a baffle or a lagged reconstructed gradient is unavailable.
   const Real base_matrix_contribution = computeFluxMatrixContribution();
-  if (!_use_two_term_pressure_expansion || !_current_face_info ||
-      !_current_face_info->neighborPtr() || !_rc_uo.faceIsBaffle(*_current_face_info) ||
+  if (!_use_two_term_pressure_expansion || !_rc_uo.faceIsBaffle(*_current_face_info) ||
       !_reconstructed_pressure_gradient_method->hasReconstructedCandidate())
     return base_matrix_contribution;
 
@@ -169,30 +168,23 @@ LinearFVPressureCorrectionDiffusionJump::computeNeighborMatrixContribution()
 Real
 LinearFVPressureCorrectionDiffusionJump::computeElemRightHandSideContribution()
 {
-  // Internal faces use the explicit nonorthogonal part of the base diffusion operator. Boundary
-  // faces retain the complete base boundary treatment.
-  Real rhs = (_current_face_info && _current_face_info->neighborPtr())
-                 ? computeFluxRHSContribution()
-                 : LinearFVAnisotropicDiffusion::computeElemRightHandSideContribution();
+  Real rhs = computeFluxRHSContribution();
 
-  if (_current_face_info && _current_face_info->neighborPtr())
-  {
-    // J_P is oriented from the opposite side toward P: J_P = p_P - p_N. Let R_f denote the
-    // explicit diffusion correction returned above. The two local rows receive
-    //
-    //   b_P =  R_f + T_f J_P,
-    //   b_N = -R_f + T_f J_N = -R_f - T_f J_P.
-    //
-    // Combined with the local matrix documented above, the element row is
-    //
-    //   T_f (p_P - p_N) = R_f + T_f J_P,
-    //
-    // or T_f [(p_P - p_N) - J_P] = R_f. The neighbor equation is its negative, so the modeled jump
-    // changes only the right hand side and the face contribution remains conservative.
-    const Real jump = _rc_uo.getSignedBaffleJump(*_current_face_info, /*elem_side=*/true);
-    if (jump != 0.0)
-      rhs += computeJumpAwareFluxMatrixContribution() * jump;
-  }
+  // J_P is oriented from the opposite side toward P: J_P = p_P - p_N. Let R_f denote the
+  // explicit diffusion correction returned above. The two local rows receive
+  //
+  //   b_P =  R_f + T_f J_P,
+  //   b_N = -R_f + T_f J_N = -R_f - T_f J_P.
+  //
+  // Combined with the local matrix documented above, the element row is
+  //
+  //   T_f (p_P - p_N) = R_f + T_f J_P,
+  //
+  // or T_f [(p_P - p_N) - J_P] = R_f. The neighbor equation is its negative, so the modeled jump
+  // changes only the right hand side and the face contribution remains conservative.
+  const Real jump = _rc_uo.getSignedBaffleJump(*_current_face_info, /*elem_side=*/true);
+  if (jump != 0.0)
+    rhs += computeJumpAwareFluxMatrixContribution() * jump;
 
   return rhs;
 }
@@ -202,16 +194,11 @@ LinearFVPressureCorrectionDiffusionJump::computeNeighborRightHandSideContributio
 {
   // The neighbor receives the opposite base flux and the oppositely oriented jump
   // J_N = p_N - p_P = -J_P, preserving conservation across the internal face.
-  Real rhs = (_current_face_info && _current_face_info->neighborPtr())
-                 ? -computeFluxRHSContribution()
-                 : LinearFVAnisotropicDiffusion::computeNeighborRightHandSideContribution();
+  Real rhs = -computeFluxRHSContribution();
 
-  if (_current_face_info && _current_face_info->neighborPtr())
-  {
-    const Real jump = _rc_uo.getSignedBaffleJump(*_current_face_info, /*elem_side=*/false);
-    if (jump != 0.0)
-      rhs += computeJumpAwareFluxMatrixContribution() * jump;
-  }
+  const Real jump = _rc_uo.getSignedBaffleJump(*_current_face_info, /*elem_side=*/false);
+  if (jump != 0.0)
+    rhs += computeJumpAwareFluxMatrixContribution() * jump;
 
   return rhs;
 }
