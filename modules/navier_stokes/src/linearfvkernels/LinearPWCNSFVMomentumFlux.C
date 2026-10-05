@@ -9,6 +9,7 @@
 
 #include "LinearPWCNSFVMomentumFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "MathFVUtils.h"
 #include "RhieChowMassFlux.h"
 
 #include <cmath>
@@ -63,9 +64,12 @@ LinearPWCNSFVMomentumFlux::twoPointStressData() const
   if (elem_distance == 0.0 || neighbor_distance == 0.0)
     return {0.0, elem_distance, neighbor_distance};
 
-  return {1.0 / (elem_distance / elem_viscosity + neighbor_distance / neighbor_viscosity),
-          elem_distance,
-          neighbor_distance};
+  const Real total_distance = elem_distance + neighbor_distance;
+  const Real face_viscosity = Moose::FV::harmonicInterpolation(elem_viscosity,
+                                                               neighbor_viscosity,
+                                                               elem_distance / total_distance,
+                                                               neighbor_distance / total_distance);
+  return {face_viscosity / total_distance, elem_distance, neighbor_distance};
 }
 
 Real

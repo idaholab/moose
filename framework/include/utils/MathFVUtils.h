@@ -165,32 +165,27 @@ linearInterpolation(const T & value1,
 }
 
 /**
- * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) of Reals, RealVectorValues and
- * RealTensorValues while accounting for the possibility that one or both of them are AD.
- * For tensors, we use a component-wise mean instead of the matrix-inverse based option.
- * @param value1 Reference to value1 in the (1/(gc/value1+(1-gc)/value2)) expression
- * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
- * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
- * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
- * element corresponding to value1
+ * Computes a weighted harmonic mean of Reals, RealVectorValues, and RealTensorValues while
+ * accounting for the possibility that one or both values are AD. For tensors, we use a
+ * component-wise mean instead of the matrix-inverse based option.
+ * @param value1 Reference to value1 in the 1/(weight1/value1 + weight2/value2) expression
+ * @param value2 Reference to value2 in the 1/(weight1/value1 + weight2/value2) expression
+ * @param weight1 Weight corresponding to value1
+ * @param weight2 Weight corresponding to value2
  * @return The interpolated value
  */
 template <typename T1, typename T2>
 typename libMesh::CompareTypes<T1, T2>::supertype
 harmonicInterpolation(const T1 & value1,
                       const T2 & value2,
-                      const FaceInfo & fi,
-                      const bool one_is_elem)
+                      const Real weight1,
+                      const Real weight2)
 {
   // We check if the base values of the given template types match, if not we throw a compile-time
   // error
   static_assert(std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
                              typename MetaPhysicL::RawType<T2>::value_type>::value,
                 "The input values for harmonic interpolation need to have the same raw-value!");
-
-  // Fetch the interpolation coefficients, we use the exact same coefficients as for a simple
-  // weighted average
-  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
 
   // We check if the types are fit to compute the harmonic mean of. This is done compile-time
   // using constexpr. We start with Real/ADReal which is straightforward if the input values are
@@ -205,7 +200,7 @@ harmonicInterpolation(const T1 & value1,
                    Moose::stringify(MetaPhysicL::raw_value(value2)) +
                    ") must be of the same sign for harmonic interpolation");
 #endif
-    return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
+    return 1.0 / (weight1 / value1 + weight2 / value2);
   }
   // For vectors (ADRealVectorValue, VectorValue), we take the component-wise harmonic mean
   else if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 1)
@@ -220,7 +215,7 @@ harmonicInterpolation(const T1 & value1,
                      Moose::stringify(MetaPhysicL::raw_value(value2(i))) +
                      ") must be of the same sign for harmonic interpolation");
 #endif
-      result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
+      result(i) = 1.0 / (weight1 / value1(i) + weight2 / value2(i));
     }
     return result;
   }
@@ -240,7 +235,7 @@ harmonicInterpolation(const T1 & value1,
                        Moose::stringify(MetaPhysicL::raw_value(value2(i, j))) +
                        ") must be of the same sign for harmonic interpolation");
 #endif
-        result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
+        result(i, j) = 1.0 / (weight1 / value1(i, j) + weight2 / value2(i, j));
       }
     return result;
   }
@@ -251,6 +246,27 @@ harmonicInterpolation(const T1 & value1,
     // C++ gets nicer, we can do this in a nicer way.
     static_assert(Moose::always_false<T1>,
                   "Harmonic interpolation is not implemented for the used type!");
+}
+
+/**
+ * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) using the geometric weighting of a
+ * face.
+ * @param value1 Reference to value1 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
+ * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
+ * element corresponding to value1
+ * @return The interpolated value
+ */
+template <typename T1, typename T2>
+typename libMesh::CompareTypes<T1, T2>::supertype
+harmonicInterpolation(const T1 & value1,
+                      const T2 & value2,
+                      const FaceInfo & fi,
+                      const bool one_is_elem)
+{
+  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+  return harmonicInterpolation(value1, value2, coeffs.first, coeffs.second);
 }
 
 /**
