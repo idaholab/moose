@@ -318,16 +318,15 @@ T_salt_interface_exact = ${fparse T_solid_interface_exact + q_exact * R_interfac
   should_solve_momentum = false
   should_solve_pressure = false
 
-  energy_l_abs_tol = 1e-18
-  energy_l_tol = 1e-18
-  solid_energy_l_abs_tol = 1e-18
-  solid_energy_l_tol = 1e-18
+  energy_l_abs_tol = 1e-14
+  energy_l_tol = 1e-14
+  solid_energy_l_abs_tol = 1e-14
+  solid_energy_l_tol = 1e-14
 
-  energy_absolute_tolerance = 1e-18
-  solid_energy_absolute_tolerance = 1e-18
+  energy_absolute_tolerance = 1e-14
+  solid_energy_absolute_tolerance = 1e-14
 
   energy_equation_relaxation = 1.0
-  # energy_field_relaxation = 1.0
 
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'

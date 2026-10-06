@@ -58,7 +58,7 @@ The coupling of the solid and fluid domains is done through boundary conditions 
 ## Interface Thermal Resistance
 
 The [!param](/Executioner/SIMPLE/thermal_resistance) parameter specifies the
-area-normalized thermal resistance in $\mathrm{m^2\,K/W}$. Its default value is zero.
+area-normalized thermal resistance(s) in $\mathrm{m^2\,K/W}$. Its default value is zero.
 It accepts either one functor that is used for every entry in
 [!param](/Executioner/SIMPLE/cht_interfaces), or one functor per interface in the same
 order as +cht_interfaces+. Every evaluated resistance must be nonnegative. A spatially
