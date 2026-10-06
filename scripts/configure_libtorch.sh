@@ -66,13 +66,6 @@ function configure_libtorch()
   # -DUSE_VALGRIND=OFF: we don't need Valgrind support because we don't use PyTorch's C++ API for Python bindings
   #    and we don't use PyTorch's profiler
   # -DUSE_OBSERVERS=OFF: we don't need observers support because we don't use PyTorch's profiler
-  #
-  # The vendored protobuf headers are passed with -I through CXXFLAGS (not -DCMAKE_CXX_FLAGS, which
-  # would discard the environment's CXXFLAGS). conda-forge clang reads a configuration file that
-  # adds -isystem $CONDA_PREFIX/include ahead of every command-line -isystem, so a newer protobuf
-  # installed in the environment would otherwise shadow the vendored one that libtorch builds
-  # against. -I directories are searched before all -isystem directories.
-  CXXFLAGS="-I$1/third_party/protobuf/src ${CXXFLAGS:-}" \
   cmake \
     -DCMAKE_C_COMPILER="$(underlying_compiler "${CC:-cc}")" \
     -DCMAKE_CXX_COMPILER="$(underlying_compiler "${CXX:-c++}")" \
