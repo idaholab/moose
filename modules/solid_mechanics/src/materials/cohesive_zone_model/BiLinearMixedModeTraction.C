@@ -137,12 +137,13 @@ BiLinearMixedModeTraction::computeModeMixity()
 
     if (!_lag_mode_mixity)
     {
-      if (MooseUtils::absoluteFuzzyEqual(delta_s, 0.0))
-        _dbeta_ddelta = RealVectorValue(0, 0, 0);
-      else
+      if (delta_s > 0)
+        // delta_s is nonnegative; only exact zero needs special handling to avoid 0/0.
         _dbeta_ddelta = RealVectorValue(-delta_s / delta(0) / delta(0),
                                         delta(1) / delta_s / delta(0),
                                         delta(2) / delta_s / delta(0));
+      else
+        _dbeta_ddelta = RealVectorValue(0, 0, 0);
     }
   }
   else
@@ -222,9 +223,8 @@ BiLinearMixedModeTraction::computeFinalDisplacementJump()
             _delta_final[_qp] * 2 * _beta[_qp] / (1 + _beta[_qp] * _beta[_qp]) -
             (2 + 2 * _beta[_qp] * _beta[_qp]) / _K / _delta_init[_qp] *
                 std::pow(Gc_mixed, -1 / _eta - 1) *
-                (std::pow(1 / _GI_c[_qp], _eta - 1) +
-                 std::pow(_beta[_qp] * _beta[_qp] / _GII_c[_qp], _eta - 1) * 2 * _beta[_qp] /
-                     _GII_c[_qp]);
+                std::pow(_beta[_qp] * _beta[_qp] / _GII_c[_qp], _eta - 1) * 2 * _beta[_qp] /
+                _GII_c[_qp];
         _ddelta_final_ddelta =
             ddelta_final_ddelta_init * _ddelta_init_ddelta + ddelta_final_dbeta * _dbeta_ddelta;
       }

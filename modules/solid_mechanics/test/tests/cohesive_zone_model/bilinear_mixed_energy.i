@@ -220,7 +220,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = lu
   nl_abs_tol = 1e-10
-  dt = 0.001
+  dt = 0.2
   end_time = 2
 []
 
@@ -229,6 +229,10 @@
   [csv]
     type = CSV
     execute_on = FINAL
+    # Resolve the traction-law corners so trapezoidal integration can use coarse steps.
+    # Initiation times: (1/100)/(3*sqrt(2)) for mixed mode and (1/100)/3 for pure modes.
+    # Failure times: 2.5/(3*sqrt(2)), 2/3, and 4/3 for mixed mode, mode I, and mode II.
+    sync_times = '0.00235702260395516 0.00333333333333333 0.58925565098879 0.666666666666667 1.33333333333333'
     show = 'prescribed_energy numerical_energy relative_error final_separation bk_mode_II_limit pure_shear_to_bk_limit_ratio'
   []
 []
