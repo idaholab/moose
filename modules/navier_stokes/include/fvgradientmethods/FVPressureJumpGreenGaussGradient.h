@@ -11,7 +11,7 @@
 #include "FVGradientMethod.h"
 
 class LinearFVGradientReader;
-class RhieChowMassFlux;
+class PorousRhieChowMassFlux;
 
 /**
  * Green-Gauss pressure gradient that removes prescribed jumps before interpolating across baffles.
@@ -22,8 +22,9 @@ public:
   static InputParameters validParams();
   FVPressureJumpGreenGaussGradient(const InputParameters & params);
 
-  /// Link this method to the Rhie-Chow object that supplies pressure jumps.
-  void linkFlowSystem(RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient);
+  /// Link this method to the porous Rhie-Chow object that supplies pressure jumps.
+  void linkFlowSystem(PorousRhieChowMassFlux & rc,
+                      const LinearFVGradientReader & pressure_gradient);
 
 private:
   void computeGradientWithoutLimiter(
@@ -31,8 +32,8 @@ private:
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
-  /// Rhie-Chow object supplying baffle locations and signed pressure jumps after solver linkage.
-  const RhieChowMassFlux * _rhie_chow = nullptr;
+  /// Porous Rhie-Chow object supplying baffle locations and signed pressure jumps after linkage.
+  const PorousRhieChowMassFlux * _rhie_chow = nullptr;
 
   /// Pressure system to which this method is linked.
   const SystemBase * _pressure_system = nullptr;

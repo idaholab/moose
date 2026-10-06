@@ -11,7 +11,10 @@
 
 #include "MooseMesh.h"
 #include "NS.h"
+#include "FVPressureJumpGreenGaussGradient.h"
+#include "FVReconstructedPressureGradient.h"
 #include "LinearSystem.h"
+#include "MooseLinearVariableFV.h"
 #include "PressureJumpModel.h"
 
 using namespace libMesh;
@@ -67,10 +70,75 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
 }
 
 void
+PorousRhieChowMassFlux::linkMomentumPressureSystems(
+    const std::vector<LinearSystem *> & momentum_systems,
+    LinearSystem & pressure_system,
+    const std::vector<unsigned int> & momentum_system_numbers)
+{
+  RhieChowMassFlux::linkMomentumPressureSystems(
+      momentum_systems, pressure_system, momentum_system_numbers);
+
+  auto * const pressure_var =
+      dynamic_cast<MooseLinearVariableFVReal *>(&_pressure_system->getVariable(0, _p->number()));
+  mooseAssert(pressure_var, "The pressure variable type was checked by RhieChowMassFlux.");
+  const auto & solution_gradient_reader = pressure_var->requestCellGradients();
+
+  if (hasPressureBaffles())
+  {
+    const auto * const jump_gradient_method =
+        dynamic_cast<const FVPressureJumpGreenGaussGradient *>(&solution_gradient_reader.method());
+    if (!jump_gradient_method)
+      mooseError("Pressure variable '",
+                 pressure_var->name(),
+                 "' must use FVPressureJumpGreenGaussGradient as its default gradient method "
+                 "when PorousRhieChowMassFlux '",
+                 name(),
+                 "' has pressure baffles.");
+
+    auto & writable_method =
+        _fe_problem.getFVGradientMethod(solution_gradient_reader.method().name(), _tid);
+    dynamic_cast<FVPressureJumpGreenGaussGradient &>(writable_method)
+        .linkFlowSystem(*this, solution_gradient_reader);
+
+    if (usingReconstructedPressureGradientMethod())
+    {
+      if (&basePressureGradientField().method() != &solution_gradient_reader.method())
+        mooseError("FVReconstructedPressureGradient '",
+                   reconstructedGradientMethod().name(),
+                   "' must use the pressure variable's FVPressureJumpGreenGaussGradient as its "
+                   "base_gradient_method when PorousRhieChowMassFlux '",
+                   name(),
+                   "' has pressure baffles.");
+    }
+    else if (&pressureGradientField().method() != &solution_gradient_reader.method())
+      mooseError("Momentum pressure kernels coupled to PorousRhieChowMassFlux '",
+                 name(),
+                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient or an "
+                 "FVReconstructedPressureGradient based on it when pressure baffles are present.");
+  }
+
+  setupPorousMeshInformation();
+}
+
+void
+PorousRhieChowMassFlux::computeHbyA(bool verbose)
+{
+  updateBaffleJumps();
+
+  // Pressure jumps are external data for the variable's gradient method. Refresh that field
+  // before pressure assembly even though the pressure solution itself has not changed yet.
+  if (hasPressureBaffles())
+    _pressure_system->updateFVGradient(basePressureGradientField());
+
+  RhieChowMassFlux::computeHbyA(verbose, *_cell_volume_porosity);
+}
+
+void
 PorousRhieChowMassFlux::meshChanged()
 {
   RhieChowMassFlux::meshChanged();
   _baffle_jump.clear();
+  setupPorousMeshInformation();
 }
 
 void
@@ -83,20 +151,20 @@ PorousRhieChowMassFlux::initialize()
 }
 
 void
-PorousRhieChowMassFlux::setupMeshInformation()
+PorousRhieChowMassFlux::setupPorousMeshInformation()
 {
-  RhieChowMassFlux::setupMeshInformation();
-
-  _cell_porosity = _pressure_system->currentSolution()->zero_clone();
+  _cell_volume_porosity = _pressure_system->currentSolution()->zero_clone();
   const auto time_arg = Moose::currentState();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
     if (hasBlocks(elem_info->subdomain_id()))
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
-      _cell_porosity->set(elem_dof, _eps(makeElemArg(elem_info->elem()), time_arg));
+      const Real cell_volume = elem_info->volume() * elem_info->coordFactor();
+      _cell_volume_porosity->set(elem_dof,
+                                 cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
     }
 
-  _cell_porosity->close();
+  _cell_volume_porosity->close();
 }
 
 void
@@ -115,13 +183,6 @@ PorousRhieChowMassFlux::initCouplingField()
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
     _baffle_jump[fi->id()];
-}
-
-void
-PorousRhieChowMassFlux::applyCellPorosityScaling(NumericVector<Number> & vec) const
-{
-  if (_cell_porosity)
-    vec.pointwise_mult(vec, *_cell_porosity);
 }
 
 Real
@@ -171,9 +232,20 @@ PorousRhieChowMassFlux::updateBaffleJumps()
 }
 
 bool
-PorousRhieChowMassFlux::isBaffleFace(const FaceInfo & fi) const
+PorousRhieChowMassFlux::faceIsBaffle(const FaceInfo & fi) const
 {
   return getPressureJumpModel(fi) != nullptr;
+}
+
+Real
+PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
+                                                         const unsigned int component) const
+{
+  mooseAssert(component < _Ainv_raw.size(), "Invalid pressure-diffusion component.");
+
+  const auto momentum_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+  const Real density = _rho(makeElemArg(elem_info.elem()), Moose::currentState());
+  return density * (*_Ainv_raw[component])(momentum_dof);
 }
 
 const PressureJumpModel *
@@ -205,7 +277,7 @@ PorousRhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo & fi) cons
   if (isPressureGradientLimited(fi))
     return true;
 
-  if (!fi.neighborPtr() || !isBaffleFace(fi))
+  if (!fi.neighborPtr() || !faceIsBaffle(fi))
     return false;
 
   return getPressureJumpModel(fi)->useOneSidedReconstruction(fi);

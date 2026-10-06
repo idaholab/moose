@@ -11,6 +11,8 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 
+class PorousRhieChowMassFlux;
+
 /**
  * Momentum flux kernel for porous equations written in superficial velocity.
  *
@@ -58,6 +60,9 @@ protected:
   Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
 private:
+  /// Porous Rhie-Chow object supplying porosity and pressure-baffle data.
+  const PorousRhieChowMassFlux & _porous_mass_flux_provider;
+
   struct TwoPointStressData
   {
     Real transmissibility;

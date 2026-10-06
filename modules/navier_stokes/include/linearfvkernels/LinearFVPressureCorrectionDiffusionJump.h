@@ -12,7 +12,7 @@
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "PressureJumpInterface.h"
 
-class RhieChowMassFlux;
+class PorousRhieChowMassFlux;
 
 /**
  * Pressure-correction diffusion kernel that enforces modeled jumps on internal baffle faces.
@@ -62,8 +62,8 @@ protected:
   /// Compute and cache the half-cell data shared by matrix and right-hand-side assembly.
   const NS::FV::PressureJumpInterfaceData & jumpInterfaceData();
 
-  /// Rhie-Chow object supplying baffle identification and signed pressure jumps.
-  const RhieChowMassFlux & _rc_uo;
+  /// Porous Rhie-Chow object supplying baffle identification and signed pressure jumps.
+  const PorousRhieChowMassFlux & _rc_uo;
 
   /// Whether to derive baffle transmissibility from the lagged two-term pressure expansion.
   const bool _use_two_term_pressure_expansion;

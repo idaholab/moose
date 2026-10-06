@@ -10,7 +10,7 @@
 #include "LinearPWCNSFVMomentumFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
 #include "MathFVUtils.h"
-#include "RhieChowMassFlux.h"
+#include "PorousRhieChowMassFlux.h"
 
 #include <cmath>
 
@@ -31,6 +31,7 @@ LinearPWCNSFVMomentumFlux::validParams()
 
 LinearPWCNSFVMomentumFlux::LinearPWCNSFVMomentumFlux(const InputParameters & params)
   : LinearWCNSFVMomentumFlux(params),
+    _porous_mass_flux_provider(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object")),
     _use_two_point_stress_transmissibility(getParam<bool>("use_two_point_stress_transmissibility"))
 {
 }
@@ -236,21 +237,21 @@ bool
 LinearPWCNSFVMomentumFlux::isInternalBaffleFace() const
 {
   return _current_face_type == FaceInfo::VarFaceNeighbors::BOTH &&
-         _mass_flux_provider.faceIsBaffle(*_current_face_info);
+         _porous_mass_flux_provider.faceIsBaffle(*_current_face_info);
 }
 
 bool
 LinearPWCNSFVMomentumFlux::needsInternalBaffleAdvectionCorrection() const
 {
   return isInternalBaffleFace() &&
-         _mass_flux_provider.faceUsesOneSidedReconstruction(*_current_face_info);
+         _porous_mass_flux_provider.faceUsesOneSidedReconstruction(*_current_face_info);
 }
 
 Real
 LinearPWCNSFVMomentumFlux::inversePorosity(const bool elem_side) const
 {
-  const Real porosity =
-      _mass_flux_provider.getFaceSidePorosity(*_current_face_info, elem_side, determineState());
+  const Real porosity = _porous_mass_flux_provider.getFaceSidePorosity(
+      *_current_face_info, elem_side, determineState());
   if (porosity <= 0.0)
     mooseError(name(), ": porosity must be positive on face ", _current_face_info->id(), ".");
 
