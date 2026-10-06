@@ -9,22 +9,15 @@
 
 #pragma once
 
-#include "ODETimeDerivative.h"
-#include "ADScalarTimeDerivative.h"
-#include "FunctorInterface.h"
-#include "MooseTypes.h"
-#include "ThermalSolidProperties.h"
-#include "SinglePhaseFluidProperties.h"
+#include "PipeWallTemperatureScalarKernelBase.h"
 
-class ThermalSolidProperties;
 class SinglePhaseFluidProperties;
 
 template <bool is_ad>
 class PipeInnerWallTemperatureScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type,
-    public FunctorInterface
+  : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
 {
-  using Base = typename std::conditional<is_ad, ADScalarTimeDerivative, ODETimeDerivative>::type;
+  using Base = PipeWallTemperatureScalarKernelBaseTempl<is_ad>;
 
 public:
   PipeInnerWallTemperatureScalarKernelTempl(const InputParameters & parameters);
@@ -32,28 +25,28 @@ public:
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian();
-  const ThermalSolidProperties & _sp;
+  virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tout[0]; }
+  virtual GenericReal<is_ad> convectiveResidual() const override;
+  virtual Real convectiveJacobian() const override;
+
+  /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+  /// Coupled mass flow rate through the pipe
   const VariableValue & _m;
+  /// Coupled temperature of the outer-surface wall node
   const VariableValue & _Tout;
-  const VariableValue & _Tup;
-  const VariableValue & _Tdown;
+  /// Coupled fluid temperature adjacent to this wall node
   const VariableValue & _Tf;
+  /// Coupled fluid temperature adjacent to the upstream wall node
   const VariableValue & _Tfup;
+  /// Coupled fluid temperature adjacent to the downstream wall node
   const VariableValue & _Tfdown;
-  bool _is_implicit;
+  /// System reference pressure
   const Moose::Functor<GenericReal<is_ad>> & _Pref;
-  const Moose::Functor<GenericReal<is_ad>> & _inner_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _outer_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _length;
-  const Moose::Functor<GenericReal<is_ad>> & _upstream_spacing;
-  const Moose::Functor<GenericReal<is_ad>> & _downstream_spacing;
-  const Moose::Functor<GenericReal<is_ad>> & _upstream_inner_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _upstream_outer_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _downstream_inner_diameter;
-  const Moose::Functor<GenericReal<is_ad>> & _downstream_outer_diameter;
+  /// Cross-sectional area of the fluid flow channel adjacent to this wall node
+  const Moose::Functor<GenericReal<is_ad>> & _flow_area;
+  /// Wetted perimeter of the fluid flow channel adjacent to this wall node
+  const Moose::Functor<GenericReal<is_ad>> & _wetted_perimeter;
 };
 
 typedef PipeInnerWallTemperatureScalarKernelTempl<false> PipeInnerWallTemperatureScalarKernel;
