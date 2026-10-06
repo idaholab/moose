@@ -37,7 +37,7 @@ ramp_time = 5.0
   [bc_inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'ch_1:in'
-    m_dot = 0 # This value is controlled by 'mfr_ctrl'
+    m_dot = mfr_fn
     T = ${T_in}
   []
   [ch_1]
@@ -62,15 +62,6 @@ ramp_time = 5.0
     type = PiecewiseLinear
     x = '0 ${ramp_time}'
     y = '0 ${mfr_final}'
-  []
-[]
-
-[ControlLogic]
-  [mfr_ctrl]
-    type = TimeFunctionComponentControl
-    component = bc_inlet
-    parameter = m_dot
-    function = mfr_fn
   []
 []
 

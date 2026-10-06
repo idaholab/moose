@@ -47,7 +47,7 @@
     type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = 0.1
-    T = 300
+    T = inlet_T_fn
   []
 
   [outlet]
@@ -65,20 +65,10 @@
   []
 []
 
-[ControlLogic]
-  [set_inlet_value]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = T
-    function = inlet_T_fn
-  []
-[]
-
 [Postprocessors]
   [inlet_T]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = T
+    type = FunctionValuePostprocessor
+    function = inlet_T_fn
   []
 []
 

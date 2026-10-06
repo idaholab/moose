@@ -58,6 +58,11 @@
     input = 'pipe1:out'
     p = 100.0e3
   []
+
+  [test_comp]
+    type = RealValueTestComponent
+    value = 355.
+  []
 []
 
 [Functions]
@@ -72,8 +77,8 @@
 [ControlLogic]
   [set_inlet_value_ctrl]
     type = SetComponentRealValueControl
-    component = inlet
-    parameter = T0
+    component = test_comp
+    parameter = value
     value = T_inlet_ctrl:value
   []
 
@@ -86,8 +91,8 @@
 [Postprocessors]
   [T_ctrl]
     type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = T0
+    component = test_comp
+    parameter = value
   []
 []
 

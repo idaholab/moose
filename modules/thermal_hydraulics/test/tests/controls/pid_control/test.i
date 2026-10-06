@@ -46,7 +46,7 @@
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     p0 = 105.e3
-    T0 = 300.
+    T0 = inlet_T0_fn
   []
   [outlet]
     type = Outlet1Phase
@@ -70,16 +70,25 @@
     K_d = 0.1
     initial_value = 340
   []
+[]
 
-  [set_inlet_value]
-    type = SetComponentRealValueControl
-    component = inlet
-    parameter = T0
-    value = pid_ctrl:output
+[Functions]
+  [inlet_T0_fn]
+    type = ParsedFunction
+    expression = 'pid_out'
+    symbol_names = 'pid_out'
+    symbol_values = 'pid_output'
   []
 []
 
 [Postprocessors]
+  [pid_output]
+    type = RealControlDataValuePostprocessor
+    control_data_name = pid_ctrl:output
+    execute_on = 'initial timestep_begin'
+    outputs = none
+  []
+
   [T_reading]
     type = PointValue
     point = '10 0 0'

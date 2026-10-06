@@ -22,7 +22,6 @@ public:
 
 protected:
   virtual void addTHMComponents() override;
-  virtual void addControlLogic() override;
 
   /// Adds inlet component
   void addInlet();

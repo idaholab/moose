@@ -57,13 +57,6 @@
 []
 
 [ControlLogic]
-  [p0_fn_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = p0
-    function = p0_fn
-  []
-
   [delay_ctrl]
     type = DelayControl
     input = p0_inlet

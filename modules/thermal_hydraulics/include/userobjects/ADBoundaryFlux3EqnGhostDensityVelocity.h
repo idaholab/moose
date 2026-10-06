@@ -12,6 +12,7 @@
 #include "ADBoundaryFlux3EqnGhostBase.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes boundary flux from densities and velocities for the 3-equation model
@@ -26,10 +27,10 @@ protected:
   virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U_interior,
                                                    const Point & point) const override;
 
-  /// Specified density
-  const Real & _rho;
-  /// Specified velocity
-  const Real & _vel;
+  /// Function specifying the density
+  const Function & _rho_fn;
+  /// Function specifying the velocity
+  const Function & _vel_fn;
   /// Reversibility
   const bool & _reversible;
   /// Fluid properties object

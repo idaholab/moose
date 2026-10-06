@@ -24,8 +24,8 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::validParams()
       "Computes a boundary flux from a specified mass flow rate and temperature for the 1-D, "
       "1-phase, variable-area Euler equations using a ghost cell");
 
-  params.addRequiredParam<Real>("mass_flow_rate", "Specified mass flow rate");
-  params.addRequiredParam<Real>("T", "Specified temperature");
+  params.addRequiredParam<FunctionName>("mass_flow_rate", "Function specifying the mass flow rate");
+  params.addRequiredParam<FunctionName>("T", "Function specifying the temperature");
   params.addRequiredParam<std::vector<FunctionName>>(
       "passives", "Specified passive transport functions [amount/m^3]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
@@ -33,7 +33,6 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::validParams()
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "Name of single-phase fluid properties user object");
 
-  params.declareControllable("mass_flow_rate T");
   return params;
 }
 
@@ -41,8 +40,8 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::ADBoundaryFlux3EqnGhostMassFlowR
     const InputParameters & parameters)
   : ADBoundaryFlux3EqnGhostBase(parameters),
 
-    _rhouA(getParam<Real>("mass_flow_rate")),
-    _T(getParam<Real>("T")),
+    _mass_flow_rate_fn(getFunction("mass_flow_rate")),
+    _T_fn(getFunction("T")),
     _reversible(getParam<bool>("reversible")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
@@ -58,13 +57,16 @@ std::vector<ADReal>
 ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(const std::vector<ADReal> & U,
                                                                      const Point & point) const
 {
+  const Real rhouA_b = _mass_flow_rate_fn.value(_t, point);
+  const Real T_b = _T_fn.value(_t, point);
+
   const ADReal rhoA = U[THMVACE1D::RHOA];
   const ADReal rhouA = U[THMVACE1D::RHOUA];
   const ADReal rhoEA = U[THMVACE1D::RHOEA];
   const ADReal A = U[THMVACE1D::AREA];
 
   std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS + _n_passives);
-  if (!_reversible || THM::isInlet(_rhouA, _normal))
+  if (!_reversible || THM::isInlet(rhouA_b, _normal))
   {
     // Pressure is the only quantity coming from the interior
     const ADReal rho = rhoA / A;
@@ -73,13 +75,13 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(const std::
     const ADReal e = E - 0.5 * vel * vel;
     const ADReal p = _fp.p_from_v_e(1.0 / rho, e);
 
-    const ADReal rho_b = _fp.rho_from_p_T(p, _T);
-    const ADReal vel_b = _rhouA / (rho_b * A);
+    const ADReal rho_b = _fp.rho_from_p_T(p, T_b);
+    const ADReal vel_b = rhouA_b / (rho_b * A);
     const ADReal e_b = _fp.e_from_p_rho(p, rho_b);
     const ADReal E_b = e_b + 0.5 * vel_b * vel_b;
 
     U_ghost[THMVACE1D::RHOA] = rho_b * A;
-    U_ghost[THMVACE1D::RHOUA] = _rhouA;
+    U_ghost[THMVACE1D::RHOUA] = rhouA_b;
     U_ghost[THMVACE1D::RHOEA] = rho_b * E_b * A;
     U_ghost[THMVACE1D::AREA] = A;
     for (const auto i : make_range(_n_passives))
@@ -88,7 +90,7 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(const std::
   else
   {
     U_ghost[THMVACE1D::RHOA] = rhoA;
-    U_ghost[THMVACE1D::RHOUA] = _rhouA;
+    U_ghost[THMVACE1D::RHOUA] = rhouA_b;
     U_ghost[THMVACE1D::RHOEA] = rhoEA;
     U_ghost[THMVACE1D::AREA] = A;
     for (const auto i : make_range(_n_passives))

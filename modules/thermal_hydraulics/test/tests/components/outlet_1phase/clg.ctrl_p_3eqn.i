@@ -55,7 +55,7 @@
   [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
-    p = 1e5
+    p = outlet_p_fn
   []
 []
 
@@ -67,20 +67,10 @@
   []
 []
 
-[ControlLogic]
-  [set_outlet_value]
-    type = TimeFunctionComponentControl
-    component = outlet
-    parameter = p
-    function = outlet_p_fn
-  []
-[]
-
 [Postprocessors]
   [outlet_p]
-    type = RealComponentParameterValuePostprocessor
-    component = outlet
-    parameter = p
+    type = FunctionValuePostprocessor
+    function = outlet_p_fn
   []
 []
 

@@ -12,6 +12,7 @@
 #include "ADBoundaryFlux3EqnGhostBase.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes a boundary flux from a specified velocity and temperature for
@@ -26,11 +27,11 @@ protected:
   virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U,
                                                    const Point & point) const override;
 
-  /// Specified velocity
-  const Real & _vel;
+  /// Function specifying the velocity
+  const Function & _vel_fn;
 
-  /// Specified temperature
-  const Real & _T;
+  /// Function specifying the temperature
+  const Function & _T_fn;
   /// Reversible flag
   const bool & _reversible;
 

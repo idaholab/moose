@@ -1,7 +1,6 @@
-# This is testing that the values set by SetComponentRealValueControl are used.
-# Function T0_fn prescribes values for T0 at inlet. We output the function
-# values via a postprocessor `T_fn` and the inlet values via another
-# postprocessor `T_ctrl`. Those two values have to be equal.
+# Tests that TimeFunctionComponentControl sets a controllable component parameter
+# to the value of a function of time. The `value` parameter of the `test_comp`
+# component is driven by `value_fn` and read back via a postprocessor.
 
 [GlobalParams]
   initial_p = 100.e3
@@ -55,39 +54,29 @@
 
   [test_comp]
     type = RealValueTestComponent
-    value = 350.
+    value = 0
   []
 []
 
 [Functions]
-  [T0_fn]
+  [value_fn]
     type = PiecewiseLinear
     x = '0 1'
-    y = '350 345'
+    y = '0 10'
   []
 []
 
 [ControlLogic]
-  [T_inlet_fn]
-    type = GetFunctionValueControl
-    function = T0_fn
-  []
-
-  [set_inlet_value]
-    type = SetComponentRealValueControl
+  [set_value]
+    type = TimeFunctionComponentControl
     component = test_comp
     parameter = value
-    value = T_inlet_fn:value
+    function = value_fn
   []
 []
 
 [Postprocessors]
-  [T_fn]
-    type = FunctionValuePostprocessor
-    function = T0_fn
-  []
-
-  [T_ctrl]
+  [value_ctrl]
     type = RealComponentParameterValuePostprocessor
     component = test_comp
     parameter = value
