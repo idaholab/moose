@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#33691'
+  issues = '#33691 #33953'
   [friction_regularAD]
     type = CSVDiff
     input = ADfriction.i
