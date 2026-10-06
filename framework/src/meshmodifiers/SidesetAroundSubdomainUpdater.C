@@ -97,10 +97,15 @@ SidesetAroundSubdomainUpdater::executeOnExternalSide(const Elem * elem, unsigned
   // assign_surface_sides
   if (_inner_ids.count(elem->subdomain_id()))
   {
-    if (_assign_outer_surface_sides && !_boundary_info.has_boundary_id(elem, side, _boundary_id) &&
-        (_mask_side == Moose::INVALID_BOUNDARY_ID ||
-         _boundary_info.has_boundary_id(elem, side, _mask_side)))
-      _add[_pid].emplace_back(elem->id(), side);
+    if (_assign_outer_surface_sides)
+    {
+      if ((!_boundary_info.has_boundary_id(elem, side, _boundary_id)) &&
+          (_mask_side == Moose::INVALID_BOUNDARY_ID ||
+           _boundary_info.has_boundary_id(elem, side, _mask_side)))
+        _add[_pid].emplace_back(elem->id(), side);
+    }
+    else if (_boundary_info.has_boundary_id(elem, side, _boundary_id))
+      _remove[_pid].emplace_back(elem->id(), side);
   }
   else
   {
@@ -166,69 +171,102 @@ SidesetAroundSubdomainUpdater::finalize()
   const auto & mesh = _mesh.getMesh();
   const auto * displaced_mesh =
       _displaced_problem ? &_displaced_problem->mesh().getMesh() : nullptr;
-  if (getParam<bool>("verbose"))
+  // ------------------------------------------------------------------
+  // 3) COMPLETELY REMOVE all nodes with this boundary id
+  // ------------------------------------------------------------------
+  for (auto node_it = mesh.local_nodes_begin(); node_it != mesh.local_nodes_end(); ++node_it)
   {
-    unsigned int total_remove = 0, total_add = 0;
-    for (const auto & [pid, list] : _remove)
-      total_remove += _remove[pid].size();
-    for (const auto & [pid, list] : _add)
-      total_add += _add[pid].size();
-    comm().sum(total_remove);
-    comm().sum(total_add);
-
-    if (total_remove)
-      _console << "Removing " << total_remove << " sides from sideset " << _boundary_id
-               << std::endl;
-    if (total_add)
-      _console << "Adding " << total_add << " sides to sideset " << _boundary_id << std::endl;
+    const libMesh::Node * node = *node_it;
+    if (_boundary_info.has_boundary_id(node, _boundary_id))
+      _boundary_info.remove_node(node, _boundary_id);
   }
 
-  auto add_functor = [this, &mesh, &displaced_mesh](const processor_id_type, const auto & sent_data)
+  if (_displaced_boundary_info && displaced_mesh)
   {
-    for (auto & [elem_id, side] : sent_data)
+    for (auto node_it = displaced_mesh->local_nodes_begin();
+         node_it != displaced_mesh->local_nodes_end();
+         ++node_it)
     {
-      _boundary_info.add_side(mesh.elem_ptr(elem_id), side, _boundary_id);
-      if (_displaced_boundary_info)
-        _displaced_boundary_info->add_side(displaced_mesh->elem_ptr(elem_id), side, _boundary_id);
+      const libMesh::Node * dnode = *node_it;
+      if (_displaced_boundary_info->has_boundary_id(dnode, _boundary_id))
+        _displaced_boundary_info->remove_node(dnode, _boundary_id);
     }
-  };
+  }
 
-  auto remove_functor =
-      [this, &mesh, &displaced_mesh](const processor_id_type, const SideList & sent_data)
+  // ------------------------------------------------------------------
+  for (auto elem_it = mesh.local_elements_begin(); elem_it != mesh.local_elements_end(); ++elem_it)
   {
-    for (const auto & [elem_id, side] : sent_data)
+    const Elem * elem = *elem_it;
+
+    for (auto side : elem->side_index_range())
     {
-      const auto elem = mesh.elem_ptr(elem_id);
-      _boundary_info.remove_side(elem, side, _boundary_id);
-      for (const auto local_node_id : elem->nodes_on_side(side))
-        _boundary_info.remove_node(elem->node_ptr(local_node_id), _boundary_id);
-      if (_displaced_boundary_info)
+      if (_boundary_info.has_boundary_id(elem, side, _boundary_id))
+        _boundary_info.remove_side(elem, side, _boundary_id);
+    }
+  }
+
+  if (_displaced_boundary_info && displaced_mesh)
+  {
+    for (auto elem_it = displaced_mesh->local_elements_begin();
+         elem_it != displaced_mesh->local_elements_end();
+         ++elem_it)
+    {
+      const Elem * delem = *elem_it;
+
+      for (auto side : delem->side_index_range())
       {
-        const auto displaced_elem = displaced_mesh->elem_ptr(elem_id);
-        _displaced_boundary_info->remove_side(displaced_elem, side, _boundary_id);
-        for (const auto local_node_id : displaced_elem->nodes_on_side(side))
-          _displaced_boundary_info->remove_node(displaced_elem->node_ptr(local_node_id),
-                                                _boundary_id);
+        if (_displaced_boundary_info->has_boundary_id(delem, side, _boundary_id))
+          _displaced_boundary_info->remove_side(delem, side, _boundary_id);
       }
     }
-  };
+  }
 
-  // communicate and act on remote and local changes
-  TIMPI::push_parallel_vector_data(_communicator, _remove, remove_functor);
-  TIMPI::push_parallel_vector_data(_communicator, _add, add_functor);
-
-  auto sync = [](auto & mesh)
+  for (auto elem_it = mesh.local_elements_begin(); elem_it != mesh.local_elements_end(); ++elem_it)
   {
-    mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
-    mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
-    mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
-    mesh.update();
+    const Elem * elem = *elem_it;
+
+    // only build boundary around these subdomains
+    if (!_inner_ids.count(elem->subdomain_id()))
+      continue;
+
+    for (auto side : elem->side_index_range())
+    {
+      const Elem * neigh = elem->neighbor_ptr(side);
+      const bool add_external_side = !neigh && _assign_outer_surface_sides;
+      const bool add_internal_side = neigh && _outer_ids.count(neigh->subdomain_id());
+
+      if (!(add_external_side || add_internal_side) ||
+          (_mask_side != Moose::INVALID_BOUNDARY_ID &&
+           !_boundary_info.has_boundary_id(elem, side, _mask_side)))
+        continue;
+
+      _boundary_info.add_side(elem, side, _boundary_id);
+
+      if (_displaced_boundary_info && displaced_mesh)
+      {
+        const Elem * delem = displaced_mesh->elem_ptr(elem->id());
+        _displaced_boundary_info->add_side(delem, side, _boundary_id);
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  auto sync = [](auto & moose_mesh)
+  {
+    auto & libmesh_mesh = moose_mesh.getMesh();
+    auto & bi = libmesh_mesh.get_boundary_info();
+    bi.parallel_sync_side_ids();
+    bi.parallel_sync_node_ids();
+    moose_mesh.update();
   };
+
   sync(_mesh);
   if (_displaced_problem)
     sync(_displaced_problem->mesh());
 
-  // Reinit equation systems
+  // ------------------------------------------------------------------
   _fe_problem.meshChanged(
-      /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
+      /*intermediate_change=*/false,
+      /*contract_mesh=*/false,
+      /*clean_refinement_flags=*/false);
 }

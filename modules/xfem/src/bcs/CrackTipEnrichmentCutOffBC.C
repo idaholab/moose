@@ -15,8 +15,9 @@ InputParameters
 CrackTipEnrichmentCutOffBC::validParams()
 {
   InputParameters p = DirichletBC::validParams();
-  p.addRequiredParam<Real>("cut_off_radius",
-                           "The cut off radius of crack tip enrichment functions");
+  p.addParam<Real>("cut_off_radius",
+                   "The cut off radius of crack tip enrichment functions. If omitted, the BC is "
+                   "applied to every node on the supplied boundary.");
   p.set<bool>("use_displaced_mesh") = false;
   p.addRequiredParam<UserObjectName>("crack_front_definition",
                                      "The CrackFrontDefinition user object name");
@@ -26,7 +27,8 @@ CrackTipEnrichmentCutOffBC::validParams()
 
 CrackTipEnrichmentCutOffBC::CrackTipEnrichmentCutOffBC(const InputParameters & parameters)
   : DirichletBC(parameters),
-    _cut_off_radius(getParam<Real>("cut_off_radius")),
+    _has_cut_off_radius(isParamValid("cut_off_radius")),
+    _cut_off_radius(_has_cut_off_radius ? getParam<Real>("cut_off_radius") : 0.0),
     _crack_front_definition(getUserObject<CrackFrontDefinition>("crack_front_definition"))
 {
 }
@@ -34,11 +36,11 @@ CrackTipEnrichmentCutOffBC::CrackTipEnrichmentCutOffBC(const InputParameters & p
 bool
 CrackTipEnrichmentCutOffBC::shouldApply() const
 {
+  if (!_has_cut_off_radius)
+    return true;
+
   Real r, theta;
   _crack_front_definition.calculateRThetaToCrackFront((*_current_node), r, theta);
 
-  if (r > _cut_off_radius)
-    return true;
-  else
-    return false;
+  return r > _cut_off_radius;
 }

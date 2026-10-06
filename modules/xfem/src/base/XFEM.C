@@ -11,6 +11,7 @@
 
 // XFEM includes
 #include "XFEMAppTypes.h"
+#include "SolidMechanicsAppTypes.h"
 #include "XFEMCutElem2D.h"
 #include "XFEMCutElem3D.h"
 #include "XFEMFuncs.h"
@@ -181,6 +182,25 @@ XFEM::clearGeomMarkedElems()
 {
   _geom_marked_elems_2d.clear();
   _geom_marked_elems_3d.clear();
+}
+
+bool
+XFEM::didNearTipEnrichmentChange()
+{
+  bool cutter_mesh_changed = false;
+  for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
+  {
+    cutter_mesh_changed = _geometric_cuts[i]->isCutterMeshChanged();
+    if (cutter_mesh_changed)
+      break;
+  }
+  return cutter_mesh_changed;
+}
+
+void
+XFEM::executeSubdomainModifiers()
+{
+  _fe_problem->execute(EXEC_XFEM_SUBDOMAIN_MODIFIER);
 }
 
 void
@@ -618,7 +638,6 @@ XFEM::markCutEdgesByState(Real time)
     // crack tip origin coordinates and direction
     Point crack_tip_origin(0, 0, 0);
     Point crack_tip_direction(0, 0, 0);
-
     if (isElemAtCrackTip(elem)) // crack tip element's crack intiation
     {
       orig_cut_side_id = CEMElem->getTipEdgeID();
@@ -1397,14 +1416,31 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
       if (_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
         _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
 
-      if (_bnd_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
+      auto & bnd_material_storage = _bnd_material_data[0]->getMaterialPropertyStorage();
+      if (bnd_material_storage.hasStatefulProperties())
         for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
         {
           _mesh->get_boundary_info().boundary_ids(parent_elem, side, parent_boundary_ids);
           std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
           for (; it_bd != parent_boundary_ids.end(); ++it_bd)
           {
-            if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+            if (!_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+              continue;
+
+            bool parent_side_has_state = true;
+            for (const auto state : bnd_material_storage.stateIndexRange())
+            {
+              const auto & state_props = bnd_material_storage.props(state);
+              const auto elem_props_it = state_props.find(parent_elem);
+              if (elem_props_it == state_props.end() ||
+                  elem_props_it->second.find(side) == elem_props_it->second.end())
+              {
+                parent_side_has_state = false;
+                break;
+              }
+            }
+
+            if (parent_side_has_state)
               _bnd_material_data[0]->copy(*libmesh_elem, *parent_elem, side);
           }
         }

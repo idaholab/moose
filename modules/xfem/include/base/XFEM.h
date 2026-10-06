@@ -148,6 +148,8 @@ public:
                       const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                       AuxiliarySystem & aux) override;
 
+  virtual void executeSubdomainModifiers() override;
+
   virtual void initSolution(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                             AuxiliarySystem & aux) override;
 
@@ -322,6 +324,13 @@ public:
   CutSubdomainID getCutSubdomainID(const GeometricCutUserObject * gcuo,
                                    const Elem * cut_elem,
                                    const Elem * parent_elem = nullptr) const;
+
+  /**
+   * Check whether the near-tip enrichment changed during the most recent call to
+   * XFEM::update().
+   * @return true if it changed
+   */
+  virtual bool didNearTipEnrichmentChange() override;
 
 private:
   bool _has_secondary_cut;
