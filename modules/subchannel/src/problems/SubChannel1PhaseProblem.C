@@ -2159,6 +2159,10 @@ SubChannel1PhaseProblem::solveAndPopulateEnthalpy(
   if (ksp_prefix && *ksp_prefix)
     LibmeshPetscCall(KSPSetOptionsPrefix(ksp, ksp_prefix));
   LibmeshPetscCall(KSPSetFromOptions(ksp));
+  // Allocate all GMRES Krylov vectors in one block. PETSc batches the dot products of Krylov
+  // vectors that are adjacent in memory, so with separately allocated vectors the summation order,
+  // and hence the result, depends on where the heap places them and can vary between runs.
+  LibmeshPetscCall(KSPGMRESSetPreAllocateVectors(ksp));
 
   // Solve
   LibmeshPetscCall(KSPSolve(ksp, rhs, x));
