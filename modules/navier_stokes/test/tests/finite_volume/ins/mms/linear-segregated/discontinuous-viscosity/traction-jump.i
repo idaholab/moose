@@ -166,11 +166,15 @@ shear_traction = 2
     variable = vel_y
     functor = exact_v
   []
-  [pressure]
-    type = LinearFVExtrapolatedPressureBC
+  [pressure-extrapoaltion]
+    type = LinearFVPressureFluxBC
     boundary = 'left right top bottom'
     variable = pressure
-    use_two_term_expansion = true
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = vel_x
+    v = vel_y
   []
 []
 

@@ -151,8 +151,7 @@ PorousRhieChowMassFlux::setupPorousMeshInformation()
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
       const Real cell_volume = elem_info->volume() * elem_info->coordFactor();
-      _cell_volumes->set(elem_dof,
-                         cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
+      _cell_volumes->set(elem_dof, cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
     }
 
   _cell_volumes->close();
