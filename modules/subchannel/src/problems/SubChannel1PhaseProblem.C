@@ -2235,6 +2235,66 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
 }
 
 PetscErrorCode
+SubChannel1PhaseProblem::addCrossflowDamping(
+    Mat M_ww, Mat M_wp, Vec b_w, Vec w_iter, int iblock, PetscScalar & max_K, PetscScalar & added_K)
+{
+  PetscFunctionBegin;
+  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = (iblock + 1) * _block_size;
+  Vec residual, pressure_term, row_scale;
+  LibmeshPetscCall(createPetscVector(residual, _block_size * _n_gaps));
+  LibmeshPetscCall(createPetscVector(pressure_term, _block_size * _n_gaps));
+  LibmeshPetscCall(createPetscVector(row_scale, _block_size * _n_gaps));
+  LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
+      _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
+
+  // residual = M_ww W + M_wp P - b_w at the current iterate
+  LibmeshPetscCall(MatMult(M_ww, w_iter, residual));
+  LibmeshPetscCall(MatMult(M_wp, _prodp, pressure_term));
+  LibmeshPetscCall(VecAXPY(residual, 1.0, pressure_term));
+  LibmeshPetscCall(VecAXPY(residual, -1.0, b_w));
+  PetscReal residual_norm;
+  LibmeshPetscCall(VecNorm(residual, NORM_2, &residual_norm));
+
+  // The first nonzero residual of this solve sets the reference. The uniform initial state can
+  // have a zero residual, in which case the full damping is applied.
+  auto & residual_ref = _crossflow_residual_ref[iblock];
+  if (residual_ref == 0.0)
+    residual_ref = residual_norm;
+  const Real residual_ratio =
+      residual_ref > 0.0 ? std::min(1.0, residual_norm / residual_ref) : 1.0;
+
+  // The largest entry of each row measures the axial transport of crossflow. The diagonal alone
+  // is not a usable scale because, with central differencing, its inflow and outflow
+  // contributions cancel for uniform axial flow and it vanishes before any crossflow develops.
+  PetscScalar row_scale_sum;
+  LibmeshPetscCall(MatGetRowMaxAbs(M_ww, row_scale, NULL));
+  LibmeshPetscCall(VecSum(row_scale, &row_scale_sum));
+  // The first outer iterations start far from the solution and need strong damping: below about
+  // 20 times the mean row scale, the first update can reverse the axial flow and drive the
+  // closures out of range, while much larger factors only add outer iterations on fine axial
+  // meshes. The converged solution does not depend on this factor.
+  const PetscScalar damping_factor = 50.0;
+  max_K = _n_gaps > 0 ? damping_factor * row_scale_sum / (_block_size * _n_gaps) : 0.0;
+  // The boost raised by failed coupled linear solves delays, but does not prevent, the decay of K
+  // with the residual.
+  added_K = std::min(max_K, max_K * residual_ratio * _crossflow_damping_boost[iblock]);
+  if (_verbose_subchannel)
+  {
+    _console << "Crossflow residual ratio: " + std::to_string(residual_ratio) << std::endl;
+    _console << "Added cross resistance: " + std::to_string(added_K) << std::endl;
+  }
+
+  LibmeshPetscCall(MatShift(M_ww, added_K));
+  LibmeshPetscCall(VecAXPY(b_w, added_K, w_iter));
+
+  LibmeshPetscCall(VecDestroy(&residual));
+  LibmeshPetscCall(VecDestroy(&pressure_term));
+  LibmeshPetscCall(VecDestroy(&row_scale));
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
+}
+
+PetscErrorCode
 SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 {
   PetscFunctionBegin;
@@ -2374,66 +2434,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
                    /*label=*/"Cross mom");
 
   // ===================== Crossflow damping ====================
-  // Proximal damping of the cross-momentum equation, M_ww W + M_wp P + K (W - W_iter) = b_w, which
-  // keeps the coupled linear solve well conditioned without changing the converged solution. K is
-  // scaled by the mean magnitude of the cross-momentum coefficients so it is consistent across
-  // meshes, and by the ratio of the current to the initial cross-momentum residual (switched
-  // evolution relaxation), so K itself vanishes as the outer iteration converges.
   PetscScalar max_K = 0.0;
   PetscScalar added_K = 0.0;
   Vec w_iter;
   LibmeshPetscCall(createPetscVector(w_iter, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
       w_iter, _Wij, first_node, last_node, _n_gaps));
-  {
-    Vec residual, pressure_term, row_scale;
-    LibmeshPetscCall(createPetscVector(residual, _block_size * _n_gaps));
-    LibmeshPetscCall(createPetscVector(pressure_term, _block_size * _n_gaps));
-    LibmeshPetscCall(createPetscVector(row_scale, _block_size * _n_gaps));
-    LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-        _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
-
-    // residual = M_ww W + M_wp P - b_w at the current iterate
-    LibmeshPetscCall(MatMult(mat_array[Idx(2, 2)], w_iter, residual));
-    LibmeshPetscCall(MatMult(mat_array[Idx(2, 1)], _prodp, pressure_term));
-    LibmeshPetscCall(VecAXPY(residual, 1.0, pressure_term));
-    LibmeshPetscCall(VecAXPY(residual, -1.0, vec_array[2]));
-    PetscReal residual_norm;
-    LibmeshPetscCall(VecNorm(residual, NORM_2, &residual_norm));
-
-    // The first nonzero residual of this solve sets the reference. The uniform initial state can
-    // have a zero residual, in which case the full damping is applied.
-    auto & residual_ref = _crossflow_residual_ref[iblock];
-    if (residual_ref == 0.0)
-      residual_ref = residual_norm;
-    const Real residual_ratio =
-        residual_ref > 0.0 ? std::min(1.0, residual_norm / residual_ref) : 1.0;
-
-    // The largest entry of each row measures the axial transport of crossflow. The diagonal alone
-    // is not a usable scale because, with central differencing, its inflow and outflow
-    // contributions cancel for uniform axial flow and it vanishes before any crossflow develops.
-    PetscScalar row_scale_sum;
-    LibmeshPetscCall(MatGetRowMaxAbs(mat_array[Idx(2, 2)], row_scale, NULL));
-    LibmeshPetscCall(VecSum(row_scale, &row_scale_sum));
-    // The first outer iterations start far from the solution and need strong damping: below about
-    // 20 times the mean row scale, the first update can reverse the axial flow and drive the
-    // closures out of range, while much larger factors only add outer iterations on fine axial
-    // meshes. The converged solution does not depend on this factor.
-    const PetscScalar damping_factor = 50.0;
-    max_K = _n_gaps > 0 ? damping_factor * row_scale_sum / (_block_size * _n_gaps) : 0.0;
-    // The boost raised by failed linear solves (see below) delays, but does not prevent, the decay
-    // of K with the residual.
-    added_K = std::min(max_K, max_K * residual_ratio * _crossflow_damping_boost[iblock]);
-    V("Crossflow residual ratio: " + std::to_string(residual_ratio));
-    V("Added cross resistance: " + std::to_string(added_K));
-
-    LibmeshPetscCall(MatShift(mat_array[Idx(2, 2)], added_K));
-    LibmeshPetscCall(VecAXPY(vec_array[2], added_K, w_iter));
-
-    LibmeshPetscCall(VecDestroy(&residual));
-    LibmeshPetscCall(VecDestroy(&pressure_term));
-    LibmeshPetscCall(VecDestroy(&row_scale));
-  }
+  LibmeshPetscCall(addCrossflowDamping(
+      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], w_iter, iblock, max_K, added_K));
 
   V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
   V("Relax P: " + std::to_string(_pressure_equation_relaxation));
@@ -2541,12 +2549,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // repeated every iteration. Capping it at the increase one fully retried solve provides keeps K
   // bounded by a multiple of the residual ratio, so it still vanishes at convergence.
   const Real max_boost = std::pow(2.0, max_retries);
-  KSPConvergedReason reason;
-  for (const auto attempt : make_range(max_retries + 1))
+  // Every attempt starts from the current outer iterate
+  auto setInitialGuess = [&]()
   {
-    const bool last_attempt = attempt == max_retries;
-    LibmeshPetscCall(KSPSetTolerances(
-        ksp, rtol, atol, dtol, last_attempt ? maxit : std::min(maxit, retry_maxit)));
     std::vector<Vec> x_sub(Q);
     for (const auto f : make_range(Q))
       LibmeshPetscCall(VecGetSubVector(x_vec, field_is[f], &x_sub[f]));
@@ -2557,6 +2562,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecCopy(w_iter, x_sub[2]));
     for (const auto f : make_range(Q))
       LibmeshPetscCall(VecRestoreSubVector(x_vec, field_is[f], &x_sub[f]));
+  };
+  KSPConvergedReason reason;
+  for (const auto attempt : make_range(max_retries + 1))
+  {
+    const bool last_attempt = attempt == max_retries;
+    LibmeshPetscCall(KSPSetTolerances(
+        ksp, rtol, atol, dtol, last_attempt ? maxit : std::min(maxit, retry_maxit)));
+    setInitialGuess();
     LibmeshPetscCall(KSPSolve(ksp, b_vec, x_vec));
     LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
     if (reason >= 0 || last_attempt)

@@ -573,14 +573,12 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       Real si_sum = 0.0;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
-        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
         {
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto Si = (*_S_flow_soln)(node_in);
-          auto mdot_in = (*_mdot_soln)(node_in);
-          mdot_sum = mdot_sum + mdot_in;
-          si_sum = si_sum + Si;
+          const auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+          mdot_sum += (*_mdot_soln)(node_in);
+          si_sum += (*_S_flow_soln)(node_in);
         }
       }
       const Real edge_flux_ave = mdot_sum / si_sum;
