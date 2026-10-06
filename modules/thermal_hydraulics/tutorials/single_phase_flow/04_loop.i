@@ -259,7 +259,7 @@ tot_power = 2000 # W
     connections = 'bottom_1:out bottom_2:in'
     volume = 1e-4
     A_ref = ${A_pipe}
-    head = 0
+    head = pump_head_fn
   []
 
   [bottom_2]
@@ -294,11 +294,14 @@ tot_power = 2000 # W
     K_d = 0
   []
 
-  [set_pump_head]
-    type = SetComponentRealValueControl
-    component = pump
-    parameter = head
-    value = pid:output
+[]
+
+[Functions]
+  [pump_head_fn]
+    type = ParsedFunction
+    expression = 'pump_head'
+    symbol_names = 'pump_head'
+    symbol_values = 'pump_head'
   []
 []
 
@@ -347,9 +350,9 @@ tot_power = 2000 # W
     variable = T
   []
   [pump_head]
-    type = RealComponentParameterValuePostprocessor
-    component = pump
-    parameter = head
+    type = RealControlDataValuePostprocessor
+    control_data_name = pid:output
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 

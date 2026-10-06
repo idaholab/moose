@@ -22,8 +22,8 @@ public:
 protected:
   virtual void buildVolumeJunctionUserObject() override;
 
-  /// Pump head [m]
-  const Real & _head;
+  /// Function specifying the pump head [m]
+  const FunctionName & _head_fn_name;
 
 public:
   static InputParameters validParams();

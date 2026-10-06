@@ -81,16 +81,6 @@
   []
 []
 
-[ControlLogic]
-  active = ''
-  [K_crtl]
-    type = TimeFunctionComponentControl
-    component = junction1
-    parameter = K
-    function = K_loss_fn
-  []
-[]
-
 [Preconditioning]
   [pc]
     type = SMP
