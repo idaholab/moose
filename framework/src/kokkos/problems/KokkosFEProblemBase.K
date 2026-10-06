@@ -380,13 +380,9 @@ FEProblemBase::initKokkos()
 
   // Initialize Kokkos mesh
   _mesh.getKokkosMesh()->update();
-  if (haveDisplaced())
-    _displaced_mesh->getKokkosMesh()->init(*_mesh.getKokkosMesh());
 
-  // Initialize Kokkos assemblies
+  // Initialize Kokkos assembly
   _kokkos_assembly.init();
-  if (haveDisplaced())
-    _displaced_problem->kokkosAssembly().init(_kokkos_assembly);
 
   // Call functions that require Kokkos mesh to be initialized first
   for (auto hook : _kokkos_mesh_initialization_hooks)
@@ -450,7 +446,7 @@ FEProblemBase::initKokkos()
       // FV kernels write through Kokkos::System; FE/QP kernels read and write
       // through FESystem; shared device pointers keep them consistent.
       _kokkos_systems.emplace({sys_num}, sys);
-      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num]);
+      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num], sys);
     }
     else
       // Pure FE/QP (or FE/QP + scalar): FESystem inherits Kokkos::System, so a standalone

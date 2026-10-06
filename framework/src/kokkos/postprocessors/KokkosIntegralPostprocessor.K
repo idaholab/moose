@@ -15,12 +15,14 @@ KokkosIntegralPostprocessor<Base>::validParams()
 {
   InputParameters params = Base::validParams();
   params.addParam<bool>("average", false, "Whether to compute volume average");
+  params.addCoupledVar("displacements",
+                       "The displacements defining the current configuration to integrate over");
   return params;
 }
 
 template <typename Base>
 KokkosIntegralPostprocessor<Base>::KokkosIntegralPostprocessor(const InputParameters & parameters)
-  : Base(parameters), _average(Base::template getParam<bool>("average"))
+  : Base(parameters), _average(Base::template getParam<bool>("average")), _deformation(*this)
 {
 }
 

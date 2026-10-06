@@ -24,12 +24,11 @@ KokkosHeatConduction::validParams()
       "d_thermal_conductivity_dT",
       "Property name of the derivative of the thermal conductivity with respect "
       "to the variable");
-  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
-  : KernelGrad(parameters)
+  : KernelGrad(parameters), _deformation(*this)
 {
   _thermal_conductivity = getKokkosMaterialProperty<Real>("thermal_conductivity");
 

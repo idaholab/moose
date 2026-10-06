@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosElementIntegralVariablePostprocessor.md KokkosSideIntegralVariablePostprocessor.md'
+
+  [integrals]
+    requirement = 'The Kokkos system shall integrate over the current configuration defined by coupled displacements, matching integration over the displaced mesh,'
+    [cartesian]
+      type = CSVDiff
+      input = 'kokkos_current_configuration_integrals.i'
+      csvdiff = 'kokkos_current_configuration_integrals_out.csv'
+      detail = 'in Cartesian coordinates and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [rz]
+      type = CSVDiff
+      input = 'kokkos_current_configuration_integrals.i'
+      cli_args = 'Mesh/coord_type=RZ Outputs/file_base=kokkos_current_configuration_integrals_rz_out'
+      csvdiff = 'kokkos_current_configuration_integrals_rz_out.csv'
+      detail = 'in axisymmetric coordinates.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+  [use_displaced_mesh]
+    type = RunException
+    input = 'kokkos_current_configuration_integrals.i'
+    cli_args = 'Postprocessors/current_volume/use_displaced_mesh=true'
+    expect_err = 'use_displaced_mesh. is private and cannot be set'
+    requirement = 'The Kokkos system shall reject requests to evaluate Kokkos objects on the displaced mesh.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

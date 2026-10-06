@@ -31,22 +31,12 @@ public:
   /**
    * Constructor
    * @param problem The MOOSE problem
-   * @param mesh The MOOSE mesh
    */
-  Assembly(FEProblemBase & problem, MooseMesh & mesh);
+  Assembly(FEProblemBase & problem);
   /**
    * Initialize assembly
    */
   void init();
-  /**
-   * Initialize assembly by shallow-copying shared data
-   * @param assembly The initialized assembly to share
-   */
-  void init(const Assembly & assembly);
-  /**
-   * Update geometry-dependent physical map data
-   */
-  void update();
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -55,6 +45,11 @@ public:
    * @returns The FE type ID
    */
   unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
+  /**
+   * Get the mesh dimension
+   * @returns The mesh dimension
+   */
+  KOKKOS_FUNCTION unsigned int getDimension() const { return _dimension; }
   /**
    * Get the maximum number of quadrature points per element in the current partition
    * @returns The maximum number of quadrature points per element
@@ -292,6 +287,14 @@ public:
   KOKKOS_FUNCTION Real coordTransformFactor(const ContiguousSubdomainID subdomain,
                                             const Real3 point) const;
   /**
+   * Get the gradient of the coordinate transform factor with respect to the point coordinate
+   * @param subdomain The contiguous subdomain ID
+   * @param point The point coordinate
+   * @returns The gradient of the coordinate transform factor
+   */
+  KOKKOS_FUNCTION Real3 coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                                     const Real3 point) const;
+  /**
    * Compute physical transformation data for an element
    * @param info The element information object
    * @param qp The local quadrature point index
@@ -336,10 +339,6 @@ public:
 
 private:
   /**
-   * Initialize assembly data shared by reference and displaced assemblies
-   */
-  void initSharedData();
-  /**
    * Initialize quadrature data
    */
   void initQuadrature();
@@ -353,13 +352,13 @@ private:
   void cachePhysicalMap();
 
   /**
-   * Pointer to the MOOSE problem
+   * Reference of the MOOSE problem
    */
-  FEProblemBase * _problem;
+  FEProblemBase & _problem;
   /**
-   * Pointer to the MOOSE mesh
+   * Reference of the MOOSE mesh
    */
-  MooseMesh * _mesh;
+  MooseMesh & _mesh;
   /**
    * FE type ID map
    */
@@ -368,7 +367,7 @@ private:
   /**
    * Mesh dimension
    */
-  unsigned int _dimension;
+  const unsigned int _dimension;
   /**
    * Coordinate system type of each subdomain
    */
@@ -485,6 +484,36 @@ Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real
     default:
       return 0;
   }
+}
+
+KOKKOS_FUNCTION inline Real3
+Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                       const Real3 point) const
+{
+  Real3 gradient(0);
+
+  switch (_coord_type[subdomain])
+  {
+    case Moose::COORD_RZ:
+      if (_rz_radial_coord == libMesh::invalid_uint)
+      {
+        // The factor is 2 pi times the distance to the axis, whose gradient is 2 pi times the unit
+        // vector normal to the axis pointing toward the point
+        auto radial = point - _rz_axis[subdomain].first;
+        radial -= (radial * _rz_axis[subdomain].second) * _rz_axis[subdomain].second;
+        gradient = (2 * M_PI / radial.norm()) * radial;
+      }
+      else
+        gradient(_rz_radial_coord) = 2 * M_PI;
+      break;
+    case Moose::COORD_RSPHERICAL:
+      gradient(0) = 8 * M_PI * point(0);
+      break;
+    default:
+      break;
+  }
+
+  return gradient;
 }
 
 KOKKOS_FUNCTION inline void
