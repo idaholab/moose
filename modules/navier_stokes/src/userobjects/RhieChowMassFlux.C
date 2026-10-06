@@ -25,6 +25,7 @@
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
+#include "FVPressureJumpGreenGaussGradient.h"
 #include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
 #include "MooseUtils.h"
@@ -307,6 +308,25 @@ RhieChowMassFlux::linkMomentumPressureSystems(
 
   _pressure_gradient_field = &coupling_reader;
 
+  const auto & solution_gradient_reader = pressure_var->requestCellGradients();
+  if (hasPressureBaffles())
+  {
+    const auto * const jump_gradient_method =
+        dynamic_cast<const FVPressureJumpGreenGaussGradient *>(&solution_gradient_reader.method());
+    if (!jump_gradient_method)
+      mooseError("Pressure variable '",
+                 pressure_var->name(),
+                 "' must use FVPressureJumpGreenGaussGradient as its default gradient method "
+                 "when RhieChowMassFlux '",
+                 name(),
+                 "' has pressure baffles.");
+
+    auto & writable_method =
+        _fe_problem.getFVGradientMethod(solution_gradient_reader.method().name(), _tid);
+    dynamic_cast<FVPressureJumpGreenGaussGradient &>(writable_method)
+        .linkFlowSystem(*this, solution_gradient_reader);
+  }
+
   if (usingReconstructedPressureGradientMethod())
   {
     reconstructedGradientMethod().linkFlowSystem(*this, coupling_reader);
@@ -317,9 +337,27 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     mooseAssert(_base_pressure_gradient_field != _pressure_gradient_field,
                 "Reconstructed and base pressure gradient readers must be distinct when "
                 "FVReconstructedPressureGradient is active.");
+
+    if (hasPressureBaffles() &&
+        &_base_pressure_gradient_field->method() != &solution_gradient_reader.method())
+      mooseError("FVReconstructedPressureGradient '",
+                 reconstructedGradientMethod().name(),
+                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient as its "
+                 "base_gradient_method when RhieChowMassFlux '",
+                 name(),
+                 "' has pressure baffles.");
   }
   else
+  {
     _base_pressure_gradient_field = _pressure_gradient_field;
+
+    if (hasPressureBaffles() &&
+        &_pressure_gradient_field->method() != &solution_gradient_reader.method())
+      mooseError("Momentum pressure kernels coupled to RhieChowMassFlux '",
+                 name(),
+                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient or an "
+                 "FVReconstructedPressureGradient based on it when pressure baffles are present.");
+  }
 
   _global_momentum_system_numbers.clear();
   _momentum_implicit_systems.clear();
@@ -378,7 +416,6 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_mass_flux.clear();
   _grad_p_current.clear();
-  _jump_aware_pressure_gradient.clear();
   setupMeshInformation();
 }
 
@@ -391,7 +428,6 @@ RhieChowMassFlux::timestepSetup()
     return;
 
   _grad_p_current.clear();
-  _jump_aware_pressure_gradient.clear();
 
   if (!usingReconstructedPressureGradientMethod())
     return;
@@ -462,8 +498,6 @@ RhieChowMassFlux::finalizePressureCorrector()
     _pressure_system->computeGradients();
     updateCellVelocity(pressureGradientComponents());
   }
-
-  ++_pressure_solution_generation;
 }
 
 void
@@ -992,6 +1026,11 @@ RhieChowMassFlux::computeHbyA(bool verbose)
 
   updateBaffleJumps();
 
+  // Pressure jumps are external data for the variable's gradient method. Refresh that field
+  // before pressure assembly even though the pressure solution itself has not changed yet.
+  if (hasPressureBaffles())
+    _pressure_system->updateFVGradient(basePressureGradientField());
+
   mooseAssert(!_grad_p_current.empty(),
               "A coupling pressure-gradient snapshot must exist before computing H/A.");
   mooseAssert(_grad_p_current.size() == _momentum_implicit_systems.size(),
@@ -1178,12 +1217,6 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   // We fill the 1/A and H/A functors
   populateCouplingFunctors(_HbyA_raw, _Ainv_raw);
 
-  // Reconstruct after the current jump and half-cell coefficients are available. The first
-  // reconstruction uses zero explicit correction; later reconstructions use the preceding
-  // jump-aware gradient as the Picard iterate.
-  if (hasPressureBaffles() && !_jump_aware_pressure_gradient.current(*this))
-    _jump_aware_pressure_gradient.reconstruct(*this);
-
   if (verbose)
   {
     _console << "************************************" << std::endl;
@@ -1309,25 +1342,6 @@ RhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
   const auto momentum_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
   const Real density = _rho(makeElemArg(elem_info.elem()), Moose::currentState());
   return density * (*_Ainv_raw[component])(momentum_dof);
-}
-
-bool
-RhieChowMassFlux::hasJumpAwarePressureGradient() const
-{
-  return _jump_aware_pressure_gradient.current(*this);
-}
-
-RealVectorValue
-RhieChowMassFlux::jumpAwarePressureGradient(const ElemInfo & elem_info) const
-{
-  return _jump_aware_pressure_gradient.gradient(*this, elem_info);
-}
-
-bool
-RhieChowMassFlux::pressureDiffusionUsesNonorthogonalCorrection() const
-{
-  mooseAssert(_p_diffusion_kernel, "The pressure-diffusion kernel must be linked first.");
-  return _p_diffusion_kernel->useNonorthogonalCorrection();
 }
 
 bool

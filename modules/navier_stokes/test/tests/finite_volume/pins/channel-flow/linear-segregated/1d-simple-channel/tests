@@ -44,4 +44,26 @@
     recover = false
     max_threads = 1
   []
+
+  [reject-ordinary-pressure-gradient]
+    type = RunException
+    input = porous-baffle-1d.i
+    cli_args = 'Variables/pressure/gradient_method=green-gauss'
+    expect_err = "Pressure variable 'pressure' must use FVPressureJumpGreenGaussGradient as its default gradient method"
+    requirement = 'The system shall reject ordinary Green-Gauss as the pressure variable gradient when internal pressure jumps are present.'
+    design = 'FVPressureJumpGreenGaussGradient.md PorousRhieChowMassFlux.md'
+    recover = false
+    max_threads = 1
+  []
+
+  [reject-ordinary-coupling-gradient]
+    type = RunException
+    input = porous-baffle-1d.i
+    cli_args = 'LinearFVKernels/u_pressure/gradient_method=green-gauss'
+    expect_err = "must use the pressure variable's FVPressureJumpGreenGaussGradient or an FVReconstructedPressureGradient based on it"
+    requirement = 'The system shall reject ordinary Green-Gauss for pressure-momentum coupling across an internal pressure jump.'
+    design = 'FVPressureJumpGreenGaussGradient.md PorousRhieChowMassFlux.md'
+    recover = false
+    max_threads = 1
+  []
 []

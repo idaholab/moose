@@ -54,13 +54,17 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
   ASSERT_TRUE(data.valid);
 
   const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure, jump);
-  const auto traces = NS::FV::pressureJumpFaceTraces(data, elem_pressure, neighbor_pressure, flux);
+  const Real elem_face_pressure =
+      elem_pressure - (flux + data.elem_correction) / data.elem_conductance;
+  const Real neighbor_face_pressure =
+      neighbor_pressure + (flux + data.neighbor_correction) / data.neighbor_conductance;
   const Real elem_half_flux =
-      data.elem_conductance * (elem_pressure - traces.elem) - data.elem_correction;
+      data.elem_conductance * (elem_pressure - elem_face_pressure) - data.elem_correction;
   const Real neighbor_half_flux =
-      data.neighbor_conductance * (traces.neighbor - neighbor_pressure) - data.neighbor_correction;
+      data.neighbor_conductance * (neighbor_face_pressure - neighbor_pressure) -
+      data.neighbor_correction;
 
-  EXPECT_NEAR(traces.elem - traces.neighbor, jump, 1e-13);
+  EXPECT_NEAR(elem_face_pressure - neighbor_face_pressure, jump, 1e-13);
   EXPECT_NEAR(elem_half_flux, flux, 1e-13);
   EXPECT_NEAR(neighbor_half_flux, flux, 1e-13);
 }

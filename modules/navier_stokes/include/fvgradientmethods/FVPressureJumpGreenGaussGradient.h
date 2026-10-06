@@ -8,43 +8,35 @@
 
 #pragma once
 
-#include "MooseTypes.h"
+#include "FVGradientMethod.h"
 
-#include "libmesh/dof_object.h"
-#include "libmesh/numeric_vector.h"
-
-#include <memory>
-#include <vector>
-
-class ElemInfo;
+class LinearFVGradientReader;
 class RhieChowMassFlux;
 
 /**
- * Stores Green-Gauss pressure gradients formed with separate traces on pressure-jump faces.
- *
- * This provider is coordinated by RhieChowMassFlux rather than registered as the pressure
- * variable's gradient method. It therefore remains distinct from the reconstructed pressure
- * gradient used for pressure-velocity coupling.
+ * Green-Gauss pressure gradient that removes prescribed jumps before interpolating across baffles.
  */
-class FVPressureJumpGreenGaussGradient
+class FVPressureJumpGreenGaussGradient : public FVGradientMethod
 {
 public:
-  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
+  static InputParameters validParams();
+  FVPressureJumpGreenGaussGradient(const InputParameters & params);
 
-  /// Reconstruct one gradient per pressure cell from the current pressure and jump generations.
-  void reconstruct(RhieChowMassFlux & rc);
-
-  /// Discard all cached gradients and generation metadata.
-  void clear();
-
-  /// Whether the stored gradients match the pressure and jump currently published by rc.
-  bool current(const RhieChowMassFlux & rc) const;
-
-  /// Read the one-sided cell gradient adjacent to an interface.
-  RealVectorValue gradient(const RhieChowMassFlux & rc, const ElemInfo & elem_info) const;
+  /// Link this method to the Rhie-Chow object that supplies pressure jumps.
+  void linkFlowSystem(RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient);
 
 private:
-  GradientContainer _gradient;
-  dof_id_type _pressure_generation = libMesh::DofObject::invalid_id;
-  dof_id_type _jump_generation = libMesh::DofObject::invalid_id;
+  void computeGradientWithoutLimiter(
+      SystemBase & system,
+      GradientContainer & gradient,
+      const std::unordered_set<unsigned int> & variable_numbers) const override;
+
+  /// Rhie-Chow object supplying baffle locations and signed pressure jumps after solver linkage.
+  const RhieChowMassFlux * _rhie_chow = nullptr;
+
+  /// Pressure system to which this method is linked.
+  const SystemBase * _pressure_system = nullptr;
+
+  /// Pressure variable number within the linked system.
+  unsigned int _pressure_variable_number = libMesh::invalid_uint;
 };

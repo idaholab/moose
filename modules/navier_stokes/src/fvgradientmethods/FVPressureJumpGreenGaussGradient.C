@@ -8,80 +8,96 @@
 
 #include "FVPressureJumpGreenGaussGradient.h"
 
+#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "FEProblemBase.h"
 #include "FVUtils.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVGradientReader.h"
 #include "LinearSystem.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseMesh.h"
 #include "PetscVectorReader.h"
-#include "PressureJumpInterface.h"
 #include "RhieChowMassFlux.h"
+#include "SystemBase.h"
 
 #include "libmesh/elem.h"
 
-void
-FVPressureJumpGreenGaussGradient::clear()
+registerMooseObject("NavierStokesApp", FVPressureJumpGreenGaussGradient);
+
+InputParameters
+FVPressureJumpGreenGaussGradient::validParams()
 {
-  _gradient.clear();
-  _pressure_generation = libMesh::DofObject::invalid_id;
-  _jump_generation = libMesh::DofObject::invalid_id;
+  InputParameters params = FVGradientMethod::validParams();
+  params.suppressParameter<MooseEnum>("limiter");
+  params.addClassDescription(
+      "Computes a Green-Gauss pressure gradient without smearing prescribed baffle jumps.");
+  return params;
 }
 
-bool
-FVPressureJumpGreenGaussGradient::current(const RhieChowMassFlux & rc) const
+FVPressureJumpGreenGaussGradient::FVPressureJumpGreenGaussGradient(const InputParameters & params)
+  : FVGradientMethod(params)
 {
-  return !_gradient.empty() && _pressure_generation == rc.pressureSolutionGeneration() &&
-         _jump_generation == rc.baffleJumpGeneration();
-}
-
-RealVectorValue
-FVPressureJumpGreenGaussGradient::gradient(const RhieChowMassFlux & rc,
-                                           const ElemInfo & elem_info) const
-{
-  mooseAssert(current(rc),
-              "A pressure-jump interface requested gradients from incompatible pressure or jump "
-              "generations.");
-
-  const auto dof =
-      elem_info.dofIndices()[rc.globalPressureSystemNumber()][rc.pressureVariableNumber()];
-  RealVectorValue value;
-  for (const auto component : index_range(_gradient))
-    value(component) = (*_gradient[component])(dof);
-  return value;
 }
 
 void
-FVPressureJumpGreenGaussGradient::reconstruct(RhieChowMassFlux & rc)
+FVPressureJumpGreenGaussGradient::linkFlowSystem(RhieChowMassFlux & rc,
+                                                 const LinearFVGradientReader & pressure_gradient)
 {
-  auto & pressure_system = rc.pressureSystem();
-  auto & fe_problem = pressure_system.feProblem();
-  auto & mesh = fe_problem.mesh();
-  const auto dimension = rc.dimension();
-  const auto pressure_variable_number = rc.pressureVariableNumber();
-  const auto system_number = rc.globalPressureSystemNumber();
-  const auto & pressure_variable = rc.pressureVariable();
-  auto & solution = *pressure_system.system().current_local_solution;
+  if (&pressure_gradient.method() != this)
+    mooseError("FVPressureJumpGreenGaussGradient '",
+               name(),
+               "' must be linked using a gradient field produced by that method.");
 
-  GradientContainer lagged_gradient;
-  lagged_gradient.reserve(_gradient.size());
-  for (const auto & component : _gradient)
-    lagged_gradient.push_back(component->clone());
+  if (&pressure_gradient.system() != &rc.pressureSystem() ||
+      pressure_gradient.variableNumber() != rc.pressureVariableNumber())
+    mooseError("FVPressureJumpGreenGaussGradient '",
+               name(),
+               "' must be linked to the pressure variable owned by RhieChowMassFlux '",
+               rc.name(),
+               "'.");
 
-  if (_gradient.empty())
+  if (_rhie_chow && _rhie_chow != &rc)
+    mooseError("FVPressureJumpGreenGaussGradient '",
+               name(),
+               "' is already linked to RhieChowMassFlux '",
+               _rhie_chow->name(),
+               "'. Use a separate gradient method for each flow system.");
+
+  _rhie_chow = &rc;
+  _pressure_system = &pressure_gradient.system();
+  _pressure_variable_number = pressure_gradient.variableNumber();
+}
+
+void
+FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
+    SystemBase & system,
+    GradientContainer & gradient,
+    const std::unordered_set<unsigned int> & variable_numbers) const
+{
+  mooseAssert(variable_numbers.size() == 1,
+              "FVPressureJumpGreenGaussGradient must be registered for exactly one pressure "
+              "variable.");
+  const auto pressure_variable_number = *variable_numbers.begin();
+
+  if (_pressure_system)
   {
-    _gradient.reserve(dimension);
-    for (const auto component : make_range(dimension))
-    {
-      libmesh_ignore(component);
-      _gradient.push_back(solution.zero_clone());
-    }
+    mooseAssert(_pressure_system == &system,
+                "FVPressureJumpGreenGaussGradient can only compute gradients for its linked "
+                "pressure system.");
+    mooseAssert(_pressure_variable_number == pressure_variable_number,
+                "FVPressureJumpGreenGaussGradient can only compute the linked pressure variable.");
   }
-  else
-    for (auto & component : _gradient)
-      component->zero();
 
-  PetscVectorReader pressure_reader(solution);
+  auto * const pressure_variable =
+      dynamic_cast<MooseLinearVariableFVReal *>(&system.getVariable(0, pressure_variable_number));
+  mooseAssert(pressure_variable,
+              "FVPressureJumpGreenGaussGradient requires a MooseLinearVariableFVReal.");
+
+  auto & fe_problem = system.feProblem();
+  auto & mesh = fe_problem.mesh();
+  const auto dimension = mesh.dimension();
+  const auto system_number = system.number();
+  PetscVectorReader pressure_reader(*system.system().current_local_solution);
 
   for (auto face_iterator = mesh.ownedFaceInfoBegin(); face_iterator != mesh.ownedFaceInfoEnd();
        ++face_iterator)
@@ -98,73 +114,33 @@ FVPressureJumpGreenGaussGradient::reconstruct(RhieChowMassFlux & rc)
       const Real elem_pressure = pressure_reader(elem_dof);
       const Real neighbor_pressure = pressure_reader(neighbor_dof);
 
-      Real elem_trace;
-      Real neighbor_trace;
-      if (rc.faceIsBaffle(*fi))
+      Real elem_face_pressure;
+      Real neighbor_face_pressure;
+      if (_rhie_chow && _rhie_chow->faceIsBaffle(*fi))
       {
-        RealVectorValue elem_gradient;
-        RealVectorValue neighbor_gradient;
-        if (!lagged_gradient.empty())
-          for (const auto component : make_range(dimension))
-          {
-            elem_gradient(component) = (*lagged_gradient[component])(elem_dof);
-            neighbor_gradient(component) = (*lagged_gradient[component])(neighbor_dof);
-          }
-
-        RealVectorValue elem_diffusion;
-        RealVectorValue neighbor_diffusion;
-        for (const auto component : make_range(dimension))
-        {
-          elem_diffusion(component) = rc.cellPressureDiffusionCoefficient(elem_info, component);
-          neighbor_diffusion(component) =
-              rc.cellPressureDiffusionCoefficient(neighbor_info, component);
-        }
-
-        const Point elem_to_face = fi->faceCentroid() - elem_info.centroid();
-        const Point face_to_neighbor = neighbor_info.centroid() - fi->faceCentroid();
-        const Real face_area = fi->faceArea() * fi->faceCoord();
-        const auto interface_data =
-            NS::FV::pressureJumpInterfaceData(fi->normal(),
-                                              elem_to_face,
-                                              face_to_neighbor,
-                                              elem_diffusion,
-                                              neighbor_diffusion,
-                                              elem_gradient,
-                                              neighbor_gradient,
-                                              face_area,
-                                              rc.pressureDiffusionUsesNonorthogonalCorrection());
-
-        if (!interface_data.valid)
-          mooseError("Cannot reconstruct jump-aware pressure gradients on face ID ",
-                     fi->id(),
-                     ": both half-cell normal conductances must be finite and positive.");
-
-        const Real jump = rc.getSignedBaffleJump(*fi, /*elem_side=*/true);
-        const Real flux =
-            NS::FV::pressureJumpFlux(interface_data, elem_pressure, neighbor_pressure, jump);
-        const auto traces =
-            NS::FV::pressureJumpFaceTraces(interface_data, elem_pressure, neighbor_pressure, flux);
-        elem_trace = traces.elem;
-        neighbor_trace = traces.neighbor;
+        const Real jump = _rhie_chow->getSignedBaffleJump(*fi, /*elem_side=*/true);
+        elem_face_pressure =
+            Moose::FV::linearInterpolation(elem_pressure, neighbor_pressure + jump, *fi, true);
+        neighbor_face_pressure =
+            Moose::FV::linearInterpolation(elem_pressure - jump, neighbor_pressure, *fi, true);
       }
       else
       {
-        const auto weights = Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *fi, true);
-        elem_trace = neighbor_trace =
-            weights.first * elem_pressure + weights.second * neighbor_pressure;
+        elem_face_pressure = neighbor_face_pressure =
+            Moose::FV::linearInterpolation(elem_pressure, neighbor_pressure, *fi, true);
       }
 
       const auto surface_vector = fi->normal() * fi->faceArea() * fi->faceCoord();
       for (const auto component : make_range(dimension))
       {
-        _gradient[component]->add(elem_dof, surface_vector(component) * elem_trace);
-        _gradient[component]->add(neighbor_dof, -surface_vector(component) * neighbor_trace);
+        gradient[component]->add(elem_dof, surface_vector(component) * elem_face_pressure);
+        gradient[component]->add(neighbor_dof, -surface_vector(component) * neighbor_face_pressure);
       }
     }
     else if (face_type == FaceInfo::VarFaceNeighbors::ELEM ||
              face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     {
-      auto * const bc = pressure_variable.getBoundaryCondition(*fi->boundaryIDs().begin());
+      auto * const bc = pressure_variable->getBoundaryCondition(*fi->boundaryIDs().begin());
       if (bc)
         bc->setupFaceData(fi, face_type);
 
@@ -175,38 +151,20 @@ FVPressureJumpGreenGaussGradient::reconstruct(RhieChowMassFlux & rc)
       const Real orientation = elem_side ? 1.0 : -1.0;
       const auto surface_vector = orientation * fi->normal() * fi->faceArea() * fi->faceCoord();
       for (const auto component : make_range(dimension))
-        _gradient[component]->add(dof, surface_vector(component) * face_value);
+        gradient[component]->add(dof, surface_vector(component) * face_value);
     }
   }
 
-  for (auto & component : _gradient)
+  for (auto & component : gradient)
     component->close();
 
-  const auto radial_coordinate = mesh.getAxisymmetricRadialCoord();
-  for (auto elem_iterator = mesh.ownedElemInfoBegin(); elem_iterator != mesh.ownedElemInfoEnd();
-       ++elem_iterator)
+  PARALLEL_TRY
   {
-    const auto * const elem_info = *elem_iterator;
-    if (!rc.hasBlocks(elem_info->subdomain_id()))
-      continue;
-
-    const auto dof = elem_info->dofIndices()[system_number][pressure_variable_number];
-    const Real volume = elem_info->volume() * elem_info->coordFactor();
-    for (const auto component : make_range(dimension))
-      _gradient[component]->set(dof, (*_gradient[component])(dof) / volume);
-
-    if (mesh.getCoordSystem(elem_info->subdomain_id()) == Moose::CoordinateSystemType::COORD_RZ)
-    {
-      mooseAssert(elem_info->centroid()(radial_coordinate) != 0.0,
-                  "Axisymmetric control volumes must not have a zero radial coordinate.");
-      _gradient[radial_coordinate]->add(
-          dof, -pressure_reader(dof) / elem_info->centroid()(radial_coordinate));
-    }
+    using ElemInfoRange = ComputeLinearFVGreenGaussGradientVolumeThread::ElemInfoRange;
+    ElemInfoRange elem_info_range(mesh.ownedElemInfoBegin(), mesh.ownedElemInfoEnd());
+    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
+        fe_problem, system, gradient, variable_numbers);
+    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
   }
-
-  for (auto & component : _gradient)
-    component->close();
-
-  _pressure_generation = rc.pressureSolutionGeneration();
-  _jump_generation = rc.baffleJumpGeneration();
+  fe_problem.checkExceptionAndStopSolve();
 }

@@ -13,7 +13,6 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "FVPressureJumpGreenGaussGradient.h"
 #include <unordered_map>
 #include <set>
 
@@ -26,6 +25,7 @@ class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;
 class FVReconstructedPressureGradient;
+class FVPressureJumpGreenGaussGradient;
 class LinearFVPressureCorrectionDiffusion;
 namespace libMesh
 {
@@ -101,20 +101,8 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
-  /// Generation of the relaxed pressure solution used by the next pressure corrector.
-  dof_id_type pressureSolutionGeneration() const { return _pressure_solution_generation; }
-
-  /// Generation of the pressure jump used by the next pressure corrector.
-  virtual dof_id_type baffleJumpGeneration() const { return 0; }
-
   /// Whether this object owns any pressure-jump faces.
   virtual bool hasPressureBaffles() const { return false; }
-
-  /// Whether jump-aware solution gradients are available for the current pressure and jump.
-  bool hasJumpAwarePressureGradient() const;
-
-  /// Read a jump-aware solution gradient on one side of a baffle.
-  RealVectorValue jumpAwarePressureGradient(const ElemInfo & elem_info) const;
 
   /// Get porosity on one side of a face.
   virtual Real
@@ -131,15 +119,6 @@ public:
 
   /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
   Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
-
-  /// Whether pressure diffusion includes the nonorthogonal correction.
-  bool pressureDiffusionUsesNonorthogonalCorrection() const;
-
-  /// Pressure variable reconstructed by this object.
-  const MooseLinearVariableFVReal & pressureVariable() const { return *_p; }
-
-  /// Global libMesh system number of the pressure system.
-  unsigned int globalPressureSystemNumber() const { return _global_pressure_system_number; }
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -326,12 +305,6 @@ protected:
    * current pressure corrector, not one left over from a preceding corrector.
    */
   dof_id_type _face_mass_flux_generation = 0;
-
-  /// Generation of the relaxed pressure solution.
-  dof_id_type _pressure_solution_generation = 0;
-
-  /// One-sided solution gradients used only by pressure-jump interface corrections.
-  FVPressureJumpGreenGaussGradient _jump_aware_pressure_gradient;
 
   /**
    * Functor describing the density of the fluid

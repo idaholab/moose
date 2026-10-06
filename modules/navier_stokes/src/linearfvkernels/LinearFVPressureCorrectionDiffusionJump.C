@@ -36,13 +36,8 @@ LinearFVPressureCorrectionDiffusionJump::LinearFVPressureCorrectionDiffusionJump
     const InputParameters & params)
   : LinearFVPressureCorrectionDiffusion(params),
     _rc_uo(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
-    _reconstructed_pressure_gradient_method(
-        dynamic_cast<const FVReconstructedPressureGradient *>(&_gradient_field.method())),
     _use_two_term_pressure_expansion(getParam<bool>("use_two_term_pressure_expansion"))
 {
-  if (_use_two_term_pressure_expansion && !_reconstructed_pressure_gradient_method)
-    paramError("use_two_term_pressure_expansion",
-               "Two-term pressure expansion requires FVReconstructedPressureGradient.");
 }
 
 void
@@ -63,13 +58,8 @@ LinearFVPressureCorrectionDiffusionJump::jumpInterfaceData()
 
   const auto & elem_info = *_current_face_info->elemInfo();
   const auto & neighbor_info = *_current_face_info->neighborInfo();
-  RealVectorValue elem_gradient;
-  RealVectorValue neighbor_gradient;
-  if (_rc_uo.hasJumpAwarePressureGradient())
-  {
-    elem_gradient = _rc_uo.jumpAwarePressureGradient(elem_info);
-    neighbor_gradient = _rc_uo.jumpAwarePressureGradient(neighbor_info);
-  }
+  const auto elem_gradient = _gradient_field.gradient(elem_info);
+  const auto neighbor_gradient = _gradient_field.gradient(neighbor_info);
 
   RealVectorValue elem_diffusion;
   RealVectorValue neighbor_diffusion;
@@ -95,8 +85,8 @@ LinearFVPressureCorrectionDiffusionJump::jumpInterfaceData()
   if (!_jump_interface_data.valid)
   {
     // Preserve one common conservative coefficient if a degenerate half-cell geometry or
-    // coefficient prevents elimination of the two traces. No one-sided correction can be formed
-    // safely in this case.
+    // coefficient prevents elimination of the two interface pressures. No one-sided correction
+    // can be formed safely in this case.
     _jump_interface_data.transmissibility = computeFluxMatrixContribution();
     _jump_interface_data.correction = 0.0;
     _jump_interface_data.valid = true;
@@ -113,14 +103,20 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   if (!_rc_uo.faceIsBaffle(*_current_face_info))
     return base_matrix_contribution;
 
-  if (!_use_two_term_pressure_expansion ||
-      !_reconstructed_pressure_gradient_method->hasReconstructedCandidate())
+  if (!_use_two_term_pressure_expansion)
+    return base_matrix_contribution;
+
+  const auto & reconstructed_gradient_field = _rc_uo.pressureGradientField();
+  const auto * const reconstructed_gradient_method =
+      dynamic_cast<const FVReconstructedPressureGradient *>(&reconstructed_gradient_field.method());
+  if (!reconstructed_gradient_method)
+    paramError("use_two_term_pressure_expansion",
+               "Two-term pressure expansion requires the momentum-pressure kernels linked to "
+               "the Rhie-Chow object to use FVReconstructedPressureGradient.");
+  if (!reconstructed_gradient_method->hasReconstructedCandidate())
     return base_matrix_contribution;
 
   const auto & interface_data = jumpInterfaceData();
-  if (!_rc_uo.hasJumpAwarePressureGradient())
-    return base_matrix_contribution;
-
   const auto & elem_info = *_current_face_info->elemInfo();
   const auto & neighbor_info = *_current_face_info->neighborInfo();
   const Point elem_to_face = _current_face_info->faceCentroid() - elem_info.centroid();
@@ -129,9 +125,10 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   Real neighbor_taylor_term = 0.0;
   for (const auto component : make_range(_subproblem.mesh().dimension()))
   {
-    elem_taylor_term += _gradient_field.component(elem_info, component) * elem_to_face(component);
-    neighbor_taylor_term +=
-        _gradient_field.component(neighbor_info, component) * neighbor_to_face(component);
+    elem_taylor_term +=
+        reconstructed_gradient_field.component(elem_info, component) * elem_to_face(component);
+    neighbor_taylor_term += reconstructed_gradient_field.component(neighbor_info, component) *
+                            neighbor_to_face(component);
   }
 
   // This is Delta p_PN^smooth,lag. It is a known denominator, not a pressure difference assembled
@@ -168,10 +165,10 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   for (const auto component : make_range(_subproblem.mesh().dimension()))
   {
     const Real elem_pressure_force = _rc_uo.cellPressureDiffusionCoefficient(elem_info, component) *
-                                     _gradient_field.component(elem_info, component);
+                                     reconstructed_gradient_field.component(elem_info, component);
     const Real neighbor_pressure_force =
         _rc_uo.cellPressureDiffusionCoefficient(neighbor_info, component) *
-        _gradient_field.component(neighbor_info, component);
+        reconstructed_gradient_field.component(neighbor_info, component);
     two_term_flux -= _current_face_info->normal()(component) * _current_face_area *
                      (interpolation_weights.first * elem_pressure_force +
                       interpolation_weights.second * neighbor_pressure_force);

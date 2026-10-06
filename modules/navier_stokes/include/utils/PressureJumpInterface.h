@@ -17,7 +17,7 @@ namespace NS
 namespace FV
 {
 
-/** Coefficients obtained by eliminating the two pressure traces on a jump face. */
+/** Coefficients obtained by eliminating the two one-sided interface pressures on a jump face. */
 struct PressureJumpInterfaceData
 {
   Real elem_conductance = 0.0;
@@ -27,13 +27,6 @@ struct PressureJumpInterfaceData
   Real transmissibility = 0.0;
   Real correction = 0.0;
   bool valid = false;
-};
-
-/** The two pressure traces reconstructed on a jump face. */
-struct PressureJumpFaceTraces
-{
-  Real elem = 0.0;
-  Real neighbor = 0.0;
 };
 
 /**
@@ -100,7 +93,7 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
   return data;
 }
 
-/** Compute the single element-to-neighbor flux after eliminating the two pressure traces. */
+/** Compute the single element-to-neighbor flux after eliminating the interface pressures. */
 inline Real
 pressureJumpFlux(const PressureJumpInterfaceData & data,
                  const Real elem_pressure,
@@ -109,17 +102,5 @@ pressureJumpFlux(const PressureJumpInterfaceData & data,
 {
   return data.transmissibility * (elem_pressure - neighbor_pressure - elem_jump) - data.correction;
 }
-
-/** Recover the separate face traces from the common oriented flux. */
-inline PressureJumpFaceTraces
-pressureJumpFaceTraces(const PressureJumpInterfaceData & data,
-                       const Real elem_pressure,
-                       const Real neighbor_pressure,
-                       const Real flux)
-{
-  return {elem_pressure - (flux + data.elem_correction) / data.elem_conductance,
-          neighbor_pressure + (flux + data.neighbor_correction) / data.neighbor_conductance};
-}
-
 }
 }
