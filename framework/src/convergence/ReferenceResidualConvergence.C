@@ -11,16 +11,12 @@
 #include "ReferenceResidualConvergence.h"
 #include "ReferenceResidualProblem.h"
 #include "FEProblemBase.h"
-#include "PetscSupport.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
 #include "TaggingInterface.h"
 #include "AuxiliarySystem.h"
 #include "MooseVariableScalar.h"
 #include "NonlinearSystem.h"
-
-// PETSc includes
-#include <petscsnes.h>
 
 registerMooseObject("MooseApp", ReferenceResidualConvergence);
 
@@ -377,28 +373,19 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
       if (_group_names[i].size() > var_space)
         var_space = _group_names[i].size();
 
-    // Get tolerances from SNES
-    NonlinearSystemBase & system = nonlinearSystem();
-    SNES snes = system.getSNES();
-    PetscReal abs_tol, rel_tol, rel_step_tol;
-    PetscInt max_its, max_funcs;
-    LibmeshPetscCallA(
-        _fe_problem.comm().get(),
-        SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs));
-
     for (const auto i : index_range(_group_names))
     {
       if (_converge_on_group[i])
       {
         // Print residual
         out << "   " << std::setw(var_space + 8) << std::right << _group_names[i] + "-> res: "
-            << (_group_resid[i] < abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
+            << (_group_resid[i] < _nl_abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
             << _group_resid[i] << COLOR_DEFAULT;
 
         // Print res/ref ratio
         if (_local_norm)
           out << "  local res/ref: "
-              << (_group_resid[i] / _group_ref_resid[i] < rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
+              << (_group_resid[i] / _group_ref_resid[i] < _nl_rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
               << std::setw(8) << _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         else
         {
@@ -408,7 +395,8 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
           if (!_group_ref_resid[i])
             out << _group_resid[i] << "\n";
           else
-            out << (_group_resid[i] / _group_ref_resid[i] < rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
+            out << (_group_resid[i] / _group_ref_resid[i] < _nl_rel_tol ? COLOR_GREEN
+                                                                        : COLOR_DEFAULT)
                 << std::setw(8) << _group_resid[i] / _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         }
       }

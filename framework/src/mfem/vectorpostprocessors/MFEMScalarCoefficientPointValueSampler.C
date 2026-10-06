@@ -88,7 +88,7 @@ MFEMScalarCoefficientPointValueSampler::execute()
 }
 
 void
-MFEMScalarCoefficientPointValueSampler::finalizeValues()
+MFEMScalarCoefficientPointValueSampler::finalize()
 {
   const auto * const interp_vals = _interp_vals.HostRead();
   for (const auto i : index_range(_declared_vals))

@@ -98,7 +98,6 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   file_base = OutputData/MFEMVariableSetupFromMOOSEVariables/var
   csv = true
 []

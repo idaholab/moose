@@ -21,7 +21,6 @@
     variable = joule_heating
     first_source_vec = e_field
     second_source_vec = e_field
-    execute_on = TIMESTEP_END
   []
 []
 

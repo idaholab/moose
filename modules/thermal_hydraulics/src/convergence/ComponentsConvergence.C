@@ -45,6 +45,20 @@ ComponentsConvergence::initialSetup()
   }
 }
 
+void
+ComponentsConvergence::preLoop()
+{
+  for (auto & conv : _convergence_objects)
+    conv->preLoop();
+}
+
+void
+ComponentsConvergence::preIteration()
+{
+  for (auto & conv : _convergence_objects)
+    conv->preIteration();
+}
+
 Convergence::MooseConvergenceStatus
 ComponentsConvergence::checkConvergenceInner(unsigned int iter)
 {

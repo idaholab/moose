@@ -114,7 +114,7 @@ floating-point rounding noise — from any source: compiler codegen, FMA/vectori
 MPI reduction order — dominates the *relative* error simply because the true value is tiny, while
 every other reported quantity in the file stays tight. That's a legitimate case for widening only
 that column's tolerance (e.g. MOOSE's `override_columns`/`override_rel_err` for CSVDiff, or
-`custom_cmp` for Exodiff — see below, and run-tests), with a comment recording the physical
+`custom_cmp` for Exodiff — see below), with a comment recording the physical
 reason and the measured noise floor — not for a blanket `rel_err` bump on the whole test. Confirm
 before doing this that (a) the widened floor stays far enough below any physically meaningful
 violation that the test would still catch one — even when the near-zero column is itself what the
@@ -145,23 +145,12 @@ affected columns.
 
 ### Exodiff: per-variable floor/relative error via `custom_cmp`
 
-MOOSE's `Exodiff` tester has no `override_columns` equivalent; instead point `custom_cmp` at a
-command file passed to `exodiff -f`. Build it, don't hand-write it:
+MOOSE's `Exodiff` tester has no `override_columns` equivalent; a per-variable tolerance goes in the
+`custom_cmp` command file instead. `.agents/skills/write-regression-tests/references/tolerances.md`
+holds that file's mechanics: generating it from `exodiff -summary`, and the `(all)` block header
+that leaves every unaffected variable at the spec's own tolerances. Which override to write, and how
+big to make it, is the part this investigation decides:
 
-- `exodiff -summary gold/<file>.e` prints every variable with its file-wide peak magnitude,
-  already formatted as `NODAL VARIABLES`/`ELEMENT VARIABLES` blocks — use this as the starting
-  template (it also tells you each column's peak, which the sizing rule below needs).
-- Give every variable-type block `(all)` (`GLOBAL VARIABLES`, `NODAL VARIABLES`, `ELEMENT
-  VARIABLES` alike — exodiff's `Parse_Variables` in `ED_SystemInterface.C` parses the `(all)` flag
-  and the indented per-variable override list independently of each other and of block type) with
-  **no** explicit `relative`/`floor` on the header line. With no tolerance of its own, `(all)`
-  falls through to the `-F <abs_zero> -t <rel_err>` the tester already passes on the command line
-  from the test spec — so the rest of the file's comparison stays exactly as strict as before, and
-  it stays correct if the spec's `abs_zero`/`rel_err` change later. Because the two are independent,
-  this holds even for a block containing some affected variables: list only the affected
-  variable's override line(s) under `(all)` and leave every unaffected variable out entirely,
-  rather than enumerating them by hand just because they share a block with an affected one. `(all)`
-  also keeps the file resilient to new output variables being added later.
 - Only add an explicit `floor` (near-zero-residual case) or `relative` (solver-telemetry case, and
   only when the test's purpose is to track solver performance — otherwise omit the telemetry
   postprocessor from the compared variables instead) on the specific affected variable line(s),
@@ -178,7 +167,3 @@ command file passed to `exodiff -f`. Build it, don't hand-write it:
   observed noise by at least ~10x, and dumping the raw variable's full time/node distribution (e.g.
   via `scipy.io.netcdf_file`, since Exodus is classic netCDF) to confirm there's no *real*,
   physically-meaningful value of that same variable sitting just below the chosen floor.
-- Look for a sibling `.cmp` file already in the test suite before inventing the format — e.g. a
-  neighboring test's `custom_cmp` file that already floors a different near-zero column is the
-  precedent to extend (per the Procedure's "look for precedent in sibling code" step above), not a
-  new convention to invent.

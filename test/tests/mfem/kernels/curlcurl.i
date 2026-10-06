@@ -43,7 +43,6 @@
     variable = db_dt_field
     source = e_field
     scale_factor = -1.0
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -140,7 +139,6 @@
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'timestep_end'
     file_base = OutputData/CurlCurl/curlcurl
   []
 []

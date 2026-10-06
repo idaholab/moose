@@ -86,7 +86,7 @@ read by the `run_tests` script.  It should be placed in the root of your applica
 - `app_name`: A unique, short name for your application.
 - `allow_warnings`: `true` by default, set this to `false` to make all warnings from running tests be
   _errors_ instead.
-- `allow_override` and `allow_unused`: `true` by default if set to `false` then syntax errors in your
+- `allow_unused`: `false` by default, if set to `false` then syntax errors in your
   test input files will be treated as errors.
 - `known_capabilities`: Extra capabilities to register as false if they aren't registered by the application.
 

@@ -36,8 +36,10 @@ Before implementing:
 - If existing functionality is nearly capable of a subtask, prefer
   short extensions or bug fixes of it over long rewrites of it. If the
   extension only fits by distorting the existing design, rework the design.
-- Don't be afraid to cross into submodules for feature additions or bug
-  fixes, especially if it aids in the 'Simplicity First' principle.
+- Dependencies are in scope for bug fixes and feature additions, whether they
+  live in a submodule or in an installed copy the build links against. The
+  change belongs where the defect or missing capability is, not where the build
+  is convenient.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
@@ -54,7 +56,9 @@ say what you are widening and why.
 A widening that stays inside the code you were already editing needs only that
 note; proceed. For a large restructuring - spanning files beyond the ones the task
 named, changing a public interface, or reworking something other code depends on -
-present both paths with their costs and wait for the user to choose.
+present both paths with their costs and wait for the user to choose. Crossing into
+a dependency is not by itself a large restructuring; judge the change by its size
+and reach, not by which repository it lands in.
 
 When editing existing code:
 - Don't "improve" adjacent code, comments, or formatting.

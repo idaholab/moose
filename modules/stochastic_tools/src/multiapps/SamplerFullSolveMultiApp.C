@@ -109,7 +109,9 @@ SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
          _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
                                 _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
     _number_of_sampler_rows = num_rows;
-    initial_setup_required = _mode != StochasticTools::MultiAppMode::BATCH_RESET;
+    // Batch-reset rebuilds apps in solveStepBatch(), except for the first local row before any
+    // solve (e.g. after recovering), whose app would otherwise stay on the old communicator.
+    initial_setup_required = _mode != StochasticTools::MultiAppMode::BATCH_RESET || !_solved_once;
   }
   else if (_solved_once || _app.isRecovering())
     initial_setup_required = _mode == StochasticTools::MultiAppMode::NORMAL;
@@ -201,6 +203,9 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     }
     if (!run)
     {
+      // Keep every rank's showStatusMessage() point-to-point send/receive in sync even
+      // when skipping the solve.
+      showStatusMessage(0);
       _local_batch_app_index++;
       continue;
     }

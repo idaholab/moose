@@ -87,9 +87,7 @@
   [main]
     type = MFEMHyprePCG
     preconditioner = boomeramg
-    l_max_its = 100
-    l_tol = 1e-4
-    l_abs_tol = 0.0
+    l_tol = 1e-12
     print_level = 2
   []
 []
@@ -99,10 +97,15 @@
   device = "cpu"
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Gravity
-    vtk_format = ASCII
+[Postprocessors]
+  [displacement_l2_norm]
+    type = MFEMVectorL2Error
+    variable = displacement
+    function = '0 0 0'
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/Gravity
 []

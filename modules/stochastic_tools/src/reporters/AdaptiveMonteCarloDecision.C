@@ -109,16 +109,20 @@ AdaptiveMonteCarloDecision::reinitChain()
 void
 AdaptiveMonteCarloDecision::execute()
 {
-  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _t_step)
-  {
-    _check_step = _t_step;
+  if (_check_step == _t_step)
     return;
-  }
 
   /* Decision step to whether or not to accept the proposed sample by the sampler.
      This decision step changes with the type of adaptive Monte Carlo sampling algorithm. */
   if (_ais)
   {
+    // This branch hard-codes row index 0, so a rank with zero local rows has no data here.
+    if (_sampler.getNumberOfLocalRows() == 0)
+    {
+      _check_step = _t_step;
+      return;
+    }
+
     const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
 
     /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed

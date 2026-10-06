@@ -57,15 +57,14 @@ sub-block; the details read as a continuation of the requirement sentence.
 
 ## Common test types (pick the right one for what's being verified)
 
-- `RunApp` - the input runs to completion (smoke/execution test); can check console output with
-  `expect_out`. Discouraged beyond a pure "does it run" smoke check - if the output is what
+`.agents/skills/write-regression-tests/SKILL.md` carries the tester table and the guidance for
+choosing among them, and is the single source for both. Two of its consequences drive most review
+findings:
+
+- `RunApp` is discouraged beyond a pure "does it run" smoke check. Where the output is what
   matters, a diff test (`CSVDiff`/`Exodiff`/`JSONDiff`) or a C++ unit test is more robust.
-- `Exodiff` - compares Exodus mesh/field output to a gold file.
-- `CSVDiff` - compares CSV postprocessor/reporter output to gold.
-- `JSONDiff` - compares JSON output to gold.
-- `RunException` - asserts the app errors as intended; pair with `expect_err = '...'`. **Every
-  user-facing error path (`mooseError`/`paramError`) should have one of these or a unit test.**
-- `PythonUnitTest` - runs a Python `unittest` (for Python contributions and tooling).
+- **Every user-facing error path (`mooseError`/`paramError`) should have a `RunException` with
+  `expect_err = '...'`, or a unit test.**
 
 ## What to verify in review
 

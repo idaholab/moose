@@ -208,6 +208,11 @@ GeneratedMeshGenerator::generate()
       else
         elem->subdomain_id() = bids[i];
     }
+    // build_cube() cached the mesh subdomains and partitioned the mesh while every element was
+    // still in the default subdomain. The subdomain set must be recomputed, and the mesh must be
+    // repartitioned because a partitioner may weight or group elements by subdomain.
+    mesh->unset_has_cached_elem_data();
+    mesh->unset_is_partitioned();
   }
 
   if (isParamValid("subdomain_name"))
@@ -341,6 +346,21 @@ GeneratedMeshGenerator::generate()
     }
   }
 
-  mesh->unset_is_prepared();
+  // Biasing moves node coordinates, which invalidates the point locator, the stored ranges and
+  // any ghosting functor that depends on element positions. It also invalidates the partition:
+  // build_cube() partitioned the unbiased geometry, and a geometric partitioner (e.g. centroid or
+  // space-filling-curve) applied to strongly biased elements would produce a poorly balanced
+  // partition. Element connectivity and the boundary id sets remain valid. Without a bias or
+  // subdomain ids, the only change to the mesh that build_cube() prepared is the boundary id
+  // offset handled above, so the existing partition is kept and MooseMesh::prepare() does not
+  // repeat the partitioning, which dominates mesh setup.
+  if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
+  {
+    mesh->clear_point_locator();
+    mesh->clear_stored_ranges();
+    mesh->unset_has_reinit_ghosting_functors();
+    mesh->unset_is_partitioned();
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -285,8 +285,7 @@ SurrogateTrainer::crossValidate()
 
     auto first = std::lower_bound(
         split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowBegin());
-    auto last = std::upper_bound(
-        split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowEnd());
+    auto last = std::lower_bound(first, split_ids_buffer.end(), _sampler.getLocalRowEnd());
     _skip_indices.insert(_skip_indices.begin(), first, last);
 
     _local_sample_size = _sampler.getNumberOfLocalRows() - _skip_indices.size();
@@ -326,6 +325,12 @@ SurrogateTrainer::crossValidate()
         skipped_row++;
       }
     }
+
+    // gatherSum() requires equal-sized vectors; a rank with no skipped rows this split
+    // never resizes split_mse above.
+    dof_id_type mse_size = split_mse.size();
+    _communicator.max(mse_size);
+    split_mse.resize(mse_size, 0.0);
     gatherSum(split_mse);
 
     // Expand cv_score if necessary.

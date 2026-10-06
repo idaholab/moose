@@ -236,6 +236,9 @@ PCSobolContext<OutType>::finalize()
   for (const auto & i : make_range(nparam))
     for (const auto & j : make_range(i + 1, nparam))
       val.push_back(_pc.computeSobolIndex({i, j}) / var);
+
+  // computeSobolIndex()/computeSobolTotal() only sum this processor's local coefficient slice.
+  this->_communicator.sum(val);
 }
 
 template <typename OutType>

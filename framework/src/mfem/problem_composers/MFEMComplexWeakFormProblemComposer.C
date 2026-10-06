@@ -14,6 +14,14 @@
 
 registerMooseObject("MooseApp", MFEMComplexWeakFormProblemComposer);
 
+InputParameters
+MFEMComplexWeakFormProblemComposer::validParams()
+{
+  InputParameters params = MFEMProblemComposer::validParams();
+  params.addClassDescription("Creates a complex-valued equation-system problem operator.");
+  return params;
+}
+
 MFEMComplexWeakFormProblemComposer::MFEMComplexWeakFormProblemComposer(
     const InputParameters & parameters)
   : MFEMProblemComposer(parameters)
