@@ -3,6 +3,7 @@
 !if! function=hasCapability('mfem')
 
 ## Overview
+
 The `MFEMWeakForm` is a MOOSE object responsible for the construction of an initialised MFEM
 [EquationSystem.md], based on the set of kernels and
 boundary conditions provided by the user. If no `MFEMWeakFormBase` object is specified by the user
@@ -11,6 +12,7 @@ be created to set up an `EquationSystem` using all kernels and boundary conditio
 input file.
 
 ## Example Input File Syntax
+
 !listing test/tests/mfem/weakforms/steady_weakform.i block=WeakForms
 
 !syntax parameters /WeakForms/MFEMWeakForm
