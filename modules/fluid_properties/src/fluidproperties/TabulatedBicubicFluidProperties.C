@@ -96,8 +96,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         if (_fp)
           _fp->p_T_from_v_e(_specific_volume[i],
                             _internal_energy[j],
-                            _p_initial_guess,
-                            _T_initial_guess,
+                            p_guess,
+                            T_guess,
                             p_ve,
                             T_ve,
                             conversion_succeeded);
@@ -186,8 +186,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         if (_fp)
           _fp->p_T_from_v_h(_specific_volume[i],
                             _enthalpy[j],
-                            _p_initial_guess,
-                            _T_initial_guess,
+                            p_guess,
+                            T_guess,
                             p_vh,
                             T_vh,
                             conversion_succeeded);

@@ -180,4 +180,26 @@ TEST(NewtonInversion, NewtonSolve2D)
   catch (MooseException &)
   {
   }
+
+  // A NaN Jacobian entry (as opposed to a merely-degenerate, all-zero row) must also be caught
+  // and reported as a MooseException. A NaN-containing row is not reliably caught by the rowmax
+  // check used to detect a degenerate row, since std::max with a NaN argument returns the other
+  // (finite) operand.
+  y1 = -3;
+  y2 = -37;
+  auto func2_with_nan = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
+  {
+    function_g2(x, y, g, dgdx, dgdy);
+    dgdx = std::numeric_limits<Real>::quiet_NaN();
+    dgdy = std::numeric_limits<Real>::quiet_NaN();
+  };
+  try
+  {
+    FluidPropertiesUtils::NewtonSolve2D(
+        y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func2_with_nan);
+    FAIL();
+  }
+  catch (MooseException &)
+  {
+  }
 }
