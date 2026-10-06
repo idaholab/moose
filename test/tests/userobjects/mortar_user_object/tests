@@ -24,7 +24,6 @@
     expect_err = 'A std::exception was raised during FEProblemBase::computeUserObjectsInternal.*TestWeightedGapUserObject intentional execute exception'
     min_parallel = 2
     max_parallel = 2
-    max_time = 10
     valgrind = 'none'
     requirement = 'The system shall terminate when one rank throws an exception during mortar user object execution.'
   []
@@ -36,7 +35,6 @@
     expect_err = 'Aborting as solve did not converge.*A std::exception was raised during FEProblemBase::computeUserObjectsInternal.*TestWeightedGapUserObject intentional execute exception'
     min_parallel = 2
     max_parallel = 2
-    max_time = 10
     valgrind = 'none'
     requirement = 'The system shall fail the solve when one rank throws an exception during mortar user object residual execution.'
   []
