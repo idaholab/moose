@@ -62,6 +62,15 @@ The SCM friction factors are compared with the UCTD implementation of the DASSH 
 | corner | SCM PCTD | 0.9555 | 0.0526 | 0.0294 |
 | corner | DASSH UCTD | 0.9596 | 0.0544 | 0.0313 |
 
+The friction closure sets the developed flow split, the mass flux of a subchannel divided by the bulk mass flux. `tri_wire_flow_split.i` solves the same assembly in steady state with the monolithic implicit solver, `implicit = true` and `segregated = false`, at a bulk mass flux of 4000 kg/m$^2$-s and a bulk Reynolds number of $3.3 \times 10^4$, the bulk Reynolds number of the EBR-II XX09 SHRT-17 steady state below. As in the friction factor sweep, $C_T = 0$, and the flow split is sampled at the outlet, where the flow is developed. The DASSH UCTD flow split is computed from the subchannel and bundle Reynolds numbers of `dassh_tri_wire_out.csv` at the same bulk Reynolds number. [tab-flow-split-tri-wire] shows that the SCM UCTD flow split agrees with the DASSH UCTD flow split to four digits. Compared with UCTD, PCTD lowers the flow split of the edge and corner subchannels by about 2% and raises that of the interior subchannels by 1.5%.
+
+!table id=tab-flow-split-tri-wire caption=Developed flow split of wire-wrapped pins in a triangular lattice, at the outlet of the 3 m assembly and a bulk Reynolds number of $3.3 \times 10^4$.
+| Flow split | Interior | Edge | Corner |
+| :- | -: | -: | -: |
+| SCM UCTD | 0.8874 | 1.2074 | 1.0344 |
+| SCM PCTD | 0.9007 | 1.1843 | 1.0169 |
+| DASSH UCTD | 0.8874 | 1.2074 | 1.0344 |
+
 ### EBR-II XX09, SHRT-17 steady state
 
 The effect of the closures on the flow and temperature distribution is shown for the SHRT-17 steady state of the EBR-II XX09 assembly in [EBR-II.md]. `XX09_SS17.i` runs `validation/EBR-II/XX09_SCM_SS17.i` with UCTD friction and Chen-Todreas (1986) mixing, `mixing_model = 1986` of [SCMMixingChenTodreas.md], or with PCTD friction and mixing via `SCMClosures/Chen/friction_model=Pacio` and `SCMClosures/Chen_Todreas/mixing_model=Pacio`, and reports the mass flow rate and temperature of the subchannels of the TTC thermocouples at $z = 0.322$ m. The turbulent exchange of axial momentum uses $C_T = 1.0$, the default of the mixing closures, for which the momentum and enthalpy turbulent interchange flow rates are equal ([Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer)). `XX09_SCM_SS17.i` uses $C_T = 2.6$, but $C_T$ has been calibrated only for bare pins in a quadrilateral lattice ([thors.md]), and no calibrated value exists for wire-wrapped pins in a triangular lattice.
@@ -123,6 +132,10 @@ Triangular lattice, bare pins:
 Triangular lattice, wire-wrapped pins:
 
 !listing /verification/friction_model_verification/friction_model/tri_wire.i language=moose
+
+Triangular lattice, wire-wrapped pins, developed flow split in steady state:
+
+!listing /verification/friction_model_verification/friction_model/tri_wire_flow_split.i language=moose
 
 EBR-II XX09, SHRT-17 steady state:
 

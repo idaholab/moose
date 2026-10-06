@@ -12,6 +12,9 @@ subchannel-opt -i tri_bare.i
 subchannel-opt -i tri_wire.i
 subchannel-opt -i tri_wire.i SCMClosures/Chen/friction_model=Pacio \
     Outputs/file_base=tri_wire_pacio_out
+subchannel-opt -i tri_wire_flow_split.i
+subchannel-opt -i tri_wire_flow_split.i SCMClosures/Chen/friction_model=Pacio \
+    Outputs/file_base=tri_wire_flow_split_pacio_out
 subchannel-opt -i XX09_SS17.i
 subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio \
     SCMClosures/Chen_Todreas/mixing_model=Pacio Outputs/file_base=XX09_SS17_pacio_out
@@ -27,7 +30,8 @@ Five figures are written next to this script:
 4. scm_XX09_SS17_mdot.png, scm_XX09_SS17_T.png: subchannel mass flow rate and temperature along the
    TTC traverse of EBR-II XX09 for SHRT-17 from SCM and DASSH.
 
-The rows of the friction factor and TTC temperature tables in the verification page are printed.
+The rows of the friction factor, developed flow split, and TTC temperature tables in the verification
+page are printed.
 """
 
 from pathlib import Path
@@ -165,6 +169,36 @@ for channel in CHANNELS:
             + " | ".join(f"{f:.4f}" for f in ff)
             + " |"
         )
+
+# Rows of the developed flow split table in the verification page. DASSH reports the subchannel and
+# bundle Reynolds numbers, Re_i = X_i Re_b Dh_i / Dh_b, so its flow split is X_i = (Re_i / Re_b)
+# (Dh_b / Dh_i), with the hydraulic diameters of SCM, which defines the same subchannels as DASSH.
+scm_split = {
+    name: np.genfromtxt(DATA / csv, delimiter=",", names=True)
+    for csv, name in (
+        ("tri_wire_flow_split_out.csv", "SCM UCTD"),
+        ("tri_wire_flow_split_pacio_out.csv", "SCM PCTD"),
+    )
+}
+split = scm_split["SCM UCTD"]
+dassh_split = [
+    np.interp(
+        np.log(split["Re_bulk"]),
+        np.log(dassh_wire["Re_bundle"]),
+        dassh_wire[f"Re_{channel}"]
+        / dassh_wire["Re_bundle"]
+        * split["Dh_bulk"]
+        / split[f"Dh_{channel}"],
+    )
+    for channel in CHANNELS
+]
+for name, data in scm_split.items():
+    print(
+        f"| {name} | "
+        + " | ".join(f"{data[f'X_{channel}']:.4f}" for channel in CHANNELS)
+        + " |"
+    )
+print("| DASSH UCTD | " + " | ".join(f"{X:.4f}" for X in dassh_split) + " |")
 
 # EBR-II XX09 SHRT-17 steady state along the TTC traverse at the TTC height
 TTC = np.arange(27, 36)
