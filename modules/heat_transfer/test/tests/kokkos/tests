@@ -84,4 +84,42 @@
       compute_devices = 'cpu cuda'
     []
   []
+
+  [current_configuration]
+    design = 'KokkosHeatConduction.md KokkosBodyForce.md'
+    issues = '#33860'
+    requirement = 'The Kokkos system shall compute conduction and a volumetric source posed on the current configuration defined by coupled displacements'
+    [solution]
+      type = CSVDiff
+      input = 'kokkos_current_configuration.i'
+      csvdiff = 'kokkos_current_configuration_out.csv'
+      detail = 'with a solution matching the one computed on the displaced mesh in Cartesian coordinates,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [solution_rz]
+      type = CSVDiff
+      input = 'kokkos_current_configuration.i'
+      cli_args = 'Mesh/coord_type=RZ Outputs/file_base=kokkos_current_configuration_rz_out'
+      csvdiff = 'kokkos_current_configuration_rz_out.csv'
+      detail = 'with a solution matching the one computed on the displaced mesh in axisymmetric coordinates,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_jacobian.i'
+      detail = 'with an exact Jacobian, including the derivatives with respect to the displacements, in Cartesian coordinates, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [jacobian_rz]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_jacobian.i'
+      cli_args = 'Mesh/coord_type=RZ'
+      detail = 'with an exact Jacobian, including the derivatives with respect to the displacements, in axisymmetric coordinates.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
 []

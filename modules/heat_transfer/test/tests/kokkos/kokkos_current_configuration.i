@@ -1,8 +1,15 @@
+# Heat conduction with a volumetric source posed on the current configuration. The Kokkos kernels
+# couple the displacements and pull the weak form back to the reference configuration; the
+# non-Kokkos kernels integrate on the displaced mesh. The two discrete solutions agree to roundoff.
+
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 10
-  displacements = 'disp_x'
+  dim = 2
+  nx = 8
+  ny = 8
+  xmin = 1
+  xmax = 2
+  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -13,7 +20,13 @@
   [disp_x]
     [InitialCondition]
       type = FunctionIC
-      function = x
+      function = '0.1 * x * y + 0.2 * x'
+    []
+  []
+  [disp_y]
+    [InitialCondition]
+      type = FunctionIC
+      function = '0.2 * x * x + 0.5 * y'
     []
   []
 []
@@ -28,25 +41,28 @@
 []
 
 [Kernels]
-  [diffusion]
-    type = Diffusion
+  [conduction]
+    type = HeatConduction
     variable = reference
-    use_displaced_mesh = true
+    thermal_conductivity = k_reference
   []
   [source]
     type = BodyForce
     variable = reference
+    value = 100
     use_displaced_mesh = true
   []
-  [kokkos_diffusion]
-    type = KokkosDiffusion
+  [kokkos_conduction]
+    type = KokkosHeatConduction
     variable = kokkos
-    use_displaced_mesh = true
+    thermal_conductivity = k_kokkos
+    displacements = 'disp_x disp_y'
   []
   [kokkos_source]
     type = KokkosBodyForce
     variable = kokkos
-    use_displaced_mesh = true
+    value = 100
+    displacements = 'disp_x disp_y'
   []
 []
 
@@ -56,28 +72,37 @@
     variable = reference
     boundary = left
     value = 0
-    use_displaced_mesh = true
   []
   [right]
     type = DirichletBC
     variable = reference
     boundary = right
-    value = 0
-    use_displaced_mesh = true
+    value = 1
   []
   [kokkos_left]
     type = KokkosDirichletBC
     variable = kokkos
     boundary = left
     value = 0
-    use_displaced_mesh = true
   []
   [kokkos_right]
     type = KokkosDirichletBC
     variable = kokkos
     boundary = right
-    value = 0
-    use_displaced_mesh = true
+    value = 1
+  []
+[]
+
+[Materials]
+  [k_reference]
+    type = GenericConstantMaterial
+    prop_names = 'k_reference'
+    prop_values = 10
+  []
+  [k_kokkos]
+    type = KokkosGenericConstantMaterial
+    prop_names = 'k_kokkos'
+    prop_values = 10
   []
 []
 
@@ -90,13 +115,12 @@
   [kokkos_integral]
     type = KokkosElementIntegralVariablePostprocessor
     variable = kokkos
-    use_displaced_mesh = true
+    displacements = 'disp_x disp_y'
   []
   [difference]
     type = ElementL2Difference
     variable = reference
     other_variable = kokkos
-    use_displaced_mesh = true
   []
 []
 
@@ -104,6 +128,8 @@
   type = Steady
   solve_type = NEWTON
   system_names = 'reference kokkos'
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]

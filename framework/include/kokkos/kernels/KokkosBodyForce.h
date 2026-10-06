@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosKernelValue.h"
+#include "KokkosDeformation.h"
 
 class KokkosBodyForce : public Moose::Kokkos::KernelValue
 {
@@ -19,7 +20,12 @@ public:
   KokkosBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int, AssemblyDatum &) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
+                                                   const unsigned int jvar,
+                                                   const unsigned int qp,
+                                                   AssemblyDatum & datum) const;
 
 protected:
   /// Scale factor
@@ -27,11 +33,32 @@ protected:
 
   /// Optional Postprocessor value
   const Moose::Kokkos::PostprocessorValue _postprocessor;
+
+  /// Kinematics of the current configuration when the force is integrated over it
+  const Moose::Kokkos::Deformation _deformation;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::precomputeQpResidual(const unsigned int, AssemblyDatum &) const
+KokkosBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_scale * _postprocessor;
+  const Real force = -_scale * _postprocessor;
+
+  return _deformation ? force * _deformation(datum, qp).J : force;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosBodyForce::precomputeQpOffDiagJacobian(const unsigned int j,
+                                             const unsigned int /* jvar */,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+{
+  const auto c = _deformation.component(datum);
+
+  if (c == libMesh::invalid_uint)
+    return 0;
+
+  return -_scale * _postprocessor *
+         _deformation(datum, qp).dJ(c, _phi(datum, j, qp), _grad_phi(datum, j, qp));
 }

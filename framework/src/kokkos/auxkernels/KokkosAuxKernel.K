@@ -9,8 +9,6 @@
 
 #include "KokkosAuxKernel.h"
 
-#include "DisplacedProblem.h"
-
 namespace Moose::Kokkos
 {
 
@@ -18,6 +16,8 @@ InputParameters
 AuxKernel::validParams()
 {
   InputParameters params = AuxKernelBase::validParams();
+  // Kokkos objects are formulated on the reference configuration
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
   return params;
 }
@@ -25,9 +25,7 @@ AuxKernel::validParams()
 AuxKernel::AuxKernel(const InputParameters & parameters)
   : ::AuxKernelBase(parameters),
     MeshHolder(*_mesh.getKokkosMesh()),
-    AssemblyHolder(getParam<bool>("use_displaced_mesh")
-                       ? _sys.feProblem().getDisplacedProblem()->kokkosAssembly()
-                       : _sys.feProblem().kokkosAssembly()),
+    AssemblyHolder(_sys.feProblem().kokkosAssembly()),
     FESystemHolder(_sys.feProblem().getKokkosFESystems()),
     _nodal(_var.isNodal()),
     _test(),

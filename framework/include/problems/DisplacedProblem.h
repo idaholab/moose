@@ -9,10 +9,6 @@
 
 #pragma once
 
-#ifdef MOOSE_KOKKOS_ENABLED
-#include "KokkosAssembly.h"
-#endif
-
 #include "SubProblem.h"
 #include "DisplacedSystem.h"
 #include "GeometricSearchData.h"
@@ -58,11 +54,6 @@ public:
     return mesh();
   }
   MooseMesh & refMesh();
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  Moose::Kokkos::Assembly & kokkosAssembly() { return _kokkos_assembly; }
-  const Moose::Kokkos::Assembly & kokkosAssembly() const { return _kokkos_assembly; }
-#endif
 
   DisplacedSystem & solverSys(const unsigned int sys_num);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
@@ -414,10 +405,6 @@ protected:
   const NumericVector<Number> * _aux_solution;
 
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  Moose::Kokkos::Assembly _kokkos_assembly;
-#endif
 
   GeometricSearchData _geometric_search_data;
 
