@@ -60,6 +60,50 @@ NLScaleIntegrator::AssembleFaceGrad(const mfem::FiniteElement & el1,
   elmat *= _scale;
 }
 
+void
+NLScaleIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
+{
+  CheckIntegrator();
+  _integrator->AssemblePA(fes);
+}
+
+void
+NLScaleIntegrator::AssembleGradPA(const mfem::Vector & x, const mfem::FiniteElementSpace & fes)
+{
+  CheckIntegrator();
+  _integrator->AssembleGradPA(x, fes);
+}
+
+void
+NLScaleIntegrator::AddMultPA(const mfem::Vector & x, mfem::Vector & y) const
+{
+  _pa_work.SetSize(y.Size());
+  _pa_work.UseDevice(true);
+  _pa_work = 0.0;
+  _integrator->AddMultPA(x, _pa_work);
+  y.Add(_scale, _pa_work);
+}
+
+void
+NLScaleIntegrator::AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const
+{
+  _pa_work.SetSize(y.Size());
+  _pa_work.UseDevice(true);
+  _pa_work = 0.0;
+  _integrator->AddMultGradPA(x, _pa_work);
+  y.Add(_scale, _pa_work);
+}
+
+void
+NLScaleIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
+{
+  _pa_work.SetSize(diag.Size());
+  _pa_work.UseDevice(true);
+  _pa_work = 0.0;
+  _integrator->AssembleGradDiagonalPA(_pa_work);
+  diag.Add(_scale, _pa_work);
+}
+
 mfem::real_t
 NLScaleIntegrator::GetElementEnergy(const mfem::FiniteElement & el,
                                     mfem::ElementTransformation & Tr,
