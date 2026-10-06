@@ -3595,9 +3595,11 @@ protected:
 
 private:
   /**
-   * Store a caught exception so it can be communicated in checkExceptionAndStopSolve().
+   * Classify the exception currently being handled and register its message with setException(),
+   * or error if the exception cannot be recovered from. Must be called from within a catch block.
+   * This does not communicate, so every rank must subsequently call checkExceptionAndStopSolve().
    */
-  void setCaughtException(const std::string & calling_method);
+  void translateCaughtException(const std::string & calling_method);
 
   /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The

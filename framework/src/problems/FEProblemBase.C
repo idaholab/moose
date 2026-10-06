@@ -5614,7 +5614,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       }
       catch (...)
       {
-        setCaughtException("computeUserObjectsInternal");
+        translateCaughtException("computeUserObjectsInternal");
       }
 
       auto has_exception = _has_exception;
@@ -8044,7 +8044,7 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::setCaughtException(const std::string & calling_method)
+FEProblemBase::translateCaughtException(const std::string & calling_method)
 {
   auto create_exception_message =
       [&calling_method](const std::string & exception_type, const auto & exception)
@@ -8099,7 +8099,7 @@ FEProblemBase::setCaughtException(const std::string & calling_method)
 void
 FEProblemBase::handleException(const std::string & calling_method)
 {
-  setCaughtException(calling_method);
+  translateCaughtException(calling_method);
   checkExceptionAndStopSolve();
 }
 
