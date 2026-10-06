@@ -86,17 +86,11 @@ private:
   /// Recompute and relax the pressure jumps using the current face mass fluxes.
   void updateBaffleJumps();
 
-  /// Whether the face uses the one-term pressure-gradient reconstruction selected by sideset.
-  bool isPressureGradientLimited(const FaceInfo & fi) const;
-
   /// Return the pressure-jump model that applies to the face, or null if there is none.
   const PressureJumpModel * getPressureJumpModel(const FaceInfo & fi) const;
 
   /// Porosity functor.
   const Moose::Functor<Real> & _eps;
-
-  /// Sidesets using one-term pressure-gradient reconstruction.
-  std::unordered_set<BoundaryID> _pressure_gradient_limiter_ids;
 
   /// Pressure-jump models with mutually disjoint boundary sets.
   std::vector<const PressureJumpModel *> _pressure_jump_models;
