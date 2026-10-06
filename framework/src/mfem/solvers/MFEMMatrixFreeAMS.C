@@ -93,7 +93,7 @@ MFEMMatrixFreeAMS::validParams()
   params.addParam<MFEMSolverName>(
       "smoother",
       "Smoother for the mfem::MatrixFreeAMS solve. Must accept a matrix-free operator, e.g. "
-      "MFEMOperatorJacobiSmoother or MFEMOperatorChebyshevSmoother. Defaults to damped Jacobi on "
+      "MFEMOperatorJacobiSmoother. Defaults to damped Jacobi on "
       "the operator being preconditioned.");
   // mfem::MatrixFreeAMS is always an LOR solver
   params.setParameters("low_order_refined", true);
