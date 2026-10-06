@@ -265,7 +265,11 @@ Simulation::printComponentLoops() const
 }
 
 void
-Simulation::addSimVariable(bool nl, const VariableName & name, FEType fe_type, Real scaling_factor)
+Simulation::addSimVariable(bool nl,
+                           const VariableName & name,
+                           FEType fe_type,
+                           Real scaling_factor,
+                           const SolverSystemName & solver_sys)
 {
   checkVariableNameLength(name);
 
@@ -294,6 +298,8 @@ Simulation::addSimVariable(bool nl, const VariableName & name, FEType fe_type, R
     else if (!MooseUtils::absoluteFuzzyEqual(scaling_factor, 1.0))
       mooseError("Aux variables cannot be provided a residual scaling factor.");
 
+    params.set<SolverSystemName>("solver_sys") = solver_sys;
+
     _vars[name] = vi;
   }
   else
@@ -312,7 +318,8 @@ Simulation::addSimVariable(bool nl,
                            const VariableName & name,
                            FEType fe_type,
                            const std::vector<SubdomainName> & subdomain_names,
-                           Real scaling_factor)
+                           Real scaling_factor,
+                           const SolverSystemName & solver_sys)
 {
   checkVariableNameLength(name);
 
@@ -351,6 +358,8 @@ Simulation::addSimVariable(bool nl,
     else if (!MooseUtils::absoluteFuzzyEqual(scaling_factor, 1.0))
       mooseError("Aux variables cannot be provided a residual scaling factor.");
 
+    params.set<SolverSystemName>("solver_sys") = solver_sys;
+
     _vars[name] = vi;
   }
   else // variable was previously added
@@ -367,6 +376,9 @@ Simulation::addSimVariable(bool nl,
       mooseError("The variable '",
                  name,
                  "' has already been added with a different type than 'MooseVariable'.");
+
+    if (params.get<SolverSystemName>("solver_sys") != solver_sys)
+      mooseError("The variable '", name, "' has already been added to a different solver system.");
 
     auto family = AddVariableAction::getNonlinearVariableFamilies();
     family = Utility::enum_to_string(fe_type.family);
