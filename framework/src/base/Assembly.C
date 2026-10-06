@@ -4590,12 +4590,6 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::hasScalingVector()
-{
-  _scaling_vector = &_sys.getVector("scaling_factors");
-}
-
-void
 Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
 {
   mooseAssert(_current_qrule == _current_qrule_arbitrary, "Rule should be arbitrary");
