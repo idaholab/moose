@@ -193,6 +193,13 @@ protected:
   PetscErrorCode solveAndPopulateEnthalpy(
       Mat A, Vec rhs, unsigned int first_node, unsigned int last_node, const char * ksp_prefix);
 
+  /**
+   * Add the term matrices to a system matrix that was zeroed beforehand. The first call determines
+   * the nonzero pattern of the sum; later calls add into that pattern instead of rebuilding the
+   * matrix, which gives the same entries.
+   */
+  PetscErrorCode addTermMatrices(Mat system, const std::vector<Mat> & terms, bool & pattern_set);
+
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
   /// number of axial blocks
@@ -428,6 +435,10 @@ protected:
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
 
+  /// Whether the nonzero patterns of the assembled system matrices have been established
+  bool _amc_sys_mdot_pattern_set = false;
+  bool _cmc_sys_Wij_pattern_set = false;
+  bool _hc_sys_h_pattern_set = false;
   /// Maximum pressure fixed-point update before solution relaxation over the blocks
   Real _pressure_fixed_point_error = 1.0;
   /// Per-block cross-momentum residual norm that scales the crossflow damping in the coupled solve
@@ -535,5 +546,6 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
       loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
