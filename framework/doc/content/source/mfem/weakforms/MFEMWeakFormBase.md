@@ -1,10 +1,10 @@
-# MFEMComplexWeakForm
+# MFEMWeakFormBase
 
 !if! function=hasCapability('mfem')
 
 ## Overview
 
-`MFEMWeakFormBase` is the base class of classes that build initialiseed [EquationSystem.md]
+`MFEMWeakFormBase` is the base class of classes that build initialized [EquationSystem.md]
 objects, through the method `createEquationSystem()`. The weak form object itself is created by
 [MFEMProblem.md].
 

@@ -13,6 +13,7 @@ all kernels and boundary conditions added in the input file.
 
 !syntax parameters /WeakForms/MFEMEigenproblemWeakForm
 
+## Input File Syntax
 !syntax inputs /WeakForms/MFEMEigenproblemWeakForm
 
 !syntax children /WeakForms/MFEMEigenproblemWeakForm
