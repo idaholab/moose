@@ -142,14 +142,15 @@ The traces in [eq:pressure-jump-taylor-expansions] are reconstruction concepts r
 additional unknowns. The object imposes the jump through the discrete face-flux relation below; it
 does not assemble a separate equation enforcing $p_f^P-p_f^N=J_P$.
 
-## Base anisotropic pressure flux
+## One-sided interface pressure flux
 
-Define the diagonal pressure-mobility tensor at the face as
+Define the diagonal pressure-mobility tensors on the two sides as
 
 \begin{equation}
-  \boldsymbol D_f=\operatorname{diag}(D_{f,1},\ldots,D_{f,d}),
+  \boldsymbol D_s=\operatorname{diag}(D_{s,1},\ldots,D_{s,d}),
   \qquad
-  \alpha_f=\boldsymbol n_f^T\boldsymbol D_f\boldsymbol n_f.
+  \alpha_s=\boldsymbol n_f^T\boldsymbol D_s\boldsymbol n_f,
+  \qquad s\in\{P,N\}.
 \label{eq:pressure-jump-face-mobility}
 \end{equation}
 
@@ -163,76 +164,71 @@ nonporous case its effective cell value is
 
 where $a_{P,i}$ is the assembled momentum-matrix diagonal and $V_P$ is the cell volume. Porous flow
 also applies the cell-porosity scaling used by [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md).
-This is the quantity represented by the `Ainv` pressure-diffusion functor.
+This is the quantity represented by the `Ainv` pressure-diffusion functor. The inherited pressure
+operator obtains its face coefficient using
+[!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation); the porous Rhie--Chow
+object selects harmonic interpolation by default.
 
-The face value $\boldsymbol D_f$ in the baseline operator uses the interpolation selected with
-[!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation). In contrast, the optional
-two-term numerator below always applies MOOSE geometric-average weights directly to each product
-$D_i\partial p/\partial x_i$.
-
-Let
-
-\begin{equation}
-  \overline{\boldsymbol g}_f
-  =w_P\boldsymbol\nabla p_P+w_N\boldsymbol\nabla p_N
-\label{eq:pressure-jump-interpolated-gradient}
-\end{equation}
-
-be the lagged face gradient constructed with geometric interpolation weights. The inherited
-anisotropic diffusion discretization writes the area-integrated pressure flux as
+The separate half-cell data below is used to reconstruct the two traces and the explicit
+anisotropic/nonorthogonal correction. Let
 
 \begin{equation}
-  Q_f^p=T_f^{(0)}(p_P-p_N)-R_f.
-\label{eq:pressure-jump-base-flux}
+  \boldsymbol h_P=\boldsymbol x_f-\boldsymbol x_P,
+  \qquad
+  \boldsymbol h_N=\boldsymbol x_N-\boldsymbol x_f,
+  \qquad
+  \delta_s=\boldsymbol h_s\mathbin{\cdot}\boldsymbol n_f.
+\label{eq:pressure-jump-half-cell-geometry}
 \end{equation}
 
-When [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_nonorthogonal_correction)
-is enabled, the baseline transmissibility is
+Both half-cell vectors use the element-to-neighbor orientation, so a valid interface has
+$\delta_P>0$ and $\delta_N>0$. The half-cell conductances are
 
 \begin{equation}
-  T_f^{(0)}
-  =\frac{|S_f|\alpha_f}
-         {|\boldsymbol d_{PN}\mathbin{\cdot}\boldsymbol n_f|},
-\label{eq:pressure-jump-base-transmissibility}
+  \tau_s=\frac{|S_f|\alpha_s}{\delta_s}.
+\label{eq:pressure-jump-half-cell-conductance}
 \end{equation}
 
-where $\boldsymbol d_{PN}=\boldsymbol x_N-\boldsymbol x_P$. With
-$\boldsymbol e_{PN}=\boldsymbol d_{PN}/|\boldsymbol d_{PN}|$, the explicit correction is
+The jump-aware Green--Gauss reconstruction supplies separate solution gradients
+$\boldsymbol g_f^P$ and $\boldsymbol g_f^N$. For each side, define
+
+\begin{equation}
+  \boldsymbol c_s=
+  (\boldsymbol D_s\boldsymbol n_f-\alpha_s\boldsymbol n_f)
+  +\alpha_s\left(\boldsymbol n_f-\frac{\boldsymbol h_s}{\delta_s}\right),
+  \qquad
+  r_s=|S_f|\boldsymbol c_s\mathbin{\cdot}\boldsymbol g_f^s.
+\label{eq:pressure-jump-side-correction}
+\end{equation}
+
+The second parenthesized term is omitted when
+[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_nonorthogonal_correction) is
+disabled. The first term remains because it represents the tangential part of the anisotropic
+mobility. The two half-cell flux equations are
 
 \begin{equation}
 \begin{aligned}
-  R_f=|S_f|\bigg[&
-    (\boldsymbol D_f\boldsymbol n_f-\alpha_f\boldsymbol n_f)
-      \mathbin{\cdot}\overline{\boldsymbol g}_f\\
-    &+\alpha_f
-      \left(
-        \boldsymbol n_f-
-        \frac{\boldsymbol e_{PN}}
-             {\boldsymbol n_f\mathbin{\cdot}\boldsymbol e_{PN}}
-      \right)
-      \mathbin{\cdot}\overline{\boldsymbol g}_f
-  \bigg].
+  Q_f^p&=\tau_P(p_P-p_f^P)-r_P,\\
+  Q_f^p&=\tau_N(p_f^N-p_N)-r_N.
 \end{aligned}
-\label{eq:pressure-jump-explicit-correction}
+\label{eq:pressure-jump-half-cell-flux}
 \end{equation}
 
-The first term in $R_f$ accounts for the tangential part of an anisotropic tensor that cannot be
-represented by the scalar normal coefficient $\alpha_f$. The second is the deferred
-nonorthogonal-mesh correction. Both use already available cell gradients and are therefore placed
-on the right-hand side.
-
-When
-[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_nonorthogonal_correction) is
-disabled, the kernel instead uses
+Eliminating the traces while enforcing $p_f^P-p_f^N=J_P$ gives the half-cell coefficient
 
 \begin{equation}
-  T_f^{(0)}=\frac{|S_f|\alpha_f}{|\boldsymbol d_{PN}|}
-\label{eq:pressure-jump-uncorrected-transmissibility}
+  T_f^{h}=\left(\frac{1}{\tau_P}+\frac{1}{\tau_N}\right)^{-1},
+  \qquad
+  R_f=T_f^{h}\left(\frac{r_P}{\tau_P}+\frac{r_N}{\tau_N}\right).
+\label{eq:pressure-jump-interface-coefficients}
 \end{equation}
 
-and omits the second term in [eq:pressure-jump-explicit-correction]. The anisotropic tangential
-correction remains. For an orthogonal mesh and isotropic mobility, $R_f=0$ and the expression
-reduces to the familiar two-point transmissibility $|S_f|D_f/|\boldsymbol d_{PN}|$.
+The assembled baseline transmissibility $T_f^{(0)}$ remains the inherited value formed from the
+Rhie--Chow face coefficient. With the porous object's default harmonic interpolation, it agrees
+with $T_f^h$ in the orthogonal scalar limit. In that limit $R_f=0$, so the new one-sided gradient
+path does not alter the pressure operator. If either half-cell conductance is invalid, the
+implementation uses the inherited face transmissibility and zero explicit correction for both
+adjacent rows.
 
 ## Jump-aware flux
 
@@ -335,7 +331,8 @@ then placed on the right-hand side because it is fixed during one linear pressur
 | Face transmissibility $T_f$ | Frozen coefficient in all four local matrix entries |
 | Pressure jump $J_P$ | Frozen value; enters only through $T_fJ_P$ on the right-hand side |
 | Anisotropic and nonorthogonal correction $R_f$ | Explicit right-hand-side contribution |
-| Reconstructed pressure gradients | Frozen values; affect $R_f$ and optionally $T_f$, but are not pressure unknowns |
+| Jump-aware solution gradients | Separate frozen cell values; affect $R_f$, but are not pressure unknowns |
+| Reconstructed coupling gradients | Separate frozen cell values; define the optional two-term secant $T_f$ |
 | Density, momentum inverse, porosity, and geometry | Frozen coefficient data |
 | Momentum-predictor flux $\phi_f^H$ | Added by a separate [LinearFVDivergence](LinearFVDivergence.md) object |
 | Derivative of a flux-dependent jump law | Not assembled; the jump law is treated by outer fixed-point iteration |
@@ -349,11 +346,12 @@ changes the pressure difference required to sustain a flux, but does not create 
 
 The default value of
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
-is `false`, in which case every face uses $T_f^{(0)}$ from the base anisotropic diffusion
+is `false`, in which case a baffle face retains the inherited transmissibility selected through
+the Rhie--Chow object. Non-baffle faces retain the full inherited anisotropic diffusion
 discretization.
 
-When this parameter is enabled, an eligible baffle face may instead use lagged, reconstructed
-cell gradients to form a scalar secant coefficient. Define the cell mobility tensor
+When this parameter is enabled, an eligible baffle face may instead use the lagged reconstructed
+coupling gradients to form a scalar secant coefficient. Define the cell mobility tensor
 
 \begin{equation}
   \boldsymbol D_s
@@ -362,25 +360,27 @@ cell gradients to form a scalar secant coefficient. Define the cell mobility ten
 \label{eq:pressure-jump-two-term-cell-mobility}
 \end{equation}
 
-Using MOOSE geometric-average weights, the reconstructed pressure flux is
+The kernel geometrically interpolates the two cell mobility-gradient products to form the lagged
+coupling flux $Q_f^{\ell}$. These are the pressure-velocity coupling gradients, not the jump-aware
+solution gradients used in $R_f^{\ell}$.
 
 \begin{equation}
   Q_f^{\ell}
-  =-|S_f|\sum_{i=1}^{d}n_{f,i}
-   \left[
-     w_PD_{P,i}\left(\frac{\partial p}{\partial x_i}\right)_P^{\ell}
-    +w_ND_{N,i}\left(\frac{\partial p}{\partial x_i}\right)_N^{\ell}
-   \right].
+  =-|S_f|\boldsymbol n_f\mathbin{\cdot}
+  \left(w_P\boldsymbol D_P\boldsymbol g_P^{c,\ell}
+       +w_N\boldsymbol D_N\boldsymbol g_N^{c,\ell}\right),
 \label{eq:pressure-jump-reconstructed-flux}
 \end{equation}
 
-The superscript $\ell$ denotes data published after the preceding pressure corrector and held
-fixed during the current solve. Applying the two one-sided Taylor expansions to that state gives
+where $w_P$ and $w_N$ are the geometric face-interpolation weights. The superscript $c$ identifies
+the coupling gradient, and $\ell$ denotes data published after the preceding pressure corrector
+and held fixed during the current solve. Applying separate Taylor expansions from the two cells to
+that coupling state gives
 
 \begin{equation}
   \Delta p_f^{\mathrm{smooth},\ell}
-  =-\boldsymbol\nabla p_P^{\ell}\mathbin{\cdot}\boldsymbol d_{Pf}
-   +\boldsymbol\nabla p_N^{\ell}\mathbin{\cdot}\boldsymbol d_{Nf}.
+  =-\boldsymbol g_P^{c,\ell}\mathbin{\cdot}\boldsymbol d_{Pf}
+   +\boldsymbol g_N^{c,\ell}\mathbin{\cdot}\boldsymbol d_{Nf}.
 \label{eq:pressure-jump-lagged-smooth-drop}
 \end{equation}
 
@@ -477,7 +477,8 @@ The two-term coefficient is used only when all of the following conditions hold:
 - the pressure gradient method is
   [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md);
 - a reconstructed candidate from a preceding pressure corrector is available;
-- $\Delta p_f^{\mathrm{smooth},\ell}$ is not fuzzily zero; and
+- $\Delta p_f^{\mathrm{smooth},\ell}$ passes a cancellation check scaled by the magnitudes of the
+  two one-sided Taylor terms; and
 - the resulting quotient is finite and positive.
 
 Otherwise, the kernel uses $T_f^{(0)}$. Selecting
@@ -514,22 +515,28 @@ $0<\alpha\leq 1$,
 \label{eq:pressure-jump-fixed-point}
 \end{equation}
 
-The updated jump is frozen before pressure-system assembly. After the pressure solve, the
-Rhie-Chow object reconstructs a new conservative face flux, which supplies the next jump update.
-At fixed-point convergence, the jump law and discrete continuity are satisfied simultaneously.
+Before assembling a pressure system, the Rhie-Chow object updates and relaxes the jump from the
+preceding corrected face flux. After the current `1/A` field is available, it reconstructs the
+jump-aware solution gradients from the current pressure and newly published jump. At fixed-point
+convergence, the jump law and discrete continuity are satisfied simultaneously.
 
 ## One-sided reconstruction
 
 A gradient reconstructed through a discontinuous face contains a spurious contribution of order
 $J_f/h$. This treats the physical discontinuity as a rapidly varying continuous pressure and can
-contaminate both the explicit flux correction and the two-term transmissibility.
+contaminate the explicit flux correction.
 
-When requested by the pressure-jump model,
-[FVReconstructedPressureGradient](FVReconstructedPressureGradient.md) therefore reconstructs each
-side from its own cell data rather than interpolating a gradient through the baffle. This produces
-separate approximations to the smooth gradients adjacent to the interface. One-sided
-reconstruction does not impose the jump itself; the subtraction of $J_P$ in
-[eq:pressure-jump-face-pressure-flux] performs that role.
+The Rhie-Chow object therefore maintains a separate jump-aware Green--Gauss solution-gradient
+field. During its surface sum, a continuous internal face contributes one common interpolated
+pressure, while a baffle contributes two traces recovered from
+[eq:pressure-jump-half-cell-flux]. The element trace contributes only to cell $P$ and the neighbor
+trace only to cell $N$. The completed sums are divided by coordinate-system-aware cell volumes.
+
+This solution-gradient field supplies $r_P$, $r_N$, and $R_f$. It is intentionally distinct from
+[FVReconstructedPressureGradient](FVReconstructedPressureGradient.md), which remains the
+pressure-velocity coupling gradient used by the momentum predictor and the optional two-term
+secant. On the first reconstruction, the one-sided correction terms are zero; later pressure
+correctors use the preceding jump-aware gradient as the Picard iterate.
 
 ## Limiting cases
 
