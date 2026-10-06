@@ -10,7 +10,7 @@
 #include "LinearFVPressureCorrectionDiffusionJump.h"
 #include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
-#include "RhieChowMassFlux.h"
+#include "PorousRhieChowMassFlux.h"
 
 #include <limits>
 
@@ -35,7 +35,7 @@ LinearFVPressureCorrectionDiffusionJump::validParams()
 LinearFVPressureCorrectionDiffusionJump::LinearFVPressureCorrectionDiffusionJump(
     const InputParameters & params)
   : LinearFVPressureCorrectionDiffusion(params),
-    _rc_uo(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
+    _rc_uo(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object")),
     _use_two_term_pressure_expansion(getParam<bool>("use_two_term_pressure_expansion"))
 {
 }

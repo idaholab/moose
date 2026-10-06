@@ -23,6 +23,7 @@ class ElemInfo;
 class FaceInfo;
 class FEProblemBase;
 class RhieChowMassFlux;
+class PorousRhieChowMassFlux;
 
 /**
  * Gradient method that reconstructs and relaxes the pressure gradient used for Rhie-Chow
@@ -192,6 +193,9 @@ private:
 
   /// Rhie-Chow object that owns this stateful reconstruction method.
   const RhieChowMassFlux * _rhie_chow = nullptr;
+
+  /// Porous Rhie-Chow object when one-sided reconstruction is configured.
+  const PorousRhieChowMassFlux * _porous_rhie_chow = nullptr;
 
   /// Pressure system that owns the reconstructed pressure variable.
   const SystemBase * _pressure_system = nullptr;

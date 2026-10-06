@@ -33,28 +33,36 @@ public:
    */
   PorousRhieChowMassFlux(const InputParameters & params);
 
+  void
+  linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
+                              LinearSystem & pressure_system,
+                              const std::vector<unsigned int> & momentum_system_numbers) override;
+
+  void computeHbyA(bool verbose) override;
+
   /**
    * Return the porosity on one side of a face.
    * @param fi The face on which to evaluate porosity
    * @param elem_side Whether to use the element side instead of the neighbor side
    * @param time The solution state at which to evaluate porosity
    */
-  Real getFaceSidePorosity(const FaceInfo & fi,
-                           bool elem_side,
-                           const Moose::StateArg & time) const override;
+  Real getFaceSidePorosity(const FaceInfo & fi, bool elem_side, const Moose::StateArg & time) const;
 
   /**
    * Return the pressure jump seen from one side of a baffle face.
    * @param fi The face on which to query the jump
    * @param elem_side Whether to return the jump seen from the element side
    */
-  Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const override;
+  Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
 
   /// Whether pressure and velocity reconstruction use separate one-sided stencils on this face.
-  bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const override;
+  bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
 
-  /// Whether at least one pressure-jump model is configured.
-  bool hasPressureBaffles() const override { return !_pressure_jump_models.empty(); }
+  /// Whether a face is governed by a pressure-jump model.
+  bool faceIsBaffle(const FaceInfo & fi) const;
+
+  /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
+  Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 
   /// Populate baffle-jump storage before initializing the face mass flux.
   void initFaceMassFlux() override;
@@ -68,20 +76,16 @@ public:
   /// Reset the current baffle-jump values during user object initialization.
   void initialize() override;
 
-protected:
-  /// Cache cell porosity in the pressure-system degree-of-freedom ordering.
-  void setupMeshInformation() override;
+private:
+  /// Whether at least one pressure-jump model is configured.
+  bool hasPressureBaffles() const { return !_pressure_jump_models.empty(); }
+
+  /// Cache cell volume times porosity in the pressure-system degree-of-freedom ordering.
+  void setupPorousMeshInformation();
 
   /// Recompute and relax the pressure jumps using the current face mass fluxes.
-  void updateBaffleJumps() override;
+  void updateBaffleJumps();
 
-  /// Whether the face is governed by one of the configured pressure-jump models.
-  bool isBaffleFace(const FaceInfo & fi) const override;
-
-  /// Multiply a pressure-system vector pointwise by the cached cell porosity.
-  void applyCellPorosityScaling(NumericVector<Number> & vec) const override;
-
-private:
   /// Whether the face uses the one-term pressure-gradient reconstruction selected by sideset.
   bool isPressureGradientLimited(const FaceInfo & fi) const;
 
@@ -100,8 +104,8 @@ private:
   /// Under-relaxation factor applied when updating pressure jumps.
   const Real _pressure_jump_relaxation;
 
-  /// Cell porosity stored in the pressure-system degree-of-freedom ordering.
-  std::unique_ptr<NumericVector<Number>> _cell_porosity;
+  /// Cell volume times porosity stored in the pressure-system degree-of-freedom ordering.
+  std::unique_ptr<NumericVector<Number>> _cell_volume_porosity;
 
   /// Restartable face field storing pressure as non-owner minus owner.
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;
