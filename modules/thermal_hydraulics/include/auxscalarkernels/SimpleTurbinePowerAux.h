@@ -13,6 +13,7 @@
 #include "ConstantScalarAux.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes turbine power for 1-phase flow
@@ -26,8 +27,10 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Value indicating if turbine is operating or not (0=false, 1=true)
-  const Real & _on;
+  /// Function indicating if turbine is operating or not (0=false, 1=true)
+  const Function & _on_fn;
+  /// Function specifying the turbine power [W]
+  const Function & _power_fn;
 
 public:
   static InputParameters validParams();

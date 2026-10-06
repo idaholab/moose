@@ -68,7 +68,7 @@
     A_ref = 1.0
     K = 0
     on = 1
-    power = 0
+    power = W_dot_fn
   []
 
   [pipe2]
@@ -84,15 +84,6 @@
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e6
-  []
-[]
-
-[ControlLogic]
-  [W_dot_ctrl]
-    type = TimeFunctionComponentControl
-    component = turbine
-    parameter = power
-    function = W_dot_fn
   []
 []
 

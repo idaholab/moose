@@ -13,9 +13,9 @@ is assumed to be the inlet of the turbine and the second one is the outlet. The 
 must have the same direction.
 
 
-The user specifies  the power to be extracted by the turbine using the parameter [!param](/Components/SimpleTurbine1Phase/power).
-Power will be extracted if the parameter [!param](/Components/SimpleTurbine1Phase/on) is set to 1 (0 maps to `false`, 1 maps to `true`).
-Both parameters are controllable.
+The user specifies the power to be extracted by the turbine using the function parameter [!param](/Components/SimpleTurbine1Phase/power).
+Power will be extracted if the function parameter [!param](/Components/SimpleTurbine1Phase/on) evaluates to 1 (0 maps to `false`, 1 maps to `true`).
+Both parameters accept a constant value or a function of time, allowing the power and on/off state to vary during a simulation.
 
 !syntax parameters /Components/SimpleTurbine1Phase
 

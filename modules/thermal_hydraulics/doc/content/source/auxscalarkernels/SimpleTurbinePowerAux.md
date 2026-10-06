@@ -2,11 +2,11 @@
 
 !syntax description /AuxScalarKernels/SimpleTurbinePowerScalarAux
 
-If the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is equal to 1 (0 maps to `false`, 1 maps to `true`), the power is
-equal to [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/value), else it is 0.
+If the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) function evaluates to 1 (0 maps to `false`, 1 maps to `true`), the power is
+equal to the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/power) function, else it is 0.
 
-The [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is controllable,
-meaning that its value can be changed dynamically during a simulation using the [Controls system](syntax/Controls/index.md).
+Both parameters accept a constant value or a function of time, so the power and on/off state can
+be varied during a simulation.
 
 !syntax parameters /AuxScalarKernels/SimpleTurbinePowerScalarAux
 

@@ -14,6 +14,7 @@
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 #include "THMUtils.h"
+#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADSimpleTurbine1PhaseUserObject);
 
@@ -21,20 +22,19 @@ InputParameters
 ADSimpleTurbine1PhaseUserObject::validParams()
 {
   InputParameters params = ADJunctionParallelChannels1PhaseUserObject::validParams();
-  params.addRequiredParam<Real>("on", "Value determining if turbine is operating (0=off, 1=on)");
-  params.addRequiredParam<Real>("W_dot", "Power, [W]");
+  params.addRequiredParam<FunctionName>(
+      "on", "Function determining if turbine is operating (0=off, 1=on)");
+  params.addRequiredParam<FunctionName>("W_dot", "Function specifying the power [W]");
 
   params.addClassDescription("Computes and caches flux and residual vectors for a 1-phase turbine");
-
-  params.declareControllable("W_dot on");
 
   return params;
 }
 
 ADSimpleTurbine1PhaseUserObject::ADSimpleTurbine1PhaseUserObject(const InputParameters & params)
   : ADJunctionParallelChannels1PhaseUserObject(params),
-    _on(getParam<Real>("on")),
-    _W_dot(getParam<Real>("W_dot"))
+    _on_fn(getFunction("on")),
+    _W_dot_fn(getFunction("W_dot"))
 {
 }
 
@@ -45,8 +45,10 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 
   using std::pow;
 
-  if ((c == 0) && THM::realToBool(_on))
+  if ((c == 0) && THM::realToBool(_on_fn.value(_t, Point())))
   {
+    const Real W_dot = _W_dot_fn.value(_t, Point());
+
     const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
     const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
     const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
@@ -55,7 +57,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
     const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
 
     // energy source
-    const ADReal S_E = _W_dot;
+    const ADReal S_E = W_dot;
 
     // momentum source
     const ADReal v_in = THM::v_from_rhoA_A(_rhoA[0], _A[0]);
@@ -69,7 +71,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
     const ADReal p_in = _fp.p_from_v_e(v_in, e_in);
     const ADReal T_in = _fp.T_from_v_e(v_in, e_in);
     const ADReal h_in = _fp.h_from_p_T(p_in, T_in);
-    const ADReal delta_p = p_in * (1 - pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
+    const ADReal delta_p = p_in * (1 - pow((1 - W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
 
     const ADRealVectorValue S_M = delta_p * _A[0] * di;
 
