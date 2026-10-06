@@ -20,6 +20,23 @@ PorousFlowPorosityBaseTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
+void
+PorousFlowPorosityBaseTempl<is_ad>::addPorosityMinParams(InputParameters & params, Real default_min)
+{
+  params.addParam<Real>("porosity_min",
+                        default_min,
+                        "Minimum allowed value of the porosity: if the computed porosity is less "
+                        "than this value, porosity is set to this value instead");
+  params.addParam<Real>(
+      "zero_modifier",
+      1E-3,
+      "If the porosity_min floor is active, the porosity derivatives are set to zero_modifier "
+      "times their unfloored values (rather than exactly zero) to hint to the nonlinear solver "
+      "that porosity is not strictly constant, which aids convergence");
+  params.addParamNamesToGroup("zero_modifier", "Advanced");
+}
+
+template <bool is_ad>
 PorousFlowPorosityBaseTempl<is_ad>::PorousFlowPorosityBaseTempl(const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
     _porosity(_nodal_material ? declareGenericProperty<Real, is_ad>("PorousFlow_porosity_nodal")
@@ -32,8 +49,37 @@ PorousFlowPorosityBaseTempl<is_ad>::PorousFlowPorosityBaseTempl(const InputParam
         is_ad ? nullptr
         : _nodal_material
             ? &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar")
-            : &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
+            : &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
+    _porosity_min(isParamValid("porosity_min") ? getParam<Real>("porosity_min")
+                                               : std::numeric_limits<Real>::lowest()),
+    _zero_modifier(isParamValid("zero_modifier") ? getParam<Real>("zero_modifier") : 1.0)
 {
+}
+
+template <bool is_ad>
+void
+PorousFlowPorosityBaseTempl<is_ad>::applyPorosityMin()
+{
+  if (MetaPhysicL::raw_value(_porosity[_qp]) >= _porosity_min)
+    return;
+
+  if constexpr (!is_ad)
+  {
+    _porosity[_qp] = _porosity_min;
+    for (unsigned int v = 0; v < _num_var; ++v)
+    {
+      (*_dporosity_dvar)[_qp][v] *= _zero_modifier;
+      (*_dporosity_dgradvar)[_qp][v] *= _zero_modifier;
+    }
+  }
+  else
+  {
+    // The AD path carries its derivatives inside the value and has no derivative material
+    // properties, so the value and the derivatives are softened separately.  Assigning
+    // _porosity_min to the ADReal would instead discard the derivatives entirely.
+    _porosity[_qp].value() = _porosity_min;
+    _porosity[_qp].derivatives() *= _zero_modifier;
+  }
 }
 
 template class PorousFlowPorosityBaseTempl<false>;

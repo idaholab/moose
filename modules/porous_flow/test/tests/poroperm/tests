@@ -240,4 +240,13 @@
     issues = '#18079'
     design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
   []
+  [linear_porosity_min_negative]
+    type = RunException
+    input = linear_test_vals.i
+    cli_args = 'Materials/porosity/porosity_min=-1'
+    expect_err = 'Must be non-negative'
+    requirement = 'The system shall report an error if a negative lower bound is placed on porosity computed as a linear function of effective porepressure, temperature and volumetric strain.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
 []
