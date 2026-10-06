@@ -194,9 +194,6 @@ protected:
   /// Compute the pressure-gradient flux contribution for a single face
   Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
 
-  /// Compute H/A and 1/A using the supplied cell-volume scaling.
-  void computeHbyA(bool verbose, const NumericVector<Number> & cell_volume_scaling);
-
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 

@@ -121,7 +121,7 @@ PorousRhieChowMassFlux::computeHbyA(bool verbose)
   if (hasPressureBaffles())
     _pressure_system->updateFVGradient(basePressureGradientField());
 
-  RhieChowMassFlux::computeHbyA(verbose, *_cell_volume_porosity);
+  RhieChowMassFlux::computeHbyA(verbose);
 }
 
 void
@@ -144,18 +144,17 @@ PorousRhieChowMassFlux::initialize()
 void
 PorousRhieChowMassFlux::setupPorousMeshInformation()
 {
-  _cell_volume_porosity = _pressure_system->currentSolution()->zero_clone();
   const auto time_arg = Moose::currentState();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
     if (hasBlocks(elem_info->subdomain_id()))
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
       const Real cell_volume = elem_info->volume() * elem_info->coordFactor();
-      _cell_volume_porosity->set(elem_dof,
-                                 cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
+      _cell_volumes->set(elem_dof,
+                         cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
     }
 
-  _cell_volume_porosity->close();
+  _cell_volumes->close();
 }
 
 void

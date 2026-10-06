@@ -977,12 +977,6 @@ RhieChowMassFlux::populateCouplingFunctors(
 void
 RhieChowMassFlux::computeHbyA(bool verbose)
 {
-  computeHbyA(verbose, *_cell_volumes);
-}
-
-void
-RhieChowMassFlux::computeHbyA(bool verbose, const NumericVector<Number> & cell_volume_scaling)
-{
   if (verbose)
   {
     _console << "************************************" << std::endl;
@@ -1080,8 +1074,7 @@ RhieChowMassFlux::computeHbyA(bool verbose, const NumericVector<Number> & cell_v
     // Unfortunately, the pressure forces are included in the momentum RHS
     // so we have to correct them back using the same coupling gradient that
     // assembled the momentum pressure source.
-    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i],
-                                         cell_volume_scaling);
+    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i], *_cell_volumes);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -1156,14 +1149,14 @@ RhieChowMassFlux::computeHbyA(bool verbose, const NumericVector<Number> & cell_v
       // Correct HbyA
       Ainv_full->add(-1.0, Ainv);
       working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
-      working_vector_petsc->pointwise_mult(*working_vector_petsc, cell_volume_scaling);
+      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
       Ainv = *Ainv_full_old;
     }
 
-    Ainv.pointwise_mult(Ainv, cell_volume_scaling);
+    Ainv.pointwise_mult(Ainv, *_cell_volumes);
 
     if (verbose)
     {
