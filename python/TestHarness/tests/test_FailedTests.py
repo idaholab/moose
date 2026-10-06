@@ -51,7 +51,8 @@ class TestHarnessTester(TestHarnessTestCase):
     def testFailedTestsUpdate(self):
         """
         Tests that previously failing tests that pass with --failed-tests are
-        updated in the previous results and not ran by the next --failed-tests.
+        updated in the previous results and not ran by the next --failed-tests,
+        and that --failed-tests-no-update leaves the previous results unchanged.
         """
         with tempfile.TemporaryDirectory() as output_dir:
             # Each test fails while its marker file exists
@@ -70,8 +71,20 @@ class TestHarnessTester(TestHarnessTestCase):
             # Both tests fail
             stats = self.runTests(*args, exit_code=128, **kwargs).results["stats"]
 
-            # Only a fails; b is updated to passing
+            # Only a fails; without updating, the previous results are unchanged
             os.remove(markers["b"])
+            with open(results_file, "r") as f:
+                previous_results = f.read()
+            for _ in range(2):
+                out = self.runTests(
+                    *args, "--failed-tests-no-update", exit_code=128, **kwargs
+                ).output
+                self.assertRegex(out, r"test\.a.*?FAILED")
+                self.assertRegex(out, r"test\.b.*?OK")
+                with open(results_file, "r") as f:
+                    self.assertEqual(f.read(), previous_results)
+
+            # Only a fails; b is updated to passing
             out = self.runTests(*args, "--failed-tests", exit_code=128, **kwargs).output
             self.assertRegex(out, r"test\.a.*?FAILED")
             self.assertRegex(out, r"test\.b.*?OK")

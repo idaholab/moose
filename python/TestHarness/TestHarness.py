@@ -1172,7 +1172,7 @@ class TestHarness:
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
-            elif self.options.failed_tests:
+            elif self.options.failed_tests and not self.options.failed_tests_no_update:
                 # Replace only the entries of previously failing tests that now
                 # pass so that the next --failed-tests run is a smaller subset.
                 # Everything else in the previous results, including the stats
@@ -1458,6 +1458,12 @@ class TestHarness:
             action="store_true",
             help="Run tests that previously failed; tests that now pass are"
             " marked as passing in the previous results",
+        )
+        parser.add_argument(
+            "--failed-tests-no-update",
+            action="store_true",
+            help="Run tests that previously failed without updating the previous"
+            " results",
         )
         parser.add_argument(
             "--show-last-run",
@@ -2128,6 +2134,9 @@ class TestHarness:
         else:
             opts.results_file = os.path.abspath(opts.results_file)
 
+        # Selects the same tests as --failed-tests; only the update is skipped
+        if opts.failed_tests_no_update:
+            opts.failed_tests = True
         if opts.failed_tests and not os.path.exists(opts.results_file):
             self.errorExit("--failed-tests could not detect a previous run")
 
