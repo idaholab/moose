@@ -14,15 +14,101 @@ velocity.
 At a porous baffle, the Rhie-Chow object can require one-sided reconstruction. In that case this
 kernel uses the local velocity state for each side of the advection operator. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
-Bernoulli pressure jump and any irreversible form loss. The stress discretization does not add
-another baffle loss; it assumes that there is no separate singular viscous surface force and
-therefore preserves the viscous traction across the interface. Set
+Bernoulli pressure jump and any irreversible form loss, as described below.
+
+The stress discretization does not add another baffle loss; it assumes that there is no separate
+singular viscous surface force and therefore preserves the viscous traction across the interface.
+Set
 [!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_two_point_stress_transmissibility) to use
 the jump-safe harmonic two-point normal-stress treatment instead of the standard
 face-interpolated stress. When nonorthogonal or deviatoric stress corrections are requested,
 this treatment includes their side-local gradient contributions in the same half-cell resistance
 balance, producing a single conservative viscous traction without interpolating a gradient across
 a material jump. Porosity must be positive on every active face.
+
+## Advection treatment across a porosity jump
+
+Let $\boldsymbol{U}=\epsilon\boldsymbol{v}$ be superficial velocity and
+$\boldsymbol{v}$ be interstitial velocity. For momentum component $i$, the conservative porous
+advection term is
+
+\begin{equation}
+  \mathcal{A}_i = \nabla\mathbin{\cdot}
+  \left(\frac{\rho}{\epsilon}\boldsymbol{U}U_i\right).
+\label{eq:pw-momentum-conservative-advection}
+\end{equation}
+
+Applying the product rule separates this term into
+
+\begin{equation}
+  \mathcal{A}_i =
+  \frac{1}{\epsilon}\nabla\mathbin{\cdot}
+  \left(\rho\boldsymbol{U}U_i\right)
+  + \rho U_i\boldsymbol{U}\mathbin{\cdot}\nabla\left(\frac{1}{\epsilon}\right).
+\label{eq:pw-momentum-advection-product-rule}
+\end{equation}
+
+`LinearPWCNSFVMomentumFlux` uses the approximation
+
+\begin{equation}
+  \mathcal{A}_i \approx \widetilde{\mathcal{A}}_i =
+  \frac{1}{\epsilon}\nabla\mathbin{\cdot}
+  \left(\rho\boldsymbol{U}U_i\right),
+\label{eq:pw-momentum-pulled-porosity-advection}
+\end{equation}
+
+so $1/\epsilon$ is pulled outside the divergence cell by cell. This approximation is exact where
+porosity is constant. It does not directly discretize the second term in
+[eq:pw-momentum-advection-product-rule], which contains the porosity gradient and becomes singular
+at a sharp porosity interface.
+
+For an internal face $f$ between cells $P$ and $N$, let
+$\phi_f=(\rho\boldsymbol{U}\mathbin{\cdot}\boldsymbol{n}_f)_f$, with
+$\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contributions are
+
+\begin{equation}
+\begin{aligned}
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}\widetilde{U}_{i,f}, \\
+  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}\widetilde{U}_{i,f},
+\end{aligned}
+\label{eq:pw-momentum-face-advection}
+\end{equation}
+
+where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). When a baffle
+requires one-sided reconstruction, the shared interpolated state is replaced by the state local to
+each row:
+
+\begin{equation}
+\begin{aligned}
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}U_{i,P}, \\
+  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}U_{i,N}.
+\end{aligned}
+\label{eq:pw-momentum-one-sided-advection}
+\end{equation}
+
+Rather than representing the omitted porosity-gradient term as a volumetric or distributional
+advection force, the interface model replaces its normal kinetic-head effect with the reversible
+Bernoulli pressure jump. If $o$ and $n$ denote the owner and non-owner sides, respectively, the
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model uses, with its default
+side-density treatment,
+
+\begin{equation}
+\begin{aligned}
+  p_n-p_o &= \frac{1}{2}\left(\rho_o v_{n,o}^2-\rho_n v_{n,n}^2\right), \\
+  v_{n,s} &= \frac{\phi_f}{\rho_s\epsilon_s}, \qquad s\in\{o,n\}.
+\end{aligned}
+\label{eq:pw-momentum-bernoulli-replacement}
+\end{equation}
+
+Thus, the advection kernel uses the cell-wise, pulled-$1/\epsilon$ approximation, while the
+pressure-jump model carries the change in normal kinetic head across the porosity discontinuity.
+This is an interface closure: it recovers the steady one-dimensional inviscid Bernoulli balance,
+but it is not an algebraic replacement for the omitted tensor term in general multidimensional
+flow. The
+[!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) option instead uses
+one face-interpolated density in the reversible term, and any configured irreversible form loss is
+added to this reversible jump.
 
 ## Stress treatment across a porosity jump
 
