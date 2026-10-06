@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorMassKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorMassKernel);
 
@@ -33,7 +34,11 @@ MFEMVectorMassKernel::MFEMVectorMassKernel(const InputParameters & parameters)
 mfem::BilinearFormIntegrator *
 MFEMVectorMassKernel::createMBFIntegrator()
 {
-  return new mfem::VectorMassIntegrator(_coef);
+  auto integ = new mfem::VectorMassIntegrator(_coef);
+  // VectorMassIntegrator otherwise assumes the number of vector components equals the spatial
+  // dimension, which does not hold for vector spaces with range_dim set differently.
+  integ->SetVDim(getMFEMProblem().getGridFunction(_test_var_name)->ParFESpace()->GetVDim());
+  return integ;
 }
 
 #endif

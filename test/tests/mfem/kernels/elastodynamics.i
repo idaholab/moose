@@ -90,7 +90,7 @@
     variable = velocity
     trial_variable = displacement
   []
-  [velocity]
+  [velocity_mass]
     type = MFEMVectorMassKernel
     variable = velocity
     coefficient = -1.0

@@ -17,7 +17,7 @@
  * \f[
  * (k \vec u, \vec v)
  * \f]
- * for \f$\vec u\f$ and \f$\vec v\f$ in vector-valued \f^1\f$ or \f^2\f$ spaces, whose
+ * for \f$\vec u\f$ and \f$\vec v\f$ in vector-valued \f$H^1\f$ or \f$L^2\f$ spaces, whose
  * components are each discretised with a scalar basis.
  */
 class MFEMVectorMassKernel : public MFEMMixedBilinearFormKernel
