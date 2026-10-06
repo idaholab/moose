@@ -17,9 +17,6 @@
     gold_dir='../kernels/gold'
     input = named_weakform.i
     csvdiff = 'OutputData/Darcy.csv'
-    # darcy.i sets both output file_bases, which !include forbids re-supplying in the input.
-    cli_args = 'Outputs/DarcyErrorCSV/file_base=OutputData/Darcy '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/Darcy'
     requirement = 'The system shall be able to solve a mixed steady state FE problem when several weak forms are present, using the weak form named by the problem composer and linear solver.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'

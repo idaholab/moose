@@ -1,4 +1,3 @@
-# Include mfem/complex/complex.i
 !include ../complex/complex.i
 
 # Naming every kernel and boundary condition explicitly must reproduce the default weak form,

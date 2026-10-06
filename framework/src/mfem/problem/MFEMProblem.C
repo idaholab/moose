@@ -511,7 +511,7 @@ MFEMProblem::getEquationSystem(const std::string & weak_form_name) const
 }
 
 void
-MFEMProblem::addMFEMProblemComposer(const std::string & composer_type,
+MFEMProblem::addProblemComposer(const std::string & composer_type,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
