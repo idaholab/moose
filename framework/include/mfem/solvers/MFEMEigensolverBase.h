@@ -35,9 +35,6 @@ public:
   virtual const mfem::HypreParVector & GetEigenvector(int index) const = 0;
 
 protected:
-  /// Sets the operator for the eigensolver in derived classes
-  virtual void SetOperatorImpl(const mfem::Operator & op) override = 0;
-
   /// Number of eigenmodes to compute
   int _num_modes;
 };
