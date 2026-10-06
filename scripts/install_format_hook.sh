@@ -16,26 +16,17 @@
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# determine the appropriate hook file
-function moose_is_git_submodule()
-{
-    # get the top level of the MOOSE repository or submodule
-    local moose_git_dir
-    moose_git_dir="$(cd $script_dir && git rev-parse --show-toplevel)"
-
-    # Try running git command one level above the top level MOOSE directory:
-    # * If MOOSE is a submodule, then ".." corresponds to the parent repository,
-    #   so its top level will be printed.
-    # * If MOOSE is NOT a submodule, then ".." leads to a non-git directory, so
-    #   git will print an error message that gets redirected to /dev/null, so
-    #   nothing will be printed.
-    cd $moose_git_dir/.. && git rev-parse --show-toplevel 2> /dev/null
-}
-if [[ $(moose_is_git_submodule) ]]; then
-    hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/../.git/modules/moose/hooks/pre-commit"
-else
-    hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/.git/hooks/pre-commit"
+# Determine the hooks directory. 'git rev-parse --git-path hooks' resolves it
+# for every supported repository structure: a stand-alone MOOSE checkout, MOOSE
+# as a submodule, a worktree (whose hooks are shared through the common git
+# directory, not the per-worktree one), and a bare repository. git prints the
+# path relative to the current directory unless it is already absolute, so
+# resolve a relative result against script_dir.
+hooks_dir="$(cd $script_dir && git rev-parse --git-path hooks)"
+if [[ "$hooks_dir" != /* ]]; then
+    hooks_dir="$script_dir/$hooks_dir"
 fi
+hookfile="$hooks_dir/pre-commit"
 
 # ensure that hook file does not exist yet
 if [[ -f $hookfile ]]; then
