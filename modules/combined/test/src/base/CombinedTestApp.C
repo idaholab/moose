@@ -66,41 +66,44 @@ CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : MooseApp(
 CombinedTestApp::~CombinedTestApp() {}
 
 void
-CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax, bool use_test_objs)
 {
-  CombinedApp::registerAll(f, af, s);
+  CombinedApp::registerAll(f, af, syntax);
   if (use_test_objs)
   {
     Registry::registerObjectsTo(f, {"CombinedTestApp"});
     Registry::registerActionsTo(af, {"CombinedTestApp"});
 
-    ChemicalReactionsTestApp::registerAll(f, af, s, use_test_objs);
-    ContactTestApp::registerAll(f, af, s, use_test_objs);
-    ElectromagneticsTestApp::registerAll(f, af, s, use_test_objs);
-    ExternalPetscSolverTestApp::registerAll(f, af, s, use_test_objs);
-    FluidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
-    FsiTestApp::registerAll(f, af, s, use_test_objs);
-    FunctionalExpansionToolsTestApp::registerAll(f, af, s, use_test_objs);
-    GeochemistryTestApp::registerAll(f, af, s, use_test_objs);
-    HeatTransferTestApp::registerAll(f, af, s, use_test_objs);
-    LevelSetTestApp::registerAll(f, af, s, use_test_objs);
-    MiscTestApp::registerAll(f, af, s, use_test_objs);
-    NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
-    OptimizationTestApp::registerAll(f, af, s, use_test_objs);
-    PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
-    PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
-    PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
-    RayTracingTestApp::registerAll(f, af, s, use_test_objs);
-    RdgTestApp::registerAll(f, af, s, use_test_objs);
-    ReactorTestApp::registerAll(f, af, s, use_test_objs);
-    ScalarTransportTestApp::registerAll(f, af, s, use_test_objs);
-    ShiftedBoundaryMethodTestApp::registerAll(f, af, s, use_test_objs);
-    SolidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
-    StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
-    SolidMechanicsTestApp::registerAll(f, af, s, use_test_objs);
-    SubChannelTestApp::registerAll(f, af, s, use_test_objs);
-    ThermalHydraulicsTestApp::registerAll(f, af, s, use_test_objs);
-    XFEMTestApp::registerAll(f, af, s, use_test_objs);
+    ChemicalReactionsTestApp::registerAll(f, af, syntax, use_test_objs);
+    ContactTestApp::registerAll(f, af, syntax, use_test_objs);
+    ElectromagneticsTestApp::registerAll(f, af, syntax, use_test_objs);
+    ExternalPetscSolverTestApp::registerAll(f, af, syntax, use_test_objs);
+    FluidPropertiesTestApp::registerAll(f, af, syntax, use_test_objs);
+    FsiTestApp::registerAll(f, af, syntax, use_test_objs);
+    FunctionalExpansionToolsTestApp::registerAll(f, af, syntax, use_test_objs);
+    GeochemistryTestApp::registerAll(f, af, syntax, use_test_objs);
+    HeatTransferTestApp::registerAll(f, af, syntax, use_test_objs);
+    LevelSetTestApp::registerAll(f, af, syntax, use_test_objs);
+    MiscTestApp::registerAll(f, af, syntax, use_test_objs);
+    NavierStokesTestApp::registerAll(f, af, syntax, use_test_objs);
+    OptimizationTestApp::registerAll(f, af, syntax, use_test_objs);
+    PeridynamicsTestApp::registerAll(f, af, syntax, use_test_objs);
+    PhaseFieldTestApp::registerAll(f, af, syntax, use_test_objs);
+    PorousFlowTestApp::registerAll(f, af, syntax, use_test_objs);
+    RayTracingTestApp::registerAll(f, af, syntax, use_test_objs);
+    RdgTestApp::registerAll(f, af, syntax, use_test_objs);
+    ReactorTestApp::registerAll(f, af, syntax, use_test_objs);
+    ScalarTransportTestApp::registerAll(f, af, syntax, use_test_objs);
+    ShiftedBoundaryMethodTestApp::registerAll(f, af, syntax, use_test_objs);
+    SolidPropertiesTestApp::registerAll(f, af, syntax, use_test_objs);
+    StochasticToolsTestApp::registerAll(f, af, syntax, use_test_objs);
+    SolidMechanicsTestApp::registerAll(f, af, syntax, use_test_objs);
+    SubChannelTestApp::registerAll(f, af, syntax, use_test_objs);
+    ThermalHydraulicsTestApp::registerAll(f, af, syntax, use_test_objs);
+    XFEMTestApp::registerAll(f, af, syntax, use_test_objs);
+
+    registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
+    registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
   }
 }
 
