@@ -29,7 +29,7 @@ MFEMTimeDerivativeVectorMassKernel::MFEMTimeDerivativeVectorMassKernel(
     const InputParameters & parameters)
   : MFEMVectorMassKernel(parameters),
     _var_dot_name(getMFEMProblem().getProblemData().time_derivative_map.getTimeDerivativeName(
-        MFEMMixedBilinearFormKernel::getTrialVariableName()))
+        _trial_var_name))
 {
 }
 
