@@ -9,8 +9,10 @@
 
 #include "LinearFVPressureCorrectionDiffusionJump.h"
 #include "FVReconstructedPressureGradient.h"
-#include "MooseUtils.h"
+#include "FVUtils.h"
 #include "RhieChowMassFlux.h"
+
+#include <limits>
 
 registerMooseObject("NavierStokesApp", LinearFVPressureCorrectionDiffusionJump);
 
@@ -43,78 +45,93 @@ LinearFVPressureCorrectionDiffusionJump::LinearFVPressureCorrectionDiffusionJump
                "Two-term pressure expansion requires FVReconstructedPressureGradient.");
 }
 
+void
+LinearFVPressureCorrectionDiffusionJump::setupFaceData(const FaceInfo * face_info)
+{
+  LinearFVPressureCorrectionDiffusion::setupFaceData(face_info);
+  _jump_interface_data_valid = false;
+}
+
+const NS::FV::PressureJumpInterfaceData &
+LinearFVPressureCorrectionDiffusionJump::jumpInterfaceData()
+{
+  if (_jump_interface_data_valid)
+    return _jump_interface_data;
+
+  mooseAssert(_current_face_info && _current_face_info->neighborPtr(),
+              "Jump-interface data requires an internal face.");
+
+  const auto & elem_info = *_current_face_info->elemInfo();
+  const auto & neighbor_info = *_current_face_info->neighborInfo();
+  RealVectorValue elem_gradient;
+  RealVectorValue neighbor_gradient;
+  if (_rc_uo.hasJumpAwarePressureGradient())
+  {
+    elem_gradient = _rc_uo.jumpAwarePressureGradient(elem_info);
+    neighbor_gradient = _rc_uo.jumpAwarePressureGradient(neighbor_info);
+  }
+
+  RealVectorValue elem_diffusion;
+  RealVectorValue neighbor_diffusion;
+  for (const auto component : make_range(_subproblem.mesh().dimension()))
+  {
+    elem_diffusion(component) = _rc_uo.cellPressureDiffusionCoefficient(elem_info, component);
+    neighbor_diffusion(component) =
+        _rc_uo.cellPressureDiffusionCoefficient(neighbor_info, component);
+  }
+  const Point elem_to_face = _current_face_info->faceCentroid() - elem_info.centroid();
+  const Point face_to_neighbor = neighbor_info.centroid() - _current_face_info->faceCentroid();
+
+  _jump_interface_data = NS::FV::pressureJumpInterfaceData(_current_face_info->normal(),
+                                                           elem_to_face,
+                                                           face_to_neighbor,
+                                                           elem_diffusion,
+                                                           neighbor_diffusion,
+                                                           elem_gradient,
+                                                           neighbor_gradient,
+                                                           _current_face_area,
+                                                           _use_nonorthogonal_correction);
+
+  if (!_jump_interface_data.valid)
+  {
+    // Preserve one common conservative coefficient if a degenerate half-cell geometry or
+    // coefficient prevents elimination of the two traces. No one-sided correction can be formed
+    // safely in this case.
+    _jump_interface_data.transmissibility = computeFluxMatrixContribution();
+    _jump_interface_data.correction = 0.0;
+    _jump_interface_data.valid = true;
+  }
+
+  _jump_interface_data_valid = true;
+  return _jump_interface_data;
+}
+
 Real
 LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution()
 {
-  // The base coefficient is the usual two-point pressure-diffusion transmissibility. It is also
-  // the fallback when the face is not a baffle or a lagged reconstructed gradient is unavailable.
   const Real base_matrix_contribution = computeFluxMatrixContribution();
-  if (!_use_two_term_pressure_expansion || !_rc_uo.faceIsBaffle(*_current_face_info) ||
+  if (!_rc_uo.faceIsBaffle(*_current_face_info))
+    return base_matrix_contribution;
+
+  if (!_use_two_term_pressure_expansion ||
       !_reconstructed_pressure_gradient_method->hasReconstructedCandidate())
     return base_matrix_contribution;
 
-  // Both displacement vectors point from their cell centroid to the common face centroid. The
-  // neighbor vector therefore points opposite the P-to-N face orientation on an orthogonal mesh.
+  const auto & interface_data = jumpInterfaceData();
+  if (!_rc_uo.hasJumpAwarePressureGradient())
+    return base_matrix_contribution;
+
   const auto & elem_info = *_current_face_info->elemInfo();
   const auto & neighbor_info = *_current_face_info->neighborInfo();
-  const Point d_elem_face = _current_face_info->faceCentroid() - elem_info.centroid();
-  const Point d_neighbor_face = _current_face_info->faceCentroid() - neighbor_info.centroid();
-
-  // These are the weights used to interpolate each component of rho/A from the cells to the face.
-  const auto interp_coeffs =
-      Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
-
-  // Everything used below is fixed while the current pressure-correction system is assembled.
-  // In particular, _gradient_field contains the coupling gradient published after the preceding
-  // pressure corrector; the Taylor terms are not functions of the pressure unknowns in this solve.
-  // They are used only to construct a lagged (Picard) coefficient T_f^lag, which will multiply the
-  // current cell pressures in the matrix.
-  //
-  // Let P and N denote the element and neighbor cells, respectively, and define
-  // d_Pf = x_f - x_P and d_Nf = x_f - x_N. The Taylor expansions to the two one-sided face
-  // pressures are
-  //
-  //   p_f^P = p_P + grad(p)_P . d_Pf,
-  //   p_f^N = p_N + grad(p)_N . d_Nf.
-  //
-  // With the element-oriented jump J_P = p_f^P - p_f^N, eliminating the two face pressures gives
-  // the lagged pressure drop after removing the modeled discontinuity:
-  //
-  //   Delta p_PN^smooth = (p_P - p_N) - J_P
-  //                      = -grad(p)_P . d_Pf + grad(p)_N . d_Nf.
+  const Point elem_to_face = _current_face_info->faceCentroid() - elem_info.centroid();
+  const Point neighbor_to_face = _current_face_info->faceCentroid() - neighbor_info.centroid();
   Real elem_taylor_term = 0.0;
   Real neighbor_taylor_term = 0.0;
-  Real two_term_flux = 0.0;
   for (const auto component : make_range(_subproblem.mesh().dimension()))
   {
-    // The reader supplies already-published scalar gradient components. These Real values remain
-    // constant throughout assembly and solution of the current pressure system.
-    const Real elem_gradient = _gradient_field.component(elem_info, component);
-    const Real neighbor_gradient = _gradient_field.component(neighbor_info, component);
-
-    // Accumulate grad(p)_P . d_Pf and grad(p)_N . d_Nf. Their signed difference below is the
-    // lagged smooth pressure drop used only to calculate T_f^lag.
-    elem_taylor_term += elem_gradient * d_elem_face(component);
-    neighbor_taylor_term += neighbor_gradient * d_neighbor_face(component);
-
-    // rho/A is also known from the completed momentum predictor, so it contributes no pressure
-    // unknowns to the matrix.
-    const Real elem_coefficient = _rc_uo.cellPressureDiffusionCoefficient(elem_info, component);
-    const Real neighbor_coefficient =
-        _rc_uo.cellPressureDiffusionCoefficient(neighbor_info, component);
-
-    // Interpolate the lagged coefficient-gradient product for this Cartesian component.
-    const Real face_pressure_force =
-        interp_coeffs.first * elem_coefficient * elem_gradient +
-        interp_coeffs.second * neighbor_coefficient * neighbor_gradient;
-
-    // With D_i = rho (A_i)^-1, the corresponding pressure-gradient flux is
-    //
-    //   q_p = -A_f sum_i n_i (D_i dp/dx_i)_f,
-    //
-    // where each coefficient-gradient product uses the geometric face interpolation above.
-    two_term_flux -=
-        _current_face_info->normal()(component) * face_pressure_force * _current_face_area;
+    elem_taylor_term += _gradient_field.component(elem_info, component) * elem_to_face(component);
+    neighbor_taylor_term +=
+        _gradient_field.component(neighbor_info, component) * neighbor_to_face(component);
   }
 
   // This is Delta p_PN^smooth,lag. It is a known denominator, not a pressure difference assembled
@@ -123,7 +140,12 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
 
   // A vanishing lagged pressure drop cannot define a transmissibility, even if roundoff leaves a
   // nonzero lagged flux. Retain the ordinary pressure-diffusion matrix coefficient in that case.
-  if (MooseUtils::absoluteFuzzyEqual(two_term_pressure_drop, 0.0))
+  // Thirty-two floating-point ulps leave headroom for the two dot-product accumulations while
+  // scaling the cancellation test with the actual Taylor terms instead of a dimensional constant.
+  const Real cancellation_scale = std::abs(elem_taylor_term) + std::abs(neighbor_taylor_term);
+  if (two_term_pressure_drop == 0.0 ||
+      std::abs(two_term_pressure_drop) <=
+          32.0 * std::numeric_limits<Real>::epsilon() * cancellation_scale)
     return base_matrix_contribution;
 
   // Both q_p^lag and Delta p_PN^smooth,lag are known numbers here. The assembled face relation is
@@ -140,13 +162,34 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   // The quotient is a frozen scalar. Returning it through compute*MatrixContribution() makes it a
   // coefficient of the current p_P and p_N unknowns; neither lagged gradient enters the matrix as
   // an unknown.
+  const auto interpolation_weights =
+      Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
+  Real two_term_flux = 0.0;
+  for (const auto component : make_range(_subproblem.mesh().dimension()))
+  {
+    const Real elem_pressure_force = _rc_uo.cellPressureDiffusionCoefficient(elem_info, component) *
+                                     _gradient_field.component(elem_info, component);
+    const Real neighbor_pressure_force =
+        _rc_uo.cellPressureDiffusionCoefficient(neighbor_info, component) *
+        _gradient_field.component(neighbor_info, component);
+    two_term_flux -= _current_face_info->normal()(component) * _current_face_area *
+                     (interpolation_weights.first * elem_pressure_force +
+                      interpolation_weights.second * neighbor_pressure_force);
+  }
   const Real two_term_matrix_contribution =
-      (two_term_flux + computeFluxRHSContribution()) / two_term_pressure_drop;
+      (two_term_flux + interface_data.correction) / two_term_pressure_drop;
 
   // A negative or non-finite quotient would not define a diffusive matrix stencil.
   return std::isfinite(two_term_matrix_contribution) && two_term_matrix_contribution > 0.0
              ? two_term_matrix_contribution
              : base_matrix_contribution;
+}
+
+Real
+LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxRHSContribution()
+{
+  return _rc_uo.faceIsBaffle(*_current_face_info) ? jumpInterfaceData().correction
+                                                  : computeFluxRHSContribution();
 }
 
 Real
@@ -168,7 +211,7 @@ LinearFVPressureCorrectionDiffusionJump::computeNeighborMatrixContribution()
 Real
 LinearFVPressureCorrectionDiffusionJump::computeElemRightHandSideContribution()
 {
-  Real rhs = computeFluxRHSContribution();
+  Real rhs = computeJumpAwareFluxRHSContribution();
 
   // J_P is oriented from the opposite side toward P: J_P = p_P - p_N. Let R_f denote the
   // explicit diffusion correction returned above. The two local rows receive
@@ -194,7 +237,7 @@ LinearFVPressureCorrectionDiffusionJump::computeNeighborRightHandSideContributio
 {
   // The neighbor receives the opposite base flux and the oppositely oriented jump
   // J_N = p_N - p_P = -J_P, preserving conservation across the internal face.
-  Real rhs = -computeFluxRHSContribution();
+  Real rhs = -computeJumpAwareFluxRHSContribution();
 
   const Real jump = _rc_uo.getSignedBaffleJump(*_current_face_info, /*elem_side=*/false);
   if (jump != 0.0)
