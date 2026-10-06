@@ -52,10 +52,17 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
-
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION("ComplexEquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator();
+  }
+
+  {
+    TIME_SECTION("ComplexEquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }

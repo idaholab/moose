@@ -62,10 +62,20 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                           mfem::Vector & X_new)
 {
   _problem_data.coefficients.setTime(GetTime());
-  FormEquationSystemOperator(dt);
+
+  {
+    TIME_SECTION(
+        "TimeDependentEquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator(dt);
+  }
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION(
+        "TimeDependentEquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   X_new.MakeRef(_true_x, 0);
 }

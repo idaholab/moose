@@ -19,7 +19,10 @@ namespace Moose::MFEM
 void
 EigenproblemESProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
+  {
+    TIME_SECTION("EigenproblemESProblemOperator::FormSystem", 2, "Assembling MFEM Eigenproblem");
+    FormEquationSystemOperator();
+  }
 
   auto * const es = GetEquationSystem();
   if (es->GetTestVarNames().size() > 1)
@@ -27,8 +30,12 @@ EigenproblemESProblemOperator::Solve()
 
   auto eigensolver =
       std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
-  es->PrepareEigensolver(*eigensolver);
-  eigensolver->Solve();
+
+  {
+    TIME_SECTION("EigenproblemESProblemOperator::SolveSystem", 2, "Solving MFEM Eigenproblem");
+    es->PrepareEigensolver(*eigensolver);
+    eigensolver->Solve();
+  }
   RecoverEigenproblemSolution(_problem_data.gridfunctions, eigensolver.get());
 }
 
