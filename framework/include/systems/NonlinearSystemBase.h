@@ -877,12 +877,6 @@ protected:
   virtual void computeScalingResidual() = 0;
 
   /**
-   * Assemble the numeric vector of scaling factors such that it can be used during assembly of the
-   * system matrix
-   */
-  void assembleScalingVector();
-
-  /**
    * Called after any ResidualObject-derived objects are added
    * to the system.
    */
@@ -902,8 +896,6 @@ protected:
    * - zeroing iteration counters
    * - setting initial solutions
    * - possibly performing automatic scaling
-   * - forming a scaling vector which, at least at some point, was required when AD objects were
-   *   used with non-unity scaling factors for nonlinear variables
    * @returns Whether any exceptions were raised while running this method
    */
   bool preSolve();

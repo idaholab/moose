@@ -4080,10 +4080,6 @@ NonlinearSystemBase::computeScaling()
 
   TIME_SECTION("computeScaling", 3, "Computing Automatic Scaling");
 
-  // It's funny but we need to assemble our vector of scaling factors here otherwise we will be
-  // applying scaling factors of 0 during Assembly of our scaling Jacobian
-  assembleScalingVector();
-
   // container for repeated access of element global dof indices
   std::vector<dof_id_type> dof_indices;
 
@@ -4231,53 +4227,6 @@ NonlinearSystemBase::computeScaling()
   return true;
 }
 
-void
-NonlinearSystemBase::assembleScalingVector()
-{
-  if (!hasVector("scaling_factors"))
-    // No variables have indicated they need scaling
-    return;
-
-  auto & scaling_vector = getVector("scaling_factors");
-
-  const auto & lm_mesh = _mesh.getMesh();
-  const auto & dof_map = dofMap();
-
-  const auto & field_variables = _vars[0].fieldVariables();
-  const auto & scalar_variables = _vars[0].scalars();
-
-  std::vector<dof_id_type> dof_indices;
-
-  for (const Elem * const elem :
-       as_range(lm_mesh.active_local_elements_begin(), lm_mesh.active_local_elements_end()))
-    for (const auto * const field_var : field_variables)
-    {
-      const auto & factors = field_var->arrayScalingFactor();
-      for (const auto i : make_range(field_var->count()))
-      {
-        dof_map.dof_indices(elem, dof_indices, field_var->number() + i);
-        for (const auto dof : dof_indices)
-          scaling_vector.set(dof, factors[i]);
-      }
-    }
-
-  for (const auto * const scalar_var : scalar_variables)
-  {
-    mooseAssert(scalar_var->count() == 1,
-                "Scalar variables should always have only one component.");
-    dof_map.SCALAR_dof_indices(dof_indices, scalar_var->number());
-    for (const auto dof : dof_indices)
-      scaling_vector.set(dof, scalar_var->scalingFactor());
-  }
-
-  // Parallel assemble
-  scaling_vector.close();
-
-  if (auto * displaced_problem = _fe_problem.getDisplacedProblem().get())
-    // copy into the corresponding displaced system vector because they should be the exact same
-    displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
-}
-
 bool
 NonlinearSystemBase::preSolve()
 {
@@ -4296,10 +4245,6 @@ NonlinearSystemBase::preSolve()
     if (!scaling_succeeded)
       return false;
   }
-
-  // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
-  // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
-  assembleScalingVector();
 
   convergence().preLoop();
 

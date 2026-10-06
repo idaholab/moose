@@ -1575,13 +1575,6 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
   }
 }
 
-void
-SystemBase::addScalingVector()
-{
-  addVector("scaling_factors", /*project=*/false, GHOSTED);
-  _subproblem.hasScalingVector(number());
-}
-
 bool
 SystemBase::computingScalingJacobian() const
 {

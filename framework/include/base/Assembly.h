@@ -1916,12 +1916,6 @@ public:
   }
 
   /**
-   * signals this object that a vector containing variable scaling factors should be used when
-   * doing residual and matrix assembly
-   */
-  void hasScalingVector();
-
-  /**
    * Modify the weights when using the arbitrary quadrature rule. The intention is to use this when
    * you wish to supply your own quadrature after calling reinit at physical points.
    *
@@ -2856,9 +2850,6 @@ protected:
   mutable std::set<FEType> _need_face_div;
   mutable std::set<FEType> _need_neighbor_div;
   mutable std::set<FEType> _need_face_neighbor_div;
-
-  /// The map from global index to variable scaling factor
-  const NumericVector<Real> * _scaling_vector = nullptr;
 
   /// In place side element builder for _current_side_elem
   libMesh::ElemSideBuilder _current_side_elem_builder;

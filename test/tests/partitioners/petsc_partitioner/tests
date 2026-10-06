@@ -73,6 +73,37 @@
     rel_err = '1.5e-1'
   [../]
 
+  [ptscotch_weight_both_empty_partition]
+    issues = '#33835'
+    requirement = 'ptscotch shall take both side weights and element weights into consideration '
+                  'when there are fewer mesh elements than partitions, leaving some partitions empty.'
+    type = 'CSVDiff'
+    input = 'petsc_partitioner.i'
+    csvdiff = 'petsc_partitioner_ptscotch_weight_both_empty_partition_out.csv'
+    # A mesh of only a couple of elements, so that partitions are left empty once there are more
+    # of them than there are elements. SCOTCH_dgraphBuild() requires every process to agree on
+    # whether the vertex and edge weight arrays are null, which takes care to get right for a
+    # process whose array is null only because it owns nothing to weight.
+    cli_args = "Mesh/nx=2
+                Mesh/ny=1
+                Mesh/uniform_refine=0
+                Mesh/Partitioner/part_package=ptscotch
+                Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/apply_side_weight=true
+                Mesh/Partitioner/apply_element_weight=true
+                Outputs/file_base=petsc_partitioner_ptscotch_weight_both_empty_partition_out
+                Outputs/exodus=false"
+    # Want to insure the partitioned mesh can be used by solver
+    expect_out = 'Solve Converged!'
+    capabilities = 'petsc>=3.10.0 & ptscotch'
+    min_parallel = 6
+    max_parallel = 6
+    # PTScotch is not valgrind clean
+    valgrind = none
+    # Do not need a high tolerance because mesh is small and parititioner is not accurate
+    rel_err = '1.5e-1'
+  []
+
   [./parmetis]
     requirement = 'Make MOOSE support parmetis via PETSc'
     type = 'CSVDiff'

@@ -918,11 +918,6 @@ public:
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
 
   /**
-   * Add the scaling factor vector to the system
-   */
-  void addScalingVector();
-
-  /**
    * Whether or not the solution states have been initialized via initSolutionState()
    *
    * After the solution states have been initialized, additional solution
