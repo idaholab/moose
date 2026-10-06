@@ -3820,9 +3820,27 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   // Check kernel coverage of subdomains (blocks) in your mesh
   if (!global_kernels_exist)
   {
+    // Only require kernel coverage on blocks where this nonlinear system has field variables
+    std::set<SubdomainID> system_subdomains;
+    for (const auto * const variable : variableWarehouse(0).fieldVariables())
+    {
+      const auto & variable_subdomains = getSubdomainsForVar(variable->number());
+
+      // An empty variable subdomain set denotes an unrestricted variable
+      if (variable_subdomains.empty())
+      {
+        system_subdomains = mesh_subdomains;
+        break;
+      }
+
+      for (const auto subdomain : variable_subdomains)
+        if (mesh_subdomains.count(subdomain))
+          system_subdomains.insert(subdomain);
+    }
+
     std::set<SubdomainID> difference;
-    std::set_difference(mesh_subdomains.begin(),
-                        mesh_subdomains.end(),
+    std::set_difference(system_subdomains.begin(),
+                        system_subdomains.end(),
                         input_subdomains.begin(),
                         input_subdomains.end(),
                         std::inserter(difference, difference.end()));
