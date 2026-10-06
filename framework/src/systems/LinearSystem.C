@@ -225,19 +225,8 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 }
 
 void
-LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                          const std::set<TagID> & matrix_tags,
-                                          const bool compute_gradients)
+LinearSystem::setMatrixOptions(const std::set<TagID> & matrix_tags)
 {
-  TIME_SECTION("computeLinearSystemInternal", 3);
-
-  // Before we assemble we clear up the matrix and the vector
-  _linear_implicit_system.matrix->zero();
-  _linear_implicit_system.rhs->zero();
-
-  // Make matrix ready to use
-  activateAllMatrixTags();
-
   for (auto tag : matrix_tags)
   {
     auto & matrix = getMatrix(tag);
@@ -252,6 +241,23 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
     }
   }
+}
+
+void
+LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags,
+                                          const bool compute_gradients)
+{
+  TIME_SECTION("computeLinearSystemInternal", 3);
+
+  // Before we assemble we clear up the matrix and the vector
+  _linear_implicit_system.matrix->zero();
+  _linear_implicit_system.rhs->zero();
+
+  // Make matrix ready to use
+  activateAllMatrixTags();
+
+  setMatrixOptions(matrix_tags);
 
   if (compute_gradients)
     computeGradients();
@@ -261,7 +267,13 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
   // back to PETSc before the CPU path writes. The CPU queries below filter out
   // Kokkos objects via AttribKokkos(false) so there is no double-counting.
   if (_fe_problem.hasKokkosResidualObjects())
+  {
     computeKokkosLinearSystem(vector_tags, matrix_tags);
+    // The first Kokkos assembly preallocates the matrices for COO assembly, which recreates the
+    // diagonal and off-diagonal blocks of distributed PETSc matrices and drops the options set on
+    // them above
+    setMatrixOptions(matrix_tags);
+  }
 #endif
 
   // linear contributions from the domain
