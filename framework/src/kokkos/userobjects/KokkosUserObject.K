@@ -16,6 +16,8 @@ InputParameters
 UserObject::validParams()
 {
   InputParameters params = ::UserObjectBase::validParams();
+  // Kokkos objects are formulated on the reference configuration
+  params.suppressParameter<bool>("use_displaced_mesh");
 
   params.registerSystemAttributeName("KokkosUserObject");
 

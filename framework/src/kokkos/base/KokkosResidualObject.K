@@ -9,7 +9,6 @@
 
 #include "KokkosResidualObject.h"
 
-#include "DisplacedProblem.h"
 #include "FEProblemBase.h"
 
 namespace Moose::Kokkos
@@ -20,16 +19,13 @@ ResidualObject::validParams()
 {
   auto params = ::ResidualObject::validParams();
 
-  params.addParam<bool>("use_displaced_mesh",
-                        false,
-                        "Whether or not this object should use the "
-                        "displaced mesh for computation. Note that in "
-                        "the case this is true but no displacements "
-                        "are provided in the Mesh block the "
-                        "undisplaced mesh will still be used.");
-
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addCoupledVar("displacements", "The displacements");
+  // Kokkos objects are formulated on the reference configuration. Objects that need the current
+  // configuration couple the displacements and pull their integrands back to the reference
+  // configuration.
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
+  params.addCoupledVar("displacements",
+                       "The displacements defining the current configuration for objects "
+                       "that integrate over it");
 
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
@@ -40,10 +36,8 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
                                Moose::VarFieldType field_type,
                                bool nodal)
   : ::ResidualObject(parameters, nodal),
-    MeshHolder(*_subproblem.mesh().getKokkosMesh()),
-    AssemblyHolder(getParam<bool>("use_displaced_mesh")
-                       ? _fe_problem.getDisplacedProblem()->kokkosAssembly()
-                       : _fe_problem.kokkosAssembly()),
+    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
+    AssemblyHolder(_fe_problem.kokkosAssembly()),
     FESystemHolder(_fe_problem.getKokkosFESystems()),
     _var(_subproblem.getVariable(_tid,
                                  getParam<NonlinearVariableName>("variable"),

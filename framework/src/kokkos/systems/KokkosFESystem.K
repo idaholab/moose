@@ -15,7 +15,6 @@
 #include "NonlinearSystemBase.h"
 #include "LinearSystem.h"
 #include "FEProblemBase.h"
-#include "DisplacedProblem.h"
 
 #include "libmesh/system.h"
 #include "libmesh/fe_interface.h"
@@ -25,7 +24,8 @@
 namespace Moose::Kokkos
 {
 
-FESystem::FESystem(SystemBase & system) : System(system)
+FESystem::FESystem(SystemBase & system)
+  : System(system), AssemblyHolder(system.feProblem().kokkosAssembly())
 {
   setupVariables();
   setupDofs();
@@ -34,14 +34,15 @@ FESystem::FESystem(SystemBase & system) : System(system)
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
     setupNodalBCDofs();
 
-  _qp_solutions.create(2, MAX_TAG);
-  _qp_solutions_grad.create(2, MAX_TAG);
-  _qp_vector_solutions.create(2, MAX_TAG);
-  _qp_vector_solutions_grad.create(2, MAX_TAG);
-  _qp_vector_solutions_curl.create(2, MAX_TAG);
+  _qp_solutions.create(MAX_TAG);
+  _qp_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions.create(MAX_TAG);
+  _qp_vector_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions_curl.create(MAX_TAG);
 }
 
-FESystem::FESystem(System & base) : System(base)
+FESystem::FESystem(System & base, SystemBase & system)
+  : System(base), AssemblyHolder(system.feProblem().kokkosAssembly())
 {
   setupVariables();
   setupDofs();
@@ -49,11 +50,11 @@ FESystem::FESystem(System & base) : System(base)
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
     setupNodalBCDofs();
 
-  _qp_solutions.create(2, MAX_TAG);
-  _qp_solutions_grad.create(2, MAX_TAG);
-  _qp_vector_solutions.create(2, MAX_TAG);
-  _qp_vector_solutions_grad.create(2, MAX_TAG);
-  _qp_vector_solutions_curl.create(2, MAX_TAG);
+  _qp_solutions.create(MAX_TAG);
+  _qp_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions.create(MAX_TAG);
+  _qp_vector_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions_curl.create(MAX_TAG);
 }
 
 void
@@ -68,7 +69,7 @@ FESystem::setupVariables()
   {
     const auto fe_type = sys.variable_type(var);
 
-    _var_fe_types[var] = _system.feProblem().kokkosAssembly().getFETypeID(fe_type);
+    _var_fe_types[var] = kokkosAssembly().getFETypeID(fe_type);
     _var_is_vector[var] = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
   }
 
@@ -180,7 +181,7 @@ void
 FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
   auto var = nbc->variable().number();
-  auto num_dofs = _var_is_vector[var] ? kokkosMesh().getDimension() : 1;
+  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
 
   if (!dofs.isAlloc())
   {
@@ -221,39 +222,22 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 void
 FESystem::reinit()
 {
-  reinit(_system.feProblem().kokkosAssembly());
-
-  if (_system.feProblem().haveDisplaced())
-    reinit(_system.feProblem().getDisplacedProblem()->kokkosAssembly());
-}
-
-void
-FESystem::reinit(const Assembly & assembly)
-{
-  const auto displaced = assembly.kokkosMesh().isDisplaced();
-
   for (auto tag : _active_solution_tags)
   {
-    auto & qp_solutions = _qp_solutions(displaced, tag);
-    auto & qp_solutions_grad = _qp_solutions_grad(displaced, tag);
-    auto & qp_vector_solutions = _qp_vector_solutions(displaced, tag);
-    auto & qp_vector_solutions_grad = _qp_vector_solutions_grad(displaced, tag);
-    auto & qp_vector_solutions_curl = _qp_vector_solutions_curl(displaced, tag);
+    if (!_qp_solutions[tag].isAlloc())
+      _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
-    if (!qp_solutions.isAlloc())
-      qp_solutions.create(kokkosMesh().getNumSubdomains(), _num_vars);
+    if (!_qp_solutions_grad[tag].isAlloc())
+      _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
-    if (!qp_solutions_grad.isAlloc())
-      qp_solutions_grad.create(kokkosMesh().getNumSubdomains(), _num_vars);
+    if (!_qp_vector_solutions[tag].isAlloc())
+      _qp_vector_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
-    if (!qp_vector_solutions.isAlloc())
-      qp_vector_solutions.create(kokkosMesh().getNumSubdomains(), _num_vars);
+    if (!_qp_vector_solutions_grad[tag].isAlloc())
+      _qp_vector_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
-    if (!qp_vector_solutions_grad.isAlloc())
-      qp_vector_solutions_grad.create(kokkosMesh().getNumSubdomains(), _num_vars);
-
-    if (!qp_vector_solutions_curl.isAlloc())
-      qp_vector_solutions_curl.create(kokkosMesh().getNumSubdomains(), _num_vars);
+    if (!_qp_vector_solutions_curl[tag].isAlloc())
+      _qp_vector_solutions_curl[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
@@ -266,31 +250,31 @@ FESystem::reinit(const Assembly & assembly)
 
         if (_var_is_vector[var])
         {
-          if (!qp_vector_solutions(sid, var).isAlloc())
-            qp_vector_solutions(sid, var).createDevice(assembly.getNumQps(sid));
+          if (!_qp_vector_solutions[tag](sid, var).isAlloc())
+            _qp_vector_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
 
-          if (!qp_vector_solutions_grad(sid, var).isAlloc())
-            qp_vector_solutions_grad(sid, var).createDevice(assembly.getNumQps(sid));
+          if (!_qp_vector_solutions_grad[tag](sid, var).isAlloc())
+            _qp_vector_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
 
-          if (!qp_vector_solutions_curl(sid, var).isAlloc())
-            qp_vector_solutions_curl(sid, var).createDevice(assembly.getNumQps(sid));
+          if (!_qp_vector_solutions_curl[tag](sid, var).isAlloc())
+            _qp_vector_solutions_curl[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
         }
         else if (!_var_is_scalar[var])
         {
-          if (!qp_solutions(sid, var).isAlloc())
-            qp_solutions(sid, var).createDevice(assembly.getNumQps(sid));
+          if (!_qp_solutions[tag](sid, var).isAlloc())
+            _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
 
-          if (!qp_solutions_grad(sid, var).isAlloc())
-            qp_solutions_grad(sid, var).createDevice(assembly.getNumQps(sid));
+          if (!_qp_solutions_grad[tag](sid, var).isAlloc())
+            _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
         }
       }
     }
 
-    qp_solutions.copyToDevice();
-    qp_solutions_grad.copyToDevice();
-    qp_vector_solutions.copyToDevice();
-    qp_vector_solutions_grad.copyToDevice();
-    qp_vector_solutions_curl.copyToDevice();
+    _qp_solutions[tag].copyToDevice();
+    _qp_solutions_grad[tag].copyToDevice();
+    _qp_vector_solutions[tag].copyToDevice();
+    _qp_vector_solutions_grad[tag].copyToDevice();
+    _qp_vector_solutions_curl[tag].copyToDevice();
   }
 
   _qp_solutions.copyToDevice();
@@ -301,22 +285,19 @@ FESystem::reinit(const Assembly & assembly)
 
   dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
-  _thread.resize(assembly.getMaxQpsPerElem(),
+  _thread.resize(kokkosAssembly().getMaxQpsPerElem(),
                  num_elems,
                  _active_variables.size(),
                  _active_solution_tags.size());
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
-  ::Kokkos::parallel_for(
-      policy, KOKKOS_CLASS_LAMBDA(const ThreadID tid) { cacheQpValues(tid, assembly); });
+  ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
 
 KOKKOS_FUNCTION void
-FESystem::cacheQpValues(const ThreadID tid, const Assembly & assembly) const
+FESystem::operator()(const ThreadID tid) const
 {
-  const auto displaced = assembly.kokkosMesh().isDisplaced();
-
   auto qp = _thread(tid, 0);
   auto elem = _thread(tid, 1);
   auto var = _active_variables(_thread(tid, 2));
@@ -333,18 +314,18 @@ FESystem::cacheQpValues(const ThreadID tid, const Assembly & assembly) const
     return;
 
   auto fe_type = _var_fe_types[var];
-  auto num_dofs = assembly.getNumDofs(elem_type, fe_type);
-  auto num_qps = assembly.getNumQps(info);
-  auto qp_offset = assembly.getQpOffset(info);
+  auto num_dofs = kokkosAssembly().getNumDofs(elem_type, fe_type);
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
 
   if (qp >= num_qps)
     return;
 
   if (_var_is_vector[var])
   {
-    auto & phi = assembly.getVectorPhi(sid, elem_type, fe_type);
-    auto & grad_phi = assembly.getVectorGradPhi(sid, elem_type, fe_type);
-    auto jacobian = assembly.getJacobian(info, qp).transpose();
+    auto & phi = kokkosAssembly().getVectorPhi(sid, elem_type, fe_type);
+    auto & grad_phi = kokkosAssembly().getVectorGradPhi(sid, elem_type, fe_type);
+    auto jacobian = kokkosAssembly().getJacobian(info, qp).transpose();
 
     Real3 value = 0;
     Real33 grad = 0;
@@ -359,16 +340,16 @@ FESystem::cacheQpValues(const ThreadID tid, const Assembly & assembly) const
 
     grad = grad * jacobian;
 
-    getVectorQpVectorValue(info, qp_offset + qp, var, tag, displaced) = value;
-    getVectorQpVectorGrad(info, qp_offset + qp, var, tag, displaced) = grad;
-    getVectorQpVectorCurl(info, qp_offset + qp, var, tag, displaced) =
-        curlFromVectorGradient(grad, assembly.kokkosMesh().getDimension());
+    getVectorQpVectorValue(info, qp_offset + qp, var, tag) = value;
+    getVectorQpVectorGrad(info, qp_offset + qp, var, tag) = grad;
+    getVectorQpVectorCurl(info, qp_offset + qp, var, tag) =
+        curlFromVectorGradient(grad, kokkosAssembly().getDimension());
   }
   else
   {
-    auto & phi = assembly.getPhi(sid, elem_type, fe_type);
-    auto & grad_phi = assembly.getGradPhi(sid, elem_type, fe_type);
-    auto jacobian = assembly.getJacobian(info, qp);
+    auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
+    auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
+    auto jacobian = kokkosAssembly().getJacobian(info, qp);
 
     Real value = 0;
     Real3 grad = 0;
@@ -383,8 +364,8 @@ FESystem::cacheQpValues(const ThreadID tid, const Assembly & assembly) const
 
     grad = jacobian * grad;
 
-    getVectorQpValue(info, qp_offset + qp, var, tag, displaced) = value;
-    getVectorQpGrad(info, qp_offset + qp, var, tag, displaced) = grad;
+    getVectorQpValue(info, qp_offset + qp, var, tag) = value;
+    getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
   }
 }
 

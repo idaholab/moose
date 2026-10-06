@@ -11,6 +11,7 @@
 
 #include "KokkosElementPostprocessor.h"
 #include "KokkosSidePostprocessor.h"
+#include "KokkosDeformation.h"
 
 template <typename Base>
 class KokkosIntegralPostprocessor : public Base
@@ -33,6 +34,9 @@ public:
 
 protected:
   const bool _average;
+
+  /// Kinematics of the current configuration when the integral is taken over it
+  const Moose::Kokkos::Deformation _deformation;
 };
 
 template <typename Base>
@@ -45,8 +49,16 @@ KokkosIntegralPostprocessor<Base>::reduce(Datum & datum, Real * result) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    sum += datum.JxW(qp) * static_cast<const Derived *>(this)->computeQpIntegral(qp, datum);
-    vol += datum.JxW(qp);
+    Real JxW = datum.JxW(qp);
+
+    if (_deformation)
+    {
+      const auto kinematics = _deformation(datum, qp);
+      JxW *= datum.isSide() ? kinematics.areaRatio(datum.normals(qp)) : kinematics.J;
+    }
+
+    sum += JxW * static_cast<const Derived *>(this)->computeQpIntegral(qp, datum);
+    vol += JxW;
   }
 
   result[0] += sum;
