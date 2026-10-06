@@ -403,7 +403,10 @@ MooseApp::validParams()
       "console");
 
   params.addCommandLineParam<unsigned int>(
-      "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
+      "n_threads",
+      "--n-threads=<n>",
+      "Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the "
+      "maximum number of threads and sets the OpenMP number of threads");
   // This probably shouldn't be global, but the implications of removing this are currently
   // unknown and we need to manage it with libmesh better
   params.setGlobalCommandLineParam("n_threads");
@@ -614,6 +617,30 @@ MooseApp::validParams()
   return params;
 }
 
+std::optional<THREAD_ID>
+MooseApp::requestedNumThreads() const
+{
+  // Read straight from the parsed input tree: the [Application] block is not applied to the app's
+  // InputParameters, and this runs at construction, well before the create_application_block task.
+  const hit::Node * const root = _parser ? _parser->queryRoot() : nullptr;
+  if (!root)
+    return std::nullopt;
+  const hit::Node * const node = root->find("Application/num_threads");
+  if (!node || node->type() != hit::NodeType::Field)
+    return std::nullopt;
+  return node->param<THREAD_ID>();
+}
+
+THREAD_ID
+MooseApp::determineNumThreads() const
+{
+  const THREAD_ID max_threads = libMesh::n_threads();
+  // A per-application count can only cap down from the process-wide count (the thread pool is
+  // sized once at launch), and a request of zero (or less) is meaningless, so treat it as a single
+  // thread. An over-request is warned about later during setup, where the console is available.
+  return std::clamp(requestedNumThreads().value_or(max_threads), THREAD_ID(1), max_threads);
+}
+
 MooseApp::MooseApp(const InputParameters & parameters)
   : PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
@@ -631,14 +658,18 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
+    // Sized to the process-wide thread count (not the app cap): this is constructed before _parser,
+    // so the [Application] num_threads is not yet available, and app-level per-thread storage is
+    // always safe at the larger size.
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>(libMesh::n_threads())),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
-    _restartable_data(libMesh::n_threads()),
+    _num_threads(determineNumThreads()),
+    _restartable_data(_num_threads),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
@@ -1062,6 +1093,18 @@ MooseApp::setupOptions()
   if (libMesh::command_line_value("--n-threads", 1) > 1)
     mooseError("You specified --n-threads > 1, but there is no threading model active!");
 #endif
+
+  // A per-application num_threads can only cap down from the process-wide --n-threads count; warn
+  // (and cap, see determineNumThreads()) if the user asked for more than the process was launched
+  // with.
+  if (requestedNumThreads().value_or(0) > libMesh::n_threads())
+    mooseWarning("[Application] num_threads=",
+                 *requestedNumThreads(),
+                 " exceeds the process-wide thread count (--n-threads=",
+                 libMesh::n_threads(),
+                 "); this application is capped to ",
+                 libMesh::n_threads(),
+                 " threads.");
 
   // Capability checking
   {
