@@ -569,7 +569,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       auto iz_ind = iz - first_node;
 
       // Calculation of average mass flux of all periphery subchannels, used by the sweep flow
-      Real edge_flux_ave = 0.0;
       Real mdot_sum = 0.0;
       Real si_sum = 0.0;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -584,7 +583,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           si_sum = si_sum + Si;
         }
       }
-      edge_flux_ave = mdot_sum / si_sum;
+      const Real edge_flux_ave = mdot_sum / si_sum;
 
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
