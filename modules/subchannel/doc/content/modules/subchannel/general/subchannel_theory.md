@@ -533,7 +533,8 @@ gives the strong damping that the first outer iterations need when they start fa
 solution. Scaling by the residual ratio, a switched evolution relaxation strategy for
 pseudo-transient continuation, makes $K$ tend to zero as the outer iteration converges, so the
 iteration approaches the convergence rate of the undamped system. The coupled linear solve starts
-from the current iterate, which keeps it short as the damping decreases.
+from the current iterate, which keeps it short as the damping decreases. Its convergence tolerance
+`rtol` is applied to the residual of that initial iterate rather than to the right-hand side.
 
 As $K$ decreases, the coupled system can become too poorly conditioned for the field-split
 preconditioner. Each coupled solve is therefore attempted with at most 1000 Krylov iterations; if it
