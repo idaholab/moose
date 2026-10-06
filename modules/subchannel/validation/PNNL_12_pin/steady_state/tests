@@ -8,6 +8,9 @@
       capabilities = 'method!=dbg'
       valgrind = NONE
       recover = false
+      # The monolithic outer iterations stop at P_tol and T_tol, which leaves differences of up to
+      # about 1e-3 between platforms
+      rel_err = 2e-3
       abs_zero = 1e-5
       max_threads = 1
       requirement = 'The system will examine the subchannel solver for the PNNL 12-pin steady state case'

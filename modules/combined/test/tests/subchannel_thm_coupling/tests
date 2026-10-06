@@ -7,6 +7,9 @@
     valgrind = NONE
     recover = false
     # heavy = true
+    # The monolithic outer iterations stop at P_tol and T_tol, which leaves differences of up to
+    # about 1e-3 between platforms
+    rel_err = 2e-3
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
@@ -19,6 +22,9 @@
     valgrind = NONE
     recover = false
     # heavy = true
+    # The monolithic outer iterations stop at P_tol and T_tol, which leaves differences of up to
+    # about 1e-3 between platforms
+    rel_err = 2e-3
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
@@ -32,6 +38,9 @@
     valgrind = NONE
     recover = false
     # heavy = true
+    # The monolithic outer iterations stop at P_tol and T_tol, which leaves differences of up to
+    # about 1e-3 between platforms
+    rel_err = 2e-3
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
