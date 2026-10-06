@@ -19,6 +19,8 @@
 #include "libmesh/system.h"
 #include "libmesh/fe_interface.h"
 
+#include "timpi/parallel_sync.h"
+
 namespace Moose::Kokkos
 {
 
@@ -200,18 +202,21 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 
   auto num_procs = _comm.size();
 
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
+  std::map<processor_id_type, std::vector<char>> send;
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
+  for (const auto proc : make_range(num_procs))
     for (auto dof : _local_comm_list[proc])
       send[proc].push_back(dofs[dof]);
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
+  auto receive = [this, &dofs](const processor_id_type pid, const std::vector<char> & recv)
+  {
+    const auto & ghost_dofs = _ghost_comm_list[pid];
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
+    for (const auto i : index_range(ghost_dofs))
+      dofs[ghost_dofs[i]] = recv[i];
+  };
+
+  TIMPI::push_parallel_vector_data(_comm, std::move(send), receive);
 }
 
 void
