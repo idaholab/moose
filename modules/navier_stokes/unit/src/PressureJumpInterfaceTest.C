@@ -63,10 +63,58 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
   const Real neighbor_half_flux =
       data.neighbor_conductance * (neighbor_face_pressure - neighbor_pressure) -
       data.neighbor_correction;
+  const Real recovered_elem_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
+      data, elem_pressure, flux, /*elem_side=*/true);
+  const Real recovered_neighbor_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
+      data, neighbor_pressure, flux, /*elem_side=*/false);
 
   EXPECT_NEAR(elem_face_pressure - neighbor_face_pressure, jump, 1e-13);
   EXPECT_NEAR(elem_half_flux, flux, 1e-13);
   EXPECT_NEAR(neighbor_half_flux, flux, 1e-13);
+  EXPECT_NEAR(recovered_elem_face_pressure, elem_face_pressure, 1e-13);
+  EXPECT_NEAR(recovered_neighbor_face_pressure, neighbor_face_pressure, 1e-13);
+}
+
+TEST(PressureJumpInterface, ManufacturedPiecewiseLinearPressure)
+{
+  const RealVectorValue normal(0.8, 0.6, 0.0);
+  const Point elem_to_face(0.5, 0.1, 0.0);
+  const Point face_to_neighbor(0.35, 0.3, 0.0);
+  const RealVectorValue elem_diffusion(2.0, 5.0, 1.0);
+  const RealVectorValue neighbor_diffusion(7.0, 3.0, 1.0);
+  const RealVectorValue elem_gradient(1.2, -0.4, 0.0);
+  const RealVectorValue neighbor_gradient(-0.3, 4.0 / 3.0, 0.0);
+  const Real face_area = 1.7;
+  const Real elem_face_pressure = 11.0;
+  const Real jump = 2.5;
+  const Real neighbor_face_pressure = elem_face_pressure - jump;
+  const Real elem_pressure = elem_face_pressure - elem_gradient * elem_to_face;
+  const Real neighbor_pressure = neighbor_face_pressure + neighbor_gradient * face_to_neighbor;
+  const Real expected_flux = -face_area * normal *
+                             RealVectorValue(elem_diffusion(0) * elem_gradient(0),
+                                             elem_diffusion(1) * elem_gradient(1),
+                                             elem_diffusion(2) * elem_gradient(2));
+
+  const auto data = NS::FV::pressureJumpInterfaceData(normal,
+                                                      elem_to_face,
+                                                      face_to_neighbor,
+                                                      elem_diffusion,
+                                                      neighbor_diffusion,
+                                                      elem_gradient,
+                                                      neighbor_gradient,
+                                                      face_area,
+                                                      true);
+  ASSERT_TRUE(data.valid);
+
+  const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure, jump);
+  const Real recovered_elem_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
+      data, elem_pressure, flux, /*elem_side=*/true);
+  const Real recovered_neighbor_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
+      data, neighbor_pressure, flux, /*elem_side=*/false);
+
+  EXPECT_NEAR(flux, expected_flux, 1e-13);
+  EXPECT_NEAR(recovered_elem_face_pressure, elem_face_pressure, 1e-13);
+  EXPECT_NEAR(recovered_neighbor_face_pressure, neighbor_face_pressure, 1e-13);
 }
 
 TEST(PressureJumpInterface, OrientationReversal)

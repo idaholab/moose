@@ -103,8 +103,9 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   if (!_rc_uo.faceIsBaffle(*_current_face_info))
     return base_matrix_contribution;
 
+  const auto & interface_data = jumpInterfaceData();
   if (!_use_two_term_pressure_expansion)
-    return base_matrix_contribution;
+    return interface_data.transmissibility;
 
   const auto & reconstructed_gradient_field = _rc_uo.pressureGradientField();
   const auto * const reconstructed_gradient_method =
@@ -114,9 +115,8 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
                "Two-term pressure expansion requires the momentum-pressure kernels linked to "
                "the Rhie-Chow object to use FVReconstructedPressureGradient.");
   if (!reconstructed_gradient_method->hasReconstructedCandidate())
-    return base_matrix_contribution;
+    return interface_data.transmissibility;
 
-  const auto & interface_data = jumpInterfaceData();
   const auto & elem_info = *_current_face_info->elemInfo();
   const auto & neighbor_info = *_current_face_info->neighborInfo();
   const Point elem_to_face = _current_face_info->faceCentroid() - elem_info.centroid();
@@ -136,14 +136,14 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   const Real two_term_pressure_drop = -elem_taylor_term + neighbor_taylor_term;
 
   // A vanishing lagged pressure drop cannot define a transmissibility, even if roundoff leaves a
-  // nonzero lagged flux. Retain the ordinary pressure-diffusion matrix coefficient in that case.
+  // nonzero lagged flux. Retain the half-cell pressure-diffusion coefficient in that case.
   // Thirty-two floating-point ulps leave headroom for the two dot-product accumulations while
   // scaling the cancellation test with the actual Taylor terms instead of a dimensional constant.
   const Real cancellation_scale = std::abs(elem_taylor_term) + std::abs(neighbor_taylor_term);
   if (two_term_pressure_drop == 0.0 ||
       std::abs(two_term_pressure_drop) <=
           32.0 * std::numeric_limits<Real>::epsilon() * cancellation_scale)
-    return base_matrix_contribution;
+    return interface_data.transmissibility;
 
   // Both q_p^lag and Delta p_PN^smooth,lag are known numbers here. The assembled face relation is
   //
@@ -155,7 +155,7 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   //
   // The face area is already included in both flux terms, so T_f^lag is the complete
   // area-integrated matrix coefficient. A valid pressure-diffusion transmissibility is positive.
-  // Degenerate or inconsistent reconstructed data revert to the base discretization.
+  // Degenerate or inconsistent reconstructed data revert to the half-cell discretization.
   // The quotient is a frozen scalar. Returning it through compute*MatrixContribution() makes it a
   // coefficient of the current p_P and p_N unknowns; neither lagged gradient enters the matrix as
   // an unknown.
@@ -179,7 +179,7 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   // A negative or non-finite quotient would not define a diffusive matrix stencil.
   return std::isfinite(two_term_matrix_contribution) && two_term_matrix_contribution > 0.0
              ? two_term_matrix_contribution
-             : base_matrix_contribution;
+             : interface_data.transmissibility;
 }
 
 Real
