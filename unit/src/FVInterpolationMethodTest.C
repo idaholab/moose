@@ -217,8 +217,7 @@ TEST(FVInterpolationMethodUtilityTest, harmonicAverageWithExplicitWeights)
   const Real weight2 = 0.75;
   const Real expected = 1.0 / (weight1 / value1 + weight2 / value2);
 
-  EXPECT_NEAR(
-      Moose::FV::harmonicInterpolation(value1, value2, weight1, weight2), expected, 1e-12);
+  EXPECT_NEAR(Moose::FV::harmonicInterpolation(value1, value2, weight1, weight2), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, advectedUpwind)

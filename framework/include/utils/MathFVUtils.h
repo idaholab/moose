@@ -176,10 +176,7 @@ linearInterpolation(const T & value1,
  */
 template <typename T1, typename T2>
 typename libMesh::CompareTypes<T1, T2>::supertype
-harmonicInterpolation(const T1 & value1,
-                      const T2 & value2,
-                      const Real weight1,
-                      const Real weight2)
+harmonicInterpolation(const T1 & value1, const T2 & value2, const Real weight1, const Real weight2)
 {
   // We check if the base values of the given template types match, if not we throw a compile-time
   // error
