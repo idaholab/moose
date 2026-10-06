@@ -19,17 +19,24 @@ InputParameters
 ADMortarConstraint::validParams()
 {
   InputParameters params = MortarConstraintBase::validParams();
+  // Requesting the AD primal gradients makes every mortar face reinitialization compute them, which
+  // is expensive on displaced meshes. Derived classes that never read _grad_u_secondary or
+  // _grad_u_primary set this to false.
+  params.addPrivateParam<bool>("_compute_primal_gradients", true);
   return params;
 }
 
 ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
   : MortarConstraintBase(parameters),
     _lambda_dummy(),
+    _grad_u_dummy(),
     _lambda(_var ? _var->adSlnLower() : _lambda_dummy),
     _u_secondary(_secondary_var.adSln()),
     _u_primary(_primary_var.adSlnNeighbor()),
-    _grad_u_secondary(_secondary_var.adGradSln()),
-    _grad_u_primary(_primary_var.adGradSlnNeighbor())
+    _grad_u_secondary(getParam<bool>("_compute_primal_gradients") ? _secondary_var.adGradSln()
+                                                                  : _grad_u_dummy),
+    _grad_u_primary(getParam<bool>("_compute_primal_gradients") ? _primary_var.adGradSlnNeighbor()
+                                                                : _grad_u_dummy)
 {
   _subproblem.haveADObjects(true);
 }

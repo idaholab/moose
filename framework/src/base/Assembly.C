@@ -2184,6 +2184,9 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
           _ad_curvatures[qp] = _curvatures[qp];
     }
 
+    if (!_need_ad_grad_phi_face)
+      return;
+
     for (const auto & it : _fe_face[dim])
     {
       FEBase & fe = *it.second;
