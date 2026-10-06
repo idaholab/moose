@@ -17,9 +17,9 @@
  * see PR #33926 for a more detailed discussion
  */
 #ifdef THERMAL_HYDRAULICS_ENABLED
-  registerMooseObject("ThermalHydraulicsTestApp", MaterialDerivativeTestKernel);
+registerMooseObject("ThermalHydraulicsTestApp", MaterialDerivativeTestKernel);
 #else
-  registerMooseObject("MooseTestApp", MaterialDerivativeTestKernel);
+registerMooseObject("MooseTestApp", MaterialDerivativeTestKernel);
 #endif
 
 InputParameters
