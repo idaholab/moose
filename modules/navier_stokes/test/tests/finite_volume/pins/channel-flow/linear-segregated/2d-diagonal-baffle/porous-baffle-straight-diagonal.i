@@ -372,11 +372,15 @@ advected_interp_method = 'upwind'
     v = superficial_v
     momentum_component = y
   []
-  [pressure_slip]
-    type = LinearFVPressureSymmetryBC
+  [pressure-split]
+    type = LinearFVPressureFluxBC
     boundary = 'bottom_clean top_clean bottom_porous top_porous'
     variable = pressure
     HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
 []
 
@@ -490,23 +494,23 @@ advected_interp_method = 'upwind'
     sort_by = x
   []
 
-  # Sample the two cell-center columns adjacent to the vertical interface at x = 2.0.
+  # Sample the two cell-center rows adjacent and parallel to the diagonal baffle.
   [v_y_left_of_interface]
     type = LineValueSampler
     variable = superficial_v
     warn_discontinuous_face_values = false
-    start_point = '1.9583333333333333 0.0416666666666667 0'
-    end_point = '1.9583333333333333 0.9583333333333333 0'
-    num_points = 12
+    start_point = '1.695266272189349 0.0384615384615385 0'
+    end_point = '2.227810650887574 0.9615384615384615 0'
+    num_points = 13
     sort_by = y
   []
   [v_y_right_of_interface]
     type = LineValueSampler
     variable = superficial_v
     warn_discontinuous_face_values = false
-    start_point = '2.0416666666666667 0.0416666666666667 0'
-    end_point = '2.0416666666666667 0.9583333333333333 0'
-    num_points = 12
+    start_point = '1.772189349112426 0.0384615384615385 0'
+    end_point = '2.304733727810651 0.9615384615384615 0'
+    num_points = 13
     sort_by = y
   []
 
@@ -544,9 +548,6 @@ advected_interp_method = 'upwind'
 
 [AuxVariables]
   [porosity_aux]
-    type = MooseLinearVariableFVReal
-  []
-  [superficial_w]
     type = MooseLinearVariableFVReal
   []
 []

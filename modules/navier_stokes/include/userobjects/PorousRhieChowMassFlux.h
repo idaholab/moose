@@ -64,6 +64,12 @@ public:
   /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
   Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 
+  /// Whether the pressure-diffusion kernel and cell coefficients are ready for interface use.
+  bool pressureDiffusionDataReady() const;
+
+  /// Whether the linked pressure-diffusion kernel applies a nonorthogonal correction.
+  bool pressureDiffusionUsesNonorthogonalCorrection() const;
+
   /// Populate baffle-jump storage before initializing the face mass flux.
   void initFaceMassFlux() override;
 
