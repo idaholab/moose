@@ -522,8 +522,6 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         _hc_sys_h_mat,
         {_hc_time_derivative_mat, _hc_advective_derivative_mat, _hc_cross_derivative_mat},
         _hc_sys_h_pattern_set));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     if (_verbose_subchannel)
       _console << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
     // RHS

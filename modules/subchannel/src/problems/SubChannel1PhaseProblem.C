@@ -13,7 +13,6 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include <iostream>
-#include <numeric>
 #include <cmath>
 #include "AuxiliarySystem.h"
 #include "SCM.h"
@@ -489,12 +488,8 @@ SubChannel1PhaseProblem::addTermMatrices(Mat system,
   const MatStructure first_pattern = DIFFERENT_NONZERO_PATTERN;
 #endif
   for (const auto term : terms)
-  {
     LibmeshPetscCall(
         MatAXPY(system, 1.0, term, pattern_set ? SUBSET_NONZERO_PATTERN : first_pattern));
-    LibmeshPetscCall(MatAssemblyBegin(system, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(system, MAT_FINAL_ASSEMBLY));
-  }
   if (!pattern_set)
   {
     // A term can gain entries later, e.g. when a crossflow changes sign, so let the pattern grow
@@ -1244,8 +1239,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
                                       _amc_cross_derivative_mat,
                                       _amc_friction_force_mat},
                                      _amc_sys_mdot_pattern_set));
-    LibmeshPetscCall(MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY));
     // RHS
     LibmeshPetscCall(VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_advective_derivative_rhs));
@@ -1294,6 +1287,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           }
         }
       }
+      LibmeshPetscCall(VecRestoreArray(ls, &xx));
       LibmeshPetscCall(VecDestroy(&ls));
     }
   }
@@ -1876,8 +1870,6 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         _cmc_sys_Wij_mat,
         {_cmc_time_derivative_mat, _cmc_advective_derivative_mat, _cmc_friction_force_mat},
         _cmc_sys_Wij_pattern_set));
-    LibmeshPetscCall(MatAssemblyBegin(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
     // RHS
     LibmeshPetscCall(VecAXPY(_cmc_sys_Wij_rhs, 1.0, _cmc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_cmc_sys_Wij_rhs, 1.0, _cmc_advective_derivative_rhs));
@@ -1909,6 +1901,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
           _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps + i_gap];
         }
       }
+      LibmeshPetscCall(VecRestoreArray(sol_holder_W, &xx));
       LibmeshPetscCall(VecDestroy(&sol_holder_P));
       LibmeshPetscCall(VecDestroy(&sol_holder_W));
     }
@@ -2388,14 +2381,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // evolution relaxation), so K itself vanishes as the outer iteration converges.
   PetscScalar max_K = 0.0;
   PetscScalar added_K = 0.0;
+  Vec w_iter;
+  LibmeshPetscCall(createPetscVector(w_iter, _block_size * _n_gaps));
+  LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+      w_iter, _Wij, first_node, last_node, _n_gaps));
   {
-    Vec w_iter, residual, pressure_term, row_scale;
-    LibmeshPetscCall(createPetscVector(w_iter, _block_size * _n_gaps));
+    Vec residual, pressure_term, row_scale;
     LibmeshPetscCall(createPetscVector(residual, _block_size * _n_gaps));
     LibmeshPetscCall(createPetscVector(pressure_term, _block_size * _n_gaps));
     LibmeshPetscCall(createPetscVector(row_scale, _block_size * _n_gaps));
-    LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        w_iter, _Wij, first_node, last_node, _n_gaps));
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
 
@@ -2421,11 +2415,10 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar row_scale_sum;
     LibmeshPetscCall(MatGetRowMaxAbs(mat_array[Idx(2, 2)], row_scale, NULL));
     LibmeshPetscCall(VecSum(row_scale, &row_scale_sum));
-    // The first outer iterations start far from the solution and need strong damping: with less
-    // than about 20 times the mean row scale, the first update can reverse the axial flow and drive
-    // the closures out of range. Larger factors than fifty did not shorten the regression suite
-    // noticeably but increase the number of outer iterations on fine axial meshes. The converged
-    // solution does not depend on this factor.
+    // The first outer iterations start far from the solution and need strong damping: below about
+    // 20 times the mean row scale, the first update can reverse the axial flow and drive the
+    // closures out of range, while much larger factors only add outer iterations on fine axial
+    // meshes. The converged solution does not depend on this factor.
     const PetscScalar damping_factor = 50.0;
     max_K = _n_gaps > 0 ? damping_factor * row_scale_sum / (_block_size * _n_gaps) : 0.0;
     // The boost raised by failed linear solves (see below) delays, but does not prevent, the decay
@@ -2434,11 +2427,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     V("Crossflow residual ratio: " + std::to_string(residual_ratio));
     V("Added cross resistance: " + std::to_string(added_K));
 
-    LibmeshPetscCall(VecSet(row_scale, added_K));
-    LibmeshPetscCall(MatDiagonalSet(mat_array[Idx(2, 2)], row_scale, ADD_VALUES));
+    LibmeshPetscCall(MatShift(mat_array[Idx(2, 2)], added_K));
     LibmeshPetscCall(VecAXPY(vec_array[2], added_K, w_iter));
 
-    LibmeshPetscCall(VecDestroy(&w_iter));
     LibmeshPetscCall(VecDestroy(&residual));
     LibmeshPetscCall(VecDestroy(&pressure_term));
     LibmeshPetscCall(VecDestroy(&row_scale));
@@ -2485,31 +2476,24 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   V("Linear solver relaxed");
 
   // ======================== Create and configure KSP =========================
-  Mat A_nest;
-  Vec b_nest;
-  Vec x_vec;
-  // One set of index sets shared by the matrix rows and columns, the vectors, and the field split.
-  // PETSc locates nested sub-vectors by comparing index sets, which is a pointer comparison when
-  // the objects are shared and otherwise expands and sorts them on every matrix-vector product and
-  // preconditioner application. General rather than stride index sets also avoid expanding them
-  // when the nested vectors are packed for the field-split scatters.
+  // One set of index sets shared by the matrix rows and columns, the field split, and the blocks of
+  // the solution and right-hand side. PETSc locates matrix blocks by comparing index sets, which is
+  // a pointer comparison when the objects are shared and otherwise expands and sorts them on every
+  // matrix-vector product and preconditioner application. General index sets return their
+  // indices without expanding them.
   std::vector<IS> field_is(Q);
+  PetscInt n_total = 0;
+  for (const auto f : make_range(Q))
   {
-    PetscInt offset = 0;
-    for (const auto f : make_range(Q))
-    {
-      PetscInt n;
-      LibmeshPetscCall(VecGetSize(vec_array[f], &n));
-      std::vector<PetscInt> indices(n);
-      std::iota(indices.begin(), indices.end(), offset);
-      LibmeshPetscCall(
-          ISCreateGeneral(PETSC_COMM_SELF, n, indices.data(), PETSC_COPY_VALUES, &field_is[f]));
-      offset += n;
-    }
+    PetscInt n;
+    LibmeshPetscCall(VecGetSize(vec_array[f], &n));
+    LibmeshPetscCall(ISCreateStride(PETSC_COMM_SELF, n, n_total, 1, &field_is[f]));
+    LibmeshPetscCall(ISToGeneral(field_is[f]));
+    n_total += n;
   }
+  Mat A_nest;
   LibmeshPetscCall(MatCreateNest(
       PETSC_COMM_SELF, Q, field_is.data(), Q, field_is.data(), mat_array.data(), &A_nest));
-  LibmeshPetscCall(VecCreateNest(PETSC_COMM_SELF, Q, field_is.data(), vec_array.data(), &b_nest));
   V("Nested system created");
 
   KSP ksp;
@@ -2531,22 +2515,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // ============================== Solve =====================================
   // The Krylov solver works on contiguous vectors; nested vectors make every vector operation and
   // field-split scatter pack and unpack the blocks.
-  Vec b_vec;
-  PetscInt n_total;
-  LibmeshPetscCall(VecGetSize(b_nest, &n_total));
+  Vec b_vec, x_vec;
   LibmeshPetscCall(VecCreateSeq(PETSC_COMM_SELF, n_total, &b_vec));
   LibmeshPetscCall(VecDuplicate(b_vec, &x_vec));
-  // Copy the blocks of a nested vector into the matching ranges of a contiguous vector
-  auto copyBlocksTo = [&](const std::vector<Vec> & blocks, Vec target)
-  {
-    for (const auto f : make_range(Q))
-    {
-      Vec sub;
-      LibmeshPetscCall(VecGetSubVector(target, field_is[f], &sub));
-      LibmeshPetscCall(VecCopy(blocks[f], sub));
-      LibmeshPetscCall(VecRestoreSubVector(target, field_is[f], &sub));
-    }
-  };
+  for (const auto f : make_range(Q))
+    LibmeshPetscCall(VecISCopy(b_vec, field_is[f], SCATTER_FORWARD, vec_array[f]));
   // Start from the current iterate. As the crossflow damping vanishes near convergence, this keeps
   // the coupled linear solve short. rtol is applied to the residual of the initial iterate rather
   // than to the right-hand side.
@@ -2559,9 +2532,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // As K decreases, the coupled system can become too poorly conditioned for the field-split
   // preconditioner. A solve that has not converged within a limited number of iterations is then
   // repeated with stronger damping. Doubling K per retry with eight retries spans the range between
-  // the residual-scaled K and the damping that the initial iterations need. Of the per-attempt caps
-  // tried, 1000 iterations was the cheapest overall: lower caps abandon solves that would converge
-  // and so raise K far more than necessary.
+  // the residual-scaled K and the damping that the initial iterations need. A per-attempt cap of
+  // 1000 iterations lets slowly converging solves finish; lower caps abandon them and raise K far
+  // more than necessary.
   const unsigned int max_retries = 8;
   const PetscInt retry_maxit = 1000;
   // The boost is kept for the remaining outer iterations of this solve so that a failure is not
@@ -2581,12 +2554,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         x_sub[0], *_mdot_soln, first_node, last_node, _n_channels));
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         x_sub[1], *_P_soln, first_node - 1, last_node - 1, _n_channels));
-    LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        x_sub[2], _Wij, first_node, last_node, _n_gaps));
+    LibmeshPetscCall(VecCopy(w_iter, x_sub[2]));
     for (const auto f : make_range(Q))
       LibmeshPetscCall(VecRestoreSubVector(x_vec, field_is[f], &x_sub[f]));
-    // Retries modify the crossflow right-hand side, so copy it for every attempt
-    copyBlocksTo(vec_array, b_vec);
     LibmeshPetscCall(KSPSolve(ksp, b_vec, x_vec));
     LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
     if (reason >= 0 || last_attempt)
@@ -2601,19 +2571,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     V("Coupled linear solve did not converge; retrying with added cross resistance: " +
       std::to_string(added_K));
 
-    Vec w_iter, delta;
-    LibmeshPetscCall(createPetscVector(w_iter, _block_size * _n_gaps));
-    LibmeshPetscCall(createPetscVector(delta, _block_size * _n_gaps));
-    LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        w_iter, _Wij, first_node, last_node, _n_gaps));
-    LibmeshPetscCall(VecSet(delta, delta_K));
-    LibmeshPetscCall(MatDiagonalSet(mat_array[Idx(2, 2)], delta, ADD_VALUES));
-    LibmeshPetscCall(VecAXPY(vec_array[2], delta_K, w_iter));
+    LibmeshPetscCall(MatShift(mat_array[Idx(2, 2)], delta_K));
+    Vec b_w;
+    LibmeshPetscCall(VecGetSubVector(b_vec, field_is[2], &b_w));
+    LibmeshPetscCall(VecAXPY(b_w, delta_K, w_iter));
+    LibmeshPetscCall(VecRestoreSubVector(b_vec, field_is[2], &b_w));
     // Rebuild the preconditioner for the modified cross-momentum block
     LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
-    LibmeshPetscCall(VecDestroy(&w_iter));
-    LibmeshPetscCall(VecDestroy(&delta));
   }
+  LibmeshPetscCall(VecDestroy(&w_iter));
   if (reason < 0)
   {
     PetscInt iterations;
@@ -2633,7 +2599,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
 
   // destroy solver containers first
-  LibmeshPetscCall(VecDestroy(&b_nest));
   LibmeshPetscCall(VecDestroy(&b_vec));
   LibmeshPetscCall(MatDestroy(&A_nest));
   LibmeshPetscCall(KSPDestroy(&ksp));
@@ -2646,17 +2611,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // ====================== Extract & scatter the solution =====================
   Vec sol_mdot, sol_p, sol_Wij;
   V("Vectors to hold solution created");
-  std::vector<Vec> loc_vecs(Q);
-  for (const auto f : make_range(Q))
-    LibmeshPetscCall(VecGetSubVector(x_vec, field_is[f], &loc_vecs[f]));
   LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol_mdot));
-  LibmeshPetscCall(VecCopy(loc_vecs[0], sol_mdot));
+  LibmeshPetscCall(VecISCopy(x_vec, field_is[0], SCATTER_REVERSE, sol_mdot));
   LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &sol_p));
-  LibmeshPetscCall(VecCopy(loc_vecs[1], sol_p));
+  LibmeshPetscCall(VecISCopy(x_vec, field_is[1], SCATTER_REVERSE, sol_p));
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
-  LibmeshPetscCall(VecCopy(loc_vecs[2], sol_Wij));
-  for (const auto f : make_range(Q))
-    LibmeshPetscCall(VecRestoreSubVector(x_vec, field_is[f], &loc_vecs[f]));
+  LibmeshPetscCall(VecISCopy(x_vec, field_is[2], SCATTER_REVERSE, sol_Wij));
   V("Solution from coupled solver copied to solution vectors");
 
   // Apply independent post-solve relaxation to the fixed-point solution update.
