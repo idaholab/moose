@@ -62,8 +62,6 @@ LinearPWCNSFVMomentumFlux::twoPointStressData() const
   const Real neighbor_distance = _use_nonorthogonal_correction
                                      ? std::abs(face_to_neighbor * fi.normal())
                                      : face_to_neighbor.norm();
-  if (elem_distance == 0.0 || neighbor_distance == 0.0)
-    return {0.0, elem_distance, neighbor_distance};
 
   const Real total_distance = elem_distance + neighbor_distance;
   const Real face_viscosity = Moose::FV::harmonicInterpolation(elem_viscosity,
@@ -149,25 +147,6 @@ LinearPWCNSFVMomentumFlux::addMatrixContribution()
 
   for (auto & matrix : _matrices)
     (*matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
-}
-
-Real
-LinearPWCNSFVMomentumFlux::computeElemMatrixContribution()
-{
-  const Real stress = computeInternalStressMatrixContribution();
-  return (computeInternalAdvectionElemMatrixContribution() * inversePorosity(/*elem_side=*/true) +
-          stress) *
-         _current_face_area;
-}
-
-Real
-LinearPWCNSFVMomentumFlux::computeNeighborMatrixContribution()
-{
-  const Real stress = computeInternalStressMatrixContribution();
-  return (computeInternalAdvectionNeighborMatrixContribution() *
-              inversePorosity(/*elem_side=*/false) -
-          stress) *
-         _current_face_area;
 }
 
 Real
