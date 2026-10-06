@@ -25,7 +25,6 @@ class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;
 class FVReconstructedPressureGradient;
-class FVPressureJumpGreenGaussGradient;
 class LinearFVPressureCorrectionDiffusion;
 namespace libMesh
 {
@@ -101,25 +100,6 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
-  /// Whether this object owns any pressure-jump faces.
-  virtual bool hasPressureBaffles() const { return false; }
-
-  /// Get porosity on one side of a face.
-  virtual Real
-  getFaceSidePorosity(const FaceInfo & fi, bool elem_side, const Moose::StateArg & time) const;
-
-  /// Get the signed pressure jump seen from one side of a baffle face.
-  virtual Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
-
-  /// Whether reconstruction should use the current cell's velocity gradient on this face.
-  virtual bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
-
-  /// Whether a face is a porous pressure baffle.
-  bool faceIsBaffle(const FaceInfo & fi) const { return isBaffleFace(fi); }
-
-  /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
-  Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
-
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -183,15 +163,16 @@ public:
    * @param pressure_system Reference to the pressure system
    * @param momentum_system_numbers The numbers of these systems
    */
-  void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   LinearSystem & pressure_system,
-                                   const std::vector<unsigned int> & momentum_system_numbers);
+  virtual void
+  linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
+                              LinearSystem & pressure_system,
+                              const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
    * Computes the inverse of the diagonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation.
    */
-  void computeHbyA(const bool verbose);
+  virtual void computeHbyA(bool verbose);
 
 protected:
   /// Update cell velocity from the supplied momentum-coupling pressure gradient.
@@ -213,17 +194,11 @@ protected:
   /// Compute the pressure-gradient flux contribution for a single face
   Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
 
+  /// Compute H/A and 1/A using the supplied cell-volume scaling.
+  void computeHbyA(bool verbose, const NumericVector<Number> & cell_volume_scaling);
+
   /// Compute the cell volumes on the mesh
-  virtual void setupMeshInformation();
-
-  /// Update baffle jump values based on current face mass fluxes
-  virtual void updateBaffleJumps();
-
-  /// Check whether a face is a pressure baffle face
-  virtual bool isBaffleFace(const FaceInfo & fi) const;
-
-  /// Apply porosity scaling to a cell-based vector (no-op for non-porous cases)
-  virtual void applyCellPorosityScaling(NumericVector<Number> & vec) const;
+  void setupMeshInformation();
 
   /// Populate the face values of the H/A and 1/A fields
   void

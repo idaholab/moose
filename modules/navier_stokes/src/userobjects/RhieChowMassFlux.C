@@ -25,7 +25,6 @@
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
-#include "FVPressureJumpGreenGaussGradient.h"
 #include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
 #include "MooseUtils.h"
@@ -308,25 +307,6 @@ RhieChowMassFlux::linkMomentumPressureSystems(
 
   _pressure_gradient_field = &coupling_reader;
 
-  const auto & solution_gradient_reader = pressure_var->requestCellGradients();
-  if (hasPressureBaffles())
-  {
-    const auto * const jump_gradient_method =
-        dynamic_cast<const FVPressureJumpGreenGaussGradient *>(&solution_gradient_reader.method());
-    if (!jump_gradient_method)
-      mooseError("Pressure variable '",
-                 pressure_var->name(),
-                 "' must use FVPressureJumpGreenGaussGradient as its default gradient method "
-                 "when RhieChowMassFlux '",
-                 name(),
-                 "' has pressure baffles.");
-
-    auto & writable_method =
-        _fe_problem.getFVGradientMethod(solution_gradient_reader.method().name(), _tid);
-    dynamic_cast<FVPressureJumpGreenGaussGradient &>(writable_method)
-        .linkFlowSystem(*this, solution_gradient_reader);
-  }
-
   if (usingReconstructedPressureGradientMethod())
   {
     reconstructedGradientMethod().linkFlowSystem(*this, coupling_reader);
@@ -337,27 +317,9 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     mooseAssert(_base_pressure_gradient_field != _pressure_gradient_field,
                 "Reconstructed and base pressure gradient readers must be distinct when "
                 "FVReconstructedPressureGradient is active.");
-
-    if (hasPressureBaffles() &&
-        &_base_pressure_gradient_field->method() != &solution_gradient_reader.method())
-      mooseError("FVReconstructedPressureGradient '",
-                 reconstructedGradientMethod().name(),
-                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient as its "
-                 "base_gradient_method when RhieChowMassFlux '",
-                 name(),
-                 "' has pressure baffles.");
   }
   else
-  {
     _base_pressure_gradient_field = _pressure_gradient_field;
-
-    if (hasPressureBaffles() &&
-        &_pressure_gradient_field->method() != &solution_gradient_reader.method())
-      mooseError("Momentum pressure kernels coupled to RhieChowMassFlux '",
-                 name(),
-                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient or an "
-                 "FVReconstructedPressureGradient based on it when pressure baffles are present.");
-  }
 
   _global_momentum_system_numbers.clear();
   _momentum_implicit_systems.clear();
@@ -1015,6 +977,12 @@ RhieChowMassFlux::populateCouplingFunctors(
 void
 RhieChowMassFlux::computeHbyA(bool verbose)
 {
+  computeHbyA(verbose, *_cell_volumes);
+}
+
+void
+RhieChowMassFlux::computeHbyA(bool verbose, const NumericVector<Number> & cell_volume_scaling)
+{
   if (verbose)
   {
     _console << "************************************" << std::endl;
@@ -1023,13 +991,6 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   }
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
-
-  updateBaffleJumps();
-
-  // Pressure jumps are external data for the variable's gradient method. Refresh that field
-  // before pressure assembly even though the pressure solution itself has not changed yet.
-  if (hasPressureBaffles())
-    _pressure_system->updateFVGradient(basePressureGradientField());
 
   mooseAssert(!_grad_p_current.empty(),
               "A coupling pressure-gradient snapshot must exist before computing H/A.");
@@ -1119,8 +1080,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     // Unfortunately, the pressure forces are included in the momentum RHS
     // so we have to correct them back using the same coupling gradient that
     // assembled the momentum pressure source.
-    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i], *_cell_volumes);
-    applyCellPorosityScaling(*working_vector_petsc);
+    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i],
+                                         cell_volume_scaling);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -1195,17 +1156,14 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       // Correct HbyA
       Ainv_full->add(-1.0, Ainv);
       working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
-      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
-      applyCellPorosityScaling(*working_vector_petsc);
+      working_vector_petsc->pointwise_mult(*working_vector_petsc, cell_volume_scaling);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
       Ainv = *Ainv_full_old;
     }
 
-    applyCellPorosityScaling(Ainv);
-
-    Ainv.pointwise_mult(Ainv, *_cell_volumes);
+    Ainv.pointwise_mult(Ainv, cell_volume_scaling);
 
     if (verbose)
     {
@@ -1303,49 +1261,4 @@ RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
                  "' has variables: ",
                  Moose::stringify(momentum_system->getVariableNames()));
   }
-}
-
-Real
-RhieChowMassFlux::getFaceSidePorosity(const FaceInfo &, bool, const Moose::StateArg &) const
-{
-  return 1.0;
-}
-
-Real
-RhieChowMassFlux::getSignedBaffleJump(const FaceInfo &, bool) const
-{
-  return 0.0;
-}
-
-void
-RhieChowMassFlux::updateBaffleJumps()
-{
-}
-
-void
-RhieChowMassFlux::applyCellPorosityScaling(NumericVector<Number> & /*vec*/) const
-{
-}
-
-bool
-RhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo &) const
-{
-  return false;
-}
-
-Real
-RhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
-                                                   const unsigned int component) const
-{
-  mooseAssert(component < _Ainv_raw.size(), "Invalid pressure-diffusion component.");
-
-  const auto momentum_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-  const Real density = _rho(makeElemArg(elem_info.elem()), Moose::currentState());
-  return density * (*_Ainv_raw[component])(momentum_dof);
-}
-
-bool
-RhieChowMassFlux::isBaffleFace(const FaceInfo &) const
-{
-  return false;
 }

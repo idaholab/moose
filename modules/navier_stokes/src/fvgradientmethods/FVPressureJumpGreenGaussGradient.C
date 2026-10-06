@@ -17,7 +17,7 @@
 #include "MooseLinearVariableFV.h"
 #include "MooseMesh.h"
 #include "PetscVectorReader.h"
-#include "RhieChowMassFlux.h"
+#include "PorousRhieChowMassFlux.h"
 #include "SystemBase.h"
 
 #include "libmesh/elem.h"
@@ -40,7 +40,7 @@ FVPressureJumpGreenGaussGradient::FVPressureJumpGreenGaussGradient(const InputPa
 }
 
 void
-FVPressureJumpGreenGaussGradient::linkFlowSystem(RhieChowMassFlux & rc,
+FVPressureJumpGreenGaussGradient::linkFlowSystem(PorousRhieChowMassFlux & rc,
                                                  const LinearFVGradientReader & pressure_gradient)
 {
   if (&pressure_gradient.method() != this)
@@ -52,14 +52,14 @@ FVPressureJumpGreenGaussGradient::linkFlowSystem(RhieChowMassFlux & rc,
       pressure_gradient.variableNumber() != rc.pressureVariableNumber())
     mooseError("FVPressureJumpGreenGaussGradient '",
                name(),
-               "' must be linked to the pressure variable owned by RhieChowMassFlux '",
+               "' must be linked to the pressure variable owned by PorousRhieChowMassFlux '",
                rc.name(),
                "'.");
 
   if (_rhie_chow && _rhie_chow != &rc)
     mooseError("FVPressureJumpGreenGaussGradient '",
                name(),
-               "' is already linked to RhieChowMassFlux '",
+               "' is already linked to PorousRhieChowMassFlux '",
                _rhie_chow->name(),
                "'. Use a separate gradient method for each flow system.");
 

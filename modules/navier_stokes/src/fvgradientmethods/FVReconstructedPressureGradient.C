@@ -14,6 +14,7 @@
 #include "LinearFVGradientReader.h"
 #include "LinearSystem.h"
 #include "MooseMesh.h"
+#include "PorousRhieChowMassFlux.h"
 #include "RhieChowMassFlux.h"
 #include "SystemBase.h"
 
@@ -70,6 +71,7 @@ FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
   if (!_rhie_chow)
   {
     _rhie_chow = &rc;
+    _porous_rhie_chow = dynamic_cast<const PorousRhieChowMassFlux *>(&rc);
     _pressure_system = &pressure_gradient.system();
     _pressure_variable_number = pressure_gradient.variableNumber();
     _momentum_systems.reserve(rc.dimension());
@@ -377,7 +379,7 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
   // gradient (zero Hessian approximation). Otherwise interpolate the two lagged cell gradients to
   // the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
-      rc.faceUsesOneSidedReconstruction(fi))
+      (_porous_rhie_chow && _porous_rhie_chow->faceUsesOneSidedReconstruction(fi)))
     return elem_gradient;
 
   const auto & velocity = rc.velocityVariable(velocity_component);
