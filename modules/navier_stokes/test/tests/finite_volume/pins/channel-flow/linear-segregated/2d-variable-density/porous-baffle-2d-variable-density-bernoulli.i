@@ -45,9 +45,12 @@ advected_interp_method = 'average'
 []
 
 [FVGradientMethods]
+  [jump_aware]
+    type = FVPressureJumpGreenGaussGradient
+  []
   [reconstructed]
     type = FVReconstructedPressureGradient
-    base_gradient_method = green-gauss
+    base_gradient_method = jump_aware
     gradient_relaxation = 1.0
   []
 []
@@ -126,7 +129,7 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = ${p_out}
-    gradient_method = reconstructed
+    gradient_method = jump_aware
   []
 []
 
@@ -161,6 +164,7 @@ advected_interp_method = 'average'
     momentum_component = 'x'
     porosity = 'porosity'
     pressure = pressure
+    gradient_method = reconstructed
   []
   [v_pressure]
     type = LinearPWCNSFVMomentumPressure
@@ -168,6 +172,7 @@ advected_interp_method = 'average'
     momentum_component = 'y'
     porosity = 'porosity'
     pressure = pressure
+    gradient_method = reconstructed
   []
   [p_diffusion]
     type = LinearFVPressureCorrectionDiffusionJump

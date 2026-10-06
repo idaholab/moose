@@ -22,9 +22,12 @@ T_inlet = 300
 T_initial = 300
 
 [FVGradientMethods]
+  [jump_aware]
+    type = FVPressureJumpGreenGaussGradient
+  []
   [reconstructed]
     type = FVReconstructedPressureGradient
-    base_gradient_method = green-gauss
+    base_gradient_method = jump_aware
     gradient_relaxation = 1.0
   []
 []
@@ -113,7 +116,7 @@ T_initial = 300
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.0
-    gradient_method = reconstructed
+    gradient_method = jump_aware
   []
   [h_fluid]
     type = MooseLinearVariableFVReal
@@ -159,6 +162,7 @@ T_initial = 300
     momentum_component = 'x'
     porosity = porosity
     pressure = pressure
+    gradient_method = reconstructed
   []
   [v_pressure]
     type = LinearPWCNSFVMomentumPressure
@@ -166,6 +170,7 @@ T_initial = 300
     momentum_component = 'y'
     porosity = porosity
     pressure = pressure
+    gradient_method = reconstructed
   []
   [u_friction]
     type = LinearFVMomentumFriction

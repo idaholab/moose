@@ -71,7 +71,6 @@ PorousRhieChowMassFlux::meshChanged()
 {
   RhieChowMassFlux::meshChanged();
   _baffle_jump.clear();
-  ++_baffle_jump_generation;
 }
 
 void
@@ -81,7 +80,6 @@ PorousRhieChowMassFlux::initialize()
 
   for (const auto & pair : _baffle_jump)
     _baffle_jump[pair.first] = 0.0;
-  ++_baffle_jump_generation;
 }
 
 void
@@ -157,7 +155,6 @@ PorousRhieChowMassFlux::updateBaffleJumps()
   if (_pressure_jump_models.empty())
     return;
 
-  bool updated = false;
   for (auto & fi : _flow_face_info)
   {
     const auto * const pressure_jump_model = getPressureJumpModel(*fi);
@@ -170,11 +167,7 @@ PorousRhieChowMassFlux::updateBaffleJumps()
         pressure_jump_model->computePressureJump(*fi, _face_mass_flux.evaluate(fi));
     _baffle_jump[fi->id()] = _pressure_jump_relaxation * new_jump +
                              (1.0 - _pressure_jump_relaxation) * _baffle_jump[fi->id()];
-    updated = true;
   }
-
-  if (updated)
-    ++_baffle_jump_generation;
 }
 
 bool
