@@ -559,6 +559,19 @@ Simulation::addConstantScalarIC(const VariableName & var_name, Real value)
 }
 
 void
+Simulation::addFunctionScalarIC(const VariableName & var_name, const FunctionName & func_name)
+{
+  if (hasInitialConditionsFromFile())
+    return;
+
+  std::string class_name = "FunctionScalarIC";
+  InputParameters params = _thm_factory.getValidParams(class_name);
+  params.set<VariableName>("variable") = var_name;
+  params.set<std::vector<FunctionName>>("function") = {func_name};
+  addSimInitialCondition(class_name, genName(var_name, "ic"), params);
+}
+
+void
 Simulation::addComponentScalarIC(const VariableName & var_name, const std::vector<Real> & value)
 {
   if (hasInitialConditionsFromFile())

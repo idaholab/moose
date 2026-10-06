@@ -26,7 +26,7 @@
 [Components]
   [total_power]
     type = TotalPower
-    power = 1.
+    power = decayheatcurve
   []
 
   [ch1:solid]
@@ -44,20 +44,10 @@
   []
 []
 
-[ControlLogic]
-  [reactor_power_control]
-    type = TimeFunctionComponentControl
-    component = total_power
-    parameter = power
-    function = decayheatcurve
-  []
-[]
-
 [Postprocessors]
   [reactor_power]
-    type = RealComponentParameterValuePostprocessor
-    component = total_power
-    parameter = power
+    type = FunctionValuePostprocessor
+    function = decayheatcurve
   []
 []
 

@@ -193,6 +193,7 @@ public:
                      const std::string & func_name,
                      const std::vector<SubdomainName> & block_names);
   void addConstantScalarIC(const VariableName & var_name, Real value);
+  void addFunctionScalarIC(const VariableName & var_name, const FunctionName & func_name);
   void addComponentScalarIC(const VariableName & var_name, const std::vector<Real> & value);
 
   void addSimInitialCondition(const std::string & type,

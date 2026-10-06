@@ -1,13 +1,13 @@
 # TotalPower
 
 This component is a [power component](thermal_hydraulics/component_groups/power.md)
-that specifies the power as a constant value via a user parameter.
+that specifies the power via a user-supplied function.
 
 ## Usage
 
-The user provides a power value via the parameter
-[!param](/Components/TotalPower/power). This parameter may be controlled via the
-[ControlLogic system](ControlLogic/index.md).
+The user provides the power via the function parameter
+[!param](/Components/TotalPower/power). A constant value may be supplied directly;
+to vary the power during a simulation, provide a function of time.
 
 !syntax parameters /Components/TotalPower
 
