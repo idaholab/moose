@@ -93,7 +93,6 @@ q = 20000000
     porosity = porosity
     p_diffusion_kernel = p_diffusion
     pressure_jump_models = pressure_jump
-    pressure_gradient_limiter = 'baffle baffle2'
     pressure_jump_relaxation = 0.1
   []
 []
