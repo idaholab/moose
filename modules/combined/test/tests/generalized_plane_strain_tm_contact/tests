@@ -7,11 +7,20 @@
    custom_cmp = 'generalized.exodiff'
    capabilities = 'superlu'
 #   deleted = '#6924'
+   requirement = 'The system shall assemble the Jacobian correctly when a generalized plane '
+                 'strain scalar constraint and a mechanical contact constraint are both active '
+                 'in a coupled thermomechanical problem.'
+   design = 'GeneralizedPlaneStrainAction.md MechanicalContactConstraint.md'
+   issues = '#5210'
  [../]
  [./out_of_plane_pressure]
    type = 'Exodiff'
    input = 'out_of_plane_pressure.i'
    exodiff = 'out_of_plane_pressure_out.e'
    abs_zero = 1e-9
+   requirement = 'The system shall apply a prescribed out-of-plane pressure to a 2D generalized '
+                 'plane strain model.'
+   design = 'GeneralizedPlaneStrainAction.md OutOfPlanePressure.md'
+   issues = '#6024'
  [../]
 []
