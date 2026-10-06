@@ -240,7 +240,7 @@ NewtonSolve2D(const T & f,
     // The solve with a NaN in the matrix would crash, not trigger the desired exception
     for (const auto i : make_range(system_size))
       for (const auto j : make_range(system_size))
-        if (!isfinite(MetaPhysicL::raw_value(J(i, j))))
+        if (!isfinite(MetaPhysicL::raw_value(J(i, j))) || isnan(J(i, j)))
         {
           assign_solution();
           mooseException(caller_name + ": NaN or infinity detected in Jacobian in NewtonSolve2D");
