@@ -538,6 +538,26 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(VecZeroEntries(_hc_radial_heat_conduction_rhs));
     LibmeshPetscCall(VecZeroEntries(_hc_sweep_enthalpy_rhs));
 
+    // Thermal conductivity and specific heat are needed at every node many times during the
+    // assembly; evaluate each node once. Pressure and temperature do not change during assembly.
+    const auto n_nodes = _subchannel_mesh.getMesh().max_node_id();
+    std::vector<Real> k_cache(n_nodes, std::numeric_limits<Real>::quiet_NaN());
+    std::vector<Real> cp_cache(n_nodes, std::numeric_limits<Real>::quiet_NaN());
+    auto thermalConductivity = [&](const Node * node)
+    {
+      auto & k = k_cache[node->id()];
+      if (std::isnan(k))
+        k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      return k;
+    };
+    auto specificHeat = [&](const Node * node)
+    {
+      auto & cp = cp_cache[node->id()];
+      if (std::isnan(cp))
+        cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      return cp;
+    };
+
     LibmeshPetscCall(MatZeroEntries(_hc_sys_h_mat));
     LibmeshPetscCall(VecZeroEntries(_hc_sys_h_rhs));
 
@@ -547,6 +567,24 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       auto pitch = _subchannel_mesh.getPitch();
       auto pin_diameter = _subchannel_mesh.getPinDiameter();
       auto iz_ind = iz - first_node;
+
+      // Calculation of average mass flux of all periphery subchannels, used by the sweep flow
+      Real edge_flux_ave = 0.0;
+      Real mdot_sum = 0.0;
+      Real si_sum = 0.0;
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+        {
+          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+          auto Si = (*_S_flow_soln)(node_in);
+          auto mdot_in = (*_mdot_soln)(node_in);
+          mdot_sum = mdot_sum + mdot_in;
+          si_sum = si_sum + Si;
+        }
+      }
+      edge_flux_ave = mdot_sum / si_sum;
 
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
@@ -564,11 +602,11 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto w_perim_in = (*_w_perim_soln)(node_in);
           auto w_perim_out = (*_w_perim_soln)(node_out);
           auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
-          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+          auto K_in = thermalConductivity(node_in);
+          auto K_out = thermalConductivity(node_out);
           auto K = this->computeInterpolatedValue(K_out, K_in, 0.5);
-          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+          auto cp_in = specificHeat(node_in);
+          auto cp_out = specificHeat(node_out);
           auto cp = this->computeInterpolatedValue(cp_out, cp_in, 0.5);
           auto mdot_loc =
               this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
@@ -647,21 +685,18 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
         // Axial heat conduction
         auto * node_center = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto K_center = _fp->k_from_p_T((*_P_soln)(node_center) + _P_out, (*_T_soln)(node_center));
-        auto cp_center =
-            _fp->cp_from_p_T((*_P_soln)(node_center) + _P_out, (*_T_soln)(node_center));
+        auto K_center = thermalConductivity(node_center);
+        auto cp_center = specificHeat(node_center);
         auto diff_center = K_center / (cp_center + 1e-15);
 
         if (iz == first_node)
         {
           auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom =
-              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
-          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
-          auto cp_bottom =
-              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
-          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
+          auto K_bottom = thermalConductivity(node_bottom);
+          auto K_top = thermalConductivity(node_top);
+          auto cp_bottom = specificHeat(node_bottom);
+          auto cp_top = specificHeat(node_top);
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
           auto diff_top = K_top / (cp_top + 1e-15);
 
@@ -695,10 +730,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         else if (iz == last_node)
         {
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom =
-              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
-          auto cp_bottom =
-              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto K_bottom = thermalConductivity(node_bottom);
+          auto cp_bottom = specificHeat(node_bottom);
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
 
           auto dz_down = _z_grid[iz] - _z_grid[iz - 1];
@@ -727,12 +760,10 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         {
           auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom =
-              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
-          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
-          auto cp_bottom =
-              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
-          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
+          auto K_bottom = thermalConductivity(node_bottom);
+          auto K_top = thermalConductivity(node_top);
+          auto cp_bottom = specificHeat(node_bottom);
+          auto cp_top = specificHeat(node_top);
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
           auto diff_top = K_top / (cp_top + 1e-15);
 
@@ -906,10 +937,10 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           }
 
           auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-          auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto K_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
-          auto cp_i = _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto cp_j = _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
+          auto K_i = thermalConductivity(node_in_i);
+          auto K_j = thermalConductivity(node_in_j);
+          auto cp_i = specificHeat(node_in_i);
+          auto cp_j = specificHeat(node_in_j);
           auto A_i = K_i / cp_i;
           auto A_j = K_j / cp_j;
           auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
@@ -943,23 +974,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         }
 
         // Compute the sweep flow enthalpy change
-        // Calculation of average mass flux of all periphery subchannels
-        Real edge_flux_ave = 0.0;
-        Real mdot_sum = 0.0;
-        Real si_sum = 0.0;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-          if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-          {
-            auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-            auto Si = (*_S_flow_soln)(node_in);
-            auto mdot_in = (*_mdot_soln)(node_in);
-            mdot_sum = mdot_sum + mdot_in;
-            si_sum = si_sum + Si;
-          }
-        }
-        edge_flux_ave = mdot_sum / si_sum;
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         PetscScalar sweep_enthalpy = 0.0;
         if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
@@ -1053,30 +1067,14 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     // Add all matrices together
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_axial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_radial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_sweep_enthalpy_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(addTermMatrices(_hc_sys_h_mat,
+                                     {_hc_time_derivative_mat,
+                                      _hc_advective_derivative_mat,
+                                      _hc_cross_derivative_mat,
+                                      _hc_axial_heat_conduction_mat,
+                                      _hc_radial_heat_conduction_mat,
+                                      _hc_sweep_enthalpy_mat},
+                                     _hc_sys_h_pattern_set));
     if (_verbose_subchannel)
       _console << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
     // RHS

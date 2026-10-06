@@ -518,28 +518,10 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     // Matrix
-#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    LibmeshPetscCall(MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN));
-#else
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(
-        MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN));
-#endif
+    LibmeshPetscCall(addTermMatrices(
+        _hc_sys_h_mat,
+        {_hc_time_derivative_mat, _hc_advective_derivative_mat, _hc_cross_derivative_mat},
+        _hc_sys_h_pattern_set));
     LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     if (_verbose_subchannel)
