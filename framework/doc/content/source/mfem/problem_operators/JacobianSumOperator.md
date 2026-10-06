@@ -1,4 +1,4 @@
-# SumOperatorExtension
+# JacobianSumOperator
 
 !if! function=hasCapability('mfem')
 
