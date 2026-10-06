@@ -137,6 +137,13 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 
 template <typename OutputType>
 void
+MooseVariableData<OutputType>::needADGradPhiFace() const
+{
+  _assembly.needADGradPhiFace();
+}
+
+template <typename OutputType>
+void
 MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
 {
   switch (gm_type)

@@ -1667,6 +1667,12 @@ public:
     return _ad_grad_phi_data_face[type];
   }
 
+  /**
+   * Request that face reinitialization compute the AD shape function gradients. Variables call this
+   * when an object needs their AD gradient or their AD face test function gradients.
+   */
+  void needADGradPhiFace() const { _need_ad_grad_phi_face = true; }
+
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type) const
   {
@@ -2763,6 +2769,10 @@ protected:
   mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data_face;
   mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>>
       _ad_vector_grad_phi_data_face;
+  /// Whether any object needs the AD face shape function gradients. Computing them on a displaced
+  /// mesh propagates the displacement derivatives of the face map into every shape function
+  /// gradient, which is expensive and unnecessary when only values and normals are used.
+  mutable bool _need_ad_grad_phi_face = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
