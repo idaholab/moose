@@ -40,11 +40,22 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
   printGeneralExecutionInformation();
 
+  // Spline node ICs will need to be evaluated indirectly.
+  bool have_indirect_constraints = !_fe_problem.mesh().getMesh().get_constraint_rows().empty();
+
+  // We should get rid of this communication after the next libMesh
+  // update gives us a cached n_constraint_rows().
+  _fe_problem.mesh().getMesh().comm().max(have_indirect_constraints);
+
   // Iterate over all the elements in the range
   for (const auto & elem : range)
   {
-    // Skip spline nodes; we want to set their values indirectly.
-    if (elem->mapping_type() == libMesh::INVALID_MAP)
+    // Skip spline nodes; we want to set their values indirectly.  For
+    // backward compatibility we'll use both new/robust (INVALID_MAP)
+    // and old/good-enough (NodeElem on mesh with constraint rows)
+    // spline node detection here.
+    if (have_indirect_constraints &&
+        (elem->mapping_type() == libMesh::INVALID_MAP || elem->type() == NODEELEM))
       continue;
 
     const unsigned int n_nodes = elem->n_nodes();
