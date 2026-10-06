@@ -385,11 +385,15 @@ LMWeightedGapUserObject::clearDerivedC()
 void
 LMWeightedGapUserObject::finalizeDerivedC()
 {
+  // send_data_back = true: every rank that touches a node's mortar segments interpolates the
+  // physical pressure D_j y_j for the primal coupling (see reinit()), so non-owner ranks need the
+  // fully reduced sums too. Without the round trip they would divide their own partial sums and
+  // use a local-only average of D_j that disagrees with the owner's constraint row.
   Moose::Mortar::Contact::communicateVelocities(_dof_to_derived_c,
                                                 _subproblem.mesh(),
                                                 _nodal,
                                                 _communicator,
-                                                /*send_data_back=*/false);
+                                                /*send_data_back=*/true);
   for (auto & [dof, scale_and_weight] : _dof_to_derived_c)
   {
     auto & [scale, weight] = scale_and_weight;

@@ -1,0 +1,16 @@
+[Tests]
+  design = 'actions/ContactAction.md userobjects/LMWeightedGapUserObject.md'
+  issues = '#32856'
+  [varying_derived_scale]
+    type = 'CSVDiff'
+    input = 'varying_derived_scale.i'
+    csvdiff = 'varying_derived_scale_out.csv'
+    # The secondary contact surface must be split across processes so that some secondary nodes
+    # are shared by ranks that do not own them.
+    min_parallel = 4
+    capabilities = 'ad_size>=150 & method!=dbg'
+    requirement = 'The system shall compute the same derived physical mortar contact stiffness scale '
+                  'on every process that shares a secondary contact node, giving the same solution as '
+                  'a serial run when that scale varies along the contact surface.'
+  []
+[]
