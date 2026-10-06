@@ -43,6 +43,10 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
   // Iterate over all the elements in the range
   for (const auto & elem : range)
   {
+    // Skip spline nodes; we want to set their values indirectly.
+    if (elem->mapping_type() == libMesh::INVALID_MAP)
+      continue;
+
     const unsigned int n_nodes = elem->n_nodes();
 
     // we need to execute objects that are for all subdomains covered by this

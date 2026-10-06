@@ -65,6 +65,10 @@ ComputeMarkerThread::subdomainChanged()
 void
 ComputeMarkerThread::onElement(const Elem * elem)
 {
+  // Evaluate markers on FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
 
