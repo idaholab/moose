@@ -20,8 +20,11 @@
 #include "SwapBackSentinel.h"
 #include "FVTimeKernel.h"
 #include "ComputeJacobianThread.h"
+#include "Assembly.h"
 
 #include "libmesh/threads.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_map.h"
 
 NonlinearThread::NonlinearThread(FEProblemBase & fe_problem)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
@@ -220,7 +223,83 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
 
       accumulateNeighbor();
     }
+    else
+    {
+      // elem's neighbor across this side is an inactive ancestor: elem is on the coarser side of
+      // a statically non-conforming interface (e.g. one block refined via RefineBlockGenerator).
+      // The real geometric neighbors are the active children of this ancestor, so visit each of
+      // them individually instead of silently skipping the whole face.
+      std::vector<const Elem *> fine_neighbors;
+      neighbor->active_family_tree_by_neighbor(fine_neighbors, elem);
+      for (const Elem * fine_neighbor : fine_neighbors)
+        onInterfaceNonConforming(elem, side, bnd_id, fine_neighbor);
+    }
   }
+}
+
+void
+NonlinearThread::onInterfaceNonConforming(const Elem * elem,
+                                          unsigned int side,
+                                          BoundaryID bnd_id,
+                                          const Elem * fine_neighbor)
+{
+  if (_fe_problem.getDisplacedProblem())
+    mooseError("InterfaceKernel '",
+               _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid)[0]->name(),
+               "' is defined on boundary ",
+               bnd_id,
+               ", whose primary (boundary-tagged) side is coarser than its paired side. This "
+               "case is only supported without a displaced mesh problem, because the borrowed "
+               "integration weight used to handle the mismatched refinement is not "
+               "AD-differentiable with respect to mesh displacement.");
+
+  const unsigned int fine_side = fine_neighbor->which_neighbor_am_i(elem);
+
+  // Measure the fine neighbor's own natural face quadrature: these physical points and weights
+  // are the correct integration measure for the portion of elem's face that fine_neighbor
+  // actually covers. Call this directly on the Assembly object (not through FEProblemBase) so no
+  // variable/dof binding happens for fine_neighbor in the "elem" role.
+  Assembly & assembly0 = _fe_problem.assembly(_tid, 0);
+  assembly0.reinitElemFaceRef(fine_neighbor, fine_side, TOLERANCE, nullptr, nullptr);
+  const auto fine_phys_points = assembly0.qPointsFace().stdVector();
+  const auto fine_phys_JxW = assembly0.JxWFace().stdVector();
+
+  // Find elem's own side-local reference coordinates for those same physical points.
+  const auto elem_side_elem = elem->build_side_ptr(side);
+  std::vector<Point> elem_side_ref_points;
+  libMesh::FEMap::inverse_map(
+      elem_side_elem->dim(), elem_side_elem.get(), fine_phys_points, elem_side_ref_points);
+
+  // Measure elem's own local Jacobian at those points using dummy unit weights, then rescale so
+  // that elem's face JxW, once bound for real below, exactly matches fine_neighbor's physical
+  // weight computed above.
+  assembly0.reinitElemFaceRef(elem, side, TOLERANCE, &elem_side_ref_points, nullptr);
+  const auto elem_dummy_JxW = assembly0.JxWFace().stdVector();
+  std::vector<Real> elem_ref_weights(fine_phys_JxW.size());
+  for (const auto qp : index_range(elem_ref_weights))
+    elem_ref_weights[qp] = fine_phys_JxW[qp] / elem_dummy_JxW[qp];
+
+  // Bind elem's (primary side) variable to its own dofs, with the face reinitialized at the
+  // corrected points/weights above.
+  _fe_problem.reinitElemFaceRef(
+      elem, side, TOLERANCE, &elem_side_ref_points, &elem_ref_weights, _tid);
+
+  SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+  _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+
+  // Bind the neighbor variable to fine_neighbor's own dofs at the matching physical points.
+  _fe_problem.setNeighborSubdomainID(fine_neighbor, _tid);
+  _fe_problem.reinitNeighborPhys(fine_neighbor, fine_side, fine_phys_points, _tid);
+
+  SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+  _fe_problem.reinitMaterialsNeighborOnBoundary(bnd_id, fine_neighbor->subdomain_id(), _tid);
+
+  _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
+
+  computeOnInterface(bnd_id);
+
+  accumulateNeighbor();
 }
 
 void

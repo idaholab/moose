@@ -68,6 +68,20 @@ protected:
                    BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
                    const Elem * lower_d_elem = nullptr);
 
+  /**
+   * Compute and accumulate the interface kernel contribution from a single active fine
+   * neighbor when \p elem's own neighbor_ptr(side) is an inactive ancestor, i.e. \p elem is on
+   * the coarser side of a statically non-conforming interface. \p variable 's dofs stay bound to
+   * \p elem (so the primary/boundary side's variable is unaffected by refinement direction),
+   * while \p elem 's face is reinitialized at the physical quadrature points of \p fine_neighbor
+   * with a Jacobian-rescaled weight so the integration measure matches fine_neighbor's true
+   * physical face area.
+   */
+  void onInterfaceNonConforming(const Elem * elem,
+                                unsigned int side,
+                                BoundaryID bnd_id,
+                                const Elem * fine_neighbor);
+
   ///@{
   /// Base class version just calls compute on each object for the element
   virtual void computeOnElement();
