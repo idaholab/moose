@@ -76,6 +76,15 @@ protected:
    * while \p elem 's face is reinitialized at the physical quadrature points of \p fine_neighbor
    * with a Jacobian-rescaled weight so the integration measure matches fine_neighbor's true
    * physical face area.
+   *
+   * elem's own residual/Jacobian contribution must accumulate additively across every active
+   * fine neighbor of a given (elem, side) visit, since each one only covers a fraction of elem's
+   * face. That local storage was already correctly prepared and zeroed exactly once for elem by
+   * FEProblemBase::prepare() before this side loop ever started, so elem's face is reinitialized
+   * directly through Assembly/SystemBase here rather than through the
+   * FEProblemBase::reinitElemFaceRef() convenience bundle, which would unconditionally (re-)zero
+   * that storage - discarding both the prior fine neighbors' contributions and elem's own
+   * volumetric Kernel contributions already accumulated earlier in its visit.
    */
   void onInterfaceNonConforming(const Elem * elem,
                                 unsigned int side,

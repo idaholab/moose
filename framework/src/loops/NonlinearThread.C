@@ -280,9 +280,24 @@ NonlinearThread::onInterfaceNonConforming(const Elem * elem,
     elem_ref_weights[qp] = fine_phys_JxW[qp] / elem_dummy_JxW[qp];
 
   // Bind elem's (primary side) variable to its own dofs, with the face reinitialized at the
-  // corrected points/weights above.
-  _fe_problem.reinitElemFaceRef(
-      elem, side, TOLERANCE, &elem_side_ref_points, &elem_ref_weights, _tid);
+  // corrected points/weights above. elem's residual/Jacobian contribution must accumulate
+  // additively across every fine neighbor of this (elem, side) visit, since each one only covers
+  // a fraction of elem's face; that local storage was already correctly prepared and zeroed
+  // exactly once for this element by FEProblemBase::prepare() before this side loop ever started.
+  // We deliberately do NOT call the FEProblemBase::reinitElemFaceRef() convenience bundle here:
+  // it unconditionally (re-)zeros elem's local residual/Jacobian storage as part of its one-shot
+  // reinit+prepare bundle (see SubProblem::reinitElemFaceRef's calls to
+  // Assembly::prepareResidual/prepareJacobianBlock), which would discard not only the prior fine
+  // neighbors' contributions but also elem's own volumetric Kernel contributions already
+  // accumulated earlier in this element's visit. elem's dof indices don't change across fine
+  // neighbors, so reinitializing the face at the new points/weights and recomputing variable
+  // values from them is all that is needed; no further dof preparation step is required.
+  for (const auto sys_num : make_range(_fe_problem.numNonlinearSystems()))
+  {
+    _fe_problem.assembly(_tid, sys_num)
+        .reinitElemFaceRef(elem, side, TOLERANCE, &elem_side_ref_points, &elem_ref_weights);
+    _fe_problem.getNonlinearSystemBase(sys_num).reinitElemFace(elem, side, _tid);
+  }
 
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
   _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
