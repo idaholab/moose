@@ -7,61 +7,68 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PipeInnerWallTemperatureScalarKernel.h"
+#include "PipeOuterWallCoupledConvectiveTemperatureScalarKernel.h"
 
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("ThermalHydraulicsApp", PipeInnerWallTemperatureScalarKernel);
-registerMooseObject("ThermalHydraulicsApp", ADPipeInnerWallTemperatureScalarKernel);
+registerMooseObject("ThermalHydraulicsApp", PipeOuterWallCoupledConvectiveTemperatureScalarKernel);
+registerMooseObject("ThermalHydraulicsApp",
+                    ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel);
 
 template <bool is_ad>
 InputParameters
-PipeInnerWallTemperatureScalarKernelTempl<is_ad>::validParams()
+PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::validParams()
 {
   InputParameters params = Base::validParams();
   params.addClassDescription(
-      "Solves for the temperature of the inner-surface radial node of a pipe wall.");
+      "Solves for the temperature of the outer-surface radial node of a pipe wall, "
+      "convectively coupled to a secondary-side flowing fluid, such as the shell side of a "
+      "heat exchanger.");
   params.addCoupledVar("mass_flow_rate",
                        {},
-                       "Mass flow rate in component. Takes a "
+                       "Mass flow rate of the secondary-side fluid. Takes a "
                        "scalar variable name");
-  params.addCoupledVar("outer_wall_temperature",
+  params.addCoupledVar("inner_wall_temperature",
                        {},
-                       "Temperature of the outer-surface wall node, on the other side of this "
+                       "Temperature of the inner-surface wall node, on the other side of this "
                        "layer's radial conduction path. Takes a scalar variable name");
   params.addCoupledVar("fluid_temperature",
                        {},
-                       "Fluid temperature adjacent to this wall node. Takes a scalar variable "
-                       "name");
+                       "Secondary-side fluid temperature adjacent to this wall node. Takes a "
+                       "scalar variable name");
   params.addCoupledVar(
       "upstream_fluid_temperature",
       {},
-      "Fluid temperature adjacent to the upstream wall node. Takes a scalar variable "
-      "name");
+      "Secondary-side fluid temperature adjacent to the upstream wall node. Takes a scalar "
+      "variable name");
   params.addCoupledVar(
       "downstream_fluid_temperature",
       {},
-      "Fluid temperature adjacent to the downstream wall node. Takes a scalar variable "
-      "name");
-  params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+      "Secondary-side fluid temperature adjacent to the downstream wall node. Takes a scalar "
+      "variable name");
+  params.addRequiredParam<MooseFunctorName>("reference_pressure",
+                                            "Secondary-side system reference pressure [Pa]");
+  params.addRequiredParam<UserObjectName>(
+      "fp", "The name of the user object for secondary-side fluid properties");
   params.addRequiredParam<MooseFunctorName>(
-      "flow_area", "Cross-sectional area of the fluid flow channel adjacent to this node [m^2]");
+      "flow_area",
+      "Cross-sectional area of the secondary-side flow channel adjacent to this node [m^2]");
   params.addRequiredParam<MooseFunctorName>(
-      "wetted_perimeter", "Wetted perimeter of the fluid flow channel adjacent to this node [m]");
+      "wetted_perimeter",
+      "Wetted perimeter of the secondary-side flow channel adjacent to this node [m]");
 
   return params;
 }
 
 template <bool is_ad>
-PipeInnerWallTemperatureScalarKernelTempl<is_ad>::PipeInnerWallTemperatureScalarKernelTempl(
-    const InputParameters & parameters)
+PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::
+    PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl(const InputParameters & parameters)
   : Base(parameters),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
     _m(ScalarCoupleable::coupledScalarValue("mass_flow_rate")),
-    _Tout(ScalarCoupleable::coupledScalarValue("outer_wall_temperature")),
+    _Tin(ScalarCoupleable::coupledScalarValue("inner_wall_temperature")),
     _Tf(ScalarCoupleable::coupledScalarValue("fluid_temperature")),
     _Tfup(ScalarCoupleable::coupledScalarValue("upstream_fluid_temperature")),
     _Tfdown(ScalarCoupleable::coupledScalarValue("downstream_fluid_temperature")),
@@ -73,7 +80,7 @@ PipeInnerWallTemperatureScalarKernelTempl<is_ad>::PipeInnerWallTemperatureScalar
 
 template <bool is_ad>
 GenericReal<is_ad>
-PipeInnerWallTemperatureScalarKernelTempl<is_ad>::convectiveResidual() const
+PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::convectiveResidual() const
 {
   const Moose::ElemArg qp = Moose::ElemArg();
   const int i = 0;
@@ -93,13 +100,13 @@ PipeInnerWallTemperatureScalarKernelTempl<is_ad>::convectiveResidual() const
   // Heat transfer to fluid (Dittus-Boelter)
   const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * kf / Dh;
 
-  // Convective heat transfer with the fluid
+  // Convective heat transfer with the secondary-side fluid
   return h * _wetted_perimeter(qp, state) / 2.0 * (_Tf[i] + in - 2 * Base::_u[i]);
 }
 
 template <bool is_ad>
 Real
-PipeInnerWallTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
+PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
 {
   if constexpr (!is_ad)
   {
@@ -121,7 +128,7 @@ PipeInnerWallTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
     // Heat transfer to fluid (Dittus-Boelter)
     const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * kf / Dh;
 
-    // Convective heat transfer with the fluid
+    // Convective heat transfer with the secondary-side fluid
     return -h * _wetted_perimeter(qp, state);
   }
   else
@@ -133,11 +140,11 @@ PipeInnerWallTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
 
 template <>
 Real
-PipeInnerWallTemperatureScalarKernelTempl<true>::convectiveJacobian() const
+PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<true>::convectiveJacobian() const
 {
   mooseError("Internal error, calling convectiveJacobian in AD class.");
   return 0.0;
 }
 
-template class PipeInnerWallTemperatureScalarKernelTempl<false>;
-template class PipeInnerWallTemperatureScalarKernelTempl<true>;
+template class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<false>;
+template class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<true>;
