@@ -101,5 +101,18 @@ pressureJumpFlux(const PressureJumpInterfaceData & data,
 {
   return data.transmissibility * (elem_pressure - neighbor_pressure - elem_jump) - data.correction;
 }
+
+/** Recover one side's face pressure from the common oriented flux. */
+inline Real
+pressureJumpOneSidedFaceValue(const PressureJumpInterfaceData & data,
+                              const Real cell_pressure,
+                              const Real flux,
+                              const bool elem_side)
+{
+  if (elem_side)
+    return cell_pressure - (flux + data.elem_correction) / data.elem_conductance;
+
+  return cell_pressure + (flux + data.neighbor_correction) / data.neighbor_conductance;
+}
 }
 }

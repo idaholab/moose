@@ -35,6 +35,9 @@ private:
   /// Porous Rhie-Chow object supplying baffle locations and signed pressure jumps after linkage.
   const PorousRhieChowMassFlux * _rhie_chow = nullptr;
 
+  /// Published gradient used to lag the explicit half-cell correction during reconstruction.
+  const LinearFVGradientReader * _pressure_gradient = nullptr;
+
   /// Pressure system to which this method is linked.
   const SystemBase * _pressure_system = nullptr;
 

@@ -226,12 +226,11 @@ half-cell coefficient
 \label{eq:pressure-jump-interface-coefficients}
 \end{equation}
 
-The assembled baseline transmissibility $T_f^{(0)}$ remains the inherited value formed from the
-Rhie-Chow face coefficient. With the porous object's default harmonic interpolation, it agrees
-with $T_f^h$ in the orthogonal scalar limit. In that limit $R_f=0$, so the new one-sided gradient
-path does not alter the pressure operator. If either half-cell conductance is invalid, the
-implementation uses the inherited face transmissibility and zero explicit correction for both
-adjacent rows.
+On a baffle face, the assembled baseline transmissibility is $T_f^h$. Using it together with
+$R_f$ preserves the single flux relation obtained by eliminating the two one-sided interface
+pressures. On non-baffle faces, the operator retains the inherited transmissibility formed from
+the Rhie-Chow face coefficient. If either half-cell conductance is invalid, the implementation
+uses that inherited face transmissibility and zero explicit correction for both adjacent rows.
 
 ## Jump-aware flux
 
@@ -349,9 +348,9 @@ changes the pressure difference required to sustain a flux, but does not create 
 
 The default value of
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
-is `false`, in which case a baffle face retains the inherited transmissibility selected through
-the Rhie-Chow object. Non-baffle faces retain the full inherited anisotropic diffusion
-discretization.
+is `false`, in which case a baffle face uses the half-cell transmissibility
+$T_f^h$ from [eq:pressure-jump-interface-coefficients]. Non-baffle faces retain the full inherited
+anisotropic diffusion discretization.
 
 When this parameter is enabled, an eligible baffle face may instead use the lagged reconstructed
 coupling gradients to form a scalar secant coefficient. Define the cell mobility tensor
@@ -469,9 +468,9 @@ This split has several important consequences:
 - The prescribed jump remains explicit. Its right-hand-side flux is $T_f^{\ell}J_P$ for cell $P$
   and its negative for cell $N$; no derivative of the jump law is placed in the matrix.
 
-If the two-term quotient cannot be used, $T_f^{\ell}$ is replaced by the baseline
-$T_f^{(0)}$ everywhere in this split: the four matrix entries use $T_f^{(0)}$, and the jump source
-uses $T_f^{(0)}J_P$. The explicit $R_f$ remains on the right-hand side. This common replacement is
+If the two-term quotient cannot be used, $T_f^{\ell}$ is replaced by the half-cell
+$T_f^h$ everywhere in this split: the four matrix entries use $T_f^h$, and the jump source
+uses $T_f^hJ_P$. The explicit $R_f$ remains on the right-hand side. This common replacement is
 necessary so that the jump and pressure-difference terms use the same face transmissibility.
 
 The two-term coefficient is used only when all of the following conditions hold:
@@ -484,7 +483,7 @@ The two-term coefficient is used only when all of the following conditions hold:
   two one-sided Taylor terms; and
 - the resulting quotient is finite and positive.
 
-Otherwise, the kernel uses $T_f^{(0)}$. Selecting
+Otherwise, the kernel uses $T_f^h$. Selecting
 [!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
 without [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md) is an input error.
 
@@ -532,10 +531,13 @@ contaminate the explicit flux correction.
 The pressure variable therefore uses
 [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md). During its surface sum, a
 continuous internal face contributes one common interpolated pressure. At a baffle, the value from
-the opposite cell is shifted by the prescribed jump before interpolation, producing a separate
-pressure for each side. The pressure reconstructed for cell $P$ contributes only to cell $P$, and
-the pressure reconstructed for cell $N$ contributes only to cell $N$. The completed sums are
-divided by coordinate-system-aware cell volumes.
+each side is recovered from the same half-cell flux relation used by the pressure operator,
+producing separate one-sided face values that preserve both the prescribed jump and the common
+interface flux.
+The explicit half-cell correction is lagged with the previously published geometric gradient.
+The pressure reconstructed for cell $P$ contributes only to cell $P$, and the pressure
+reconstructed for cell $N$ contributes only to cell $N$. The completed sums are divided by
+coordinate-system-aware cell volumes.
 
 This solution-gradient field supplies $r_P$, $r_N$, and $R_f$. It is distinct from
 [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md), which remains the
@@ -573,9 +575,9 @@ part of the pressure equation.
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=LinearFVKernels/HbyA_divergence
 
 In this two-dimensional diagonal-baffle example, the pressure jump model additionally includes
-entry, corner, and exit form losses. The pressure variable uses a reconstructed gradient, and the
-pressure-diffusion kernel enables the explicit nonorthogonal correction needed by the diagonal
-geometry.
+entry, corner, and exit form losses. The pressure variable uses a jump-aware geometric gradient,
+the momentum-pressure kernels use the reconstructed coupling gradient, and the pressure-diffusion
+kernel enables the explicit nonorthogonal correction needed by the diagonal geometry.
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-diagonal-baffle/porous-baffle-straight-diagonal.i block=UserObjects
 

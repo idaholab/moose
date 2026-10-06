@@ -5,7 +5,9 @@
     input = porous-baffle-straight-diagonal.i
     csvdiff = 'porous-baffle-straight-diagonal_out.csv porous-baffle-straight-diagonal_out_horizontal_profile_0001.csv porous-baffle-straight-diagonal_out_skew_pressure_profile_0001.csv porous-baffle-straight-diagonal_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal_out_v_y_right_of_interface_0001.csv'
     requirement = 'The system shall preserve pressure and velocity profiles across a straight channel with a diagonal porous baffle form-loss jump without introducing transverse velocity oscillations.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+             'FVPressureJumpGreenGaussGradient.md LinearFVPressureCorrectionDiffusionJump.md '
+             'LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
     cli_args = ''
     recover = false
     max_threads = 1
@@ -28,7 +30,9 @@
     input = porous-baffle-straight-diagonal.i
     csvdiff = 'porous-baffle-straight-diagonal-complete-stress_out.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_right_of_interface_0001.csv'
     requirement = 'The system shall include conservative nonorthogonal and deviatoric viscous stress corrections with harmonic two-point transmissibility across a diagonal porous baffle with discontinuous viscosity.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearPWCNSFVMomentumFlux.md'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+             'FVPressureJumpGreenGaussGradient.md LinearFVPressureCorrectionDiffusionJump.md '
+             'LinearPWCNSFVMomentumFlux.md'
     cli_args = "LinearFVKernels/u_advection/use_nonorthogonal_correction=true "
                "LinearFVKernels/v_advection/use_nonorthogonal_correction=true "
                "LinearFVKernels/u_advection/use_deviatoric_terms=true "

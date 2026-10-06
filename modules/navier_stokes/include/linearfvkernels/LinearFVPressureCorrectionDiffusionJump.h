@@ -51,8 +51,9 @@ protected:
    * Compute the pressure-correction transmissibility for the current face.
    *
    * On eligible baffle faces, the two-term option derives the transmissibility from the lagged
-   * reconstructed pressure gradients. Otherwise, this returns the inherited diffusion
-   * transmissibility selected by the Rhie-Chow object.
+   * reconstructed pressure gradients. Other baffle faces use the transmissibility obtained by
+   * eliminating the two one-sided interface pressures. Non-baffle faces and invalid half-cell
+   * data use the inherited diffusion transmissibility selected by the Rhie-Chow object.
    */
   Real computeJumpAwareFluxMatrixContribution();
 

@@ -14,6 +14,7 @@
 #include "FVPressureJumpGreenGaussGradient.h"
 #include "FVReconstructedPressureGradient.h"
 #include "LinearSystem.h"
+#include "LinearFVPressureCorrectionDiffusion.h"
 #include "MooseLinearVariableFV.h"
 #include "PressureJumpModel.h"
 
@@ -236,6 +237,19 @@ PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_i
   const auto momentum_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
   const Real density = _rho(makeElemArg(elem_info.elem()), Moose::currentState());
   return density * (*_Ainv_raw[component])(momentum_dof);
+}
+
+bool
+PorousRhieChowMassFlux::pressureDiffusionDataReady() const
+{
+  return _p_diffusion_kernel && _Ainv_raw.size() == dimension();
+}
+
+bool
+PorousRhieChowMassFlux::pressureDiffusionUsesNonorthogonalCorrection() const
+{
+  mooseAssert(pressureDiffusionDataReady(), "Pressure-diffusion data must be ready first.");
+  return _p_diffusion_kernel->useNonorthogonalCorrection();
 }
 
 const PressureJumpModel *
