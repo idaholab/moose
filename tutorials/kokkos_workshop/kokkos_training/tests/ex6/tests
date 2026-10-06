@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosAuxKernels/index.md syntax/KokkosUserObjects/index.md'
+
+  [ex6]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall'
+    [aux_and_reducer]
+      type = CSVDiff
+      input = 'ex6.i'
+      csvdiff = 'ex6_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'compute the gradient magnitude of a variable with a Kokkos auxiliary kernel and the volume fraction above a threshold with a Kokkos reducer postprocessor, and'
+    []
+    [nodal_error]
+      type = RunException
+      input = 'ex6.i'
+      cli_args = 'AuxVariables/grad_u/family=LAGRANGE AuxVariables/grad_u/order=FIRST'
+      expect_err = 'The gradient is not defined at nodes; use an elemental variable.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'error if the gradient magnitude auxiliary kernel is used on a nodal variable.'
+    []
+  []
+[]
