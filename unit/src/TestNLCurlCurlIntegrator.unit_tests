@@ -22,7 +22,7 @@
   [sum_operator_diagonal_matches_action]
     type = GoogleTest
     unit_test = CheckData.SumOperatorExtensionDiagonalMatchesItsAction
-    design = '/SumOperatorExtension.md'
+    design = '/JacobianSumOperator.md'
     requirement = 'The system shall assemble a diagonal for the combined nonlinear and linear partially assembled operator that agrees with the action of that operator, and shall impose a unit diagonal on essential rows.'
   []
 []

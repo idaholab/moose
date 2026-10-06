@@ -14,7 +14,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
-#include "SumOperatorExtension.h"
+#include "JacobianSumOperator.h"
 
 TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 {
@@ -189,7 +189,7 @@ TEST(CheckData, NLCurlCurlIntegratorPartialAssemblyMatchesLegacy)
 TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
 {
   if (mfem::Mpi::WorldSize() > 1)
-    GTEST_SKIP() << "SumOperatorExtension assembles its diagonal on local rather than true DoFs, "
+    GTEST_SKIP() << "JacobianSumOperator assembles its diagonal on local rather than true DoFs, "
                     "and overruns diag vector in parallel.";
 
   mfem::Mesh serial = mfem::Mesh::MakeCartesian3D(2, 2, 2, mfem::Element::HEXAHEDRON);
@@ -245,7 +245,7 @@ TEST(CheckData, SumOperatorExtensionDiagonalMatchesItsAction)
   mfem::OperatorHandle linear_op;
   blf.FormSystemMatrix(ess_tdofs, linear_op);
 
-  Moose::MFEM::SumOperatorExtension sum(nlf_grad, linear_op.Ptr(), &nlf);
+  Moose::MFEM::JacobianSumOperator sum(nlf_grad, linear_op.Ptr(), &nlf);
 
   mfem::Vector assembled(x.Size());
   sum.AssembleDiagonal(assembled);

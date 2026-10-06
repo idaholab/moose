@@ -496,7 +496,7 @@ EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
   // guard against dereferencing nullptr here.
   mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
 
-  _jacobian.Reset(new SumOperatorExtension(nlf_grad, _linear_operator.Ptr(), nlf));
+  _jacobian.Reset(new JacobianSumOperator(nlf_grad, _linear_operator.Ptr(), nlf));
 }
 
 void

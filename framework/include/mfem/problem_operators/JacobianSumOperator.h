@@ -22,10 +22,10 @@ namespace Moose::MFEM
 // It is essential that the first operator is the gradient of the
 // nonlinear form here, as we call B->AssembleDiagonal later on,
 // and this will fail for the gradient of the nlf.
-class SumOperatorExtension : public mfem::Operator
+class JacobianSumOperator : public mfem::Operator
 {
 public:
-  SumOperatorExtension(const mfem::Operator * A,
+  JacobianSumOperator(const mfem::Operator * A,
                        const mfem::Operator * B,
                        mfem::ParNonlinearForm * nlf)
     : Operator(A->Height(), A->Width()), _A(A), _B(B), _z(A->Height()), _nlf(nlf)
@@ -37,7 +37,7 @@ public:
     // not be in iterative mode.
   }
 
-  ~SumOperatorExtension() override = default;
+  ~JacobianSumOperator() override = default;
 
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
