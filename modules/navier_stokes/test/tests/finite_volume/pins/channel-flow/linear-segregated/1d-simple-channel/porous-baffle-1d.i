@@ -12,9 +12,12 @@ forchheimer_value = 50
 inlet_u = 0.1
 
 [FVGradientMethods]
+  [jump_aware]
+    type = FVPressureJumpGreenGaussGradient
+  []
   [reconstructed]
     type = FVReconstructedPressureGradient
-    base_gradient_method = green-gauss
+    base_gradient_method = jump_aware
     gradient_relaxation = 1.0
   []
 []
@@ -78,7 +81,7 @@ inlet_u = 0.1
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.0
-    gradient_method = reconstructed
+    gradient_method = jump_aware
   []
 []
 
@@ -106,6 +109,7 @@ inlet_u = 0.1
     momentum_component = 'x'
     porosity = porosity
     pressure = pressure
+    gradient_method = reconstructed
   []
   [u_friction]
     type = LinearFVMomentumFriction

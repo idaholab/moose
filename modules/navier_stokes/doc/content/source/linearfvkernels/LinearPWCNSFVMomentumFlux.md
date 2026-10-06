@@ -68,7 +68,7 @@ Otherwise, $d_P=\lVert\boldsymbol{r}_P\rVert$ and
 $d_N=\lVert\boldsymbol{r}_N\rVert$.
 
 The interface treatment uses one common superficial face velocity $\boldsymbol{U}_f$, but it does
-not impose a common interstitial velocity. Instead, the two one-sided interstitial traces are
+not impose a common interstitial velocity. Instead, the interstitial velocities on the two sides are
 
 \begin{equation}
   \boldsymbol{v}_f^P = \frac{\boldsymbol{U}_f}{\epsilon_P}, \qquad

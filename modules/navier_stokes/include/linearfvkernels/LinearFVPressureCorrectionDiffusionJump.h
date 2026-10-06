@@ -13,7 +13,6 @@
 #include "PressureJumpInterface.h"
 
 class RhieChowMassFlux;
-class FVReconstructedPressureGradient;
 
 /**
  * Pressure-correction diffusion kernel that enforces modeled jumps on internal baffle faces.
@@ -65,9 +64,6 @@ protected:
 
   /// Rhie-Chow object supplying baffle identification and signed pressure jumps.
   const RhieChowMassFlux & _rc_uo;
-
-  /// Reconstructed pressure-gradient method used by the optional two-term expansion.
-  const FVReconstructedPressureGradient * const _reconstructed_pressure_gradient_method;
 
   /// Whether to derive baffle transmissibility from the lagged two-term pressure expansion.
   const bool _use_two_term_pressure_expansion;
