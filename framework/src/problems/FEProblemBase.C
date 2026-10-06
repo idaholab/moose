@@ -3936,13 +3936,30 @@ FEProblemBase::projectSolution()
     }
   }
 
+  // Spline node ICs will need to be evaluated indirectly.
+  bool have_indirect_constraints = !_mesh.getMesh().get_constraint_rows().empty();
+
+  // We should get rid of this communication after the next libMesh
+  // update gives us a cached n_constraint_rows().
+  _mesh.getMesh().comm().max(have_indirect_constraints);
+
   for (auto & sys : _solver_systems)
   {
     sys->solution().close();
+    if (have_indirect_constraints)
+    {
+      sys->system().solve_for_unconstrained_dofs(sys->solution());
+      sys->system().get_dof_map().enforce_constraints_exactly(sys->system(), &sys->solution());
+    }
     sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (have_indirect_constraints)
+  {
+    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
+    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
+  }
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
@@ -4011,13 +4028,30 @@ FEProblemBase::projectInitialConditionOnCustomRange(
     }
   }
 
+  // Spline node ICs will need to be evaluated indirectly.
+  bool have_indirect_constraints = !_mesh.getMesh().get_constraint_rows().empty();
+
+  // We should get rid of this communication after the next libMesh
+  // update gives us a cached n_constraint_rows().
+  _mesh.getMesh().comm().max(have_indirect_constraints);
+
   for (auto & nl : _nl)
   {
     nl->solution().close();
+    if (have_indirect_constraints)
+    {
+      nl->system().solve_for_unconstrained_dofs(nl->solution());
+      nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), &nl->solution());
+    }
     nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (have_indirect_constraints)
+  {
+    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
+    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
+  }
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
