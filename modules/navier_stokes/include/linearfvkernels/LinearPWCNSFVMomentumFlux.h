@@ -34,12 +34,6 @@ public:
   /// Assemble the internal-face matrix with side-specific porosity scaling of advection.
   void addMatrixContribution() override;
 
-  /// Compute the element-row internal-face matrix contribution.
-  Real computeElemMatrixContribution() override;
-
-  /// Compute the neighbor-row internal-face matrix contribution.
-  Real computeNeighborMatrixContribution() override;
-
   /// Compute the element-row internal-face right-hand-side contribution.
   Real computeElemRightHandSideContribution() override;
 

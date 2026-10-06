@@ -1,0 +1,25 @@
+[Tests]
+  design = 'LinearFVPressureCorrectionDiffusionJump.md LinearPWCNSFVMomentumFlux.md'
+  issues = '#31995'
+
+  [orthogonal_isotropic]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.OrthogonalIsotropic
+    requirement = 'The system shall compute the half-cell conductances and interface transmissibility for orthogonal isotropic diffusion without a nonorthogonal correction.'
+  []
+  [conserves_flux_and_preserves_jump]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.ConservesFluxAndPreservesJump
+    requirement = 'The system shall construct pressure-jump interface coefficients that conserve the flux through both half cells while preserving the prescribed pressure jump.'
+  []
+  [orientation_reversal]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.OrientationReversal
+    requirement = 'The system shall preserve the pressure-jump interface coefficients and reverse the flux sign when the interface orientation and element-neighbor ordering are reversed.'
+  []
+  [rejects_degenerate_half_cell]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.RejectsDegenerateHalfCell
+    requirement = 'The system shall reject pressure-jump interface data with a nonpositive projected half-cell distance.'
+  []
+[]

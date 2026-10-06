@@ -59,8 +59,7 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
     const Real normal_diffusion = normal * diffusion_normal;
     const Real normal_distance = half_cell * normal;
     if (!std::isfinite(normal_distance) || normal_distance <= 0.0 ||
-        !std::isfinite(normal_diffusion) || normal_diffusion <= 0.0 || !std::isfinite(face_area) ||
-        face_area <= 0.0)
+        !std::isfinite(normal_diffusion) || normal_diffusion <= 0.0 || face_area <= 0.0)
       return false;
 
     conductance = face_area * normal_diffusion / normal_distance;
