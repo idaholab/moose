@@ -171,11 +171,6 @@
 []
 
 [Postprocessors]
-  [traction_x]
-    type = SideAverageValue
-    boundary = left_right
-    variable = traction_x
-  []
   [traction_y]
     type = SideAverageValue
     boundary = left_right
@@ -254,7 +249,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = lu
   nl_abs_tol = 1e-10
-  dt = 0.001
+  dt = 0.2
   end_time = 2
 []
 
@@ -263,6 +258,9 @@
   [csv]
     type = CSV
     execute_on = FINAL
+    # Resolve the traction-law corners so trapezoidal integration can use coarse steps.
+    # Both shear directions have speed 3: initiation at (1/100)/3 and failure at 4/3.
+    sync_times = '0.00333333333333333 1.33333333333333'
     show = 'prescribed_energy numerical_energy relative_error final_separation bk_mode_II_limit pure_shear_to_bk_limit_ratio'
   []
 []
