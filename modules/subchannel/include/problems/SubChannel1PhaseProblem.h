@@ -149,6 +149,29 @@ protected:
   /// Computes implicit solve using PetSc
   PetscErrorCode implicitPetscSolve(int iblock);
 
+  /**
+   * Add proximal damping K (W - W_iter) to the cross-momentum equation of the coupled solve,
+   * M_ww W + M_wp P + K (W - W_iter) = b_w, which keeps the coupled linear solve well conditioned
+   * without changing the converged solution. K is scaled by the mean magnitude of the
+   * cross-momentum coefficients so it is consistent across meshes, and by the ratio of the current
+   * to the initial cross-momentum residual (switched evolution relaxation), so K itself vanishes as
+   * the outer iteration converges.
+   * @param M_ww     cross-momentum block acting on the crossflow; K is added to its diagonal
+   * @param M_wp     cross-momentum block acting on the pressure
+   * @param b_w      cross-momentum right-hand side; K W_iter is added to it
+   * @param w_iter   crossflow at the current outer iterate
+   * @param iblock   axial block
+   * @param max_K    the damping applied far from convergence, which bounds K
+   * @param added_K  the damping applied
+   */
+  PetscErrorCode addCrossflowDamping(Mat M_ww,
+                                     Mat M_wp,
+                                     Vec b_w,
+                                     Vec w_iter,
+                                     int iblock,
+                                     PetscScalar & max_K,
+                                     PetscScalar & added_K);
+
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
   /// Detects whether pin diameter or duct displacement fields require geometry recalculation
