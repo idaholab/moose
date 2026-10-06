@@ -10,6 +10,10 @@ The user may pass [!param](/Application/num_threads) in addition to the command 
 application. The `--n-threads` value then indicates the maximum number of threads that can be used, while each application, for example in the context of
 [MultiApps](syntax/MultiApps/index.md), may only use [!param](/Application/num_threads) threads.
 
+!alert note
+`--n-threads` sets the number of threads used by several of libMesh's threaded routines. These routines will create a thread pool at this maximum size.
+If you are also running other threaded applications at the same time and the combined thread count exceeds the system's capacity, this can cause slowdowns.
+
 ## Example
 
 The following input file snippet demonstrates the use of the `Application` block.
