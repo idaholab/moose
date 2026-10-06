@@ -512,8 +512,8 @@ MFEMProblem::getEquationSystem(const std::string & weak_form_name) const
 
 void
 MFEMProblem::addProblemComposer(const std::string & composer_type,
-                                    const std::string & name,
-                                    InputParameters & parameters)
+                                const std::string & name,
+                                InputParameters & parameters)
 {
   _problem_composer = addObject<MFEMProblemComposer>(composer_type, name, parameters).front();
 }
@@ -538,7 +538,7 @@ MFEMProblem::addDefaultProblemComposer()
 }
 
 void
-MFEMProblem::setMFEMProblemOperators()
+MFEMProblem::setProblemOperators()
 {
   std::vector<MFEMProblemComposer *> problem_composers;
   theWarehouse()

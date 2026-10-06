@@ -209,9 +209,9 @@ public:
   /**
    * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
-  void addMFEMProblemComposer(const std::string & composer_type,
-                              const std::string & name,
-                              InputParameters & parameters);
+  void addProblemComposer(const std::string & composer_type,
+                          const std::string & name,
+                          InputParameters & parameters);
 
   /**
    * Add default problem composer if none has been added by the user
@@ -221,7 +221,7 @@ public:
   /**
    * Set all MFEM ProblemOperators to solve in this problem
    */
-  void setMFEMProblemOperators();
+  void setProblemOperators();
 
   /**
    * Get vector of all ProblemOperators added to this problem.
