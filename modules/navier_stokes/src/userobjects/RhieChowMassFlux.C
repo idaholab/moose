@@ -378,6 +378,7 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_mass_flux.clear();
   _grad_p_current.clear();
+  _jump_aware_pressure_gradient.clear();
   setupMeshInformation();
 }
 
@@ -390,6 +391,7 @@ RhieChowMassFlux::timestepSetup()
     return;
 
   _grad_p_current.clear();
+  _jump_aware_pressure_gradient.clear();
 
   if (!usingReconstructedPressureGradientMethod())
     return;
@@ -460,6 +462,8 @@ RhieChowMassFlux::finalizePressureCorrector()
     _pressure_system->computeGradients();
     updateCellVelocity(pressureGradientComponents());
   }
+
+  ++_pressure_solution_generation;
 }
 
 void
@@ -1174,6 +1178,12 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   // We fill the 1/A and H/A functors
   populateCouplingFunctors(_HbyA_raw, _Ainv_raw);
 
+  // Reconstruct after the current jump and half-cell coefficients are available. The first
+  // reconstruction uses zero explicit correction; later reconstructions use the preceding
+  // jump-aware gradient as the Picard iterate.
+  if (hasPressureBaffles() && !_jump_aware_pressure_gradient.current(*this))
+    _jump_aware_pressure_gradient.reconstruct(*this);
+
   if (verbose)
   {
     _console << "************************************" << std::endl;
@@ -1299,6 +1309,25 @@ RhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
   const auto momentum_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
   const Real density = _rho(makeElemArg(elem_info.elem()), Moose::currentState());
   return density * (*_Ainv_raw[component])(momentum_dof);
+}
+
+bool
+RhieChowMassFlux::hasJumpAwarePressureGradient() const
+{
+  return _jump_aware_pressure_gradient.current(*this);
+}
+
+RealVectorValue
+RhieChowMassFlux::jumpAwarePressureGradient(const ElemInfo & elem_info) const
+{
+  return _jump_aware_pressure_gradient.gradient(*this, elem_info);
+}
+
+bool
+RhieChowMassFlux::pressureDiffusionUsesNonorthogonalCorrection() const
+{
+  mooseAssert(_p_diffusion_kernel, "The pressure-diffusion kernel must be linked first.");
+  return _p_diffusion_kernel->useNonorthogonalCorrection();
 }
 
 bool
