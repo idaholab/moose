@@ -53,6 +53,12 @@ public:
   /// Whether pressure and velocity reconstruction use separate one-sided stencils on this face.
   bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const override;
 
+  /// Generation of the currently published pressure-jump field.
+  dof_id_type baffleJumpGeneration() const override { return _baffle_jump_generation; }
+
+  /// Whether at least one pressure-jump model is configured.
+  bool hasPressureBaffles() const override { return !_pressure_jump_models.empty(); }
+
   /// Populate baffle-jump storage before initializing the face mass flux.
   void initFaceMassFlux() override;
 
@@ -102,4 +108,7 @@ private:
 
   /// Restartable face field storing pressure as non-owner minus owner.
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;
+
+  /// Generation of the currently published pressure-jump field.
+  dof_id_type _baffle_jump_generation = 0;
 };
