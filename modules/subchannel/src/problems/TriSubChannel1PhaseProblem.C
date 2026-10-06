@@ -920,23 +920,15 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto base_value = harm_A * shape_factor * Sij / dist_ij;
           auto neg_base_value = -1.0 * base_value;
 
-          row_ct = ii_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
+          // Each gap is visited once from each of its two channels, so only the row of the
+          // current channel is written here
+          const auto other_ch = (i_ch == ii_ch) ? jj_ch : ii_ch;
+          row_ct = i_ch + _n_channels * iz_ind;
+          col_ct = i_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
               _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
 
-          row_ct = jj_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
-
-          row_ct = ii_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
-
-          row_ct = jj_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
+          col_ct = other_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
               _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
           counter++;
