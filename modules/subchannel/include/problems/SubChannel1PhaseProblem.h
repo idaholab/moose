@@ -428,14 +428,13 @@ protected:
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
 
-  /// Added resistances for monolithic convergence
-  PetscScalar _added_K = 0.0;
-  PetscScalar _added_K_old = 1000.0;
-  PetscScalar _max_sumWij;
-  PetscScalar _max_sumWij_new;
-  PetscScalar _correction_factor = 1.0;
   /// Maximum pressure fixed-point update before solution relaxation over the blocks
   Real _pressure_fixed_point_error = 1.0;
+  /// Per-block cross-momentum residual norm that scales the crossflow damping in the coupled solve
+  std::vector<Real> _crossflow_residual_ref;
+  /// Per-block factor, raised after coupled linear-solve failures, that delays the decay of the
+  /// crossflow damping
+  std::vector<Real> _crossflow_damping_boost;
 
 public:
   static InputParameters validParams();

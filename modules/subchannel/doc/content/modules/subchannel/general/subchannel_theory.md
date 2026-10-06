@@ -492,88 +492,60 @@ FGMRES and a field-split preconditioner. SCM checks the PETSc convergence reason
 coupled flow and enthalpy linear solves and reports the reason, iteration count, and residual norm
 instead of accepting a diverged solution.
 
-As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
+Before the coupled system is solved, SCM adds a damping term to the crossflow equation and then
+applies the optional equation and solution relaxation described below. These steps stabilize the
+iteration on the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and
+$crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks
+$M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing
+equations. None of them changes the converged solution.
 
-#### 1. Fast scale estimates
-
-!! Intentional comment to provide extra spacing
-
-From the axial- and cross-momentum rows, the code forms a quick pressure estimate and a provisional
-cross-momentum imbalance:
-\begin{equation}
-\begin{aligned}
-\hat{\mathbf m} &= M_{pm}\,\mathbf m, \\
-\hat{\mathbf p} &= \frac{\hat{\mathbf m}}{\operatorname{diag}(M_{pp}) + \varepsilon_p\mathbf 1},\\
-\hat{\mathbf r}_w &= M_{wp}\,\hat{\mathbf p} - \mathbf b_{w,p},
-\end{aligned}
-\end{equation}
-where $\mathbf b_{w,p}$ is the pressure-force right-hand side and
-$\varepsilon_p=10^{-10}$ avoids division by zero. The signed gap contributions in
-$\hat{\mathbf r}_w$ are accumulated per channel into
-$\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
-
-#### 2. Adaptive resistance multiplier
+#### 1. Crossflow damping
 
 !! Intentional comment to provide extra spacing
 
-Two scales are computed:
+The crossflow equation is replaced by its proximal form
 
 \begin{equation}
-\begin{aligned}
-m_{\min} &= \min |\mathbf m|,\\
-S_{\max} &= \max\Big(\max |\mathrm{sumw_{ijloc}}|,\; 10^{-10}\Big)
-\end{aligned}
+M_{wp}\,\mathbf P^{\ell+1} + M_{ww}\,\mathbf W^{\ell+1} +
+K^{\ell}\left(\mathbf W^{\ell+1}-\mathbf W^{\ell}\right) = \mathbf b_w,
 \end{equation}
 
-Additionally, a mean inter-iteration change for crossflow is formed
-\begin{equation}
-r_{\mathrm{base}} = \operatorname{mean}\big(\big|\mathbf W^{(k)}| - |\mathbf W^{(k-1)}\big|\big),
-\end{equation}
-leading to an adaptive resistance multiplier
-\begin{equation}
-r = \frac{r_{\mathrm{base}}}{\max(S_{\max}, \varepsilon)} + 0.5,\qquad \varepsilon\sim10^{-10}.
-\end{equation}
-The +0.5 offset supplies a baseline contribution to the added resistance.
-
-#### 3. Crossflow resistance inflation
-
-!! Intentional comment to provide extra spacing
-
-A cross-coupling resistance is estimated and smoothed:
-\begin{equation}
-\begin{aligned}
-\tilde K   &= \frac{S_{\max}}{m_{\min}}, &
-K^\star &= 0.9\,\tilde K + 0.1\,K_{\text{old}}, &
-K       &= r\,K^\star.
-\end{aligned}
-\end{equation}
-After smoothing, the provisional crossflow resistance $K$ is mapped through a piecewise lower-bound function that enforces minimum safe damping levels in specific ranges.
+i.e. $K^{\ell}$ is added to the diagonal of $M_{ww}$ and $K^{\ell}\,\mathbf W^{\ell}$ to
+$\mathbf b_w$. The damping improves the conditioning of the coupled linear system, and the
+additional term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$, so it does not alter the
+converged crossflow. The coefficient is
 
 \begin{equation}
-K \rightarrow
-\begin{cases}
-K , & K >= 10, \\
-1.0, & 1 \leq K < 10, \\
-0.5, & 0.1 \leq K < 1, \\
-\frac{1}{3}, & 0.01 \leq K < 0.1, \\
-0.1, & 0.001 \leq K < 0.01, \\
-K, & K < 10^{-3}.
-\end{cases}
+K^{\ell} = \min\left(K_{\max},\;K_{\max}\,
+\frac{\left\|\mathbf r_w^{\ell}\right\|_2}{\left\|\mathbf r_w^{0}\right\|_2}\,\gamma\right),
+\qquad
+K_{\max} = c_K\,\overline{\max_j\left|(M_{ww})_{ij}\right|},
+\qquad
+\mathbf r_w^{\ell} = M_{wp}\,\mathbf P^{\ell} + M_{ww}\,\mathbf W^{\ell} - \mathbf b_w,
 \end{equation}
 
-This mapping acts as a {snap-up} rule for the crossflow resistance $K$ over the range $[10^{-3}, 10]$:
-it raises $K$ out of weak-damping intervals but leaves very small and very large
-values unchanged. The purpose is to maintain numerical stability and adequate
-diagonal dominance in the cross-momentum equations without introducing full quantization or "bucketing".
+where the overbar denotes the mean over the crossflow unknowns of the block, $c_K = 50$, and
+$\mathbf r_w^{0}$ is the first nonzero crossflow residual of the block in the current solve. The
+largest entry of each row of $M_{ww}$ measures the axial transport of crossflow; it keeps
+$K_{\max}$ consistent with the other terms of the crossflow equation on any axial mesh, and unlike
+the diagonal it does not vanish for central differencing of uniform axial flow. The factor $c_K$
+gives the strong damping that the first outer iterations need when they start far from the
+solution. Scaling by the residual ratio, a switched evolution relaxation strategy for
+pseudo-transient continuation, makes $K$ tend to zero as the outer iteration converges, so the
+iteration approaches the convergence rate of the undamped system. The coupled linear solve starts
+from the current iterate, which keeps it short as the damping decreases.
 
-Finally, $K$ is added to the diagonal of the cross-momentum block,
-\begin{equation}
-M_{ww} \;\leftarrow\; M_{ww} + K\,I,
-\end{equation}
-thereby increasing diagonal dominance and improving conditioning for the crossflow equations. Note
-that this treatment does influence the crossflow distribution solution.
+As $K$ decreases, the coupled system can become too poorly conditioned for the field-split
+preconditioner. Each coupled solve is therefore attempted with at most 1000 Krylov iterations; if it
+does not converge, $K$ is doubled (by at least $0.05\,K_{\max}$) and the solve is repeated, up to
+eight times, the last attempt with the full `maxit`. Each retry also doubles the block factor
+$\gamma$, which starts at one in every solve and is capped at $2^8$. It keeps the damping at the
+level the preconditioner needs for the remaining outer iterations, and because it is bounded, $K$
+still tends to zero with the residual. Where the preconditioner cannot solve the undamped system,
+$K$ instead settles at the smallest value it can handle; the converged solution is unaffected
+because the damping term vanishes at the fixed point.
 
-#### 4. Equation under-relaxation
+#### 2. Equation under-relaxation
 
 !! Intentional comment to provide extra spacing
 
@@ -598,7 +570,7 @@ The off-diagonal entries are unchanged. A factor of one bypasses relaxation, whi
 one increases the diagonal magnitude and damps the update toward the previous iterate without
 changing the fixed point. With the defaults, only the crossflow equation is under-relaxed.
 
-#### 5. Post-solve solution relaxation
+#### 3. Post-solve solution relaxation
 
 !! Intentional comment to provide extra spacing
 
@@ -615,13 +587,13 @@ one. Equation relaxation and post-solve relaxation are independent and may be us
 preserve the fixed point: equation relaxation modifies the matrix and right-hand side before the
 linear solve, while post-solve relaxation damps the fixed-point update after that solve.
 
-#### 6. Net effect
+#### 4. Net effect
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) scale estimation, (ii) adaptive, iteration-smoothed, and piecewise snapped
-added crossflow resistance, and (iii) independently configurable equation and solution relaxation
-improves robustness of the nested solve during rapid crossflow changes. Added resistance and
-equation relaxation both increase entries on the crossflow diagonal, but neither guarantees strict
-diagonal dominance for every geometry and flow state. Post-solve relaxation does not alter matrix
-conditioning. Users can retain the default behavior or tune the two relaxation layers separately.
+The combination of (i) residual-scaled crossflow damping and (ii) independently configurable
+equation and solution relaxation improves robustness of the nested solve during rapid crossflow
+changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
+but neither guarantees strict diagonal dominance for every geometry and flow state. Post-solve
+relaxation does not alter matrix conditioning. Because all three preserve the fixed point, the
+converged solution is independent of them up to the outer-iteration tolerance `P_tol`.
