@@ -191,6 +191,101 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
   return cache;
 }
 
+const ComputeUserObjectsThread::InternalSideMaterialReinitCache &
+ComputeUserObjectsThread::getInternalSideMaterialReinitCache(
+    const SubdomainID subdomain_id, const SubdomainID neighbor_subdomain_id)
+{
+  const auto cache_key = std::make_pair(subdomain_id, neighbor_subdomain_id);
+  auto [cache_it, inserted] = _internal_side_material_reinit_cache.try_emplace(cache_key);
+  auto & cache = cache_it->second;
+
+  if (!inserted)
+    return cache;
+
+  std::vector<const MaterialPropertyInterface *> material_consumers;
+  material_consumers.reserve(_internal_side_objs.size() + _domain_objs.size());
+  const auto add_material_consumer = [&material_consumers](const auto * const object)
+  {
+    if (const auto * const consumer = dynamic_cast<const MaterialPropertyInterface *>(object))
+      material_consumers.push_back(consumer);
+  };
+
+  for (const auto * const uo : _internal_side_objs)
+    if (!uo->blockRestricted() || uo->hasBlocks(neighbor_subdomain_id))
+      add_material_consumer(uo);
+
+  for (const auto * const uo : _domain_objs)
+    if (!uo->blockRestricted() || uo->hasBlocks(neighbor_subdomain_id))
+      add_material_consumer(uo);
+
+  // TwoMaterialPropertyInterface exposes one dependency set for face and neighbor properties, so
+  // use the same consumers to select both material data types.
+  const auto & materials = _fe_problem.getRegularMaterialsWarehouse();
+  const auto & face_materials = materials[Moose::FACE_MATERIAL_DATA];
+  if (face_materials.hasActiveBlockObjects(subdomain_id, _tid))
+    cache.face_materials = MaterialBase::buildRequiredMaterials(
+        material_consumers, face_materials.getActiveBlockObjects(subdomain_id, _tid), true);
+
+  const auto & neighbor_materials = materials[Moose::NEIGHBOR_MATERIAL_DATA];
+  if (neighbor_materials.hasActiveBlockObjects(neighbor_subdomain_id, _tid))
+    cache.neighbor_materials = MaterialBase::buildRequiredMaterials(
+        material_consumers,
+        neighbor_materials.getActiveBlockObjects(neighbor_subdomain_id, _tid),
+        true);
+
+  return cache;
+}
+
+const ComputeUserObjectsThread::InterfaceMaterialReinitCache &
+ComputeUserObjectsThread::getInterfaceMaterialReinitCache(
+    const BoundaryID bnd_id,
+    const SubdomainID subdomain_id,
+    const SubdomainID neighbor_subdomain_id,
+    const std::vector<UserObject *> & interface_objs)
+{
+  const auto cache_key = std::make_tuple(bnd_id, subdomain_id, neighbor_subdomain_id);
+  auto [cache_it, inserted] = _interface_material_reinit_cache.try_emplace(cache_key);
+  auto & cache = cache_it->second;
+
+  if (!inserted)
+    return cache;
+
+  std::vector<const MaterialPropertyInterface *> material_consumers;
+  material_consumers.reserve(interface_objs.size() + _all_domain_objs.size());
+  const auto add_material_consumer = [&material_consumers](const auto * const object)
+  {
+    if (const auto * const consumer = dynamic_cast<const MaterialPropertyInterface *>(object))
+      material_consumers.push_back(consumer);
+  };
+
+  for (const auto * const uo : interface_objs)
+    add_material_consumer(uo);
+
+  for (const auto * const uo : _all_domain_objs)
+    if (uo->shouldExecuteOnInterface())
+      add_material_consumer(uo);
+
+  // Interface materials execute after face and neighbor reinitialization, so include their
+  // dependencies when selecting the materials that must execute first.
+  const auto & interface_materials = _fe_problem.getInterfaceMaterialsWarehouse();
+  if (interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+    for (const auto & material : interface_materials.getActiveBoundaryObjects(bnd_id, _tid))
+      add_material_consumer(material.get());
+
+  getRequiredBoundaryMaterials(
+      material_consumers, bnd_id, subdomain_id, cache.face_materials, cache.boundary_materials);
+
+  const auto & neighbor_materials =
+      _fe_problem.getRegularMaterialsWarehouse()[Moose::NEIGHBOR_MATERIAL_DATA];
+  if (neighbor_materials.hasActiveBlockObjects(neighbor_subdomain_id, _tid))
+    cache.neighbor_materials = MaterialBase::buildRequiredMaterials(
+        material_consumers,
+        neighbor_materials.getActiveBlockObjects(neighbor_subdomain_id, _tid),
+        true);
+
+  return cache;
+}
+
 void
 ComputeUserObjectsThread::onBoundary(const Elem * elem,
                                      unsigned int side,
@@ -261,13 +356,17 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   _fe_problem.prepareFace(elem, _tid);
   _fe_problem.reinitNeighbor(elem, side, _tid);
 
+  const auto & required_mats =
+      getInternalSideMaterialReinitCache(elem->subdomain_id(), neighbor->subdomain_id());
+
   // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-  _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid, true, &required_mats.face_materials);
 
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-  _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsNeighbor(
+      neighbor->subdomain_id(), _tid, true, &required_mats.neighbor_materials);
 
   for (const auto & uo : _internal_side_objs)
     if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
@@ -320,16 +419,20 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   _fe_problem.prepareFace(elem, _tid);
   _fe_problem.reinitNeighbor(elem, side, _tid);
 
+  const auto & required_mats = getInterfaceMaterialReinitCache(
+      bnd_id, elem->subdomain_id(), neighbor->subdomain_id(), interface_objs);
+
   // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
   // still remember to swap back during stack unwinding.
 
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-  _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+  _fe_problem.reinitMaterialsFaceOnBoundary(
+      bnd_id, elem->subdomain_id(), _tid, true, &required_mats.face_materials);
+  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid, true, &required_mats.boundary_materials);
 
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-  _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
+  _fe_problem.reinitMaterialsNeighbor(
+      neighbor->subdomain_id(), _tid, true, &required_mats.neighbor_materials);
   // Has to happen after face and neighbor properties have been computed. Note that we don't use
   // a sentinel here because FEProblem::swapBackMaterialsFace is going to handle face materials,
   // boundary materials, and interface materials (e.g. it queries the boundary material data

@@ -34,4 +34,8 @@ protected:
 
   /// Whether computing the automatically-created face material is an error for this test
   const bool _error_on_face;
+  /// Whether computing this material with boundary material data is an error for this test
+  const bool _error_on_boundary;
+  /// Whether computing the automatically-created neighbor material is an error for this test
+  const bool _error_on_neighbor;
 };
