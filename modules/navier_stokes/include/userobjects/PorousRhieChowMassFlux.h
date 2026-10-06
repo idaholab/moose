@@ -98,9 +98,6 @@ private:
   /// Under-relaxation factor applied when updating pressure jumps.
   const Real _pressure_jump_relaxation;
 
-  /// Cell volume times porosity stored in the pressure-system degree-of-freedom ordering.
-  std::unique_ptr<NumericVector<Number>> _cell_volume_porosity;
-
   /// Restartable face field storing pressure as non-owner minus owner.
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;
 };
