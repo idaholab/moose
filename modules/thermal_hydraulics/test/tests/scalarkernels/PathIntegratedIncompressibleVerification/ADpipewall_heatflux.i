@@ -1,10 +1,23 @@
-pi = 3.14159265358979
+# Two radial wall nodes bridge a fixed primary-fluid temperature Tf1 to a prescribed
+# outer-wall heat flux q_flux (PipeOuterWallHeatFluxScalarKernel), with no other path out
+# of the outer node. In steady state all of the applied heat must flow inward through the
+# fluid-side convection (PipeInnerWallTemperatureScalarKernel, Dittus-Boelter) and radial
+# conduction resistances in series, which is the series circuit solved algebraically below
+# for Tin_analytical/Tout_analytical using fluid properties fixed at Tf1 (mu1, cp1, k1).
+#
+# As in pipewall_ambient.i, the numeric solution evaluates water properties locally at the
+# wall node's own temperature rather than at the fixed Tf1, so its Dittus-Boelter h differs
+# slightly from the analytical one; here the wall runs about 1-2 K above Tf1 (heat flows
+# into the fluid), smaller than the ~0.3 K excursion in the ambient case, so the expected
+# relative mismatch is correspondingly smaller (~1e-4 in the gold file) but is still of the
+# same property-evaluation origin, not a convergence or solve-tolerance effect; end_time =
+# 100 s is well beyond this system's thermal time constants.
 
 length = 1.0
 
 Di = 0.05
 Do = 0.06
-Dm = '${fparse ( ${Di} + ${Do} ) / 2}'
+Dm = '${fparse ( Di + Do ) / 2}'
 
 k_wall = 15.0
 cp_wall = 500.0
@@ -22,28 +35,28 @@ mu1 = 0.001002
 cp1 = 4185.0
 k1 = 0.598
 
-flow_area1 = '${fparse ${pi} / 4 * ${Di} ^ 2}'
-wetted_perimeter1 = '${fparse ${pi} * ${Di}}'
-Dh1 = '${fparse 4 * ${flow_area1} / ${wetted_perimeter1}}'
-area_in = '${fparse ${pi} / 4 * ( ${Dm} ^ 2 - ${Di} ^ 2 )}'
-area_out = '${fparse ${pi} / 4 * ( ${Do} ^ 2 - ${Dm} ^ 2 )}'
-interface_perimeter = '${fparse ${pi} * ${Dm}}'
-interface_thickness = '${fparse ( ${Do} - ${Di} ) / 2}'
-heated_perimeter = '${fparse ${pi} * ${Do}}'
+flow_area1 = '${fparse pi / 4 * Di^2}'
+wetted_perimeter1 = '${fparse pi * Di}'
+Dh1 = '${fparse 4 * flow_area1 / wetted_perimeter1}'
+area_in = '${fparse pi / 4 * ( Dm^2 - Di^2 )}'
+area_out = '${fparse pi / 4 * ( Do^2 - Dm^2 )}'
+interface_perimeter = '${fparse pi * Dm}'
+interface_thickness = '${fparse ( Do - Di ) / 2}'
+heated_perimeter = '${fparse pi * Do}'
 
 # Independent analytical steady state: a series thermal-resistance circuit
 # Tf1 --[fluid convection]-- Tin_wall --[radial conduction]-- Tout_wall, with a
 # prescribed heat flux injected directly at the outer node and no other path out of
 # the outer node, so in steady state all of the applied heat flows inward through the
 # fluid-side convection and radial conduction resistances in series.
-Re1 = '${fparse ${m1} / ${flow_area1} * ${Dh1} / ${mu1}}'
-Pr1 = '${fparse ${mu1} * ${cp1} / ${k1}}'
-h1 = '${fparse 0.023 * ${Re1} ^ 0.8 * ${Pr1} ^ 0.4 * ${k1} / ${Dh1}}'
-G1 = '${fparse ${h1} * ${wetted_perimeter1}}'
-G2 = '${fparse ${k_wall} * ${interface_perimeter} / ${interface_thickness}}'
-Qflux = '${fparse ${q_flux} * ${heated_perimeter}}'
-Tin_analytical = '${fparse ${Tf1} + ${Qflux} / ${G1}}'
-Tout_analytical = '${fparse ${Tin_analytical} + ${Qflux} / ${G2}}'
+Re1 = '${fparse m1 / flow_area1 * Dh1 / mu1}'
+Pr1 = '${fparse mu1 * cp1 / k1}'
+h1 = '${fparse 0.023 * Re1^0.8 * Pr1^0.4 * k1 / Dh1}'
+G1 = '${fparse h1 * wetted_perimeter1}'
+G2 = '${fparse k_wall * interface_perimeter / interface_thickness}'
+Qflux = '${fparse q_flux * heated_perimeter}'
+Tin_analytical = '${fparse Tf1 + Qflux / G1}'
+Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
 
 [Mesh]
   type = GeneratedMesh

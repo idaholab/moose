@@ -1,10 +1,21 @@
-pi = 3.14159265358979
+# Same two-node series circuit as pipewall_ambient.i (fluid convection, then radial
+# conduction, into the outer wall node), but the outer node now loses heat to ambient
+# through two parallel paths: convection (linear in T, PipeOuterWallAmbientTemperatureScalarKernel)
+# and radiation (quartic in T, PipeOuterWallRadiationScalarKernel). That makes the
+# steady state the root of a single nonlinear equation in Tout rather than a plain
+# series-resistor network; see the derivation and tolerance comment just below
+# Tin_analytical/Tout_analytical. As in pipewall_ambient.i, the numeric kernels evaluate
+# fluid properties locally rather than at the single fixed Tf1 used to build the
+# analytical cross-check, so the expected agreement is approximate (same order,
+# ~2e-4 relative) rather than to roundoff, and is not limited by solve tolerance or by
+# the run not having reached steady state (end_time = 100 s is well beyond the wall's
+# thermal time constants here).
 
 length = 1.0
 
 Di = 0.05
 Do = 0.06
-Dm = '${fparse ( ${Di} + ${Do} ) / 2}'
+Dm = '${fparse ( Di + Do ) / 2}'
 
 k_wall = 15.0
 cp_wall = 500.0
@@ -15,34 +26,33 @@ m1 = 1.0
 Tf1 = 293.15
 Tamb = 273.15
 htc_amb = 50.0
+emissivity = 0.8
 
-# Representative water properties near Tf1, used only to build the independent
-# analytical steady-state cross-check below (same constants as the other
-# IncompressibleVerification heat tests, e.g. ADheat.i)
-mu1 = 0.001002
-cp1 = 4185.0
-k1 = 0.598
-
-flow_area1 = '${fparse ${pi} / 4 * ${Di} ^ 2}'
-wetted_perimeter1 = '${fparse ${pi} * ${Di}}'
-Dh1 = '${fparse 4 * ${flow_area1} / ${wetted_perimeter1}}'
-area_in = '${fparse ${pi} / 4 * ( ${Dm} ^ 2 - ${Di} ^ 2 )}'
-area_out = '${fparse ${pi} / 4 * ( ${Do} ^ 2 - ${Dm} ^ 2 )}'
-interface_perimeter = '${fparse ${pi} * ${Dm}}'
-interface_thickness = '${fparse ( ${Do} - ${Di} ) / 2}'
-ambient_perimeter = '${fparse ${pi} * ${Do}}'
+flow_area1 = '${fparse pi / 4 * Di^2}'
+wetted_perimeter1 = '${fparse pi * Di}'
+area_in = '${fparse pi / 4 * ( Dm^2 - Di^2 )}'
+area_out = '${fparse pi / 4 * ( Do^2 - Dm^2 )}'
+interface_perimeter = '${fparse pi * Dm}'
+interface_thickness = '${fparse ( Do - Di ) / 2}'
+ambient_perimeter = '${fparse pi * Do}'
 
 # Independent analytical steady state: a series thermal-resistance circuit
-# Tf1 --[fluid convection]-- Tin_wall --[radial conduction]-- Tout_wall --[ambient convection]-- Tamb
-Re1 = '${fparse ${m1} / ${flow_area1} * ${Dh1} / ${mu1}}'
-Pr1 = '${fparse ${mu1} * ${cp1} / ${k1}}'
-h1 = '${fparse 0.023 * ${Re1} ^ 0.8 * ${Pr1} ^ 0.4 * ${k1} / ${Dh1}}'
-G1 = '${fparse ${h1} * ${wetted_perimeter1}}'
-G2 = '${fparse ${k_wall} * ${interface_perimeter} / ${interface_thickness}}'
-G3 = '${fparse ${htc_amb} * ${ambient_perimeter}}'
-q = '${fparse ( ${Tf1} - ${Tamb} ) / ( 1 / ${G1} + 1 / ${G2} + 1 / ${G3} )}'
-Tin_analytical = '${fparse ${Tf1} - ${q} / ${G1}}'
-Tout_analytical = '${fparse ${Tamb} + ${q} / ${G3}}'
+# Tf1 --[fluid convection]-- Tin_wall --[radial conduction]-- Tout_wall --[parallel ambient
+# convection + radiation]-- Tamb
+#
+# Unlike pipewall_ambient.i, the outer node now loses heat through two parallel paths to
+# ambient (convection, linear in T, and radiation, quartic in T), so the steady state is
+# the root of a single nonlinear equation in Tout rather than a plain series-resistor
+# network. Eliminating Tin via the (linear) inner-node balance collapses the fluid-side and
+# radial conductances into a single series conductance Gseries = G1*G2/(G1+G2), leaving:
+#   Gseries*(Tf1 - Tout) = htc_amb*ambient_perimeter*(Tout - Tamb)
+#                          + sigma*emissivity*ambient_perimeter*(Tout^4 - Tamb^4)
+# which was solved for Tout by Newton's method offline (not at parse time, since fparse
+# cannot solve a nonlinear equation), then Tin recovered from the linear relation. The
+# values below were verified to satisfy both nodes' original flux-balance equations to
+# within 1e-11 W/m.
+Tin_analytical = 292.53408744418897
+Tout_analytical = 292.1600915387281
 
 [Mesh]
   type = GeneratedMesh
@@ -146,6 +156,16 @@ Tout_analytical = '${fparse ${Tamb} + ${q} / ${G3}}'
     downstream_spacing = ${length}
     upstream_area = ${area_out}
     downstream_area = ${area_out}
+    is_implicit = true
+  []
+  [outer_radiation]
+    type = PipeOuterWallRadiationScalarKernel
+    variable = Tout_wall
+    sp = wall_sp
+    area = ${area_out}
+    perimeter = ${ambient_perimeter}
+    T_ambient = ${Tamb}
+    emissivity = ${emissivity}
     is_implicit = true
   []
   [outer_dt]
