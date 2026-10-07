@@ -20,4 +20,16 @@
     design = 'MooseUtils.md'
     issues = '#31563 #33467'
   []
+  [tokenize_and_convert]
+    type = GoogleTest
+    unit_test = MooseUtils.tokenizeAndConvert
+    requirement = 'The system shall be able to convert delimited strings into vectors of numerals.'
+    issues = '#9789'
+  []
+  [tokenizeAndConvertThrowOnUnreadable]
+    type = GoogleTest
+    unit_test = MooseUtils.tokenizeAndConvertThrowOnUnreadable
+    requirement = 'The system shall be able to throw an exception when failing to convert delimited strings into vectors of numerals.'
+    issues = '#13311'
+  []
 []
