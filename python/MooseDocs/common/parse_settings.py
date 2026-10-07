@@ -74,6 +74,13 @@ def parse_settings(defaults, local, error_on_unknown=True):
                                 in the default list.
     """
     known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
+    # TODO: This needs to be removed once the tests are passing
+    for k, v in defaults.items():
+        try:
+            v[2]
+        except Exception:
+            raise MooseDocsException(f"Setting '{k}' is missing a validator!")
+
     validators = dict((k, v[2]) for k, v in defaults.items())
     settings, unknown = match_settings(known, local, validators)
     if error_on_unknown and unknown:
