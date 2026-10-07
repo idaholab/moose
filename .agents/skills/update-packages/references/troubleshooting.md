@@ -88,6 +88,17 @@ An outage reads like a failure of the change under test, so rule it out first. S
 failing in the same container build step with the same remote error is an outage, not a
 regression.
 
+**Treat the first explanation as a hypothesis, and try to break it.** A mechanism that fits
+the first two failing tests perfectly can still be wrong for the rest. Before acting on it,
+name a case that would disprove it and check that case: a failing test that does not use
+the component you blame, a job on a different platform, a build without the suspected
+change. If such a case fails the same way, the explanation is incomplete.
+
+**Keep tested claims apart from inferred ones.** In every report, say which statements come
+from a run and which are reasoning ("fails with version X" versus "probably also fails in
+case Y"). An inference that later drives a decision, such as how widely users are affected,
+needs its own run first.
+
 Check also whether the failure is confined to one build mode, platform or thread count.
 Code under `#ifndef NDEBUG` runs only in debug builds, so a failure in every debug job and
 no opt job points at a debug-only path; a failure only in the `--n-threads` steps points at
@@ -180,6 +191,10 @@ git cherry-pick --no-commit <first>^..<last>
 # rebuild and rerun
 git restore --staged --worktree <files the commits touched>
 ```
+
+Confirm the rebuild picked up the change before trusting the rerun: the rebuilt library
+must be newer than the edited source. A stale binary tests the old code and makes the
+result meaningless.
 
 ## 7. Use the two distributions as a bisect lever
 
@@ -292,6 +307,10 @@ Choose rows that separate the hypotheses: here B isolates the BLAS library's thr
 OpenMP setting, and D removes `--n-threads` entirely. Record the results as a table. A single
 wrong exit code reverses the conclusion, so confirm each value when the user reports it.
 
+When giving the user commands to run, copy paths and names from one source rather than
+retyping them, and prefer checks that do not depend on timing; a check that races the
+process it inspects fails exactly when the fix works.
+
 **Take a backtrace of every thread.** A matrix says which variable matters, and a backtrace
 says where the code waits:
 
@@ -351,7 +370,7 @@ reflect the discretization instead of the solver path; loosening `rel_err` only 
 sensitivity. The test spec's comments often record earlier sensitivity, which supports the
 diagnosis.
 
-## 12. Choosing the replacement pin
+## 12. Choosing a replacement pin or other fix
 
 The target is what `conda-forge-pinning-feedstock` pins, **not** the newest build on the
 channel. The channel routinely carries versions several majors ahead of the pin; picking
@@ -377,15 +396,28 @@ Beware that a pin's key name is not always the package name (keys use `_`, conda
 often use `-`). Querying the key name returns nothing and looks like "no such package";
 the `meta.yaml.template` that consumes the key shows the real package name.
 
-When the culprit is a dependency that a submodule downloads (Section 5), the smallest fix
-is to hold that one dependency at the last good version with
-`--download-<pkg>-commit=<ref>` in `scripts/configure_petsc.sh`, next to the existing
-Kokkos pin. Confirm first that the new PETSc still accepts the old version, and prove the
-pin fixes the failure locally (Section 10) before pushing it. Give the pin a comment that
-says why, add a newsletter line, and put "drop the pin once upstream is fixed" on the
-`## To do` list. `git log -- scripts/configure_petsc.sh` shows that package updates add and
-drop such pins routinely. Tag the owner of the code the failure interacts with on the PR as
-a review request, not a permission request.
+When the culprit is a dependency that a submodule downloads (Section 5), there is usually
+more than one way to resolve it, and which one fits depends on the case:
+
+- hold that dependency at a good version with `--download-<pkg>-commit=<ref>` in
+  `scripts/configure_petsc.sh` (the existing Kokkos pin is an example);
+- change how it is built (a `--download-<pkg>-*` option, a different threading model);
+- move to a newer upstream release or commit that already contains a fix;
+- change the MOOSE, libMesh or application code that triggers the problem;
+- work around it in the test inputs or the TestHarness, when the failure is confined there.
+
+Lay these out with their trade-offs and **confirm the choice with the developers who own the
+affected code before implementing any of them.** Do not treat a pin as the default answer: a
+pin holds back fixes, diverges from what PETSc expects, and needs someone to remove it later,
+and the owners may prefer a fix in their own code. `git log -- scripts/configure_petsc.sh`
+shows what has been done before, which informs the discussion but does not decide it.
+
+Whichever option is chosen, check that it is accepted by the new submodule version and
+prove locally that it fixes the failure (Section 10) before pushing it. For a pin, choose the
+**newest** good release, not just a known good one: test the release right before the bad
+one first, since an older pin drops fixes for no reason. Give the change a comment that says
+why, add a newsletter line, and put any follow-up ("drop the pin once upstream is fixed") on
+the `## To do` list.
 
 ## 13. Landing fixes without breaking the versioner gate
 
@@ -515,6 +547,15 @@ and add the bullets the fix earns.
 - **Ask before fixing anything the user has not scoped.** Compiler fallout can range from a
   one-line test change to a framework change with its own review; which of those belongs in
   a package update is the user's call, not yours.
+- **A finished diagnosis is not a decided fix.** A fix that worked for one failure is not the
+  rule for the next one that looks similar. When several fixes are possible, or the fix
+  touches code that other developers own, present the options and check with those
+  developers before implementing. Record the item as "waiting on <who>" in notes and on the
+  `## To do` list, so it is not picked up as ready to implement in a later session.
+- **Prove a fix before pushing it.** A fix reasoned out but never run (a compiler flag, an
+  include-order change, a pin) costs a full CI cycle when it is wrong. Run the smallest
+  check that would show it working, and check the repository's history for how the same
+  file has been changed before, before proposing it.
 - **Permission failures are not engineering problems.** Applying a label can fail outright
   without triage or write access on the repository. Note it, hand it to a maintainer, and
   move on. When such a failure comes from a command that did several things at once, check
