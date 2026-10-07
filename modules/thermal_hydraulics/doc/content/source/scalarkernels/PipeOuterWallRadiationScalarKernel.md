@@ -4,40 +4,30 @@
 
 This class adds a radiative heat transfer term, exchanged with an ambient/surrounding
 environment, to the outer-surface radial node of a pipe wall. Unlike
-[PipeOuterWallAmbientTemperatureScalarKernel.md] and
-[PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], it does not implement the
+[PipeOuterWallAmbientTemperatureScalarKernel.md], [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and [PipeOuterWallHeatFluxScalarKernel.md], it does not implement the
 axial or radial conduction terms of the wall node's equation; it is a purely additive
 term, meant to be added alongside another scalar kernel acting on the same outer-surface
-wall scalar variable (such as [PipeOuterWallAmbientTemperatureScalarKernel.md]), analogous
+wall scalar variable (such as [PipeOuterWallAmbientTemperatureScalarKernel.md] and [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]), analogous
 to how [ODETimeDerivative.md] supplies the time-derivative term rather than the full
-equation.
+equation; it adds the following term for [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_outer_pipe_temperature)
 
 !equation
-\frac{du}{dt} = \ldots + \frac{\sigma \, f \, \varepsilon \, F \, P \left( T_\infty^4 - u^4
-\right)}{A \rho c_p}
+\frac{\sigma \, f \, \varepsilon \, F \, P_{o,w} \left( T_\infty^4 - T_{o,w}^4 \right)}{A_{o,w} \rho_w c_{p,w}}
 
 where
 
 - $\sigma$ is the Stefan-Boltzmann constant,
 - $f$ is an optional functor by which to scale the term,
 - $\varepsilon$ is the surface emissivity,
-- $F$ is the view factor,
-- $P$ is the perimeter of this wall node exposed to the radiative environment,
+- $F$ is the view factor for the portion of the outer wall surface exposed to the radiative environment at the ambient temperature,
+- $P_{o,w}$ is the total perimeter of this wall node,
 - $T_\infty$ is the ambient/surrounding temperature,
-- $u$ is this node's own temperature,
-- $A$ is the cross-sectional area of this wall layer, and
-- $\rho$ and $c_p$ are the wall material's density and specific heat, evaluated at $u$.
-
-This follows the same convention as [ADRadiativeHeatFluxBC.md], including its parameter
-names and default values (`view_factor = 1`, `scale = 1`,
-`stefan_boltzmann_constant = 5.670367e-8`), adapted here to a lumped scalar-kernel
-formulation rather than a boundary-integrated finite-element residual: a perimeter is
-supplied explicitly, and the result is normalized by $A \rho c_p$ so that it combines
-correctly with the other kernels (radial conduction, axial conduction, convective/ambient
-exchange, and the time derivative) acting on the same wall temperature variable.
+- $T_{o,w}$ is this node's own temperature,
+- $A_{o,w}$ is the cross-sectional area of this wall layer, and
+- $\rho_w$ and $c_{p,w}$ are the wall material's density and specific heat, evaluated at $T_{o,w}$.
 
 This kernel takes a solid properties object based on the
-[ThermalSolidProperties.md] base class, used only to evaluate $\rho$ and $c_p$ at this
+[ThermalSolidProperties.md] base class, used only to evaluate $\rho_w$ and $c_{p,w}$ at this
 node's own temperature for the normalization above (the same object and `area` value
 supplied to this node's other kernel should be used here, for consistency).
 
