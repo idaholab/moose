@@ -22,7 +22,7 @@
     max_parallel = 1
     allow_test_objects = true
     issues = '#19747'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing density as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [dynamic_viscosity]
@@ -61,7 +61,7 @@
     max_parallel = 1
     allow_test_objects = true
     issues = '#19747'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing pressure as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [specific_internal_energy_3eqn]
@@ -74,7 +74,7 @@
     max_parallel = 1
     allow_test_objects = true
     issues = '#19747'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific internal energy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [specific_volume_3eqn]
@@ -88,7 +88,7 @@
     allow_test_objects = true
     # relap-7#639
     issues = '#26336'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific volume as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [velocity_3eqn]
@@ -102,7 +102,7 @@
     allow_test_objects = true
     # relap-7#639
     issues = '#26336'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing velocity as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [enthalpy_3eqn]
@@ -116,7 +116,7 @@
     allow_test_objects = true
     # relap-7#639
     issues = '#26336'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific enthalpy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [reynolds_number]
@@ -142,7 +142,7 @@
     max_parallel = 1
     allow_test_objects = true
     issues = '#19747'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing temperature as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [total_enthalpy_3eqn]
@@ -155,7 +155,7 @@
     max_parallel = 1
     allow_test_objects = true
     issues = '#19747'
-    design = 'MaterialDerivativeTestKernel.md'
+    design = 'DerivativeMaterialInterface.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing total enthalpy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [wall_friction_function]

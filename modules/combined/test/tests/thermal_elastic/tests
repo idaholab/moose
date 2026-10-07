@@ -36,5 +36,5 @@
     input = 'derivatives.i'
     allow_test_objects = true
     recover = false
-  [../]
+  [../
 []
