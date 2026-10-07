@@ -24,6 +24,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem_side_builder.h"
 
+#include <algorithm>
+#include <iterator>
 #include <unordered_map>
 
 // libMesh forward declarations
@@ -3109,23 +3111,27 @@ Assembly::cacheJacobian(const Residuals & residuals,
     return;
   }
 
-  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
-#ifndef NDEBUG
-  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
+  // constrain_element_matrix needs a single set of columns for all rows, while each residual may
+  // depend on a different set of dofs, so the columns are the union of the derivative indices of
+  // all residuals. A row is zero in the columns its residual does not depend on. The derivative
+  // indices are sorted, and the residuals usually share the same indices (e.g. the test functions
+  // of one element), so they are only merged when they differ.
+  const auto & first_dofs = residuals[0].derivatives().nude_indices();
+  _column_indices.assign(first_dofs.begin(), first_dofs.end());
   for (const auto i : make_range(decltype(residuals.size())(1), residuals.size()))
   {
-    const auto & residual = residuals[i];
-    auto current_dofs_set = std::set<dof_id_type>(residual.derivatives().nude_indices().begin(),
-                                                  residual.derivatives().nude_indices().end());
-    mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
-                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
-                "same for every residual passed to this method otherwise constrain_element_matrix "
-                "will not work.");
+    const auto & dofs = residuals[i].derivatives().nude_indices();
+    if (std::equal(dofs.begin(), dofs.end(), _column_indices.begin(), _column_indices.end()))
+      continue;
+    std::vector<dof_id_type> merged;
+    merged.reserve(_column_indices.size() + dofs.size());
+    std::set_union(_column_indices.begin(),
+                   _column_indices.end(),
+                   dofs.begin(),
+                   dofs.end(),
+                   std::back_inserter(merged));
+    _column_indices.swap(merged);
   }
-#endif
-  _column_indices.assign(compare_dofs.begin(), compare_dofs.end());
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
