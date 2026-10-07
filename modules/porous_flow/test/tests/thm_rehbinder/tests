@@ -1,10 +1,13 @@
 [Tests]
+  design = 'thm_rehbinder_tests.md'
   [./fixed_outer]
     type = 'CSVDiff'
     input = 'fixed_outer.i'
     csvdiff = 'fixed_outer_P_0001.csv fixed_outer_T_0001.csv fixed_outer_U_0001.csv'
     # Loosening tolerance for parallel testing
     abs_zero = 1e-8
+    issues = '#8432'
+    requirement = 'The system shall reproduce the Rehbinder analytical solution for coupled thermal-hydraulic-mechanical deformation around a pressurized, heated cylindrical cavity, using a fixed-displacement outer boundary condition.'
   [../]
   [./fixed_outer_rz]
     type = 'CSVDiff'
@@ -12,6 +15,8 @@
     csvdiff = 'fixed_outer_rz_P_0001.csv fixed_outer_rz_T_0001.csv fixed_outer_rz_U_0001.csv'
     # Loosening tolerance for parallel testing
     abs_zero = 1e-8
+    issues = '#10152'
+    requirement = 'The system shall reproduce the Rehbinder analytical solution for coupled thermal-hydraulic-mechanical deformation around a pressurized, heated cylindrical cavity, using the RZ coordinate system with a fixed-displacement outer boundary condition.'
   [../]
   [./free_outer]
     type = 'CSVDiff'
@@ -19,5 +24,7 @@
     csvdiff = 'free_outer_P_0001.csv free_outer_T_0001.csv free_outer_U_0001.csv'
     # Loosening tolerance for parallel testing
     rel_err = 1e-5
+    issues = '#8432'
+    requirement = 'The system shall reproduce the Rehbinder analytical solution for coupled thermal-hydraulic-mechanical deformation around a pressurized, heated cylindrical cavity, using a traction-free outer boundary condition.'
   [../]
 []

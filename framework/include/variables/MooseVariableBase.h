@@ -201,8 +201,6 @@ public:
    */
   void eigen(bool eigen) { _is_eigen = eigen; }
 
-  void initialSetup() override;
-
   virtual void clearAllDofIndices() { _dof_indices.clear(); }
 
   /**

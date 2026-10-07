@@ -63,6 +63,13 @@ public:
    */
   virtual std::vector<VariableName> getAuxVariableNames();
 
+  template <typename T>
+  std::vector<std::shared_ptr<T>>
+  addObject(const std::string & type, const std::string & name, InputParameters & parameters)
+  {
+    return ExternalProblem::addObject<T>(type, name, parameters, /*threaded=*/false);
+  }
+
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
                             InputParameters & parameters) override;
