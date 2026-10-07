@@ -75,8 +75,8 @@ TangentialMortarMechanicalContact::initialSetup()
                "constraint when nodal-normal derivatives are enabled.");
 }
 
-ADReal
-TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
+void
+TangentialMortarMechanicalContact::precomputeQpQuantities()
 {
   // Interpolate each nodal tangential pressure with its own Householder tangent frame.
   const auto direction = static_cast<unsigned int>(_direction);
@@ -85,7 +85,7 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
   const auto & phi = _weighted_velocities_uo.tangentialTractionBasis(direction);
   const bool ad_tangents = _weighted_velocities_uo.shouldRecordNodalNormalDerivatives();
 
-  ADReal traction_component = 0;
+  _qp_traction_component = 0;
   if (ad_tangents)
     for (const auto j : index_range(phi))
     {
@@ -94,7 +94,7 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // householderTangents() applies a Householder reflection to two Cartesian basis vectors, so
       // the frame it returns is already orthonormal and needs no normalization here.
       const auto & tangents = _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, j);
-      traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
+      _qp_traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
     }
   else
   {
@@ -103,10 +103,15 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
     {
       const auto nodal_pressure = _weighted_velocities_uo.nodalTangentialPressure(
           _lower_secondary_elem->node_ref(j), direction);
-      traction_component += phi[j][_qp] * nodal_pressure * nodal_tangents[direction][j](_component);
+      _qp_traction_component +=
+          phi[j][_qp] * nodal_pressure * nodal_tangents[direction][j](_component);
     }
   }
+}
 
+ADReal
+TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
+{
   switch (type)
   {
     case Moose::MortarType::Secondary:
@@ -118,10 +123,10 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      return _test_secondary[_i][_qp] * traction_component;
+      return _test_secondary[_i][_qp] * _qp_traction_component;
 
     case Moose::MortarType::Primary:
-      return -_test_primary[_i][_qp] * traction_component;
+      return -_test_primary[_i][_qp] * _qp_traction_component;
 
     default:
       return 0;

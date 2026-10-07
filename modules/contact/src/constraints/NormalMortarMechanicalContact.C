@@ -66,26 +66,31 @@ NormalMortarMechanicalContact::initialSetup()
         "when nodal-normal derivatives are enabled.");
 }
 
-ADReal
-NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
+void
+NormalMortarMechanicalContact::precomputeQpQuantities()
 {
   // Interpolating sum_j Phi_j z_j n_j is the transpose of the weighted gap and keeps the two sides
   // of the interface in equilibrium.
   const auto & phi = _weighted_gap_uo.tractionBasis();
   const bool ad_normals = _weighted_gap_uo.shouldRecordNodalNormalDerivatives();
-  ADReal traction_component = 0;
+  _qp_traction_component = 0;
   for (const auto j : index_range(phi))
   {
     const auto nodal_pressure =
         _weighted_gap_uo.nodalContactPressure(_lower_secondary_elem->node_ref(j));
 
     if (ad_normals)
-      traction_component += phi[j][_qp] * nodal_pressure *
-                            _weighted_gap_uo.contactNormal(*_lower_secondary_elem, j)(_component);
+      _qp_traction_component +=
+          phi[j][_qp] * nodal_pressure *
+          _weighted_gap_uo.contactNormal(*_lower_secondary_elem, j)(_component);
     else
-      traction_component += phi[j][_qp] * nodal_pressure * _normals[j](_component);
+      _qp_traction_component += phi[j][_qp] * nodal_pressure * _normals[j](_component);
   }
+}
 
+ADReal
+NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
+{
   switch (type)
   {
     case Moose::MortarType::Secondary:
@@ -97,12 +102,12 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // indicates the momentum will tend to increase at this location with time, which is what we
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
-      return _test_secondary[_i][_qp] * traction_component;
+      return _test_secondary[_i][_qp] * _qp_traction_component;
 
     case Moose::MortarType::Primary:
       // The traction is signed according to the secondary face, so we need to introduce a negative
       // sign here
-      return -_test_primary[_i][_qp] * traction_component;
+      return -_test_primary[_i][_qp] * _qp_traction_component;
 
     default:
       return 0;

@@ -23,7 +23,11 @@ public:
   void initialSetup() override;
 
 protected:
+  void precomputeQpQuantities() override;
   ADReal computeQpResidual(Moose::MortarType type) final;
+
+  /// The interpolated tangential traction component at the current quadrature point
+  ADReal _qp_traction_component;
 
   /// Displacement component on which the residual will be computed
   const MooseEnum _component;

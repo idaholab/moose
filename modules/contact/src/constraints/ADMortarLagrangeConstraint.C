@@ -97,11 +97,14 @@ ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
   }
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+  {
+    precomputeQpQuantities();
     for (const auto index : is_index_on_lower_dimension)
     {
       _i = index;
       _local_re(_i) += raw_value(_JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type));
     }
+  }
 
   accumulateTaggedLocalResidual();
 }
@@ -176,6 +179,7 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   // automatic differentiation-generated derivatives.
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
+    precomputeQpQuantities();
     unsigned int index_lower = 0;
     for (const auto index : is_index_on_lower_dimension)
     {
