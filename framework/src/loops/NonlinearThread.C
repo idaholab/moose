@@ -226,7 +226,7 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
     else
     {
       // elem's neighbor across this side is an inactive ancestor: elem is on the coarser side of
-      // a statically non-conforming interface (e.g. one block refined via RefineBlockGenerator).
+      // an interface with h-refinement on the other side.
       // The real geometric neighbors are the active children of this ancestor, so visit each of
       // them individually instead of silently skipping the whole face.
       std::vector<const Elem *> fine_neighbors;
@@ -259,16 +259,16 @@ NonlinearThread::onInterfaceNonConforming(const Elem * elem,
   // are the correct integration measure for the portion of elem's face that fine_neighbor
   // actually covers. Call this directly on the Assembly object (not through FEProblemBase) so no
   // variable/dof binding happens for fine_neighbor in the "elem" role.
-  Assembly & assembly0 = _fe_problem.assembly(_tid, 0);
+  Assembly & assembly0 = _fe_problem.assembly(_tid, _fe_problem.currentNlSysNum());
   assembly0.reinitElemFaceRef(fine_neighbor, fine_side, TOLERANCE, nullptr, nullptr);
   const auto fine_phys_points = assembly0.qPointsFace().stdVector();
   const auto fine_phys_JxW = assembly0.JxWFace().stdVector();
 
   // Find elem's own side-local reference coordinates for those same physical points.
-  const auto elem_side_elem = elem->build_side_ptr(side);
+  const Elem & elem_side_elem = _elem_side_builder(*elem, side);
   std::vector<Point> elem_side_ref_points;
   libMesh::FEMap::inverse_map(
-      elem_side_elem->dim(), elem_side_elem.get(), fine_phys_points, elem_side_ref_points);
+      elem_side_elem.dim(), &elem_side_elem, fine_phys_points, elem_side_ref_points);
 
   // Measure elem's own local Jacobian at those points using dummy unit weights, then rescale so
   // that elem's face JxW, once bound for real below, exactly matches fine_neighbor's physical
@@ -284,14 +284,14 @@ NonlinearThread::onInterfaceNonConforming(const Elem * elem,
   // additively across every fine neighbor of this (elem, side) visit, since each one only covers
   // a fraction of elem's face; that local storage was already correctly prepared and zeroed
   // exactly once for this element by FEProblemBase::prepare() before this side loop ever started.
-  // We deliberately do NOT call the FEProblemBase::reinitElemFaceRef() convenience bundle here:
-  // it unconditionally (re-)zeros elem's local residual/Jacobian storage as part of its one-shot
-  // reinit+prepare bundle (see SubProblem::reinitElemFaceRef's calls to
-  // Assembly::prepareResidual/prepareJacobianBlock), which would discard not only the prior fine
-  // neighbors' contributions but also elem's own volumetric Kernel contributions already
-  // accumulated earlier in this element's visit. elem's dof indices don't change across fine
-  // neighbors, so reinitializing the face at the new points/weights and recomputing variable
-  // values from them is all that is needed; no further dof preparation step is required.
+  // The loop below calls Assembly::reinitElemFaceRef() directly rather than the
+  // FEProblemBase/SubProblem method of the same name: that convenience bundle also calls
+  // Assembly::prepareResidual()/prepareJacobianBlock(), which would unconditionally re-zero elem's
+  // local residual/Jacobian storage, discarding both the prior fine neighbors' contributions and
+  // elem's own volumetric Kernel contributions already accumulated earlier in this element's
+  // visit. elem's dof indices don't change across fine neighbors, so reinitializing the face at
+  // the new points/weights and recomputing variable values from them is all that is needed; no
+  // further dof preparation step is required.
   for (const auto sys_num : make_range(_fe_problem.numNonlinearSystems()))
   {
     _fe_problem.assembly(_tid, sys_num)

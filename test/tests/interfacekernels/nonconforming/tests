@@ -1,9 +1,9 @@
 [Tests]
   design = 'syntax/InterfaceKernels/index.md'
-  issues = '#TBD'
+  issues = '#33963'
 
   [primary_side_refinement]
-    requirement = 'The system shall correctly evaluate an InterfaceKernel across a statically '
+    requirement = 'The system shall correctly evaluate residual and Jacobian contributions across a statically '
                    'non-conforming interface (one side refined relative to the other), giving '
                    'the same, exactly conserved result regardless of which side carries the '
                    '"primary" boundary tag,'

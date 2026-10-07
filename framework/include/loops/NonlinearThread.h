@@ -13,6 +13,7 @@
 #include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/elem_range.h"
+#include "libmesh/elem_side_builder.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -202,4 +203,7 @@ private:
   bool _subdomain_has_dg;
   /// Whether the subdomain has HDGKernels
   bool _subdomain_has_hdg;
+
+  /// Builds (and caches) the side element for elem/side pairs in onInterfaceNonConforming
+  libMesh::ElemSideBuilder _elem_side_builder;
 };
