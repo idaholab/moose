@@ -52,7 +52,8 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Tests that previously failing tests that pass with --failed-tests are
         updated in the previous results and not ran by the next --failed-tests,
-        and that --failed-tests-no-update leaves the previous results unchanged.
+        that all other previous results are kept unchanged, and that
+        --failed-tests-no-update leaves the previous results unchanged.
         """
         with tempfile.TemporaryDirectory() as output_dir:
             # Each test fails while its marker file exists
@@ -63,13 +64,20 @@ class TestHarnessTester(TestHarnessTestCase):
             }
             for marker in markers.values():
                 open(marker, "w").close()
+            # Passes in the original run, so is never re-ran and must be kept
+            tests["c"] = {"type": "RunCommand", "command": "'true'"}
 
             results_file = os.path.join(output_dir, "results.json")
             args = ["--no-color", "--results-file", results_file]
             kwargs = {"tmp_output": False, "tests": tests}
 
-            # Both tests fail
-            stats = self.runTests(*args, exit_code=128, **kwargs).results["stats"]
+            def load_results():
+                with open(results_file, "r") as f:
+                    return json.load(f)
+
+            # a and b fail, c passes
+            self.runTests(*args, exit_code=128, **kwargs)
+            original_results = load_results()
 
             # Only a fails; without updating, the previous results are unchanged
             os.remove(markers["b"])
@@ -88,20 +96,32 @@ class TestHarnessTester(TestHarnessTestCase):
             out = self.runTests(*args, "--failed-tests", exit_code=128, **kwargs).output
             self.assertRegex(out, r"test\.a.*?FAILED")
             self.assertRegex(out, r"test\.b.*?OK")
-            with open(results_file, "r") as f:
-                results = json.load(f)
+            self.assertNotRegex(out, r"test\.c")
+            results = load_results()
             entries = results["tests"]["test"]["tests"]
-            self.assertEqual(entries["a"]["status"]["status"], "FAIL")
             self.assertEqual(entries["b"]["status"]["status"], "OK")
-            # Stats from the original run are kept
-            self.assertEqual(results["stats"], stats)
+            # Everything else, including the entries of a and c, the headers,
+            # and the stats of the original run, is unchanged
+            del entries["b"]
+            del original_results["tests"]["test"]["tests"]["b"]
+            # The spec file path is refreshed when an entry is stored, and the
+            # test spec is written to a new temporary directory on each run
+            del results["tests"]["test"]["spec_file"]
+            del original_results["tests"]["test"]["spec_file"]
+            self.assertEqual(results, original_results)
 
             # Only a is ran again, and it now passes
             os.remove(markers["a"])
             out = self.runTests(*args, "--failed-tests", **kwargs).output
             self.assertRegex(out, r"test\.a.*?OK")
-            self.assertNotRegex(out, r"test\.b")
+            self.assertNotRegex(out, r"test\.[bc]")
+            entries = load_results()["tests"]["test"]["tests"]
+            self.assertEqual(sorted(entries), ["a", "b", "c"])
+            self.assertEqual(entries["a"]["status"]["status"], "OK")
+            self.assertEqual(
+                entries["c"], original_results["tests"]["test"]["tests"]["c"]
+            )
 
             # Nothing left to run
             out = self.runTests(*args, "--failed-tests", **kwargs).output
-            self.assertNotRegex(out, r"test\.[ab]")
+            self.assertNotRegex(out, r"test\.[abc]")
