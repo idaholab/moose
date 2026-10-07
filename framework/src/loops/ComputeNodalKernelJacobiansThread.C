@@ -77,6 +77,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
 
     // The NodalKernels that are active and are coupled to the jvar in question
     std::vector<std::shared_ptr<NodalKernelBase>> active_involved_kernels;
+    // A NodalKernel active on several of the node's blocks must contribute only once
+    std::set<const NodalKernelBase *> involved_kernels;
 
     const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (const auto & block : block_ids)
@@ -93,7 +95,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
             // loop
             if (nodal_kernel->variable().number() == jvar)
             {
-              active_involved_kernels.push_back(nodal_kernel);
+              if (involved_kernels.insert(nodal_kernel.get()).second)
+                active_involved_kernels.push_back(nodal_kernel);
               continue;
             }
 
@@ -103,7 +106,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
             for (const auto & var : coupled_vars)
               if (var->number() == jvar)
               {
-                active_involved_kernels.push_back(nodal_kernel);
+                if (involved_kernels.insert(nodal_kernel.get()).second)
+                  active_involved_kernels.push_back(nodal_kernel);
                 break; // It only takes one
               }
           }
