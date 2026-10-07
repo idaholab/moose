@@ -11,6 +11,10 @@
 
 #include "PipeWallTemperatureScalarKernelBase.h"
 
+/**
+ * Outer wall path-integrated incompressible conjugate heat transfer kernel with an ambient outer
+ * boundary condition
+ */
 template <bool is_ad>
 class PipeOuterWallAmbientTemperatureScalarKernelTempl
   : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
