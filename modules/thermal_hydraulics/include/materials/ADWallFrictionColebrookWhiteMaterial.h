@@ -10,6 +10,8 @@
 #pragma once
 
 #include "Material.h"
+
+class Function;
 #include "MooseEnum.h"
 
 /**
@@ -37,7 +39,7 @@ protected:
   /// Hydraulic diameter
   const ADMaterialProperty<Real> & _D_h;
   /// Roughness of the surface
-  const Real & _roughness;
+  const Function & _roughness_fn;
 
   /// max iterations for iterative solve
   const unsigned int _max_its;
