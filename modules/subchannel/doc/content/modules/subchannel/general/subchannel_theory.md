@@ -488,9 +488,13 @@ are uncoupled from the other equations in this otherwise monolithic system (enth
 the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
 The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
 block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
-FGMRES and a field-split preconditioner. SCM checks the PETSc convergence reason for both the
-coupled flow and enthalpy linear solves and reports the reason, iteration count, and residual norm
-instead of accepting a diverged solution.
+FGMRES, restarted every 200 iterations, and a multiplicative field-split preconditioner with one
+split per field. The restart is longer than the PETSc default of 30 because, once the crossflow
+damping described below has decayed, a restart of 30 discards the Krylov space before it resolves
+the coupled crossflow-pressure modes, and the solve stagnates. The options of the coupled solve can
+be changed with the `scm_coupled_` PETSc prefix, e.g. `-scm_coupled_ksp_gmres_restart`. SCM
+checks the PETSc convergence reason for both the coupled flow and enthalpy linear solves and reports
+the reason, iteration count, and residual norm instead of accepting a diverged solution.
 
 Before the coupled system is solved, SCM adds a damping term to the crossflow equation and then
 applies the optional equation and solution relaxation described below. These steps stabilize the
@@ -525,7 +529,11 @@ K_{\max} = c_K\,\overline{\max_j\left|(M_{ww})_{ij}\right|},
 \end{equation}
 
 where the overbar denotes the mean over the crossflow unknowns of the block, $c_K = 50$, and
-$\mathbf r_w^{0}$ is the first nonzero crossflow residual of the block in the current solve. The
+$\mathbf r_w^{\ell}$ is the residual of the crossflow equation at the current iterate, before the
+damping is added. The reference $\left\|\mathbf r_w^{0}\right\|_2$ is the largest crossflow
+residual norm of the block in the current solve so far, so the ratio never exceeds one. The uniform
+initial state has a crossflow residual that is zero up to round-off, depending on the input; using
+the first residual as the reference would then hold $K$ at $K_{\max}$ for the whole solve. The
 largest entry of each row of $M_{ww}$ measures the axial transport of crossflow; it keeps
 $K_{\max}$ consistent with the other terms of the crossflow equation on any axial mesh, and unlike
 the diagonal it does not vanish for central differencing of uniform axial flow. The factor $c_K$
@@ -536,15 +544,26 @@ iteration approaches the convergence rate of the undamped system. The coupled li
 from the current iterate, which keeps it short as the damping decreases. Its convergence tolerance
 `rtol` is applied to the residual of that initial iterate rather than to the right-hand side.
 
-As $K$ decreases, the coupled system can become too poorly conditioned for the field-split
-preconditioner. Each coupled solve is therefore attempted with at most 1000 Krylov iterations; if it
-does not converge, $K$ is doubled (by at least $0.05\,K_{\max}$) and the solve is repeated, up to
-eight times, the last attempt with the full `maxit`. Each retry also doubles the block factor
-$\gamma$, which starts at one in every solve and is capped at $2^8$. It keeps the damping at the
-level the preconditioner needs for the remaining outer iterations, and because it is bounded, $K$
-still tends to zero with the residual. Where the preconditioner cannot solve the undamped system,
-$K$ instead settles at the smallest value it can handle; the converged solution is unaffected
-because the damping term vanishes at the fixed point.
+The block factor $\gamma$ starts at one in every solve, is capped at $2^8$, and is doubled in two
+situations:
+
+- +Linear-solve failure.+ As $K$ decreases, the coupled system can become too poorly conditioned
+  for the field-split preconditioner. Each coupled solve is therefore attempted with at most 1000
+  Krylov iterations; if it does not converge, $K$ is doubled (by at least $0.05\,K_{\max}$) and the
+  solve is repeated, up to eight times, the last attempt with the full `maxit`. Each retry also
+  doubles $\gamma$, which keeps the damping at the level the preconditioner needs for the remaining
+  outer iterations.
+- +Outer-iteration growth.+ The crossflow residual reacts to a diverging outer iteration only after
+  the temperature and fluid properties have already moved, so $K$ can decay faster than the outer
+  iteration tolerates; this happens, for instance, near flow blockages. After every temperature
+  update of a block, $\gamma$ is therefore doubled if the temperature error $\epsilon_T$ has grown
+  by more than a factor of two since the previous update. The factor of two is larger than the
+  iteration-to-iteration variation of $\epsilon_T$ near convergence, so the safeguard reacts to
+  divergence rather than to noise.
+
+Because $\gamma$ is bounded, $K$ still tends to zero with the residual. Where the preconditioner
+cannot solve the undamped system, $K$ instead settles at the smallest value it can handle; the
+converged solution is unaffected because the damping term vanishes at the fixed point.
 
 #### 2. Equation under-relaxation
 
@@ -592,9 +611,9 @@ linear solve, while post-solve relaxation damps the fixed-point update after tha
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) residual-scaled crossflow damping and (ii) independently configurable
-equation and solution relaxation improves robustness of the nested solve during rapid crossflow
-changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
+The combination of (i) residual-scaled crossflow damping that backs off when the linear solve fails
+or the outer iteration diverges and (ii) independently configurable equation and solution relaxation
+improves robustness of the nested solve during rapid crossflow changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
 but neither guarantees strict diagonal dominance for every geometry and flow state. Post-solve
 relaxation does not alter matrix conditioning. Because all three preserve the fixed point, the
 converged solution is independent of them up to the outer-iteration tolerance `P_tol`.
