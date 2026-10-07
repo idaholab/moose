@@ -488,11 +488,14 @@ are uncoupled from the other equations in this otherwise monolithic system (enth
 the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
 The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
 block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
-FGMRES, restarted every 200 iterations, and a multiplicative field-split preconditioner with one
-split per field. The restart is longer than the PETSc default of 30 because, once the crossflow
-damping described below has decayed, a restart of 30 discards the Krylov space before it resolves
-the coupled crossflow-pressure modes, and the solve stagnates. The options of the coupled solve can
-be changed with the `scm_coupled_` PETSc prefix, e.g. `-scm_coupled_ksp_gmres_restart`. SCM
+FGMRES and a multiplicative field-split preconditioner with one split per field. The FGMRES restart
+length is set by `coupled_gmres_restart`, which defaults to the PETSc value of 30. With tight `P_tol`
+and `T_tol`, once the crossflow damping described below has decayed, a restart of 30 discards the
+Krylov space before it resolves the coupled crossflow-pressure modes, and the coupled solves
+stagnate; a restart of 100 to 300 avoids this. A longer restart also removes the linear-solve
+failures that raise the damping, which can destabilize the outer iteration of flow blockage cases,
+so it is not the default. Other options of the coupled solve can be changed with the `scm_coupled_`
+PETSc prefix. SCM
 checks the PETSc convergence reason for both the coupled flow and enthalpy linear solves and reports
 the reason, iteration count, and residual norm instead of accepting a diverged solution.
 
@@ -559,7 +562,9 @@ situations:
   update of a block, $\gamma$ is therefore doubled if the temperature error $\epsilon_T$ has grown
   by more than a factor of two since the previous update. The factor of two is larger than the
   iteration-to-iteration variation of $\epsilon_T$ near convergence, so the safeguard reacts to
-  divergence rather than to noise.
+  divergence rather than to noise. It does not replace the damping that linear-solve failures
+  provide with the default `coupled_gmres_restart`: flow blockage cases can still diverge with a
+  longer restart.
 
 Because $\gamma$ is bounded, $K$ still tends to zero with the residual. Where the preconditioner
 cannot solve the undamped system, $K$ instead settles at the smallest value it can handle; the
