@@ -69,6 +69,8 @@
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     model = solid_mechanics:laromance/test/SS316H.json
+    absolute_tolerance = 1e-20
+    relative_tolerance = 1e-20
     outputs = all
   [../]
 []
