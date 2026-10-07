@@ -15,6 +15,9 @@
 
 class ThermalSolidProperties;
 
+/**
+ * Base class for path-integrated incompressible conjugate heat transfer kernels
+ */
 template <bool is_ad>
 class PipeWallTemperatureScalarKernelBaseTempl
   : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,

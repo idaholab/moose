@@ -13,6 +13,10 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary
+ * side boundary condition
+ */
 template <bool is_ad>
 class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl
   : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
