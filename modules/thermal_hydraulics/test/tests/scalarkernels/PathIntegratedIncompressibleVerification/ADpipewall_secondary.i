@@ -1,10 +1,25 @@
-pi = 3.14159265358979
+# Two radial wall nodes bridge a fixed primary-fluid temperature Tf1 to a fixed
+# secondary-fluid temperature Tf2 through three conductances in series: primary-side
+# convection (PipeInnerWallTemperatureScalarKernel), radial conduction through the wall,
+# and secondary-side convection (PipeOuterWallCoupledConvectiveTemperatureScalarKernel) -
+# a double-pipe-style conjugate heat transfer arrangement. The analytical Tin/Tout below
+# are the steady state of that series-resistance circuit, solved algebraically at parse
+# time with both streams' water properties fixed at representative constants (mu_f, cp_f,
+# k_f), giving a simple linear system.
+#
+# As in pipewall_ambient.i, the numeric kernels instead evaluate water properties locally
+# at each wall node's own running temperature on both the primary and secondary sides, so
+# the two convective coefficients each differ slightly from their analytical counterparts.
+# That is the dominant source of the ~3e-4 to 7e-4 relative mismatch seen in the gold
+# file; it is not a convergence or solve-tolerance artifact, since end_time = 100 s is
+# well beyond this system's thermal time constants. The test therefore only requires
+# approximate agreement with the analytical values, not agreement to roundoff.
 
 length = 1.0
 
 Di = 0.05
 Do = 0.06
-Dm = '${fparse ( ${Di} + ${Do} ) / 2}'
+Dm = '${fparse ( Di + Do ) / 2}'
 
 k_wall = 15.0
 cp_wall = 500.0
@@ -24,35 +39,35 @@ mu_f = 0.001002
 cp_f = 4185.0
 k_f = 0.598
 
-flow_area1 = '${fparse ${pi} / 4 * ${Di} ^ 2}'
-wetted_perimeter1 = '${fparse ${pi} * ${Di}}'
-Dh1 = '${fparse 4 * ${flow_area1} / ${wetted_perimeter1}}'
-area_in = '${fparse ${pi} / 4 * ( ${Dm} ^ 2 - ${Di} ^ 2 )}'
-area_out = '${fparse ${pi} / 4 * ( ${Do} ^ 2 - ${Dm} ^ 2 )}'
-interface_perimeter = '${fparse ${pi} * ${Dm}}'
-interface_thickness = '${fparse ( ${Do} - ${Di} ) / 2}'
+flow_area1 = '${fparse pi / 4 * Di^2}'
+wetted_perimeter1 = '${fparse pi * Di}'
+Dh1 = '${fparse 4 * flow_area1 / wetted_perimeter1}'
+area_in = '${fparse pi / 4 * ( Dm^2 - Di^2 )}'
+area_out = '${fparse pi / 4 * ( Do^2 - Dm^2 )}'
+interface_perimeter = '${fparse pi * Dm}'
+interface_thickness = '${fparse ( Do - Di ) / 2}'
 
 flow_area2 = 0.003
 wetted_perimeter2 = 0.3
-Dh2 = '${fparse 4 * ${flow_area2} / ${wetted_perimeter2}}'
+Dh2 = '${fparse 4 * flow_area2 / wetted_perimeter2}'
 
 # Independent analytical steady state: a series thermal-resistance circuit
 # Tf1 --[primary convection]-- Tin_wall --[radial conduction]-- Tout_wall --[secondary convection]-- Tf2
-Re1 = '${fparse ${m1} / ${flow_area1} * ${Dh1} / ${mu_f}}'
-Pr1 = '${fparse ${mu_f} * ${cp_f} / ${k_f}}'
-h1 = '${fparse 0.023 * ${Re1} ^ 0.8 * ${Pr1} ^ 0.4 * ${k_f} / ${Dh1}}'
-G1 = '${fparse ${h1} * ${wetted_perimeter1}}'
+Re1 = '${fparse m1 / flow_area1 * Dh1 / mu_f}'
+Pr1 = '${fparse mu_f * cp_f / k_f}'
+h1 = '${fparse 0.023 * Re1^0.8 * Pr1^0.4 * k_f / Dh1}'
+G1 = '${fparse h1 * wetted_perimeter1}'
 
-G2 = '${fparse ${k_wall} * ${interface_perimeter} / ${interface_thickness}}'
+G2 = '${fparse k_wall * interface_perimeter / interface_thickness}'
 
-Re2 = '${fparse ${m2} / ${flow_area2} * ${Dh2} / ${mu_f}}'
-Pr2 = '${fparse ${mu_f} * ${cp_f} / ${k_f}}'
-h2 = '${fparse 0.023 * ${Re2} ^ 0.8 * ${Pr2} ^ 0.4 * ${k_f} / ${Dh2}}'
-G3 = '${fparse ${h2} * ${wetted_perimeter2}}'
+Re2 = '${fparse m2 / flow_area2 * Dh2 / mu_f}'
+Pr2 = '${fparse mu_f * cp_f / k_f}'
+h2 = '${fparse 0.023 * Re2^0.8 * Pr2^0.4 * k_f / Dh2}'
+G3 = '${fparse h2 * wetted_perimeter2}'
 
-q = '${fparse ( ${Tf1} - ${Tf2} ) / ( 1 / ${G1} + 1 / ${G2} + 1 / ${G3} )}'
-Tin_analytical = '${fparse ${Tf1} - ${q} / ${G1}}'
-Tout_analytical = '${fparse ${Tf2} + ${q} / ${G3}}'
+q = '${fparse ( Tf1 - Tf2 ) / ( 1 / G1 + 1 / G2 + 1 / G3 )}'
+Tin_analytical = '${fparse Tf1 - q / G1}'
+Tout_analytical = '${fparse Tf2 + q / G3}'
 
 [Mesh]
   type = GeneratedMesh
