@@ -666,14 +666,11 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
   if (section_node)
     mooseAssert(section_node->type() == hit::NodeType::Section, "Node type should be a section");
 
-  std::vector<hit::ErrorMessage> param_errors;
+  // Keeps track of parameters with errors so that we can check whether a required parameter
+  // is also missing (which could indicate a typo) for these
   std::set<std::string> params_with_errors;
-  const auto hasErrorForNode = [&param_errors, this](const hit::Node * const node)
-  {
-    const auto has_node = [node](const auto & err) { return err.node == node; };
-    return std::find_if(_errors.begin(), _errors.end(), has_node) != _errors.end() ||
-           std::find_if(param_errors.begin(), param_errors.end(), has_node) != param_errors.end();
-  };
+  // Errors from previous sections precede this index
+  const auto first_section_error = _errors.size();
 
   for (const auto & [name, par_unique_ptr] : p)
   {
@@ -770,9 +767,12 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
       if (p.isPrivate(param_name))
       {
         // Error if it isn't global, just once
-        if (!global && !hasErrorForNode(param_node))
-          param_errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
-                                    param_node);
+        if (!global && std::find_if(_errors.begin(),
+                                    _errors.end(),
+                                    [&param_node](const auto & err)
+                                    { return err.node == param_node; }) == _errors.end())
+          _errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
+                               param_node);
       }
       else
       {
@@ -787,12 +787,12 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
         }
         catch (hit::Error & e)
         {
-          param_errors.emplace_back(e.message, param_node);
+          _errors.emplace_back(e.message, param_node);
           params_with_errors.insert(name);
         }
         catch (std::exception & e)
         {
-          param_errors.emplace_back(e.what(), param_node);
+          _errors.emplace_back(e.what(), param_node);
           params_with_errors.insert(name);
         }
 
@@ -804,7 +804,7 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
                   par_unique_ptr.get()))
             if (const auto error = p.setupVariableNames(cast_par->set(), *param_node, {}))
             {
-              param_errors.emplace_back(*error, param_node);
+              _errors.emplace_back(*error, param_node);
               params_with_errors.insert(name);
             }
 
@@ -813,7 +813,7 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
             if (const auto error = p.parameterRangeCheck(
                     *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
             {
-              param_errors.emplace_back(error->second, param_node);
+              _errors.emplace_back(error->second, param_node);
               params_with_errors.insert(name);
             }
         }
@@ -864,22 +864,21 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
 
   // Required parameters are normally checked when the object is constructed, because actions may
   // still set them after parsing. A parameter error in this section aborts the run before that
-  // happens, so report missing required parameters here, ahead of the parameter errors, because
-  // a missing required parameter is often the fix for them (e.g. a suppressed parameter that was
-  // replaced by a required one).
-  if (!param_errors.empty())
+  // happens, so report missing required parameters here, ahead of the parameter errors.
+  if (_errors.size() > first_section_error)
   {
+    std::vector<hit::ErrorMessage> required_errors;
     for (const auto & error : p.missingRequiredParamErrors(
              section_node ? section_node->fullpath() : "", params_with_errors, true))
     {
       if (section_node)
-        _errors.emplace_back(error, section_node);
+        required_errors.emplace_back(error, section_node);
       else
-        _errors.emplace_back(error);
+        required_errors.emplace_back(error);
     }
+    _errors.insert(
+        _errors.begin() + first_section_error, required_errors.begin(), required_errors.end());
   }
-
-  _errors.insert(_errors.end(), param_errors.begin(), param_errors.end());
 }
 
 void
