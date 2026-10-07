@@ -3,13 +3,14 @@
 ## Overview
 
 This object acts as a base class for [PipeInnerWallTemperatureScalarKernel.md],
-[PipeOuterWallAmbientTemperatureScalarKernel.md], and
-[PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]. It implements the physics shared
-by every radial node of a two-radial-node lumped pipe wall model: axial conduction to the
+[PipeOuterWallAmbientTemperatureScalarKernel.md],
+[PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and
+[PipeOuterWallHeatFluxScalarKernel.md]. It implements the physics shared by every radial
+node of a two-radial-node lumped pipe wall model: axial conduction to the
 upstream/downstream nodes of the same radial layer, and radial conduction to the node on the
 other side of the wall. It does not implement the heat exchange on this node's non-radial
-side (with a flowing fluid or a fixed ambient environment), which each derived class
-provides.
+side (with a flowing fluid, a fixed ambient environment, or a prescribed heat flux), which
+each derived class provides.
 
 The model is geometry-general: it is driven entirely by functor inputs for areas,
 perimeters, and a radial conduction-path thickness, rather than a circular inner/outer

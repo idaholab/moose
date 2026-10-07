@@ -304,4 +304,26 @@
                   'steady-state wall temperatures of a wall losing heat to ambient through '
                   'parallel convective and radiative paths.'
   []
+  [pipewall_heatflux]
+    type = CSVDiff
+    input = pipewall_heatflux.i
+    csvdiff = 'pipewall_heatflux_out.csv'
+    design = 'PipeInnerWallTemperatureScalarKernel.md PipeOuterWallHeatFluxScalarKernel.md'
+    requirement = 'Given a prescribed primary fluid temperature and applied outer-wall heat '
+                  'flux, the pipe inner-wall and outer-wall heat flux kernels must converge '
+                  'approximately to the analytical two-radial-node series-resistance '
+                  'steady-state wall temperatures.'
+  []
+  [pipewall_heatfluxAD]
+    type = CSVDiff
+    input = ADpipewall_heatflux.i
+    csvdiff = 'ADpipewall_heatflux_out.csv'
+    design = 'PipeInnerWallTemperatureScalarKernel.md PipeOuterWallHeatFluxScalarKernel.md'
+    cli_args = 'ScalarKernels/inner/type=ADPipeInnerWallTemperatureScalarKernel '
+               'ScalarKernels/outer/type=ADPipeOuterWallHeatFluxScalarKernel'
+    requirement = 'Given a prescribed primary fluid temperature and applied outer-wall heat '
+                  'flux, the AD pipe inner-wall and outer-wall heat flux kernels must '
+                  'converge approximately to the analytical two-radial-node '
+                  'series-resistance steady-state wall temperatures.'
+  []
 []
