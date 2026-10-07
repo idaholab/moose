@@ -11,6 +11,9 @@
 
 #include "IncompressibleMomentumSPBase.h"
 
+/**
+ * Coupled pressure path-integrated incompressible momentum kernel
+ */
 template <bool is_ad>
 class CoupledPressureIncompressibleMomentumSPScalarKernelTempl
   : public IncompressibleMomentumSPBaseTempl<is_ad>
