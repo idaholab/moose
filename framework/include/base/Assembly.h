@@ -3046,7 +3046,10 @@ Assembly::cacheResiduals(const Residuals & residuals,
   if (!computingResidual() || vector_tags.empty())
     return;
 
-  if (residuals.size() == 1)
+  // A single row needs no constraining unless its dof is constrained (e.g. by a periodic boundary,
+  // a hanging node, or a user constraint), in which case its residual must be distributed to the
+  // constraining dofs
+  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]))
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
@@ -3100,7 +3103,8 @@ Assembly::cacheJacobian(const Residuals & residuals,
   if (!computingJacobian() || matrix_tags.empty())
     return;
 
-  if (residuals.size() == 1)
+  // See cacheResiduals: a single row that is not constrained needs no constraining
+  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]))
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
