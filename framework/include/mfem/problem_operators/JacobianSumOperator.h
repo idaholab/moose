@@ -26,8 +26,8 @@ class JacobianSumOperator : public mfem::Operator
 {
 public:
   JacobianSumOperator(const mfem::Operator * A,
-                       const mfem::Operator * B,
-                       mfem::ParNonlinearForm * nlf)
+                      const mfem::Operator * B,
+                      mfem::ParNonlinearForm * nlf)
     : Operator(A->Height(), A->Width()), _A(A), _B(B), _z(A->Height()), _nlf(nlf)
   {
     mooseAssert(A->Width() == B->Width(), "Operator Widths must match");
