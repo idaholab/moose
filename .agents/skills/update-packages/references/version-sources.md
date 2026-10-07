@@ -48,6 +48,7 @@ never `-dirty`.
 | Base MPI container images | `apptainer/mpi.def` — `FROM_IMAGES` (digest-pinned) | the human-readable tag list in the jinja comment directly above `FROM_IMAGES` | `idaholab/moose-containers` — the images must be published there first |
 | code-server, moose-language-support, python, FMI/Assimulo/PyFMI/PythonFMU, gperftools, go | `apptainer/moose-dev.def` — the `*_VERSION=` block near the top of `%post` | none | each project's releases page |
 | PETSc configure options | `scripts/configure_petsc.sh` | — | often changes with a PETSc bump (e.g. dropping a `--download-*-commit` pin once upstream catches up) |
+| Libraries PETSc downloads (OpenBLAS, MUMPS, hypre, SuperLU_DIST, SLEPc, ...) | the PETSc tag's `config/BuildSystem/config/packages/<Name>.py` default, unless `scripts/configure_petsc.sh` passes `--download-<pkg>-commit` | — | they move silently with the `petsc` submodule; compare the two tags' package files (troubleshooting.md, Section 5) |
 | libMesh / wasp / MFEM / conduit / NEML2 / libtorch build options | `scripts/configure_*.sh`, `scripts/update_and_rebuild_*.sh` | — | these are `influential:` files, so touching them forces a package bump |
 
 ## Which package a file belongs to
