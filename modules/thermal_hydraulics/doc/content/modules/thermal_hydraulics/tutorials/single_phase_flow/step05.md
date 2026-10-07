@@ -79,46 +79,24 @@ This is the same as what we did in step 1 of this tutorial.
 
 ## Inlet Mass Flow Rate
 
-To set up the inlet boundary condition as a function of time, we first need to define a time-dependent
+The inlet mass flow rate is prescribed by a function. We first define a time-dependent
 function in the top-level `[Functions]` block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=Functions/m_dot_sec_fn
          link=False
 
-In the [ControlLogic](ControlLogic/index.md) block, we bring the function value in using the [GetFunctionValueControl.md]
-block:
+The [!param](/Components/InletMassFlowRateTemperature1Phase/m_dot) parameter of the inlet component
+is then set to this function:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
-         block=ControlLogic/m_dot_sec_inlet_ctrl
+         block=Components/inlet_sec
          link=False
 
-And then we feed this value back into the system:
-
-!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
-         block=ControlLogic/set_m_dot_sec_ctrl
-         link=False
-
-
-### Alternative Solution
-
-An alternative solution to this is to use a convenience block called [TimeFunctionComponentControl.md]
-which combines these two `ControlLogic` blocks into one.
-It takes three parameters `component`, `parameter`, and `function`.
-
-The equivalent syntax would look like this:
-
-```
-[set_m_dot_sec_ctrl]
-  type = TimeFunctionComponentControl
-  component = inlet_sec
-  parameter = m_dot
-  function = m_dot_sec_fn
-[]
-```
-
-!alert note
-+Note:+ This should be your preferred setup when you want to use time-dependent component parameters.
+The `m_dot` parameter is a function parameter: a constant value or a function of time may be
+supplied directly, and the inlet mass flow rate follows the prescribed function as the simulation
+runs. The same holds for the other prescribed boundary values, such as the inlet temperature and
+the outlet pressure.
 
 
 !content pagination previous=tutorials/single_phase_flow/step04.md

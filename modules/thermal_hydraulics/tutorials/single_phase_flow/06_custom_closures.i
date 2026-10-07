@@ -55,10 +55,8 @@ m_dot_sec_in = 1. # kg/s
       10 ${m_dot_sec_in}'
   []
   [pump_head_fn]
-    type = ParsedFunction
-    expression = 'pump_head'
-    symbol_names = 'pump_head'
-    symbol_values = 'pump_head'
+    type = ConstantFunction
+    value = 0 # controlled
   []
 []
 
@@ -430,15 +428,14 @@ m_dot_sec_in = 1. # kg/s
     K_d = 0
   []
 
+  [set_pump_head]
+    type = SetRealValueControl
+    parameter = Functions/pump_head_fn/value
+    value = pid:output
+  []
 []
 
 [Postprocessors]
-  [pump_head]
-    type = RealControlDataValuePostprocessor
-    control_data_name = pid:output
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-
   [power_to_coolant]
     type = ADHeatRateConvection1Phase
     block = core_chan

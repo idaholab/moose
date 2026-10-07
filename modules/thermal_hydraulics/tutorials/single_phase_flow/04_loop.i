@@ -294,14 +294,17 @@ tot_power = 2000 # W
     K_d = 0
   []
 
+  [set_pump_head]
+    type = SetRealValueControl
+    parameter = Functions/pump_head_fn/value
+    value = pid:output
+  []
 []
 
 [Functions]
   [pump_head_fn]
-    type = ParsedFunction
-    expression = 'pump_head'
-    symbol_names = 'pump_head'
-    symbol_values = 'pump_head'
+    type = ConstantFunction
+    value = 0 # controlled
   []
 []
 
@@ -349,10 +352,10 @@ tot_power = 2000 # W
     boundary = cooling_pipe:out
     variable = T
   []
+
   [pump_head]
-    type = RealControlDataValuePostprocessor
-    control_data_name = pid:output
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    type = FunctionValuePostprocessor
+    function = pump_head_fn
   []
 []
 
