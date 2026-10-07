@@ -20,6 +20,7 @@ LMWeightedVelocitiesUserObject::validParams()
   params += LMWeightedGapUserObject::newParams();
   params.addClassDescription("Provides the mortar contact Lagrange multipliers (normal and "
                              "tangential) for constraint enforcement.");
+  params.set<bool>("allow_nodal_normal_derivatives") = true;
   params.renameCoupledVar("lm_variable", "lm_variable_normal", "");
   params.addRequiredCoupledVar(
       "lm_variable_tangential_one",
@@ -57,6 +58,7 @@ LMWeightedVelocitiesUserObject::initialize()
   // Takes care of WeightedGapUserObject::initialize() as well
   WeightedVelocitiesUserObject::initialize();
   initializeNodalScaling();
+  clearDerivedC();
 }
 
 void
@@ -64,6 +66,8 @@ LMWeightedVelocitiesUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
   finalizeNodalScaling();
+  if (_derive_c_from_elasticity && _derived_c_needs_update)
+    finalizeDerivedC();
 }
 
 void
@@ -71,16 +75,21 @@ LMWeightedVelocitiesUserObject::computeQpIProperties()
 {
   WeightedVelocitiesUserObject::computeQpIProperties();
   computeQpINodalScaling();
+  accumulateDerivedCIfNeeded();
 }
 
 const ADVariableValue &
 LMWeightedVelocitiesUserObject::contactTangentialPressureDirOne() const
 {
+  if (_derive_c_from_elasticity)
+    return scaledLowerSln(*_lm_variable_tangential_one, _scaled_tangential_pressure_one);
   return _lm_variable_tangential_one->adSlnLower();
 }
 
 const ADVariableValue &
 LMWeightedVelocitiesUserObject::contactTangentialPressureDirTwo() const
 {
+  if (_derive_c_from_elasticity)
+    return scaledLowerSln(*_lm_variable_tangential_two, _scaled_tangential_pressure_two);
   return _lm_variable_tangential_two->adSlnLower();
 }

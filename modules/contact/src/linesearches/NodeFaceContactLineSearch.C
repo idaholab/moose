@@ -7,34 +7,66 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PetscContactLineSearch.h"
+#include "NodeFaceContactLineSearch.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/petsc_solver_exception.h"
 #include <petscdm.h>
 
-registerMooseObject("ContactApp", PetscContactLineSearch);
+registerMooseObject("ContactApp", NodeFaceContactLineSearch);
+registerMooseObjectRenamed("ContactApp",
+                           PetscContactLineSearch,
+                           "08/18/2026 00:00",
+                           NodeFaceContactLineSearch);
 
 InputParameters
-PetscContactLineSearch::validParams()
+NodeFaceContactLineSearch::validParams()
 {
-  return ContactLineSearchBase::validParams();
+  InputParameters params = ContactLineSearchBase::validParams();
+  params.addRequiredParam<unsigned>("allowed_lambda_cuts",
+                                    "The number of times lambda is allowed to get cut");
+  return params;
 }
 
-PetscContactLineSearch::PetscContactLineSearch(const InputParameters & parameters)
-  : ContactLineSearchBase(parameters)
+NodeFaceContactLineSearch::NodeFaceContactLineSearch(const InputParameters & parameters)
+  : ContactLineSearchBase(parameters),
+    _user_ksp_rtol_set(false),
+    _allowed_lambda_cuts(getParam<unsigned>("allowed_lambda_cuts"))
 {
-  _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
-      _fe_problem.getNonlinearSystem(/*nl_sys_num=*/0).nonlinearSolver());
-  if (!_solver)
-    mooseError(
-        "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");
 }
 
 void
-PetscContactLineSearch::lineSearch()
+NodeFaceContactLineSearch::printContactInfo(const std::set<dof_id_type> & contact_set)
 {
+  if (!contact_set.empty())
+    _console << contact_set.size() << " nodes in contact" << std::endl;
+  else
+    _console << "No nodes in contact" << std::endl;
+}
+
+void
+NodeFaceContactLineSearch::insertSet(const std::set<dof_id_type> & mech_set)
+{
+  if (_current_contact_state.empty())
+    _current_contact_state = mech_set;
+  else
+    for (auto & node : mech_set)
+      _current_contact_state.insert(node);
+}
+
+void
+NodeFaceContactLineSearch::reset()
+{
+  _current_contact_state.clear();
+  zeroIts();
+}
+
+void
+NodeFaceContactLineSearch::lineSearch()
+{
+  setupBackingLineSearch();
+
   PetscBool changed_y = PETSC_FALSE, changed_w = PETSC_FALSE;
   Vec X, F, Y, W, G, W1;
   SNESLineSearch line_search;

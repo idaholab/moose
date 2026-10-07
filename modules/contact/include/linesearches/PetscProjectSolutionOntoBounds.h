@@ -18,7 +18,6 @@
 
 class GeometricSearchData;
 class PenetrationLocator;
-class NonlinearSystemBase;
 class DisplacedProblem;
 
 namespace libMesh
@@ -42,7 +41,6 @@ public:
   virtual void lineSearch() override;
 
 protected:
-  NonlinearSystemBase & _nl;
   PetscNonlinearSolver<Real> * _solver;
   DisplacedProblem * _displaced_problem;
   const GeometricSearchData * _geometric_search_data;

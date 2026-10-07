@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 
 class FEProblem;
+class NonlinearSystemBase;
 class LineSearch : public MooseObject
 {
 public:
@@ -44,4 +45,13 @@ protected:
 
   /// number of non-linear iterations
   size_t _nl_its;
+
+  /// The nonlinear system number this line search should be applied to
+  const unsigned int _nl_sys_num;
+
+  /// The nonlinear system this line search should be applied to
+  NonlinearSystemBase & _nl;
+
+private:
+  friend class SetupLineSearchAction;
 };

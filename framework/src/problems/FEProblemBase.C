@@ -556,7 +556,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*num_threads=*/1),
     _is_petsc_options_inserted(false),
-    _line_search(nullptr),
     _using_ad_mat_props(false),
     _current_ic_state(0),
     _use_hash_table_matrix_assembly(getParam<bool>("use_hash_table_matrix_assembly")),
@@ -1667,8 +1666,9 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("lineSearchInitialSetup", 5, "Initializing Line Search");
 
-    if (_line_search)
-      _line_search->initialSetup();
+    for (const auto i : make_range(numNonlinearSystems()))
+      if (auto * const ls = getNonlinearSystemBase(i).getLineSearch())
+        ls->initialSetup();
   }
 
   // Perform Reporter get/declare check
@@ -1751,8 +1751,9 @@ FEProblemBase::timestepSetup()
   }
 
   _control_warehouse.timestepSetup();
-  if (_line_search)
-    _line_search->timestepSetup();
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (auto * const ls = getNonlinearSystemBase(i).getLineSearch())
+      ls->timestepSetup();
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
@@ -2888,12 +2889,6 @@ FEProblemBase::getMeshDivision(const std::string & name, const THREAD_ID tid) co
   if (!ret)
     mooseError("No MeshDivision object named ", name, " of appropriate type");
   return *ret;
-}
-
-void
-FEProblemBase::lineSearch()
-{
-  _line_search->lineSearch();
 }
 
 NonlinearSystem &
@@ -5182,8 +5177,9 @@ FEProblemBase::customSetup(const ExecFlagType & exec_type)
 {
   SubProblem::customSetup(exec_type);
 
-  if (_line_search)
-    _line_search->customSetup(exec_type);
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (auto * const ls = getNonlinearSystemBase(i).getLineSearch())
+      ls->customSetup(exec_type);
 
   unsigned int n_threads = numThreads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)

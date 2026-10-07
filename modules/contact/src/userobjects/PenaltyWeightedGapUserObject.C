@@ -20,6 +20,35 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.set<bool>("allow_nodal_normal_derivatives") = true;
+  params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.suppressParameter<bool>("ghost_point_neighbors");
+  // Penalty contact has no LM constraint to contribute the nodal-normal one-ring to the matrix
+  // graph, so its weighted-gap object supplies the coupling relationship manager directly.
+  const auto configure_one_ring =
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+  {
+    rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+    rm_params.set<BoundaryName>("secondary_boundary") =
+        obj_params.get<BoundaryName>("secondary_boundary");
+    rm_params.set<BoundaryName>("primary_boundary") =
+        obj_params.get<BoundaryName>("primary_boundary");
+    rm_params.set<SubdomainName>("secondary_subdomain") =
+        obj_params.get<SubdomainName>("secondary_subdomain");
+    rm_params.set<SubdomainName>("primary_subdomain") =
+        obj_params.get<SubdomainName>("primary_subdomain");
+    // penetration_tolerance is required exactly for augmented-Lagrange contact, which uses
+    // frozen-normal geometry.
+    rm_params.set<bool>("ghost_point_neighbors") =
+        obj_params.get<bool>("use_nodal_normal_derivatives") &&
+        !obj_params.isParamValid("penetration_tolerance");
+  };
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC,
+                                configure_one_ring);
+  params.addRelationshipManager(
+      "AugmentSparsityOnInterface", Moose::RelationshipManagerType::COUPLING, configure_one_ring);
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(

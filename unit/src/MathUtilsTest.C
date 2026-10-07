@@ -203,3 +203,43 @@ TEST(MathUtilsTest, smootherStep)
   EXPECT_NEAR(smootherStep<ComputeType::value>(x, start, end), val, 1e-5);
   EXPECT_NEAR(smootherStep<ComputeType::derivative>(x, start, end), deriv, 1e-5);
 }
+
+TEST(MathUtilsTest, regularizedNormValue)
+{
+  const RealVectorValue zero_vector(0, 0, 0);
+  const RealVectorValue vector(3, 4, 0);
+  const std::array<Real, 3> zero_array{{0, 0, 0}};
+  const std::array<Real, 3> array{{3, 4, 0}};
+
+  // With the default epsilon, both the zero and non-zero cases should match
+  // sqrt(sum of squares + epsilon) to double precision, since epsilon is negligible relative to
+  // the magnitudes involved here.
+  EXPECT_NEAR(MathUtils::regularizedNorm(zero_vector), 0.0, 1e-15);
+  EXPECT_NEAR(MathUtils::regularizedNorm(vector), 5.0, 1e-12);
+  EXPECT_NEAR(MathUtils::regularizedNorm(zero_array), 0.0, 1e-15);
+  EXPECT_NEAR(MathUtils::regularizedNorm(array), 5.0, 1e-12);
+
+  // A caller-supplied epsilon should be respected exactly
+  EXPECT_DOUBLE_EQ(MathUtils::regularizedNorm(zero_vector, 1.0), std::sqrt(1.0));
+  EXPECT_DOUBLE_EQ(MathUtils::regularizedNorm(zero_array, 1.0), std::sqrt(1.0));
+}
+
+TEST(MathUtilsTest, regularizedNormSingularity)
+{
+  // Without regularization, computing an AD norm at the zero vector produces a NaN derivative
+  // because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx diverges as f(x) -> 0. regularizedNorm must
+  // remain finite and differentiable there.
+  constexpr dof_id_type derivative_index = 0;
+
+  ADRealVectorValue zero_vector(0, 0, 0);
+  Moose::derivInsert(zero_vector(0).derivatives(), derivative_index, 1.0);
+  const ADReal norm = MathUtils::regularizedNorm(zero_vector);
+  EXPECT_NEAR(MetaPhysicL::raw_value(norm), 0.0, 1e-15);
+  EXPECT_NEAR(norm.derivatives()[derivative_index], 0.0, 1e-12);
+
+  std::array<ADReal, 2> zero_array{{ADReal(0), ADReal(0)}};
+  Moose::derivInsert(zero_array[0].derivatives(), derivative_index, 1.0);
+  const ADReal array_norm = MathUtils::regularizedNorm(zero_array);
+  EXPECT_NEAR(MetaPhysicL::raw_value(array_norm), 0.0, 1e-15);
+  EXPECT_NEAR(array_norm.derivatives()[derivative_index], 0.0, 1e-12);
+}
