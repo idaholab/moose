@@ -147,7 +147,7 @@
     recover = false
     restep = false
   []
-  [MFEMNonlinearCurlCurlLinearCoeff]
+  [MFEMNonLinearCurlCurlLinearCoeff]
     type = CSVDiff
     issues = '#33579'
     input = nlcurlcurl_lcoef.i
@@ -159,7 +159,7 @@
     compute_devices = 'cpu'
     recover = false
   []
-  [MFEMNonlinearCurlCurlLinearCoeffPartial]
+  [MFEMNonLinearCurlCurlLinearCoeffPartial]
     type = CSVDiff
     issues = '#33579'
     input = nlcurlcurl_lcoef.i
@@ -172,7 +172,7 @@
     cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMCurlCurlKernel'
     recover = false
   []
-  [MFEMNonlinearCurlCurlLinearKernelPartial]
+  [MFEMNonLinearCurlCurlLinearKernelPartial]
     type = CSVDiff
     issues = '#33579'
     input = nlcurlcurl_lcoef.i
@@ -185,11 +185,11 @@
     cli_args = 'Executioner/assembly_level=partial'
     recover = false
   []
-  [MFEMNonlinearCurlCurl]
+  [MFEMNonLinearCurlCurl]
     type = CSVDiff
     input = nlcurlcurl_nlcoef.i
-    csvdiff = 'OutputData/MFEMNonlinearCurlCurl.csv '
-              'OutputData/MFEMNonlinearCurlCurl_line_sample_h_field_0001.csv'
+    csvdiff = 'OutputData/MFEMNonLinearCurlCurl.csv '
+              'OutputData/MFEMNonLinearCurlCurl_line_sample_h_field_0001.csv'
     design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
     issues = '#33579'
     requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
@@ -199,11 +199,11 @@
     compute_devices = 'cpu'
     recover = false
   []
-  [MFEMNonlinearCurlCurlPartial]
+  [MFEMNonLinearCurlCurlPartial]
     type = CSVDiff
     input = nlcurlcurl_nlcoef.i
-    csvdiff = 'OutputData/MFEMNonlinearCurlCurl.csv '
-              'OutputData/MFEMNonlinearCurlCurl_line_sample_h_field_0001.csv'
+    csvdiff = 'OutputData/MFEMNonLinearCurlCurl.csv '
+              'OutputData/MFEMNonLinearCurlCurl_line_sample_h_field_0001.csv'
     design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
     issues = '#33579'
     requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '

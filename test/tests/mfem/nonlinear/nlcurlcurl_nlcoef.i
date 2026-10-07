@@ -141,6 +141,6 @@
 [Outputs]
   [CSV]
     type = CSV
-    file_base = OutputData/MFEMNonlinearCurlCurl
+    file_base = OutputData/MFEMNonLinearCurlCurl
   []
 []
