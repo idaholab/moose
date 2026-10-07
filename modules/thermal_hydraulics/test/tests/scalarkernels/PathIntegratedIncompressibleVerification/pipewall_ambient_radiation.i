@@ -1,10 +1,21 @@
-pi = 3.14159265358979
+# Same two-node series circuit as pipewall_ambient.i (fluid convection, then radial
+# conduction, into the outer wall node), but the outer node now loses heat to ambient
+# through two parallel paths: convection (linear in T, PipeOuterWallAmbientTemperatureScalarKernel)
+# and radiation (quartic in T, PipeOuterWallRadiationScalarKernel). That makes the
+# steady state the root of a single nonlinear equation in Tout rather than a plain
+# series-resistor network; see the derivation and tolerance comment just below
+# Tin_analytical/Tout_analytical. As in pipewall_ambient.i, the numeric kernels evaluate
+# fluid properties locally rather than at the single fixed Tf1 used to build the
+# analytical cross-check, so the expected agreement is approximate (same order,
+# ~2e-4 relative) rather than to roundoff, and is not limited by solve tolerance or by
+# the run not having reached steady state (end_time = 100 s is well beyond the wall's
+# thermal time constants here).
 
 length = 1.0
 
 Di = 0.05
 Do = 0.06
-Dm = '${fparse ( ${Di} + ${Do} ) / 2}'
+Dm = '${fparse ( Di + Do ) / 2}'
 
 k_wall = 15.0
 cp_wall = 500.0
@@ -17,13 +28,13 @@ Tamb = 273.15
 htc_amb = 50.0
 emissivity = 0.8
 
-flow_area1 = '${fparse ${pi} / 4 * ${Di} ^ 2}'
-wetted_perimeter1 = '${fparse ${pi} * ${Di}}'
-area_in = '${fparse ${pi} / 4 * ( ${Dm} ^ 2 - ${Di} ^ 2 )}'
-area_out = '${fparse ${pi} / 4 * ( ${Do} ^ 2 - ${Dm} ^ 2 )}'
-interface_perimeter = '${fparse ${pi} * ${Dm}}'
-interface_thickness = '${fparse ( ${Do} - ${Di} ) / 2}'
-ambient_perimeter = '${fparse ${pi} * ${Do}}'
+flow_area1 = '${fparse pi / 4 * Di^2}'
+wetted_perimeter1 = '${fparse pi * Di}'
+area_in = '${fparse pi / 4 * ( Dm^2 - Di^2 )}'
+area_out = '${fparse pi / 4 * ( Do^2 - Dm^2 )}'
+interface_perimeter = '${fparse pi * Dm}'
+interface_thickness = '${fparse ( Do - Di ) / 2}'
+ambient_perimeter = '${fparse pi * Do}'
 
 # Independent analytical steady state: a series thermal-resistance circuit
 # Tf1 --[fluid convection]-- Tin_wall --[radial conduction]-- Tout_wall --[parallel ambient

@@ -1,10 +1,29 @@
-pi = 3.14159265358979
+# Two radial wall nodes (inner surface, outer surface) bridge a fixed primary-fluid
+# temperature Tf1 to a fixed ambient temperature Tamb through three conductances in
+# series: fluid-side convection (PipeInnerWallTemperatureScalarKernel, Dittus-Boelter),
+# radial conduction through the wall, and ambient convection
+# (PipeOuterWallAmbientTemperatureScalarKernel). The analytical Tin/Tout below are the
+# steady state of that series-resistance circuit, solved algebraically at parse time
+# with fluid properties evaluated once at the fixed Tf1 (mu1, cp1, k1 below), giving a
+# simple linear system.
+#
+# The numeric solution instead evaluates water properties locally at the wall node's own
+# running temperature (via the fp Water97FluidProperties, not the fixed mu1/cp1/k1
+# constants), so its convective coefficient differs slightly from the analytical one -
+# the inner wall settles about 0.3 K below Tf1, and water's viscosity/conductivity vary
+# over that span by amounts that shift the Dittus-Boelter h by a few tenths of a percent.
+# That is the dominant source of the ~2e-4 relative mismatch seen in the gold file; it is
+# not a convergence or solve-tolerance artifact (the run reaches end_time = 100 s, which
+# is roughly 8-16 wall thermal time constants here, so transient decay contributes only
+# ~1e-5 relative error, confirmed by linearizing the two-node system with fixed
+# properties). The test therefore only requires approximate agreement with the analytical
+# values, not agreement to roundoff.
 
 length = 1.0
 
 Di = 0.05
 Do = 0.06
-Dm = '${fparse ( ${Di} + ${Do} ) / 2}'
+Dm = '${fparse ( Di + Do ) / 2}'
 
 k_wall = 15.0
 cp_wall = 500.0
@@ -23,26 +42,26 @@ mu1 = 0.001002
 cp1 = 4185.0
 k1 = 0.598
 
-flow_area1 = '${fparse ${pi} / 4 * ${Di} ^ 2}'
-wetted_perimeter1 = '${fparse ${pi} * ${Di}}'
-Dh1 = '${fparse 4 * ${flow_area1} / ${wetted_perimeter1}}'
-area_in = '${fparse ${pi} / 4 * ( ${Dm} ^ 2 - ${Di} ^ 2 )}'
-area_out = '${fparse ${pi} / 4 * ( ${Do} ^ 2 - ${Dm} ^ 2 )}'
-interface_perimeter = '${fparse ${pi} * ${Dm}}'
-interface_thickness = '${fparse ( ${Do} - ${Di} ) / 2}'
-ambient_perimeter = '${fparse ${pi} * ${Do}}'
+flow_area1 = '${fparse pi / 4 * Di^2}'
+wetted_perimeter1 = '${fparse pi * Di}'
+Dh1 = '${fparse 4 * flow_area1 / wetted_perimeter1}'
+area_in = '${fparse pi / 4 * ( Dm^2 - Di^2 )}'
+area_out = '${fparse pi / 4 * ( Do^2 - Dm^2 )}'
+interface_perimeter = '${fparse pi * Dm}'
+interface_thickness = '${fparse ( Do - Di ) / 2}'
+ambient_perimeter = '${fparse pi * Do}'
 
 # Independent analytical steady state: a series thermal-resistance circuit
 # Tf1 --[fluid convection]-- Tin_wall --[radial conduction]-- Tout_wall --[ambient convection]-- Tamb
-Re1 = '${fparse ${m1} / ${flow_area1} * ${Dh1} / ${mu1}}'
-Pr1 = '${fparse ${mu1} * ${cp1} / ${k1}}'
-h1 = '${fparse 0.023 * ${Re1} ^ 0.8 * ${Pr1} ^ 0.4 * ${k1} / ${Dh1}}'
-G1 = '${fparse ${h1} * ${wetted_perimeter1}}'
-G2 = '${fparse ${k_wall} * ${interface_perimeter} / ${interface_thickness}}'
-G3 = '${fparse ${htc_amb} * ${ambient_perimeter}}'
-q = '${fparse ( ${Tf1} - ${Tamb} ) / ( 1 / ${G1} + 1 / ${G2} + 1 / ${G3} )}'
-Tin_analytical = '${fparse ${Tf1} - ${q} / ${G1}}'
-Tout_analytical = '${fparse ${Tamb} + ${q} / ${G3}}'
+Re1 = '${fparse m1 / flow_area1 * Dh1 / mu1}'
+Pr1 = '${fparse mu1 * cp1 / k1}'
+h1 = '${fparse 0.023 * Re1^0.8 * Pr1^0.4 * k1 / Dh1}'
+G1 = '${fparse h1 * wetted_perimeter1}'
+G2 = '${fparse k_wall * interface_perimeter / interface_thickness}'
+G3 = '${fparse htc_amb * ambient_perimeter}'
+q = '${fparse ( Tf1 - Tamb ) / ( 1 / G1 + 1 / G2 + 1 / G3 )}'
+Tin_analytical = '${fparse Tf1 - q / G1}'
+Tout_analytical = '${fparse Tamb + q / G3}'
 
 [Mesh]
   type = GeneratedMesh
