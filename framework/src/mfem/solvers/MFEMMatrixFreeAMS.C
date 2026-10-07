@@ -94,7 +94,7 @@ void
 Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemContext()
 {
   LinearSolverBase::UpdateEquationSystemContext();
-  SetupLOR(_equation_system);
+  SetupLOR();
   // update the pointer to the bilinear form representing the curl-curl problem being
   // preconditioned
   auto & matrix_free_ams = cast_ref<Moose::MFEM::MatrixFreeAMS &>(*_solver);

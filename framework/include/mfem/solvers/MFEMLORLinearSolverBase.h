@@ -52,7 +52,7 @@ private:
   /// _lor is true, before the assembled linear operator has been set via SetOperator. Default
   /// no-op; override in solvers or preconditioners that construct LOR-related data from the
   /// bilinear form.
-  virtual void SetupLOR(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system);
+  virtual void SetupLOR();
 };
 
 template <class MFEMSolverType>
@@ -108,7 +108,7 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
     mooseError("LOR solver cannot take a preconditioner");
   if (_lor)
   {
-    SetupLOR(_equation_system);
+    SetupLOR();
     if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreAMS, mfem::HypreADS>)
       if (_a->ParFESpace()->GetMesh()->GetTypicalElementGeometry() != mfem::Geometry::Type::CUBE)
         mooseError("LOR HypreAMS/ADS Solver only supports hex meshes.");
@@ -124,20 +124,19 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
 
 template <class MFEMSolverType>
 void
-LORLinearSolverBase<MFEMSolverType>::SetupLOR(
-    std::shared_ptr<Moose::MFEM::EquationSystem> equation_system)
+LORLinearSolverBase<MFEMSolverType>::SetupLOR()
 {
-  if (!equation_system)
+  if (!_equation_system)
     mooseError("LOR solver setup requires an EquationSystem to be defined.");
-  if (equation_system->IsComplex())
+  if (_equation_system->IsComplex())
     mooseError("LOR solve is not supported for complex equation systems.");
-  if (equation_system->IsMultivariate())
+  if (_equation_system->IsMultivariate())
     mooseError("LOR solve is only supported for single-variable systems");
 
-  const auto & test_var_name = equation_system->GetTestVarNames().at(0);
-  _a = &equation_system->GetBilinearForm(test_var_name);
+  const auto & test_var_name = _equation_system->GetTestVarNames().at(0);
+  _a = &_equation_system->GetBilinearForm(test_var_name);
   CheckSpectralEquivalence(*_a);
-  _ess_bdr_markers = equation_system->GetEssentialBoundaryMarkers(test_var_name);
+  _ess_bdr_markers = _equation_system->GetEssentialBoundaryMarkers(test_var_name);
   _a->ParFESpace()->GetEssentialTrueDofs(_ess_bdr_markers, _ess_tdofs);
 }
 
