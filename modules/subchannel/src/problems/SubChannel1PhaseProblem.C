@@ -123,6 +123,13 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
+  params.addRangeCheckedParam<PetscInt>(
+      "coupled_gmres_restart",
+      30,
+      "coupled_gmres_restart > 0",
+      "Restart length of the FGMRES solver of the coupled monolithic flow system. Values of 100 to "
+      "300 speed up solves with tight P_tol and T_tol, where the default stagnates once the "
+      "crossflow damping is small, but can destabilize the outer iteration of flow blockage cases");
   params.addParam<MooseEnum>(
       "interpolation_scheme",
       schemes,
@@ -173,7 +180,8 @@ SubChannel1PhaseProblem::validParams()
   params.addParamNamesToGroup(
       "P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
-      "mass_flow_relaxation pressure_relaxation crossflow_relaxation rtol atol dtol maxit",
+      "mass_flow_relaxation pressure_relaxation crossflow_relaxation rtol atol dtol maxit "
+      "coupled_gmres_restart",
       "Solver tolerances and iterations");
   params.addParamNamesToGroup("implicit segregated staggered_pressure interpolation_scheme",
                               "Solution method");
@@ -223,6 +231,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
+    _coupled_gmres_restart(getParam<PetscInt>("coupled_gmres_restart")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
@@ -2509,11 +2518,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetOptionsPrefix(ksp, "scm_coupled_"));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
-  // As the crossflow damping vanishes near convergence, FGMRES with the default restart of 30
-  // stagnates on the coupled crossflow-pressure modes and most solves exhaust their iterations. A
-  // restart of 100 to 300 resolves them on the Toshiba 37-pin case at tight tolerances; 200 is in
-  // the middle of that range.
-  LibmeshPetscCall(KSPGMRESSetRestart(ksp, 200));
+  LibmeshPetscCall(KSPGMRESSetRestart(ksp, _coupled_gmres_restart));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCFIELDSPLIT));

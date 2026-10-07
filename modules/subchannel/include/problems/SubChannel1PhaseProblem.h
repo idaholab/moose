@@ -296,6 +296,8 @@ protected:
   const PetscReal & _dtol;
   /// The maximum number of iterations to use for the ksp linear solver
   const PetscInt & _maxit;
+  /// Restart length of the FGMRES solver of the coupled monolithic flow system
+  const PetscInt & _coupled_gmres_restart;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
   /// The direction of gravity
