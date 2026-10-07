@@ -13,6 +13,9 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Inner wall path-integrated incompressible conjugate heat transfer kernel
+ */
 template <bool is_ad>
 class PipeInnerWallTemperatureScalarKernelTempl
   : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>

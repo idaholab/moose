@@ -15,6 +15,10 @@
 
 class ThermalSolidProperties;
 
+/**
+ * Outer wall radiative heat transfer kernel for the path-integrated incompressible conjugate heat
+ * transfer model
+ */
 template <bool is_ad>
 class PipeOuterWallRadiationScalarKernelTempl
   : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,

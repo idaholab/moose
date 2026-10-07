@@ -15,6 +15,9 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Path-integrated incompressible energy kernel
+ */
 template <bool is_ad>
 class IncompressibleEnergySPScalarKernelTempl
   : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
