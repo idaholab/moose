@@ -267,10 +267,13 @@ new compiler or library behavior — those belong in this same PR, as their own 
 often need a newsletter mention too.
 
 `references/troubleshooting.md` is the playbook for this phase: reducing a list of red jobs
-to a list of causes, reading a job page without being misled by a truncated fetch, telling
-your diff apart from a channel that moved underneath the PR, what a toolchain bump
-predictably breaks, and the git recipes for landing a fix without invalidating the hash
-commit.
+to a list of causes, reading a job page without being misled by a truncated fetch,
+classifying each failure (outage, hang, crash, numerical diff, compile error), telling your
+diff apart from a channel that moved underneath the PR, tracing the dependency versions a
+PETSc bump drags in, checking whether `next` already has the fix, what a toolchain bump
+predictably breaks, reproducing a failure in the PR's own container, isolating a hang with
+an environment matrix, a backtrace and a library swap, and the git recipes for landing a
+fix without invalidating the hash commit.
 
 Run the branch without the hash commit for the whole of this phase. Drop it at the first
 fix, along with the fix's own push:
