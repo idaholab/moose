@@ -791,9 +791,13 @@ clobberall: clobber
           echo $$item >> .clang_complete;  \
         done
 
+# -imacros keeps the #pragma lines of the scanned header while dropping the functions that
+# contain them, so loop pragmas from libstdc++ (e.g. #pragma GCC unroll in GCC 15) would land
+# at file scope and break every JIT compile. They are optimization hints only, so drop them.
 ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@echo "Building monolithic ADReal header for JIT compilation"
-	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
+	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@.tmp
+	@grep -v -E '^[[:space:]]*#[[:space:]]*pragma GCC (unroll|ivdep|novector)' $@.tmp > $@; rm -f $@.tmp
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands_all_kokkos_srcfiles := $(MOOSE_KOKKOS_SRC_FILES)
