@@ -464,7 +464,8 @@ protected:
   bool _hc_sys_h_pattern_set = false;
   /// Maximum pressure fixed-point update before solution relaxation over the blocks
   Real _pressure_fixed_point_error = 1.0;
-  /// Per-block cross-momentum residual norm that scales the crossflow damping in the coupled solve
+  /// Per-block largest cross-momentum residual norm of the solve, which scales the crossflow
+  /// damping in the coupled solve
   std::vector<Real> _crossflow_residual_ref;
   /// Per-block factor, raised after coupled linear-solve failures, that delays the decay of the
   /// crossflow damping

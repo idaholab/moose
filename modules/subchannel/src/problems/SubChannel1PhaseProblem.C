@@ -2256,13 +2256,13 @@ SubChannel1PhaseProblem::addCrossflowDamping(
   PetscReal residual_norm;
   LibmeshPetscCall(VecNorm(residual, NORM_2, &residual_norm));
 
-  // The first nonzero residual of this solve sets the reference. The uniform initial state can
-  // have a zero residual, in which case the full damping is applied.
+  // The largest residual of this solve so far sets the reference. The uniform initial state has a
+  // residual that is zero up to round-off, depending on the input; taking the first residual as the
+  // reference would then hold K at its maximum for the whole solve. A zero reference applies the
+  // full damping.
   auto & residual_ref = _crossflow_residual_ref[iblock];
-  if (residual_ref == 0.0)
-    residual_ref = residual_norm;
-  const Real residual_ratio =
-      residual_ref > 0.0 ? std::min(1.0, residual_norm / residual_ref) : 1.0;
+  residual_ref = std::max(residual_ref, residual_norm);
+  const Real residual_ratio = residual_ref > 0.0 ? residual_norm / residual_ref : 1.0;
 
   // The largest entry of each row measures the axial transport of crossflow. The diagonal alone
   // is not a usable scale because, with central differencing, its inflow and outflow
