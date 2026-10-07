@@ -342,6 +342,7 @@
                   'the same.'
     map = False
     partial = True
+    min_slots = 2
   []
   [continuity_penalty_sphere_hex20]
     type = 'Exodiff'
