@@ -29,8 +29,8 @@ On a solver, `weak_form` selects only the equation system that solver configures
 such as the system [MFEMGeometricMultigridSolver.md] builds its hierarchy from. It does not bind
 the solver to a particular problem operator: a problem still has a single driver solver, which is
 used by every problem operator regardless of which equation system that operator solves. In a
-problem with several weak forms, a solver whose configuration depends on its equation system should
-therefore be used only when all of the operators solve the system it names.
+problem with several weak forms, a solver must be provided a valid weak form name, which it
+shall use to configure itself if necessary.
 
 !if-end!
 

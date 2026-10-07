@@ -11,9 +11,10 @@ is specified by the user in a real `MFEMEigenproblem` using an `MFEMSteady` exec
 `MFEMEigenproblemWeakForm` object will be created to set up an `EigenproblemEquationSystem` using
 all kernels and boundary conditions added in the input file.
 
+## Input File Syntax
+
 !syntax parameters /WeakForms/MFEMEigenproblemWeakForm
 
-## Input File Syntax
 !syntax inputs /WeakForms/MFEMEigenproblemWeakForm
 
 !syntax children /WeakForms/MFEMEigenproblemWeakForm

@@ -9,18 +9,3 @@
     bcs = 'bottom top_convective'
   []
 []
-
-[Postprocessors]
-  [temperature_norm]
-    type = MFEML2Error
-    variable = temperature
-    function = 0
-  []
-[]
-
-[Outputs]
-  [HeatTransferCSV]
-    type = CSV
-    file_base = OutputData/HeatTransferWeakForm
-  []
-[]

@@ -53,8 +53,11 @@
   []
   [MFEMTransientWeakForm]
     type = CSVDiff
+    gold_dir='../kernels/gold'    
     input = transient_weakform.i
-    csvdiff = 'OutputData/HeatTransferWeakForm.csv'
+    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0002.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
     requirement = 'The system shall be able to solve a transient FE problem using a time dependent weak form whose kernels and boundary conditions are specified by the user.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
