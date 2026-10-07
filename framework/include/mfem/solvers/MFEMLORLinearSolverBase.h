@@ -103,16 +103,19 @@ template <class MFEMSolverType>
 void
 LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
 {
-  if (_lor && GetPreconditioner())
-    mooseError("LOR solver cannot take a preconditioner");
-  if (_lor)
-  {
-    SetupLOR();
-    if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreAMS, mfem::HypreADS>)
-      if (_a->ParFESpace()->GetMesh()->GetTypicalElementGeometry() != mfem::Geometry::Type::CUBE)
-        mooseError("LOR HypreAMS/ADS Solver only supports hex meshes.");
-    SetLORSolver();
-  }
+  if (!_lor)
+    return;
+
+  if (isParamSetByUser("preconditioner"))
+    paramError("preconditioner", "LOR solver cannot take a preconditioner");
+
+  SetupLOR();
+
+  if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreAMS, mfem::HypreADS>)
+    if (_a->ParFESpace()->GetMesh()->GetTypicalElementGeometry() != mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreAMS/ADS Solver only supports hex meshes.");
+
+  SetLORSolver();
 }
 
 template <class MFEMSolverType>
