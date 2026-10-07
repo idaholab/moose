@@ -42,7 +42,7 @@ public:
   ~CustomProblemOperator() override;
 
   // The initialisation function
-  void Init(mfem::BlockVector &) override;
+  void Init() override;
 
   // Solve the equation
   void Solve() override;
