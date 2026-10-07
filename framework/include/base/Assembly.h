@@ -25,6 +25,7 @@
 #include "libmesh/elem_side_builder.h"
 
 #include <unordered_map>
+#include <algorithm>
 
 // libMesh forward declarations
 namespace libMesh
@@ -3103,8 +3104,13 @@ Assembly::cacheJacobian(const Residuals & residuals,
   if (!computingJacobian() || matrix_tags.empty())
     return;
 
-  // See cacheResiduals: a single row that is not constrained needs no constraining
-  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]))
+  // A single row needs no constraining unless its dof or one of its column dofs is constrained, in
+  // which case its entries must be distributed to the constraining rows and columns
+  const auto & single_row_dofs = residuals[0].derivatives().nude_indices();
+  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]) &&
+      std::none_of(single_row_dofs.begin(),
+                   single_row_dofs.end(),
+                   [this](const auto dof) { return _dof_map.is_constrained_dof(dof); }))
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)

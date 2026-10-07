@@ -7,4 +7,10 @@
     csvdiff = 'periodic_nodal_load_out.csv'
     requirement = 'The system shall apply the residual of an automatic differentiation nodal kernel at a node whose degree of freedom is constrained by a periodic boundary condition to the constraining degree of freedom.'
   []
+  [periodic_coupled_jacobian]
+    type = PetscJacobianTester
+    input = 'periodic_coupled_jacobian.i'
+    ratio_tol = 1e-7
+    requirement = 'The system shall apply the Jacobian of an automatic differentiation nodal kernel that couples to a degree of freedom constrained by a periodic boundary condition to the constraining degree of freedom.'
+  []
 []
