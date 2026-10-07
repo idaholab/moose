@@ -196,12 +196,22 @@ Confirm the rebuild picked up the change before trusting the rerun: the rebuilt 
 must be newer than the edited source. A stale binary tests the old code and makes the
 result meaningless.
 
+Check each step's exit status, not just that its output file exists. A failing compiler or
+preprocessor can leave an empty or partial file behind, and `make` then treats that file
+as up to date, so later steps quietly test the wrong thing.
+
 ## 7. Use the two distributions as a bisect lever
 
 conda recipes build with the compiler pins from `conda/conda_build_config.yaml`; apptainer
 containers carry their own toolchain from their base images. When a source-level failure
 appears in one distribution and not the other, the difference between their toolchains is
 the first hypothesis, and it is cheap to confirm by reading both versions.
+
+A failure confined to one distribution can also come from a code path only that
+distribution enables, not from its toolchain. The conda recipes, for example, set
+environment variables in `conda/<pkg>/build.sh` that switch MOOSE onto installed-package
+code paths the source-tree builds never take. `git grep` the variable or file named in
+the error across `conda/` and `apptainer/` to see which distributions reach it.
 
 The same reasoning applies across the variant matrix: `[linux]`, `[osx]` and
 `[osx and arm64]` selectors mean a pin can be satisfiable on one platform and not another,
