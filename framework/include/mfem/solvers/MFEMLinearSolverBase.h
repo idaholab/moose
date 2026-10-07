@@ -37,9 +37,8 @@ public:
   virtual void Solve() { mooseError("'solve' method not used in this solver type."); }
 
 protected:
-  /// Called once per SetOperator, only when a preconditioner is set.
   /// Override in solvers that accept a preconditioner.
-  virtual void SetPreconditionerImpl() { mooseError("This solver does not support a preconditioner."); }
+  virtual void SetPreconditionerImpl() { paramError("preconditioner", "Can't be preconditioned."); }
 
   /// Preconditioner to be used for the problem
   std::shared_ptr<LinearSolverBase> _preconditioner;
@@ -48,6 +47,9 @@ protected:
   std::shared_ptr<EquationSystem> _equation_system;
 
 private:
+  /// Retrieves the preconditioner, sets the operator on it, and sets it on the wrapped solver
+  void SetPreconditioner(const mfem::Operator & op);
+
   friend class ::MFEMProblemSolve;
 };
 } // namespace Moose::MFEM

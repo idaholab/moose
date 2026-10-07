@@ -44,32 +44,34 @@ LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
 }
 
 void
+LinearSolverBase::SetPreconditioner(const mfem::Operator & op)
+{
+  if (!isParamSetByUser("preconditioner"))
+    return;
+
+  auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
+      "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
+  if (dynamic_cast<const EigensolverBase *>(&pre))
+    paramError("preconditioner", "Eigensolvers cannot be used as preconditioners.");
+  // Take shared ownership so the preconditioner outlives the solver
+  _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.getSharedPtr());
+  // SetOperatorImpl() may build the preconditioner (e.g. MatrixFreeAMS) for SetPreconditionerImpl()
+  _preconditioner->SetOperator(op);
+  SetPreconditionerImpl();
+}
+
+void
 LinearSolverBase::SetOperator(const mfem::Operator & op)
 {
-  if (isParamSetByUser("preconditioner"))
-  {
-    auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
-        "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
-    if (dynamic_cast<const EigensolverBase *>(&pre))
-      paramError("preconditioner", "Eigensolvers cannot be used as preconditioners.");
-    // Take shared ownership so the preconditioner outlives the solver
-    _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.shared_from_this());
-  }
-
-  // On the one hand, UpdateEquationSystemContext() may replace the wrapped solver (e.g. LOR),
-  // so it must precede SetPreconditionerImpl(). On the other hand, it may perform checks relying
-  // on _preconditioner (e.g. LOR), so it must follow its assignment above.
+  // May replace the wrapped solver (e.g. LOR), so this must precede SetPreconditioner()
   UpdateEquationSystemContext();
 
-  if (_preconditioner)
-  {
-    _preconditioner->SetOperator(op);
-    SetPreconditionerImpl();
-  }
+  SetPreconditioner(op);
 
   // SetOperatorImpl() calls SetOperator() on the wrapped mfem solver. In most cases, this will
-  // redundantly reset the operator on the preconditioner, but for others it requires the
-  // preconditioner be already set (e.g. HypreAME), thus why it follows SetPreconditionerImpl().
+  // redundantly reset the operator on the preconditioner. For others it requires the preconditioner
+  // be already set (e.g. AME), thus why it follows SetPreconditioner(). Repeating SetOperator() for
+  // BoomerAMG when used as a preconditioner will also reset it to one V-cycle as expected.
   SetOperatorImpl(op);
 }
 } // namespace Moose::MFEM
