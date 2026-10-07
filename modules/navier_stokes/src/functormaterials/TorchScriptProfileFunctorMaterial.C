@@ -323,7 +323,7 @@ TorchScript1DProfileFunctorMaterial::timestepSetup()
 
 Real
 TorchScript1DProfileFunctorMaterial::sampleProfile(const unsigned int profile_index,
-                                                 const Point & point) const
+                                                   const Point & point) const
 {
   if (profile_index >= _profiles.size())
     mooseError("Invalid profile index ", profile_index, " requested from ", name(), ".");
