@@ -53,6 +53,8 @@ PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
     (*_dporosity_dvar)[_qp].assign(_num_var, 0.0);
     (*_dporosity_dgradvar)[_qp].assign(_num_var, RealGradient());
   }
+
+  this->applyPorosityMin();
 }
 
 template class PorousFlowPorosityConstTempl<false>;

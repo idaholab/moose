@@ -28,8 +28,6 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::validParams()
                         "Modify the usual exponential relationships that "
                         "governs porosity so that porosity is always "
                         "positive");
-  PorousFlowPorosityBaseTempl<is_ad>::addPorosityMinParams(params,
-                                                           std::numeric_limits<Real>::lowest());
   params.setDocString(
       "porosity_min",
       "Minimum allowed value of the porosity: if the computed porosity is less than this value, "
