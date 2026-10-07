@@ -1,5 +1,5 @@
 [Tests]
-  design = 'TorchScriptProfileFunctorMaterial.md TorchScriptUserObject.md'
+  design = 'TorchScript1DProfileFunctorMaterial.md TorchScriptUserObject.md'
   issues = '#33552'
 
   [interpolation]

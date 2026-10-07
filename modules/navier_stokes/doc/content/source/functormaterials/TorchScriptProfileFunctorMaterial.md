@@ -1,10 +1,10 @@
-# TorchScriptProfileFunctorMaterial
+# TorchScript1DProfileFunctorMaterial
 
 !if! function=hasLibtorch()
 
 ## Overview
 
-`TorchScriptProfileFunctorMaterial` evaluates a TorchScript model and converts its output into one
+`TorchScript1DProfileFunctorMaterial` evaluates a TorchScript model and converts its output into one
 or more spatially varying functor material properties. It is intended for models that predict a
 discrete one-dimensional profile, such as a friction coefficient, heat-transfer coefficient, or
 closure correction along a channel. The predicted values are linearly interpolated in profile
@@ -21,13 +21,14 @@ arguments supplied by a consuming MOOSE object.
 
 Model inputs are supplied using exactly one of the following parameters:
 
-- [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names), which obtains the
+- [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_names), which obtains the
   model inputs from scalar postprocessors; or
-- [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_values), which supplies
+- [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_values), which supplies
   constant model inputs directly in the input file.
 
 For $M$ inputs, the material constructs a tensor of shape `[1, M]`. The tensor scalar type is
-selected with [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/tensor_dtype).
+selected with [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/tensor_dtype), which
+defaults to `float32`.
 
 The TorchScript model may return any of the following shapes:
 
@@ -36,17 +37,17 @@ The TorchScript model may return any of the following shapes:
 - `[1, C, N]` with a leading unit batch dimension.
 
 The number of output profiles $C$ must equal the number of entries in
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_names), and the number of
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_names), and the number of
 stations $N$ must equal the number of entries in
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates). The coordinates
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_coordinates). The coordinates
 must be finite and strictly increasing. Each row of the normalized `[C, N]` output tensor is paired
-with [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates) to construct
+with [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_coordinates) to construct
 one linearly interpolated functor.
 
 ## Update schedule
 
 The TorchScript model is evaluated according to
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/execute_on), which accepts two
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/execute_on), which accepts two
 flags:
 
 - `INITIAL` (default) evaluates the model once during initial setup, so the generated profiles
@@ -55,23 +56,36 @@ flags:
   profiles can follow time-varying inputs.
 
 Only these two flags are offered because the model consumes solely the scalar values supplied
-through [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names) or
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_values).
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/execute_on) therefore controls
-*when* inference re-runs, not what it depends on: the profiles never depend on the solution at
-the point where a functor is evaluated.
+through [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_names) or
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_values).
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/execute_on) therefore controls
+*when* inference re-runs. Between updates, the generated profiles remain fixed.
 
-With `TIMESTEP_BEGIN`, the material rebuilds its profiles at the start of the step, before the
-step's other time-step-begin objects (such as postprocessors) are recomputed. A re-evaluation
-therefore reads its inputs as they stood at the end of the previous step; an input postprocessor
-that is itself updated at `TIMESTEP_BEGIN` is thus seen with a one-step lag.
+If an entry in [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_names) is a
+postprocessor that depends on the solution, the material reads only that postprocessor's most
+recently stored scalar value:
+
+- In a steady simulation, inference occurs before the nonlinear solve. The default `INITIAL`
+  evaluation can occur before the input postprocessor has performed its normal `INITIAL`
+  execution. Including `TIMESTEP_BEGIN` causes one additional profile update immediately before
+  the steady solve, after `INITIAL` postprocessors have executed. This update can therefore use
+  postprocessor values computed from the initialized solution, but the resulting profiles remain
+  fixed throughout the nonlinear iterations.
+- In a transient simulation with `TIMESTEP_BEGIN`, the material rebuilds its profiles before
+  postprocessors scheduled on `TIMESTEP_BEGIN` are recomputed. It therefore uses the value stored
+  by the input postprocessor at its preceding execution, normally a value computed from the
+  previous accepted solution. The profiles then remain fixed throughout the current time-step
+  solve. A postprocessor that also executes on `TIMESTEP_BEGIN` is consequently seen with a
+  one-step lag.
 
 !alert warning title=Profile availability and automatic differentiation
 Values referenced by
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names) must be available when
-the first evaluation occurs. The published functors have type `Real`; they are compatible with
-non-AD consumers, and TorchScript inference itself is not part of the MOOSE
-automatic-differentiation graph.
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/input_names) must be available when
+each profile update occurs. The published functors do not reevaluate the model when the solution
+changes or distinguish current and old solution states. They have type `Real`, and TorchScript
+inference is performed outside the MOOSE automatic-differentiation graph. Consequently, a
+solution-dependent input is treated as a lagged explicit coupling: its dependence on the current
+nonlinear solution is not represented in the Jacobian.
 
 ## Spatial coordinate mapping
 
@@ -82,19 +96,19 @@ s(\boldsymbol{x}) =
 \frac{(\boldsymbol{x}-\boldsymbol{x}_0)\mathbin{\cdot}\widehat{\boldsymbol{d}}}{L_s},
 
 where $\boldsymbol{x}_0$ is
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_origin),
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_origin),
 $\widehat{\boldsymbol{d}}$ is the normalized
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_direction), and $L_s$ is
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/coordinate_scale). The supplied
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_direction), and $L_s$ is
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/coordinate_scale). The supplied
 direction therefore does not need to have unit length, but it must be finite and nonzero.
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/coordinate_scale) converts mesh
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/coordinate_scale) converts mesh
 distance along the selected direction into the coordinate system used by
-[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates).
+[!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/profile_coordinates).
 
-The [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/out_of_range_behavior) parameter
+The [!param](/FunctorMaterials/TorchScript1DProfileFunctorMaterial/out_of_range_behavior) parameter
 determines how $s$ values outside the tabulated coordinate range are handled:
 
-- `error` reports an error;
+- `error` (default) reports an error;
 - `clamp` returns the value at the nearest endpoint; and
 - `extrapolate` linearly extrapolates using the nearest two profile stations.
 
@@ -162,11 +176,11 @@ Linear interpolation therefore gives `profile_a = 11` and `profile_b = 4.5` at t
 - The saved TorchScript model should be generated with a PyTorch version compatible with the
   LibTorch version linked into MOOSE.
 
-!syntax parameters /FunctorMaterials/TorchScriptProfileFunctorMaterial
+!syntax parameters /FunctorMaterials/TorchScript1DProfileFunctorMaterial
 
-!syntax inputs /FunctorMaterials/TorchScriptProfileFunctorMaterial
+!syntax inputs /FunctorMaterials/TorchScript1DProfileFunctorMaterial
 
-!syntax children /FunctorMaterials/TorchScriptProfileFunctorMaterial
+!syntax children /FunctorMaterials/TorchScript1DProfileFunctorMaterial
 
 !if-end!
 

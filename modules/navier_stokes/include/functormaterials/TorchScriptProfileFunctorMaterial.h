@@ -40,12 +40,12 @@
  *
  * where profile_direction is normalized internally.
  */
-class TorchScriptProfileFunctorMaterial : public FunctorMaterial
+class TorchScript1DProfileFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  TorchScriptProfileFunctorMaterial(const InputParameters & parameters);
+  TorchScript1DProfileFunctorMaterial(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void timestepSetup() override;

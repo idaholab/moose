@@ -1,4 +1,4 @@
-# Regression test for the execute_on schedule of TorchScriptProfileFunctorMaterial.
+# Regression test for the execute_on schedule of TorchScript1DProfileFunctorMaterial.
 #
 # The model inputs come from time-varying postprocessors (a_in = 10 + t and
 # b_in = 5 - t). With execute_on = timestep_begin the material re-runs inference
@@ -47,7 +47,7 @@
 
 [FunctorMaterials]
   [profiles]
-    type = TorchScriptProfileFunctorMaterial
+    type = TorchScript1DProfileFunctorMaterial
     torch_script_userobject = profile_network
 
     input_names = 'a_in b_in'

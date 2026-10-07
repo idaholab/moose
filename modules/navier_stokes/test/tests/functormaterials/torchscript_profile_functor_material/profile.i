@@ -17,7 +17,7 @@
 
 [FunctorMaterials]
   [profiles]
-    type = TorchScriptProfileFunctorMaterial
+    type = TorchScript1DProfileFunctorMaterial
     torch_script_userobject = profile_network
 
     input_values = '10 5'
@@ -30,7 +30,6 @@
 
     coordinate_scale = 2
     out_of_range_behavior = error
-    tensor_dtype = float64
   []
 []
 

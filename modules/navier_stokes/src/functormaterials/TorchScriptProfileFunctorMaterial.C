@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TorchScriptProfileFunctorMaterial.h"
+#include "TorchScript1DProfileFunctorMaterial.h"
 
 #ifdef MOOSE_LIBTORCH_ENABLED
 
@@ -17,10 +17,10 @@
 #include <cstdint>
 #include <exception>
 
-registerMooseObject("NavierStokesApp", TorchScriptProfileFunctorMaterial);
+registerMooseObject("NavierStokesApp", TorchScript1DProfileFunctorMaterial);
 
 InputParameters
-TorchScriptProfileFunctorMaterial::validParams()
+TorchScript1DProfileFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
 
@@ -70,7 +70,7 @@ TorchScriptProfileFunctorMaterial::validParams()
                              "profile coordinate range.");
 
   params.addParam<MooseEnum>("tensor_dtype",
-                             MooseEnum("float32 float64", "float64"),
+                             MooseEnum("float32 float64", "float32"),
                              "Floating-point type expected by the TorchScript model.");
 
   // The model consumes only scalar inputs (constants or postprocessor values),
@@ -89,7 +89,7 @@ TorchScriptProfileFunctorMaterial::validParams()
   return params;
 }
 
-TorchScriptProfileFunctorMaterial::TorchScriptProfileFunctorMaterial(
+TorchScript1DProfileFunctorMaterial::TorchScript1DProfileFunctorMaterial(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _torch_script_userobject(getUserObject<TorchScriptUserObject>("torch_script_userobject")),
@@ -150,7 +150,7 @@ TorchScriptProfileFunctorMaterial::TorchScriptProfileFunctorMaterial(
 }
 
 torch::Tensor
-TorchScriptProfileFunctorMaterial::buildInputTensor() const
+TorchScript1DProfileFunctorMaterial::buildInputTensor() const
 {
   std::vector<Real> values;
 
@@ -166,7 +166,7 @@ TorchScriptProfileFunctorMaterial::buildInputTensor() const
 
   for (const auto i : index_range(values))
     if (!std::isfinite(values[i]))
-      mooseError("TorchScriptProfileFunctorMaterial '",
+      mooseError("TorchScript1DProfileFunctorMaterial '",
                  name(),
                  "' received non-finite model input ",
                  i,
@@ -185,7 +185,7 @@ TorchScriptProfileFunctorMaterial::buildInputTensor() const
 }
 
 void
-TorchScriptProfileFunctorMaterial::updateProfiles()
+TorchScript1DProfileFunctorMaterial::updateProfiles()
 {
   torch::Tensor output;
 
@@ -250,7 +250,8 @@ TorchScriptProfileFunctorMaterial::updateProfiles()
   const auto expected_stations = static_cast<std::int64_t>(_profile_coordinates.size());
 
   if (output.size(0) != expected_channels)
-    mooseError("TorchScript model in ",
+    paramError("profile_names",
+               "TorchScript model in ",
                name(),
                " returned ",
                output.size(0),
@@ -259,7 +260,8 @@ TorchScriptProfileFunctorMaterial::updateProfiles()
                " entries.");
 
   if (output.size(1) != expected_stations)
-    mooseError("TorchScript model in ",
+    paramError("profile_coordinates",
+               "TorchScript model in ",
                name(),
                " returned ",
                output.size(1),
@@ -307,20 +309,20 @@ TorchScriptProfileFunctorMaterial::updateProfiles()
 }
 
 void
-TorchScriptProfileFunctorMaterial::initialSetup()
+TorchScript1DProfileFunctorMaterial::initialSetup()
 {
   updateProfiles();
 }
 
 void
-TorchScriptProfileFunctorMaterial::timestepSetup()
+TorchScript1DProfileFunctorMaterial::timestepSetup()
 {
   if (_profile_update_schedule.count(EXEC_TIMESTEP_BEGIN))
     updateProfiles();
 }
 
 Real
-TorchScriptProfileFunctorMaterial::sampleProfile(const unsigned int profile_index,
+TorchScript1DProfileFunctorMaterial::sampleProfile(const unsigned int profile_index,
                                                  const Point & point) const
 {
   if (profile_index >= _profiles.size())
