@@ -7,6 +7,7 @@ The primary species are created as [nonlinear variables](Variables/index.md), by
 The reactions are parsed from the syntax described on this [page](modules/chemical_reactions/index.md#parser).
 Equilibrium species are output as [auxiliary variables](AuxVariables/index.md), by the [AddSecondarySpeciesAction.md].
 This action is the solid kinetic pendant of the aqueous equilibrium [AddCoupledEqSpeciesAction.md].
+Setting [!param](/ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction/use_kokkos) to `true` creates the Kokkos versions of these objects instead.
 
 !syntax parameters /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction
 
