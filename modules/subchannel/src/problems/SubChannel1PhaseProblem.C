@@ -2335,7 +2335,7 @@ SubChannel1PhaseProblem::implicitPetscSolve()
   const unsigned int first_node = 1;
   const unsigned int last_node = _n_cells;
 
-  // ---------- assemble per-block operators -----------------
+  // ---------- assemble operators ---------------------------
   computeSumWij();
   computeMdot();
   computeWijPrime();
@@ -2859,11 +2859,10 @@ SubChannel1PhaseProblem::externalSolve()
         comm().max(T_error);
       }
     }
-    const bool block_converged = T_error <= _T_tol;
-    temperature_converged &= block_converged;
-    if (!block_converged)
+    temperature_converged = T_error <= _T_tol;
+    if (!temperature_converged)
     {
-      _console << "Reached maximum number of temperature iterations " << std::endl;
+      _console << "Reached maximum number of temperature iterations" << std::endl;
     }
     P_error = _segregated_bool ? relativeChange(*_P_soln, P_old, 0, _n_cells, _P_out)
                                : _pressure_fixed_point_error;

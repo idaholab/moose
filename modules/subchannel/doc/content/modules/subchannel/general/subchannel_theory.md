@@ -394,9 +394,13 @@ The main unknown variable in this non linear residual is the crossflow $w_{ij}$.
     id=scm-solver-flowchart
     caption=SCM solver iteration scheme
 
-For each outer pressure iteration the solution is repeated. Within a solve, SCM first refreshes the flow solution and then solves the enthalpy equation,
+Each outer pressure iteration solves the whole axial domain at once. Within it, SCM repeats a
+temperature loop in which it first refreshes the flow solution and then solves the enthalpy equation,
 recovers temperature from pressure and enthalpy, and updates density and viscosity. The
-`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are performed before the next flow solve. Its default value of one preserves the original flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow field.
+`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are
+performed before the next flow solve. Its default value of one preserves the original
+flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow
+field.
 
 The temperature recovered from the equation of state can be relaxed independently:
 
@@ -426,8 +430,12 @@ use the relative field change
 {\left\|\vec{P}^{\,\ell}+P_{\mathrm{out}}\mathbf{1}\right\|_2+10^{-14}},
 \end{equation}
 
-whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
-independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the pressure field has not converged, the algorithm continues solving with updated pressure field.
+whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update. Measuring
+the monolithic update before post-solve relaxation keeps the meaning of `P_tol` independent of
+`pressure_relaxation`. The maximum errors are synchronized across processes. If the pressure field
+has not converged, the algorithm starts another outer iteration with the updated pressure field.
+`P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
+the solver's automatic outer-iteration limit.
 
 ### Algorithm variations
 

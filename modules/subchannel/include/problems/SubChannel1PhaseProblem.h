@@ -430,7 +430,7 @@ protected:
   PetscScalar _max_sumWij;
   PetscScalar _max_sumWij_new;
   PetscScalar _correction_factor = 1.0;
-  /// Maximum pressure fixed-point update before solution relaxation over the blocks
+  /// Maximum pressure fixed-point update before solution relaxation
   Real _pressure_fixed_point_error = 1.0;
 
 public:
