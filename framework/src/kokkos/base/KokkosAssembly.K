@@ -189,13 +189,17 @@ Assembly::initQuadrature()
       {
         auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
         auto eid = kokkosMesh().getContiguousElementID(elem);
-        auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
-        _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
-        _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
+        for (const auto side :
+             _mesh.getMesh().get_boundary_info().sides_with_boundary_id(elem, boundary))
+          if (_qp_offset_face(side, eid) == libMesh::DofObject::invalid_id)
+          {
+            _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
+            _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
 
-        _elem_face_property_idx(side, eid) = _n_elem_face_properties[sid];
-        ++_n_elem_face_properties[sid];
+            _elem_face_property_idx(side, eid) = _n_elem_face_properties[sid];
+            ++_n_elem_face_properties[sid];
+          }
       }
     }
 
