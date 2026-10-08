@@ -1,5 +1,4 @@
 [Mesh]
-#   [hinomaru]
   type = MFEMFileMesh
   file = ../mesh/hinomaru_offset.e
 []
@@ -39,29 +38,28 @@
     type = MFEMParsedFunction
     expression = 0
   []
-
-  [cylindrical]
-    type = MFEMCoordinateTransformations
-    coord_type = RZ
-    inv_r_eps = 0
+  # Meridional radius R = x
+  [R]
+    type = MFEMParsedFunction
+    expression = 'x'
   []
-
-  # Weighted source coefficient r * J_theta used on the RHS
+  [inv_R]
+    type = MFEMParsedFunction
+    expression = '1.0/x'
+  []
+  # Weighted source coefficient R * J_theta = x * 8
   [Jtheta_r_wire]
-    type = ParsedFunction
-    expression = 8*sqrt(x*x+y*y)
+    type = MFEMParsedFunction
+    expression = '8.0*x'
   []
 []
 
 [FunctorMaterials]
-  # Cylindrical coefficients used in the axisymmetric weak form
   [cyl_coeffs]
     type = MFEMGenericFunctorMaterial
     prop_names = 'diffCoef massCoef'
-    prop_values = 'cylindrical_r cylindrical_inv_r'
+    prop_values = 'R inv_R'
   []
-
-  # Azimuthal current density in the wire
   [J_wire]
     type = MFEMGenericFunctorMaterial
     prop_names = 'Jtheta sourceCoef'
@@ -75,10 +73,11 @@
     type = MFEMVariable
     fespace = RTFESpace
   []
+
   [J]
     type = MFEMVariable
     fespace = L2FESpace
-    []
+  []
 []
 
 [Kernels]
@@ -87,6 +86,7 @@
     variable = Atheta
     coefficient = diffCoef
   []
+
   [mass]
     type = MFEMMassKernel
     variable = Atheta
@@ -102,16 +102,15 @@
 
 [AuxKernels]
   [B_from_Atheta]
-    type = MFEMAxisymmetricCurlAthetaAux
+    type = MFEMMeridionalCurlAux
     variable = B
     source = Atheta
-    coordinate_function = cylindrical
   []
   [J]
     type = MFEMScalarProjectionAux
     variable = J
     coefficient = Jtheta
-    []
+  []
 []
 
 [BCs]
@@ -134,7 +133,7 @@
   [LineSampler]
     type = MFEMVariableLineValueSampler
     variable = 'B'
-    start_point = '2.899 -1.98 0' # Ensure that it does not coincide with a vertical element boundary, thus not trigger the H(Div) boundary issue.
+    start_point = '2.899 -1.98 0'
     end_point = '2.899 1.98 0'
     num_points = 10
   []

@@ -14,25 +14,28 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Class to compute the axisymmetric curl associated with
- * an azimuthal scalar field A_theta.
+ * Class to compute the meridional curl associated with an azimuthal scalar field A_theta.
  *
- * For A_theta(r,z), this computes
+ * For a 2D meridional mesh with coordinates
+ *
+ *   x = r
+ *   y = z
+ *
+ * this computes
  *
  *   B_r = -dA_theta/dz
  *   B_z =  dA_theta/dr + A_theta/r
  *
- * using the regularized inverse-r coefficient declared by an
- * MFEMCoordinateTransformations function object with coord_type = RZ.
+ * using r = x directly.
  */
-class MFEMAxisymmetricCurlAthetaAux : public MFEMAuxKernel
+class MFEMMeridionalCurlAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMAxisymmetricCurlAthetaAux(const InputParameters & parameters);
+  MFEMMeridionalCurlAux(const InputParameters & parameters);
 
-  virtual ~MFEMAxisymmetricCurlAthetaAux() = default;
+  virtual ~MFEMMeridionalCurlAux() = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -41,14 +44,8 @@ protected:
   /// Name of source MFEMVariable storing A_theta.
   const VariableName _source_var_name;
 
-  /// Reference to source scalar gridfunction.
+  /// Reference to source scalar grid function.
   const mfem::ParGridFunction & _source_var;
-
-  /// Name of the MFEMCoordinateTransformations function object.
-  const FunctionName _coordinate_function;
-
-  /// Derived inverse-r coefficient name "<coordinate_function>_inv_r".
-  const std::string _inv_r_coefficient;
 };
 
 #endif
