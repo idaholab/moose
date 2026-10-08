@@ -7,9 +7,12 @@ in PETSc to evaluate the quality of the Jacobian in the specified tests.
 
 Test configuration options are specified in the `tests` file.
 
-- `ratio_tol`: Relative tolerance to compare the ration against, defaults to 1e-8
+- `ratio_tol`: Tolerance on $||J - J_{fd}||_F / ||J||_F$, the finite-difference error relative to
+  the magnitude of the Jacobian, defaults to 1e-7
 
-- `difference_tol`: Relative tolerance to compare the difference against, defaults to 1e-8
+- `difference_tol`: Tolerance on the absolute difference $||J - J_{fd}||_F$. Because it scales with
+  the magnitude of the Jacobian entries (material coefficients, field magnitudes, mesh size, and
+  units), it is disabled by default, and `ratio_tol` is the meaningful check.
 
 - `state`: The state for which we want to compare against the
          finite-differenced Jacobian ('user' (default) 'const_positive' or
