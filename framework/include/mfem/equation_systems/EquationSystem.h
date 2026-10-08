@@ -78,7 +78,7 @@ public:
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
   /// Get partially-assembled Jacobian
-  void FormJacobianOperator(const mfem::Vector & u) const;
+  void FormJacobianOperator(const mfem::Vector & u);
   /// Get operator handle for linear component of system operator
   mfem::OperatorHandle & GetLinearOperator() const { return _linear_operator; };
 
@@ -315,6 +315,8 @@ protected:
   std::vector<mfem::Array<int>> _ess_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
+  mfem::Array2D<mfem::Operator *> _h_blocks_pa, _jacobian_blocks_pa;
+
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
