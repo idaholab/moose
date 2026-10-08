@@ -78,8 +78,10 @@ q_conduction_ref = ${fparse gap_conductance*interface_temperature_span}
 q_radiation_ref = ${fparse sigma*(T_left_ref^4-T_right_ref^4)/emissivity_denominator}
 q_total_ref = ${fparse q_conduction_ref+q_radiation_ref}
 
-nx_solid = 200
-nx_gap = 200
+# Coarsest mesh of the spatial convergence study in mms_spatial.py, which
+# refines it uniformly. Matches linear_fv_gray_lambert_parallel_plates_simple.i.
+nx_solid = 10
+nx_gap = 10
 
 [Problem]
   kernel_coverage_check = false
@@ -286,6 +288,12 @@ nx_gap = 200
 []
 
 [Postprocessors]
+  # Mesh size for the spatial convergence study
+  [h]
+    type = AverageElementSize
+    outputs = csv
+  []
+
   # Interface temperatures
   [T_left_rad]
     type = GrayLambertSurfaceRadiationPP
@@ -390,7 +398,9 @@ nx_gap = 200
   energy_l_tol = 1e-14
   energy_equation_relaxation = 0.99
   energy_field_relaxation = 0.99
-  energy_absolute_tolerance = 1e-12
+  # The fluid energy residual stagnates near 1e-10 in this problem, so a tighter
+  # tolerance is never reached. Matches linear_fv_gray_lambert_parallel_plates_simple.i.
+  energy_absolute_tolerance = 1e-8
 
   solid_energy_l_abs_tol = 1e-14
   solid_energy_l_tol = 1e-14

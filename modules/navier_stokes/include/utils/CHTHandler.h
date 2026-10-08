@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "MooseObject.h"
 #include "UserObjectInterface.h"
 #include "NonADFunctorInterface.h"
@@ -38,6 +39,7 @@ public:
   CHTHandler(const InputParameters & parameters);
 
   static InputParameters validParams();
+
   /// Link energy systems
   void linkEnergySystems(SystemBase * solid_energy_system,
                          SystemBase * fluid_energy_system,
@@ -49,6 +51,7 @@ public:
 
   /// Run error checks and make sure everything works
   void deduceCHTBoundaryCoupling();
+
   /// Update the coupling fields for \param side
   void updateCHTBoundaryCouplingFields(const NS::CHTSide side);
 
@@ -63,6 +66,7 @@ public:
 
   /// Increment CHT iterators in the loop
   void incrementCHTIterators();
+
   /// Sum the integrated fluxes over all processors
   void sumIntegratedFluxes();
 
@@ -84,6 +88,7 @@ protected:
 
   /// The energy system
   SystemBase * _energy_system;
+
   /// The solid energy system
   SystemBase * _solid_energy_system;
 
@@ -127,6 +132,7 @@ protected:
 
   /// The solid (0) and fluid (1) system numbers.
   std::vector<unsigned int> _cht_system_numbers;
+
   /// The participating media radiation system numbers.
   std::vector<unsigned int> _cht_pm_radiation_system_numbers;
 
@@ -135,6 +141,7 @@ protected:
 
   /// The conduction kernels from the solid/fluid domains. Can't be const, considering we are updating the inner structures for every face.
   std::vector<LinearFVFluxKernel *> _cht_conduction_kernels;
+
   /// The conduction radiation kernels from the fluid domains.
   std::vector<LinearFVFluxKernel *> _cht_pm_radiation_kernels;
 
@@ -143,6 +150,7 @@ protected:
 
   /// Vector of boundary conditions that describe the radiation pm bcs from each side.
   std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_pm_radiation_boundary_conditions;
+
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
   std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
@@ -152,6 +160,7 @@ protected:
   std::vector<std::vector<Real>> _integrated_boundary_heat_flux;
 
   /// Integrated net outward surface-radiation flux, kept separate for the CHT energy balance.
+  /// Only populated when a surface-radiation user object is supplied.
   std::vector<Real> _integrated_boundary_surface_radiation_heat_flux;
 
   /// Functors describing the raw wall temperatures on the conjugate heat transfer interfaces.
@@ -180,6 +189,7 @@ CHTHandler::resetCHTConvergence()
 {
   _fpi_it = 0;
 }
+
 inline void
 CHTHandler::incrementCHTIterators()
 {

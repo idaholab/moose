@@ -7,10 +7,14 @@
 #       |   -d < x < 0    |           | 1 < x < 1+d      |
 #
 # The prescribed temperatures are applied only to the OUTER slab faces.
-# The left/right cavity surfaces use linear-FV CHT. Surface-to-surface
-# radiation is passed into CHTHandler through surface_radiation_object_name.
-# The top/bottom cavity walls are externally adiabatic, so their conductive
-# heat flux is balanced by LinearFVGrayLambertBC.
+# The left/right cavity surfaces use linear-FV CHT, and the top/bottom cavity
+# walls are externally adiabatic.
+#
+# As written, this input solves the case without radiation. The radiation case
+# activates the inactive objects below and sets
+# Executioner/surface_radiation_object_name = gray_lambert, which passes the
+# surface-to-surface radiation into CHTHandler. The conductive heat flux on the
+# top/bottom walls is then balanced by LinearFVGrayLambertBC.
 
 ################################################################################
 # MATERIAL PROPERTIES AND GEOMETRY
@@ -26,10 +30,14 @@ k_solid = 38.0
 cp = 640.0
 alpha = 3.26e-5
 
+eps = 1.0
+
 slab_thickness = 0.10
-n_slab_x = 20
-n_fluid_x = 200
-n_y = 120
+# Coarsest mesh on which SIMPLE converges for this problem; a 10x10 fluid mesh
+# stalls with momentum residuals near 0.5.
+n_slab_x = 4
+n_fluid_x = 20
+n_y = 20
 
 rad_left = 'left_0 left_1 left_2 left_3 left_4'
 rad_right = 'right_0 right_1 right_2 right_3 right_4'
@@ -37,7 +45,7 @@ rad_top = 'top_0 top_1 top_2 top_3 top_4'
 rad_bottom = 'bottom_0 bottom_1 bottom_2 bottom_3 bottom_4'
 
 rad_cht = '${rad_left} ${rad_right}'
-# rad_noncht = '${rad_top} ${rad_bottom}'
+rad_noncht = '${rad_top} ${rad_bottom}'
 rad_all = '${rad_left} ${rad_right} ${rad_top} ${rad_bottom}'
 walls = ${rad_all}
 
@@ -199,6 +207,9 @@ walls = ${rad_all}
 ################################################################################
 
 [UserObjects]
+  # Activated for the radiation case
+  inactive = 'view_factor gray_lambert'
+
   [ins_rhie_chow_interpolator]
     type = RhieChowMassFlux
     u = vel_x
@@ -209,32 +220,32 @@ walls = ${rad_all}
     block = fluid
   []
 
-  # # The enclosure is convex and unobstructed. This deterministic view-factor
-  # # object also avoids ray-orientation ambiguity on the internal CHT sidesets.
-  # [view_factor]
-  #   type = UnobstructedPlanarViewFactor
-  #   boundary = ${rad_all}
-  #   normalize_view_factor = true
-  #   execute_on = INITIAL
-  # []
+  # The enclosure is convex and unobstructed. This deterministic view-factor
+  # object also avoids ray-orientation ambiguity on the internal CHT sidesets.
+  [view_factor]
+    type = UnobstructedPlanarViewFactor
+    boundary = ${rad_all}
+    normalize_view_factor = true
+    execute_on = INITIAL
+  []
 
-  # [gray_lambert]
-  #   type = ViewFactorObjectSurfaceRadiation
-  #   boundary = ${rad_all}
+  [gray_lambert]
+    type = ViewFactorObjectSurfaceRadiation
+    boundary = ${rad_all}
 
-  #   # There are no fixed-temperature or radiatively adiabatic surfaces here.
-  #   # All 20 surfaces obtain their current temperature from T_fluid.
-  #   emissivity = '${eps} ${eps} ${eps} ${eps} ${eps}
-  #                 ${eps} ${eps} ${eps} ${eps} ${eps}
-  #                 ${eps} ${eps} ${eps} ${eps} ${eps}
-  #                 ${eps} ${eps} ${eps} ${eps} ${eps}'
-  #   temperature = T_fluid
-  #   view_factor_object_name = view_factor
+    # There are no fixed-temperature or radiatively adiabatic surfaces here.
+    # All 20 surfaces obtain their current temperature from T_fluid.
+    emissivity = '${eps} ${eps} ${eps} ${eps} ${eps}
+                  ${eps} ${eps} ${eps} ${eps} ${eps}
+                  ${eps} ${eps} ${eps} ${eps} ${eps}
+                  ${eps} ${eps} ${eps} ${eps} ${eps}'
+    temperature = T_fluid
+    view_factor_object_name = view_factor
 
-  #   # Refreshes radiation during the SIMPLE/CHT Picard loop. The handler uses
-  #   # the most recently assembled radiation state (one fluid-energy solve lag).
-  #   execute_on = 'NONLINEAR TIMESTEP_END'
-  # []
+    # Refreshes radiation during the SIMPLE/CHT Picard loop. The handler uses
+    # the most recently assembled radiation state (one fluid-energy solve lag).
+    execute_on = 'NONLINEAR TIMESTEP_END'
+  []
 []
 
 ################################################################################
@@ -386,6 +397,9 @@ walls = ${rad_all}
 ################################################################################
 
 [LinearFVBCs]
+  # Activated for the radiation case
+  inactive = 'radiation_top_bottom'
+
   [no_slip_u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_x
@@ -429,8 +443,29 @@ walls = ${rad_all}
   [insulated_slab_horizontal_faces]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = T_solid
-    boundary = 'left_solid_bottom left_solid_top right_solid_bottom right_solid_top bottom_0 bottom_1 bottom_2 bottom_3 bottom_4 top_0 top_1 top_2 top_3 top_4'
+    boundary = 'left_solid_bottom left_solid_top right_solid_bottom right_solid_top'
     functor = 0
+  []
+
+  # Without radiation, the top/bottom cavity walls are adiabatic. The radiation
+  # case replaces this BC with radiation_top_bottom.
+  [adiabatic_top_bottom]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = T_fluid
+    boundary = ${rad_noncht}
+    functor = 0
+  []
+
+  # Radiation is imposed directly only on the non-CHT top/bottom walls.
+  # Do not add these boundaries to adiabatic_boundary in gray_lambert:
+  # this BC makes their conductive flux balance their radiative flux.
+  [radiation_top_bottom]
+    type = LinearFVGrayLambertBC
+    variable = T_fluid
+    temperature_radiation = T_fluid
+    coeff_diffusion = ${k_fluid}
+    surface_radiation_object_name = gray_lambert
+    boundary = ${rad_noncht}
   []
 
   # Neumann-Dirichlet CHT. Each patch needs its own pair because CHTHandler
@@ -612,14 +647,17 @@ walls = ${rad_all}
 # DIAGNOSTICS
 ################################################################################
 
-# [VectorPostprocessors]
-#   [surface_radiation]
-#     type = SurfaceRadiationVectorPostprocessor
-#     surface_radiation_object_name = gray_lambert
-#     information = 'temperature emissivity radiosity heat_flux_density'
-#     execute_on = TIMESTEP_END
-#   []
-# []
+[VectorPostprocessors]
+  # Activated for the radiation case
+  inactive = 'surface_radiation'
+
+  [surface_radiation]
+    type = SurfaceRadiationVectorPostprocessor
+    surface_radiation_object_name = gray_lambert
+    information = 'temperature emissivity radiosity heat_flux_density'
+    execute_on = TIMESTEP_END
+  []
+[]
 
 ################################################################################
 # EXECUTION / SOLVE
@@ -637,10 +675,10 @@ cht_relaxation = '0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3'
   energy_system = energy_system
   solid_energy_system = solid_energy_system
 
-  momentum_l_abs_tol = 1e-11
-  pressure_l_abs_tol = 1e-11
-  energy_l_abs_tol = 1e-11
-  solid_energy_l_abs_tol = 1e-11
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
+  energy_l_abs_tol = 1e-14
+  solid_energy_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -650,11 +688,12 @@ cht_relaxation = '0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3'
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.9
 
-  num_iterations = 4000
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-8
-  solid_energy_absolute_tolerance = 1e-8
+  num_iterations = 5000
+  # Tight enough that the gold files do not depend on the number of MPI ranks.
+  pressure_absolute_tolerance = 1e-11
+  momentum_absolute_tolerance = 1e-11
+  energy_absolute_tolerance = 1e-11
+  solid_energy_absolute_tolerance = 1e-11
 
   # Activate CHT on every patched slab/cavity interface.
   cht_interfaces = ${rad_cht}
@@ -662,9 +701,8 @@ cht_relaxation = '0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3'
   cht_fluid_flux_relaxation = ${cht_relaxation}
   cht_solid_temperature_relaxation = ${cht_relaxation}
   cht_fluid_temperature_relaxation = ${cht_relaxation}
-  cht_heat_flux_tolerance = 1e-3
+  cht_heat_flux_tolerance = 1e-4
   max_cht_fpi = 10
-  # surface_radiation_object_name = gray_lambert
 
   print_fields = false
   momentum_l_max_its = 300

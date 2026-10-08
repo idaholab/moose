@@ -9,9 +9,8 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
-    max_threads = 1
+    max_threads = 1 # Linear FV doesn't support threading at the moment
     recover = false # We don't support recover for SIMPLE at the moment
-
   []
 
   [parallel_plates_convergence]
@@ -22,5 +21,55 @@
     max_threads = 1 # Linear FV doesn't support threading at the moment
     recover = false # We don't support recover for SIMPLE at the moment
     heavy = true
+  []
+
+  [cht]
+    design = 'LinearFVGrayLambertBC.md linear_fv_cht.md'
+    issues = '#33742'
+    requirement = 'The system shall be able to solve conjugate heat transfer with LinearFV systems and the SIMPLE solver'
+
+    [two_slabs_convergence]
+      type = MMSTest
+      input = mms_spatial.py
+      test_case = TestGrayLambertCHTTwoSlabs
+      detail = 'and demonstrate first-order spatial convergence of the interface temperatures and of the conductive, radiative, and total heat fluxes for two solid slabs coupled through a transparent conducting gap by Robin-Robin interfaces with surface-to-surface radiation,'
+      max_threads = 1 # Linear FV doesn't support threading at the moment
+      recover = false # We don't support recover for SIMPLE at the moment
+      heavy = true
+    []
+    [cavity]
+      type = Exodiff
+      input = diff_heated_cavity_slabs_cht.i
+      exodiff = 'diff_heated_cavity_slabs_cht_out.e'
+      detail = 'for natural convection in a differentially heated cavity bounded by conducting slabs through Dirichlet-Neumann interfaces,'
+      max_threads = 1 # Linear FV doesn't support threading at the moment
+      recover = false # We don't support recover for SIMPLE at the moment
+    []
+    [cavity_radiation]
+      type = Exodiff
+      input = diff_heated_cavity_slabs_cht.i
+      exodiff = 'diff_heated_cavity_slabs_cht_radiation.e'
+      cli_args = "UserObjects/inactive='' "
+                 "LinearFVBCs/inactive='adiabatic_top_bottom' "
+                 "VectorPostprocessors/inactive='' "
+                 "Executioner/surface_radiation_object_name=gray_lambert "
+                 "Outputs/file_base=diff_heated_cavity_slabs_cht_radiation"
+      detail = 'and the same cavity with surface-to-surface radiation exchanged between all cavity walls.'
+      mesh_mode = REPLICATED # UnobstructedPlanarViewFactor does not allow distributed mesh
+      max_threads = 1 # Linear FV doesn't support threading at the moment
+      recover = false # We don't support recover for SIMPLE at the moment
+    []
+  []
+
+  [cht_surface_radiation_no_shared_boundary]
+    type = RunException
+    input = two_slabs_cht_s2s_analytic.i
+    cli_args = "UserObjects/view_factors_uo/boundary='left right' "
+               "UserObjects/gray_lambert/boundary='left right'"
+    expect_err = "The supplied surface-radiation user object does not contain any of the boundaries listed in 'cht_interfaces'."
+    design = 'linear_fv_cht.md'
+    issues = '#33742'
+    requirement = 'The system shall report an error if the surface-to-surface radiation user object supplied to conjugate heat transfer does not share any boundary with the conjugate heat transfer interfaces.'
+    max_threads = 1 # Linear FV doesn't support threading at the moment
   []
 []

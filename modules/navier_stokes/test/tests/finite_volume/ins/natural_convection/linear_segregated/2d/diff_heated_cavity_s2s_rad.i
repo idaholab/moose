@@ -106,7 +106,7 @@ walls = ${rad_all}
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
   []
-[view_factor_study]
+  [view_factor_study]
     type = ViewFactorRayStudy
     boundary = ${rad_all}
     execute_on = INITIAL
@@ -247,7 +247,7 @@ walls = ${rad_all}
     force_boundary_execution = false
   []
 
-   ####### FUEL ENERGY EQUATION #######
+   ####### FLUID ENERGY EQUATION #######
 
   [heat_advection]
     type = LinearFVEnergyAdvection
