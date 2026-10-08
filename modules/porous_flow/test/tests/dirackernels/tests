@@ -502,4 +502,43 @@
     design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#12962'
   []
+  [total_mobility]
+    type = 'CSVDiff'
+    input = 'total_mobility.i'
+    csvdiff = 'total_mobility.csv'
+    requirement = 'PorousFlowPeacemanBorehole shall, when weighting its flux by a mobility, weight injected fluid by the total mobility of all phases, so that it injects into a reservoir containing none of the injected phase.'
+    design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33845'
+  []
+  [total_mobility_with_relperm]
+    type = 'RunException'
+    input = 'total_mobility.i'
+    cli_args = 'DiracKernels/injector/use_relative_permeability=true'
+    expect_err = 'use_mobility=true already includes the relative permeability'
+    requirement = 'PorousFlowPeacemanBorehole shall error if its flux is weighted by both a mobility and a relative permeability, since the mobility already includes the relative permeability.'
+    design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33845'
+  []
+  [total_mobility_cyclic]
+    type = 'CSVDiff'
+    input = 'total_mobility.i'
+    # The borehole injects until t = 250 and then produces, from a bottom-hole pressure below the
+    # reservoir's 20 MPa, the gas it injected
+    cli_args = 'DiracKernels/injector/character=if(t<=250,-1,1) DiracKernels/injector/bottom_p_or_t=if(t<=250,25e6,15e6) Outputs/file_base=total_mobility_cyclic'
+    csvdiff = 'total_mobility_cyclic.csv'
+    requirement = 'PorousFlowPeacemanBorehole shall weight its flux by the total mobility of all phases while it injects and by the mobility of the produced phase alone while it produces, for a borehole whose character changes sign during the simulation.'
+    design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33845'
+  []
+  [total_mobility_negative_multiplier]
+    type = 'CSVDiff'
+    input = 'total_mobility.i'
+    # multiplying_var = -1 reverses the injector's flux, so the borehole produces.  Producing flow
+    # takes the phase mobility, and that is zero for the absent gas, so nothing flows
+    cli_args = 'DiracKernels/injector/multiplying_var=-1 Outputs/file_base=total_mobility_negative_multiplier'
+    csvdiff = 'total_mobility_negative_multiplier.csv'
+    requirement = 'PorousFlowPeacemanBorehole shall take the direction of flow from its flux after any multiplying variable is applied, so that a flux the multiplier reverses into production is weighted by the phase mobility rather than the total mobility.'
+    design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33845'
+  []
 []

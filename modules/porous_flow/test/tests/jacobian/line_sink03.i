@@ -325,7 +325,6 @@
     variable = massfrac_ph0_sp0
     use_mobility = true
     mass_fraction_component = 1
-    use_relative_permeability = true
     use_internal_energy = true
     point_file = one_point.bh
     #NOTE this commented-out line: point_file = ten_points.bh
