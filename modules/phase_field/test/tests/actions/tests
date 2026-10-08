@@ -148,6 +148,8 @@
     issues = '#9485'
     design = 'actions/GrainGrowthAction.md'
     requirement = 'The grain growth action shall have the ability to set up problems with a temperature gradient'
+    # needed in parallel
+    abs_zero = 1e-9
   [../]
   [./grand_potential_kernels]
     # Test

@@ -131,11 +131,13 @@ JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters
   // populate map
   for (auto it : Moose::enumerate(this->_coupled_moose_vars))
   {
-    auto number = it.value()->number();
+    const auto & var = *it.value();
 
-    // skip AuxVars as off-diagonal jacobian entries are not calculated for them
-    if (number < _jvar_max_size)
-      _jvar_map[number] = it.index();
+    // skip variables from other systems (AuxVariables or variables of another nonlinear system)
+    // as off-diagonal jacobian entries are not calculated for them. Their numbers are local to
+    // their own system, so they cannot be distinguished by comparing against nVariables()
+    if (&var.sys() == &this->_sys)
+      _jvar_map[var.number()] = it.index();
   }
 
   // mark the kernel variable for the check in computeOffDiagJacobian
@@ -174,11 +176,11 @@ JvarMapInterfaceBase<T>::getParameterJvarMap(std::string parameter_name)
   const auto num = this->coupledComponents(parameter_name);
   for (std::size_t i = 0; i < num; ++i)
   {
-    const auto number = this->getVar(parameter_name, i)->number();
+    const auto & var = *this->getVar(parameter_name, i);
 
-    // skip AuxVars as off-diagonal jacobian entries are not calculated for them
-    if (number < _jvar_max_size)
-      jvar_map[number] = i;
+    // skip variables from other systems, see the constructor
+    if (&var.sys() == &this->_sys)
+      jvar_map[var.number()] = i;
   }
 
   return jvar_map;
