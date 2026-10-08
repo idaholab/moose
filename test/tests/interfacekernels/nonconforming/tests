@@ -1,0 +1,23 @@
+[Tests]
+  design = 'syntax/InterfaceKernels/index.md'
+  issues = '#33963'
+
+  [primary_side_refinement]
+    requirement = 'The system shall correctly evaluate residual and Jacobian contributions across a statically '
+                   'non-conforming interface (one side refined relative to the other), giving '
+                   'the same, exactly conserved result regardless of which side carries the '
+                   '"primary" boundary tag,'
+    [coarser]
+      type = CSVDiff
+      input = 'coarse_primary.i'
+      csvdiff = 'coarse_primary_out.csv'
+      detail = 'when the coarser side is primary,'
+    []
+    [finer]
+      type = CSVDiff
+      input = 'fine_primary.i'
+      csvdiff = 'fine_primary_out.csv'
+      detail = 'and when the finer side is primary.'
+    []
+  []
+[]
