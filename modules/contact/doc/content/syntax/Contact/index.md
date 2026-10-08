@@ -120,7 +120,8 @@ For mortar formulations, the surface block is given in
 [!param](/Contact/ContactAction/primary_surface_blocks), so that no lower-dimensional primary block
 is generated. Node/face formulations use surface elements whose nodes are all in the primary
 nodeset as contact faces without additional input. Their contact normal follows the right-hand
-rule from the surface element node ordering and must point toward the secondary body.
+rule from the surface element node ordering and must point toward the secondary body; otherwise
+no contact is detected. [OrientSurfaceMeshGenerator.md] can orient `TRI` and `QUAD` surfaces.
 
 !listing test/tests/rigid_surface/rigid_surface_3d.i block=Mesh Contact
 
