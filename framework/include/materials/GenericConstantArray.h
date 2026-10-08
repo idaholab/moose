@@ -10,13 +10,16 @@
 #pragma once
 
 #include "Material.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
-class GenericConstantArray : public Material
+class GenericConstantArray : public Material, public VariableSizeMaterialPropertiesInterface
 {
 public:
   static InputParameters validParams();
 
   GenericConstantArray(const InputParameters & parameters);
+
+  virtual std::size_t getVectorPropertySize(const MaterialPropertyName & prop_name) const override;
 
 protected:
   virtual void initQpStatefulProperties() override;

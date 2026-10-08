@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6881 #14057 #23123 #31506'
+  issues = '#6881 #14057 #23123 #31506 #22861'
   design = '/variables/ArrayMooseVariable.md'
   [test]
     type = 'Exodiff'
@@ -96,5 +96,45 @@
     # row 63: (44, 0.)  (45, 0.)  (46, 0.0833333)  (47, 0.166667)  (56, -0.0833333)  (57, -0.666667)  (58, -1.33333)  (59, -0.166667)  (60, 0.336458)  (61, -0.331771)  (62, 0.169792)  (63, 2.33958)
     expect_out = 'row 63\: \(44\, 0.\)  \(45\, 0.\)  \(46\, 0.083333\d+\)  \(47\, 0.16666\d+\)  \(56\, -0.083333\d+\)  \(57\, -0.66666\d+\)  \(58\, -1.3333\d+\)  \(59\, -0.16666\d+\)  \(60\, 0.33680\d+\)  \(61\, -0.33159\d+\)  \(62\, 0.17013\d+\)  \(63\, 2.3402\d+\)'
     requirement = 'The system shall assemble the Jacobian properly with array variables.'
+  []
+
+  [coefficient_size_errors]
+    requirement = 'The system shall report an error if the size of an array material property coefficient does not match the number of components of the array variable for'
+    [diffusion]
+      type = RunException
+      input = 'array_diffusion_reaction.i'
+      cli_args = "Materials/dc/prop_value='1 1 1'"
+      expect_err = "The size \(3\) of material property 'dc' declared by material 'dc' is inconsistent with the number of components of the array variable \(2\)"
+      detail = 'array diffusion,'
+    []
+    [reaction]
+      type = RunException
+      input = 'array_diffusion_reaction.i'
+      cli_args = "Materials/rc/prop_value='1 0 0; 0 1 0'"
+      expect_err = "The size \(2x3\) of material property 'rc' declared by material 'rc' is inconsistent with the number of components of the array variable \(2\)"
+      detail = 'array reaction,'
+    []
+    [ad_reaction]
+      type = RunException
+      input = 'ad_array_diffusion_reaction.i'
+      cli_args = "Materials/rc/prop_value='1 0 0; 0 1 0'"
+      expect_err = "The size \(2x3\) of material property 'rc' declared by material 'rc' is inconsistent with the number of components of the array variable \(2\)"
+      detail = 'array reaction when using automatic differentiation,'
+    []
+    [time_derivative]
+      type = RunException
+      input = 'array_diffusion_reaction_transient.i'
+      cli_args = "Materials/tc/prop_value='1 1 1'"
+      expect_err = "The size \(3\) of material property 'tc' declared by material 'tc' is inconsistent with the number of components of the array variable \(2\)"
+      detail = 'array time derivative, and'
+    []
+    [dg_diffusion]
+      type = RunException
+      input = 'array_diffusion_reaction_dg.i'
+      # Use a separate property for the DG kernel so ArrayDiffusion does not error first
+      cli_args = "DGKernels/dgdiff/diff=dgc Materials/dgc/type=GenericConstantArray Materials/dgc/prop_name=dgc Materials/dgc/prop_value='1 1 1'"
+      expect_err = "The size \(3\) of material property 'dgc' declared by material 'dgc' is inconsistent with the number of components of the array variable \(2\)"
+      detail = 'array DG diffusion.'
+    []
   []
 []
