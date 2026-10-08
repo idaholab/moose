@@ -24,5 +24,6 @@
     vector_variable = ordinary_pressure_gradient
     component = x
     execute_on = TIMESTEP_END
+    execution_order_group = 1
   []
 []
