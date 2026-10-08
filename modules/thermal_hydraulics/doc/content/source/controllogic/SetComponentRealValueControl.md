@@ -7,8 +7,8 @@
 
 ## Example input syntax
 
-In this example, the `T0` parameter of the `inlet` component
-using the `value` [ControlData.md] of the `T_inlet_fn` ControlLogic.
+In this example, the `value` parameter of the `test_comp` component is set
+from the `value` [ControlData.md] of the `T_inlet_fn` ControlLogic.
 
 !listing test/tests/controls/set_component_real_value_control/test.i block=Components ControlLogic
 

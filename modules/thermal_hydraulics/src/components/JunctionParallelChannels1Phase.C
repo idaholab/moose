@@ -54,12 +54,11 @@ JunctionParallelChannels1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
     params.set<RealVectorValue>("dir_c0") = _directions[0];
-    params.set<Real>("K") = _K;
+    params.set<FunctionName>("K") = _K_fn_name;
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
-    connectObject(params, _junction_uo_name, "K");
   }
 }

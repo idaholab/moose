@@ -16,10 +16,9 @@ InputParameters
 InletDensityVelocity1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
-  params.addRequiredParam<Real>("rho", "Prescribed density [kg/m^3]");
-  params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
+  params.addRequiredParam<FunctionName>("rho", "Prescribed density [kg/m^3]");
+  params.addRequiredParam<FunctionName>("vel", "Prescribed velocity [m/s]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
-  params.declareControllable("rho vel");
   params.addClassDescription(
       "Boundary condition with prescribed density and velocity for 1-phase flow channels.");
   return params;
@@ -51,17 +50,14 @@ InletDensityVelocity1Phase::addMooseObjects()
   {
     const std::string class_name = "ADBoundaryFlux3EqnGhostDensityVelocity";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<Real>("rho") = getParam<Real>("rho");
-    params.set<Real>("vel") = getParam<Real>("vel");
+    params.set<FunctionName>("rho") = getParam<FunctionName>("rho");
+    params.set<FunctionName>("vel") = getParam<FunctionName>("vel");
     params.set<Real>("normal") = _normal;
     params.set<bool>("reversible") = _reversible;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _boundary_uo_name, params);
-
-    connectObject(params, _boundary_uo_name, "rho");
-    connectObject(params, _boundary_uo_name, "vel");
   }
 
   // BCs

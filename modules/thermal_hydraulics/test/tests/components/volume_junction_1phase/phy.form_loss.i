@@ -94,15 +94,6 @@ A = 0.1
   []
 []
 
-[ControlLogic]
-  active = ''
-  [K_crtl]
-    type = TimeFunctionComponentControl
-    component = junction
-    parameter = K
-    function = K_fn
-  []
-[]
 
 [Postprocessors]
   [pJ_in]

@@ -47,7 +47,7 @@
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 1.01e5
-    T0 = 300
+    T0 = inlet_T0_fn
   []
 
   [outlet]
@@ -65,20 +65,10 @@
   []
 []
 
-[ControlLogic]
-  [set_inlet_value]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = T0
-    function = inlet_T0_fn
-  []
-[]
-
 [Postprocessors]
   [inlet_T0]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = T0
+    type = FunctionValuePostprocessor
+    function = inlet_T0_fn
   []
 []
 

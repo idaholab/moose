@@ -79,15 +79,27 @@ Then, we add the PID control block as follows:
 The value computed by the PID control is available in the control logic system under the name
 `pid:output`, where `pid` is the name of the block.
 
-As a last step, we need to feed this value back into the system.
-That can be done via `SetComponentRealValueControl` block.
+The pump head is prescribed by a function, so we set the pump's
+[!param](/Components/Pump1Phase/head) parameter to a [ConstantFunction.md]:
+
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
+         block=Functions/pump_head_fn
+         link=False
+
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
+         block=Components/pump
+         link=False
+
+As a last step, we feed the PID output back into the system. The `value` parameter of a
+[ConstantFunction.md] is controllable, so we use a [SetRealValueControl.md] to set it from
+`pid:output`:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          block=ControlLogic/set_pump_head
          link=False
 
-The parameter to control is specified via a `component` and `parameter` parameters, which are
-the component name and the parameter name of that component we want to modify.
+The parameter to control is given as `Functions/pump_head_fn/value`, so the controlled function
+value becomes the pump head, which is adjusted as the simulation runs.
 
 
 !content pagination previous=tutorials/single_phase_flow/step03.md

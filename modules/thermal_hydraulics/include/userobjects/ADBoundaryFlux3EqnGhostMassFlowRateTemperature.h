@@ -26,10 +26,10 @@ protected:
   virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U,
                                                    const Point & point) const override;
 
-  /// Specified mass flow rate
-  const Real & _rhouA;
-  /// Specified temperature
-  const Real & _T;
+  /// Function specifying the mass flow rate
+  const Function & _mass_flow_rate_fn;
+  /// Function specifying the temperature
+  const Function & _T_fn;
 
   /// Number of passive transport variables
   unsigned int _n_passives;

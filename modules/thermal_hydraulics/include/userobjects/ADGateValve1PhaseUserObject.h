@@ -29,8 +29,8 @@ public:
   const std::vector<ADReal> & getFlux(const unsigned int & connection_index) const override;
 
 protected:
-  /// Fraction of possible flow area that is open
-  const Real & _f_open;
+  /// Function specifying the fraction of possible flow area that is open
+  const Function & _f_open_fn;
   /// Minimum open area fraction
   const Real & _f_open_min;
 

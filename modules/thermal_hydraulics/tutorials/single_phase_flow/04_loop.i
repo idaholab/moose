@@ -259,7 +259,7 @@ tot_power = 2000 # W
     connections = 'bottom_1:out bottom_2:in'
     volume = 1e-4
     A_ref = ${A_pipe}
-    head = 0
+    head = pump_head_fn
   []
 
   [bottom_2]
@@ -295,10 +295,16 @@ tot_power = 2000 # W
   []
 
   [set_pump_head]
-    type = SetComponentRealValueControl
-    component = pump
-    parameter = head
+    type = SetRealValueControl
+    parameter = Functions/pump_head_fn/value
     value = pid:output
+  []
+[]
+
+[Functions]
+  [pump_head_fn]
+    type = ConstantFunction
+    value = 0 # controlled
   []
 []
 
@@ -346,10 +352,10 @@ tot_power = 2000 # W
     boundary = cooling_pipe:out
     variable = T
   []
+
   [pump_head]
-    type = RealComponentParameterValuePostprocessor
-    component = pump
-    parameter = head
+    type = FunctionValuePostprocessor
+    function = pump_head_fn
   []
 []
 

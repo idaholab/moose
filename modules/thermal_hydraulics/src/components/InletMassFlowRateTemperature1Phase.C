@@ -16,12 +16,11 @@ InputParameters
 InletMassFlowRateTemperature1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
-  params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
-  params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
+  params.addRequiredParam<FunctionName>("m_dot", "Prescribed mass flow rate [kg/s]");
+  params.addRequiredParam<FunctionName>("T", "Prescribed temperature [K]");
   params.addParam<std::vector<FunctionName>>(
       "passives", {}, "Prescribed passive transport functions [amount/m^3]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
-  params.declareControllable("m_dot T");
   params.addClassDescription("Boundary condition with prescribed mass flow rate and temperature "
                              "for 1-phase flow channels.");
   return params;
@@ -62,14 +61,12 @@ InletMassFlowRateTemperature1Phase::addMooseObjects()
     const std::string class_name = "ADBoundaryFlux3EqnGhostMassFlowRateTemperature";
     InputParameters params = _factory.getValidParams(class_name);
     params.applyParameters(parameters());
-    params.set<Real>("mass_flow_rate") = getParam<Real>("m_dot");
+    params.set<FunctionName>("mass_flow_rate") = getParam<FunctionName>("m_dot");
     params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     getTHMProblem().addUserObject(class_name, _boundary_uo_name, params);
-    connectObject(params, _boundary_uo_name, "m_dot", "mass_flow_rate");
-    connectObject(params, _boundary_uo_name, "T");
   }
 
   // BCs

@@ -30,9 +30,8 @@
 
 [Postprocessors]
   [reactor_power]
-    type = RealComponentParameterValuePostprocessor
-    component = total_power
-    parameter = power
+    type = FunctionValuePostprocessor
+    function = 1234.
   []
 []
 

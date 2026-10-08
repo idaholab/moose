@@ -11,6 +11,8 @@
 
 #include "Material.h"
 
+class Function;
+
 /**
  * Computes drag coefficient using the Churchill formula for Fanning friction factor
  */
@@ -36,7 +38,7 @@ protected:
   /// Hydraulic diameter
   const ADMaterialProperty<Real> & _D_h;
   /// Roughness of the surface
-  const Real & _roughness;
+  const Function & _roughness_fn;
 
 public:
   static InputParameters validParams();

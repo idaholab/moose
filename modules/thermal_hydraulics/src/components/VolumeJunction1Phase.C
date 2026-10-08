@@ -35,7 +35,7 @@ VolumeJunction1Phase::validParams()
   params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V [-]");
   params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V [-]");
 
-  params.addParam<Real>("K", 0., "Form loss factor [-]");
+  params.addParam<FunctionName>("K", "0", "Function specifying the form loss factor [-]");
   params.addParam<Real>("A_ref", "Reference area [m^2]");
 
   params.addParam<bool>("apply_velocity_scaling",
@@ -43,7 +43,6 @@ VolumeJunction1Phase::validParams()
                         "Set to true to apply the scaling to the normal velocity. See "
                         "documentation for more information.");
 
-  params.declareControllable("K");
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
   return params;
@@ -70,7 +69,7 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _temperature_var_name(junctionVariableName("T")),
     _velocity_var_name(junctionVariableName("vel")),
 
-    _K(getParam<Real>("K")),
+    _K_fn_name(getParam<FunctionName>("K")),
     _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero)
 {
   // Note: 'A_ref' can be required by child classes
@@ -183,13 +182,12 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
-    params.set<Real>("K") = _K;
+    params.set<FunctionName>("K") = _K_fn_name;
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
-    connectObject(params, _junction_uo_name, "K");
   }
 }
 

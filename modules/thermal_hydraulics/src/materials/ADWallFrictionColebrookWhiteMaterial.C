@@ -10,6 +10,7 @@
 #include "ADRealForward.h"
 #include "ADWallFrictionColebrookWhiteMaterial.h"
 #include "Numerics.h"
+#include "Function.h"
 #include <cmath>
 
 registerMooseObject("ThermalHydraulicsApp", ADWallFrictionColebrookWhiteMaterial);
@@ -27,8 +28,7 @@ ADWallFrictionColebrookWhiteMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
 
-  params.addParam<Real>("roughness", 0, "Surface roughness");
-  params.declareControllable("roughness");
+  params.addParam<FunctionName>("roughness", "0", "Function specifying the surface roughness");
 
   params.addParam<Real>("rtol", 1e-14, "Relative tolerance for implicit solve.");
   params.addParam<unsigned int>("max_iterations", 20, "Max iterations for iterative solve.");
@@ -49,7 +49,7 @@ ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(
     _rho(getADMaterialProperty<Real>("rho")),
     _vel(getADMaterialProperty<Real>("vel")),
     _D_h(getADMaterialProperty<Real>("D_h")),
-    _roughness(getParam<Real>("roughness")),
+    _roughness_fn(getFunction("roughness")),
     _max_its(getParam<unsigned int>("max_iterations")),
     _max_its_behavior(getParam<MooseEnum>("max_iterations_behavior")),
     _tol(getParam<Real>("rtol"))
@@ -69,6 +69,8 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
                              "), consider using different friction factor"));
   }
 
+  const Real roughness = _roughness_fn.value(_t, _q_point[_qp]);
+
   // Colebrook-white equation has implicit formulation must use iteration
   ADReal & f_D = _f_D[_qp];
   ADReal f_D_old = 0;
@@ -78,7 +80,7 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
   for (; it < _max_its; ++it)
   {
     f_D_old = f_D;
-    f_D = pow(-2. * log10(_roughness / (3.7 * _D_h[_qp]) + 2.51 / (Re * sqrt(f_D))), -2.);
+    f_D = pow(-2. * log10(roughness / (3.7 * _D_h[_qp]) + 2.51 / (Re * sqrt(f_D))), -2.);
     if (abs(f_D - f_D_old) / f_D < _tol)
       break;
   }

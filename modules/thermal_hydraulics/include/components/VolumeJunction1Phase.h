@@ -112,8 +112,8 @@ protected:
   /// velocity variable name for junction
   const VariableName _velocity_var_name;
 
-  /// Form loss coefficient
-  const Real & _K;
+  /// Function specifying the form loss coefficient
+  const FunctionName & _K_fn_name;
   /// Reference area
   const Real & _A_ref;
 

@@ -102,7 +102,7 @@ delta_t_open = 0.1
   [pipe2_valve]
     type = GateValve1Phase
     connections = 'pipe2A:out pipe2B:in'
-    open_area_fraction = 0 # (controlled via 'pipe2_valve_control')
+    open_area_fraction = pipe2_open_fn
   []
 
   [pipe2B]
@@ -132,7 +132,7 @@ delta_t_open = 0.1
   [pipe3_valve]
     type = GateValve1Phase
     connections = 'pipe3A:out pipe3B:in'
-    open_area_fraction = 0 # (controlled via 'pipe3_valve_control')
+    open_area_fraction = pipe3_open_fn
   []
 
   [pipe3B]
@@ -148,21 +148,6 @@ delta_t_open = 0.1
     type = Outlet1Phase
     input = 'pipe3B:out'
     p = ${p}
-  []
-[]
-
-[ControlLogic]
-  [pipe2_valve_control]
-    type = TimeFunctionComponentControl
-    component = pipe2_valve
-    parameter = open_area_fraction
-    function = pipe2_open_fn
-  []
-  [pipe3_valve_control]
-    type = TimeFunctionComponentControl
-    component = pipe3_valve
-    parameter = open_area_fraction
-    function = pipe3_open_fn
   []
 []
 

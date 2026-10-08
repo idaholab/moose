@@ -44,8 +44,8 @@
   [inlet]
     type = InletVelocityTemperature1Phase
     input = 'pipe:in'
-    vel = 1.0
-    T     = 444.447
+    vel = inlet_vel_fn
+    T   = inlet_T_fn
   []
 
   [outlet]
@@ -66,22 +66,6 @@
     type = PiecewiseLinear
     x = '0 1 2'
     y = '300 400 440'
-  []
-[]
-
-[ControlLogic]
-  [inlet_vel_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = vel
-    function = inlet_vel_fn
-  []
-
-  [inlet_T_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = T
-    function = inlet_T_fn
   []
 []
 
@@ -115,14 +99,12 @@
 
 [Postprocessors]
   [vel_inlet]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = vel
+    type = FunctionValuePostprocessor
+    function = inlet_vel_fn
   []
   [T_inlet]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = T
+    type = FunctionValuePostprocessor
+    function = inlet_T_fn
   []
 []
 

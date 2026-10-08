@@ -25,8 +25,8 @@ public:
 protected:
   virtual Convergence * getNonlinearConvergence() const override { return nullptr; }
 
-  /// The value of power
-  const Real & _power;
+  /// The name of the function prescribing the power
+  const FunctionName & _power_fn_name;
 
 public:
   static InputParameters validParams();

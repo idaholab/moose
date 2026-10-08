@@ -132,13 +132,12 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<FunctionName>("power_coefficient") = _power_coefficient;
     params.set<std::vector<VariableName>>("omega") = {omega_var_name};
     params.set<Real>("A_ref") = getParam<Real>("A_ref");
-    params.set<Real>("K") = getParam<Real>("K");
+    params.set<FunctionName>("K") = getParam<FunctionName>("K");
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<std::string>("turbine_name") = cname();
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, getShaftConnectedUserObjectName(), params);
-    connectObject(params, _junction_uo_name, "K");
   }
 }
 

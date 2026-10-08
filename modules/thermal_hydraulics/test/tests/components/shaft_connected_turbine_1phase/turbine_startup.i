@@ -46,7 +46,7 @@ p_out = 1e6
   [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'ch_in:in'
-    m_dot = 0
+    m_dot = mfr_fn
     T = ${T_in}
   []
   [turbine]
@@ -125,13 +125,6 @@ p_out = 1e6
 []
 
 [ControlLogic]
-  [mfr_cntrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = m_dot
-    function = mfr_fn
-  []
-
   [speed_set_point]
     type = GetFunctionValueControl
     function = ${omega_rated}

@@ -16,8 +16,7 @@ InputParameters
 Outlet1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
-  params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
-  params.declareControllable("p");
+  params.addRequiredParam<FunctionName>("p", "Prescribed pressure [Pa]");
   params.addClassDescription(
       "Boundary condition with prescribed pressure for 1-phase flow channels.");
   return params;
@@ -46,13 +45,12 @@ Outlet1Phase::addMooseObjects()
   {
     const std::string class_name = "ADBoundaryFlux3EqnGhostPressure";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<Real>("p") = getParam<Real>("p");
+    params.set<FunctionName>("p") = getParam<FunctionName>("p");
     params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     getTHMProblem().addUserObject(class_name, _boundary_uo_name, params);
-    connectObject(params, _boundary_uo_name, "p");
   }
 
   // BCs

@@ -221,7 +221,7 @@ protected:
   const bool & _pipe_pars_transferred;
 
   /// Roughness of flow channel surface, [m]
-  const Real & _roughness;
+  const FunctionName & _roughness_fn_name;
 
   /// Convective Heat transfer geometry
   EConvHeatTransGeom _HT_geometry;
