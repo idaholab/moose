@@ -32,4 +32,22 @@
     unit_test = InputParametersTest.moveParamToGroupMissingParamError
     requirement = 'The system shall error when moving a nonexistent parameter to a documentation group.'
   []
+  [missing_required_params]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrors
+    requirement = 'The system shall list missing required parameters with their documentation strings, optionally skipping parameters by name or skipping private parameters.'
+    issues = '#33156'
+  []
+  [missing_required_params_renamed]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrorsRenamed
+    requirement = 'The system shall report a missing renamed required parameter by its current name and shall consider it set when set through its old name.'
+    issues = '#33156'
+  []
+  [missing_required_params_deprecated_coupled_var]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrorsDeprecatedCoupledVar
+    requirement = 'The system shall consider a required coupled variable set when its deprecated coupled variable name is set.'
+    issues = '#33156'
+  []
 []
