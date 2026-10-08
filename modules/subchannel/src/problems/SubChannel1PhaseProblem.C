@@ -2534,7 +2534,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // The Krylov solver works on contiguous vectors; nested vectors make every vector operation and
   // field-split scatter pack and unpack the blocks.
   Vec b_vec, x_vec;
-  LibmeshPetscCall(VecCreateSeq(PETSC_COMM_SELF, n_total, &b_vec));
+  LibmeshPetscCall(createPetscVector(b_vec, n_total));
   LibmeshPetscCall(VecDuplicate(b_vec, &x_vec));
   for (const auto f : make_range(Q))
     LibmeshPetscCall(VecISCopy(b_vec, field_is[f], SCATTER_FORWARD, vec_array[f]));
