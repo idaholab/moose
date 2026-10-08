@@ -20,18 +20,23 @@ public:
   static InputParameters validParams();
   KokkosRadiativeHeatFluxBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real coefficient() const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real coefficient(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
   /// Emissivity of the boundary
   const Real _eps_boundary;
 
+  /// View factor function
+  const Moose::Kokkos::Function _view_factor_fn;
+
   /// Post-processor by which to scale boundary condition
   const Moose::Kokkos::PostprocessorValue _scale_pp;
 };
 
-KOKKOS_FUNCTION inline Real
-KokkosRadiativeHeatFluxBC::coefficient() const
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosRadiativeHeatFluxBC::coefficient(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _scale_pp * _eps_boundary;
+  return _scale_pp * _eps_boundary * _view_factor_fn.value(_t, datum.q_point(qp));
 }

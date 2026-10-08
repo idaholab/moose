@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,15 +10,22 @@
 #pragma once
 
 #include "KokkosIntegratedBCValue.h"
+#include "KokkosFunction.h"
 
 /**
- * Boundary condition for radiative heat flux where temperature and the
- * temperature of a body in radiative heat transfer are specified.
+ * Base class for Kokkos boundary conditions for radiative heat exchange with a body of
+ * temperature \f$ T_\infty \f$. The derived class defines the hook
+ *
+ * template <typename Derived>
+ * KOKKOS_FUNCTION Real coefficient(const unsigned int qp, AssemblyDatum & datum) const;
+ *
+ * returning the effective emissivity of the radiative exchange.
  */
 class KokkosRadiativeHeatFluxBCBase : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
+
   KokkosRadiativeHeatFluxBCBase(const InputParameters & parameters);
 
   template <typename Derived>
@@ -31,9 +38,8 @@ public:
 protected:
   /// Stefan-Boltzmann constant
   const Real _sigma_stefan_boltzmann;
-
-  /// The temperature of the body irhs
-  const Real _tinf;
+  /// Temperature of the body in radiative heat transfer
+  const Moose::Kokkos::Function _tinf;
 };
 
 template <typename Derived>
@@ -41,12 +47,13 @@ KOKKOS_FUNCTION Real
 KokkosRadiativeHeatFluxBCBase::precomputeQpResidual(const unsigned int qp,
                                                     AssemblyDatum & datum) const
 {
-  auto bc = static_cast<const Derived *>(this);
+  const auto & bc = *static_cast<const Derived *>(this);
+  const Real T = _u(datum, qp);
+  const Real Tinf = _tinf.value(_t, datum.q_point(qp));
+  const Real T4 = T * T * T * T;
+  const Real T4inf = Tinf * Tinf * Tinf * Tinf;
 
-  Real T = _u(datum, qp);
-  Real T4 = T * T * T * T;
-  Real T4inf = _tinf * _tinf * _tinf * _tinf;
-  return _sigma_stefan_boltzmann * bc->coefficient() * (T4 - T4inf);
+  return _sigma_stefan_boltzmann * bc.template coefficient<Derived>(qp, datum) * (T4 - T4inf);
 }
 
 template <typename Derived>
@@ -55,9 +62,10 @@ KokkosRadiativeHeatFluxBCBase::precomputeQpJacobian(const unsigned int j,
                                                     const unsigned int qp,
                                                     AssemblyDatum & datum) const
 {
-  auto bc = static_cast<const Derived *>(this);
+  const auto & bc = *static_cast<const Derived *>(this);
+  const Real T = _u(datum, qp);
+  const Real T3 = T * T * T;
 
-  Real T = _u(datum, qp);
-  Real T3 = T * T * T;
-  return 4 * _sigma_stefan_boltzmann * bc->coefficient() * T3 * _phi(datum, j, qp);
+  return 4 * _sigma_stefan_boltzmann * bc.template coefficient<Derived>(qp, datum) * T3 *
+         _phi(datum, j, qp);
 }
