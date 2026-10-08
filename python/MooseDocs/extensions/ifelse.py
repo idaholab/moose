@@ -133,7 +133,8 @@ class IfElseExtension(command.CommandExtension):
 
         exe = syntax.executable
         if exe is None:
-            LOG.error(f"Failed to locate a valid executable in {syntax['executable']}.")
+            LOG.error(f"Failed to locate a valid executable in {
+                      syntax['executable']}.")
             return
 
         try:
@@ -195,10 +196,16 @@ class IfCommandBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_function(setting: str) -> str:
+            return setting
+
         settings["function"] = (
             None,
             "The function---with arguments---to evaluate. This setting is +required+.",
+            validation_function,
         )
+
         return settings
 
     def createTokenHelper(self, parent, info, page, settings):

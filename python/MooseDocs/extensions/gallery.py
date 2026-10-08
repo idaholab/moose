@@ -12,6 +12,7 @@ from ..common import exceptions
 from ..base import components, LatexRenderer
 from ..tree import tokens, html, latex
 from . import command, core, media
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -71,7 +72,11 @@ class CardComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["title"] = (None, "Title of the card.")
+
+        def validation_title(setting: str) -> str:
+            return setting
+
+        settings["title"] = (None, "Title of the card.", validation_title)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -121,9 +126,21 @@ class GalleryComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["large"] = (4, "Number of columns on large screens (1-12).")
-        settings["medium"] = (6, "Number of columns on medium screens (1-12).")
-        settings["small"] = (12, "Number of columns on small screens (1-12).")
+        settings["large"] = (
+            4,
+            "Number of columns on large screens (1-12).",
+            validation.number_of_columns,
+        )
+        settings["medium"] = (
+            6,
+            "Number of columns on medium screens (1-12).",
+            validation.number_of_columns,
+        )
+        settings["small"] = (
+            12,
+            "Number of columns on small screens (1-12).",
+            validation.number_of_columns,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
