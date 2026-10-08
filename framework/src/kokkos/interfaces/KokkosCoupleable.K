@@ -204,6 +204,14 @@ Coupleable::kokkosCoupledVectorTagGradientByName(const std::string & var_name,
                                                  const std::string & tag_name,
                                                  unsigned int comp) const
 {
+  if (!isCoupled(var_name))
+  {
+    Moose::Kokkos::Variable variable;
+    variable.init(std::vector<Real>{0}, CoupleableKey{});
+
+    return Moose::Kokkos::VariableGradient(variable);
+  }
+
   auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
   return Moose::Kokkos::VariableGradient(variable);
@@ -213,6 +221,14 @@ Moose::Kokkos::VariableGradient
 Coupleable::kokkosCoupledVectorTagGradientsByName(const std::string & var_name,
                                                   const std::string & tag_name) const
 {
+  if (!isCoupled(var_name))
+  {
+    Moose::Kokkos::Variable variable;
+    variable.init(std::vector<Real>(coupledComponents(var_name), 0), CoupleableKey{});
+
+    return Moose::Kokkos::VariableGradient(variable);
+  }
+
   auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
 
   return Moose::Kokkos::VariableGradient(variable);
