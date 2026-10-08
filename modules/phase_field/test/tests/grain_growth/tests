@@ -16,6 +16,8 @@
     requirement = 'A flat grain boundary shall not move along a temperature gradient'
     design = 'PolycrystalKernelAction.md'
     issues = '#9507'
+    # needed in parallel
+    abs_zero = 1e-9
   [../]
 
   [./thumb]
