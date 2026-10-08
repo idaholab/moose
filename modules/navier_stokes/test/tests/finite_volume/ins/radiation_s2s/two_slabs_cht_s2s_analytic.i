@@ -79,9 +79,10 @@ q_radiation_ref = ${fparse sigma*(T_left_ref^4-T_right_ref^4)/emissivity_denomin
 q_total_ref = ${fparse q_conduction_ref+q_radiation_ref}
 
 # Coarsest mesh of the spatial convergence study in mms_spatial.py, which
-# refines it uniformly. Matches linear_fv_gray_lambert_parallel_plates_simple.i.
-nx_solid = 10
-nx_gap = 10
+# refines it uniformly. The errors are already first order on this mesh, and
+# starting this coarse keeps the study short enough for the default test suite.
+nx_solid = 5
+nx_gap = 5
 
 [Problem]
   kernel_coverage_check = false

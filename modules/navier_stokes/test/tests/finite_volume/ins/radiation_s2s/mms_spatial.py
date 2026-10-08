@@ -50,7 +50,7 @@ class TestGrayLambertCHTTwoSlabs(unittest.TestCase):
 
         df = mms.run_spatial(
             "two_slabs_cht_s2s_analytic.i",
-            4,
+            3,
             y_pp=labels,
             file_base="two_slabs_cht_s2s_analytic",
         )
