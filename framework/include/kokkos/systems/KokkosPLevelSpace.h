@@ -12,6 +12,7 @@
 #include "KokkosDofSpace.h"
 #include "KokkosEntityBlocks.h"
 #include "KokkosMatrix.h"
+#include "KokkosQpJacobianLevel.h"
 #include "KokkosVector.h"
 
 #include "libmesh/system.h"
@@ -367,6 +368,9 @@ private:
 
   /// The level's entity-block decomposition, built only when its smoother inverts the blocks
   EntityBlocks _blocks;
+
+  /// The level's operator launch sizes, kept across the operators built for each application
+  QpJacobianLaunchSizes _operator_sizes;
 
   /// The number of entity blocks the level carries, over all processes
   dof_id_type _num_entity_blocks = 0;

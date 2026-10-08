@@ -55,10 +55,12 @@ public:
    * @param assembly The Kokkos assembly holding the quadrature rule and the cached basis tables
    * @param cache The quadrature-point Jacobian cache, which must hold a valid linearization
    * @param level The level the operator acts on
+   * @param sizes The level's launch sizes, filled in on first use and reused by later operators
    */
   QpJacobianOperator(const Assembly & assembly,
                      const QpJacobianCache & cache,
-                     const QpJacobianLevel & level);
+                     const QpJacobianLevel & level,
+                     QpJacobianLaunchSizes & sizes);
 
   /**
    * Kokkos function tags for the loops over (element, variable) pairs
@@ -183,35 +185,11 @@ public:
 
 private:
   /**
-   * The floating point operations one apply() performs on the pairs of each of its two loops,
-   * counted once on first use and reused after. A loop whose count is zero owns no pair and is not
-   * dispatched. Negative means they have not been counted yet.
+   * The level's launch sizes, owned by whoever owns the level so that they are measured once and
+   * not by every operator built for it. Host memory, read and written only by the dispatching
+   * methods.
    */
-  ///@{
-  double _apply_flops = -1;
-  double _apply_tensor_flops = -1;
-  ///@}
-
-  /**
-   * The per-team scratch an apply() needs, being the largest any (element, variable) pair asks for
-   * on whichever of the two loops owns it. Both loops are given that much, since the difference
-   * between them is far below what limits occupancy. Zero means it has not been measured yet.
-   */
-  std::size_t _apply_scratch_bytes = 0;
-
-  /**
-   * The per-team scratch an assembleBlocks() needs, being the largest any (element, variable) pair
-   * asks for. Zero means it has not been measured yet.
-   */
-  std::size_t _block_scratch_bytes = 0;
-
-  /**
-   * The team size the sum-factorized apply() runs under, being the largest range any phase of that
-   * loop runs over, so that every phase has a thread per index. Leaving the size to
-   * ::Kokkos::AUTO instead gives a team whose threads beyond that range do nothing. Zero means it
-   * has not been measured yet.
-   */
-  unsigned int _apply_tensor_team_size = 0;
+  QpJacobianLaunchSizes * _sizes;
 
   /**
    * The quadrature-point linearization the operator contracts

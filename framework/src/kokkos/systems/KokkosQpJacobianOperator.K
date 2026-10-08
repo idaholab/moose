@@ -19,8 +19,9 @@ namespace Moose::Kokkos
 
 QpJacobianOperator::QpJacobianOperator(const Assembly & assembly,
                                        const QpJacobianCache & cache,
-                                       const QpJacobianLevel & level)
-  : AssemblyHolder(assembly), _cache(cache), _level(level)
+                                       const QpJacobianLevel & level,
+                                       QpJacobianLaunchSizes & sizes)
+  : AssemblyHolder(assembly), _sizes(&sizes), _cache(cache), _level(level)
 {
   // Every level lives on the mesh the fine level does, so the loops of every level run over the
   // same (element, variable) pairs
@@ -33,7 +34,7 @@ QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
   _x_tag = x_tag;
   _y_tag = y_tag;
 
-  if (_apply_flops < 0)
+  if (_sizes->apply_flops < 0)
   {
     ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyFlopLoop> flop_policy(
         0, _thread.size());
@@ -52,12 +53,12 @@ QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
         tensor_size_policy, *this, ::Kokkos::Max<unsigned int>(tensor_team_size));
 
     ::Kokkos::fence();
-    _apply_flops = flops;
-    _apply_tensor_flops = tensor_flops;
-    _apply_tensor_team_size = tensor_team_size;
+    _sizes->apply_flops = flops;
+    _sizes->apply_tensor_flops = tensor_flops;
+    _sizes->apply_tensor_team_size = tensor_team_size;
   }
 
-  if (!_apply_scratch_bytes)
+  if (!_sizes->apply_scratch_bytes)
   {
     ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyScratchLoop> scratch_policy(
         0, _thread.size());
@@ -65,30 +66,30 @@ QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
     ::Kokkos::parallel_reduce(
         scratch_policy, *this, ::Kokkos::Max<std::size_t>(bytes));
     ::Kokkos::fence();
-    _apply_scratch_bytes = bytes;
+    _sizes->apply_scratch_bytes = bytes;
   }
 
-  if (_apply_flops > 0)
+  if (_sizes->apply_flops > 0)
   {
     ApplyPolicy policy(_thread.size(), ::Kokkos::AUTO);
-    policy.set_scratch_size(0, ::Kokkos::PerTeam(_apply_scratch_bytes));
+    policy.set_scratch_size(0, ::Kokkos::PerTeam(_sizes->apply_scratch_bytes));
     ::Kokkos::parallel_for(policy, *this);
   }
 
-  if (_apply_tensor_flops > 0)
+  if (_sizes->apply_tensor_flops > 0)
   {
     // The team wants a thread per index of the largest range its phases run over, capped by what the
     // functor's register and scratch use leaves room for. The device rounds the request up to its own
     // scheduling granularity, so the size is requested as measured rather than rounded here.
     ApplyTensorPolicy policy(_thread.size(), ::Kokkos::AUTO);
-    policy.set_scratch_size(0, ::Kokkos::PerTeam(_apply_scratch_bytes));
+    policy.set_scratch_size(0, ::Kokkos::PerTeam(_sizes->apply_scratch_bytes));
 
     const auto max_team_size =
         static_cast<unsigned int>(policy.team_size_max(*this, ::Kokkos::ParallelForTag()));
-    const auto team_size = ::std::min(_apply_tensor_team_size, max_team_size);
+    const auto team_size = ::std::min(_sizes->apply_tensor_team_size, max_team_size);
 
     ApplyTensorPolicy sized_policy(_thread.size(), team_size);
-    sized_policy.set_scratch_size(0, ::Kokkos::PerTeam(_apply_scratch_bytes));
+    sized_policy.set_scratch_size(0, ::Kokkos::PerTeam(_sizes->apply_scratch_bytes));
     ::Kokkos::parallel_for(sized_policy, *this);
   }
 
@@ -96,7 +97,8 @@ QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
 
   // Reported so that a shell operator's applications carry a flop rate in PETSc's log alongside
   // the events of the assembled operators they are compared against
-  LibmeshPetscCallA(PETSC_COMM_SELF, PetscLogGpuFlops(_apply_flops + _apply_tensor_flops));
+  LibmeshPetscCallA(PETSC_COMM_SELF,
+                    PetscLogGpuFlops(_sizes->apply_flops + _sizes->apply_tensor_flops));
 }
 
 /**
@@ -615,18 +617,18 @@ QpJacobianOperator::assembleBlocks(const EntityBlocks & blocks)
 {
   _blocks = blocks;
 
-  if (!_block_scratch_bytes)
+  if (!_sizes->block_scratch_bytes)
   {
     ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, BlockScratchLoop> scratch_policy(
         0, _thread.size());
     std::size_t bytes = 0;
     ::Kokkos::parallel_reduce(scratch_policy, *this, ::Kokkos::Max<std::size_t>(bytes));
     ::Kokkos::fence();
-    _block_scratch_bytes = bytes;
+    _sizes->block_scratch_bytes = bytes;
   }
 
   BlockPolicy policy(_thread.size(), ::Kokkos::AUTO);
-  policy.set_scratch_size(0, ::Kokkos::PerTeam(_block_scratch_bytes));
+  policy.set_scratch_size(0, ::Kokkos::PerTeam(_sizes->block_scratch_bytes));
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }

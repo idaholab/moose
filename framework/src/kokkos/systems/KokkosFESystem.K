@@ -313,13 +313,15 @@ FESystem::fineLevel(const TagID matrix_tag) const
 void
 FESystem::applyQpJacobian(const TagID x_tag, const TagID y_tag, const TagID matrix_tag)
 {
-  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag)).apply(x_tag, y_tag);
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag), _qp_jacobian_sizes)
+      .apply(x_tag, y_tag);
 }
 
 void
 FESystem::computeQpJacobianDiagonal(const TagID diag_tag, const TagID matrix_tag)
 {
-  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag)).diagonal(diag_tag);
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag), _qp_jacobian_sizes)
+      .diagonal(diag_tag);
 }
 
 void
@@ -336,7 +338,7 @@ FESystem::updateEntityBlocks(const TagID matrix_tag)
 {
   _entity_blocks.zero();
 
-  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag))
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag), _qp_jacobian_sizes)
       .assembleBlocks(_entity_blocks);
 
   _entity_blocks.reduce();
@@ -347,7 +349,7 @@ FESystem::updateEntityBlocks(const TagID matrix_tag)
 void
 FESystem::applyEntityBlocks(const TagID r_tag, const TagID x_tag, const TagID matrix_tag)
 {
-  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag))
+  QpJacobianOperator(kokkosAssembly(), _qp_jacobian, fineLevel(matrix_tag), _qp_jacobian_sizes)
       .applyBlocks(_entity_blocks, r_tag, x_tag);
 }
 

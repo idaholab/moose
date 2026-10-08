@@ -16,6 +16,46 @@ namespace Moose::Kokkos
 {
 
 /**
+ * The launch sizes the operator loops of one level need, measured by device reductions over the
+ * level's (element, variable) pairs on first use. They depend on the mesh, the level's FE types
+ * and which pairs the quadrature-point Jacobian cache couples, none of which a linearization
+ * changes, so the owner of a level keeps them across the operators it builds for that level.
+ */
+struct QpJacobianLaunchSizes
+{
+  /**
+   * The floating point operations one apply() performs on the pairs of each of its two loops. A
+   * loop whose count is zero owns no pair and is not dispatched. Negative means they have not been
+   * counted yet.
+   */
+  ///@{
+  double apply_flops = -1;
+  double apply_tensor_flops = -1;
+  ///@}
+
+  /**
+   * The per-team scratch an apply() needs, being the largest any (element, variable) pair asks for
+   * on whichever of the two loops owns it. Both loops are given that much, since the difference
+   * between them is far below what limits occupancy. Zero means it has not been measured yet.
+   */
+  std::size_t apply_scratch_bytes = 0;
+
+  /**
+   * The per-team scratch an assembleBlocks() needs, being the largest any (element, variable) pair
+   * asks for. Zero means it has not been measured yet.
+   */
+  std::size_t block_scratch_bytes = 0;
+
+  /**
+   * The team size the sum-factorized apply() runs under, being the largest range any phase of that
+   * loop runs over, so that every phase has a thread per index. Leaving the size to
+   * ::Kokkos::AUTO instead gives a team whose threads beyond that range do nothing. Zero means it
+   * has not been measured yet.
+   */
+  unsigned int apply_tensor_team_size = 0;
+};
+
+/**
  * One level of a p-multigrid hierarchy as the operator action and the operator diagonal see it: the
  * DOF layout the level's vectors are indexed by, the FE type each variable carries on the level,
  * the level's tagged vectors, and the rows the level holds fixed.

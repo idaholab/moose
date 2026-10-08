@@ -626,6 +626,11 @@ private:
   ///@}
 
   /**
+   * The fine level's operator launch sizes, kept across the operators built for each application
+   */
+  QpJacobianLaunchSizes _qp_jacobian_sizes;
+
+  /**
    * Cached elemental quadrature values and gradients
    */
   ///@{

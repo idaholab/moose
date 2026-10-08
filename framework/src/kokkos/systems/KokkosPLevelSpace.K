@@ -425,7 +425,7 @@ PLevelSpace::dispatch(const QpJacobianCache & cache,
 
   _vectors.copyToDevice();
 
-  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level());
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level(), _operator_sizes);
 
   if (x)
     op.apply(X, Y);
@@ -480,7 +480,7 @@ PLevelSpace::assembleMatrix(const QpJacobianCache & cache)
 
   _matrix = 0.0;
 
-  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level());
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level(), _operator_sizes);
 
   // The identity the level's operator carries on every row it holds fixed is placed by the assembly
   // as well, so that the matrix is complete when it is closed below
@@ -596,7 +596,7 @@ PLevelSpace::verifyEntityBlocks(const ConsoleStream & console)
 
   _blocks.zero();
 
-  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level(), _operator_sizes);
 
   op.assembleBlocks(_blocks);
 
@@ -693,7 +693,7 @@ PLevelSpace::setupBlockSmoother()
   // changed
   _blocks.zero();
 
-  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level(), _operator_sizes);
 
   op.assembleBlocks(_blocks);
 
@@ -720,7 +720,7 @@ PLevelSpace::applyBlockSmoother(Vec r, Vec x)
 
   _vectors.copyToDevice();
 
-  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level());
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache(), level(), _operator_sizes);
 
   op.applyBlocks(_blocks, X, Y);
 
