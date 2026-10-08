@@ -308,6 +308,11 @@ FEProblemBase::validParams()
                                        "File base name used for restart (e.g. "
                                        "<path>/<filebase> or <path>/LATEST to "
                                        "grab the latest file available)");
+  params.addParam<bool>("restart_use_checkpoint_mesh",
+                        false,
+                        "Whether to read the mesh from the checkpoint in 'restart_file_base' "
+                        "instead of building it from the Mesh block. Mesh generators, uniform "
+                        "refinement, and initial adaptivity are not repeated on that mesh.");
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_vectors",
@@ -402,8 +407,9 @@ FEProblemBase::validParams()
                               "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
                               "use_hash_table_matrix_assembly restore_original_nonzero_pattern",
                               "Nonlinear system(s)");
-  params.addParamNamesToGroup(
-      "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
+  params.addParamNamesToGroup("restart_file_base restart_use_checkpoint_mesh force_restart "
+                              "allow_initial_conditions_with_restart",
+                              "Restart");
   params.addParamNamesToGroup(
       "verbose_setup verbose_multiapps verbose_restore parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
@@ -691,6 +697,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
       setRestartFile(restart_file_base);
     }
   }
+  if (getParam<bool>("restart_use_checkpoint_mesh") && !_app.hasRestartRecoverFileBase())
+    paramError("restart_use_checkpoint_mesh",
+               "Reading the mesh from a checkpoint requires 'restart_file_base'");
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
   // // well before our Problem(s) are constructed. Historically, in MooseMesh we have a bunch of
@@ -1303,7 +1312,8 @@ FEProblemBase::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh())
+  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh() &&
+      !_app.isRestartingFromCheckpointMesh())
   {
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())

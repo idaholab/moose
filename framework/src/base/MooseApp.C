@@ -687,6 +687,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _distributed_mesh_on_command_line(getParam<bool>("distributed_mesh")),
     _recover(false),
     _restart(false),
+    _restart_from_checkpoint_mesh(false),
     _split_mesh(false),
     _use_split(getParam<bool>("use_split")),
     _force_restart(getParam<bool>("force_restart")),
