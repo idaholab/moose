@@ -82,7 +82,10 @@ class ListingExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         """Only add the moose input parser JavaScript if the page needs it."""
-        find_moose_code_token = lambda token: token.get("language", None) == "moose"
+
+        def find_moose_code_token(token):
+            return token.get("language", None) == "moose"
+
         if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
             self.translator.renderer.addJavaScript(
                 "moose_input_parser", "js/moose_input_parser.js", page
@@ -170,7 +173,6 @@ class LocalListingCommand(command.CommandComponent):
         except:
             return content
         for node in moosetree.iterate(root):
-            # Add reference to moose syntax
             fullpath = "/".join([n.name for n in node.path])
             moose_node = syntax_ext.find(
                 fullpath, node_type=SyntaxNode, throw_on_missing=False
@@ -455,7 +457,21 @@ class InputListingCommand(FileListingCommand):
         hit = pyhit.load(filename)
         out = []
         for block in blocks.split():
-            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.rstrip("/")))
+            # This first check will attempt to do a strict search for the node
+            # This will help ensure that we get Kernels when we AuxKernels is
+            # in the input file first
+            # This same bug would exist for anything that ends with the same
+            # thing that another starts with
+            node = moosetree.find(
+                hit, lambda n: n.name == block.rstrip("/").split("/")[-1]
+            )
+            # Since there is quite a bit of documentation that relies on the
+            # original behavior for finding the blocks we can fall back to the
+            # original search method
+            if node is None:
+                node = moosetree.find(
+                    hit, lambda n: n.fullpath.endswith(block.rstrip("/"))
+                )
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
