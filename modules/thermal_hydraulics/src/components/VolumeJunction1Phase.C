@@ -122,7 +122,7 @@ VolumeJunction1Phase::check() const
   }
 
   // https://github.com/idaholab/moose/issues/28670
-  if (getTHMProblem().hasInitialConditionsFromFile() && libMesh::n_threads() > 1 &&
+  if (getTHMProblem().hasInitialConditionsFromFile() && _app.numThreads() > 1 &&
       _app.n_processors() > 1)
     mooseDocumentedError("moose",
                          28670,

@@ -213,6 +213,7 @@
     valgrind = none
     recover = false
     restep = false
+    min_slots = 2
   []
   [MFEMHeatTransfer]
     type = CSVDiff

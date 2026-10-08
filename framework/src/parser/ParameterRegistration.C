@@ -112,6 +112,9 @@ registerParameter(MFEMVectorCoefficientName);
 registerParameter(MFEMMatrixCoefficientName);
 registerParameter(MFEMFESpaceName);
 registerParameter(MFEMSolverName);
+registerParameter(MFEMKernelName);
+registerParameter(MFEMBoundaryConditionName);
+registerParameter(MFEMWeakFormName);
 #endif
 
 /*******************************************************************************/

@@ -927,7 +927,7 @@ MooseMesh::cacheChangedLists()
 
   ConstElemRange elem_range(getMesh().local_elements_begin(), getMesh().local_elements_end(), 1);
   CacheChangedListsThread cclt(*this);
-  Threads::parallel_reduce(elem_range, cclt);
+  Threads::parallel_reduce(elem_range, cclt, getMooseApp().numThreads());
 
   _coarsened_element_children.clear();
 

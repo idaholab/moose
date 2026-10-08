@@ -54,6 +54,7 @@
       input = 'reporter_positions.i'
       jsondiff = 'reporter_positions_out.json'
       detail = 'a reporter with data in the expected vector of points format,'
+      min_slots = 2
     []
     [functors]
       type = 'JSONDiff'

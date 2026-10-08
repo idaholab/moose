@@ -168,6 +168,13 @@ TEST(MooseUtils, tokenizeAndConvert)
   }
 }
 
+TEST(MooseUtils, tokenizeAndConvertThrowOnUnreadable)
+{
+  std::string raw("1,abc,3");
+  std::vector<Real> tokens;
+  EXPECT_THROW(MooseUtils::tokenizeAndConvert(raw, tokens, ",", true), std::invalid_argument);
+}
+
 TEST(MooseUtils, numDigits)
 {
   EXPECT_EQ(MooseUtils::numDigits(4), 1);

@@ -62,7 +62,7 @@ Global Options:
   --error-deprecated                  Turn deprecated code messages into Errors
   -e --error-unused                   Error when encountering unused input file options
   --keep-cout                         Keep standard output from all processors when running in parallel
-  --n-threads=<n>                     Runs the specified number of threads per process
+  --n-threads=<n>                     Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the maximum number of threads and sets the OpenMP number of threads
   --no-color                          Disable coloring of all Console outputs
   --no-gdb-backtrace                  Disables gdb backtraces.
   --no-timing                         Disabled performance logging; overrides -t or --timing
@@ -158,6 +158,7 @@ Again: you *MUST* turn on `checkpoint = true` in the `Outputs` block of your inp
 ### `--n-threads`
 
 `--n-threads` controls the number of threads per MPI process MOOSE will use for the computation.  This is how you turn on shared-memory parallelism.
+It directly sets the numbers of threads if Application/num_threads is not passed. If it is passed, then this argument specifies the maximum number of threads; it is notably setting the OpenMP number of threads.
 
 ### Mesh Splitting Options
 

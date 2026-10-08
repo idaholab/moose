@@ -10,9 +10,16 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
+EquationSystemProblemOperator::EquationSystemProblemOperator(MFEMProblem & problem,
+                                                             const std::string & weak_form_name)
+  : ProblemOperator(problem), _equation_system(problem.getEquationSystem(weak_form_name))
+{
+}
+
 void
 EquationSystemProblemOperator::SetGridFunctions()
 {
@@ -24,10 +31,17 @@ EquationSystemProblemOperator::SetGridFunctions()
 void
 EquationSystemProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
-
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION("EquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator();
+  }
+
+  {
+    TIME_SECTION("EquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
