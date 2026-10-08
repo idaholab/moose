@@ -11,6 +11,13 @@
   []
 []
 
+[Functions]
+  [view_factor]
+    type = KokkosParsedFunction
+    expression = 0.5+0.1*x
+  []
+[]
+
 [BCs]
   [bc]
     type = KokkosRadiativeHeatFluxBC

@@ -84,4 +84,372 @@
       compute_devices = 'cpu cuda'
     []
   []
+
+  [heat_source]
+    type = 'Exodiff'
+    input = 'kokkos_heat_source_bar.i'
+    exodiff = 'kokkos_heat_source_bar_out.e'
+    abs_zero = 5e-7
+    design = 'KokkosHeatSource.md'
+    requirement = 'The Kokkos system shall reproduce an analytical solution of a heat source in a 1D ceramic bar.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [anisotropic]
+    design = 'KokkosAnisoHeatConduction.md KokkosAnisoHeatConductionMaterial.md'
+    requirement = 'The Kokkos system shall compute heat conduction with an anisotropic thermal conductivity tensor'
+    [orthotropic]
+      type = 'Exodiff'
+      input = 'kokkos_heat_conduction_ortho.i'
+      exodiff = 'kokkos_heat_conduction_ortho_out.e'
+      detail = 'for an orthotropic conductivity,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_heat_conduction_ortho.i'
+      cli_args = 'Materials/heat/thermal_conductivity_temperature_coefficient_function=coefficient Outputs/exodus=false'
+      detail = 'with a perfect Jacobian for a temperature-dependent conductivity.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+  []
+
+  [specific_heat]
+    type = 'Exodiff'
+    input = 'kokkos_specific_heat_transient.i'
+    exodiff = 'kokkos_specific_heat_transient_out.e'
+    design = 'KokkosSpecificHeatConductionTimeDerivative.md'
+    requirement = 'The Kokkos system shall compute the time derivative term of the heat equation with the specific heat and the density as arguments.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [temperature_dependent]
+    design = 'KokkosHeatConductionMaterial.md KokkosHeatCapacityConductionTimeDerivative.md KokkosHeatConductionBC.md KokkosThermalSensitivity.md KokkosThermalConductivity.md'
+    requirement = 'The Kokkos system shall compute heat conduction with temperature-dependent properties given by functions and coupled variable derivatives'
+    [solution]
+      type = 'Exodiff'
+      input = 'kokkos_temperature_dependent.i'
+      exodiff = 'kokkos_temperature_dependent_out.e'
+      detail = 'by solving the coupled problem,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_temperature_dependent.i'
+      cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+      detail = 'with a perfect Jacobian including the coupled variable derivatives.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+  []
+
+  [truss]
+    type = 'Exodiff'
+    input = 'kokkos_truss_heat_conduction.i'
+    exodiff = 'kokkos_truss_heat_conduction_out.e'
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    design = 'KokkosTrussHeatConduction.md KokkosTrussHeatConductionTimeDerivative.md'
+    requirement = 'The Kokkos system shall compute heat conduction in truss elements taking the cross-sectional area into account.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [homogenization]
+    design = 'KokkosHomogenizedHeatConduction.md KokkosAnisoHomogenizedHeatConduction.md KokkosHomogenizedThermalConductivity.md'
+    requirement = 'The Kokkos system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach'
+    [scalar]
+      type = 'Exodiff'
+      input = 'kokkos_homogenization.i'
+      exodiff = 'kokkos_homogenization_out.e'
+      detail = 'for scalar heterogeneous thermal conductivities,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tensor]
+      type = 'Exodiff'
+      input = 'kokkos_homogenization_tensor.i'
+      exodiff = 'kokkos_homogenization_tensor_out.e'
+      detail = 'for diagonal tensor heterogeneous thermal conductivities, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [full_tensor]
+      type = 'Exodiff'
+      input = 'kokkos_homogenization_tensor.i'
+      exodiff = 'kokkos_homogenization_full_tensor.e'
+      cli_args = 'Outputs/file_base=kokkos_homogenization_full_tensor Materials/heat2/thermal_conductivity="100 1 0 0 80 8 0 0 0"'
+      detail = 'for full tensor heterogeneous thermal conductivities.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [convective_flux_function]
+    design = 'KokkosConvectiveFluxFunction.md'
+    requirement = 'The Kokkos system shall compute a convective heat flux boundary condition with the heat transfer coefficient given as'
+    [constant]
+      type = 'CSVDiff'
+      input = 'kokkos_convective_flux_function.i'
+      csvdiff = 'kokkos_convective_flux_function_out.csv'
+      detail = 'a constant function,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+    [time]
+      type = 'CSVDiff'
+      input = 'kokkos_convective_flux_function.i'
+      csvdiff = 'kokkos_convective_flux_function_out.csv'
+      cli_args = "Functions/coefficient/expression='t*10.0'"
+      detail = 'a function of time,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+      prereq = 'convective_flux_function/constant'
+    []
+    [temperature]
+      type = 'CSVDiff'
+      input = 'kokkos_convective_flux_function.i'
+      csvdiff = 'kokkos_convective_flux_function_out.csv'
+      cli_args = 'BCs/right/coefficient=coefficient_temperature BCs/right/coefficient_function_type=TEMPERATURE'
+      detail = 'a function of temperature, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+      prereq = 'convective_flux_function/time'
+    []
+    [temperature_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_convective_flux_function.i'
+      cli_args = 'BCs/right/coefficient=coefficient_temperature BCs/right/coefficient_function_type=TEMPERATURE Outputs/csv=false'
+      detail = 'a function of temperature with a perfect Jacobian.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      allow_test_objects = true
+    []
+  []
+
+  [radiative]
+    design = 'KokkosFunctionRadiativeBC.md KokkosInfiniteCylinderRadiativeBC.md'
+    requirement = 'The Kokkos system shall compute radiative heat flux boundary conditions'
+    [function]
+      type = 'Exodiff'
+      input = 'kokkos_function_radiative_bc.i'
+      exodiff = 'kokkos_function_radiative_bc_out.e'
+      detail = 'with the emissivity given by a function, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [cylinder]
+      type = 'Exodiff'
+      input = 'kokkos_radiative_bc_cyl.i'
+      exodiff = 'kokkos_radiative_bc_cyl_out.e'
+      detail = 'for radiative exchange between infinite cylinders.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [semiconductor]
+    type = 'Exodiff'
+    input = 'kokkos_semiconductor_linear_conductivity.i'
+    exodiff = 'kokkos_semiconductor_linear_conductivity_out.e'
+    design = 'KokkosSemiconductorLinearConductivity.md'
+    requirement = 'The Kokkos system shall compute the electrical conductivity of a semiconductor from temperature using the Steinhart-Hart equation.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [materials]
+    type = 'Exodiff'
+    input = 'kokkos_heat_source_materials.i'
+    exodiff = 'kokkos_heat_source_materials_out.e'
+    design = 'KokkosFunctionPathEllipsoidHeatSource.md KokkosElectricalConductivity.md KokkosThermalCompliance.md KokkosJouleHeatingHeatGeneratedAux.md'
+    requirement = 'The Kokkos system shall compute a moving ellipsoidal volumetric heat source, the temperature-dependent electrical conductivity, the thermal compliance, and the Joule heating auxiliary field.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [side_integral]
+    type = 'CSVDiff'
+    input = 'kokkos_convective_ht_side_integral.i'
+    csvdiff = 'kokkos_convective_ht_side_integral_out.csv'
+    design = 'KokkosConvectiveHeatTransferSideIntegral.md'
+    requirement = 'The Kokkos system shall compute the convective heat transfer across a boundary with the heat transfer coefficient and the fluid temperature given as variables or material properties.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [gray_lambert]
+    design = 'KokkosViewFactorObjectSurfaceRadiation.md KokkosGrayLambertNeumannBC.md KokkosGrayLambertSurfaceRadiationPP.md'
+    requirement = 'The Kokkos system shall couple radiative transfer between gray Lambert surfaces to heat conduction'
+    [constant_flux]
+      type = 'Exodiff'
+      input = 'kokkos_gray_lambert_coupled.i'
+      exodiff = 'kokkos_gray_lambert_coupled_out.e'
+      detail = 'by applying the surface heat flux density, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [emission_reconstruction]
+      type = 'Exodiff'
+      input = 'kokkos_gray_lambert_coupled.i'
+      exodiff = 'kokkos_gray_lambert_coupled_emission.e'
+      cli_args = 'BCs/radiation/reconstruct_emission=true Outputs/file_base=kokkos_gray_lambert_coupled_emission'
+      detail = 'by reconstructing the spatial distribution of the emission via the T4 law.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [directional_flux]
+    design = 'KokkosDirectionalFluxBC.md KokkosSelfShadowSideUserObject.md KokkosExposedSideAverageValue.md'
+    requirement = 'The Kokkos system shall apply a directed flux to the surface of a geometry with and without self shadowing'
+    [2d]
+      type = 'Exodiff'
+      input = 'kokkos_directional_flux_2d.i'
+      exodiff = 'kokkos_directional_flux_2d_out.e'
+      detail = 'in 2D,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [3d]
+      type = 'Exodiff'
+      input = 'kokkos_directional_flux_3d.i'
+      exodiff = 'kokkos_directional_flux_3d_out.e'
+      detail = 'in 3D,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      recover = false # outputs only on FINAL; recover is tested through the 2d case
+    []
+    [quad4]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_quad4.csv'
+      cli_args = 'GlobalParams/elem_type=quad4 GlobalParams/order=first Outputs/file_base=kokkos_directional_flux_quad4'
+      detail = 'on QUAD4 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [quad8]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_quad8.csv'
+      cli_args = 'GlobalParams/elem_type=quad8 GlobalParams/order=second Outputs/file_base=kokkos_directional_flux_quad8'
+      detail = 'on QUAD8 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [quad9]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_quad9.csv'
+      cli_args = 'GlobalParams/elem_type=quad9 GlobalParams/order=second Outputs/file_base=kokkos_directional_flux_quad9'
+      detail = 'on QUAD9 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tri3]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tri3.csv'
+      cli_args = 'GlobalParams/elem_type=tri3 GlobalParams/order=first Outputs/file_base=kokkos_directional_flux_tri3'
+      detail = 'on TRI3 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tri6]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tri6.csv'
+      cli_args = 'GlobalParams/elem_type=tri6 GlobalParams/order=second Outputs/file_base=kokkos_directional_flux_tri6'
+      detail = 'on TRI6 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tri7]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_2d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tri7.csv'
+      cli_args = 'GlobalParams/elem_type=tri7 GlobalParams/order=third Outputs/file_base=kokkos_directional_flux_tri7'
+      detail = 'on TRI7 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tet4]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_3d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tet4.csv'
+      cli_args = 'GlobalParams/elem_type=tet4 GlobalParams/order=first Outputs/file_base=kokkos_directional_flux_tet4'
+      detail = 'on TET4 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tet10]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_3d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tet10.csv'
+      cli_args = 'GlobalParams/elem_type=tet10 GlobalParams/order=second Outputs/file_base=kokkos_directional_flux_tet10'
+      detail = 'on TET10 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [tet14]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_3d_elem.i'
+      csvdiff = 'kokkos_directional_flux_tet14.csv'
+      cli_args = 'GlobalParams/elem_type=tet14 GlobalParams/order=third Outputs/file_base=kokkos_directional_flux_tet14'
+      detail = 'on TET14 elements,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [hex8]
+      type = 'CSVDiff'
+      input = 'kokkos_directional_flux_3d_elem.i'
+      csvdiff = 'kokkos_directional_flux_hex8.csv'
+      cli_args = 'GlobalParams/elem_type=hex8 GlobalParams/order=first Outputs/file_base=kokkos_directional_flux_hex8'
+      detail = 'on HEX8 elements.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [radiative_heat_flux]
+    issues = '#30655'
+    design = 'KokkosRadiativeHeatFluxBC.md'
+    requirement = 'The Kokkos system shall be able to compute numerically accurate Jacobians when specifying a radiative boundary condition for a plate heat structure'
+    [constant]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_radiation_heat_flux_bc.i'
+      ratio_tol = 1e-6
+      difference_tol = 2e-5
+      max_threads = 1
+      max_parallel = 1
+      detail = 'with a unit view factor, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [view_factor]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_radiation_heat_flux_bc.i'
+      cli_args = 'BCs/bc/view_factor=view_factor'
+      ratio_tol = 1e-6
+      difference_tol = 2e-5
+      max_threads = 1
+      max_parallel = 1
+      detail = 'with a view factor given by a function.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
 []
