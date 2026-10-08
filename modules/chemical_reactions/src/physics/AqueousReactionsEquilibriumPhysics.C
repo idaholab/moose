@@ -43,6 +43,8 @@ AqueousReactionsEquilibriumPhysics::validParams()
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, -9.81), "Gravity vector (for Darcy advection)");
 
+  params.addParam<bool>("use_kokkos", false, "Whether to add the Kokkos versions of the objects");
+
   return params;
 }
 
@@ -54,8 +56,14 @@ AqueousReactionsEquilibriumPhysics::AqueousReactionsEquilibriumPhysics(
     _weights(_num_solver_species),
     _primary_participation(_num_solver_species),
     _coupled_v(_num_solver_species),
-    _pressure_var(getParam<std::vector<VariableName>>("pressure"))
+    _pressure_var(getParam<std::vector<VariableName>>("pressure")),
+    _kokkos_prefix(getParam<bool>("use_kokkos") ? "Kokkos" : "")
 {
+#ifndef MOOSE_KOKKOS_ENABLED
+  if (getParam<bool>("use_kokkos"))
+    paramError("use_kokkos", "MOOSE was not configured with Kokkos");
+#endif
+
   // Further parse the reactions
   // Keeping the data in these vectors of vectors as an intermediate processing step
   for (const auto i : index_range(_reactions))
@@ -143,7 +151,8 @@ AqueousReactionsEquilibriumPhysics::addFEKernels()
       if (_primary_participation[i][j])
       {
         {
-          InputParameters params_sub = _factory.getValidParams("CoupledBEEquilibriumSub");
+          InputParameters params_sub =
+              _factory.getValidParams(_kokkos_prefix + "CoupledBEEquilibriumSub");
           assignBlocks(params_sub, _blocks);
           params_sub.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_sub.set<Real>("weight") = _weights[i][j];
@@ -151,13 +160,14 @@ AqueousReactionsEquilibriumPhysics::addFEKernels()
           params_sub.set<Real>("sto_u") = _sto_u[i][j];
           params_sub.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_sub.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
-          _problem->addKernel("CoupledBEEquilibriumSub",
+          _problem->addKernel(_kokkos_prefix + "CoupledBEEquilibriumSub",
                               _solver_species[i] + "_" + _eq_species[j] + "_sub",
                               params_sub);
         }
 
         {
-          InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
+          InputParameters params_cd =
+              _factory.getValidParams(_kokkos_prefix + "CoupledDiffusionReactionSub");
           assignBlocks(params_cd, _blocks);
           params_cd.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_cd.set<Real>("weight") = _weights[i][j];
@@ -165,7 +175,7 @@ AqueousReactionsEquilibriumPhysics::addFEKernels()
           params_cd.set<Real>("sto_u") = _sto_u[i][j];
           params_cd.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_cd.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
-          _problem->addKernel("CoupledDiffusionReactionSub",
+          _problem->addKernel(_kokkos_prefix + "CoupledDiffusionReactionSub",
                               _solver_species[i] + "_" + _eq_species[j] + "_cd",
                               params_cd);
         }
@@ -173,7 +183,8 @@ AqueousReactionsEquilibriumPhysics::addFEKernels()
         // If pressure is coupled, add a CoupledConvectionReactionSub Kernel as well
         if (getParam<bool>("add_darcy_advection_term") && isParamValid("pressure"))
         {
-          InputParameters params_conv = _factory.getValidParams("CoupledConvectionReactionSub");
+          InputParameters params_conv =
+              _factory.getValidParams(_kokkos_prefix + "CoupledConvectionReactionSub");
           assignBlocks(params_conv, _blocks);
           params_conv.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_conv.set<Real>("weight") = _weights[i][j];
@@ -183,7 +194,7 @@ AqueousReactionsEquilibriumPhysics::addFEKernels()
           params_conv.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
           params_conv.set<std::vector<VariableName>>("p") = _pressure_var;
           params_conv.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-          _problem->addKernel("CoupledConvectionReactionSub",
+          _problem->addKernel(_kokkos_prefix + "CoupledConvectionReactionSub",
                               _solver_species[i] + "_" + _eq_species[j] + "_conv",
                               params_conv);
         }
@@ -202,7 +213,8 @@ AqueousReactionsEquilibriumPhysics::addAuxiliaryKernels()
     // we should not be adding them twice, since only 1 eq_species per reaction
     if (std::find(_aux_species.begin(), _aux_species.end(), _eq_species[j]) != _aux_species.end())
     {
-      InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
+      InputParameters params_eq =
+          _factory.getValidParams(_kokkos_prefix + "AqueousEquilibriumRxnAux");
       assignBlocks(params_eq, _blocks);
       params_eq.set<AuxVariableName>("variable") = _eq_species[j];
       params_eq.defaultCoupledValue("log_k", _log_eq_const[j]);
@@ -212,7 +224,8 @@ AqueousReactionsEquilibriumPhysics::addAuxiliaryKernels()
                                      _stos[j].begin() + _solver_species_involved[j].size());
       params_eq.set<std::vector<Real>>("sto_v") = stos_primary;
       params_eq.set<std::vector<VariableName>>("v") = _solver_species_involved[j];
-      getProblem().addAuxKernel("AqueousEquilibriumRxnAux", "aux_" + _eq_species[j], params_eq);
+      getProblem().addAuxKernel(
+          _kokkos_prefix + "AqueousEquilibriumRxnAux", "aux_" + _eq_species[j], params_eq);
     }
   }
 }

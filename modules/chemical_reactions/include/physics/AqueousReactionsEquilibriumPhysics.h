@@ -50,4 +50,6 @@ protected:
   const std::vector<VariableName> & _pressure_var;
   /// Gravity vector
   const RealVectorValue _gravity;
+  /// Prefix prepended to the object types, which selects the Kokkos versions when requested
+  const std::string _kokkos_prefix;
 };
