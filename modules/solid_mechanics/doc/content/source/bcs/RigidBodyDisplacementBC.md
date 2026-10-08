@@ -4,7 +4,7 @@
 
 ## Description
 
-`RigidBodyDisplacementBC` prescribes one component of the displacement of a body, or of a surface,
+`RigidBodyDisplacementBC` prescribes one component of the displacement of a body or a surface
 that moves rigidly with a finite translation and rotation. The displacement of a node with
 reference coordinates $\boldsymbol{X}$ is
 
@@ -37,6 +37,11 @@ displacement variable with identical motion parameters.
 To move an entire meshed body rigidly, apply the boundary condition to a nodeset containing all of
 its nodes, generated for example by [ParsedGenerateNodeset.md]. The body may also be a surface
 mesh embedded in three dimensions.
+
+The boundary condition can also be used in axisymmetric (RZ) problems, where the components refer
+to the radial and axial displacements. A translation along the axis of symmetry is then the only
+rigid motion of the revolved body, so only the axial translation function should be nonzero and
+the rotation should be omitted.
 
 ## Example Input File Syntax
 
