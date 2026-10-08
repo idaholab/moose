@@ -63,9 +63,10 @@ findContactPoint(PenetrationInfo & p_info,
 
   const Elem * primary_elem = p_info._elem;
 
-  unsigned int dim = primary_elem->dim();
-
   const Elem * side = p_info._side;
+
+  // Contact problem dimension; exceeds the element dimension for a primary surface element
+  unsigned int dim = side->dim() + 1;
 
   const std::vector<libMesh::Point> & phys_point = fe_side->get_xyz();
 
@@ -265,14 +266,7 @@ findContactPoint(PenetrationInfo & p_info,
   }
   else
   {
-    const Node * const * elem_nodes = primary_elem->get_nodes();
-    const libMesh::Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
-    const libMesh::Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
-
-    libMesh::Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
-    out_of_plane_normal /= out_of_plane_normal.norm();
-
-    p_info._normal = dxyz_dxi[0].cross(out_of_plane_normal);
+    p_info._normal = dxyz_dxi[0].cross(outOfPlaneNormal(*primary_elem));
     if (std::fabs(p_info._normal.norm()) > 1e-15)
       p_info._normal /= p_info._normal.norm();
   }
@@ -315,6 +309,19 @@ findContactPoint(PenetrationInfo & p_info,
   p_info._dxyzdxi = dxyz_dxi;
   p_info._dxyzdeta = dxyz_deta;
   p_info._d2xyzdxideta = d2xyz_dxieta;
+}
+
+libMesh::Point
+outOfPlaneNormal(const Elem & primary_elem)
+{
+  if (primary_elem.dim() == 1)
+    return libMesh::Point(0, 0, 1);
+
+  const libMesh::Point in_plane_vector1 = primary_elem.point(1) - primary_elem.point(0);
+  const libMesh::Point in_plane_vector2 = primary_elem.point(2) - primary_elem.point(0);
+
+  libMesh::Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
+  return out_of_plane_normal / out_of_plane_normal.norm();
 }
 
 void

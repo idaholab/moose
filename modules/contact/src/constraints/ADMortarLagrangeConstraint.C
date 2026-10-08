@@ -59,7 +59,9 @@ void
 ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
 {
   _primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
-      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+      *_lower_primary_elem,
+      AutomaticMortarGeneration::primaryInteriorElem(*_lower_primary_elem),
+      *_lower_secondary_elem);
 
   _secondary_ip_lowerd_map = amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 
@@ -118,7 +120,9 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   Real scaling_factor = 1;
 
   _primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
-      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+      *_lower_primary_elem,
+      AutomaticMortarGeneration::primaryInteriorElem(*_lower_primary_elem),
+      *_lower_secondary_elem);
 
   _secondary_ip_lowerd_map = amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 

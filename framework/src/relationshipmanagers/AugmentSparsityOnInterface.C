@@ -304,7 +304,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
       {
         // We are still generating the mesh, so it's possible we don't even have the right boundary
         // ids created yet! So we actually ghost all boundary elements and all lower dimensional
-        // elements who have parents on a boundary
+        // elements who have parents on a boundary or, like rigid surface elements, no parent
         if (elem->on_boundary())
           coupled_elements.insert(std::make_pair(elem, _null_mat));
         else if (const Elem * const ip = elem->interior_parent())
@@ -312,6 +312,8 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
           if (ip->on_boundary())
             coupled_elements.insert(std::make_pair(elem, _null_mat));
         }
+        else if (elem->dim() + 1 == _mesh->mesh_dimension())
+          coupled_elements.insert(std::make_pair(elem, _null_mat));
       }
       else
       {
@@ -343,17 +345,20 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
           coupled_elements.insert(std::make_pair(elem, _null_mat));
 
 #ifndef NDEBUG
-          // let's do some safety checks
+          // let's do some safety checks. Primary surface elements may have no interior parent
           const Elem * const ip = elem->interior_parent();
-          mooseAssert(ip,
+          mooseAssert(ip || elem->subdomain_id() == primary_subdomain_id,
                       "We should have set interior parents for all of our lower-dimensional mortar "
-                      "subdomains");
-          auto side = ip->which_side_am_i(elem);
-          auto bnd_id = elem->subdomain_id() == primary_subdomain_id ? primary_boundary_id
-                                                                     : secondary_boundary_id;
-          mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, bnd_id),
-                      "The interior parent for the lower-dimensional element does not lie on the "
-                      "boundary");
+                      "secondary subdomains");
+          if (ip)
+          {
+            auto side = ip->which_side_am_i(elem);
+            auto bnd_id = elem->subdomain_id() == primary_subdomain_id ? primary_boundary_id
+                                                                       : secondary_boundary_id;
+            mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, bnd_id),
+                        "The interior parent for the lower-dimensional element does not lie on the "
+                        "boundary");
+          }
 #endif
         }
       }

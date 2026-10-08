@@ -120,7 +120,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 {
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
-      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+      *_lower_primary_elem,
+      AutomaticMortarGeneration::primaryInteriorElem(*_lower_primary_elem),
+      *_lower_secondary_elem);
   const auto & secondary_ip_lowerd_map =
       amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 

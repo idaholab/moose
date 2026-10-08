@@ -282,6 +282,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
 
         for (const Elem * elem : candidate_elements)
         {
+          if (_mesh.isSurfaceElemOnNodeset(*elem, _primary_boundary))
+          {
+            located_elem_ids.push_back(elem->id());
+            continue;
+          }
           for (auto s : elem->side_index_range())
             if (boundary_info.has_boundary_id(elem, s, _primary_boundary))
             {
@@ -1333,7 +1338,8 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * primary_elem,
                                              const Point * secondary_point,
                                              const Real tangential_tolerance)
 {
-  unsigned int dim = primary_elem->dim();
+  // Contact problem dimension; exceeds the element dimension for a primary surface element
+  unsigned int dim = side->dim() + 1;
 
   const std::vector<Point> & phys_point = fe->get_xyz();
 
@@ -1357,16 +1363,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * primary_elem,
     normal = dxyz_dxi[0].cross(dxyz_deta[0]);
   }
   else if (dim - 1 == 1)
-  {
-    const Node * const * elem_nodes = primary_elem->get_nodes();
-    const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
-    const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
-
-    Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
-    out_of_plane_normal /= out_of_plane_normal.norm();
-
-    normal = dxyz_dxi[0].cross(out_of_plane_normal);
-  }
+    normal = dxyz_dxi[0].cross(Moose::outOfPlaneNormal(*primary_elem));
   else
   {
     return true;
@@ -1399,8 +1396,11 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   //   original projected position of secondary node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  const auto & side = _elem_side_builder(*info._starting_elem, info._starting_side_num);
-  fe.reinit(&side, &points);
+  const Elem * const side =
+      info._starting_side_num == libMesh::invalid_uint
+          ? info._starting_elem
+          : &_elem_side_builder(*info._starting_elem, info._starting_side_num);
+  fe.reinit(side, &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
   if (info.isCaptured())
@@ -1757,7 +1757,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(
     // surface
     bool allowMultipleNeighbors = false;
 
-    if (elems_connected_to_edge[0]->dim() == 3)
+    if (_mesh.dimension() == 3)
     {
       if (edge_nodes.size() == 1)
       {
@@ -1820,11 +1820,18 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
 {
   const BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
 
-  for (auto s : elem->side_index_range())
-  {
-    if (!boundary_info.has_boundary_id(elem, s, _primary_boundary))
-      continue;
+  // A primary surface element is its single contact face, with side number invalid_uint
+  const bool surface_elem = _mesh.isSurfaceElemOnNodeset(*elem, _primary_boundary);
+  std::vector<unsigned int> sides;
+  if (surface_elem)
+    sides.push_back(libMesh::invalid_uint);
+  else
+    for (auto s : elem->side_index_range())
+      if (boundary_info.has_boundary_id(elem, s, _primary_boundary))
+        sides.push_back(s);
 
+  for (const auto s : sides)
+  {
     // Don't create info for this side if one already exists
     bool already_have_info_this_side = false;
     for (const auto & pi : thisElemInfo)
@@ -1837,7 +1844,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     if (already_have_info_this_side)
       break;
 
-    const Elem * side = elem->build_side_ptr(s).release();
+    const Elem * side = PenetrationInfo::buildSide(*elem, s, surface_elem).release();
 
     // Only continue with creating info for this side if the side contains
     // all of the nodes in nodes_that_must_be_on_side

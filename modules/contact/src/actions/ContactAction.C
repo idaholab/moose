@@ -65,6 +65,13 @@ ContactAction::validParams()
       "primary", "The list of boundary IDs referring to primary sidesets");
   params.addParam<std::vector<BoundaryName>>(
       "secondary", "The list of boundary IDs referring to secondary sidesets");
+  params.addParam<std::vector<SubdomainName>>(
+      "primary_surface_blocks",
+      {},
+      "Surface mesh blocks, one per contact pair, used as the primary side of mortar contact "
+      "instead of a lower-dimensional block generated from the 'primary' boundary. Such a block "
+      "has no interior parent, e.g. a rigid surface mesh, and the corresponding 'primary' entry "
+      "must be a nodeset on its nodes.");
   params.addParam<std::vector<BoundaryName>>(
       "automatic_pairing_boundaries",
       {},
@@ -308,7 +315,8 @@ ContactAction::validParams()
   params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_qp_mapping");
 
   // Contact surface definition
-  params.addParamNamesToGroup("primary secondary displacements", "Contact Surface Definition");
+  params.addParamNamesToGroup("primary secondary primary_surface_blocks displacements",
+                              "Contact Surface Definition");
   // Automatic pairing
   params.addParamNamesToGroup(
       "automatic_pairing_boundaries automatic_pairing_distance automatic_pairing_method",
@@ -362,6 +370,22 @@ ContactAction::ContactAction(const InputParameters & params)
     _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
     _mortar_dynamics(getParam<bool>("mortar_dynamics"))
 {
+  const auto & surface_blocks = getParam<std::vector<SubdomainName>>("primary_surface_blocks");
+  if (!surface_blocks.empty())
+  {
+    if (_formulation != ContactFormulation::MORTAR &&
+        _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("primary_surface_blocks",
+                 "Primary surface blocks are only used by mortar formulations. Node-face "
+                 "formulations use primary surface elements on the 'primary' nodeset without "
+                 "this parameter.");
+    if (surface_blocks.size() != _boundary_pairs.size())
+      paramError("primary_surface_blocks",
+                 "One primary surface block must be given for each primary and secondary pair.");
+    for (const auto i : index_range(_boundary_pairs))
+      _primary_surface_blocks.emplace(_boundary_pairs[i], surface_blocks[i]);
+  }
+
   // Check for automatic selection of contact pairs.
   if (getParam<std::vector<BoundaryName>>("automatic_pairing_boundaries").size() > 1)
     _automatic_pairing_boundaries =
@@ -879,7 +903,8 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
       params.set<bool>("use_displaced_mesh") = true;
       params.set<BoundaryName>("primary_boundary") = primary_boundary;
       params.set<BoundaryName>("secondary_boundary") = secondary_boundary;
-      params.set<SubdomainName>("primary_subdomain") = action_name + "_primary_subdomain" + suffix;
+      params.set<SubdomainName>("primary_subdomain") =
+          primarySubdomainName({primary_boundary, secondary_boundary});
       params.set<SubdomainName>("secondary_subdomain") =
           action_name + "_secondary_subdomain" + suffix;
       params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
@@ -911,6 +936,14 @@ std::string
 ContactAction::pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair) const
 {
   return _boundary_pairs.size() > 1 ? ContactPairLowerDBlockGenerator::pairSuffix(pair) : "";
+}
+
+std::string
+ContactAction::primarySubdomainName(const std::pair<BoundaryName, BoundaryName> & pair) const
+{
+  if (!_primary_surface_blocks.empty())
+    return libmesh_map_find(_primary_surface_blocks, pair);
+  return MooseUtils::shortName(name()) + "_primary_subdomain" + pairSuffix(pair);
 }
 
 void
@@ -1010,7 +1043,9 @@ ContactAction::addMortarContact()
           primary_params.set<std::vector<BoundaryName>>("sidesets") = {primary_boundary};
           secondary_params.set<std::vector<BoundaryName>>("sidesets") = {secondary_boundary};
 
-          _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
+          if (_primary_surface_blocks.empty())
+            _app.appendMeshGenerator(
+                "LowerDBlockFromSidesetGenerator", primary_name, primary_params);
           _app.appendMeshGenerator(
               "LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
         }
@@ -1093,7 +1128,8 @@ ContactAction::addMortarContact()
     for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
     {
       const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
-      const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
+      const std::string primary_subdomain_name =
+          primarySubdomainName({primary_boundary, secondary_boundary});
       const std::string secondary_subdomain_name = action_name + "_secondary_subdomain" + suffix;
       const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm" + suffix;
       const std::string tangential_lagrange_multiplier_name =
@@ -1303,7 +1339,7 @@ ContactAction::addMortarContact()
       const BoundaryName & primary_boundary = contact_pair.first;
       const BoundaryName & secondary_boundary = contact_pair.second;
       const std::string suffix = pairSuffix(contact_pair);
-      const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
+      const std::string primary_subdomain_name = primarySubdomainName(contact_pair);
       const std::string secondary_subdomain_name = action_name + "_secondary_subdomain" + suffix;
       const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm" + suffix;
       const std::string tangential_lagrange_multiplier_name =
