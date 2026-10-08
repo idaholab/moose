@@ -1526,7 +1526,7 @@ SubChannel1PhaseProblem::computeT()
   const unsigned int last_node = _n_cells;
   const unsigned int first_node = 1;
   std::vector<Real> residual;
-  residual.reserve(_n_channels);
+  residual.reserve(_n_cells * _n_channels);
   Real residual_norm_sq = 0.0;
   Real temperature_norm_sq = 0.0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -2780,16 +2780,10 @@ SubChannel1PhaseProblem::externalSolve()
   V("Solution initialized");
   Real P_error = 1.0;
   unsigned int P_it = 0;
-  unsigned int P_it_max;
   bool temperature_converged = true;
 
-  if (_segregated_bool)
-    P_it_max = 5;
-  else
-    P_it_max = 100;
-
-  if (_P_maxit > 0)
-    P_it_max = _P_maxit;
+  // P_maxit = 0 selects the default outer-iteration limit of the chosen algorithm
+  const unsigned int P_it_max = _P_maxit > 0 ? _P_maxit : (_segregated_bool ? 5 : 100);
 
   while ((P_error > _P_tol && P_it < P_it_max))
   {
@@ -2876,7 +2870,7 @@ SubChannel1PhaseProblem::externalSolve()
     comm().max(P_error);
     _console << "P_error :" << P_error << std::endl;
     V("Iteration:  " + std::to_string(P_it));
-    V("Maximum iterations: " + std::to_string(_P_maxit));
+    V("Maximum iterations: " + std::to_string(P_it_max));
   }
   // Cache only the final iteration status. Earlier outer iterations may fail their thermal
   // tolerance and subsequently recover.
