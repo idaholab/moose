@@ -352,6 +352,17 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
 
+  // workaround to make sure the PA tests still work if we only have a single
+  // variable/preconditioner. otherwise, we would have to modify all PA tests
+  // to use MFEMBlockDiagonalPreconditioner.
+  if (block_op->NumRowBlocks() == 1 && block_op->NumColBlocks() == 1)
+  {
+    // The block is owned by _h_blocks_pa, not by op
+    op.Reset(_h_blocks_pa(0, 0), /*own_A=*/false);
+    delete block_op;
+    return;
+  }
+
   op.Reset(block_op);
 }
 
@@ -571,6 +582,14 @@ EquationSystem::FormJacobianOperator(const mfem::Vector & u)
       if (_jacobian_blocks_pa(i, j))
         block_op->SetBlock(i, j, _jacobian_blocks_pa(i, j));
     }
+  }
+
+  if (block_op->NumRowBlocks() == 1 && block_op->NumColBlocks() == 1)
+  {
+    // The block is owned by _jacobian_blocks_pa, not by _jacobian
+    _jacobian.Reset(_jacobian_blocks_pa(0, 0), /*own_A=*/false);
+    delete block_op;
+    return;
   }
 
   _jacobian.Reset(block_op);
