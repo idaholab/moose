@@ -52,7 +52,7 @@ user needs to set the input parameter `automatic_pairing_method = NODE`.
 
 For either method, the boundary with the larger area in each automatically generated pair is
 assigned as the primary surface. See
-[ContactPairLowerDBlockGenerator](/ContactPairLowerDBlockGenerator.md) for details of the pairing
+[AutomaticContactPairingGenerator](/AutomaticContactPairingGenerator.md) for details of the pairing
 and primary/secondary assignment.
 
 ## References

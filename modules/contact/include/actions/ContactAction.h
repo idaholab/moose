@@ -129,16 +129,15 @@ private:
    * Remove repeated contact pairs from _boundary_pairs.
    */
   void removeRepeatedPairs();
+  /// Name of the AutomaticContactPairingGenerator appended by this action
+  std::string automaticPairingGeneratorName() const;
   /**
-   * Create contact pairs between all boundaries whose centroids are within a user-specified
-   * distance of each other.
+   * Append the AutomaticContactPairingGenerator that detects contact pairs among
+   * _automatic_pairing_boundaries and, for mortar contact, creates their lower-dimensional blocks
    */
-  void createSidesetPairsFromGeometry();
-  /**
-   * Create contact pairs between all boundaries by determining that _nodes_ on both boundaries are
-   * close enough.
-   */
-  void createSidesetsFromNodeProximity();
+  void appendAutomaticPairingGenerator();
+  /// Fill _boundary_pairs from the contact pairs mesh meta-data of the appended generator
+  void getAutomaticContactPairs();
   /**
    * Returns a name suffix encoding the boundary pair for multi-pair mortar setups,
    * or an empty string when there is only one pair (preserving single-pair name backwards compat).

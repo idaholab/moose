@@ -1,13 +1,17 @@
-# ContactPairLowerDBlockGenerator
+# AutomaticContactPairingGenerator
 
 ## Overview
 
 This mesh generator automatically detects contact surface pairs among a list of
-candidate boundaries and creates the lower-dimensional primary/secondary subdomain
-blocks that [ContactAction](/actions/ContactAction.md) needs for mortar contact. It
-is appended to the mesh generator tree by [ContactAction](/actions/ContactAction.md)
-whenever `automatic_pairing_boundaries` is specified on the `[Contact]` action, so
-it is not typically added directly by a user in the `[Mesh]` block.
+candidate boundaries and stores them in the mesh meta-data. When
+`create_lower_d_blocks` is true, it also creates the lower-dimensional
+primary/secondary subdomain blocks that [ContactAction](/actions/ContactAction.md)
+needs for mortar contact. It is appended to the mesh generator tree by
+[ContactAction](/actions/ContactAction.md) whenever `automatic_pairing_boundaries`
+is specified on the `[Contact]` action, so it is not typically added directly by a
+user in the `[Mesh]` block. [ContactAction](/actions/ContactAction.md) reads the
+detected pairs from the mesh meta-data, which is restored from the checkpoint when
+recovering.
 
 Two candidate boundaries are considered a contact pair if they are within
 `automatic_pairing_distance` of each other, using one of two detection strategies
@@ -35,19 +39,20 @@ and centroids therefore differ from their true values in the problem coordinate
 system, which can affect the primary/secondary assignment and the `CENTROID` pairing
 distances.
 
-For each detected pair, a primary and a secondary lower-dimensional subdomain block
-are created (named using the `prefix` parameter), matching the naming convention
+When `create_lower_d_blocks` is true, a primary and a secondary lower-dimensional
+subdomain block are created for each detected pair (named using the `prefix` parameter), matching the naming convention
 used internally by [ContactAction](/actions/ContactAction.md). If more than one
 pair is found among the candidate boundaries, the generated block names are
 suffixed with `_p_<primary name>_s_<secondary name>`, e.g. `_p_top_s_bottom` for
 the pair (`top`, `bottom`), so that they remain unique.
 
-Because the pairing search operates on the mesh's boundary and node information
-directly, it requires a serial (non-distributed) mesh at the point this generator
-runs.
+The pairing search supports distributed meshes. Sideset areas and centroids are
+summed across processes, and for the `NODE` method the candidate boundary nodes are
+gathered onto every process before the search. This communication is skipped when
+the mesh is serial.
 
-!syntax parameters /Mesh/ContactPairLowerDBlockGenerator
+!syntax parameters /Mesh/AutomaticContactPairingGenerator
 
-!syntax inputs /Mesh/ContactPairLowerDBlockGenerator
+!syntax inputs /Mesh/AutomaticContactPairingGenerator
 
-!syntax children /Mesh/ContactPairLowerDBlockGenerator
+!syntax children /Mesh/AutomaticContactPairingGenerator

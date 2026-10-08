@@ -18,8 +18,7 @@
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 #include "AugmentedLagrangianContactProblem.h"
-
-#include "ContactPairLowerDBlockGenerator.h"
+#include "AutomaticContactPairingGenerator.h"
 
 #include <set>
 #include <algorithm>
@@ -592,14 +591,12 @@ ContactAction::act()
       _problem->setSNESMFReuseBase(false, false);
   }
 
-  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0)
+  if (_automatic_pairing_boundaries.size() > 0)
   {
-    if (getParam<MooseEnum>("automatic_pairing_method").getEnum<ProximityMethod>() ==
-        ProximityMethod::NODE)
-      createSidesetsFromNodeProximity();
-    else if (getParam<MooseEnum>("automatic_pairing_method").getEnum<ProximityMethod>() ==
-             ProximityMethod::CENTROID)
-      createSidesetPairsFromGeometry();
+    if (_current_task == "append_mesh_generator")
+      appendAutomaticPairingGenerator();
+    else if (_current_task == "post_mesh_prepared")
+      getAutomaticContactPairs();
   }
 
   if (_formulation == ContactFormulation::MORTAR ||
@@ -910,7 +907,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
 std::string
 ContactAction::pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair) const
 {
-  return _boundary_pairs.size() > 1 ? ContactPairLowerDBlockGenerator::pairSuffix(pair) : "";
+  return _boundary_pairs.size() > 1 ? AutomaticContactPairingGenerator::pairSuffix(pair) : "";
 }
 
 void
@@ -972,48 +969,32 @@ ContactAction::addMortarContact()
   {
     // Don't do mesh generators when recovering or when the user has requested for us not to
     // (presumably because the lower-dimensional blocks are already in the mesh due to manual
-    // addition or because we are restarting)
+    // addition or because we are restarting). Automatically detected pairs get their
+    // lower-dimensional blocks from the generator appended in appendAutomaticPairingGenerator()
     if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.useMasterMesh() &&
-        _generate_mortar_mesh)
+        _generate_mortar_mesh && _automatic_pairing_boundaries.empty())
     {
-      if (_automatic_pairing_boundaries.size() > 0)
+      for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
       {
-        auto params = _factory.getValidParams("ContactPairLowerDBlockGenerator");
-        params.set<std::vector<BoundaryName>>("automatic_pairing_boundaries") =
-            _automatic_pairing_boundaries;
-        params.set<Real>("automatic_pairing_distance") =
-            getParam<Real>("automatic_pairing_distance");
-        params.set<MooseEnum>("automatic_pairing_method") =
-            getParam<MooseEnum>("automatic_pairing_method");
-        params.set<std::string>("prefix") = action_name;
+        const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
+        const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
+        const std::string secondary_subdomain_name = action_name + "_secondary_subdomain" + suffix;
+
+        const MeshGeneratorName primary_name = primary_subdomain_name + "_generator";
+        const MeshGeneratorName secondary_name = secondary_subdomain_name + "_generator";
+
+        auto primary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+        auto secondary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+
+        primary_params.set<SubdomainName>("new_block_name") = primary_subdomain_name;
+        secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
+
+        primary_params.set<std::vector<BoundaryName>>("sidesets") = {primary_boundary};
+        secondary_params.set<std::vector<BoundaryName>>("sidesets") = {secondary_boundary};
+
+        _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
         _app.appendMeshGenerator(
-            "ContactPairLowerDBlockGenerator", action_name + "_auto_mortar_generator", params);
-      }
-      else
-      {
-        for (const auto & [primary_boundary, secondary_boundary] : _boundary_pairs)
-        {
-          const std::string suffix = pairSuffix({primary_boundary, secondary_boundary});
-          const std::string primary_subdomain_name = action_name + "_primary_subdomain" + suffix;
-          const std::string secondary_subdomain_name =
-              action_name + "_secondary_subdomain" + suffix;
-
-          const MeshGeneratorName primary_name = primary_subdomain_name + "_generator";
-          const MeshGeneratorName secondary_name = secondary_subdomain_name + "_generator";
-
-          auto primary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-          auto secondary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-
-          primary_params.set<SubdomainName>("new_block_name") = primary_subdomain_name;
-          secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
-
-          primary_params.set<std::vector<BoundaryName>>("sidesets") = {primary_boundary};
-          secondary_params.set<std::vector<BoundaryName>>("sidesets") = {secondary_boundary};
-
-          _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
-          _app.appendMeshGenerator(
-              "LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
-        }
+            "LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
       }
     }
   }
@@ -1601,50 +1582,53 @@ ContactAction::addNodeFaceContact()
   }
 }
 
-void
-ContactAction::createSidesetsFromNodeProximity()
+std::string
+ContactAction::automaticPairingGeneratorName() const
 {
-  mooseInfo("The contact action is reading the list of boundaries and automatically pairs them "
-            "if the distance between nodes is less than a specified distance.");
-
-  if (!_mesh)
-    mooseError("Failed to obtain mesh for automatically generating contact pairs.");
-
-  if (!_mesh->getMesh().is_serial())
-    paramError(
-        "automatic_pairing_boundaries",
-        "The generation of automatic contact pairs in the contact action requires a serial mesh.");
-
-  _boundary_pairs = ContactPairLowerDBlockGenerator::findPairsNodeProximity(
-      _mesh->getMesh(),
-      _automatic_pairing_boundaries,
-      getParam<Real>("automatic_pairing_distance"));
-
-  mooseInfo(
-      "The following boundary pairs were created by the contact action using nodal proximity: ");
-  for (const auto & [primary, secondary] : _boundary_pairs)
-    mooseInfoRepeated(
-        "Primary boundary ID: ", primary, " and secondary boundary ID: ", secondary, ".");
+  return MooseUtils::shortName(name()) + "_auto_pairing_generator";
 }
 
 void
-ContactAction::createSidesetPairsFromGeometry()
+ContactAction::appendAutomaticPairingGenerator()
 {
-  mooseInfo("The contact action is reading the list of boundaries and automatically pairs them "
-            "if their centroids fall within a specified distance of each other.");
+  // A sub-app cloning its parent mesh runs no mesh generators, so there would be no generator to
+  // detect the pairs
+  if (_app.useMasterMesh())
+    paramError("automatic_pairing_boundaries",
+               "Automatic contact pairing is not supported when cloning the parent app mesh.");
+  if (_app.getMeshGeneratorNames().empty())
+    paramError("automatic_pairing_boundaries",
+               "Automatic contact pairing requires the mesh to be built by mesh generators. Use a "
+               "FileMeshGenerator in the [Mesh] block to read a mesh file.");
 
-  if (!_mesh)
-    mooseError("Failed to obtain mesh for automatically generating contact pairs.");
+  // The generator is appended even when recovering. Generation is then skipped, but constructing
+  // the generator declares the contact pairs mesh meta-data, which is restored from the checkpoint
+  auto params = _factory.getValidParams("AutomaticContactPairingGenerator");
+  params.set<std::vector<BoundaryName>>("automatic_pairing_boundaries") =
+      _automatic_pairing_boundaries;
+  params.set<Real>("automatic_pairing_distance") = getParam<Real>("automatic_pairing_distance");
+  params.set<MooseEnum>("automatic_pairing_method") =
+      getParam<MooseEnum>("automatic_pairing_method");
+  params.set<std::string>("prefix") = MooseUtils::shortName(name());
+  params.set<bool>("create_lower_d_blocks") =
+      (_formulation == ContactFormulation::MORTAR ||
+       _formulation == ContactFormulation::MORTAR_PENALTY) &&
+      _generate_mortar_mesh;
+  _app.appendMeshGenerator(
+      "AutomaticContactPairingGenerator", automaticPairingGeneratorName(), params);
+}
 
-  if (!_mesh->getMesh().is_serial())
-    paramError(
-        "automatic_pairing_boundaries",
-        "The generation of automatic contact pairs in the contact action requires a serial mesh.");
+void
+ContactAction::getAutomaticContactPairs()
+{
+  const auto & pairs = getMeshProperty<AutomaticContactPairingGenerator::ContactPairs>(
+      AutomaticContactPairingGenerator::contact_pairs_property, automaticPairingGeneratorName());
+  _boundary_pairs.assign(pairs.begin(), pairs.end());
 
-  _boundary_pairs = ContactPairLowerDBlockGenerator::findPairsCentroid(
-      _mesh->getMesh(),
-      _automatic_pairing_boundaries,
-      getParam<Real>("automatic_pairing_distance"));
+  mooseInfo("The following boundary pairs were detected automatically by the contact action:");
+  for (const auto & [primary, secondary] : _boundary_pairs)
+    mooseInfoRepeated(
+        "Primary boundary ID: ", primary, " and secondary boundary ID: ", secondary, ".");
 }
 
 MooseEnum
