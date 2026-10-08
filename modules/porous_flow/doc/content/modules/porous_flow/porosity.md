@@ -3,7 +3,7 @@
 Porosity may be fixed at a constant value, or it may be a function of the
 effective porepressure, the volumetric strain, the temperature and/or chemical precipitates
 
-All the porosity Materials below accept the optional `porosity_min` parameter, which places a lower bound on porosity, $\phi \geq \phi_{\mathrm{min}}$.  If it is not provided, no lower bound is imposed, except for [PorousFlowPorosityLinear](/PorousFlowPorosityLinear.md), which bounds porosity below by zero by default.
+All the porosity Materials below accept the optional `porosity_min` parameter, which places a lower bound on porosity, $\phi \geq \phi_{\mathrm{min}}$.  If it is not provided, no lower bound is imposed, except for [PorousFlowPorosityLinear](/PorousFlowPorosityLinear.md), which bounds porosity below by zero by default, and [PorousFlowPorosityConst](/PorousFlowPorosityConst.md), which generates an error if the porosity is negative or less than `porosity_min`, since a constant porosity is never clipped.
 
 Available porosity formulations include:
 
