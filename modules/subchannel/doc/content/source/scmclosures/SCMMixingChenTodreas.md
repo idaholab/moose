@@ -81,10 +81,12 @@ where $V_i$ and $V_j$ are the axial velocities of the two types of subchannels o
 For the turbulent regime, the flow-split dependence is evaluated from Eq. (31) of [!cite](pacio2022analysis):
 
 !equation
-W_{mT} =
-\frac{8.8}{Re^{0.18}}
-\frac{X_i^{\,2-0.18}-X_j^{\,2-0.18}}
-     {X_i^2-X_j^2} .
+C_{mT} =
+\frac{W_{mT}}{Re^{m}}
+\frac{X_i^{\,2-m}-X_j^{\,2-m}}
+     {X_i^2-X_j^2} ,
+
+with the turbulent wire mixing coefficient $W_{mT} = 8.8$ and the turbulent exponent $m = 0.18$ of Table 5 of [!cite](pacio2022analysis).
 
 The denominator is $X_i^2-X_j^2$ rather than the $X_i-X_j$ of Eq. (32) of [!cite](pacio2022analysis), which is the effective crossflow and already includes the mean velocity of the two subchannels. SCM applies that mean velocity to the mixing parameter through the average mass flux of the gap.
 
@@ -104,17 +106,19 @@ Re_L = 700,
 \qquad
 Re_T = 10^4 .
 
-The laminar mixing coefficient is
+For the laminar regime, Eq. (33) of [!cite](pacio2022analysis) gives
 
 !equation
-W_{mL} = 0,
+C_{mL} = \frac{W_{mL}}{Re},
 
-and in the intermittent regime the mixing coefficient is interpolated as
+with the laminar wire mixing coefficient $W_{mL} = 0$ of Table 5, and in the intermittent regime the mixing coefficient is interpolated with the same transition formula as the Pacio-Chen-Todreas friction factor, Eq. (35) of [!cite](pacio2022analysis),
 
 !equation
 C_m =
-W_{mL} +
-\left(W_{mT}-W_{mL}\right)\psi^{2/3},
+C_{mL} \left(1-\psi\right)^{\gamma} \left(1-\psi^{\lambda}\right) +
+C_{mT}\,\psi^{\gamma},
+
+with $\gamma = 0.362$ and $\lambda = 6.7$ of Table 5,
 
 where
 

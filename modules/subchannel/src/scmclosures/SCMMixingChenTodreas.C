@@ -280,6 +280,8 @@ SCMMixingChenTodreas::computePacioMixingParameter(const Real Xi,
                                                   const Real Xj,
                                                   const Real perimeter_ratio) const
 {
+  mooseAssert(_mixing_model == "Pacio", "The Pacio mixing parameter requires mixing_model = Pacio");
+
   const Real pitch = _subchannel_mesh.getPitch();
   const Real pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
@@ -322,22 +324,33 @@ SCMMixingChenTodreas::computePacioMixingParameter(const Real Xi,
                (Utility::pow<2>(Xi) - Utility::pow<2>(Xj));
   }
 
+  // Laminar and turbulent wire mixing coefficients, Pacio et al. (2022) Table 5
   const Real WmL = 0.0;
-  const Real WmT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
+  const Real WmT = 8.8;
+
+  // Mixing parameter without the geometric factors, Pacio et al. (2022) Eqs. (31) and (33):
+  // WmT fraction / Reb^m in the turbulent regime and WmL / Reb in the laminar regime
+  const Real Re_eff = std::max(bulk_Re, 1.0);
+  const Real Cm_L = WmL / Re_eff;
+  const Real Cm_T = WmT * fraction / std::pow(Re_eff, 0.18);
 
   Real Cm;
 
   if (bulk_Re < ReL)
-    Cm = WmL;
+    Cm = Cm_L;
   else if (bulk_Re > ReT)
-    Cm = WmT;
+    Cm = Cm_T;
   else
   {
     const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
 
-    const Real gamma = 2.0 / 3.0;
+    // Same transition interpolation as the Pacio-Chen-Todreas friction factor, Pacio et al. (2022)
+    // Eq. (35), with gamma and lambda of Table 5
+    const Real gamma = 0.362;
+    const Real lambda = 6.7;
 
-    Cm = WmL + (WmT - WmL) * std::pow(psi, gamma);
+    Cm = Cm_L * std::pow(1.0 - psi, gamma) * (1.0 - std::pow(psi, lambda)) +
+         Cm_T * std::pow(psi, gamma);
   }
 
   // Pacio uses the edge-subchannel projected wire area and bare flow area.

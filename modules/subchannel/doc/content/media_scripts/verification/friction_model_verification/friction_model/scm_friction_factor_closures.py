@@ -19,6 +19,8 @@ subchannel-opt -i tri_wire_flow_split.i SCMClosures/Chen/friction_model=Pacio \
 subchannel-opt -i XX09_SS17.i
 subchannel-opt -i XX09_SS17.i SCMClosures/Chen/friction_model=Pacio \
     SCMClosures/Chen_Todreas/mixing_model=Pacio Outputs/file_base=XX09_SS17_pacio_out
+# dassh_XX09_SS17.py writes the DASSH data; it is kept with the DASSH comparison inputs at
+# https://github.com/kyriv-lab/moose/tree/dassh_XX09_SS17/modules/subchannel/verification/friction_model_verification/friction_model
 python dassh_XX09_SS17.py
 
 Five figures are written next to this script:
