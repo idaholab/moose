@@ -277,7 +277,12 @@ PorousFlowDarcyBaseTempl<is_ad>::computeProtoFluxWithoutMobility()
     _proto_flux[ph].assign(num_nodes, 0.0);
     for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
     {
-      const Real jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      // The AD weight carries the displacement derivatives on a displaced mesh
+      GenericReal<is_ad> jxw_coord;
+      if constexpr (is_ad)
+        jxw_coord = this->_ad_JxW[_qp] * this->_ad_coord[_qp];
+      else
+        jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
       for (_i = 0; _i < num_nodes; ++_i)
         _proto_flux[ph][_i] += jxw_coord * darcyQp(ph);
     }
