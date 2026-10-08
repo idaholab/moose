@@ -200,6 +200,15 @@ ReporterTransferInterface::sumVectorReporter(const ReporterName & name, FEProble
   problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).vectorSum();
 }
 
+void
+ReporterTransferInterface::broadcastReporter(const ReporterName & name,
+                                             FEProblemBase & problem,
+                                             processor_id_type root)
+{
+  checkHasReporterValue(name, problem);
+  problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).broadcast(root);
+}
+
 std::vector<ReporterName>
 ReporterTransferInterface::getReporterNamesHelper(std::string prefix,
                                                   const std::string & obj_name,

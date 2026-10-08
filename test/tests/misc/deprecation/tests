@@ -73,6 +73,35 @@
     design = 'InputParameters.md'
     issues = '#15497'
   []
+  [deprecated_coupled_var_global_override]
+    type = 'RunApp'
+    input = 'deprecated_coupled_var_global_params.i'
+    requirement = 'The system shall give precedence to a coupled variable set locally with a deprecated parameter name over the blessed name set in the global parameters, and warn about the use of the deprecated name.'
+    design = 'InputParameters.md'
+    issues = '#32350'
+    no_error_deprecated = True
+    expect_out = "Kernels/local_coupled_v/stupid_name: 'stupid_name' has been deprecated and will be removed on 01/01/2040. Please use 'source' instead."
+  []
+  [deprecated_coupled_var_local_conflict]
+    type = 'RunException'
+    input = 'deprecated_coupled_var_global_params.i'
+    cli_args = 'Kernels/local_coupled_v/source=u'
+    requirement = 'The system shall report an error when a coupled variable is set using both a deprecated parameter name and its blessed name within the same input block.'
+    design = 'InputParameters.md'
+    issues = '#32350'
+    no_error_deprecated = True
+    expect_err = "provided more than once using the aliased names 'source' and 'stupid_name'"
+  []
+  [deprecated_coupled_var_global_conflict]
+    type = 'RunException'
+    input = 'deprecated_coupled_var_global_params.i'
+    cli_args = 'GlobalParams/stupid_name=u'
+    requirement = 'The system shall report an error when a coupled variable is set using both a deprecated parameter name and its blessed name within the global parameters.'
+    design = 'InputParameters.md'
+    issues = '#32350'
+    no_error_deprecated = True
+    expect_err = "provided more than once using the aliased names 'source' and 'stupid_name'"
+  []
   [deprec_param_duplicate_print]
     type = RunApp
     input = 'deprecated_param.i'

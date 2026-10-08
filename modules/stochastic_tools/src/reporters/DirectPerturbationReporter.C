@@ -118,13 +118,14 @@ DirectPerturbationReporterContext<DataType>::finalize()
   // the reference value. So the process that has that will communicate it
   // to everybody. We reuse the initialization function for the reference
   // value as well
-  auto reference_value = initializeDataType(_data[0]);
+  // _data can be empty on a rank with zero local rows.
+  auto reference_value = _data.empty() ? DataType() : initializeDataType(_data[0]);
   if (_relative_sensitivity)
   {
-    if (_sampler.getLocalRowBegin() == 0)
+    // The reference point is sampler row 0, which is always local to rank 0.
+    if (this->processor_id() == 0)
       reference_value = _data[0];
-
-    this->comm().sum(reference_value);
+    this->comm().broadcast(reference_value);
   }
 
   for (const auto param_i : make_range(num_columns))

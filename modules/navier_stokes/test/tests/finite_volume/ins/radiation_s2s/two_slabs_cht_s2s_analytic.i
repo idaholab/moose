@@ -246,7 +246,7 @@ nx_gap = 200
     h = ${h_f}
     thermal_conductivity = ${k_fluid}
     incoming_flux = heat_flux_to_fluid_left_rad
-    surface_temperature = interface_temperature_solid_left_rad
+    surface_temperature = interface_temperature_to_fluid_left_rad
   []
 
   [solid_left]
@@ -256,7 +256,7 @@ nx_gap = 200
     h = ${h_s}
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_rad
-    surface_temperature = interface_temperature_fluid_left_rad
+    surface_temperature = interface_temperature_to_solid_left_rad
   []
 
   # Robin-Robin CHT at the right gap/solid interface.
@@ -267,7 +267,7 @@ nx_gap = 200
     h = ${h_f}
     thermal_conductivity = ${k_fluid}
     incoming_flux = heat_flux_to_fluid_right_rad
-    surface_temperature = interface_temperature_solid_right_rad
+    surface_temperature = interface_temperature_to_fluid_right_rad
   []
 
   [solid_right]
@@ -277,7 +277,7 @@ nx_gap = 200
     h = ${h_s}
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_rad
-    surface_temperature = interface_temperature_fluid_right_rad
+    surface_temperature = interface_temperature_to_solid_right_rad
   []
 
   # Do not add LinearFVGrayLambertBC on left_rad/right_rad. The modified

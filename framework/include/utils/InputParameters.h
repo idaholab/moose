@@ -846,6 +846,18 @@ public:
   void checkParams(const std::string & parsing_syntax);
 
   /**
+   * Return errors for missing required parameters.
+   *
+   * @param parsing_syntax The parsing syntax to use in the error if this object has no block
+   * @param skip_required_params Names of required parameters to skip the check for
+   * @param skip_private Whether to skip the check for private parameters
+   */
+  std::vector<std::string>
+  missingRequiredParamErrors(const std::string & parsing_syntax,
+                             const std::set<std::string> & skip_required_params = {},
+                             bool skip_private = false) const;
+
+  /**
    * Performs a range check on the parameter (which must have a range check)
    *
    * @param value The parameter value

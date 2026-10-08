@@ -13,6 +13,12 @@
 
 #include "MFEMSamplerBase.h"
 
+namespace Moose::MFEM
+{
+std::vector<Point>
+generateLinePoints(const Point & start_point, const Point & end_point, unsigned int num_points);
+}
+
 /**
  * Base class for sampling real or complex MFEM variables at points.
  *

@@ -33,7 +33,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taoblmvm
+  tao_solver = taobqnls
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '0.0001'
   verbose = true

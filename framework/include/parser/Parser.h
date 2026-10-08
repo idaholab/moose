@@ -40,6 +40,13 @@ public:
   eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
 };
 
+class RangeEvaler : public hit::Evaler
+{
+public:
+  virtual std::string
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+};
+
 class RepeatEvaler : public hit::Evaler
 {
 public:

@@ -6,6 +6,20 @@
     design = 'syntax/Materials/index.md'
     requirement = 'The system shall not evaluate an unrelated face material while executing user objects on a boundary.'
   []
+  [unrelated_internal_side_materials]
+    type = 'RunApp'
+    input = 'unrelated_internal_side_materials.i'
+    issues = '#31418'
+    design = 'syntax/Materials/index.md'
+    requirement = 'The system shall not evaluate unrelated face or neighbor materials while executing user objects on an internal side.'
+  []
+  [unrelated_interface_materials]
+    type = 'RunApp'
+    input = 'unrelated_interface_materials.i'
+    issues = '#31418'
+    design = 'syntax/Materials/index.md'
+    requirement = 'The system shall not evaluate unrelated face, boundary, or neighbor materials while executing user objects on an interface.'
+  []
   [direct_face_dependency]
     type = 'CSVDiff'
     input = 'direct_face_dependency.i'

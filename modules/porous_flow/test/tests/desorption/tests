@@ -1,12 +1,17 @@
 [Tests]
+  design = 'PorousFlowDesorpedMassTimeDerivative.md'
   [./desorption01]
     type = 'Exodiff'
     input = 'desorption01.i'
     exodiff = 'desorption01_out.e'
+    issues = '#8240 #8139'
+    requirement = 'The system shall be able to simulate desorption of fluid from a matrix into pore space, conserving the total fluid mass, in the absence of any other fluid flow.'
   [../]
   [./desorption02]
     type = 'Exodiff'
     input = 'desorption02.i'
     exodiff = 'desorption02_out.e'
+    issues = '#8782'
+    requirement = 'The system shall be able to simulate desorption of fluid from a matrix into pore space while that fluid is simultaneously advected by Darcy flow.'
   [../]
 []

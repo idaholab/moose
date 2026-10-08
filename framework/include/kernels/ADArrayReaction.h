@@ -21,6 +21,8 @@ public:
 
   ADArrayReaction(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void computeQpResidual(ADRealEigenVector & residual) override;
 

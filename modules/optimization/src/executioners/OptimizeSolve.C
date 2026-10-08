@@ -18,9 +18,8 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum(
-      "taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
-      "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
+  MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl "
+                            "taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -49,7 +48,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
-  if (libMesh::n_threads() > 1)
+  if (_problem.numThreads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
 
   if (_output_opt_iters && _problem.isTransient())
@@ -120,13 +119,6 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::BOUNDED_NEWTON_TRUST_LINE:
       LibmeshPetscCallQ(TaoSetType(_tao, TAOBNTL));
       break;
-    case TaoSolverEnum::QUASI_NEWTON:
-      LibmeshPetscCallQ(TaoSetType(_tao, TAOLMVM));
-      break;
-    case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
-      LibmeshPetscCallQ(TaoSetType(_tao, TAOBLMVM));
-      break;
-
     case TaoSolverEnum::NELDER_MEAD:
       LibmeshPetscCallQ(TaoSetType(_tao, TAONM));
       break;

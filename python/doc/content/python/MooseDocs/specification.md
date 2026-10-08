@@ -55,6 +55,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [extensions/media.md] | Extension for including images and movies. |
 | [extensions/appsyntax.md] | Enables the use of MOOSE application syntax within markdown files. |
 | [extensions/sqa.md] | Provides tools for writing software quality documentation using templates. |
+| [extensions/civet.md] | Provides linking and results connections to [CIVET](https://github.com/idaholab/civet) testing results. |
 | [extensions/layout.md] | Provides tools for creating columns and tabs via markdown. |
 | [extensions/acronym.md] | Provides means for defining and listing acronyms across pages. |
 | [extensions/graph.md] | Adds [plotly](https://plot.ly) support for creating charts. |

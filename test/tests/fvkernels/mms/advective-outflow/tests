@@ -15,6 +15,7 @@
       input = test.py
       test_case = TestOutflow
       detail = 'a weighted averaging advection interpolation, and'
+      min_slots = 2
     []
     [minmod]
       type = MMSTest

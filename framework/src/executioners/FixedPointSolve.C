@@ -263,7 +263,7 @@ FixedPointSolve::solve()
     // Snag all of the local dof indices for all of these variables
     AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
     const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    Threads::parallel_reduce(elem_range, aldit, _problem.numThreads());
 
     transformed_dofs = aldit.getDofIndices();
   }
@@ -277,7 +277,7 @@ FixedPointSolve::solve()
       // Snag all of the local dof indices for all of these variables
       AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
       const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-      Threads::parallel_reduce(elem_range, aldit);
+      Threads::parallel_reduce(elem_range, aldit, _problem.numThreads());
 
       secondary_transformed_dofs = aldit.getDofIndices();
     }
@@ -300,7 +300,7 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.initialize();
+    convergence.preLoop();
   }
 
   _fixed_point_it = 0;
@@ -452,7 +452,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.preSolve();
+    convergence.preIteration();
   }
 
   // Keep track of the solution warnings from the TIMESTEP_BEGIN phase before:

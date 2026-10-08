@@ -55,7 +55,7 @@ MFEMComplexVariableValueSamplerBase::execute()
 }
 
 void
-MFEMComplexVariableValueSamplerBase::finalizeValues()
+MFEMComplexVariableValueSamplerBase::finalize()
 {
   _real_interp_vals.HostReadWrite();
   _imag_interp_vals.HostReadWrite();

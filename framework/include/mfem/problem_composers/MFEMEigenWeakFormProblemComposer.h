@@ -12,15 +12,17 @@
 #pragma once
 
 #include "MFEMEigenproblem.h"
-#include "MFEMProblemComposer.h"
+#include "MFEMWeakFormProblemComposerBase.h"
 
 /**
  * MFEMEigenWeakFormProblemComposer required to build an
  * instance of EigenproblemESProblemOperator
  */
-class MFEMEigenWeakFormProblemComposer : public MFEMProblemComposer
+class MFEMEigenWeakFormProblemComposer : public MFEMWeakFormProblemComposerBase
 {
 public:
+  static InputParameters validParams();
+
   MFEMEigenWeakFormProblemComposer(const InputParameters & parameters);
 
   /// Returns a pointer to a freshly minted problem operator.

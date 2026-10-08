@@ -15,15 +15,15 @@
 #include "VectorComponentFunctor.h"
 #include <unordered_map>
 #include <set>
-#include <unordered_set>
 
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
-class LinearFVPressureCorrectionDiffusion;
 class LinearFVGradientReader;
+class FVReconstructedPressureGradient;
+class LinearFVPressureCorrectionDiffusion;
 namespace libMesh
 {
 class Elem;
@@ -49,6 +49,52 @@ public:
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
   const LinearFVGradientReader & pressureGradientField() const;
 
+  /// Get the base pressure gradient field used to seed reconstructed gradient updates.
+  const LinearFVGradientReader & basePressureGradientField() const;
+
+  /// Get the base-pressure gradient component vectors used to seed reconstructed updates.
+  const std::vector<NumericVector<Number> *> & basePressureGradientComponents() const;
+
+  /// Get the momentum-layout H/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
+
+  /// Get the momentum-layout 1/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & AinvComponents() const;
+
+  /// Variable number of the pressure variable reconstructed by this object.
+  unsigned int pressureVariableNumber() const;
+
+  /// Number of spatial dimensions of the coupled momentum/pressure systems.
+  unsigned int dimension() const { return _dim; }
+
+  /// Velocity variable for one spatial component.
+  MooseLinearVariableFVReal & velocityVariable(unsigned int component) { return *_vel[component]; }
+
+  /// Velocity variable for one spatial component.
+  const MooseLinearVariableFVReal & velocityVariable(unsigned int component) const
+  {
+    return *_vel[component];
+  }
+
+  /// Momentum linear system for one spatial component.
+  LinearSystem & momentumSystem(unsigned int component) { return *_momentum_systems[component]; }
+
+  /// Momentum linear system for one spatial component.
+  const LinearSystem & momentumSystem(unsigned int component) const
+  {
+    return *_momentum_systems[component];
+  }
+
+  /// Pressure linear system.
+  const LinearSystem & pressureSystem() const { return *_pressure_system; }
+
+  /**
+   * Producer counter for the conservative face mass flux: incremented every time
+   * computeFaceMassFlux() runs. Used to verify reconstruction consumes the face flux produced by
+   * the current pressure corrector, not one left over from a preceding corrector.
+   */
+  dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
+
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -61,14 +107,49 @@ public:
   void initCouplingField();
   /// Update the values of the face velocities in the containers
   void computeFaceMassFlux();
-  /// Update the cell values of the velocity variables
-  void computeCellVelocity();
+
+  /// Whether the registered pressure gradient field is produced by the reconstructed method.
+  bool usingReconstructedPressureGradientMethod() const;
+
+  /// Snapshot the fields read by the next momentum predictor.
+  void prepareMomentumPredictor();
+
+  /// Capture the lagged velocity gradients computed while assembling the momentum predictor.
+  void finalizeMomentumPredictor();
+
+  /// Capture the lagged velocity gradient for another corrector using the current predictor.
+  void preparePISOCorrector();
+
+  /**
+   * Before pressure relaxation, form the conservative reconstructed candidate from the corrected
+   * face flux and update the cell velocity from that unrelaxed candidate. No-op for ordinary
+   * pressure-gradient methods.
+   */
+  void preparePressureRelaxation();
+
+  /**
+   * After pressure relaxation, refresh every registered pressure gradient and publish relaxed
+   * reconstructed feedback for the next momentum predictor. Ordinary methods also update the cell
+   * velocity here, preserving their existing relaxed-pressure behavior.
+   */
+  void finalizePressureCorrector();
+
+  /// Compute every registered pressure gradient once, before the first momentum predictor of a
+  /// SIMPLE iteration sequence has anything to read.
+  void initPressureGradient();
 
   virtual void meshChanged() override;
   virtual void initialize() override;
   virtual void execute() override {}
   virtual void finalize() override {}
   virtual void initialSetup() override;
+
+  /**
+   * Prepare reconstructed-gradient state once per attempted time step. Accepted coupling feedback
+   * is retained for the next time step and restored when an attempt is retried, while candidate
+   * fields and sequencing counters are reset for every attempt.
+   */
+  virtual void timestepSetup() override;
 
   /**
    * Update the momentum system-related information
@@ -85,15 +166,24 @@ public:
    * Computes the inverse of the diagonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation.
    */
-  void computeHbyA(const bool with_updated_pressure, const bool verbose);
+  void computeHbyA(const bool verbose);
 
 protected:
-  /// Select the right pressure gradient field and return a reference to the container
-  std::vector<std::unique_ptr<NumericVector<Number>>> &
-  selectPressureGradient(const bool updated_pressure);
+  /// Update cell velocity from the supplied momentum-coupling pressure gradient.
+  template <typename GradientComponent>
+  void updateCellVelocity(const std::vector<GradientComponent> & pressure_gradient);
 
   /// Get the registered pressure gradient component vectors.
   const std::vector<NumericVector<Number> *> & pressureGradientComponents() const;
+
+  /// Access the reconstructed gradient method when it is selected.
+  FVReconstructedPressureGradient & reconstructedGradientMethod();
+
+  /// Access the reconstructed gradient method when it is selected.
+  const FVReconstructedPressureGradient & reconstructedGradientMethod() const;
+
+  /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
+  void checkReconstructedPressureGradientCompatibility() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -123,8 +213,9 @@ protected:
   /// The thread 0 copy of the pressure variable
   const MooseLinearVariableFVReal * const _p;
 
-  /// The thread 0 copy of the x-velocity variable
-  std::vector<const MooseLinearVariableFVReal *> _vel;
+  /// Thread 0 copies of the velocity variables; non-const to allow writing
+  /// cell velocities in updateCellVelocity().
+  std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
   LinearFVPressureCorrectionDiffusion * _p_diffusion_kernel;
@@ -162,11 +253,16 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /**
-   * for a PISO iteration we need to hold on to the original pressure gradient field.
-   * Should not be used in other conditions.
-   */
+  /// Coupling pressure gradient captured before the current momentum predictor is assembled.
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
+
+  /**
+   * Producer counter for the conservative face mass flux: incremented every time
+   * computeFaceMassFlux() runs. Exposed read-only through faceMassFluxGeneration() so the
+   * reconstructed gradient can verify it is reconstructing from the face flux produced by the
+   * current pressure corrector, not one left over from a preceding corrector.
+   */
+  dof_id_type _face_mass_flux_generation = 0;
 
   /**
    * Functor describing the density of the fluid
@@ -190,6 +286,9 @@ protected:
 
   /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
   const LinearFVGradientReader * _pressure_gradient_field;
+
+  /// Base pressure gradient field used to seed reconstructed gradient updates.
+  const LinearFVGradientReader * _base_pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;

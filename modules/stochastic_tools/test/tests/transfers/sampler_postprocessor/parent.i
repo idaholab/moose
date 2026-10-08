@@ -40,7 +40,6 @@
     type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sobol
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -50,8 +49,6 @@
     to_multi_app = sub
     sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
-    execute_on = INITIAL
-    check_multiapp_execute_on = false
   []
   [data]
     type = SamplerPostprocessorTransfer
@@ -59,8 +56,6 @@
     sampler = sobol
     to_vector_postprocessor = storage
     from_postprocessor = avg
-    execute_on = TIMESTEP_BEGIN
-    check_multiapp_execute_on = false
   []
 []
 

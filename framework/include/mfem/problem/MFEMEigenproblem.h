@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMProblem.h"
+#include "EigenproblemEquationSystem.h"
 
 class MFEMEigenproblem : public MFEMProblem
 {
@@ -30,6 +31,21 @@ public:
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & parameters) override;
+
+  /**
+   * Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
+   */
+  Moose::MFEM::EigenRHSCoefficient getRHSCoefficient();
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm() override;
+
+  /**
+   * Add default problem composer if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer() override;
 };
 
 #endif

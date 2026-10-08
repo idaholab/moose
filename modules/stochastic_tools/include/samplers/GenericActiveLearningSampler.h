@@ -37,7 +37,7 @@ protected:
   /// Gather all the samples
   virtual void executeSetUp() override;
   /// Return the sample for the given row and column
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
@@ -52,12 +52,12 @@ protected:
   const std::vector<Real> & _initial_values;
 
   /// Vectors of new proposed samples
-  std::vector<std::vector<Real>> _new_samples;
+  std::vector<std::vector<Real>> & _new_samples;
 
 private:
   /// Number of samples to propose in each iteration (not all are sent for subApp evals)
   const unsigned int _num_tries;
 
   /// Storage for all the proposed samples
-  std::vector<std::vector<Real>> _inputs_all;
+  std::vector<std::vector<Real>> & _inputs_all;
 };

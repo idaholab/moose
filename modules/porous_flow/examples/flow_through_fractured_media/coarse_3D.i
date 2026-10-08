@@ -108,17 +108,15 @@
   []
 []
 
+[PorousFlowFullySaturated]
+  porepressure = pp
+  coupling_type = Hydro
+  mass_fraction_vars = tracer
+  fp = simple_fluid
+  stabilization = full
+[]
+
 [Kernels]
-  [mass0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    variable = pp
-  []
-  [adv0]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = pp
-  []
   [diff0]
     type = PorousFlowDispersiveFlux
     fluid_component = 0
@@ -126,31 +124,12 @@
     disp_trans = 0
     disp_long = 0
   []
-  [mass1]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    variable = tracer
-  []
-  [adv1]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = tracer
-  []
   [diff1]
     type = PorousFlowDispersiveFlux
     fluid_component = 1
     variable = tracer
     disp_trans = 0
     disp_long = 0
-  []
-[]
-
-[UserObjects]
-  [dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'pp tracer'
-    number_fluid_phases = 1
-    number_fluid_components = 2
   []
 []
 
@@ -165,22 +144,6 @@
 []
 
 [Materials]
-  [temperature]
-    type = PorousFlowTemperature
-  []
-  [ppss]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pp
-  []
-  [massfrac]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'tracer'
-  []
-  [simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-  []
   [poro1]
     type = PorousFlowPorosityConst
     porosity = 6e-4   # = a * phif
@@ -202,10 +165,6 @@
     diffusion_coeff = '1.e-9 1.e-9'
     tortuosity = 0.1
     block = 'matrix'
-  []
-  [relp]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
   []
   [permeability1]
     type = PorousFlowPermeabilityConst

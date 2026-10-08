@@ -41,6 +41,7 @@
     skip_keys = 'part number_of_parts'
 
     requirement = "The system shall support the ability to transfer integer, real, vector, and string reporter data."
+    min_slots = 2
   []
 
   [errors]

@@ -455,7 +455,7 @@ walls = ${rad_all}
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = left_0
-    functor = interface_temperature_solid_left_0
+    functor = interface_temperature_to_fluid_left_0
   []
   [solid_left_0]
     type = LinearFVRobinCHTBC
@@ -464,14 +464,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_0
-    surface_temperature = interface_temperature_fluid_left_0
+    surface_temperature = interface_temperature_to_solid_left_0
   []
 
   [fluid_left_1]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = left_1
-    functor = interface_temperature_solid_left_1
+    functor = interface_temperature_to_fluid_left_1
   []
   [solid_left_1]
     type = LinearFVRobinCHTBC
@@ -480,14 +480,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_1
-    surface_temperature = interface_temperature_fluid_left_1
+    surface_temperature = interface_temperature_to_solid_left_1
   []
 
   [fluid_left_2]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = left_2
-    functor = interface_temperature_solid_left_2
+    functor = interface_temperature_to_fluid_left_2
   []
   [solid_left_2]
     type = LinearFVRobinCHTBC
@@ -496,14 +496,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_2
-    surface_temperature = interface_temperature_fluid_left_2
+    surface_temperature = interface_temperature_to_solid_left_2
   []
 
   [fluid_left_3]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = left_3
-    functor = interface_temperature_solid_left_3
+    functor = interface_temperature_to_fluid_left_3
   []
   [solid_left_3]
     type = LinearFVRobinCHTBC
@@ -512,14 +512,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_3
-    surface_temperature = interface_temperature_fluid_left_3
+    surface_temperature = interface_temperature_to_solid_left_3
   []
 
   [fluid_left_4]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = left_4
-    functor = interface_temperature_solid_left_4
+    functor = interface_temperature_to_fluid_left_4
   []
   [solid_left_4]
     type = LinearFVRobinCHTBC
@@ -528,7 +528,7 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_left_4
-    surface_temperature = interface_temperature_fluid_left_4
+    surface_temperature = interface_temperature_to_solid_left_4
   []
 
   # ---- right slab / fluid interface ----------------------------------------
@@ -536,7 +536,7 @@ walls = ${rad_all}
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = right_0
-    functor = interface_temperature_solid_right_0
+    functor = interface_temperature_to_fluid_right_0
   []
   [solid_right_0]
     type = LinearFVRobinCHTBC
@@ -545,14 +545,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_0
-    surface_temperature = interface_temperature_fluid_right_0
+    surface_temperature = interface_temperature_to_solid_right_0
   []
 
   [fluid_right_1]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = right_1
-    functor = interface_temperature_solid_right_1
+    functor = interface_temperature_to_fluid_right_1
   []
   [solid_right_1]
     type = LinearFVRobinCHTBC
@@ -561,14 +561,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_1
-    surface_temperature = interface_temperature_fluid_right_1
+    surface_temperature = interface_temperature_to_solid_right_1
   []
 
   [fluid_right_2]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = right_2
-    functor = interface_temperature_solid_right_2
+    functor = interface_temperature_to_fluid_right_2
   []
   [solid_right_2]
     type = LinearFVRobinCHTBC
@@ -577,14 +577,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_2
-    surface_temperature = interface_temperature_fluid_right_2
+    surface_temperature = interface_temperature_to_solid_right_2
   []
 
   [fluid_right_3]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = right_3
-    functor = interface_temperature_solid_right_3
+    functor = interface_temperature_to_fluid_right_3
   []
   [solid_right_3]
     type = LinearFVRobinCHTBC
@@ -593,14 +593,14 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_3
-    surface_temperature = interface_temperature_fluid_right_3
+    surface_temperature = interface_temperature_to_solid_right_3
   []
 
   [fluid_right_4]
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = right_4
-    functor = interface_temperature_solid_right_4
+    functor = interface_temperature_to_fluid_right_4
   []
   [solid_right_4]
     type = LinearFVRobinCHTBC
@@ -609,7 +609,7 @@ walls = ${rad_all}
     h = 0
     thermal_conductivity = ${k_solid}
     incoming_flux = heat_flux_to_solid_right_4
-    surface_temperature = interface_temperature_fluid_right_4
+    surface_temperature = interface_temperature_to_solid_right_4
   []
 []
 

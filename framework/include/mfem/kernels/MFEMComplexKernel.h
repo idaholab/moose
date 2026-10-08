@@ -13,7 +13,7 @@
 
 #include "MFEMKernel.h"
 
-/*
+/**
 Class to construct an MFEM integrator to apply to the equation system.
 */
 class MFEMComplexKernel : public MFEMKernel

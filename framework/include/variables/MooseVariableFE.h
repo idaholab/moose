@@ -347,6 +347,16 @@ public:
   {
     return _element_data->adGradSln();
   }
+
+  /// Face-only AD solution getters; see MooseVariableData::adSlnFace()
+  const ADTemplateVariableValue<OutputType> & adSlnFace() const
+  {
+    return _element_data->adSlnFace();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
+  {
+    return _element_data->adGradSlnFace();
+  }
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
     return _element_data->adSecondSln();

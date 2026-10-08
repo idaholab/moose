@@ -27,9 +27,6 @@
 
 [Problem]
   nl_sys_names = 'u_sys v_sys'
-  # Each system holds a single block-restricted variable, so the per-system
-  # coverage check (which expects every mesh block covered) does not apply.
-  kernel_coverage_check = false
   # Guards against an interface kernel inserting into the wrong system's matrix:
   # the neighbor rows/columns live in a different system and are not part of the
   # current system's sparsity pattern.

@@ -35,7 +35,6 @@ MooseInit::initKokkos()
     settings.set_disable_warnings(true);
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
-
   unsigned int num_kokkos_gpus = Kokkos::num_devices();
 
   comm().min(num_kokkos_gpus);
@@ -53,7 +52,6 @@ MooseInit::initKokkos()
     // Override the default GPU ID
     settings.set_device_id(kokkos_gpu_id);
   }
-
 #endif
 
   // Set this environment variable if not set already to silence Kokkos warning

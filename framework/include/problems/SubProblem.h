@@ -88,6 +88,9 @@ public:
   virtual const MooseMesh & mesh() const = 0;
   virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
+
   /**
    * @returns whether there will be nonlocal coupling at any point in the simulation, e.g. whether
    * there are any active \emph or inactive nonlocal kernels or boundary conditions
@@ -840,12 +843,6 @@ public:
    * @return A boolean representing whether we are performing automatic scaling
    */
   bool automaticScaling() const;
-
-  /**
-   * Tells this problem that the assembly associated with the given nonlinear system number involves
-   * a scaling vector
-   */
-  void hasScalingVector(const unsigned int nl_sys_num);
 
   /**
    * Whether we have a displaced problem in our simulation

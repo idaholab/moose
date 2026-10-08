@@ -1,27 +1,39 @@
 [Tests]
+  issues = '#9537'
   [./brookscorey1]
     type = 'CSVDiff'
     input = 'brooks_corey1.i'
     csvdiff = 'brooks_corey1_out_vpp_0001.csv'
+    design = 'PorousFlowCapillaryPressureBC.md'
+    requirement = 'The system shall be able to compute the Brooks-Corey capillary pressure as a function of saturation, without the low-saturation logarithmic extension.'
   [../]
   [./brookscorey2]
     type = 'CSVDiff'
     input = 'brooks_corey2.i'
     csvdiff = 'brooks_corey2_out_vpp_0001.csv'
+    design = 'PorousFlowCapillaryPressureBC.md'
+    requirement = 'The system shall be able to compute the Brooks-Corey capillary pressure as a function of saturation, with the low-saturation logarithmic extension.'
   [../]
   [./vangenuchten1]
     type = 'CSVDiff'
     input = 'vangenuchten1.i'
     csvdiff = 'vangenuchten1_out_vpp_0001.csv'
+    design = 'PorousFlowCapillaryPressureVG.md'
+    requirement = 'The system shall be able to compute the van Genuchten capillary pressure as a function of saturation, without the low-saturation logarithmic extension.'
   [../]
   [./vangenuchten2]
     type = 'CSVDiff'
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
+    design = 'PorousFlowCapillaryPressureVG.md'
+    requirement = 'The system shall be able to compute the van Genuchten capillary pressure as a function of saturation, with the low-saturation logarithmic extension.'
   [../]
   [./vangenuchten3]
     type = 'CSVDiff'
     input = 'vangenuchten3.i'
     csvdiff = 'vangenuchten3_out_vpp_0001.csv'
+    issues = '#9537 #10181'
+    design = 'PorousFlowCapillaryPressureVG.md'
+    requirement = 'The system shall be able to compute the van Genuchten capillary pressure as a function of saturation using a saturation-scaling parameter that avoids a zero or infinite derivative at full saturation.'
   [../]
 []

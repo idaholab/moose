@@ -32,6 +32,8 @@ public:
     _s_superlu->SetOperator(*_a_superlu.get());
   }
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override { _s_superlu->Mult(x, y); }
+  /** Toggle device offloading for the wrapped SuperLU solver. */
+  void SetDeviceOffload(bool offload) { _s_superlu->SetDeviceOffload(offload); }
 
 private:
   std::unique_ptr<mfem::SuperLURowLocMatrix> _a_superlu{nullptr};

@@ -13,8 +13,8 @@
 
 #include "MFEMVariableValueSamplerBase.h"
 
-/*
- * MFEM Postprocessor which samples values at a set of points evenly
+/**
+ * Samples a real-valued MFEM variable at a set of points evenly
  * distributed along a line.
  */
 class MFEMVariableLineValueSampler : public MFEMVariableValueSamplerBase

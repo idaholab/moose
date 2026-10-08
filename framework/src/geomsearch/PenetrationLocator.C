@@ -56,8 +56,8 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
   // element
   // This is a time savings so that the thread objects don't do this themselves multiple times
-  _fe.resize(libMesh::n_threads());
-  for (unsigned int i = 0; i < libMesh::n_threads(); i++)
+  _fe.resize(_subproblem.numThreads());
+  for (unsigned int i = 0; i < _subproblem.numThreads(); i++)
   {
     unsigned int n_dims = _mesh.dimension();
     _fe[i].resize(n_dims + 1);
@@ -91,7 +91,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
 
 PenetrationLocator::~PenetrationLocator()
 {
-  for (unsigned int i = 0; i < libMesh::n_threads(); i++)
+  for (unsigned int i = 0; i < _subproblem.numThreads(); i++)
     for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
       delete _fe[i][dim];
 
@@ -128,7 +128,7 @@ PenetrationLocator::detectPenetration()
                        _nearest_node,
                        _mesh.nodeToElemMap());
 
-  Threads::parallel_reduce(secondary_node_range, pt);
+  Threads::parallel_reduce(secondary_node_range, pt, _subproblem.numThreads());
 
   std::vector<dof_id_type> recheck_secondary_nodes = pt._recheck_secondary_nodes;
 
@@ -145,24 +145,8 @@ PenetrationLocator::detectPenetration()
     NodeIdRange recheck_secondary_node_range(
         recheck_secondary_nodes.begin(), recheck_secondary_nodes.end(), 1);
 
-    Threads::parallel_reduce(recheck_secondary_node_range, pt);
+    Threads::parallel_reduce(recheck_secondary_node_range, pt, _subproblem.numThreads());
   }
-
-  if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
-    mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
-                             "detected for one or more secondary nodes. This could be because "
-                             "those secondary nodes simply do not project to faces on the primary "
-                             "surface. However, this could also be because contact should be "
-                             "enforced on those nodes, but the faces that they project to "
-                             "are outside the contact patch, which will give an erroneous "
-                             "result. Use appropriate options for 'patch_size' and "
-                             "'patch_update_strategy' in the Mesh block to avoid this issue. "
-                             "Setting 'patch_update_strategy=iteration' is recommended because "
-                             "it completely avoids this potential issue. Also note that this "
-                             "warning is printed only once, so a similar situation could occur "
-                             "multiple times during the simulation but this warning is printed "
-                             "only at the first occurrence."));
 }
 
 void

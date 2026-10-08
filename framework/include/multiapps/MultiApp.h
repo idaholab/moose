@@ -74,6 +74,30 @@ struct LocalRankConfig
   processor_id_type my_first_rank;
 };
 
+template <>
+inline void
+dataStore(std::ostream & stream, LocalRankConfig & v, void * context)
+{
+  dataStore(stream, v.num_local_sims, context);
+  dataStore(stream, v.first_local_sim_index, context);
+  dataStore(stream, v.num_local_apps, context);
+  dataStore(stream, v.first_local_app_index, context);
+  dataStore(stream, v.is_first_local_rank, context);
+  dataStore(stream, v.my_first_rank, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, LocalRankConfig & v, void * context)
+{
+  dataLoad(stream, v.num_local_sims, context);
+  dataLoad(stream, v.first_local_sim_index, context);
+  dataLoad(stream, v.num_local_apps, context);
+  dataLoad(stream, v.first_local_app_index, context);
+  dataLoad(stream, v.is_first_local_rank, context);
+  dataLoad(stream, v.my_first_rank, context);
+}
+
 /// Returns app partitioning information relevant to the given rank for a
 /// multiapp scenario with the given number of apps (napps) and parallel/mpi
 /// procs (nprocs).  min_app_procs and max_app_procs define the min and max

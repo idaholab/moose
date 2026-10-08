@@ -109,9 +109,6 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
 class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
-  /// Get the device accelerated computations are supposed to be running on.
-  std::optional<MooseEnum> getComputeDevice() const;
-
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
@@ -415,6 +412,13 @@ public:
    * Returns the MPI processor ID of the current processor.
    */
   processor_id_type processor_id() const { return _comm->rank(); }
+
+  /**
+   * Returns the number of threads this application uses.
+   * This is set by the [Application] num_threads value, or the process-wide count,
+   * which is set by the command line --n-threads, when unset
+   */
+  THREAD_ID numThreads() const { return _num_threads; }
 
   /**
    * Get the command line
@@ -1121,22 +1125,12 @@ public:
 
 #ifdef MOOSE_MFEM_ENABLED
   /**
-   * Create/configure the MFEM device with the provided \p device_string. More than one device can
-   * be configured. If supplying multiple devices, they should be comma separated
+   * Create/configure the MFEM device. If the application-level \p compute_device parameter was
+   * explicitly set, it takes precedence over \p executioner_device; otherwise,
+   * \p executioner_device is used. More than one device can be configured. If supplying multiple
+   * devices, they should be comma separated.
    */
-  void setMFEMDevice(const std::string & device_string,
-                     bool gpu_aware_mpi,
-                     Moose::PassKey<MFEMProblemSolve>);
-
-  /**
-   * Get the MFEM device object
-   */
-  std::shared_ptr<mfem::Device> getMFEMDevice(Moose::PassKey<MultiApp>) { return _mfem_device; }
-
-  /**
-   * Get the configured MFEM devices
-   */
-  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
+  void setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi);
 #endif
 
   /**
@@ -1342,6 +1336,9 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
+  /// The number of threads this application uses
+  THREAD_ID _num_threads;
+
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
 
@@ -1475,6 +1472,20 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * @return the raw num_threads value requested in the [Application] input block, read directly
+   * from the parser (the block is not applied to the app's InputParameters), or std::nullopt if
+   * unset. May be out of range; determineNumThreads() clamps it.
+   */
+  std::optional<THREAD_ID> requestedNumThreads() const;
+
+  /**
+   * Determines the number of threads this application should use from the [Application] block's
+   * num_threads parameter. Used to initialize _num_threads. An over-request is warned about
+   * in setupOptions(). See numThreads().
+   */
+  THREAD_ID determineNumThreads() const;
+
   /**
    * Internal function used to recursively create the executor objects.
    *
@@ -1743,14 +1754,6 @@ private:
   const torch::DeviceType _libtorch_device;
 #endif
 
-#ifdef MOOSE_MFEM_ENABLED
-  /// The MFEM Device object
-  std::shared_ptr<mfem::Device> _mfem_device;
-
-  /// MFEM supported devices based on user-provided config
-  std::set<std::string> _mfem_devices;
-#endif
-
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
@@ -1808,11 +1811,3 @@ MooseApp::getInterfaceObjects() const
   const static std::vector<T *> empty;
   return empty;
 }
-
-#ifdef MOOSE_MFEM_ENABLED
-inline const std::set<std::string> &
-MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
-{
-  return _mfem_devices;
-}
-#endif

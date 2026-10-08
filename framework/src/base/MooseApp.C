@@ -403,7 +403,10 @@ MooseApp::validParams()
       "console");
 
   params.addCommandLineParam<unsigned int>(
-      "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
+      "n_threads",
+      "--n-threads=<n>",
+      "Sets the numbers of threads if Application/num_threads is not passed. Else, specifies the "
+      "maximum number of threads and sets the OpenMP number of threads");
   // This probably shouldn't be global, but the implications of removing this are currently
   // unknown and we need to manage it with libmesh better
   params.setGlobalCommandLineParam("n_threads");
@@ -415,11 +418,6 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "error_unused", "-e --error-unused", "Error when encountering unused input file options");
   params.setGlobalCommandLineParam("error_unused");
-  params.addCommandLineParam<bool>(
-      "error_override",
-      "-o --error-override",
-      "Error when encountering overridden or parameters supplied multiple times");
-  params.setGlobalCommandLineParam("error_override");
   params.addCommandLineParam<bool>(
       "error_deprecated", "--error-deprecated", "Turn deprecated code messages into Errors");
   params.setGlobalCommandLineParam("error_deprecated");
@@ -589,10 +587,6 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
-#ifdef MOOSE_MFEM_ENABLED
-  params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
-  params.addPrivateParam<std::set<std::string>>("_mfem_devices");
-#endif
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -623,6 +617,30 @@ MooseApp::validParams()
   return params;
 }
 
+std::optional<THREAD_ID>
+MooseApp::requestedNumThreads() const
+{
+  // Read straight from the parsed input tree: the [Application] block is not applied to the app's
+  // InputParameters, and this runs at construction, well before the create_application_block task.
+  const hit::Node * const root = _parser ? _parser->queryRoot() : nullptr;
+  if (!root)
+    return std::nullopt;
+  const hit::Node * const node = root->find("Application/num_threads");
+  if (!node || node->type() != hit::NodeType::Field)
+    return std::nullopt;
+  return node->param<THREAD_ID>();
+}
+
+THREAD_ID
+MooseApp::determineNumThreads() const
+{
+  const THREAD_ID max_threads = libMesh::n_threads();
+  // A per-application count can only cap down from the process-wide count (the thread pool is
+  // sized once at launch), and a request of zero (or less) is meaningless, so treat it as a single
+  // thread. An over-request is warned about later during setup, where the console is available.
+  return std::clamp(requestedNumThreads().value_or(max_threads), THREAD_ID(1), max_threads);
+}
+
 MooseApp::MooseApp(const InputParameters & parameters)
   : PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
@@ -640,14 +658,18 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
+    // Sized to the process-wide thread count (not the app cap): this is constructed before _parser,
+    // so the [Application] num_threads is not yet available, and app-level per-thread storage is
+    // always safe at the larger size.
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>(libMesh::n_threads())),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
-    _restartable_data(libMesh::n_threads()),
+    _num_threads(determineNumThreads()),
+    _restartable_data(_num_threads),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
@@ -696,14 +718,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #ifdef MOOSE_LIBTORCH_ENABLED
     ,
     _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("compute_device")))
-#endif
-#ifdef MOOSE_MFEM_ENABLED
-    ,
-    _mfem_device(isParamValid("_mfem_device")
-                     ? getParam<std::shared_ptr<mfem::Device>>("_mfem_device")
-                     : nullptr),
-    _mfem_devices(isParamValid("_mfem_devices") ? getParam<std::set<std::string>>("_mfem_devices")
-                                                : std::set<std::string>{})
 #endif
 {
   if (&parameters != &_pars)
@@ -924,17 +938,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
 
-#ifdef MOOSE_MFEM_ENABLED
-  if (_mfem_device)
-  {
-    mooseAssert(!isUltimateMaster(),
-                "The MFEM device should only be auto-set for sub-applications");
-    mooseAssert(!_mfem_devices.empty(),
-                "If we are a sub-application and we have an MFEM device object, then we must know "
-                "its configuration string");
-  }
-#endif
-
   // Data specifically associated with the mesh (meta-data) that will read from the restart
   // file early during the simulation setup so that they are available to Actions and other objects
   // that need them during the setup process. Most of the restartable data isn't made available
@@ -958,14 +961,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   queryKokkosGPUs();
 #endif
 #endif
-}
-
-std::optional<MooseEnum>
-MooseApp::getComputeDevice() const
-{
-  if (isParamSetByUser("compute_device"))
-    return getParam<MooseEnum>("compute_device");
-  return {};
 }
 
 MooseApp::~MooseApp()
@@ -1040,9 +1035,6 @@ MooseApp::setupOptions()
   else if (getParam<bool>("allow_unused"))
     setCheckUnusedFlag(false);
 
-  if (getParam<bool>("error_override"))
-    setErrorOverridden();
-
   if (getParam<bool>("trap_fpe"))
   {
     _trap_fpe = true;
@@ -1101,6 +1093,18 @@ MooseApp::setupOptions()
   if (libMesh::command_line_value("--n-threads", 1) > 1)
     mooseError("You specified --n-threads > 1, but there is no threading model active!");
 #endif
+
+  // A per-application num_threads can only cap down from the process-wide --n-threads count; warn
+  // (and cap, see determineNumThreads()) if the user asked for more than the process was launched
+  // with.
+  if (requestedNumThreads().value_or(0) > libMesh::n_threads())
+    mooseWarning("[Application] num_threads=",
+                 *requestedNumThreads(),
+                 " exceeds the process-wide thread count (--n-threads=",
+                 libMesh::n_threads(),
+                 "); this application is capped to ",
+                 libMesh::n_threads(),
+                 " threads.");
 
   // Capability checking
   {
@@ -3627,27 +3631,33 @@ MooseApp::isInTree()
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string,
-                        bool gpu_aware_mpi,
-                        Moose::PassKey<MFEMProblemSolve>)
+MooseApp::setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi)
 {
-  const auto string_vec = MooseUtils::split(device_string, ",");
-  auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
-  if (!_mfem_device)
+  // Static for lifetime purposes only, otherwise unneeded
+  static mfem::Device device;
+  // Static so multiapps can error when configured with a different device, otherwise unneeded
+  static std::string configured_device;
+
+  std::string selected_device;
+  if (isParamSetByUser("compute_device"))
+    selected_device = static_cast<std::string>(getParam<MooseEnum>("compute_device"));
+  else if (!executioner_device.empty())
+    selected_device = executioner_device;
+  else if (!mfem::Device::IsConfigured())
+    selected_device = "cpu";
+
+  if (!mfem::Device::IsConfigured())
   {
-    _mfem_device = std::make_shared<mfem::Device>(device_string);
-    _mfem_devices = std::move(string_set);
-    _mfem_device->SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
-    _mfem_device->Print(Moose::out);
+    device.Configure(selected_device);
+    device.SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
+    device.Print(Moose::out);
+    configured_device = selected_device;
   }
-  else if (!device_string.empty() && string_set != _mfem_devices)
-    mooseError("Attempted to configure with "
-               "MFEM devices '",
-               MooseUtils::join(string_set, " "),
-               "', but we have already "
-               "configured the MFEM device "
-               "object with the devices '",
-               MooseUtils::join(_mfem_devices, " "),
+  else if (!selected_device.empty() && selected_device != configured_device)
+    mooseError("Attempted to configure with MFEM devices '",
+               selected_device,
+               "', but we have already configured the MFEM device object with the devices '",
+               configured_device,
                "'");
 }
 #endif

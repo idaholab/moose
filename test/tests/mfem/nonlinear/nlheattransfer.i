@@ -110,7 +110,6 @@
     start_point = '0.0 0.5 0.5'
     end_point = '1.0 0.5 0.5'
     num_points = 3
-    execute_on = TIMESTEP_END
   []
 []
 

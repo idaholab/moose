@@ -84,9 +84,9 @@ DefaultMultiAppFixedPointConvergence::checkIterationType(IterationType it_type) 
 }
 
 void
-DefaultMultiAppFixedPointConvergence::initialize()
+DefaultMultiAppFixedPointConvergence::preLoop()
 {
-  DefaultConvergenceBase::initialize();
+  DefaultConvergenceBase::preLoop();
 
   _fixed_point_timestep_begin_norm.clear();
   _fixed_point_timestep_end_norm.clear();
@@ -109,9 +109,9 @@ DefaultMultiAppFixedPointConvergence::initialize()
 }
 
 void
-DefaultMultiAppFixedPointConvergence::preSolve()
+DefaultMultiAppFixedPointConvergence::preIteration()
 {
-  DefaultConvergenceBase::preSolve();
+  DefaultConvergenceBase::preIteration();
 
   // compute TIMESTEP_BEGIN residual norm; this should be executed after TIMESTEP_BEGIN
   // but before the solve

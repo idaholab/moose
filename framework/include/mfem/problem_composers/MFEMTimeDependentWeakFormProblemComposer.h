@@ -11,15 +11,17 @@
 
 #pragma once
 
-#include "MFEMProblemComposer.h"
+#include "MFEMWeakFormProblemComposerBase.h"
 
 /**
  * MFEMTimeDependentWeakFormProblemComposer required to build an instance
  * of TimeDependentEquationSystemProblemOperator
  */
-class MFEMTimeDependentWeakFormProblemComposer : public MFEMProblemComposer
+class MFEMTimeDependentWeakFormProblemComposer : public MFEMWeakFormProblemComposerBase
 {
 public:
+  static InputParameters validParams();
+
   MFEMTimeDependentWeakFormProblemComposer(const InputParameters & parameters);
 
   /// Returns a pointer to a freshly minted problem operator.

@@ -104,6 +104,9 @@ public:
   FEProblemBase & feProblem() { return _fe_problem; }
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
+
   /**
    * Applies scaling factors to the system's variables
    * @param inverse_scaling_factors A vector containing the inverse of each variable's scaling
@@ -916,11 +919,6 @@ public:
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
-
-  /**
-   * Add the scaling factor vector to the system
-   */
-  void addScalingVector();
 
   /**
    * Whether or not the solution states have been initialized via initSolutionState()

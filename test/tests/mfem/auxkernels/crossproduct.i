@@ -78,7 +78,6 @@
     variable = lorentz_force
     first_source_vec = e_field
     second_source_vec = b_field
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -94,7 +93,6 @@
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101
-    execute_on = 'final'
   []
   [line_sample_b_field]
     type = MFEMVariableLineValueSampler
@@ -102,7 +100,6 @@
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101
-    execute_on = 'final'
   []
   [line_sample_lorentz_force]
     type = MFEMVariableLineValueSampler
@@ -110,14 +107,12 @@
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101
-    execute_on = 'final'
   []
 []
 
 [Outputs]
   [CSV]
     type = CSV
-    execute_on = 'final'
     file_base = OutputData/CrossProduct/crossproduct
   []
 []
