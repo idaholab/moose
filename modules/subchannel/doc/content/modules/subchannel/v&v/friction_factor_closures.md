@@ -27,7 +27,7 @@ The geometry is the PSBT assembly, with pitch $P = 12.6$ mm, pin diameter $D = 9
 
 ### Triangular lattice, bare pins
 
-The geometry is the 19-pin LBE assembly, with $P = 11.48$ mm, $D = 8.2$ mm, and duct flat-to-flat distance $53.2$ mm. Only UCTD is shown. `friction_model = Pacio` uses the same bare-pin coefficients but changes the transition Reynolds numbers and the interpolation between the laminar and turbulent regimes.
+The geometry is the 19-pin LBE assembly, with $P = 11.48$ mm, $D = 8.2$ mm, and duct flat-to-flat distance $53.2$ mm. Only UCTD is shown, since PCTD applies only to wire-wrapped pins.
 
 As for the wire-wrapped pins below, the SCM friction factors are compared with the UCTD implementation of the DASSH subchannel code [!cite](atz2021ducted). The script `dassh_XX09_SS17.py` evaluates the DASSH subchannel friction factors for the same geometry with the DASSH flow split and transition interpolation, over the bundle Reynolds number range of the SCM sweep. The right side of [scm-friction-tri-bare] gives the relative difference between the SCM and DASSH UCTD friction factors at the local Reynolds numbers of the SCM sweep. As for the wire-wrapped pins, SCM UCTD and DASSH UCTD agree exactly in the laminar and turbulent regimes and within 0.7% in the transition regime, and the difference comes from the intermittency factor: with the bulk intermittency factor of SCM, the DASSH friction factors agree with SCM within 0.15%. The largest difference is in the corner subchannel, whose laminar flow split of 0.49 is much lower than its turbulent flow split of 0.77, so the DASSH transition bounds of the corner subchannel are the furthest from those of SCM. [tab-friction-tri-bare] gives the friction factors at the local subchannel Reynolds numbers of [tab-friction-tri-wire].
 
@@ -46,6 +46,14 @@ As for the wire-wrapped pins below, the SCM friction factors are compared with t
 | edge | DASSH UCTD | 0.9906 | 0.0544 | 0.0313 |
 | corner | SCM UCTD | 0.9396 | 0.0518 | 0.0289 |
 | corner | DASSH UCTD | 0.9396 | 0.0515 | 0.0288 |
+
+`tri_bare_flow_split.i` gives the developed flow split of the same assembly as `tri_wire_flow_split.i` below gives for the wire-wrapped pins, at a bulk mass flux of 1275 kg/m$^2$-s and the same bulk Reynolds number of $3.3 \times 10^4$. This bulk Reynolds number is above the transition-turbulent boundary of $1.9 \times 10^4$ of this geometry, so the flow split is the turbulent UCTD flow split. [tab-flow-split-tri-bare] shows that the SCM UCTD flow split agrees with the DASSH UCTD flow split to four digits in the interior and edge subchannels and within 0.04% in the corner subchannel.
+
+!table id=tab-flow-split-tri-bare caption=Developed flow split of bare pins in a triangular lattice, at the outlet of the 3 m assembly and a bulk Reynolds number of $3.3 \times 10^4$.
+| Flow split | Interior | Edge | Corner |
+| :- | -: | -: | -: |
+| SCM UCTD | 1.0528 | 0.9757 | 0.7673 |
+| DASSH UCTD | 1.0528 | 0.9757 | 0.7676 |
 
 ### Triangular lattice, wire-wrapped pins
 
@@ -144,6 +152,10 @@ Triangular lattice, bare pins:
 Triangular lattice, wire-wrapped pins:
 
 !listing /verification/friction_model_verification/friction_model/tri_wire.i language=moose
+
+Triangular lattice, bare pins, developed flow split in steady state:
+
+!listing /verification/friction_model_verification/friction_model/tri_bare_flow_split.i language=moose
 
 Triangular lattice, wire-wrapped pins, developed flow split in steady state:
 
