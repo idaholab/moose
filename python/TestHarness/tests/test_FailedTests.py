@@ -52,7 +52,8 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Tests that previously failing tests that pass with --failed-tests are
         updated in the previous results and not ran by the next --failed-tests,
-        that all other previous results are kept unchanged, and that
+        that all other previous results are kept unchanged, that the last set of
+        failing tests is kept once they all pass, and that
         --failed-tests-no-update leaves the previous results unchanged.
         """
         with tempfile.TemporaryDirectory() as output_dir:
@@ -110,18 +111,14 @@ class TestHarnessTester(TestHarnessTestCase):
             del original_results["tests"]["test"]["spec_file"]
             self.assertEqual(results, original_results)
 
-            # Only a is ran again, and it now passes
+            # Only a is ran again, and it now passes; as no failing tests would
+            # remain, the previous results are unchanged
             os.remove(markers["a"])
-            out = self.runTests(*args, "--failed-tests", **kwargs).output
-            self.assertRegex(out, r"test\.a.*?OK")
-            self.assertNotRegex(out, r"test\.[bc]")
-            entries = load_results()["tests"]["test"]["tests"]
-            self.assertEqual(sorted(entries), ["a", "b", "c"])
-            self.assertEqual(entries["a"]["status"]["status"], "OK")
-            self.assertEqual(
-                entries["c"], original_results["tests"]["test"]["tests"]["c"]
-            )
-
-            # Nothing left to run
-            out = self.runTests(*args, "--failed-tests", **kwargs).output
-            self.assertNotRegex(out, r"test\.[abc]")
+            with open(results_file, "r") as f:
+                previous_results = f.read()
+            for _ in range(2):
+                out = self.runTests(*args, "--failed-tests", **kwargs).output
+                self.assertRegex(out, r"test\.a.*?OK")
+                self.assertNotRegex(out, r"test\.[bc]")
+                with open(results_file, "r") as f:
+                    self.assertEqual(f.read(), previous_results)

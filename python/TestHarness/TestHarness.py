@@ -1177,18 +1177,26 @@ class TestHarness:
                 # pass so that the next --failed-tests run is a smaller subset.
                 # Everything else in the previous results, including the stats
                 # of the original run, is kept.
-                updated = False
-                for job_group in all_jobs:
-                    for job in job_group:
-                        previous_status = job.previousTesterStatus()[0]
-                        if (
-                            job.isPass()
-                            and previous_status in job.job_status.getFailingStatuses()
-                        ):
-                            job.storeResults(self.scheduler)
-                            updated = True
-                if updated:
-                    storage = self.options.results_storage
+                fixed_jobs = [
+                    job
+                    for job_group in all_jobs
+                    for job in job_group
+                    if job.isPass()
+                    and job.previousTesterStatus()[0]
+                    in job.job_status.getFailingStatuses()
+                ]
+                storage = self.options.results_storage
+                num_failing = sum(
+                    test["status"]["fail"]
+                    for test_dir in storage["tests"].values()
+                    for test in test_dir["tests"].values()
+                )
+                # When every previously failing test now passes, keep the last
+                # set of failing tests so that the next --failed-tests run
+                # re-runs it instead of running nothing
+                if fixed_jobs and len(fixed_jobs) < num_failing:
+                    for job in fixed_jobs:
+                        job.storeResults(self.scheduler)
                     self.writeResults(stats=storage.get("stats"))
 
     def determineScheduler(self):
@@ -1457,7 +1465,7 @@ class TestHarness:
             "--failed-tests",
             action="store_true",
             help="Run tests that previously failed; tests that now pass are"
-            " marked as passing in the previous results",
+            " marked as passing in the previous results unless all of them pass",
         )
         parser.add_argument(
             "--failed-tests-no-update",

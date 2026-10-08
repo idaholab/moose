@@ -36,7 +36,8 @@ To see more options for `run_tests` you can invoke it with `-h`.  There are many
 through, but some of the important ones are:
 
 - `--failed-tests`: Runs the tests that just failed.  Tests that now pass are removed from the
-  set of failed tests, so each subsequent use runs only the tests that still fail.
+  set of failed tests, so each subsequent use runs only the tests that still fail.  Once all of
+  them pass, the last set of failed tests is kept.
 - `--failed-tests-no-update`: Same as `--failed-tests`, but the set of failed tests does not
   change, which is useful for checking that fixed tests keep passing.
 - `--n-threads <n>`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
