@@ -3665,7 +3665,7 @@ MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const
 bool
 MooseMesh::isSurfaceElemOnNodeset(const Elem & elem, const BoundaryID bnd_id) const
 {
-  if (elem.dim() == 0 || elem.dim() + 1 != dimension() || elem.interior_parent() ||
+  if (elem.dim() == 0 || elem.dim() + 1u != dimension() || elem.interior_parent() ||
       _mesh_sideset_ids.count(bnd_id))
     return false;
   const auto & binfo = getMesh().get_boundary_info();

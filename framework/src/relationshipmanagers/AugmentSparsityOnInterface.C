@@ -312,7 +312,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
           if (ip->on_boundary())
             coupled_elements.insert(std::make_pair(elem, _null_mat));
         }
-        else if (elem->dim() + 1 == _mesh->mesh_dimension())
+        else if (elem->dim() + 1u == _mesh->mesh_dimension())
           coupled_elements.insert(std::make_pair(elem, _null_mat));
       }
       else
