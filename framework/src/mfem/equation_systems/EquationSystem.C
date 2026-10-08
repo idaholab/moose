@@ -33,7 +33,17 @@ EquationSystem::DeleteHBlocks()
         _jacobian_blocks(i, j) = nullptr;
       delete _h_blocks(i, j);
     }
+
+  for (const auto i : make_range(_h_blocks_pa.NumRows()))
+    for (const auto j : make_range(_h_blocks_pa.NumCols()))
+    {
+      if (_jacobian_blocks_pa.NumRows() && _jacobian_blocks_pa(i, j) == _h_blocks_pa(i, j))
+        _jacobian_blocks_pa(i, j) = nullptr;
+      delete _h_blocks_pa(i, j);
+    }
+
   _h_blocks.DeleteAll();
+  _h_blocks_pa.DeleteAll();
 }
 
 void
@@ -43,7 +53,14 @@ EquationSystem::DeleteJacobianBlocks()
     for (const auto j : make_range(_jacobian_blocks.NumCols()))
       if (!_h_blocks.NumRows() || _jacobian_blocks(i, j) != _h_blocks(i, j))
         delete _jacobian_blocks(i, j);
+
+  for (const auto i : make_range(_jacobian_blocks_pa.NumRows()))
+    for (const auto j : make_range(_jacobian_blocks_pa.NumCols()))
+      if (!_h_blocks_pa.NumRows() || _jacobian_blocks_pa(i, j) != _h_blocks_pa(i, j))
+        delete _jacobian_blocks_pa(i, j);
+
   _jacobian_blocks.DeleteAll();
+  _jacobian_blocks_pa.DeleteAll();
 }
 
 bool
@@ -274,29 +291,68 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                    mfem::BlockVector & trueX,
                                    mfem::BlockVector & trueRHS)
 {
-  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
-              "Non-legacy assembly is only supported for single test and trial variable systems");
+  // Allocate block operator
+  DeleteHBlocks();
+  _h_blocks_pa.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _h_blocks_pa = nullptr;
+  // Zero out RHS and sync memory
+  trueRHS = 0.0;
+  trueRHS.SyncToBlocks();
 
-  auto & test_var_name = _test_var_names.at(0);
-  mfem::Vector aux_x, aux_rhs;
-  mfem::OperatorPtr aux_a;
+  auto * const block_op = new mfem::BlockOperator(_block_true_offsets);
 
-  auto blf = _blfs.Get(test_var_name);
-  blf->FormLinearSystem(_ess_tdof_lists.at(0),
-                        *_var_ess_constraints.at(0),
-                        *_lfs.Get(test_var_name),
-                        aux_a,
-                        aux_x,
-                        aux_rhs,
-                        /*copy_interior=*/true);
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (const auto j : index_range(_trial_var_names))
+    {
+      auto trial_var_name = _trial_var_names.at(j);
 
-  trueX.GetBlock(0) = aux_x;
-  trueRHS.GetBlock(0) = aux_rhs;
+      mfem::Vector aux_x, aux_rhs;
+      mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
+      mfem::OperatorPtr aux_a;
+
+      if (test_var_name == trial_var_name)
+      {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+
+        auto blf = _blfs.Get(test_var_name);
+        blf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *_var_ess_constraints.at(j),
+                              *_lfs.Get(test_var_name),
+                              aux_a,
+                              aux_x,
+                              aux_rhs,
+                              /*copy_interior=*/true);
+        trueX.GetBlock(j) = aux_x;
+      }
+      else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
+                                          _ess_tdof_lists.at(i),
+                                          *_var_ess_constraints.at(j),
+                                          aux_lf = 0.,
+                                          aux_a,
+                                          aux_x,
+                                          aux_rhs);
+      }
+      else
+        continue;
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks_pa(i, j) = aux_a.Ptr();
+      aux_a.SetOperatorOwner(false);
+
+      // add to block operator.
+      if (_h_blocks_pa(i, j))
+        block_op->SetBlock(i, j, _h_blocks_pa(i, j));
+    }
+  }
+
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
 
-  op.Reset(aux_a.Ptr());
-  aux_a.SetOperatorOwner(false);
+  op.Reset(block_op);
 }
 
 void
@@ -485,7 +541,7 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   if (IsNonlinear())
   {
     if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
-      FormJacobianOperator(u);
+      const_cast<EquationSystem *>(this)->FormJacobianOperator(u);
     else if (_assembly_level == mfem::AssemblyLevel::LEGACY)
       const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
     else
