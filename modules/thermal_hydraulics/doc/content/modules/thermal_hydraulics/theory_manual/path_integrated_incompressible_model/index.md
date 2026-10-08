@@ -126,9 +126,9 @@ where
 - $P_{i,w}$ is the perimeter of the inner surface of the cross-section, and
 - $P_{o,w}$ is the perimeter of the outer surface of the cross-section.
 
-This equation is discretized on a per-segment basis to match what is done in [!eqref](#discretized_energy). Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
+This equation is discretized on a per-segment basis to match what is done in [!eqref](discretized_energy). Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
 
-!media thermal_hydraulics/tikz_diagrams/piipe_cross_section.png
+!media thermal_hydraulics/tikz_diagrams/pipe_cross_section.png
        id=fig:pipe_CHT_discretization
        caption=Conjugate heat transfer illustration for a simple pipe.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;text-align:center;
@@ -167,7 +167,7 @@ where
 
 Similarly, the discretized energy equation for the outer wall temperature is:
 
-! equation id=discretized_outer_pipe_temperature
+!equation id=discretized_outer_pipe_temperature
 A_{o,w} \rho_w c_{p,w} \pd{T_{o,w}}{t} = \frac{k_w P_{m,w} \left( T_{i,w} - T_{o,w} \right)}{\delta} +
 \frac{G_{o,u} \left( T_{o,u} - T_{o,w} \right) + G_{o,d} \left( T_{o,d} - T_{o,w} \right)}{L} + q_o^{'}
 
