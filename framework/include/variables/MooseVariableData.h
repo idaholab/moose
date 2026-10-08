@@ -303,6 +303,7 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u = true;
+    // Coupled AD gradients reach face objects, e.g. boundary materials, through this accessor
     needADGradPhiFace();
     return _ad_grad_u;
   }
