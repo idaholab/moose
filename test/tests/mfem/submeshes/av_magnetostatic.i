@@ -13,8 +13,8 @@
 [SubMeshes]
   inactive = 'fluxcut'
   [fluxcut]
-    type = MFEMCutTransitionSubMesh
-    cut_boundary = 'MeasurementPlane'
+    type = MFEMTransitionSubMesh
+    boundary = 'MeasurementPlane'
     block = 'TorusCore TorusSheath'
     transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr

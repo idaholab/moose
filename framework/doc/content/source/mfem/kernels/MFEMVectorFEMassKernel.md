@@ -10,6 +10,8 @@ Adds the domain integrator for integrating the bilinear form
 (k \vec u, \vec v)_\Omega \,\,\, \forall \vec v \in V
 
 where $\vec u, \vec v \in H(\mathrm{curl})$ or $H(\mathrm{div})$, and $k$ is a scalar coefficient.
+`matrix_coefficient` may be given in place of `coefficient` to use a matrix $k$, as for the
+perfectly matched layer coefficient of [MFEMPerfectlyMatchedLayerFunction.md].
 
 This term arises from the weak form of the mass operator
 
