@@ -23,7 +23,8 @@ python dassh_XX09_SS17.py
 Five figures are written next to this script:
 
 1. scm_friction_quad_bare.png: MATRA and Chen-Todreas, bare pins in a square lattice.
-2. scm_friction_tri_bare.png: Upgraded Chen-Todreas, bare pins in a triangular lattice.
+2. scm_friction_tri_bare.png: Upgraded Chen-Todreas in SCM and DASSH, bare pins in a triangular
+   lattice, next to the relative difference between the SCM and DASSH friction factors.
 3. scm_friction_tri_wire.png: Upgraded and Pacio Chen-Todreas in SCM and Upgraded Chen-Todreas in
    DASSH, wire-wrapped pins in a triangular lattice, next to the relative difference between the
    SCM and DASSH Upgraded Chen-Todreas friction factors.
@@ -97,10 +98,6 @@ plot_channels(ax, "quad_bare_out.csv", "black", "MATRA", channels=("center",))
 plot_channels(ax, "quad_bare_chen_out.csv", "red", "Chen-Todreas")
 save(fig, ax, "scm_friction_quad_bare.png")
 
-fig, ax = new_axes("Triangular lattice, bare pins")
-plot_channels(ax, "tri_bare_out.csv", "black", "UCTD")
-save(fig, ax, "scm_friction_tri_bare.png")
-
 
 def interpolate_ff(csv, channel, Re):
     """Friction factor of a subchannel at the local Reynolds numbers Re, interpolated in log-log"""
@@ -116,59 +113,86 @@ def interpolate_ff(csv, channel, Re):
     )
 
 
-fig, (ax, ax_err) = plt.subplots(1, 2, figsize=(14.0, 5.0))
-ax.set_xscale("log")
-ax.set_yscale("log")
-ax.set_xlim(1.0, 1.0e6)
-ax.set_xlabel("Subchannel Reynolds number, $Re$")
-ax.set_ylabel("Friction factor, $f$")
-ax.set_title("Triangular lattice, wire-wrapped pins")
-ax.grid(True, which="both", color="0.85", linewidth=0.5)
-plot_channels(ax, "tri_wire_out.csv", "black", "UCTD")
-plot_channels(ax, "tri_wire_pacio_out.csv", "red", "PCTD")
-plot_channels(ax, "dassh_tri_wire_out.csv", "green", "DASSH UCTD")
-ax.legend(frameon=False)
-# Relative difference of SCM UCTD from DASSH UCTD at the local Reynolds numbers of the SCM sweep. The
-# DASSH curves are sampled more finely than the SCM sweep, so they are the ones interpolated.
-scm_wire = np.genfromtxt(DATA / "tri_wire_out.csv", delimiter=",", names=True)
+def plot_dassh_comparison(title, scm_csvs, dassh_csv, name):
+    """Plot the SCM and DASSH friction factors next to the relative difference between the SCM and
+    DASSH UCTD friction factors. scm_csvs maps the SCM CSV files to their color and label, with the
+    SCM UCTD CSV first."""
+    fig, (ax, ax_err) = plt.subplots(1, 2, figsize=(14.0, 5.0))
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlim(1.0, 1.0e6)
+    ax.set_xlabel("Subchannel Reynolds number, $Re$")
+    ax.set_ylabel("Friction factor, $f$")
+    ax.set_title(title)
+    ax.grid(True, which="both", color="0.85", linewidth=0.5)
+    for csv, (color, label) in scm_csvs.items():
+        plot_channels(ax, csv, color, label)
+    plot_channels(ax, dassh_csv, "green", "DASSH UCTD")
+    ax.legend(frameon=False)
+    # Relative difference of SCM UCTD from DASSH UCTD at the local Reynolds numbers of the SCM sweep.
+    # The DASSH curves are sampled more finely than the SCM sweep, so they are the ones interpolated.
+    scm = np.genfromtxt(DATA / next(iter(scm_csvs)), delimiter=",", names=True)
+    dassh = np.genfromtxt(DATA / dassh_csv, delimiter=",", names=True)
+    for channel in CHANNELS:
+        Re = scm[f"Re_{channel}"]
+        # Skip Re < 1, as in plot_channels, and Re outside the DASSH curve, where np.interp
+        # extrapolates
+        keep = (Re >= max(1.0, dassh[f"Re_{channel}"].min())) & (
+            Re <= dassh[f"Re_{channel}"].max()
+        )
+        ff_dassh = interpolate_ff(dassh_csv, channel, Re[keep])
+        ax_err.plot(
+            Re[keep],
+            100.0 * (scm[f"ff_{channel}"][keep] / ff_dassh - 1.0),
+            color="black",
+            linestyle=LINESTYLES[channel],
+            label=LABELS[channel],
+        )
+    ax_err.set_xscale("log")
+    ax_err.set_xlim(1.0, 1.0e6)
+    ax_err.set_xlabel("Subchannel Reynolds number, $Re$")
+    ax_err.set_ylabel("$(f_{SCM} - f_{DASSH}) / f_{DASSH}$ [%]")
+    ax_err.set_title("SCM UCTD relative to DASSH UCTD")
+    ax_err.grid(True, which="both", color="0.85", linewidth=0.5)
+    save(fig, ax_err, name)
+
+
+plot_dassh_comparison(
+    "Triangular lattice, bare pins",
+    {"tri_bare_out.csv": ("black", "UCTD")},
+    "dassh_tri_bare_out.csv",
+    "scm_friction_tri_bare.png",
+)
+plot_dassh_comparison(
+    "Triangular lattice, wire-wrapped pins",
+    {
+        "tri_wire_out.csv": ("black", "UCTD"),
+        "tri_wire_pacio_out.csv": ("red", "PCTD"),
+    },
+    "dassh_tri_wire_out.csv",
+    "scm_friction_tri_wire.png",
+)
 dassh_wire = np.genfromtxt(DATA / "dassh_tri_wire_out.csv", delimiter=",", names=True)
-for channel in CHANNELS:
-    Re = scm_wire[f"Re_{channel}"]
-    # Skip Re < 1, as in plot_channels, and Re outside the DASSH curve, where np.interp extrapolates
-    keep = (Re >= max(1.0, dassh_wire[f"Re_{channel}"].min())) & (
-        Re <= dassh_wire[f"Re_{channel}"].max()
-    )
-    ff_dassh = interpolate_ff("dassh_tri_wire_out.csv", channel, Re[keep])
-    ax_err.plot(
-        Re[keep],
-        100.0 * (scm_wire[f"ff_{channel}"][keep] / ff_dassh - 1.0),
-        color="black",
-        linestyle=LINESTYLES[channel],
-        label=LABELS[channel],
-    )
-ax_err.set_xscale("log")
-ax_err.set_xlim(1.0, 1.0e6)
-ax_err.set_xlabel("Subchannel Reynolds number, $Re$")
-ax_err.set_ylabel("$(f_{SCM} - f_{DASSH}) / f_{DASSH}$ [%]")
-ax_err.set_title("SCM UCTD relative to DASSH UCTD")
-ax_err.grid(True, which="both", color="0.85", linewidth=0.5)
-save(fig, ax_err, "scm_friction_tri_wire.png")
 
 
-# Rows of the friction factor comparison table in the verification page
+# Rows of the friction factor comparison tables in the verification page
 TABLE_RE = np.array([1.0e2, 3.0e3, 1.0e4])
-for channel in CHANNELS:
-    for csv, name in (
+for csvs in (
+    (("tri_bare_out.csv", "SCM UCTD"), ("dassh_tri_bare_out.csv", "DASSH UCTD")),
+    (
         ("tri_wire_out.csv", "SCM UCTD"),
         ("tri_wire_pacio_out.csv", "SCM PCTD"),
         ("dassh_tri_wire_out.csv", "DASSH UCTD"),
-    ):
-        ff = interpolate_ff(csv, channel, TABLE_RE)
-        print(
-            f"| {LABELS[channel]} | {name} | "
-            + " | ".join(f"{f:.4f}" for f in ff)
-            + " |"
-        )
+    ),
+):
+    for channel in CHANNELS:
+        for csv, name in csvs:
+            ff = interpolate_ff(csv, channel, TABLE_RE)
+            print(
+                f"| {LABELS[channel]} | {name} | "
+                + " | ".join(f"{f:.4f}" for f in ff)
+                + " |"
+            )
 
 # Rows of the developed flow split table in the verification page. DASSH reports the subchannel and
 # bundle Reynolds numbers, Re_i = X_i Re_b Dh_i / Dh_b, so its flow split is X_i = (Re_i / Re_b)

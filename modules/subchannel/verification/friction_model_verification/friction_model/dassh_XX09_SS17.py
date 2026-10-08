@@ -2,12 +2,13 @@
 compared with SCM in the friction factor closures verification page.
 
 DASSH (https://github.com/dassh-dev/dassh) must be installed in the Python environment running this
-script. Two CSV files are written next to this script:
+script. Three CSV files are written next to this script:
 
 1. dassh_XX09_SS17_out.csv: position, type, mass flow rate, and temperature of every subchannel at
    the TTC height for the SHRT-17 steady state in dassh_XX09_SS17.txt.
 2. dassh_tri_wire_out.csv: DASSH UCTD friction factor and Reynolds number of the interior, edge,
    and corner subchannels versus the bundle Reynolds number, in the format of tri_wire_out.csv.
+3. dassh_tri_bare_out.csv: the same for the 19-pin bare-pin assembly of tri_bare.i.
 """
 
 import os
@@ -93,23 +94,48 @@ def write_profile(reactor, wdir):
             f.write("{:.8e},{:.8e},{},{:.8e},{:.8e}\n".format(*row))
 
 
-def write_friction_factor(reactor):
+def bare_rodded_region():
+    """DASSH UCTD rodded region with the geometry of tri_bare.i, the 19-pin LBE bare-pin assembly.
+    The friction factor and flow split constants depend only on the geometry, so the coolant,
+    duct, and flow rate only need to be valid."""
+    return dassh.RoddedRegion(
+        "tri_bare",
+        3,  # rings
+        0.01148,  # pin pitch
+        0.0082,  # pin diameter
+        0.0,  # wire pitch
+        0.0,  # wire diameter
+        0.0005,  # clad thickness, not used
+        # Inner flat-to-flat distance of tri_bare.i; the outer one only sets the unused duct wall
+        [0.05319936, 0.0572],
+        1.0,  # flow rate
+        dassh.Material("water", temperature=359.15),
+        dassh.Material("ss316"),
+        None,  # duct heat transfer parameters
+        "UCTD",  # friction
+        "UCTD",  # flow split
+        "UCTD",  # mixing
+        "DB",  # Nusselt number
+        None,  # shape factor
+    )
+
+
+def write_friction_factor(rr, csv):
     """Write the DASSH UCTD subchannel friction factors versus the bundle Reynolds number.
 
     DASSH uses the subchannel friction factors in the UCTD flow split and the bundle friction factor
     in the pressure drop. The subchannel friction factors are evaluated with the DASSH flow split and
     the DASSH transition interpolation in flowsplit_ctd._iterate.
     """
-    rr = reactor.assemblies[0].rodded
     Cf = rr.corr_constants["ff"]["Cf_sc"]
     Re_bl, Re_bt = rr.corr_constants["ff"]["Re_bnds"]
     de_ratio = rr.params["de"] / rr.bundle_params["de"]
     # Subchannel regime bounds, as in flowsplit_ctd._calc_transition_flowsplit
     Re_iL = Re_bl * de_ratio * rr.corr_constants["fs"]["fs"]["laminar"]
     Re_iT = Re_bt * de_ratio * rr.corr_constants["fs"]["fs"]["turbulent"]
-    # Same bundle Reynolds number range as the SCM mass flux sweep in tri_wire.i
+    # Same bundle Reynolds number range as the SCM mass flux sweeps in tri_wire.i and tri_bare.i
     Re_bundle = np.geomspace(1.0, 3.0e5, 4000)
-    with open(SCRIPT_DIR / "dassh_tri_wire_out.csv", "w") as f:
+    with open(SCRIPT_DIR / csv, "w") as f:
         f.write("Re_bundle,Re_center,ff_center,Re_edge,ff_edge,Re_corner,ff_corner\n")
         for Re in Re_bundle:
             rr.coolant_int_params["Re"] = Re
@@ -135,4 +161,5 @@ def write_friction_factor(reactor):
 with tempfile.TemporaryDirectory() as wdir:
     reactor = run_dassh(wdir)
     write_profile(reactor, wdir)
-    write_friction_factor(reactor)
+    write_friction_factor(reactor.assemblies[0].rodded, "dassh_tri_wire_out.csv")
+write_friction_factor(bare_rodded_region(), "dassh_tri_bare_out.csv")

@@ -29,11 +29,23 @@ The geometry is the PSBT assembly, with pitch $P = 12.6$ mm, pin diameter $D = 9
 
 The geometry is the 19-pin LBE assembly, with $P = 11.48$ mm, $D = 8.2$ mm, and duct flat-to-flat distance $53.2$ mm. Only UCTD is shown. `friction_model = Pacio` uses the same bare-pin coefficients but changes the transition Reynolds numbers and the interpolation between the laminar and turbulent regimes.
 
+As for the wire-wrapped pins below, the SCM friction factors are compared with the UCTD implementation of the DASSH subchannel code [!cite](atz2021ducted). The script `dassh_XX09_SS17.py` evaluates the DASSH subchannel friction factors for the same geometry with the DASSH flow split and transition interpolation, over the bundle Reynolds number range of the SCM sweep. The right side of [scm-friction-tri-bare] gives the relative difference between the SCM and DASSH UCTD friction factors at the local Reynolds numbers of the SCM sweep. As for the wire-wrapped pins, SCM UCTD and DASSH UCTD agree exactly in the laminar and turbulent regimes and within 0.7% in the transition regime, and the difference comes from the intermittency factor: with the bulk intermittency factor of SCM, the DASSH friction factors agree with SCM within 0.15%. The largest difference is in the corner subchannel, whose laminar flow split of 0.49 is much lower than its turbulent flow split of 0.77, so the DASSH transition bounds of the corner subchannel are the furthest from those of SCM. [tab-friction-tri-bare] gives the friction factors at the local subchannel Reynolds numbers of [tab-friction-tri-wire].
+
 !media media_scripts/verification/friction_model_verification/friction_model/scm_friction_factor_closures.py
     image_name=scm_friction_tri_bare.png
-    style=width:60%;margin-bottom:2%;margin:auto;
+    style=width:100%;margin-bottom:2%;margin:auto;
     id=scm-friction-tri-bare
-    caption=Friction factor of UCTD for bare pins in a triangular lattice.
+    caption=Left: friction factor of UCTD in SCM (black) and DASSH (green) for bare pins in a triangular lattice; the DASSH curves hide the SCM curves. Right: relative difference between the SCM and DASSH UCTD friction factors.
+
+!table id=tab-friction-tri-bare caption=Friction factor of bare pins in a triangular lattice at local subchannel Reynolds numbers of $10^2$, $3 \times 10^3$, and $10^4$.
+| Subchannel | Closure | $Re = 10^2$ | $Re = 3 \times 10^3$ | $Re = 10^4$ |
+| :- | :- | -: | -: | -: |
+| interior | SCM UCTD | 1.1930 | 0.0604 | 0.0334 |
+| interior | DASSH UCTD | 1.1930 | 0.0604 | 0.0334 |
+| edge | SCM UCTD | 0.9906 | 0.0545 | 0.0314 |
+| edge | DASSH UCTD | 0.9906 | 0.0544 | 0.0313 |
+| corner | SCM UCTD | 0.9396 | 0.0518 | 0.0289 |
+| corner | DASSH UCTD | 0.9396 | 0.0515 | 0.0288 |
 
 ### Triangular lattice, wire-wrapped pins
 
