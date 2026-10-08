@@ -166,6 +166,11 @@ public:
   ~Function();
 
   /**
+   * Copy assignment operator
+   */
+  Function & operator=(const Function & function) = default;
+
+  /**
    * Get whether the function wrapper is valid
    * @returns Whether the function wrapper is valid
    */
