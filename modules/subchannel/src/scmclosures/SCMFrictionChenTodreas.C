@@ -51,6 +51,11 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
     mooseError("Wire-wrapped bundle friction requires both wire diameter and wire lead length. "
                "Set both to zero for a bare pin bundle.");
 
+  if (_is_tri_lattice && !_has_wire_wrap && _friction_model == "Pacio")
+    paramError("friction_model",
+               "The Pacio-Chen-Todreas friction correlation applies only to wire-wrapped "
+               "triangular assemblies.");
+
   if (_is_tri_lattice)
   {
     const auto pitch = _subchannel_mesh.getPitch();
