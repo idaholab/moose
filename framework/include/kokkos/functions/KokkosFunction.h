@@ -242,4 +242,10 @@ private:
   FunctionWrapperDeviceBase * _wrapper_device = nullptr;
 };
 
+template <>
+struct ArrayDeepCopy<Function>
+{
+  static constexpr bool value = true;
+};
+
 } // namespace Moose::Kokkos
