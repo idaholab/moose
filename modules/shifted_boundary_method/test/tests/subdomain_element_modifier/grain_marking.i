@@ -43,7 +43,7 @@
 [UserObjects]
   [surface_builder]
     type = SurfaceMeshBySubdomainBuilder
-    surface_mesh = boundary_mesh
+    complete_boundary_mesh = boundary_mesh
   []
   [subdomain_tester]
     type = PointInSubdomainCheckUO
@@ -55,7 +55,6 @@
   [assign_subdomains]
     type = SubdomainElementModifier
     subdomain_id_tester = subdomain_tester
-    lambda = 0.5
     execute_on = INITIAL
   []
 []

@@ -76,11 +76,11 @@
 [UserObjects]
   [builder1]
     type = BoundaryMeshBuilder
-    surface_mesh = sphere_surf
+    boundary_mesh = sphere_surf
   []
   [builder2]
     type = BoundaryMeshBuilder
-    surface_mesh = tet_surf
+    boundary_mesh = tet_surf
   []
   [check1]
     type = PointInPolyhedronCheckUO

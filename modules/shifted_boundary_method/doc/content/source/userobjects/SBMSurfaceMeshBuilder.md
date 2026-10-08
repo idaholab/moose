@@ -3,7 +3,7 @@
 `SBMSurfaceMeshBuilder` prepares the geometric data structures required by
 [`UnsignedDistanceToSurfaceMesh`](functions/UnsignedDistanceToSurfaceMesh.md) and
 other distance-based components. It processes a source mesh—identified by the
-`surface_mesh` parameter—to build the surface-element wrappers (a `SurfaceElementSet`
+`interface_mesh` parameter—to build the surface-element wrappers (a `SurfaceElementSet`
 of `SurfaceElement` objects) and a centroid KDTree for efficient nearest-neighbor
 queries.
 

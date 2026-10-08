@@ -1,6 +1,8 @@
 Applications:
     shifted_boundary_method:
         exe_directory: ${MOOSE_DIR}/modules/shifted_boundary_method
+        app_types:
+            - ShiftedBoundaryMethodApp
         content_directory: ${MOOSE_DIR}/modules/shifted_boundary_method/doc/content
         unregister:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
