@@ -225,7 +225,7 @@ Coupleable::kokkosCoupledVectorTagNodalValueByName(const std::string & var_name,
 {
   auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  if (!variable.nodal())
+  if (variable.coupled() && !variable.nodal())
     mooseError("Cannot get nodal values from the coupled variable '",
                var_name,
                "', because the associated variable is not nodal.");
@@ -239,7 +239,7 @@ Coupleable::kokkosCoupledVectorTagNodalValuesByName(const std::string & var_name
 {
   auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  if (!variable.nodal())
+  if (variable.coupled() && !variable.nodal())
     mooseError("Cannot get nodal values from the coupled variable '",
                var_name,
                "', because the associated variable is not nodal.");
@@ -999,7 +999,7 @@ Coupleable::kokkosADCoupledVectorTagNodalValueByName(const std::string & var_nam
 {
   auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  if (!variable.nodal())
+  if (variable.coupled() && !variable.nodal())
     mooseError("Cannot get nodal values from the coupled variable '",
                var_name,
                "', because the associated variable is not nodal.");
@@ -1013,7 +1013,7 @@ Coupleable::kokkosADCoupledVectorTagNodalValuesByName(const std::string & var_na
 {
   auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  if (!variable.nodal())
+  if (variable.coupled() && !variable.nodal())
     mooseError("Cannot get nodal values from the coupled variable '",
                var_name,
                "', because the associated variable is not nodal.");
