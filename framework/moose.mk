@@ -265,6 +265,12 @@ libmesh_CPPFLAGS += -include $(moose_config)
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
+# all_header_dir is reassigned by app.mk (included after this file) to point at the
+# application's own header_symlinks dir, so anything below that needs MOOSE's own
+# header_symlinks dir (e.g. via a deferred/secondary-expansion reference) must use this
+# copy instead of all_header_dir, or it will end up pointed at the app's directory when
+# building an app and MOOSE side by side.
+moose_all_header_dir := $(all_header_dir)
 
 define all_header_dir_rule
 $(1): | prebuild
@@ -450,7 +456,7 @@ ifeq (x$(moose_HEADER_deps),x)
 endif
 
 .SECONDEXPANSION:
-$(moose_revision_header): $(moose_HEADER_deps) | $$(all_header_dir)
+$(moose_revision_header): $(moose_HEADER_deps) | $$(moose_all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
 	        HEADER_FILE="$(moose_revision_header)" \
@@ -461,8 +467,8 @@ $(moose_revision_header): $(moose_HEADER_deps) | $$(all_header_dir)
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
 	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \
 	fi
-	@if [ ! -e "$(all_header_dir)/MooseRevision.h" ]; then \
-		ln -sf $(moose_revision_header) $(all_header_dir); \
+	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
+		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
 	fi
 
 # libmesh submodule status
