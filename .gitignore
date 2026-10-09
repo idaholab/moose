@@ -365,3 +365,6 @@ binaryoutput
 # large, machine-local artifact; only the checked-in config is tracked.
 .codegraph/
 !codegraph.json
+
+# images generated on-the-fly
+modules/subchannel/doc/content/media_scripts/validation/**/*.png
