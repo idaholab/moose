@@ -270,16 +270,22 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
     return;
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  const auto var = _kokkos_var.var(comp);
-  auto dof = sys.getElemLocalDofIndex(elem, i, var);
-  const auto scaled_local_re = local_re * sys.getVariableScalingFactor(var);
+  auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
+  auto constraints = sys.getLocalConstraints(dof);
 
   for (unsigned int t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
     if (sys.isResidualTagActive(tag))
-      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), scaled_local_re);
+    {
+      if (constraints.size())
+        for (unsigned int c = 0; c < constraints.size(); ++c)
+          ::Kokkos::atomic_add(&sys.getVectorDofValue(constraints[c].first, tag),
+                               constraints[c].second * local_re);
+      else
+        ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
+    }
   }
 }
 
@@ -351,14 +357,26 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   auto row = sys.getElemLocalDofIndex(elem, i, ivar);
   auto col = sys.isScalarVariable(jvar) ? sys.getScalarGlobalDofIndex(j, jvar)
                                         : sys.getElemGlobalDofIndex(elem, j, jvar);
-  const auto scaled_local_ke = local_ke * sys.getVariableScalingFactor(ivar);
+  auto row_constraints = sys.getLocalConstraints(row);
+  auto col_constraints = sys.getGlobalConstraints(col);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
     if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
-      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), scaled_local_ke);
+    {
+      for (unsigned int rc = 0; rc < ::Kokkos::max(1u, row_constraints.size()); ++rc)
+        for (unsigned int cc = 0; cc < ::Kokkos::max(1u, col_constraints.size()); ++cc)
+        {
+          auto r = row_constraints.size() ? row_constraints[rc].first : row;
+          auto c = col_constraints.size() ? col_constraints[cc].first : col;
+          auto w = (row_constraints.size() ? row_constraints[rc].second : 1.0) *
+                   (col_constraints.size() ? col_constraints[cc].second : 1.0);
+
+          ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), w * local_ke);
+        }
+    }
   }
 }
 
@@ -493,6 +511,9 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
 {
   Real local_re[MAX_CACHED_DOF];
 
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+
   unsigned int stride = MAX_CACHED_DOF * datum.num_local_threads();
   unsigned int num_batches = datum.n_dofs() / stride;
 
@@ -518,7 +539,7 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
     body(local_re - ib, ib, ie);
 
     for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i - ib] * scaling_factor, datum.elem().id, i);
   }
 }
 
@@ -527,6 +548,9 @@ KOKKOS_FUNCTION void
 ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) const
 {
   Real local_ke[MAX_CACHED_DOF];
+
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
 
   for (unsigned int j = datum.local_thread_id(); j < datum.n_jdofs();
        j += datum.num_local_threads())
@@ -547,7 +571,8 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
       body(local_ke - ib, ib, ie, j);
 
       for (unsigned int i = ib; i < ie; ++i)
-        accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
+        accumulateTaggedElementalMatrix(
+            local_ke[i - ib] * scaling_factor, datum.elem().id, i, j, datum.jvar());
     }
   }
 }
