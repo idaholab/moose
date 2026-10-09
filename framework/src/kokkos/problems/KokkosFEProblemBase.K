@@ -24,6 +24,25 @@
 #include "MaterialPropertyInterface.h"
 #include "Coupleable.h"
 
+namespace
+{
+void
+checkKokkosObject(const std::string & api,
+                  const std::string & type,
+                  const std::string & name,
+                  const InputParameters & parameters)
+{
+  if (!parameters.isKokkosObject())
+    mooseError("FEProblemBase::",
+               api,
+               "() can only add Kokkos objects, but '",
+               name,
+               "' of type '",
+               type,
+               "' is not a Kokkos object");
+}
+}
+
 Moose::Kokkos::System &
 FEProblemBase::getKokkosSystem(const unsigned int sys_num)
 {
@@ -53,6 +72,8 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -74,6 +95,8 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosNodalKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -92,6 +115,8 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosBoundaryCondition", bc_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -114,6 +139,8 @@ FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
                                        const std::string & name,
                                        InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosLinearFVKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -138,6 +165,8 @@ FEProblemBase::addKokkosLinearFVBC(const std::string & bc_name,
                                    const std::string & name,
                                    InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosLinearFVBC", bc_name, name, parameters);
+
   parallel_object_only();
 
   const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -162,6 +191,8 @@ FEProblemBase::addKokkosAuxKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosAuxKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   setAuxKernelParamsAndLog(kernel_name, name, parameters, "KokkosAuxKernel");
@@ -176,6 +207,8 @@ FEProblemBase::addKokkosFunction(const std::string & type,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosFunction", type, name, parameters);
+
   parallel_object_only();
 
   parameters.set<SubProblem *>("_subproblem") = this;
@@ -204,7 +237,7 @@ FEProblemBase::getKokkosFunction(const std::string & name)
   const auto & function = getKokkosFunction<Moose::FunctionBase>(name);
 
   std::shared_ptr<Moose::Kokkos::FunctionWrapperHostBase> wrapper =
-      Moose::Kokkos::FunctorRegistry::buildFunction(&function, function.type());
+      Moose::Kokkos::FunctorWrapperRegistry::buildFunction(&function, function.type());
 
   return Moose::Kokkos::Function(wrapper);
 }
@@ -214,6 +247,8 @@ FEProblemBase::addKokkosPostprocessor(const std::string & pp_name,
                                       const std::string & name,
                                       InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosPostprocessor", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosPostprocessor");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -224,6 +259,8 @@ FEProblemBase::addKokkosVectorPostprocessor(const std::string & pp_name,
                                             const std::string & name,
                                             InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosVectorPostprocessor", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosVectorPostprocessor");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -234,6 +271,8 @@ FEProblemBase::addKokkosReporter(const std::string & pp_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosReporter", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosReporter");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -244,6 +283,8 @@ FEProblemBase::addKokkosUserObject(const std::string & user_object_name,
                                    const std::string & name,
                                    InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosUserObject", user_object_name, name, parameters);
+
   parallel_object_only();
 
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
@@ -276,6 +317,8 @@ FEProblemBase::addKokkosMaterial(const std::string & mat_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosMaterial", mat_name, name, parameters);
+
   addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 
   _has_kokkos_objects = true;
