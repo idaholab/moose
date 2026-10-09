@@ -32,10 +32,5 @@ AddVectorPostprocessorAction::act()
   if (!_problem)
     mooseError("The Problem has not been initialized yet!");
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosVectorPostprocessor(_type, _name, _moose_object_pars);
-  else
-#endif
-    _problem->addVectorPostprocessor(_type, _name, _moose_object_pars);
+  _problem->addVectorPostprocessor(_type, _name, _moose_object_pars);
 }

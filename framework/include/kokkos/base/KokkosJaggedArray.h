@@ -413,8 +413,9 @@ JaggedArray<T, inner, outer, index_type, layout>::finalize()
   _offsets.copyToDevice();
 
   // Pad an extra element at the end to avoid accessing the bound in the following operators when
-  // the last inner array has zero size
-  _data.create(_offsets.last() + stride + 1);
+  // the last inner array has zero size. An empty outer array, e.g. on a process without local
+  // elements, has no last offset.
+  _data.create((_offsets.size() ? _offsets.last() + stride : 0) + 1);
 
   _finalized = true;
 }
