@@ -45,7 +45,7 @@ ADDGKernel::ADDGKernel(const InputParameters & parameters)
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
 
     _u(_var.adSln()),
-    _grad_u(_var.adGradSln()),
+    _grad_u(_var.adGradSlnFace()),
     _u_neighbor(_var.adSlnNeighbor()),
     _grad_u_neighbor(_var.adGradSlnNeighbor())
 {

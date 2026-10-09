@@ -317,10 +317,14 @@ public:
     return _ad_u;
   }
 
-  /// Face-only counterpart of adGradSln(); see adSlnFace()
+  /**
+   * Face counterpart of adGradSln(); see adSlnFace(). Objects evaluating on element faces must use
+   * this accessor: on a face, the AD gradient is only computed when it was requested here.
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
   {
-    _need_ad = _need_ad_grad_u = true;
+    _need_ad = _need_ad_grad_u = _need_ad_grad_u_face = true;
+    needADGradPhiFace();
     return _ad_grad_u;
   }
 
@@ -512,6 +516,10 @@ private:
             unsigned int nqp,
             std::size_t num_shapes);
 
+  /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
+  /// gradient and AD face test function gradients are built from
+  void needADGradPhiFace() const;
+
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
 
@@ -566,6 +574,8 @@ private:
   mutable bool _need_ad_volume = false;
   mutable bool _need_ad_u = false;
   mutable bool _need_ad_grad_u = false;
+  /// Whether the AD gradient is needed on element faces, i.e. requested through adGradSlnFace()
+  mutable bool _need_ad_grad_u_face = false;
   mutable bool _need_ad_grad_u_dot = false;
   mutable bool _need_ad_second_u = false;
   mutable bool _need_ad_curl_u = false;
@@ -866,5 +876,6 @@ MooseVariableData<OutputType>::adGradPhiFace() const
   if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
     mooseError("Unsupported element type: ", Moose::stringify(_element_type));
   mooseAssert(_ad_grad_phi_face, "this should be non-null");
+  needADGradPhiFace();
   return *_ad_grad_phi_face;
 }

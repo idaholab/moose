@@ -47,6 +47,8 @@ InputParameters
 ComputeDynamicWeightedGapLMMechanicalContact::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  // Mechanical contact residuals use only primal values and normals
+  params.set<bool>("_compute_primal_gradients") = false;
   params.addClassDescription(
       "Computes the normal contact mortar constraints for dynamic simulations");
   params.addRangeCheckedParam<Real>("capture_tolerance",

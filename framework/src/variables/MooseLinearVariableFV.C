@@ -936,6 +936,13 @@ MooseLinearVariableFV<OutputType>::adGradSln() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnFace() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const ADTemplateVariableCurl<OutputType> &
 MooseLinearVariableFV<OutputType>::adCurlSln() const
 {

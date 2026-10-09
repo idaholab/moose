@@ -47,6 +47,8 @@ InputParameters
 ComputeWeightedGapLMMechanicalContact::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  // Mechanical contact residuals use only primal values and normals
+  params.set<bool>("_compute_primal_gradients") = false;
   params.addClassDescription("Computes the weighted gap that will later be used to enforce the "
                              "zero-penetration mechanical contact conditions");
   params.suppressParameter<VariableName>("secondary_variable");

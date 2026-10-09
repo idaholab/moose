@@ -16,6 +16,8 @@ InputParameters
 MortarGenericTraction::validParams()
 {
   InputParameters params = ADMortarLagrangeConstraint::validParams();
+  // Mechanical contact residuals use only primal values and normals
+  params.set<bool>("_compute_primal_gradients") = false;
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
