@@ -16,9 +16,7 @@
 namespace Moose::MFEM
 {
 /**
- * Wrapper for mfem::BlockDiagonalPreconditioner that creates a mfem::BlockDiagonalPreconditioner
- * operator.
- *
+ * Wrapper for mfem::BlockDiagonalPreconditioner.
  */
 class BlockDiagonalPreconditioner : public mfem::Solver
 {

@@ -380,7 +380,8 @@
     csvdiff = 'OutputData/Darcy.csv'
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM with partial assembly.'
     capabilities = 'mfem'
-    cli_args = 'Executioner/assembly_level=partial Solvers/main/type=MFEMGMRESSolver Solvers/main/l_tol=1e-12'
+    cli_args = 'Executioner/assembly_level=partial '
+               'Solvers/active="gmres block_diagonal velocity_jacobi pressure_schur"'
     compute_devices = 'cpu cuda'
     recover = false
   []
