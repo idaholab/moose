@@ -80,6 +80,7 @@
     design = 'linear_fv_cht.md'
     issues = '#33742'
     requirement = 'The system shall report an error if a surface-to-surface radiation user object is supplied for conjugate heat transfer without any conjugate heat transfer interfaces.'
+    mesh_mode = REPLICATED # PatchSidesetGenerator does not allow distributed mesh
     max_threads = 1 # Linear FV doesn't support threading at the moment
   []
 []
