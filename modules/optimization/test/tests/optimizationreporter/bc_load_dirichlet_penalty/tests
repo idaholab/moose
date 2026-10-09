@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#33487'
+  design = 'source/bcs/FunctionPenaltyDirichletBC.md '
+           'SideOptimizationNeumannFunctionInnerProduct.md ParsedOptimizationFunction.md'
+  [penalty_oracle_grad_check]
+    type = TaoGradientTester
+    input = main.i
+    max_rel_tol = 1e-8
+    tao_fd_delta = 1e-3
+    requirement = 'The system shall compute an objective gradient that agrees with finite '
+                  'differences when parameterized Dirichlet boundary data is imposed weakly with a '
+                  'penalty boundary condition and the boundary inner product is scaled by the '
+                  'penalty factor.'
+  []
+[]
