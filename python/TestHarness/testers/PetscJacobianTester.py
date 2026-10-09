@@ -19,12 +19,17 @@ class PetscJacobianTester(RunApp):
     def validParams():
         params = RunApp.validParams()
         params.addParam(
-            "ratio_tol", 1e-7, "Relative tolerance to compare the ration against."
+            "ratio_tol",
+            1e-7,
+            "Tolerance on ||J - Jfd||_F / ||J||_F, the finite-difference error relative to the "
+            "magnitude of the Jacobian.",
         )
         params.addParam(
             "difference_tol",
-            1e0,
-            "Relative tolerance to compare the difference against.",
+            float("inf"),
+            "Tolerance on the absolute difference ||J - Jfd||_F. It scales with the magnitude of "
+            "the Jacobian entries, so it is disabled by default and ratio_tol is the meaningful "
+            "check.",
         )
         params.addParam(
             "state",
