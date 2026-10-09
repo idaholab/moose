@@ -78,8 +78,27 @@
 []
 
 [Solvers]
+  active = 'main'
   [main]
     type = MFEMMUMPS
+  []
+  [velocity_jacobi]
+    type = MFEMOperatorJacobiSmoother
+  []
+  [pressure_schur]
+    type = MFEMOperatorJacobiSmoother
+    schur_complement_variable = pressure
+    schur_complement_coupled_variable = velocity
+  []
+  [block_diagonal]
+    type = MFEMBlockDiagonalPreconditioner
+    variables = 'velocity pressure'
+    preconditioners = 'velocity_jacobi pressure_schur'
+  []
+  [gmres]
+    type = MFEMGMRESSolver
+    preconditioner = block_diagonal
+    l_tol = 1e-12
   []
 []
 

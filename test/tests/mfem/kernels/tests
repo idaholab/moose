@@ -24,6 +24,37 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMCurlCurlPartialSmoother]
+    type = CSVDiff
+    issues = '#33579'
+    input = curlcurl.i
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
+              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    cli_args = 'Solvers/active="cg matrix_free_ams jacobi" Solvers/matrix_free_ams/smoother=jacobi '
+               'Executioner/assembly_level=partial '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
+    requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell '
+                  'problem with Nedelec elements of the first kind using a matrix-free auxiliary-space '
+                  'Maxwell preconditioner with a user-supplied smoother.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMCurlCurlPartialSmootherLORError]
+    type = RunException
+    issues = '#33579'
+    input = curlcurl.i
+    cli_args = 'Solvers/active="cg matrix_free_ams jacobi" Solvers/matrix_free_ams/smoother=jacobi '
+               'Solvers/jacobi/low_order_refined=true Executioner/assembly_level=partial '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
+    expect_err = 'Low-order-refined smoothers are not supported.'
+    requirement = 'The system shall report an error if a low-order-refined smoother is supplied to a '
+                  'matrix-free auxiliary-space Maxwell preconditioner.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+  []
   [MFEMDiffusion]
     type = CSVDiff
     input = diffusion.i
@@ -341,6 +372,17 @@
     csvdiff = 'OutputData/Darcy.csv'
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
     capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMDarcyPartial]
+    type = CSVDiff
+    input = darcy.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM with partial assembly.'
+    capabilities = 'mfem'
+    cli_args = 'Executioner/assembly_level=partial '
+               'Solvers/active="gmres block_diagonal velocity_jacobi pressure_schur"'
     compute_devices = 'cpu cuda'
     recover = false
   []

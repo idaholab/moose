@@ -15,6 +15,8 @@
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
+    closed_basis=GaussLobatto
+    open_basis=IntegratedGLL
   []
   [HDivFESpace]
     type = MFEMVectorFESpace
@@ -43,6 +45,7 @@
     variable = db_dt_field
     source = e_field
     scale_factor = -1.0
+    execute_on = TIMESTEP_END
   []
 []
 
@@ -78,7 +81,7 @@
 
 [Kernels]
   [curlcurl]
-    type = MFEMCurlCurlKernel
+    type = MFEMNLCurlCurlKernel
     variable = e_field
   []
   [mass]
@@ -92,30 +95,24 @@
   []
 []
 
-
 [Solvers]
-  active = 'gmres ams'
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
-  []
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
+    # A single AMG V-cycle per auxiliary space keeps the preconditioner linear,
+    # as plain GMRES requires. The default inner CG iterations do not.
+    inner_pi_iterations = 0
+    inner_g_iterations = 0
   []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-    # Matches the default MFEMMatrixFreeAMS smoother, so the solve reproduces the default gold
-    damping = 0.25
-  []
-  [gmres]
-    type = MFEMHypreGMRES
-    preconditioner = ams
-    l_tol = 1e-12
-  []
-  [cg]
-    type = MFEMCGSolver
+  [lin]
+    type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
-    l_tol = 1e-12
+    l_tol = 1e-16
+  []
+  [native_mfem_nl]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 10
+    abs_tol = 1.0e-15
+    rel_tol = 1.0e-15
   []
 []
 
@@ -124,26 +121,20 @@
   device = cpu
 []
 
-[VectorPostprocessors]
-  [line_sample_e_field]
-    type = MFEMVariableLineValueSampler
-    variable = 'e_field'
-    start_point = '-0.99 -0.99 0.99'
-    end_point = '0.99 0.99 -0.99'
-    num_points = 114
-  []
-  [line_sample_db_dt_field]
-    type = MFEMVariableLineValueSampler
-    variable = 'db_dt_field'
-    start_point = '-0.99 -0.99 0.99'
-    end_point = '0.99 0.99 -0.99'
-    num_points = 114
-  []
-[]
+ [VectorPostprocessors]
+   [line_sample_e_field]
+     type = MFEMVariableLineValueSampler
+     variable = 'e_field'
+     start_point = '-0.99 -0.99 0.99'
+     end_point = '0.99 0.99 -0.99'
+     num_points = 114
+   []
+ []
 
 [Outputs]
   [CSV]
     type = CSV
+    execute_on = 'timestep_end'
     file_base = OutputData/CurlCurl/curlcurl
   []
 []
