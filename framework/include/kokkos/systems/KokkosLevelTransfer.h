@@ -97,12 +97,13 @@ public:
 
   /**
    * Fill a vector with a deterministic, non-constant pattern of its global DOF indices, so that a
-   * verification is reproducible from run to run
+   * verification is reproducible from run to run. The pattern is written where the vector's data
+   * lives, so a device vector is left current on the device for the operations it is handed to.
    * @param vector The vector to fill
-   * @param sys The system the vector belongs to
+   * @param dof_space The DOF layout of the system the vector belongs to
    */
   static void fillVerificationPattern(libMesh::NumericVector<Number> & vector,
-                                      const libMesh::System & sys);
+                                      const DofSpace & dof_space);
 
 protected:
   /// The coarse side of the level pair

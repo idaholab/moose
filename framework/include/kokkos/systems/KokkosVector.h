@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosArray.h"
+#include "KokkosDofSpace.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dof_map.h"
@@ -20,8 +21,6 @@
 
 namespace Moose::Kokkos
 {
-
-class DofSpace;
 
 /**
  * The Kokkos wrapper class for PETSc vector
@@ -135,6 +134,20 @@ public:
 
     return *this;
   }
+
+  /**
+   * Set every entry this process owns to a function of that entry's DOF index, evaluated where the
+   * vector's data lives. A device-resident vector is written on the device, so that a
+   * vector a solve reads on the device is never left current on the host by filling it, which an
+   * entry-by-entry libMesh::NumericVector::set() and close() does.
+   *
+   * The vector must have been created writable and not assembled, and the caller restores it
+   * afterwards.
+   * @param value A device-callable functor taking the entry's local and global DOF indices and
+   * returning the entry
+   */
+  template <typename Functor>
+  void setFromDofIndex(const Functor & value);
 #endif
 
 private:
@@ -213,5 +226,34 @@ private:
   const DofSpace * _reduction_dof_space = nullptr;
   ///@}
 };
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename Functor>
+void
+Vector::setFromDofIndex(const Functor & value)
+{
+  mooseAssert(_is_alloc, "Kokkos vector error: setFromDofIndex() on an unallocated vector.");
+  mooseAssert(!_read_only && !_assemble,
+              "Kokkos vector error: setFromDofIndex() needs a writable, unassembled vector.");
+
+  // Local DOF i is global DOF first_dof() + i, the numbering DofSpace builds its local-to-global
+  // map from
+  const auto first_dof = _dof_space->getDofMap().first_dof();
+  const auto local = _local;
+
+  const ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+      0, _dof_space->getNumLocalDofs());
+
+  ::Kokkos::parallel_for(
+      policy, KOKKOS_LAMBDA(const dof_id_type i) { local[i] = value(i, first_dof + i); });
+
+  // A host vector's owned device storage is a staging copy, so the values go back to the PETSc
+  // array it aliases on the host; a device vector's storage is PETSc's array itself
+  if (_is_host)
+    _local.copyToHost();
+  else
+    ::Kokkos::fence();
+}
+#endif
 
 } // namespace Moose::Kokkos

@@ -39,6 +39,17 @@ mooseKokkosInverseShellMult(Mat shell, Vec x, Vec y)
   LibmeshPetscCallQ(KSPSolve(static_cast<KSP>(ctx), x, y));
   return LIBMESH_PETSC_SUCCESS;
 }
+
+/// The unit vector of one global DOF
+struct UnitVectorValue
+{
+  dof_id_type dof;
+
+  KOKKOS_FUNCTION PetscScalar operator()(dof_id_type, const dof_id_type global) const
+  {
+    return global == dof ? 1.0 : 0.0;
+  }
+};
 } // namespace
 
 void
@@ -95,16 +106,17 @@ PMultigrid::verifyLevelOperators()
     Real error = 0;
     Real scale = 0;
 
+    Moose::Kokkos::Vector unit_device;
+
     for (const auto dof : make_range(level_sys.n_dofs()))
     {
       const auto owned = dof >= dof_map.first_dof() && dof < dof_map.end_dof();
 
-      unit->zero();
-
-      if (owned)
-        unit->set(dof, 1.0);
-
-      unit->close();
+      // Written where the vector's data lives, so that the application below reads a unit vector
+      // that is already current on the device
+      unit_device.create(*unit, level->dofSpace(), false);
+      unit_device.setFromDofIndex(UnitVectorValue{dof});
+      unit_device.restore();
 
       level->apply(cache, *unit, *column);
 
@@ -189,7 +201,7 @@ PMultigrid::verifyLevelMatrices()
     auto matrix_free = level_sys.solution->zero_clone();
     auto assembled = level_sys.solution->zero_clone();
 
-    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level_sys);
+    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level->dofSpace());
 
     // Both operators eliminate a fixed row and column, but the assembled one carries a literal
     // identity on the fixed row where the matrix-free one contributes nothing, so the two agree
@@ -290,7 +302,7 @@ PMultigrid::verifyLevelGalerkin()
     auto prolonged = finer_sys.solution->zero_clone();
     auto applied = finer_sys.solution->zero_clone();
 
-    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level.system());
+    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level.dofSpace());
 
     // The hierarchy carries only corrections that vanish on the DOFs a level holds fixed, and the
     // transfers leave those DOFs out of both directions, so the comparison is made on a vector of

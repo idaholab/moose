@@ -8,11 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosLevelTransfer.h"
+#include "KokkosVector.h"
 
 #include "ConsoleStream.h"
 #include "MooseError.h"
 
-#include "libmesh/dof_map.h"
 #include "libmesh/numeric_vector.h"
 
 namespace Moose::Kokkos
@@ -20,18 +20,18 @@ namespace Moose::Kokkos
 
 void
 LevelTransfer::fillVerificationPattern(libMesh::NumericVector<Number> & vector,
-                                       const libMesh::System & sys)
+                                       const DofSpace & dof_space)
 {
-  const auto & dof_map = sys.get_dof_map();
+  Vector device;
+  device.create(vector, dof_space, false);
 
-  vector.zero();
+  // Any pattern that varies from DOF to DOF exercises the transfer; deriving it from the global
+  // index keeps a verification reproducible from run to run and independent of the partitioning
+  device.setFromDofIndex(KOKKOS_LAMBDA(dof_id_type, const dof_id_type global)->PetscScalar {
+    return 1.0 + ::Kokkos::sin(0.7 * (global + 1));
+  });
 
-  for (const auto dof : make_range(dof_map.first_dof(), dof_map.end_dof()))
-    // Any pattern that varies from DOF to DOF exercises the transfer; deriving it from the global
-    // index keeps a verification reproducible from run to run and independent of the partitioning
-    vector.set(dof, 1.0 + std::sin(0.7 * (dof + 1)));
-
-  vector.close();
+  device.restore();
 }
 
 void
@@ -42,8 +42,8 @@ LevelTransfer::verify(const ConsoleStream & console)
   auto prolonged = _fine.sys.solution->zero_clone();
   auto restricted = _coarse.sys.solution->zero_clone();
 
-  fillVerificationPattern(*coarse, _coarse.sys);
-  fillVerificationPattern(*fine, _fine.sys);
+  fillVerificationPattern(*coarse, _coarse.dof_space);
+  fillVerificationPattern(*fine, _fine.dof_space);
 
   prolong(*coarse, *prolonged);
   restrictTo(*fine, *restricted);

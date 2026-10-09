@@ -85,6 +85,20 @@ levelMatRestrict(Mat shell, Vec x, Vec y)
   static_cast<PLevelSpace *>(ctx)->restrictToVec(x, y);
   return LIBMESH_PETSC_SUCCESS;
 }
+
+/**
+ * One on the DOFs a level holds fixed and zero elsewhere, read from the device copy of the level's
+ * constrained-DOF mask
+ */
+struct ConstrainedRowsValue
+{
+  Array<bool> constrained;
+
+  KOKKOS_FUNCTION PetscScalar operator()(const dof_id_type local, dof_id_type) const
+  {
+    return constrained[local] ? 1.0 : 0.0;
+  }
+};
 } // namespace
 
 std::string
@@ -289,19 +303,21 @@ PLevelSpace::setupConstrainedDofs()
 
   _constrained_dof = constraint_operator.constrainedMask();
 
-  // The operator's fixed rows carry the identity, which this vector places there
+  // The operator's fixed rows carry the identity, which this vector places there. It is written
+  // from the device copy of the mask where the vector's data lives, so a device vector is left
+  // current on the device for the operator applications that read it.
   _constrained_rows = &_sys.add_vector("constrained rows", false);
 
-  _constrained_rows->zero();
+  Vector rows;
+  rows.create(*_constrained_rows, dofSpace(), false);
+
+  rows.setFromDofIndex(ConstrainedRowsValue{_constrained_dof});
+
+  rows.restore();
 
   for (const auto dof : make_range(dofSpace().getNumLocalDofs()))
     if (_constrained_dof[dof])
-    {
-      _constrained_rows->set(dof_map.first_dof() + dof, 1.0);
       ++_num_constrained_dofs;
-    }
-
-  _constrained_rows->close();
 
   _sys.comm().sum(_num_constrained_dofs);
 }
