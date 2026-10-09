@@ -78,6 +78,34 @@ convention of the source side. Consequently, the two directional temperature fun
 represent the values seen by their destination regions and naturally produce the two
 sides of the temperature jump. The heat-flux continuity condition is unchanged.
 
+## Surface-to-Surface Radiation
+
+Radiation exchanged between solid surfaces across a transparent fluid can be included by
+setting [!param](/Executioner/SIMPLE/surface_radiation_object_name) to a
+[GrayLambertSurfaceRadiationBase.md] user object, such as [ViewFactorObjectSurfaceRadiation.md].
+The user object must contain at least one boundary listed in
+[!param](/Executioner/SIMPLE/cht_interfaces).
+
+On every CHT interface that belongs to the user object, the net outward radiative heat flux
+density $q_\mathrm{rad}^{\prime\prime}$ leaves the solid without being deposited in the fluid.
+The flux handed to the receiving domain is therefore the conductive flux leaving the source
+domain minus the radiative flux:
+
+\begin{equation}
+    q_\mathrm{to\,side}^{\prime\prime} = q_\mathrm{source}^{\prime\prime} - q_\mathrm{rad}^{\prime\prime}\,.
+\end{equation}
+
+This applies to both the Dirichlet-Neumann and Robin-Robin coupling methods below. The CHT
+iteration is considered converged when the integrated fluxes satisfy
+$Q_s + Q_f - Q_\mathrm{rad} = 0$ on each interface within
+[!param](/Executioner/SIMPLE/cht_heat_flux_tolerance), where $Q_s$ and $Q_f$ are the
+outward conductive heat rates from the solid and fluid and $Q_\mathrm{rad}$ is the net outward
+radiative heat rate.
+
+The user object computes one averaged radiative flux per sideset, which is applied uniformly
+over the corresponding CHT interface. To resolve the spatial distribution of the radiative
+flux, split the walls into several sidesets, for example with [PatchSidesetGenerator.md].
+
 ## Coupling Methods
 
 The methods currently recommended for CHT utilize [LinearFVDirichletCHTBC.md] and

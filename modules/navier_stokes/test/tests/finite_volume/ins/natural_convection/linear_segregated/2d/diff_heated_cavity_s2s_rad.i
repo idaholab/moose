@@ -47,8 +47,8 @@ walls = ${rad_all}
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 60
-    ny = 60
+    nx = 20
+    ny = 20
   []
 
   [patch_left]
@@ -324,9 +324,9 @@ walls = ${rad_all}
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-11
-  pressure_l_abs_tol = 1e-11
-  energy_l_abs_tol = 1e-11
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
+  energy_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -338,9 +338,10 @@ walls = ${rad_all}
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.9
   num_iterations = 1500
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-8
+  # Tight enough that the gold file does not depend on the number of MPI ranks.
+  pressure_absolute_tolerance = 1e-11
+  momentum_absolute_tolerance = 1e-11
+  energy_absolute_tolerance = 1e-11
   print_fields = false
   momentum_l_max_its = 300
 

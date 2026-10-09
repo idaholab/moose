@@ -71,4 +71,15 @@
     requirement = 'The system shall report an error if the surface-to-surface radiation user object supplied to conjugate heat transfer does not share any boundary with the conjugate heat transfer interfaces.'
     max_threads = 1 # Linear FV doesn't support threading at the moment
   []
+
+  [cht_surface_radiation_no_cht_interfaces]
+    type = RunException
+    input = radiative_transfer_no_action_linearfv_simple.i
+    cli_args = "Executioner/surface_radiation_object_name=gray_lambert"
+    expect_err = "Surface radiation coupling requires at least one entry in 'cht_interfaces'."
+    design = 'linear_fv_cht.md'
+    issues = '#33742'
+    requirement = 'The system shall report an error if a surface-to-surface radiation user object is supplied for conjugate heat transfer without any conjugate heat transfer interfaces.'
+    max_threads = 1 # Linear FV doesn't support threading at the moment
+  []
 []

@@ -103,6 +103,9 @@ CHTHandler::CHTHandler(const InputParameters & params)
 {
   if (isParamSetByUser("cht_interfaces") && !_cht_boundary_names.size())
     paramError("cht_interfaces", "You must declare at least one interface!");
+  if (isParamValid("surface_radiation_object_name") && _cht_boundary_names.empty())
+    paramError("surface_radiation_object_name",
+               "Surface radiation coupling requires at least one entry in 'cht_interfaces'.");
 
   const auto & thermal_resistance_names =
       getParam<std::vector<MooseFunctorName>>("thermal_resistance");
@@ -150,13 +153,11 @@ CHTHandler::deduceCHTBoundaryCoupling()
         &getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name");
     _surface_radiation_boundary_ids = _surface_radiation_uo->getSurfaceIDs();
 
-    bool has_cht_surface = false;
-    for (const auto boundary_id : _cht_boundary_ids)
-      if (_surface_radiation_boundary_ids.count(boundary_id))
-      {
-        has_cht_surface = true;
-        break;
-      }
+    const bool has_cht_surface =
+        std::any_of(_cht_boundary_ids.begin(),
+                    _cht_boundary_ids.end(),
+                    [this](const auto boundary_id)
+                    { return _surface_radiation_boundary_ids.count(boundary_id); });
 
     if (!has_cht_surface)
       paramError("surface_radiation_object_name",
@@ -634,7 +635,8 @@ CHTHandler::converged() const
     const Real radiation_flux =
         _surface_radiation_uo ? _integrated_boundary_surface_radiation_heat_flux[i] : 0.0;
 
-    // Special case: all fluxes are zero at startup, but convergence has not been tested yet.
+    // An interface whose fluxes are all zero after the first iteration is balanced. Skip it so
+    // that the remaining interfaces are still checked.
     if (_fpi_it != 0 && f1 == 0.0 && f2 == 0.0 && radiation_flux == 0.0)
       continue;
 
