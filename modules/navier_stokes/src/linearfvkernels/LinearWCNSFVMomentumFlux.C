@@ -9,6 +9,8 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
+#include "NSFVUtils.h"
+#include "MathFVUtils.h"
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
@@ -188,16 +190,7 @@ LinearWCNSFVMomentumFlux::computeInternalStressMatrixContribution()
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
-
-    // If we requested nonorthogonal correction, we use the normal component of the
-    // cell to face vector.
-    const auto d = _use_nonorthogonal_correction
-                       ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
-                       : _current_face_info->dCNMag();
-
-    // Cache the matrix contribution
-    _stress_matrix_contribution = _mu(face_arg, determineState()) / d;
+    _stress_matrix_contribution = computeInternalStressTransmissibility();
     _cached_matrix_contribution = true;
   }
 
@@ -207,101 +200,100 @@ LinearWCNSFVMomentumFlux::computeInternalStressMatrixContribution()
 Real
 LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
 {
-  // We can have contributions to the right hand side in two occasions:
-  // (1) when we use nonorthogonal correction for the normal gradients
-  // (2) when we request the deviatoric parts of the stress tensor. (needed for space-dependent
-  // viscosities for example)
   if (!_cached_rhs_contribution)
   {
-    // scenario (1), we need to add the nonorthogonal correction. In 1D, we don't have
-    // any correction so we just skip this part
-    if (_dim > 1 && _use_nonorthogonal_correction)
-    {
-      const auto face_arg = makeCDFace(*_current_face_info);
-      const auto state_arg = determineState();
-      mooseAssert(_gradient_field,
-                  "Gradient field should be registered when gradients are needed.");
-
-      // Get the gradients from the adjacent cells
-      const auto grad_elem = _gradient_field->gradient(*_current_face_info->elemInfo());
-      const auto grad_neighbor = _gradient_field->gradient(*_current_face_info->neighborInfo());
-
-      // Interpolate the two gradients to the face
-      const auto interp_coeffs =
-          interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
-
-      const auto correction_vector =
-          _current_face_info->normal() -
-          1 / (_current_face_info->normal() * _current_face_info->eCN()) *
-              _current_face_info->eCN();
-
-      // Cache the matrix contribution
-      _stress_rhs_contribution +=
-          _mu(face_arg, state_arg) *
-          (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
-          correction_vector;
-    }
-    // scenario (2), we will have to account for the deviatoric parts of the stress tensor.
-    if (_use_deviatoric_terms)
-    {
-      const auto state_arg = determineState();
-
-      // Interpolate the two gradients to the face
-      const auto interp_coeffs =
-          interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
-
-      RealGradient grad_elem[3];
-      RealGradient grad_neighbor[3];
-      Real trace_elem = 0;
-      Real trace_neighbor = 0;
-      RealVectorValue deviatoric_vector_elem;
-      RealVectorValue deviatoric_vector_neighbor;
-
-      // Loop over every velocity component so we can form the symmetric gradient pieces
-      for (const auto dir : make_range(_dim))
-      {
-        const auto & gradient_field = velocityGradientField(dir);
-        grad_elem[dir] = gradient_field.gradient(*_current_face_info->elemInfo());
-        grad_neighbor[dir] = gradient_field.gradient(*_current_face_info->neighborInfo());
-        trace_elem += grad_elem[dir](dir);
-        trace_neighbor += grad_neighbor[dir](dir);
-      }
-
-      const auto face_arg = makeCDFace(*_current_face_info);
-
-      if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
-      {
-        Real elem_value = 0.0;
-        Real neighbor_value = 0.0;
-        const auto & radial_var = velocityVar(_rz_radial_coord);
-        elem_value = radial_var.getElemValue(*_current_face_info->elemInfo(), state_arg) /
-                     _current_face_info->elemInfo()->centroid()(_rz_radial_coord);
-        neighbor_value = radial_var.getElemValue(*_current_face_info->neighborInfo(), state_arg) /
-                         _current_face_info->neighborInfo()->centroid()(_rz_radial_coord);
-
-        trace_elem += elem_value;
-        trace_neighbor += neighbor_value;
-      }
-
-      // Assemble the explicit transpose/trace contribution component by component
-      for (const auto dir : make_range(_dim))
-      {
-        grad_elem[dir](dir) -= 2. / 3 * trace_elem;
-        grad_neighbor[dir](dir) -= 2. / 3 * trace_neighbor;
-
-        deviatoric_vector_elem(dir) = grad_elem[dir](_index);
-        deviatoric_vector_neighbor(dir) = grad_neighbor[dir](_index);
-      }
-
-      _stress_rhs_contribution += _mu(face_arg, state_arg) *
-                                  (interp_coeffs.first * deviatoric_vector_elem +
-                                   interp_coeffs.second * deviatoric_vector_neighbor) *
-                                  _current_face_info->normal();
-    }
+    _stress_rhs_contribution = computeInternalStressExplicitCorrection();
     _cached_rhs_contribution = true;
   }
 
   return _stress_rhs_contribution;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeInternalStressTransmissibility() const
+{
+  const auto face_arg = makeCDFace(*_current_face_info);
+
+  // A nonorthogonal correction uses the normal component of the cell-to-cell vector.
+  const auto d = _use_nonorthogonal_correction
+                     ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
+                     : _current_face_info->dCNMag();
+
+  return _mu(face_arg, determineState()) / d;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
+{
+  // We can have contributions to the right hand side in two occasions:
+  // (1) when we use nonorthogonal correction for the normal gradients
+  // (2) when we request the deviatoric parts of the stress tensor. (needed for space-dependent
+  // viscosities for example)
+  if ((!_use_nonorthogonal_correction || _dim == 1) && !_use_deviatoric_terms)
+    return 0.0;
+
+  // Scenario (1), add the nonorthogonal correction. In 1D, there is no correction.
+  RealVectorValue correction_vector;
+  if (_dim > 1 && _use_nonorthogonal_correction)
+    correction_vector =
+        _current_face_info->normal() -
+        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+
+  // Interpolate the two cell corrections to the face.
+  const auto interp_coeffs =
+      interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
+  const Real elem_correction =
+      computeCellStressExplicitCorrection(*_current_face_info->elemInfo(), correction_vector);
+  const Real neighbor_correction =
+      computeCellStressExplicitCorrection(*_current_face_info->neighborInfo(), correction_vector);
+
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return _mu(face_arg, determineState()) *
+         (interp_coeffs.first * elem_correction + interp_coeffs.second * neighbor_correction);
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeCellStressExplicitCorrection(
+    const ElemInfo & cell_info, const RealVectorValue & nonorthogonal_correction_vector) const
+{
+  Real correction = 0.0;
+
+  if (_dim > 1 && _use_nonorthogonal_correction)
+  {
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    // Get the kernel variable gradient from this cell.
+    correction += _gradient_field->gradient(cell_info) * nonorthogonal_correction_vector;
+  }
+
+  // Scenario (2), account for the deviatoric parts of the stress tensor.
+  if (_use_deviatoric_terms)
+  {
+    std::array<RealGradient, 3> gradients;
+    Real trace = 0.0;
+    RealVectorValue deviatoric_vector;
+
+    // Loop over every velocity component to form the symmetric gradient pieces.
+    for (const auto dir : make_range(_dim))
+    {
+      gradients[dir] = velocityGradientField(dir).gradient(cell_info);
+      trace += gradients[dir](dir);
+    }
+
+    if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
+      trace += velocityVar(_rz_radial_coord).getElemValue(cell_info, determineState()) /
+               cell_info.centroid()(_rz_radial_coord);
+
+    // Assemble the explicit transpose/trace contribution component by component.
+    for (const auto dir : make_range(_dim))
+    {
+      gradients[dir](dir) -= 2.0 / 3.0 * trace;
+      deviatoric_vector(dir) = gradients[dir](_index);
+    }
+
+    correction += deviatoric_vector * _current_face_info->normal();
+  }
+
+  return correction;
 }
 
 Real

@@ -72,6 +72,20 @@ protected:
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalStressRHSContribution();
 
+  /// Computes the implicit internal-face stress transmissibility.
+  virtual Real computeInternalStressTransmissibility() const;
+
+  /// Computes the explicit internal-face stress correction.
+  virtual Real computeInternalStressExplicitCorrection() const;
+
+  /**
+   * Compute the explicit stress correction reconstructed from one adjacent cell.
+   * @param cell_info The cell where velocity gradients and values are evaluated
+   * @param nonorthogonal_correction_vector The geometric correction vector for this cell
+   */
+  Real computeCellStressExplicitCorrection(
+      const ElemInfo & cell_info, const RealVectorValue & nonorthogonal_correction_vector) const;
+
   /// Computes the matrix contributions of the boundary conditions resulting from the stress tensor
   /// @param bc The boundary condition whose contributions should be used
   Real computeStressBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
@@ -84,12 +98,12 @@ protected:
   /// Computes the matrix contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// Computes the right hand side contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// The dimension of the mesh
   const unsigned int _dim;

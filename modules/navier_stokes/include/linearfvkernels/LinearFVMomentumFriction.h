@@ -12,7 +12,7 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Imposes a friction force on the momentum equation
+ * Imposes Darcy and/or Forchheimer resistance on the momentum equation.
  */
 class LinearFVMomentumFriction : public LinearFVElementalKernel
 {
@@ -21,9 +21,10 @@ public:
   LinearFVMomentumFriction(const InputParameters & params);
 
 protected:
-  virtual Real computeMatrixContribution() override;
-  virtual Real computeRightHandSideContribution() override;
-  Real computeFrictionWCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+  Real computeMatrixContribution() override;
+  Real computeRightHandSideContribution() override;
+  Real computeFrictionCoefficient(const Moose::ElemArg & elem_arg,
+                                  const Moose::StateArg & state) const;
 
   /// Index x|y|z of the momentum equation component
   const unsigned int _index;
@@ -31,6 +32,23 @@ protected:
   /// Darcy coefficient
   const Moose::Functor<RealVectorValue> * const _D;
 
+  /// Forchheimer coefficient
+  const Moose::Functor<RealVectorValue> * const _F;
+
   /// Dynamic viscosity
   const Moose::Functor<Real> * const _mu;
+
+  /// Density
+  const Moose::Functor<Real> * const _rho;
+
+  /// Porosity
+  const Moose::Functor<Real> & _porosity;
+
+  /// Mesh dimension
+  const unsigned int _dim;
+
+  /// Velocity components used to evaluate the Forchheimer speed
+  const Moose::Functor<Real> * const _u;
+  const Moose::Functor<Real> * const _v;
+  const Moose::Functor<Real> * const _w;
 };
