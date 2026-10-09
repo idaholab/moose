@@ -48,6 +48,20 @@ function configure_libtorch()
     ARGS+=("-GNinja")
   fi
   ARGS+=("${@:4}")
+
+  # conda-forge clang (the default_cfg builds, from 20.1.8/21.1.7) reads a configuration file
+  # next to the compiler that adds -isystem $CONDA_PREFIX/include ahead of every command-line
+  # include directory. The environment's protobuf (pulled in by pyarrow) then shadows the protobuf
+  # 3.13 that libtorch vendors and builds against. --no-default-config skips that file; an
+  # activated environment already supplies the same include, -L and rpath flags through
+  # CPPFLAGS/CXXFLAGS and LDFLAGS, after libtorch's own include directories. GCC rejects the flag,
+  # so it is only added for a compiler that accepts it.
+  local c_compiler cxx_compiler c_cfg="" cxx_cfg=""
+  c_compiler="$(underlying_compiler "${CC:-cc}")"
+  cxx_compiler="$(underlying_compiler "${CXX:-c++}")"
+  "$c_compiler" --no-default-config -E -x c /dev/null &> /dev/null && c_cfg="--no-default-config"
+  "$cxx_compiler" --no-default-config -E -x c++ /dev/null &> /dev/null && cxx_cfg="--no-default-config"
+
   # Documenting the flag choices:
   # -DCMAKE_INCLUDE_PATH and -DCMAKE_LIBRARY_PATH are needed to find the PETSc installation,
   #    which is needed to make sure BLAS and LAPACK are compatible with PETSc and vice versa.
@@ -66,9 +80,11 @@ function configure_libtorch()
   # -DUSE_VALGRIND=OFF: we don't need Valgrind support because we don't use PyTorch's C++ API for Python bindings
   #    and we don't use PyTorch's profiler
   # -DUSE_OBSERVERS=OFF: we don't need observers support because we don't use PyTorch's profiler
+  CFLAGS="${c_cfg} ${CFLAGS:-}" \
+  CXXFLAGS="${cxx_cfg} ${CXXFLAGS:-}" \
   cmake \
-    -DCMAKE_C_COMPILER="$(underlying_compiler "${CC:-cc}")" \
-    -DCMAKE_CXX_COMPILER="$(underlying_compiler "${CXX:-c++}")" \
+    -DCMAKE_C_COMPILER="${c_compiler}" \
+    -DCMAKE_CXX_COMPILER="${cxx_compiler}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="$3" \
     -DBUILD_PYTHON=OFF \
