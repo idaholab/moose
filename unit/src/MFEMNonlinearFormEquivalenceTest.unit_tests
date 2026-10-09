@@ -1,0 +1,15 @@
+[Tests]
+  design = '/EquationSystem.md'
+  issues = '#33579'
+
+  [uniform_dirichlet_condition]
+    type = GoogleTest
+    unit_test = MFEMNonlinearFormEquivalenceTest.UniformDirichletCondition
+    requirement = 'The system shall produce the same Newton residual history, solution and Jacobian when a linear term is assembled through the nonlinear form machinery as when the same term is assembled through the bilinear form machinery, under a uniform inhomogeneous Dirichlet condition, and shall impose a unit diagonal on the essential rows of the Jacobian in both cases.'
+  []
+  [space_and_time_dependent_dirichlet_condition]
+    type = GoogleTest
+    unit_test = MFEMNonlinearFormEquivalenceTest.SpaceAndTimeDependentDirichletCondition
+    requirement = 'The system shall produce the same Newton residual history, solution and Jacobian for the bilinear and nonlinear form assembly paths when the Dirichlet condition varies over the boundary and with time and the system is re-formed at more than one time.'
+  []
+[]
