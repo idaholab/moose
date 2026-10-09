@@ -636,6 +636,73 @@ TEST(InputParametersTest, deprecateCoupledVar)
   EXPECT_NE(message->find("01/01/2099"), std::string::npos);
 }
 
+TEST(InputParametersTest, missingRequiredParamErrors)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredParam<Real>("req", "Required doc");
+  params.addParam<Real>("opt", "Optional doc");
+  params.addPrivateParam<Real>("_priv");
+  params.makeParamRequired<Real>("_priv");
+
+  // Without a hit node, the parsing syntax is used as the block path
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 2);
+  EXPECT_EQ(errors[0], "missing required parameter 'Block/_priv'\n\tDoc String: \"\"");
+  EXPECT_EQ(errors[1], "missing required parameter 'Block/req'\n\tDoc String: \"Required doc\"");
+
+  // Skipped by name
+  errors = params.missingRequiredParamErrors("Block", {"req"});
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/_priv'"), std::string::npos);
+
+  // Skipped because private
+  errors = params.missingRequiredParamErrors("Block", {}, true);
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/req'"), std::string::npos);
+
+  // Set required parameters are not reported
+  params.set<Real>("req") = 1;
+  params.set<Real>("_priv") = 2;
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
+}
+
+TEST(InputParametersTest, missingRequiredParamErrorsRenamed)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredParam<Real>("old_param", "Required doc");
+  params.renameParam("old_param", "new_param", "");
+  params.addRequiredCoupledVar("old_var", "Required coupled doc");
+  params.deprecateCoupledVar("old_var", "new_var", "01/01/2099");
+
+  // Missing renamed parameters are reported by their current names
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 2);
+  EXPECT_NE(errors[0].find("'Block/new_param'"), std::string::npos);
+  EXPECT_NE(errors[1].find("'Block/new_var'"), std::string::npos);
+
+  // The old and new names share one value, so setting either satisfies the requirement
+  params.set<Real>("old_param") = 1;
+  params.set<std::vector<VariableName>>("old_var") = {"u"};
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
+}
+
+TEST(InputParametersTest, missingRequiredParamErrorsDeprecatedCoupledVar)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredCoupledVar("new_var", "Required coupled doc");
+  params.addDeprecatedCoupledVar("old_var", "new_var");
+
+  // addDeprecatedCoupledVar keeps a separate parameter for the old name
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/new_var'"), std::string::npos);
+
+  // Setting the old name satisfies the required new name
+  params.set<std::vector<VariableName>>("old_var") = {"u"};
+  EXPECT_FALSE(params.isParamValid("new_var"));
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
+}
+
 TEST(InputParametersTest, noDefaultValueError)
 {
   InputParameters params = emptyInputParameters();

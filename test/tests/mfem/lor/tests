@@ -34,6 +34,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     prereq = MFEMCurlCurlLOR # racing to create the OutputData directory
+    min_slots = 2
   []
   [MFEMGradDivLOR]
     type = CSVDiff

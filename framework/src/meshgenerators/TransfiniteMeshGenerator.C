@@ -333,7 +333,7 @@ TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int np, const std::stri
   for (unsigned int iter = 0; iter < string_points.size(); iter++)
   {
     std::vector<Real> point_vals;
-    MooseUtils::tokenizeAndConvert(string_points[iter], point_vals, " ");
+    MooseUtils::tokenizeAndConvert(string_points[iter], point_vals, " ", true);
     edge[it] = Point(point_vals[0], point_vals[1], point_vals[2]);
     it++;
   }
@@ -351,7 +351,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   std::vector<Point> edge(param_vec.size());
 
   std::vector<Real> param_coords;
-  MooseUtils::tokenizeAndConvert(parameter, param_coords, ";");
+  MooseUtils::tokenizeAndConvert(parameter, param_coords, ";", true);
   Point P3;
   if (param_coords.size() == 1)
   {

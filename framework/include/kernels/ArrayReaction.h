@@ -18,6 +18,8 @@ public:
 
   ArrayReaction(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void computeQpResidual(RealEigenVector & residual) override;
   virtual RealEigenVector computeQpJacobian() override;
