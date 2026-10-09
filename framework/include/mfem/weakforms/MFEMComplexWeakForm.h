@@ -32,6 +32,9 @@ protected:
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
 
+  virtual void addConstraint(const std::string & name,
+                             std::shared_ptr<MFEMConstraint> constraint) override;
+
 private:
   /// The equation system as a ComplexEquationSystem, which is the type this class builds in
   /// makeEquationSystem(). Needed because the AddComplex* methods are declared only on the

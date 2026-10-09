@@ -17,7 +17,17 @@ namespace Moose::MFEM
 {
 
 void
-EigenproblemEquationSystem::ApplyEssentialBCs()
+EigenproblemEquationSystem::AddEssentialConstraint(
+    std::shared_ptr<MFEMEssentialConstraint> constraint)
+{
+  mooseError("Constraint '",
+             constraint->name(),
+             "' cannot be used in an MFEM eigenproblem: essential constraints on interior "
+             "degrees of freedom are not supported by the eigenproblem equation system.");
+}
+
+void
+EigenproblemEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(1);
   _ess_markers.resize(1);
@@ -26,8 +36,8 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
   _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
-  trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+  ApplyEssentialConstraint(
+      _trial_var_names.at(0), trial_gf, _ess_markers.at(0), _ess_tdof_lists.at(0));
   CheckProblemIsHomogeneous();
 }
 
@@ -97,7 +107,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
 
   height = trueX.Size();
   width = trueX.Size();
-  ApplyEssentialBCs();
+  ApplyEssentialConstraints();
   FormEigenproblemMatrix();
   FormMassMatrix(rhs_coefficient);
 }
