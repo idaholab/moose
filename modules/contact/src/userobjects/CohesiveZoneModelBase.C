@@ -132,6 +132,8 @@ CohesiveZoneModelBase::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
+  _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
+
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
   _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
