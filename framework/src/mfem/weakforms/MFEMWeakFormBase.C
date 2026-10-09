@@ -24,13 +24,16 @@ MFEMWeakFormBase::validParams()
       "bcs", {}, "List of boundary conditions to add to the weak form");
   params.addParam<std::vector<MFEMKernelName>>(
       "kernels", {}, "List of kernels to add to the weak form");
+  params.addParam<std::vector<MFEMConstraintName>>(
+      "constraints", {}, "List of constraints to add to the weak form");
   return params;
 }
 
 MFEMWeakFormBase::MFEMWeakFormBase(const InputParameters & parameters)
   : MFEMObject(parameters),
     _bc_names(getParam<std::vector<MFEMBoundaryConditionName>>("bcs")),
-    _kernel_names(getParam<std::vector<MFEMKernelName>>("kernels"))
+    _kernel_names(getParam<std::vector<MFEMKernelName>>("kernels")),
+    _constraint_names(getParam<std::vector<MFEMConstraintName>>("constraints"))
 {
 }
 
@@ -67,6 +70,20 @@ MFEMWeakFormBase::initEquationSystem()
       if (!problem_data.kernels.Has(kernel_name))
         paramError("kernels", "No kernel named '", kernel_name, "' has been added to the problem.");
       addKernel(kernel_name, problem_data.kernels.GetShared(kernel_name));
+    }
+
+  if (_constraint_names.empty()) // default to all constraints added by user
+    for (const auto & [constraint_name, constraint] : problem_data.constraints)
+      addConstraint(constraint_name, constraint);
+  else
+    for (const auto & constraint_name : _constraint_names)
+    {
+      if (!problem_data.constraints.Has(constraint_name))
+        paramError("constraints",
+                   "No constraint named '",
+                   constraint_name,
+                   "' has been added to the problem.");
+      addConstraint(constraint_name, problem_data.constraints.GetShared(constraint_name));
     }
 
   if (problem_data.nonlinear_solver)

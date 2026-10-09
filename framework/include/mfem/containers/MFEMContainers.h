@@ -29,6 +29,7 @@ class ParFiniteElementSpaceHierarchy;
 
 class MFEMKernel;
 class MFEMBoundaryCondition;
+class MFEMConstraint;
 
 namespace Moose::MFEM
 {
@@ -248,6 +249,7 @@ using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
 using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
 using Kernels = NamedFieldsMap<MFEMKernel>;
 using BoundaryConditions = NamedFieldsMap<MFEMBoundaryCondition>;
+using Constraints = NamedFieldsMap<MFEMConstraint>;
 using EquationSystems = NamedFieldsMap<EquationSystem>;
 
 } // namespace Moose::MFEM
