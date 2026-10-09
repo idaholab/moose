@@ -94,7 +94,7 @@
       type = MMSTest
       input = test.py
       test_case = KTLimitedUpwind
-      min_slots = 2 # memory heavy and 2 MPI slots crashes
+      min_slots = 3 # memory heavy and 2 MPI slots crashes
       detail = 'with upwind interpolation of face values and resulting first order convergence'
     []
     [KTLimitedVanLeer]

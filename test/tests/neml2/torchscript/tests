@@ -8,5 +8,6 @@
     exodiff = 'heat_conduction_out.e'
     capabilities = 'libtorch & neml2'
     compute_devices = 'cpu cuda'
+    min_slots = 2
   []
 []
