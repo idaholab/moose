@@ -40,8 +40,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    # Writes the same output files
-    prereq = MFEMCurlCurlPartial
   []
   [MFEMCurlCurlPartialSmootherLORError]
     type = RunException
@@ -380,7 +378,7 @@
     type = CSVDiff
     input = darcy.i
     csvdiff = 'OutputData/Darcy.csv'
-    requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
+    requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM with partial assembly.'
     capabilities = 'mfem'
     cli_args = 'Executioner/assembly_level=partial Solvers/main/type=MFEMGMRESSolver Solvers/main/l_tol=1e-12'
     compute_devices = 'cpu cuda'
