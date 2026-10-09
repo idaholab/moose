@@ -67,3 +67,49 @@
     max_threads = 1
   []
 []
+
+  [form-loss-owner-elem-left-to-right]
+    type = 'CSVDiff'
+    input = form-loss-orientation.i
+    csvdiff = 'form-loss-owner-elem-left-to-right.csv'
+    requirement = 'The system shall apply the irreversible form-loss sign from owner to non-owner when the FaceInfo element owns the jump and the flow travels left to right.'
+    design = 'BernoulliFormLossPressureJump.md porous_rhie_chow_baffle.md'
+    issues = '#31995'
+    cli_args = 'Outputs/file_base=form-loss-owner-elem-left-to-right'
+    recover = false
+    max_threads = 1
+  []
+  [form-loss-owner-elem-right-to-left]
+    type = 'CSVDiff'
+    input = form-loss-orientation.i
+    csvdiff = 'form-loss-owner-elem-right-to-left.csv'
+    requirement = 'The system shall apply the irreversible form-loss sign from owner to non-owner when the FaceInfo element owns the jump and the flow travels right to left.'
+    design = 'BernoulliFormLossPressureJump.md porous_rhie_chow_baffle.md'
+    issues = '#31995'
+    cli_args = "inlet_u=-0.1 velocity_inlet_boundary=right pressure_outlet_boundary=left direction=-1 Outputs/file_base=form-loss-owner-elem-right-to-left"
+    recover = false
+    max_threads = 1
+  []
+  [form-loss-owner-neighbor-left-to-right]
+    type = 'CSVDiff'
+    input = form-loss-orientation.i
+    csvdiff = 'form-loss-owner-neighbor-left-to-right.csv'
+    requirement = 'The system shall apply the irreversible form-loss sign from owner to non-owner when the FaceInfo neighbor owns the jump and the flow travels left to right.'
+    design = 'BernoulliFormLossPressureJump.md porous_rhie_chow_baffle.md'
+    issues = '#31995'
+    cli_args = "primary_block=2 paired_block=1 Outputs/file_base=form-loss-owner-neighbor-left-to-right"
+    recover = false
+    max_threads = 1
+  []
+  [form-loss-owner-neighbor-right-to-left]
+    type = 'CSVDiff'
+    input = form-loss-orientation.i
+    csvdiff = 'form-loss-owner-neighbor-right-to-left.csv'
+    requirement = 'The system shall apply the irreversible form-loss sign from owner to non-owner when the FaceInfo neighbor owns the jump and the flow travels right to left.'
+    design = 'BernoulliFormLossPressureJump.md porous_rhie_chow_baffle.md'
+    issues = '#31995'
+    cli_args = "primary_block=2 paired_block=1 inlet_u=-0.1 velocity_inlet_boundary=right pressure_outlet_boundary=left direction=-1 Outputs/file_base=form-loss-owner-neighbor-right-to-left"
+    recover = false
+    max_threads = 1
+  []
+

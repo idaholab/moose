@@ -1,0 +1,182 @@
+[Tests]
+  issues = '#31995'
+  [form-loss-size-mismatch]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/pressure_jump/form_loss='10'"
+    expect_err = 'Must have the same length as boundary'
+    requirement = 'The system shall reject a form-loss coefficient vector whose length does not match the pressure-jump boundary list.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [reference-side-size-mismatch]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/pressure_jump/form_loss='10 10' UserObjects/pressure_jump/reference_velocity_side='lower_porosity'"
+    expect_err = 'Must have the same length as boundary'
+    requirement = 'The system shall reject a reference-velocity-side vector whose length does not match the pressure-jump boundary list.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [reference-side-without-form-loss]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/pressure_jump/reference_velocity_side='lower_porosity lower_porosity'"
+    expect_err = 'Requires form_loss to be provided'
+    requirement = 'The system shall reject a reference-velocity-side selection when no form-loss coefficients are provided.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [negative-form-loss]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/pressure_jump/form_loss='-1 0'"
+    expect_err = 'All entries must be >= 0'
+    requirement = 'The system shall reject a negative form-loss coefficient.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [nonpositive-jump-density]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'UserObjects/pressure_jump/density=0'
+    expect_err = 'density must be positive on pressure-jump face'
+    requirement = 'The system shall reject a nonpositive density on a pressure-jump face.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [nonpositive-jump-porosity]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'UserObjects/pressure_jump/porosity=0'
+    expect_err = 'porosity must be positive on pressure-jump face'
+    requirement = 'The system shall reject a nonpositive porosity on a pressure-jump face.'
+    design = 'BernoulliFormLossPressureJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [overlapping-jump-boundaries]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/active='pressure_jump duplicate_jump rc' UserObjects/rc/pressure_jump_models='pressure_jump duplicate_jump'"
+    expect_err = 'Pressure jump models must not act on overlapping boundaries'
+    requirement = 'The system shall reject pressure-jump models that act on overlapping boundaries.'
+    design = 'PorousRhieChowMassFlux.md'
+    recover = false
+    max_threads = 1
+  []
+  [reconstructed-wrong-base]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'FVGradientMethods/reconstructed/base_gradient_method=green-gauss'
+    expect_err = "must use the pressure variable's FVPressureJumpGreenGaussGradient as its base_gradient_method"
+    requirement = 'The system shall reject a reconstructed pressure gradient whose base method is not the pressure-jump Green-Gauss method.'
+    design = 'FVPressureJumpGreenGaussGradient.md FVReconstructedPressureGradient.md PorousRhieChowMassFlux.md'
+    recover = false
+    max_threads = 1
+  []
+  [ordinary-pressure-diffusion]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "LinearFVKernels/active='u_advection u_pressure ordinary_p_diffusion HbyA_divergence' UserObjects/rc/p_diffusion_kernel=ordinary_p_diffusion LinearFVKernels/ordinary_p_diffusion/use_nonorthogonal_correction=false"
+    expect_err = 'Pressure jump models require LinearFVPressureCorrectionDiffusionJump'
+    requirement = 'The system shall reject an ordinary pressure-correction diffusion kernel when pressure-jump models are configured.'
+    design = 'PorousRhieChowMassFlux.md LinearFVPressureCorrectionDiffusionJump.md'
+    recover = false
+    max_threads = 1
+  []
+  [two-term-without-reconstruction]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'LinearFVKernels/u_pressure/gradient_method=jump_aware LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true'
+    expect_err = 'Two-term pressure expansion requires the momentum-pressure kernels linked to the Rhie-Chow object to use FVReconstructedPressureGradient'
+    requirement = 'The system shall reject two-term pressure expansion unless the momentum-pressure kernels use a reconstructed pressure gradient.'
+    design = 'LinearFVPressureCorrectionDiffusionJump.md FVReconstructedPressureGradient.md'
+    recover = false
+    max_threads = 1
+  []
+  [nonpositive-face-porosity]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/rc/pressure_jump_models='' UserObjects/rc/porosity=0"
+    expect_err = 'porosity must be positive on face'
+    requirement = 'The system shall reject a nonpositive face porosity in the porous momentum flux kernel.'
+    design = 'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md'
+    recover = false
+    max_threads = 1
+  []
+  [friction-without-model]
+    type = RunException
+    input = kernel-errors.i
+    expect_err = 'Provide Darcy_name, Forchheimer_name, or both'
+    requirement = 'The system shall reject a linear finite-volume friction kernel that provides neither Darcy nor Forchheimer coefficients.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [darcy-without-mu]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='darcy_no_mu'"
+    expect_err = 'The mu parameter is required when Darcy_name is provided'
+    requirement = 'The system shall reject Darcy friction without a viscosity functor.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [forchheimer-without-rho]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='forch_no_rho'"
+    expect_err = 'The rho parameter is required when Forchheimer_name is provided'
+    requirement = 'The system shall reject Forchheimer friction without a density functor.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [forchheimer-without-u]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='forch_no_u'"
+    expect_err = 'The u parameter is required when Forchheimer_name is provided'
+    requirement = 'The system shall reject Forchheimer friction without the x-velocity.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [forchheimer-without-v]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='forch_no_v'"
+    expect_err = 'The v parameter is required for Forchheimer resistance in 2D or 3D'
+    requirement = 'The system shall reject Forchheimer friction in three dimensions without the y-velocity.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [forchheimer-without-w]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='forch_no_w'"
+    expect_err = 'The w parameter is required for Forchheimer resistance in 3D'
+    requirement = 'The system shall reject Forchheimer friction in three dimensions without the z-velocity.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+  [forchheimer-nonpositive-porosity]
+    type = RunException
+    input = kernel-errors.i
+    cli_args = "LinearFVKernels/active='forch_zero_porosity source'"
+    expect_err = 'porosity must be positive when using Forchheimer friction'
+    requirement = 'The system shall reject a nonpositive porosity in Forchheimer friction.'
+    design = 'LinearFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+  []
+[]

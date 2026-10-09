@@ -26,7 +26,6 @@
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
 #include "FVReconstructedPressureGradient.h"
-#include "FVUtils.h"
 #include "MooseUtils.h"
 
 // libMesh includes

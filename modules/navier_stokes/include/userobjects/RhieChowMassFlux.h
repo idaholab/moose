@@ -88,9 +88,6 @@ public:
   }
 
   /// Pressure linear system.
-  LinearSystem & pressureSystem() { return *_pressure_system; }
-
-  /// Pressure linear system.
   const LinearSystem & pressureSystem() const { return *_pressure_system; }
 
   /**
