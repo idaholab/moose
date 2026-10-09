@@ -458,8 +458,9 @@ class InputListingCommand(FileListingCommand):
         out = []
         for block in blocks.split():
             # This first check will attempt to do a strict search for the node
-            # This will help ensure that we get Kernels when we AuxKernels is
-            # in the input file first
+            # For example, this will ensure that we get the Kernels block when:
+            # - we specify block=Kernels
+            # - AuxKernels block shows in the input file first so it matched first on a looser check
             # This same bug would exist for anything that ends with the same
             # thing that another starts with
             node = moosetree.find(
