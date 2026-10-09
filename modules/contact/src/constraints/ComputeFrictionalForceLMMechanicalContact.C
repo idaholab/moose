@@ -220,10 +220,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
-  // Compute the friction coefficient (constant or function)
+  // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
+  // tangential velocity divided by the integral of the same test function, which is the nodal
+  // coefficient of the mortar projection of the relative tangential velocity (Wohlmuth 2011, Acta
+  // Numerica, eq. 3.10a; Faraji et al. 2022, arXiv:2201.01095, eq. 48).
   ADReal mu_ad = computeFrictionValue(contact_pressure,
-                                      _dof_to_real_tangential_velocity[dof][0],
-                                      _dof_to_real_tangential_velocity[dof][1]);
+                                      *tangential_vel[0] / *_normalization_ptr,
+                                      *tangential_vel[1] / *_normalization_ptr);
 
   const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
@@ -273,9 +276,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
-  // Compute the friction coefficient (constant or function)
-  ADReal mu_ad =
-      computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
+  // Compute the friction coefficient (constant or function) from the projected nodal slip rate, as
+  // in enforceConstraintOnDof3d()
+  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel / *_normalization_ptr, 0.0);
 
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};

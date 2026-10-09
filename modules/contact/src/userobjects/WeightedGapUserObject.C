@@ -131,8 +131,6 @@ WeightedGapUserObject::computeQpIProperties()
 
   weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
   normalization += (*_test)[_i][_qp] * _qp_factor;
-
-  _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
 }
 
 void
