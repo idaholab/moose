@@ -18,6 +18,8 @@
 
 #include "libmesh/periodic_boundary_base.h"
 
+#include "timpi/parallel_sync.h"
+
 // C++ includes
 #include <algorithm>
 #include <limits>
@@ -1145,21 +1147,74 @@ GrainTracker::remapGrains()
     // Cache for holding values during swaps
     std::vector<std::map<Node *, CacheValues>> cache(_n_vars);
 
-    // Perform the actual swaps on all processors
-    for (auto & grain : _feature_sets)
+    /**
+     * Each processor only writes the nodes it owns, and in the elemental case it only visits the
+     * nodes of the elements it flooded. A node on the edge of a grain can be owned by a processor
+     * that flooded none of the grain's elements around it, so send those nodes to their owners,
+     * together with the grain's current variable index since the owner may not hold the grain.
+     */
+    using RemoteNode = std::tuple<unsigned int, std::size_t, dof_id_type>;
+    std::map<unsigned int, std::pair<std::size_t, std::set<Node *>>> remote_grain_nodes;
+    if (_is_elemental)
     {
-      // See if this grain was remapped
-      auto new_var_it = grain_id_to_new_var.find(grain._id);
-      if (new_var_it != grain_id_to_new_var.end())
-        swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::FILL);
+      MeshBase & mesh = _mesh.getMesh();
+      std::map<processor_id_type, std::vector<RemoteNode>> to_owner;
+      for (const auto & grain : _feature_sets)
+        if (grain_id_to_new_var.count(grain._id))
+          for (const auto entity : grain._local_ids)
+            if (const Elem * elem = mesh.query_elem_ptr(entity))
+              for (const auto & node : elem->node_ref_range())
+                if (node.processor_id() != processor_id())
+                  to_owner[node.processor_id()].emplace_back(
+                      grain._id, grain._var_index, node.id());
+
+      Parallel::push_parallel_vector_data(
+          _communicator,
+          to_owner,
+          [&](processor_id_type, const std::vector<RemoteNode> & received)
+          {
+            for (const auto & [grain_id, var_index, node_id] : received)
+            {
+              auto & [grain_var_index, nodes] = remote_grain_nodes[grain_id];
+              grain_var_index = var_index;
+              nodes.insert(mesh.node_ptr(node_id));
+            }
+          });
     }
 
-    for (auto & grain : _feature_sets)
+    const std::set<Node *> no_remote_nodes;
+    std::set<unsigned int> local_grain_ids;
+    for (const auto & grain : _feature_sets)
+      local_grain_ids.insert(grain._id);
+
+    for (const auto cache_mode : {RemapCacheMode::FILL, RemapCacheMode::USE})
     {
-      // See if this grain was remapped
-      auto new_var_it = grain_id_to_new_var.find(grain._id);
-      if (new_var_it != grain_id_to_new_var.end())
-        swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::USE);
+      // Perform the actual swaps on all processors
+      for (auto & grain : _feature_sets)
+      {
+        // See if this grain was remapped
+        auto new_var_it = grain_id_to_new_var.find(grain._id);
+        if (new_var_it != grain_id_to_new_var.end())
+        {
+          const auto remote_it = remote_grain_nodes.find(grain._id);
+          swapSolutionValues(grain,
+                             new_var_it->second,
+                             cache,
+                             cache_mode,
+                             remote_it != remote_grain_nodes.end() ? remote_it->second.second
+                                                                   : no_remote_nodes);
+        }
+      }
+
+      // Remap the received nodes of grains this processor holds no part of
+      for (const auto & [grain_id, var_index_nodes] : remote_grain_nodes)
+        if (!local_grain_ids.count(grain_id))
+          for (auto * const node : var_index_nodes.second)
+            swapSolutionValuesHelper(node,
+                                     var_index_nodes.first,
+                                     libmesh_map_find(grain_id_to_new_var, grain_id),
+                                     cache,
+                                     cache_mode);
     }
 
     _sys.solution().close();
@@ -1426,7 +1481,8 @@ void
 GrainTracker::swapSolutionValues(FeatureData & grain,
                                  std::size_t new_var_index,
                                  std::vector<std::map<Node *, CacheValues>> & cache,
-                                 RemapCacheMode cache_mode)
+                                 RemapCacheMode cache_mode,
+                                 const std::set<Node *> & remote_nodes)
 {
   MeshBase & mesh = _mesh.getMesh();
 
@@ -1455,6 +1511,11 @@ GrainTracker::swapSolutionValues(FeatureData & grain,
       swapSolutionValuesHelper(
           mesh.query_node_ptr(entity), grain._var_index, new_var_index, cache, cache_mode);
   }
+
+  // Remap the nodes we own whose grain elements were flooded on other processors
+  for (auto * const curr_node : remote_nodes)
+    if (updated_nodes_tmp.insert(curr_node).second)
+      swapSolutionValuesHelper(curr_node, grain._var_index, new_var_index, cache, cache_mode);
 
   // Update the variable index in the unique grain datastructure after swaps are complete
   if (cache_mode == RemapCacheMode::USE || cache_mode == RemapCacheMode::BYPASS)
