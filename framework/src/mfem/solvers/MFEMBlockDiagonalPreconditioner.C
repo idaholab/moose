@@ -23,36 +23,22 @@ BlockDiagonalPreconditioner::SetOperator(const mfem::Operator & op)
   height = op.Height();
   width = op.Width();
 
-  // cast the incoming operator into a BlockOperator. If it comes out null,
-  // then we have a single-variable system
-  const auto * const block_op = dynamic_cast<const mfem::BlockOperator *>(&op);
+  // MFEMBlockDiagonalPreconditioner rejects single-variable systems, so op is always blocked
+  const auto & block_op = cast_ref<const mfem::BlockOperator &>(op);
 
   // mfem::BlockDiagonalPreconditioner references _offsets, so release it before they change
   _block_diag_precon.reset();
-  if (block_op)
-    _offsets = block_op->RowOffsets();
-  else
-  {
-    // Fallback for using BlockDiagonalPreconditioner with a single variable
-    _offsets.SetSize(2);
-    _offsets[0] = 0;
-    _offsets[1] = op.Height();
-  }
-
+  _offsets = block_op.RowOffsets();
   mooseAssert(static_cast<std::size_t>(_offsets.Size() - 1) == _block_solvers.size(),
               "Number of block solvers does not match the number of diagonal blocks.");
 
   _block_diag_precon = std::make_unique<mfem::BlockDiagonalPreconditioner>(_offsets);
   for (const auto i : index_range(_block_solvers))
   {
-    const mfem::Operator & block =
-        block_op ? block_op->GetBlock(i, i) : op; // just use op if we have single-variable system
     auto & block_solver = *_block_solvers[i];
-    block_solver.SetOperator(const_cast<mfem::Operator &>(block));
-    _block_diag_precon->SetDiagonalBlock(
-        i,
-        &block_solver
-             .GetSolver()); // LinearSolverBase::GetSolver returns ref to underlying mfem object
+    // Set up the sub-solver before adding it, since SetDiagonalBlock checks its dimensions
+    block_solver.SetOperator(const_cast<mfem::Operator &>(block_op.GetBlock(i, i)));
+    _block_diag_precon->SetDiagonalBlock(i, &block_solver.GetSolver());
   }
 }
 
@@ -120,6 +106,16 @@ MFEMBlockDiagonalPreconditioner::UpdateEquationSystemContext()
   // so the sub-solvers are ordered by block index now, instead of at
   // time of construction.
   const auto & trial_var_names = _equation_system->GetTrialVarNames();
+
+  // EquationSystem gives a single-variable system its operator without a block wrapper, and the
+  // preconditioner for that block can then be used directly
+  if (trial_var_names.size() == 1)
+    paramError("variables",
+               "MFEMBlockDiagonalPreconditioner requires a system with more than one trial "
+               "variable. Use the preconditioner for '",
+               trial_var_names[0],
+               "' directly.");
+
   if (trial_var_names.size() != _variables.size())
     paramError("variables", "Must list each trial variable of the equation system exactly once.");
 

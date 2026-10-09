@@ -112,6 +112,22 @@ public:
   }
 
   /**
+   * @returns a reference to the MFEM ParMixedBilinearForm corresponding to test_var_name and
+   * trial_var_name
+   */
+  mfem::ParMixedBilinearForm & GetMixedBilinearForm(const std::string & test_var_name,
+                                                    const std::string & trial_var_name)
+  {
+    if (!_mblfs.Has(test_var_name) || !_mblfs.Get(test_var_name)->Has(trial_var_name))
+      mooseError("No mixed bilinear form couples variable '",
+                 trial_var_name,
+                 "' into the equation for '",
+                 test_var_name,
+                 "'.");
+    return _mblfs.Get(test_var_name)->GetRef(trial_var_name);
+  }
+
+  /**
    * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
    */
   mfem::ParGridFunction & GetGridFunction(const std::string & trial_var_name)
@@ -156,6 +172,8 @@ public:
   bool IsMultivariate() const { return _test_var_names.size() > 1; }
   /// @returns Whether nonlinear integrators are present in the equation system
   bool IsNonlinear() const { return _non_linear; }
+  /// @returns The assembly level used in the equation system
+  mfem::AssemblyLevel GetAssemblyLevel() const { return _assembly_level; }
 
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
