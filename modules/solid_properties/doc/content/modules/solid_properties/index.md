@@ -54,6 +54,7 @@ are also available:
 
 Userobjects available in the Solid Properties module that provide thermal properties are:
 
+- [copper](/ThermalCryogenicOFHCCopperProperties.md)
 - [graphite](/ThermalGraphiteProperties.md)
 - [monolithic silicon carbide](/ThermalMonolithicSiCProperties.md)
 - [composite silicon carbide](/ThermalCompositeSiCProperties.md)
