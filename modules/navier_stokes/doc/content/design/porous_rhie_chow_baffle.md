@@ -35,8 +35,9 @@ J = \frac{1}{2}\left(\rho_o u_{n,o}^2-\rho_n u_{n,n}^2\right),
 u_{n,s}=\frac{\phi_f}{\rho_s\epsilon_s},
 \end{equation}
 
-where $o$ and $n$ denote the owner and non-owner sides. An optional form-loss term adds
-$-\operatorname{sign}(\phi_f)K\rho_f u_{ref}^2/2$. The reference side is selected with
+where $o$ and $n$ denote the owner and non-owner sides. The stored jump $J$ is
+pressure on the non-owner side minus pressure on the owner side. An optional form-loss term adds
+$-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$. The reference side is selected with
 [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side).
 [!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) selects whether the
 reversible term uses side densities or a common interpolated face density. The

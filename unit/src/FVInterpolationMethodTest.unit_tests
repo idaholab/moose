@@ -7,3 +7,11 @@
     requirement = 'The system shall compute the deferred-correction contribution of the MUSCL advected-interpolation scheme, reducing to pure upwinding when the deferred correction factor is zero and reproducing the full linear reconstruction to the face when the deferred correction factor is one.'
   []
 []
+  [harmonic_average_explicit_weights]
+    type = GoogleTest
+    unit_test = FVInterpolationMethodUtilityTest.harmonicAverageWithExplicitWeights
+    requirement = 'The system shall compute harmonic interpolation from explicitly supplied values and weights.'
+    design = 'FVHarmonicAverage.md'
+    issues = '#31995'
+  []
+
