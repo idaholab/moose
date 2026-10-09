@@ -545,6 +545,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_weak_forms", "add_elemental_field_variable");
   addTaskDependency("add_mfem_weak_forms", "add_kernel");
   addTaskDependency("add_mfem_weak_forms", "add_bc");
+  addTaskDependency("add_mfem_weak_forms", "add_constraint");
   addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_kernel_components");
   addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_bc_components");
   addTaskDependency("add_mfem_weak_forms", "add_mfem_fespace_hierarchies");
@@ -860,6 +861,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("WeakForms/*", "MFEMWeakFormName");
   syntax.registerSyntaxType("Kernels/*", "MFEMKernelName");
   syntax.registerSyntaxType("BCs/*", "MFEMBoundaryConditionName");
+  syntax.registerSyntaxType("Constraints/*", "MFEMConstraintName");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask(
