@@ -466,9 +466,9 @@ class InputListingCommand(FileListingCommand):
             node = moosetree.find(
                 hit, lambda n: n.name == block.rstrip("/").split("/")[-1]
             )
-            # Since there is quite a bit of documentation that relies on the
-            # original behavior for finding the blocks we can fall back to the
-            # original search method
+            # The first rule is not sufficient to cover all existing use cases
+            # In particular only using the first rule would break the use of
+            # block/something that is heavily used throughout documentation.
             if node is None:
                 node = moosetree.find(
                     hit, lambda n: n.fullpath.endswith(block.rstrip("/"))
@@ -482,7 +482,7 @@ class InputListingCommand(FileListingCommand):
             render = str(node.render())
             if node.parent != hit:
                 render = render.replace(
-                    f"[{node.name}]", f'[{node.fullpath.strip("/")}]', 1
+                    f"[{node.name}]", f"[{node.fullpath.strip('/')}]", 1
                 )
             out.append(render)
         return pyhit.parse("\n".join(out)) if out else hit
@@ -535,7 +535,6 @@ def get_listing_options(token):
 
 
 class RenderListing(floats.RenderFloat):
-
     def createLatex(self, parent, token, page):
 
         ctoken = token(1)
@@ -574,7 +573,6 @@ class RenderListing(floats.RenderFloat):
 
 
 class RenderListingCode(core.RenderCode):
-
     def createLatex(self, parent, token, page):
         opts = get_listing_options(token)
         latex.Environment(
