@@ -13,6 +13,20 @@
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
   []
+  [EBR-II_SHRT-17_SS_Pacio_test]
+    type = CSVDiff
+    input = 'XX09_SCM_SS17_Pacio.i'
+    csvdiff = 'XX09_SCM_SS17_Pacio_out.csv'
+    heavy = true
+    capabilities = 'method!=dbg'
+    abs_zero = 1e-5
+    rel_err = 2.5e-5
+    valgrind = NONE
+    recover = false
+    design = 'SCMFrictionChenTodreas.md SCMMixingChenTodreas.md'
+    issues = '#33608'
+    requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case with the Pacio-Chen-Todreas friction and mixing parameterizations'
+  []
   [EBR-II_SHRT-45R_SS_test]
     type = CSVDiff
     input = 'XX09_SCM_SS45R.i'

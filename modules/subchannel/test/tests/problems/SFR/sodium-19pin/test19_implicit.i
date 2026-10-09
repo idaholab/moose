@@ -44,21 +44,21 @@ P_out = 2.0e5 # Pa
   verbose_subchannel = true
   duct_HTC_closure = 'gnielinski'
   pin_HTC_closure = 'gnielinski'
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpgradedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

@@ -20,4 +20,12 @@
         recover = false
         requirement = 'The system will examine the tri subchannel solver for lead coolant'
     []
+    [pacio_bare_pins]
+        type = RunException
+        input = test_LBE-19pin.i
+        cli_args = 'SCMClosures/Chen/friction_model=Pacio'
+        expect_err = "The Pacio-Chen-Todreas friction correlation applies only to wire-wrapped triangular assemblies\."
+        issues = '#33608'
+        requirement = 'The system shall reject the Pacio-Chen-Todreas friction correlation for a bare pin triangular assembly.'
+    []
 []

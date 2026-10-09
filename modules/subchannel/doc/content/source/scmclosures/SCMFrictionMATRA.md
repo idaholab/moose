@@ -27,6 +27,9 @@ f_w \rightarrow
 \end{cases}
 \end{equation}
 
+!alert note
+Plots of the friction factor versus Reynolds number for all SCM friction closures are given in [Friction Factor Closures Verification](subchannel/v&v/friction_factor_closures.md).
+
 !syntax parameters /SCMClosures/SCMFrictionMATRA
 
 !syntax inputs /SCMClosures/SCMFrictionMATRA
