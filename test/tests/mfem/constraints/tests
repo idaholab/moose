@@ -106,4 +106,22 @@
     requirement = 'The system shall report an error if a tree-cotree gauge is applied to an H(curl) variable whose finite element space is of higher than first order, since only the lowest-order edge degrees of freedom are gauged'
     capabilities = 'mfem'
   []
+  [MFEMWeakFormConstraints]
+    type = CSVDiff
+    input = two_weak_forms_constraint.i
+    csvdiff = two_weak_forms_constraint_out.csv
+    design = 'MFEMWeakFormBase.md'
+    requirement = 'The system shall be able to add an essential constraint in an MFEM problem only to the weak form that names it, leaving equation systems built by other weak forms unaffected'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMUnknownConstraint]
+    type = RunException
+    input = unknown_constraint.i
+    expect_err = 'NotAConstraint'
+    design = 'MFEMWeakFormBase.md'
+    requirement = 'The system shall report an error if an MFEM weak form names a constraint that has not been added to the problem'
+    capabilities = 'mfem'
+  []
 []
