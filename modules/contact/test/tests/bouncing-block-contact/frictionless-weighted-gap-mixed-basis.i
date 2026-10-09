@@ -161,7 +161,6 @@ offset = 1e-2
   nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = false
-  abort_on_solve_fail = true
   nl_rel_tol = 1e-12
 []
 
