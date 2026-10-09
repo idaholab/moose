@@ -777,8 +777,10 @@ RayTracingStudy::segmentSubdomainSetup(const SubdomainID subdomain,
     if (var->kind() == Moose::VarKindType::VAR_AUXILIARY)
       var->prepareAux();
 
+  _fe_problem.resolveMaterialDependencies(needed_moose_vars, needed_mat_props, subdomain, tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
-  _fe_problem.prepareMaterials(needed_mat_props, subdomain, tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, tid);
 }
 
 void
