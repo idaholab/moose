@@ -88,6 +88,10 @@ ComputeMaterialsObjectThread::subdomainChanged()
 void
 ComputeMaterialsObjectThread::onElement(const Elem * elem)
 {
+  // Evaluate materials on FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   if (_materials.hasActiveBlockObjects(_subdomain, _tid) ||
       _discrete_materials.hasActiveBlockObjects(_subdomain, _tid))
   {

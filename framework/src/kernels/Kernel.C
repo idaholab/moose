@@ -97,9 +97,10 @@ Kernel::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+  if (_assembly.elem()->mapping_type() != libMesh::INVALID_MAP)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
   accumulateTaggedLocalResidual();
 
@@ -114,10 +115,11 @@ Kernel::computeJacobian()
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   precalculateJacobian();
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < _phi.size(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+  if (_assembly.elem()->mapping_type() != libMesh::INVALID_MAP)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
   accumulateTaggedLocalMatrix();
 
