@@ -21,7 +21,7 @@
 #include <unordered_set>
 
 class FEProblemBase;
-class FVGreenGaussGradient;
+class FVTwoSidedFaceInterpolation;
 class SystemBase;
 
 /**
@@ -43,14 +43,15 @@ public:
    * @param fe_problem Reference to the problem
    * @param system The system which contains variables that need gradients.
    * @param temporary_gradient Scratch storage for gradients being assembled.
-   * @param gradient_method Method that supplies internal-face values.
+   * @param two_sided_interpolation Optional interpolation for different element and neighbor face
+   * values.
    */
   ComputeLinearFVGreenGaussGradientFaceThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
       std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
       const std::unordered_set<unsigned int> & gradient_variables,
-      const FVGreenGaussGradient & gradient_method);
+      const FVTwoSidedFaceInterpolation * two_sided_interpolation = nullptr);
 
   /**
    * Splitting constructor.
@@ -98,6 +99,6 @@ protected:
   /// Indices of the variables this producer should compute gradients for.
   const std::unordered_set<unsigned int> & _gradient_variables;
 
-  /// Method providing the two Green-Gauss values on an internal face.
-  const FVGreenGaussGradient & _gradient_method;
+  /// Optional interpolation for internal faces that use different values on their two sides.
+  const FVTwoSidedFaceInterpolation * const _two_sided_interpolation;
 };

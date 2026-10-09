@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
-#include "FVGreenGaussGradient.h"
+#include "FVTwoSidedFaceInterpolation.h"
 #include "LinearFVBoundaryCondition.h"
 #include "SystemBase.h"
 #include "PetscVectorReader.h"
@@ -19,7 +19,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     SystemBase & system,
     std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
     const std::unordered_set<unsigned int> & gradient_variables,
-    const FVGreenGaussGradient & gradient_method)
+    const FVTwoSidedFaceInterpolation * const two_sided_interpolation)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _system(system),
@@ -27,7 +27,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _system_number(_libmesh_system.number()),
     _temporary_gradient(temporary_gradient),
     _gradient_variables(gradient_variables),
-    _gradient_method(gradient_method)
+    _two_sided_interpolation(two_sided_interpolation)
 {
 }
 
@@ -42,7 +42,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     // to compute extrapolated boundary conditions for example.
     _temporary_gradient(x._temporary_gradient),
     _gradient_variables(x._gradient_variables),
-    _gradient_method(x._gradient_method)
+    _two_sided_interpolation(x._two_sided_interpolation)
 {
 }
 
@@ -93,17 +93,23 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
             dof_indices_neighbor[face_i] =
                 face_info->neighborInfo()->dofIndices()[_system_number][_current_var->number()];
 
-            const auto face_values = _gradient_method.internalFaceValues(
-                *face_info,
-                *face_info->elemInfo(),
-                *face_info->neighborInfo(),
-                solution_reader(dof_indices_elem[face_i]),
-                solution_reader(dof_indices_neighbor[face_i]));
+            const Real elem_value = solution_reader(dof_indices_elem[face_i]);
+            const Real neighbor_value = solution_reader(dof_indices_neighbor[face_i]);
+            FVTwoSidedFaceInterpolation::FaceValues face_values;
+            if (_two_sided_interpolation)
+              face_values = _two_sided_interpolation->twoSidedInterpolate(
+                  *face_info, elem_value, neighbor_value);
+            else
+            {
+              const Real face_value =
+                  Moose::FV::linearInterpolation(elem_value, neighbor_value, *face_info, true);
+              face_values = {face_value, face_value};
+            }
 
             const auto surface_vector =
                 face_info->normal() * face_info->faceArea() * face_info->faceCoord();
-            const auto elem_contribution = surface_vector * face_values.first;
-            const auto neighbor_contribution = -surface_vector * face_values.second;
+            const auto elem_contribution = surface_vector * face_values.elem;
+            const auto neighbor_contribution = -surface_vector * face_values.neighbor;
 
             for (const auto i : make_range(_dim))
             {
