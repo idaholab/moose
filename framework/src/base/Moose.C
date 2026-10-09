@@ -846,10 +846,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Transfers
   registerSyntax("AddTransferAction", "Transfers/*");
 
-  // Material derivative test
-  registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
-  registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
-
   registerSyntax("ProjectedStatefulMaterialStorageAction", "ProjectedStatefulMaterialStorage/*");
 
   // Application Block System

@@ -19,11 +19,9 @@
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_variable");
-
-registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_kernel");
-
-registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_preconditioning");
+registerMooseAction("CombinedTestApp", MaterialDerivativeTestAction, "add_variable");
+registerMooseAction("CombinedTestApp", MaterialDerivativeTestAction, "add_kernel");
+registerMooseAction("CombinedTestApp", MaterialDerivativeTestAction, "add_preconditioning");
 
 InputParameters
 MaterialDerivativeTestAction::validParams()

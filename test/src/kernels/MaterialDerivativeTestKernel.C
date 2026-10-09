@@ -9,7 +9,18 @@
 
 #include "MaterialDerivativeTestKernel.h"
 
-registerMooseObject("MooseApp", MaterialDerivativeTestKernel);
+/**
+ * This file is used in the tests for the thermal hydraulics app
+ * to try and prevent duplicate files we simlink to this in the module's test directory
+ * the ifdef allows it to be registered with MooseTestApp when testing in moose/test
+ * and to be registered with ThermalHydraulicsTestApp when building that module
+ * see PR #33926 for a more detailed discussion
+ */
+#ifdef THERMAL_HYDRAULICS_ENABLED
+registerMooseObject("ThermalHydraulicsTestApp", MaterialDerivativeTestKernel);
+#else
+registerMooseObject("MooseTestApp", MaterialDerivativeTestKernel);
+#endif
 
 InputParameters
 MaterialDerivativeTestKernel::validParams()
