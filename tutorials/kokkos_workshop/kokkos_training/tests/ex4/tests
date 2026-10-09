@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosBCs/index.md'
+
+  [ex4]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall apply a convective flux boundary condition implemented through a statically polymorphic base class'
+    [constant]
+      type = CSVDiff
+      input = 'ex4_constant.i'
+      csvdiff = 'ex4_constant_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with a constant heat transfer coefficient,'
+    []
+    [linear]
+      type = CSVDiff
+      input = 'ex4_linear.i'
+      csvdiff = 'ex4_linear_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with a heat transfer coefficient depending linearly on the solution,'
+    []
+    [control]
+      type = CSVDiff
+      input = 'ex4_control.i'
+      csvdiff = 'ex4_control_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with a constant heat transfer coefficient changed in time by a control,'
+    []
+    [jacobian_constant]
+      type = PetscJacobianTester
+      input = 'ex4_constant.i'
+      cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with an exact Jacobian for the constant coefficient, and'
+    []
+    [jacobian_linear]
+      type = PetscJacobianTester
+      input = 'ex4_linear.i'
+      cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with an exact Jacobian for the solution-dependent coefficient.'
+    []
+  []
+[]
