@@ -62,9 +62,9 @@ dt_step = 1e4 # s
   [Chen_Todreas]
     type = SCMMixingChenTodreas
     mixing_model = Pacio
-    # C_T scales only the turbulent exchange of axial momentum, which is the mixing term of the
-    # PCTD governing equations, Eq. (2) of Pacio et al. (2022); it does not change the enthalpy
-    # mixing. C_T = 1 makes the turbulent momentum mixing equal to the enthalpy mixing.
+    # C_T multiplies the mixing parameter in the axial momentum equation, whose mixing term is the
+    # exchange of axial momentum of the PCTD equations, Eq. (2) of Pacio et al. (2022); the enthalpy
+    # mixing uses the mixing parameter without C_T. C_T = 1 applies it unchanged, as in PCTD.
     CT = 1.0
   []
   [Dittus-Boelter]

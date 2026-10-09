@@ -16,7 +16,9 @@ Two figures are written next to this script:
    versus the bulk Reynolds number, Fig. 6 of the paper.
 
 The measured points and the PCTD curves of the paper are read from its figures, so they are accurate
-to about the size of the markers, 0.01 in the flow split and 2% in the friction factor.
+to about the size of the markers, 0.01 in the flow split and 2% in the friction factor. The PCTD curves
+of the flow split are the complete curves of Fig. 7: the constant laminar level, the transition, and
+the constant turbulent level.
 """
 
 from pathlib import Path
@@ -70,14 +72,34 @@ KENNEDY = (
 
 # PCTD curves of Pacio et al. (2022), read from Figs. 7 and 6 of the paper by following the line of
 # each curve: bulk Reynolds number and flow split of the interior, edge, and corner subchannels
-# between the laminar and turbulent boundaries, 700 < Re_b < 10^4, where the flow split changes, and
-# bulk Reynolds number and bulk friction factor
+# between the laminar and turbulent boundaries, 700 < Re_b < 10^4, where the flow split changes
+# steeply near the laminar boundary, and bulk Reynolds number and bulk friction factor
 PAPER_LIANG = {
     "interior": (
         [
-            710,
-            852,
-            1022,
+            691,
+            704,
+            719,
+            734,
+            749,
+            763,
+            779,
+            794,
+            811,
+            820,
+            846,
+            865,
+            879,
+            893,
+            928,
+            933,
+            954,
+            971,
+            977,
+            1053,
+            1059,
+            1075,
+            1081,
             1226,
             1472,
             1766,
@@ -92,9 +114,29 @@ PAPER_LIANG = {
             9100,
         ],
         [
-            0.741,
+            0.712,
+            0.736,
+            0.754,
+            0.762,
+            0.767,
+            0.771,
+            0.775,
+            0.778,
+            0.781,
+            0.783,
             0.788,
-            0.805,
+            0.791,
+            0.794,
+            0.797,
+            0.793,
+            0.794,
+            0.797,
+            0.799,
+            0.8,
+            0.81,
+            0.81,
+            0.812,
+            0.813,
             0.819,
             0.829,
             0.838,
@@ -111,9 +153,28 @@ PAPER_LIANG = {
     ),
     "edge": (
         [
-            710,
-            852,
-            1022,
+            691,
+            704,
+            719,
+            733,
+            749,
+            763,
+            780,
+            795,
+            813,
+            828,
+            845,
+            864,
+            879,
+            896,
+            916,
+            934,
+            955,
+            972,
+            1055,
+            1057,
+            1080,
+            1082,
             1226,
             1472,
             1766,
@@ -128,9 +189,28 @@ PAPER_LIANG = {
             9100,
         ],
         [
-            1.346,
-            1.276,
-            1.25,
+            1.393,
+            1.357,
+            1.329,
+            1.317,
+            1.308,
+            1.302,
+            1.296,
+            1.291,
+            1.287,
+            1.283,
+            1.279,
+            1.275,
+            1.272,
+            1.269,
+            1.265,
+            1.262,
+            1.259,
+            1.257,
+            1.246,
+            1.245,
+            1.24,
+            1.24,
             1.23,
             1.213,
             1.199,
@@ -147,9 +227,30 @@ PAPER_LIANG = {
     ),
     "corner": (
         [
-            710,
-            852,
-            1022,
+            692,
+            704,
+            719,
+            733,
+            748,
+            763,
+            779,
+            796,
+            811,
+            829,
+            846,
+            862,
+            880,
+            899,
+            918,
+            934,
+            955,
+            975,
+            994,
+            1012,
+            1036,
+            1055,
+            1078,
+            1085,
             1226,
             1472,
             1766,
@@ -164,9 +265,30 @@ PAPER_LIANG = {
             9100,
         ],
         [
-            0.627,
-            0.774,
-            0.827,
+            0.541,
+            0.611,
+            0.67,
+            0.693,
+            0.71,
+            0.724,
+            0.735,
+            0.745,
+            0.754,
+            0.763,
+            0.77,
+            0.777,
+            0.784,
+            0.79,
+            0.797,
+            0.802,
+            0.809,
+            0.814,
+            0.82,
+            0.824,
+            0.829,
+            0.834,
+            0.842,
+            0.845,
             0.868,
             0.903,
             0.934,
@@ -219,6 +341,27 @@ PAPER_KENNEDY = (
     ],
 )
 
+# Constant flow split of the PCTD curves of Fig. 7 of the paper in the laminar regime, Re_b <= 700,
+# and in the turbulent regime, Re_b >= 10^4; the flow split changes only between them. The laminar
+# and turbulent boundaries are cbL1 = 700 and cbT1 = 10^4 of Table 5 of the paper.
+PAPER_LAMINAR = {"interior": 0.714, "edge": 1.391, "corner": 0.542}
+PAPER_TURBULENT = {"interior": 0.878, "edge": 1.133, "corner": 1.100}
+RE_LAMINAR, RE_TURBULENT = 700.0, 1.0e4
+# Range of the bulk Reynolds number over which the flat parts of the curves are drawn
+RE_PLOT = (400.0, 3.0e4)
+
+
+def paper_liang_curve(channel):
+    """Full PCTD curve of the paper for a type of subchannel: the constant laminar level up to the
+    laminar boundary, the transition read from the figure, and the constant turbulent level from the
+    turbulent boundary"""
+    Re, X = PAPER_LIANG[channel]
+    return (
+        [RE_PLOT[0]] + list(Re) + [RE_TURBULENT, RE_PLOT[1]],
+        [PAPER_LAMINAR[channel]] + list(X) + [PAPER_TURBULENT[channel]] * 2,
+    )
+
+
 COLORS = {"interior": "black", "edge": "red", "corner": "blue"}
 MARKERS = {"interior": "s", "edge": "o", "corner": "^"}
 
@@ -256,7 +399,7 @@ fig, ax = plt.subplots(figsize=(7.0, 5.0))
 for channel in COLORS:
     ax.plot(Re, X[channel], color=COLORS[channel], label=f"SCM PCTD, {channel}")
     ax.plot(
-        *PAPER_LIANG[channel],
+        *paper_liang_curve(channel),
         color=COLORS[channel],
         linestyle="--",
         label=f"PCTD paper, {channel}",
