@@ -47,6 +47,9 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
     _face_diff(this->getFaceADMaterialProperty<Real>("diffusivity")),
     _alpha(moose_obj->getParam<Real>("alpha"))
 {
+  // _grad_u_sol is also read on element faces, which requires the face request. Both accessors
+  // return the same storage.
+  _u_var.adGradSlnFace();
 }
 
 void
