@@ -1580,8 +1580,18 @@ GrainTracker::updateFieldInfo()
         entity_value = _vars[curr_var]->getNodalValue(*node_ptr);
       }
 
+      /**
+       * An entity on the interface between two grains can have equal values for both, e.g. an
+       * element straddling a sharp initial interface. The solve only resolves such ties to
+       * round-off, which differs with the number of processors, so treat values within
+       * libMesh::TOLERANCE as equal and give the entity to the grain with the lower id.
+       */
+      const auto existing = tmp_map.find(entity);
       if (entity_value != std::numeric_limits<Real>::lowest() &&
-          (tmp_map.find(entity) == tmp_map.end() || entity_value > tmp_map[entity]))
+          (existing == tmp_map.end() ||
+           MooseUtils::absoluteFuzzyGreaterThan(entity_value, existing->second, TOLERANCE) ||
+           (MooseUtils::absoluteFuzzyEqual(entity_value, existing->second, TOLERANCE) &&
+            grain._id < static_cast<unsigned int>(_feature_maps[map_index][entity]))))
       {
         mooseAssert(grain._id != invalid_id, "Missing Grain ID");
         _feature_maps[map_index][entity] = grain._id;
