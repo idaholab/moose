@@ -268,10 +268,19 @@
   [schema_expect_err]
     type = PythonUnitTest
     input = test_SchemaDiff.py
+    test_case = TestHarnessTester
     min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report multiple failures resulting from SchemaDiff operations."
     required_python_packages = 'deepdiff xmltodict'
     collections = 'FAILURE_ANALYSIS'
+  []
+  [schema_string_lists]
+    type = PythonUnitTest
+    input = test_SchemaDiff.py
+    test_case = TestSchemaDiffStringLists
+    requirement = "The system shall report a SchemaDiff difference between whitespace-separated lists of values that differ beyond the tolerances, including lists of negative values."
+    required_python_packages = 'deepdiff packaging'
+    issues = '#33873'
   []
   [test_show_last_results]
     type = PythonUnitTest
