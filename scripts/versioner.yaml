@@ -25,7 +25,7 @@ packages:
       - conda/build
   # dependers: moose-dev
   mpi:
-    version: 2026.08.23
+    version: 2026.10.08
     influential:
       - apptainer/mpi.def
       - apptainer/files/mpi
