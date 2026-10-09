@@ -35,6 +35,7 @@
 
 XFEM::XFEM(const InputParameters & params)
   : XFEMInterface(params),
+    _state_marked_t_step(0),
     _efa_mesh(Moose::out),
     _debug_output_level(1),
     _min_weight_multiplier(0.0)
@@ -119,6 +120,7 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal)
   if (mit != _state_marked_elems.end())
     mooseError(" ERROR: element ", elem->id(), " already marked for crack growth.");
   _state_marked_elems[elem] = normal;
+  _state_marked_t_step = _fe_problem->timeStep();
 }
 
 void
@@ -272,6 +274,9 @@ XFEM::update(Real time,
       mooseError("XFEM does not currently support mesh adaptivity or adaptively refined meshes");
 
   bool mesh_changed = false;
+
+  if (!_state_marked_elems.empty() && _state_marked_t_step == _fe_problem->timeStep())
+    clearStateMarkedElems();
 
   buildEFAMesh();
 
