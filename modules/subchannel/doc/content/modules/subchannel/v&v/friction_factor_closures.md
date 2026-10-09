@@ -91,6 +91,46 @@ The friction closure sets the developed flow split, the mass flux of a subchanne
 | SCM PCTD | 0.9007 | 1.1843 | 1.0169 |
 | DASSH UCTD | 0.8874 | 1.2074 | 1.0344 |
 
+### Comparison with the PCTD paper
+
+SCM PCTD, `friction_model = Pacio` and `mixing_model = Pacio`, is compared with the results shown in [!cite](pacio2022analysis) for two wire-wrapped triangular lattices of its Table 6: the 127-pin MYRRHA bundle of [!cite](kennedy2015experimental), for the bulk friction factor $f_b$, and the 37-pin bundle of [!cite](liang2020experiment), for the flow split. The flow split is the mass flux of a subchannel type divided by the bulk mass flux. The measured points and the PCTD curves of the paper are read from its Figs. 6 and 7, so they are accurate to about the size of the markers: 0.01 in the flow split and 2% in $f_b$.
+
+`pacio_kennedy.i` and `pacio_liang.i` use the geometry of the paper, with the flat-to-flat distance from Eq. (A.6) of the paper. The wire diameter of Kennedy et al., 1.80 mm, exceeds the pin-to-pin gap, $P - D = 1.79$ mm, by 0.01 mm, which the mesh generator rejects, so it is reduced to the gap. The inputs share `pacio_paper.i` and sweep the inlet mass flux with the unheated, 3 m long assembly and the $10^4$ s time steps of the friction factor sweeps, from $Re_b \approx 500$ to $5 \times 10^4$. The fluid is water, since the flow split and $f_b$ depend on the bulk Reynolds number and the geometry, not on the fluid. `pacio_kennedy_mdot.i` and `pacio_liang_mdot.i` report the mass flow rate and flow area of every subchannel at the outlet. Because PCTD lumps the subchannels of each type, the flow split of a type is the sum of the mass flow rates of its subchannels divided by the sum of their flow areas and by the bulk mass flux; with the mixing of SCM, which acts gap by gap, a single subchannel does not represent its type. $f_b$ is calculated from the pressure gradient between $z = 2.0$ m and $z = 2.9$ m, in the developed flow and without gravity, as $f_b = (dP/dz) \, 2 D_{h,b} \rho / G^2$. $C_T = 1$, so that the turbulent mixing of axial momentum, which is the mixing term of the PCTD equations, is equal to the enthalpy mixing; $C_T$ does not change the enthalpy mixing.
+
+!media media_scripts/verification/friction_model_verification/friction_model/scm_pacio_paper.py
+    image_name=scm_pacio_liang.png
+    style=width:60%;margin-bottom:2%;margin:auto;
+    id=scm-pacio-liang
+    caption=Flow split of the interior (black), edge (red), and corner (blue) subchannels of the 37-pin assembly of Liang et al. in SCM PCTD (solid), in the PCTD calculation of the paper (dashed), and measured (markers).
+
+[tab-pacio-liang] gives the difference between the SCM flow split and the PCTD curve of the paper. In the laminar regime, $Re_b \leq 700$, SCM gives 0.714, 1.389, and 0.542 for the interior, edge, and corner subchannels, the same as the paper within the reading accuracy. For $Re_b \geq 10^4$ the flow split is constant, and SCM is within 0.02 of the paper: 0.860, 1.152, and 1.112, against 0.878, 1.133, and 1.100. The interior and edge subchannels also agree within 0.05 in the transition regime. The corner subchannel of SCM has a higher flow split than the paper in the transition regime, up to 0.13 above it near $Re_b = 700$ to $1500$, and approaches the paper as the flow becomes turbulent. This difference has not been isolated. One difference between the two calculations is that the paper interpolates the mixing of the transition regime with the flow splits of the turbulent regime, its Eq. (36), while SCM interpolates the mixing parameter with the Eq. (35) form of the friction factor and evaluates it with the local flow split.
+
+!table id=tab-pacio-liang caption=Mean (maximum) difference between the flow split of SCM PCTD and the PCTD curve of the paper for the 37-pin assembly of Liang et al., over bands of the bulk Reynolds number.
+| $Re_b$ | Interior | Edge | Corner |
+| :- | -: | -: | -: |
+| 700 to 1500 | +0.013 (0.023) | -0.030 (0.043) | +0.124 (0.134) |
+| 1500 to 3000 | -0.002 (0.008) | -0.008 (0.019) | +0.090 (0.111) |
+| 3000 to $10^4$ | -0.014 (0.018) | +0.011 (0.019) | +0.038 (0.069) |
+| $\geq 10^4$ | -0.018 | +0.019 | +0.012 |
+
+Compared with the measurements of Liang et al., SCM PCTD is on average 0.04 above the interior flow split, 0.05 below the edge, and 0.06 below the corner, with root mean square differences of 0.05 to 0.06. For the interior and edge subchannels these are similar to the differences of the paper's own PCTD curves, which also overpredict the interior flow split and underpredict the edge flow split of the measurements at low $Re_b$. The corner flow split of SCM is closer to the measurements than the paper's curve, because it is higher than the curve.
+
+!media media_scripts/verification/friction_model_verification/friction_model/scm_pacio_paper.py
+    image_name=scm_pacio_kennedy.png
+    style=width:60%;margin-bottom:2%;margin:auto;
+    id=scm-pacio-kennedy
+    caption=Bulk friction factor of the 127-pin assembly of Kennedy et al. in SCM PCTD (solid), in the PCTD calculation of the paper (dashed), and measured (markers).
+
+[tab-pacio-kennedy] shows that the SCM bulk friction factor agrees with the PCTD curve of the paper within about 2% over $Re_b$ from 700 to $5 \times 10^4$, except for up to 5% near the laminar boundary of 700, and reproduces the change of slope at the turbulent boundary of $10^4$. Compared with the ten measured points of Kennedy et al., SCM is on average 2.6% low, with a root mean square difference of 5.2%. Most of this comes from the point at $Re_b \approx 4200$, which SCM underpredicts by 13%, as does the paper's curve. For $Re_b > 6000$ the mean difference is -1.4%, and the largest is 7.3%.
+
+!table id=tab-pacio-kennedy caption=Bulk friction factor of the 127-pin assembly of Kennedy et al. in SCM PCTD and in the PCTD curve of the paper.
+| $Re_b$ | Paper | SCM | Difference |
+| :- | -: | -: | -: |
+| 1000 | 0.1062 | 0.1048 | -1.3% |
+| 3000 | 0.0530 | 0.0524 | -1.1% |
+| $10^4$ | 0.0313 | 0.0312 | -0.4% |
+| $3 \times 10^4$ | 0.0258 | 0.0255 | -1.0% |
+
 ### EBR-II XX09, SHRT-17 steady state
 
 The effect of the closures on the flow and temperature distribution is shown for the SHRT-17 steady state of the EBR-II XX09 assembly in [EBR-II.md]. `XX09_SS17.i` runs `validation/EBR-II/XX09_SCM_SS17.i` with UCTD friction and Chen-Todreas (1986) mixing, `mixing_model = 1986` of [SCMMixingChenTodreas.md], or with PCTD friction and mixing via `SCMClosures/Chen/friction_model=Pacio` and `SCMClosures/Chen_Todreas/mixing_model=Pacio`, and reports the mass flow rate and temperature of the subchannels of the TTC thermocouples at $z = 0.322$ m. The turbulent exchange of axial momentum uses $C_T = 1.0$, the default of the mixing closures, for which the momentum and enthalpy turbulent interchange flow rates are equal ([Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer)). `XX09_SCM_SS17.i` uses $C_T = 2.6$, but $C_T$ has been calibrated only for bare pins in a quadrilateral lattice ([thors.md]), and no calibrated value exists for wire-wrapped pins in a triangular lattice.
@@ -164,5 +204,17 @@ Triangular lattice, wire-wrapped pins, developed flow split in steady state:
 EBR-II XX09, SHRT-17 steady state:
 
 !listing /verification/friction_model_verification/friction_model/XX09_SS17.i language=moose
+
+The inputs that reproduce the calculations of the PCTD paper include a shared file:
+
+!listing /verification/friction_model_verification/friction_model/pacio_paper.i language=moose
+
+127-pin assembly of Kennedy et al.:
+
+!listing /verification/friction_model_verification/friction_model/pacio_kennedy.i language=moose
+
+37-pin assembly of Liang et al.:
+
+!listing /verification/friction_model_verification/friction_model/pacio_liang.i language=moose
 
 The DASSH model of EBR-II XX09, SHRT-17 steady state, `dassh_XX09_SS17.txt`, and the script that runs DASSH and writes the DASSH data, `dassh_XX09_SS17.py`, are kept with the [DASSH comparison inputs](https://github.com/kyriv-lab/moose/tree/dassh_XX09_SS17/modules/subchannel/verification/friction_model_verification/friction_model).
