@@ -111,7 +111,7 @@ Typically, it is sufficient to assume that negligible momentum and energy transf
 
 The flow energy equation above is designed to couple to a variable segment wall temperature. For convenience and modularity, additional conjugate heat transfer kernels are added to close the heat transfer through the solid bounding wall. The area-averaged governing equation for which is:
 
-! equation id=pipe_CHT_conservation
+!equation id=pipe_CHT_conservation
 A_w \rho_w c_{p,w} \pd{T_w}{t} = \nabla \cdot \left (k_w \nabla T_w \right ) + q_{i,w}^{''} P_{i,w} - q_{o,w}^{''} P_{o,w}
 
 where
@@ -135,7 +135,7 @@ This equation is discretized on a per-segment basis to match what is done in [!e
 
 Thus, the discretized energy equation for the inner wall temperature is:
 
-! equation id=discretized_inner_pipe_temperature
+!equation id=discretized_inner_pipe_temperature
 A_{i,w} \rho_w c_{p,w} \pd{T_{i,w}}{t} = \frac{k_w P_{m,w} \left( T_{o,w} - T_{i,w} \right)}{\delta} +
 \frac{G_{i,u} \left( T_{i,u} - T_{i,w} \right) + G_{i,d} \left( T_{i,d} - T_{i,w} \right)}{L} +
 h \frac{P_{i,w}}{2} \left( T_f + T_{in} - 2T_{i,w} \right)
