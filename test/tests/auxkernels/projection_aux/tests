@@ -57,6 +57,7 @@
                   AuxVariables/base_elem/order=FIRST
                   ICs/active='linear_elem linear_nodal'"
       detail = "between variables supported in 2d at various orders on a displaced mesh,"
+      min_slots = 2
     []
     [2d_quadratic]
       type = 'CSVDiff'
