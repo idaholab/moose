@@ -35,6 +35,8 @@
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "DirichletBCBase.h"
+#include "LibmeshDirichletBCBase.h"
+#include "LibmeshDirichletValueFunction.h"
 #include "NodalBCBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
@@ -102,6 +104,7 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/dirichlet_boundaries.h"
 #include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
@@ -159,7 +162,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _integrated_bcs(numThreads()),
     _nodal_bcs(/*num_threads=*/1),
     _preset_nodal_bcs(/*num_threads=*/1),
-    _ad_preset_nodal_bcs(/*num_threads=*/1),
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels(/*num_threads=*/1),
     _kokkos_integrated_bcs(/*num_threads=*/1),
@@ -241,6 +243,77 @@ NonlinearSystemBase::preInit()
 }
 
 void
+NonlinearSystemBase::syncLibmeshTime()
+{
+  _sys.time = _fe_problem.time();
+}
+
+void
+NonlinearSystemBase::reinitConstraints()
+{
+  syncLibmeshTime();
+
+  _sys.reinit_constraints();
+}
+
+void
+NonlinearSystemBase::refreshLibmeshDirichletValues()
+{
+  if (!_libmesh_dirichlet_bcs.hasObjects())
+    return;
+
+  auto & dof_map = _sys.get_dof_map();
+
+  // What libMesh constrains on its own -- adaptivity hanging nodes, periodic partners, and the
+  // modes a neighbor's lower p level suppresses -- recorded so that the constraints the sweep below
+  // adds can be told apart from it. Those are all homogeneous, which is what libMesh's own
+  // constraint enforcement carries, so this system leaves them to it.
+  std::set<dof_id_type> preexisting_constraints;
+  for (const auto & [dof, _] : dof_map.get_dof_constraints())
+    preexisting_constraints.insert(dof);
+
+  std::vector<libMesh::DirichletBoundary> boundaries;
+
+  for (const auto & bc : _libmesh_dirichlet_bcs.getObjects())
+  {
+    // A C1 family's projection needs a gradient functor that a MOOSE boundary condition has no way
+    // to supply (libMesh's ConstrainDirichlet::apply_dirichlet_impl only calls a plain-valued
+    // libMesh::FunctionBase for it)
+    if (libMesh::FEInterface::get_continuity(bc->variable().feType()) == libMesh::C_ONE)
+      bc->mooseError("This boundary condition sources its prescribed values from libMesh's "
+                     "Dirichlet constraint machinery, which projects them onto variable '",
+                     bc->variable().name(),
+                     "', whose finite element family has C1 continuity. This is not supported.");
+
+    boundaries.push_back(libMesh::DirichletBoundary(
+        bc->boundaryIDs(), {bc->variable().number()}, LibmeshDirichletValueFunction(*bc)));
+    dof_map.add_dirichlet_boundary(boundaries.back());
+  }
+
+  reinitConstraints();
+
+  // A Dirichlet constraint prescribes its degree of freedom outright, so its row couples to
+  // nothing. libMesh stores no value for a row whose prescribed value is zero, so an absent value
+  // is that zero rather than a missing constraint.
+  _libmesh_dirichlet_values.clear();
+
+  const auto & values = dof_map.get_primal_constraint_values();
+
+  for (const auto & [dof, row] : dof_map.get_dof_constraints())
+    if (row.empty() && !preexisting_constraints.count(dof))
+    {
+      const auto it = values.find(dof);
+      _libmesh_dirichlet_values[dof] = it == values.end() ? 0.0 : it->second;
+    }
+
+  // Put the DofMap back the way it was found, now that the values are copied out
+  for (const auto & boundary : boundaries)
+    dof_map.remove_dirichlet_boundary(boundary);
+
+  reinitConstraints();
+}
+
+void
 NonlinearSystemBase::reinitMortarFunctors()
 {
   // reinit is called on meshChanged() in FEProblemBase. We could implement meshChanged() instead.
@@ -308,7 +381,6 @@ NonlinearSystemBase::initialSetup()
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
     _preset_nodal_bcs.residualSetup();
-    _ad_preset_nodal_bcs.residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels.initialSetup();
@@ -391,7 +463,6 @@ NonlinearSystemBase::timestepSetup()
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
   _preset_nodal_bcs.timestepSetup();
-  _ad_preset_nodal_bcs.timestepSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.timestepSetup();
@@ -427,7 +498,6 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
   _preset_nodal_bcs.customSetup(exec_type);
-  _ad_preset_nodal_bcs.customSetup(exec_type);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.customSetup(exec_type);
@@ -569,7 +639,18 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
     std::shared_ptr<ADDirichletBCBase> addbc = std::dynamic_pointer_cast<ADDirichletBCBase>(bc);
     if (addbc && addbc->preset())
-      _ad_preset_nodal_bcs.addObject(addbc);
+      _preset_nodal_bcs.addObject(addbc);
+
+    // Dirichlet BCs whose prescribed values libMesh projects. These preset like the two families
+    // above, and are additionally kept on their own, since refreshLibmeshDirichletValues() walks
+    // them to build the boundaries it hands libMesh.
+    std::shared_ptr<LibmeshDirichletBCBase> ldbc =
+        std::dynamic_pointer_cast<LibmeshDirichletBCBase>(bc);
+    if (ldbc)
+    {
+      _preset_nodal_bcs.addObject(ldbc);
+      _libmesh_dirichlet_bcs.addObject(ldbc);
+    }
   }
 
   // IntegratedBCBase
@@ -951,6 +1032,10 @@ NonlinearSystemBase::setInitialSolution()
       _console << " Skipping predictor this step" << std::endl;
   }
 
+  // Reproject before the preset dispatch below reads the values back out, so that a prescribed
+  // value depending on time is the one this solve is taken at
+  refreshLibmeshDirichletValues();
+
   // do nodal BC
   {
     TIME_SECTION("initialBCs", 2, "Applying BCs To Initial Condition");
@@ -963,23 +1048,12 @@ NonlinearSystemBase::setInitialSolution()
 
       if (node->processor_id() == processor_id())
       {
-        bool has_preset_nodal_bcs = _preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
-        bool has_ad_preset_nodal_bcs = _ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
-
-        // reinit variables in nodes
-        if (has_preset_nodal_bcs || has_ad_preset_nodal_bcs)
+        if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+        {
+          // reinit variables in nodes
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        if (has_preset_nodal_bcs)
-        {
-          const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs)
-            preset_bc->computeValue(initial_solution);
-        }
-        if (has_ad_preset_nodal_bcs)
-        {
-          const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs_res)
+          for (const auto & preset_bc : _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id))
             preset_bc->computeValue(initial_solution);
         }
       }
@@ -1728,7 +1802,6 @@ NonlinearSystemBase::residualSetup()
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
   _preset_nodal_bcs.residualSetup();
-  _ad_preset_nodal_bcs.residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.residualSetup();
@@ -2993,7 +3066,6 @@ NonlinearSystemBase::jacobianSetup()
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
   _preset_nodal_bcs.jacobianSetup();
-  _ad_preset_nodal_bcs.jacobianSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.jacobianSetup();
@@ -3428,7 +3500,6 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _general_dampers.updateActive();
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
-    _ad_preset_nodal_bcs.updateActive();
     _splits.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();

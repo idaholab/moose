@@ -22,7 +22,7 @@ public:
   /**
    * Method to preset the nodal value if applicable
    */
-  virtual void computeValue(NumericVector<Number> & current_solution) = 0;
+  virtual void computeValue(NumericVector<Number> & current_solution) override = 0;
 
   static InputParameters validParams();
 
