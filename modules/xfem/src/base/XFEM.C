@@ -1501,11 +1501,13 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
               std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
   }
 
-  // add sibling elems on displaced mesh
+  // add sibling elems on displaced mesh, rebuilding the list from the undisplaced one so that pairs
+  // from previous updates are not duplicated
   if (_displaced_mesh)
   {
     for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
     {
+      _sibling_displaced_elems[_geometric_cuts[i]->getInterfaceID()].clear();
       for (auto & se : _sibling_elems[_geometric_cuts[i]->getInterfaceID()])
       {
         Elem * elem = _displaced_mesh->elem_ptr(se.first->id());
