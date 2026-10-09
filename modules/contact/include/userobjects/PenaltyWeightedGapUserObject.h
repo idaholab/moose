@@ -96,6 +96,14 @@ protected:
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
 
+  /// Augmented lagrange multipliers at the start of the current timestep, restored when the
+  /// timestep is retried so the retry starts from the accepted state
+  std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier_start;
+
+  /// The timestep index at which _dof_to_lagrange_multiplier_start was last saved. Used to detect a
+  /// retried timestep, since timestepSetup() runs once per time step attempt.
+  int & _t_step_old_normal;
+
   /// Map from degree of freedom to local penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty;
 

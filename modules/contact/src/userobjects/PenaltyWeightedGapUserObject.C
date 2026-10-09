@@ -78,6 +78,7 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
+    _t_step_old_normal(declareRestartableData<int>("t_step_old_normal", 0)),
     _dt(_fe_problem.dt()),
     _use_physical_gap(getParam<bool>("use_physical_gap")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
@@ -203,6 +204,15 @@ PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
   // Let's not clear the LMs for improved performance in
   // nonlinear problems
+
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the LMs hold the discarded attempt's values; restore the accepted ones
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_normal;
+  _t_step_old_normal = _fe_problem.timeStep();
+  if (retried_timestep)
+    _dof_to_lagrange_multiplier = _dof_to_lagrange_multiplier_start;
+  else
+    _dof_to_lagrange_multiplier_start = _dof_to_lagrange_multiplier;
 
   // reset penalty
   for (auto & dof_lp : _dof_to_local_penalty)
