@@ -20,14 +20,14 @@ build:
     # things that depend on this moose-dev must use the
     # exact moose-* packages that this was built with
     - moose-build 2026.09.22 {{ mpi }}
-    - moose-libmesh 2026.08.18_0772c3d {{ mpi }}_2
+    - moose-libmesh 2026.10.08_342ad76 {{ mpi }}_0
     - moose-wasp 2026.08.13_ce25dcd build_2
     - moose-tools 2026.09.22
 
 requirements:
   run:
     - moose-build 2026.09.22 {{ mpi }}
-    - moose-libmesh 2026.08.18_0772c3d {{ mpi }}_2
+    - moose-libmesh 2026.10.08_342ad76 {{ mpi }}_0
     - moose-wasp 2026.08.13_ce25dcd build_2
     - moose-tools 2026.09.22
   run_constrained:
