@@ -12,7 +12,7 @@
 #include "GeneralReporter.h"
 
 /**
- *  Base class for subcritical crack growth reporters
+ * Base class for crack growth reporters
  */
 class CrackMeshCut3DUserObject;
 class CrackGrowthReporterBase : public GeneralReporter
@@ -30,7 +30,7 @@ protected:
    * in an internal data structure.
    * @param index Vector of crack front point indices from the cutter mesh.
    */
-  virtual void computeGrowth(std::vector<int> & index) = 0;
+  virtual void computeGrowth(const std::vector<int> & index) = 0;
 
   /// cutter mesh object name
   const UserObjectName & _cutter_name;
@@ -39,8 +39,10 @@ protected:
   /// Maximum crack growth increment allowed for any of the crack front points
   const Real _max_growth_increment;
 
-  /// The name of the reporter with K_I fracture integral values
+  /// K_I fracture integral values
   const std::vector<Real> & _ki_vpp;
+  /// K_II fracture integral values
+  const std::vector<Real> & _kii_vpp;
 
   ///@{
   /// Crack front point locations where fracture integrals are computed, stored as the
@@ -60,12 +62,18 @@ protected:
   std::vector<Real> & _id;
   ///@}
 
+  ///@{
+  /// Fracture integral values for output
+  std::vector<Real> & _ki;
+  std::vector<Real> & _kii;
+  ///@}
+
 private:
   /**
    * get indexing from the cutter mesh
    * @return the cutter mesh index vector
    */
   std::vector<int> getCutterMeshIndices() const;
-  /// copy data into coordinate reporters
-  void copyCoordinates() const;
+  /// Copy VectorPostprocessor data into reporters
+  void copyVectorPostprocessorValues();
 };

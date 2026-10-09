@@ -27,6 +27,8 @@
 #include "EFAFuncs.h"
 #include "EFAError.h"
 
+#include <algorithm>
+
 ElementFragmentAlgorithm::ElementFragmentAlgorithm(std::ostream & os) : _ostream(os) {}
 
 ElementFragmentAlgorithm::~ElementFragmentAlgorithm()
@@ -262,9 +264,14 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
   if (!curr_elem)
     EFAError("addElemEdgeIntersection: elem ", elemid, " is not of type EFAelement2D");
 
-  // add cuts to two face edges at the same time
-  curr_elem->addFaceEdgeCut(faceid, edgeid[0], position[0], nullptr, _embedded_nodes, true, true);
-  curr_elem->addFaceEdgeCut(faceid, edgeid[1], position[1], nullptr, _embedded_nodes, true, true);
+  // add cuts to two face edges at the same time. The two cuts are distinct physical points, so
+  // each gets its own in/out embedded node that addFaceEdgeCut creates or reconciles.
+  EFANode * embedded_node0 = nullptr;
+  EFANode * embedded_node1 = nullptr;
+  curr_elem->addFaceEdgeCut(
+      faceid, edgeid[0], position[0], embedded_node0, _embedded_nodes, true, true);
+  curr_elem->addFaceEdgeCut(
+      faceid, edgeid[1], position[1], embedded_node1, _embedded_nodes, true, true);
 }
 
 void
@@ -280,13 +287,26 @@ ElementFragmentAlgorithm::addFragFaceIntersection(
 void
 ElementFragmentAlgorithm::updatePhysicalLinksAndFragments()
 {
-  // loop over the elements in the mesh
+  // Sweep every element because independent single-hop cut propagation can leave the same phantom
+  // embedded node referenced more than one element away from where it was grouped.
+  std::vector<EFANode *> invalid_emb;
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
+    eit->second->prepareForFragmentUpdate(_crack_tip_elements, _embedded_nodes, invalid_emb);
+
+  if (!invalid_emb.empty())
   {
-    EFAElement * curr_elem = eit->second;
-    curr_elem->updateFragments(_crack_tip_elements, _embedded_nodes);
-  } // loop over all elements
+    // Deduplicate -- the same node may be flagged by more than one element.
+    std::sort(invalid_emb.begin(), invalid_emb.end());
+    invalid_emb.erase(std::unique(invalid_emb.begin(), invalid_emb.end()), invalid_emb.end());
+
+    for (auto & [_, elem] : _elements)
+      for (EFANode * emb : invalid_emb)
+        elem->purgeEmbeddedNodeReferences(emb);
+  }
+
+  for (eit = _elements.begin(); eit != _elements.end(); ++eit)
+    eit->second->updateFragments(_crack_tip_elements, _embedded_nodes);
 }
 
 void
