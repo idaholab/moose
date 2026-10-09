@@ -19,13 +19,14 @@ public:
   KokkosXYBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosXYBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosXYBodyForce::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return (datum.q_point(qp)(0) + datum.q_point(qp)(1)) *
-         KokkosBodyForce::precomputeQpResidual<Derived>(qp, datum);
+         KokkosBodyForce::precomputeQpResidualValue<Derived>(qp, datum);
 }

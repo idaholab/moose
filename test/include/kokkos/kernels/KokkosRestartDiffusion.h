@@ -21,14 +21,12 @@ public:
   virtual void timestepSetup() override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
 protected:
   Moose::Kokkos::Scalar<unsigned int> _step;
@@ -37,20 +35,17 @@ protected:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosRestartDiffusion::computeQpResidual(const unsigned int i,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosRestartDiffusion::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _coef(_step) * KokkosDiffusion::computeQpResidual<Derived>(i, qp, datum);
+  return _coef(_step) * KokkosDiffusion::precomputeQpResidualGrad<Derived>(qp, datum);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosRestartDiffusion::computeQpJacobian(const unsigned int i,
-                                          const unsigned int j,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosRestartDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const
 {
-  return _coef(_step) * KokkosDiffusion::computeQpJacobian<Derived>(i, j, qp, datum);
+  return _coef(_step) * KokkosDiffusion::precomputeQpJacobianGrad<Derived>(j, qp, datum);
 }

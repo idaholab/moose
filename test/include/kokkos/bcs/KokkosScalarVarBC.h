@@ -23,20 +23,18 @@ public:
   KokkosScalarVarBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int /* qp */,
+                                                 AssemblyDatum & datum) const
   {
-    return -_alpha(datum, 0) * _test(datum, i, qp);
+    return -_alpha(datum, 0);
   }
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobianScalar(const unsigned int i,
-                                                      const unsigned int /* j */,
-                                                      const unsigned int jvar,
-                                                      const unsigned int qp,
-                                                      AssemblyDatum & datum) const
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianScalarValue(const unsigned int /* j */,
+                                                              const unsigned int jvar,
+                                                              const unsigned int /* qp */,
+                                                              AssemblyDatum & /* datum */) const
   {
-    return jvar == _alpha_var ? -_test(datum, i, qp) : 0;
+    return jvar == _alpha_var ? -1 : 0;
   }
 
 protected:

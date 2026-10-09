@@ -253,9 +253,9 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION Real33 getJacobian(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real33 getDxiDx(ElementInfo info, unsigned int qp) const
   {
-    return _jacobian[info.subdomain][getQpOffset(info) + qp];
+    return _dxi_dx[info.subdomain][getQpOffset(info) + qp];
   }
   /**
    * Get the transformed Jacobian weight of an element quadrature point
@@ -298,13 +298,13 @@ public:
    * Compute physical transformation data for an element
    * @param info The element information object
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points) const;
   /**
@@ -312,7 +312,7 @@ public:
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    * @param normal The pointer to store normal vector
@@ -320,7 +320,7 @@ public:
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int side,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points,
                                           Real3 * const normal) const;
@@ -454,7 +454,7 @@ private:
    * Cached physical maps on element quadrature points
    */
   ///@{
-  Array<Array<Real33>> _jacobian;
+  Array<Array<Real33>> _dxi_dx;
   Array<Array<Real>> _jxw;
   Array<Array<Real3>> _xyz;
   ///@}
@@ -519,7 +519,7 @@ Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
 KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points) const
 {
@@ -538,14 +538,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian || JxW)
+    if (dxi_dx || JxW)
       J += grad_phi(node, qp).cartesian_product(points);
 
     xyz += phi(node, qp) * points;
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  if (dxi_dx)
+    *dxi_dx = J.inverse(_dimension);
 
   if (JxW)
     *JxW =
@@ -559,7 +559,7 @@ KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int side,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points,
                              Real3 * const normal) const
@@ -586,7 +586,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian)
+    if (dxi_dx)
       J += grad_phi(node, qp).cartesian_product(points);
 
     if (JxW || q_points)
@@ -601,8 +601,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
     }
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  if (dxi_dx)
+    *dxi_dx = J.inverse(_dimension);
 
   if (q_points)
     *q_points = xyz;

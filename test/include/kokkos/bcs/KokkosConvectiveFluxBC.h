@@ -19,14 +19,12 @@ public:
   KokkosConvectiveFluxBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 private:
   const Real _initial;
@@ -37,9 +35,8 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveFluxBC::computeQpResidual(const unsigned int i,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const
+KokkosConvectiveFluxBC::precomputeQpResidualValue(const unsigned int qp,
+                                                  AssemblyDatum & datum) const
 {
   Real value;
 
@@ -48,15 +45,14 @@ KokkosConvectiveFluxBC::computeQpResidual(const unsigned int i,
   else
     value = _final;
 
-  return -(_test(datum, i, qp) * _rate * (value - _u(datum, qp)));
+  return -(_rate * (value - _u(datum, qp)));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveFluxBC::computeQpJacobian(const unsigned int i,
-                                          const unsigned int j,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const
+KokkosConvectiveFluxBC::precomputeQpJacobianValue(const unsigned int j,
+                                                  const unsigned int qp,
+                                                  AssemblyDatum & datum) const
 {
-  return -(_test(datum, i, qp) * _rate * (-_phi(datum, j, qp)));
+  return _rate * _phi(datum, j, qp);
 }

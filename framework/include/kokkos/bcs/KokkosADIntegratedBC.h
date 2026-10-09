@@ -15,127 +15,168 @@ namespace Moose::Kokkos
 {
 
 /**
- * The base class for a user to derive their own Kokkos integrated boundary conditions using
- * automatic differentiation (AD).
+ * The base class for a user to derive their own Kokkos integrated boundary conditions whose
+ * Jacobians are computed with pointwise automatic differentiation (AD).
  *
- * The user should define computeQpResidual() as inlined public methods in their derived class (not
- * virtual override). The signature of computeQpResidual() expected to be defined in the derived
- * class is as follows:
- *
- * @tparam Derived The object type
- * @param i The element-local DOF index
- * @param qp The local quadrature point index
- * @param datum The AssemblyDatum object of the current thread
- * @returns The residual contribution
+ * The residual takes the form of a Kokkos integrated BC, defined through the
+ * precomputeQpResidualValue() and precomputeQpResidualGrad() hooks, of which at least one must be
+ * defined:
  *
  * template <typename Derived>
- * KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int i,
- *                                                         const unsigned int qp,
- *                                                         AssemblyDatum & datum) const;
+ * KOKKOS_FUNCTION DenseADReal<max_ad_slots> precomputeQpResidualValue(const unsigned int qp,
+ *                                                                     AssemblyDatum & datum) const;
+ * template <typename Derived>
+ * KOKKOS_FUNCTION DenseADReal3<max_ad_slots> precomputeQpResidualGrad(const unsigned int qp,
+ *                                                                     AssemblyDatum & datum) const;
  *
- * Note that computeQpJacobian() and computeQpOffDiagJacobian() are unused for AD integrated
- * boundary conditions.
+ * The derivative directions of the dual numbers are the quadrature point quantities the BC
+ * reads through its AD accessors: one slot for each value and three for each gradient of a
+ * nonlinear variable that the coupling matrix couples to the BC variable. The derived class
+ * declares an upper bound on that number as
+ *
+ *   static constexpr unsigned int max_ad_slots = ...;
+ *
+ * and creates its accessors with adCoupledValue(), adCoupledGradient(), adCoupledDot(), or their
+ * counterparts on the BC variable.
  */
 class ADIntegratedBC : public IntegratedBCBase
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Constructor
-   */
+  /// AD integrated BCs dispatch one team per boundary side, whose threads share the quadrature
+  /// point terms
+  static constexpr bool uses_team_dispatch = true;
+
   ADIntegratedBC(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeResidualAndJacobian() override;
 
   /**
-   * The parallel computation entry function called by Kokkos
+   * The team operation called by Kokkos for each boundary side
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const;
+  KOKKOS_FUNCTION void
+  operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & bc) const;
 
   /**
-   * Compute residual
-   * @param bc The boundary condition object of the final derived type
-   * @param datum The AssemblyDatum object of the current thread
+   * Get the slot table of the AD accessors
    */
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION const ADSlotTable & adSlotTable() const { return _ad_slots; }
 
 protected:
   /**
-   * Dispatch parallel calculation
+   * Create AD accessors of a coupled variable or of the BC variable
+   * @tparam slots The max_ad_slots of the derived class
    */
-  virtual void dispatch();
+  ///@{
+  template <unsigned int slots>
+  ADVariableValue<slots> adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  template <unsigned int slots>
+  ADVariableGradient<slots> adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+  template <unsigned int slots>
+  ADVariableValue<slots> adCoupledDot(const std::string & var_name, unsigned int comp = 0);
+  template <unsigned int slots>
+  ADVariableValue<slots> adValue();
+  template <unsigned int slots>
+  ADVariableGradient<slots> adGradient();
+  template <unsigned int slots>
+  ADVariableValue<slots> adDot();
+  ///@}
 
+  /// Test function values and gradients, for derived classes that need them in their hooks
+  ///@{
+  const VariableTestValue _test;
+  const VariableTestGradient _grad_test;
+  ///@}
+
+private:
   /**
-   * Current test function
+   * Dispatch the residual and Jacobian computation
    */
-  const ADVariableTestValue _test;
-  /**
-   * Gradient of the current test function
-   */
-  const ADVariableTestGradient _grad_test;
-  /**
-   * Current shape function
-   */
-  const ADVariablePhiValue _phi;
-  /**
-   * Gradient of the current shape function
-   */
-  const ADVariablePhiGradient _grad_phi;
-  /**
-   * Current solution at quadrature points
-   */
-  const ADVariableValue _u;
-  /**
-   * Gradient of the current solution at quadrature points
-   */
-  const ADVariableGradient _grad_u;
-  /**
-   * Whether computing residual
-   */
+  void dispatch();
+
+  /// Registration of the AD accessors created during construction
+  ADSlotSetup _ad_setup;
+  /// Slot table of the AD accessors
+  ADSlotTable _ad_slots;
+  /// Number of derivative slots declared by the derived class
+  unsigned int _max_ad_slots = 0;
+  /// Whether the residual is being computed
   bool _computing_residual = false;
-  /**
-   * Whether computing Jacobian
-   */
+  /// Whether the Jacobian is being computed
   bool _computing_jacobian = false;
 };
 
-template <typename Derived>
-KOKKOS_FUNCTION void
-ADIntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
+template <unsigned int slots>
+ADVariableValue<slots>
+ADIntegratedBC::adCoupledValue(const std::string & var_name, const unsigned int comp)
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  ADVariableValue<slots> value(kokkosCoupledValue(var_name, comp));
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
+}
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+template <unsigned int slots>
+ADVariableGradient<slots>
+ADIntegratedBC::adCoupledGradient(const std::string & var_name, const unsigned int comp)
+{
+  ADVariableGradient<slots> gradient(kokkosCoupledGradient(var_name, comp));
+  _ad_setup.add(gradient.slot(), gradient.variable(), true);
+  return gradient;
+}
 
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
+template <unsigned int slots>
+ADVariableValue<slots>
+ADIntegratedBC::adCoupledDot(const std::string & var_name, const unsigned int comp)
+{
+  ADVariableValue<slots> value(kokkosCoupledDot(var_name, comp));
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
+}
 
-  datum.do_derivatives(_computing_jacobian);
+template <unsigned int slots>
+ADVariableValue<slots>
+ADIntegratedBC::adValue()
+{
+  ADVariableValue<slots> value{VariableValue(_var)};
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
+}
 
-  bc.computeResidualInternal(bc, datum);
+template <unsigned int slots>
+ADVariableGradient<slots>
+ADIntegratedBC::adGradient()
+{
+  ADVariableGradient<slots> gradient{VariableGradient(_var)};
+  _ad_setup.add(gradient.slot(), gradient.variable(), true);
+  return gradient;
+}
+
+template <unsigned int slots>
+ADVariableValue<slots>
+ADIntegratedBC::adDot()
+{
+  ADVariableValue<slots> value{VariableValue(_var, Moose::SOLUTION_DOT_TAG)};
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-ADIntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const
+ADIntegratedBC::operator()(ResidualLoop,
+                           const TeamMember<ResidualLoop> & team,
+                           const Derived & bc) const
 {
-  for (unsigned int i = datum.local_thread_id(); i < datum.n_dofs(); i += datum.num_local_threads())
-  {
-    ADReal local_re = 0;
+  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
 
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-      local_re += datum.JxW(qp) * bc.template computeQpResidual<Derived>(i, qp, datum);
+  AssemblyDatum datum(
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-    if (_computing_residual)
-      accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i);
-    if (_computing_jacobian)
-      accumulateTaggedElementalMatrix(local_re.derivatives(), datum, i);
-  }
+  assembleADTerms(bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 } // namespace Moose::Kokkos

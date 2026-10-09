@@ -10,17 +10,32 @@
 #pragma once
 
 #include "KokkosKernelBase.h"
+#include "KokkosPrecomputeHooks.h"
 
 namespace Moose::Kokkos
 {
 
 /**
- * The base class for a user to derive their own Kokkos vector kernels on vector variables.
+ * The base class for a user to derive their own Kokkos kernels on vector variables.
+ *
+ * A Kokkos vector kernel computes its residual contribution as a sum of terms, each the product of
+ * a coefficient computed once per quadrature point and one test function quantity:
+ *
+ *   R_i = sum_qp JxW (f_value . psi_i + f_grad : grad psi_i + f_curl . curl psi_i)
+ *
+ * The coefficient hooks are precomputeQpResidual{Value,Grad,Curl}(qp, datum), returning Real3,
+ * Real33, and Real3, respectively, of which at least one must be defined, and the optional
+ * Jacobian hooks precomputeQpJacobian{Value,Grad,Curl}(j, qp, datum) and
+ * precomputeQpOffDiagJacobian{Value,Grad,Curl}(j, jvar, qp, datum). Only the terms whose hooks
+ * are defined are assembled. KokkosPrecomputeHookTraits.h documents the hook families.
  */
 class VectorKernel : public KernelBase
 {
 public:
   static InputParameters validParams();
+
+  /// Vector kernels assemble the products of precompute hooks with the test functions
+  static constexpr bool uses_precompute_hooks = true;
 
   /**
    * Constructor
@@ -37,74 +52,6 @@ public:
   virtual void computeJacobian() override;
 
   /**
-   * Default methods to prevent compile errors even when these methods were not defined in the
-   * derived class
-   */
-  ///@{
-  /**
-   * Compute diagonal Jacobian contribution on a quadrature point
-   * @tparam Derived The object type
-   * @param i The test function DOF index
-   * @param j The trial function DOF index
-   * @param qp The local quadrature point index
-   * @param datum The AssemblyDatum object of the current thread
-   * @returns The diagonal Jacobian contribution
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
-                                         const unsigned int /* j */,
-                                         const unsigned int /* qp */,
-                                         AssemblyDatum & /* datum */) const
-  {
-    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
-                    "redefined this method in your class without typos.");
-
-    return 0;
-  }
-  /**
-   * Compute off-diagonal Jacobian contribution on a quadrature point
-   * @tparam Derived The object type
-   * @param i The test function DOF index
-   * @param j The trial function DOF index
-   * @param jvar The variable number for column
-   * @param qp The local quadrature point index
-   * @param datum The AssemblyDatum object of the current thread
-   * @returns The off-diagonal Jacobian contribution
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
-                                                const unsigned int /* j */,
-                                                const unsigned int /* jvar */,
-                                                const unsigned int /* qp */,
-                                                AssemblyDatum & /* datum */) const
-  {
-    ::Kokkos::abort(
-        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
-        "redefined this method in your class without typos.");
-
-    return 0;
-  }
-  ///@}
-
-  /**
-   * Functions used to check if users have overriden the hook methods, whose calculations can be
-   * skipped when not overriden
-   * @returns The function pointer of the default hook method
-   */
-  ///@{
-  template <typename Derived>
-  static auto defaultJacobian()
-  {
-    return &VectorKernel::computeQpJacobian<Derived>;
-  }
-  template <typename Derived>
-  static auto defaultOffDiagJacobian()
-  {
-    return &VectorKernel::computeQpOffDiagJacobian<Derived>;
-  }
-  ///@}
-
-  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -118,9 +65,8 @@ public:
   ///@}
 
   /**
-   * The parallel computation bodies that can be customized in the derived class by defining
-   * them in the derived class with the same signature.
-   * Make sure to define them as inlined public methods if to be defined in the derived class.
+   * The parallel computation bodies, which a derived class may hide by defining methods with the
+   * same signature as inlined public methods
    */
   ///@{
   /**
@@ -172,6 +118,18 @@ protected:
    * Gradient of the current vector solution at quadrature points
    */
   const VectorVariableGradient _grad_u;
+  /**
+   * Curl of the current vector test function
+   */
+  const VectorVariableTestCurl _curl_test;
+  /**
+   * Curl of the current vector shape function
+   */
+  const VectorVariablePhiCurl _curl_phi;
+  /**
+   * Curl of the current vector solution at quadrature points
+   */
+  const VectorVariableCurl _curl_u;
 };
 
 template <typename Derived>
@@ -234,44 +192,22 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 VectorKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
-  ResidualObject::computeResidualInternal(
-      datum,
-      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
-      });
+  ResidualObject::computeResidualInternal(datum, precomputeResidualBody<true>(kernel, datum));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 VectorKernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
-  ResidualObject::computeJacobianInternal(
-      datum,
-      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] +=
-                datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(i, j, qp, datum);
-      });
+  ResidualObject::computeJacobianInternal(datum, precomputeJacobianBody<true>(kernel, datum));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 VectorKernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
-  ResidualObject::computeJacobianInternal(
-      datum,
-      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
-                                               i, j, datum.jvar(), qp, datum);
-      });
+  ResidualObject::computeJacobianInternal(datum,
+                                          precomputeOffDiagJacobianBody<true>(kernel, datum));
 }
 
 } // namespace Moose::Kokkos
