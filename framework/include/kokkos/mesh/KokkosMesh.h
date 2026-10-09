@@ -56,27 +56,36 @@ public:
    * Constructor
    * @param mesh The MOOSE mesh
    */
-  Mesh(MooseMesh & mesh) : _mesh(mesh) {}
+  Mesh(MooseMesh & mesh);
   /**
    * Get the underyling MOOSE mesh
    * @returns The MOOSE mesh
    */
-  const MooseMesh & getMesh() { return _mesh; }
+  const MooseMesh & getMesh() const { return *_mesh; }
   /**
    * Get whether the mesh was initialized
    */
   [[nodiscard]] bool initialized() const { return _initialized; }
+
   /**
    * Update the mesh
    */
   void update();
+  /**
+   * Initialize by shallow-copying shared mesh data
+   * @param mesh The initialized mesh to share
+   */
+  void init(const Mesh & mesh);
+  /**
+   * Update geometry-dependent data from the underlying MOOSE mesh
+   */
+  void updateGeometry();
 
   /**
    * Mark that element geometry data is needed; initElementGeometry() will be called on the next
    * update()
    */
   void setNeedsElementGeometry() { _needs_element_geometry = true; }
-
   /**
    * Mark that element-side geometry data is needed; initElementSideGeometry() will be called on the
    * next update()
@@ -131,7 +140,7 @@ public:
    * Get the list of local nodes including semi-local nodes
    * @returns The list of local nodes including semi-local nodes
    */
-  const auto & getLocalNodes() const { return _maps->local_nodes; }
+  const auto & getLocalNodes() const { return _local_nodes; }
   /**
    * Get the contiguous subdomain ID of a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -157,10 +166,10 @@ public:
    */
   ContiguousElementID getContiguousElementID(const Elem * elem) const;
   /**
-   * Get the ghost element ID map (host-side only)
-   * @returns Map from ghost Elem* to contiguous element ID
+   * Get the ghost elements (host-side only)
+   * @returns The ghost elements
    */
-  const auto & getGhostElemIdMapping() const { return _maps->ghost_elem_id_mapping; }
+  const auto & getGhostElements() const { return _ghost_elems; }
   /**
    * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -198,6 +207,14 @@ public:
     return libmesh_map_find(_maps->boundary_node_ids, boundary);
   }
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get whether this is a displaced mesh
+   */
+  KOKKOS_FUNCTION bool isDisplaced() const { return _is_displaced; }
+  /**
+   * Get the mesh dimension
+   */
+  KOKKOS_FUNCTION unsigned int getDimension() const { return _dimension; }
   /**
    * Get the element information object
    * @param elem The contiguous element ID
@@ -437,6 +454,10 @@ public:
 
 private:
   /**
+   * Allocate and populate node coordinates
+   */
+  void initNode();
+  /**
    * Initialize host maps
    */
   void initMap();
@@ -446,13 +467,21 @@ private:
   void initElement();
 
   /**
-   * Reference of the MOOSE mesh
+   * Pointer to the MOOSE mesh
    */
-  MooseMesh & _mesh;
+  MooseMesh * _mesh;
   /**
    * Flag whether the mesh was initialized
    */
   bool _initialized = false;
+  /**
+   * Whether this is a displaced mesh
+   */
+  bool _is_displaced = false;
+  /**
+   * Mesh dimension
+   */
+  unsigned int _dimension = 0;
 
   /**
    * The wrapper of host maps
@@ -471,18 +500,6 @@ private:
      * Map from the MOOSE element type and p-refinement level to the element type ID
      */
     std::map<std::pair<ElemType, unsigned int>, unsigned int> elem_type_id_mapping;
-    /**
-     * List of local nodes including semi-local nodes
-     */
-    std::vector<Node *> local_nodes;
-    /**
-     * Map from off-process ghost node to the contiguous node ID
-     */
-    std::unordered_map<const Node *, ContiguousNodeID> ghost_node_id_mapping;
-    /**
-     * Map from off-process ghost Elem* to its contiguous element ID on this process
-     */
-    std::unordered_map<const Elem *, ContiguousElementID> ghost_elem_id_mapping;
     /**
      * Range of the contiguous element IDs in each subdomain
      */
@@ -503,6 +520,14 @@ private:
    * A shared pointer holding all the host maps to avoid deep copy
    */
   std::shared_ptr<MeshMap> _maps;
+  /**
+   * List of local nodes including semi-local nodes
+   */
+  Array<Node *> _local_nodes;
+  /**
+   * List of off-process ghost elements
+   */
+  Array<Elem *> _ghost_elems;
 
   /**
    * Element integer for Kokkos contiguous element ID
@@ -569,33 +594,61 @@ private:
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
 
-  /// Whether initElementGeometry() has been called and the element geometry cache is populated
+  /**
+   * Whether initElementGeometry() has been called and the element geometry cache is populated
+   */
   bool _element_geometry_initialized = false;
-  /// Whether initElementGeometry() should be called on the next update()
+  /**
+   * Whether initElementGeometry() should be called on the next update()
+   */
   bool _needs_element_geometry = false;
-  /// Whether initElementSideGeometry() has been called and the side geometry cache is populated
+  /**
+   * Whether initElementSideGeometry() has been called and the side geometry cache is populated
+   */
   bool _element_side_geometry_initialized = false;
-  /// Whether initElementSideGeometry() should be called on the next update()
+  /**
+   * Whether initElementSideGeometry() should be called on the next update()
+   */
   bool _needs_element_side_geometry = false;
-  /// Cached coordinate-weighted local element volumes indexed by contiguous element ID
+  /**
+   * Cached coordinate-weighted local element volumes indexed by contiguous element ID
+   */
   Array<Real> _elem_volume;
-  /// Cached local element centroids indexed by contiguous element ID
+  /**
+   * Cached local element centroids indexed by contiguous element ID
+   */
   Array<Real3> _elem_centroid;
-  /// Cached coordinate-weighted side areas indexed by (side, local contiguous element ID)
+  /**
+   * Cached coordinate-weighted side areas indexed by (side, local contiguous element ID)
+   */
   Array2D<Real> _side_area;
-  /// Cached side centroids indexed by (side, contiguous element ID)
+  /**
+   * Cached side centroids indexed by (side, contiguous element ID)
+   */
   Array2D<Real3> _side_centroid;
-  /// Cached side normals indexed by (side, contiguous element ID)
+  /**
+   * Cached side normals indexed by (side, contiguous element ID)
+   */
   Array2D<Real3> _side_normal;
-  /// Element-centroid to side-centroid vectors indexed by (side, contiguous element ID)
+  /**
+   * Element-centroid to side-centroid vectors indexed by (side, contiguous element ID)
+   */
   Array2D<Real3> _elem_centroid_to_side_centroid;
-  /// Element-centroid to side-centroid distances indexed by (side, contiguous element ID)
+  /**
+   * Element-centroid to side-centroid distances indexed by (side, contiguous element ID)
+   */
   Array2D<Real> _elem_centroid_to_side_centroid_distance;
-  /// Element-centroid to neighbor-centroid vectors indexed by (side, contiguous element ID)
+  /**
+   * Element-centroid to neighbor-centroid vectors indexed by (side, contiguous element ID)
+   */
   Array2D<Real3> _elem_centroid_to_neighbor_centroid;
-  /// Element-centroid to neighbor-centroid distances indexed by (side, contiguous element ID)
+  /**
+   * Element-centroid to neighbor-centroid distances indexed by (side, contiguous element ID)
+   */
   Array2D<Real> _elem_centroid_to_neighbor_centroid_distance;
-  /// Boundary IDs for each side indexed by (side, contiguous element ID)
+  /**
+   * Boundary IDs for each side indexed by (side, contiguous element ID)
+   */
   Array2D<BoundaryID> _side_boundary_id;
 };
 
@@ -633,14 +686,21 @@ public:
    * Constructor
    * @param mesh The Kokkos mesh
    */
-  MeshHolder(const Mesh & mesh) : _mesh_host(mesh), _mesh_device(mesh) {}
+  MeshHolder(Mesh & mesh) : _mesh_host(&mesh), _mesh_device(mesh) {}
   /**
    * Copy constructor
    */
   MeshHolder(const MeshHolder & holder)
-    : _mesh_host(holder._mesh_host), _mesh_device(holder._mesh_host)
+    : _mesh_host(holder._mesh_host), _mesh_device(*holder._mesh_host)
   {
   }
+  /**
+   * Empty copy assignment operator
+   * This holder is not copy-assignable and should be fixed at construction depending on whether the
+   * object operates on undisplaced or displaced mesh, but we create displaced assembly by
+   * shallow-copying reference assembly, so we provide this empty assignment operator
+   */
+  MeshHolder & operator=(const MeshHolder &) { return *this; }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -651,12 +711,12 @@ public:
   KOKKOS_FUNCTION const Mesh & kokkosMesh() const
   {
     KOKKOS_IF_ON_HOST(
-        if (!_mesh_host.initialized()) mooseError(
+        if (!_mesh_host->initialized()) mooseError(
             "kokkosMesh() was called too early. Kokkos mesh is available after problem "
             "initialization. Override initialSetup() if you need to setup your object data "
             "using the Kokkos mesh.");
 
-        return _mesh_host;)
+        return *_mesh_host;)
 
     return _mesh_device;
   }
@@ -666,11 +726,11 @@ private:
   /**
    * Host reference of the Kokkos mesh
    */
-  const Mesh & _mesh_host;
+  Mesh * _mesh_host;
   /**
    * Device copy of the Kokkos mesh
    */
-  const Mesh _mesh_device;
+  Mesh _mesh_device;
 };
 
 } // namespace Moose::Kokkos

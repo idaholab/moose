@@ -40,6 +40,12 @@ public:
   KOKKOS_FUNCTION const Mesh & mesh() const { return _mesh; }
 
   /**
+   * Get the mesh dimension
+   * @returns The mesh dimension
+   */
+  KOKKOS_FUNCTION unsigned int dimension() const { return _mesh.getDimension(); }
+
+  /**
    * Get the element information object
    * @returns The element information object
    */
@@ -497,7 +503,7 @@ Datum::J(const unsigned int qp)
   if (!isNodal())
     reinitTransform(qp);
   else
-    _J.identity(_assembly.getDimension());
+    _J.identity(_mesh.getDimension());
 
   return _J;
 }
@@ -519,7 +525,7 @@ Datum::q_point(const unsigned int qp)
   if (!isNodal())
     reinitTransform(qp);
   else
-    _xyz = _assembly.kokkosMesh().getNodePoint(_node);
+    _xyz = _mesh.getNodePoint(_node);
 
   return _xyz;
 }
