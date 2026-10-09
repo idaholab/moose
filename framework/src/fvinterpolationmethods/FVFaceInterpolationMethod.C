@@ -9,6 +9,15 @@
 
 #include "FVFaceInterpolationMethod.h"
 
+FVTwoSidedFaceInterpolation::FaceValues
+FVFaceInterpolationMethod::twoSidedInterpolate(const FaceInfo & face,
+                                               const Real elem_value,
+                                               const Real neighbor_value) const
+{
+  const Real face_value = interpolate(face, elem_value, neighbor_value);
+  return {face_value, face_value};
+}
+
 Real
 FVFaceInterpolationMethod::interpolate(const Moose::FunctorBase<Real> & functor,
                                        const FaceInfo & face,

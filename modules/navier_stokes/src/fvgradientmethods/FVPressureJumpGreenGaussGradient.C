@@ -80,21 +80,24 @@ FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
                 "FVPressureJumpGreenGaussGradient can only compute the linked pressure variable.");
   }
 
-  FVGreenGaussGradient::computeGradientWithoutLimiter(system, gradient, variable_numbers);
+  computeGreenGaussGradient(system, gradient, variable_numbers, this);
 }
 
-FVGreenGaussGradient::InternalFaceValues
-FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
-                                                     const ElemInfo & elem_info,
-                                                     const ElemInfo & neighbor_info,
-                                                     Real elem_value,
-                                                     Real neighbor_value) const
+FVTwoSidedFaceInterpolation::FaceValues
+FVPressureJumpGreenGaussGradient::twoSidedInterpolate(const FaceInfo & fi,
+                                                      const Real elem_value,
+                                                      const Real neighbor_value) const
 {
   if (!_rhie_chow || !_rhie_chow->faceIsBaffle(fi))
-    return FVGreenGaussGradient::internalFaceValues(
-        fi, elem_info, neighbor_info, elem_value, neighbor_value);
+  {
+    const Real face_value = Moose::FV::linearInterpolation(elem_value, neighbor_value, fi, true);
+    return {face_value, face_value};
+  }
 
   mooseAssert(_pressure_gradient, "A linked pressure gradient is required on pressure-jump faces.");
+
+  const auto & elem_info = *fi.elemInfo();
+  const auto & neighbor_info = *fi.neighborInfo();
 
   const Real jump = _rhie_chow->getSignedBaffleJump(fi, /*elem_side=*/true);
   if (!_rhie_chow->pressureDiffusionDataReady())
@@ -117,26 +120,26 @@ FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
 
   // Use the published geometric pressure gradient to match the deferred correction in the
   // pressure equation. The reconstructed coupling gradient must not enter this correction.
-  const auto interface_data = NS::FV::pressureJumpInterfaceData(
-      fi.normal(),
-      fi.faceCentroid() - elem_info.centroid(),
-      neighbor_info.centroid() - fi.faceCentroid(),
-      elem_diffusion,
-      neighbor_diffusion,
-      _pressure_gradient->gradient(elem_info),
-      _pressure_gradient->gradient(neighbor_info),
-      fi.faceArea() * fi.faceCoord(),
-      _rhie_chow->pressureDiffusionUsesNonorthogonalCorrection());
+  const auto interface_data =
+      NS::FV::pressureJumpInterfaceData(fi.normal(),
+                                        fi.faceCentroid() - elem_info.centroid(),
+                                        neighbor_info.centroid() - fi.faceCentroid(),
+                                        elem_diffusion,
+                                        neighbor_diffusion,
+                                        _pressure_gradient->gradient(elem_info),
+                                        _pressure_gradient->gradient(neighbor_info),
+                                        fi.faceArea() * fi.faceCoord(),
+                                        _rhie_chow->pressureDiffusionUsesNonorthogonalCorrection());
 
   if (interface_data.valid)
   {
     // Eliminate the interface pressures to obtain one conservative flux, then recover the
     // one-sided face value used in each cell's Green-Gauss surface sum.
     const Real flux = NS::FV::pressureJumpFlux(interface_data, elem_value, neighbor_value, jump);
-    return {NS::FV::pressureJumpOneSidedFaceValue(
-                interface_data, elem_value, flux, /*elem_side=*/true),
-            NS::FV::pressureJumpOneSidedFaceValue(
-                interface_data, neighbor_value, flux, /*elem_side=*/false)};
+    return {
+        NS::FV::pressureJumpOneSidedFaceValue(interface_data, elem_value, flux, /*elem_side=*/true),
+        NS::FV::pressureJumpOneSidedFaceValue(
+            interface_data, neighbor_value, flux, /*elem_side=*/false)};
   }
 
   // Degenerate half-cell geometry cannot define a conductance. The interpolation
