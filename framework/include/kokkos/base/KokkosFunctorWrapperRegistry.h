@@ -15,58 +15,16 @@
 namespace Moose::Kokkos
 {
 
-class FunctorRegistryEntryBase
+class FunctorWrapperRegistry
 {
 public:
-  virtual ~FunctorRegistryEntryBase() {}
-  /**
-   * Build a host wrapper for this functor
-   * @param object The pointer to the functor
-   */
-  virtual std::unique_ptr<FunctorWrapperHostBase> build(const void * object) const = 0;
-};
+  FunctorWrapperRegistry() = default;
 
-template <typename Object>
-class FunctorRegistryEntry : public FunctorRegistryEntryBase
-{
-public:
-  std::unique_ptr<FunctorWrapperHostBase> build(const void * object) const override final
-  {
-    return std::make_unique<FunctorWrapperHost<Object>>(object);
-  }
-};
+  FunctorWrapperRegistry(FunctorWrapperRegistry const &) = delete;
+  FunctorWrapperRegistry & operator=(FunctorWrapperRegistry const &) = delete;
 
-class FunctionRegistryEntryBase
-{
-public:
-  virtual ~FunctionRegistryEntryBase() {}
-  /**
-   * Build a host wrapper for this function
-   * @param object The pointer to the function
-   */
-  virtual std::unique_ptr<FunctionWrapperHostBase> build(const void * object) const = 0;
-};
-
-template <typename Object>
-class FunctionRegistryEntry : public FunctionRegistryEntryBase
-{
-public:
-  std::unique_ptr<FunctionWrapperHostBase> build(const void * object) const override final
-  {
-    return std::make_unique<FunctionWrapperHost<Object>>(object);
-  }
-};
-
-class FunctorRegistry
-{
-public:
-  FunctorRegistry() = default;
-
-  FunctorRegistry(FunctorRegistry const &) = delete;
-  FunctorRegistry & operator=(FunctorRegistry const &) = delete;
-
-  FunctorRegistry(FunctorRegistry &&) = delete;
-  FunctorRegistry & operator=(FunctorRegistry &&) = delete;
+  FunctorWrapperRegistry(FunctorWrapperRegistry &&) = delete;
+  FunctorWrapperRegistry & operator=(FunctorWrapperRegistry &&) = delete;
 
   /**
    * Register a functor
@@ -76,7 +34,7 @@ public:
   template <typename Object>
   static char addFunctor(const std::string & name)
   {
-    getRegistry()._functors[name] = std::make_unique<FunctorRegistryEntry<Object>>();
+    getRegistry()._functors[name] = &functorBuilder<Object>;
 
     return 0;
   }
@@ -89,7 +47,7 @@ public:
   template <typename Object>
   static char addFunction(const std::string & name)
   {
-    getRegistry()._functions[name] = std::make_unique<FunctionRegistryEntry<Object>>();
+    getRegistry()._functions[name] = &functionBuilder<Object>;
 
     return 0;
   }
@@ -109,7 +67,7 @@ public:
                  name,
                  "'. Double check that you used Kokkos-specific registration macro.");
 
-    return it->second->build(object);
+    return it->second(object);
   }
 
   /**
@@ -127,7 +85,7 @@ public:
                  name,
                  "'. Double check that you used Kokkos-specific registration macro.");
 
-    return it->second->build(object);
+    return it->second(object);
   }
 
 private:
@@ -135,18 +93,43 @@ private:
    * Get the registry singleton
    * @returns The registry singleton
    */
-  static FunctorRegistry & getRegistry();
+  static FunctorWrapperRegistry & getRegistry();
+
+  using FunctorBuilder = std::unique_ptr<FunctorWrapperHostBase> (*)(const void * object);
+  using FunctionBuilder = std::unique_ptr<FunctionWrapperHostBase> (*)(const void * object);
 
   /**
-   * Map containing the host wrapper shells of functors with the key being the registered object
-   * type name
+   * Build a host wrapper for a registered functor type
+   * @tparam Object The functor class type
+   * @param object The pointer to the functor
+   * @returns The host functor wrapper
    */
-  std::map<std::string, std::unique_ptr<FunctorRegistryEntryBase>> _functors;
+  template <typename Object>
+  static std::unique_ptr<FunctorWrapperHostBase> functorBuilder(const void * object)
+  {
+    return std::make_unique<FunctorWrapperHost<Object>>(object);
+  }
+
   /**
-   * Map containing the host wrapper shells of functions with the key being the registered object
-   * type name
+   * Build a host wrapper for a registered function type
+   * @tparam Object The function class type
+   * @param object The pointer to the function
+   * @returns The host function wrapper
    */
-  std::map<std::string, std::unique_ptr<FunctionRegistryEntryBase>> _functions;
+  template <typename Object>
+  static std::unique_ptr<FunctionWrapperHostBase> functionBuilder(const void * object)
+  {
+    return std::make_unique<FunctionWrapperHost<Object>>(object);
+  }
+
+  /**
+   * Map containing host functor wrapper builders keyed by registered object type name
+   */
+  std::map<std::string, FunctorBuilder> _functors;
+  /**
+   * Map containing host function wrapper builders keyed by registered object type name
+   */
+  std::map<std::string, FunctionBuilder> _functions;
 };
 
 } // namespace Moose::Kokkos
@@ -154,13 +137,13 @@ private:
 #define registerKokkosFunction(app, classname)                                                     \
   registerMooseObject(app, classname);                                                             \
   static char combineNames(kokkos_functor_##classname, __COUNTER__) =                              \
-      Moose::Kokkos::FunctorRegistry::addFunctor<classname>(#classname);                           \
+      Moose::Kokkos::FunctorWrapperRegistry::addFunctor<classname>(#classname);                    \
   static char combineNames(kokkos_function_##classname, __COUNTER__) =                             \
-      Moose::Kokkos::FunctorRegistry::addFunction<classname>(#classname)
+      Moose::Kokkos::FunctorWrapperRegistry::addFunction<classname>(#classname)
 
 #define registerKokkosFunctionAliased(app, classname, alias)                                       \
   registerMooseObjectAliased(app, classname, alias);                                               \
   static char combineNames(kokkos_functor_##classname, __COUNTER__) =                              \
-      Moose::Kokkos::FunctorRegistry::addFunctor<classname>(alias);                                \
+      Moose::Kokkos::FunctorWrapperRegistry::addFunctor<classname>(alias);                         \
   static char combineNames(kokkos_function_##classname, __COUNTER__) =                             \
-      Moose::Kokkos::FunctorRegistry::addFunction<classname>(alias)
+      Moose::Kokkos::FunctorWrapperRegistry::addFunction<classname>(alias)

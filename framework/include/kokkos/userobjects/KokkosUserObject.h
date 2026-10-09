@@ -13,6 +13,7 @@
 #include "KokkosAssembly.h"
 #include "KokkosFESystem.h"
 #include "KokkosDispatcher.h"
+#include "KokkosUserObjectWrapperRegistry.h"
 
 #include "UserObjectBase.h"
 
