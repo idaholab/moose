@@ -23,11 +23,12 @@ public:
   KokkosConvectiveHeatFluxBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
-                                            AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 private:
   /// Far-field temperature variable
@@ -42,16 +43,17 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveHeatFluxBC::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosConvectiveHeatFluxBC::precomputeQpResidualValue(const unsigned int qp,
+                                                      AssemblyDatum & datum) const
 {
   return -_htc(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveHeatFluxBC::precomputeQpJacobian(const unsigned int j,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
+KokkosConvectiveHeatFluxBC::precomputeQpJacobianValue(const unsigned int j,
+                                                      const unsigned int qp,
+                                                      AssemblyDatum & datum) const
 {
   return -_phi(datum, j, qp) *
          (-_htc(datum, qp) + _htc_dT(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp)));

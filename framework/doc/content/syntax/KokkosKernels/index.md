@@ -23,39 +23,47 @@ virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
 Indices such as `_i`, `_j`, and `_qp` were made available in those functions as member variables.
 
-In Kokkos-MOOSE, the corresponding hook methods are +*no longer virtual functions*+.
-Instead, they are (re)defined in the derived class as +*inlined public*+ methods.
-Their signatures look like the following:
+A Kokkos-MOOSE kernel instead computes, once per quadrature point, the coefficients that multiply each test function quantity, and the base class contracts them with the test functions of every degree of freedom.
+The residual of a kernel takes the form
+
+!equation
+R_i = \sum_{qp} JxW \left( f_v \psi_i + \mathbf{f}_g \cdot \nabla \psi_i \right),
+
+where $f_v$ and $\mathbf{f}_g$ are the coefficients of the test function value and gradient.
+Evaluating the coefficients once per quadrature point, independently of the test function index, is what makes this form efficient on GPU, and the [optimized kernels](syntax/Kernels/index.md#optimized) of the original MOOSE use the same idea.
+
+The hook methods are +*no longer virtual functions*+.
+Instead, they are defined in the derived class as +*inlined public*+ methods, and their names state the test function quantity they multiply:
 
 ```cpp
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                       const unsigned int j,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
-                                              const unsigned int j,
-                                              const unsigned int jvar,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                               const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpOffDiagJacobianScalar(const unsigned int i,
-                                                    const unsigned int j,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                      const unsigned int jvar,
+                                                      const unsigned int qp,
+                                                      AssemblyDatum & datum) const;
+template <typename Derived>
+KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianScalarValue(const unsigned int j,
+                                                            const unsigned int jvar,
+                                                            const unsigned int qp,
+                                                            AssemblyDatum & datum) const;
 ```
 
-The template argument `Derived` can be used for implementing static polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion by statically casting `this` pointer to the derived type and directly calling the derived class methods using the cast pointer.
+The Jacobian hooks each have `Value` and `Grad` variants like the residual hooks, with the `Grad` variants returning `Real3`.
+A kernel defines the hooks of the terms its weak form contains, and at least one residual hook must be defined.
+The base class assembles only the terms whose hooks are defined, so a kernel pays nothing for the terms it does not have, and it assembles a Jacobian contribution only when the matching Jacobian hook is defined.
+Misspelling a residual hook is a compile error.
 
-Analogously to the original MOOSE, `computeQpResidual()` must be provided in the derived class, and the definitions of `computeQpJacobian()`, `computeQpOffDiagJacobian()`, and `computeQpOffDiagJacobianScalar()` are optional.
-The optional methods have default definitions in the base class, and redefining them in the derived class hides the base class definitions.
-Beware not to misspell the function names when redefining the optional methods, as they will be silently ignored rather than throwing a compile error.
+The template argument `Derived` can be used for implementing static polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion by statically casting `this` pointer to the derived type and directly calling the derived class methods using the cast pointer.
 
 The indices can no longer be member variables due to the [parallelization](syntax/Kokkos/index.md#kokkos_functor), and therefore they are now passed as function arguments.
 `datum` is a temporary object holding element-private data, and `_q_point` is available through `datum` as `datum.q_point(qp)`.
@@ -79,74 +87,32 @@ Diffusion::computeQpJacobian()
 }
 ```
 
-will look like the following in `KokkosDiffusion`:
+will look like the following in `KokkosDiffusion`, whose terms multiply the test function gradient:
 
 ```cpp
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Real3
+KokkosDiffusion::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpJacobian(const unsigned int i,
-                                   const unsigned int j,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Real3
+KokkosDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                          const unsigned int qp,
+                                          AssemblyDatum & datum) const
 {
-  return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return _grad_phi(datum, j, qp);
 }
 ```
 
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
 
-## Optimized Kernel Objects id=kokkos_kernel_optimized
-
-[Similarly to the original MOOSE](syntax/Kernels/index.md#optimized), Kokkos-MOOSE provides `Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` for creating an optimized kernel by factoring out test functions in residual and Jacobian calculations.
-It is strongly encouraged to leverage these optimized kernel objects whenever possible for best performance.
-These objects use `precomputeQpResidual()`, `precomputeQpJacobian()`, and `precomputeQpOffDiagJacobian()` hooks with signatures that differ from those in `Moose::Kokkos::Kernel`.
-The signatures of these hook methods are as follows:
-
-- For `Moose::Kokkos::KernelValue`,
-
-```cpp
-template <typename Derived>
-KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp,
-                                          AssemblyDatum & datum) const;
-template <typename Derived>
-KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const;
-template <typename Derived>
-KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
-                                                 const unsigned int jvar,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const;
-```
-
-- For `Moose::Kokkos::KernelGrad`,
-
-```cpp
-template <typename Derived>
-KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp,
-                                           AssemblyDatum & datum) const;
-template <typename Derived>
-KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
-                                           const unsigned int qp,
-                                           AssemblyDatum & datum) const;
-template <typename Derived>
-KOKKOS_FUNCTION Real3 precomputeQpOffDiagJacobian(const unsigned int j,
-                                                  const unsigned int jvar,
-                                                  const unsigned int qp,
-                                                  AssemblyDatum & datum) const;
-```
-
-See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffusionPrecompute` for examples of optimized kernels:
+`Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` are other names for `Moose::Kokkos::Kernel` that state in the class declaration which term a kernel contributes.
+A kernel whose weak form has both terms, such as convection-diffusion, defines both families of hooks on a single class.
+See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffusionPrecompute` for examples:
 
 !listing test/include/kokkos/kernels/KokkosConvectionPrecompute.h id=kokkos-convection-precompute
          caption=The `KokkosConvectionPrecompute` header file.
@@ -154,10 +120,12 @@ See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffus
 !listing test/include/kokkos/kernels/KokkosDiffusionPrecompute.h id=kokkos-diffusion-precompute
          caption=The `KokkosDiffusionPrecompute` header file.
 
+Kernels on vector variables derive from `Moose::Kokkos::VectorKernel` and use the same hooks with `Real3` and `Real33` coefficients, plus a `Curl` variant of each hook for weak forms containing $\nabla \times \boldsymbol{\psi}_i$.
+
 ## Time Derivative Kernels
 
-[Like the original MOOSE](syntax/Kernels/index.md#time-derivative), you can create a time-derivative kernel by subclassing `Moose::Kokkos::TimeKernel`.
-For Kokkos-MOOSE, its optimized `Moose::Kokkos::TimeKernelValue` base class is also provided, which is analogous to `Moose::Kokkos::KernelValue`.
+[Like the original MOOSE](syntax/Kernels/index.md#time-derivative), you can create a time-derivative kernel by subclassing `Moose::Kokkos::TimeKernel`, which also provides `_u_dot` and `_du_dot_du`.
+`Moose::Kokkos::TimeKernelValue` is another name for it.
 In Kokkos-MOOSE, the dummy `_qp` indexing of the `du_dot_du` term was lifted.
 The following shows the conversion of the example presented in the original page into the Kokkos version:
 
@@ -167,10 +135,10 @@ The following shows the conversion of the example presented in the original page
 return _test[_i][_qp] * _u_dot[_qp];
 ```
 
-the Kokkos version will look like:
+the Kokkos version of `precomputeQpResidualValue()` will look like:
 
 ```cpp
-return _test(datum, i, qp) * _u_dot(datum, qp);
+return _u_dot(datum, qp);
 ```
 
 - For `computeQpJacobian()` whose original code is:
@@ -179,10 +147,10 @@ return _test(datum, i, qp) * _u_dot(datum, qp);
 return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 ```
 
-the Kokkos version will look like:
+the Kokkos version of `precomputeQpJacobianValue()` will look like:
 
 ```cpp
-return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
+return _phi(datum, j, qp) * _du_dot_du;
 ```
 
 See the following source codes of `KokkosTimeDerivative` for an example of a time-derivative kernel:
@@ -196,17 +164,36 @@ See the following source codes of `KokkosTimeDerivative` for an example of a tim
 ## Automatic Differentiation id=kokkos_ad_kernel
 
 Kokkos-MOOSE kernels also support [automatic differentiation (AD)](automatic_differentiation/index.md).
-AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with `registerKokkosADResidualObject()`.
-AD kernels require `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
+AD kernels derive from `Moose::Kokkos::ADKernel`, are registered with `registerKokkosADResidualObject()`, and define the same residual hooks as ordinary kernels, `precomputeQpResidualValue()` and `precomputeQpResidualGrad()`, returning dual numbers instead of reals.
+The Jacobian is assembled from the derivatives of those dual numbers, so no Jacobian hooks are defined.
+
+The derivatives are taken pointwise: their directions are the quadrature point quantities the kernel reads, one direction for each coupled value and three for each coupled gradient, rather than the degrees of freedom of the element.
+The kernel evaluates its hooks once per quadrature point, and the base class contracts their derivatives with the shape functions of each coupled variable.
+A kernel declares the number of directions it reads as `max_ad_slots`, which sizes its dual numbers at compile time, and reads its inputs through AD accessors whose type carries that number:
 
 ```cpp
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int i,
-                                                        const unsigned int qp,
-                                                        AssemblyDatum & datum) const;
+class KokkosADDiffusion : public Moose::Kokkos::ADKernel
+{
+public:
+  /// The residual depends on grad u
+  static constexpr unsigned int max_ad_slots = 3;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<max_ad_slots>
+  precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
+  {
+    return _grad_u(datum, qp);
+  }
+
+private:
+  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
+};
 ```
 
-`computeQpJacobian()` and `computeQpOffDiagJacobian()` are unused, as AD automatically assembles the Jacobian.
+The accessors are created in the constructor with `adValue()`, `adGradient()`, and `adDot()` for the kernel variable, or `adCoupledValue()`, `adCoupledGradient()`, and `adCoupledDot()` for coupled variables, for example `_grad_u(adGradient<max_ad_slots>())`.
+During initial setup, each accessor of a nonlinear variable that the coupling matrix couples to the kernel variable receives its derivative directions; every other accessor, such as one reading an auxiliary variable, a constant, or a variable whose coupling the preconditioner omits, returns its value without derivatives.
+The Jacobian therefore contains exactly the blocks the coupling matrix requests.
+An object whose accessors receive more directions than its `max_ad_slots` errors during setup.
 
 !syntax list /Kernels objects=True actions=False subsystems=False
 

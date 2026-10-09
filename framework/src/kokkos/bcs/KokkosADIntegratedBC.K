@@ -20,15 +20,19 @@ ADIntegratedBC::validParams()
 }
 
 ADIntegratedBC::ADIntegratedBC(const InputParameters & parameters)
-  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _test(),
-    _grad_test(),
-    _phi(),
-    _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _test(), _grad_test()
 {
   addMooseVariableDependency(&_var);
+}
+
+void
+ADIntegratedBC::initialSetup()
+{
+  IntegratedBCBase::initialSetup();
+
+  _max_ad_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
+  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots);
+  _ad_slots = _ad_setup.table();
 }
 
 void
@@ -61,15 +65,14 @@ ADIntegratedBC::computeResidualAndJacobian()
 void
 ADIntegratedBC::dispatch()
 {
-  _thread.resize(_computing_jacobian ? _num_local_jacobian_threads : _num_local_residual_threads,
-                 numKokkosBoundarySides());
-
-  Policy policy(0, _thread.size());
-
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
 
-  _residual_dispatcher->parallelFor(policy);
+  TeamLaunch launch;
+  launch.league_size = numKokkosBoundarySides();
+  launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), _max_ad_slots);
+
+  _residual_dispatcher->parallelForTeams(launch);
 }
 
 } // namespace Moose::Kokkos

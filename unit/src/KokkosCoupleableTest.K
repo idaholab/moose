@@ -75,10 +75,6 @@ public:
                               const Moose::Kokkos::VectorVariableValue & vector_value,
                               const Moose::Kokkos::VectorVariableValue & vector_dof_value,
                               const Moose::Kokkos::VectorVariableValue & vector_nodal_value,
-                              const Moose::Kokkos::ADVariableValue & elemental_ad_value,
-                              const Moose::Kokkos::ADVariableValue & elemental_ad_dof_value,
-                              const Moose::Kokkos::ADVariableValue & nodal_ad_value,
-                              const Moose::Kokkos::ADVariableValue & nodal_ad_dof_value,
                               Moose::Kokkos::Array<Real> & results)
     : AssemblyHolder(assembly),
       FESystemHolder(systems),
@@ -92,10 +88,6 @@ public:
       _vector_value(vector_value),
       _vector_dof_value(vector_dof_value),
       _vector_nodal_value(vector_nodal_value),
-      _elemental_ad_value(elemental_ad_value),
-      _elemental_ad_dof_value(elemental_ad_dof_value),
-      _nodal_ad_value(nodal_ad_value),
-      _nodal_ad_dof_value(nodal_ad_dof_value),
       _results(results)
   {
   }
@@ -132,25 +124,6 @@ public:
       _results(12 + i) = vector_dof_value(i);
       _results(15 + i) = vector_nodal_value(i);
     }
-
-    const auto elemental_ad_value = _elemental_ad_value(elem_datum, 0);
-    const auto elemental_ad_dof_value = _elemental_ad_dof_value(elem_datum, 0);
-    const auto elemental_dof =
-        elem_datum.system(elemental_primary.sys())
-            .getElemGlobalDofIndex(elem_datum.elem().id, 0, elemental_primary.var());
-    _results(18) = elemental_ad_value.value();
-    _results(19) = elemental_ad_value.derivatives()[elemental_dof];
-    _results(20) = elemental_ad_dof_value.value();
-    _results(21) = elemental_ad_dof_value.derivatives()[elemental_dof];
-
-    const auto nodal_ad_value = _nodal_ad_value(node_datum, 0);
-    const auto nodal_ad_dof_value = _nodal_ad_dof_value(node_datum, 0);
-    const auto nodal_dof = node_datum.system(nodal_primary.sys())
-                               .getNodeGlobalDofIndex(node_datum.node(), 0, nodal_primary.var());
-    _results(22) = nodal_ad_value.value();
-    _results(23) = nodal_ad_value.derivatives()[nodal_dof];
-    _results(24) = nodal_ad_dof_value.value();
-    _results(25) = nodal_ad_dof_value.derivatives()[nodal_dof];
   }
 
 private:
@@ -164,10 +137,6 @@ private:
   const Moose::Kokkos::VectorVariableValue _vector_value;
   const Moose::Kokkos::VectorVariableValue _vector_dof_value;
   const Moose::Kokkos::VectorVariableValue _vector_nodal_value;
-  const Moose::Kokkos::ADVariableValue _elemental_ad_value;
-  const Moose::Kokkos::ADVariableValue _elemental_ad_dof_value;
-  const Moose::Kokkos::ADVariableValue _nodal_ad_value;
-  const Moose::Kokkos::ADVariableValue _nodal_ad_dof_value;
   Moose::Kokkos::Array<Real> _results;
 };
 
@@ -526,91 +495,6 @@ TEST_F(KokkosCoupleableTest, VectorVariableAPIs)
   expectVariables(object->kokkosCoupledVectorNodalDots("vectors"), u, v, Moose::SOLUTION_DOT_TAG);
 }
 
-TEST_F(KokkosCoupleableTest, ADFieldVariableAPIs)
-{
-  auto & u = addFieldVariable("u");
-  auto & v = addFieldVariable("v");
-  auto object = createObject("ad_object", {"u"}, {"u", "v"});
-
-  expectVariable(object->kokkosADCoupledVectorTagValueByName("field", Moose::SOLUTION_TAG),
-                 u,
-                 Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledVectorTagValuesByName("fields", Moose::SOLUTION_TAG),
-                  u,
-                  v,
-                  Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledVectorTagGradientByName("field", Moose::SOLUTION_TAG),
-                 u,
-                 Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledVectorTagGradientsByName("fields", Moose::SOLUTION_TAG),
-                  u,
-                  v,
-                  Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledVectorTagNodalValueByName("field", Moose::SOLUTION_TAG),
-                 u,
-                 Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledVectorTagNodalValuesByName("fields", Moose::SOLUTION_TAG),
-                  u,
-                  v,
-                  Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledVectorTagDofValueByName("field", Moose::SOLUTION_TAG),
-                 u,
-                 Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledVectorTagDofValuesByName("fields", Moose::SOLUTION_TAG),
-                  u,
-                  v,
-                  Moose::SOLUTION_TAG);
-
-  expectVariable(object->kokkosADCoupledVectorTagValue("field", "tag"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(
-      object->kokkosADCoupledVectorTagValues("fields", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(
-      object->kokkosADCoupledVectorTagGradient("field", "tag"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(
-      object->kokkosADCoupledVectorTagGradients("fields", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(
-      object->kokkosADCoupledVectorTagNodalValue("field", "tag"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(
-      object->kokkosADCoupledVectorTagNodalValues("fields", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(
-      object->kokkosADCoupledVectorTagDofValue("field", "tag"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(
-      object->kokkosADCoupledVectorTagDofValues("fields", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
-
-  expectVariable(object->kokkosADCoupledValue("field"), u, Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledValues("fields"), u, v, Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledGradient("field"), u, Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledGradients("fields"), u, v, Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledNodalValue("field"), u, Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledNodalValues("fields"), u, v, Moose::SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledDofValue("field"), u, Moose::SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledDofValues("fields"), u, v, Moose::SOLUTION_TAG);
-
-  expectVariable(object->kokkosADCoupledValueOld("field"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledValuesOld("fields"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledGradientOld("field"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledGradientsOld("fields"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledNodalValueOld("field"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledNodalValuesOld("fields"), u, v, Moose::OLD_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledDofValueOld("field"), u, Moose::OLD_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledDofValuesOld("fields"), u, v, Moose::OLD_SOLUTION_TAG);
-
-  expectVariable(object->kokkosADCoupledValueOlder("field"), u, Moose::OLDER_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledValuesOlder("fields"), u, v, Moose::OLDER_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledGradientOlder("field"), u, Moose::OLDER_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledGradientsOlder("fields"), u, v, Moose::OLDER_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledNodalValueOlder("field"), u, Moose::OLDER_SOLUTION_TAG);
-  expectVariables(
-      object->kokkosADCoupledNodalValuesOlder("fields"), u, v, Moose::OLDER_SOLUTION_TAG);
-  expectVariable(object->kokkosADCoupledDofValueOlder("field"), u, Moose::OLDER_SOLUTION_TAG);
-  expectVariables(object->kokkosADCoupledDofValuesOlder("fields"), u, v, Moose::OLDER_SOLUTION_TAG);
-
-  expectVariable(object->kokkosADCoupledDot("field"), u, Moose::SOLUTION_DOT_TAG);
-  expectVariables(object->kokkosADCoupledDots("fields"), u, v, Moose::SOLUTION_DOT_TAG);
-  expectVariable(object->kokkosADCoupledNodalDot("field"), u, Moose::SOLUTION_DOT_TAG);
-  expectVariables(object->kokkosADCoupledNodalDots("fields"), u, v, Moose::SOLUTION_DOT_TAG);
-}
-
 TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
 {
   if (!_problem->mesh().getKokkosMesh())
@@ -639,10 +523,6 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
   const auto vector_value = vector_object->kokkosCoupledVectorValue("vector");
   const auto vector_dof_value = vector_object->kokkosCoupledVectorDofValue("vector");
   const auto vector_nodal_value = vector_nodal_object->kokkosCoupledVectorValue("vector");
-  const auto elemental_ad_value = elemental_object->kokkosADCoupledValue("field");
-  const auto elemental_ad_dof_value = elemental_object->kokkosADCoupledDofValue("field");
-  const auto nodal_ad_value = nodal_object->kokkosADCoupledValue("field");
-  const auto nodal_ad_dof_value = nodal_object->kokkosADCoupledDofValue("field");
 
   EXPECT_FALSE(elemental_value.variable().nodal());
   EXPECT_TRUE(nodal_value.variable().nodal());
@@ -669,7 +549,7 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
   system.reinit();
   systems.copyToDevice();
 
-  Moose::Kokkos::Array<Real> results(26);
+  Moose::Kokkos::Array<Real> results(18);
   KokkosCoupledValueEvaluator evaluator(_problem->kokkosAssembly(),
                                         systems,
                                         elemental_value,
@@ -682,10 +562,6 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
                                         vector_value,
                                         vector_dof_value,
                                         vector_nodal_value,
-                                        elemental_ad_value,
-                                        elemental_ad_dof_value,
-                                        nodal_ad_value,
-                                        nodal_ad_dof_value,
                                         results);
   Kokkos::parallel_for(1, evaluator);
   Kokkos::fence();
@@ -705,14 +581,6 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
     EXPECT_DOUBLE_EQ(results(12 + i), expected_vector(i));
     EXPECT_DOUBLE_EQ(results(15 + i), expected_vector(i));
   }
-  EXPECT_DOUBLE_EQ(results(18), -1.75);
-  EXPECT_DOUBLE_EQ(results(19), 1);
-  EXPECT_DOUBLE_EQ(results(20), -1.75);
-  EXPECT_DOUBLE_EQ(results(21), 1);
-  EXPECT_DOUBLE_EQ(results(22), 2.5);
-  EXPECT_DOUBLE_EQ(results(23), 1);
-  EXPECT_DOUBLE_EQ(results(24), 2.5);
-  EXPECT_DOUBLE_EQ(results(25), 1);
 }
 
 TEST_F(KokkosCoupleableTest, DefaultAPIs)

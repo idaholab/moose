@@ -336,9 +336,9 @@ public:
    * | dxi/dy deta/dy dzeta/dy |
    * | dxi/dz deta/dz dzeta/dz |
    * @param qp The local quadrature point index
-   * @returns The Jacobian matrix
+   * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION const Real33 & J(const unsigned int qp);
+  KOKKOS_FUNCTION const Real33 & dxi_dx(const unsigned int qp);
 
   /**
    * Get the transformed Jacobian weight
@@ -430,7 +430,7 @@ private:
    * Cached physical transformation data
    */
   ///@{
-  Real33 _J;
+  Real33 _dxi_dx;
   Real _JxW;
   Real3 _xyz;
   Real3 _normal;
@@ -492,14 +492,14 @@ Datum::isNodalDefined(const Variable & var) const
 }
 
 KOKKOS_FUNCTION inline const Real33 &
-Datum::J(const unsigned int qp)
+Datum::dxi_dx(const unsigned int qp)
 {
   if (!isNodal())
     reinitTransform(qp);
   else
-    _J.identity(_assembly.getDimension());
+    _dxi_dx.identity(_assembly.getDimension());
 
-  return _J;
+  return _dxi_dx;
 }
 
 KOKKOS_FUNCTION inline Real
@@ -543,12 +543,12 @@ Datum::reinitTransform(const unsigned int qp)
 
   if (!isSide())
   {
-    _J = _assembly.getJacobian(_elem, qp);
+    _dxi_dx = _assembly.getDxiDx(_elem, qp);
     _JxW = _assembly.getJxW(_elem, qp);
     _xyz = _assembly.getQPoint(_elem, qp);
   }
   else
-    _assembly.computePhysicalMap(_elem, _side, qp, &_J, &_JxW, &_xyz, &_normal);
+    _assembly.computePhysicalMap(_elem, _side, qp, &_dxi_dx, &_JxW, &_xyz, &_normal);
 
   _cached_qp = qp;
 }

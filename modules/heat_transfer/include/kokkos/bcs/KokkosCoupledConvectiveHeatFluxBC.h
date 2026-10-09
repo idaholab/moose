@@ -24,11 +24,12 @@ public:
   KokkosCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
-                                            AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 private:
   /// The number of components
@@ -45,8 +46,8 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledConvectiveHeatFluxBC::precomputeQpResidual(const unsigned int qp,
-                                                        AssemblyDatum & datum) const
+KokkosCoupledConvectiveHeatFluxBC::precomputeQpResidualValue(const unsigned int qp,
+                                                             AssemblyDatum & datum) const
 {
   Real q = 0;
   Real u = _u(datum, qp);
@@ -57,9 +58,9 @@ KokkosCoupledConvectiveHeatFluxBC::precomputeQpResidual(const unsigned int qp,
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledConvectiveHeatFluxBC::precomputeQpJacobian(const unsigned int j,
-                                                        const unsigned int qp,
-                                                        AssemblyDatum & datum) const
+KokkosCoupledConvectiveHeatFluxBC::precomputeQpJacobianValue(const unsigned int j,
+                                                             const unsigned int qp,
+                                                             AssemblyDatum & datum) const
 {
   Real dq = 0;
   Real phi = _phi(datum, j, qp);

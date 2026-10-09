@@ -412,13 +412,12 @@ Kokkos-MOOSE is carefully designed to avoid the CRTP by leveraging a registry de
 However, the basic principles of static polymorphism in the CRTP (templates, static casting of `this`, methods being public, function hiding) are still applicable and important to understand.
 In Kokkos-MOOSE, the base classes are not template classes, which alleviates the burden of users in dealing with class templates.
 Instead, the hook methods provided by Kokkos-MOOSE are template functions with respect to your object type, so you can directly cast `this` pointer in the hook methods without having to rely on class templates.
-For example, the `computeQpResidual` hook method of Kokkos-MOOSE [Kernels](syntax/KokkosKernels/index.md) is defined as a template function:
+For example, the `precomputeQpResidualValue` hook method of Kokkos-MOOSE [Kernels](syntax/KokkosKernels/index.md) is defined as a template function:
 
 ```cpp
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 ```
 
 The function template argument `Derived` replaces the class template argument in the CRTP and corresponds to your derived object type.

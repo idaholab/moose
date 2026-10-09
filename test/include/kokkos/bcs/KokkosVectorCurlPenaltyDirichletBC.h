@@ -20,17 +20,28 @@ public:
   KokkosVectorCurlPenaltyDirichletBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualValue(const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianValue(const unsigned int j,
+                                                                 const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 
 protected:
+  /**
+   * Get the component of a vector tangential to a surface, a - (a . n) n. Its product with a test
+   * function equals (n x a) . (n x psi), the integrand of the penalty term.
+   * @param a The vector
+   * @param normal The unit normal of the surface
+   * @returns The tangential component
+   */
+  KOKKOS_FUNCTION static Moose::Kokkos::Real3 tangential(const Moose::Kokkos::Real3 & a,
+                                                         const Moose::Kokkos::Real3 & normal)
+  {
+    return a - (a * normal) * normal;
+  }
+
   const Moose::Kokkos::Scalar<const Real> _penalty;
   const bool _has_function_y;
   const bool _has_function_z;
@@ -40,10 +51,9 @@ protected:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosVectorCurlPenaltyDirichletBC::computeQpResidual(const unsigned int i,
-                                                      const unsigned int qp,
-                                                      AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorCurlPenaltyDirichletBC::precomputeQpResidualValue(const unsigned int qp,
+                                                              AssemblyDatum & datum) const
 {
   const auto & function_x = static_cast<const KokkosParsedFunction &>(_function_x);
   const auto & function_y = static_cast<const KokkosParsedFunction &>(_function_y);
@@ -54,18 +64,14 @@ KokkosVectorCurlPenaltyDirichletBC::computeQpResidual(const unsigned int i,
                                      _has_function_y ? function_y.value(_t, p) : 0,
                                      _has_function_z ? function_z.value(_t, p) : 0);
 
-  const auto ncu = (_u(datum, qp) - u_exact).cross_product(normal);
-  return _penalty * (ncu * _test(datum, i, qp).cross_product(normal));
+  return _penalty * tangential(_u(datum, qp) - u_exact, normal);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosVectorCurlPenaltyDirichletBC::computeQpJacobian(const unsigned int i,
-                                                      const unsigned int j,
-                                                      const unsigned int qp,
-                                                      AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorCurlPenaltyDirichletBC::precomputeQpJacobianValue(const unsigned int j,
+                                                              const unsigned int qp,
+                                                              AssemblyDatum & datum) const
 {
-  const auto normal = datum.normals(qp);
-  return _penalty *
-         (_phi(datum, j, qp).cross_product(normal) * _test(datum, i, qp).cross_product(normal));
+  return _penalty * tangential(_phi(datum, j, qp), datum.normals(qp));
 }

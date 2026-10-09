@@ -17,6 +17,7 @@ AuxKernel::validParams()
 {
   InputParameters params = AuxKernelBase::validParams();
   // Kokkos objects are formulated on the reference configuration
+  params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
   return params;

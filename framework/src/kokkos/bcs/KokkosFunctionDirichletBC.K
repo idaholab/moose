@@ -28,7 +28,8 @@ template <bool is_ad>
 KokkosFunctionDirichletBCTempl<is_ad>::KokkosFunctionDirichletBCTempl(
     const InputParameters & parameters)
   : Moose::Kokkos::DirichletBCBaseTempl<is_ad>(parameters),
-    _func(this->getKokkosFunction("function"))
+    _func(this->getKokkosFunction("function")),
+    _nodal_value(makeNodalValue())
 {
 }
 
