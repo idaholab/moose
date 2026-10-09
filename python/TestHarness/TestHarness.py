@@ -1172,6 +1172,32 @@ class TestHarness:
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
+            elif self.options.failed_tests and not self.options.failed_tests_no_update:
+                # Replace only the entries of previously failing tests that now
+                # pass so that the next --failed-tests run is a smaller subset.
+                # Everything else in the previous results, including the stats
+                # of the original run, is kept.
+                fixed_jobs = [
+                    job
+                    for job_group in all_jobs
+                    for job in job_group
+                    if job.isPass()
+                    and job.previousTesterStatus()[0]
+                    in job.job_status.getFailingStatuses()
+                ]
+                storage = self.options.results_storage
+                num_failing = sum(
+                    test["status"]["fail"]
+                    for test_dir in storage["tests"].values()
+                    for test in test_dir["tests"].values()
+                )
+                # When every previously failing test now passes, keep the last
+                # set of failing tests so that the next --failed-tests run
+                # re-runs it instead of running nothing
+                if fixed_jobs and len(fixed_jobs) < num_failing:
+                    for job in fixed_jobs:
+                        job.storeResults(self.scheduler)
+                    self.writeResults(stats=storage.get("stats"))
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
@@ -1273,10 +1299,10 @@ class TestHarness:
     def writeResults(self, complete=False, stats=None):
         """Forcefully write the current results to file
 
-        Will not do anything if using existing storage.
+        Should not be called when displaying a previous run.
         """
         # Not writing results
-        if self.useExistingStorage():
+        if self.options.show_last_run:
             raise Exception("Should not write results")
 
         storage = self.options.results_storage
@@ -1438,7 +1464,14 @@ class TestHarness:
         parser.add_argument(
             "--failed-tests",
             action="store_true",
-            help="Run tests that previously failed",
+            help="Run tests that previously failed; tests that now pass are"
+            " marked as passing in the previous results unless all of them pass",
+        )
+        parser.add_argument(
+            "--failed-tests-no-update",
+            action="store_true",
+            help="Run tests that previously failed without updating the previous"
+            " results",
         )
         parser.add_argument(
             "--show-last-run",
@@ -2109,6 +2142,9 @@ class TestHarness:
         else:
             opts.results_file = os.path.abspath(opts.results_file)
 
+        # Selects the same tests as --failed-tests; only the update is skipped
+        if opts.failed_tests_no_update:
+            opts.failed_tests = True
         if opts.failed_tests and not os.path.exists(opts.results_file):
             self.errorExit("--failed-tests could not detect a previous run")
 
