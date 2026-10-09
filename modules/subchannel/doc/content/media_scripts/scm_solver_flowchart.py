@@ -3,10 +3,9 @@
 The diagram shows the nested solver structure:
 
 1. Outer pressure iteration.
-2. Downstream block sweep.
-3. One main-flow solve per temperature-loop iteration.
-4. One or more enthalpy/temperature/property subcycles per flow solve.
-5. Temperature-loop and pressure-loop completion checks.
+2. One main-flow solve per temperature-loop iteration.
+3. One or more enthalpy/temperature/property subcycles per flow solve.
+4. Temperature-loop and pressure-loop completion checks.
 
 Run
 ---
@@ -289,9 +288,9 @@ def create_flowchart(output_path: str | Path) -> Path:
     """Create the PR #33446 iteration-scheme flowchart."""
     output_path = Path(output_path)
 
-    fig, ax = plt.subplots(figsize=(13.6, 16.8))
+    fig, ax = plt.subplots(figsize=(13.6, 15.4))
     ax.set_xlim(-8.7, 8.7)
-    ax.set_ylim(0.15, 17.15)
+    ax.set_ylim(1.6, 17.15)
     ax.set_aspect("equal")
     ax.axis("off")
 
@@ -304,7 +303,7 @@ def create_flowchart(output_path: str | Path) -> Path:
         (0.0, 15.48),
         5.85,
         0.98,
-        "Divide domain into blocks and set boundary and initial conditions",
+        "Set boundary and initial conditions",
         fontsize=10.7,
         wrap=38,
     )
@@ -315,7 +314,7 @@ def create_flowchart(output_path: str | Path) -> Path:
         (0.0, 13.57),
         5.85,
         1.08,
-        "Solve the main flow variables in the current block (with equation and update relaxation)",
+        "Solve the main flow variables (with equation and update relaxation)",
         fontsize=10.7,
         wrap=39,
     )
@@ -338,7 +337,7 @@ def create_flowchart(output_path: str | Path) -> Path:
         (0.0, 9.34),
         5.45,
         0.92,
-        "Update density and viscosity in the block",
+        "Update density and viscosity",
         fill=THERMAL_FILL,
         fontsize=10.7,
         wrap=34,
@@ -362,17 +361,9 @@ def create_flowchart(output_path: str | Path) -> Path:
         fontsize=10.8,
         wrap=22,
     )
-    last_block = add_decision(
-        ax,
-        (0.0, 4.52),
-        3.25,
-        1.04,
-        "Last block?",
-        fontsize=11.2,
-    )
     pressure_loop = add_decision(
         ax,
-        (0.0, 2.88),
+        (0.0, 4.40),
         4.10,
         1.14,
         "Pressure converged?",
@@ -381,7 +372,7 @@ def create_flowchart(output_path: str | Path) -> Path:
     )
     returned = add_process(
         ax,
-        (0.0, 1.32),
+        (0.0, 2.84),
         4.35,
         0.76,
         "RETURN",
@@ -392,35 +383,15 @@ def create_flowchart(output_path: str | Path) -> Path:
     # ------------------------------------------------------------------
     # Side actions
     # ------------------------------------------------------------------
-    next_block = add_process(
-        ax,
-        (-4.90, 4.52),
-        2.75,
-        1.12,
-        "Move to next block downstream",
-        fill=ACTION_FILL,
-        fontsize=10.0,
-        wrap=16,
-    )
     next_timestep = add_process(
         ax,
-        (-6.85, 1.32),
+        (-6.85, 2.84),
         2.55,
         1.00,
         "Go to next timestep",
         fill=ACTION_FILL,
         fontsize=10.0,
         wrap=15,
-    )
-    first_block = add_process(
-        ax,
-        (6.65, 2.88),
-        2.75,
-        1.12,
-        "Move to first block upstream",
-        fill=ACTION_FILL,
-        fontsize=10.0,
-        wrap=16,
     )
 
     # ------------------------------------------------------------------
@@ -451,8 +422,8 @@ def create_flowchart(output_path: str | Path) -> Path:
 
     add_arrow(ax, properties["bottom"], subcycle["top"])
 
-    # Enthalpy subcycle loop. It remains inside the current block and does not
-    # repeat the main flow solve until the subcycle group is finished.
+    # Enthalpy subcycle loop. It does not repeat the main flow solve until the
+    # subcycle group is finished.
     subcycle_rail_x = 4.55
     subcycle_entry_y = power["top"][1] + 0.22
     add_polyline(
@@ -469,36 +440,33 @@ def create_flowchart(output_path: str | Path) -> Path:
     add_arrow(ax, subcycle["bottom"], temperature_loop["top"])
     add_branch_label(ax, (0.52, 7.10), "No", is_yes=False)
 
-    add_arrow(ax, temperature_loop["bottom"], last_block["top"])
-    add_branch_label(ax, (0.53, 5.38), "Yes", is_yes=True)
-
-    add_arrow(ax, last_block["bottom"], pressure_loop["top"])
-    add_branch_label(ax, (0.50, 3.70), "Yes", is_yes=True)
+    add_arrow(ax, temperature_loop["bottom"], pressure_loop["top"])
+    add_branch_label(ax, (0.53, 5.30), "Yes", is_yes=True)
 
     add_arrow(ax, pressure_loop["bottom"], returned["top"])
-    add_branch_label(ax, (0.53, 2.04), "Yes", is_yes=True)
+    add_branch_label(ax, (0.53, 3.52), "Yes", is_yes=True)
 
     # ------------------------------------------------------------------
-    # Left-side returns: temperature iteration, downstream block sweep,
-    # and next timestep share one clean return rail.
+    # Left-side returns: temperature iteration and next timestep share one
+    # clean return rail.
     # ------------------------------------------------------------------
-    block_rail_x = -4.90
+    temperature_rail_x = -4.90
     timestep_rail_x = -6.85
     left_return_y = solver_merge[1]
 
-    # Temperature loop is not complete: repeat the flow solve in this block.
+    # Temperature loop is not complete: repeat the flow solve.
     add_polyline(
-        ax, [temperature_loop["left"], (block_rail_x, temperature_loop["left"][1])]
+        ax,
+        [
+            temperature_loop["left"],
+            (temperature_rail_x, temperature_loop["left"][1]),
+            (temperature_rail_x, left_return_y),
+        ],
     )
     add_branch_label(ax, (-2.82, 6.20), "No", is_yes=False)
 
-    # Continue the downstream block sweep.
-    add_arrow(ax, last_block["left"], next_block["right"])
-    add_branch_label(ax, (-2.18, 4.52), "No", is_yes=False)
-    add_polyline(ax, [next_block["top"], (block_rail_x, left_return_y)])
-
-    # At the next timestep the outer return bends at the top. The block rail
-    # joins its horizontal segment vertically from below, as requested.
+    # At the next timestep the outer return bends at the top. The temperature
+    # rail joins its horizontal segment vertically from below.
     add_arrow(ax, returned["left"], next_timestep["right"])
     add_polyline(
         ax,
@@ -509,12 +477,12 @@ def create_flowchart(output_path: str | Path) -> Path:
     # Right-side pressure return. It is kept outside the subcycle loop.
     # ------------------------------------------------------------------
     pressure_rail_x = 6.65
-    add_arrow(ax, pressure_loop["right"], first_block["left"])
-    add_branch_label(ax, (2.72, 2.88), "No", is_yes=False)
+    add_branch_label(ax, (2.72, 4.40), "No", is_yes=False)
     add_polyline(
         ax,
         [
-            first_block["top"],
+            pressure_loop["right"],
+            (pressure_rail_x, pressure_loop["right"][1]),
             (pressure_rail_x, left_return_y),
             solver_merge,
         ],
