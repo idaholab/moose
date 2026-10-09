@@ -9,7 +9,7 @@
 import os
 import logging
 from ..common import exceptions
-from ..base import components, LatexRenderer
+from ..base import components, LatexRenderer, MaterializeRenderer
 from ..tree import tokens, html, latex
 from . import command, core, media
 
@@ -34,6 +34,10 @@ CardContent = tokens.newToken("CardContent")
 CardReveal = tokens.newToken("CardReveal")
 CardTitle = tokens.newToken("CardTitle", deactivator=False, activator=False)
 Gallery = tokens.newToken("Gallery", large=3, medium=6, small=12)
+Slideshow = tokens.newToken("Slideshow", interval=None, overlay_default=False)
+Slide = tokens.newToken("Slide", overlay=None)
+SlideContent = tokens.newToken("SlideContent")
+SlideCaption = tokens.newToken("SlideCaption")
 
 
 class GalleryExtension(command.CommandExtension):
@@ -50,18 +54,30 @@ class GalleryExtension(command.CommandExtension):
         self.requires(core, command, media)
         self.addCommand(reader, CardComponent())
         self.addCommand(reader, GalleryComponent())
+        self.addCommand(reader, SlideshowComponent())
+        self.addCommand(reader, SlideComponent())
         renderer.add("Card", RenderCard())
         renderer.add("CardImage", RenderCardImage())
         renderer.add("CardContent", RenderCardContent())
         renderer.add("CardReveal", RenderCardReveal())
         renderer.add("CardTitle", RenderCardTitle())
         renderer.add("Gallery", RenderGallery())
+        renderer.add("Slideshow", RenderSlideshow())
+        renderer.add("Slide", RenderSlide())
+        renderer.add("SlideContent", RenderSlideContent())
+        renderer.add("SlideCaption", RenderSlideCaption())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage("tcolorbox")
             renderer.addPackage("xparse")
             renderer.addPreamble("\\definecolor{card-frame}{RGB}{0,88,151}")
             renderer.addPreamble(CARD_LATEX)
+
+        # The slideshow relies on the Materialize carousel component; register the
+        # initialization script that wires up autoplay, which Materialize does not provide
+        # on its own.
+        if isinstance(renderer, MaterializeRenderer):
+            renderer.addJavaScript("moose_slideshow", "js/carousel.js")
 
 
 class CardComponent(command.CommandComponent):
@@ -133,6 +149,79 @@ class GalleryComponent(command.CommandComponent):
             medium=int(settings["medium"]),
             small=int(settings["small"]),
         )
+
+
+class SlideshowComponent(command.CommandComponent):
+    COMMAND = "slideshow"
+    SUBCOMMAND = None
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings["interval"] = (
+            None,
+            "Auto-advance period in seconds; if unset, slides advance only when the "
+            "viewer clicks a control.",
+        )
+        settings["overlay_default"] = (
+            False,
+            "Default for the 'overlay' setting of each slide in the slideshow.",
+        )
+        return settings
+
+    def createToken(self, parent, info, page, settings):
+        return Slideshow(
+            parent,
+            interval=settings["interval"],
+            overlay_default=settings["overlay_default"],
+            **self.attributes(settings),
+        )
+
+
+class SlideComponent(command.CommandComponent):
+    COMMAND = "slide"
+    SUBCOMMAND = ("jpg", "jpeg", "gif", "png", "svg")
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings["caption"] = (None, "Caption text displayed beneath the slide image.")
+        settings["dark_src"] = (None, "Image to utilize with dark HTML theme.")
+        settings["alt"] = (
+            None,
+            "Alt text describing the image (defaults to the caption).",
+        )
+        settings["overlay"] = (
+            None,
+            "Overlay the caption and any block content on the bottom of the image rather than "
+            "placing them beneath it; defaults to the slideshow's 'overlay_default' setting.",
+        )
+        return settings
+
+    def createToken(self, parent, info, page, settings):
+        # The paired form (!slide!...!slide-end!) carries arbitrary block content (e.g. a
+        # caption line plus a link to the relevant model) in the regex 'block' group, which
+        # the recursive lexer tokenizes into the returned token. The caption and the block
+        # content share one SlideContent token, so the 'overlay' setting places them together;
+        # any 'caption' setting is rendered first, so the block content follows beneath it.
+        slide = Slide(parent, overlay=settings["overlay"], **self.attributes(settings))
+        media.Image(
+            slide,
+            src=info["subcommand"],
+            dark=settings["dark_src"],
+            alt=settings["alt"] or settings["caption"],
+        )
+        block = info["block"] if "block" in info else None
+        if not (settings["caption"] or block):
+            return slide
+
+        content = SlideContent(slide)
+        if settings["caption"]:
+            caption = SlideCaption(content)
+            self.reader.tokenize(
+                caption, settings["caption"], page, "inline", line=info.line
+            )
+        return content
 
 
 class RenderCard(components.RenderComponent):
@@ -245,3 +334,85 @@ class RenderGallery(components.RenderComponent):
         row = html.Tag(parent, "div", token)
         row.addClass("row")
         return row
+
+
+class RenderSlideshow(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        # No carousel in LaTeX; the slide images render in order (see RenderSlide).
+        return parent
+
+    def createHTML(self, parent, token, page):
+        # Without the Materialize carousel (plain HTML, PDF), degrade to the slide images
+        # in order rather than dropping them, since the images are the content.
+        return parent
+
+    def createMaterialize(self, parent, token, page):
+        for child in token.children:
+            if child.name != "Slide":
+                msg = (
+                    "The 'slideshow' command requires that all content be slides (i.e., "
+                    "created with the 'slide' command). However, one of the children of the "
+                    "slideshow is a '%s' token."
+                )
+                LOG.error(msg, child.name)
+
+        div = html.Tag(parent, "div", token)
+        div.addClass("carousel")
+        # 'carousel-slider' selects Materialize's full-width layout (one 100%-wide slide at a
+        # time), which pairs with the fullWidth option the init script passes. Without it each
+        # slide is a fixed 200px box and neighboring slides remain visible beside the active one.
+        div.addClass("carousel-slider")
+        div.addClass("moose-slideshow")
+        if token["interval"]:
+            # The carousel script uses milliseconds, as does JavaScript's setInterval.
+            div["data-interval"] = str(round(token["interval"] * 1000))
+        return div
+
+
+class RenderSlide(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createHTML(self, parent, token, page):
+        return parent
+
+    def createMaterialize(self, parent, token, page):
+        # A <div> (not an <a>) so that a slide can hold arbitrary content, including links:
+        # a link inside an <a class="carousel-item"> would be an invalid nested anchor, which
+        # the browser splits out of the slide.
+        div = html.Tag(parent, "div", token)
+        div.addClass("carousel-item")
+        # The carousel item spans the full carousel width, so the image and its content sit in
+        # an inner box as wide as the image, which bounds an overlay to the image.
+        return html.Tag(div, "div", class_="moose-slide")
+
+
+class RenderSlideContent(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createHTML(self, parent, token, page):
+        return parent
+
+    def createMaterialize(self, parent, token, page):
+        slide = token.parent
+        overlay = slide["overlay"]
+        if overlay is None:
+            overlay = slide.parent.get("overlay_default", False)
+
+        div = html.Tag(parent, "div", token)
+        div.addClass("moose-slide-content")
+        if overlay:
+            div.addClass("moose-slide-overlay")
+        return div
+
+
+class RenderSlideCaption(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createHTML(self, parent, token, page):
+        return html.Tag(parent, "p", class_="moose-caption")
+
+    def createMaterialize(self, parent, token, page):
+        return html.Tag(parent, "span", class_="carousel-caption")
