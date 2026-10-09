@@ -95,6 +95,13 @@ public:
   /**
    * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
    * This might be useful when coupling to other physics
+   * @param eigen_index Index of the converged eigenvalue whose inverse magnitude is used as the
+   * normalization factor when "normal_factor" is not provided
+   */
+  void postScaleEigenVector(unsigned int eigen_index);
+
+  /**
+   * Normalize the eigen vector currently held by the eigen system, using the active eigen index
    */
   void postScaleEigenVector();
 
