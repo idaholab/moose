@@ -1,0 +1,47 @@
+[Tests]
+  design = 'SphereContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
+  issues = '#33801'
+  [hertz_inelastic]
+    type = 'CSVDiff'
+    input = 'hertz_inelastic.i'
+    csvdiff = 'hertz_inelastic_csv.csv hertz_inelastic_csv_contact_lm_0010.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'The system shall drive a rigid sphere into a J2-plasticity half-space '
+                  '(2D axisymmetric, small strain) using the analytic-level-set nodal-NCP '
+                  'contact stack with a semismooth Newton solver.'
+  []
+  # Jacobian tests come in a pair - one per branch of the min-NCP.  The default
+  # input has the sphere tangent to the material tip at t=0, so lambda = 0 and
+  # g = 0 both evaluate to zero.  That is exactly the semismooth kink, where any
+  # FD probe straddles the two derivative branches and disagrees with the
+  # hand-coded Jacobian at O(1).  Moving the sphere away or into the body forces
+  # the state onto ONE branch and lets us assert a tight ratio.
+  [hertz_inelastic-jac-open]
+    type = 'PetscJacobianTester'
+    input = 'hertz_inelastic.i'
+    prereq = 'hertz_inelastic'
+    ratio_tol = 5e-7
+    difference_tol = 1e-6
+    cli_args = 'UserObjects/sphere/center="0 -4.5 0" Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    heavy = true
+    requirement = 'The hand-coded Jacobian of the rigid-inelastic Hertz setup shall match the '
+                  'finite-differenced Jacobian to near machine precision when the min-NCP '
+                  'residual is unambiguously on its lambda branch (no contact).'
+  []
+  [hertz_inelastic-jac-penetrated]
+    type = 'PetscJacobianTester'
+    input = 'hertz_inelastic.i'
+    prereq = 'hertz_inelastic-jac-open'
+    ratio_tol = 5e-7
+    difference_tol = 1e-6
+    cli_args = 'UserObjects/sphere/center="0 -3.5 0" Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    heavy = true
+    requirement = 'The hand-coded Jacobian of the rigid-inelastic Hertz setup shall match the '
+                  'finite-differenced Jacobian to near machine precision when the min-NCP '
+                  'residual is unambiguously on its gap branch (deep penetration).'
+  []
+[]
