@@ -1406,7 +1406,7 @@
     input = advection_displaced_AD.i
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'The system shall compute the Jacobian of the AD advective flux on a displaced mesh, including the derivatives of the quadrature weight with respect to the displacements, when the displacements are variables.'
+    requirement = 'The system shall be able to compute the Jacobian of the advective flux on a displaced mesh using automatic differentiation, including the derivatives of the quadrature weight with respect to the displacements, when the displacements are variables.'
     issues = '#33992'
     design = 'PorousFlowAdvectiveFlux.md'
   []
