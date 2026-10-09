@@ -353,7 +353,7 @@ public:
   {
     return _element_data->adSlnFace();
   }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
   {
     return _element_data->adGradSlnFace();
   }

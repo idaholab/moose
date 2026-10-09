@@ -303,8 +303,6 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u = true;
-    // Coupled AD gradients reach face objects, e.g. boundary materials, through this accessor
-    needADGradPhiFace();
     return _ad_grad_u;
   }
 
@@ -319,10 +317,13 @@ public:
     return _ad_u;
   }
 
-  /// Face-only counterpart of adGradSln(); see adSlnFace()
+  /**
+   * Face counterpart of adGradSln(); see adSlnFace(). Objects evaluating on element faces must use
+   * this accessor: on a face, the AD gradient is only computed when it was requested here.
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
   {
-    _need_ad = _need_ad_grad_u = true;
+    _need_ad = _need_ad_grad_u = _need_ad_grad_u_face = true;
     needADGradPhiFace();
     return _ad_grad_u;
   }
@@ -330,7 +331,6 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u_dot = true;
-    needADGradPhiFace();
 
     if (!_time_integrator)
       // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -574,6 +574,8 @@ private:
   mutable bool _need_ad_volume = false;
   mutable bool _need_ad_u = false;
   mutable bool _need_ad_grad_u = false;
+  /// Whether the AD gradient is needed on element faces, i.e. requested through adGradSlnFace()
+  mutable bool _need_ad_grad_u_face = false;
   mutable bool _need_ad_grad_u_dot = false;
   mutable bool _need_ad_second_u = false;
   mutable bool _need_ad_curl_u = false;

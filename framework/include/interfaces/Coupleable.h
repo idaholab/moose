@@ -1605,6 +1605,12 @@ private:
 
   void checkFuncType(const std::string var_name, VarType t, FuncAge age) const;
 
+  /**
+   * Whether this object evaluates coupled variables on element faces, so that it must request
+   * coupled AD gradients through the face accessors
+   */
+  bool isFaceObject() const;
+
 protected:
   /**
    * Deprecated method. Use \p getFieldVar instead

@@ -56,7 +56,7 @@ protected:
    */
   virtual void scalarDirichlet(const Moose::Functor<Real> & dirichlet_value) override;
 
-  /// Element-interior scalar gradients at quadrature points
+  /// Scalar gradients at element-interior and element-face quadrature points
   const MooseArray<ADRealVectorValue> & _grad_u_sol;
 
   /// Element-interior scalar test-function gradients evaluated on a face

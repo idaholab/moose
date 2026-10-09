@@ -33,8 +33,9 @@ ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
     _lambda(_var ? _var->adSlnLower() : _lambda_dummy),
     _u_secondary(_secondary_var.adSln()),
     _u_primary(_primary_var.adSlnNeighbor()),
-    _grad_u_secondary(getParam<bool>("_compute_primal_gradients") ? _secondary_var.adGradSln()
-                                                                  : _grad_u_dummy),
+    _grad_u_secondary(getParam<bool>("_compute_primal_gradients")
+                          ? _secondary_var.adGradSlnFace()
+                          : _grad_u_dummy),
     _grad_u_primary(getParam<bool>("_compute_primal_gradients") ? _primary_var.adGradSlnNeighbor()
                                                                 : _grad_u_dummy)
 {
