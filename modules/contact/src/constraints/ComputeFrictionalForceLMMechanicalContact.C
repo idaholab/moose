@@ -84,6 +84,28 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
+    paramError("weighted_velocities_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_velocities_uo.name(),
+               "'.");
+
+  // The weighted-gap and weighted-velocity parameters may identify different user objects, so each
+  // object's interface and displacement configuration must be validated.
+  if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must be defined on the same secondary/primary subdomain "
+               "pair as this constraint when nodal-normal derivatives are enabled.");
+
+  const std::array<std::pair<const MooseVariable *, unsigned int>, 3>
+      velocity_displacement_variables{{{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
+  for (const auto & [variable, component] : velocity_displacement_variables)
+    if (variable != _weighted_velocities_uo.dispVar(component))
+      paramError("weighted_velocities_uo",
+                 "'weighted_velocities_uo' must use the same displacement variables as this "
+                 "constraint when nodal-normal derivatives are enabled.");
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",

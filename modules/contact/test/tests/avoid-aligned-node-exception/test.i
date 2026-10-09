@@ -488,7 +488,8 @@ youngs_modulus = 10e11
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  nl_rel_tol = 1e-7
+  # Resolve complementarity closely enough to verify near-zero crack penetration.
+  nl_rel_tol = 1e-10
 []
 
 [Outputs]

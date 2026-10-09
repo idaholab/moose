@@ -1,0 +1,13 @@
+[Tests]
+  design = 'AutomaticMortarGeneration.md'
+  issues = '#33378'
+  [weighted_normal_and_householder_tangents]
+    type = GoogleTest
+    unit_test = MortarNodalGeometryTest.weightedNormalAndHouseholderTangents
+    requirement = 'The system shall compute the automatic differentiation derivatives of a '
+                  'Householder-reflected tangent basis for a synthetic unit normal, matching a '
+                  'finite-difference approximation and keeping the tangents mutually orthogonal '
+                  'and unit norm both away from and at the pole where the reflection chart '
+                  'switches.'
+  []
+[]
