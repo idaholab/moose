@@ -303,15 +303,6 @@ public:
     return _elem_centroid_to_neighbor_centroid_distance(side, elem);
   }
   /**
-   * @returns The boundary ID associated with an element side. If there is none, the returned value
-   * will be \p Moose::INVALID_BOUNDARY_ID
-   */
-  KOKKOS_FUNCTION BoundaryID getSideBoundaryID(ContiguousElementID elem, unsigned int side) const
-  {
-    KOKKOS_ASSERT(_element_side_geometry_initialized);
-    return _side_boundary_id(side, elem);
-  }
-  /**
    * Get the coordinate-weighted volume of a local element
    * @param elem The local contiguous element ID
    * @returns The element volume including the coordinate transformation factor
@@ -433,6 +424,39 @@ public:
    * @returns Whether the node is on the boundary
    */
   KOKKOS_FUNCTION bool isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const;
+  /**
+   * Get the number of boundary IDs of a local element side
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @returns The number of boundary IDs the side belongs to
+   */
+  KOKKOS_FUNCTION unsigned int getNumSideBoundaryIDs(ContiguousElementID elem,
+                                                     unsigned int side) const
+  {
+    return _side_boundary_ids(side, elem).size();
+  }
+  /**
+   * Get a boundary ID of a local element side
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @param i The index into the boundary IDs of the side, in ascending order of boundary ID
+   * @returns The boundary ID
+   */
+  KOKKOS_FUNCTION BoundaryID getSideBoundaryID(ContiguousElementID elem,
+                                               unsigned int side,
+                                               unsigned int i) const
+  {
+    return _side_boundary_ids(side, elem)[i];
+  }
+  /**
+   * Get whether a local element side belongs to a boundary
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @param boundary The boundary ID
+   * @returns Whether the side belongs to the boundary
+   */
+  KOKKOS_FUNCTION bool
+  isSideOnBoundary(ContiguousElementID elem, unsigned int side, BoundaryID boundary) const;
 #endif
 
 private:
@@ -568,6 +592,11 @@ private:
    * Contiguous node IDs on each boundary
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
+  /**
+   * Boundary IDs of each local element side indexed by (side, contiguous element ID), each inner
+   * array sorted in ascending order
+   */
+  JaggedArray<BoundaryID, 1, 2> _side_boundary_ids;
 
   /// Whether initElementGeometry() has been called and the element geometry cache is populated
   bool _element_geometry_initialized = false;
@@ -595,8 +624,6 @@ private:
   Array2D<Real3> _elem_centroid_to_neighbor_centroid;
   /// Element-centroid to neighbor-centroid distances indexed by (side, contiguous element ID)
   Array2D<Real> _elem_centroid_to_neighbor_centroid_distance;
-  /// Boundary IDs for each side indexed by (side, contiguous element ID)
-  Array2D<BoundaryID> _side_boundary_id;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -611,6 +638,18 @@ Mesh::isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const
   auto target = Utils::find(node, begin, end);
 
   return target != end;
+}
+
+KOKKOS_FUNCTION inline bool
+Mesh::isSideOnBoundary(ContiguousElementID elem, unsigned int side, BoundaryID boundary) const
+{
+  const auto boundaries = _side_boundary_ids(side, elem);
+
+  for (unsigned int i = 0; i < boundaries.size(); ++i)
+    if (boundaries[i] == boundary)
+      return true;
+
+  return false;
 }
 #endif
 

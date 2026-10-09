@@ -11,6 +11,10 @@ The following kernels are used:
 - [CoupledDiffusionReactionSub.md] for the diffusion term
 - [CoupledConvectionReactionSub.md] for the advection term
 
+The secondary species concentrations are computed with [AqueousEquilibriumRxnAux.md].
+Setting [!param](/Physics/AqueousReactionsEquilibrium/AqueousReactionsEquilibriumPhysics/use_kokkos)
+to `true` adds the Kokkos versions of these objects instead.
+
 ## Variable definition
 
 The `AqueousReactionsEquilibriumPhysics` takes care of defining solver and auxiliary variables for the species

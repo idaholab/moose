@@ -46,6 +46,7 @@ AddCoupledSolidKinSpeciesAction::validParams()
   params.addRequiredCoupledVar("system_temperature",
                                "The system temperature for all reactions (K)");
   params.addClassDescription("Adds solid kinetic Kernels and AuxKernels for primary species");
+  params.addParam<bool>("use_kokkos", false, "Whether to add the Kokkos versions of the objects");
   return params;
 }
 
@@ -62,8 +63,14 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
     _e_act(getParam<std::vector<Real>>("activation_energy")),
     _gas_const(getParam<Real>("gas_constant")),
     _ref_temp(getParam<std::vector<Real>>("reference_temperature")),
-    _sys_temp(getParam<std::vector<VariableName>>("system_temperature"))
+    _sys_temp(getParam<std::vector<VariableName>>("system_temperature")),
+    _kokkos_prefix(getParam<bool>("use_kokkos") ? "Kokkos" : "")
 {
+#ifndef MOOSE_KOKKOS_ENABLED
+  if (getParam<bool>("use_kokkos"))
+    paramError("use_kokkos", "MOOSE was not configured with Kokkos");
+#endif
+
   // Note: as the reaction syntax has changed, check to see if the old syntax has
   // been used and throw an informative error. The number of = signs should be one
   // more than the number of commas, while the smallest number of spaces possible is 2
@@ -212,11 +219,12 @@ AddCoupledSolidKinSpeciesAction::act()
     // Add Kernels for each primary species
     for (unsigned int i = 0; i < _primary_species.size(); ++i)
     {
-      InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
+      InputParameters params_kin = _factory.getValidParams(_kokkos_prefix + "CoupledBEKinetic");
       params_kin.set<NonlinearVariableName>("variable") = _primary_species[i];
       params_kin.set<std::vector<Real>>("weight") = _weights[i];
       params_kin.set<std::vector<VariableName>>("v") = _kinetic_species_involved[i];
-      _problem->addKernel("CoupledBEKinetic", _primary_species[i] + "_" + "_kin", params_kin);
+      _problem->addKernel(
+          _kokkos_prefix + "CoupledBEKinetic", _primary_species[i] + "_" + "_kin", params_kin);
     }
   }
 
@@ -225,7 +233,7 @@ AddCoupledSolidKinSpeciesAction::act()
     // Add AuxKernels for each solid kinetic species
     for (unsigned int i = 0; i < _num_reactions; ++i)
     {
-      InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
+      InputParameters params_kin = _factory.getValidParams(_kokkos_prefix + "KineticDisPreConcAux");
       params_kin.set<AuxVariableName>("variable") = _solid_kinetic_species[i];
       params_kin.defaultCoupledValue("log_k", _logk[i]);
       params_kin.set<Real>("r_area") = _r_area[i];
@@ -237,7 +245,7 @@ AddCoupledSolidKinSpeciesAction::act()
       params_kin.set<std::vector<Real>>("sto_v") = _stos[i];
       params_kin.set<std::vector<VariableName>>("v") = _primary_species_involved[i];
       _problem->addAuxKernel(
-          "KineticDisPreConcAux", "aux_" + _solid_kinetic_species[i], params_kin);
+          _kokkos_prefix + "KineticDisPreConcAux", "aux_" + _solid_kinetic_species[i], params_kin);
     }
   }
 }

@@ -1,0 +1,102 @@
+# Tests the Jacobian when no secondary species are present
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+[]
+
+[Variables]
+  [a]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [b]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [pressure]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[ICs]
+  [pressure]
+    type = RandomIC
+    variable = pressure
+    max = 10
+    min = 1
+  []
+  [a]
+    type = RandomIC
+    variable = a
+    max = 1
+    min = 0
+  []
+  [b]
+    type = RandomIC
+    variable = b
+    max = 1
+    min = 0
+  []
+[]
+
+[Kernels]
+  [a_ie]
+    type = KokkosPrimaryTimeDerivative
+    variable = a
+  []
+  [a_diff]
+    type = KokkosPrimaryDiffusion
+    variable = a
+  []
+  [a_conv]
+    type = KokkosPrimaryConvection
+    variable = a
+    p = pressure
+  []
+  [b_ie]
+    type = KokkosPrimaryTimeDerivative
+    variable = b
+  []
+  [b_diff]
+    type = KokkosPrimaryDiffusion
+    variable = b
+  []
+  [b_conv]
+    type = KokkosPrimaryConvection
+    variable = b
+    p = pressure
+  []
+  [pressure]
+    type = KokkosDarcyFluxPressure
+    variable = pressure
+  []
+[]
+
+[Materials]
+  [porous]
+    type = KokkosGenericConstantMaterial
+    prop_names = 'diffusivity conductivity porosity'
+    prop_values = '1e-4 1e-4 0.2'
+  []
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = NEWTON
+  end_time = 1
+[]
+
+[Outputs]
+  perf_graph = true
+[]
+
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
