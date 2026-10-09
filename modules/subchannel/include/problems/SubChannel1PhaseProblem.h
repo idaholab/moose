@@ -149,6 +149,29 @@ protected:
   /// Computes implicit solve using PetSc
   PetscErrorCode implicitPetscSolve(int iblock);
 
+  /**
+   * Add proximal damping K (W - W_iter) to the cross-momentum equation of the coupled solve,
+   * M_ww W + M_wp P + K (W - W_iter) = b_w, which keeps the coupled linear solve well conditioned
+   * without changing the converged solution. K is scaled by the mean magnitude of the
+   * cross-momentum coefficients so it is consistent across meshes, and by the ratio of the current
+   * to the initial cross-momentum residual (switched evolution relaxation), so K itself vanishes as
+   * the outer iteration converges.
+   * @param M_ww     cross-momentum block acting on the crossflow; K is added to its diagonal
+   * @param M_wp     cross-momentum block acting on the pressure
+   * @param b_w      cross-momentum right-hand side; K W_iter is added to it
+   * @param w_iter   crossflow at the current outer iterate
+   * @param iblock   axial block
+   * @param max_K    the damping applied far from convergence, which bounds K
+   * @param added_K  the damping applied
+   */
+  PetscErrorCode addCrossflowDamping(Mat M_ww,
+                                     Mat M_wp,
+                                     Vec b_w,
+                                     Vec w_iter,
+                                     int iblock,
+                                     PetscScalar & max_K,
+                                     PetscScalar & added_K);
+
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
   /// Detects whether pin diameter or duct displacement fields require geometry recalculation
@@ -192,6 +215,13 @@ protected:
    */
   PetscErrorCode solveAndPopulateEnthalpy(
       Mat A, Vec rhs, unsigned int first_node, unsigned int last_node, const char * ksp_prefix);
+
+  /**
+   * Add the term matrices to a system matrix that was zeroed beforehand. The first call determines
+   * the nonzero pattern of the sum; later calls add into that pattern instead of rebuilding the
+   * matrix, which gives the same entries.
+   */
+  PetscErrorCode addTermMatrices(Mat system, const std::vector<Mat> & terms, bool & pattern_set);
 
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
@@ -266,6 +296,8 @@ protected:
   const PetscReal & _dtol;
   /// The maximum number of iterations to use for the ksp linear solver
   const PetscInt & _maxit;
+  /// Restart length of the FGMRES solver of the coupled monolithic flow system
+  const PetscInt & _coupled_gmres_restart;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
   /// The direction of gravity
@@ -428,14 +460,22 @@ protected:
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
 
-  /// Added resistances for monolithic convergence
-  PetscScalar _added_K = 0.0;
-  PetscScalar _added_K_old = 1000.0;
-  PetscScalar _max_sumWij;
-  PetscScalar _max_sumWij_new;
-  PetscScalar _correction_factor = 1.0;
+  /// Whether the nonzero patterns of the assembled system matrices have been established
+  bool _amc_sys_mdot_pattern_set = false;
+  bool _cmc_sys_Wij_pattern_set = false;
+  bool _hc_sys_h_pattern_set = false;
   /// Maximum pressure fixed-point update before solution relaxation over the blocks
   Real _pressure_fixed_point_error = 1.0;
+  /// Per-block largest cross-momentum residual norm of the solve, which scales the crossflow
+  /// damping in the coupled solve
+  std::vector<Real> _crossflow_residual_ref;
+  /// Per-block factor, raised after coupled linear-solve failures and after outer iterations whose
+  /// temperature error grows, that delays the decay of the crossflow damping
+  std::vector<Real> _crossflow_damping_boost;
+  /// Number of coupled linear-solve retries, each doubling the crossflow damping
+  static constexpr unsigned int _max_crossflow_retries = 8;
+  /// Cap on the damping boost: the increase one fully retried coupled solve provides
+  static constexpr Real _max_crossflow_damping_boost = 1 << _max_crossflow_retries;
 
 public:
   static InputParameters validParams();
@@ -536,5 +576,6 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
       loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
