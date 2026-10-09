@@ -118,7 +118,7 @@ C_m =
 C_{mL} \left(1-\psi\right)^{\gamma} \left(1-\psi^{\lambda}\right) +
 C_{mT}\,\psi^{\gamma},
 
-with $\gamma = 0.362$ and $\lambda = 6.7$ of Table 5,
+with $\gamma = 0.362$ and $\lambda = 6.7$ of Table 5 of [!cite](pacio2022analysis),
 
 where
 
