@@ -62,8 +62,7 @@ Kokkos-MOOSE is not a separate finite element backend in the same sense as MFEM-
 device-portable implementation path for supported MOOSE systems, built around Kokkos data structures,
 memory-space rules, and parallel dispatch. It relies on libMesh as the finite element backend. Many
 Kokkos-MOOSE system objects are compatible with host MOOSE/libMesh objects, but exceptions exist; for
-example, host MOOSE nodal boundary conditions cannot be used in the same input as Kokkos-MOOSE
-residual objects.
+example, material properties are not compatible between host MOOSE and Kokkos-MOOSE.
 
 For details, see [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md).
 

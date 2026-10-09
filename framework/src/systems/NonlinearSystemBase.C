@@ -1996,26 +1996,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   // Make matrix ready to use
   activateAllMatrixTags();
 
-  for (auto tag : matrix_tags)
-  {
-    if (!hasMatrix(tag))
-      continue;
-
-    auto & jacobian = getMatrix(tag);
-    // Necessary for speed
-    if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
-    {
-      LibmeshPetscCall(MatSetOption(petsc_matrix->mat(),
-                                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                                    PETSC_TRUE));
-      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-        LibmeshPetscCall(
-            MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
-      if (_fe_problem.ignoreZerosInJacobian())
-        LibmeshPetscCall(MatSetOption(
-            cast_ref<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
-    }
-  }
+  setMatrixOptions(matrix_tags);
 
   residualSetup();
 
@@ -2042,7 +2023,13 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
+  {
     computeKokkosResidualAndJacobian(vector_tags, matrix_tags);
+    // The first Kokkos assembly preallocates the matrices for COO assembly, which recreates the
+    // diagonal and off-diagonal blocks of distributed PETSc matrices and drops the options set on
+    // them above
+    setMatrixOptions(matrix_tags);
+  }
 #endif
 
   // residual contributions from the domain
@@ -3008,15 +2995,8 @@ NonlinearSystemBase::jacobianSetup()
 }
 
 void
-NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
+NonlinearSystemBase::setMatrixOptions(const std::set<TagID> & tags)
 {
-  TIME_SECTION("computeJacobianInternal", 3);
-
-  _fe_problem.setCurrentNonlinearSystem(number());
-
-  // Make matrix ready to use
-  activateAllMatrixTags();
-
   for (auto tag : tags)
   {
     if (!hasMatrix(tag))
@@ -3037,6 +3017,19 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
             cast_ref<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
     }
   }
+}
+
+void
+NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
+{
+  TIME_SECTION("computeJacobianInternal", 3);
+
+  _fe_problem.setCurrentNonlinearSystem(number());
+
+  // Make matrix ready to use
+  activateAllMatrixTags();
+
+  setMatrixOptions(tags);
 
   jacobianSetup();
 
@@ -3063,7 +3056,13 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
+  {
     computeKokkosJacobian(tags);
+    // The first Kokkos assembly preallocates the matrices for COO assembly, which recreates the
+    // diagonal and off-diagonal blocks of distributed PETSc matrices and drops the options set on
+    // them above
+    setMatrixOptions(tags);
+  }
 #endif
 
   PARALLEL_TRY
