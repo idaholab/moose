@@ -25,10 +25,13 @@ face-interpolated [!param](/UserObjects/BernoulliFormLossPressureJump/density) i
 side densities in this term.
 
 Each entry of [!param](/UserObjects/BernoulliFormLossPressureJump/form_loss) adds the irreversible
-term $-\operatorname{sign}(\phi_f)K\rho_f u_{ref}^2/2$ on the corresponding
+term $-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$ on the corresponding
 [!param](/UserObjects/BernoulliFormLossPressureJump/boundary). The side used for $u_{ref}$ is
 selected by [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side), which
-defaults to the lower-porosity side.
+defaults to the lower-porosity side. The stored jump $J$ is pressure on the non-owner
+side minus pressure on the owner side, and $\phi_{o\rightarrow n}$ is the mass flux from
+the owner toward the non-owner. FaceInfo element/neighbor ordering does not define that
+sign.
 
 ## Example Input Syntax
 

@@ -15,6 +15,7 @@
 #include "FVReconstructedPressureGradient.h"
 #include "LinearSystem.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
+#include "LinearFVPressureCorrectionDiffusionJump.h"
 #include "MooseLinearVariableFV.h"
 #include "PressureJumpModel.h"
 
@@ -69,6 +70,11 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
 {
   RhieChowMassFlux::linkMomentumPressureSystems(
       momentum_systems, pressure_system, momentum_system_numbers);
+
+  if (hasPressureBaffles() &&
+      !dynamic_cast<const LinearFVPressureCorrectionDiffusionJump *>(_p_diffusion_kernel))
+    paramError("p_diffusion_kernel",
+               "Pressure jump models require LinearFVPressureCorrectionDiffusionJump.");
 
   auto * const pressure_var =
       dynamic_cast<MooseLinearVariableFVReal *>(&_pressure_system->getVariable(0, _p->number()));

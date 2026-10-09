@@ -132,7 +132,9 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
                                               : elem_porosity <= neighbor_porosity;
     const Real reference_velocity = use_elem ? face_mass_flux / (elem_rho * elem_porosity)
                                              : face_mass_flux / (neighbor_rho * neighbor_porosity);
-    const Real flow_sign = face_mass_flux > 0.0 ? 1.0 : -1.0;
+    const Real owner_to_non_owner_mass_flux =
+        elem_is_owner ? face_mass_flux : -face_mass_flux;
+    const Real flow_sign = owner_to_non_owner_mass_flux > 0.0 ? 1.0 : -1.0;
     pressure_jump -=
         flow_sign * 0.5 * form_loss * face_rho * reference_velocity * reference_velocity;
   }

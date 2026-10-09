@@ -21,3 +21,16 @@
     abs_zero = 1e-4
   []
 []
+
+  [nonpositive-cp]
+    type = RunException
+    input = porous-baffle-2d-enthalpy.i
+    cli_args = 'LinearFVKernels/fluid_exchange/cp=0 Executioner/num_iterations=1'
+    expect_err = 'cp must stay positive when solving for enthalpy'
+    requirement = 'The system shall reject a nonpositive specific heat when linearizing enthalpy-based volumetric heat transfer.'
+    design = 'LinearFVEnthalpyVolumetricHeatTransfer.md'
+    issues = '#31995'
+    recover = false
+    max_threads = 1
+  []
+

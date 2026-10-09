@@ -62,7 +62,7 @@ void
 FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
                                                 const LinearFVGradientReader & pressure_gradient)
 {
-  mooseAssert(&pressure_gradient.system() == &rc.pressureSystem(),
+  mooseAssert(pressure_gradient.system().number() == rc.pressureSystem().number(),
               "First binding must use the pressure system owned by the RhieChowMassFlux.");
 
   mooseAssert(pressure_gradient.variableNumber() == rc.pressureVariableNumber(),
@@ -140,7 +140,7 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
 {
   checkFlowSystem(rc);
 
-  mooseAssert(_pressure_system == &rc.pressureSystem() &&
+  mooseAssert(_pressure_system && _pressure_system->number() == rc.pressureSystem().number() &&
                   _pressure_variable_number == rc.pressureVariableNumber(),
               "FVReconstructedPressureGradient must be linked to the pressure field owned by its "
               "bound RhieChowMassFlux.");

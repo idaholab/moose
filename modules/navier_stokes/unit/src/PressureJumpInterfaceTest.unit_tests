@@ -23,3 +23,9 @@
     requirement = 'The system shall reject pressure-jump interface data with a nonpositive projected half-cell distance.'
   []
 []
+  [manufactured_piecewise_linear_pressure]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.ManufacturedPiecewiseLinearPressure
+    requirement = 'The system shall recover the conservative flux and both one-sided pressures for a manufactured piecewise-linear pressure field across an anisotropic interface.'
+  []
+

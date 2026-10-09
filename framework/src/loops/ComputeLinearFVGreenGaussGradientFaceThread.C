@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
+#include "FVGreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
 #include "SystemBase.h"
 #include "PetscVectorReader.h"
@@ -17,14 +18,16 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     FEProblemBase & fe_problem,
     SystemBase & system,
     std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
-    const std::unordered_set<unsigned int> & gradient_variables)
+    const std::unordered_set<unsigned int> & gradient_variables,
+    const FVGreenGaussGradient & gradient_method)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _system(system),
     _libmesh_system(system.system()),
     _system_number(_libmesh_system.number()),
     _temporary_gradient(temporary_gradient),
-    _gradient_variables(gradient_variables)
+    _gradient_variables(gradient_variables),
+    _gradient_method(gradient_method)
 {
 }
 
@@ -38,7 +41,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
     _temporary_gradient(x._temporary_gradient),
-    _gradient_variables(x._gradient_variables)
+    _gradient_variables(x._gradient_variables),
+    _gradient_method(x._gradient_method)
 {
 }
 
@@ -89,19 +93,22 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
             dof_indices_neighbor[face_i] =
                 face_info->neighborInfo()->dofIndices()[_system_number][_current_var->number()];
 
-            const auto face_value =
-                Moose::FV::linearInterpolation(solution_reader(dof_indices_elem[face_i]),
-                                               solution_reader(dof_indices_neighbor[face_i]),
-                                               *face_info,
-                                               true);
+            const auto face_values = _gradient_method.internalFaceValues(
+                *face_info,
+                *face_info->elemInfo(),
+                *face_info->neighborInfo(),
+                solution_reader(dof_indices_elem[face_i]),
+                solution_reader(dof_indices_neighbor[face_i]));
 
-            const auto contribution =
-                face_info->normal() * face_info->faceArea() * face_info->faceCoord() * face_value;
+            const auto surface_vector =
+                face_info->normal() * face_info->faceArea() * face_info->faceCoord();
+            const auto elem_contribution = surface_vector * face_values.first;
+            const auto neighbor_contribution = -surface_vector * face_values.second;
 
             for (const auto i : make_range(_dim))
             {
-              temporary_values_elem[i][face_i] = contribution(i);
-              temporary_values_neighbor[i][face_i] = -contribution(i);
+              temporary_values_elem[i][face_i] = elem_contribution(i);
+              temporary_values_neighbor[i][face_i] = neighbor_contribution(i);
             }
           }
           // If this face is on the boundary of the block where the variable is defined, we
