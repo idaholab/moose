@@ -78,7 +78,8 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
             std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>{})),
     _epsilon_tolerance(1.0e-40),
     _dof_to_damage(declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADReal, Real>>>(
-        "dof_do_damage", std::unordered_map<dof_id_type, std::pair<ADReal, Real>>{}))
+        "dof_do_damage", std::unordered_map<dof_id_type, std::pair<ADReal, Real>>{})),
+    _t_step_old_czm(declareRestartableData<int>("t_step_old_czm", 0))
 {
   _czm_interpolated_traction.resize(_ndisp);
 
@@ -180,6 +181,22 @@ CohesiveZoneModelBase::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the maps below hold the discarded attempt's values and keys. Restore the
+  // state saved at the start of the first attempt so the retry starts from the accepted state.
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_czm;
+  _t_step_old_czm = _fe_problem.timeStep();
+  if (retried_timestep)
+  {
+    _dof_to_step_slip = _dof_to_step_slip_start;
+    _dof_to_accumulated_slip = _dof_to_accumulated_slip_start;
+    _dof_to_tangential_traction = _dof_to_tangential_traction_start;
+    _dof_to_frictional_lagrange_multipliers = _dof_to_frictional_lagrange_multipliers_start;
+    _dof_to_local_penalty_friction = _dof_to_local_penalty_friction_start;
+    _dof_to_damage = _dof_to_damage_start;
+    return;
+  }
+
   // Clear step slip (values used in between AL iterations for penalty adaptivity)
   for (auto & map_pr : _dof_to_step_slip)
   {
@@ -217,6 +234,13 @@ CohesiveZoneModelBase::timestepSetup()
     old_damage = {MetaPhysicL::raw_value(damage)};
     damage = {0.0};
   }
+
+  _dof_to_step_slip_start = _dof_to_step_slip;
+  _dof_to_accumulated_slip_start = _dof_to_accumulated_slip;
+  _dof_to_tangential_traction_start = _dof_to_tangential_traction;
+  _dof_to_frictional_lagrange_multipliers_start = _dof_to_frictional_lagrange_multipliers;
+  _dof_to_local_penalty_friction_start = _dof_to_local_penalty_friction;
+  _dof_to_damage_start = _dof_to_damage;
 }
 
 void

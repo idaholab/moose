@@ -233,7 +233,6 @@
                   'regularization enforced on damage evolution.'
     rel_err = 1.0e-6
     abs_zero = 1.0e-8
-    restep = false
   []
   [traction_curve_modeI_3d]
     type = CSVDiff

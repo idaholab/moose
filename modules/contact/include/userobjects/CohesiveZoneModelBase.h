@@ -135,4 +135,20 @@ protected:
 
   /// Damage values (pair of current and old) on CZM interface
   std::unordered_map<dof_id_type, std::pair<ADReal, Real>> & _dof_to_damage;
+
+  /// The timestep index at which the damage, slip and tangential traction history were last
+  /// advanced. Used to detect a retried timestep (e.g. from --test-restep or a rejected step),
+  /// since timestepSetup() runs once per time step attempt rather than once per accepted step.
+  int & _t_step_old_czm;
+
+  ///@{ Cohesive and frictional state at the start of the current timestep, restored when it is
+  /// retried
+  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_step_slip_start;
+  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> _dof_to_accumulated_slip_start;
+  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>
+      _dof_to_tangential_traction_start;
+  std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers_start;
+  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction_start;
+  std::unordered_map<dof_id_type, std::pair<ADReal, Real>> _dof_to_damage_start;
+  ///@}
 };
