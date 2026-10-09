@@ -55,6 +55,10 @@ assigned as the primary surface. See
 [AutomaticContactPairingGenerator](/AutomaticContactPairingGenerator.md) for details of the pairing
 and primary/secondary assignment.
 
+Automatic pairing requires the mesh to be built by mesh generators, because the action appends an
+[AutomaticContactPairingGenerator](/AutomaticContactPairingGenerator.md) to the mesh generator tree.
+To read a mesh file, use a [FileMeshGenerator](/FileMeshGenerator.md) in the `[Mesh]` block.
+
 ## References
 
 !bibtex bibliography

@@ -98,9 +98,7 @@ AutomaticContactPairingGenerator::generate()
   // Mortar contact needs at least one pair to build its lower-dimensional blocks, while node-face
   // contact may proceed with none
   if (pairs.empty() && _create_lower_d_blocks)
-    mooseError("AutomaticContactPairingGenerator '",
-               name(),
-               "': no contact pairs found within distance ",
+    mooseError("No contact pairs found within distance ",
                _pairing_distance,
                " among boundaries ",
                Moose::stringify(_pairing_boundaries));
@@ -138,7 +136,7 @@ AutomaticContactPairingGenerator::pairSuffix(const std::pair<BoundaryName, Bound
 }
 
 std::vector<AutomaticContactPairingGenerator::CandidateBoundary>
-AutomaticContactPairingGenerator::candidateBoundaries(const MeshBase & mesh)
+AutomaticContactPairingGenerator::candidateBoundaries(const MeshBase & mesh) const
 {
   // A boundary listed more than once, either repeated or as both a name and an ID, would otherwise
   // be paired with itself
@@ -153,18 +151,18 @@ AutomaticContactPairingGenerator::candidateBoundaries(const MeshBase & mesh)
     if (it != candidates.end())
     {
       if (it->name == bname)
-        ::mooseError("Boundary '",
-                     bname,
-                     "' is listed more than once in 'automatic_pairing_boundaries'. Each boundary "
-                     "may be listed only once.");
+        mooseError("Boundary '",
+                   bname,
+                   "' is listed more than once in 'automatic_pairing_boundaries'. Each boundary "
+                   "may be listed only once.");
       else
-        ::mooseError("Boundaries '",
-                     it->name,
-                     "' and '",
-                     bname,
-                     "' in 'automatic_pairing_boundaries' refer to the same boundary (ID ",
-                     bid,
-                     "). Each boundary may be listed only once.");
+        mooseError("Boundaries '",
+                   it->name,
+                   "' and '",
+                   bname,
+                   "' in 'automatic_pairing_boundaries' refer to the same boundary (ID ",
+                   bid,
+                   "). Each boundary may be listed only once.");
     }
     candidates.push_back({bname, bid, 0, Point(0, 0, 0)});
   }
@@ -240,7 +238,7 @@ AutomaticContactPairingGenerator::orderPair(const CandidateBoundary & a,
 }
 
 std::vector<std::pair<BoundaryName, BoundaryName>>
-AutomaticContactPairingGenerator::findPairsNodeProximity(const MeshBase & mesh)
+AutomaticContactPairingGenerator::findPairsNodeProximity(const MeshBase & mesh) const
 {
   const auto candidates = candidateBoundaries(mesh);
   const auto find_candidate = [&candidates](const BoundaryID bid) -> const CandidateBoundary &
@@ -317,12 +315,12 @@ AutomaticContactPairingGenerator::findPairsNodeProximity(const MeshBase & mesh)
 }
 
 std::vector<std::pair<BoundaryName, BoundaryName>>
-AutomaticContactPairingGenerator::findPairsCentroid(const MeshBase & mesh)
+AutomaticContactPairingGenerator::findPairsCentroid(const MeshBase & mesh) const
 {
   const auto candidates = candidateBoundaries(mesh);
   for (const auto & candidate : candidates)
     if (candidate.area == 0)
-      ::mooseError("Boundary '", candidate.name, "' not found in mesh.");
+      mooseError("Boundary '", candidate.name, "' not found in mesh.");
 
   // Find all pairs within distance
   std::vector<std::pair<BoundaryName, BoundaryName>> pairs;

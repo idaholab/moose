@@ -4,11 +4,12 @@
 
 This mesh generator automatically detects contact surface pairs among a list of
 candidate boundaries and stores them in the mesh meta-data. When
-`create_lower_d_blocks` is true, it also creates the lower-dimensional
-primary/secondary subdomain blocks that [ContactAction](/actions/ContactAction.md)
-needs for mortar contact. It is appended to the mesh generator tree by
-[ContactAction](/actions/ContactAction.md) whenever `automatic_pairing_boundaries`
-is specified on the `[Contact]` action, so it is not typically added directly by a
+[!param](/Mesh/AutomaticContactPairingGenerator/create_lower_d_blocks) is true, it
+also creates the lower-dimensional primary/secondary subdomain blocks that
+[ContactAction](/actions/ContactAction.md) needs for mortar contact. It is appended
+to the mesh generator tree by [ContactAction](/actions/ContactAction.md) whenever
+[!param](/Contact/ContactAction/automatic_pairing_boundaries) is specified on the
+`[Contact]` action, so it is not typically added directly by a
 user in the `[Mesh]` block. [ContactAction](/actions/ContactAction.md) reads the
 detected pairs from the mesh meta-data, which is restored from the checkpoint when
 recovering.
@@ -39,12 +40,16 @@ and centroids therefore differ from their true values in the problem coordinate
 system, which can affect the primary/secondary assignment and the `CENTROID` pairing
 distances.
 
-When `create_lower_d_blocks` is true, a primary and a secondary lower-dimensional
-subdomain block are created for each detected pair (named using the `prefix` parameter), matching the naming convention
-used internally by [ContactAction](/actions/ContactAction.md). If more than one
-pair is found among the candidate boundaries, the generated block names are
-suffixed with `_p_<primary name>_s_<secondary name>`, e.g. `_p_top_s_bottom` for
-the pair (`top`, `bottom`), so that they remain unique.
+When [!param](/Mesh/AutomaticContactPairingGenerator/create_lower_d_blocks) is
+true, a primary and a secondary lower-dimensional subdomain block are created for
+each detected pair (named using the
+[!param](/Mesh/AutomaticContactPairingGenerator/prefix) parameter), matching the
+naming convention used internally by [ContactAction](/actions/ContactAction.md). If
+more than one pair is found among the candidate boundaries, the generated block
+names are suffixed with `_p_<primary name>_s_<secondary name>`, e.g.
+`_p_top_s_bottom` for the pair (`top`, `bottom`), so that they remain unique. Because
+mortar contact needs at least one pair, the generator reports an error when no pair
+is found in this case.
 
 The pairing search supports distributed meshes. Sideset areas and centroids are
 summed across processes, and for the `NODE` method the candidate boundary nodes are

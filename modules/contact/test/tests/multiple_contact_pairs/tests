@@ -144,6 +144,14 @@
                   'define contact surface pairs is provided.'
     allow_warnings = true
   []
+  [automatic_pair_file_mesh_error]
+    type = 'RunException'
+    issues = '#33978'
+    input = 'automatic_pair_file_mesh.i'
+    expect_err = "Automatic contact pairing requires the mesh to be built by mesh generators"
+    requirement = 'The system shall generate an error if automatic contact pairing is requested '
+                  'for a mesh that is not built by mesh generators.'
+  []
   [three_hexagons_coarse_various_actions]
     type = 'Exodiff'
     input = 'three_hexagons_coarse_various_actions.i'

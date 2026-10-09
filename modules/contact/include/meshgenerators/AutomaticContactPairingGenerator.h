@@ -24,7 +24,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
   /// Type of the mesh meta-data holding the detected (primary, secondary) boundary name pairs
-  typedef std::vector<std::pair<std::string, std::string>> ContactPairs;
+  using ContactPairs = std::vector<std::pair<std::string, std::string>>;
 
   /// Name of the mesh meta-data holding the detected contact pairs
   static constexpr auto contact_pairs_property = "contact_pairs";
@@ -60,17 +60,18 @@ private:
   };
 
   /// Find pairs by node-proximity KD-tree search; returns deduplicated pairs
-  std::vector<std::pair<BoundaryName, BoundaryName>> findPairsNodeProximity(const MeshBase & mesh);
+  std::vector<std::pair<BoundaryName, BoundaryName>>
+  findPairsNodeProximity(const MeshBase & mesh) const;
 
   /// Find pairs by sideset centroid distance; returns deduplicated pairs
-  std::vector<std::pair<BoundaryName, BoundaryName>> findPairsCentroid(const MeshBase & mesh);
+  std::vector<std::pair<BoundaryName, BoundaryName>> findPairsCentroid(const MeshBase & mesh) const;
 
   /**
    * Resolve the candidate boundary names to boundary IDs, erroring if any boundary is listed more
    * than once, and compute the area and centroid of each candidate sideset. Areas and centroids are
    * computed in Cartesian coordinates.
    */
-  std::vector<CandidateBoundary> candidateBoundaries(const MeshBase & mesh);
+  std::vector<CandidateBoundary> candidateBoundaries(const MeshBase & mesh) const;
 
   /// Order two paired boundaries as (primary, secondary), with the larger surface as primary
   static std::pair<BoundaryName, BoundaryName> orderPair(const CandidateBoundary & a,

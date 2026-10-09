@@ -1627,8 +1627,7 @@ ContactAction::getAutomaticContactPairs()
 
   mooseInfo("The following boundary pairs were detected automatically by the contact action:");
   for (const auto & [primary, secondary] : _boundary_pairs)
-    mooseInfoRepeated(
-        "Primary boundary ID: ", primary, " and secondary boundary ID: ", secondary, ".");
+    mooseInfoRepeated("Primary boundary: ", primary, " and secondary boundary: ", secondary, ".");
 }
 
 MooseEnum
