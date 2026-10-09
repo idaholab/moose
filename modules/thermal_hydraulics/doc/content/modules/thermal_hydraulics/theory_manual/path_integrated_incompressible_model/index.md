@@ -128,7 +128,7 @@ where
 
 This equation is discretized on a per-segment basis to match what is done in [!eqref](discretized_energy). Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
 
-!media thermal_hydraulics/tikz_diagrams/pipe_cross_section.png
+!media modules/thermal_hydraulics/media/conjugate-heat-transfer_pipe_cross_section.png
        id=fig:pipe_CHT_discretization
        caption=Conjugate heat transfer illustration for a simple pipe.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;text-align:center;
