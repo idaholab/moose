@@ -102,6 +102,9 @@ protected:
   /// Whether mortar dynamic contact constraints are to be used
   const bool _mortar_dynamics;
 
+  /// Surface mesh blocks used as the primary side of mortar contact, by contact pair
+  std::map<std::pair<BoundaryName, BoundaryName>, SubdomainName> _primary_surface_blocks;
+
   struct MortarInfo
   {
     BoundaryID primary_id;
@@ -144,4 +147,9 @@ private:
    * or an empty string when there is only one pair (preserving single-pair name backwards compat).
    */
   std::string pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair) const;
+  /**
+   * Returns the primary lower-dimensional subdomain name of a contact pair: the generated block or
+   * the user-provided primary surface block
+   */
+  std::string primarySubdomainName(const std::pair<BoundaryName, BoundaryName> & pair) const;
 };

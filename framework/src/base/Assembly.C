@@ -2249,6 +2249,14 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // coming from reinit of the mortar segment element in the case of mortar
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
+  // An invalid side means the neighbor is itself the face, e.g. a primary surface element, so the
+  // points are reference points on the neighbor element
+  if (neighbor_side == libMesh::invalid_uint)
+  {
+    reinitFEFaceNeighbor(neighbor, *pts);
+    return;
+  }
+
   // reinit neighbor face
   for (const auto & it : _fe_face_neighbor[neighbor_dim])
   {
@@ -2476,7 +2484,11 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
         "JxW must also correspond to the 'top' quadrature point. And libMesh/MOOSE has no way to "
         "guarantee that with multiple quadrature points.");
 
-    _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
+    // An invalid side means the neighbor is itself the face, e.g. a primary surface element
+    _current_neighbor_side_elem =
+        neighbor_side == libMesh::invalid_uint
+            ? neighbor
+            : &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
     // With a single point our size-1 JxW should just be the element volume
     _current_JxW_neighbor.resize(1);
