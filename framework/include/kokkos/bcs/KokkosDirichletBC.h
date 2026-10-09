@@ -19,13 +19,41 @@ public:
 
   KokkosDirichletBCTempl(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
+  /// The AD BC depends on the nodal value of its own variable only
+  static constexpr unsigned int max_ad_slots = is_ad ? 1 : 0;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION auto computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
   {
-    return _value;
+    if constexpr (is_ad)
+      return Moose::Kokkos::DenseADReal<max_ad_slots>(_value);
+    else
+      return Real(_value);
   }
 
+  /// Get the AD accessor of the nodal value of the BC variable
+  const auto & nodalValue() const { return _nodal_value; }
+
 protected:
+  /// Placeholder for the AD nodal value accessor, which the non-AD BC replaces with _u
+  struct NoNodalValue
+  {
+  };
+
+  /// Create the nodal value accessor of the BC variable
+  auto makeNodalValue()
+  {
+    if constexpr (is_ad)
+      return this->template adNodalValue<max_ad_slots>();
+    else
+      return NoNodalValue();
+  }
+
   const Moose::Kokkos::Scalar<const Real> _value;
+
+  /// Nodal value of the BC variable, with its derivative, read by the AD BC
+  const std::conditional_t<is_ad, Moose::Kokkos::ADVariableValue<max_ad_slots>, NoNodalValue>
+      _nodal_value;
 };
 
 typedef KokkosDirichletBCTempl<false> KokkosDirichletBC;

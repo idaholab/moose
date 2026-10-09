@@ -23,25 +23,26 @@ public:
   KokkosVectorDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real33 precomputeQpResidual(const unsigned int qp,
-                                                             AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real33 precomputeQpResidualGrad(const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real33
-  precomputeQpJacobian(const unsigned int j, const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real33 precomputeQpJacobianGrad(const unsigned int j,
+                                                                 const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real33
-KokkosVectorDiffusion::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosVectorDiffusion::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _grad_u(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real33
-KokkosVectorDiffusion::precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
-                                            AssemblyDatum & datum) const
+KokkosVectorDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                                const unsigned int qp,
+                                                AssemblyDatum & datum) const
 {
   return _grad_phi(datum, j, qp);
 }

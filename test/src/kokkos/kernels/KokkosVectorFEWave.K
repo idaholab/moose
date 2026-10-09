@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseTestApp", KokkosVectorFEWave);
 InputParameters
 KokkosVectorFEWave::validParams()
 {
-  InputParameters params = Moose::Kokkos::KernelCurl::validParams();
+  InputParameters params = Moose::Kokkos::VectorKernel::validParams();
   params.addRequiredParam<FunctionName>("x_forcing_func", "The x forcing function.");
   params.addParam<FunctionName>("y_forcing_func", "The y forcing function.");
   params.addParam<FunctionName>("z_forcing_func", "The z forcing function.");
@@ -22,7 +22,7 @@ KokkosVectorFEWave::validParams()
 }
 
 KokkosVectorFEWave::KokkosVectorFEWave(const InputParameters & parameters)
-  : Moose::Kokkos::KernelCurl(parameters),
+  : Moose::Kokkos::VectorKernel(parameters),
     _has_y_ffn(isParamValid("y_forcing_func")),
     _has_z_ffn(isParamValid("z_forcing_func")),
     _x_ffn(getKokkosFunction<KokkosParsedFunction>("x_forcing_func")),

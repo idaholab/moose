@@ -3218,7 +3218,11 @@ FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
                                              const std::string & base_name,
                                              bool & reinit_displaced)
 {
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  // Objects without the parameter, such as Kokkos objects, always use the reference mesh
+  const bool use_displaced_mesh = parameters.have_parameter<bool>("use_displaced_mesh") &&
+                                  parameters.get<bool>("use_displaced_mesh");
+
+  if (_displaced_problem && use_displaced_mesh)
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
@@ -3226,7 +3230,7 @@ FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
   }
   else
   {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    if (_displaced_problem == nullptr && use_displaced_mesh)
     {
       // We allow Kernels to request that they use_displaced_mesh,
       // but then be overridden when no displacements variables are

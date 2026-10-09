@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosCoupledTimeDerivative);
 InputParameters
 KokkosCoupledTimeDerivative::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = Moose::Kokkos::KernelValue::validParams();
   params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
                              "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");
@@ -22,7 +22,7 @@ KokkosCoupledTimeDerivative::validParams()
 }
 
 KokkosCoupledTimeDerivative::KokkosCoupledTimeDerivative(const InputParameters & parameters)
-  : KernelValue(parameters),
+  : Moose::Kokkos::KernelValue(parameters),
     _v_dot(kokkosCoupledDot("v")),
     _dv_dot(kokkosCoupledDotDu("v")),
     _v_var(coupled("v"))

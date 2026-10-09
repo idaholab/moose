@@ -21,6 +21,6 @@ KokkosADTimeDerivative::validParams()
 }
 
 KokkosADTimeDerivative::KokkosADTimeDerivative(const InputParameters & parameters)
-  : ADTimeKernel(parameters)
+  : ADTimeKernel(parameters), _u_dot(adDot<max_ad_slots>())
 {
 }

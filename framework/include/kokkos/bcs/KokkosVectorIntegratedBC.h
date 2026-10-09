@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosIntegratedBCBase.h"
+#include "KokkosPrecomputeHooks.h"
 
 namespace Moose::Kokkos
 {
@@ -17,11 +18,20 @@ namespace Moose::Kokkos
 /**
  * The base class for a user to derive their own Kokkos integrated boundary conditions on vector
  * variables.
+ *
+ * The residual is assembled from the coefficient hooks precomputeQpResidual{Value,Grad,Curl}(qp,
+ * datum), returning Real3, Real33, and Real3, respectively, of which at least one must be defined,
+ * with the optional Jacobian hooks precomputeQpJacobian{Value,Grad,Curl}(j, qp, datum) and
+ * precomputeQpOffDiagJacobian{Value,Grad,Curl}(j, jvar, qp, datum). Only the terms whose hooks
+ * are defined are assembled. KokkosPrecomputeHookTraits.h documents the hook families.
  */
 class VectorIntegratedBC : public IntegratedBCBase
 {
 public:
   static InputParameters validParams();
+
+  /// Vector integrated BCs assemble the products of precompute hooks with the test functions
+  static constexpr bool uses_precompute_hooks = true;
 
   /**
    * Constructor
@@ -36,54 +46,6 @@ public:
    * Dispatch diagonal and off-diagonal Jacobian calculation
    */
   virtual void computeJacobian() override;
-
-  /**
-   * Default methods to prevent compile errors even when these methods were not defined in the
-   * derived class
-   */
-  ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
-                                         const unsigned int /* j */,
-                                         const unsigned int /* qp */,
-                                         AssemblyDatum & /* datum */) const
-  {
-    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
-                    "redefined this method in your class without typos.");
-
-    return 0;
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
-                                                const unsigned int /* j */,
-                                                const unsigned int /* jvar */,
-                                                const unsigned int /* qp */,
-                                                AssemblyDatum & /* datum */) const
-  {
-    ::Kokkos::abort(
-        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
-        "redefined this method in your class without typos.");
-
-    return 0;
-  }
-  ///@}
-
-  /**
-   * Functions used to check if users have overriden the hook methods, whose calculations can be
-   * skipped when not overriden
-   */
-  ///@{
-  template <typename Derived>
-  static auto defaultJacobian()
-  {
-    return &VectorIntegratedBC::computeQpJacobian<Derived>;
-  }
-  template <typename Derived>
-  static auto defaultOffDiagJacobian()
-  {
-    return &VectorIntegratedBC::computeQpOffDiagJacobian<Derived>;
-  }
-  ///@}
 
   /**
    * The parallel computation entry functions called by Kokkos
@@ -190,43 +152,21 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 VectorIntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const
 {
-  ResidualObject::computeResidualInternal(
-      datum,
-      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * bc.template computeQpResidual<Derived>(i, qp, datum);
-      });
+  ResidualObject::computeResidualInternal(datum, precomputeResidualBody<true>(bc, datum));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 VectorIntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
 {
-  ResidualObject::computeJacobianInternal(
-      datum,
-      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += datum.JxW(qp) * bc.template computeQpJacobian<Derived>(i, j, qp, datum);
-      });
+  ResidualObject::computeJacobianInternal(datum, precomputeJacobianBody<true>(bc, datum));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 VectorIntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
 {
-  ResidualObject::computeJacobianInternal(
-      datum,
-      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += datum.JxW(qp) * bc.template computeQpOffDiagJacobian<Derived>(
-                                               i, j, datum.jvar(), qp, datum);
-      });
+  ResidualObject::computeJacobianInternal(datum, precomputeOffDiagJacobianBody<true>(bc, datum));
 }
 
 } // namespace Moose::Kokkos

@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosBodyForce);
 InputParameters
 KokkosBodyForce::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = Moose::Kokkos::KernelValue::validParams();
   params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
   params.addParam<PostprocessorName>(
       "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
@@ -27,7 +27,7 @@ KokkosBodyForce::validParams()
 }
 
 KokkosBodyForce::KokkosBodyForce(const InputParameters & parameters)
-  : KernelValue(parameters),
+  : Moose::Kokkos::KernelValue(parameters),
     _scale(getParam<Real>("value")),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _deformation(*this)

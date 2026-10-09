@@ -21,14 +21,12 @@ public:
   virtual void initialSetup() override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
 private:
   std::set<SubdomainID> _blocks;
@@ -38,22 +36,20 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosBlockPropertyDiffusion::computeQpResidual(const unsigned int i,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosBlockPropertyDiffusion::precomputeQpResidualGrad(const unsigned int qp,
+                                                       AssemblyDatum & datum) const
 {
   Real k = _has_prop[datum.subdomain()] ? _prop(datum, qp) : 1.0;
-  return k * _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return k * _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosBlockPropertyDiffusion::computeQpJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosBlockPropertyDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                                       const unsigned int qp,
+                                                       AssemblyDatum & datum) const
 {
   Real k = _has_prop[datum.subdomain()] ? _prop(datum, qp) : 1.0;
-  return k * _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return k * _grad_phi(datum, j, qp);
 }

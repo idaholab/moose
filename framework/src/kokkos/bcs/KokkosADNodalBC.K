@@ -20,10 +20,18 @@ ADNodalBC::validParams()
 }
 
 ADNodalBC::ADNodalBC(const InputParameters & parameters)
-  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(_var, Moose::SOLUTION_TAG, true)
+  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD)
 {
   addMooseVariableDependency(&_var);
+}
+
+void
+ADNodalBC::initialSetup()
+{
+  NodalBCBase::initialSetup();
+
+  _ad_setup.assign(*this, _kokkos_var, DispatcherRegistry::getProperty("max_ad_slots", type()));
+  _ad_slots = _ad_setup.table();
 }
 
 void

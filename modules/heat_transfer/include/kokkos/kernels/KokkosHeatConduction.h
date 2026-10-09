@@ -29,16 +29,17 @@ public:
   KokkosHeatConduction(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real3 precomputeQpOffDiagJacobian(const unsigned int j,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpOffDiagJacobianGrad(const unsigned int j,
+                                                        const unsigned int jvar,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
 
 private:
   Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
@@ -50,7 +51,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosHeatConduction::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosHeatConduction::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
   const Real3 flux = _thermal_conductivity(datum, qp) * _grad_u(datum, qp);
 
@@ -63,9 +64,9 @@ KokkosHeatConduction::precomputeQpResidual(const unsigned int qp, AssemblyDatum 
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosHeatConduction::precomputeQpJacobian(const unsigned int j,
-                                           const unsigned int qp,
-                                           AssemblyDatum & datum) const
+KokkosHeatConduction::precomputeQpJacobianGrad(const unsigned int j,
+                                               const unsigned int qp,
+                                               AssemblyDatum & datum) const
 {
   Real3 jac = _thermal_conductivity(datum, qp) * _grad_phi(datum, j, qp);
   if (_d_thermal_conductivity_dT)
@@ -80,10 +81,10 @@ KokkosHeatConduction::precomputeQpJacobian(const unsigned int j,
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosHeatConduction::precomputeQpOffDiagJacobian(const unsigned int j,
-                                                  const unsigned int /* jvar */,
-                                                  const unsigned int qp,
-                                                  AssemblyDatum & datum) const
+KokkosHeatConduction::precomputeQpOffDiagJacobianGrad(const unsigned int j,
+                                                      const unsigned int /* jvar */,
+                                                      const unsigned int qp,
+                                                      AssemblyDatum & datum) const
 {
   const auto c = _deformation.component(datum);
 

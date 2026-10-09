@@ -20,38 +20,34 @@ public:
   KokkosParsedFuncCoefDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
 private:
   Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _function;
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosParsedFuncCoefDiffusion::computeQpResidual(const unsigned int i,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosParsedFuncCoefDiffusion::precomputeQpResidualGrad(const unsigned int qp,
+                                                        AssemblyDatum & datum) const
 {
   const auto & func = static_cast<const KokkosParsedFunction &>(_function);
   const Real k = func.value(_t, datum.q_point(qp));
-  return k * _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return k * _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosParsedFuncCoefDiffusion::computeQpJacobian(const unsigned int i,
-                                                 const unsigned int j,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosParsedFuncCoefDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const
 {
   const auto & func = static_cast<const KokkosParsedFunction &>(_function);
   const Real k = func.value(_t, datum.q_point(qp));
-  return k * _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return k * _grad_phi(datum, j, qp);
 }

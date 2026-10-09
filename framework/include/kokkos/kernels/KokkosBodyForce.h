@@ -20,12 +20,13 @@ public:
   KokkosBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
-                                                   const unsigned int jvar,
-                                                   const unsigned int qp,
-                                                   AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                        const unsigned int jvar,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
 
 protected:
   /// Scale factor
@@ -40,7 +41,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosBodyForce::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   const Real force = -_scale * _postprocessor;
 
@@ -49,10 +50,10 @@ KokkosBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & dat
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::precomputeQpOffDiagJacobian(const unsigned int j,
-                                             const unsigned int /* jvar */,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+KokkosBodyForce::precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                  const unsigned int /* jvar */,
+                                                  const unsigned int qp,
+                                                  AssemblyDatum & datum) const
 {
   const auto c = _deformation.component(datum);
 

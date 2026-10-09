@@ -12,36 +12,33 @@
 #include "KokkosADIntegratedBC.h"
 
 /**
- * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
- * Uses the term produced from integrating the diffusion operator by parts.
+ * Implements a Neumann BC where grad(u) = scale_factor * coef * v on the boundary, with its
+ * Jacobian computed by pointwise automatic differentiation
  */
 class KokkosADCoupledVarNeumannBC : public Moose::Kokkos::ADIntegratedBC
 {
 public:
+  /// The residual depends on the values of v and of the scale factor
+  static constexpr unsigned int max_ad_slots = 2;
+
   static InputParameters validParams();
 
   KokkosADCoupledVarNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::ADReal
-  computeQpResidual(const unsigned int i, const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
+  precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
+  {
+    return -_scale_factor(datum, qp) * _coef * _coupled_var(datum, qp);
+  }
 
 protected:
-  /// Variable providing the value of grad(u) on the boundary.
-  const Moose::Kokkos::ADVariableValue _coupled_var;
+  /// Variable providing the value of grad(u) on the boundary
+  const Moose::Kokkos::ADVariableValue<max_ad_slots> _coupled_var;
 
   /// A coefficient that is multiplied with the residual contribution
   const Real _coef;
 
   /// Scale factor
-  const Moose::Kokkos::ADVariableValue _scale_factor;
+  const Moose::Kokkos::ADVariableValue<max_ad_slots> _scale_factor;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal
-KokkosADCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
-                                               const unsigned int qp,
-                                               AssemblyDatum & datum) const
-{
-  return -_test(datum, i, qp) * _scale_factor(datum, qp) * _coef * _coupled_var(datum, qp);
-}

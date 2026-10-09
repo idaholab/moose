@@ -11,23 +11,28 @@
 
 #include "KokkosADKernel.h"
 
+/**
+ * The Laplacian operator $(\nabla \psi_i, \nabla u_h)$ with its Jacobian computed by pointwise
+ * automatic differentiation
+ */
 class KokkosADDiffusion : public Moose::Kokkos::ADKernel
 {
 public:
+  /// The residual depends on grad u
+  static constexpr unsigned int max_ad_slots = 3;
+
   static InputParameters validParams();
 
   KokkosADDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::ADReal
-  computeQpResidual(const unsigned int i, const unsigned int qp, AssemblyDatum & datum) const;
-};
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<max_ad_slots>
+  precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
+  {
+    return _grad_u(datum, qp);
+  }
 
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal
-KokkosADDiffusion::computeQpResidual(const unsigned int i,
-                                     const unsigned int qp,
-                                     AssemblyDatum & datum) const
-{
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
-}
+private:
+  /// Gradient of the kernel variable
+  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
+};

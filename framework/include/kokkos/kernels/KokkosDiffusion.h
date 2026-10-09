@@ -23,31 +23,26 @@ public:
   KokkosDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpJacobian(const unsigned int i,
-                                   const unsigned int j,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                          const unsigned int qp,
+                                          AssemblyDatum & datum) const
 {
-  return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return _grad_phi(datum, j, qp);
 }

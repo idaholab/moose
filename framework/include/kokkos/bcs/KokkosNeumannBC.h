@@ -19,7 +19,7 @@ public:
   KokkosNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int, AssemblyDatum &) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int, AssemblyDatum &) const;
 
 protected:
   /// Value of grad(u) on the boundary.
@@ -28,7 +28,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosNeumannBC::precomputeQpResidual(const unsigned int, AssemblyDatum &) const
+KokkosNeumannBC::precomputeQpResidualValue(const unsigned int, AssemblyDatum &) const
 {
   return -_value;
 }

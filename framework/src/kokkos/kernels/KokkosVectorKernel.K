@@ -27,7 +27,10 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _phi(),
     _grad_phi(),
     _u(_var),
-    _grad_u(_var)
+    _grad_u(_var),
+    _curl_test(),
+    _curl_phi(),
+    _curl_u(_var)
 {
   addMooseVariableDependency(&_var);
 }

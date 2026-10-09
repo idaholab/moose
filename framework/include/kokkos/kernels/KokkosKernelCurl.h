@@ -15,31 +15,9 @@ namespace Moose::Kokkos
 {
 
 /**
- * A base class that defines the curl operators for Kokkos vector kernels.
+ * Name for a Kokkos vector kernel whose residual multiplies the test function curl, defined
+ * through the precomputeQpResidualCurl() family of hooks of VectorKernel
  */
-class KernelCurl : public VectorKernel
-{
-public:
-  static InputParameters validParams();
-
-  /**
-   * Constructor
-   */
-  KernelCurl(const InputParameters & parameters);
-
-protected:
-  /**
-   * Curl of the current vector test function
-   */
-  const VectorVariableTestCurl _curl_test;
-  /**
-   * Curl of the current vector shape function
-   */
-  const VectorVariablePhiCurl _curl_phi;
-  /**
-   * Curl of the current vector solution at quadrature points
-   */
-  const VectorVariableCurl _curl_u;
-};
+using KernelCurl = VectorKernel;
 
 } // namespace Moose::Kokkos

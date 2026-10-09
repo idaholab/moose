@@ -20,4 +20,7 @@ KokkosADDiffusion::validParams()
   return params;
 }
 
-KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters) : ADKernel(parameters) {}
+KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters)
+  : ADKernel(parameters), _grad_u(adGradient<max_ad_slots>())
+{
+}

@@ -27,6 +27,7 @@ MaterialBase::validParams()
       "element/face or subdomain, respectively. Material properties will be only stored for each "
       "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
 
+  params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");
   params.suppressParameter<std::vector<OutputName>>("outputs");

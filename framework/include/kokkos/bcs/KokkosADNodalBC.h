@@ -10,69 +10,90 @@
 #pragma once
 
 #include "KokkosNodalBCBase.h"
+#include "KokkosADResidualObject.h"
 
 namespace Moose::Kokkos
 {
 
 /**
- * The base class for a user to derive their own Kokkos nodal boundary conditions using automatic
- * differentiation (AD).
+ * The base class for a user to derive their own Kokkos nodal boundary conditions whose Jacobians
+ * are computed with pointwise automatic differentiation (AD).
  *
- * The user should define computeQpResidual() as inlined public methods in their derived class (not
- * virtual override). The signature of computeQpResidual() expected to be defined in the derived
- * class is as follows:
- *
- * @tparam Derived The object type
- * @param qp The dummy quadrature point index (= 0)
- * @param datum The AssemblyDatum object of the current thread
- * @returns The residual contribution
+ * The derived class defines
  *
  * template <typename Derived>
- * KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int qp,
- *                                                         AssemblyDatum & datum) const;
+ * KOKKOS_FUNCTION DenseADReal<max_ad_slots> computeQpResidual(const unsigned int qp,
+ *                                                             AssemblyDatum & datum) const;
  *
- * Note that computeQpJacobian() and computeQpOffDiagJacobian() are unused for AD nodal boundary
- * conditions.
+ * whose derivative directions are the nodal values the BC reads through its AD accessors, one slot
+ * per nonlinear variable that the coupling matrix couples to the BC variable, and declares an upper
+ * bound on their number as
+ *
+ *   static constexpr unsigned int max_ad_slots = ...;
  */
 class ADNodalBC : public NodalBCBase
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Constructor
-   */
   ADNodalBC(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeResidualAndJacobian() override;
 
   /**
-   * The parallel computation entry function called by Kokkos
+   * The parallel computation entry function called by Kokkos for each boundary node
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const;
 
 protected:
   /**
-   * Dispatch parallel calculation
+   * Create an AD accessor of the nodal value of a coupled variable or of the BC variable
+   * @tparam slots The max_ad_slots of the derived class
    */
-  virtual void dispatch();
+  ///@{
+  template <unsigned int slots>
+  ADVariableValue<slots> adCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+  template <unsigned int slots>
+  ADVariableValue<slots> adNodalValue();
+  ///@}
 
+private:
   /**
-   * Current solution at nodes
+   * Dispatch the residual and Jacobian computation
    */
-  const ADVariableValue _u;
-  /**
-   * Whether computing residual
-   */
+  void dispatch();
+
+  /// Registration of the AD accessors created during construction
+  ADSlotSetup _ad_setup;
+  /// Slot table of the AD accessors
+  ADSlotTable _ad_slots;
+  /// Whether the residual is being computed
   bool _computing_residual = false;
-  /**
-   * Whether computing Jacobian
-   */
+  /// Whether the Jacobian is being computed
   bool _computing_jacobian = false;
 };
+
+template <unsigned int slots>
+ADVariableValue<slots>
+ADNodalBC::adCoupledNodalValue(const std::string & var_name, const unsigned int comp)
+{
+  ADVariableValue<slots> value(kokkosCoupledNodalValue(var_name, comp));
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
+}
+
+template <unsigned int slots>
+ADVariableValue<slots>
+ADNodalBC::adNodalValue()
+{
+  ADVariableValue<slots> value{VariableValue(_var, Moose::SOLUTION_TAG, true)};
+  _ad_setup.add(value.slot(), value.variable(), false);
+  return value;
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void
@@ -86,14 +107,25 @@ ADNodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) cons
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  datum.do_derivatives(_computing_jacobian);
-
-  ADReal local_re = bc.template computeQpResidual<Derived>(0, datum);
+  const auto local_re = bc.template computeQpResidual<Derived>(0, datum);
 
   if (_computing_residual)
-    accumulateTaggedNodalResidual(false, local_re.value(), node);
+    accumulateTaggedNodalResidual(false, denseADValue(local_re), node);
+
   if (_computing_jacobian)
-    accumulateTaggedNodalMatrix(false, local_re.derivatives(), node);
+  {
+    // The BC replaces the row of the residual variable: the first column sets the row and the rest
+    // add to it. A residual without derivatives still sets an empty row.
+    if (_ad_slots.numBlocks() == 0)
+      accumulateTaggedNodalMatrix(false, 0, node, _kokkos_var.var());
+
+    for (unsigned int b = 0; b < _ad_slots.numBlocks(); ++b)
+    {
+      const auto & block = _ad_slots.block(b);
+      accumulateTaggedNodalMatrix(
+          b != 0, denseADDerivative(local_re, block.first), node, block.var);
+    }
+  }
 }
 
 } // namespace Moose::Kokkos

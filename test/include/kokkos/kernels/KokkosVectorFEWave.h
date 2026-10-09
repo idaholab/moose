@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "KokkosKernelCurl.h"
+#include "KokkosVectorKernel.h"
 #include "KokkosParsedFunction.h"
 
-class KokkosVectorFEWave : public Moose::Kokkos::KernelCurl
+class KokkosVectorFEWave : public Moose::Kokkos::VectorKernel
 {
 public:
   static InputParameters validParams();
@@ -20,15 +20,20 @@ public:
   KokkosVectorFEWave(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualCurl(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualValue(const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianCurl(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianValue(const unsigned int j,
+                                                                 const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 
 protected:
   const bool _has_y_ffn;
@@ -39,10 +44,15 @@ protected:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosVectorFEWave::computeQpResidual(const unsigned int i,
-                                      const unsigned int qp,
-                                      AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorFEWave::precomputeQpResidualCurl(const unsigned int qp, AssemblyDatum & datum) const
+{
+  return _curl_u(datum, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorFEWave::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   const auto & x_ffn = static_cast<const KokkosParsedFunction &>(_x_ffn);
   const auto & y_ffn = static_cast<const KokkosParsedFunction &>(_y_ffn);
@@ -51,17 +61,23 @@ KokkosVectorFEWave::computeQpResidual(const unsigned int i,
   const Moose::Kokkos::Real3 forcing(
       x_ffn.value(_t, p), _has_y_ffn ? y_ffn.value(_t, p) : 0, _has_z_ffn ? z_ffn.value(_t, p) : 0);
 
-  return _curl_test(datum, i, qp) * _curl_u(datum, qp) + _test(datum, i, qp) * _u(datum, qp) -
-         forcing * _test(datum, i, qp);
+  return _u(datum, qp) - forcing;
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosVectorFEWave::computeQpJacobian(const unsigned int i,
-                                      const unsigned int j,
-                                      const unsigned int qp,
-                                      AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorFEWave::precomputeQpJacobianCurl(const unsigned int j,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
 {
-  return _curl_test(datum, i, qp) * _curl_phi(datum, j, qp) +
-         _test(datum, i, qp) * _phi(datum, j, qp);
+  return _curl_phi(datum, j, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosVectorFEWave::precomputeQpJacobianValue(const unsigned int j,
+                                              const unsigned int qp,
+                                              AssemblyDatum & datum) const
+{
+  return _phi(datum, j, qp);
 }

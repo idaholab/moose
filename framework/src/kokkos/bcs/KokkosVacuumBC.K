@@ -14,13 +14,13 @@ registerKokkosResidualObject("MooseApp", KokkosVacuumBC);
 InputParameters
 KokkosVacuumBC::validParams()
 {
-  InputParameters params = IntegratedBCValue::validParams();
+  InputParameters params = Moose::Kokkos::IntegratedBCValue::validParams();
   params.addClassDescription("Vacuum boundary condition for diffusion.");
   params.addParam<Real>("alpha", 1, "Diffusion coefficient.");
   return params;
 }
 
 KokkosVacuumBC::KokkosVacuumBC(const InputParameters & parameters)
-  : IntegratedBCValue(parameters), _alpha(getParam<Real>("alpha"))
+  : Moose::Kokkos::IntegratedBCValue(parameters), _alpha(getParam<Real>("alpha"))
 {
 }
