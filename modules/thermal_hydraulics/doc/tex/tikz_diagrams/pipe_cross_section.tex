@@ -1,0 +1,37 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=3]
+
+\newcommand{\Rfluid}{0.5}
+\newcommand{\Rmid}{0.75}
+\newcommand{\Router}{1.0}
+
+\coordinate (pC) at (0,0);
+
+% wall (solid), outer boundary
+\draw[blue, ultra thick, fill=blue!25!white] (pC) circle (\Router);
+
+% mid-thickness boundary between the inner and outer wall control volumes
+\draw[dashed] (pC) circle (\Rmid);
+
+% fluid, inner wall boundary (fluid/wall interface)
+\draw[red, ultra thick, fill=red!25!white] (pC) circle (\Rfluid);
+
+% region labels
+\node[red] at (0, {-0.55 * \Rfluid}) {Fluid};
+\node[blue] at (0, {-0.5 * (\Rfluid + \Rmid)}) {Solid};
+
+% temperature labels
+\node at (pC) {$T_f$};
+\node at ({\Rfluid + 0.12}, 0) {$T_{i,w}$};
+\node at ({\Router + 0.12}, 0) {$T_{o,w}$};
+
+\end{tikzpicture}
+
+\end{document}
