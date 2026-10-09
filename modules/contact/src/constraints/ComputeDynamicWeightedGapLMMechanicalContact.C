@@ -217,8 +217,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   _dof_to_nodal_wear_depth[dof] += _test[_i][_qp] * _wear_depth[_qp] * _JxW_msm[_qp] * _coord[_qp];
 
-  if (_normalize_c)
-    _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
+  // Always accumulated: also used to compute nodal slip rates for friction
+  _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
 
 void
@@ -266,7 +266,7 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
+      _dof_to_weighted_gap, _mesh, _nodal, /*normalize_c*/ true, _communicator, false);
 
   if (_has_wear)
     communicateWear();
@@ -310,7 +310,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
+      _dof_to_weighted_gap, _mesh, _nodal, /*normalize_c*/ true, _communicator, false);
 
   if (_has_wear)
     communicateWear();
