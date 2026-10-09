@@ -222,8 +222,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
   // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
   // tangential velocity divided by the integral of the same test function, which is the nodal
-  // coefficient of the mortar projection of the relative tangential velocity (Wohlmuth 2011, Acta
-  // Numerica, eq. 3.10a; Faraji et al. 2022, arXiv:2201.01095, eq. 48).
+  // coefficient of the mortar projection of the relative tangential velocity
+  // (Wohlmuth 2011, eq. 3.10a).
   ADReal mu_ad = computeFrictionValue(contact_pressure,
                                       *tangential_vel[0] / *_normalization_ptr,
                                       *tangential_vel[1] / *_normalization_ptr);
