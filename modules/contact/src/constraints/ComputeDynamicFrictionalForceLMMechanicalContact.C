@@ -46,7 +46,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
       "epsilon",
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
-  params.addParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
+  params.addRangeCheckedParam<Real>(
+      "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   MooseEnum friction_projection_degree("ONE TWO", "TWO");
   friction_projection_degree.addDocumentation(
       "ONE", "Use the degree-one Alart-Curnier friction residual.");
@@ -121,7 +122,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpProperties()
   // It appears that the relative velocity between weighted gap and this class have a sign
   // difference
   _qp_tangential_velocity_nodal = -_relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
-  _qp_real_tangential_velocity_nodal = -_relative_velocity;
 }
 
 void
@@ -141,19 +141,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
   _dof_to_weighted_tangential_velocity[dof][0] +=
       _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
 
-  _dof_to_real_tangential_velocity[dof][0] +=
-      _test[_i][_qp] * MetaPhysicL::raw_value(_qp_real_tangential_velocity_nodal) *
-      nodal_tangents[0][_i];
-
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
   {
     _dof_to_weighted_tangential_velocity[dof][1] +=
         _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
-
-    _dof_to_real_tangential_velocity[dof][1] +=
-        _test[_i][_qp] * MetaPhysicL::raw_value(_qp_real_tangential_velocity_nodal) *
-        nodal_tangents[1][_i];
   }
 }
 
@@ -163,7 +155,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::residualSetup()
   // Clear both maps
   ComputeDynamicWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_tangential_velocity.clear();
-  _dof_to_real_tangential_velocity.clear();
 }
 
 void
@@ -180,8 +171,20 @@ ComputeDynamicFrictionalForceLMMechanicalContact::timestepSetup()
 
   _dof_to_old_real_tangential_velocity.clear();
 
-  for (auto & map_pr : _dof_to_real_tangential_velocity)
-    _dof_to_old_real_tangential_velocity.emplace(map_pr);
+  // The nodal slip rate is the weighted tangential velocity divided by the integral of the same
+  // test function, which is the nodal coefficient of the mortar projection of the relative
+  // tangential velocity (Wohlmuth 2011, eq. 3.10a)
+  for (const auto & [dof, weighted_velocities] : _dof_to_weighted_tangential_velocity)
+  {
+    // Only the owning process holds the fully summed values
+    if (dof->processor_id() != this->processor_id())
+      continue;
+
+    const Real normalization = libmesh_map_find(_dof_to_weighted_gap, dof).second;
+    _dof_to_old_real_tangential_velocity[dof] = {
+        {MetaPhysicL::raw_value(weighted_velocities[0]) / normalization,
+         _3d ? MetaPhysicL::raw_value(weighted_velocities[1]) / normalization : 0.0}};
+  }
 }
 
 void
@@ -191,10 +194,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
 
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
-
-  if (_has_friction_function)
-    Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -230,10 +229,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
 
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
-
-  if (_has_friction_function)
-    Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
