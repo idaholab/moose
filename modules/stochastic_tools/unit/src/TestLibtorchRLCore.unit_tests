@@ -1,0 +1,103 @@
+[Tests]
+  design = 'LibtorchDRLControlTrainer.md'
+  issues = '#19571'
+
+  [observation_history]
+    type = GoogleTest
+    unit_test = LibtorchRLCoreTest.ObservationHistoryStacksCurrentAndTrajectoryData
+    requirement = 'The system shall stack an observation with its previous values into a policy input, both during a simulation and from a recorded trajectory.'
+  []
+  [observation_history_errors]
+    requirement = 'The system shall report an error for an observation history'
+    [malformed_stored_history]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.ObservationHistoryRejectsMalformedStoredHistory
+      detail = 'whose stored entries do not match the number of input timesteps;'
+    []
+    [zero_timesteps]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.ObservationHistoryRejectsZeroTimesteps
+      detail = 'with zero input timesteps.'
+    []
+  []
+  [value_estimator]
+    requirement = 'The system shall compute generalized advantage estimates and value targets for a trajectory'
+    [gae_targets]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.ValueEstimatorComputesGAETargets
+      detail = 'without terminal transitions;'
+    []
+    [terminal_transitions]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.ValueEstimatorMasksTerminalTransitions
+      detail = 'without bootstrapping from the value past a terminal transition.'
+    []
+  []
+  [ppo_loss]
+    type = GoogleTest
+    unit_test = LibtorchRLCoreTest.PPOLossUsesStoredLogProbabilityAndValueTarget
+    requirement = 'The system shall compute the clipped Proximal Policy Optimization actor loss with an entropy bonus, and the critic loss, from stored action log-probabilities and value targets.'
+  []
+  [mini_batch_sampler]
+    requirement = 'The system shall split a batch of transitions into mini-batches'
+    [standardized_advantages]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.MiniBatchSamplerStandardizesAdvantagesPerBatch
+      detail = 'with the advantages standardized within each mini-batch;'
+    []
+    [seeded_shuffling]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.MiniBatchSamplerUsesExplicitGeneratorForDeterministicShuffling
+      detail = 'in the same order when given identically seeded random number generators.'
+    []
+  []
+  [trajectory_assembler]
+    requirement = 'The system shall assemble reporter data into reinforcement learning transitions'
+    [window_stride]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryAssemblerDownsamplesWithWindowStride
+      detail = 'by downsampling with the timestep window, stacking the observation history, and marking the final transition as terminal;'
+    []
+    [averaged_rewards]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryAssemblerAveragesRewardsWithoutShift
+      detail = 'with rewards averaged over each timestep window;'
+    []
+    [complete_windows]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryAssemblerCountsCompleteWindows
+      detail = 'from complete timestep windows only, skipping samples without one.'
+    []
+  []
+  [trajectory_assembler_errors]
+    requirement = 'The system shall report an error when assembling reinforcement learning transitions'
+    [mismatched_sample_counts]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryAssemblerRejectsMismatchedSampleCounts
+      detail = 'from observation reporters that hold a different number of samples than the reward reporter;'
+    []
+    [zero_timestep_window]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryAssemblerRejectsZeroTimestepWindow
+      detail = 'with a timestep window of zero.'
+    []
+  []
+  [trajectory_buffer]
+    requirement = 'The system shall store reinforcement learning trajectories in a buffer that'
+    [reward_statistics]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryBufferRewardStatisticsIncludeSpreadBetweenTrajectories
+      detail = 'computes reward statistics over all transitions and for each trajectory;'
+    []
+    [flatten]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryBufferFlattensTrajectoriesInOrder
+      detail = 'flattens trajectories of different lengths into a single batch in order;'
+    []
+    [mismatched_lengths]
+      type = GoogleTest
+      unit_test = LibtorchRLCoreTest.TrajectoryBufferRejectsMismatchedTrajectoryLengths
+      detail = 'rejects a trajectory whose fields do not match the length of its reward sequence.'
+    []
+  []
+[]
