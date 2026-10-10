@@ -24,11 +24,11 @@ public:
 
 protected:
   /**
-   * If the user has provided porosity_min and _porosity[_qp] < porosity_min, set
-   * _porosity[_qp] = porosity_min and multiply the derivatives of porosity by _zero_modifier (the
-   * derivative material properties for non-AD objects, and the AD derivatives for AD objects).
-   * Otherwise do nothing.  Derived classes call this at the end of computeQpProperties(), after
-   * the unfloored porosity and its derivatives have been computed.
+   * If _porosity[_qp] < porosity_min, set _porosity[_qp] = porosity_min and multiply the
+   * derivatives of porosity by _zero_modifier (the derivative material properties for non-AD
+   * objects, and the AD derivatives for AD objects).  Otherwise do nothing.  Derived classes call
+   * this at the end of computeQpProperties(), after the unfloored porosity and its derivatives have
+   * been computed.
    */
   void applyPorosityMin();
 
@@ -41,7 +41,7 @@ protected:
   /// d(porosity)/d(grad PorousFlow variable)
   MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
-  /// Minimum allowed porosity.  Equals the lowest Real (so no floor is applied) if the user does not provide porosity_min
+  /// Minimum allowed porosity (default zero, so porosity is never negative)
   const Real _porosity_min;
 
   /// When the porosity_min floor is active, the porosity derivatives are multiplied by this

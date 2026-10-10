@@ -31,10 +31,10 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::validParams()
   params.setDocString(
       "porosity_min",
       "Minimum allowed value of the porosity: if the computed porosity is less than this value, "
-      "porosity is set to this value instead.  By default no floor is imposed.  The "
-      "ensure_positive transform only acts for decay > 0, so chemistry-driven (precipitation) "
-      "porosity is otherwise unbounded below and can become negative once pore space is filled by "
-      "mineral; set this to a small positive value in that case.");
+      "porosity is set to this value instead.  The default of zero means porosity is never "
+      "negative.  The ensure_positive transform only acts for decay > 0, so chemistry-driven "
+      "(precipitation) porosity would otherwise become negative once pore space is filled by "
+      "mineral; a small positive value may be preferable in that case.");
   params.addClassDescription("Base class Material for porosity that is computed via an exponential "
                              "relationship with coupled variables (strain, porepressure, "
                              "temperature, chemistry)");

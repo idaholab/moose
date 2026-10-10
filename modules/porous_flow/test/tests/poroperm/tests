@@ -240,30 +240,20 @@
     issues = '#18079'
     design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
   []
-  [linear_porosity_min_negative]
-    type = RunException
-    input = linear_test_vals.i
-    cli_args = 'Materials/porosity/porosity_min=-1'
-    expect_err = 'porosity_min >= 0'
-    requirement = 'The system shall report an error if a negative lower bound is placed on porosity computed as a linear function of effective porepressure, temperature and volumetric strain.'
-    issues = '#33944'
-    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
-  []
-  [const_porosity_less_than_min]
-    type = RunException
+  [const_porosity_default_min]
+    type = CSVDiff
     input = const_porosity_check.i
-    cli_args = 'Materials/porosity/porosity_min=0.2'
-    expect_err = 'The porosity \(0.1\) is less than porosity_min \(0.2\)'
-    requirement = 'The system shall report an error if a constant porosity is less than the lower bound placed on porosity.'
+    csvdiff = 'const_porosity_check_out.csv'
+    requirement = 'The system shall set a constant porosity, defined by an auxiliary variable, that is negative to zero by default.'
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityConst.md'
   []
-  [const_porosity_negative_variable]
-    type = RunException
+  [const_porosity_min]
+    type = CSVDiff
     input = const_porosity_check.i
-    cli_args = 'Materials/porosity/porosity=poro_var'
-    expect_err = 'The porosity variable is less than zero'
-    requirement = 'The system shall report an error if a constant porosity defined by an auxiliary variable is negative.'
+    cli_args = 'Materials/porosity/porosity_min=0.05 Outputs/file_base=const_porosity_min_out'
+    csvdiff = 'const_porosity_min_out.csv'
+    requirement = 'The system shall set a constant porosity, defined by an auxiliary variable, that is less than a user-specified lower bound to that lower bound.'
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityConst.md'
   []

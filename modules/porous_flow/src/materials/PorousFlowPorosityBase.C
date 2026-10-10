@@ -15,11 +15,13 @@ PorousFlowPorosityBaseTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addPrivateParam<std::string>("pf_material_type", "porosity");
-  params.addRangeCheckedParam<Real>(
+  params.addParam<Real>(
       "porosity_min",
-      "porosity_min >= 0",
+      0.0,
       "Minimum allowed value of the porosity: if the computed porosity is less than this value, "
-      "porosity is set to this value instead.  If not provided, no lower bound is imposed");
+      "porosity is set to this value instead.  The default of zero means porosity is never "
+      "negative.  A negative value may be used, for instance, when comparing with analytical "
+      "solutions of linear poroelasticity in which porosity can become negative");
   params.addRangeCheckedParam<Real>(
       "zero_modifier",
       1E-3,
@@ -46,8 +48,7 @@ PorousFlowPorosityBaseTempl<is_ad>::PorousFlowPorosityBaseTempl(const InputParam
         : _nodal_material
             ? &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar")
             : &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
-    _porosity_min(isParamValid("porosity_min") ? getParam<Real>("porosity_min")
-                                               : std::numeric_limits<Real>::lowest()),
+    _porosity_min(getParam<Real>("porosity_min")),
     _zero_modifier(getParam<Real>("zero_modifier"))
 {
 }

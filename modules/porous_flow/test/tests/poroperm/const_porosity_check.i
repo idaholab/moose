@@ -1,6 +1,7 @@
-# Checks that PorousFlowPorosityConst generates an error if the porosity
-# is negative, or less than porosity_min.  With the parameters below the
-# porosity is valid; the tests file uses cli_args to make it invalid.
+# Checks that PorousFlowPorosityConst sets the porosity to porosity_min
+# where the porosity AuxVariable is less than porosity_min.
+# The AuxVariable is -0.1, so the porosity should be 0 (the default
+# porosity_min), or porosity_min if that is provided.
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -22,6 +23,19 @@
     order = CONSTANT
     family = MONOMIAL
     initial_condition = -0.1
+  []
+  [porosity]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [porosity]
+    type = PorousFlowPropertyAux
+    property = porosity
+    variable = porosity
+    execute_on = 'initial timestep_end'
   []
 []
 
@@ -66,7 +80,15 @@
   []
   [porosity]
     type = PorousFlowPorosityConst
-    porosity = 0.1
+    porosity = poro_var
+  []
+[]
+
+[Postprocessors]
+  [porosity]
+    type = ElementAverageValue
+    variable = porosity
+    execute_on = 'initial timestep_end'
   []
 []
 
@@ -75,4 +97,8 @@
   solve_type = Newton
   dt = 1
   end_time = 1
+[]
+
+[Outputs]
+  csv = true
 []

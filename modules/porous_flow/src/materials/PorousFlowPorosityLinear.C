@@ -42,11 +42,6 @@ PorousFlowPorosityLinear::validParams()
   params.addParam<Real>("P_coeff", 0.0, "Effective porepressure coefficient");
   params.addParam<Real>("T_coeff", 0.0, "Temperature coefficient");
   params.addParam<Real>("epv_coeff", 0.0, "Volumetric-strain coefficient");
-  // PorousFlowPorosityLinear has always bounded porosity below by zero by default
-  params.set<Real>("porosity_min", /*quiet_mode=*/true) = 0.0;
-  params.setDocString("porosity_min",
-                      "Minimum allowed value of the porosity: if the linear relationship gives "
-                      "values less than this value, then porosity is set to this value instead");
   params.addClassDescription(
       "This Material calculates the porosity in PorousFlow simulations using the relationship "
       "porosity_ref + P_coeff * (P - P_ref) + T_coeff * (T - T_ref) + epv_coeff * (epv - epv_ref), "
