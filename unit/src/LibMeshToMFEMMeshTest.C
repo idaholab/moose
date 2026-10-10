@@ -10,6 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include <stdexcept>
+#include <string>
+#include <tuple>
 #include "gtest/gtest.h"
 #include "GeneratedMeshGenerator.h"
 #include "MeshGeneratorMesh.h"
@@ -309,6 +311,77 @@ TEST_F(GeneratedMeshMFEMTest, Quad8CentreNodes)
     EXPECT_DOUBLE_EQ(node[1], centre[1]);
   }
 }
+
+/// Element type, mesh dimension, and whether fallback element types are allowed
+using HigherOrderGeometryParams = std::tuple<std::string, unsigned int, bool>;
+
+/**
+ * Converts straight-sided meshes of several higher-order elements, and compares their geometry
+ * with that of the same mesh converted to first-order elements. Any misplaced higher-order node
+ * makes the two differ.
+ */
+class HigherOrderGeometryMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+                                    public testing::WithParamInterface<HigherOrderGeometryParams>
+{
+};
+
+TEST_P(HigherOrderGeometryMFEMTest, MatchesFirstOrder)
+{
+  const auto & [elem_type, dim, fallback] = GetParam();
+  // Fallback element types produce a warning.
+  Moose::_throw_on_warning = false;
+
+  InputParameters mesh_params = getValidParams();
+  InputParameters generator_params = generatedMeshParams(dim);
+  generator_params.set<MooseEnum>("elem_type") = elem_type;
+  generator_params.set<unsigned int>("nx") = 2;
+  if (dim > 1)
+    generator_params.set<unsigned int>("ny") = 2;
+  if (dim > 2)
+    generator_params.set<unsigned int>("nz") = 2;
+  buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params, fallback);
+  const auto first_order_moose_mesh =
+      buildAdditionalMesh(mesh_params, "GeneratedMeshGenerator", generator_params);
+  const auto first_order_mesh =
+      Moose::MFEM::buildMFEMMesh(*first_order_moose_mesh, fallback, /*first_order=*/true);
+
+  ASSERT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
+  ASSERT_EQ(_mfem_mesh_ptr->GetNE(), first_order_mesh->GetNE());
+  mfem::Vector x, x_first_order;
+  for (const auto e : make_range(_mfem_mesh_ptr->GetNE()))
+  {
+    auto & transformation = *_mfem_mesh_ptr->GetElementTransformation(e);
+    auto & first_order_transformation = *first_order_mesh->GetElementTransformation(e);
+    // Compare at the nodes of the higher-order element, which include any interpolated nodes.
+    const auto & points = _mfem_mesh_ptr->GetNodalFESpace()->GetFE(e)->GetNodes();
+    for (const auto i : make_range(points.GetNPoints()))
+    {
+      transformation.Transform(points.IntPoint(i), x);
+      first_order_transformation.Transform(points.IntPoint(i), x_first_order);
+      // The two mappings are evaluated with different bases, so they agree only to round-off,
+      // which is far below 1e-12 for coordinates of order one. A misplaced node would move
+      // points by a fraction of the element size.
+      for (const auto d : make_range(x.Size()))
+        EXPECT_NEAR(x(d), x_first_order(d), 1e-12);
+    }
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(MultiElement,
+                         HigherOrderGeometryMFEMTest,
+                         testing::Values(HigherOrderGeometryParams{"EDGE3", 1, false},
+                                         HigherOrderGeometryParams{"EDGE4", 1, false},
+                                         HigherOrderGeometryParams{"TRI6", 2, false},
+                                         HigherOrderGeometryParams{"TRI7", 2, true},
+                                         HigherOrderGeometryParams{"QUAD8", 2, false},
+                                         HigherOrderGeometryParams{"QUAD9", 2, false},
+                                         HigherOrderGeometryParams{"TET10", 3, false},
+                                         HigherOrderGeometryParams{"TET14", 3, true},
+                                         HigherOrderGeometryParams{"HEX20", 3, false},
+                                         HigherOrderGeometryParams{"HEX27", 3, false},
+                                         HigherOrderGeometryParams{"PRISM15", 3, false},
+                                         HigherOrderGeometryParams{"PRISM18", 3, false}),
+                         [](const auto & info) { return std::get<0>(info.param); });
 
 class FileMeshMFEMTest : public LibMeshToMFEMMeshTest<FileMesh>,
                          public testing::WithParamInterface<std::string>

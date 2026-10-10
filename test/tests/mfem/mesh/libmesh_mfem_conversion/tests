@@ -167,4 +167,97 @@
       prereq = LibMeshToMFEMMeshPyramid/run
     []
   []
+  [LibMeshToMFEMMeshFallback]
+    requirement = 'The system shall, when requested, represent libMesh element types that MFEM does not support by the closest supported type, '
+    [fallback]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = 'elem_type=TET14 Problem/fallback_elements=true file_base=fallback-tet14 '
+                 'Outputs/mesh/ordering=NONE'
+      detail = 'converting a mesh of TET14 elements to TET10 elements with a warning, '
+      allow_warnings = true
+      capabilities = 'mfem'
+      recover = false
+    []
+    [reference]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = 'elem_type=TET10 file_base=fallback-tet10 Outputs/mesh/ordering=NONE'
+      detail = 'which is verified against the same mesh built from TET10 elements, '
+      capabilities = 'mfem'
+      recover = false
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh fallback-tet14.mesh fallback-tet10.mesh'
+      detail = 'by confirming that the meshes they write to disk are the same.'
+      capabilities = 'mfem'
+      recover = false
+      prereq = 'LibMeshToMFEMMeshFallback/fallback LibMeshToMFEMMeshFallback/reference'
+    []
+  []
+  [LibMeshToMFEMMeshFallbackError]
+    type = RunException
+    input = generated_mesh.i
+    cli_args = 'elem_type=TET14 file_base=fallback-error'
+    expect_err = 'Can not represent libMesh element type'
+    requirement = 'The system shall report an error when converting a libMesh mesh containing element types that MFEM does not support, unless fallback element types are requested.'
+    capabilities = 'mfem'
+  []
+  [LibMeshToMFEMMeshFirstOrder]
+    requirement = 'The system shall, when requested, represent a higher-order libMesh mesh with first-order MFEM elements, '
+    [first_order]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = 'elem_type=HEX27 Problem/first_order_mesh=true file_base=first-order-hex27 '
+                 'Outputs/mesh/ordering=GECKO'
+      detail = 'converting a mesh of HEX27 elements to HEX8 elements, '
+      capabilities = 'mfem'
+      recover = false
+    []
+    [reference]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = 'elem_type=HEX8 file_base=first-order-hex8 Outputs/mesh/ordering=GECKO'
+      detail = 'which is verified against the same mesh built from HEX8 elements, '
+      capabilities = 'mfem'
+      recover = false
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh first-order-hex27.mesh first-order-hex8.mesh'
+      detail = 'by confirming that the meshes they write to disk are the same.'
+      capabilities = 'mfem'
+      recover = false
+      prereq = 'LibMeshToMFEMMeshFirstOrder/first_order LibMeshToMFEMMeshFirstOrder/reference'
+    []
+  []
+  [MFEMMeshOutputSubMesh]
+    design = 'source/mfem/outputs/MFEMMeshOutput.md'
+    requirement = 'The system shall be able to write an MFEM submesh in the native MFEM mesh format, '
+    [submesh]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = 'Outputs/mesh/submesh=right_half file_base=submesh'
+      detail = 'writing the submesh of one block of a two-block mesh, '
+      capabilities = 'mfem'
+      recover = false
+    []
+    [reference]
+      type = RunApp
+      input = generated_mesh.i
+      cli_args = "Mesh/inactive='' file_base=submesh-reference"
+      detail = 'which is verified against a mesh containing only that block, '
+      capabilities = 'mfem'
+      recover = false
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh submesh.mesh submesh-reference.mesh'
+      detail = 'by confirming that the meshes they write to disk are the same.'
+      capabilities = 'mfem'
+      recover = false
+      prereq = 'MFEMMeshOutputSubMesh/submesh MFEMMeshOutputSubMesh/reference'
+    []
+  []
 []

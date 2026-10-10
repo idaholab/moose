@@ -13,6 +13,7 @@
 
 #include "MooseError.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/id_types.h"
 #include "libmesh/utility.h"
 #include "mfem/config/config.hpp"
 #include "mfem/fem/fe/fe_base.hpp"
@@ -23,21 +24,21 @@
 #include <vector>
 
 /**
- * CubitBlockInfo
+ * LibmeshMFEMBlockInfo
  *
  * Stores the information about each block in a mesh. Each block can contain a different
  * element type (although all element types must be of the same order and dimension).
  */
-class CubitBlockInfo
+class LibmeshMFEMBlockInfo
 {
 public:
-  CubitBlockInfo() = delete;
-  ~CubitBlockInfo() = default;
+  LibmeshMFEMBlockInfo() = delete;
+  ~LibmeshMFEMBlockInfo() = default;
 
   /**
    * Default initializer.
    */
-  CubitBlockInfo(int dimension, bool fallback, bool force_first_order);
+  LibmeshMFEMBlockInfo(int dimension, bool fallback, bool force_first_order);
 
   struct ElementInfo
   {
@@ -56,18 +57,19 @@ public:
   /**
    * Returns a constant reference to the element info for a particular block.
    */
-  const ElementInfo & blockElement(int block_id) const;
+  const ElementInfo & blockElement(libMesh::subdomain_id_type block_id) const;
 
   /**
    * Returns information for a particular face in a particular block.
    */
-  const ElementInfo & blockFace(int block_id, int bound_id) const;
+  const ElementInfo & blockFace(libMesh::subdomain_id_type block_id, unsigned int face_id) const;
 
   /**
    * Call to add each block individually.
    */
-  void
-  addBlockElement(int block_id, libMesh::ElemType elem_type, libMesh::ElemMappingType map_type);
+  void addBlockElement(libMesh::subdomain_id_type block_id,
+                       libMesh::ElemType elem_type,
+                       libMesh::ElemMappingType map_type);
 
   /**
    * Accessors.
@@ -88,10 +90,10 @@ protected:
   /**
    * Helper methods.
    */
-  inline const std::set<int> & blockIDs() const { return _block_ids; }
+  inline const std::set<libMesh::subdomain_id_type> & blockIDs() const { return _block_ids; }
 
-  bool hasBlockID(int block_id) const;
-  bool validBlockID(int block_id) const;
+  bool hasBlockID(libMesh::subdomain_id_type block_id) const;
+  bool validBlockID(libMesh::subdomain_id_type block_id) const;
   bool validDimension(int dimension) const;
 
   const ElementInfo & getElementInfo(libMesh::ElemType elem_type, bool warn = false) const;
@@ -100,7 +102,7 @@ private:
   /**
    * Stores all block IDs.
    */
-  std::set<int> _block_ids;
+  std::set<libMesh::subdomain_id_type> _block_ids;
 
   bool _fallback;
   bool _force_first_order;
@@ -108,7 +110,7 @@ private:
   /**
    * Maps from block ID to element.
    */
-  std::map<int, libMesh::ElemType> _block_element_for_block_id;
+  std::map<libMesh::subdomain_id_type, libMesh::ElemType> _block_element_for_block_id;
 
   /**
    * Dimension and order of block elements.

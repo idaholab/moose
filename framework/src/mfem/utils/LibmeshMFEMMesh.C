@@ -17,18 +17,18 @@
 
 LibmeshMFEMMesh::LibmeshMFEMMesh(
     const int num_elements_in_mesh,
-    const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_block_ids,
-    const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
-    const std::vector<int> & unique_side_boundary_ids,
-    const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
-    const std::vector<int> & unique_libmesh_corner_node_ids,
-    const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
-    const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-    const std::map<int, std::vector<std::vector<unsigned int>>> & libmesh_node_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_block_ids_for_boundary_id,
-    const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const std::vector<subdomain_id_type> & unique_block_ids,
+    const std::map<subdomain_id_type, std::string> & block_ids_to_names,
+    const std::vector<boundary_id_type> & unique_side_boundary_ids,
+    const std::map<boundary_id_type, std::string> & bound_ids_to_names,
+    const std::vector<dof_id_type> & unique_libmesh_corner_node_ids,
+    const ElementIDsForBlockID & libmesh_element_ids_for_block_id,
+    const NodeIDsForElementID & libmesh_node_ids_for_element_id,
+    const NodeIDsForBoundaryID & libmesh_node_ids_for_boundary_id,
+    const SideIDsForBoundaryID & libmesh_side_ids_for_boundary_id,
+    const BlockIDsForBoundaryID & libmesh_block_ids_for_boundary_id,
+    const CoordinatesForNodeID & coordinates_for_libmesh_node_id)
 {
   buildMFEMVerticesAndElements(num_elements_in_mesh,
                                block_info,
@@ -58,18 +58,18 @@ LibmeshMFEMMesh::LibmeshMFEMMesh(
 void
 LibmeshMFEMMesh::buildMFEMVerticesAndElements(
     const int num_elements_in_mesh,
-    const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_block_ids,
-    const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
-    const std::vector<int> & unique_side_boundary_ids,
-    const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
-    const std::vector<int> & unique_libmesh_corner_node_ids,
-    const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
-    const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-    const std::map<int, std::vector<std::vector<unsigned int>>> & libmesh_node_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_block_ids_for_boundary_id,
-    const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const std::vector<subdomain_id_type> & unique_block_ids,
+    const std::map<subdomain_id_type, std::string> & block_ids_to_names,
+    const std::vector<boundary_id_type> & unique_side_boundary_ids,
+    const std::map<boundary_id_type, std::string> & bound_ids_to_names,
+    const std::vector<dof_id_type> & unique_libmesh_corner_node_ids,
+    const ElementIDsForBlockID & libmesh_element_ids_for_block_id,
+    const NodeIDsForElementID & libmesh_node_ids_for_element_id,
+    const NodeIDsForBoundaryID & libmesh_node_ids_for_boundary_id,
+    const SideIDsForBoundaryID & libmesh_side_ids_for_boundary_id,
+    const BlockIDsForBoundaryID & libmesh_block_ids_for_boundary_id,
+    const CoordinatesForNodeID & coordinates_for_libmesh_node_id)
 {
   // Set dimensions.
   Dim = spaceDim = block_info.dimension();
@@ -95,9 +95,8 @@ LibmeshMFEMMesh::buildMFEMVerticesAndElements(
 }
 
 void
-LibmeshMFEMMesh::buildMFEMVertices(
-    const std::vector<int> & unique_libmesh_corner_node_ids,
-    const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id)
+LibmeshMFEMMesh::buildMFEMVertices(const std::vector<dof_id_type> & unique_libmesh_corner_node_ids,
+                                   const CoordinatesForNodeID & coordinates_for_libmesh_node_id)
 {
   _mfem_vertex_index_for_libmesh_corner_node_id.clear();
 
@@ -106,7 +105,7 @@ LibmeshMFEMMesh::buildMFEMVertices(
 
   // Iterate over the global IDs of each unqiue corner node from the MOOSE mesh.
   int ivertex = 0;
-  for (int libmesh_node_id : unique_libmesh_corner_node_ids)
+  for (const auto libmesh_node_id : unique_libmesh_corner_node_ids)
   {
     // Get the xyz coordinates associated with the libmesh corner node.
     auto & coordinates = libmesh_map_find(coordinates_for_libmesh_node_id, libmesh_node_id);
@@ -123,11 +122,11 @@ LibmeshMFEMMesh::buildMFEMVertices(
 void
 LibmeshMFEMMesh::buildMFEMElements(
     const int num_elements_in_mesh,
-    const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_block_ids,
-    const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
-    const std::map<int, std::vector<int>> & element_ids_for_block_id,
-    const std::map<int, std::vector<int>> & node_ids_for_element_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const std::vector<subdomain_id_type> & unique_block_ids,
+    const std::map<subdomain_id_type, std::string> & block_ids_to_names,
+    const ElementIDsForBlockID & element_ids_for_block_id,
+    const NodeIDsForElementID & node_ids_for_element_id)
 {
   _mfem_element_id_for_libmesh_element_id.clear();
 
@@ -136,7 +135,7 @@ LibmeshMFEMMesh::buildMFEMElements(
   elements.SetSize(num_elements_in_mesh);
 
   int ielement = 0;
-  for (int block_id : unique_block_ids)
+  for (const auto block_id : unique_block_ids)
   {
     // Get the element type associated with the block.
     auto & block_element = block_info.blockElement(block_id);
@@ -145,14 +144,14 @@ LibmeshMFEMMesh::buildMFEMElements(
 
     auto & element_ids = libmesh_map_find(element_ids_for_block_id, block_id);
 
-    for (int element_id : element_ids) // Iterate over elements in block.
+    for (const auto element_id : element_ids) // Iterate over elements in block.
     {
       auto & libmesh_node_ids = libmesh_map_find(node_ids_for_element_id, element_id);
 
       // Iterate over ONLY the corner nodes in the element.
       for (const auto ivertex : make_range(block_element.num_corner_nodes))
       {
-        const int libmesh_node_id = libmesh_node_ids[ivertex];
+        const auto libmesh_node_id = libmesh_node_ids[ivertex];
 
         // Map from the corner libmesh node --> corresponding mfem vertex.
         renumbered_vertex_ids[ivertex] = getMFEMVertexIndex(libmesh_node_id);
@@ -183,12 +182,12 @@ LibmeshMFEMMesh::buildMFEMElements(
 
 void
 LibmeshMFEMMesh::buildMFEMBoundaryElements(
-    const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_side_boundary_ids,
-    const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
-    const std::map<int, std::vector<std::vector<unsigned int>>> & libmesh_node_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,
-    const std::map<int, std::vector<int>> & libmesh_block_ids_for_boundary_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const std::vector<boundary_id_type> & unique_side_boundary_ids,
+    const std::map<boundary_id_type, std::string> & bound_ids_to_names,
+    const NodeIDsForBoundaryID & libmesh_node_ids_for_boundary_id,
+    const SideIDsForBoundaryID & libmesh_side_ids_for_boundary_id,
+    const BlockIDsForBoundaryID & libmesh_block_ids_for_boundary_id)
 {
   // Find total number of boundary elements.
   NumOfBdrElements = 0;
@@ -199,7 +198,7 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
     return;
   }
 
-  for (int boundary_id : unique_side_boundary_ids)
+  for (const auto boundary_id : unique_side_boundary_ids)
   {
     NumOfBdrElements += libmesh_map_find(libmesh_node_ids_for_boundary_id, boundary_id).size();
   }
@@ -208,7 +207,7 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
 
   // Iterate over boundary ids.
   int iboundary = 0;
-  for (int boundary_id : unique_side_boundary_ids)
+  for (const auto boundary_id : unique_side_boundary_ids)
   {
     auto & all_boundary_node_ids = libmesh_map_find(libmesh_node_ids_for_boundary_id, boundary_id);
     auto & all_boundary_side_ids = libmesh_map_find(libmesh_side_ids_for_boundary_id, boundary_id);
@@ -231,7 +230,7 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
 
       for (const auto knode : make_range(boundary_face_info.num_corner_nodes))
       {
-        const int libmesh_node_id = boundary_node_ids[knode];
+        const auto libmesh_node_id = boundary_node_ids[knode];
 
         // Renumber vertex ("node") IDs so they're contiguous and start from 0.
         renumbered_vertex_ids[knode] = getMFEMVertexIndex(libmesh_node_id);
@@ -360,14 +359,14 @@ LibmeshMFEMMesh::buildMFEMFaceElement(const int face_type,
 
 void
 LibmeshMFEMMesh::handleHigherOrderFESpace(
-    const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_block_ids,
-    const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
-    const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-    const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const std::vector<subdomain_id_type> & unique_block_ids,
+    const ElementIDsForBlockID & libmesh_element_ids_for_block_id,
+    const NodeIDsForElementID & libmesh_node_ids_for_element_id,
+    const CoordinatesForNodeID & coordinates_for_libmesh_node_id)
 {
   // Map from each MFEM node to the libMesh node it was set from.
-  std::map<int, int> libmesh_node_id_for_mfem_node_id;
+  std::map<int, dof_id_type> libmesh_node_id_for_mfem_node_id;
 
   // Call FinalizeTopology. If we call this then we must call Finalize later after
   // we've defined the mesh nodes.
@@ -417,7 +416,7 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
         // Find the libmesh node ID:
         // NB: the map is 1-based to we need to subtract 1.
         const int libmesh_node_index = block_element.mfem_to_libmesh[j] - 1;
-        const int libmesh_node_id = libmesh_node_ids[libmesh_node_index];
+        const auto libmesh_node_id = libmesh_node_ids[libmesh_node_index];
 
         libmesh_node_id_for_mfem_node_id[mfem_node_id] = libmesh_node_id;
 
@@ -459,10 +458,10 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
 
 void
 LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
-    const CubitBlockInfo & block_info,
-    const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-    const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id,
-    const std::map<int, int> & libmesh_node_id_for_mfem_node_id)
+    const LibmeshMFEMBlockInfo & block_info,
+    const NodeIDsForElementID & libmesh_node_ids_for_element_id,
+    const CoordinatesForNodeID & coordinates_for_libmesh_node_id,
+    const std::map<int, dof_id_type> & libmesh_node_id_for_mfem_node_id)
 {
   const auto * finite_element_space = GetNodalFESpace();
   if (!finite_element_space)
@@ -471,13 +470,13 @@ LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
   }
 
   // Create a set of all unique libmesh node ids.
-  std::set<int> libmesh_node_ids;
+  std::set<dof_id_type> libmesh_node_ids;
 
   for (auto & key_value : libmesh_node_ids_for_element_id)
   {
-    const std::vector<int> & libmesh_node_ids_for_element = key_value.second;
+    const auto & libmesh_node_ids_for_element = key_value.second;
 
-    for (int libmesh_node_id : libmesh_node_ids_for_element)
+    for (const auto libmesh_node_id : libmesh_node_ids_for_element)
     {
       libmesh_node_ids.insert(libmesh_node_id);
     }
@@ -500,7 +499,7 @@ LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
 
       if (j < element_info.num_nodes)
       {
-        const int libmesh_node_id = libmesh_map_find(libmesh_node_id_for_mfem_node_id, mfem_dof);
+        const auto libmesh_node_id = libmesh_map_find(libmesh_node_id_for_mfem_node_id, mfem_dof);
 
         // Remove from set.
         libmesh_node_ids.erase(libmesh_node_id);
