@@ -1,0 +1,20 @@
+[Tests]
+  design = 'GrandPotentialInterface.md GBAnisotropy.md GBWidthAnisotropy.md'
+  issues = '#33932'
+
+  [moelans2022_table1]
+    type = GoogleTest
+    unit_test = MoelansInterfaceFitsTest.moelans2022Table1
+    requirement = 'The system shall compute the interface parameter gamma from the interfacial free energy with the 2022 polynomial fit of Moelans, reproducing the gamma values published with that fit.'
+  []
+  [gamma_1p5]
+    type = GoogleTest
+    unit_test = MoelansInterfaceFitsTest.gamma1p5
+    requirement = 'The system shall reproduce the analytical interface parameter relations at gamma = 1.5, within the accuracy of each fit, with both the 2022 and the earlier 2009 polynomial fits of Moelans.'
+  []
+  [in_range]
+    type = GoogleTest
+    unit_test = MoelansInterfaceFitsTest.inRange
+    requirement = 'The system shall identify interfacial free energies that lie outside the range covered by the 2022 polynomial fit of Moelans.'
+  []
+[]
