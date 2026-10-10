@@ -21,7 +21,10 @@ PorousFlowPorosityConstTempl<is_ad>::validParams()
       "porosity",
       "The porosity (assumed indepenent of porepressure, temperature, "
       "strain, etc, for this material).  This should be a real number, or "
-      "a constant monomial variable (not a linear lagrange or other kind of variable).");
+      "a constant monomial variable (not a linear lagrange or other kind of variable).  If it is "
+      "less than porosity_min, porosity is set to porosity_min instead.");
+  // The porosity derivatives are always zero in this Material, so zero_modifier has no effect
+  params.suppressParameter<Real>("zero_modifier");
   params.addClassDescription("This Material calculates the porosity assuming it is constant");
   return params;
 }
@@ -39,13 +42,6 @@ PorousFlowPorosityConstTempl<is_ad>::initQpStatefulProperties()
 {
   // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
   _porosity[_qp] = _input_porosity[0];
-}
-
-template <bool is_ad>
-void
-PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
-{
-  initQpStatefulProperties();
 
   if (!is_ad)
   {
@@ -53,6 +49,15 @@ PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
     (*_dporosity_dvar)[_qp].assign(_num_var, 0.0);
     (*_dporosity_dgradvar)[_qp].assign(_num_var, RealGradient());
   }
+
+  this->applyPorosityMin();
+}
+
+template <bool is_ad>
+void
+PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
+{
+  initQpStatefulProperties();
 }
 
 template class PorousFlowPorosityConstTempl<false>;

@@ -260,6 +260,7 @@
     solid_bulk = 1
     constant_fluid_bulk_modulus = 8
     constant_biot_modulus = 4.7058823529
+    porosity_min = -1 # the analytical solution of this linear poroelasticity benchmark has negative porosity at early times
   []
   [permeability]
     type = PorousFlowPermeabilityConst

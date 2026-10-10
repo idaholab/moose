@@ -3,6 +3,8 @@
 Porosity may be fixed at a constant value, or it may be a function of the
 effective porepressure, the volumetric strain, the temperature and/or chemical precipitates
 
+All the porosity Materials below accept the `porosity_min` parameter, which places a lower bound on porosity, $\phi \geq \phi_{\mathrm{min}}$: if the computed porosity is less than `porosity_min`, it is set to `porosity_min`.  Its default is zero, so porosity is never negative unless the user sets a negative `porosity_min`, which can be useful when comparing with analytical solutions of linear poroelasticity (for instance, Mandel's problem) in which porosity becomes negative.  When the bound is active, the derivatives of porosity are multiplied by the small `zero_modifier` rather than set to zero, which aids convergence.
+
 Available porosity formulations include:
 
 ## Constant: [PorousFlowPorosityConst](/PorousFlowPorosityConst.md)
