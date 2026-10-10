@@ -257,4 +257,28 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityConst.md'
   []
+  [exponential_porosity_min]
+    type = CSVDiff
+    input = exponential_porosity_check.i
+    csvdiff = 'exponential_porosity_check_out.csv'
+    requirement = 'The system shall set porosity computed by an exponential relationship to the user-specified lower bound when the computed porosity is less than that bound.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [const_porosity_min_AD]
+    type = CSVDiff
+    input = const_porosity_check_AD.i
+    csvdiff = 'const_porosity_check_AD_out.csv'
+    requirement = 'The system shall set porosity that is constant, using automatic differentiation, to the user-specified lower bound when the computed porosity is less than that bound.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityConst.md'
+  []
+  [exponential_porosity_min_AD]
+    type = CSVDiff
+    input = exponential_porosity_check_AD.i
+    csvdiff = 'exponential_porosity_check_AD_out.csv'
+    requirement = 'The system shall set porosity computed by an exponential relationship, using automatic differentiation, to the user-specified lower bound when the computed porosity is less than that bound.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
 []

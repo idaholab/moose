@@ -41,14 +41,7 @@ void
 PorousFlowPorosityConstTempl<is_ad>::initQpStatefulProperties()
 {
   // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
-  _porosity[_qp] = std::max(_input_porosity[0], _porosity_min);
-}
-
-template <bool is_ad>
-void
-PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
-{
-  initQpStatefulProperties();
+  _porosity[_qp] = _input_porosity[0];
 
   if (!is_ad)
   {
@@ -56,6 +49,15 @@ PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
     (*_dporosity_dvar)[_qp].assign(_num_var, 0.0);
     (*_dporosity_dgradvar)[_qp].assign(_num_var, RealGradient());
   }
+
+  this->applyPorosityMin();
+}
+
+template <bool is_ad>
+void
+PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
+{
+  initQpStatefulProperties();
 }
 
 template class PorousFlowPorosityConstTempl<false>;
