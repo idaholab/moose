@@ -15,6 +15,7 @@
 #include "MFEMMesh.h"
 #include "MooseMesh.h"
 
+#include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh_serializer.h"
@@ -46,47 +47,19 @@ using ElementIDsForBoundaryID = std::map<boundary_id_type, std::vector<dof_id_ty
  * and element IDs.
  */
 std::tuple<ElementIDsForBoundaryID, SideIDsForBoundaryID>
-buildBoundaryInfo(MooseMesh & mesh)
+buildBoundaryInfo(const MeshBase & libmesh)
 {
   ElementIDsForBoundaryID element_ids_for_boundary_id;
   SideIDsForBoundaryID side_ids_for_boundary_id;
-  mesh.buildBndElemList();
 
-  struct BoundaryElementAndSideIDs
+  // Read the sides on each boundary directly from libMesh, rather than from the MooseMesh
+  // boundary element cache, which would keep pointers to elements that are deleted when a
+  // temporarily serialized distributed mesh is distributed again.
+  for (const auto & [element_id, side_id, boundary_id] :
+       libmesh.get_boundary_info().build_active_side_list())
   {
-    std::vector<dof_id_type> element_ids; // Element ids for a boundary id.
-    std::vector<unsigned int> side_ids;   // Side ids for a boundary id.
-
-    BoundaryElementAndSideIDs() : element_ids{}, side_ids{} {}
-  };
-
-  std::map<BoundaryID, BoundaryElementAndSideIDs> boundary_ids_map;
-
-  // Iterate over elements on the boundary to build the map that allows us to go
-  // from a boundary id to a vector of element id/side ids.
-  for (MooseMesh::bnd_elem_iterator boundary_element = mesh.bndElemsBegin();
-       boundary_element != mesh.bndElemsEnd();
-       ++boundary_element)
-  {
-    auto boundary_id = (*boundary_element)->_bnd_id;
-
-    auto element_id = (*boundary_element)->_elem->id(); // ID of element on boundary.
-    auto side_id = (*boundary_element)->_side;          // ID of side that element is on.
-
-    boundary_ids_map[boundary_id].element_ids.push_back(element_id);
-    boundary_ids_map[boundary_id].side_ids.push_back(side_id);
-  }
-
-  // Run through the (key, value) pairs in the boundary_ids_map map.
-  for (const auto & key_value_pair : boundary_ids_map)
-  {
-    auto boundary_id = key_value_pair.first;
-
-    auto element_ids = key_value_pair.second.element_ids;
-    auto side_ids = key_value_pair.second.side_ids;
-
-    element_ids_for_boundary_id[boundary_id] = std::move(element_ids);
-    side_ids_for_boundary_id[boundary_id] = std::move(side_ids);
+    element_ids_for_boundary_id[boundary_id].push_back(element_id);
+    side_ids_for_boundary_id[boundary_id].push_back(side_id);
   }
 
   return {element_ids_for_boundary_id, side_ids_for_boundary_id};
@@ -429,9 +402,9 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
   // 7.
   // element_ids_for_boundary_id stores the ids of each element on each boundary.
   // side_ids_for_boundary_id stores the sides of those elements that are on each boundary.
-  auto [element_ids_for_boundary_id, side_ids_for_boundary_id] = buildBoundaryInfo(mesh);
+  auto [element_ids_for_boundary_id, side_ids_for_boundary_id] = buildBoundaryInfo(mesh.getMesh());
 
-  // 8. Get a vector containing all boundary IDs on sides of semi-local elements.
+  // 8. Get a vector containing the IDs of all side boundaries in the mesh.
   const auto unique_side_boundary_ids = getSideBoundaryIDs(mesh.getMesh());
   std::map<libMesh::boundary_id_type, std::string> boundary_ids_to_names =
       mesh.getMesh().get_boundary_info().get_sideset_name_map();

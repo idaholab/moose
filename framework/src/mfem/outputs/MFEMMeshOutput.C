@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMeshOutput.h"
+#include "MFEMProblem.h"
 
 #include <algorithm>
 #include <cmath>
@@ -327,10 +328,10 @@ MFEMMeshOutput::output()
   // was numbered or partitioned.
   canonicalizeMesh(serial_mesh);
 
-  if (_ordering > 0)
+  if (_ordering != "NONE")
   {
     mfem::Array<int> new_order;
-    if (_ordering == 1)
+    if (_ordering == "HILBERT")
       serial_mesh.GetHilbertElementOrdering(new_order);
     else
       // FIXME: Add support for various Gecko element ordering configs

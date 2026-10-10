@@ -32,25 +32,36 @@
 class LibmeshMFEMBlockInfo
 {
 public:
-  LibmeshMFEMBlockInfo() = delete;
-  ~LibmeshMFEMBlockInfo() = default;
-
   /**
-   * Default initializer.
+   * Construct the block information for a mesh of dimension \p dimension. \p fallback indicates
+   * whether element types MFEM can not represent should be replaced by the closest type it can,
+   * and \p force_first_order whether every element should be represented as first order.
    */
   LibmeshMFEMBlockInfo(int dimension, bool fallback, bool force_first_order);
 
+  /**
+   * How a libMesh element type is represented in MFEM.
+   */
   struct ElementInfo
   {
+    /// The MFEM element type
     mfem::Element::Type mfem_elem_type;
+    /// The dimension of the element
     int dimension;
+    /// The number of libMesh nodes in the element
     int num_nodes;
+    /// The number of nodes at the corners of the element, which become MFEM vertices
     int num_corner_nodes;
+    /// The number of sides of the element
     int num_faces;
+    /// The polynomial order of the element geometry
     int order;
+    /// The libMesh element type of each side, indexed by libMesh side number
     std::vector<libMesh::ElemType> faces;
+    /// For each MFEM node of the element, the 1-based index of the corresponding libMesh node
     std::vector<int> mfem_to_libmesh;
-    /// Weightings used to calculate additional control points needed by MFEM
+    /// For each MFEM node that has no corresponding libMesh node, the weights to give each
+    /// libMesh node of the element (by libMesh local index) when interpolating its position
     std::vector<std::vector<mfem::real_t>> additional_points;
   };
 
@@ -78,10 +89,9 @@ public:
   inline uint8_t dimension() const { return _dimension; }
   int basisType() const;
 
-  inline std::size_t numBlocks() const { return blockIDs().size(); }
   inline bool hasBlocks() const { return !blockIDs().empty(); }
 
-protected:
+private:
   /**
    * Reset all block elements. Called internally in initializer.
    */
@@ -98,14 +108,13 @@ protected:
 
   const ElementInfo & getElementInfo(libMesh::ElemType elem_type, bool warn = false) const;
 
-private:
   /**
    * Stores all block IDs.
    */
   std::set<libMesh::subdomain_id_type> _block_ids;
 
-  bool _fallback;
-  bool _force_first_order;
+  const bool _fallback;
+  const bool _force_first_order;
 
   /**
    * Maps from block ID to element.
@@ -115,7 +124,7 @@ private:
   /**
    * Dimension and order of block elements.
    */
-  uint8_t _dimension;
+  const uint8_t _dimension;
   uint8_t _order;
   int _basis_type;
 

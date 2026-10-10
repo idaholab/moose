@@ -5,12 +5,22 @@
 Help() {
     echo "Checks that data in two MFEM native mesh files are the same"
     echo ""
-    echo "Usage: check.sh <file 1> <file 2>"
+    echo "Usage: check.sh <file 1> <file 2> [--ignore-boundary]"
+    echo ""
+    echo "  --ignore-boundary  Do not compare the boundary elements of the meshes"
 }
 #Check correct number of args
-if [ ! "$#" -eq 2 ]; then
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
     Help
     exit 1
+fi
+IGNORE_BOUNDARY=0
+if [ "$#" -eq 3 ]; then
+    if [ "$3" != "--ignore-boundary" ]; then
+        Help
+        exit 1
+    fi
+    IGNORE_BOUNDARY=1
 fi
 #Check files exist
 FILE_LEFT=$1
@@ -24,19 +34,19 @@ if [ ! -f "${FILE_RIGHT}" ]; then
     exit 1
 fi
 
-# MFEM doesn't seem to reorder boundary elements consistently, so filter them out.
-# It also assumes a different spacing of control points in higher-order meshes
-# than does libMesh.
+# The name of the finite element collection holding the nodes of a higher-order mesh records
+# where its control points are placed, which differs between meshes read by libMesh and by
+# MFEM even when the node positions are the same, so it is not compared. The boundary
+# elements are skipped when requested, for meshes whose boundaries are expected to differ.
 # Use unique temporary files so that checks run concurrently do not overwrite each other.
 TMP_LEFT=$(mktemp)
 TMP_RIGHT=$(mktemp)
 trap 'rm -f "${TMP_LEFT}" "${TMP_RIGHT}"' EXIT
-awk '/boundary/ {INSIDE=1; next}
+FILTER='IGNORE_BOUNDARY==1 && /boundary/ {INSIDE=1; next}
     /vertices/ && INSIDE==1 {INSIDE=0; next};
-    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_LEFT}" > "${TMP_LEFT}"
-awk '/boundary/ {INSIDE=1; next}
-    /vertices/ && INSIDE==1 {INSIDE=0; next};
-    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_RIGHT}" > "${TMP_RIGHT}"
+    INSIDE!=1 && !/FiniteElementCollection/ {print $0}'
+awk -v IGNORE_BOUNDARY="${IGNORE_BOUNDARY}" "${FILTER}" "${FILE_LEFT}" > "${TMP_LEFT}"
+awk -v IGNORE_BOUNDARY="${IGNORE_BOUNDARY}" "${FILTER}" "${FILE_RIGHT}" > "${TMP_RIGHT}"
 
 #Should be identical
 #exit code will be 0 if no diff

@@ -263,8 +263,6 @@ LibmeshMFEMMesh::buildMFEMElement(const int element_type,
 {
   mfem::Element * new_element = nullptr;
 
-  // FIXME: Need to add support for SEG4, QUAD8, TRI7, HEX20, TET14, WEDGE15, PYRAMID13
-
   switch (element_type)
   {
     case mfem::Element::Type::SEGMENT:

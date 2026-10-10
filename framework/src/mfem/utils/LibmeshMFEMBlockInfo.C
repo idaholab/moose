@@ -73,16 +73,6 @@ const std::map<libMesh::ElemType, LibmeshMFEMBlockInfo::ElementInfo>
           {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3},
           {1, 2, 3, 4, 5, 6},
           ::no_additional_points}},
-        // {libMesh::ElemType::TRI7,
-        //  {mfem::Element::Type::TRIANGLE,
-        //   2,
-        //   7,
-        //   3,
-        //   3,
-        //   3,
-        //   {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3},
-        //   {1, 2, 3, 4, 5, 6, 7},
-        //   ::no_additional_points}},
         {libMesh::ElemType::QUAD4,
          {mfem::Element::Type::QUADRILATERAL,
           2,
@@ -148,19 +138,6 @@ const std::map<libMesh::ElemType, LibmeshMFEMBlockInfo::ElementInfo>
            libMesh::ElemType::TRI6},
           {1, 2, 3, 4, 5, 7, 8, 6, 9, 10},
           ::no_additional_points}},
-        // {libMesh::ElemType::TET14,
-        //  {mfem::Element::Type::TETRAHEDRON,
-        //   3,
-        //   14,
-        //   4,
-        //   4,
-        //   3,
-        //   {libMesh::ElemType::TRI7,
-        //    libMesh::ElemType::TRI7,
-        //    libMesh::ElemType::TRI7,
-        //    libMesh::ElemType::TRI7},
-        //   {1, 2, 3, 4, 5, 7, 8, 6, 9, 10, 11, 12, 13, 14},
-        //   ::no_additional_points}},
         {libMesh::ElemType::HEX8,
          {mfem::Element::Type::HEXAHEDRON,
           3,
@@ -394,15 +371,12 @@ LibmeshMFEMBlockInfo::getElementInfo(libMesh::ElemType elem_type, bool warn) con
  * LibmeshMFEMBlockInfo
  */
 LibmeshMFEMBlockInfo::LibmeshMFEMBlockInfo(int dimension, bool fallback, bool force_first_order)
+  : _fallback(fallback), _force_first_order(force_first_order), _dimension(dimension)
 {
   if (!validDimension(dimension))
   {
     mooseError("Invalid dimension '", dimension, "' specified.");
   }
-
-  _dimension = dimension;
-  _fallback = fallback;
-  _force_first_order = force_first_order;
 
   clearBlockElements();
 }

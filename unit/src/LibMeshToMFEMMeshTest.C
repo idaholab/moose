@@ -25,6 +25,10 @@
 #include "MFEMMeshFactory.h"
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/fe_map.h"
+#include "libmesh/utility.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/elem.h"
+#include "libmesh/boundary_info.h"
 #include "type_traits"
 
 template <class M>
@@ -134,17 +138,17 @@ getElementSet(std::shared_ptr<mfem::ParMesh> mesh, mfem::Element::Type elem_type
 {
   std::set<std::set<Coord>> actual_elements;
   const int N = mesh->SpaceDimension();
-  for (int i = 0; i < mesh->GetNE(); ++i)
+  for (const auto i : make_range(mesh->GetNE()))
   {
     mfem::Element * elem = mesh->GetElement(i);
     EXPECT_EQ(elem->GetType(), elem_type);
     int * vertices = elem->GetVertices();
     std::set<Coord> vert_coords;
-    for (int j = 0; j < elem->GetNVertices(); ++j)
+    for (const auto j : make_range(elem->GetNVertices()))
     {
       mfem::real_t * vc = mesh->GetVertex(vertices[j]);
       Coord c(N);
-      for (int k = 0; k < N; ++k)
+      for (const auto k : make_range(N))
       {
         c[k] = vc[k];
       }
@@ -312,6 +316,36 @@ TEST_F(GeneratedMeshMFEMTest, Quad8CentreNodes)
   }
 }
 
+/**
+ * Check that the higher-order mesh \p mesh has the same geometry as \p first_order_mesh, which
+ * holds the same elements in the same order. This holds for straight-sided meshes, and fails if
+ * any higher-order node is misplaced.
+ */
+void
+expectSameGeometry(mfem::ParMesh & mesh, mfem::ParMesh & first_order_mesh)
+{
+  ASSERT_NE(mesh.GetNodes(), nullptr);
+  ASSERT_EQ(mesh.GetNE(), first_order_mesh.GetNE());
+  mfem::Vector x, x_first_order;
+  for (const auto e : make_range(mesh.GetNE()))
+  {
+    auto & transformation = *mesh.GetElementTransformation(e);
+    auto & first_order_transformation = *first_order_mesh.GetElementTransformation(e);
+    // Compare at the nodes of the higher-order element, which include any interpolated nodes.
+    const auto & points = mesh.GetNodalFESpace()->GetFE(e)->GetNodes();
+    for (const auto i : make_range(points.GetNPoints()))
+    {
+      transformation.Transform(points.IntPoint(i), x);
+      first_order_transformation.Transform(points.IntPoint(i), x_first_order);
+      // The two mappings are evaluated with different bases, so they agree only to round-off,
+      // which is far below 1e-12 for coordinates of order one. A misplaced node would move
+      // points by a fraction of the element size.
+      for (const auto d : make_range(x.Size()))
+        EXPECT_NEAR(x(d), x_first_order(d), 1e-12);
+    }
+  }
+}
+
 /// Element type, mesh dimension, and whether fallback element types are allowed
 using HigherOrderGeometryParams = std::tuple<std::string, unsigned int, bool>;
 
@@ -345,26 +379,7 @@ TEST_P(HigherOrderGeometryMFEMTest, MatchesFirstOrder)
   const auto first_order_mesh =
       Moose::MFEM::buildMFEMMesh(*first_order_moose_mesh, fallback, /*first_order=*/true);
 
-  ASSERT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  ASSERT_EQ(_mfem_mesh_ptr->GetNE(), first_order_mesh->GetNE());
-  mfem::Vector x, x_first_order;
-  for (const auto e : make_range(_mfem_mesh_ptr->GetNE()))
-  {
-    auto & transformation = *_mfem_mesh_ptr->GetElementTransformation(e);
-    auto & first_order_transformation = *first_order_mesh->GetElementTransformation(e);
-    // Compare at the nodes of the higher-order element, which include any interpolated nodes.
-    const auto & points = _mfem_mesh_ptr->GetNodalFESpace()->GetFE(e)->GetNodes();
-    for (const auto i : make_range(points.GetNPoints()))
-    {
-      transformation.Transform(points.IntPoint(i), x);
-      first_order_transformation.Transform(points.IntPoint(i), x_first_order);
-      // The two mappings are evaluated with different bases, so they agree only to round-off,
-      // which is far below 1e-12 for coordinates of order one. A misplaced node would move
-      // points by a fraction of the element size.
-      for (const auto d : make_range(x.Size()))
-        EXPECT_NEAR(x(d), x_first_order(d), 1e-12);
-    }
-  }
+  expectSameGeometry(*_mfem_mesh_ptr, *first_order_mesh);
 }
 
 INSTANTIATE_TEST_SUITE_P(MultiElement,
@@ -383,6 +398,81 @@ INSTANTIATE_TEST_SUITE_P(MultiElement,
                                          HigherOrderGeometryParams{"PRISM18", 3, false}),
                          [](const auto & info) { return std::get<0>(info.param); });
 
+/**
+ * Tests for PRISM20 and PRISM21 elements, which MFEM can only represent as PRISM18s. No mesh
+ * generator produces them directly, so a mesh of PRISM6s is converted to PRISM21s, whose first
+ * 20 nodes are those of a PRISM20.
+ */
+class CompletePrismMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+                              public testing::WithParamInterface<libMesh::ElemType>
+{
+protected:
+  std::shared_ptr<MeshGeneratorMesh> buildPrismMesh(const std::string & name);
+};
+
+std::shared_ptr<MeshGeneratorMesh>
+CompletePrismMFEMTest::buildPrismMesh(const std::string & name)
+{
+  InputParameters mesh_params = getValidParams();
+  InputParameters generator_params = generatedMeshParams(3);
+  generator_params.set<MooseEnum>("elem_type") = "PRISM6";
+  generator_params.set<unsigned int>("nx") = 2;
+  generator_params.set<unsigned int>("ny") = 2;
+  generator_params.set<unsigned int>("nz") = 2;
+  auto moose_mesh = buildMooseMeshOnly(
+      mesh_params, "GeneratedMeshGenerator", generator_params, name, name + "_generator");
+  auto & mesh = moose_mesh->getMesh();
+  mesh.all_complete_order();
+
+  if (GetParam() == libMesh::ElemType::PRISM20)
+  {
+    // The boundary information refers to the elements being replaced, and is not needed here.
+    mesh.get_boundary_info().clear();
+    std::vector<dof_id_type> element_ids;
+    for (const auto * const elem : mesh.element_ptr_range())
+      element_ids.push_back(elem->id());
+    for (const auto id : element_ids)
+    {
+      auto & prism21 = mesh.elem_ref(id);
+      auto prism20 = libMesh::Elem::build(libMesh::ElemType::PRISM20);
+      for (const auto n : make_range(prism20->n_nodes()))
+        prism20->set_node(n, prism21.node_ptr(n));
+      prism20->subdomain_id() = prism21.subdomain_id();
+      prism20->set_id(id);
+      mesh.insert_elem(std::move(prism20));
+    }
+    mesh.prepare_for_use();
+  }
+
+  for (const auto * const elem : mesh.element_ptr_range())
+    EXPECT_EQ(elem->type(), GetParam());
+  return moose_mesh;
+}
+
+TEST_P(CompletePrismMFEMTest, FallbackMatchesFirstOrder)
+{
+  // Falling back to PRISM18 elements produces a warning.
+  Moose::_throw_on_warning = false;
+  const auto mesh = buildPrismMesh("prism_mesh");
+  const auto mfem_mesh = Moose::MFEM::buildMFEMMesh(*mesh, /*fallback=*/true, false);
+  EXPECT_EQ(mfem_mesh->GetElementType(0), mfem::Element::WEDGE);
+  const auto first_order_mfem_mesh = Moose::MFEM::buildMFEMMesh(*mesh, true, /*first_order=*/true);
+  expectSameGeometry(*mfem_mesh, *first_order_mfem_mesh);
+}
+
+TEST_P(CompletePrismMFEMTest, ErrorWithoutFallback)
+{
+  const auto mesh = buildPrismMesh("prism_mesh");
+  EXPECT_MOOSEERROR_MSG_CONTAINS(Moose::MFEM::buildMFEMMesh(*mesh, false, false),
+                                 "Can not represent libMesh element type ");
+}
+
+INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
+                         CompletePrismMFEMTest,
+                         testing::Values(libMesh::ElemType::PRISM20, libMesh::ElemType::PRISM21),
+                         [](const auto & info)
+                         { return libMesh::Utility::enum_to_string(info.param); });
+
 class FileMeshMFEMTest : public LibMeshToMFEMMeshTest<FileMesh>,
                          public testing::WithParamInterface<std::string>
 {
@@ -397,7 +487,7 @@ protected:
     LibMeshToMFEMMeshTest<FileMesh>::SetUp();
     _filename = GetParam();
     size_t split_at = _filename.find("-");
-    _elem_type = types.at(_filename.substr(0, split_at));
+    _elem_type = libmesh_map_find(types, _filename.substr(0, split_at));
     _nodes_per_element = std::stoi(_filename.substr(split_at + 1, _filename.find(".") - split_at));
   }
 
@@ -425,7 +515,7 @@ TEST_P(FileMeshMFEMTest, CheckLoad)
   int n_elem = _mfem_mesh_ptr->GetNE();
   EXPECT_EQ(n_elem, _moose_mesh_ptr->nElem());
   const mfem::FiniteElementSpace * nodal_fespace = _mfem_mesh_ptr->GetNodalFESpace();
-  for (int i = 0; i < n_elem; ++i)
+  for (const auto i : make_range(n_elem))
   {
     mfem::Element * elem = _mfem_mesh_ptr->GetElement(i);
     EXPECT_EQ(elem->GetType(), _elem_type);
@@ -505,18 +595,18 @@ checkTransform(const Elem * libmesh_elem,
   const int M = ref_coords[0].size();
   const int N = ref_coords.size();
   mfem::DenseMatrix ref_coords_mat(M, N), actual_phys_coords_mat(M, N);
-  for (int i = 0; i < M; ++i)
+  for (const auto i : make_range(M))
   {
-    for (int j = 0; j < N; ++j)
+    for (const auto j : make_range(N))
     {
       ref_coords_mat(i, j) = ref_coords[j][i];
     }
   }
   mfem_transform.Transform(ref_coords_mat, actual_phys_coords_mat);
-  for (int j = 0; j < N; ++j)
+  for (const auto j : make_range(N))
   {
     std::string ref_coord;
-    for (int i = 0; i < M; ++i)
+    for (const auto i : make_range(M))
     {
       if (i > 0)
       {
@@ -526,7 +616,9 @@ checkTransform(const Elem * libmesh_elem,
     }
     Point expected =
         libMesh::FEMap::map(M, libmesh_elem, toPoint(ref_coords[j], libmesh_elem->type()));
-    for (int i = 0; i < M; ++i)
+    // The two mappings are evaluated with different bases, so they agree only to round-off,
+    // which is far below 1e-12 for coordinates of order one.
+    for (const auto i : make_range(M))
     {
       EXPECT_NEAR(actual_phys_coords_mat(i, j), expected(i), 1e-12)
           << "Unexpected element " << i << " of physical coordinate at (" << ref_coord

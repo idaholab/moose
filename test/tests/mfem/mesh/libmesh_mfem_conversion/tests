@@ -2,7 +2,7 @@
   design = 'source/mfem/utils/BuildMFEMMesh.md'
   issues = '#32520'
   [LibMeshToMFEMMeshQuad]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of quads, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of quads, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -21,7 +21,7 @@
     []
   []
   [LibMeshToMFEMMeshHex]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of hexes, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of hexes, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -42,7 +42,7 @@
     []
   []
   [LibMeshToMFEMMeshHex2]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order hexes, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of second-order hexes, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -63,7 +63,7 @@
     []
   []
   [LibMeshToMFEMMeshTet]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of tets, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of tets, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -84,7 +84,7 @@
     []
   []
   [LibMeshToMFEMMeshTet2]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order tets, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of second-order tets, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -105,7 +105,7 @@
     []
   []
   [LibMeshToMFEMMeshWedge]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of wedges, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of wedges, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -126,7 +126,7 @@
     []
   []
   [LibMeshToMFEMMeshWedge2]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order wedges, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of second-order wedges, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -147,7 +147,7 @@
     []
   []
   [LibMeshToMFEMMeshPyramid]
-    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of pyramids, '
+    requirement = 'It shall be possible to create MFEM meshes from libMesh ones made up of pyramids, '
     [run]
       type = RunApp
       input = libmesh_parent.i
@@ -253,8 +253,9 @@
     []
     [verify]
       type = RunCommand
-      command = './check.sh submesh.mesh submesh-reference.mesh'
-      detail = 'by confirming that the meshes they write to disk are the same.'
+      command = './check.sh submesh.mesh submesh-reference.mesh --ignore-boundary'
+      detail = 'by confirming that the meshes they write to disk are the same apart from their '
+               'boundaries, which differ where the submesh meets the rest of the mesh.'
       capabilities = 'mfem'
       recover = false
       prereq = 'MFEMMeshOutputSubMesh/submesh MFEMMeshOutputSubMesh/reference'

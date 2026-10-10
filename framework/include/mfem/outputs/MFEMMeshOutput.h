@@ -12,10 +12,12 @@
 #pragma once
 
 #include "FileOutput.h"
-#include "MFEMProblem.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 /**
- * Class for output MFEM mesh in native format.
+ * Writes an MFEM mesh in the native MFEM mesh format.
  */
 class MFEMMeshOutput : public FileOutput
 {
@@ -27,15 +29,15 @@ public:
 protected:
   void output() override;
 
-  /// Mesh set of output variables are defined on. May differ from main problem mesh if SubMesh
-  /// variables are in use. Always handled as a serial mesh.
+  /// Mesh to write: the problem mesh or one of its submeshes. It is gathered onto a single process
+  /// when written.
   mfem::ParMesh & _pmesh;
 
   /// Whether and how the mesh elements should be reordered prior to output.
-  int _ordering;
+  const MooseEnum _ordering;
 
-  /// Number of decimal places to include in the ASCII output file.
-  int _precision;
+  /// Number of significant digits to write in the ASCII output file.
+  const int _precision;
 };
 
 #endif
