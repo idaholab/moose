@@ -4,8 +4,7 @@
   [MFEMCurlCurl]
     type = CSVDiff
     input = curlcurl.i
-    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
-              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -14,11 +13,8 @@
   [MFEMCurlCurlPartial]
     type = CSVDiff
     input = curlcurl.i
-    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
-              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
-    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial '
-               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
-               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial FESpaces/HCurlFESpace/closed_basis=GaussLobatto FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -38,13 +34,7 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/Diffusion1D.csv'
-    cli_args = 'Mesh/file=../mesh/ref-segment.mesh '
-               'Mesh/uniform_refine=5 '
-               'BCs/bottom/boundary=1 '
-               'BCs/top/boundary=2 '
-               'VectorPostprocessors/active="" '
-               'Outputs/active=csv Outputs/csv=true '
-               'Outputs/file_base=OutputData/Diffusion1D'
+    cli_args = 'Mesh/file=../mesh/ref-segment.mesh Mesh/uniform_refine=5 BCs/bottom/boundary=1 BCs/top/boundary=2 VectorPostprocessors/active="" Outputs/active=csv Outputs/csv=true Outputs/file_base=OutputData/Diffusion1D'
     requirement = 'The system shall have the ability to solve a 1D diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -68,8 +58,7 @@
       type = CSVDiff
       input = diffusion_amr.i
       csvdiff = 'OutputData/DiffusionPRefinement.csv'
-      cli_args = 'Adaptivity/Markers/ref/max_h_level=0 Adaptivity/Markers/ref/max_p_level=1 '
-                 'Outputs/file_base=OutputData/DiffusionPRefinement'
+      cli_args = 'Adaptivity/Markers/ref/max_h_level=0 Adaptivity/Markers/ref/max_p_level=1 Outputs/file_base=OutputData/DiffusionPRefinement'
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       recover = false
@@ -80,9 +69,7 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/diffusion_line_sample_0001.csv'
-    cli_args = 'Solvers/inactive="boomeramg" '
-               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
-               'Executioner/assembly_level=partial '
+    cli_args = 'Solvers/inactive="boomeramg" Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Executioner/assembly_level=partial '
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -92,10 +79,7 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/diffusion_line_sample_0001.csv'
-    cli_args = 'Solvers/inactive="boomeramg" '
-               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
-               'Executioner/device=ceed-cpu '
-               'Executioner/assembly_level=none '
+    cli_args = 'Solvers/inactive="boomeramg" Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Executioner/device=ceed-cpu Executioner/assembly_level=none '
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
@@ -105,14 +89,9 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/DiffusionPartialMPI.csv'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" '
-               'Executioner/assembly_level=partial '
-               'Executioner/gpu_aware_mpi=true '
-               'Outputs/active=csv Outputs/csv=true '
-               'Outputs/file_base=OutputData/DiffusionPartialMPI'
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" Executioner/assembly_level=partial Executioner/gpu_aware_mpi=true Outputs/active=csv Outputs/csv=true Outputs/file_base=OutputData/DiffusionPartialMPI'
     expect_out = 'Use GPU-aware MPI:    yes'
-    requirement = 'The system shall be able to solve a diffusion problem with partial assembly across '
-                  'multiple GPUs with GPU-aware MPI enabled.'
+    requirement = 'The system shall be able to solve a diffusion problem with partial assembly across multiple GPUs with GPU-aware MPI enabled.'
     capabilities = 'mfem'
     compute_devices = 'cuda'
     min_parallel = 2
@@ -122,14 +101,9 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/DiffusionPartialMPI.csv'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" '
-               'Executioner/assembly_level=partial '
-               'Executioner/gpu_aware_mpi=false '
-               'Outputs/active=csv Outputs/csv=true '
-               'Outputs/file_base=OutputData/DiffusionPartialMPI'
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" Executioner/assembly_level=partial Executioner/gpu_aware_mpi=false Outputs/active=csv Outputs/csv=true Outputs/file_base=OutputData/DiffusionPartialMPI'
     expect_out = 'Use GPU-aware MPI:    no'
-    requirement = 'The system shall be able to solve a diffusion problem with partial assembly across '
-                  'multiple GPUs with GPU-aware MPI disabled.'
+    requirement = 'The system shall be able to solve a diffusion problem with partial assembly across multiple GPUs with GPU-aware MPI disabled.'
     capabilities = 'mfem'
     compute_devices = 'cuda'
     min_parallel = 2
@@ -149,8 +123,7 @@
   [MFEMGradDiv]
     type = CSVDiff
     input = graddiv.i
-    csvdiff = 'OutputData/GradDiv/graddiv_F_line_sample_0001.csv '
-              'OutputData/GradDiv/graddiv_divF_line_sample_0001.csv'
+    csvdiff = 'OutputData/GradDiv/graddiv_F_line_sample_0001.csv OutputData/GradDiv/graddiv_divF_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -160,13 +133,8 @@
   [MFEMHeatConduction]
     type = CSVDiff
     input = heattransfer.i
-    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
-    cli_args = 'BCs/active="bottom top_dirichlet" '
-               'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv OutputData/HeatConduction/heatconduction_line_sample_0002.csv OutputData/HeatConduction/heatconduction_line_sample_0003.csv OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    cli_args = 'BCs/active="bottom top_dirichlet" Executioner/dt=0.25 Executioner/end_time=1.0 Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -176,16 +144,8 @@
   [MFEMHeatConductionElement]
     type = CSVDiff
     input = heattransfer.i
-    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
-    cli_args = 'BCs/active="bottom top_dirichlet" '
-               'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Solvers/inactive="boomeramg" '
-               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction '
-               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
-               'Executioner/assembly_level=element'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv OutputData/HeatConduction/heatconduction_line_sample_0002.csv OutputData/HeatConduction/heatconduction_line_sample_0003.csv OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    cli_args = 'BCs/active="bottom top_dirichlet" Executioner/dt=0.25 Executioner/end_time=1.0 Solvers/inactive="boomeramg" Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -196,17 +156,8 @@
   [MFEMHeatConductionMatFree]
     type = CSVDiff
     input = heattransfer.i
-    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
-    cli_args = 'BCs/active="bottom top_dirichlet" '
-               'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
-               'Solvers/inactive="boomeramg" '
-               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction '
-               'Executioner/assembly_level=none '
-               'Executioner/device=ceed-cpu'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv OutputData/HeatConduction/heatconduction_line_sample_0002.csv OutputData/HeatConduction/heatconduction_line_sample_0003.csv OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    cli_args = 'BCs/active="bottom top_dirichlet" Executioner/dt=0.25 Executioner/end_time=1.0 Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction Executioner/assembly_level=none Executioner/device=ceed-cpu'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
@@ -218,9 +169,7 @@
   [MFEMHeatTransfer]
     type = CSVDiff
     input = heattransfer.i
-    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv '
-              'OutputData/HeatTransfer/heattransfer_line_sample_0002.csv '
-              'OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
+    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv OutputData/HeatTransfer/heattransfer_line_sample_0002.csv OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -239,12 +188,7 @@
   [MFEMMixedHeatTransfer]
     type = CSVDiff
     input = mixed_heattransfer.i
-    csvdiff = 'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0001.csv '
-              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0002.csv '
-              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0003.csv '
-              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0001.csv '
-              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0002.csv '
-              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0003.csv'
+    csvdiff = 'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0001.csv OutputData/MixedHeatTransfer/mht_temperature_line_sample_0002.csv OutputData/MixedHeatTransfer/mht_temperature_line_sample_0003.csv OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0001.csv OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0002.csv OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -256,9 +200,7 @@
     input = linearelasticity.i
     cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=by_component '
     csvdiff = 'OutputData/LinearElasticity.csv'
-    requirement = 'The system shall have the ability to solve a linear elasticity problem using '
-                  'MFEM with a BoomerAMG preconditioner that treats each displacement component '
-                  'as a separate unknown.'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM with a BoomerAMG preconditioner that treats each displacement component as a separate unknown.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
@@ -268,16 +210,13 @@
     input = linearelasticity.i
     cli_args = 'Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=rigid_body_modes '
     csvdiff = 'OutputData/LinearElasticity.csv'
-    requirement = 'The system shall have the ability to solve a linear elasticity problem using '
-                  'MFEM with a BoomerAMG preconditioner that uses the rigid body modes of the '
-                  'displacement space.'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM with a BoomerAMG preconditioner that uses the rigid body modes of the displacement space.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
   []
   [MFEMBoomerAMGVectorTreatmentErrors]
-    requirement = 'The system shall report an error when a BoomerAMG treatment for vector '
-                  'unknowns is requested'
+    requirement = 'The system shall report an error when a BoomerAMG treatment for vector unknowns is requested'
     [no_fespace]
       type = RunException
       input = linearelasticity.i
@@ -289,8 +228,7 @@
     [nodes_ordering]
       type = RunException
       input = linearelasticity.i
-      cli_args = 'FESpaces/H1FESpace/ordering=NODES Solvers/boomeramg/fespace=H1FESpace '
-                 'Solvers/boomeramg/vector_treatment=by_component'
+      cli_args = 'FESpaces/H1FESpace/ordering=NODES Solvers/boomeramg/fespace=H1FESpace Solvers/boomeramg/vector_treatment=by_component'
       expect_err = "must have ordering = VDIM when vector_treatment is 'by_component' or "
                    "'rigid_body_modes'."
       detail = 'on a space ordered by nodes, and'
@@ -367,6 +305,26 @@
     input = maxwell_anisotropic_eigenproblem.i
     csvdiff = 'OutputData/MaxwellAnisotropicEigenproblem_eigenvalues_0001.csv'
     requirement = 'The system shall have the ability to solve an anisotropic vector-valued eigenproblem with a matrix right-hand-side coefficient and Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMAnisotropicDiffusion]
+    type = XMLDiff
+    xmldiff = 'OutputData/AnisotropicDiffusion/Run0/Cycle000001/data.pvtu
+               OutputData/AnisotropicDiffusion/Run0/Cycle000001/proc000000.vtu'
+    input = anisotropic_diffusion.i
+    requirement = 'The system shall have the ability to solve anisotropic diffusion problems with a given coefficient matrix, using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMConflictingCoefficientsError]
+    type = RunException
+    input = conflicting_coefficients.i
+    expect_err = "You must specify only one of parameter \"coefficient\" and \"matrix_coefficient\""
+    requirement = 'The system shall error given a user specifies a scalar and matrix coefficient in an MFEM kernel.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false

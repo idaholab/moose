@@ -11,16 +11,14 @@
 
 #pragma once
 
-#include <map>
+#include "InputParameters.h"
+#include "CoefficientMap.h"
+
+#include "mfem/fem/coefficient.hpp"
+
 #include <string>
-#include <tuple>
-#include <utility>
 #include <variant>
 #include <vector>
-
-#include "MooseException.h"
-
-#include "CoefficientMap.h"
 
 namespace Moose::MFEM
 {
@@ -166,6 +164,15 @@ public:
   /// try interpreting the name as numbers with which to construct a
   /// constant matrix coefficient.
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
+
+  /// Resolve and return the coefficient defined in the given parameters.
+  /// There must either be exactly one coefficient parameter set by a user, or a default scalar
+  /// parameter; otherwise a MOOSE error is thrown.
+  std::variant<std::reference_wrapper<mfem::Coefficient>,
+               std::reference_wrapper<mfem::MatrixCoefficient>>
+  resolveCoefficientVariant(const InputParameters & params,
+                            const std::string & scalar,
+                            const std::string & matrix);
 
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
