@@ -1744,6 +1744,22 @@ Coupleable::adCoupledArrayGradient(const std::string & var_name, unsigned int co
   return var->adGradSlnNeighbor();
 }
 
+const ADArrayVariableSecond &
+Coupleable::adCoupledArraySecond(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArraySecond(var_name);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSecondSln();
+  return var->adSecondSlnNeighbor();
+}
+
 std::vector<const ADArrayVariableGradient *>
 Coupleable::adCoupledArrayGradients(const std::string & var_name) const
 {
@@ -2489,6 +2505,23 @@ Coupleable::getADDefaultArrayGradient(const std::string & var_name) const
   }
 
   return *default_gradient_it->second;
+}
+
+const ADArrayVariableSecond &
+Coupleable::getADDefaultArraySecond(const std::string & var_name) const
+{
+  auto default_second_it = _ad_default_array_second.find(var_name);
+  if (default_second_it == _ad_default_array_second.end())
+  {
+    const auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+    const ADArrayVariableSecond::value_type zero =
+        ADArrayVariableSecond::value_type::Zero(n, Moose::dim * Moose::dim);
+    auto second = std::make_unique<ADArrayVariableSecond>(_coupleable_max_qps, zero);
+    default_second_it =
+        _ad_default_array_second.insert(std::make_pair(var_name, std::move(second))).first;
+  }
+
+  return *default_second_it->second;
 }
 
 const ADVariableGradient &
