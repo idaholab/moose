@@ -16,4 +16,26 @@
       detail = 'on a displaced mesh.'
     []
   []
+  [parallel_execute_exception]
+    type = RunException
+    input = test.i
+    issues = '#33908'
+    cli_args = 'UserObjects/weighted_gap_uo/throw_on_rank=1 Outputs/exodus=false'
+    expect_err = 'A std::exception was raised during FEProblemBase::computeUserObjectsInternal.*TestWeightedGapUserObject intentional execute exception'
+    min_parallel = 2
+    max_parallel = 2
+    valgrind = 'none'
+    requirement = 'The system shall terminate when one rank throws an exception during mortar user object execution.'
+  []
+  [parallel_execute_exception_during_solve]
+    type = RunException
+    input = test.i
+    issues = '#33908'
+    cli_args = 'Problem/solve=true Variables/u/family=LAGRANGE Kernels/diff/type=Diffusion Kernels/diff/variable=u UserObjects/weighted_gap_uo/throw_on_rank=1 Outputs/exodus=false'
+    expect_err = 'Aborting as solve did not converge.*A std::exception was raised during FEProblemBase::computeUserObjectsInternal.*TestWeightedGapUserObject intentional execute exception'
+    min_parallel = 2
+    max_parallel = 2
+    valgrind = 'none'
+    requirement = 'The system shall fail the solve when one rank throws an exception during mortar user object residual execution.'
+  []
 []
