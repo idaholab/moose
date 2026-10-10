@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#34287'
+  design = '/variables/ArrayMooseVariable.md'
+  [ad_second]
+    requirement = 'The system shall provide automatic differentiation second derivatives of array variables'
+    [reference]
+      type = CSVDiff
+      input = 'biharmonic_reference.i'
+      csvdiff = 'biharmonic_out.csv'
+      detail = 'that reproduce the solution of a fourth order problem on Hermite elements solved with standard variables,'
+    []
+    [biharmonic]
+      type = CSVDiff
+      input = 'biharmonic_ad_array.i'
+      csvdiff = 'biharmonic_out.csv'
+      prereq = 'ad_second/reference'
+      detail = 'for an array variable on Hermite elements, and'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'biharmonic_ad_array.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Outputs/csv=false'
+      run_sim = true
+      detail = 'with exact derivatives with respect to the degrees of freedom.'
+    []
+  []
+[]
