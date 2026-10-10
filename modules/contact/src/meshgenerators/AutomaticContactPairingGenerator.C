@@ -7,13 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ContactPairLowerDBlockGenerator.h"
+#include "AutomaticContactPairingGenerator.h"
 #include "MooseMeshUtils.h"
 #include "PointListAdaptor.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
 #include "libmesh/elem_side_builder.h"
+#include "libmesh/parallel_algebra.h"
 
 #include <algorithm>
 
@@ -28,19 +29,19 @@ using ResultItem = std::pair<T, U>;
 }
 #endif
 
-using NodeBoundaryIDInfo = std::pair<const Node *, BoundaryID>;
+using NodeBoundaryIDInfo = std::pair<Point, BoundaryID>;
 
 template <>
 inline const Point &
 PointListAdaptor<NodeBoundaryIDInfo>::getPoint(const NodeBoundaryIDInfo & item) const
 {
-  return *(item.first);
+  return item.first;
 }
 
-registerMooseObject("ContactApp", ContactPairLowerDBlockGenerator);
+registerMooseObject("ContactApp", AutomaticContactPairingGenerator);
 
 InputParameters
-ContactPairLowerDBlockGenerator::validParams()
+AutomaticContactPairingGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to modify");
@@ -58,40 +59,54 @@ ContactPairLowerDBlockGenerator::validParams()
       "CENTROID uses sideset center-of-gravity distances.");
   params.addRequiredParam<std::string>(
       "prefix", "Prefix prepended to the names of generated subdomain blocks.");
+  params.addRequiredParam<bool>(
+      "create_lower_d_blocks",
+      "Whether to create primary and secondary lower-dimensional subdomain blocks for each "
+      "detected pair.");
   params.addClassDescription(
-      "Detects contact surface pairs by proximity and creates lower-dimensional subdomain blocks "
-      "for use in mortar contact.");
+      "Detects contact surface pairs by proximity, stores them in the mesh meta-data, and "
+      "optionally creates lower-dimensional subdomain blocks for use in mortar contact.");
   return params;
 }
 
-ContactPairLowerDBlockGenerator::ContactPairLowerDBlockGenerator(const InputParameters & parameters)
+AutomaticContactPairingGenerator::AutomaticContactPairingGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _pairing_boundaries(getParam<std::vector<BoundaryName>>("automatic_pairing_boundaries")),
     _pairing_distance(getParam<Real>("automatic_pairing_distance")),
     _pairing_method(getParam<MooseEnum>("automatic_pairing_method")),
-    _prefix(getParam<std::string>("prefix"))
+    _prefix(getParam<std::string>("prefix")),
+    _create_lower_d_blocks(getParam<bool>("create_lower_d_blocks"))
 {
+  // Declared here, and assigned during generation, so that the pairs are restored from the mesh
+  // meta-data on recover, when generation is skipped
+  declareMeshProperty<ContactPairs>(contact_pairs_property);
 }
 
 std::unique_ptr<MeshBase>
-ContactPairLowerDBlockGenerator::generate()
+AutomaticContactPairingGenerator::generate()
 {
   auto mesh = std::move(_input);
 
   std::vector<std::pair<BoundaryName, BoundaryName>> pairs;
   if (_pairing_method == "NODE")
-    pairs = findPairsNodeProximity(*mesh, _pairing_boundaries, _pairing_distance);
+    pairs = findPairsNodeProximity(*mesh);
   else
-    pairs = findPairsCentroid(*mesh, _pairing_boundaries, _pairing_distance);
+    pairs = findPairsCentroid(*mesh);
 
-  if (pairs.empty())
-    mooseError("ContactPairLowerDBlockGenerator '",
-               name(),
-               "': no contact pairs found within distance ",
+  // Mortar contact needs at least one pair to build its lower-dimensional blocks, while node-face
+  // contact may proceed with none
+  if (pairs.empty() && _create_lower_d_blocks)
+    mooseError("No contact pairs found within distance ",
                _pairing_distance,
                " among boundaries ",
                Moose::stringify(_pairing_boundaries));
+
+  setMeshProperty<ContactPairs>(contact_pairs_property, ContactPairs(pairs.begin(), pairs.end()));
+
+  if (!_create_lower_d_blocks)
+    return mesh;
 
   const bool multiple_pairs = pairs.size() > 1;
   for (const auto & pair : pairs)
@@ -111,7 +126,7 @@ ContactPairLowerDBlockGenerator::generate()
 }
 
 std::string
-ContactPairLowerDBlockGenerator::pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair)
+AutomaticContactPairingGenerator::pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair)
 {
   // Labeling each boundary keeps the suffix unambiguous when boundary names contain underscores,
   // e.g. (top_left, bottom) -> _p_top_left_s_bottom and (top, left_bottom) -> _p_top_s_left_bottom.
@@ -120,14 +135,13 @@ ContactPairLowerDBlockGenerator::pairSuffix(const std::pair<BoundaryName, Bounda
   return "_p_" + pair.first + "_s_" + pair.second;
 }
 
-std::vector<ContactPairLowerDBlockGenerator::CandidateBoundary>
-ContactPairLowerDBlockGenerator::candidateBoundaries(const MeshBase & mesh,
-                                                     const std::vector<BoundaryName> & boundaries)
+std::vector<AutomaticContactPairingGenerator::CandidateBoundary>
+AutomaticContactPairingGenerator::candidateBoundaries(const MeshBase & mesh) const
 {
   // A boundary listed more than once, either repeated or as both a name and an ID, would otherwise
   // be paired with itself
   std::vector<CandidateBoundary> candidates;
-  for (const auto & bname : boundaries)
+  for (const auto & bname : _pairing_boundaries)
   {
     const BoundaryID bid = MooseMeshUtils::getBoundaryID(bname, mesh);
     const auto it =
@@ -137,23 +151,26 @@ ContactPairLowerDBlockGenerator::candidateBoundaries(const MeshBase & mesh,
     if (it != candidates.end())
     {
       if (it->name == bname)
-        ::mooseError("Boundary '",
-                     bname,
-                     "' is listed more than once in 'automatic_pairing_boundaries'. Each boundary "
-                     "may be listed only once.");
+        mooseError("Boundary '",
+                   bname,
+                   "' is listed more than once in 'automatic_pairing_boundaries'. Each boundary "
+                   "may be listed only once.");
       else
-        ::mooseError("Boundaries '",
-                     it->name,
-                     "' and '",
-                     bname,
-                     "' in 'automatic_pairing_boundaries' refer to the same boundary (ID ",
-                     bid,
-                     "). Each boundary may be listed only once.");
+        mooseError("Boundaries '",
+                   it->name,
+                   "' and '",
+                   bname,
+                   "' in 'automatic_pairing_boundaries' refer to the same boundary (ID ",
+                   bid,
+                   "). Each boundary may be listed only once.");
     }
     candidates.push_back({bname, bid, 0, Point(0, 0, 0)});
   }
 
-  // Accumulate the area and area-weighted centroid of each candidate sideset
+  // Accumulate the area and area-weighted centroid of each candidate sideset. On a distributed
+  // mesh, each process accumulates over the sides of its local elements so that ghosted sides are
+  // counted once, and the partial sums are then summed across processes
+  const bool serial = mesh.is_serial();
   libMesh::ElemSideBuilder side_builder;
   for (const auto & [eid, side, bid] : mesh.get_boundary_info().build_side_list())
   {
@@ -164,10 +181,36 @@ ContactPairLowerDBlockGenerator::candidateBoundaries(const MeshBase & mesh,
     if (it == candidates.end())
       continue;
 
-    const Elem & side_elem = side_builder(*mesh.elem_ptr(eid), side);
+    const Elem & elem = *mesh.elem_ptr(eid);
+    if (!serial && elem.processor_id() != mesh.processor_id())
+      continue;
+
+    const Elem & side_elem = side_builder(elem, side);
     const Real area = side_elem.volume();
     it->area += area;
     it->centroid += side_elem.true_centroid() * area;
+  }
+
+  if (!serial)
+  {
+    // Pack the areas and weighted centroids so that a single reduction suffices
+    std::vector<Real> sums;
+    sums.reserve(candidates.size() * (1 + Moose::dim));
+    for (const auto & candidate : candidates)
+    {
+      sums.push_back(candidate.area);
+      for (const auto d : make_range(Moose::dim))
+        sums.push_back(candidate.centroid(d));
+    }
+    mesh.comm().sum(sums);
+
+    auto sum_it = sums.begin();
+    for (auto & candidate : candidates)
+    {
+      candidate.area = *sum_it++;
+      for (const auto d : make_range(Moose::dim))
+        candidate.centroid(d) = *sum_it++;
+    }
   }
 
   for (auto & candidate : candidates)
@@ -178,7 +221,8 @@ ContactPairLowerDBlockGenerator::candidateBoundaries(const MeshBase & mesh,
 }
 
 std::pair<BoundaryName, BoundaryName>
-ContactPairLowerDBlockGenerator::orderPair(const CandidateBoundary & a, const CandidateBoundary & b)
+AutomaticContactPairingGenerator::orderPair(const CandidateBoundary & a,
+                                            const CandidateBoundary & b)
 {
   // The larger surface is chosen as primary, which places the Lagrange multipliers on the smaller
   // surface and reduces the number of secondary elements that are only partially covered by the
@@ -194,13 +238,9 @@ ContactPairLowerDBlockGenerator::orderPair(const CandidateBoundary & a, const Ca
 }
 
 std::vector<std::pair<BoundaryName, BoundaryName>>
-ContactPairLowerDBlockGenerator::findPairsNodeProximity(
-    MeshBase & mesh, const std::vector<BoundaryName> & boundaries, Real distance)
+AutomaticContactPairingGenerator::findPairsNodeProximity(const MeshBase & mesh) const
 {
-  if (!mesh.is_serial())
-    ::mooseError("Automatic contact pair detection requires a serial mesh.");
-
-  const auto candidates = candidateBoundaries(mesh, boundaries);
+  const auto candidates = candidateBoundaries(mesh);
   const auto find_candidate = [&candidates](const BoundaryID bid) -> const CandidateBoundary &
   {
     const auto it =
@@ -211,11 +251,22 @@ ContactPairLowerDBlockGenerator::findPairsNodeProximity(
     return *it;
   };
 
-  // Collect nodes on candidate boundaries, from both sidesets and nodesets
+  // Collect nodes on candidate boundaries, from both sidesets and nodesets. On a distributed mesh,
+  // each process contributes the boundary nodes it owns, which it sees together with all of their
+  // boundary sides through the default point-neighbor ghosting, and the lists are then gathered so
+  // that every process searches the complete set
+  const bool serial = mesh.is_serial();
   std::vector<NodeBoundaryIDInfo> node_bid_list;
   for (const auto & candidate : candidates)
     for (const auto node_id : MooseMeshUtils::getBoundaryNodes(mesh, candidate.id))
-      node_bid_list.emplace_back(mesh.node_ptr(node_id), candidate.id);
+    {
+      const Node & node = mesh.node_ref(node_id);
+      if (serial || node.processor_id() == mesh.processor_id())
+        node_bid_list.emplace_back(node, candidate.id);
+    }
+
+  if (!serial)
+    mesh.comm().allgather(node_bid_list);
 
   // Sort by boundary id for deterministic ordering
   std::sort(node_bid_list.begin(),
@@ -226,14 +277,14 @@ ContactPairLowerDBlockGenerator::findPairsNodeProximity(
   using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
       nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<NodeBoundaryIDInfo>, Real, std::size_t>,
       PointListAdaptor<NodeBoundaryIDInfo>,
-      LIBMESH_DIM,
+      Moose::dim,
       std::size_t>;
 
   const unsigned int max_leaf_size = 20;
   auto point_list =
       PointListAdaptor<NodeBoundaryIDInfo>(node_bid_list.begin(), node_bid_list.end());
   auto kd_tree = std::make_unique<KDTreeType>(
-      LIBMESH_DIM, point_list, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size));
+      Moose::dim, point_list, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size));
   kd_tree->buildIndex();
 
   nanoflann::SearchParameters search_params;
@@ -243,8 +294,8 @@ ContactPairLowerDBlockGenerator::findPairsNodeProximity(
   for (const auto & [entry_node, entry_bid] : node_bid_list)
   {
     ret_matches.clear();
-    const Point search_point = *entry_node;
-    kd_tree->radiusSearch(&search_point(0), distance * distance, ret_matches, search_params);
+    kd_tree->radiusSearch(
+        &entry_node(0), _pairing_distance * _pairing_distance, ret_matches, search_params);
 
     for (const auto & [pair_idx, _] : ret_matches)
     {
@@ -264,23 +315,18 @@ ContactPairLowerDBlockGenerator::findPairsNodeProximity(
 }
 
 std::vector<std::pair<BoundaryName, BoundaryName>>
-ContactPairLowerDBlockGenerator::findPairsCentroid(MeshBase & mesh,
-                                                   const std::vector<BoundaryName> & boundaries,
-                                                   Real distance)
+AutomaticContactPairingGenerator::findPairsCentroid(const MeshBase & mesh) const
 {
-  if (!mesh.is_serial())
-    ::mooseError("Automatic contact pair detection requires a serial mesh.");
-
-  const auto candidates = candidateBoundaries(mesh, boundaries);
+  const auto candidates = candidateBoundaries(mesh);
   for (const auto & candidate : candidates)
     if (candidate.area == 0)
-      ::mooseError("Boundary '", candidate.name, "' not found in mesh.");
+      mooseError("Boundary '", candidate.name, "' not found in mesh.");
 
   // Find all pairs within distance
   std::vector<std::pair<BoundaryName, BoundaryName>> pairs;
   for (const auto i : index_range(candidates))
     for (const auto j : make_range(i + 1, candidates.size()))
-      if ((candidates[i].centroid - candidates[j].centroid).norm() <= distance)
+      if ((candidates[i].centroid - candidates[j].centroid).norm() <= _pairing_distance)
         pairs.push_back(orderPair(candidates[i], candidates[j]));
 
   removeDuplicatePairs(pairs);
@@ -288,7 +334,7 @@ ContactPairLowerDBlockGenerator::findPairsCentroid(MeshBase & mesh,
 }
 
 void
-ContactPairLowerDBlockGenerator::removeDuplicatePairs(
+AutomaticContactPairingGenerator::removeDuplicatePairs(
     std::vector<std::pair<BoundaryName, BoundaryName>> & pairs)
 {
   std::sort(pairs.begin(), pairs.end());
