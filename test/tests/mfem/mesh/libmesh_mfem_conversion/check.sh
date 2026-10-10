@@ -27,18 +27,21 @@ fi
 # MFEM doesn't seem to reorder boundary elements consistently, so filter them out.
 # It also assumes a different spacing of control points in higher-order meshes
 # than does libMesh.
+# Use unique temporary files so that checks run concurrently do not overwrite each other.
+TMP_LEFT=$(mktemp)
+TMP_RIGHT=$(mktemp)
+trap 'rm -f "${TMP_LEFT}" "${TMP_RIGHT}"' EXIT
 awk '/boundary/ {INSIDE=1; next}
     /vertices/ && INSIDE==1 {INSIDE=0; next};
-    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_LEFT}" > tmp_left
+    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_LEFT}" > "${TMP_LEFT}"
 awk '/boundary/ {INSIDE=1; next}
     /vertices/ && INSIDE==1 {INSIDE=0; next};
-    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_RIGHT}" > tmp_right
+    INSIDE!=1 && !/FiniteElementCollection/ {print $0}' "${FILE_RIGHT}" > "${TMP_RIGHT}"
 
 #Should be identical
 #exit code will be 0 if no diff
-git diff --no-index tmp_left tmp_right
+git diff --no-index "${TMP_LEFT}" "${TMP_RIGHT}"
 code=$?
-rm tmp_left tmp_right
 if [ ! $code -eq 0 ]; then
     exit 1
 fi

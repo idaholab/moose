@@ -276,7 +276,8 @@ InputParameters
 MFEMMeshOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Output for controlling MFEMMeshOutput inherited data.");
+  params.addClassDescription("Writes the mesh of an MFEMProblem, or one of its submeshes, in the "
+                             "native MFEM mesh format.");
   params.addParam<std::string>("submesh",
                                "Submesh to output variables on. Leave blank to use base mesh.");
   MooseEnum ordering("NONE HILBERT GECKO", "NONE", false);
@@ -284,20 +285,19 @@ MFEMMeshOutput::validParams()
       "ordering",
       ordering,
       "Whether to reorder the elements of the mesh. Options are NONE to do nothing, HILBERT to "
-      "perform a spatial sort on the elements so theyappriximately follow the Hilbert curve, and "
+      "perform a spatial sort on the elements so they approximately follow the Hilbert curve, and "
       "GECKO to use the Gecko library to order elements for increased memory coherence.");
   params.addParam<int>("precision", 16, "Number of digits to use with ASCII output.");
-  // FIXME: Allow users to specify precision
   return params;
 }
 
 MFEMMeshOutput::MFEMMeshOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _pmesh(parameters.isParamValid("submesh")
-               ? static_cast<MFEMProblem *>(_problem_ptr)
+               ? cast_ptr<MFEMProblem *>(_problem_ptr)
                      ->getProblemData()
                      .submeshes.GetRef(getParam<std::string>("submesh"))
-               : static_cast<MFEMProblem *>(_problem_ptr)->mfemParMesh()),
+               : cast_ptr<MFEMProblem *>(_problem_ptr)->mfemParMesh()),
     _ordering(getParam<MooseEnum>("ordering")),
     _precision(getParam<int>("precision"))
 {

@@ -11,16 +11,17 @@
 
 #pragma once
 
-#include "libmesh/elem.h"
-#include "libmesh/enum_io_package.h"
-#include "libmesh/exodusII_io.h"
 #include "libmesh/id_types.h"
-#include "libmesh/nemesis_io.h"
-#include "libmesh/node.h"
-#include "libmesh/parallel_mesh.h"
+#include "libmesh/utility.h"
 #include "CubitElementInfo.h"
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
-#include "MooseError.h"
+#include "libmesh/restore_warnings.h"
+
+#include <array>
+#include <map>
+#include <string>
+#include <vector>
 
 /**
  * LibmeshMFEMMesh
@@ -31,7 +32,8 @@ class LibmeshMFEMMesh : public mfem::Mesh
 {
 public:
   /**
-   * Initializer for 1st order elements.
+   * Build the MFEM mesh from the libMesh mesh data. Higher-order elements are represented by
+   * setting the nodes of the mesh.
    */
   LibmeshMFEMMesh(const int num_elements_in_mesh,
                   const CubitBlockInfo & block_info,
@@ -47,31 +49,6 @@ public:
                   const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,
                   const std::map<int, std::vector<int>> & libmesh_block_ids_for_boundary_id,
                   const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id);
-
-  /**
-   * Initializer for 2nd order elements.
-   */
-  LibmeshMFEMMesh(const int num_elements_in_mesh,
-                  const CubitBlockInfo & block_info,
-                  const std::vector<int> & unique_block_ids,
-                  const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
-                  const std::vector<int> & unique_side_boundary_ids,
-                  const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
-                  const std::vector<int> & unique_libmesh_corner_node_ids,
-                  const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
-                  const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-                  const std::map<int, std::vector<std::vector<unsigned int>>> &
-                      libmesh_node_ids_for_boundary_id,
-                  const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,
-                  const std::map<int, std::vector<int>> & libmesh_block_ids_for_boundary_id,
-                  const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id,
-                  std::map<int, int> & libmesh_node_id_for_mfem_node_id,
-                  std::map<int, int> & mfem_node_id_for_libmesh_node_id);
-
-  LibmeshMFEMMesh(std::string mesh_fname,
-                  int generate_edges = 0,
-                  int refine = 1,
-                  bool fix_orientation = true);
 
 protected:
   /**
@@ -148,9 +125,7 @@ protected:
       const std::vector<int> & unique_block_ids,
       const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
       const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
-      const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id,
-      std::map<int, int> & libmesh_node_id_for_mfem_node_id,
-      std::map<int, int> & mfem_node_id_for_libmesh_node_id);
+      const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id);
 
   /**
    * Verifies whether the libmesh and mfem node ids have a unique mapping. All
@@ -168,12 +143,12 @@ protected:
    */
   inline int getMFEMElementID(int libmesh_element_id) const
   {
-    return _mfem_element_id_for_libmesh_element_id.at(libmesh_element_id);
+    return libmesh_map_find(_mfem_element_id_for_libmesh_element_id, libmesh_element_id);
   }
 
   inline int getMFEMVertexIndex(int libmesh_corner_node_id) const
   {
-    return _mfem_vertex_index_for_libmesh_corner_node_id.at(libmesh_corner_node_id);
+    return libmesh_map_find(_mfem_vertex_index_for_libmesh_corner_node_id, libmesh_corner_node_id);
   }
 
 private:

@@ -18,7 +18,9 @@ The order in which these actions are executed respects the dependencies declared
 In order to build the FE problem using the MFEM library on the
 backend, the `MFEMProblem` type must be used in `Problem` block in the
 user input. Furthermore, the mesh used with the problem must be either
-of type [MFEMMesh](source/mfem/mesh/MFEMMesh.md) or [suitable for
+an MFEM-backed mesh ([MFEMFileMesh](source/mfem/mesh/MFEMFileMesh.md)
+or [MFEMMeshGeneratorMesh](source/mfem/mesh/MFEMMeshGeneratorMesh.md))
+or a libMesh-based mesh [suitable for
 conversion](source/mfem/utils/BuildMFEMMesh.md#Overview) to an
 MFEM-based mesh.
 

@@ -11,14 +11,16 @@
 
 #pragma once
 
-#include <stdint.h>
 #include "MooseError.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/utility.h"
 #include "mfem/config/config.hpp"
 #include "mfem/fem/fe/fe_base.hpp"
-#include <vector>
 
-// FIXME: Alex's work on this in a branch put these in namespaces. Should I do that here?
+#include <cstdint>
+#include <map>
+#include <set>
+#include <vector>
 
 /**
  * CubitBlockInfo
@@ -78,12 +80,6 @@ public:
   inline bool hasBlocks() const { return !blockIDs().empty(); }
 
 protected:
-  /**
-   * Checks that the order of a new block element matches the order of existing blocks. Called
-   * internally in mehtod "addBlockElement".
-   */
-  // void checkElementBlockIsCompatible(const ElementInfo & new_block_element) const;
-
   /**
    * Reset all block elements. Called internally in initializer.
    */

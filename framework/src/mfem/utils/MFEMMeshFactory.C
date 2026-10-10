@@ -8,30 +8,384 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
-#include <memory>
+
+#include "MFEMMeshFactory.h"
+#include "CubitElementInfo.h"
+#include "LibmeshMFEMMesh.h"
+#include "MFEMMesh.h"
+#include "MooseMesh.h"
+
+#include "libmesh/elem.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/mesh_serializer.h"
+#include "libmesh/utility.h"
+
+#include <algorithm>
+#include <array>
 #include <map>
+#include <set>
 #include <tuple>
 #include <vector>
 
-#include "MFEMMeshFactory.h"
-#include "libmesh/elem.h"
-#include "libmesh/enum_io_package.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/id_types.h"
-#include "libmesh/ignore_warnings.h"
-#include "libmesh/libmesh_config.h"
-#include "libmesh/mesh_base.h"
-#include "libmesh/mesh_input.h"
-#include "libmesh/node.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/system.h"
-#include "libmesh/vtk_io.h"
-#include "CubitElementInfo.h"
-#include "LibmeshMFEMMesh.h"
-#include "MooseMesh.h"
-#include "MFEMMesh.h"
+namespace
+{
+using IDMap = std::map<int, std::vector<int>>;
 
+/**
+ * An internal method used to create maps from each boundary ID to vectors of side IDs
+ * and element IDs.
+ */
+std::tuple<IDMap, IDMap>
+buildBoundaryInfo(MooseMesh & mesh)
+{
+  IDMap element_ids_for_boundary_id;
+  IDMap side_ids_for_boundary_id;
+  mesh.buildBndElemList();
+
+  struct BoundaryElementAndSideIDs
+  {
+    std::vector<int> element_ids; // Element ids for a boundary id.
+    std::vector<int> side_ids;    // Side ids for a boundary id.
+
+    BoundaryElementAndSideIDs() : element_ids{}, side_ids{} {}
+  };
+
+  std::map<BoundaryID, BoundaryElementAndSideIDs> boundary_ids_map;
+
+  // Iterate over elements on the boundary to build the map that allows us to go
+  // from a boundary id to a vector of element id/side ids.
+  for (MooseMesh::bnd_elem_iterator boundary_element = mesh.bndElemsBegin();
+       boundary_element != mesh.bndElemsEnd();
+       ++boundary_element)
+  {
+    auto boundary_id = (*boundary_element)->_bnd_id;
+
+    auto element_id = (*boundary_element)->_elem->id(); // ID of element on boundary.
+    auto side_id = (*boundary_element)->_side;          // ID of side that element is on.
+
+    boundary_ids_map[boundary_id].element_ids.push_back(element_id);
+    boundary_ids_map[boundary_id].side_ids.push_back(side_id);
+  }
+
+  // Run through the (key, value) pairs in the boundary_ids_map map.
+  for (const auto & key_value_pair : boundary_ids_map)
+  {
+    auto boundary_id = key_value_pair.first;
+
+    auto element_ids = key_value_pair.second.element_ids;
+    auto side_ids = key_value_pair.second.side_ids;
+
+    element_ids_for_boundary_id[boundary_id] = std::move(element_ids);
+    side_ids_for_boundary_id[boundary_id] = std::move(side_ids);
+  }
+
+  return {element_ids_for_boundary_id, side_ids_for_boundary_id};
+}
+
+/**
+ * Create a mapping from each boundary ID to a vector of vectors containing the global node
+ * IDs of nodes that lie on the faces of elements that fall on the boundary.
+ */
+std::map<int, std::vector<std::vector<unsigned int>>>
+buildBoundaryNodeIDs(const MooseMesh & mesh,
+                     const std::vector<int> & unique_side_bound_ids,
+                     const IDMap & element_ids_for_bound,
+                     const IDMap & side_ids_for_bound)
+{
+  std::map<int, std::vector<std::vector<unsigned int>>> node_ids_for_bound_id;
+
+  // Iterate over all bound IDs.
+  for (int bound_id : unique_side_bound_ids)
+  {
+    // Get element IDs of element on bound (and their sides that are on bound).
+    auto & bound_element_ids = libmesh_map_find(element_ids_for_bound, bound_id);
+    auto & bound_element_sides = libmesh_map_find(side_ids_for_bound, bound_id);
+
+    // Create vector to store the node ids of all bound nodes.
+    std::vector<std::vector<unsigned int>> bound_node_ids(bound_element_ids.size());
+
+    // Iterate over elements on bound.
+    for (const auto jelement : index_range(bound_element_ids))
+    {
+      // Get element ID and the bound side.
+      const int bound_element_global_id = bound_element_ids[jelement];
+      const int bound_element_side = bound_element_sides[jelement];
+
+      const Elem * element_ptr = mesh.elemPtr(bound_element_global_id);
+
+      // Get vector of local node IDs on bound side of element.
+      auto nodes_of_element_on_side = element_ptr->nodes_on_side(bound_element_side);
+
+      // Replace local IDs with global IDs.
+      for (const auto knode : index_range(nodes_of_element_on_side))
+      {
+        // Get the global node ID of each node.
+        const int local_node_id = nodes_of_element_on_side[knode];
+        const int global_node_id = element_ptr->node_id(local_node_id);
+
+        nodes_of_element_on_side[knode] = global_node_id;
+      }
+
+      // Add to vector.
+      bound_node_ids[jelement] = std::move(nodes_of_element_on_side);
+    }
+
+    // Add to the map.
+    node_ids_for_bound_id[bound_id] = std::move(bound_node_ids);
+  }
+
+  return node_ids_for_bound_id;
+}
+
+/**
+ * Builds two maps:
+ * 1. Mapping from each block ID --> vector containing all element IDs for block.
+ * 2. Mapping from each element --> vector containing all global node IDs for element.
+ */
+std::tuple<IDMap, IDMap>
+buildElementAndNodeIDs(MeshBase & libmesh,
+                       const CubitBlockInfo & block_info,
+                       const std::vector<int> & unique_block_ids)
+{
+  IDMap element_ids_for_block_id;
+  IDMap node_ids_for_element_id;
+
+  for (int block_id : unique_block_ids)
+  {
+    auto & element_info = block_info.blockElement(block_id);
+
+    std::vector<int> elements_in_block;
+
+    auto active_block_elements_begin = libmesh.active_subdomain_elements_begin(block_id);
+    auto active_block_elements_end = libmesh.active_subdomain_elements_end(block_id);
+
+    for (auto element_iterator = active_block_elements_begin;
+         element_iterator != active_block_elements_end;
+         element_iterator++)
+    {
+      auto element_ptr = *element_iterator;
+
+      const int element_id = element_ptr->id();
+
+      std::vector<int> element_node_ids(element_info.num_nodes);
+
+      elements_in_block.push_back(element_id);
+
+      for (const auto node_counter : make_range(element_info.num_nodes))
+      {
+        element_node_ids[node_counter] = element_ptr->node_id(node_counter);
+      }
+
+      node_ids_for_element_id[element_id] = std::move(element_node_ids);
+    }
+
+    elements_in_block.shrink_to_fit();
+
+    // Add to map.
+    element_ids_for_block_id[block_id] = std::move(elements_in_block);
+  }
+
+  return {element_ids_for_block_id, node_ids_for_element_id};
+}
+
+/**
+ * Iterates through each block to find the elements in the block. For each
+ * element in a block, it runs through the nodes in the block and adds only
+ * the corner nodes to a vector. This is then sorted and only unique global
+ * node IDs are retained.
+ */
+std::vector<int>
+buildUniqueCornerNodeIDs(const CubitBlockInfo & block_info,
+                         const std::vector<int> & unique_block_ids,
+                         const IDMap & element_ids_for_block_id,
+                         const IDMap & node_ids_for_element_id)
+{
+  std::vector<int> unique_corner_node_ids;
+
+  // Iterate through all nodes (on edge of each element) and add their global IDs
+  // to the unique_corner_node_ids vector.
+  for (int block_id : unique_block_ids)
+  {
+    auto & block_element = block_info.blockElement(block_id);
+    auto & element_ids = libmesh_map_find(element_ids_for_block_id, block_id);
+    for (int element_id : element_ids)
+    {
+      auto & node_ids = libmesh_map_find(node_ids_for_element_id, element_id);
+
+      // Only use the nodes on the edge of the element!
+      for (const auto knode : make_range(block_element.num_corner_nodes))
+      {
+        unique_corner_node_ids.push_back(node_ids[knode]);
+      }
+    }
+  }
+
+  // Sort unique_vertex_ids in ascending order and remove duplicate node IDs.
+  std::sort(unique_corner_node_ids.begin(), unique_corner_node_ids.end());
+
+  auto new_end = std::unique(unique_corner_node_ids.begin(), unique_corner_node_ids.end());
+
+  unique_corner_node_ids.resize(std::distance(unique_corner_node_ids.begin(), new_end));
+
+  return unique_corner_node_ids;
+}
+
+/**
+ * Assemble information on block elements .
+ */
+CubitBlockInfo
+buildCubitBlockInfo(MeshBase & libmesh,
+                    const std::vector<int> & unique_block_ids,
+                    bool fallback,
+                    bool first_order)
+{
+  CubitBlockInfo block_info(libmesh.mesh_dimension(), fallback, first_order);
+  /**
+   * Iterate over the block_ids. Note that we only need to extract the first element from
+   * each block since only a single element type can be specified per block.
+   */
+  for (int block_id : unique_block_ids)
+  {
+    auto element_range = libmesh.active_subdomain_elements_ptr_range(block_id);
+    if (element_range.begin() == element_range.end())
+    {
+      mooseError("Block '", block_id, "' contains no elements.");
+    }
+
+    auto first_element_ptr = *element_range.begin();
+
+    block_info.addBlockElement(
+        block_id, first_element_ptr->type(), first_element_ptr->mapping_type());
+  }
+  return block_info;
+}
+
+/**
+ * Blocks/subdomains are separate subsets of the mesh that could have different
+ * material properties etc. This method returns a vector containing the unique
+ * IDs of each block in the mesh. This will be passed to the MFEMMesh constructor
+ * which sets the attribute of each element to the ID of the block that it is a
+ * part of.
+ */
+std::vector<int>
+getLibmeshBlockIDs(const MeshBase & libmesh)
+{
+  // Identify all subdomains (blocks) in the entire mesh (global == true).
+  std::set<subdomain_id_type> block_ids_set;
+  libmesh.subdomain_ids(block_ids_set, true);
+
+  std::vector<int> unique_block_ids(block_ids_set.size());
+
+  int counter = 0;
+  for (auto block_id : block_ids_set)
+  {
+    unique_block_ids[counter++] = block_id;
+  }
+
+  return unique_block_ids;
+}
+
+/**
+ * Returns a vector containing the IDs of all boundaries.
+ */
+std::vector<int>
+getSideBoundaryIDs(const MeshBase & libmesh)
+{
+  const libMesh::BoundaryInfo & boundary_info = libmesh.get_boundary_info();
+  const std::set<boundary_id_type> & side_boundary_ids_set = boundary_info.get_side_boundary_ids();
+
+  std::vector<int> side_boundary_ids(side_boundary_ids_set.size());
+
+  int counter = 0;
+  for (auto side_boundary_id : side_boundary_ids_set)
+  {
+    // MFEM boundary attributes must be positive.
+    if (side_boundary_id <= 0)
+      mooseError("Boundary ID ",
+                 side_boundary_id,
+                 " can not be represented in an MFEM mesh, which requires positive boundary IDs. "
+                 "Renumber the boundary, for example with a RenameBoundaryGenerator.");
+    side_boundary_ids[counter++] = side_boundary_id;
+  }
+
+  std::sort(side_boundary_ids.begin(), side_boundary_ids.end());
+
+  return side_boundary_ids;
+}
+
+/**
+ * Maps from the element ID to the block ID.
+ */
+std::map<int, int>
+getBlockIDForElementID(const std::map<int, std::vector<int>> & element_ids_for_block_id)
+{
+  std::map<int, int> block_id_for_element_id;
+
+  for (const auto & key_value : element_ids_for_block_id)
+  {
+    auto block_id = key_value.first;
+    auto & element_ids = key_value.second;
+
+    for (const auto & element_id : element_ids)
+    {
+      block_id_for_element_id[element_id] = block_id;
+    }
+  }
+
+  return block_id_for_element_id;
+}
+
+/**
+ * Maps from the boundary ID to a vector containing the block IDs of all elements that lie on
+ * the boundary.
+ */
+IDMap
+getBlockIDsForBoundaryID(const std::map<int, std::vector<int>> & element_ids_for_block_id,
+                         const std::map<int, std::vector<int>> & element_ids_for_boundary_id)
+{
+  auto block_id_for_element_id = getBlockIDForElementID(element_ids_for_block_id);
+
+  std::map<int, std::vector<int>> block_ids_for_boundary_id;
+
+  for (const auto & key_value : element_ids_for_boundary_id)
+  {
+    auto boundary_id = key_value.first;
+    auto & element_ids = key_value.second;
+
+    std::vector<int> block_ids(element_ids.size());
+
+    int ielement = 0;
+    for (const auto & element_id : element_ids)
+    {
+      block_ids[ielement++] = libmesh_map_find(block_id_for_element_id, element_id);
+    }
+
+    block_ids_for_boundary_id[boundary_id] = std::move(block_ids);
+  }
+
+  return block_ids_for_boundary_id;
+}
+
+/**
+ * Returns the libMesh partitioning, giving the rank owning each element in the order the
+ * elements are added to the MFEM mesh, which is block by block.
+ */
+std::vector<int>
+getMeshPartitioning(const MeshBase & libmesh,
+                    const std::vector<int> & unique_block_ids,
+                    const IDMap & element_ids_for_block_id)
+{
+  std::vector<int> partitioning;
+  partitioning.reserve(libmesh.n_active_elem());
+  for (const auto block_id : unique_block_ids)
+    for (const auto element_id : libmesh_map_find(element_ids_for_block_id, block_id))
+      partitioning.push_back(libmesh.elem_ref(element_id).processor_id());
+  return partitioning;
+}
+}
+
+namespace Moose::MFEM
+{
 std::shared_ptr<mfem::ParMesh>
 buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
 {
@@ -43,13 +397,9 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
   }
   // Otherwise we must construct it ourselves. Start by building a serial mesh.
 
-  // 1. If the mesh is distributed and split between more than one processor,
-  // we need to call allgather on each processor. This will gather the nodes
-  // and elements onto each processor.
-  if (mesh.isDistributedMesh())
-  {
-    mesh.getMesh().allgather();
-  }
+  // 1. If the mesh is distributed, gather the nodes and elements onto each processor for the
+  // duration of the conversion.
+  libMesh::MeshSerializer serializer(mesh.getMesh());
 
   // 2. Get the unique libmesh IDs of each block in the mesh.
   std::vector<int> unique_block_ids = getLibmeshBlockIDs(mesh.getMesh());
@@ -105,491 +455,26 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
   auto block_ids_for_boundary_id =
       getBlockIDsForBoundaryID(element_ids_for_block_id, element_ids_for_boundary_id);
 
-  // FIXME: Alex's libmeshtomfemmesh branch
-  // (https://github.com/idaholab/moose/compare/next...alexanderianblair:platypus-moose:alexanderianblair/libmeshtomfemmesh)
-  // moves some things out of the LibmeshMFEMMesh constructor and into
-  // this function. I guess a benefit to doing that is it makes it
-  // clear what can be achieved with public methods and what still
-  // requires access to protected members.
+  // 11. Build the serial MFEM mesh.
+  LibmeshMFEMMesh serial_mesh(mesh.getMesh().n_active_elem(),
+                              block_info,
+                              unique_block_ids,
+                              block_ids_to_names,
+                              unique_side_boundary_ids,
+                              boundary_ids_to_names,
+                              unique_corner_node_ids,
+                              element_ids_for_block_id,
+                              node_ids_for_element_id,
+                              node_ids_for_boundary_id,
+                              side_ids_for_boundary_id,
+                              block_ids_for_boundary_id,
+                              coordinates_for_node_id);
 
-  // 11.
-  // Call the correct initializer.
-
-  // Construct maps between libMesh and MFEM node IDs. These aren't
-  // currently used for anything, but will be needed when we implement
-  // transfers between libMesh and MFEM meshes.
-  std::map<int, int> _libmesh_global_node_id_for_mfem_local_node_id,
-      _mfem_local_node_id_for_libmesh_global_node_id;
-
-  std::shared_ptr<LibmeshMFEMMesh> _mfem_mesh;
-  switch (block_info.order())
-  {
-    case 1:
-    {
-      _mfem_mesh = std::make_shared<LibmeshMFEMMesh>(mesh.nElem(),
-                                                     block_info,
-                                                     unique_block_ids,
-                                                     block_ids_to_names,
-                                                     unique_side_boundary_ids,
-                                                     boundary_ids_to_names,
-                                                     unique_corner_node_ids,
-                                                     element_ids_for_block_id,
-                                                     node_ids_for_element_id,
-                                                     node_ids_for_boundary_id,
-                                                     side_ids_for_boundary_id,
-                                                     block_ids_for_boundary_id,
-                                                     coordinates_for_node_id);
-      break;
-    }
-    case 2:
-    case 3:
-    {
-      _mfem_mesh =
-          std::make_shared<LibmeshMFEMMesh>(mesh.nElem(),
-                                            block_info,
-                                            unique_block_ids,
-                                            block_ids_to_names,
-                                            unique_side_boundary_ids,
-                                            boundary_ids_to_names,
-                                            unique_corner_node_ids,
-                                            element_ids_for_block_id,
-                                            node_ids_for_element_id,
-                                            node_ids_for_boundary_id,
-                                            side_ids_for_boundary_id,
-                                            block_ids_for_boundary_id,
-                                            coordinates_for_node_id,
-                                            _libmesh_global_node_id_for_mfem_local_node_id,
-                                            _mfem_local_node_id_for_libmesh_global_node_id);
-      break;
-    }
-    default:
-    {
-      mooseError("Unsupported element type of order ", block_info.order(), ".");
-      break;
-    }
-  }
-
-  // Now use the serial mesh to create a ParMesh
-
-  auto partitioning = getMeshPartitioning(mesh.getMesh());
-  int * partitioning_raw_ptr = partitioning ? partitioning.get() : nullptr;
-
-  auto _mfem_par_mesh =
-      std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, *_mfem_mesh, partitioning_raw_ptr, 1);
-
-  // If we have a higher-order mesh then we need to figure-out the mapping from the libMesh node ID
-  // to the MFEM node ID since this will have changed.
-  // No need to change dof mappings if running on a single processor or if a first order element.
-  if (mesh.n_processors() > 1 && block_info.order() > 1)
-  {
-    convertSerialDofMappingsToParallel(mesh.getMesh(),
-                                       *_mfem_mesh.get(),
-                                       *_mfem_par_mesh.get(),
-                                       _libmesh_global_node_id_for_mfem_local_node_id,
-                                       _mfem_local_node_id_for_libmesh_global_node_id);
-  }
-
-  _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
-  return _mfem_par_mesh;
+  // Now use the serial mesh to create a ParMesh, partitioned in the same way as the libMesh mesh.
+  auto partitioning =
+      getMeshPartitioning(mesh.getMesh(), unique_block_ids, element_ids_for_block_id);
+  return std::make_shared<mfem::ParMesh>(mesh.comm().get(), serial_mesh, partitioning.data(), 1);
 }
-
-std::tuple<IDMap, IDMap>
-buildBoundaryInfo(MooseMesh & mesh)
-{
-  IDMap element_ids_for_boundary_id;
-  IDMap side_ids_for_boundary_id;
-  mesh.buildBndElemList();
-
-  struct BoundaryElementAndSideIDs
-  {
-    std::vector<int> element_ids; // Element ids for a boundary id.
-    std::vector<int> side_ids;    // Side ids for a boundary id.
-
-    BoundaryElementAndSideIDs() : element_ids{}, side_ids{} {}
-  };
-
-  std::vector<BoundaryID> unique_boundary_ids;
-  std::map<BoundaryID, BoundaryElementAndSideIDs> boundary_ids_map;
-
-  // Iterate over elements on the boundary to build the map that allows us to go
-  // from a boundary id to a vector of element id/side ids.
-  for (MooseMesh::bnd_elem_iterator boundary_element = mesh.bndElemsBegin();
-       boundary_element != mesh.bndElemsEnd();
-       ++boundary_element)
-  {
-    auto boundary_id = (*boundary_element)->_bnd_id;
-
-    bool is_new_boundary_id = (boundary_ids_map.count(boundary_id) == 0);
-
-    if (is_new_boundary_id) // Initialize new struct.
-    {
-      boundary_ids_map[boundary_id] = BoundaryElementAndSideIDs();
-      unique_boundary_ids.push_back(boundary_id);
-    }
-
-    auto element_id = (*boundary_element)->_elem->id(); // ID of element on boundary.
-    auto side_id = (*boundary_element)->_side;          // ID of side that element is on.
-
-    boundary_ids_map[boundary_id].element_ids.push_back(element_id);
-    boundary_ids_map[boundary_id].side_ids.push_back(side_id);
-  }
-
-  // Sort.
-  std::sort(unique_boundary_ids.begin(), unique_boundary_ids.end());
-
-  // Run through the (key, value) pairs in the boundary_ids_map map.
-  for (const auto & key_value_pair : boundary_ids_map)
-  {
-    auto boundary_id = key_value_pair.first;
-
-    auto element_ids = key_value_pair.second.element_ids;
-    auto side_ids = key_value_pair.second.side_ids;
-
-    element_ids_for_boundary_id[boundary_id] = std::move(element_ids);
-    side_ids_for_boundary_id[boundary_id] = std::move(side_ids);
-  }
-
-  return {element_ids_for_boundary_id, side_ids_for_boundary_id};
-}
-
-std::map<int, std::vector<std::vector<unsigned int>>>
-buildBoundaryNodeIDs(const MooseMesh & mesh,
-                     const std::vector<int> & unique_side_bound_ids,
-                     const IDMap & element_ids_for_bound,
-                     const IDMap & side_ids_for_bound)
-{
-  std::map<int, std::vector<std::vector<unsigned int>>> node_ids_for_bound_id;
-
-  // Iterate over all bound IDs.
-  for (int bound_id : unique_side_bound_ids)
-  {
-    // Get element IDs of element on bound (and their sides that are on bound).
-    auto & bound_element_ids = element_ids_for_bound.at(bound_id);
-    auto & bound_element_sides = side_ids_for_bound.at(bound_id);
-
-    // Create vector to store the node ids of all bound nodes.
-    std::vector<std::vector<unsigned int>> bound_node_ids(bound_element_ids.size());
-
-    // Iterate over elements on bound.
-    for (int jelement = 0; jelement < (int)bound_element_ids.size(); jelement++)
-    {
-      // Get element ID and the bound side.
-      const int bound_element_global_id = bound_element_ids[jelement];
-      const int bound_element_side = bound_element_sides[jelement];
-
-      const Elem * element_ptr = mesh.elemPtr(bound_element_global_id);
-
-      // Get vector of local node IDs on bound side of element.
-      auto nodes_of_element_on_side = element_ptr->nodes_on_side(bound_element_side);
-
-      // Replace local IDs with global IDs.
-      for (int knode = 0; knode < (int)nodes_of_element_on_side.size(); knode++)
-      {
-        // Get the global node ID of each node.
-        const int local_node_id = nodes_of_element_on_side[knode];
-        const int global_node_id = element_ptr->node_id(local_node_id);
-
-        nodes_of_element_on_side[knode] = global_node_id;
-      }
-
-      // Add to vector.
-      bound_node_ids[jelement] = std::move(nodes_of_element_on_side);
-    }
-
-    // Add to the map.
-    node_ids_for_bound_id[bound_id] = std::move(bound_node_ids);
-  }
-
-  return node_ids_for_bound_id;
-}
-
-std::tuple<IDMap, IDMap>
-buildElementAndNodeIDs(MeshBase & libmesh,
-                       const CubitBlockInfo block_info,
-                       const std::vector<int> & unique_block_ids)
-{
-  IDMap element_ids_for_block_id;
-  IDMap node_ids_for_element_id;
-
-  for (int block_id : unique_block_ids)
-  {
-    auto & element_info = block_info.blockElement(block_id);
-
-    std::vector<int> elements_in_block;
-
-    auto active_block_elements_begin = libmesh.active_subdomain_elements_begin(block_id);
-    auto active_block_elements_end = libmesh.active_subdomain_elements_end(block_id);
-
-    for (auto element_iterator = active_block_elements_begin;
-         element_iterator != active_block_elements_end;
-         element_iterator++)
-    {
-      auto element_ptr = *element_iterator;
-
-      const int element_id = element_ptr->id();
-
-      std::vector<int> element_node_ids(element_info.num_nodes);
-
-      elements_in_block.push_back(element_id);
-
-      for (int node_counter = 0; node_counter < element_info.num_nodes; node_counter++)
-      {
-        element_node_ids[node_counter] = element_ptr->node_id(node_counter);
-      }
-
-      node_ids_for_element_id[element_id] = std::move(element_node_ids);
-    }
-
-    elements_in_block.shrink_to_fit();
-
-    // Add to map.
-    element_ids_for_block_id[block_id] = std::move(elements_in_block);
-  }
-
-  return {element_ids_for_block_id, node_ids_for_element_id};
-}
-
-std::vector<int>
-buildUniqueCornerNodeIDs(const CubitBlockInfo & block_info,
-                         const std::vector<int> & unique_block_ids,
-                         const IDMap & element_ids_for_block_id,
-                         const IDMap & node_ids_for_element_id)
-{
-  std::vector<int> unique_corner_node_ids;
-
-  // Iterate through all nodes (on edge of each element) and add their global IDs
-  // to the unique_corner_node_ids vector.
-  for (int block_id : unique_block_ids)
-  {
-    auto & block_element = block_info.blockElement(block_id);
-    auto & element_ids = element_ids_for_block_id.at(block_id);
-    for (int element_id : element_ids)
-    {
-      auto & node_ids = node_ids_for_element_id.at(element_id);
-
-      // Only use the nodes on the edge of the element!
-      for (int knode = 0; knode < block_element.num_corner_nodes; knode++)
-      {
-        unique_corner_node_ids.push_back(node_ids[knode]);
-      }
-    }
-  }
-
-  // Sort unique_vertex_ids in ascending order and remove duplicate node IDs.
-  std::sort(unique_corner_node_ids.begin(), unique_corner_node_ids.end());
-
-  auto new_end = std::unique(unique_corner_node_ids.begin(), unique_corner_node_ids.end());
-
-  unique_corner_node_ids.resize(std::distance(unique_corner_node_ids.begin(), new_end));
-
-  return unique_corner_node_ids;
-}
-
-void
-convertSerialDofMappingsToParallel(
-    const MeshBase & libmesh,
-    const mfem::Mesh & serial_mesh,
-    const mfem::ParMesh & parallel_mesh,
-    std::map<int, int> & libmesh_global_node_id_for_mfem_local_node_id,
-    std::map<int, int> & mfem_local_node_id_for_libmesh_global_node_id)
-{
-  // Get the FE spaces.
-  const auto * serial_fespace = serial_mesh.GetNodalFESpace();
-  const auto * parallel_fespace = parallel_mesh.GetNodalFESpace();
-
-  mooseAssert(serial_fespace != nullptr && parallel_fespace != nullptr, "Nodal FESpace is NULL!");
-
-  // Important notes:
-  // 1. LibMesh: node id is unique even across multiple processors.
-  // 2. MFEM: "local dof": belongs to the processor.
-  // 3. MFEM: "local true dof": unique nodes on a processor. i.e. if local nodes 1, 2 both
-  // correspond to the same coordinates on a processor they will map to a single true dof.
-  std::map<int, int> _libmesh_global_node_id_for_mfem_local_node_id;
-  std::map<int, int> _mfem_local_node_id_for_libmesh_global_node_id;
-
-  // Match-up the libMesh elements on the processor with the MFEM elements on the ParMesh.
-  int counter = 0;
-  for (auto element_ptr : libmesh.local_element_ptr_range())
-  {
-    const auto global_element_id = element_ptr->id();
-    const auto local_element_id = counter++;
-
-    // Get the LOCAL dofs of the element for both the serial and ParMesh for this element.
-    mfem::Array<int> serial_local_dofs;
-    serial_fespace->GetElementDofs(global_element_id, serial_local_dofs);
-
-    mfem::Array<int> parallel_local_dofs;
-    parallel_fespace->GetElementDofs(local_element_id, parallel_local_dofs);
-
-    // Verify that the number of LOCAL dofs match.
-    mooseAssert(serial_local_dofs.Size() == parallel_local_dofs.Size(),
-                "Serial and parallel dofs sizes do not match for element.");
-
-    const auto num_local_dofs = serial_local_dofs.Size();
-
-    std::map<int, int> serial_dof_for_parallel_dof;
-    std::map<int, int> parallel_dof_for_serial_dof;
-
-    for (int i = 0; i < num_local_dofs; i++)
-    {
-      auto parallel_dof = parallel_local_dofs[i];
-      auto serial_dof = serial_local_dofs[i];
-
-      serial_dof_for_parallel_dof[parallel_dof] = serial_dof;
-      parallel_dof_for_serial_dof[serial_dof] = parallel_dof;
-    }
-
-    // Iterate over serial local dofs and update mappings.
-    for (auto dof : serial_local_dofs)
-    {
-      const auto parallel_local_dof = parallel_dof_for_serial_dof[dof];
-
-      // Pair the libmesh node formerly associated with the serial node with this node.
-      const int libmesh_node_id = libmesh_global_node_id_for_mfem_local_node_id.at(dof);
-
-      // Update two-way mappings.
-      _libmesh_global_node_id_for_mfem_local_node_id[parallel_local_dof] = libmesh_node_id;
-      _mfem_local_node_id_for_libmesh_global_node_id[libmesh_node_id] = parallel_local_dof;
-    }
-  }
-
-  libmesh_global_node_id_for_mfem_local_node_id = _libmesh_global_node_id_for_mfem_local_node_id;
-  mfem_local_node_id_for_libmesh_global_node_id = _mfem_local_node_id_for_libmesh_global_node_id;
-}
-
-CubitBlockInfo
-buildCubitBlockInfo(MeshBase & libmesh,
-                    const std::vector<int> & unique_block_ids,
-                    bool fallback,
-                    bool first_order)
-{
-  CubitBlockInfo block_info(libmesh.mesh_dimension(), fallback, first_order);
-  /**
-   * Iterate over the block_ids. Note that we only need to extract the first element from
-   * each block since only a single element type can be specified per block.
-   */
-  for (int block_id : unique_block_ids)
-  {
-    auto element_range = libmesh.active_subdomain_elements_ptr_range(block_id);
-    if (element_range.begin() == element_range.end())
-    {
-      mooseError("Block '", block_id, "' contains no elements.");
-    }
-
-    auto first_element_ptr = *element_range.begin();
-
-    block_info.addBlockElement(
-        block_id, first_element_ptr->type(), first_element_ptr->mapping_type());
-  }
-  return block_info;
-}
-
-std::vector<int>
-getLibmeshBlockIDs(const MeshBase & libmesh)
-{
-  // Identify all subdomains (blocks) in the entire mesh (global == true).
-  std::set<subdomain_id_type> block_ids_set;
-  libmesh.subdomain_ids(block_ids_set, true);
-
-  std::vector<int> unique_block_ids(block_ids_set.size());
-
-  int counter = 0;
-  for (auto block_id : block_ids_set)
-  {
-    unique_block_ids[counter++] = block_id;
-  }
-
-  return unique_block_ids;
-}
-
-std::vector<int>
-getSideBoundaryIDs(const MeshBase & libmesh)
-{
-  const libMesh::BoundaryInfo & boundary_info = libmesh.get_boundary_info();
-  const std::set<boundary_id_type> & side_boundary_ids_set = boundary_info.get_side_boundary_ids();
-
-  std::vector<int> side_boundary_ids(side_boundary_ids_set.size());
-
-  int counter = 0;
-  for (auto side_boundary_id : side_boundary_ids_set)
-  {
-    side_boundary_ids[counter++] = side_boundary_id;
-  }
-
-  std::sort(side_boundary_ids.begin(), side_boundary_ids.end());
-
-  return side_boundary_ids;
-}
-
-std::map<int, int>
-getBlockIDForElementID(const std::map<int, std::vector<int>> & element_ids_for_block_id)
-{
-  std::map<int, int> block_id_for_element_id;
-
-  for (const auto & key_value : element_ids_for_block_id)
-  {
-    auto block_id = key_value.first;
-    auto & element_ids = key_value.second;
-
-    for (const auto & element_id : element_ids)
-    {
-      block_id_for_element_id[element_id] = block_id;
-    }
-  }
-
-  return block_id_for_element_id;
-}
-
-IDMap
-getBlockIDsForBoundaryID(const std::map<int, std::vector<int>> & element_ids_for_block_id,
-                         const std::map<int, std::vector<int>> & element_ids_for_boundary_id)
-{
-  auto block_id_for_element_id = getBlockIDForElementID(element_ids_for_block_id);
-
-  std::map<int, std::vector<int>> block_ids_for_boundary_id;
-
-  for (const auto & key_value : element_ids_for_boundary_id)
-  {
-    auto boundary_id = key_value.first;
-    auto & element_ids = key_value.second;
-
-    std::vector<int> block_ids(element_ids.size());
-
-    int ielement = 0;
-    for (const auto & element_id : element_ids)
-    {
-      block_ids[ielement++] = block_id_for_element_id.at(element_id);
-    }
-
-    block_ids_for_boundary_id[boundary_id] = std::move(block_ids);
-  }
-
-  return block_ids_for_boundary_id;
-}
-
-std::unique_ptr<int[]>
-getMeshPartitioning(MeshBase & libmesh)
-{
-  // Call allgather because we need all element information on each processor.
-  libmesh.allgather();
-
-  const int num_elements = libmesh.n_elem();
-  if (num_elements < 1)
-  {
-    return nullptr;
-  }
-
-  int * mesh_partitioning = new int[num_elements];
-
-  for (auto element : libmesh.element_ptr_range())
-  {
-    int element_id = element->id();
-
-    mesh_partitioning[element_id] = element->processor_id();
-  }
-
-  // Wrap-up in a unique pointer.
-  return std::unique_ptr<int[]>(mesh_partitioning);
 }
 
 #endif

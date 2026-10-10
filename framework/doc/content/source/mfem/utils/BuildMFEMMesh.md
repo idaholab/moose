@@ -2,7 +2,7 @@
 
 !if! function=hasCapability('mfem')
 
-The `buildMFEMMesh` function is used to obtain an `mfem::ParMesh`
+The `Moose::MFEM::buildMFEMMesh` function is used to obtain an `mfem::ParMesh`
 object from a `MooseMesh` object. It is called by the constructor for
 an `MFEMProblem`. It takes two additional arguments:
 
@@ -52,6 +52,19 @@ Higher-order pyramids are not currently supported, due to [a bug in
 MFEM](https://github.com/mfem/mfem/issues/5256). Support for these
 element types (including falling-back from PYRAMID18 →
 PYRAMID14) will be added once that bug is fixed.
+
+The resulting `mfem::ParMesh` uses the communicator of the `MooseMesh`
+and the same partitioning as the `libMesh` mesh. A distributed mesh is
+gathered onto every process while the conversion runs, and is
+distributed again afterwards.
+
+MFEM requires block and boundary IDs to be positive, so a libMesh
+mesh containing a block or boundary with ID 0 can not be converted. Such
+blocks and boundaries should be renumbered first, for example with a
+[RenameBlockGenerator](RenameBlockGenerator.md) or a
+[RenameBoundaryGenerator](RenameBoundaryGenerator.md). The block and
+boundary IDs are used unchanged as the attributes of the MFEM mesh, and
+their names are carried over as named attribute sets.
 
 If the argument `first_order` is true then all elements will be
 converted to their corresponding first-order types. For example, a

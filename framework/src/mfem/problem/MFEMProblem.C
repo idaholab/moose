@@ -122,7 +122,7 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = buildMFEMMesh(_mesh, _fallback_elements, _first_order_mesh);
+  auto pmesh = Moose::MFEM::buildMFEMMesh(_mesh, _fallback_elements, _first_order_mesh);
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();

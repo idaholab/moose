@@ -468,7 +468,7 @@ protected:
   /**
    * Options controlling how a libMesh mesh is converted into an MFEM mesh.
    */
-  bool _fallback_elements, _first_order_mesh;
+  const bool _fallback_elements, _first_order_mesh;
 
   /**
    * Solver definitions recorded by AddMFEMSolverAction before the dependency resolver constructs

@@ -356,7 +356,7 @@ CubitBlockInfo::getElementInfo(libMesh::ElemType elem_type, bool warn) const
 {
   if (_force_first_order)
   {
-    elem_type = _first_order_types.at(elem_type);
+    elem_type = libmesh_map_find(_first_order_types, elem_type);
   }
   if (elem_type == libMesh::ElemType::PYRAMID13 || elem_type == libMesh::ElemType::PYRAMID14 ||
       elem_type == libMesh::ElemType::PYRAMID18)
@@ -412,14 +412,17 @@ CubitBlockInfo::addBlockElement(int block_id,
   if (hasBlockID(block_id))
     mooseError("Block with ID '", block_id, "' has already been added.");
   else if (!validBlockID(block_id))
-    mooseError("Illegal block ID '", block_id, "'.");
+    mooseError("Block ID ",
+               block_id,
+               " can not be represented in an MFEM mesh, which requires positive block IDs. "
+               "Renumber the block, for example with a RenameBlockGenerator.");
 
   const auto & block_element = getElementInfo(elem_type, true);
 
   if (!hasBlocks()) // Set order of elements.
   {
     _order = block_element.order;
-    _basis_type = _libmesh_to_mfem_basis_types.at(map_type);
+    _basis_type = libmesh_map_find(_libmesh_to_mfem_basis_types, map_type);
   }
   else
   {
@@ -428,10 +431,10 @@ CubitBlockInfo::addBlockElement(int block_id,
      */
     if (_dimension != block_element.dimension)
     {
-      mooseError("Element of type ", elem_type, " is not ", _dimension, "D.");
+      mooseError("Element of type ", elem_type, " is not ", static_cast<int>(_dimension), "D.");
     }
 
-    if (_basis_type != _libmesh_to_mfem_basis_types.at(map_type))
+    if (_basis_type != libmesh_map_find(_libmesh_to_mfem_basis_types, map_type))
     {
       mooseError("All block elements must have the same mapping type.");
     }
@@ -504,7 +507,7 @@ CubitBlockInfo::blockElement(int block_id) const
     mooseError("No element info for block ID '", block_id, "'.");
   }
 
-  return getElementInfo(_block_element_for_block_id.at(block_id));
+  return getElementInfo(libmesh_map_find(_block_element_for_block_id, block_id));
 }
 
 const CubitBlockInfo::ElementInfo &

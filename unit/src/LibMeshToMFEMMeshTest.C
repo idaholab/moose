@@ -11,7 +11,7 @@
 
 #include <stdexcept>
 #include "gtest/gtest.h"
-#include "GeneratedMesh.h"
+#include "GeneratedMeshGenerator.h"
 #include "MeshGeneratorMesh.h"
 #include "ElementGenerator.h"
 #include "FileMesh.h"
@@ -22,6 +22,7 @@
 #include "Registry.h"
 #include "MFEMMeshFactory.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/fe_map.h"
 #include "type_traits"
 
 template <class M>
@@ -93,7 +94,7 @@ public:
                  bool first_order = false)
   {
     _moose_mesh_ptr = buildMooseMeshOnly(mesh_params, generator_class, generator_params);
-    _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, fallback, first_order);
+    _mfem_mesh_ptr = Moose::MFEM::buildMFEMMesh(*_moose_mesh_ptr, fallback, first_order);
   }
 
   std::shared_ptr<M> buildAdditionalMesh(InputParameters & mesh_params,
@@ -152,15 +153,29 @@ getElementSet(std::shared_ptr<mfem::ParMesh> mesh, mfem::Element::Type elem_type
   return actual_elements;
 }
 
-using GeneratedMeshMFEMTest = LibMeshToMFEMMeshTest<GeneratedMesh>;
+using GeneratedMeshMFEMTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh>;
+
+/**
+ * Return parameters for a GeneratedMeshGenerator of dimension \p dim. Its block and boundary IDs
+ * are offset from the default of zero, because MFEM requires positive IDs.
+ */
+InputParameters
+generatedMeshParams(const unsigned int dim)
+{
+  InputParameters params = GeneratedMeshGenerator::validParams();
+  params.set<MooseEnum>("dim") = dim;
+  params.set<std::vector<SubdomainID>>("subdomain_ids") = {1};
+  params.set<boundary_id_type>("boundary_id_offset") = 1;
+  return params;
+}
 
 TEST_F(GeneratedMeshMFEMTest, Check1D)
 {
   InputParameters mesh_params = getValidParams();
-  mesh_params.set<MooseEnum>("dim") = 1;
-  mesh_params.set<unsigned int>("nx") = 3;
-  mesh_params.set<double>("xmax") = 3.;
-  buildMesh(mesh_params);
+  InputParameters generator_params = generatedMeshParams(1);
+  generator_params.set<unsigned int>("nx") = 3;
+  generator_params.set<Real>("xmax") = 3.;
+  buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params);
   EXPECT_EQ(_mfem_mesh_ptr->Dimension(), 1);
   EXPECT_EQ(_mfem_mesh_ptr->SpaceDimension(), 1);
   EXPECT_EQ(_mfem_mesh_ptr->GetNV(), 4);
@@ -175,10 +190,10 @@ TEST_F(GeneratedMeshMFEMTest, Check1D)
 TEST_F(GeneratedMeshMFEMTest, Check2D)
 {
   InputParameters mesh_params = getValidParams();
-  mesh_params.set<MooseEnum>("dim") = 2;
-  mesh_params.set<unsigned int>("nx") = 2;
-  mesh_params.set<unsigned int>("ny") = 2;
-  buildMesh(mesh_params);
+  InputParameters generator_params = generatedMeshParams(2);
+  generator_params.set<unsigned int>("nx") = 2;
+  generator_params.set<unsigned int>("ny") = 2;
+  buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params);
   EXPECT_EQ(_mfem_mesh_ptr->Dimension(), 2);
   EXPECT_EQ(_mfem_mesh_ptr->SpaceDimension(), 2);
   EXPECT_EQ(_mfem_mesh_ptr->GetNV(), 9);
@@ -197,11 +212,11 @@ TEST_F(GeneratedMeshMFEMTest, Check2D)
 TEST_F(GeneratedMeshMFEMTest, Check3D)
 {
   InputParameters mesh_params = getValidParams();
-  mesh_params.set<MooseEnum>("dim") = 3;
-  mesh_params.set<unsigned int>("nx") = 2;
-  mesh_params.set<unsigned int>("ny") = 1;
-  mesh_params.set<unsigned int>("nz") = 2;
-  buildMesh(mesh_params);
+  InputParameters generator_params = generatedMeshParams(3);
+  generator_params.set<unsigned int>("nx") = 2;
+  generator_params.set<unsigned int>("ny") = 1;
+  generator_params.set<unsigned int>("nz") = 2;
+  buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params);
   EXPECT_EQ(_mfem_mesh_ptr->Dimension(), 3);
   EXPECT_EQ(_mfem_mesh_ptr->SpaceDimension(), 3);
   EXPECT_EQ(_mfem_mesh_ptr->GetNV(), 18);
@@ -244,6 +259,55 @@ TEST_F(GeneratedMeshMFEMTest, Check3D)
                                                {1.0, 1., 0.5},
                                                {1.0, 1., 1.0}}};
   EXPECT_EQ(expected_elements, actual_elements);
+}
+
+TEST_F(GeneratedMeshMFEMTest, BlockIDZero)
+{
+  InputParameters mesh_params = getValidParams();
+  InputParameters generator_params = generatedMeshParams(2);
+  generator_params.set<std::vector<SubdomainID>>("subdomain_ids") = {0};
+  EXPECT_MOOSEERROR_MSG_CONTAINS(buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params),
+                                 "Block ID 0 can not be represented in an MFEM mesh");
+}
+
+TEST_F(GeneratedMeshMFEMTest, BoundaryIDZero)
+{
+  InputParameters mesh_params = getValidParams();
+  InputParameters generator_params = generatedMeshParams(2);
+  generator_params.set<boundary_id_type>("boundary_id_offset") = 0;
+  EXPECT_MOOSEERROR_MSG_CONTAINS(buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params),
+                                 "Boundary ID 0 can not be represented in an MFEM mesh");
+}
+
+TEST_F(GeneratedMeshMFEMTest, Quad8CentreNodes)
+{
+  // MFEM's second-order quadrilateral has a centre node, which a QUAD8 lacks, so it is
+  // interpolated from the other nodes of each element.
+  InputParameters mesh_params = getValidParams();
+  InputParameters generator_params = generatedMeshParams(2);
+  generator_params.set<unsigned int>("nx") = 2;
+  generator_params.set<unsigned int>("ny") = 2;
+  generator_params.set<MooseEnum>("elem_type") = "QUAD8";
+  buildMesh(mesh_params, "GeneratedMeshGenerator", generator_params);
+
+  const auto & fespace = *_mfem_mesh_ptr->GetNodalFESpace();
+  mfem::Array<int> vertices, dofs;
+  for (const auto e : make_range(_mfem_mesh_ptr->GetNE()))
+  {
+    // The elements are straight-sided, so the centre node lies at the mean of the vertices.
+    _mfem_mesh_ptr->GetElementVertices(e, vertices);
+    Coord centre(2, 0.);
+    for (const auto v : vertices)
+      for (const auto d : make_range(2))
+        centre[d] += _mfem_mesh_ptr->GetVertex(v)[d] / vertices.Size();
+
+    // The centre node is the last degree of freedom of a second-order quadrilateral.
+    fespace.GetElementDofs(e, dofs);
+    Coord node(2);
+    _mfem_mesh_ptr->GetNode(dofs.Last(), node.data());
+    EXPECT_DOUBLE_EQ(node[0], centre[0]);
+    EXPECT_DOUBLE_EQ(node[1], centre[1]);
+  }
 }
 
 class FileMeshMFEMTest : public LibMeshToMFEMMeshTest<FileMesh>,
