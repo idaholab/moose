@@ -26,13 +26,13 @@
     tensor = 'mandel_stress'
     invariant = 'effective_stress'
   []
-  [yield]
+  [yield_surface]
     type = YieldFunction
     yield_stress = 100
   []
   [flow]
     type = ComposedModel
-    models = 'vonmises yield'
+    models = 'vonmises yield_surface'
   []
   [normality]
     type = Normality
@@ -66,7 +66,7 @@
   []
   [surface]
     type = ComposedModel
-    models = 'plastic_strain_rate plastic_strain elastic_strain elasticity mandel_stress vonmises yield'
+    models = 'plastic_strain_rate plastic_strain elastic_strain elasticity mandel_stress vonmises yield_surface'
   []
   [flow_rate]
     type = PerzynaPlasticFlowRate

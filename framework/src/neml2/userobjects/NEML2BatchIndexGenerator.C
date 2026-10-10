@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2BatchIndexGenerator.h"
-#include "NEML2Utils.h"
 
 registerMooseObject("MooseApp", NEML2BatchIndexGenerator);
 
@@ -43,9 +42,6 @@ NEML2BatchIndexGenerator::meshChanged()
 void
 NEML2BatchIndexGenerator::initialize()
 {
-  if (!NEML2Utils::shouldCompute(_fe_problem))
-    return;
-
   if (!_outdated)
     return;
 
@@ -57,9 +53,6 @@ NEML2BatchIndexGenerator::initialize()
 void
 NEML2BatchIndexGenerator::execute()
 {
-  if (!NEML2Utils::shouldCompute(_fe_problem))
-    return;
-
   if (!_outdated)
     return;
 
@@ -70,9 +63,6 @@ NEML2BatchIndexGenerator::execute()
 void
 NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
 {
-  if (!NEML2Utils::shouldCompute(_fe_problem))
-    return;
-
   if (!_outdated)
     return;
 
