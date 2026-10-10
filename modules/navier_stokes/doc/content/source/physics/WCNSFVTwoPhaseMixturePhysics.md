@@ -20,7 +20,8 @@ The phase advection-diffusion equation is:
 where:
 
 - $\phi$ is the phase fraction
-- $\mathbf{v}$ is the advecting velocity
+- $\mathbf{v}$ is the advecting velocity, the mixture velocity plus the drift velocity of the
+  dispersed phase
 - $k$ the phase diffusivity
 - $\alpha$ is the phase exchange coefficient
 
@@ -30,6 +31,15 @@ The kernels created are:
 - [INSFVScalarFieldAdvection.md] for the scalar advection term
 - [FVDiffusion.md] for the scalar diffusion term
 - [NSFVMixturePhaseInterface.md] for the phase exchange term if a phase exchange coefficient is specified
+
+The dispersed phase moves at the mixture velocity plus its drift velocity
+$\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$, the velocity relative to the centre of mass of the mixture,
+and not at the mixture velocity plus its slip velocity
+$\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$, which is measured against the continuous phase. The two
+differ by the dispersed phase mass fraction and agree only in the dilute limit. Where a slip
+velocity is requested this Physics therefore has [WCNSFV2PSlipVelocityFunctorMaterial.md] declare
+both and hands the drift velocity to [INSFVScalarFieldAdvection.md], while
+[WCNSFV2PMomentumDriftFlux.md] takes the slip velocity.
 
 The momentum equations, if defined using a [WCNSFVFlowPhysics.md], are modified in the presence of a two-phase
 mixture. Density and viscosity should be set to their mixture values, see [#materials] for more information.

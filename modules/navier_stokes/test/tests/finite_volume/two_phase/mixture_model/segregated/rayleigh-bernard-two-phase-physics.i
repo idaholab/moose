@@ -41,8 +41,8 @@ cp_d = 1
         gravity = '0 ${g} 0'
 
         # Initial conditions
-        initial_velocity = '1e-12 1e-12 0'
-        initial_pressure = 0.2
+        initial_velocity = '0 0 0'
+        initial_pressure = 0
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
@@ -109,15 +109,11 @@ cp_d = 1
   type = PIMPLE
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'
 
-  end_time = 1e8
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 10
-    iteration_window = 2
-    growth_factor = 2
-    cutback_factor = 0.5
-    dt = 1e-3
-  []
+  # Four steps of the early transient at a step below the buoyant time scale of 0.1 s. Marched to
+  # steady state instead, this configuration has at least three steady states and the one reached
+  # depends on the time step, so only the transient is a well defined thing to compare against.
+  dt = 0.1
+  num_steps = 4
 
   # Systems
   momentum_systems = 'u_system v_system'
@@ -156,7 +152,7 @@ cp_d = 1
   exodus = false
   [out]
     type = CSV
-    execute_on = 'FINAL'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
