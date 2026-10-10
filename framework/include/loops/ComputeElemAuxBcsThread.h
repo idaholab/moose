@@ -10,9 +10,10 @@
 #pragma once
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
+#include "TheWarehouse.h"
+#include "Attributes.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -23,7 +24,7 @@ class ComputeElemAuxBcsThread
 {
 public:
   ComputeElemAuxBcsThread(FEProblemBase & fe_problem,
-                          const MooseObjectWarehouse<AuxKernelType> & storage,
+                          const TheWarehouse::Query & query,
                           bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
@@ -37,8 +38,9 @@ protected:
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernelType> & _storage;
+  /// Warehouse to retrieve the auxkernels
+  const TheWarehouse::Query _query;
+  TheWarehouse::QueryCache<AttribThread, AttribBoundaries> _query_boundary;
 
   bool _need_materials;
 
@@ -46,8 +48,8 @@ protected:
   void printGeneralExecutionInformation() const;
 
   /// Print list of specific objects executed and in which order
-  void printBoundaryExecutionInformation(
-      unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const;
+  void printBoundaryExecutionInformation(unsigned int boundary_id,
+                                         const std::vector<AuxKernelType *> & kernels) const;
 
   /// Keeps track of which boundaries the loop has reported execution on
   mutable std::set<SubdomainID> _boundaries_exec_printed;

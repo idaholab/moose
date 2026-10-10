@@ -9,7 +9,7 @@
 
 // MOOSE includes
 #include "BoundaryElemIntegrityCheckThread.h"
-#include "AuxiliarySystem.h"
+#include "AuxKernelBase.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 #include "SideUserObject.h"
@@ -25,24 +25,14 @@
 
 BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
-  : _fe_problem(fe_problem),
-    _aux_sys(fe_problem.getAuxiliarySystem()),
-    _elem_aux(_aux_sys.elemAuxWarehouse()),
-    _elem_vec_aux(_aux_sys.elemVectorAuxWarehouse()),
-    _elem_array_aux(_aux_sys.elemArrayAuxWarehouse()),
-    _query(query)
+  : _fe_problem(fe_problem), _query(query)
 {
 }
 
 // Splitting Constructor
 BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     BoundaryElemIntegrityCheckThread & x, Threads::split)
-  : _fe_problem(x._fe_problem),
-    _aux_sys(x._aux_sys),
-    _elem_aux(x._elem_aux),
-    _elem_vec_aux(x._elem_vec_aux),
-    _elem_array_aux(x._elem_array_aux),
-    _query(x._query)
+  : _fe_problem(x._fe_problem), _query(x._query)
 {
 }
 
@@ -118,9 +108,46 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         }
     };
 
-    check(_elem_aux);
-    check(_elem_vec_aux);
-    check(_elem_array_aux);
+    auto check_aux_from_the_warehouse =
+        [elem, boundary_id, &bnd_name, tid, &mesh, side, this](auto & system_type)
+    {
+      // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
+      // boundaries they couple across, but their coupled variables are only required to be
+      // defined on the mortar segment mesh, not on every element of those boundaries.
+      std::vector<AuxKernelBase *> auxkernels;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>(system_type)
+          .template condition<AttribThread>(tid)
+          .template condition<AttribAuxKernelMortar>(false)
+          .template condition<AttribBoundaries>(boundary_id, true)
+          .queryInto(auxkernels);
+      if (auxkernels.empty())
+        return;
+
+      for (const auto & bnd_object : auxkernels)
+        // Skip if this object uses geometric search because coupled variables may be defined on
+        // paired boundaries instead of the boundary this elem is on
+        if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
+        {
+          // First check the higher-dimensional element
+          auto leftover_vars = bnd_object->checkAllVariables(*elem);
+          if (!leftover_vars.empty())
+          {
+            const auto neighbor = elem->neighbor_ptr(side);
+            const bool upwind_elem = !neighbor || elem->id() < neighbor->id();
+            const Elem * lower_d_elem =
+                upwind_elem ? mesh.getLowerDElem(elem, side)
+                            : mesh.getLowerDElem(neighbor, neighbor->which_neighbor_am_i(elem));
+            if (lower_d_elem)
+              leftover_vars = bnd_object->checkVariables(*lower_d_elem, leftover_vars);
+          }
+
+          boundaryIntegrityCheckError(*bnd_object, leftover_vars, bnd_name);
+        }
+    };
+
+    check_aux_from_the_warehouse("AuxKernel");
     for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
       check(_fe_problem.getNonlinearSystemBase(i).getIntegratedBCWarehouse());
   }

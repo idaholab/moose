@@ -43,14 +43,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _aux_scalar_storage(_app.getExecuteOnEnum(), numThreads()),
-    _nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _elemental_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _nodal_array_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum(), numThreads())
+    _aux_scalar_storage(_app.getExecuteOnEnum(), numThreads())
 #ifdef MOOSE_KOKKOS_ENABLED
     ,
     _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
@@ -91,26 +84,36 @@ AuxiliarySystem::initialSetup()
     _aux_scalar_storage.sort(tid);
     _aux_scalar_storage.initialSetup(tid);
 
-    _nodal_aux_storage.sort(tid);
-    _nodal_aux_storage.initialSetup(tid);
+    // Replace this with an "inplace" call to initialSetup when implemented (#32362)
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->initialSetup();
 
-    _mortar_nodal_aux_storage.sort(tid);
-    _mortar_nodal_aux_storage.initialSetup(tid);
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->initialSetup();
 
-    _nodal_vec_aux_storage.sort(tid);
-    _nodal_vec_aux_storage.initialSetup(tid);
-
-    _nodal_array_aux_storage.sort(tid);
-    _nodal_array_aux_storage.initialSetup(tid);
-
-    _elemental_aux_storage.sort(tid);
-    _elemental_aux_storage.initialSetup(tid);
-
-    _elemental_vec_aux_storage.sort(tid);
-    _elemental_vec_aux_storage.initialSetup(tid);
-
-    _elemental_array_aux_storage.sort(tid);
-    _elemental_array_aux_storage.initialSetup(tid);
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->initialSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -151,13 +154,35 @@ AuxiliarySystem::timestepSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
-    _nodal_aux_storage.timestepSetup(tid);
-    _mortar_nodal_aux_storage.timestepSetup(tid);
-    _nodal_vec_aux_storage.timestepSetup(tid);
-    _nodal_array_aux_storage.timestepSetup(tid);
-    _elemental_aux_storage.timestepSetup(tid);
-    _elemental_vec_aux_storage.timestepSetup(tid);
-    _elemental_array_aux_storage.timestepSetup(tid);
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->timestepSetup();
+
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->timestepSetup();
+
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->timestepSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -174,13 +199,35 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.customSetup(exec_type, tid);
-    _nodal_aux_storage.customSetup(exec_type, tid);
-    _mortar_nodal_aux_storage.customSetup(exec_type, tid);
-    _nodal_vec_aux_storage.customSetup(exec_type, tid);
-    _nodal_array_aux_storage.customSetup(exec_type, tid);
-    _elemental_aux_storage.customSetup(exec_type, tid);
-    _elemental_vec_aux_storage.customSetup(exec_type, tid);
-    _elemental_array_aux_storage.customSetup(exec_type, tid);
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->customSetup(exec_type);
+
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->customSetup(exec_type);
+
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->customSetup(exec_type);
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -197,13 +244,35 @@ AuxiliarySystem::subdomainSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
-    _nodal_aux_storage.subdomainSetup(tid);
-    _mortar_nodal_aux_storage.subdomainSetup(tid);
-    _nodal_vec_aux_storage.subdomainSetup(tid);
-    _nodal_array_aux_storage.subdomainSetup(tid);
-    _elemental_aux_storage.subdomainSetup(tid);
-    _elemental_vec_aux_storage.subdomainSetup(tid);
-    _elemental_array_aux_storage.subdomainSetup(tid);
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->subdomainSetup();
+
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->subdomainSetup();
+
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->subdomainSetup();
   }
 }
 
@@ -215,13 +284,35 @@ AuxiliarySystem::jacobianSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
-    _nodal_aux_storage.jacobianSetup(tid);
-    _mortar_nodal_aux_storage.jacobianSetup(tid);
-    _nodal_vec_aux_storage.jacobianSetup(tid);
-    _nodal_array_aux_storage.jacobianSetup(tid);
-    _elemental_aux_storage.jacobianSetup(tid);
-    _elemental_vec_aux_storage.jacobianSetup(tid);
-    _elemental_array_aux_storage.jacobianSetup(tid);
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->jacobianSetup();
+
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->jacobianSetup();
+
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->jacobianSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -238,13 +329,35 @@ AuxiliarySystem::residualSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
-    _nodal_aux_storage.residualSetup(tid);
-    _mortar_nodal_aux_storage.residualSetup(tid);
-    _nodal_vec_aux_storage.residualSetup(tid);
-    _nodal_array_aux_storage.residualSetup(tid);
-    _elemental_aux_storage.residualSetup(tid);
-    _elemental_vec_aux_storage.residualSetup(tid);
-    _elemental_array_aux_storage.residualSetup(tid);
+    std::vector<AuxKernel *> nodal_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_auxkernels);
+    for (auto & nodal_aux : nodal_auxkernels)
+      nodal_aux->residualSetup();
+
+    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_vec_auxkernels);
+    for (auto & nodal_aux : nodal_vec_auxkernels)
+      nodal_aux->residualSetup();
+
+    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(tid)
+        .queryIntoUnsorted(nodal_array_auxkernels);
+    for (auto & nodal_aux : nodal_array_auxkernels)
+      nodal_aux->residualSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -257,13 +370,8 @@ void
 AuxiliarySystem::updateActive(THREAD_ID tid)
 {
   _aux_scalar_storage.updateActive(tid);
-  _nodal_aux_storage.updateActive(tid);
-  _mortar_nodal_aux_storage.updateActive(tid);
-  _nodal_vec_aux_storage.updateActive(tid);
-  _nodal_array_aux_storage.updateActive(tid);
-  _elemental_aux_storage.updateActive(tid);
-  _elemental_vec_aux_storage.updateActive(tid);
-  _elemental_array_aux_storage.updateActive(tid);
+  // AuxKernels (nodal, mortar, and elemental) are queried from theWarehouse(), which filters out
+  // disabled objects on every query, so there is no cached active list to refresh here.
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (tid == 0)
@@ -339,49 +447,33 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
     {
       std::shared_ptr<AuxKernel> kernel =
           _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
-      if (kernel->isNodal())
-      {
-        if (kernel->isMortar())
-          _mortar_nodal_aux_storage.addObject(kernel, tid);
-        else
-          _nodal_aux_storage.addObject(kernel, tid);
-      }
-      else
-        _elemental_aux_storage.addObject(kernel, tid);
+      _fe_problem.theWarehouse().add(kernel);
     }
 
     else if (base == "VectorAuxKernel")
     {
       std::shared_ptr<VectorAuxKernel> kernel =
           _factory.create<VectorAuxKernel>(kernel_name, name, parameters, tid);
-      if (kernel->isNodal())
-      {
-        if (kernel->isMortar())
-          mooseError("Vector mortar aux kernels not yet implemented");
-        _nodal_vec_aux_storage.addObject(kernel, tid);
-      }
-      else
-        _elemental_vec_aux_storage.addObject(kernel, tid);
+      if (kernel->isNodal() && kernel->isMortar())
+        mooseError("Vector mortar aux kernels not yet implemented");
+      _fe_problem.theWarehouse().add(kernel);
     }
 
     else if (base == "ArrayAuxKernel")
     {
       std::shared_ptr<ArrayAuxKernel> kernel =
           _factory.create<ArrayAuxKernel>(kernel_name, name, parameters, tid);
-      if (kernel->isNodal())
-      {
-        if (kernel->isMortar())
-          mooseError("Vector mortar aux kernels not yet implemented");
-        _nodal_array_aux_storage.addObject(kernel, tid);
-      }
-      else
-        _elemental_array_aux_storage.addObject(kernel, tid);
+      if (kernel->isNodal() && kernel->isMortar())
+        mooseError("Vector mortar aux kernels not yet implemented");
+      _fe_problem.theWarehouse().add(kernel);
     }
     else
       mooseAssert(false,
                   "Attempting to add AuxKernel of type '" + kernel_name + "' and name '" + name +
                       "' to the auxiliary system with invalid _moose_base: " + base);
   }
+  if (parameters.isParamValid("execution_order_group"))
+    _execution_order_groups.insert(parameters.get<int>("execution_order_group"));
 }
 
 void
@@ -467,17 +559,20 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_vars[0].fieldVariables().size() > 0)
   {
-    computeNodalArrayVars(type);
-    computeNodalVecVars(type);
-    computeNodalVars(type);
-    computeMortarNodalVars(type);
-    computeElementalArrayVars(type);
-    computeElementalVecVars(type);
-    computeElementalVars(type);
+    for (const auto group : _execution_order_groups)
+    {
+      computeNodalVars(type, group);
+      computeNodalVecVars(type, group);
+      computeNodalArrayVars(type, group);
+      computeMortarNodalVars(type, group);
+      computeElementalVars(type, group);
+      computeElementalVecVars(type, group);
+      computeElementalArrayVars(type, group);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-    kokkosCompute(type);
+      kokkosCompute(type, group);
 #endif
+    }
 
     if (hasLinearFVGradients())
     {
@@ -487,6 +582,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     }
 
     // compute time derivatives of nodal aux variables _after_ the values were updated
+    // NOTE: don't rely on time derivatives within auxkernels to be updated
     if (_fe_problem.dt() > 0.)
       for (auto & ti : _time_integrators)
         ti->computeTimeDerivatives();
@@ -501,77 +597,51 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 {
   std::set<std::string> depend_objects;
 
-  // Elemental AuxKernels
+  // AuxKernels (nodal, mortar, and elemental)
   {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _elemental_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<AuxKernel *> auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribExecOns>(type)
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(auxkernels);
+    for (const auto & aux : auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
 
-  // Elemental VectorAuxKernels
+  // VectorAuxKernels (nodal and elemental)
   {
-    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
-        _elemental_vec_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<VectorAuxKernel *> vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribExecOns>(type)
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(vec_auxkernels);
+    for (const auto & aux : vec_auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
 
-  // Elemental ArrayAuxKernels
+  // ArrayAuxKernels (nodal and elemental)
   {
-    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
-        _elemental_array_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _nodal_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Mortar Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _mortar_nodal_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal VectorAuxKernels
-  {
-    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
-        _nodal_vec_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal ArrayAuxKernels
-  {
-    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
-        _nodal_array_aux_storage[type].getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<ArrayAuxKernel *> array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribExecOns>(type)
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(array_auxkernels);
+    for (const auto & aux : array_auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
@@ -610,76 +680,48 @@ AuxiliarySystem::getDependObjects()
 {
   std::set<std::string> depend_objects;
 
-  // Elemental AuxKernels
+  // AuxKernels (nodal, mortar, and elemental)
   {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _elemental_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<AuxKernel *> auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(auxkernels);
+    for (const auto & aux : auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
 
-  // Elemental VectorAuxKernels
+  // VectorAuxKernels (nodal and elemental)
   {
-    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
-        _elemental_vec_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<VectorAuxKernel *> vec_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(vec_auxkernels);
+    for (const auto & aux : vec_auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
 
-  // Elemental ArrayAuxKernels
+  // ArrayAuxKernels (nodal and elemental)
   {
-    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
-        _elemental_array_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Mortar Nodal AuxKernels
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
-        _mortar_nodal_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal VectorAuxKernels
-  {
-    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
-        _nodal_vec_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
-    {
-      const std::set<UserObjectName> & uo = aux->getDependObjects();
-      depend_objects.insert(uo.begin(), uo.end());
-    }
-  }
-
-  // Nodal ArrayAuxKernels
-  {
-    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
-        _nodal_array_aux_storage.getActiveObjects();
-    for (const auto & aux : auxs)
+    std::vector<ArrayAuxKernel *> array_auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(array_auxkernels);
+    for (const auto & aux : array_auxkernels)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
@@ -783,111 +825,163 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeNodalVars(ExecFlagType type)
+AuxiliarySystem::computeNodalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVars", 3);
 
-  const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
-  computeNodalVarsHelper<AuxKernel>(nodal);
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Real")
+                                  .condition<AttribAuxKernelNodal>(true)
+                                  .condition<AttribAuxKernelMortar>(false)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeNodalVarsHelper<AuxKernel>(query);
 }
 
 void
-AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
+AuxiliarySystem::computeNodalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVecVars", 3);
 
-  const MooseObjectWarehouse<VectorAuxKernel> & nodal = _nodal_vec_aux_storage[type];
-  computeNodalVarsHelper<VectorAuxKernel>(nodal);
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Vector")
+                                  .condition<AttribAuxKernelNodal>(true)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeNodalVarsHelper<VectorAuxKernel>(query);
 }
 
 void
-AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
+AuxiliarySystem::computeNodalArrayVars(ExecFlagType type, int group)
 {
-  const MooseObjectWarehouse<ArrayAuxKernel> & nodal = _nodal_array_aux_storage[type];
-  computeNodalVarsHelper<ArrayAuxKernel>(nodal);
+  TIME_SECTION("computeNodalArrayVars", 3);
+
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Array")
+                                  .condition<AttribAuxKernelNodal>(true)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeNodalVarsHelper<ArrayAuxKernel>(query);
 }
 
 void
-AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
+AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type, int group)
 {
   TIME_SECTION("computeMortarNodalVars", 3);
 
-  const MooseObjectWarehouse<AuxKernel> & mortar_nodal_warehouse = _mortar_nodal_aux_storage[type];
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Real")
+                                  .condition<AttribAuxKernelMortar>(true)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
 
-  mooseAssert(!mortar_nodal_warehouse.hasActiveBlockObjects(),
-              "We don't allow creation of block restricted mortar nodal aux kernels.");
+  // Use thread 0's dependency-sorted list to determine which boundaries have mortar nodal aux
+  // kernels and how many. The sort order does not depend on the thread, so
+  // ComputeMortarNodalAuxBndThread re-resolves the same (boundary, index) pair against its own
+  // thread's copy of the kernels.
+  std::vector<AuxKernel *> mortar_nodal_auxs;
+  query.clone().condition<AttribThread>(0).queryInto(mortar_nodal_auxs);
 
-  if (mortar_nodal_warehouse.hasActiveBoundaryObjects())
-  {
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & [bnd_id, mortar_nodal_auxes] :
-         mortar_nodal_warehouse.getActiveBoundaryObjects())
-      for (const auto index : index_range(mortar_nodal_auxes))
+  if (mortar_nodal_auxs.empty())
+    return;
+
+  std::map<BoundaryID, std::size_t> num_kernels_by_boundary;
+  for (auto * aux : mortar_nodal_auxs)
+    for (const auto bnd_id : aux->boundaryIDs())
+      ++num_kernels_by_boundary[bnd_id];
+
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (const auto & [bnd_id, num_kernels] : num_kernels_by_boundary)
+    for (const auto index : make_range(num_kernels))
+    {
+      PARALLEL_TRY
       {
-        PARALLEL_TRY
+        try
         {
-          try
-          {
-            ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
-                _fe_problem, mortar_nodal_warehouse, bnd_id, index);
-            Threads::parallel_reduce(bnd_nodes, mnabt, this->numThreads());
-          }
-          catch (MooseException & e)
-          {
-            _fe_problem.setException("The following MooseException was raised during mortar nodal "
-                                     "Auxiliary variable computation:\n" +
-                                     std::string(e.what()));
-          }
-          catch (MetaPhysicL::LogicError & e)
-          {
-            moose::translateMetaPhysicLError(e);
-          }
-          catch (std::exception & e)
-          {
-            // Continue if we find a libMesh degenerate map exception, but
-            // just re-throw for any real error
-            if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
-                !strstr(e.what(), "det != 0"))
-              throw;
-
-            _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
-                                     "nodal Auxiliary variable computation:\n" +
-                                     std::string(e.what()));
-          }
+          ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(_fe_problem, query, bnd_id, index);
+          Threads::parallel_reduce(bnd_nodes, mnabt, this->numThreads());
         }
-        PARALLEL_CATCH;
+        catch (MooseException & e)
+        {
+          _fe_problem.setException("The following MooseException was raised during mortar nodal "
+                                   "Auxiliary variable computation:\n" +
+                                   std::string(e.what()));
+        }
+        catch (MetaPhysicL::LogicError & e)
+        {
+          moose::translateMetaPhysicLError(e);
+        }
+        catch (std::exception & e)
+        {
+          // Continue if we find a libMesh degenerate map exception, but
+          // just re-throw for any real error
+          if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+              !strstr(e.what(), "det != 0"))
+            throw;
 
-        // We need to make sure we propagate exceptions to all processes before trying to close
-        // here, which is a parallel operation
-        solution().close();
-        _sys.update();
+          _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
+                                   "nodal Auxiliary variable computation:\n" +
+                                   std::string(e.what()));
+        }
       }
-  }
+      PARALLEL_CATCH;
+
+      // We need to make sure we propagate exceptions to all processes before trying to close
+      // here, which is a parallel operation
+      solution().close();
+      _sys.update();
+    }
 }
 
 void
-AuxiliarySystem::computeElementalVars(ExecFlagType type)
+AuxiliarySystem::computeElementalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVars", 3);
 
-  const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
-  computeElementalVarsHelper<AuxKernel>(elemental);
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Real")
+                                  .condition<AttribAuxKernelNodal>(false)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeElementalVarsHelper<AuxKernel>(query);
 }
 
 void
-AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
+AuxiliarySystem::computeElementalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVecVars", 3);
 
-  const MooseObjectWarehouse<VectorAuxKernel> & elemental = _elemental_vec_aux_storage[type];
-  computeElementalVarsHelper<VectorAuxKernel>(elemental);
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Vector")
+                                  .condition<AttribAuxKernelNodal>(false)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeElementalVarsHelper<VectorAuxKernel>(query);
 }
 
 void
-AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
+AuxiliarySystem::computeElementalArrayVars(ExecFlagType type, int group)
 {
-  const MooseObjectWarehouse<ArrayAuxKernel> & elemental = _elemental_array_aux_storage[type];
-  computeElementalVarsHelper<ArrayAuxKernel>(elemental);
+  TheWarehouse::Query query = _fe_problem.theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("AuxKernel")
+                                  .condition<AttribAuxKernelValueType>("Array")
+                                  .condition<AttribAuxKernelNodal>(false)
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribExecutionOrderGroup>(group);
+  computeElementalVarsHelper<ArrayAuxKernel>(query);
 }
 
 void
@@ -919,8 +1013,28 @@ AuxiliarySystem::getMinQuadratureOrder()
 bool
 AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 {
-  return _elemental_aux_storage.hasActiveBoundaryObjects(bnd_id) ||
-         _elemental_vec_aux_storage.hasActiveBoundaryObjects(bnd_id);
+  std::vector<AuxKernel *> elem_auxkernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("AuxKernel")
+      .condition<AttribAuxKernelValueType>("Real")
+      .condition<AttribAuxKernelNodal>(false)
+      .condition<AttribThread>(0)
+      .condition<AttribBoundaries>(bnd_id, true)
+      .queryIntoUnsorted(elem_auxkernels);
+  if (!elem_auxkernels.empty())
+    return true;
+
+  std::vector<VectorAuxKernel *> elem_vec_auxkernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("AuxKernel")
+      .condition<AttribAuxKernelValueType>("Vector")
+      .condition<AttribAuxKernelNodal>(false)
+      .condition<AttribThread>(0)
+      .condition<AttribBoundaries>(bnd_id, true)
+      .queryIntoUnsorted(elem_vec_auxkernels);
+  return !elem_vec_auxkernels.empty();
 }
 
 void
@@ -932,15 +1046,27 @@ AuxiliarySystem::copyCurrentIntoPreviousNL()
 
 template <typename AuxKernelType>
 void
-AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse)
+AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
 {
-  if (warehouse.hasActiveBlockObjects())
+  // Get all elemental aux-kernels of this type/group/exec-flag, regardless of restriction. This
+  // is only used as a non-emptiness check below, and spans every thread's copy of each kernel (no
+  // AttribThread condition), so it must stay unsorted - sorting would run dependency/cyclic
+  // resolution across per-thread duplicates of the same kernel, which can falsely detect a cycle.
+  std::vector<AuxKernelType *> auxs;
+  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
+
+  if (auxs.size())
   {
-    // Block Elemental AuxKernels
+    // Block Elemental AuxKernels. Boundary-restricted kernels are excluded here - even if they
+    // are not also block-restricted (and would otherwise match every block) - since they are
+    // handled entirely by the boundary-element loop below, matching the old warehouse's mutually
+    // exclusive block/boundary dispatch.
+    const TheWarehouse::Query block_query =
+        query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
     PARALLEL_TRY
     {
       const ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-      ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, true);
+      ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, block_query, true);
       try
       {
         Threads::parallel_reduce(range, eavt, this->numThreads());
@@ -960,15 +1086,17 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
     _sys.update();
   }
 
-  // Boundary Elemental AuxKernels
-  if (warehouse.hasActiveBoundaryObjects())
+  // Boundary Elemental AuxKernels. Reuses the "any elemental aux kernels at all" check above as a
+  // cheap gate; ComputeElemAuxBcsThread itself finds nothing per-element if none of them are
+  // actually boundary restricted.
+  if (auxs.size())
   {
     TIME_SECTION("computeElementalVecVars", 3);
 
     PARALLEL_TRY
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-      ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, warehouse, true);
+      ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, query, true);
       try
       {
         Threads::parallel_reduce(bnd_elems, eabt, this->numThreads());
@@ -991,15 +1119,28 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
 
 template <typename AuxKernelType>
 void
-AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse)
+AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
 {
-  if (warehouse.hasActiveBlockObjects())
+  // Get all block restricted aux-kernels. This is only used as a non-emptiness check below, and
+  // spans every thread's copy of each kernel (no AttribThread condition), so it must stay
+  // unsorted - sorting would run dependency/cyclic resolution across per-thread duplicates of the
+  // same kernel, which can falsely detect a cycle.
+  // NOTE: we should use this query to pass to the loop instead
+  std::vector<AuxKernelType *> auxs;
+  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
+
+  if (auxs.size())
   {
-    // Block Nodal AuxKernels
+    // Block Nodal AuxKernels. Boundary-restricted kernels are excluded here - even if they are
+    // not also block-restricted (and would otherwise match every block) - since they are handled
+    // entirely by the boundary-node loop below, matching the old warehouse's mutually exclusive
+    // block/boundary dispatch.
+    const TheWarehouse::Query block_query =
+        query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
     PARALLEL_TRY
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
-      ComputeNodalAuxVarsThread<AuxKernelType> navt(_fe_problem, warehouse);
+      ComputeNodalAuxVarsThread<AuxKernelType> navt(_fe_problem, block_query);
       Threads::parallel_reduce(range, navt, this->numThreads());
 
       solution().close();
@@ -1008,15 +1149,17 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
     PARALLEL_CATCH;
   }
 
-  if (warehouse.hasActiveBoundaryObjects())
+  // Boundary Nodal AuxKernels. Reuses the "any nodal aux kernels at all" check above as a cheap
+  // gate; ComputeNodalAuxBcsThread itself finds nothing per-node if none of them are actually
+  // boundary restricted.
+  if (auxs.size())
   {
     TIME_SECTION("computeBoundaryObjects", 3);
 
-    // Boundary Nodal AuxKernels
     PARALLEL_TRY
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-      ComputeNodalAuxBcsThread<AuxKernelType> nabt(_fe_problem, warehouse);
+      ComputeNodalAuxBcsThread<AuxKernelType> nabt(_fe_problem, query);
       Threads::parallel_reduce(bnd_nodes, nabt, this->numThreads());
 
       solution().close();
@@ -1058,11 +1201,8 @@ AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
   }
 }
 
+template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(const TheWarehouse::Query &);
 template void
-AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(const MooseObjectWarehouse<AuxKernel> &);
-template void AuxiliarySystem::computeElementalVarsHelper<VectorAuxKernel>(
-    const MooseObjectWarehouse<VectorAuxKernel> &);
-template void
-AuxiliarySystem::computeNodalVarsHelper<AuxKernel>(const MooseObjectWarehouse<AuxKernel> &);
-template void AuxiliarySystem::computeNodalVarsHelper<VectorAuxKernel>(
-    const MooseObjectWarehouse<VectorAuxKernel> &);
+AuxiliarySystem::computeElementalVarsHelper<VectorAuxKernel>(const TheWarehouse::Query &);
+template void AuxiliarySystem::computeNodalVarsHelper<AuxKernel>(const TheWarehouse::Query &);
+template void AuxiliarySystem::computeNodalVarsHelper<VectorAuxKernel>(const TheWarehouse::Query &);

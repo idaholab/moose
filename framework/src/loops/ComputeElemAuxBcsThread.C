@@ -10,22 +10,24 @@
 // MOOSE includes
 #include "ComputeElemAuxBcsThread.h"
 #include "AuxiliarySystem.h"
+#include "Attributes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
 #include "SwapBackSentinel.h"
+#include "TheWarehouse.h"
 
 #include "libmesh/threads.h"
 
 template <typename AuxKernelType>
-ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
-    FEProblemBase & fe_problem,
-    const MooseObjectWarehouse<AuxKernelType> & storage,
-    bool need_materials)
+ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(FEProblemBase & fe_problem,
+                                                                const TheWarehouse::Query & query,
+                                                                bool need_materials)
   : _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage),
+    _query(query),
+    _query_boundary(_query),
     _need_materials(need_materials)
 {
 }
@@ -36,7 +38,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(ComputeElemAuxBc
                                                                 Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
-    _storage(x._storage),
+    _query(x._query),
+    _query_boundary(x._query_boundary),
     _need_materials(x._need_materials)
 {
 }
@@ -47,9 +50,6 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 {
   ParallelUniqueId puid;
   _tid = puid.id;
-
-  // Reference to all boundary restricted AuxKernels for the current thread
-  const auto & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
   printGeneralExecutionInformation();
 
@@ -65,12 +65,15 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
     if (elem->processor_id() == _fe_problem.processor_id())
     {
-      // Locate the AuxKernel objects for the current BoundaryID
-      const auto iter = boundary_kernels.find(boundary_id);
+      // Only kernels actually restricted to this boundary - unrestricted ones are already
+      // handled by the block-based element loop.
+      std::vector<AuxKernelType *> kernels;
+      _query_boundary.queryInto(
+          kernels, _tid, std::make_tuple(boundary_id, /*must_be_restricted=*/true));
 
-      if (iter != boundary_kernels.end() && !(iter->second.empty()))
+      if (!kernels.empty())
       {
-        printBoundaryExecutionInformation(boundary_id, iter->second);
+        printBoundaryExecutionInformation(boundary_id, kernels);
         const auto sub_id = elem->subdomain_id();
         if (sub_id != last_sub_id)
         {
@@ -105,7 +108,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         if (_need_materials)
         {
           std::unordered_set<unsigned int> needed_mat_props;
-          for (const auto & aux : iter->second)
+          for (const auto & aux : kernels)
           {
             const auto & mp_deps = aux->getMatPropDependencies();
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
@@ -124,7 +127,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
           }
         }
 
-        for (const auto & aux : iter->second)
+        for (const auto & aux : kernels)
         {
           aux->determineWhetherCoincidentLowerDCalc();
           aux->compute();
@@ -148,30 +151,34 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
-  {
-    const auto & console = _fe_problem.console();
-    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing boundary restricted auxkernels on boundary elements on "
-            << execute_on << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  std::vector<AuxKernelType *> all_kernels;
+  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  if (all_kernels.empty())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing boundary restricted auxkernels on boundary elements on " << execute_on
+          << std::endl;
 }
 
 template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
-    unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const
+    unsigned int boundary_id, const std::vector<AuxKernelType *> & kernels) const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects() ||
-      _boundaries_exec_printed.count(boundary_id))
+  if (!_fe_problem.shouldPrintExecution(_tid) || _boundaries_exec_printed.count(boundary_id))
     return;
 
   const auto & console = _fe_problem.console();
   console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
   std::vector<MooseObject *> objs_ptrs;
-  for (auto & kernel_ptr : kernels)
+  for (auto * kernel_ptr : kernels)
     if (kernel_ptr->hasBoundary(boundary_id))
-      objs_ptrs.push_back(dynamic_cast<MooseObject *>(kernel_ptr.get()));
+      objs_ptrs.push_back(dynamic_cast<MooseObject *>(kernel_ptr));
   std::string list_kernels = ConsoleUtils::mooseObjectVectorToString(objs_ptrs);
   console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
   _boundaries_exec_printed.insert(boundary_id);

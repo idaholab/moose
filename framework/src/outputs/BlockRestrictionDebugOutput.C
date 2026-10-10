@@ -326,74 +326,96 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
     {
 
       {
-        const auto & wh = auxSystem.nodalAuxWarehouse();
+        std::vector<AuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Real")
+            .condition<AttribAuxKernelMortar>(false)
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[nodal]", names) || objectsFound;
       }
 
       {
-        const auto & wh = auxSystem.nodalVectorAuxWarehouse();
+        std::vector<VectorAuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Vector")
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[nodalVector]", names) || objectsFound;
       }
 
       {
-        const auto & wh = auxSystem.nodalArrayAuxWarehouse();
+        std::vector<ArrayAuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Array")
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[nodalArray]", names) || objectsFound;
       }
 
       {
-        const auto & wh = auxSystem.elemAuxWarehouse();
+        std::vector<AuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Real")
+            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[elemAux]", names) || objectsFound;
       }
 
       {
-        const auto & wh = auxSystem.elemVectorAuxWarehouse();
+        std::vector<VectorAuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Vector")
+            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[elemVector]", names) || objectsFound;
       }
 
       {
-        const auto & wh = auxSystem.elemArrayAuxWarehouse();
+        std::vector<ArrayAuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribAuxKernelValueType>("Array")
+            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[elemArray]", names) || objectsFound;
       }
     }
@@ -482,16 +504,11 @@ BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
       groups[blocks].insert("AuxVariable/" + vg_description.name(vn));
   }
 
-  // Custom warehouses below are not covered by theWarehouse() queries.
-  const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.mortarNodalAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalVectorAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalArrayAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemVectorAuxWarehouse());
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemArrayAuxWarehouse());
+  // Custom warehouses below are not covered by theWarehouse() queries. All
+  // AuxKernel/VectorAuxKernel/ArrayAuxKernel (nodal, mortar, and elemental) are covered by the
+  // generic query above since they are added to theWarehouse().
 #ifdef MOOSE_KOKKOS_ENABLED
+  const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosNodalAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosElemAuxWarehouse());
 #endif
@@ -553,6 +570,14 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
     {
       const auto * const boundary_restrictable = dynamic_cast<const BoundaryRestrictable *>(object);
       mooseAssert(boundary_restrictable, "Query returned an object without BoundaryRestrictable");
+
+      // AuxKernels are treated like the "custom warehouse" objects below: only boundary-restricted
+      // ones belong in these groups, since unrestricted (block-only) ones are already represented
+      // in the block-restriction groups.
+      if (!boundary_restrictable->boundaryRestricted() &&
+          dynamic_cast<const AuxKernelBase *>(object))
+        continue;
+
       const auto & ids = boundary_restrictable->boundaryRestricted()
                              ? boundary_restrictable->boundaryIDs()
                              : boundary_restrictable->meshBoundaryIDs();
@@ -561,16 +586,11 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
 
   // Custom warehouses below are not covered by theWarehouse() queries. For these explicit passes,
   // only boundary-restricted objects belong in boundary-restriction groups; block-only objects are
-  // already represented in the block groups.
-  const auto & aux_system = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.mortarNodalAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalVectorAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalArrayAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemVectorAuxWarehouse(), false);
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemArrayAuxWarehouse(), false);
+  // already represented in the block groups. All AuxKernel/VectorAuxKernel/ArrayAuxKernel (nodal,
+  // mortar, and elemental) are covered by the generic query above since they are added to
+  // theWarehouse().
 #ifdef MOOSE_KOKKOS_ENABLED
+  const auto & aux_system = _problem_ptr->getAuxiliarySystem();
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosNodalAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosElemAuxWarehouse(), false);
 #endif

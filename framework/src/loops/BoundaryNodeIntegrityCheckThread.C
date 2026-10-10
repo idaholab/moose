@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "BoundaryElemIntegrityCheckThread.h"
-#include "AuxiliarySystem.h"
+#include "AuxKernelBase.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 #include "NodalUserObject.h"
@@ -26,10 +26,6 @@
 BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _aux_sys(fe_problem.getAuxiliarySystem()),
-    _nodal_aux(_aux_sys.nodalAuxWarehouse()),
-    _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
-    _nodal_array_aux(_aux_sys.nodalArrayAuxWarehouse()),
     _query(query)
 {
 }
@@ -38,10 +34,6 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
 BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     BoundaryNodeIntegrityCheckThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
-    _aux_sys(x._aux_sys),
-    _nodal_aux(x._nodal_aux),
-    _nodal_vec_aux(x._nodal_vec_aux),
-    _nodal_array_aux(x._nodal_array_aux),
     _query(x._query)
 {
 }
@@ -70,22 +62,33 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
     if (uo->checkVariableBoundaryIntegrity())
       boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*node), bnd_name);
 
-  auto check = [node, boundary_id, &bnd_name, this](const auto & warehouse)
+  // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
+  // boundaries they couple across, but their coupled variables are only required to be defined
+  // on the mortar segment mesh, not on every node of those boundaries.
+  auto check_aux_from_the_warehouse = [node, boundary_id, &bnd_name, this](auto & system_type)
   {
-    if (!warehouse.hasBoundaryObjects(boundary_id, _tid))
+    std::vector<AuxKernelBase *> auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>(system_type)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribAuxKernelMortar>(false)
+        .template condition<AttribBoundaries>(boundary_id, true)
+        .queryInto(auxkernels);
+    if (auxkernels.empty())
       return;
 
-    const auto & bnd_objects = warehouse.getBoundaryObjects(boundary_id, _tid);
-    for (const auto & bnd_object : bnd_objects)
+    for (const auto & aux : auxkernels)
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on
-      if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
-        boundaryIntegrityCheckError(*bnd_object, bnd_object->checkAllVariables(*node), bnd_name);
+      if (!aux->requiresGeometricSearch() && aux->checkVariableBoundaryIntegrity())
+        boundaryIntegrityCheckError(*aux, aux->checkAllVariables(*node), bnd_name);
   };
 
-  check(_nodal_aux);
-  check(_nodal_vec_aux);
-  check(_nodal_array_aux);
+  // AttribSystem groups AuxKernel/VectorAuxKernel/ArrayAuxKernel under the same "AuxKernel" tag
+  // (they execute through the same AuxiliarySystem machinery), so one call already covers all
+  // three value types here since we only ever query into the common AuxKernelBase type.
+  check_aux_from_the_warehouse("AuxKernel");
 }
 
 void
