@@ -1,5 +1,5 @@
 [Tests]
-  issues = "#15538"
+  issues = "#15538 #24527"
   [multiapp]
     requirement = 'PODFullSolveMultiapp shall throw an error when '
     design = "PODFullSolveMultiApp.md"
@@ -107,6 +107,17 @@
       cli_args = "Surrogates/rbpod/change_rank='doesnt_exist'"
       detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same."
       expect_err = "The size of 'new_ranks' is not equal to the size of 'change_rank' 0 != 1"
+    []
+    [not_ready]
+      type = RunException
+      input = trainer_and_surr.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/execute_on='initial timestep_begin final' "
+                 "VectorPostprocessors/res/execute_on='initial final' "
+                 "VectorPostprocessors/res/expect_model_ready=true"
+      detail = 'evaluation is requested before the basis vectors and reduced operators exist.'
+      expect_err = "does not have basis vectors and reduced operators"
+      max_parallel = 3 # We need fewer processors than samples
     []
   []
 []
