@@ -97,6 +97,7 @@
   solve_type = Newton
   dt = 1
   end_time = 1
+  nl_abs_tol = 1E-10
 []
 
 [Outputs]
