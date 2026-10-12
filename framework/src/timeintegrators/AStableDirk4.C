@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "AStableDirk4.h"
+#include "libmesh/sparse_matrix.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -32,6 +33,7 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters)
     _gamma(0.5 + std::sqrt(3) / 3. * std::cos(libMesh::pi / 18.)),
     _safe_start(getParam<bool>("safe_start"))
 {
+  requestTimeJacobian();
   mooseInfo("AStableDirk4 and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 
@@ -210,4 +212,15 @@ AStableDirk4::postResidual(NumericVector<Number> & residual)
       residual.close();
     }
   }
+}
+
+void
+AStableDirk4::postJacobian(SparseMatrix<Number> & jacobian)
+{
+  if (_t_step == 1 && _safe_start)
+    _bootstrap_method->postJacobian(jacobian);
+  else
+    // the stages weight their non-time residual by the diagonal coefficient; the update stage
+    // uses the non-time residuals of the earlier stages only, see postResidual()
+    weightNonTimeJacobian(jacobian, _stage < 4 ? _a[_stage - 1][_stage - 1] : 0.0);
 }
