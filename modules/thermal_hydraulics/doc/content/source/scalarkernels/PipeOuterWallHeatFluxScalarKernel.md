@@ -7,7 +7,7 @@ temperature $T_{i,w}$ and coupled variables for the upstream $T_{o,u}$ and downs
 temperature, $T_{o,w}$:
 
 !equation
-0 = \frac{1}{A_{o,w} \rho_w c_{p,w}} \left[ frac{k_w P_{m,w} \left( T_{i,w} - T_{o,w} \right)}{\delta} +
+0 = \frac{1}{A_{o,w} \rho_w c_{p,w}} \left[ \frac{k_w P_{m,w} \left( T_{i,w} - T_{o,w} \right)}{\delta} +
 \frac{G_{o,u} \left( T_{o,u} - T_{o,w} \right) + G_{o,d} \left( T_{o,d} - T_{o,w} \right)}{L} + q_o^{'} \right]
 
 This kernel implements an applied heat flux boundary condition for the per-length heat transfer term:
