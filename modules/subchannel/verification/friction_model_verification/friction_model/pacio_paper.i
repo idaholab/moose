@@ -2,12 +2,13 @@
 # for the wire-wrapped triangular lattices of Kennedy et al. (2015) and Liang et al. (2020). Each
 # time step solves the assembly at a larger inlet mass flux, which sets the bulk Reynolds number.
 # The including input defines the mesh, the exponent G_exp0 of the initial inlet mass flux, the
-# number of steps, the center, edge, and corner subchannel indices and counts, and includes the file
+# inlet mass flux 10^(G_exp0 + G_exp_rate n) [kg/m^2-s] at step n through G_exp_rate, the number of
+# steps, the center, edge, and corner subchannel indices and counts, and includes the file
 # with the mass flow rate and flow area of every subchannel at the outlet. The PCTD model lumps the
 # subchannels of each type, so the flow split of a type is calculated from those in the plotting
 # script. The bulk friction factor is calculated from the pressure gradient in the developed flow.
-# The fluid is water, since the flow split and friction factors depend on the bulk Reynolds number,
-# not on the fluid.
+# The fluid is water and the assembly is unheated, so the density is nearly uniform and the flow split
+# and friction factors depend only on the bulk Reynolds number and the geometry, as in the PCTD model.
 
 T_in = 359.15 # K
 P_out = 4.923e6 # Pa
@@ -18,8 +19,6 @@ z_out = 3.0
 # from the outlet boundary
 z_dp_in = 2.0
 z_dp_out = 2.9
-# Inlet mass flux 10^(G_exp0 + G_exp_rate n) [kg/m^2-s] at step n
-G_exp_rate = 0.1
 # Each sweep step is a time step of the transient solve; the time derivative of the axial momentum
 # equation is negligible for a time step this long, as in friction_factor_sampling.i
 dt_step = 1e4 # s

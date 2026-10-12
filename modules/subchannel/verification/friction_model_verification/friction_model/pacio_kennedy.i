@@ -4,8 +4,9 @@
 # SCMClosures/Chen_Todreas/CT=0.0 on the command line.
 
 # Inlet mass flux from 10^G_exp0 = 40 kg/m^2-s, a bulk Reynolds number of about 466, up to 10^(G_exp0 +
-# 0.1 n_steps) = 3981 kg/m^2-s, a bulk Reynolds number of about 46340
+# G_exp_rate n_steps) = 3981 kg/m^2-s, a bulk Reynolds number of about 46340
 G_exp0 = 1.6
+G_exp_rate = 0.1
 n_steps = 20
 n_rings = 7
 pin_diameter = 0.00655 # m

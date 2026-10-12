@@ -4,9 +4,11 @@
 # SCMClosures/Chen_Todreas/CT=0.0 on the command line.
 
 # Inlet mass flux from 10^G_exp0 = 40 kg/m^2-s, a bulk Reynolds number of about 398, up to 10^(G_exp0 +
-# 0.1 n_steps) = 2512 kg/m^2-s, a bulk Reynolds number of about 24993
+# G_exp_rate n_steps) = 2512 kg/m^2-s, a bulk Reynolds number of about 24993. The steps of 0.02
+# decades resolve the jump of the flow split at the laminar boundary, Re_b = 700
 G_exp0 = 1.6
-n_steps = 18
+G_exp_rate = 0.02
+n_steps = 90
 n_rings = 4
 pin_diameter = 0.01 # m
 wire_diameter = 0.0009 # m

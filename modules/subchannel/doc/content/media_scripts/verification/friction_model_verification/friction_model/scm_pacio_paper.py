@@ -469,16 +469,31 @@ print(
 )
 
 
-# Difference between SCM and the PCTD curves of the paper, over the transition regime for the flow
-# split and over the range of the SCM sweep for the friction factor
+# Rows of the flow split table of the verification page: difference between SCM and the PCTD curve
+# of the paper, absolute and as a percentage of the paper, at the SCM points of each band of the bulk
+# Reynolds number. The mean over the band is followed by the maximum absolute difference.
 Re, X, _ = load("pacio_liang_pctd_out.csv", n_rings=4)
-for channel in COLORS:
-    Re_paper, X_paper = (np.array(v) for v in PAPER_LIANG[channel])
-    scm = np.interp(np.log(Re_paper), np.log(Re), X[channel])
-    print(
-        f"Liang {channel} vs paper curve: mean {np.mean(scm - X_paper):+.3f}, "
-        f"max {np.max(np.abs(scm - X_paper)):.3f}"
-    )
+BANDS = (
+    ("Laminar", 0.0, RE_LAMINAR),
+    ("Transition", RE_LAMINAR, 1500.0),
+    ("Transition", 1500.0, 3000.0),
+    ("Transition", 3000.0, RE_TURBULENT),
+    ("Turbulent", RE_TURBULENT, np.inf),
+)
+for regime, lo, hi in BANDS:
+    keep = (Re > lo) & (Re <= hi)
+    cells = []
+    for channel in COLORS:
+        Re_paper, X_paper = (np.array(v) for v in paper_liang_curve(channel))
+        order = np.argsort(Re_paper)
+        paper = np.interp(np.log(Re[keep]), np.log(Re_paper[order]), X_paper[order])
+        diff = X[channel][keep] - paper
+        rel = 100.0 * diff / paper
+        cells.append(
+            f"{diff.mean():+.3f} ({np.abs(diff).max():.3f}), "
+            f"{rel.mean():+.1f}% ({np.abs(rel).max():.1f}%)"
+        )
+    print(f"| {regime} | {lo:.0f} to {hi:.0f} | " + " | ".join(cells) + " |")
 Re, _, f_bulk = load("pacio_kennedy_pctd_out.csv", n_rings=7)
 Re_paper, f_paper = (np.array(v) for v in PAPER_KENNEDY)
 keep = (Re_paper > Re.min()) & (Re_paper < Re.max())
