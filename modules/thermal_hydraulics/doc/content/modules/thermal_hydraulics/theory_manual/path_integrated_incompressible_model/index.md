@@ -176,8 +176,9 @@ where
 - $q_o^{'}$ is the per-length heat transfer term through the outer boundary.
 
 Since the outer boundary of the wall may be subject to a number of boundary conditions, a number of kernels are provided for flexibility in modeling the per-length heat transfer term. The base kernels include:
-- Ambient convection [PipeOuterWallAmbientTemperatureScalarKernel.md]
-- Coupled secondary-side convection [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]
-- Applied heat flux [PipeOuterWallHeatFluxScalarKernel.md]
+
+- Ambient convection: [PipeOuterWallAmbientTemperatureScalarKernel.md]
+- Coupled secondary-side convection: [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]
+- Applied heat flux: [PipeOuterWallHeatFluxScalarKernel.md]
 
 An optional standalone term for radiative heat transfer [PipeOuterWallRadiationScalarKernel.md] may also be added to any of the base outer wall temperature kernels (but it really only makes sense for the ambient and coupled convection kernels).
