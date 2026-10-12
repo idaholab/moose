@@ -132,6 +132,7 @@
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'using default geometric subpatch-plane normals for a curved HEX20 mortar interface.'
     recover = false
+    min_slots = 2
   []
   [subpatch-plane-modes]
     issues = '#33282'
