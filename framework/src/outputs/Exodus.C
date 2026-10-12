@@ -228,8 +228,18 @@ Exodus::outputSetup()
   //    _displaced_problem->mesh().elemPtr(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
   // Here we assume that the displaced mesh and the reference mesh are identical except
   // coordinations.
-  if (_problem_ptr->getDisplacedProblem())
-    serialize(_problem_ptr->getDisplacedProblem()->mesh());
+  if (auto * displaced_problem = _problem_ptr->getDisplacedProblem().get())
+  {
+    // Gathering rebuilds element neighbors, which for disjoint neighbor boundary pairs (e.g. from
+    // BreakMeshByBlockGenerator) are found geometrically and only match in the undisplaced
+    // configuration, so gather the undisplaced mesh and displace it again afterwards.
+    if (!displaced_problem->mesh().getMesh().is_serial_on_zero())
+    {
+      displaced_problem->undisplaceMesh();
+      serialize(displaced_problem->mesh());
+      displaced_problem->updateMesh();
+    }
+  }
 
   // Create the ExodusII_IO object
   _exodus_io_ptr = std::make_unique<ExodusII_IO>(_es_ptr->get_mesh());
