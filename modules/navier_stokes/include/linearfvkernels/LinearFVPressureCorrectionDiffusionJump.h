@@ -50,12 +50,12 @@ protected:
    * Compute the pressure-correction transmissibility for the current face.
    *
    * Baffle faces use the transmissibility obtained by eliminating the two one-sided interface
-   * pressures. Non-baffle faces and invalid half-cell data use the inherited diffusion
-   * transmissibility selected by the Rhie-Chow object.
+   * pressures. Non-baffle faces use the inherited diffusion transmissibility selected by the
+   * Rhie-Chow object.
    */
   Real computeJumpAwareFluxMatrixContribution();
 
-  /// Compute the explicit one-sided correction for the current baffle face.
+  /// Compute the complete element-side right-hand side for the current face.
   Real computeJumpAwareFluxRHSContribution();
 
   /// Compute and cache the half-cell data shared by matrix and right-hand-side assembly.

@@ -10,6 +10,8 @@
 
 #include "PressureJumpInterface.h"
 
+#include <limits>
+
 TEST(PressureJumpInterface, OrthogonalIsotropic)
 {
   const RealVectorValue normal(1.0, 0.0, 0.0);
@@ -18,9 +20,10 @@ TEST(PressureJumpInterface, OrthogonalIsotropic)
   const RealVectorValue gradient(3.0, -4.0, 0.0);
 
   const auto data = NS::FV::pressureJumpInterfaceData(
-      normal, half_cell, half_cell, diffusion, diffusion, gradient, gradient, 3.0, true);
+      normal, half_cell, half_cell, diffusion, diffusion, gradient, gradient, 3.0, true, 0.0);
 
   ASSERT_TRUE(data.valid);
+  EXPECT_TRUE(data.is_baffle);
   EXPECT_DOUBLE_EQ(data.elem_conductance, 12.0);
   EXPECT_DOUBLE_EQ(data.neighbor_conductance, 12.0);
   EXPECT_DOUBLE_EQ(data.transmissibility, 6.0);
@@ -50,10 +53,15 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
                                                       elem_gradient,
                                                       neighbor_gradient,
                                                       1.7,
-                                                      true);
+                                                      true,
+                                                      jump);
   ASSERT_TRUE(data.valid);
+  EXPECT_DOUBLE_EQ(data.elem_jump, jump);
 
-  const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure, jump);
+  const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure);
+  const Real assembled_flux = data.transmissibility * elem_pressure -
+                              data.transmissibility * neighbor_pressure -
+                              (data.correction + data.transmissibility * data.elem_jump);
   const Real elem_face_pressure =
       elem_pressure - (flux + data.elem_correction) / data.elem_conductance;
   const Real neighbor_face_pressure =
@@ -69,6 +77,7 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
       data, neighbor_pressure, flux, /*elem_side=*/false);
 
   EXPECT_NEAR(elem_face_pressure - neighbor_face_pressure, jump, 1e-13);
+  EXPECT_NEAR(assembled_flux, flux, 1e-13);
   EXPECT_NEAR(elem_half_flux, flux, 1e-13);
   EXPECT_NEAR(neighbor_half_flux, flux, 1e-13);
   EXPECT_NEAR(recovered_elem_face_pressure, elem_face_pressure, 1e-13);
@@ -103,10 +112,11 @@ TEST(PressureJumpInterface, ManufacturedPiecewiseLinearPressure)
                                                       elem_gradient,
                                                       neighbor_gradient,
                                                       face_area,
-                                                      true);
+                                                      true,
+                                                      jump);
   ASSERT_TRUE(data.valid);
 
-  const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure, jump);
+  const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure);
   const Real recovered_elem_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
       data, elem_pressure, flux, /*elem_side=*/true);
   const Real recovered_neighbor_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
@@ -135,7 +145,8 @@ TEST(PressureJumpInterface, OrientationReversal)
                                                          elem_gradient,
                                                          neighbor_gradient,
                                                          1.7,
-                                                         true);
+                                                         true,
+                                                         2.5);
   const auto reverse = NS::FV::pressureJumpInterfaceData(-normal,
                                                          -face_to_neighbor,
                                                          -elem_to_face,
@@ -144,12 +155,13 @@ TEST(PressureJumpInterface, OrientationReversal)
                                                          neighbor_gradient,
                                                          elem_gradient,
                                                          1.7,
-                                                         true);
+                                                         true,
+                                                         -2.5);
   ASSERT_TRUE(forward.valid);
   ASSERT_TRUE(reverse.valid);
 
-  const Real forward_flux = NS::FV::pressureJumpFlux(forward, 11.0, 4.0, 2.5);
-  const Real reverse_flux = NS::FV::pressureJumpFlux(reverse, 4.0, 11.0, -2.5);
+  const Real forward_flux = NS::FV::pressureJumpFlux(forward, 11.0, 4.0);
+  const Real reverse_flux = NS::FV::pressureJumpFlux(reverse, 4.0, 11.0);
 
   EXPECT_NEAR(reverse.elem_conductance, forward.neighbor_conductance, 1e-13);
   EXPECT_NEAR(reverse.neighbor_conductance, forward.elem_conductance, 1e-13);
@@ -157,16 +169,28 @@ TEST(PressureJumpInterface, OrientationReversal)
   EXPECT_NEAR(reverse_flux, -forward_flux, 1e-13);
 }
 
-TEST(PressureJumpInterface, RejectsDegenerateHalfCell)
+TEST(PressureJumpInterface, RejectsInvalidGeometryAndCoefficients)
 {
-  const auto data = NS::FV::pressureJumpInterfaceData(RealVectorValue(1.0, 0.0, 0.0),
-                                                      Point(0.0, 1.0, 0.0),
-                                                      Point(0.5, 0.0, 0.0),
-                                                      RealVectorValue(1.0, 1.0, 1.0),
-                                                      RealVectorValue(1.0, 1.0, 1.0),
-                                                      RealVectorValue(),
-                                                      RealVectorValue(),
-                                                      1.0,
-                                                      true);
-  EXPECT_FALSE(data.valid);
+  const auto build_operator =
+      [](const Point & elem_to_face, const RealVectorValue & elem_diffusion, const Real face_area)
+  {
+    return NS::FV::pressureJumpInterfaceData(RealVectorValue(1.0, 0.0, 0.0),
+                                             elem_to_face,
+                                             Point(0.5, 0.0, 0.0),
+                                             elem_diffusion,
+                                             RealVectorValue(1.0, 1.0, 1.0),
+                                             RealVectorValue(),
+                                             RealVectorValue(),
+                                             face_area,
+                                             true,
+                                             0.0);
+  };
+
+  EXPECT_FALSE(build_operator(Point(0.0, 1.0, 0.0), RealVectorValue(1.0, 1.0, 1.0), 1.0).valid);
+  EXPECT_FALSE(build_operator(Point(0.5, 0.0, 0.0), RealVectorValue(0.0, 1.0, 1.0), 1.0).valid);
+  EXPECT_FALSE(build_operator(Point(0.5, 0.0, 0.0),
+                              RealVectorValue(std::numeric_limits<Real>::infinity(), 1.0, 1.0),
+                              1.0)
+                   .valid);
+  EXPECT_FALSE(build_operator(Point(0.5, 0.0, 0.0), RealVectorValue(1.0, 1.0, 1.0), 0.0).valid);
 }

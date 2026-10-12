@@ -229,8 +229,11 @@ half-cell coefficient
 On a baffle face, the assembled transmissibility is $T_f=T_f^h$. Using it together with $R_f$
 preserves the single flux relation obtained by eliminating the two one-sided interface
 pressures. On non-baffle faces, the operator retains the inherited transmissibility formed from
-the Rhie-Chow face coefficient. If either half-cell conductance is invalid, the implementation
-uses that inherited face transmissibility and zero explicit correction for both adjacent rows.
+the Rhie-Chow face coefficient. A modeled baffle requires finite, positive projected half-cell
+distances, normal pressure-diffusion coefficients, face area, and conductances, together with
+finite explicit corrections. The implementation reports the face ID and coefficient data if these
+conditions are not met because a different fallback for assembly and reconstruction would not
+define a common interface flux.
 
 ## Jump-aware flux
 
@@ -389,7 +392,8 @@ The pressure variable therefore uses
 continuous internal face contributes one common interpolated pressure. At a baffle, the value from
 each side is recovered from the same half-cell flux relation used by the pressure operator,
 producing separate one-sided face values that preserve both the prescribed jump and the common
-interface flux.
+interface flux. The pressure assembly, corrected Rhie-Chow flux, and one-sided recovery all use the
+same face operator containing $J_P$, $	au_P$, $	au_N$, $r_P$, $r_N$, $T_f^h$, and $R_f$.
 The explicit half-cell correction is lagged with the previously published geometric gradient.
 The pressure reconstructed for cell $P$ contributes only to cell $P$, and the pressure
 reconstructed for cell $N$ contributes only to cell $N$. The completed sums are divided by

@@ -17,6 +17,7 @@
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVPressureCorrectionDiffusionJump.h"
 #include "MooseLinearVariableFV.h"
+#include "PressureJumpInterface.h"
 #include "PressureJumpModel.h"
 
 using namespace libMesh;
@@ -255,6 +256,68 @@ PorousRhieChowMassFlux::pressureDiffusionUsesNonorthogonalCorrection() const
 {
   mooseAssert(pressureDiffusionDataReady(), "Pressure-diffusion data must be ready first.");
   return _p_diffusion_kernel->useNonorthogonalCorrection();
+}
+
+NS::FV::PressureJumpInterfaceData
+PorousRhieChowMassFlux::pressureJumpInterfaceData(const FaceInfo & fi,
+                                                  const RealVectorValue & elem_gradient,
+                                                  const RealVectorValue & neighbor_gradient,
+                                                  const Real face_area) const
+{
+  NS::FV::PressureJumpInterfaceData data;
+  if (!fi.neighborPtr() || !faceIsBaffle(fi))
+    return data;
+
+  mooseAssert(pressureDiffusionDataReady(),
+              "Pressure-diffusion data must be ready before constructing a baffle face operator.");
+
+  const auto & elem_info = *fi.elemInfo();
+  const auto & neighbor_info = *fi.neighborInfo();
+  RealVectorValue elem_diffusion;
+  RealVectorValue neighbor_diffusion;
+  for (const auto component : make_range(dimension()))
+  {
+    elem_diffusion(component) = cellPressureDiffusionCoefficient(elem_info, component);
+    neighbor_diffusion(component) = cellPressureDiffusionCoefficient(neighbor_info, component);
+  }
+
+  data = NS::FV::pressureJumpInterfaceData(fi.normal(),
+                                           fi.faceCentroid() - elem_info.centroid(),
+                                           neighbor_info.centroid() - fi.faceCentroid(),
+                                           elem_diffusion,
+                                           neighbor_diffusion,
+                                           elem_gradient,
+                                           neighbor_gradient,
+                                           face_area,
+                                           pressureDiffusionUsesNonorthogonalCorrection(),
+                                           getSignedBaffleJump(fi, /*elem_side=*/true));
+
+  if (!data.valid)
+    mooseError("Cannot construct the pressure-jump operator on face ",
+               fi.id(),
+               ". The projected element and neighbor half-cell distances, normal pressure "
+               "diffusion coefficients, face area, and resulting conductances must be finite and "
+               "positive, and the corrections must be finite. Got element distance ",
+               data.elem_normal_distance,
+               ", neighbor distance ",
+               data.neighbor_normal_distance,
+               ", element normal diffusion ",
+               data.elem_normal_diffusion,
+               ", neighbor normal diffusion ",
+               data.neighbor_normal_diffusion,
+               ", face area ",
+               data.face_area,
+               ", element conductance ",
+               data.elem_conductance,
+               ", neighbor conductance ",
+               data.neighbor_conductance,
+               ", element correction ",
+               data.elem_correction,
+               ", and neighbor correction ",
+               data.neighbor_correction,
+               ".");
+
+  return data;
 }
 
 const PressureJumpModel *
