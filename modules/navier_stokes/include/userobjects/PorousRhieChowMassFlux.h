@@ -14,6 +14,10 @@
 #include <unordered_set>
 
 class PressureJumpModel;
+namespace NS::FV
+{
+struct PressureJumpInterfaceData;
+}
 
 /**
  * Computes Rhie-Chow face mass fluxes for porous flow with optional internal pressure jumps.
@@ -69,6 +73,19 @@ public:
 
   /// Whether the linked pressure-diffusion kernel applies a nonorthogonal correction.
   bool pressureDiffusionUsesNonorthogonalCorrection() const;
+
+  /**
+   * Construct the complete pressure-jump operator for a face.
+   * @param fi The face on which to construct the operator
+   * @param elem_gradient The lagged pressure gradient in the element
+   * @param neighbor_gradient The lagged pressure gradient in the neighbor
+   * @param face_area The area multiplier used by the caller's flux convention
+   */
+  NS::FV::PressureJumpInterfaceData
+  pressureJumpInterfaceData(const FaceInfo & fi,
+                            const RealVectorValue & elem_gradient,
+                            const RealVectorValue & neighbor_gradient,
+                            Real face_area) const;
 
   /// Populate baffle-jump storage before initializing the face mass flux.
   void initFaceMassFlux() override;

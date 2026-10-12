@@ -17,15 +17,22 @@ namespace NS
 namespace FV
 {
 
-/** Coefficients obtained by eliminating the two one-sided interface pressures on a jump face. */
+/** Complete face operator obtained by eliminating the two one-sided interface pressures. */
 struct PressureJumpInterfaceData
 {
+  bool is_baffle = false;
+  Real elem_jump = 0.0;
   Real elem_conductance = 0.0;
   Real neighbor_conductance = 0.0;
   Real elem_correction = 0.0;
   Real neighbor_correction = 0.0;
   Real transmissibility = 0.0;
   Real correction = 0.0;
+  Real elem_normal_distance = 0.0;
+  Real neighbor_normal_distance = 0.0;
+  Real elem_normal_diffusion = 0.0;
+  Real neighbor_normal_diffusion = 0.0;
+  Real face_area = 0.0;
   bool valid = false;
 };
 
@@ -42,22 +49,28 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
                           const RealVectorValue & elem_gradient,
                           const RealVectorValue & neighbor_gradient,
                           const Real face_area,
-                          const bool use_nonorthogonal_correction)
+                          const bool use_nonorthogonal_correction,
+                          const Real elem_jump)
 {
   PressureJumpInterfaceData data;
+  data.is_baffle = true;
+  data.elem_jump = elem_jump;
+  data.face_area = face_area;
 
   const auto side_data = [&](const Point & half_cell,
                              const RealVectorValue & diffusion,
                              const RealVectorValue & gradient,
                              Real & conductance,
-                             Real & correction)
+                             Real & correction,
+                             Real & normal_distance,
+                             Real & normal_diffusion)
   {
     RealVectorValue diffusion_normal;
     for (const auto i : make_range(Moose::dim))
       diffusion_normal(i) = diffusion(i) * normal(i);
 
-    const Real normal_diffusion = normal * diffusion_normal;
-    const Real normal_distance = half_cell * normal;
+    normal_diffusion = normal * diffusion_normal;
+    normal_distance = half_cell * normal;
     if (!std::isfinite(normal_distance) || normal_distance <= 0.0 ||
         !std::isfinite(normal_diffusion) || normal_diffusion <= 0.0 || face_area <= 0.0)
       return false;
@@ -72,16 +85,21 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
     return std::isfinite(conductance) && conductance > 0.0 && std::isfinite(correction);
   };
 
-  if (!side_data(elem_to_face,
-                 elem_diffusion,
-                 elem_gradient,
-                 data.elem_conductance,
-                 data.elem_correction) ||
-      !side_data(face_to_neighbor,
-                 neighbor_diffusion,
-                 neighbor_gradient,
-                 data.neighbor_conductance,
-                 data.neighbor_correction))
+  const bool elem_valid = side_data(elem_to_face,
+                                    elem_diffusion,
+                                    elem_gradient,
+                                    data.elem_conductance,
+                                    data.elem_correction,
+                                    data.elem_normal_distance,
+                                    data.elem_normal_diffusion);
+  const bool neighbor_valid = side_data(face_to_neighbor,
+                                        neighbor_diffusion,
+                                        neighbor_gradient,
+                                        data.neighbor_conductance,
+                                        data.neighbor_correction,
+                                        data.neighbor_normal_distance,
+                                        data.neighbor_normal_diffusion);
+  if (!elem_valid || !neighbor_valid)
     return data;
 
   data.transmissibility = 1.0 / (1.0 / data.elem_conductance + 1.0 / data.neighbor_conductance);
@@ -96,10 +114,10 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
 inline Real
 pressureJumpFlux(const PressureJumpInterfaceData & data,
                  const Real elem_pressure,
-                 const Real neighbor_pressure,
-                 const Real elem_jump)
+                 const Real neighbor_pressure)
 {
-  return data.transmissibility * (elem_pressure - neighbor_pressure - elem_jump) - data.correction;
+  return data.transmissibility * (elem_pressure - neighbor_pressure - data.elem_jump) -
+         data.correction;
 }
 
 /** Recover one side's face pressure from the common oriented flux. */

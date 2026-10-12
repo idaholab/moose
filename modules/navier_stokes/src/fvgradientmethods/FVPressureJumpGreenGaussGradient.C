@@ -108,42 +108,19 @@ FVPressureJumpGreenGaussGradient::twoSidedInterpolate(const FaceInfo & fi,
             Moose::FV::linearInterpolation(elem_value - jump, neighbor_value, fi, true)};
   }
 
-  // The cell coefficients are the diagonal entries of the pressure-diffusion tensor.
-  RealVectorValue elem_diffusion;
-  RealVectorValue neighbor_diffusion;
-  for (const auto component : make_range(_rhie_chow->dimension()))
-  {
-    elem_diffusion(component) = _rhie_chow->cellPressureDiffusionCoefficient(elem_info, component);
-    neighbor_diffusion(component) =
-        _rhie_chow->cellPressureDiffusionCoefficient(neighbor_info, component);
-  }
-
   // Use the published geometric pressure gradient to match the deferred correction in the
   // pressure equation. The reconstructed coupling gradient must not enter this correction.
-  const auto interface_data =
-      NS::FV::pressureJumpInterfaceData(fi.normal(),
-                                        fi.faceCentroid() - elem_info.centroid(),
-                                        neighbor_info.centroid() - fi.faceCentroid(),
-                                        elem_diffusion,
-                                        neighbor_diffusion,
-                                        _pressure_gradient->gradient(elem_info),
-                                        _pressure_gradient->gradient(neighbor_info),
-                                        fi.faceArea() * fi.faceCoord(),
-                                        _rhie_chow->pressureDiffusionUsesNonorthogonalCorrection());
+  const auto face_operator =
+      _rhie_chow->pressureJumpInterfaceData(fi,
+                                            _pressure_gradient->gradient(elem_info),
+                                            _pressure_gradient->gradient(neighbor_info),
+                                            fi.faceArea() * fi.faceCoord());
 
-  if (interface_data.valid)
-  {
-    // Eliminate the interface pressures to obtain one conservative flux, then recover the
-    // one-sided face value used in each cell's Green-Gauss surface sum.
-    const Real flux = NS::FV::pressureJumpFlux(interface_data, elem_value, neighbor_value, jump);
-    return {
-        NS::FV::pressureJumpOneSidedFaceValue(interface_data, elem_value, flux, /*elem_side=*/true),
-        NS::FV::pressureJumpOneSidedFaceValue(
-            interface_data, neighbor_value, flux, /*elem_side=*/false)};
-  }
-
-  // Degenerate half-cell geometry cannot define a conductance. The interpolation
-  // fallback still preserves the prescribed pressure jump.
-  return {Moose::FV::linearInterpolation(elem_value, neighbor_value + jump, fi, true),
-          Moose::FV::linearInterpolation(elem_value - jump, neighbor_value, fi, true)};
+  // Eliminate the interface pressures to obtain one conservative flux, then recover the
+  // one-sided face value used in each cell's Green-Gauss surface sum.
+  const Real flux = NS::FV::pressureJumpFlux(face_operator, elem_value, neighbor_value);
+  return {
+      NS::FV::pressureJumpOneSidedFaceValue(face_operator, elem_value, flux, /*elem_side=*/true),
+      NS::FV::pressureJumpOneSidedFaceValue(
+          face_operator, neighbor_value, flux, /*elem_side=*/false)};
 }
