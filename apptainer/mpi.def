@@ -21,13 +21,13 @@
     ubuntu24_gccmin:   moose-mpi-ubuntu24-gccmin:24.04-gcc9.5.0-mpich5.0.2-20261008
 -#}
 {%- set FROM_IMAGES = {
-  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/staging-moose-mpi-rocky8-gcc@sha256:a567e08beb7f417c770a428a7494e44926a704dff7855d9fcae27ad2c468227e",
-  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/staging-moose-mpi-rocky8-oneapi@sha256:71096cae143ac6d86ac2fdc863e00a2ab793de68530ce26d491a45cdb716351b",
-  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/staging-moose-mpi-rocky9-gcc@sha256:60af62b869bb7aa8e453760d430bdc31136ffbbdec22991b9ace97d84a93afb7",
-  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/staging-moose-mpi-ubuntu24-clang@sha256:681dcfa2aa05d928b9899854b73351eed329a0420f81eedc7e0565fcd88453da",
-  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/staging-moose-mpi-ubuntu24-cuda-gcc@sha256:744c476e8a836ccd1c4489bc29b00fc78c92ddc666680a2d507b394adefab90d",
-  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/staging-moose-mpi-ubuntu24-gcc@sha256:b26a1e4030018136a3487c2896a3cf42d53f5ceccde9bfe81c7ffcb72a84b949",
-  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/staging-moose-mpi-ubuntu24-gccmin@sha256:1978f0a8e5462832043b15c7ba9fd3991944cad1ecfd8357dbfb54bc941c3664"
+  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc@sha256:efa677939d9024753761f806df6257ed27acaa04f958b79eab7f95e540aa55ac",
+  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi@sha256:0e2a63370d0493b8357c801de1758a015b29ec0ef8a3c7aa0112b52ac92755d5",
+  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc@sha256:542cee398bd116d1d2b0474e024eadb914401df7b06f6bb3d20e023da7bbeb0a",
+  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-clang@sha256:7475ca1293095d3147767beb1e6a9a2afc678597647d0635ad8703f2059f9abe",
+  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-cuda-gcc@sha256:e924a14256a8339b36be972487d911800a081365d502b1c2dfda164d1a16ac3f",
+  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gcc@sha256:ec0f5b6f3cb2e13e470159b242e9073b498b984888060510d251817fa4329883",
+  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gccmin@sha256:47a7577b7e323d9fb0c063887a275b08321446b40b1ff7f06c837da2b2660c59"
 } -%}
 
 Bootstrap: docker
