@@ -281,4 +281,21 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosity.md'
   []
+  [vinsome_westerveld]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    csvdiff = vinsome_westerveld_out.csv
+    requirement = 'The system shall be able to calculate porosity as a linear function of effective porepressure, temperature and volumetric strain, plus a thermal-opening term proportional to the heat content of the adjacent matrix computed using the Vinsome-Westerveld method.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_porosity_min]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Materials/porosity/porosity_min=0.5 Outputs/file_base=vinsome_westerveld_porosity_min_out'
+    csvdiff = vinsome_westerveld_porosity_min_out.csv
+    requirement = 'The system shall set porosity computed using the Vinsome-Westerveld thermal-opening method to the user-specified lower bound when the computed porosity is less than that bound.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
 []
