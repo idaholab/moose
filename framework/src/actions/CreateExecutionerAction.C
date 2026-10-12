@@ -15,6 +15,7 @@
 #include "FEProblem.h"
 #include "EigenProblem.h"
 #include "EigenProblemSolve.h"
+#include "SetupPreconditionerAction.h"
 
 registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
 
@@ -51,9 +52,9 @@ CreateExecutionerAction::act()
     mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
                "EigenProblem, and Steady and Transient need a FEProblem");
 
-  // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
-  if (_auto_preconditioning && !_awh.hasActions("add_preconditioning") &&
-      _moose_object_pars.isParamValid("solve_type"))
+  // If enabled, automatically create a Preconditioner for the nonlinear systems that do not have
+  // one in the [Preconditioning] block
+  if (_auto_preconditioning && _moose_object_pars.isParamValid("solve_type"))
     setupAutoPreconditioning();
 
   _app.setExecutioner(std::move(executioner));
@@ -67,8 +68,28 @@ CreateExecutionerAction::setupAutoPreconditioning()
   const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
   if (((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON")) ||
       ((solve_type.find("LINEAR") != solve_type.items().end()) && (solve_type == "LINEAR")))
+  {
+    // Nonlinear systems that already have a preconditioner from the [Preconditioning] block. Other
+    // actions on the preconditioning task (e.g. Physics) are not tied to a nonlinear system, so
+    // their presence disables the automatic preconditioner entirely.
+    std::set<unsigned int> preconditioned_nl_sys;
+    for (const auto action : _awh.getActionListByName("add_preconditioning"))
+    {
+      const auto pc_action = dynamic_cast<const SetupPreconditionerAction *>(action);
+      if (!pc_action)
+        return;
+      const auto & pc_params = pc_action->getObjectParams();
+      preconditioned_nl_sys.insert(
+          pc_params.isParamValid("nl_sys")
+              ? _problem->nlSysNum(pc_params.get<NonlinearSystemName>("nl_sys"))
+              : 0);
+    }
+
     for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
     {
+      if (preconditioned_nl_sys.count(_problem->nlSysNum(nl_sys_name)))
+        continue;
+
       // Action Parameters
       InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
       params.set<std::string>("type") = "SMP";
@@ -92,4 +113,5 @@ CreateExecutionerAction::setupAutoPreconditioning()
 
       _awh.addActionBlock(ptr);
     }
+  }
 }
