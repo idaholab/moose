@@ -66,8 +66,6 @@
     recover = false
     max_threads = 1
   []
-[]
-
   [form-loss-owner-elem-left-to-right]
     type = 'CSVDiff'
     input = form-loss-orientation.i
@@ -112,4 +110,4 @@
     recover = false
     max_threads = 1
   []
-
+[]

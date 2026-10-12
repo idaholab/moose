@@ -20,8 +20,6 @@
     max_threads = 1
     abs_zero = 1e-4
   []
-[]
-
   [nonpositive-cp]
     type = RunException
     input = porous-baffle-2d-enthalpy.i
@@ -33,4 +31,4 @@
     recover = false
     max_threads = 1
   []
-
+[]
