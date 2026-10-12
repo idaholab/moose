@@ -8,9 +8,16 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness import checkPythonVersion
 
 
 class TestHarnessTester(TestHarnessTestCase):
+    def testMinimumVersion(self):
+        """Test that the TestHarness rejects unsupported Python versions."""
+        checkPythonVersion((3, 10, 0))
+        with self.assertRaisesRegex(RuntimeError, "requires Python 3.10 or newer"):
+            checkPythonVersion((3, 9, 20))
+
     def testVersion(self):
         """Test that python=... is working."""
         output = self.runTests("-i", "python_version").output
