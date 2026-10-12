@@ -328,6 +328,10 @@ public:
     return _ad_grad_u;
   }
 
+  /**
+   * Volume-only: on element faces the AD gradient time derivative is not computed, because it
+   * would require the AD face shape function gradients, and the returned array is left empty
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u_dot = true;

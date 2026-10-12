@@ -807,8 +807,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // stays empty so that a face object that read it through the volume accessor adGradSln() fails
   // the bounds assertion instead of silently using gradients built without the AD face shape
   // function gradients. Neighbor data never uses AD shape function gradients and is not affected.
-  if (_need_ad_grad_u && _element_type == Moose::ElementType::Element && _current_qrule != _qrule &&
-      !_need_ad_grad_u_face)
+  const bool on_element_face =
+      _element_type == Moose::ElementType::Element && _current_qrule != _qrule;
+  if (_need_ad_grad_u && on_element_face && !_need_ad_grad_u_face)
     _ad_grad_u.resize(0);
   else if (_need_ad_grad_u)
   {
@@ -857,7 +858,11 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
     }
 
-    if (_need_ad_grad_u_dot)
+    // The gradient time derivative is volume-only, so on an element face it is left empty for the
+    // same reason as the gradient above
+    if (_need_ad_grad_u_dot && on_element_face)
+      _ad_grad_u_dot.resize(0);
+    else if (_need_ad_grad_u_dot)
     {
       if (_time_integrator)
       {
