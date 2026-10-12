@@ -8,11 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVPressureCorrectionDiffusionJump.h"
-#include "FVReconstructedPressureGradient.h"
-#include "FVUtils.h"
 #include "PorousRhieChowMassFlux.h"
-
-#include <limits>
 
 registerMooseObject("NavierStokesApp", LinearFVPressureCorrectionDiffusionJump);
 
@@ -24,19 +20,13 @@ LinearFVPressureCorrectionDiffusionJump::validParams()
                              "contribution on internal faces.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object", "The rhie-chow user-object which provides baffle jump information.");
-  params.addParam<bool>(
-      "use_two_term_pressure_expansion",
-      false,
-      "Whether to compute the baffle pressure transmissibility from the lagged two-term cell "
-      "pressure expansions.");
   return params;
 }
 
 LinearFVPressureCorrectionDiffusionJump::LinearFVPressureCorrectionDiffusionJump(
     const InputParameters & params)
   : LinearFVPressureCorrectionDiffusion(params),
-    _rc_uo(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object")),
-    _use_two_term_pressure_expansion(getParam<bool>("use_two_term_pressure_expansion"))
+    _rc_uo(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object"))
 {
 }
 
@@ -103,83 +93,7 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxMatrixContribution(
   if (!_rc_uo.faceIsBaffle(*_current_face_info))
     return base_matrix_contribution;
 
-  const auto & interface_data = jumpInterfaceData();
-  if (!_use_two_term_pressure_expansion)
-    return interface_data.transmissibility;
-
-  const auto & reconstructed_gradient_field = _rc_uo.pressureGradientField();
-  const auto * const reconstructed_gradient_method =
-      dynamic_cast<const FVReconstructedPressureGradient *>(&reconstructed_gradient_field.method());
-  if (!reconstructed_gradient_method)
-    paramError("use_two_term_pressure_expansion",
-               "Two-term pressure expansion requires the momentum-pressure kernels linked to "
-               "the Rhie-Chow object to use FVReconstructedPressureGradient.");
-  if (!reconstructed_gradient_method->hasReconstructedCandidate())
-    return interface_data.transmissibility;
-
-  const auto & elem_info = *_current_face_info->elemInfo();
-  const auto & neighbor_info = *_current_face_info->neighborInfo();
-  const Point elem_to_face = _current_face_info->faceCentroid() - elem_info.centroid();
-  const Point neighbor_to_face = _current_face_info->faceCentroid() - neighbor_info.centroid();
-  Real elem_taylor_term = 0.0;
-  Real neighbor_taylor_term = 0.0;
-  for (const auto component : make_range(_subproblem.mesh().dimension()))
-  {
-    elem_taylor_term +=
-        reconstructed_gradient_field.component(elem_info, component) * elem_to_face(component);
-    neighbor_taylor_term += reconstructed_gradient_field.component(neighbor_info, component) *
-                            neighbor_to_face(component);
-  }
-
-  // This is Delta p_PN^smooth,lag. It is a known denominator, not a pressure difference assembled
-  // from the current solution vector.
-  const Real two_term_pressure_drop = -elem_taylor_term + neighbor_taylor_term;
-
-  // A vanishing lagged pressure drop cannot define a transmissibility, even if roundoff leaves a
-  // nonzero lagged flux. Retain the half-cell pressure-diffusion coefficient in that case.
-  // Thirty-two floating-point ulps leave headroom for the two dot-product accumulations while
-  // scaling the cancellation test with the actual Taylor terms instead of a dimensional constant.
-  const Real cancellation_scale = std::abs(elem_taylor_term) + std::abs(neighbor_taylor_term);
-  if (two_term_pressure_drop == 0.0 ||
-      std::abs(two_term_pressure_drop) <=
-          32.0 * std::numeric_limits<Real>::epsilon() * cancellation_scale)
-    return interface_data.transmissibility;
-
-  // Both q_p^lag and Delta p_PN^smooth,lag are known numbers here. The assembled face relation is
-  //
-  //   q_p = T_f Delta p_PN^smooth - R_f,
-  //
-  // so matching the reconstructed flux requires
-  //
-  //   T_f^lag = (q_p^lag + R_f^lag) / Delta p_PN^smooth,lag.
-  //
-  // The face area is already included in both flux terms, so T_f^lag is the complete
-  // area-integrated matrix coefficient. A valid pressure-diffusion transmissibility is positive.
-  // Degenerate or inconsistent reconstructed data revert to the half-cell discretization.
-  // The quotient is a frozen scalar. Returning it through compute*MatrixContribution() makes it a
-  // coefficient of the current p_P and p_N unknowns; neither lagged gradient enters the matrix as
-  // an unknown.
-  const auto interpolation_weights =
-      Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
-  Real two_term_flux = 0.0;
-  for (const auto component : make_range(_subproblem.mesh().dimension()))
-  {
-    const Real elem_pressure_force = _rc_uo.cellPressureDiffusionCoefficient(elem_info, component) *
-                                     reconstructed_gradient_field.component(elem_info, component);
-    const Real neighbor_pressure_force =
-        _rc_uo.cellPressureDiffusionCoefficient(neighbor_info, component) *
-        reconstructed_gradient_field.component(neighbor_info, component);
-    two_term_flux -= _current_face_info->normal()(component) * _current_face_area *
-                     (interpolation_weights.first * elem_pressure_force +
-                      interpolation_weights.second * neighbor_pressure_force);
-  }
-  const Real two_term_matrix_contribution =
-      (two_term_flux + interface_data.correction) / two_term_pressure_drop;
-
-  // A negative or non-finite quotient would not define a diffusive matrix stencil.
-  return std::isfinite(two_term_matrix_contribution) && two_term_matrix_contribution > 0.0
-             ? two_term_matrix_contribution
-             : interface_data.transmissibility;
+  return jumpInterfaceData().transmissibility;
 }
 
 Real
@@ -192,8 +106,8 @@ LinearFVPressureCorrectionDiffusionJump::computeJumpAwareFluxRHSContribution()
 Real
 LinearFVPressureCorrectionDiffusionJump::computeElemMatrixContribution()
 {
-  // The gradients determine a frozen T_f; LinearFVFluxKernel puts +T_f in A(P,P) and -T_f in
-  // A(N,P), where those entries multiply the current element pressure p_P.
+  // LinearFVFluxKernel puts +T_f in A(P,P) and -T_f in A(N,P), where those entries multiply the
+  // current element pressure p_P.
   return computeJumpAwareFluxMatrixContribution();
 }
 

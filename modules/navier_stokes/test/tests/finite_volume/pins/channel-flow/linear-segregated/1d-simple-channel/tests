@@ -32,19 +32,6 @@
     max_threads = 1
   []
 
-  [linear-bernoulli-forchheimer-form-loss-pressure-two-term]
-    type = 'CSVDiff'
-    input = porous-baffle-1d.i
-    csvdiff = 'linear-bernoulli-forchheimer-form-loss-pressure-two-term.csv'
-    requirement = 'The system shall recover the exact combined one-dimensional Forchheimer and baffle form-loss pressure drop when using the two-term pressure expansion.'
-    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md FVReconstructedPressureGradient.md LinearPWCNSFVMomentumPressure.md'
-    cli_args = "forchheimer_value=50 mu=1 UserObjects/pressure_jump/form_loss='10 10' "
-               "LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true "
-               "Outputs/file_base=linear-bernoulli-forchheimer-form-loss-pressure-two-term"
-    recover = false
-    max_threads = 1
-  []
-
   [reject-ordinary-pressure-gradient]
     type = RunException
     input = porous-baffle-1d.i
