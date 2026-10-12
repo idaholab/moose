@@ -828,6 +828,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // Curl
   if (_need_ad_curl_u)
     fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
+  // Div
+  if (_need_ad_div_u)
+    fill<constant_monomial>(_ad_div_u, *_current_div_phi, _ad_dof_values, nqp, n_test);
 
   const bool is_transient = _subproblem.isTransient();
   if (is_transient)
