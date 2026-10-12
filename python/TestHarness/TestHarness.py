@@ -322,6 +322,24 @@ class TestHarness:
         # Search for the test root (if any; required when app_name is not specified)
         test_root = None if skip_testroot else findTestRoot(test_root_dir)
 
+        # When running the tests in another folder (--test-root) whose testroot
+        # does not name an application (or that has no testroot at all), use
+        # the application of the testroot found from the current directory.
+        # This allows running e.g. an external test suite with the executable
+        # of the application that run_tests is called from
+        if (
+            test_root_dir is not None
+            and not app_name
+            and not cli_app_name
+            and (test_root is None or test_root.hit_node.get("app_name") is None)
+        ):
+            local_test_root = findTestRoot()
+            if local_test_root is not None and local_test_root.app_name:
+                if test_root is None:
+                    test_root = local_test_root
+                else:
+                    test_root = test_root._replace(app_name=local_test_root.app_name)
+
         # Append PYTHONPATH paths specified from testroot
         if test_root:
             for path in test_root.extra_pythonpath:
@@ -333,8 +351,9 @@ class TestHarness:
             # app_name was specified so without a testroot, we don't
             # know what application to run
             if app_name is None:
+                start_dir = os.path.abspath(test_root_dir or os.getcwd())
                 raise RuntimeError(
-                    f"Failed to find testroot by traversing upwards from {os.getcwd()}"
+                    f"Failed to find testroot by traversing upwards from {start_dir}"
                 )
             # app_name was specified so just run from this directory
             # without any additional parameters
@@ -353,6 +372,16 @@ class TestHarness:
             # Missing an app_name
             elif app_name is not None:
                 raise RuntimeError(f"{test_root.root_dir}/testroot missing app_name")
+            # The testroot does not say which application to run (an empty
+            # app_name is an explicit request to not use one) and none
+            # could be found from the current directory either
+            elif not cli_app_name and test_root.hit_node.get("app_name") is None:
+                util.errorExit(
+                    f"{os.path.join(test_root.root_dir, 'testroot')} does not "
+                    "specify an app_name and no application could be determined "
+                    f"from a testroot above {os.getcwd()}.\nRun from an "
+                    "application directory or pass --app-name <name>."
+                )
 
         # An explicit --app-name overrides whatever the testroot specified
         # (useful e.g. when a testroot uses a placeholder app_name)
