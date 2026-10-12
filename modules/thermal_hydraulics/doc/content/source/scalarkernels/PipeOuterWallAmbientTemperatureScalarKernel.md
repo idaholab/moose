@@ -12,7 +12,7 @@ temperature $T_{i,w}$ and coupled variables for the upstream $T_{o,u}$ and downs
 This kernel implements an ambient convective heat transfer term for the per-length heat transfer term:
 
 !equation
-q_o^{'} = h P_{o,w} \left ( T_{o,w} - T_\infty \right )
+q_o^{'} = h P_{o,w} \left ( T_\infty - T_{o,w} \right )
 
 $h$ and $T_\infty$ are supplied directly by the user as functors (constants,
 functions, variables, materials, or postprocessors); this kernel does not compute an ambient heat transfer coefficient internally from a flow correlation.

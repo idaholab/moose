@@ -29,8 +29,10 @@
 
 % temperature labels
 \node at (pC) {$T_f$};
-\node at ({\Rfluid + 0.12}, 0) {$T_{i,w}$};
-\node at ({\Router + 0.12}, 0) {$T_{o,w}$};
+\draw[red, ultra thick, fill=red] (\Rfluid,0) circle (0.025);
+\node at ({\Rfluid + 0.14}, 0) {$T_{i,w}$};
+\draw[blue, ultra thick, fill=blue] (\Router,0) circle (0.025);
+\node at ({\Router + 0.14}, 0) {$T_{o,w}$};
 
 \end{tikzpicture}
 
