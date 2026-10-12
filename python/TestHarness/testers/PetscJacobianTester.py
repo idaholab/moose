@@ -28,7 +28,7 @@ class PetscJacobianTester(RunApp):
             "difference_tol",
             float("inf"),
             "Tolerance on the absolute difference ||J - Jfd||_F. It scales with the magnitude of "
-            "the Jacobian entries, so it is disabled by default and ratio_tol is the meaningful "
+            "the Jacobian entries, so it is disabled by default and ratio_tol is the default "
             "check.",
         )
         params.addParam(

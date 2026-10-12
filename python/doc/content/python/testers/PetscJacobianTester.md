@@ -12,7 +12,7 @@ Test configuration options are specified in the `tests` file.
 
 - `difference_tol`: Tolerance on the absolute difference $||J - J_{fd}||_F$. Because it scales with
   the magnitude of the Jacobian entries (material coefficients, field magnitudes, mesh size, and
-  units), it is disabled by default, and `ratio_tol` is the meaningful check.
+  units), it is disabled by default, and `ratio_tol` is the default check.
 
 - `state`: The state for which we want to compare against the
          finite-differenced Jacobian ('user' (default) 'const_positive' or
