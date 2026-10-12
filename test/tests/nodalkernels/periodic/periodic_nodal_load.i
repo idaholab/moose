@@ -4,6 +4,9 @@
 # assembled system for the nodal values u(0) and u(0.5),
 #   [[13/3, -23/6], [-23/6, 13/3]] [u(0), u(0.5)] = -[1, 1/4],
 # gives u(0) = -127/98 and u(0.5) = -59/49.
+# The variable w is not periodic and is loaded by u through a second nodal kernel, so the Jacobian
+# row of w at x = 1 is not constrained but its column of u is. w does not couple back to u, so it
+# does not change the solution for u.
 
 [Mesh]
   [gen]
@@ -15,6 +18,8 @@
 
 [Variables]
   [u]
+  []
+  [w]
   []
 []
 
@@ -40,6 +45,14 @@
     type = Reaction
     variable = u
   []
+  [diffusion_w]
+    type = Diffusion
+    variable = w
+  []
+  [reaction_w]
+    type = Reaction
+    variable = w
+  []
 []
 
 [NodalKernels]
@@ -47,6 +60,11 @@
     type = ADCoupledForceNodalKernel
     variable = u
     v = minus_x_squared
+  []
+  [coupled_load]
+    type = ADCoupledForceNodalKernel
+    variable = w
+    v = u
   []
 []
 
