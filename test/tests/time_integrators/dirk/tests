@@ -46,4 +46,60 @@
     allow_warnings = true
     abs_zero = 5e-10
   []
+
+  [jacobian]
+    requirement = 'The system shall compute exact Jacobians of the stage residuals of multistage time integrators, which weight the time and non-time residuals differently, for'
+    issues = '#34102'
+    design = 'LStableDirk2.md LStableDirk3.md LStableDirk4.md AStableDirk4.md ImplicitMidpoint.md'
+    [dirk2]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=LStableDirk2'
+      run_sim = true
+      detail = 'the two-stage L-stable DIRK method,'
+    []
+    [dirk3]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=LStableDirk3'
+      run_sim = true
+      detail = 'the three-stage L-stable DIRK method,'
+    []
+    [dirk4]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=LStableDirk4'
+      run_sim = true
+      detail = 'the four-stage L-stable DIRK method,'
+    []
+    [astable_dirk4]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=AStableDirk4'
+      run_sim = true
+      detail = 'the four-stage A-stable DIRK method, whose last stage is an update without an implicit solve for the new non-time residual,'
+    []
+    [midpoint]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=ImplicitMidpoint'
+      run_sim = true
+      detail = 'the implicit midpoint method,'
+    []
+    [together]
+      type = PetscJacobianTester
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=LStableDirk2 Executioner/residual_and_jacobian_together=true'
+      run_sim = true
+      detail = 'and when the residual and the Jacobian are computed together.'
+    []
+  []
+  [variable_restriction]
+    type = RunException
+    input = 'dirk-2d-heat.i'
+    cli_args = 'Executioner/TimeIntegrator/variables=u'
+    expect_err = 'LStableDirk2 weights the time and non-time residuals of its stages differently and does not support integrating a subset of the variables'
+    issues = '#34102'
+    requirement = 'The system shall report an error if a multistage time integrator that weights the time and non-time residuals differently is restricted to a subset of the variables.'
+  []
 []
