@@ -27,8 +27,9 @@ CreateExecutionerAction::validParams()
   params.addParam<bool>(
       "auto_preconditioning",
       true,
-      "When true and a [Preconditioning] block does not exist, the application will attempt to use "
-      "the correct preconditioning given the Executioner settings.");
+      "When true, the application will attempt to use the correct preconditioning given the "
+      "Executioner settings for the nonlinear systems that do not have a preconditioner in the "
+      "[Preconditioning] block.");
   return params;
 }
 
@@ -63,55 +64,59 @@ CreateExecutionerAction::act()
 void
 CreateExecutionerAction::setupAutoPreconditioning()
 {
-  // If using NEWTON or LINEAR then automatically create SingleMatrixPreconditioner object with
-  // full=true
-  const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
-  if (((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON")) ||
-      ((solve_type.find("LINEAR") != solve_type.items().end()) && (solve_type == "LINEAR")))
+  // Nonlinear systems that already have a preconditioner from the [Preconditioning] block. Other
+  // actions on the preconditioning task (e.g. Physics) are not tied to a nonlinear system, so
+  // their presence disables the automatic preconditioner entirely.
+  std::set<unsigned int> preconditioned_nl_sys;
+  for (const auto action : _awh.getActionListByName("add_preconditioning"))
   {
-    // Nonlinear systems that already have a preconditioner from the [Preconditioning] block. Other
-    // actions on the preconditioning task (e.g. Physics) are not tied to a nonlinear system, so
-    // their presence disables the automatic preconditioner entirely.
-    std::set<unsigned int> preconditioned_nl_sys;
-    for (const auto action : _awh.getActionListByName("add_preconditioning"))
-    {
-      const auto pc_action = dynamic_cast<const SetupPreconditionerAction *>(action);
-      if (!pc_action)
-        return;
-      const auto & pc_params = pc_action->getObjectParams();
-      preconditioned_nl_sys.insert(
-          pc_params.isParamValid("nl_sys")
-              ? _problem->nlSysNum(pc_params.get<NonlinearSystemName>("nl_sys"))
-              : 0);
-    }
+    const auto pc_action = dynamic_cast<const SetupPreconditionerAction *>(action);
+    if (!pc_action)
+      return;
+    const auto & pc_params = pc_action->getObjectParams();
+    preconditioned_nl_sys.insert(
+        pc_params.isParamValid("nl_sys")
+            ? _problem->nlSysNum(pc_params.get<NonlinearSystemName>("nl_sys"))
+            : 0);
+  }
 
-    for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
-    {
-      if (preconditioned_nl_sys.count(_problem->nlSysNum(nl_sys_name)))
-        continue;
+  // Without a [Preconditioning] block, only NEWTON and LINEAR solves need a preconditioner, which
+  // then uses the full coupling. A user preconditioner sets a custom coupling matrix, so every
+  // other nonlinear system then needs a preconditioner to set its coupling matrix, whatever the
+  // solve type. Its coupling follows the effective solve type, which a user preconditioner can
+  // override.
+  if (preconditioned_nl_sys.empty())
+  {
+    const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
+    if (!((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON")) &&
+        !((solve_type.find("LINEAR") != solve_type.items().end()) && (solve_type == "LINEAR")))
+      return;
+  }
 
-      // Action Parameters
-      InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
-      params.set<std::string>("type") = "SMP";
+  for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
+  {
+    if (preconditioned_nl_sys.count(_problem->nlSysNum(nl_sys_name)))
+      continue;
 
-      // Associate errors with "solve_type"
-      associateWithParameter(_moose_object_pars, "solve_type", params);
+    // Action Parameters
+    InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
+    params.set<std::string>("type") = "SMP";
 
-      // Create the Action that will build the Preconditioner object
-      std::shared_ptr<Action> ptr = _action_factory.create(
-          "SetupPreconditionerAction",
-          MooseUtils::join(
-              std::vector<std::string>({"_moose_auto", static_cast<std::string>(nl_sys_name)}),
-              "_"),
-          params);
+    // Associate errors with "solve_type"
+    associateWithParameter(_moose_object_pars, "solve_type", params);
 
-      // Set 'full=true'
-      std::shared_ptr<MooseObjectAction> moa_ptr = std::static_pointer_cast<MooseObjectAction>(ptr);
-      InputParameters & mo_params = moa_ptr->getObjectParams();
-      mo_params.set<bool>("full") = true;
-      mo_params.set<NonlinearSystemName>("nl_sys") = nl_sys_name;
+    // Create the Action that will build the Preconditioner object
+    std::shared_ptr<Action> ptr = _action_factory.create(
+        "SetupPreconditionerAction",
+        MooseUtils::join(
+            std::vector<std::string>({"_moose_auto", static_cast<std::string>(nl_sys_name)}), "_"),
+        params);
 
-      _awh.addActionBlock(ptr);
-    }
+    // The SingleMatrixPreconditioner defaults to the full coupling for NEWTON and LINEAR solves
+    std::shared_ptr<MooseObjectAction> moa_ptr = std::static_pointer_cast<MooseObjectAction>(ptr);
+    InputParameters & mo_params = moa_ptr->getObjectParams();
+    mo_params.set<NonlinearSystemName>("nl_sys") = nl_sys_name;
+
+    _awh.addActionBlock(ptr);
   }
 }

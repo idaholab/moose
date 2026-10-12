@@ -44,7 +44,15 @@
       cli_args = "Preconditioning/inactive=v Outputs/exodus=false"
       expect_out = 'MOOSE Preconditioner:\s+\[u\]: SMP \[v\]: SMP \(auto\)'
       detail = "nonlinear systems without a user-specified preconditioner still receive the "
-               "automatically created preconditioner."
+               "automatically created preconditioner, including when"
+    []
+    [multi_system_solve_type_override]
+      type = RunApp
+      input = '../../misc/multiple-nl-systems/different-vars-per-system.i'
+      cli_args = "Executioner/solve_type=PJFNK Preconditioning/u/solve_type=NEWTON "
+                 "Preconditioning/inactive=v Outputs/exodus=false"
+      expect_out = 'MOOSE Preconditioner:\s+\[u\]: SMP \[v\]: SMP \(auto\)'
+      detail = "a user-specified preconditioner overrides the solve type of the executioner."
     []
   []
 []
