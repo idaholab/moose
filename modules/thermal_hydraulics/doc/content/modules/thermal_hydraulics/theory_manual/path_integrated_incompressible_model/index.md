@@ -146,6 +146,7 @@ where
 - $T_{i,w}$ is the temperature of the inner surface of the wall,
 - $T_{o,w}$ is the temperature of the outer surface of the wall,
 - $P_{m,w}$ is the perimeter of the mid-thickness dividing line that represents the boundary between the inner layer and the outer layer of the wall,
+- $\delta$ is the thickness of the wall,
 - $L$ is the segment length,
 - $h$ is the heat transfer coefficient of the fluid,
 - $T_f$ is the fluid temperature of the segment (defined at the outlet of the segment, as mentioned before), and
@@ -161,7 +162,7 @@ G_{i,d} = \left( \frac{\Delta x_d}{2 k_w A_{i,w}} + \frac{\Delta x_d}{2 k_d A_{i
 
 where
 
-- $\Delta x_u$ and $\Delta x_d$ are the axial spacings to the upstream and downstream nodes,
+- $\Delta x_u$ and $\Delta x_d$ are the axial spacings to the upstream and downstream nodes, related to lengths via $\Delta x_u = L/2 + L_u/2$,
 - $k_u$ and $k_d$ are the wall conductivity evaluated at the upstream and downstream node's own temperature, and
 - $A_{i,u}$ and $A_{i,d}$ are the layer area evaluated at the upstream and downstream node's own cross-section.
 

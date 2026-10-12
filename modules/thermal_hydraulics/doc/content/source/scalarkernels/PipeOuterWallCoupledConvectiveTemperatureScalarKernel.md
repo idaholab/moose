@@ -12,7 +12,7 @@ temperature $T_{i,w}$ and coupled variables for the upstream $T_{o,u}$ and downs
 This kernel implements a secondary side, coupled convective heat transfer term for the per-length heat transfer term:
 
 !equation
-q_o^{'} = \frac{h P_{o,w}}{2} \left ( 2 T_{o,w} - T_{in,f} - T_f \right )
+q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
 
 where $h$ is computed internally from a Dittus-Boelter correlation using the hydraulic
 diameter of the secondary-side flow channel, $D_h = 4 A_f / P_w$, with $A_f$ the flow
@@ -25,6 +25,9 @@ Pr = \frac{\mu_f c_{p,f}}{k_f}
 
 where $\dot{m}$ is the secondary-side mass flow rate and $\mu_f$, $c_{p,f}$, and $k_f$ are the secondary-side fluid viscosity, specific heat, and thermal conductivity, evaluated at the reference pressure and the mean of $T_f$ and $T_{in,f}$. $T_{in,f}$ upwinds the
 upstream/downstream secondary-side fluid temperature according to the sign of $\dot{m}$:
+
+!equation
+T_{in,f} = \frac{1}{2} \left(1-\frac{|\dot{m}|}{\dot{m}} \right) T_{d,f} + \frac{1}{2} \left(1+\frac{|\dot{m}|}{\dot{m}} \right) T_{u,f}
 
 Note, use of this kernel with transient problems also necessitates the use of a
 [ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
