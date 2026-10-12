@@ -137,6 +137,7 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
       if (repeat_augmented_lagrange_step)
       {
         _lagrangian_iteration_number++;
+        aug_contact->setLagrangianIterationNumber(_lagrangian_iteration_number);
         Moose::out << "Augmented Lagrangian contact repeat " << _lagrangian_iteration_number
                    << '\n';
 
