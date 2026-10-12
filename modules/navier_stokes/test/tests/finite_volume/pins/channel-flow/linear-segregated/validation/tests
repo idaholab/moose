@@ -90,16 +90,6 @@
     recover = false
     max_threads = 1
   []
-  [two-term-without-reconstruction]
-    type = RunException
-    input = pressure-jump-errors.i
-    cli_args = 'LinearFVKernels/u_pressure/gradient_method=jump_aware LinearFVKernels/p_diffusion/use_two_term_pressure_expansion=true'
-    expect_err = 'Two-term pressure expansion requires the momentum-pressure kernels linked to the Rhie-Chow object to use FVReconstructedPressureGradient'
-    requirement = 'The system shall reject two-term pressure expansion unless the momentum-pressure kernels use a reconstructed pressure gradient.'
-    design = 'LinearFVPressureCorrectionDiffusionJump.md FVReconstructedPressureGradient.md'
-    recover = false
-    max_threads = 1
-  []
   [nonpositive-face-porosity]
     type = RunException
     input = pressure-jump-errors.i

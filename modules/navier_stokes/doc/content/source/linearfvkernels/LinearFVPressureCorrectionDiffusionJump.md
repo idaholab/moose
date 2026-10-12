@@ -226,8 +226,8 @@ half-cell coefficient
 \label{eq:pressure-jump-interface-coefficients}
 \end{equation}
 
-On a baffle face, the assembled baseline transmissibility is $T_f^h$. Using it together with
-$R_f$ preserves the single flux relation obtained by eliminating the two one-sided interface
+On a baffle face, the assembled transmissibility is $T_f=T_f^h$. Using it together with $R_f$
+preserves the single flux relation obtained by eliminating the two one-sided interface
 pressures. On non-baffle faces, the operator retains the inherited transmissibility formed from
 the Rhie-Chow face coefficient. If either half-cell conductance is invalid, the implementation
 uses that inherited face transmissibility and zero explicit correction for both adjacent rows.
@@ -334,7 +334,6 @@ then placed on the right-hand side because it is fixed during one linear pressur
 | Pressure jump $J_P$ | Frozen value; enters only through $T_fJ_P$ on the right-hand side |
 | Anisotropic and nonorthogonal correction $R_f$ | Explicit right-hand-side contribution |
 | Jump-aware solution gradients | Separate frozen cell values; affect $R_f$, but are not pressure unknowns |
-| Reconstructed coupling gradients | Separate frozen cell values; define the optional two-term secant $T_f$ |
 | Density, momentum inverse, porosity, and geometry | Frozen coefficient data |
 | Momentum-predictor flux $\phi_f^H$ | Added by a separate [LinearFVDivergence](LinearFVDivergence.md) object |
 | Derivative of a flux-dependent jump law | Not assembled; the jump law is treated by outer fixed-point iteration |
@@ -343,149 +342,6 @@ then placed on the right-hand side because it is fixed during one linear pressur
 Both matrix rows sum to zero, and the two right-hand-side entries also sum to zero. The baffle face
 therefore preserves local conservation and the constant-pressure nullspace. The pressure jump
 changes the pressure difference required to sustain a flux, but does not create or remove mass.
-
-## Optional two-term transmissibility
-
-The default value of
-[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
-is `false`, in which case a baffle face uses the half-cell transmissibility
-$T_f^h$ from [eq:pressure-jump-interface-coefficients]. Non-baffle faces retain the full inherited
-anisotropic diffusion discretization.
-
-When this parameter is enabled, an eligible baffle face may instead use the lagged reconstructed
-coupling gradients to form a scalar secant coefficient. Define the cell mobility tensor
-
-\begin{equation}
-  \boldsymbol D_s
-  =\operatorname{diag}(D_{s,1},\ldots,D_{s,d}),
-  \qquad s\in\{P,N\}.
-\label{eq:pressure-jump-two-term-cell-mobility}
-\end{equation}
-
-The kernel geometrically interpolates the two cell mobility-gradient products to form the lagged
-coupling flux $Q_f^{\ell}$. These are the pressure-velocity coupling gradients, not the jump-aware
-solution gradients used in $R_f^{\ell}$.
-
-\begin{equation}
-  Q_f^{\ell}
-  =-|S_f|\boldsymbol n_f\mathbin{\cdot}
-  \left(w_P\boldsymbol D_P\boldsymbol g_P^{c,\ell}
-       +w_N\boldsymbol D_N\boldsymbol g_N^{c,\ell}\right),
-\label{eq:pressure-jump-reconstructed-flux}
-\end{equation}
-
-where $w_P$ and $w_N$ are the geometric face-interpolation weights. The superscript $c$ identifies
-the coupling gradient, and $\ell$ denotes data published after the preceding pressure corrector
-and held fixed during the current solve. Applying separate Taylor expansions from the two cells to
-that coupling state gives
-
-\begin{equation}
-  \Delta p_f^{\mathrm{smooth},\ell}
-  =-\boldsymbol g_P^{c,\ell}\mathbin{\cdot}\boldsymbol d_{Pf}
-   +\boldsymbol g_N^{c,\ell}\mathbin{\cdot}\boldsymbol d_{Nf}.
-\label{eq:pressure-jump-lagged-smooth-drop}
-\end{equation}
-
-Because the assembled flux relation retains the explicit correction $R_f^{\ell}$, matching the
-reconstructed flux requires
-
-\begin{equation}
-  T_f^{\ell}
-  =\frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}}.
-\label{eq:pressure-jump-two-term-transmissibility}
-\end{equation}
-
-Substitution into the lagged face relation verifies the construction:
-
-\begin{equation}
-  T_f^{\ell}\Delta p_f^{\mathrm{smooth},\ell}-R_f^{\ell}
-  =Q_f^{\ell}+R_f^{\ell}-R_f^{\ell}
-  =Q_f^{\ell}.
-\label{eq:pressure-jump-two-term-consistency}
-\end{equation}
-
-Although its inputs are lagged, $T_f^{\ell}$ is a matrix coefficient: it multiplies the current
-$p_P$ and $p_N$. No derivative of $T_f^{\ell}$ with respect to the current pressure is included,
-so this is a Picard rather than a Newton linearization.
-
-For clarity, the face equation assembled in the two-term case is
-
-\begin{equation}
-  T_f^{\ell}(p_P-p_N)
-  =R_f^{\ell}+T_f^{\ell}J_P,
-  \qquad
-  T_f^{\ell}
-  =\frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}}.
-\label{eq:pressure-jump-two-term-linear-equation}
-\end{equation}
-
-The superscript $\ell$ applies to the coefficient data, not to the two pressure unknowns on the
-left-hand side. Substitution of the secant coefficient makes the exact matrix and right-hand-side
-insertions
-
-\begin{equation}
-\begin{aligned}
-  A_{PP}&\mathrel{+}=
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}},
-  &
-  A_{PN}&\mathrel{+}=-
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}},\\
-  A_{NP}&\mathrel{+}=-
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}},
-  &
-  A_{NN}&\mathrel{+}=
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}},\\
-  b_P&\mathrel{+}=R_f^{\ell}+
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}}J_P,
-  &
-  b_N&\mathrel{+}=-R_f^{\ell}-
-    \frac{Q_f^{\ell}+R_f^{\ell}}
-         {\Delta p_f^{\mathrm{smooth},\ell}}J_P.
-\end{aligned}
-\label{eq:pressure-jump-two-term-entries}
-\end{equation}
-
-This split has several important consequences:
-
-- $p_P$ and $p_N$ are the only quantities in this face contribution that are unknown during the
-  current pressure solve.
-- $Q_f^{\ell}$ is not added to the right-hand side. It contributes only to the frozen scalar
-  $T_f^{\ell}$ that multiplies the current pressures in the matrix.
-- $\Delta p_f^{\mathrm{smooth},\ell}$ is likewise not an additional pressure unknown or source. It
-  is the known denominator used to construct $T_f^{\ell}$.
-- $R_f^{\ell}$ has two roles: it participates in the numerator that defines $T_f^{\ell}$, and the
-  same explicit correction is added with opposite signs to the two right-hand-side entries.
-  Omitting it from the numerator would make the reconstructed flux inconsistent with the retained
-  right-hand-side correction; adding $Q_f^{\ell}$ separately to the right-hand side would count the
-  reconstructed flux twice.
-- The prescribed jump remains explicit. Its right-hand-side flux is $T_f^{\ell}J_P$ for cell $P$
-  and its negative for cell $N$; no derivative of the jump law is placed in the matrix.
-
-If the two-term quotient cannot be used, $T_f^{\ell}$ is replaced by the half-cell
-$T_f^h$ everywhere in this split: the four matrix entries use $T_f^h$, and the jump source
-uses $T_f^hJ_P$. The explicit $R_f$ remains on the right-hand side. This common replacement is
-necessary so that the jump and pressure-difference terms use the same face transmissibility.
-
-The two-term coefficient is used only when all of the following conditions hold:
-
-- the face is an internal baffle face;
-- the pressure gradient method is
-  [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md);
-- a reconstructed candidate from a preceding pressure corrector is available;
-- $\Delta p_f^{\mathrm{smooth},\ell}$ passes a cancellation check scaled by the magnitudes of the
-  two one-sided Taylor terms; and
-- the resulting quotient is finite and positive.
-
-Otherwise, the kernel uses $T_f^h$. Selecting
-[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
-without [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md) is an input error.
 
 ## Flux-dependent jump law
 
@@ -510,7 +366,7 @@ $0<\alpha\leq 1$,
       +\alpha\mathcal J(\phi_f^{\ell}),\\
   \sum_{f\in\partial P}\sigma_{P,f}|S_f|\phi_f^{\ell+1}&=0,\\
   |S_f|\phi_f^{p,\ell+1}
-    &=T_f^{\ell}
+    &=T_f^{h,\ell}
       \left[(p_P^{\ell+1}-p_N^{\ell+1})-J_f^{\ell+1}\right]
       -R_f^{\ell}.
 \end{aligned}
@@ -541,8 +397,7 @@ coordinate-system-aware cell volumes.
 
 This solution-gradient field supplies $r_P$, $r_N$, and $R_f$. It is distinct from
 [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md), which remains the
-pressure-velocity coupling gradient used by the momentum predictor and the optional two-term
-secant.
+pressure-velocity coupling gradient used by the momentum predictor.
 
 ## Limiting cases
 
@@ -584,11 +439,6 @@ kernel enables the explicit nonorthogonal correction needed by the diagonal geom
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-diagonal-baffle/porous-baffle-straight-diagonal.i block=Variables/pressure
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-diagonal-baffle/porous-baffle-straight-diagonal.i block=LinearFVKernels/p_diffusion
-
-Both regression examples use the default baseline transmissibility. To exercise the optional
-secant construction in a compatible reconstructed-gradient problem, set
-[!param](/LinearFVKernels/LinearFVPressureCorrectionDiffusionJump/use_two_term_pressure_expansion)
-to `true` in the `p_diffusion` block, subject to the conditions and limitation stated above.
 
 !syntax parameters /LinearFVKernels/LinearFVPressureCorrectionDiffusionJump
 

@@ -18,8 +18,7 @@ class PorousRhieChowMassFlux;
  * Pressure-correction diffusion kernel that enforces modeled jumps on internal baffle faces.
  *
  * The signed pressure jump is added to the right hand side with the same face transmissibility as
- * the pressure-correction operator. An optional two-term pressure expansion derives that
- * transmissibility from lagged reconstructed pressure gradients.
+ * the pressure-correction operator.
  */
 class LinearFVPressureCorrectionDiffusionJump : public LinearFVPressureCorrectionDiffusion
 {
@@ -50,10 +49,9 @@ protected:
   /**
    * Compute the pressure-correction transmissibility for the current face.
    *
-   * On eligible baffle faces, the two-term option derives the transmissibility from the lagged
-   * reconstructed pressure gradients. Other baffle faces use the transmissibility obtained by
-   * eliminating the two one-sided interface pressures. Non-baffle faces and invalid half-cell
-   * data use the inherited diffusion transmissibility selected by the Rhie-Chow object.
+   * Baffle faces use the transmissibility obtained by eliminating the two one-sided interface
+   * pressures. Non-baffle faces and invalid half-cell data use the inherited diffusion
+   * transmissibility selected by the Rhie-Chow object.
    */
   Real computeJumpAwareFluxMatrixContribution();
 
@@ -65,9 +63,6 @@ protected:
 
   /// Porous Rhie-Chow object supplying baffle identification and signed pressure jumps.
   const PorousRhieChowMassFlux & _rc_uo;
-
-  /// Whether to derive baffle transmissibility from the lagged two-term pressure expansion.
-  const bool _use_two_term_pressure_expansion;
 
   /// Cached half-cell coefficients for the current face.
   NS::FV::PressureJumpInterfaceData _jump_interface_data;
