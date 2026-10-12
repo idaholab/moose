@@ -14,7 +14,7 @@ This kernel implements a secondary side, coupled convective heat transfer term f
 !equation
 q_o^{'} = \frac{h P_{o,w}}{2} \left ( 2 T_{o,w} - T_{in,f} - T_f \right )
 
-$h$ is computed internally from a Dittus-Boelter correlation using the hydraulic
+where $h$ is computed internally from a Dittus-Boelter correlation using the hydraulic
 diameter of the secondary-side flow channel, $D_h = 4 A_f / P_w$, with $A_f$ the flow
 channel's cross-sectional area:
 
