@@ -251,9 +251,9 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   {
     for (const auto node : inactive_lm_nodes)
     {
-      // inactive_lm_nodes is a globally-consistent set: every processor that shares a node with
-      // the mortar interface learns whether that node is inactive, regardless of which processor
-      // owns it (see AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes /
+      // inactive_lm_nodes contains each inactive node on every processor with a secondary element
+      // touching it and on the node's owner, even if the owner has no such element (see
+      // AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes /
       // computeInactiveLMNodes). Without this ownership check, a node shared across a partition
       // boundary would have its Jacobian/residual contribution added once per processor that
       // sees it, over-constraining the dof.

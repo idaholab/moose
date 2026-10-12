@@ -1996,6 +1996,24 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
   _inactive_local_lm_nodes.clear();
   for (const auto node_id : inactive_node_ids)
     _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+
+  pushInactiveLMNodesToOwners();
+}
+
+void
+AutomaticMortarGeneration::pushInactiveLMNodesToOwners()
+{
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes;
+  for (const auto node : _inactive_local_lm_nodes)
+    if (node->processor_id() != _mesh.processor_id())
+      proc_to_inactive_nodes[node->processor_id()].push_back(node->id());
+
+  auto action_functor = [this](const processor_id_type, const std::vector<dof_id_type> & sent_data)
+  {
+    for (const auto node_id : sent_data)
+      _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes, action_functor);
 }
 
 void
@@ -2079,6 +2097,8 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
           _inactive_local_lm_nodes.insert(el->node_ptr(n));
+
+  pushInactiveLMNodesToOwners();
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)

@@ -282,6 +282,13 @@ public:
   void computeIncorrectEdgeDroppingInactiveLMNodes();
 
   /**
+   * Send inactive LM nodes to their owning processors and add them to the owners' inactive node
+   * sets. The owner of a node need not own (or even ghost) any secondary element touching it, but
+   * only the owner zeroes the node's LM DoFs.
+   */
+  void pushInactiveLMNodesToOwners();
+
+  /**
    * Get list of secondary elems without any corresponding primary elements.
    * Used to enforce zero values on inactive DoFs of elemental variables.
    */
