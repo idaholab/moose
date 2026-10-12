@@ -112,6 +112,15 @@ nodalQuadraturePointToSecondaryNodeMap(const Elem & secondary_elem,
   // avoids silently assigning two quadrature entries to the same node.
   for (const auto qp : make_range(q_points.size()))
   {
+    // A non-finite point comes from a non-finite displaced mesh, e.g. after a failed linear solve.
+    // Throw so the time step can be cut instead of erroring out.
+    if (!std::isfinite(q_points[qp].norm_sq()))
+      throw MooseException("AutomaticMortarGeneration: Nodal quadrature point ",
+                           qp,
+                           " on secondary mortar element ",
+                           secondary_elem.id(),
+                           " is not finite.");
+
     unsigned int closest_node = invalid_node;
     Real closest_dist_sq = std::numeric_limits<Real>::max();
     Real second_closest_dist_sq = std::numeric_limits<Real>::max();
