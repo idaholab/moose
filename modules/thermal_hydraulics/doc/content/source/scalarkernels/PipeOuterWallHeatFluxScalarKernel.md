@@ -15,7 +15,7 @@ This kernel implements an applied heat flux boundary condition for the per-lengt
 !equation
 q_o^{'} = P_{o,w} q_o^{''}
 
-$q_o^{''}$ is supplied directly by the user as a functor (a constant, function, variable,
+where $q_o^{''}$ is supplied directly by the user as a functor (a constant, function, variable,
 material, or postprocessor), following the same sign convention as
 [HSBoundaryHeatFlux.md]; this kernel does not compute the heat flux internally from a
 flow or radiation correlation, and $q_o^{''}$ does not depend on this node's own temperature, so this kernel makes no contribution to the Jacobian beyond the shared radial/axial conduction terms.
