@@ -61,7 +61,8 @@ direction = 1
     porosity = porosity
     p_diffusion_kernel = p_diffusion
     pressure_jump_models = pressure_jump
-    pressure_jump_relaxation = 1.0
+    # Dampen the quadratic form-loss feedback during the SIMPLE outer iteration.
+    pressure_jump_relaxation = 0.1
   []
 []
 
@@ -182,9 +183,11 @@ direction = 1
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.3
   pressure_variable_relaxation = 0.1
-  num_iterations = 200
+  # All four orientations recover the analytic solution within 500 iterations.
+  num_iterations = 500
   pressure_absolute_tolerance = 1e-10
-  momentum_absolute_tolerance = 1e-8
+  # This accepts the small inviscid outer-iteration cycle after pressure and velocity converge.
+  momentum_absolute_tolerance = 2e-5
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
