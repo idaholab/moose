@@ -10,8 +10,7 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ScalarKernel.h"
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 
 class ThermalSolidProperties;
 
@@ -19,20 +18,16 @@ class ThermalSolidProperties;
  * Outer wall radiative heat transfer kernel for the path-integrated incompressible conjugate heat
  * transfer model
  */
-template <bool is_ad>
-class PipeOuterWallRadiationScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
-    public FunctorInterface
+class ADPipeOuterWallRadiationScalarKernel : public ADScalarKernel, public ADFunctorInterface
 {
-  using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
+  using Base = ADScalarKernel;
 
 public:
-  PipeOuterWallRadiationScalarKernelTempl(const InputParameters & parameters);
-  virtual bool isADObject() const override { return is_ad; };
+  ADPipeOuterWallRadiationScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   /// Solid properties object for the pipe wall
@@ -40,20 +35,17 @@ protected:
   /// Property state integration flag
   const bool _is_implicit;
   /// Cross-sectional area of this wall layer
-  const Moose::Functor<GenericReal<is_ad>> & _area;
+  const Moose::Functor<ADReal> & _area;
   /// Perimeter of this wall node exposed to the radiative environment
-  const Moose::Functor<GenericReal<is_ad>> & _perimeter;
+  const Moose::Functor<ADReal> & _perimeter;
   /// Ambient temperature functor
-  const Moose::Functor<GenericReal<is_ad>> & _T_ambient;
+  const Moose::Functor<ADReal> & _T_ambient;
   /// Emissivity functor
-  const Moose::Functor<GenericReal<is_ad>> & _emissivity;
+  const Moose::Functor<ADReal> & _emissivity;
   /// View factor functor
-  const Moose::Functor<GenericReal<is_ad>> & _view_factor;
+  const Moose::Functor<ADReal> & _view_factor;
   /// Functor by which to scale the radiative heat transfer term
-  const Moose::Functor<GenericReal<is_ad>> & _scale;
+  const Moose::Functor<ADReal> & _scale;
   /// Stefan-Boltzmann constant
   const Real _sigma;
 };
-
-typedef PipeOuterWallRadiationScalarKernelTempl<false> PipeOuterWallRadiationScalarKernel;
-typedef PipeOuterWallRadiationScalarKernelTempl<true> ADPipeOuterWallRadiationScalarKernel;

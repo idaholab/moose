@@ -9,19 +9,17 @@
 
 #include "PipeOuterWallRadiationScalarKernel.h"
 
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "ThermalSolidProperties.h"
 #include "PhysicalConstants.h"
 
-registerMooseObject("ThermalHydraulicsApp", PipeOuterWallRadiationScalarKernel);
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallRadiationScalarKernel);
 
-template <bool is_ad>
 InputParameters
-PipeOuterWallRadiationScalarKernelTempl<is_ad>::validParams()
+ADPipeOuterWallRadiationScalarKernel::validParams()
 {
-  InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
-  params += FunctorInterface::validParams();
+  InputParameters params = ADScalarKernel::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Adds a radiative heat transfer term, exchanged with an ambient/surrounding "
       "environment, to the outer-surface radial node of a pipe wall.");
@@ -46,26 +44,24 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PipeOuterWallRadiationScalarKernelTempl<is_ad>::PipeOuterWallRadiationScalarKernelTempl(
+ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _sp(this->template getUserObject<ThermalSolidProperties>("sp")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
-    _area(this->template getFunctor<GenericReal<is_ad>>("area")),
-    _perimeter(this->template getFunctor<GenericReal<is_ad>>("perimeter")),
-    _T_ambient(this->template getFunctor<GenericReal<is_ad>>("T_ambient")),
-    _emissivity(this->template getFunctor<GenericReal<is_ad>>("emissivity")),
-    _view_factor(this->template getFunctor<GenericReal<is_ad>>("view_factor")),
-    _scale(this->template getFunctor<GenericReal<is_ad>>("scale")),
+    _area(this->template getFunctor<ADReal>("area")),
+    _perimeter(this->template getFunctor<ADReal>("perimeter")),
+    _T_ambient(this->template getFunctor<ADReal>("T_ambient")),
+    _emissivity(this->template getFunctor<ADReal>("emissivity")),
+    _view_factor(this->template getFunctor<ADReal>("view_factor")),
+    _scale(this->template getFunctor<ADReal>("scale")),
     _sigma(this->template getParam<Real>("stefan_boltzmann_constant"))
 {
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PipeOuterWallRadiationScalarKernelTempl<is_ad>::computeQpResidual()
+ADReal
+ADPipeOuterWallRadiationScalarKernel::computeQpResidual()
 {
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
@@ -88,44 +84,9 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::computeQpResidual()
   return -q_radiation / A / rho / cp;
 }
 
-template <bool is_ad>
 Real
-PipeOuterWallRadiationScalarKernelTempl<is_ad>::computeQpJacobian()
+ADPipeOuterWallRadiationScalarKernel::computeQpJacobian()
 {
-  if constexpr (!is_ad)
-  {
-    const Moose::ElemArg elem_arg = Moose::ElemArg();
-    const int i = 0;
-    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-
-    const auto A = _area(elem_arg, state);
-    const auto cp = _sp.cp_from_T(Base::_u[i]);
-    const auto rho = _sp.rho_from_T(Base::_u[i]);
-
-    const auto scale = _scale(elem_arg, state);
-    const auto emissivity = _emissivity(elem_arg, state);
-    const auto view_factor = _view_factor(elem_arg, state);
-
-    // Radiative heat transfer with the ambient/surrounding environment
-    const auto q_radiation = -4.0 * _sigma * scale * emissivity * view_factor *
-                             _perimeter(elem_arg, state) * pow(Base::_u[i], 3);
-
-    return -q_radiation / A / rho / cp;
-  }
-  else
-  {
-    mooseError("computeQpJacobian() should not be called in AD mode");
-    return 0;
-  }
+  mooseError("computeQpJacobian() should not be called in AD mode");
+  return 0;
 }
-
-template <>
-Real
-PipeOuterWallRadiationScalarKernelTempl<true>::computeQpJacobian()
-{
-  mooseError("Internal error, calling computeQpJacobian in AD class.");
-  return 0.0;
-}
-
-template class PipeOuterWallRadiationScalarKernelTempl<false>;
-template class PipeOuterWallRadiationScalarKernelTempl<true>;

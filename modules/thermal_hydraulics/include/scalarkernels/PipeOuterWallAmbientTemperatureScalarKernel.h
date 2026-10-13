@@ -15,33 +15,25 @@
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with an ambient outer
  * boundary condition
  */
-template <bool is_ad>
-class PipeOuterWallAmbientTemperatureScalarKernelTempl
-  : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
+class ADPipeOuterWallAmbientTemperatureScalarKernel : public ADPipeWallTemperatureScalarKernelBase
 {
-  using Base = PipeWallTemperatureScalarKernelBaseTempl<is_ad>;
+  using Base = ADPipeWallTemperatureScalarKernelBase;
 
 public:
-  PipeOuterWallAmbientTemperatureScalarKernelTempl(const InputParameters & parameters);
-  virtual bool isADObject() const override { return is_ad; };
+  ADPipeOuterWallAmbientTemperatureScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tin[0]; }
-  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
+  virtual ADReal otherNodeTemperature() const override { return _Tin[0]; }
+  virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Coupled temperature of the inner-surface wall node
-  const GenericVariableValue<is_ad> & _Tin;
+  const ADVariableValue & _Tin;
   /// Ambient temperature functor
-  const Moose::Functor<GenericReal<is_ad>> & _T_ambient;
+  const Moose::Functor<ADReal> & _T_ambient;
   /// Ambient heat transfer coefficient functor
-  const Moose::Functor<GenericReal<is_ad>> & _htc_ambient;
+  const Moose::Functor<ADReal> & _htc_ambient;
   /// Perimeter of this wall node exposed to the ambient environment
-  const Moose::Functor<GenericReal<is_ad>> & _ambient_perimeter;
+  const Moose::Functor<ADReal> & _ambient_perimeter;
 };
-
-typedef PipeOuterWallAmbientTemperatureScalarKernelTempl<false>
-    PipeOuterWallAmbientTemperatureScalarKernel;
-typedef PipeOuterWallAmbientTemperatureScalarKernelTempl<true>
-    ADPipeOuterWallAmbientTemperatureScalarKernel;
