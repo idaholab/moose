@@ -323,6 +323,7 @@ share/
 .vscode/*
 *.code-workspace
 .cache
+.env
 
 # Ignore Claude Code project context
 .claude/
@@ -365,3 +366,4 @@ binaryoutput
 # large, machine-local artifact; only the checked-in config is tracked.
 .codegraph/
 !codegraph.json
+
