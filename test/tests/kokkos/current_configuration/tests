@@ -60,4 +60,23 @@
       compute_devices = 'cpu cuda'
     []
   []
+  [vector_jacobian]
+    requirement = 'The Kokkos system shall assemble exact Jacobians, including the derivatives with respect to the displacements, of vector kernels and boundary conditions posed on the current configuration, covering gradient, curl, coupled vector, and value terms'
+    design = 'KokkosVectorDiffusion.md KokkosVectorNeumannBC.md'
+    [two_dimensional]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_vector_jacobian.i'
+      detail = 'in two dimensions and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [three_dimensional]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_vector_jacobian.i'
+      cli_args = "Mesh/dim=3 Mesh/nz=2 Mesh/displacements='disp_x disp_y disp_z'"
+      detail = 'in three dimensions.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
 []
