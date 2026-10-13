@@ -136,9 +136,9 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
   Real c2 = _gamma * _R_specific * T;
   if (c2 < 0)
   {
-    c2 = 0;
     flagInvalidSolution(
         "Sound speed squared (gamma * R * T) is negative: c2 = " + Moose::stringify(c2) + ".");
+    c2 = 0;
   }
 
   return std::sqrt(c2);
@@ -153,9 +153,9 @@ IdealGasFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
   auto c2 = _gamma * _R_specific * T;
   if (MetaPhysicL::raw_value(c2) < 0)
   {
+    flagInvalidSolution("Sound speed squared (gamma * R * T) is negative: c2 = " +
+                        Moose::stringify(MetaPhysicL::raw_value(c2)) + ".");
     c2 = 0;
-    flagInvalidSolution(
-        "Sound speed squared (gamma * R * T) is negative: c2 = " + Moose::stringify(c2) + ".");
   }
 
   return sqrt(c2);

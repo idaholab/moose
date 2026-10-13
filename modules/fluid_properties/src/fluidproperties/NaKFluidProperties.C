@@ -236,7 +236,7 @@ NaKFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
   // Converted from (W/cm-C)
   if (Tc < 150 || Tc > 680)
     flagInvalidSolution(
-        "NaK thermal diffusivity evaluated outside of temperature range [150, 680] C");
+        "NaK thermal conductivity evaluated outside of temperature range [150, 680] C");
   return 100 * (0.214 + 2.07e-4 * Tc - 2.2e-7 * Tc * Tc);
 }
 

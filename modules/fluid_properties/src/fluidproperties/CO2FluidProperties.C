@@ -129,7 +129,7 @@ Real
 CO2FluidProperties::saturatedLiquidDensity(Real temperature) const
 {
   if (temperature < _triple_point_temperature || temperature > _critical_temperature)
-    throw MooseException("Temperature is out of range in " + name() + ": saturatedLiquiDensity()");
+    throw MooseException("Temperature is out of range in " + name() + ": saturatedLiquidDensity()");
 
   Real Tstar = temperature / _critical_temperature;
 
@@ -447,7 +447,7 @@ CO2FluidProperties::p_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1100.0 || density <= 0.0)
-    throw MooseException("Parameters out of range in " + name() + ": pressure()");
+    throw MooseException("Parameters out of range in " + name() + ": p_from_rho_T()");
 
   Real pressure = 0.0;
 
@@ -666,7 +666,7 @@ CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
   // Check the temperature is in the range of validity (216.592 K <= T <= 1000 K)
   if (temperature <= _triple_point_temperature || temperature >= 1000.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": k()");
+                         "K out of range (216.59 K, 1000 K) in " + name() + ": k()");
 
   // Scaled variables
   Real Tr = temperature / _critical_temperature;

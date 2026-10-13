@@ -224,7 +224,7 @@ Real
 CaloricallyImperfectGas::T_from_h(Real h) const
 {
   if (h < _min_h || h > _max_h)
-    outOfBounds("h_from_e", h, _min_h, _max_h);
+    outOfBounds("T_from_h", h, _min_h, _max_h);
 
   if (h < _min_h)
     return _T_h_lookup[0];

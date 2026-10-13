@@ -182,7 +182,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real v, Real e) const
     if (conversion_succeeded)
       return cv_from_p_T(p, T);
     else
-      mooseError("cp_from_v_e calculation failed.");
+      mooseError("cv_from_v_e calculation failed.");
   }
 }
 
@@ -206,7 +206,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(
     Real dcv_dp, dcv_dT;
     cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     Real p1, T1;
     const Real dv = fdStep(v, 1e-6);
@@ -214,7 +214,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(
     Real dp_dv = (p1 - p) / dv;
     Real dT_dv = (T1 - T) / dv;
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     Real p2, T2;
     const Real de = fdStep(e, 1e-6);
@@ -222,7 +222,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(
     Real dp_de = (p2 - p) / de;
     Real dT_de = (T2 - T) / de;
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
     dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
