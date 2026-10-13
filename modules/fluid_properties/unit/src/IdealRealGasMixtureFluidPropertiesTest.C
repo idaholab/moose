@@ -169,3 +169,51 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, primaryCriticalPointPerObject)
   EXPECT_FALSE(std::isnan(v));
   REL_TEST(fp_dense_mix.p_from_T_v(T, v, x), p, REL_TOL_CONSISTENCY);
 }
+
+/**
+ * Verify the isobaric heat capacity against (dh/dT)_p of the mixture enthalpy
+ * h = sum_i x_i h_i(T, v / x_i), using a primary component whose enthalpy depends on
+ * the specific volume
+ */
+TEST_F(IdealRealGasMixtureFluidPropertiesTest, cpVolumeDependentEnthalpy)
+{
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
+
+  InputParameters fp_params = _factory.getValidParams("TestTVFluidProperties");
+  _fe_problem->addUserObject("TestTVFluidProperties", "fp_tv", fp_params);
+  InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
+  params.set<UserObjectName>("fp_primary") = "fp_tv";
+  params.set<std::vector<UserObjectName>>("fp_secondary") = {"fp_nitrogen"};
+  params.set<bool>("allow_imperfect_jacobians") = true;
+  _fe_problem->addUserObject("IdealRealGasMixtureFluidProperties", "fp_tv_mix", params);
+  const auto & fp_mix = _fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>("fp_tv_mix");
+
+  const Real T = 400.0;
+  const Real v = 1.2;
+  const std::vector<Real> x = {0.3};
+
+  // Mixture enthalpy as a function of (T, v)
+  const auto h_mix = [&](Real T, Real v)
+  {
+    const auto & fp_tv = _fe_problem->getUserObject<SinglePhaseFluidProperties>("fp_tv");
+    return (1.0 - x[0]) * fp_tv.h_from_T_v(T, v / (1.0 - x[0])) +
+           x[0] * _fp_nitrogen->h_from_T_v(T, v / x[0]);
+  };
+  const Real dT = 1e-4;
+  const Real dv = 1e-7;
+  const Real dh_dT = (h_mix(T + dT, v) - h_mix(T - dT, v)) / (2.0 * dT);
+  const Real dh_dv = (h_mix(T, v + dv) - h_mix(T, v - dv)) / (2.0 * dv);
+  Real p, dp_dT, dp_dv;
+  std::vector<Real> dp_dx;
+  fp_mix.p_from_T_v(T, v, x, p, dp_dT, dp_dv, dp_dx);
+  const Real cp_ref = dh_dT - dh_dv * dp_dT / dp_dv;
+
+  REL_TEST(fp_mix.cp_from_T_v(T, v, x), cp_ref, REL_TOL_DERIVATIVE);
+  Real cp, dcp_dT, dcp_dv;
+  std::vector<Real> dcp_dx;
+  fp_mix.cp_from_T_v(T, v, x, cp, dcp_dT, dcp_dv, dcp_dx);
+  REL_TEST(cp, cp_ref, REL_TOL_DERIVATIVE);
+
+  Moose::_throw_on_warning = original_throw_on_warning;
+}

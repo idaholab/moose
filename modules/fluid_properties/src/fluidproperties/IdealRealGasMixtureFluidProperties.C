@@ -651,13 +651,14 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, const std::vecto
 
   Real h, dh_dT, dh_dv;
   _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
-  const Real cp_primary = dh_dT - dh_dv * dp_dT / dp_dv;
+  // h_i is evaluated at v_i = v / x_i, so dv_i/dv = 1 / x_i
+  const Real cp_primary = dh_dT - dh_dv / x_primary * dp_dT / dp_dv;
   Real cp = x_primary * cp_primary;
 
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
-    const Real cp_sec = dh_dT - dh_dv * dp_dT / dp_dv;
+    const Real cp_sec = dh_dT - dh_dv / x[i] * dp_dT / dp_dv;
     cp += x[i] * cp_sec;
   }
 
@@ -681,7 +682,8 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T,
 
   Real h, dh_dT, dh_dv;
   _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
-  const Real cp_primary = dh_dT - dh_dv * dp_dT / dp_dv;
+  // h_i is evaluated at v_i = v / x_i, so dv_i/dv = 1 / x_i
+  const Real cp_primary = dh_dT - dh_dv / x_primary * dp_dT / dp_dv;
   cp = x_primary * cp_primary;
 
   // Neglect these for now. These require higher-order derivatives, so a finite
@@ -696,7 +698,7 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T,
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
-    const Real cp_sec = dh_dT - dh_dv * dp_dT / dp_dv;
+    const Real cp_sec = dh_dT - dh_dv / x[i] * dp_dT / dp_dv;
     cp += x[i] * cp_sec;
     dcp_dx[i] = cp_sec - cp_primary;
   }
