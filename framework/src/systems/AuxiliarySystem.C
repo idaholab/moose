@@ -89,7 +89,7 @@ AuxiliarySystem::initialSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -99,7 +99,7 @@ AuxiliarySystem::initialSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -109,7 +109,7 @@ AuxiliarySystem::initialSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -160,7 +160,7 @@ AuxiliarySystem::timestepSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -170,7 +170,7 @@ AuxiliarySystem::timestepSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -180,7 +180,7 @@ AuxiliarySystem::timestepSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -205,7 +205,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -215,7 +215,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -225,7 +225,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -250,7 +250,7 @@ AuxiliarySystem::subdomainSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -260,7 +260,7 @@ AuxiliarySystem::subdomainSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -270,7 +270,7 @@ AuxiliarySystem::subdomainSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -290,7 +290,7 @@ AuxiliarySystem::jacobianSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -300,7 +300,7 @@ AuxiliarySystem::jacobianSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -310,7 +310,7 @@ AuxiliarySystem::jacobianSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -335,7 +335,7 @@ AuxiliarySystem::residualSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_auxkernels);
     for (auto & nodal_aux : nodal_auxkernels)
@@ -345,7 +345,7 @@ AuxiliarySystem::residualSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_vec_auxkernels);
     for (auto & nodal_aux : nodal_vec_auxkernels)
@@ -355,7 +355,7 @@ AuxiliarySystem::residualSetup()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(tid)
         .queryIntoUnsorted(nodal_array_auxkernels);
     for (auto & nodal_aux : nodal_array_auxkernels)
@@ -607,7 +607,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribExecOns>(type)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(auxkernels);
@@ -624,7 +624,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribExecOns>(type)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(vec_auxkernels);
@@ -641,7 +641,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribExecOns>(type)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(array_auxkernels);
@@ -690,7 +690,7 @@ AuxiliarySystem::getDependObjects()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Real")
+        .condition<AttribAuxKernelType>(AuxKernelType::Real)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(auxkernels);
     for (const auto & aux : auxkernels)
@@ -706,7 +706,7 @@ AuxiliarySystem::getDependObjects()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Vector")
+        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(vec_auxkernels);
     for (const auto & aux : vec_auxkernels)
@@ -722,7 +722,7 @@ AuxiliarySystem::getDependObjects()
     _fe_problem.theWarehouse()
         .query()
         .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelValueType>("Array")
+        .condition<AttribAuxKernelType>(AuxKernelType::Array)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(array_auxkernels);
     for (const auto & aux : array_auxkernels)
@@ -833,14 +833,13 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Real")
-                                  .condition<AttribAuxKernelNodal>(true)
-                                  .condition<AttribAuxKernelMortar>(false)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Nodal)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<AuxKernel>(query);
 }
 
@@ -849,13 +848,13 @@ AuxiliarySystem::computeNodalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVecVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Vector")
-                                  .condition<AttribAuxKernelNodal>(true)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Vector | AuxKernelType::Nodal)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<VectorAuxKernel>(query);
 }
 
@@ -864,13 +863,13 @@ AuxiliarySystem::computeNodalArrayVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalArrayVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Array")
-                                  .condition<AttribAuxKernelNodal>(true)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Array | AuxKernelType::Nodal)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeNodalVarsHelper<ArrayAuxKernel>(query);
 }
 
@@ -879,13 +878,13 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type, int group)
 {
   TIME_SECTION("computeMortarNodalVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Real")
-                                  .condition<AttribAuxKernelMortar>(true)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Mortar)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
 
   // Use thread 0's dependency-sorted list to determine which boundaries have mortar nodal aux
   // kernels and how many. The sort order does not depend on the thread, so
@@ -950,13 +949,13 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Real")
-                                  .condition<AttribAuxKernelNodal>(false)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Elemental)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeElementalVarsHelper<AuxKernel>(query);
 }
 
@@ -965,26 +964,26 @@ AuxiliarySystem::computeElementalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVecVars", 3);
 
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Vector")
-                                  .condition<AttribAuxKernelNodal>(false)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Vector | AuxKernelType::Elemental)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeElementalVarsHelper<VectorAuxKernel>(query);
 }
 
 void
 AuxiliarySystem::computeElementalArrayVars(ExecFlagType type, int group)
 {
-  TheWarehouse::Query query = _fe_problem.theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("AuxKernel")
-                                  .condition<AttribAuxKernelValueType>("Array")
-                                  .condition<AttribAuxKernelNodal>(false)
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribExecutionOrderGroup>(group);
+  TheWarehouse::Query query =
+      _fe_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("AuxKernel")
+          .condition<AttribAuxKernelType>(AuxKernelType::Array | AuxKernelType::Elemental)
+          .condition<AttribExecOns>(type)
+          .condition<AttribExecutionOrderGroup>(group);
   computeElementalVarsHelper<ArrayAuxKernel>(query);
 }
 
@@ -1021,8 +1020,7 @@ AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
   _fe_problem.theWarehouse()
       .query()
       .condition<AttribSystem>("AuxKernel")
-      .condition<AttribAuxKernelValueType>("Real")
-      .condition<AttribAuxKernelNodal>(false)
+      .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Elemental)
       .condition<AttribThread>(0)
       .condition<AttribBoundaries>(bnd_id, true)
       .queryIntoUnsorted(elem_auxkernels);
@@ -1033,8 +1031,7 @@ AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
   _fe_problem.theWarehouse()
       .query()
       .condition<AttribSystem>("AuxKernel")
-      .condition<AttribAuxKernelValueType>("Vector")
-      .condition<AttribAuxKernelNodal>(false)
+      .condition<AttribAuxKernelType>(AuxKernelType::Vector | AuxKernelType::Elemental)
       .condition<AttribThread>(0)
       .condition<AttribBoundaries>(bnd_id, true)
       .queryIntoUnsorted(elem_vec_auxkernels);

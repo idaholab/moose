@@ -330,8 +330,8 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Real")
-            .condition<AttribAuxKernelMortar>(false)
+            .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Nodal |
+                                            AuxKernelType::Elemental)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -346,7 +346,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Vector")
+            .condition<AttribAuxKernelType>(AuxKernelType::Vector)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -361,7 +361,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Array")
+            .condition<AttribAuxKernelType>(AuxKernelType::Array)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -376,8 +376,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Real")
-            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribAuxKernelType>(AuxKernelType::Real | AuxKernelType::Elemental)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -392,8 +391,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Vector")
-            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribAuxKernelType>(AuxKernelType::Vector | AuxKernelType::Elemental)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
@@ -408,8 +406,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
         _problem_ptr->theWarehouse()
             .query()
             .condition<AttribSystem>("AuxKernel")
-            .condition<AttribAuxKernelValueType>("Array")
-            .condition<AttribAuxKernelNodal>(false)
+            .condition<AttribAuxKernelType>(AuxKernelType::Array | AuxKernelType::Elemental)
             .condition<AttribThread>(0)
             .condition<AttribSubdomains>(subdomain_id)
             .queryIntoUnsorted(aux_kernels);
