@@ -1776,7 +1776,10 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   checkInputVariablesVE(v, e);
 
   Real h, T = 0, s;
-  if (_create_direct_ve_interpolations)
+  const bool have_direct_ve_tables =
+      _create_direct_ve_interpolations && _entropy_idx != libMesh::invalid_uint &&
+      _enthalpy_idx != libMesh::invalid_uint && _T_idx != libMesh::invalid_uint;
+  if (have_direct_ve_tables)
   {
     s = _property_ve_ipol[_entropy_idx]->sample(v, e);
     h = _property_ve_ipol[_enthalpy_idx]->sample(v, e);

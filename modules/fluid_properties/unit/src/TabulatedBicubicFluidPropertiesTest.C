@@ -223,6 +223,9 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real s2 = _tab_ve_from_pT->s_from_v_e(v, e);
     REL_TEST(s1, s2, 0.001);
 
+    // Gibbs free energy from the (p, T) from (v, e) interpolations
+    REL_TEST(_tab_ve_from_pT->g_from_v_e(v, e), h1 - T * s1, 0.001);
+
     // entropy derivatives from the (p, T) from (v, e) interpolations: de = T ds - p dv
     Real s3, ds_dv, ds_de;
     _tab_ve_from_pT->s_from_v_e(v, e, s3, ds_dv, ds_de);
@@ -1186,4 +1189,38 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, combined)
   ABS_TEST(e, e2, tol);
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
+}
+
+/**
+ * Verify the Gibbs free energy of a (v, e) tabulation that does not interpolate temperature
+ * but does construct (p, T) from (v, e)
+ */
+TEST_F(TabulatedBicubicFluidPropertiesTest, gibbsWithoutTemperatureColumn)
+{
+  InputParameters params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+  params.set<UserObjectName>("input_fp") = "idg_fp";
+  params.set<MooseEnum>("out_of_bounds_behavior") = "set_to_closest_bound";
+  params.set<bool>("create_pT_interpolations") = false;
+  params.set<bool>("create_ve_interpolations") = true;
+  params.set<bool>("construct_pT_from_ve") = true;
+  params.set<Real>("temperature_min") = 400;
+  params.set<Real>("temperature_max") = 500;
+  params.set<Real>("pressure_min") = 1e6;
+  params.set<Real>("pressure_max") = 2e6;
+  params.set<Real>("T_initial_guess") = 450;
+  params.set<Real>("p_initial_guess") = 1.5e6;
+  MultiMooseEnum properties("density enthalpy viscosity k c cv cp entropy pressure temperature",
+                            "density enthalpy entropy");
+  params.set<MultiMooseEnum>("interpolated_properties") = properties;
+  _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_ve_no_T", params);
+  auto & fp = _fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_ve_no_T");
+  Moose::_throw_on_warning = false;
+  fp.initialSetup();
+  Moose::_throw_on_warning = true;
+
+  const Real p = 1.5e6;
+  const Real T = 450.0;
+  const Real v = _idg_fp->v_from_p_T(p, T);
+  const Real e = _idg_fp->e_from_p_T(p, T);
+  REL_TEST(fp.g_from_v_e(v, e), _idg_fp->g_from_v_e(v, e), 1e-3);
 }
