@@ -274,6 +274,99 @@ precomputeOffDiagJacobianScalarTerms(const Object & object,
 ///@}
 
 /**
+ * Gather the JxW-weighted coefficients of the variation of the residual of a scalar precompute
+ * object posed on the current configuration along a displacement degree of freedom, the shape
+ * function phi_j of displacement component c. With h = grad_x phi_j, the framework supplies the
+ * variations of the configuration,
+ *
+ *   d(grad_x w) = -(grad_x w)_c h,   d(JxW) = JxW (h_c + phi_j (grad_x log rho)_c)
+ *
+ * on elements, where rho is the coordinate transform factor, and d(JxW) loses the normal part
+ * n_c (n . h) of h_c on sides. The variations of the coefficients follow from the Jacobian hooks of
+ * the object evaluated along d(grad_x u) and the off-diagonal hooks along d(grad_x v) for each
+ * coupled field variable v, through a replacement of the trial function. The variation of the test
+ * function gradient contributes -(f_grad . h) e_c to the gradient coefficient.
+ */
+template <typename Object>
+KOKKOS_FUNCTION auto
+precomputeDisplacementJacobianTerms(const Object & object,
+                                    AssemblyDatum & datum,
+                                    const unsigned int c,
+                                    const unsigned int j,
+                                    const unsigned int qp)
+{
+  using Field = PrecomputeField<false>;
+
+  PrecomputedTerms<Real, Real3> terms{};
+
+  const auto phi = VariablePhiValue()(datum, j, qp);
+  const auto h = VariablePhiGradient()(datum, j, qp);
+  const auto JxW = datum.JxW(qp);
+
+  Real dmeasure = h(c) + phi * datum.grad_log_coord(qp)(c);
+
+  if (datum.isSide())
+  {
+    const auto n = NormalAccessor()(datum, qp);
+    dmeasure -= n(c) * (n * h);
+  }
+
+  datum.displacementVariation(true);
+
+  Real f_value = 0, df_value = 0;
+  Real3 f_grad = 0, df_grad = 0;
+
+  if constexpr (has_precomputeQpResidualValue_v<Object>)
+    f_value = object.template precomputeQpResidualValue<Object>(qp, datum);
+  if constexpr (has_precomputeQpResidualGrad_v<Object>)
+    f_grad = object.template precomputeQpResidualGrad<Object>(qp, datum);
+
+  const auto sys = datum.sys();
+  const auto tag = datum.tag();
+
+  AssemblyDatum::TrialOverride trial{0, -datum.gradient(sys, datum.ivar(), tag, qp)(c) * h};
+  datum.trialOverride(&trial);
+
+  if constexpr (has_precomputeQpJacobianValue_v<Object>)
+    df_value += object.template precomputeQpJacobianValue<Object>(j, qp, datum);
+  if constexpr (has_precomputeQpJacobianGrad_v<Object>)
+    df_grad += object.template precomputeQpJacobianGrad<Object>(j, qp, datum);
+
+  if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object> ||
+                has_precomputeQpOffDiagJacobianGrad_v<Object>)
+  {
+    const auto & system = datum.system(sys);
+    const auto & coupling = system.getFieldCoupling(datum.ivar());
+
+    for (unsigned int k = 0; k < coupling.size(); ++k)
+    {
+      const auto v = coupling[k];
+
+      if (!system.isVariableActive(v, datum.subdomain()))
+        continue;
+
+      trial.grad_phi = -datum.gradient(sys, v, tag, qp)(c) * h;
+
+      if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object>)
+        df_value += object.template precomputeQpOffDiagJacobianValue<Object>(j, v, qp, datum);
+      if constexpr (has_precomputeQpOffDiagJacobianGrad_v<Object>)
+        df_grad += object.template precomputeQpOffDiagJacobianGrad<Object>(j, v, qp, datum);
+    }
+  }
+
+  datum.trialOverride(nullptr);
+  datum.displacementVariation(false);
+
+  Real3 e_c(0);
+  e_c(c) = 1;
+
+  terms.value = JxW * (dmeasure * f_value + df_value);
+  terms.grad = Field::pullBack(JxW * (dmeasure * f_grad + df_grad - (f_grad * h) * e_c), datum, qp);
+
+  return terms;
+}
+
+/**
  * Assembly loop bodies of precompute residual objects, passed to
  * ResidualObject::computeResidualInternal() and ResidualObject::computeJacobianInternal()
  */
@@ -320,7 +413,11 @@ template <bool is_vector, typename Object>
 KOKKOS_FUNCTION auto
 precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
 {
-  return [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+  // Displacement component discretized by the column variable of an object posed on the current
+  // configuration
+  const auto c = datum.configuration().component(datum.sys(), datum.jvar());
+
+  return [&, c](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
   {
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
@@ -332,6 +429,17 @@ precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
                           has_precomputeQpOffDiagJacobianValue_v<Object>,
                           has_precomputeQpOffDiagJacobianGrad_v<Object>,
                           has_precomputeQpOffDiagJacobianCurl_v<Object>>(terms, datum, i, qp);
+
+      if constexpr (!is_vector)
+        if (c != libMesh::invalid_uint)
+        {
+          const auto displacement_terms =
+              precomputeDisplacementJacobianTerms(object, datum, c, j, qp);
+
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] +=
+                contractTerms<false, true, true, false>(displacement_terms, datum, i, qp);
+        }
     }
   };
 }

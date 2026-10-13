@@ -60,7 +60,7 @@ ElementUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & o
 {
   auto elem = kokkosBlockElementID(tid);
 
-  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _configuration);
 
   object.template execute<Derived>(datum);
 }

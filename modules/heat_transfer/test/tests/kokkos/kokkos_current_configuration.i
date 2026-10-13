@@ -1,6 +1,6 @@
 # Heat conduction with a volumetric source posed on the current configuration. The Kokkos kernels
-# couple the displacements and pull the weak form back to the reference configuration; the
-# non-Kokkos kernels integrate on the displaced mesh. The two discrete solutions agree to roundoff.
+# compose the deformation into their geometry on the reference mesh; the non-Kokkos kernels
+# integrate on the displaced mesh. The two discrete solutions agree to roundoff.
 
 [Mesh]
   type = GeneratedMesh
@@ -56,13 +56,13 @@
     type = KokkosHeatConduction
     variable = kokkos
     thermal_conductivity = k_kokkos
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
   []
   [kokkos_source]
     type = KokkosBodyForce
     variable = kokkos
     value = 100
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
   []
 []
 
@@ -115,7 +115,7 @@
   [kokkos_integral]
     type = KokkosElementIntegralVariablePostprocessor
     variable = kokkos
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
   []
   [difference]
     type = ElementL2Difference

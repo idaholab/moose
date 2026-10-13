@@ -173,8 +173,13 @@ ADIntegratedBC::operator()(ResidualLoop,
 {
   auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      _configuration);
 
   assembleADTerms(bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }

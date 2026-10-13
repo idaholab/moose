@@ -59,7 +59,7 @@ KokkosVectorCurlPenaltyDirichletBC::precomputeQpResidualValue(const unsigned int
   const auto & function_y = static_cast<const KokkosParsedFunction &>(_function_y);
   const auto & function_z = static_cast<const KokkosParsedFunction &>(_function_z);
   const auto p = datum.q_point(qp);
-  const auto normal = datum.normals(qp);
+  const auto normal = _normals(datum, qp);
   const Moose::Kokkos::Real3 u_exact(function_x.value(_t, p),
                                      _has_function_y ? function_y.value(_t, p) : 0,
                                      _has_function_z ? function_z.value(_t, p) : 0);
@@ -73,5 +73,5 @@ KokkosVectorCurlPenaltyDirichletBC::precomputeQpJacobianValue(const unsigned int
                                                               const unsigned int qp,
                                                               AssemblyDatum & datum) const
 {
-  return _penalty * tangential(_phi(datum, j, qp), datum.normals(qp));
+  return _penalty * tangential(_phi(datum, j, qp), _normals(datum, qp));
 }

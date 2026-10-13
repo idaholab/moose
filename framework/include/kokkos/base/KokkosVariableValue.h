@@ -49,6 +49,9 @@ public:
    */
   KOKKOS_FUNCTION Real operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
+    if (!is_test && datum.trialOverride())
+      return datum.trialOverride()->phi;
+
     auto & elem = datum.elem();
     auto side = datum.side();
     auto fe = is_test ? datum.ife() : datum.jfe();
@@ -82,6 +85,9 @@ public:
    */
   KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
+    if (!is_test && datum.trialOverride())
+      return datum.trialOverride()->grad_phi;
+
     return datum.dxi_dx(qp) * reference(datum, i, qp);
   }
 };
@@ -376,8 +382,11 @@ VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) 
   auto side = datum.side();
   auto & sys = datum.system(_var.sys(comp));
 
+  // The cached element gradients are taken on the reference configuration, while the face
+  // gradients use the map of the configuration
   return side == libMesh::invalid_uint
-             ? sys.getVectorQpGrad(elem, datum.qpOffset() + qp, _var.var(comp), _var.tag())
+             ? datum.pushForward(
+                   sys.getVectorQpGrad(elem, datum.qpOffset() + qp, _var.var(comp), _var.tag()), qp)
              : sys.getVectorQpGradFace(
                    elem, side, datum.dxi_dx(qp), qp, _var.var(comp), _var.tag());
 }
@@ -623,7 +632,8 @@ VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsig
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
-      grad = sys.getVectorQpVectorGrad(elem, datum.qpOffset() + qp, var, tag);
+      grad =
+          datum.pushForward(sys.getVectorQpVectorGrad(elem, datum.qpOffset() + qp, var, tag), qp);
     else
       grad = sys.getVectorQpVectorGradFace(elem, side, datum.dxi_dx(qp), qp, var, tag);
   }
@@ -648,20 +658,28 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
     auto var = _var.var(comp);
     auto tag = _var.tag();
 
-    if (side == libMesh::invalid_uint)
+    // The cached element curls are taken on the reference configuration, so the curl on the
+    // current configuration is formed from the shape function gradients
+    if (side == libMesh::invalid_uint && !datum.configuration().displaced())
       curl = sys.getVectorQpVectorCurl(elem, datum.qpOffset() + qp, var, tag);
     else
     {
       auto fe = sys.getFETypeID(var);
       auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
-      auto & grad_phi = datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
       auto jacobian = datum.dxi_dx(qp);
       auto jacobian_transpose = jacobian.transpose();
       Real33 grad = 0;
 
       for (unsigned int i = 0; i < n_dofs; ++i)
+      {
+        const auto & grad_phi =
+            side == libMesh::invalid_uint
+                ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
         grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
-                (grad_phi(i, qp) * jacobian_transpose);
+                (grad_phi * jacobian_transpose);
+      }
 
       curl = curlFromVectorGradient(grad, datum.assembly().getDimension());
     }

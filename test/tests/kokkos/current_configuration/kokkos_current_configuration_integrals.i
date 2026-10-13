@@ -1,5 +1,5 @@
-# Integrals over the current configuration computed by Kokkos postprocessors that couple the
-# displacements are compared against integrals over the displaced mesh.
+# Integrals over the current configuration computed by Kokkos postprocessors with
+# use_displaced_mesh = true are compared against integrals over the displaced mesh.
 
 [Mesh]
   type = GeneratedMesh
@@ -41,7 +41,7 @@
   [current_volume]
     type = KokkosElementIntegralVariablePostprocessor
     variable = u
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
     execute_on = INITIAL
   []
   [displaced_volume]
@@ -60,7 +60,7 @@
     type = KokkosSideIntegralVariablePostprocessor
     variable = u
     boundary = 'right top'
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
     execute_on = INITIAL
   []
   [displaced_side]

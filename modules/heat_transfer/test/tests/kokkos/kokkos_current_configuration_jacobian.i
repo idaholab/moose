@@ -1,5 +1,5 @@
-# Jacobian of the current-configuration heat conduction and source terms with respect to the
-# temperature and to nonlinear displacements. No displaced mesh is created.
+# Jacobian of current-configuration heat conduction, a volumetric source, and a boundary flux
+# coupled to a displacement, with respect to the temperature and to nonlinear displacements
 
 [Mesh]
   type = GeneratedMesh
@@ -8,6 +8,7 @@
   ny = 3
   xmin = 1
   xmax = 2
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -35,13 +36,13 @@
   [conduction]
     type = KokkosHeatConduction
     variable = T
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
   []
   [source]
     type = KokkosBodyForce
     variable = T
     value = 100
-    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
   []
   [disp_x]
     type = KokkosDiffusion
@@ -50,6 +51,16 @@
   [disp_y]
     type = KokkosDiffusion
     variable = disp_y
+  []
+[]
+
+[BCs]
+  [flux]
+    type = KokkosCoupledVarNeumannBC
+    variable = T
+    boundary = 'right top'
+    v = disp_y
+    use_displaced_mesh = true
   []
 []
 

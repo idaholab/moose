@@ -29,6 +29,11 @@ VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
     _grad_u(_var)
 {
   addMooseVariableDependency(&_var);
+
+  if (_configuration.displaced())
+    paramError("use_displaced_mesh",
+               "Kokkos vector objects do not yet assemble their Jacobian with respect to the "
+               "displacements of the current configuration.");
 }
 
 void
