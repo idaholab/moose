@@ -11,7 +11,11 @@
 
 #include "FVGradientMethod.h"
 
-class FVTwoSidedFaceInterpolation;
+#include <utility>
+
+class ComputeLinearFVGreenGaussGradientFaceThread;
+class ElemInfo;
+class FaceInfo;
 
 /**
  * Green-Gauss cell-centered gradient method for linear finite-volume variables.
@@ -28,12 +32,20 @@ protected:
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
+  /// Element-side and neighbor-side values contributed by an internal face.
+  using InternalFaceValues = std::pair<Real, Real>;
+
   /**
-   * Compute a Green-Gauss gradient with optional two-sided interpolation at internal faces.
+   * Return the two Green-Gauss face values on an internal face.
+   *
+   * The first value is multiplied by the outward element surface vector. The second value is
+   * multiplied by its opposite for the neighbor row.
    */
-  void computeGreenGaussGradient(
-      SystemBase & system,
-      GradientContainer & gradient,
-      const std::unordered_set<unsigned int> & variable_numbers,
-      const FVTwoSidedFaceInterpolation * two_sided_interpolation = nullptr) const;
+  virtual InternalFaceValues internalFaceValues(const FaceInfo & fi,
+                                                const ElemInfo & elem_info,
+                                                const ElemInfo & neighbor_info,
+                                                Real elem_value,
+                                                Real neighbor_value) const;
+
+  friend class ComputeLinearFVGreenGaussGradientFaceThread;
 };

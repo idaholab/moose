@@ -32,6 +32,17 @@
     max_threads = 1
   []
 
+  [shared-baffle-velocity-gradient-reconstruction]
+    type = RunApp
+    input = form-loss-orientation.i
+    cli_args = 'FVGradientMethods/reconstructed/baffle_velocity_gradient_reconstruction=shared'
+    requirement = 'The system shall support interpolating the lagged velocity gradient across a '
+                  'pressure baffle independently of the physical pressure-jump model.'
+    design = 'FVReconstructedPressureGradient.md'
+    recover = false
+    max_threads = 1
+  []
+
   [reject-ordinary-pressure-gradient]
     type = RunException
     input = porous-baffle-1d.i

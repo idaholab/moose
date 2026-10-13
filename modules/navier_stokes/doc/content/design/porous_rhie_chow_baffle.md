@@ -20,9 +20,11 @@ is therefore
 \end{equation}
 
 [LinearPWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$
-factor to each cell row. On a
-porous baffle where pressure-gradient reconstruction is one-sided, it also uses the local velocity
-state on each side instead of sharing an interpolated state across the jump.
+factor to each cell row. On a porous baffle where the pressure-jump model requests one-sided
+momentum advection, it also uses the local velocity state on each side instead of sharing an
+interpolated state across the jump. Independently,
+[!param](/FVGradientMethods/FVReconstructedPressureGradient/baffle_velocity_gradient_reconstruction)
+controls whether cell-velocity reconstruction uses shared or side-local lagged velocity gradients.
 
 ## Pressure jump
 

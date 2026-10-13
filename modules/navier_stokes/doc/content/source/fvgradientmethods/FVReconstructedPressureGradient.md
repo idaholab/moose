@@ -30,7 +30,10 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    the pressure gradient used before a reconstructed coupling gradient exists. At an internal face,
    the lagged gradients of the two neighboring cells are averaged to a face value
    $(\nabla\mathbf{u})^{\text{lag}}_f$; at a domain boundary, or at the edge of this method's block
-   restriction, the owning cell's lagged gradient is used directly.
+   restriction, the owning cell's lagged gradient is used directly. On a pressure-baffle face,
+   [!param](/FVGradientMethods/FVReconstructedPressureGradient/baffle_velocity_gradient_reconstruction)
+   independently selects either this shared average or the gradient local to each cell side. This
+   numerical reconstruction choice does not alter the physical pressure jump.
 
 2. Turn each corrected face flux into a face equation for the cell velocity. A first-order Taylor
    expansion of the velocity from the cell centroid to the face centroid gives

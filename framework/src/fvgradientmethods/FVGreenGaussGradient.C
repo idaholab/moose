@@ -12,6 +12,7 @@
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "FEProblemBase.h"
+#include "MathFVUtils.h"
 #include "SystemBase.h"
 
 registerMooseObject("MooseApp", FVGreenGaussGradient);
@@ -29,21 +30,22 @@ FVGreenGaussGradient::FVGreenGaussGradient(const InputParameters & params)
 {
 }
 
+FVGreenGaussGradient::InternalFaceValues
+FVGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
+                                         const ElemInfo & /*elem_info*/,
+                                         const ElemInfo & /*neighbor_info*/,
+                                         Real elem_value,
+                                         Real neighbor_value) const
+{
+  const Real face_value = Moose::FV::linearInterpolation(elem_value, neighbor_value, fi, true);
+  return {face_value, face_value};
+}
+
 void
 FVGreenGaussGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
-{
-  computeGreenGaussGradient(system, gradient, variable_numbers);
-}
-
-void
-FVGreenGaussGradient::computeGreenGaussGradient(
-    SystemBase & system,
-    GradientContainer & gradient,
-    const std::unordered_set<unsigned int> & variable_numbers,
-    const FVTwoSidedFaceInterpolation * const two_sided_interpolation) const
 {
   auto & fe_problem = system.feProblem();
 
@@ -54,7 +56,7 @@ FVGreenGaussGradient::computeGreenGaussGradient(
                                   fe_problem.mesh().ownedFaceInfoEnd());
 
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        fe_problem, system, gradient, variable_numbers, two_sided_interpolation);
+        fe_problem, system, gradient, variable_numbers, *this);
     Threads::parallel_reduce(face_info_range, gradient_face_thread, system.numThreads());
   }
   fe_problem.checkExceptionAndStopSolve();

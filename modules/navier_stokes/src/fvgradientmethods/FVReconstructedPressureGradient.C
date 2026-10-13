@@ -47,6 +47,11 @@ FVReconstructedPressureGradient::validParams()
       0.1,
       "0.0<gradient_relaxation<=1.0",
       "Relaxation factor applied when updating the reconstructed pressure-coupling gradient.");
+  params.addParam<MooseEnum>(
+      "baffle_velocity_gradient_reconstruction",
+      MooseEnum("one-sided shared", "one-sided"),
+      "Whether the lagged velocity gradient in the cell-velocity reconstruction is taken from "
+      "each side of a pressure baffle independently or interpolated across the baffle.");
   return params;
 }
 
@@ -54,7 +59,9 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
   : FVGradientMethod(params),
     MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
-    _gradient_relaxation(getParam<Real>("gradient_relaxation"))
+    _gradient_relaxation(getParam<Real>("gradient_relaxation")),
+    _use_one_sided_baffle_velocity_gradient(
+        getParam<MooseEnum>("baffle_velocity_gradient_reconstruction") == "one-sided")
 {
 }
 
@@ -374,12 +381,12 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 {
   const auto dimension = rc.dimension();
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
-  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a face where
-  // reconstruction is one-sided (e.g. a baffle with a porosity jump), use the owned cell's
-  // gradient (zero Hessian approximation). Otherwise interpolate the two lagged cell gradients to
-  // the face.
+  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a baffle configured for
+  // one-sided reconstruction, use the owned cell's gradient (zero Hessian approximation).
+  // Otherwise interpolate the two lagged cell gradients to the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
-      (_porous_rhie_chow && _porous_rhie_chow->faceUsesOneSidedReconstruction(fi)))
+      (_use_one_sided_baffle_velocity_gradient && _porous_rhie_chow &&
+       _porous_rhie_chow->faceIsBaffle(fi)))
     return elem_gradient;
 
   const auto & velocity = rc.velocityVariable(velocity_component);

@@ -80,24 +80,21 @@ FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
                 "FVPressureJumpGreenGaussGradient can only compute the linked pressure variable.");
   }
 
-  computeGreenGaussGradient(system, gradient, variable_numbers, this);
+  FVGreenGaussGradient::computeGradientWithoutLimiter(system, gradient, variable_numbers);
 }
 
-FVTwoSidedFaceInterpolation::FaceValues
-FVPressureJumpGreenGaussGradient::twoSidedInterpolate(const FaceInfo & fi,
-                                                      const Real elem_value,
-                                                      const Real neighbor_value) const
+FVGreenGaussGradient::InternalFaceValues
+FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
+                                                     const ElemInfo & elem_info,
+                                                     const ElemInfo & neighbor_info,
+                                                     const Real elem_value,
+                                                     const Real neighbor_value) const
 {
   if (!_rhie_chow || !_rhie_chow->faceIsBaffle(fi))
-  {
-    const Real face_value = Moose::FV::linearInterpolation(elem_value, neighbor_value, fi, true);
-    return {face_value, face_value};
-  }
+    return FVGreenGaussGradient::internalFaceValues(
+        fi, elem_info, neighbor_info, elem_value, neighbor_value);
 
   mooseAssert(_pressure_gradient, "A linked pressure gradient is required on pressure-jump faces.");
-
-  const auto & elem_info = *fi.elemInfo();
-  const auto & neighbor_info = *fi.neighborInfo();
 
   const Real jump = _rhie_chow->getSignedBaffleJump(fi, /*elem_side=*/true);
   if (!_rhie_chow->pressureDiffusionDataReady())

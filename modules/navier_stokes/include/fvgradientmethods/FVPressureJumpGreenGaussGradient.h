@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "FVTwoSidedFaceInterpolation.h"
 #include "FVGreenGaussGradient.h"
 
 class LinearFVGradientReader;
@@ -17,8 +16,7 @@ class PorousRhieChowMassFlux;
 /**
  * Green-Gauss pressure gradient that removes prescribed jumps before interpolating across baffles.
  */
-class FVPressureJumpGreenGaussGradient : public FVGreenGaussGradient,
-                                         public FVTwoSidedFaceInterpolation
+class FVPressureJumpGreenGaussGradient : public FVGreenGaussGradient
 {
 public:
   static InputParameters validParams();
@@ -34,8 +32,11 @@ private:
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
-  FaceValues
-  twoSidedInterpolate(const FaceInfo & fi, Real elem_value, Real neighbor_value) const override;
+  InternalFaceValues internalFaceValues(const FaceInfo & fi,
+                                        const ElemInfo & elem_info,
+                                        const ElemInfo & neighbor_info,
+                                        Real elem_value,
+                                        Real neighbor_value) const override;
 
   /// Porous Rhie-Chow object supplying baffle locations and signed pressure jumps after linkage.
   const PorousRhieChowMassFlux * _rhie_chow = nullptr;
