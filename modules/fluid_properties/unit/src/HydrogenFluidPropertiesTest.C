@@ -28,8 +28,8 @@ TEST_F(HydrogenFluidPropertiesTest, molarMass)
  */
 TEST_F(HydrogenFluidPropertiesTest, criticalProperties)
 {
-  ABS_TEST(_fp->criticalPressure(), 1.315e6, REL_TOL_SAVED_VALUE);
-  ABS_TEST(_fp->criticalTemperature(), 33.19, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalPressure(), 1.2964e6, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalTemperature(), 33.145, REL_TOL_SAVED_VALUE);
   ABS_TEST(_fp->criticalDensity(), 31.26226704, REL_TOL_SAVED_VALUE);
 }
 
@@ -48,7 +48,7 @@ TEST_F(HydrogenFluidPropertiesTest, triplePointProperties)
  */
 TEST_F(HydrogenFluidPropertiesTest, vapor)
 {
-  const Real tol = 10.0 * REL_TOL_EXTERNAL_VALUE;
+  const Real tol = REL_TOL_EXTERNAL_VALUE;
 
   // Vapor pressure
   REL_TEST(_fp->vaporPressure(14.0), 7.541e3, tol);

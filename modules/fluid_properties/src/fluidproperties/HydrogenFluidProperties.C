@@ -25,8 +25,8 @@ HydrogenFluidProperties::validParams()
 HydrogenFluidProperties::HydrogenFluidProperties(const InputParameters & parameters)
   : HelmholtzFluidProperties(parameters),
     _Mh2(2.01588e-3),
-    _p_critical(1.315e6),
-    _T_critical(33.19),
+    _p_critical(1.2964e6),
+    _T_critical(33.145),
     _rho_molar_critical(15.508),
     _rho_critical(1000.0 * _rho_molar_critical * _Mh2),
     _p_triple(7.7e3),
