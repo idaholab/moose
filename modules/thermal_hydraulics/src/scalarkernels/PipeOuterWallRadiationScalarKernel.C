@@ -31,7 +31,8 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::validParams()
       "is_implicit",
       false,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
-  params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
+  params.addRequiredParam<UserObjectName>("solid_properties",
+                                          "The name of the user object for solid properties");
   params.addRequiredParam<MooseFunctorName>("area",
                                             "Cross-sectional area of this wall layer [m^2]");
   params.addRequiredParam<MooseFunctorName>(
@@ -50,8 +51,8 @@ template <bool is_ad>
 PipeOuterWallRadiationScalarKernelTempl<is_ad>::PipeOuterWallRadiationScalarKernelTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
-    _sp(this->template getUserObject<ThermalSolidProperties>("sp")),
+    ADFunctorInterface(this),
+    _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _area(this->template getFunctor<GenericReal<is_ad>>("area")),
     _perimeter(this->template getFunctor<GenericReal<is_ad>>("perimeter")),
