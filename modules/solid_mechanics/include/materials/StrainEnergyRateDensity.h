@@ -40,15 +40,21 @@ private:
 
   /// The strain energy density material property
   MaterialProperty<Real> & _strain_energy_rate_density;
+  const MaterialProperty<Real> & _strain_energy_rate_density_old;
 
   /// Current and old values of stress
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
 
   /// Current value of the strain increment for incremental models
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _strain_rate;
+  const MaterialProperty<RankTwoTensor> & _strain_rate_old;
 
   /// number of plastic models
   const unsigned _num_models;
+
+  /// Whether to compute the strain energy rate density incrementally
+  const bool _use_incremental_serd;
 
   /// The user supplied list of inelastic models to compute the strain energy release rate
   std::vector<GenericStressUpdateBase<is_ad> *> _inelastic_models;
