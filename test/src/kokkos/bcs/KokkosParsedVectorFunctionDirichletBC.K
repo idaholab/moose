@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosVectorFunctionDirichletBC.h"
+#include "KokkosParsedVectorFunctionDirichletBC.h"
 
-registerKokkosResidualObject("MooseTestApp", KokkosVectorFunctionDirichletBC);
+registerKokkosResidualObject("MooseTestApp", KokkosParsedVectorFunctionDirichletBC);
 
 InputParameters
-KokkosVectorFunctionDirichletBC::validParams()
+KokkosParsedVectorFunctionDirichletBC::validParams()
 {
   InputParameters params = Moose::Kokkos::VectorNodalBC::validParams();
   params.addClassDescription(
@@ -23,7 +23,8 @@ KokkosVectorFunctionDirichletBC::validParams()
   return params;
 }
 
-KokkosVectorFunctionDirichletBC::KokkosVectorFunctionDirichletBC(const InputParameters & parameters)
+KokkosParsedVectorFunctionDirichletBC::KokkosParsedVectorFunctionDirichletBC(
+    const InputParameters & parameters)
   : Moose::Kokkos::VectorNodalBC(parameters),
     _has_function_y(isParamValid("function_y")),
     _has_function_z(isParamValid("function_z")),

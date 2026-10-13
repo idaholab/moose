@@ -1,0 +1,28 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "KokkosPostprocessorDirichletBC.h"
+
+registerKokkosResidualObject("MooseApp", KokkosPostprocessorDirichletBC);
+
+InputParameters
+KokkosPostprocessorDirichletBC::validParams()
+{
+  InputParameters params = NodalBC::validParams();
+  params.addClassDescription(
+      "Dirichlet boundary condition with value prescribed by a Postprocessor value.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The postprocessor to set the value to on the boundary.");
+  return params;
+}
+
+KokkosPostprocessorDirichletBC::KokkosPostprocessorDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters), _postprocessor_value(getPostprocessorValue("postprocessor"))
+{
+}
