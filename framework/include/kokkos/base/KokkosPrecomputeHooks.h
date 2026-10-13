@@ -11,6 +11,7 @@
 
 #include "KokkosPrecomputeHookTraits.h"
 #include "KokkosVariableValue.h"
+#include "KokkosDispatcher.h"
 
 namespace Moose::Kokkos
 {
@@ -343,13 +344,21 @@ curlCoefficientAsGradient(const Real3 & f, const unsigned int dim)
  * x = X + u moves by dx = phi_j e_c, and on sides the normal n = F^{-T} N / |F^{-T} N| varies by
  * dn = -n_c (h - (n . h) n); the position and normal Jacobian hooks of the object contract these
  * with the derivatives of its coefficients.
+ *
+ * The variation is linear in (phi_j, h), because the Jacobian, position, and normal Jacobian hooks
+ * are linear in their trial function and variation arguments. The assembly therefore evaluates it
+ * once per quadrature point along the directions (1, 0) and (0, e_k) and contracts the results
+ * with the shape functions of each column.
+ * @param phi The value of the displacement shape function
+ * @param h The gradient of the displacement shape function on the configuration
  */
 template <bool is_vector, typename Object>
 KOKKOS_FUNCTION auto
 precomputeDisplacementJacobianTerms(const Object & object,
                                     AssemblyDatum & datum,
                                     const unsigned int c,
-                                    const unsigned int j,
+                                    const Real phi,
+                                    const Real3 & h,
                                     const unsigned int qp)
 {
   using Field = PrecomputeField<is_vector>;
@@ -358,8 +367,8 @@ precomputeDisplacementJacobianTerms(const Object & object,
 
   PrecomputedTerms<Coefficient, GradCoefficient> terms{};
 
-  const auto phi = VariablePhiValue()(datum, j, qp);
-  const auto h = VariablePhiGradient()(datum, j, qp);
+  // The hooks receive a placeholder column index; the trial function they read is replaced
+  const unsigned int j = 0;
   const auto JxW = datum.JxW(qp);
 
   Real dmeasure = h(c) + phi * datum.grad_log_coord(qp)(c);
@@ -423,7 +432,13 @@ precomputeDisplacementJacobianTerms(const Object & object,
       trial.grad_phi = displacementGradientVariation(datum.gradient(sys, var, tag, qp), c, h);
   };
 
-  vary(datum.ivar());
+  // The variation of a field gradient vanishes along the direction of the shape function value
+  const bool varies_gradients = h(0) != 0 || h(1) != 0 || h(2) != 0;
+
+  if constexpr (has_jacobian_hook<Object>)
+    if (varies_gradients)
+      vary(datum.ivar());
+
   datum.trialOverride(&trial);
 
   if constexpr (has_precomputeQpJacobianValue_v<Object>)
@@ -434,26 +449,27 @@ precomputeDisplacementJacobianTerms(const Object & object,
     df_curl += object.template precomputeQpJacobianCurl<Object>(j, qp, datum);
 
   if constexpr (has_offdiag_jacobian_hook<Object>)
-  {
-    const auto & coupling = system.getFieldCoupling(datum.ivar());
-
-    for (unsigned int k = 0; k < coupling.size(); ++k)
+    if (varies_gradients)
     {
-      const auto v = coupling[k];
+      const auto & coupling = system.getFieldCoupling(datum.ivar());
 
-      if (!system.isVariableActive(v, datum.subdomain()))
-        continue;
+      for (unsigned int k = 0; k < coupling.size(); ++k)
+      {
+        const auto v = coupling[k];
 
-      vary(v);
+        if (!system.isVariableActive(v, datum.subdomain()))
+          continue;
 
-      if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object>)
-        df_value += object.template precomputeQpOffDiagJacobianValue<Object>(j, v, qp, datum);
-      if constexpr (has_precomputeQpOffDiagJacobianGrad_v<Object>)
-        df_grad += object.template precomputeQpOffDiagJacobianGrad<Object>(j, v, qp, datum);
-      if constexpr (has_precomputeQpOffDiagJacobianCurl_v<Object>)
-        df_curl += object.template precomputeQpOffDiagJacobianCurl<Object>(j, v, qp, datum);
+        vary(v);
+
+        if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object>)
+          df_value += object.template precomputeQpOffDiagJacobianValue<Object>(j, v, qp, datum);
+        if constexpr (has_precomputeQpOffDiagJacobianGrad_v<Object>)
+          df_grad += object.template precomputeQpOffDiagJacobianGrad<Object>(j, v, qp, datum);
+        if constexpr (has_precomputeQpOffDiagJacobianCurl_v<Object>)
+          df_curl += object.template precomputeQpOffDiagJacobianCurl<Object>(j, v, qp, datum);
+      }
     }
-  }
 
   datum.trialOverride(nullptr);
   datum.displacementVariation(false, false, false);
@@ -483,6 +499,224 @@ precomputeDisplacementJacobianTerms(const Object & object,
     terms.curl = JxW * (dmeasure * f_curl + df_curl);
 
   return terms;
+}
+
+/**
+ * Layout of the per-team scratch memory of the displacement Jacobian of a precompute object. At
+ * each quadrature point the scratch holds the JxW-weighted coefficients of the variation along the
+ * directions (phi, h) = (1, 0), (0, e_0), (0, e_1), (0, e_2), each as a value coefficient, a
+ * gradient coefficient pulled back to the reference element, and for vector fields a curl
+ * coefficient, followed by the inverse of the map of the configuration
+ * @tparam is_vector Whether the field is vector-valued
+ */
+template <bool is_vector>
+struct DisplacementScratchLayout
+{
+  /// Number of reals of the value coefficient
+  static constexpr unsigned int value_size = is_vector ? 3 : 1;
+  /// Number of reals of the gradient coefficient
+  static constexpr unsigned int grad_size = is_vector ? 9 : 3;
+  /// Number of reals of the curl coefficient
+  static constexpr unsigned int curl_size = is_vector ? 3 : 0;
+  /// Number of reals of the coefficients of one direction
+  static constexpr unsigned int direction_size = value_size + grad_size + curl_size;
+  /// Number of directions
+  static constexpr unsigned int num_directions = 4;
+  /// Offset of the inverse of the map of the configuration within a quadrature point
+  static constexpr unsigned int map_offset = num_directions * direction_size;
+  /// Number of reals per quadrature point
+  static constexpr unsigned int qp_size = map_offset + 9;
+
+  /**
+   * Get the number of bytes of scratch memory per team
+   * @param max_qps The maximum number of quadrature points of an element or side
+   */
+  static std::size_t bytes(const unsigned int max_qps)
+  {
+    return ::Kokkos::View<Real *, ::Kokkos::DefaultExecutionSpace::scratch_memory_space>::
+        shmem_size(max_qps * qp_size);
+  }
+};
+
+/**
+ * Store and load precomputed terms of one direction of the displacement variation
+ */
+///@{
+template <bool is_vector, typename Terms>
+KOKKOS_FUNCTION void
+storeDisplacementTerms(Real * scratch, const Terms & terms)
+{
+  using Layout = DisplacementScratchLayout<is_vector>;
+
+  if constexpr (!is_vector)
+  {
+    scratch[0] = terms.value;
+    for (unsigned int k = 0; k < 3; ++k)
+      scratch[Layout::value_size + k] = terms.grad(k);
+  }
+  else
+  {
+    for (unsigned int a = 0; a < 3; ++a)
+    {
+      scratch[a] = terms.value(a);
+      scratch[Layout::value_size + Layout::grad_size + a] = terms.curl(a);
+      for (unsigned int b = 0; b < 3; ++b)
+        scratch[Layout::value_size + 3 * a + b] = terms.grad(a, b);
+    }
+  }
+}
+
+template <bool is_vector>
+KOKKOS_FUNCTION auto
+loadDisplacementTerms(const Real * scratch)
+{
+  using Layout = DisplacementScratchLayout<is_vector>;
+  using Field = PrecomputeField<is_vector>;
+
+  PrecomputedTerms<typename Field::Coefficient, typename Field::GradCoefficient> terms{};
+
+  if constexpr (!is_vector)
+  {
+    terms.value = scratch[0];
+    for (unsigned int k = 0; k < 3; ++k)
+      terms.grad(k) = scratch[Layout::value_size + k];
+  }
+  else
+  {
+    for (unsigned int a = 0; a < 3; ++a)
+    {
+      terms.value(a) = scratch[a];
+      terms.curl(a) = scratch[Layout::value_size + Layout::grad_size + a];
+      for (unsigned int b = 0; b < 3; ++b)
+        terms.grad(a, b) = scratch[Layout::value_size + 3 * a + b];
+    }
+  }
+
+  return terms;
+}
+///@}
+
+/**
+ * Assemble the Jacobian of a precompute object posed on the current configuration with respect to
+ * one displacement component on one element or side with one team. The team evaluates the
+ * variation of the residual along the four directions of precomputeDisplacementJacobianTerms() once
+ * per quadrature point into scratch, then combines the stored coefficients for each displacement
+ * shape function and contracts them with the test functions:
+ *
+ *   J_ij = sum_qp T(phi_j T_0 + sum_k h_k T_(1 + k))(psi_i)
+ *
+ * where T_d are the coefficients of direction d and T(.)(psi_i) contracts coefficients with the
+ * test function i.
+ * @param object The residual object of the final derived type
+ * @param team The team handle
+ * @param datum The AssemblyDatum object of the element or side, whose column variable is the
+ * displacement component
+ * @param c The displacement component
+ * @param accumulate The callable accumulating an entry (i, j) of the local matrix
+ */
+template <bool is_vector, typename Object, typename Team, typename Accumulate>
+KOKKOS_FUNCTION void
+assembleDisplacementJacobian(const Object & object,
+                             const Team & team,
+                             const AssemblyDatum & datum,
+                             const unsigned int c,
+                             Accumulate accumulate)
+{
+  using Layout = DisplacementScratchLayout<is_vector>;
+
+  const auto n_qps = datum.n_qps();
+  ::Kokkos::
+      View<Real *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>
+          scratch(team.team_scratch(0), n_qps * Layout::qp_size);
+
+  // Each thread evaluates its quadrature points with its own datum, whose geometry cache and trial
+  // function replacement are thread-private
+  ::Kokkos::parallel_for(
+      ::Kokkos::TeamThreadRange(team, n_qps),
+      [&](const unsigned int qp)
+      {
+        AssemblyDatum qp_datum(datum);
+        Real * q = &scratch(qp * Layout::qp_size);
+
+        storeDisplacementTerms<is_vector>(
+            q,
+            precomputeDisplacementJacobianTerms<is_vector>(object, qp_datum, c, 1, Real3(0), qp));
+
+        for (unsigned int k = 0; k < 3; ++k)
+        {
+          Real3 e_k(0);
+          e_k(k) = 1;
+          storeDisplacementTerms<is_vector>(
+              q + (1 + k) * Layout::direction_size,
+              precomputeDisplacementJacobianTerms<is_vector>(object, qp_datum, c, 0, e_k, qp));
+        }
+
+        const auto & dxi_dx = qp_datum.dxi_dx(qp);
+        for (unsigned int a = 0; a < 3; ++a)
+          for (unsigned int b = 0; b < 3; ++b)
+            q[Layout::map_offset + 3 * a + b] = dxi_dx(a, b);
+      });
+  team.team_barrier();
+
+  const auto & assembly = datum.assembly();
+  const auto & elem = datum.elem();
+  const auto side = datum.side();
+  const auto jfe = datum.jfe();
+  const auto n_idofs = datum.n_idofs();
+  const auto n_jdofs = datum.n_jdofs();
+
+  // Each thread contracts the columns j it is assigned with its own datum, whose cached geometry is
+  // read by the test function accessors
+  ::Kokkos::parallel_for(
+      ::Kokkos::TeamThreadRange(team, n_jdofs),
+      [&](const unsigned int j)
+      {
+        AssemblyDatum j_datum(datum);
+        Real local_ke[MAX_CACHED_DOF];
+
+        for (unsigned int ib = 0; ib < n_idofs; ib += MAX_CACHED_DOF)
+        {
+          const auto ie = ::Kokkos::min(ib + MAX_CACHED_DOF, n_idofs);
+
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i - ib] = 0;
+
+          for (unsigned int qp = 0; qp < n_qps; ++qp)
+          {
+            const Real * q = &scratch(qp * Layout::qp_size);
+
+            const Real phi = side == libMesh::invalid_uint
+                                 ? assembly.getPhi(elem.subdomain, elem.type, jfe)(j, qp)
+                                 : assembly.getPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
+            const Real3 ref =
+                side == libMesh::invalid_uint
+                    ? assembly.getGradPhi(elem.subdomain, elem.type, jfe)(j, qp)
+                    : assembly.getGradPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
+
+            const Real * map = q + Layout::map_offset;
+            const Real3 h(map[0] * ref(0) + map[1] * ref(1) + map[2] * ref(2),
+                          map[3] * ref(0) + map[4] * ref(1) + map[5] * ref(2),
+                          map[6] * ref(0) + map[7] * ref(1) + map[8] * ref(2));
+
+            // Combine the directions into the coefficients of column j
+            const Real weights[Layout::num_directions] = {phi, h(0), h(1), h(2)};
+            Real combined[Layout::direction_size] = {};
+
+            for (unsigned int d = 0; d < Layout::num_directions; ++d)
+              for (unsigned int k = 0; k < Layout::direction_size; ++k)
+                combined[k] += weights[d] * q[d * Layout::direction_size + k];
+
+            const auto terms = loadDisplacementTerms<is_vector>(combined);
+
+            for (unsigned int i = ib; i < ie; ++i)
+              local_ke[i - ib] +=
+                  contractTerms<is_vector, true, true, is_vector>(terms, j_datum, i, qp);
+          }
+
+          for (unsigned int i = ib; i < ie; ++i)
+            accumulate(local_ke[i - ib], i, j);
+        }
+      });
 }
 
 /**
@@ -532,11 +766,7 @@ template <bool is_vector, typename Object>
 KOKKOS_FUNCTION auto
 precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
 {
-  // Displacement component discretized by the column variable of an object posed on the current
-  // configuration
-  const auto c = datum.configuration().component(datum.sys(), datum.jvar());
-
-  return [&, c](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+  return [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
   {
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
@@ -548,16 +778,6 @@ precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
                           has_precomputeQpOffDiagJacobianValue_v<Object>,
                           has_precomputeQpOffDiagJacobianGrad_v<Object>,
                           has_precomputeQpOffDiagJacobianCurl_v<Object>>(terms, datum, i, qp);
-
-      if (c != libMesh::invalid_uint)
-      {
-        const auto displacement_terms =
-            precomputeDisplacementJacobianTerms<is_vector>(object, datum, c, j, qp);
-
-        for (unsigned int i = ib; i < ie; ++i)
-          local_ke[i] +=
-              contractTerms<is_vector, true, true, is_vector>(displacement_terms, datum, i, qp);
-      }
     }
   };
 }

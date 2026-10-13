@@ -585,6 +585,8 @@ registerResidualObjectDispatchers(const std::string & objectname)
                                                                      has_jacobian_hook<Object>);
     DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianLoop>(
         objectname, has_offdiag_jacobian_hook<Object>);
+    DispatcherRegistry::addTeamDispatcher<typename Object::DisplacementJacobianLoop, Object>(
+        objectname);
   }
   else
   {
