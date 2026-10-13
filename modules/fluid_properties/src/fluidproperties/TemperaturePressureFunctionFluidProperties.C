@@ -429,7 +429,7 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real p, Real T) const
     rho_from_p_T(p, T, rho, drho_dp, drho_dT);
     // Wikipedia notation for thermal expansion / compressibility coefficients
     Real alpha = -drho_dT / rho;
-    Real beta = -drho_dp / rho;
+    Real beta = drho_dp / rho;
     if (!MooseUtils::absoluteFuzzyEqual(beta, 0))
       return _cv + MathUtils::pow(alpha, 2) * T / rho / beta;
     else
@@ -477,7 +477,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real pressure, Real temp
     rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     // Wikipedia notation for thermal expansion / compressibility coefficients
     Real alpha = -drho_dT / rho;
-    Real beta = -drho_dp / rho;
+    Real beta = drho_dp / rho;
     if (!MooseUtils::absoluteFuzzyEqual(beta, 0))
       return cp_from_p_T(pressure, temperature) -
              MathUtils::pow(alpha, 2) * temperature / rho / beta;

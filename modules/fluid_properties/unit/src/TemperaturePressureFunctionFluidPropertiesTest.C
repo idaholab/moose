@@ -39,7 +39,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_constant_cv)
   Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
   Real density = 1 / v;
   Real alpha = -1. / density * 2.5;
-  Real beta = -1. / density * 32e-5;
+  Real beta = 1. / density * 32e-5;
   Real cp = cv + MathUtils::pow(alpha, 2) * T / density / beta;
 
   // Testing the properties with a constant cv
@@ -76,7 +76,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_constant_cv)
   visc = 1e-3 + 1e-5 * T - 3e-9 * p;
   density = 1 / v;
   alpha = -1. / density * 2.5;
-  beta = -1. / density * 32e-5;
+  beta = 1. / density * 32e-5;
   cp = cv + MathUtils::pow(alpha, 2) * T / density / beta;
 
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
@@ -116,7 +116,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 8.56E7;
     Real T = 200.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 9220000.46051060781;
+    Real e = 9219999.5394894015;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -125,7 +125,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
     Real density = 1 / v;
     Real alpha = -1. / density * 2.5;
-    Real beta = -1. / density * 32e-5;
+    Real beta = 1. / density * 32e-5;
     Real cv = cp - MathUtils::pow(alpha, 2) * T / density / beta;
 
     ABS_TEST(_fp_cp->cp_from_p_T(p, T), cp, tol);
@@ -152,7 +152,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 1.06841E8;
     Real T = 300.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 17061150.6748718396;
+    Real e = 17061149.3251282759;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -161,7 +161,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
     Real density = 1 / v;
     Real alpha = -1. / density * 2.5;
-    Real beta = -1. / density * 32e-5;
+    Real beta = 1. / density * 32e-5;
     Real cv = cp - MathUtils::pow(alpha, 2) * T / density / beta;
 
     ABS_TEST(_fp_cp->cp_from_p_T(p, T), cp, tol);
@@ -325,4 +325,25 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, combined)
   ABS_TEST(e, e2, tol);
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
+}
+
+/**
+ * Verify the thermodynamic relation cp - cv = T alpha^2 / (rho kappa_T), with
+ * alpha = -(1/rho) drho/dT the thermal expansion coefficient and kappa_T = (1/rho) drho/dp > 0
+ * the isothermal compressibility, so that cp >= cv
+ */
+TEST_F(TemperaturePressureFunctionFluidPropertiesTest, heatCapacityDifference)
+{
+  const Real p = 8.56E7;
+  const Real T = 200.0;
+  const Real rho = 1400 + 2.5 * T + 32e-5 * p;
+  const Real alpha = -2.5 / rho;
+  const Real kappa_T = 32e-5 / rho;
+  const Real cp_minus_cv = T * alpha * alpha / (rho * kappa_T);
+  EXPECT_GT(cp_minus_cv, 0.0);
+
+  // constant cv
+  REL_TEST(_fp->cp_from_p_T(p, T), _fp->cv_from_p_T(p, T) + cp_minus_cv, REL_TOL_CONSISTENCY);
+  // function cp
+  REL_TEST(_fp_cp->cv_from_p_T(p, T), _fp_cp->cp_from_p_T(p, T) - cp_minus_cv, REL_TOL_CONSISTENCY);
 }
