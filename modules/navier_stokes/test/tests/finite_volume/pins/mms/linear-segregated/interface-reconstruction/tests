@@ -12,7 +12,7 @@
                   'material properties with decreasing velocity, pressure-gradient, and pressure '
                   'oscillation errors using both shared and side-local velocity gradients.'
     heavy = true
-    max_threads = 1
+    max_threads = 1 # see libmesh issue #3808
   []
 
   [density-jump-equal-porosity]
@@ -24,6 +24,6 @@
                   'pressure-gradient, and pressure oscillation errors using both shared and '
                   'side-local velocity gradients.'
     heavy = true
-    max_threads = 1
+    max_threads = 1 # see libmesh issue #3808
   []
 []

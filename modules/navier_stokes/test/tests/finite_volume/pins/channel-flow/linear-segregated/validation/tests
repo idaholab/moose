@@ -7,8 +7,8 @@
     expect_err = 'Must have the same length as boundary'
     requirement = 'The system shall reject a form-loss coefficient vector whose length does not match the pressure-jump boundary list.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [reference-side-size-mismatch]
     type = RunException
@@ -17,8 +17,8 @@
     expect_err = 'Must have the same length as boundary'
     requirement = 'The system shall reject a reference-velocity-side vector whose length does not match the pressure-jump boundary list.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [reference-side-without-form-loss]
     type = RunException
@@ -27,8 +27,8 @@
     expect_err = 'Requires form_loss to be provided'
     requirement = 'The system shall reject a reference-velocity-side selection when no form-loss coefficients are provided.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [negative-form-loss]
     type = RunException
@@ -37,8 +37,8 @@
     expect_err = 'All entries must be >= 0'
     requirement = 'The system shall reject a negative form-loss coefficient.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [nonpositive-jump-density]
     type = RunException
@@ -47,8 +47,8 @@
     expect_err = 'density must be positive on pressure-jump face'
     requirement = 'The system shall reject a nonpositive density on a pressure-jump face.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [nonpositive-jump-porosity]
     type = RunException
@@ -57,8 +57,8 @@
     expect_err = 'porosity must be positive on pressure-jump face'
     requirement = 'The system shall reject a nonpositive porosity on a pressure-jump face.'
     design = 'BernoulliFormLossPressureJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [overlapping-jump-boundaries]
     type = RunException
@@ -67,8 +67,8 @@
     expect_err = 'Pressure jump models must not act on overlapping boundaries'
     requirement = 'The system shall reject pressure-jump models that act on overlapping boundaries.'
     design = 'PorousRhieChowMassFlux.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [reconstructed-wrong-base]
     type = RunException
@@ -77,8 +77,8 @@
     expect_err = "must use the pressure variable's FVPressureJumpGreenGaussGradient as its base_gradient_method"
     requirement = 'The system shall reject a reconstructed pressure gradient whose base method is not the pressure-jump Green-Gauss method.'
     design = 'FVPressureJumpGreenGaussGradient.md FVReconstructedPressureGradient.md PorousRhieChowMassFlux.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [ordinary-pressure-diffusion]
     type = RunException
@@ -87,8 +87,8 @@
     expect_err = 'Pressure jump models require LinearFVPressureCorrectionDiffusionJump'
     requirement = 'The system shall reject an ordinary pressure-correction diffusion kernel when pressure-jump models are configured.'
     design = 'PorousRhieChowMassFlux.md LinearFVPressureCorrectionDiffusionJump.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [nonpositive-face-porosity]
     type = RunException
@@ -97,8 +97,8 @@
     expect_err = 'porosity must be positive on face'
     requirement = 'The system shall reject a nonpositive face porosity in the porous momentum flux kernel.'
     design = 'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [friction-without-model]
     type = RunException
@@ -106,8 +106,8 @@
     expect_err = 'Provide Darcy_name, Forchheimer_name, or both'
     requirement = 'The system shall reject a linear finite-volume friction kernel that provides neither Darcy nor Forchheimer coefficients.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [darcy-without-mu]
     type = RunException
@@ -116,8 +116,8 @@
     expect_err = 'The mu parameter is required when Darcy_name is provided'
     requirement = 'The system shall reject Darcy friction without a viscosity functor.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [forchheimer-without-rho]
     type = RunException
@@ -126,8 +126,8 @@
     expect_err = 'The rho parameter is required when Forchheimer_name is provided'
     requirement = 'The system shall reject Forchheimer friction without a density functor.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [forchheimer-without-u]
     type = RunException
@@ -136,18 +136,18 @@
     expect_err = 'The u parameter is required when Forchheimer_name is provided'
     requirement = 'The system shall reject Forchheimer friction without the x-velocity.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [forchheimer-without-v]
     type = RunException
     input = kernel-errors.i
     cli_args = "LinearFVKernels/active='forch_no_v'"
     expect_err = 'The v parameter is required for Forchheimer resistance in 2D or 3D'
-    requirement = 'The system shall reject Forchheimer friction in three dimensions without the y-velocity.'
+    requirement = 'The system shall reject Forchheimer friction in two or three dimensions without the y-velocity.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [forchheimer-without-w]
     type = RunException
@@ -156,8 +156,8 @@
     expect_err = 'The w parameter is required for Forchheimer resistance in 3D'
     requirement = 'The system shall reject Forchheimer friction in three dimensions without the z-velocity.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
   [forchheimer-nonpositive-porosity]
     type = RunException
@@ -166,7 +166,7 @@
     expect_err = 'porosity must be positive when using Forchheimer friction'
     requirement = 'The system shall reject a nonpositive porosity in Forchheimer friction.'
     design = 'LinearFVMomentumFriction.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
 []

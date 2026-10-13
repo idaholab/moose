@@ -16,11 +16,10 @@
 #include <unordered_map>
 #include <set>
 
-class PetscVectorReader;
-
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
+class PetscVectorReader;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;

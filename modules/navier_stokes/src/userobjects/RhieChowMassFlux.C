@@ -808,7 +808,11 @@ RhieChowMassFlux::velocityBoundaryValue(const unsigned int component,
 Real
 RhieChowMassFlux::computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader)
 {
+  // Making sure the kernel knows which face we are on
   _p_diffusion_kernel->setupFaceData(&fi);
+
+  // We are setting this to 1.0 because we don't want to multiply the kernel contributions
+  // with the surface area yet. The surface area will be factored in in the advection kernels.
   _p_diffusion_kernel->setCurrentFaceArea(1.0);
 
   Real p_grad_flux = 0.0;
@@ -816,14 +820,22 @@ RhieChowMassFlux::computeFacePressureGradientFlux(const FaceInfo & fi, PetscVect
   {
     const auto & elem_info = *fi.elemInfo();
     const auto & neighbor_info = *fi.neighborInfo();
+
+    // Fetching the dof indices for the pressure variable
     const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
     const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
+
+    // Fetching the values of the pressure for the element and the neighbor
     const auto p_elem_value = p_reader(elem_dof);
     const auto p_neighbor_value = p_reader(neighbor_dof);
+
+    // Compute the elem matrix contributions for the face
     const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
     const auto neighbor_matrix_contribution =
         _p_diffusion_kernel->computeNeighborMatrixContribution();
     const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
+
+    // Compute the face flux from the matrix and right hand side contributions
     p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
                    p_elem_value * elem_matrix_contribution) -
                   elem_rhs_contribution;
@@ -841,6 +853,8 @@ RhieChowMassFlux::computeFacePressureGradientFlux(const FaceInfo & fi, PetscVect
     const auto matrix_contribution =
         _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
     const auto rhs_contribution = _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
+
+    // On the boundary, only the element side has a contribution
     p_grad_flux = p_elem_value * matrix_contribution - rhs_contribution;
   }
 

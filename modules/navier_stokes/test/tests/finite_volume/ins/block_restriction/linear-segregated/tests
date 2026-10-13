@@ -36,7 +36,7 @@
                 Outputs/file_base=reconstructed-gradient-face-orientation"
     abs_zero = 1e-10
     prereq = reconstructed-gradient-block-restricted
-    max_threads = 1
+    max_threads = 1 # see libmesh issue #3808
     issues = '#31995'
     requirement = "The reconstructed pressure-gradient method shall match the unrestricted reference when the inactive blocks adjoining the block-restricted flow domain have a different density than the fluid."
   []

@@ -617,7 +617,8 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   // Solve the pressure corrector
   const auto residuals = solvePressureCorrector();
 
-  // Update face fluxes using the pressure-correction solution (before pressure relaxation)
+  // Update face fluxes using the pressure-correction solution (before pressure relaxation). In
+  // certain segregated solver algorithms (like PISO) this is only done on the last iteration.
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 

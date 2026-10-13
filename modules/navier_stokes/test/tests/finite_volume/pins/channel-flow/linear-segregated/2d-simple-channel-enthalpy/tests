@@ -6,8 +6,8 @@
     csvdiff = 'porous-baffle-2d-enthalpy-fluid-only_out.csv porous-baffle-2d-enthalpy-fluid-only_out_centerline_0002.csv'
     requirement = 'The system shall preserve velocity and fluid enthalpy profiles through a porous baffle with fluid-only heat transport.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearPWCNSFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVEnthalpyFunctorMaterial.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
 
   [fluid-solid]
@@ -16,8 +16,8 @@
     csvdiff = 'porous-baffle-2d-enthalpy_out.csv porous-baffle-2d-enthalpy_out_centerline_0002.csv'
     requirement = 'The system shall preserve velocity, fluid temperature, and solid temperature profiles through a porous baffle with coupled fluid-solid heat transfer.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearPWCNSFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVEnthalpyFunctorMaterial.md'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
     abs_zero = 1e-4
   []
   [nonpositive-cp]
@@ -28,7 +28,7 @@
     requirement = 'The system shall reject a nonpositive specific heat when linearizing enthalpy-based volumetric heat transfer.'
     design = 'LinearFVEnthalpyVolumetricHeatTransfer.md'
     issues = '#31995'
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
 []

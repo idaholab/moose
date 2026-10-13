@@ -51,7 +51,8 @@ FVReconstructedPressureGradient::validParams()
       "baffle_velocity_gradient_reconstruction",
       MooseEnum("one-sided shared", "one-sided"),
       "Whether the lagged velocity gradient in the cell-velocity reconstruction is taken from "
-      "each side of a pressure baffle independently or interpolated across the baffle.");
+      "each side of a pressure baffle independently or interpolated across the baffle. Only has "
+      "an effect on pressure-baffle faces of a PorousRhieChowMassFlux.");
   return params;
 }
 

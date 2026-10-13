@@ -9,6 +9,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "libmesh/int_range.h"
 
 #include <cmath>
 
