@@ -27,7 +27,8 @@ ADPipeOuterWallRadiationScalarKernel::validParams()
       "is_implicit",
       false,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
-  params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
+  params.addRequiredParam<UserObjectName>("solid_properties",
+                                          "The name of the user object for solid properties");
   params.addRequiredParam<MooseFunctorName>("area",
                                             "Cross-sectional area of this wall layer [m^2]");
   params.addRequiredParam<MooseFunctorName>(
@@ -48,7 +49,7 @@ ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
     ADFunctorInterface(this),
-    _sp(this->template getUserObject<ThermalSolidProperties>("sp")),
+    _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _area(this->template getFunctor<ADReal>("area")),
     _perimeter(this->template getFunctor<ADReal>("perimeter")),
