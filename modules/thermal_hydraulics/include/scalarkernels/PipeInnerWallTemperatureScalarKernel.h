@@ -29,21 +29,21 @@ public:
 
 protected:
   virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tout[0]; }
-  virtual GenericReal<is_ad> convectiveResidual() const override;
+  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate through the pipe
-  const VariableValue & _m;
+  const GenericVariableValue<is_ad> & _m;
   /// Coupled temperature of the outer-surface wall node
-  const VariableValue & _Tout;
+  const GenericVariableValue<is_ad> & _Tout;
   /// Coupled fluid temperature adjacent to this wall node
-  const VariableValue & _Tf;
+  const GenericVariableValue<is_ad> & _Tf;
   /// Coupled fluid temperature adjacent to the upstream wall node
-  const VariableValue & _Tfup;
+  const GenericVariableValue<is_ad> & _Tfup;
   /// Coupled fluid temperature adjacent to the downstream wall node
-  const VariableValue & _Tfdown;
+  const GenericVariableValue<is_ad> & _Tfdown;
   /// System reference pressure
   const Moose::Functor<GenericReal<is_ad>> & _Pref;
   /// Cross-sectional area of the fluid flow channel adjacent to this wall node

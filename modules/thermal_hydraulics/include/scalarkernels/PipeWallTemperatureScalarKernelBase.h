@@ -37,16 +37,16 @@ protected:
   /// Temperature of the wall node on the other side of this layer's radial conduction path
   virtual GenericReal<is_ad> otherNodeTemperature() const = 0;
   /// Heat flux exchanged with the fluid or ambient environment on this node's non-radial side
-  virtual GenericReal<is_ad> convectiveResidual() const = 0;
-  /// Derivative of convectiveResidual() with respect to this node's own temperature
+  virtual GenericReal<is_ad> convectiveLinearHeatRate() const = 0;
+  /// Derivative of convectiveLinearHeatRate() with respect to this node's own temperature
   virtual Real convectiveJacobian() const = 0;
 
   /// Solid properties object for the pipe wall
   const ThermalSolidProperties & _sp;
   /// Coupled wall temperature of the upstream node (same radial layer)
-  const VariableValue & _Tup;
+  const GenericVariableValue<is_ad> & _Tup;
   /// Coupled wall temperature of the downstream node (same radial layer)
-  const VariableValue & _Tdown;
+  const GenericVariableValue<is_ad> & _Tdown;
   /// Property state integration flag
   const bool _is_implicit;
   /// Cross-sectional area of this wall layer
@@ -54,7 +54,7 @@ protected:
   /// Perimeter of the interface between the inner and outer wall nodes
   const Moose::Functor<GenericReal<is_ad>> & _interface_perimeter;
   /// Radial conduction-path distance between the inner and outer wall nodes
-  const Moose::Functor<GenericReal<is_ad>> & _interface_thickness;
+  const Moose::Functor<GenericReal<is_ad>> & _wall_thickness;
   /// Axial length of this node's control volume
   const Moose::Functor<GenericReal<is_ad>> & _length;
   /// Axial distance from this node to the upstream node
