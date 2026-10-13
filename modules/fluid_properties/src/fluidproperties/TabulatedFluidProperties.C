@@ -1750,7 +1750,7 @@ TabulatedFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Rea
     Real ds_dp, ds_dT;
     s_from_p_T(p, T, s, ds_dp, ds_dT);
     ds_dv = ds_dp * dp_dv + ds_dT * dT_dv;
-    ds_dv = ds_dp * dp_de + ds_dT * dT_de;
+    ds_de = ds_dp * dp_de + ds_dT * dT_de;
   }
   else if (_fp)
     _fp->s_from_v_e(v, e, s, ds_dv, ds_de);

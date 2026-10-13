@@ -222,6 +222,13 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real s1 = _tab_ve_from_pT->s_from_p_T(p, T);
     Real s2 = _tab_ve_from_pT->s_from_v_e(v, e);
     REL_TEST(s1, s2, 0.001);
+
+    // entropy derivatives from the (p, T) from (v, e) interpolations: de = T ds - p dv
+    Real s3, ds_dv, ds_de;
+    _tab_ve_from_pT->s_from_v_e(v, e, s3, ds_dv, ds_de);
+    REL_TEST(s3, s2, REL_TOL_CONSISTENCY);
+    REL_TEST(ds_de, 1.0 / T, 0.01);
+    REL_TEST(ds_dv, p / T, 0.01);
   }
 
   // check computation of fluid props from p, s
