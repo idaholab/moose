@@ -52,12 +52,6 @@ public:
    */
   virtual Real computePressureJump(const FaceInfo & fi, Real face_mass_flux) const = 0;
 
-  /**
-   * Return whether momentum advection should use independent values from each face side.
-   * @param fi The face carrying the pressure jump
-   */
-  virtual bool useOneSidedReconstruction(const FaceInfo & fi) const = 0;
-
   /// Boundary IDs handled by this model.
   const std::unordered_set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 

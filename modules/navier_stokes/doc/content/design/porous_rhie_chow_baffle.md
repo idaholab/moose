@@ -20,9 +20,9 @@ is therefore
 \end{equation}
 
 [LinearPWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$
-factor to each cell row. On a porous baffle where the pressure-jump model requests one-sided
-momentum advection, it also uses the local velocity state on each side instead of sharing an
-interpolated state across the jump. Independently,
+factor to each cell row. Its
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction) parameter
+selects local or shared velocity states at porous baffles. Independently,
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/baffle_velocity_gradient_reconstruction)
 controls whether cell-velocity reconstruction uses shared or side-local lagged velocity gradients.
 
@@ -42,7 +42,8 @@ pressure on the non-owner side minus pressure on the owner side. An optional for
 $-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$. The reference side is selected with
 [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side).
 [!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) selects whether the
-reversible term uses side densities or a common interpolated face density. The
+reversible term uses side densities or a common interpolated face density; it does not select either
+numerical reconstruction policy. The
 [BernoulliFormLossPressureJump.md] model provides this jump to the
 [PorousRhieChowMassFlux.md] object named by
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models).

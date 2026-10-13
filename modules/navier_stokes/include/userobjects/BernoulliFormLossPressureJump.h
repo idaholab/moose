@@ -34,12 +34,6 @@ public:
    */
   Real computePressureJump(const FaceInfo & fi, Real face_mass_flux) const override;
 
-  /**
-   * Return whether reconstruction should use independent values from each side of the face.
-   * @param fi The internal face carrying the pressure jump
-   */
-  bool useOneSidedReconstruction(const FaceInfo & fi) const override;
-
 private:
   /// Porosity on each side of a pressure-jump face.
   const Moose::Functor<Real> & _porosity;

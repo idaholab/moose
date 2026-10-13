@@ -67,6 +67,9 @@ private:
   /// Whether to use a two-point harmonic transmissibility for the stress term.
   const bool _use_two_point_stress_transmissibility;
 
+  /// Whether baffle advection uses the velocity state local to each face side.
+  const bool _use_one_sided_baffle_advection;
+
   /// Compute the geometry and material data used by the harmonic stress discretization.
   TwoPointStressData twoPointStressData() const;
 

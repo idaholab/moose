@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#31995'
+  design = 'FVReconstructedPressureGradient.md LinearPWCNSFVMomentumFlux.md '
+           'LinearFVPressureCorrectionDiffusionJump.md'
+
+  [continuous-properties]
+    type = MMSTest
+    input = test.py
+    test_case = TestContinuousProperties
+    requirement = 'The system shall reconstruct a manufactured piecewise-linear velocity field '
+                  'and zero pressure gradient across a zero-jump interface with continuous '
+                  'material properties with decreasing velocity, pressure-gradient, and pressure '
+                  'oscillation errors using both shared and side-local velocity gradients.'
+    heavy = true
+    max_threads = 1
+  []
+
+  [density-jump-equal-porosity]
+    type = MMSTest
+    input = test.py
+    test_case = TestDensityJumpEqualPorosity
+    requirement = 'The system shall reconstruct a manufactured piecewise-linear velocity field '
+                  'with a density jump and equal porosity with decreasing velocity, '
+                  'pressure-gradient, and pressure oscillation errors using both shared and '
+                  'side-local velocity gradients.'
+    heavy = true
+    max_threads = 1
+  []
+[]

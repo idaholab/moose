@@ -26,13 +26,21 @@ LinearPWCNSFVMomentumFlux::validParams()
       false,
       "Use a harmonic two-point treatment for the normal stress term and side-local gradients "
       "for the explicit nonorthogonal and deviatoric stress corrections.");
+  params.addParam<MooseEnum>(
+      "baffle_advection_reconstruction",
+      MooseEnum("one-sided shared", "one-sided"),
+      "Whether momentum advection uses the velocity state local to each side of a pressure "
+      "baffle or the shared state supplied by advected_interp_method_name.");
   return params;
 }
 
 LinearPWCNSFVMomentumFlux::LinearPWCNSFVMomentumFlux(const InputParameters & params)
   : LinearWCNSFVMomentumFlux(params),
     _porous_mass_flux_provider(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object")),
-    _use_two_point_stress_transmissibility(getParam<bool>("use_two_point_stress_transmissibility"))
+    _use_two_point_stress_transmissibility(
+        getParam<bool>("use_two_point_stress_transmissibility")),
+    _use_one_sided_baffle_advection(
+        getParam<MooseEnum>("baffle_advection_reconstruction") == "one-sided")
 {
 }
 
@@ -222,8 +230,7 @@ LinearPWCNSFVMomentumFlux::isInternalBaffleFace() const
 bool
 LinearPWCNSFVMomentumFlux::needsInternalBaffleAdvectionCorrection() const
 {
-  return isInternalBaffleFace() &&
-         _porous_mass_flux_provider.faceUsesOneSidedReconstruction(*_current_face_info);
+  return _use_one_sided_baffle_advection && isInternalBaffleFace();
 }
 
 Real
