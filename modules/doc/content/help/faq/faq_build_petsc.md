@@ -13,4 +13,6 @@ cd ~/projects/moose/scripts
 ./update_and_rebuild_libmesh.sh
 ```
 
-The above creates a new Conda environment: 'custom-petsc', and installs the needed MPICH dependency. We then activate it, build PETSc, and then libMesh.
+The above creates a new Conda environment named `custom-petsc` and installs the compiler/MPI
+toolchain and MOOSE tooling dependencies. We then activate it, build PETSc, and then build libMesh
+against that PETSc installation.
