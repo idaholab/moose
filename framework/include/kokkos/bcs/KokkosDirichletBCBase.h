@@ -19,8 +19,8 @@ namespace Moose::Kokkos
  * The base Kokkos boundary condition of a Dirichlet type, with residual u - g. The derived class
  * defines the Dirichlet value g through
  *
- * template <typename Derived>
- * KOKKOS_FUNCTION auto computeValue(const unsigned int qp, AssemblyDatum & datum) const;
+ * template <typename Derived, typename DatumType>
+ * KOKKOS_FUNCTION auto computeValue(const unsigned int qp, DatumType & datum) const;
  *
  * which returns Real for the non-AD BC. The AD BC returns DenseADReal<max_ad_slots>, so that a
  * value coupling other variables contributes its derivatives, and reads the nodal value of its
@@ -63,8 +63,8 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(PresetLoop, const ThreadID tid, const Derived & bc) const;
 
-  template <typename Derived>
-  KOKKOS_FUNCTION auto computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived, typename DatumType>
+  KOKKOS_FUNCTION auto computeQpResidual(const unsigned int qp, DatumType & datum) const;
 
   using Base = std::conditional_t<is_ad, ADNodalBC, NodalBC>;
   using Base::operator();
@@ -112,9 +112,9 @@ DirichletBCBaseTempl<is_ad>::operator()(PresetLoop, const ThreadID tid, const De
 }
 
 template <bool is_ad>
-template <typename Derived>
+template <typename Derived, typename DatumType>
 KOKKOS_FUNCTION auto
-DirichletBCBaseTempl<is_ad>::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+DirichletBCBaseTempl<is_ad>::computeQpResidual(const unsigned int qp, DatumType & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 

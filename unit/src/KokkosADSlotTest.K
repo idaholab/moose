@@ -39,16 +39,17 @@ public:
 
   KokkosADSlotTestKernel(const InputParameters & parameters)
     : ADKernel(parameters),
-      _u(adValue<max_ad_slots>()),
-      _grad_u(adGradient<max_ad_slots>()),
-      _v(adCoupledValue<max_ad_slots>("v")),
-      _grad_v(adCoupledGradient<max_ad_slots>("v"))
+      _u(adValue()),
+      _grad_u(adGradient()),
+      _v(adCoupledValue("v")),
+      _grad_v(adCoupledGradient("v"))
   {
   }
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
-  precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int qp,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     return _u(datum, qp) * _v(datum, qp) + _grad_u(datum, qp) * _grad_v(datum, qp);
   }
@@ -64,10 +65,10 @@ public:
   ///@}
 
 private:
-  Moose::Kokkos::ADVariableValue<max_ad_slots> _u;
-  Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
-  Moose::Kokkos::ADVariableValue<max_ad_slots> _v;
-  Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_v;
+  Moose::Kokkos::ADVariableValue _u;
+  Moose::Kokkos::ADVariableGradient _grad_u;
+  Moose::Kokkos::ADVariableValue _v;
+  Moose::Kokkos::ADVariableGradient _grad_v;
 };
 
 registerKokkosADResidualObject("MooseUnitApp", KokkosADSlotTestKernel);

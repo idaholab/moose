@@ -28,17 +28,19 @@ public:
 
   KokkosADNonlinearCoupledTest(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<max_ad_slots>
-  precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<slots>
+  precomputeQpResidualGrad(const unsigned int qp,
+                           Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     const auto u = _u(datum, qp);
     return (1 + u * u) * _grad_u(datum, qp) + _v(datum, qp) * _grad_v(datum, qp);
   }
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
-  precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int qp,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     const auto v = _v(datum, qp);
     const auto grad_u = _grad_u(datum, qp);
@@ -48,12 +50,12 @@ public:
 private:
   /// Kernel variable and its gradient
   ///@{
-  const Moose::Kokkos::ADVariableValue<max_ad_slots> _u;
-  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
+  const Moose::Kokkos::ADVariableValue _u;
+  const Moose::Kokkos::ADVariableGradient _grad_u;
   ///@}
   /// Coupled variable and its gradient
   ///@{
-  const Moose::Kokkos::ADVariableValue<max_ad_slots> _v;
-  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_v;
+  const Moose::Kokkos::ADVariableValue _v;
+  const Moose::Kokkos::ADVariableGradient _grad_v;
   ///@}
 };

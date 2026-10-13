@@ -22,8 +22,8 @@ namespace Moose::Kokkos
  * The derived class defines
  *
  * template <typename Derived>
- * KOKKOS_FUNCTION DenseADReal<max_ad_slots> computeQpResidual(const unsigned int qp,
- *                                                             AssemblyDatum & datum) const;
+ * KOKKOS_FUNCTION DenseADReal<max_ad_slots>
+ * computeQpResidual(const unsigned int qp, ADAssemblyDatum<max_ad_slots> & datum) const;
  *
  * whose derivative directions are the nodal values the BC reads through its AD accessors, one slot
  * per nonlinear variable that the coupling matrix couples to the BC variable, and declares an upper
@@ -52,13 +52,10 @@ public:
 protected:
   /**
    * Create an AD accessor of the nodal value of a coupled variable or of the BC variable
-   * @tparam slots The max_ad_slots of the derived class
    */
   ///@{
-  template <unsigned int slots>
-  ADVariableValue<slots> adCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
-  template <unsigned int slots>
-  ADVariableValue<slots> adNodalValue();
+  ADVariableValue adCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+  ADVariableValue adNodalValue();
   ///@}
 
 private:
@@ -77,20 +74,18 @@ private:
   bool _computing_jacobian = false;
 };
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADNodalBC::adCoupledNodalValue(const std::string & var_name, const unsigned int comp)
 {
-  ADVariableValue<slots> value(kokkosCoupledNodalValue(var_name, comp));
+  ADVariableValue value(kokkosCoupledNodalValue(var_name, comp));
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADNodalBC::adNodalValue()
 {
-  ADVariableValue<slots> value{VariableValue(_var, Moose::SOLUTION_TAG, true)};
+  ADVariableValue value{VariableValue(_var, Moose::SOLUTION_TAG, true)};
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
@@ -105,8 +100,10 @@ ADNodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) cons
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(
-      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
+  ADAssemblyDatum<Derived::max_ad_slots> datum(
+      AssemblyDatum(
+          node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration),
+      _ad_slots);
 
   const auto local_re = bc.template computeQpResidual<Derived>(0, datum);
 

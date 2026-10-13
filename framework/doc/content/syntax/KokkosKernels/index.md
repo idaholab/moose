@@ -169,7 +169,7 @@ The Jacobian is assembled from the derivatives of those dual numbers, so no Jaco
 
 The derivatives are taken pointwise: their directions are the quadrature point quantities the kernel reads, one direction for each coupled value and three for each coupled gradient, rather than the degrees of freedom of the element.
 The kernel evaluates its hooks once per quadrature point, and the base class contracts their derivatives with the shape functions of each coupled variable.
-A kernel declares the number of directions it reads as `max_ad_slots`, which sizes its dual numbers at compile time, and reads its inputs through AD accessors whose type carries that number:
+A kernel declares the number of directions it reads as `max_ad_slots`, and templates its hooks on the number of slots of the datum, which sizes its dual numbers at compile time:
 
 ```cpp
 class KokkosADDiffusion : public Moose::Kokkos::ADKernel
@@ -178,22 +178,26 @@ public:
   /// The residual depends on grad u
   static constexpr unsigned int max_ad_slots = 3;
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<max_ad_slots>
-  precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<slots>
+  precomputeQpResidualGrad(const unsigned int qp, Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     return _grad_u(datum, qp);
   }
 
 private:
-  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
+  const Moose::Kokkos::ADVariableGradient _grad_u;
 };
 ```
 
-The accessors are created in the constructor with `adValue()`, `adGradient()`, and `adDot()` for the kernel variable, or `adCoupledValue()`, `adCoupledGradient()`, and `adCoupledDot()` for coupled variables, for example `_grad_u(adGradient<max_ad_slots>())`.
+The accessors are created in the constructor with `adValue()`, `adGradient()`, and `adDot()` for the kernel variable, or `adCoupledValue()`, `adCoupledGradient()`, and `adCoupledDot()` for coupled variables, for example `_grad_u(adGradient())`.
 During initial setup, each accessor of a nonlinear variable that the coupling matrix couples to the kernel variable receives its derivative directions; every other accessor, such as one reading an auxiliary variable, a constant, or a variable whose coupling the preconditioner omits, returns its value without derivatives.
 The Jacobian therefore contains exactly the blocks the coupling matrix requests.
 An object whose accessors receive more directions than its `max_ad_slots` errors during setup.
+
+An AD kernel or integrated boundary condition with `use_displaced_mesh = true` is posed on the current configuration.
+Its hooks are then instantiated with `max_ad_slots` plus the directions of the displacements, the value and reference gradient of each component, and the geometry of the current configuration, which the accessors and the base class compose from the dual deformation gradient, carries the derivatives with respect to the displacements.
+The Jacobian with respect to the displacements is therefore assembled with no change to the kernel.
 
 !syntax list /Kernels objects=True actions=False subsystems=False
 

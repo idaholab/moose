@@ -25,14 +25,15 @@ public:
 
   KokkosADCoupledTimeDerivative(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
-  precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int qp,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     return _v_dot(datum, qp);
   }
 
 private:
   /// Time derivative of the coupled variable
-  const Moose::Kokkos::ADVariableValue<max_ad_slots> _v_dot;
+  const Moose::Kokkos::ADVariableValue _v_dot;
 };

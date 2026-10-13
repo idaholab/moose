@@ -22,6 +22,6 @@ KokkosADCoupledTimeDerivative::validParams()
 }
 
 KokkosADCoupledTimeDerivative::KokkosADCoupledTimeDerivative(const InputParameters & parameters)
-  : ADKernel(parameters), _v_dot(adCoupledDot<max_ad_slots>("v"))
+  : ADKernel(parameters), _v_dot(adCoupledDot("v"))
 {
 }

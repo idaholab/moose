@@ -658,8 +658,14 @@ registerADResidualObjectDispatchers(const std::string & objectname)
                 "max_ad_slots', the number of derivative directions its residual reads: one for "
                 "each coupled value and three for each coupled gradient.");
 
+  // Team AD objects are also compiled with the displacement slots of the current configuration,
+  // and dispatch the instantiation matching their configuration
   if constexpr (Object::uses_team_dispatch)
+  {
     DispatcherRegistry::addTeamDispatcher<typename Object::ResidualLoop, Object>(objectname);
+    DispatcherRegistry::addTeamDispatcher<typename Object::DisplacedResidualLoop, Object>(
+        objectname);
+  }
   else
     DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
 

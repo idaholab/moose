@@ -41,4 +41,23 @@
       compute_devices = 'cpu cuda'
     []
   []
+  [ad_jacobian]
+    requirement = 'The Kokkos system shall assemble exact Jacobians by automatic differentiation, including the derivatives with respect to the displacements, of kernels and boundary conditions posed on the current configuration'
+    design = 'KokkosADDiffusion.md KokkosADCoupledVarNeumannBC.md'
+    [cartesian]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_ad_jacobian.i'
+      detail = 'in Cartesian coordinates and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [rz]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_ad_jacobian.i'
+      cli_args = 'Mesh/coord_type=RZ'
+      detail = 'in axisymmetric coordinates.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
 []

@@ -25,20 +25,21 @@ public:
 
   KokkosADCoupledVarNeumannBC(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
-  precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int qp,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     return -_scale_factor(datum, qp) * _coef * _coupled_var(datum, qp);
   }
 
 protected:
   /// Variable providing the value of grad(u) on the boundary
-  const Moose::Kokkos::ADVariableValue<max_ad_slots> _coupled_var;
+  const Moose::Kokkos::ADVariableValue _coupled_var;
 
   /// A coefficient that is multiplied with the residual contribution
   const Real _coef;
 
   /// Scale factor
-  const Moose::Kokkos::ADVariableValue<max_ad_slots> _scale_factor;
+  const Moose::Kokkos::ADVariableValue _scale_factor;
 };

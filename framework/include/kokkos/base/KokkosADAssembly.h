@@ -19,12 +19,19 @@ namespace Moose::Kokkos
 /**
  * Layout of the per-team scratch memory of a pointwise AD element or side assembly. At each
  * quadrature point the scratch holds the JxW-weighted residual coefficients of the test function
- * value and of its physical gradient, followed by their derivatives with respect to each slot:
+ * value and of its reference gradient, followed by their derivatives with respect to each slot,
+ * and then the inverse of the reference map Jacobian:
  *
  *   [qp][0]                 f_value
- *   [qp][1 .. 3]            f_grad
+ *   [qp][1 .. 3]            f_grad, pulled back to the reference element
  *   [qp][4 (1 + s)]         d f_value / d slot s
  *   [qp][4 (1 + s) + 1 .. 3] d f_grad / d slot s
+ *   [qp][4 (1 + slots) ..]  dxi/dx of the reference configuration, row major
+ *
+ * The gradient coefficient is contracted with the reference test function gradient, so that the
+ * variation of the test function gradient with the displacements is carried by the derivatives of
+ * the pulled back coefficient. The trial functions of the slot blocks are taken on the reference
+ * configuration, where the gradient slots are defined.
  */
 struct ADScratchLayout
 {
@@ -37,8 +44,20 @@ struct ADScratchLayout
    */
   KOKKOS_FUNCTION static constexpr unsigned int qpSize(unsigned int slots)
   {
+    return term_size * (1 + slots) + map_size;
+  }
+  /**
+   * Get the offset of the inverse of the reference map Jacobian within the entries of a
+   * quadrature point
+   * @param slots The number of derivative slots
+   */
+  KOKKOS_FUNCTION static constexpr unsigned int mapOffset(unsigned int slots)
+  {
     return term_size * (1 + slots);
   }
+
+  /// Number of reals of the inverse of the reference map Jacobian
+  static constexpr unsigned int map_size = 9;
 
   /**
    * Get the number of bytes of scratch memory per team
@@ -75,40 +94,81 @@ storeADCoefficient(Real * scratch, const unsigned int offset, const DenseADReal<
 }
 
 /**
+ * Detection of the residual hooks of a pointwise AD residual object at a number of derivative
+ * slots
+ */
+///@{
+template <typename Object, unsigned int slots, typename = void>
+struct HasADResidualValue : std::false_type
+{
+};
+template <typename Object, unsigned int slots>
+struct HasADResidualValue<
+    Object,
+    slots,
+    std::void_t<
+        decltype(std::declval<const Object &>().template precomputeQpResidualValue<Object, slots>(
+            0u, std::declval<ADAssemblyDatum<slots> &>()))>> : std::true_type
+{
+};
+template <typename Object, unsigned int slots, typename = void>
+struct HasADResidualGrad : std::false_type
+{
+};
+template <typename Object, unsigned int slots>
+struct HasADResidualGrad<
+    Object,
+    slots,
+    std::void_t<
+        decltype(std::declval<const Object &>().template precomputeQpResidualGrad<Object, slots>(
+            0u, std::declval<ADAssemblyDatum<slots> &>()))>> : std::true_type
+{
+};
+///@}
+
+/**
  * Evaluate the residual hooks of a pointwise AD residual object at one quadrature point and store
  * the JxW-weighted coefficients and their slot derivatives into scratch
  * @param object The residual object of the final derived type
- * @param datum The AssemblyDatum object of the element or side
+ * @param datum The ADAssemblyDatum object of the quadrature point
  * @param qp The local quadrature point index
  * @param scratch The scratch entries of the quadrature point
  */
-template <typename Object>
+template <typename Object, unsigned int slots>
 KOKKOS_FUNCTION void
-evaluateADTerms(const Object & object, AssemblyDatum & datum, const unsigned int qp, Real * scratch)
+evaluateADTerms(const Object & object,
+                ADAssemblyDatum<slots> & datum,
+                const unsigned int qp,
+                Real * scratch)
 {
-  constexpr auto slots = Object::max_ad_slots;
-  const auto JxW = datum.JxW(qp);
+  const auto JxW = datum.adJxW(qp);
 
   for (unsigned int k = 0; k < ADScratchLayout::qpSize(slots); ++k)
     scratch[k] = 0;
 
-  if constexpr (has_precomputeQpResidualValue_v<Object>)
+  if constexpr (HasADResidualValue<Object, slots>::value)
     storeADCoefficient<slots>(
-        scratch, 0, JxW * object.template precomputeQpResidualValue<Object>(qp, datum));
+        scratch, 0, JxW * object.template precomputeQpResidualValue<Object, slots>(qp, datum));
 
-  if constexpr (has_precomputeQpResidualGrad_v<Object>)
+  if constexpr (HasADResidualGrad<Object, slots>::value)
   {
-    const auto grad = object.template precomputeQpResidualGrad<Object>(qp, datum);
+    const DenseADReal3<slots> grad = datum.adPullBack(
+        JxW * object.template precomputeQpResidualGrad<Object, slots>(qp, datum), qp);
     for (unsigned int k = 0; k < 3; ++k)
-      storeADCoefficient<slots>(scratch, 1 + k, JxW * grad(k));
+      storeADCoefficient<slots>(scratch, 1 + k, grad(k));
   }
+
+  const auto & dxi_dx = datum.reference_dxi_dx(qp);
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      scratch[ADScratchLayout::mapOffset(slots) + 3 * i + j] = dxi_dx(i, j);
 }
 
 /**
  * Contract the coefficients of one term set at a quadrature point with a shape function
  * @param terms The term set: value coefficient followed by the gradient coefficient
  * @param phi The shape function value
- * @param grad_phi The physical shape function gradient
+ * @param grad_phi The shape function gradient matching the gradient coefficient
  */
 KOKKOS_INLINE_FUNCTION Real
 contractADTerms(const Real * terms, const Real phi, const Real3 & grad_phi)
