@@ -11,7 +11,7 @@
 
 #include "KokkosTypes.h"
 #include "KokkosFunctionWrapper.h"
-#include "KokkosFunctorRegistry.h"
+#include "KokkosFunctorWrapperRegistry.h"
 
 #include "FunctionBase.h"
 
@@ -166,6 +166,11 @@ public:
   ~Function();
 
   /**
+   * Copy assignment operator
+   */
+  Function & operator=(const Function & function) = default;
+
+  /**
    * Get whether the function wrapper is valid
    * @returns Whether the function wrapper is valid
    */
@@ -240,6 +245,12 @@ private:
    * Pointer to the device function wrapper
    */
   FunctionWrapperDeviceBase * _wrapper_device = nullptr;
+};
+
+template <>
+struct ArrayDeepCopy<Function>
+{
+  static constexpr bool value = true;
 };
 
 } // namespace Moose::Kokkos

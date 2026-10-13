@@ -59,8 +59,9 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable()
         const auto elem = _bnd_mesh->elemPtr(elem_id);
 
         if (elem->processor_id() == _moose_object.processor_id())
-          element_side_ids.insert({kokkos_mesh->getContiguousElementID(elem),
-                                   _bnd_mesh->sideWithBoundaryID(elem, boundary)});
+          for (const auto side :
+               _bnd_mesh->getMesh().get_boundary_info().sides_with_boundary_id(elem, boundary))
+            element_side_ids.insert({kokkos_mesh->getContiguousElementID(elem), side});
       }
 
     _kokkos_element_side_ids = element_side_ids;

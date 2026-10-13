@@ -4,9 +4,6 @@
 
 This is the Kokkos version of [HeatConductionMaterial](HeatConductionMaterial.md). See the original document for details.
 
-!alert note
-Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/Materials/HeatConductionMaterial/thermal_conductivity_temperature_function) and [!param](/Materials/HeatConductionMaterial/specific_heat_temperature_function) are not available.
-
 ## Example Input Syntax
 
 !listing heat_transfer/test/tests/kokkos/kokkos_conduction.i start=[conduction] end=[] include-end=true

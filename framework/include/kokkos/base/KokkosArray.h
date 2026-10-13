@@ -316,6 +316,8 @@ public:
    */
   KOKKOS_FUNCTION T & first() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[0];)
 
     return _device_data[0];
@@ -327,6 +329,8 @@ public:
    */
   KOKKOS_FUNCTION T & last() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[_size - 1];)
 
     return _device_data[_size - 1];
