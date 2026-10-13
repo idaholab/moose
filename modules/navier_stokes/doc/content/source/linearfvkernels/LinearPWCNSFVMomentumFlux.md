@@ -11,8 +11,10 @@ the face mass flux and the porosity on each side of the face. The advection cont
 into a cell row is scaled by that cell's inverse porosity, so the mass flux transports interstitial
 velocity.
 
-At a porous baffle, the Rhie-Chow object can require one-sided reconstruction. In that case this
-kernel uses the local velocity state for each side of the advection operator. The
+At a porous baffle,
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction)
+selects whether this kernel uses the local velocity state for each side of the advection operator
+or the shared state supplied by the configured interpolation method. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
 Bernoulli pressure jump and any irreversible form loss, as described below.
 
@@ -75,9 +77,9 @@ $\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contribu
 \end{equation}
 
 where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). When a baffle
-requires one-sided reconstruction, the shared interpolated state is replaced by the state local to
-each row:
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). When
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction) is
+`one-sided`, the shared interpolated state is replaced by the state local to each row:
 
 \begin{equation}
 \begin{aligned}
@@ -108,7 +110,7 @@ but it is not an algebraic replacement for the omitted tensor term in general mu
 flow. The
 [!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) option instead uses
 one face-interpolated density in the reversible term, and any configured irreversible form loss is
-added to this reversible jump.
+added to this reversible jump. It does not select either momentum-advection reconstruction policy.
 
 ## Stress treatment across a porosity jump
 

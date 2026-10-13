@@ -329,12 +329,3 @@ PorousRhieChowMassFlux::getPressureJumpModel(const FaceInfo & fi) const
 
   return nullptr;
 }
-
-bool
-PorousRhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo & fi) const
-{
-  if (!fi.neighborPtr() || !faceIsBaffle(fi))
-    return false;
-
-  return getPressureJumpModel(fi)->useOneSidedReconstruction(fi);
-}

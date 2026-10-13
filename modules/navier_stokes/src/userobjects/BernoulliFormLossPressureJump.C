@@ -11,8 +11,6 @@
 #include "FVUtils.h"
 #include "MooseEnum.h"
 
-#include <cmath>
-
 registerMooseObject("NavierStokesApp", BernoulliFormLossPressureJump);
 
 InputParameters
@@ -140,19 +138,4 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
   }
 
   return pressure_jump;
-}
-
-bool
-BernoulliFormLossPressureJump::useOneSidedReconstruction(const FaceInfo & fi) const
-{
-  mooseAssert(appliesTo(fi), "The pressure jump model must apply to the supplied face.");
-  if (!fi.neighborPtr())
-    return false;
-
-  const auto time = Moose::currentState();
-  const Real elem_porosity = _porosity(makeElemArg(fi.elemPtr()), time);
-  const Real neighbor_porosity = _porosity(makeElemArg(fi.neighborPtr()), time);
-  const bool porosity_jump = std::abs(elem_porosity - neighbor_porosity) > TOLERANCE;
-
-  return porosity_jump || !_use_interpolated_density;
 }

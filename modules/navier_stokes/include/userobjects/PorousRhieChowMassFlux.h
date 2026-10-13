@@ -59,9 +59,6 @@ public:
    */
   Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
 
-  /// Whether momentum advection uses separate one-sided states on this face.
-  bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
-
   /// Whether a face is governed by a pressure-jump model.
   bool faceIsBaffle(const FaceInfo & fi) const;
 
