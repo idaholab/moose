@@ -274,23 +274,77 @@ precomputeOffDiagJacobianScalarTerms(const Object & object,
 ///@}
 
 /**
- * Gather the JxW-weighted coefficients of the variation of the residual of a scalar precompute
- * object posed on the current configuration along a displacement degree of freedom, the shape
- * function phi_j of displacement component c. With h = grad_x phi_j, the framework supplies the
- * variations of the configuration,
+ * Variation -(grad_x w) e_c (x) h of the gradient of a field on the configuration along a
+ * displacement of component c with shape function gradient h
+ */
+///@{
+KOKKOS_INLINE_FUNCTION Real3
+displacementGradientVariation(const Real3 & grad, const unsigned int c, const Real3 & h)
+{
+  return -grad(c) * h;
+}
+KOKKOS_INLINE_FUNCTION Real33
+displacementGradientVariation(const Real33 & grad, const unsigned int c, const Real3 & h)
+{
+  Real33 variation;
+
+  for (unsigned int a = 0; a < 3; ++a)
+    for (unsigned int b = 0; b < 3; ++b)
+      variation(a, b) = -grad(a, c) * h(b);
+
+  return variation;
+}
+///@}
+
+/**
+ * Get the tensor C with C : A = f . curl(A) for the curl of a vector field formed from its gradient
+ * A, so that a curl coefficient f can be contracted with a gradient
+ * @param f The curl coefficient
+ * @param dim The mesh dimension
+ */
+KOKKOS_INLINE_FUNCTION Real33
+curlCoefficientAsGradient(const Real3 & f, const unsigned int dim)
+{
+  Real33 C;
+
+  if (dim == 2)
+  {
+    C(1, 0) = f(2);
+    C(0, 1) = -f(2);
+  }
+  else if (dim == 3)
+  {
+    C(2, 1) = f(0);
+    C(1, 2) = -f(0);
+    C(0, 2) = f(1);
+    C(2, 0) = -f(1);
+    C(1, 0) = f(2);
+    C(0, 1) = -f(2);
+  }
+
+  return C;
+}
+
+/**
+ * Gather the JxW-weighted coefficients of the variation of the residual of a precompute object
+ * posed on the current configuration along a displacement degree of freedom, the shape function
+ * phi_j of displacement component c. With h = grad_x phi_j, the framework supplies the variations
+ * of the configuration,
  *
- *   d(grad_x w) = -(grad_x w)_c h,   d(JxW) = JxW (h_c + phi_j (grad_x log rho)_c)
+ *   d(grad_x w) = -(grad_x w) e_c (x) h,   d(JxW) = JxW (h_c + phi_j (grad_x log rho)_c)
  *
  * on elements, where rho is the coordinate transform factor, and d(JxW) loses the normal part
- * n_c (n . h) of h_c on sides. The variations of the coefficients follow from the Jacobian hooks of
- * the object evaluated along d(grad_x u) and the off-diagonal hooks along d(grad_x v) for each
- * coupled field variable v, through a replacement of the trial function. The variation of the test
- * function gradient contributes -(f_grad . h) e_c to the gradient coefficient. The quadrature point
+ * n_c (n . h) of h_c on sides. Values do not vary. The variations of the coefficients follow from
+ * the Jacobian hooks of the object evaluated along d(grad_x u) and the off-diagonal hooks along
+ * d(grad_x v) for each coupled field variable v, through a replacement of the trial function. The
+ * variation of the test function gradient contributes -(f_grad h) (x) e_c to the gradient
+ * coefficient, and that of the test function curl, which is formed from the gradient, contributes
+ * through the tensor C of the curl coefficient with C : grad = f_curl . curl. The quadrature point
  * x = X + u moves by dx = phi_j e_c, and on sides the normal n = F^{-T} N / |F^{-T} N| varies by
  * dn = -n_c (h - (n . h) n); the position and normal Jacobian hooks of the object contract these
  * with the derivatives of its coefficients.
  */
-template <typename Object>
+template <bool is_vector, typename Object>
 KOKKOS_FUNCTION auto
 precomputeDisplacementJacobianTerms(const Object & object,
                                     AssemblyDatum & datum,
@@ -298,9 +352,11 @@ precomputeDisplacementJacobianTerms(const Object & object,
                                     const unsigned int j,
                                     const unsigned int qp)
 {
-  using Field = PrecomputeField<false>;
+  using Field = PrecomputeField<is_vector>;
+  using Coefficient = typename Field::Coefficient;
+  using GradCoefficient = typename Field::GradCoefficient;
 
-  PrecomputedTerms<Real, Real3> terms{};
+  PrecomputedTerms<Coefficient, GradCoefficient> terms{};
 
   const auto phi = VariablePhiValue()(datum, j, qp);
   const auto h = VariablePhiGradient()(datum, j, qp);
@@ -322,18 +378,22 @@ precomputeDisplacementJacobianTerms(const Object & object,
   datum.displacementVariation(
       true, has_normal_jacobian_hook<Object>, has_position_jacobian_hook<Object>);
 
-  Real f_value = 0, df_value = 0;
-  Real3 f_grad = 0, df_grad = 0;
+  Coefficient f_value = 0, df_value = 0, f_curl = 0, df_curl = 0;
+  GradCoefficient f_grad = 0, df_grad = 0;
 
   if constexpr (has_precomputeQpResidualValue_v<Object>)
     f_value = object.template precomputeQpResidualValue<Object>(qp, datum);
   if constexpr (has_precomputeQpResidualGrad_v<Object>)
     f_grad = object.template precomputeQpResidualGrad<Object>(qp, datum);
+  if constexpr (has_precomputeQpResidualCurl_v<Object>)
+    f_curl = object.template precomputeQpResidualCurl<Object>(qp, datum);
 
   if constexpr (has_precomputeQpPositionJacobianValue_v<Object>)
     df_value += object.template precomputeQpPositionJacobianValue<Object>(dx, qp, datum);
   if constexpr (has_precomputeQpPositionJacobianGrad_v<Object>)
     df_grad += object.template precomputeQpPositionJacobianGrad<Object>(dx, qp, datum);
+  if constexpr (has_precomputeQpPositionJacobianCurl_v<Object>)
+    df_curl += object.template precomputeQpPositionJacobianCurl<Object>(dx, qp, datum);
 
   if (datum.isSide())
   {
@@ -341,23 +401,40 @@ precomputeDisplacementJacobianTerms(const Object & object,
       df_value += object.template precomputeQpNormalJacobianValue<Object>(dn, qp, datum);
     if constexpr (has_precomputeQpNormalJacobianGrad_v<Object>)
       df_grad += object.template precomputeQpNormalJacobianGrad<Object>(dn, qp, datum);
+    if constexpr (has_precomputeQpNormalJacobianCurl_v<Object>)
+      df_curl += object.template precomputeQpNormalJacobianCurl<Object>(dn, qp, datum);
   }
 
   const auto sys = datum.sys();
   const auto tag = datum.tag();
+  const auto & system = datum.system(sys);
+  const auto & assembly = datum.assembly();
 
-  AssemblyDatum::TrialOverride trial{0, -datum.gradient(sys, datum.ivar(), tag, qp)(c) * h};
+  // Replace the trial function of a variable by the variation of its gradient
+  AssemblyDatum::TrialOverride trial{0, Real3(0), Real3(0), Real33(0)};
+  auto vary = [&](const unsigned int var)
+  {
+    trial = {0, Real3(0), Real3(0), Real33(0)};
+
+    if (assembly.isVectorFEType(system.getFETypeID(var)))
+      trial.vector_grad_phi =
+          displacementGradientVariation(datum.vectorGradient(sys, var, tag, qp), c, h);
+    else
+      trial.grad_phi = displacementGradientVariation(datum.gradient(sys, var, tag, qp), c, h);
+  };
+
+  vary(datum.ivar());
   datum.trialOverride(&trial);
 
   if constexpr (has_precomputeQpJacobianValue_v<Object>)
     df_value += object.template precomputeQpJacobianValue<Object>(j, qp, datum);
   if constexpr (has_precomputeQpJacobianGrad_v<Object>)
     df_grad += object.template precomputeQpJacobianGrad<Object>(j, qp, datum);
+  if constexpr (has_precomputeQpJacobianCurl_v<Object>)
+    df_curl += object.template precomputeQpJacobianCurl<Object>(j, qp, datum);
 
-  if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object> ||
-                has_precomputeQpOffDiagJacobianGrad_v<Object>)
+  if constexpr (has_offdiag_jacobian_hook<Object>)
   {
-    const auto & system = datum.system(sys);
     const auto & coupling = system.getFieldCoupling(datum.ivar());
 
     for (unsigned int k = 0; k < coupling.size(); ++k)
@@ -367,23 +444,43 @@ precomputeDisplacementJacobianTerms(const Object & object,
       if (!system.isVariableActive(v, datum.subdomain()))
         continue;
 
-      trial.grad_phi = -datum.gradient(sys, v, tag, qp)(c) * h;
+      vary(v);
 
       if constexpr (has_precomputeQpOffDiagJacobianValue_v<Object>)
         df_value += object.template precomputeQpOffDiagJacobianValue<Object>(j, v, qp, datum);
       if constexpr (has_precomputeQpOffDiagJacobianGrad_v<Object>)
         df_grad += object.template precomputeQpOffDiagJacobianGrad<Object>(j, v, qp, datum);
+      if constexpr (has_precomputeQpOffDiagJacobianCurl_v<Object>)
+        df_curl += object.template precomputeQpOffDiagJacobianCurl<Object>(j, v, qp, datum);
     }
   }
 
   datum.trialOverride(nullptr);
   datum.displacementVariation(false, false, false);
 
-  Real3 e_c(0);
-  e_c(c) = 1;
+  // Variation of the test function gradient, and of the test function curl expressed through the
+  // gradient
+  GradCoefficient test_variation = 0;
+
+  if constexpr (!is_vector)
+    test_variation(c) = -(f_grad * h);
+  else
+  {
+    const auto f_h = f_grad * h + curlCoefficientAsGradient(f_curl, assembly.getDimension()) * h;
+
+    for (unsigned int a = 0; a < 3; ++a)
+      test_variation(a, c) = -f_h(a);
+  }
 
   terms.value = JxW * (dmeasure * f_value + df_value);
-  terms.grad = Field::pullBack(JxW * (dmeasure * f_grad + df_grad - (f_grad * h) * e_c), datum, qp);
+
+  GradCoefficient grad = dmeasure * f_grad;
+  grad += df_grad;
+  grad += test_variation;
+  terms.grad = Field::pullBack(JxW * grad, datum, qp);
+
+  if constexpr (is_vector)
+    terms.curl = JxW * (dmeasure * f_curl + df_curl);
 
   return terms;
 }
@@ -452,16 +549,15 @@ precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
                           has_precomputeQpOffDiagJacobianGrad_v<Object>,
                           has_precomputeQpOffDiagJacobianCurl_v<Object>>(terms, datum, i, qp);
 
-      if constexpr (!is_vector)
-        if (c != libMesh::invalid_uint)
-        {
-          const auto displacement_terms =
-              precomputeDisplacementJacobianTerms(object, datum, c, j, qp);
+      if (c != libMesh::invalid_uint)
+      {
+        const auto displacement_terms =
+            precomputeDisplacementJacobianTerms<is_vector>(object, datum, c, j, qp);
 
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] +=
-                contractTerms<false, true, true, false>(displacement_terms, datum, i, qp);
-        }
+        for (unsigned int i = ib; i < ie; ++i)
+          local_ke[i] +=
+              contractTerms<is_vector, true, true, is_vector>(displacement_terms, datum, i, qp);
+      }
     }
   };
 }

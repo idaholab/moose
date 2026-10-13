@@ -125,6 +125,9 @@ public:
    */
   KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
+    if (!is_test && datum.trialOverride())
+      return datum.trialOverride()->vector_phi;
+
     auto & elem = datum.elem();
     auto side = datum.side();
     auto fe = is_test ? datum.ife() : datum.jfe();
@@ -158,6 +161,9 @@ public:
    */
   KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
+    if (!is_test && datum.trialOverride())
+      return datum.trialOverride()->vector_grad_phi;
+
     return reference(datum, i, qp) * datum.dxi_dx(qp).transpose();
   }
 };
@@ -190,6 +196,10 @@ public:
    */
   KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
+    if (!is_test && datum.trialOverride())
+      return curlFromVectorGradient(datum.trialOverride()->vector_grad_phi,
+                                    datum.assembly().getDimension());
+
     auto & elem = datum.elem();
     auto side = datum.side();
     auto fe = is_test ? datum.ife() : datum.jfe();
