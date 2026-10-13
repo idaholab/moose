@@ -69,7 +69,7 @@ isOptionalArtificialNeuralNetBuffer(const std::string & key)
  */
 template <typename NamedTensorList>
 bool
-findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
+hasNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
 {
   for (const auto & entry : tensors)
     if (entry.name == key)
@@ -156,7 +156,7 @@ loadArtificialNeuralNetStateFromTorchScript(Moose::LibtorchArtificialNeuralNet &
     for (auto & parameter : nn.named_parameters())
     {
       torch::Tensor stored_tensor;
-      if (!findNamedTensor(scripted_parameters, parameter.key(), stored_tensor))
+      if (!hasNamedTensor(scripted_parameters, parameter.key(), stored_tensor))
       {
         error = "Missing scripted parameter: " + parameter.key();
         return false;
@@ -168,7 +168,7 @@ loadArtificialNeuralNetStateFromTorchScript(Moose::LibtorchArtificialNeuralNet &
     for (auto & buffer : nn.named_buffers())
     {
       torch::Tensor stored_tensor;
-      if (!findNamedTensor(scripted_buffers, buffer.key(), stored_tensor))
+      if (!hasNamedTensor(scripted_buffers, buffer.key(), stored_tensor))
       {
         if (isOptionalArtificialNeuralNetBuffer(buffer.key()))
           continue;
