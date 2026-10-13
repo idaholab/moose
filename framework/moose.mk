@@ -794,10 +794,18 @@ clobberall: clobber
 # -imacros keeps the #pragma lines of the scanned header while dropping the functions that
 # contain them, so loop pragmas from libstdc++ (e.g. #pragma GCC unroll in GCC 15) would land
 # at file scope and break every JIT compile. They are optimization hints only, so drop them.
+#
+# -imacros also drops the declarations of every header that cmath reaches at build time,
+# relying on the JIT source's own #include <cmath> to provide them again. On macOS the JIT runs
+# against whatever SDK is active at run time, which need not be the build SDK. With libc++ 21
+# and macOS SDK 26, cmath no longer reaches machine/types.h, so the u_int32_t and u_int64_t
+# typedefs used by the inlined sys/types.h are missing. Including machine/types.h first restores
+# them; it is include guarded and does not redefine anything the monolithic header contains.
 ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@echo "Building monolithic ADReal header for JIT compilation"
 	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@.tmp
-	@grep -v -E '^[[:space:]]*#[[:space:]]*pragma GCC (unroll|ivdep|novector)' $@.tmp > $@; rm -f $@.tmp
+	@printf '#ifdef __APPLE__\n#include <machine/types.h>\n#endif\n' > $@
+	@grep -v -E '^[[:space:]]*#[[:space:]]*pragma GCC (unroll|ivdep|novector)' $@.tmp >> $@; rm -f $@.tmp
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands_all_kokkos_srcfiles := $(MOOSE_KOKKOS_SRC_FILES)
