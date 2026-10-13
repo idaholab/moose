@@ -19,12 +19,14 @@
 #include "FEProblem.h"
 #include "TimeStepper.h"
 #include "TransientBase.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "TransientBase.h"
 #include "libmesh/id_types.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/mesh_base.h"
 #include "DirichletBCBase.h"
 #include "libmesh/vector_value.h"
 #include <algorithm>
@@ -71,6 +73,17 @@ ExplicitMixedOrder::validParams()
       "A subset of variables that require first-order integration (velocity only) to be applied by "
       "this time integrator.");
 
+  params.addParam<bool>(
+      "restrict_to_active_blocks",
+      true,
+      "This is only relevant in cases where the first-order and second-order "
+      "variables are not defined over the whole mesh. "
+      "If set to true, the FE problem will be restricted to blocks of the mesh "
+      "upon which the first-order and second-order variables are defined. Usually "
+      "you want this, but with mesh adaptivity in cases where the variables are "
+      "only defined on a subset of the mesh, a computational cost is associated "
+      "with frequently re-calculating the active elements.");
+
   // Prevent users from using variables option by accident.
   params.suppressParameter<std::vector<VariableName>>("variables");
 
@@ -94,7 +107,14 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
         declareRestartableData<std::vector<dof_id_type>>("first_local_indices")),
     _vars_second(declareRestartableData<std::unordered_set<unsigned int>>("second_order_vars")),
     _local_second_order_indices(
-        declareRestartableData<std::vector<dof_id_type>>("second_local_indices"))
+        declareRestartableData<std::vector<dof_id_type>>("second_local_indices")),
+    _relevant_blocks{},
+    _all_mesh_is_relevant(false),
+    _restrict_to_active_blocks(getParam<bool>("restrict_to_active_blocks")),
+    _elem_range(nullptr),
+    _node_range(nullptr),
+    _elem_buffer(),
+    _node_buffer()
 {
   _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
@@ -149,7 +169,13 @@ ExplicitMixedOrder::solve()
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
 
   if (_mesh_changed)
+  {
     updateDOFIndices();
+    // DOFs have now been updated, and the ghost stuff in following line involved DOFs
+    computeAndApplyRanges();
+    // Now _mass_matrix_diag_inverted and _mass_matrix_lumped have been appropriately ghosted.
+    // Below, they are recalculated
+  }
 
   // Compute the mass matrix
   if (_mesh_changed || !_constant_mass)
@@ -287,12 +313,9 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 }
 
 void
-ExplicitMixedOrder::init()
+ExplicitMixedOrder::initialSetup()
 {
-  ExplicitTimeIntegrator::init();
-
-  // Compute ICs for velocity
-  computeICs();
+  ExplicitTimeIntegrator::initialSetup();
 
   // Seperate variables into first and second time integration order and find
   // the local indices for each
@@ -323,6 +346,73 @@ ExplicitMixedOrder::init()
   // If var_nums is empty then that means the user has specified all the variables in this system
   if (!var_nums.empty())
     mooseError("Not all nonlinear variables have their order specified.");
+
+  buildRelevantBlocks(var_names_first, var_names_second);
+  computeAndApplyRanges();
+}
+
+void
+ExplicitMixedOrder::computeAndApplyRanges()
+{
+  if (!_all_mesh_is_relevant && _restrict_to_active_blocks)
+  {
+    constructRanges();
+    setCurrentAlgebraicRanges();
+    if (_nonlinear_implicit_system)
+      _nonlinear_implicit_system->update();
+    reinitGhostedVectorsForCurrentAlgebraicRange();
+  }
+}
+
+void
+ExplicitMixedOrder::buildRelevantBlocks(const std::vector<VariableName> & var_names_first,
+                                        const std::vector<VariableName> & var_names_second)
+{
+  if (!_restrict_to_active_blocks)
+    return;
+
+  auto & mesh = _sys.system().get_mesh();
+  auto & moose_mesh = _fe_problem.mesh();
+  std::set<SubdomainID> all_ids;
+  mesh.subdomain_ids(all_ids, /*global=*/true);
+
+  bool all_blocks_selected = false;
+  // little lambda function to add blocks to _relevant_blocks
+  const auto add_blocks_for = [&](const std::vector<VariableName> & var_names)
+  {
+    for (const auto & var_name : var_names)
+    {
+      const auto & var = _fe_problem.getVariable(/*tid=*/0, var_name);
+      const auto & block_names = var.blocks();
+
+      if (std::find(block_names.begin(), block_names.end(), "ANY_BLOCK_ID") != block_names.end())
+      {
+        _relevant_blocks.insert(all_ids.begin(), all_ids.end());
+        all_blocks_selected = true;
+        return;
+      }
+      for (const auto & name : block_names)
+        _relevant_blocks.insert(moose_mesh.getSubdomainID(name));
+    }
+  };
+
+  _relevant_blocks.clear();
+  add_blocks_for(var_names_first);
+  if (!all_blocks_selected)
+    add_blocks_for(var_names_second);
+
+  // if the variables are defined over all blocks, don't bother with
+  // the computeAndApplyRanges stuff, as it's all done by other parts of MOOSE
+  _all_mesh_is_relevant = (_relevant_blocks == all_ids);
+}
+
+void
+ExplicitMixedOrder::init()
+{
+  ExplicitTimeIntegrator::init();
+
+  // Compute ICs for velocity
+  computeICs();
 }
 
 void
@@ -360,6 +450,48 @@ ExplicitMixedOrder::updateDOFIndices()
 }
 
 void
+ExplicitMixedOrder::constructRanges()
+{
+  auto & mesh = _sys.system().get_mesh();
+  const processor_id_type my_rank = processor_id();
+
+  // ---- Build union element range across all relevant blocks ----
+  _elem_buffer.clear();
+  _elem_buffer.reserve(mesh.n_active_elem()); // heuristic
+
+  for (const auto id : _relevant_blocks)
+  {
+    // Per-subdomain active elements
+    for (const auto * e : mesh.active_subdomain_element_ptr_range(id))
+    {
+      if (e->processor_id() == my_rank)
+        _elem_buffer.push_back(e);
+    }
+  }
+
+  // Build a StoredRange (ConstElemRange) from the packed vector
+  _elem_range = std::make_unique<libMesh::ConstElemRange>(&_elem_buffer);
+
+  // ---- Derive node range from element range ----
+  std::unordered_set<const libMesh::Node *> uniq;
+  uniq.reserve(mesh.n_nodes());
+
+  for (const libMesh::Elem * e : *_elem_range)
+    for (unsigned i = 0; i < e->n_nodes(); ++i)
+      uniq.insert(e->node_ptr(i));
+
+  _node_buffer.assign(uniq.begin(), uniq.end());
+  _node_range = std::make_unique<libMesh::ConstNodeRange>(&_node_buffer);
+}
+
+void
+ExplicitMixedOrder::setCurrentAlgebraicRanges()
+{
+  _fe_problem.setCurrentAlgebraicElementRange(_elem_range.get());
+  _fe_problem.setCurrentAlgebraicNodeRange(_node_range.get());
+}
+
+void
 ExplicitMixedOrder::computeICs()
 {
   // Compute the first-order approximation of the velocity at the current time step
@@ -384,4 +516,57 @@ ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
   else
     mooseError("Variable " + _sys.system().variable_name(var_num) +
                " does not exist in time order sets.");
+}
+
+void
+ExplicitMixedOrder::buildGhostIDs(const libMesh::ConstElemRange & elems,
+                                  std::vector<dof_id_type> & ghost_ids) const
+{
+  ghost_ids.clear();
+  const auto & dm = _sys.system().get_dof_map();
+
+  const auto first = dm.first_dof();
+  const auto end = dm.end_dof();
+
+  std::vector<dof_id_type> dofs;
+  for (const libMesh::Elem * e : elems)
+  {
+    dofs.clear();
+    dm.dof_indices(e, dofs);
+    for (const auto di : dofs)
+      if (di < first || di >= end) // off-rank -> needs ghost
+        ghost_ids.push_back(di);
+  }
+  std::sort(ghost_ids.begin(), ghost_ids.end());
+  ghost_ids.erase(std::unique(ghost_ids.begin(), ghost_ids.end()), ghost_ids.end());
+}
+
+void
+ExplicitMixedOrder::reinitGhostedVectorsForCurrentAlgebraicRange()
+{
+  // Defensive: ensure we have a valid element range before proceeding
+  if (!_elem_range)
+    return;
+
+  // Build ghost IDs for the newly restricted algebraic coverage
+  std::vector<dof_id_type> ghost_ids;
+  buildGhostIDs(*_elem_range, ghost_ids);
+
+  // Size info
+  const auto & dm = _sys.system().get_dof_map();
+  const auto n_glob = dm.n_dofs();
+  const auto n_local = dm.n_local_dofs();
+
+  // If sizes are not distributed yet, do not attempt re-init
+  if (n_glob == 0)
+    return;
+
+  // Re-init ONLY those vectors you created as GHOSTED (do not convert PARALLEL vectors to ghosted)
+  auto safe_reinit = [&](NumericVector<Number> * v)
+  {
+    if (v && v->type() == GHOSTED)
+      v->init(n_glob, n_local, ghost_ids, /*fast=*/false, /*ptype=*/GHOSTED);
+  };
+  safe_reinit(_mass_matrix_diag_inverted);
+  safe_reinit(_mass_matrix_lumped);
 }
