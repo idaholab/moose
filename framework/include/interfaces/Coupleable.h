@@ -1605,13 +1605,13 @@ private:
 
   void checkFuncType(const std::string var_name, VarType t, FuncAge age) const;
 
+protected:
   /**
    * Whether this object evaluates coupled variables on element faces, so that it must request
-   * coupled AD gradients through the face accessors
+   * coupled AD gradients through the face accessors. Base classes of face objects override this.
    */
-  bool isFaceObject() const;
+  virtual bool isFaceObject() const { return false; }
 
-protected:
   /**
    * Deprecated method. Use \p getFieldVar instead
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite

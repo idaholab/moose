@@ -24,15 +24,6 @@
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
 #include "Material.h"
-#include "IntegratedBCBase.h"
-#include "DGKernelBase.h"
-#include "InterfaceKernelBase.h"
-#include "SideUserObject.h"
-#include "InternalSideUserObject.h"
-#include "InterfaceUserObjectBase.h"
-#include "MortarUserObject.h"
-#include "MortarConstraintBase.h"
-#include "InternalSideIndicatorBase.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -217,23 +208,6 @@ checkComponent(const MooseObject * obj,
   if (bound > 0 && comp >= bound)
     obj->paramError(
         var_name, "component ", comp, " is out of range for this variable (max ", bound - 1, ")");
-}
-
-bool
-Coupleable::isFaceObject() const
-{
-  if (const auto * const mat = dynamic_cast<const MaterialBase *>(this))
-    return mat->isBoundaryMaterial();
-  if (const auto * const aux = dynamic_cast<const AuxKernelBase *>(this))
-    return !_c_nodal && aux->boundaryRestricted();
-  return dynamic_cast<const IntegratedBCBase *>(this) || dynamic_cast<const DGKernelBase *>(this) ||
-         dynamic_cast<const InterfaceKernelBase *>(this) ||
-         dynamic_cast<const SideUserObject *>(this) ||
-         dynamic_cast<const InternalSideUserObject *>(this) ||
-         dynamic_cast<const InterfaceUserObjectBase *>(this) ||
-         dynamic_cast<const MortarUserObject *>(this) ||
-         dynamic_cast<const MortarConstraintBase *>(this) ||
-         dynamic_cast<const InternalSideIndicatorBase *>(this);
 }
 
 // calls to this must go *after* get[bla]Var calls and (checking for nullptr

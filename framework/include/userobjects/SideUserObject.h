@@ -37,6 +37,8 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  bool isFaceObject() const override { return true; }
+
   MooseMesh & _mesh;
 
   const MooseArray<Point> & _q_point;

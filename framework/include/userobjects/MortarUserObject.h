@@ -34,4 +34,7 @@ public:
    */
   virtual void reinit() = 0;
   virtual void threadJoin(const UserObject &) override final {}
+
+protected:
+  bool isFaceObject() const override { return true; }
 };

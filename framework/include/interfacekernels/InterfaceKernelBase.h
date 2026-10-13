@@ -44,6 +44,8 @@ public:
   void prepareShapes(unsigned int var_num) override final;
 
 protected:
+  bool isFaceObject() const override { return true; }
+
   /// Compute jacobians at quadrature points
   virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) { return 0; }
 

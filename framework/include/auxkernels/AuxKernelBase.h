@@ -83,6 +83,8 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  bool isFaceObject() const override { return !_c_nodal && boundaryRestricted(); }
+
   /// Base MooseVariable
   MooseVariableFieldBase & _var;
 

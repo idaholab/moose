@@ -30,6 +30,8 @@ public:
   virtual bool shouldApply() const override;
 
 protected:
+  bool isFaceObject() const override { return true; }
+
   /// current element
   const Elem * const & _current_elem;
   /// Volume of the current element

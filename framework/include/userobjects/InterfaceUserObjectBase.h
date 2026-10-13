@@ -34,6 +34,8 @@ public:
   InterfaceUserObjectBase(const InputParameters & parameters);
 
 protected:
+  bool isFaceObject() const override { return true; }
+
   /**
    * Execute method.
    */
