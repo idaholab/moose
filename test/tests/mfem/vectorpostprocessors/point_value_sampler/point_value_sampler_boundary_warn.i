@@ -12,6 +12,11 @@
 []
 
 [FESpaces]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -31,6 +36,10 @@
 []
 
 [Variables]
+  [h1_scalar]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
   [nd_vector]
     type = MFEMVariable
     fespace = HCurlFESpace
