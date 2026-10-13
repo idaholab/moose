@@ -66,7 +66,18 @@ class MooseCoverage:
             help="The output path for the initialized .json state file.",
         )
         initialize_parser.add_argument(
-            "search_dirs", nargs="*", type=str, help="The directories to search."
+            "--search-dirs",
+            nargs="*",
+            type=str,
+            required=True,
+            help="The directories to search for .gcno and .gcda files.",
+        )
+        initialize_parser.add_argument(
+            "--include-dirs",
+            nargs="*",
+            type=str,
+            required=True,
+            help="The source directories to include.",
         )
         initialize_parser.add_argument(
             "--search-app",
@@ -91,11 +102,16 @@ class MooseCoverage:
             "out_info", type=str, help="The output path for the finalized .info file."
         )
         finalize_parser.add_argument(
-            "include_dirs",
+            "--include-dirs",
             nargs="*",
             type=str,
-            help="The source directories to include in the final output.",
+            help=(
+                "Override the source directories to include; defaults"
+                "to the initialized --include-dirs."
+            ),
         )
+
+        action_parser.add_parser("version", parents=[parent], help="Shows the version.")
 
         return parser.parse_args()
 
@@ -108,7 +124,7 @@ class MooseCoverage:
     def error(cls, content):
         """Exit with an error with a red prefix."""
         cls.print(content, prefix_color="red", file=sys.stderr)
-        raise SystemExit()
+        sys.exit(1)
 
     @classmethod
     def add_color(cls, content: str, prefix_color: str):
@@ -157,17 +173,6 @@ class MooseCoverage:
         return dirs
 
     @staticmethod
-    def get_includes(gcno_dirs: Iterable[GCNODirectory]) -> list[str]:
-        """Get the include directories given the directories with .gcno files."""
-        dirs = set()
-        for gcno_dir in gcno_dirs:
-            for dir in ["include", "src"]:
-                full_dir = os.path.join(gcno_dir.root_dir, dir)
-                if full_dir not in dirs and os.path.isdir(full_dir):
-                    dirs.add(full_dir)
-        return sorted(dirs)
-
-    @staticmethod
     def get_info_source_dirs(info_contents: list[str]) -> list[str]:
         """Get the source directories given a lcov .info file."""
         dirs = set()
@@ -203,7 +208,20 @@ class MooseCoverage:
             search_dirs.extend(["build", "src"])
         search_dirs = [os.path.abspath(v) for v in search_dirs]
         if not search_dirs:
-            self.error("Must provide search directories or --search-app.")
+            self.error("Must provide --search-directories or --search-app.")
+        for dir in search_dirs:
+            if not os.path.isdir(dir):
+                self.error(
+                    f"--search-dirs: Directory '{self.pretty_path(dir)}' not found"
+                )
+
+        # Load includes
+        include_dirs = [os.path.abspath(v) for v in self.args.include_dirs]
+        for dir in include_dirs:
+            if not os.path.isdir(dir):
+                self.error(
+                    f"--include-dirs: Directory '{self.pretty_path(dir)}' not found"
+                )
 
         # Load directories to ignore
         ignore_search_dirs = set()
@@ -260,7 +278,7 @@ class MooseCoverage:
                         gcno_dir.dir,
                         "--include",
                     ]
-                    + self.get_includes(gcno_directories)
+                    + include_dirs
                 )
                 self.run(cmd)
 
@@ -288,6 +306,7 @@ class MooseCoverage:
         state = {
             "gcno_directories": [asdict(v) for v in gcno_directories],
             "initial_info": "".join(initial_info),
+            "include_dirs": include_dirs,
         }
         out_json_path = os.path.abspath(self.args.out_json)
         self.print(
@@ -298,11 +317,7 @@ class MooseCoverage:
 
     def action_finalize(self):
         """Run the finalize action, which finalizes coverage."""
-        include_dirs = self.args.include_dirs
-        if not include_dirs:
-            self.error("Include directories not provided.")
-        include_dirs = [os.path.abspath(v) for v in include_dirs]
-
+        # Load initialize state
         in_json_path = self.args.in_json
         self.print(
             f"Reading initial state from {self.pretty_path(in_json_path)}", bold=True
@@ -314,6 +329,16 @@ class MooseCoverage:
             state = json.load(f)
         gcno_directories = [self.GCNODirectory(**v) for v in state["gcno_directories"]]
         initial_info = state["initial_info"]
+        include_dirs = state["include_dirs"]
+
+        # Override include dirs if requested
+        if self.args.include_dirs:
+            include_dirs = [os.path.abspath(v) for v in self.args.include_dirs]
+            for dir in include_dirs:
+                if not os.path.isdir(dir):
+                    self.error(
+                        f"--include-dirs: Directory '{self.pretty_path(dir)}' not found"
+                    )
 
         search_dirs = sorted(
             set([self.pretty_path(v.root_dir) for v in gcno_directories])
@@ -405,6 +430,10 @@ class MooseCoverage:
             self.print(f"  {self.pretty_path(f)}")
             for f in self.get_info_source_dirs(combined_info)
         ]
+
+    def action_version(self):
+        """Run the version action, which shows the version."""
+        print("coverage.py version 1")
 
     def main(self):
         """Run the given action from command line."""
