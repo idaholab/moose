@@ -26,7 +26,7 @@ mpi:
   - openmpi                                                 # [linux or (osx and arm64)]
 
 mpi_version:
-  - 5.0.1
+  - 5.0.2
   - 5.0.10                                                  # [linux or (osx and arm64)]
 
 mpi_friendly_name:
@@ -41,7 +41,7 @@ zip_keys:
 # Should match the first zipped item in mpi_version above; used by the moose
 # and app conda install that just builds with mpich
 mpich_version:
-  - 5.0.1
+  - 5.0.2
 
 # libfabric 2.5.1 on linux has an undefined reference to
 # getrandom@GLIBC_2.25 during builds due to the 2.25 sysroot
