@@ -655,12 +655,11 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                neighbor_cell_id,
                ".");
 
-  const Elem * face_side = nullptr;
-  if (!_vel[0]->isInternalFace(fi))
-  {
-    const bool elem_is_fluid = hasBlocks(fi.elemPtr()->subdomain_id());
-    face_side = elem_is_fluid ? fi.elemPtr() : fi.neighborPtr();
-  }
+  // On a face shared with a non-flow block, the FaceInfo element may be the non-flow cell, so
+  // the density must be evaluated on the flow side.
+  const Elem * face_side = fi.elemPtr();
+  if (!_vel[0]->isInternalFace(fi) && !hasBlocks(fi.elemPtr()->subdomain_id()))
+    face_side = fi.neighborPtr();
 
   const Moose::FaceArg face_arg{&fi,
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
