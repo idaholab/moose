@@ -30,7 +30,7 @@ AugmentedLagrangianContactProblemInterface::AugmentedLagrangianContactProblemInt
 const AugmentedLagrangianContactConvergenceBase &
 AugmentedLagrangianContactProblemInterface::getAugmentedLagrangianContactConvergence() const
 {
-  mooseAssert(numNonlinearSystems() == 1, "Multiple nonlinear systems are not supported.");
+  mooseAssert(_problem.numNonlinearSystems() == 1, "Multiple nonlinear systems are not supported.");
 
   const auto & name = _problem.getNonlinearConvergenceNames()[0];
   const auto * const convergence = dynamic_cast<const AugmentedLagrangianContactConvergenceBase *>(
