@@ -656,3 +656,37 @@ TEST_F(CaloricallyImperfectGasTest, compareWithIdeal)
     REL_TEST(de_dh, de_dh2, 1e-5);
   }
 }
+
+/**
+ * Verify the sound speed derivatives for an internal energy that is quadratic in temperature,
+ * so that the specific heat ratio varies with the internal energy
+ */
+TEST_F(CaloricallyImperfectGasTest, soundSpeedVaryingGamma)
+{
+  // e(T) = 3000 T + 2 T^2, so cv = 3000 + 4 T and the specific heat ratio vary continuously
+  InputParameters e_fn_params = _factory.getValidParams("ParsedFunction");
+  e_fn_params.set<std::string>("expression") = "3000 * t + 2 * t * t";
+  _fe_problem->addFunction("ParsedFunction", "e_quad_fn", e_fn_params);
+  _fe_problem->getFunction("e_quad_fn").initialSetup();
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_quad_fn";
+  uo_pars.set<FunctionName>("mu") = "default_fn";
+  uo_pars.set<FunctionName>("k") = "default_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 0.01;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_quad", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_quad");
+  fp.initialSetup();
+
+  const Real T = 300.0;
+  const Real p = 1e5;
+  const Real v = 1.0 / fp.rho_from_p_T(p, T);
+  const Real e = fp.e_from_p_T(p, T);
+
+  // The tolerance accounts for the linear interpolation of the T(e) lookup table
+  DERIV_TEST_CUSTOM_PERTURBATION(fp.c_from_v_e, v, e, 1e-4, 1e-4);
+  DERIV_TEST_CUSTOM_PERTURBATION(fp.gamma_from_v_e, v, e, 1e-4, 1e-4);
+}

@@ -350,13 +350,12 @@ CaloricallyImperfectGas::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
-  Real gamma, dgamma_dv, dgamma_dT;
-  gamma_from_v_e(v, e, gamma, dgamma_dv, dgamma_dT);
+  Real gamma, dgamma_dv, dgamma_de;
+  gamma_from_v_e(v, e, gamma, dgamma_dv, dgamma_de);
   c = std::sqrt(gamma * _R_specific * T);
 
-  const Real dc_dT = 0.5 / c * _R_specific * (gamma + T * dgamma_dT);
-  dc_dv = dc_dT * dT_dv;
-  dc_de = dc_dT * dT_de;
+  dc_dv = 0.5 / c * _R_specific * (gamma * dT_dv + T * dgamma_dv);
+  dc_de = 0.5 / c * _R_specific * (gamma * dT_de + T * dgamma_de);
 }
 
 Real
