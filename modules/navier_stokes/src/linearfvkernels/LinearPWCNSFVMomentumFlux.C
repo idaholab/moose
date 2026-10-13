@@ -30,7 +30,8 @@ LinearPWCNSFVMomentumFlux::validParams()
       "baffle_advection_reconstruction",
       MooseEnum("one-sided shared", "one-sided"),
       "Whether momentum advection uses the velocity state local to each side of a pressure "
-      "baffle or the shared state supplied by advected_interp_method_name.");
+      "baffle or the shared state supplied by advected_interp_method_name. Only has an effect "
+      "on pressure-baffle faces of a PorousRhieChowMassFlux.");
   return params;
 }
 

@@ -6,8 +6,7 @@
     csvdiff = 'porous-baffle-2d-variable-density-bernoulli_out.csv porous-baffle-2d-variable-density-bernoulli_out_centerline_solution_0001.csv'
     requirement = 'The system shall preserve the variable-density Bernoulli baffle pressure jump, density profile, porosity profile, and superficial velocity profile.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearPWCNSFVMomentumFlux.md LinearPWCNSFVMomentumPressure.md'
-    cli_args = ''
-    recover = false
-    max_threads = 1
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
 []
