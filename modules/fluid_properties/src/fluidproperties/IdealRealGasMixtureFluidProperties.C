@@ -297,8 +297,8 @@ Real
 IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real v_primary = v / primaryMassFraction(x);
-  static const Real vc = 1. / _fp_primary->criticalDensity();
-  static const Real ec = _fp_primary->criticalInternalEnergy();
+  const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real ec = _fp_primary->criticalInternalEnergy();
 
   // Initial estimate of a bracketing interval for the temperature
   Real lower_temperature, upper_temperature;
@@ -382,8 +382,8 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, const std::vector
   Real v_ideal = R_molar * T / (M_star * p);
 
   // check range of validity for primary (condensable) component
-  static const Real Tc = _fp_primary->criticalTemperature();
-  static const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real Tc = _fp_primary->criticalTemperature();
+  const Real vc = 1. / _fp_primary->criticalDensity();
   Real v_spndl, e_spndl;
   if (T < Tc)
     _fp_primary->v_e_spndl_from_T(T, v_spndl, e_spndl);
@@ -470,8 +470,8 @@ Real
 IdealRealGasMixtureFluidProperties::T_from_p_v(Real p, Real v, const std::vector<Real> & x) const
 {
   Real v_primary = v / primaryMassFraction(x);
-  static const Real vc = 1. / _fp_primary->criticalDensity();
-  static const Real ec = _fp_primary->criticalInternalEnergy();
+  const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real ec = _fp_primary->criticalInternalEnergy();
 
   // Initial estimate of a bracketing interval for the temperature
   Real lower_temperature, upper_temperature;
