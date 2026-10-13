@@ -4333,7 +4333,24 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 {
   parallel_object_only();
 
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Kokkos materials live on the reference problem. One evaluated on the current configuration
+  // couples the displacements of the displaced problem and composes the deformation into its
+  // geometry.
+  if (parameters.isKokkosObject() && parameters.get<bool>("use_displaced_mesh"))
+  {
+    if (_displaced_problem)
+      parameters.set<std::vector<VariableName>>("_displacements") =
+          std::vector<VariableName>(_displaced_problem->getDisplacementVarNames().begin(),
+                                    _displaced_problem->getDisplacementVarNames().end());
+    else
+      parameters.set<bool>("use_displaced_mesh") = false;
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+  }
+  else
+#endif
+      if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     _reinit_displaced_elem = _reinit_displaced_face = _reinit_displaced_neighbor = true;

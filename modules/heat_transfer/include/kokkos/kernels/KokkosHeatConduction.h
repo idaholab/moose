@@ -30,10 +30,17 @@ public:
   KOKKOS_FUNCTION Real3 precomputeQpJacobianGrad(const unsigned int j,
                                                  const unsigned int qp,
                                                  AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real3 precomputeQpPositionJacobianGrad(const Real3 & dx,
+                                                         const unsigned int qp,
+                                                         AssemblyDatum & datum) const;
 
 private:
   Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
   Moose::Kokkos::MaterialProperty<Real> _d_thermal_conductivity_dT;
+  /// Gradient of the thermal conductivity with respect to the position, which carries the
+  /// dependence of a conductivity evaluated on the current configuration on the displacements
+  Moose::Kokkos::MaterialProperty<Real3> _d_thermal_conductivity_dx;
 };
 
 template <typename Derived>
@@ -53,4 +60,18 @@ KokkosHeatConduction::precomputeQpJacobianGrad(const unsigned int j,
   if (_d_thermal_conductivity_dT)
     jac += _d_thermal_conductivity_dT(datum, qp) * _phi(datum, j, qp) * _grad_u(datum, qp);
   return jac;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosHeatConduction::precomputeQpPositionJacobianGrad(const Real3 & dx,
+                                                       const unsigned int qp,
+                                                       AssemblyDatum & datum) const
+{
+  if (!_d_thermal_conductivity_dx)
+    return Real3(0);
+
+  const Real3 dk_dx = _d_thermal_conductivity_dx(datum, qp);
+
+  return (dk_dx * dx) * _grad_u(datum, qp);
 }

@@ -24,6 +24,12 @@ KokkosHeatConduction::validParams()
       "d_thermal_conductivity_dT",
       "Property name of the derivative of the thermal conductivity with respect "
       "to the variable");
+  params.addParam<MaterialPropertyName>(
+      "d_thermal_conductivity_dx",
+      "d_thermal_conductivity_dx",
+      "Property name of the gradient of the thermal conductivity with respect to the position, "
+      "used in the Jacobian with respect to the displacements when the term is posed on the "
+      "current configuration");
   return params;
 }
 
@@ -34,4 +40,7 @@ KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
 
   if (hasKokkosMaterialProperty<Real>("d_thermal_conductivity_dT"))
     _d_thermal_conductivity_dT = getKokkosMaterialProperty<Real>("d_thermal_conductivity_dT");
+
+  if (hasKokkosMaterialProperty<Real3>("d_thermal_conductivity_dx"))
+    _d_thermal_conductivity_dx = getKokkosMaterialProperty<Real3>("d_thermal_conductivity_dx");
 }

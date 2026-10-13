@@ -163,7 +163,7 @@ protected:
   const bool _neighbor;
 
   /**
-   * Configuration of the geometry, which is the reference configuration
+   * Configuration on which the properties are evaluated
    */
   const Configuration _configuration;
 
