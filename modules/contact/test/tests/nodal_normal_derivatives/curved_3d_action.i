@@ -20,12 +20,6 @@ overclosure = 0.001
   [combined]
     inputs := 'top_curve bottom_curve'
   []
-  [Partitioner]
-    type = GridPartitioner
-    nx = 1
-    ny = 1
-    nz = 1
-  []
 []
 
 [ICs]

@@ -199,7 +199,6 @@
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
     min_parallel = 13
-    restep = false # Frictional penalty history is not restored on rejected time steps
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '

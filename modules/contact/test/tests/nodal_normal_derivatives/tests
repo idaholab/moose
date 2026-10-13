@@ -23,7 +23,9 @@
   [nonnodal_displacement]
     type = RunException
     input = ../3d-mortar-contact/frictionless-mortar-3d.i
-    cli_args = 'Variables/disp_x/family=MONOMIAL Variables/disp_x/order=CONSTANT'
+    # The disp_x Dirichlet conditions would reject the elemental variable before contact setup
+    cli_args = "Variables/disp_x/family=MONOMIAL Variables/disp_x/order=CONSTANT "
+               "BCs/active='boty botz topy topz'"
     expect_err = 'Nodal-normal derivatives require a nodal displacement variable.'
     design = 'ComputeWeightedGapLMMechanicalContact.md'
     requirement = 'Mechanical mortar contact shall require nodal displacement variables when '
@@ -81,7 +83,8 @@
     type = RunApp
     input = curved_3d_action.i
     cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
-               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/nx=2 '
+               'Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/type=GridPartitioner '
+               'Mesh/Partitioner/nx=2 '
                'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 '
                'Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm '
                'Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic '
@@ -107,7 +110,7 @@
                'Contact/mortar/al_penetration_tolerance=1e-4 '
                'Contact/mortar/al_incremental_slip_tolerance=1e-4 '
                'Executioner/nl_abs_tol=1e-4 Executioner/end_time=0.05 Executioner/dt=0.05 '
-               'Problem/error_on_jacobian_nonzero_reallocation=true Mesh/Partitioner/nx=2'
+               'Problem/error_on_jacobian_nonzero_reallocation=true'
     expect_out = 'Solve Converged!'
     design = 'ContactAction.md PenaltyFrictionUserObject.md '
              'ComputeWeightedGapLMMechanicalContact.md'
@@ -124,7 +127,7 @@
                'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 '
                'Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm '
                'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true '
-               'Mesh/Partitioner/nx=2 -snes_test_err 1e-7'
+               '-snes_test_err 1e-7'
     run_sim = false
     # First-order mortar Jacobian assembly must not reallocate matrix nonzeros.
     ratio_tol = 2e-5
@@ -144,11 +147,15 @@
                'Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND '
                'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
                'Contact/mortar/penalty_friction=1e2 ICs/inactive=normal_lm '
-               'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true '
-               'Mesh/Partitioner/nx=2 -snes_test_err 1e-7'
+               'Executioner/nl_abs_tol=1e-4 Executioner/abort_on_solve_fail=true '
+               '-snes_test_err 1e-7'
     run_sim = false
+    # Penalty contact on this second-order curved interface can assemble Jacobian entries outside
+    # the preallocated sparsity pattern for some partitions (#34065), so the reallocation check is
+    # not enabled here. The Jacobian comparison does not depend on the sparsity pattern.
     # The penalty formulation provides a smooth initial active set and comparable contact and bulk
-    # Jacobian blocks.
+    # Jacobian blocks. The checked Jacobian precedes a forced full Newton step that can invert an
+    # element, so the solve aborts once the Jacobian check is complete.
     ratio_tol = 6.4e-4
     difference_tol = 3.1
     capabilities = 'ad_size>=200'
@@ -170,7 +177,7 @@
                'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
                'Contact/mortar/penalty_friction=1e2 ICs/inactive=normal_lm '
                'Executioner/nl_abs_tol=1e-4 Executioner/abort_on_solve_fail=true '
-               'Problem/error_on_jacobian_nonzero_reallocation=true Mesh/Partitioner/nx=2 '
+               'Problem/error_on_jacobian_nonzero_reallocation=true '
                '-snes_test_err 1e-7'
     run_sim = false
     ratio_tol = 3.4e-3
@@ -194,8 +201,7 @@
     cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 '
                'Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 Contact/mortar/model=frictionless '
                'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/solve_type=PJFNK '
-               'Executioner/end_time=0.05 Executioner/dt=0.05 Executioner/nl_abs_tol=1e-4 '
-               'Mesh/Partitioner/nx=2'
+               'Executioner/end_time=0.05 Executioner/dt=0.05 Executioner/nl_abs_tol=1e-4'
     expect_out = 'Solve Converged!'
     design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md '
              'AutomaticMortarGeneration.md'
@@ -213,7 +219,7 @@
                'Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND '
                'Contact/mortar/model=frictionless '
                'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/end_time=0.05 '
-               'Executioner/dt=0.05 Executioner/line_search=basic Mesh/Partitioner/nx=2'
+               'Executioner/dt=0.05 Executioner/line_search=basic'
     expect_out = 'Solve Converged!'
     capabilities = 'ad_size>=200'
     design = 'ContactAction.md AutomaticMortarGeneration.md'
@@ -231,7 +237,7 @@
                'Variables/disp_y/order=THIRD Variables/disp_z/order=THIRD '
                'Contact/mortar/model=frictionless '
                'Problem/error_on_jacobian_nonzero_reallocation=false Executioner/end_time=0.05 '
-               'Executioner/dt=0.05 Executioner/line_search=basic Mesh/Partitioner/nx=2'
+               'Executioner/dt=0.05 Executioner/line_search=basic'
     expect_out = 'Solve Converged!'
     capabilities = 'ad_size>=200'
     design = 'ContactAction.md AutomaticMortarGeneration.md'

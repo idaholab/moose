@@ -20,7 +20,8 @@ LMWeightedVelocitiesUserObject::validParams()
   params += LMWeightedGapUserObject::newParams();
   params.addClassDescription("Provides the mortar contact Lagrange multipliers (normal and "
                              "tangential) for constraint enforcement.");
-  params.set<bool>("use_nodal_normal_derivatives") = true;
+  addNodalNormalCoupling(params);
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params.renameCoupledVar("lm_variable", "lm_variable_normal", "");
   params.addRequiredCoupledVar(
       "lm_variable_tangential_one",

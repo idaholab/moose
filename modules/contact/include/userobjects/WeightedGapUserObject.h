@@ -19,6 +19,13 @@ class WeightedGapUserObject : public MortarUserObject
 public:
   static InputParameters validParams();
 
+  /**
+   * Request the secondary face point-neighbor matrix coupling that nodal-normal derivatives need.
+   * MortarConsumerInterface supplies the geometric and algebraic relationship manager; this adds
+   * the coupling relationship manager, which is attached through a separate system lifecycle.
+   */
+  static void addNodalNormalCoupling(InputParameters & params);
+
   WeightedGapUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -68,7 +75,7 @@ public:
   virtual Real getNormalGap(const Node * const /*node*/) const;
 
   /// Whether this formulation includes displacement derivatives of the secondary nodal normals
-  virtual bool usesNodalNormalDerivatives() const { return false; }
+  virtual bool usesNodalNormalDerivatives() const = 0;
 
   /// Whether the current assembly records nodal-normal derivatives for this object's system
   bool shouldRecordNodalNormalDerivatives() const;

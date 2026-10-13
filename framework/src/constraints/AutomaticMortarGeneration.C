@@ -2193,6 +2193,9 @@ AutomaticMortarGeneration::computeADNodalNormals(
   std::unordered_map<const Node *, ADRealVectorValue> weighted_area_vectors;
   std::unordered_map<const Node *, Real> weighted_area_magnitudes;
 
+  // One face FE object per secondary element order, reused across elements of that order
+  std::map<Order, std::unique_ptr<FEBase>> fe_faces;
+
   // AD propagates coordinate derivatives through the parent-side area vectors and normalization.
   for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
     for (const Elem * const secondary_elem :
@@ -2212,9 +2215,12 @@ AutomaticMortarGeneration::computeADNodalNormals(
                    " because it has a non-positive characteristic length.");
 
       const auto side = interior_parent->which_side_am_i(secondary_elem);
-      FEType fe_type(secondary_elem->default_order(), LAGRANGE);
-      std::unique_ptr<FEBase> fe_face(FEBase::build(dim, fe_type));
-      fe_face->attach_quadrature_rule(&qface);
+      auto & fe_face = fe_faces[secondary_elem->default_order()];
+      if (!fe_face)
+      {
+        fe_face = FEBase::build(dim, FEType(secondary_elem->default_order(), LAGRANGE));
+        fe_face->attach_quadrature_rule(&qface);
+      }
 
       const auto & face_normals = fe_face->get_normals();
       const auto & face_points = fe_face->get_xyz();

@@ -79,9 +79,12 @@ but its inner Newton Jacobian does not include displacement derivatives of the n
 directions. Including the direction derivatives in this formulation requires separate treatment of
 the nonsmooth active-set and Coulomb return-map generalized Jacobian and its globalization.
 
-Dynamic mortar through [ContactAction](/ContactAction.md), Cartesian-LM, cohesive-zone, augmented-
-Lagrangian `mortar_penalty`, and nonmortar contact do not include displacement derivatives of normal
-and tangent vectors in their Jacobians. Quadrature-point normal interpolation is not supported for
+Dynamic mortar contact includes these derivatives in the primal normal-traction and
+tangential-friction constraints, but its dynamic weighted-gap and weighted-velocity constraints do
+not include displacement derivatives of the normal and tangent vectors. Cartesian-LM,
+cohesive-zone, augmented-Lagrangian `mortar_penalty`, and nonmortar contact do not include
+displacement derivatives of normal and tangent vectors in their Jacobians. Quadrature-point normal
+interpolation is not supported for
 quasistatic local-basis contact. The displacement variables must be nodal nonlinear variables in
 the system assembled by the contact objects.
 

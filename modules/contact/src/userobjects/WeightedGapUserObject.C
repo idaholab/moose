@@ -31,10 +31,36 @@ WeightedGapUserObject::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
-  params.addPrivateParam<bool>("use_nodal_normal_derivatives", false);
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
+}
+
+void
+WeightedGapUserObject::addNodalNormalCoupling(InputParameters & params)
+{
+  params.set<bool>("ghost_point_neighbors") = true;
+  const auto configure_point_neighbors =
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+  {
+    rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+    rm_params.set<BoundaryName>("secondary_boundary") =
+        obj_params.get<BoundaryName>("secondary_boundary");
+    rm_params.set<BoundaryName>("primary_boundary") =
+        obj_params.get<BoundaryName>("primary_boundary");
+    rm_params.set<SubdomainName>("secondary_subdomain") =
+        obj_params.get<SubdomainName>("secondary_subdomain");
+    rm_params.set<SubdomainName>("primary_subdomain") =
+        obj_params.get<SubdomainName>("primary_subdomain");
+    // Augmented-Lagrangian penalty contact, selected by penetration_tolerance, and objects that
+    // disable ghost_point_neighbors do not include nodal-normal derivatives.
+    rm_params.set<bool>("ghost_point_neighbors") =
+        obj_params.get<bool>("ghost_point_neighbors") &&
+        !obj_params.isParamValid("penetration_tolerance");
+  };
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                configure_point_neighbors);
 }
 
 WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
@@ -56,29 +82,6 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
-
-  if (getParam<bool>("use_nodal_normal_derivatives"))
-  {
-    if (getParam<bool>("interpolate_normals"))
-      paramError(
-          "interpolate_normals",
-          "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
-          "combined with quadrature-point normal interpolation.");
-
-    const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
-        {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
-    for (const auto & [variable, parameter_name] : displacement_variables)
-      if (variable)
-      {
-        if (!variable->isNodal())
-          paramError(parameter_name,
-                     "Nodal-normal derivatives require a nodal displacement variable.");
-        if (&variable->sys() != &_sys)
-          paramError(parameter_name,
-                     "Nodal-normal derivatives require displacement variables in the nonlinear "
-                     "system assembled by this contact object.");
-      }
-  }
 }
 
 ADReal

@@ -70,7 +70,7 @@
     design = 'ContactAction.md NormalMortarMechanicalContact.md'
     issues = '#33657'
     requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
-                  'curved interface, using'
+                  'curved interface.'
     # abs_zero checks the normalized force imbalance against zero.
     [dual]
       type = 'CSVDiff'
@@ -79,7 +79,7 @@
       abs_zero = 1e-8
       cli_args = 'Contact/leftright/use_dual=true '
                  'Outputs/file_base=dual_mortar_force_balance'
-      detail = 'a dual (biorthogonal) Lagrange multiplier basis,'
+      detail = 'The forces shall balance with a dual (biorthogonal) Lagrange multiplier basis.'
     []
     [standard]
       type = 'CSVDiff'
@@ -88,7 +88,7 @@
       abs_zero = 1e-8
       cli_args = 'Contact/leftright/use_dual=false '
                  'Outputs/file_base=std_mortar_force_balance'
-      detail = 'a standard Lagrange multiplier basis, and'
+      detail = 'The forces shall balance with a standard Lagrange multiplier basis.'
     []
     [penalty]
       type = 'CSVDiff'
@@ -98,7 +98,7 @@
       # Match the penalty scale to the bulk stiffness while retaining robust convergence.
       cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
                  'Outputs/file_base=penalty_mortar_force_balance'
-      detail = 'a penalty formulation.'
+      detail = 'The forces shall balance with a penalty formulation.'
     []
   []
 
@@ -106,7 +106,7 @@
     design = 'ContactAction.md NormalMortarMechanicalContact.md'
     issues = '#33378'
     requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
-                  'curved, frictional interface, using'
+                  'curved, frictional interface.'
     # The penalty formulation checks normal and tangential force balance without PDASS active-set
     # parameters.
     [penalty]
@@ -117,8 +117,7 @@
       cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
                  'Contact/leftright/penalty_friction=1e5 '
                  'Outputs/file_base=penalty_mortar_force_balance_friction'
-      detail = 'a penalty formulation.'
-      restep = false # Frictional penalty history is not restored on rejected time steps
+      detail = 'The normal and frictional forces shall balance with a penalty formulation.'
     []
   []
 []

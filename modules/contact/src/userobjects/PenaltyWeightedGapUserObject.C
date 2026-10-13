@@ -20,32 +20,9 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
-  params.set<bool>("use_nodal_normal_derivatives") = true;
-  params.set<bool>("ghost_point_neighbors") = true;
-  params.suppressParameter<bool>("ghost_point_neighbors");
   // The weighted-gap object supplies penalty contact's nodal-normal point-neighbor matrix coupling.
-  // MortarConsumerInterface supplies the geometric and algebraic relationship manager.
-  const auto configure_point_neighbors =
-      [](const InputParameters & obj_params, InputParameters & rm_params)
-  {
-    rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-    rm_params.set<BoundaryName>("secondary_boundary") =
-        obj_params.get<BoundaryName>("secondary_boundary");
-    rm_params.set<BoundaryName>("primary_boundary") =
-        obj_params.get<BoundaryName>("primary_boundary");
-    rm_params.set<SubdomainName>("secondary_subdomain") =
-        obj_params.get<SubdomainName>("secondary_subdomain");
-    rm_params.set<SubdomainName>("primary_subdomain") =
-        obj_params.get<SubdomainName>("primary_subdomain");
-    rm_params.set<bool>("ghost_point_neighbors") =
-        obj_params.get<bool>("use_nodal_normal_derivatives") &&
-        !obj_params.isParamValid("penetration_tolerance");
-  };
-  // Coupling relationship managers are attached through a separate system lifecycle from geometric
-  // and algebraic relationship managers.
-  params.addRelationshipManager("AugmentSparsityOnInterface",
-                                Moose::RelationshipManagerType::COUPLING,
-                                configure_point_neighbors);
+  addNodalNormalCoupling(params);
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
