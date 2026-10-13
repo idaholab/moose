@@ -2,21 +2,21 @@
 
 When cold fluid is injected into a fractured rock, the rock next to each fracture cools and contracts, and the fracture opens.  This Material models that effect.  It is intended for the mixed-dimensional approach described in [flow through fractured media](porous_flow/nomultiapp_flow_through_fractured_media.md), in which a fracture is represented by lower-dimensional elements and its porosity is the fracture aperture (multiplied by the fracture porosity, which is usually unity).
 
-The Material computes porosity (at the nodes or quadpoints, depending on the `at_nodes` flag) according to
+The Material computes porosity (at the nodes or quadrature points, depending on the [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/at_nodes) flag) according to
 
 \begin{equation}
 \label{eq:poro_vw}
 \phi = \phi_{\mathrm{linear}} - c\, I \ ,
 \end{equation}
 
-where $\phi_{\mathrm{linear}}$ is the porosity given by [PorousFlowPorosityLinear](PorousFlowPorosityLinear.md) (so dependence on porepressure, temperature and volumetric strain is retained), $c$ is the `thermal_opening_coeff`, and
+where $\phi_{\mathrm{linear}}$ is the porosity given by [PorousFlowPorosityLinear](PorousFlowPorosityLinear.md) (so dependence on porepressure, temperature and volumetric strain is retained), $c$ is the [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/thermal_opening_coeff), and
 
 \begin{equation}
 \label{eq:vw_heat_content}
 I = \int_{0}^{\infty} \left(T(z, t) - T_{\mathrm{ref}}\right) \mathrm{d}z
 \end{equation}
 
-is the heat content (in K$\,$m) of the matrix adjacent to the fracture.  Here $z$ is the distance from the fracture face into the matrix and $T_{\mathrm{ref}}$ is the `matrix_reference_temperature`, which is the undisturbed matrix temperature.  When the matrix cools, $I < 0$, so a positive $c$ increases the porosity (opens the fracture).
+is the heat content (in K$\,$m) of the matrix adjacent to the fracture.  Here $z$ is the distance from the fracture face into the matrix and $T_{\mathrm{ref}}$ is the [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature), which is the undisturbed matrix temperature.  When the matrix cools, $I < 0$, so a positive $c$ increases the porosity (opens the fracture).
 
 The thermal opening depends on how much of the matrix has cooled, not only on the temperature at the fracture face.  The cooled layer is often only centimetres to metres thick, which is much thinner than typical matrix elements, so it is not resolved by the mesh (see also the discussion of "retardation" by the matrix in [flow through fractured media](porous_flow/nomultiapp_flow_through_fractured_media.md)).  Therefore $I$ is computed using a semi-analytic temperature profile, as described below.
 
@@ -29,7 +29,7 @@ Following [!cite](vinsome1980), who developed the method to compute heat losses 
 T(z, t) - T_{\mathrm{ref}} = \left(\theta + p z + q z^{2}\right) e^{-z/d}, \qquad d = \frac{\sqrt{\kappa t}}{2} \ ,
 \end{equation}
 
-where $\theta = T - T_{\mathrm{ref}}$ is the temperature change at the fracture face, $\kappa$ is the `matrix_thermal_diffusivity` (thermal conductivity divided by volumetric heat capacity), and $t$ is the time since `vw_start_time`.  The exponential factor captures the diffusive penetration of the temperature change into the matrix, and $p$ and $q$ adjust the shape of the profile as the history of $\theta$ evolves.  With this profile, the heat content is
+where $\theta = T - T_{\mathrm{ref}}$ is the temperature change at the fracture face, $\kappa$ is the [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_thermal_diffusivity) (thermal conductivity divided by volumetric heat capacity), and $t$ is the time since [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time).  The exponential factor captures the diffusive penetration of the temperature change into the matrix, and $p$ and $q$ adjust the shape of the profile as the history of $\theta$ evolves.  With this profile, the heat content is
 
 \begin{equation}
 I = \theta d + p d^{2} + 2 q d^{3} \ .
@@ -66,7 +66,7 @@ These values assume the fracture opening is not resisted by the in-situ stress, 
 ## Assumptions and limitations
 
 - Heat conduction in the matrix is one-dimensional, normal to the fracture, and the matrix is semi-infinite.  When the cooled zones of neighbouring fractures overlap, $I$ will be overestimated in magnitude.
-- The matrix is at `matrix_reference_temperature` at `vw_start_time`.  Before `vw_start_time` the thermal-opening term is zero.  Because the diffusion length $d$ is measured from `vw_start_time`, this should be the time at which the fracture-face temperature first starts to change (for instance, when injection begins), as in [!cite](vinsome1980).
+- The matrix is at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time).  Before [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) the thermal-opening term is zero.  Because the diffusion length $d$ is measured from [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time), this should be the time at which the fracture-face temperature first starts to change (for instance, when injection begins), as in [!cite](vinsome1980).
 - The profile [eq:vw_profile] is an approximation.  For a step change in the fracture-face temperature, the computed $I$ is approximately $3\%$ smaller in magnitude than the exact value once the time step is small, and the error is larger when the time step is comparable to the elapsed time (see below).
 - The heat lost by the matrix is not removed from the simulation by this Material: the thermal-opening term only modifies porosity.  The heat exchange between the fracture and the matrix is computed by the usual PorousFlow kernels.
 

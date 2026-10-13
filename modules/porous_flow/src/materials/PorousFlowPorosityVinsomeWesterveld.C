@@ -87,9 +87,9 @@ PorousFlowPorosityVinsomeWesterveld::initQpStatefulProperties()
 }
 
 void
-PorousFlowPorosityVinsomeWesterveld::computeQpProperties()
+PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
 {
-  computeLinearPorosityQp();
+  PorousFlowPorosityLinear::computeUnboundedPorosityQp();
 
   const Real theta = (*_temperature)[_qp] - _T_matrix_ref[_qp];
   _theta[_qp] = theta;
@@ -124,6 +124,4 @@ PorousFlowPorosityVinsomeWesterveld::computeQpProperties()
   for (unsigned int pvar = 0; pvar < _num_var; ++pvar)
     (*_dporosity_dvar)[_qp][pvar] -=
         _thermal_opening_coeff * dI_dtheta * (*_dtemperature_dvar)[_qp][pvar];
-
-  applyPorosityMin();
 }

@@ -44,7 +44,7 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeQpProperties() override;
+  virtual void computeUnboundedPorosityQp() override;
 
   /// Change of porosity per unit matrix heat content (units 1/K when porosity is an aperture)
   const Real _thermal_opening_coeff;

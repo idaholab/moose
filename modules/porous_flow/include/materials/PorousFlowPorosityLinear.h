@@ -30,11 +30,11 @@ protected:
   virtual void computeQpProperties() override;
 
   /**
-   * Computes the linear porosity relationship and its derivatives at the current node or
-   * quadpoint, without applying the porosity_min floor.  Derived classes may add further terms
-   * to _porosity and its derivatives before calling applyPorosityMin()
+   * Computes porosity and its derivatives at the current node or quadrature point, without
+   * applying the porosity_min lower bound.  Derived classes may override this to add further
+   * terms to _porosity and its derivatives; computeQpProperties() then applies porosity_min
    */
-  void computeLinearPorosityQp();
+  virtual void computeUnboundedPorosityQp();
 
   /// When calculating nodal porosity, use the strain at the nearest quadpoint to the node
   const bool _strain_at_nearest_qp;

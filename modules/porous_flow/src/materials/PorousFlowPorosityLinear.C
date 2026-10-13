@@ -120,12 +120,12 @@ PorousFlowPorosityLinear::initQpStatefulProperties()
 void
 PorousFlowPorosityLinear::computeQpProperties()
 {
-  computeLinearPorosityQp();
+  computeUnboundedPorosityQp();
   applyPorosityMin();
 }
 
 void
-PorousFlowPorosityLinear::computeLinearPorosityQp()
+PorousFlowPorosityLinear::computeUnboundedPorosityQp()
 {
   // note the [0] below: _phi_ref is a constant monomial and we use [0] regardless of
   // _nodal_material
