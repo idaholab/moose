@@ -243,6 +243,26 @@ void lineRemoverCutElem(libMesh::ReplicatedMesh & mesh,
                         const bool improve_boundary_tri_elems = false);
 
 /**
+ * Trim the 2D mesh by removing all the elements on one side of the given line. Elements crossed
+ * by the line are replaced by a single C0POLYGON element (the clipped retained piece), so the
+ * surrounding full elements keep their original type (QUAD4, TRI3, ...).
+ * @param mesh input mesh to trim
+ * @param cut_line_params parameters of the line that cuts the input mesh (a, b, c in a*x+b*y+c=0)
+ * @param poly_subdomain_id_shift subdomain id shift used to define the C0POLYGON element
+ * subdomains formed by the cut
+ * @param poly_elem_subdomain_name_suffix suffix used to name the C0POLYGON element subdomains
+ * @param block_id_to_remove a temporary subdomain id used to mark the elements that need to be
+ * removed
+ * @param new_boundary_id boundary id of the new boundary that forms due to the trimming
+ */
+void lineRemoverCutElemPoly(libMesh::ReplicatedMesh & mesh,
+                            const std::vector<Real> & cut_line_params,
+                            const dof_id_type poly_subdomain_id_shift,
+                            const SubdomainName poly_elem_subdomain_name_suffix,
+                            const subdomain_id_type block_id_to_remove,
+                            const boundary_id_type new_boundary_id);
+
+/**
  * Improve the element quality of the boundary TRI3 elements of the given boundary
  * @param mesh input mesh with the boundary TRI3 elements that need to be improved
  * @param boundary_to_improve boundary id of the boundary that needs to be improved
