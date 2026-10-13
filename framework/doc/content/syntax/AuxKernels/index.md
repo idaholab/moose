@@ -101,7 +101,7 @@ Within a group, auxiliary kernels are executed in the following order:
 - nodal auxiliary kernels, which set a single-component field nodal variable
 - nodal vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field nodal variable
 - nodal array auxiliary kernels, which set an array (# of components can be set as needed) field nodal variable
-- mortar nodal auxiliary kernels, which set a single-component field nodal variable defined in a mortar mesh
+- mortar nodal auxiliary kernels, which set a single-component field nodal variable defined on a mortar mesh
 - elemental auxiliary kernels, which set a single-component field elemental variable
 - elemental vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field elemental variable
 - elemental array auxiliary kernels, which set an array (# of components can be set as needed) field elemental variable
@@ -111,7 +111,8 @@ The distinction between a nodal and elemental variable is essentially that a nod
 freedom both conceptually and practically attached to the node `DofObject` in libMesh.
 
 !alert note
-Setup operations, such as the initial setup and the time step setup, are not currently ordered in execution groups.
+Setup operations are called on auxiliary kernels in dependency order, so a kernel is set up after the kernels it depends on. They do not follow the `execution_order_group` parameter or the execution order of the kernel categories (nodal, elemental, mortar, etc.).
+
 
 !alert note title=When in doubt...
 When you want to check in which order the auxiliary kernels and/or other objects are being executed, the

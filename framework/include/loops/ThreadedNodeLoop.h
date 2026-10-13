@@ -82,9 +82,9 @@ protected:
    *
    * @tparam T the object type
    * @param objs the vector with all the objects (should be pointers)
-   * @param objects_type the name of the type of objects. Defaults to the CPP object name
    * @param print_header whether to print a header about the timing of execution and the type of
    * objects
+   * @param line_prefix prefix to prepend to each line of the console output
    */
   template <typename T>
   void printExecutionOrdering(const std::vector<T *> & objs,
@@ -173,7 +173,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::printExecutionOrdering(
   std::vector<MooseObject *> moose_objs;
   moose_objs.reserve(objs.size());
   for (auto obj_ptr : objs)
-    moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
+    moose_objs.push_back(cast_ptr<MooseObject *>(obj_ptr));
   const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
   // Print string with a DBG prefix and with sufficient line breaks

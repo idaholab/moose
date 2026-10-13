@@ -12,7 +12,7 @@
     type = 'CSVDiff'
     input = 'build_array_variable_aux_from_aux.i'
     csvdiff = 'build_array_variable_aux_from_aux_out.csv'
-    requirement = 'The system shall support the copy the values of auxiliary variables into the component fields of an array variable, and order the execution of the auxkernels such that the array variable is not lagging compared to its component variables.'
+    requirement = 'The system shall support copying the values of auxiliary variables into the component fields of an array variable, and order the execution of the auxkernels such that the array variable is not lagging compared to its component variables.'
   []
 
   [error]
