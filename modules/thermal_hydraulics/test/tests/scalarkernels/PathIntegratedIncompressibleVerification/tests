@@ -229,16 +229,6 @@
     cli_args = 'ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp3/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical temperature of 3 segments.'
   []
-  [pipewall_ambient]
-    type = CSVDiff
-    input = pipewall_ambient.i
-    csvdiff = 'pipewall_ambient_out.csv'
-    design = 'PipeInnerWallTemperatureScalarKernel.md PipeOuterWallAmbientTemperatureScalarKernel.md'
-    requirement = 'Given a prescribed primary fluid temperature and ambient temperature, the pipe '
-                  'inner-wall and ambient-coupled outer-wall kernels must converge approximately '
-                  'to the analytical two-radial-node series-resistance steady-state wall '
-                  'temperatures.'
-  []
   [pipewall_ambientAD]
     type = CSVDiff
     input = ADpipewall_ambient.i
@@ -250,18 +240,6 @@
                   'pipe inner-wall and ambient-coupled outer-wall kernels must converge '
                   'approximately to the analytical two-radial-node series-resistance '
                   'steady-state wall temperatures.'
-  []
-  [pipewall_secondary]
-    type = CSVDiff
-    input = pipewall_secondary.i
-    csvdiff = 'pipewall_secondary_out.csv'
-    design = 'PipeInnerWallTemperatureScalarKernel.md '
-             'PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md'
-    requirement = 'Given prescribed primary- and secondary-side fluid temperatures, the pipe '
-                  'inner-wall and secondary-fluid outer-wall kernels must converge '
-                  'approximately to the analytical two-radial-node series-resistance '
-                  'steady-state wall temperatures of a double-pipe-style conjugate heat '
-                  'transfer arrangement.'
   []
   [pipewall_secondaryAD]
     type = CSVDiff
@@ -277,18 +255,6 @@
                   'steady-state wall temperatures of a double-pipe-style conjugate heat '
                   'transfer arrangement.'
   []
-  [pipewall_ambient_radiation]
-    type = CSVDiff
-    input = pipewall_ambient_radiation.i
-    csvdiff = 'pipewall_ambient_radiation_out.csv'
-    design = 'PipeInnerWallTemperatureScalarKernel.md PipeOuterWallAmbientTemperatureScalarKernel.md '
-             'PipeOuterWallRadiationScalarKernel.md'
-    requirement = 'Given a prescribed primary fluid temperature and ambient temperature, the '
-                  'pipe inner-wall, ambient-coupled outer-wall, and outer-wall radiation '
-                  'kernels together must converge approximately to the analytical '
-                  'steady-state wall temperatures of a wall losing heat to ambient through '
-                  'parallel convective and radiative paths.'
-  []
   [pipewall_ambient_radiationAD]
     type = CSVDiff
     input = ADpipewall_ambient_radiation.i
@@ -303,16 +269,6 @@
                   'kernels together must converge approximately to the analytical '
                   'steady-state wall temperatures of a wall losing heat to ambient through '
                   'parallel convective and radiative paths.'
-  []
-  [pipewall_heatflux]
-    type = CSVDiff
-    input = pipewall_heatflux.i
-    csvdiff = 'pipewall_heatflux_out.csv'
-    design = 'PipeInnerWallTemperatureScalarKernel.md PipeOuterWallHeatFluxScalarKernel.md'
-    requirement = 'Given a prescribed primary fluid temperature and applied outer-wall heat '
-                  'flux, the pipe inner-wall and outer-wall heat flux kernels must converge '
-                  'approximately to the analytical two-radial-node series-resistance '
-                  'steady-state wall temperatures.'
   []
   [pipewall_heatfluxAD]
     type = CSVDiff
