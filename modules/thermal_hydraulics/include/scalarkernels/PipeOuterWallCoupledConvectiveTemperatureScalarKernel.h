@@ -30,21 +30,21 @@ public:
 
 protected:
   virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tin[0]; }
-  virtual GenericReal<is_ad> convectiveResidual() const override;
+  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Fluid properties object for the secondary-side fluid
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate of the secondary-side fluid
-  const VariableValue & _m;
+  const GenericVariableValue<is_ad> & _m;
   /// Coupled temperature of the inner-surface wall node
-  const VariableValue & _Tin;
+  const GenericVariableValue<is_ad> & _Tin;
   /// Coupled secondary-side fluid temperature adjacent to this wall node
-  const VariableValue & _Tf;
+  const GenericVariableValue<is_ad> & _Tf;
   /// Coupled secondary-side fluid temperature adjacent to the upstream wall node
-  const VariableValue & _Tfup;
+  const GenericVariableValue<is_ad> & _Tfup;
   /// Coupled secondary-side fluid temperature adjacent to the downstream wall node
-  const VariableValue & _Tfdown;
+  const GenericVariableValue<is_ad> & _Tfdown;
   /// Secondary-side system reference pressure
   const Moose::Functor<GenericReal<is_ad>> & _Pref;
   /// Cross-sectional area of the secondary-side flow channel adjacent to this wall node

@@ -11,6 +11,7 @@
 
 #include "FunctorInterface.h"
 #include "ThermalSolidProperties.h"
+#include "PhysicalConstants.h"
 
 registerMooseObject("ThermalHydraulicsApp", PipeOuterWallRadiationScalarKernel);
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallRadiationScalarKernel);
@@ -23,10 +24,7 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::validParams()
   params += FunctorInterface::validParams();
   params.addClassDescription(
       "Adds a radiative heat transfer term, exchanged with an ambient/surrounding "
-      "environment, to the outer-surface radial node of a pipe wall. This kernel is meant to "
-      "be added alongside another scalar kernel (such as "
-      "PipeOuterWallAmbientTemperatureScalarKernel) acting on the same scalar variable, "
-      "analogous to how ODETimeDerivative supplies the time-derivative term.");
+      "environment, to the outer-surface radial node of a pipe wall.");
   params.addParam<bool>(
       "is_implicit",
       false,
@@ -41,7 +39,9 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::validParams()
   params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor");
   params.addParam<MooseFunctorName>(
       "scale", 1.0, "Functor by which to scale the radiative heat transfer term");
-  params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "Stefan-Boltzmann constant");
+  params.addParam<Real>("stefan_boltzmann_constant",
+                        PhysicalConstants::stefan_boltzmann_constant,
+                        "Stefan-Boltzmann constant");
 
   return params;
 }
@@ -67,23 +67,23 @@ template <bool is_ad>
 GenericReal<is_ad>
 PipeOuterWallRadiationScalarKernelTempl<is_ad>::computeQpResidual()
 {
-  const Moose::ElemArg qp = Moose::ElemArg();
+  const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
-  const auto A = _area(qp, state);
+  const auto A = _area(elem_arg, state);
   const auto cp = _sp.cp_from_T(Base::_u[i]);
   const auto rho = _sp.rho_from_T(Base::_u[i]);
 
-  const auto scale = _scale(qp, state);
-  const auto emissivity = _emissivity(qp, state);
-  const auto view_factor = _view_factor(qp, state);
+  const auto scale = _scale(elem_arg, state);
+  const auto emissivity = _emissivity(elem_arg, state);
+  const auto view_factor = _view_factor(elem_arg, state);
   const auto T4 = pow(Base::_u[i], 4);
-  const auto T4inf = pow(_T_ambient(qp, state), 4);
+  const auto T4inf = pow(_T_ambient(elem_arg, state), 4);
 
   // Radiative heat transfer with the ambient/surrounding environment
   const auto q_radiation =
-      _sigma * scale * emissivity * view_factor * _perimeter(qp, state) * (T4inf - T4);
+      _sigma * scale * emissivity * view_factor * _perimeter(elem_arg, state) * (T4inf - T4);
 
   return -q_radiation / A / rho / cp;
 }
@@ -94,21 +94,21 @@ PipeOuterWallRadiationScalarKernelTempl<is_ad>::computeQpJacobian()
 {
   if constexpr (!is_ad)
   {
-    const Moose::ElemArg qp = Moose::ElemArg();
+    const Moose::ElemArg elem_arg = Moose::ElemArg();
     const int i = 0;
     const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
-    const auto A = _area(qp, state);
+    const auto A = _area(elem_arg, state);
     const auto cp = _sp.cp_from_T(Base::_u[i]);
     const auto rho = _sp.rho_from_T(Base::_u[i]);
 
-    const auto scale = _scale(qp, state);
-    const auto emissivity = _emissivity(qp, state);
-    const auto view_factor = _view_factor(qp, state);
+    const auto scale = _scale(elem_arg, state);
+    const auto emissivity = _emissivity(elem_arg, state);
+    const auto view_factor = _view_factor(elem_arg, state);
 
     // Radiative heat transfer with the ambient/surrounding environment
     const auto q_radiation = -4.0 * _sigma * scale * emissivity * view_factor *
-                             _perimeter(qp, state) * pow(Base::_u[i], 3);
+                             _perimeter(elem_arg, state) * pow(Base::_u[i], 3);
 
     return -q_radiation / A / rho / cp;
   }

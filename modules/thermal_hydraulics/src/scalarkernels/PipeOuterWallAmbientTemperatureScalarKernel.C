@@ -39,7 +39,7 @@ template <bool is_ad>
 PipeOuterWallAmbientTemperatureScalarKernelTempl<
     is_ad>::PipeOuterWallAmbientTemperatureScalarKernelTempl(const InputParameters & parameters)
   : Base(parameters),
-    _Tin(ScalarCoupleable::coupledScalarValue("inner_wall_temperature")),
+    _Tin(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inner_wall_temperature")),
     _T_ambient(this->template getFunctor<GenericReal<is_ad>>("T_ambient")),
     _htc_ambient(this->template getFunctor<GenericReal<is_ad>>("htc_ambient")),
     _ambient_perimeter(this->template getFunctor<GenericReal<is_ad>>("ambient_perimeter"))
@@ -48,14 +48,14 @@ PipeOuterWallAmbientTemperatureScalarKernelTempl<
 
 template <bool is_ad>
 GenericReal<is_ad>
-PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveResidual() const
+PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
 {
-  const Moose::ElemArg qp = Moose::ElemArg();
+  const Moose::ElemArg elem_arg = Moose::ElemArg();
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
   // Convective heat transfer with the ambient environment
-  return _htc_ambient(qp, state) * _ambient_perimeter(qp, state) *
-         (_T_ambient(qp, state) - Base::_u[0]);
+  return _htc_ambient(elem_arg, state) * _ambient_perimeter(elem_arg, state) *
+         (_T_ambient(elem_arg, state) - Base::_u[0]);
 }
 
 template <bool is_ad>
@@ -64,11 +64,11 @@ PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() co
 {
   if constexpr (!is_ad)
   {
-    const Moose::ElemArg qp = Moose::ElemArg();
+    const Moose::ElemArg elem_arg = Moose::ElemArg();
     const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
     // Convective heat transfer with the ambient environment
-    return -_htc_ambient(qp, state) * _ambient_perimeter(qp, state);
+    return -_htc_ambient(elem_arg, state) * _ambient_perimeter(elem_arg, state);
   }
   else
   {

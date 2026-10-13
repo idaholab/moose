@@ -28,11 +28,11 @@ public:
 
 protected:
   virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tin[0]; }
-  virtual GenericReal<is_ad> convectiveResidual() const override;
+  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Coupled temperature of the inner-surface wall node
-  const VariableValue & _Tin;
+  const GenericVariableValue<is_ad> & _Tin;
   /// Ambient temperature functor
   const Moose::Functor<GenericReal<is_ad>> & _T_ambient;
   /// Ambient heat transfer coefficient functor

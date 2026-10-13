@@ -38,7 +38,7 @@ template <bool is_ad>
 PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::PipeOuterWallHeatFluxScalarKernelTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    _Tin(ScalarCoupleable::coupledScalarValue("inner_wall_temperature")),
+    _Tin(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inner_wall_temperature")),
     _heat_flux(this->template getFunctor<GenericReal<is_ad>>("heat_flux")),
     _heated_perimeter(this->template getFunctor<GenericReal<is_ad>>("heated_perimeter"))
 {
@@ -46,13 +46,13 @@ PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::PipeOuterWallHeatFluxScalarKernel
 
 template <bool is_ad>
 GenericReal<is_ad>
-PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::convectiveResidual() const
+PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
 {
-  const Moose::ElemArg qp = Moose::ElemArg();
+  const Moose::ElemArg elem_arg = Moose::ElemArg();
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
   // Prescribed heat flux applied to this node, positive into the wall
-  return _heat_flux(qp, state) * _heated_perimeter(qp, state);
+  return _heat_flux(elem_arg, state) * _heated_perimeter(elem_arg, state);
 }
 
 template <bool is_ad>
