@@ -254,3 +254,36 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, transportVolumeDependentSecondary
 
   Moose::_throw_on_warning = original_throw_on_warning;
 }
+
+/**
+ * Verify the mass fraction derivatives for a mixture of three components, where the secondary
+ * mass fractions are independent and the primary mass fraction is 1 - sum of the others
+ */
+TEST_F(IdealRealGasMixtureFluidPropertiesTest, threeComponents)
+{
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
+
+  {
+    InputParameters params = _factory.getValidParams("IdealGasFluidProperties");
+    params.set<Real>("gamma") = 1.67;
+    params.set<Real>("molar_mass") = 0.039948;
+    _fe_problem->addUserObject("IdealGasFluidProperties", "fp_argon", params);
+  }
+  InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
+  params.set<UserObjectName>("fp_primary") = "fp_steam";
+  params.set<std::vector<UserObjectName>>("fp_secondary") = {"fp_nitrogen", "fp_argon"};
+  params.set<bool>("allow_imperfect_jacobians") = true;
+  _fe_problem->addUserObject("IdealRealGasMixtureFluidProperties", "fp_mix3", params);
+  const auto & fp_mix3 = _fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>("fp_mix3");
+
+  const Real T = 400.0;
+  const Real v = 1.1;
+  const std::vector<Real> x = {0.3, 0.2};
+
+  VAPOR_MIX_DERIV_TEST(fp_mix3.p_from_T_v, T, v, x, REL_TOL_DERIVATIVE);
+  VAPOR_MIX_DERIV_TEST(fp_mix3.e_from_T_v, T, v, x, REL_TOL_DERIVATIVE);
+  VAPOR_MIX_DERIV_TEST(fp_mix3.s_from_T_v, T, v, x, REL_TOL_DERIVATIVE);
+
+  Moose::_throw_on_warning = original_throw_on_warning;
+}

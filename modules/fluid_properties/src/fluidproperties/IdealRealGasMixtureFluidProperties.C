@@ -132,19 +132,8 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
     {                                                                                              \
       dy_dx[i] = y_sec[i] - x[i] * dy_dv_sec[i] * v / (x[i] * x[i]);                               \
-      for (unsigned int j = 0; j < _n_secondary_vapors; j++)                                       \
-      {                                                                                            \
-        if (j == i)                                                                                \
-          continue;                                                                                \
-        if (_n_secondary_vapors > 1)                                                               \
-          imperfectJacobianMessage(                                                                \
-              "The mass fraction derivatives in the following "                                    \
-              "function have not been tested for mixtures of 3 or more components:\n\n",           \
-              __PRETTY_FUNCTION__);                                                                \
-        const Real dxj_dxi = 0;                                                                    \
-        dy_dx[i] += dxj_dxi * y_sec[j] - x[j] * dy_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;        \
-      }                                                                                            \
-      const Real dx_primary_dxi = -x_primary / (1. - x[i]);                                        \
+      /* the secondary mass fractions are independent and x_primary = 1 - sum_j x_j */             \
+      const Real dx_primary_dxi = -1.0;                                                            \
       dy_dx[i] += dx_primary_dxi * y_primary -                                                     \
                   x_primary * dy_dv_primary * v / (x_primary * x_primary) * dx_primary_dxi;        \
     }                                                                                              \
@@ -547,7 +536,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
   dp_dv = dp_dv_primary / x_primary;
 
   // get the partial pressures and their derivatives first
-  Real p_sec, dp_dT_sec, dxj_dxi;
+  Real p_sec, dp_dT_sec;
   std::vector<Real> dp_dv_sec(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
@@ -562,23 +551,9 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     dp_dx[i] = -dp_dv_sec[i] * v / (x[i] * x[i]);
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j == i)
-        continue;
-      // Note: this was previously as follows, but we were unable to understand
-      // why and this is not currently tested (requires 3 or more components in
-      // the mixture):
-      // dxj_dxi = -x[j] / (1. - x[i]);
-      if (_n_secondary_vapors > 1)
-        imperfectJacobianMessage(
-            "The mass fraction derivatives in the following "
-            "function have not been tested for mixtures of 3 or more components:\n\n",
-            __PRETTY_FUNCTION__);
-      dxj_dxi = 0;
-      dp_dx[i] += -dp_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;
-    }
-    dp_dx[i] += -dp_dv_primary * v / (x_primary * x_primary) * (-x_primary / (1. - x[i]));
+    // the secondary mass fractions are independent and x_primary = 1 - sum_j x_j
+    const Real dx_primary_dxi = -1.0;
+    dp_dx[i] += -dp_dv_primary * v / (x_primary * x_primary) * dx_primary_dxi;
   }
 }
 
