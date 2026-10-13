@@ -35,7 +35,8 @@ CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 template <bool is_ad>
 CoupledPressureIncompressibleMomentumSPScalarKernelTempl<is_ad>::
     CoupledPressureIncompressibleMomentumSPScalarKernelTempl(const InputParameters & parameters)
-  : Base(parameters), _mc(ScalarCoupleable::coupledScalarValue("coupled_mass_flow_rate"))
+  : Base(parameters),
+    _mc(ScalarCoupleable::coupledGenericScalarValue<is_ad>("coupled_mass_flow_rate"))
 {
 }
 
