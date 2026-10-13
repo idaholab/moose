@@ -94,7 +94,7 @@ for some unique set of degrees of freedom $\{V_i\}$. We shall also wish to restr
 
 To do this, we first identify a 'cut' surface $\Gamma_c$ of the toroidal conductor that is required to make it simply connected.
 Next, we define a one element wide 'transition' region $\Omega_t \subset \Omega_c$
-on one side of the cut surface, using an `MFEMCutTransitionSubMesh` object, comprised of all
+on one side of the cut surface, using an `MFEMTransitionSubMesh` object, comprised of all
 elements with at least one vertex lying on the cut surface that lie on one side of the cut.
 
 Next, to enforce $\vec \nabla \times \vec E_{ext} =0$ in this region, we define a scalar field variable $v$ defined on a (nodal) $H^1$ conforming finite element space on this submesh such that $\vec E_{ext} = -\vec \nabla v$:
