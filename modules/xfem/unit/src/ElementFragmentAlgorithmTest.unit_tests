@@ -1,0 +1,15 @@
+[Tests]
+  design = 'XFEM/index.md'
+  issues = '#32779'
+
+  [duplicate_embedded_node_reuse_on_shared_edge]
+    type = GoogleTest
+    unit_test = ElementFragmentAlgorithm.duplicateEmbeddedNodeReuseOnSharedEdge
+    requirement = 'The system shall reuse the existing embedded node, and keep a single cut, when two faces of a 3D element cut the same physical edge at the same position with different embedded nodes.'
+  []
+  [duplicate_embedded_node_reuse_across_neighbor_propagation]
+    type = GoogleTest
+    unit_test = ElementFragmentAlgorithm.duplicateEmbeddedNodeReuseAcrossNeighborPropagation
+    requirement = 'The system shall reuse the existing embedded node of a neighboring 3D element, and keep a single cut on each copy of the shared edge, when a cut with a different embedded node at the same position propagates across an element face.'
+  []
+[]

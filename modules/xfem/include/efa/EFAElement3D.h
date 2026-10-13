@@ -39,65 +39,68 @@ private:
 
 public:
   // override virtual methods in base class
-  virtual unsigned int numFragments() const;
-  virtual bool isPartial() const;
-  virtual void getNonPhysicalNodes(std::set<EFANode *> & non_physical_nodes) const;
+  unsigned int numFragments() const override;
+  bool isPartial() const override;
+  void getNonPhysicalNodes(std::set<EFANode *> & non_physical_nodes) const override;
 
-  virtual void switchNode(EFANode * new_node, EFANode * old_node, bool descend_to_parent);
-  virtual void switchEmbeddedNode(EFANode * new_node, EFANode * old_node);
-  virtual void updateFragmentNode();
-  virtual void getMasterInfo(EFANode * node,
-                             std::vector<EFANode *> & master_nodes,
-                             std::vector<double> & master_weights) const;
-  virtual unsigned int numInteriorNodes() const;
+  void switchNode(EFANode * new_node, EFANode * old_node, bool descend_to_parent) override;
+  void switchEmbeddedNode(EFANode * new_node, EFANode * old_node) override;
+  void updateFragmentNode() override;
+  void getMasterInfo(EFANode * node,
+                     std::vector<EFANode *> & master_nodes,
+                     std::vector<double> & master_weights) const override;
+  unsigned int numInteriorNodes() const override;
 
   bool overlaysElement(const EFAElement3D * other_elem) const;
-  virtual unsigned int getNeighborIndex(const EFAElement * neighbor_elem) const;
+  unsigned int getNeighborIndex(const EFAElement * neighbor_elem) const override;
   virtual void getNeighborEdgeIndex(const EFAElement3D * neighbor_elem,
                                     unsigned int face_id,
                                     unsigned int edge_id,
                                     unsigned int & neigh_face_id,
                                     unsigned int & neigh_edge_id) const;
-  virtual void clearNeighbors();
-  virtual void setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap);
-  virtual void neighborSanityCheck() const;
+  void clearNeighbors() override;
+  void
+  setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap) override;
+  void neighborSanityCheck() const override;
 
-  virtual void initCrackTip(std::set<EFAElement *> & CrackTipElements);
-  virtual bool shouldDuplicateForCrackTip(const std::set<EFAElement *> & CrackTipElements);
-  virtual bool shouldDuplicateCrackTipSplitElement(const std::set<EFAElement *> & CrackTipElements);
-  virtual bool shouldDuplicateForPhantomCorner();
-  virtual bool willCrackTipExtend(std::vector<unsigned int> & split_neighbors) const;
-  virtual bool isCrackTipElement() const;
+  void initCrackTip(std::set<EFAElement *> & CrackTipElements) override;
+  bool shouldDuplicateForCrackTip(const std::set<EFAElement *> & CrackTipElements) override;
+  bool
+  shouldDuplicateCrackTipSplitElement(const std::set<EFAElement *> & CrackTipElements) override;
+  bool shouldDuplicateForPhantomCorner() override;
+  bool willCrackTipExtend(std::vector<unsigned int> & split_neighbors) const override;
+  bool isCrackTipElement() const override;
 
-  virtual unsigned int getNumCuts() const;
-  virtual bool isFinalCut() const;
-  virtual void updateFragments(const std::set<EFAElement *> & CrackTipElements,
-                               std::map<unsigned int, EFANode *> & EmbeddedNodes);
-  virtual void fragmentSanityCheck(unsigned int n_old_frag_faces,
-                                   unsigned int n_old_frag_cuts) const;
-  virtual void restoreFragment(const EFAElement * const from_elem);
+  unsigned int getNumCuts() const override;
+  bool isFinalCut() const override;
+  void prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                std::vector<EFANode *> & invalid_emb_out) override;
+  void purgeEmbeddedNodeReferences(EFANode * emb_node) override;
+  void updateFragments(const std::set<EFAElement *> & CrackTipElements,
+                       std::map<unsigned int, EFANode *> & EmbeddedNodes) override;
+  void fragmentSanityCheck(unsigned int n_old_frag_faces,
+                           unsigned int n_old_frag_cuts) const override;
+  void restoreFragment(const EFAElement * const from_elem) override;
 
-  virtual void createChild(const std::set<EFAElement *> & CrackTipElements,
-                           std::map<unsigned int, EFAElement *> & Elements,
-                           std::map<unsigned int, EFAElement *> & newChildElements,
-                           std::vector<EFAElement *> & ChildElements,
-                           std::vector<EFAElement *> & ParentElements,
-                           std::map<unsigned int, EFANode *> & TempNodes);
-  virtual void removePhantomEmbeddedNode();
-  virtual void
-  connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNodes,
-                   std::map<unsigned int, EFANode *> & TempNodes,
-                   std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap,
-                   bool merge_phantom_faces);
-  virtual void printElement(std::ostream & ostream) const;
+  void createChild(const std::set<EFAElement *> & CrackTipElements,
+                   std::map<unsigned int, EFAElement *> & Elements,
+                   std::map<unsigned int, EFAElement *> & newChildElements,
+                   std::vector<EFAElement *> & ChildElements,
+                   std::vector<EFAElement *> & ParentElements,
+                   std::map<unsigned int, EFANode *> & TempNodes) override;
+  void removePhantomEmbeddedNode() override;
+  void connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNodes,
+                        std::map<unsigned int, EFANode *> & TempNodes,
+                        std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap,
+                        bool merge_phantom_faces) override;
+  void printElement(std::ostream & ostream) const override;
 
   // EFAelement3D specific methods
   EFAFragment3D * getFragment(unsigned int frag_id) const;
   std::set<EFANode *> getFaceNodes(unsigned int face_id) const;
   bool getFaceNodeParametricCoordinates(EFANode * node, std::vector<double> & xi_3d) const;
   EFAVolumeNode * getInteriorNode(unsigned int interior_node_id) const;
-  void removeEmbeddedNode(EFANode * emb_node, bool remove_for_neighbor);
-
   unsigned int numFaces() const;
   void setFace(unsigned int face_id, EFAFace * face);
   void createFaces();
@@ -140,10 +143,16 @@ public:
   bool faceContainsTip(unsigned int face_id) const;
   bool fragmentFaceAlreadyCut(unsigned int ElemFaceID) const;
 
+  /**
+   * Add an intersection on edge edge_id of face face_id.
+   * @param embedded_node In/out: the embedded node to use for this intersection, or nullptr to
+   * create one.  It is updated when this method reconciles onto an embedded node that already
+   * exists on the edge, so that the caller does not keep propagating the discarded node.
+   */
   void addFaceEdgeCut(unsigned int face_id,
                       unsigned int edge_id,
                       double position,
-                      EFANode * embedded_node,
+                      EFANode *& embedded_node,
                       std::map<unsigned int, EFANode *> & EmbeddedNodes,
                       bool add_to_neighbor,
                       bool add_to_adjacent);
@@ -161,7 +170,6 @@ private:
                             unsigned int edge_id,
                             double position,
                             EFANode * from_node,
-                            EFANode * embedded_node,
                             EFANode *& local_embedded);
   void mapParametricCoordinateFrom2DTo3D(unsigned int face_id,
                                          std::vector<double> & xi_2d,

@@ -355,12 +355,25 @@ EFAElement3D::switchNode(EFANode * new_node, EFANode * old_node, bool descend_to
 void
 EFAElement3D::switchEmbeddedNode(EFANode * new_emb_node, EFANode * old_emb_node)
 {
+  // An embedded node created by an edge cut lives in the EFAEdge's intersection list, and
+  // EFAFace::switchNode() only descends into its edges when old_emb_node is one of the face's own
+  // nodes, so it is never reached through the faces alone.  Switch the edges explicitly;
+  // EFAElement2D::switchEmbeddedNode() gets this for free because a 2D element owns its edges.
   for (unsigned int i = 0; i < _num_faces; ++i)
+  {
     _faces[i]->switchNode(new_emb_node, old_emb_node);
+    for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+      _faces[i]->getEdge(j)->switchNode(new_emb_node, old_emb_node);
+  }
   for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
     _interior_nodes[i]->switchNode(new_emb_node, old_emb_node);
   for (unsigned int i = 0; i < _fragments.size(); ++i)
+  {
     _fragments[i]->switchNode(new_emb_node, old_emb_node);
+    for (unsigned int j = 0; j < _fragments[i]->numFaces(); ++j)
+      for (unsigned int k = 0; k < _fragments[i]->getFace(j)->numEdges(); ++k)
+        _fragments[i]->getFace(j)->getEdge(k)->switchNode(new_emb_node, old_emb_node);
+  }
 }
 
 void
@@ -842,9 +855,15 @@ EFAElement3D::isFinalCut() const
 }
 
 void
-EFAElement3D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
-                              std::map<unsigned int, EFANode *> & EmbeddedNodes)
+EFAElement3D::prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                       std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                       std::vector<EFANode *> & invalid_emb_out)
 {
+  // First-pass preparation: combine crack-tip faces and identify invalid embedded
+  // nodes.  The actual removal/free of the invalid nodes is deferred to a global
+  // sweep in the driver; see ElementFragmentAlgorithm::updatePhysicalLinksAndFragments
+  // for the contract.
+
   // combine the crack-tip faces in a fragment to a single intersected face
   std::set<EFAElement *>::iterator sit;
   sit = CrackTipElements.find(this);
@@ -856,10 +875,30 @@ EFAElement3D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
       EFAError("crack tip elem ", _id, " must have 1 fragment");
   }
 
-  // remove the inappropriate embedded nodes on interior faces
+  // identify (but do NOT remove) inappropriate embedded nodes on interior faces
   // (MUST DO THIS AFTER combine_tip_faces())
   if (_fragments.size() == 1)
-    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes);
+    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes, invalid_emb_out);
+}
+
+void
+EFAElement3D::purgeEmbeddedNodeReferences(EFANode * emb_node)
+{
+  // Strip all references to emb_node from this element's fragments and element
+  // faces. The driver iterates every element to clean long-range propagation
+  // (>1 hop from the element where the node was identified as invalid).
+  for (auto * fragment : _fragments)
+    fragment->removeEmbeddedNode(emb_node);
+  for (auto * face : _faces)
+    face->removeEmbeddedNode(emb_node);
+}
+
+void
+EFAElement3D::updateFragments(const std::set<EFAElement *> & /*CrackTipElements*/,
+                              std::map<unsigned int, EFANode *> & /*EmbeddedNodes*/)
+{
+  // Cleanup half (combine_tip_faces + removeInvalidEmbeddedNodes) has already run
+  // for every element in the prior prepareForFragmentUpdate() pass.
 
   // for an element with no fragment, create one fragment identical to the element
   if (_fragments.size() == 0)
@@ -1416,23 +1455,6 @@ EFAElement3D::getInteriorNode(unsigned int interior_node_id) const
     EFAError("interior_node_id out of bounds");
 }
 
-void
-EFAElement3D::removeEmbeddedNode(EFANode * emb_node, bool remove_for_neighbor)
-{
-  for (unsigned int i = 0; i < _fragments.size(); ++i)
-    _fragments[i]->removeEmbeddedNode(emb_node);
-
-  for (unsigned int i = 0; i < _faces.size(); ++i)
-    _faces[i]->removeEmbeddedNode(emb_node);
-
-  if (remove_for_neighbor)
-  {
-    for (unsigned int i = 0; i < numFaces(); ++i)
-      for (unsigned int j = 0; j < numFaceNeighbors(i); ++j)
-        getFaceNeighbor(i, j)->removeEmbeddedNode(emb_node, false);
-  }
-}
-
 unsigned int
 EFAElement3D::numFaces() const
 {
@@ -1986,7 +2008,7 @@ void
 EFAElement3D::addFaceEdgeCut(unsigned int face_id,
                              unsigned int edge_id,
                              double position,
-                             EFANode * embedded_node,
+                             EFANode *& embedded_node,
                              std::map<unsigned int, EFANode *> & EmbeddedNodes,
                              bool add_to_neighbor,
                              bool add_to_adjacent)
@@ -2010,15 +2032,17 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
   {
     unsigned int emb_id = cut_edge->getEmbeddedNodeIndex(position, edge_node1);
     EFANode * old_emb = cut_edge->getEmbeddedNode(emb_id);
-    if (embedded_node && embedded_node != old_emb)
-      EFAError("Attempting to add edge intersection when one already exists with different node.",
-               " elem: ",
-               _id,
-               " edge: ",
-               edge_id,
-               " position: ",
-               position);
+    // If the same physical edge point is rediscovered through a different face/neighbor path,
+    // reuse the existing embedded node on that edge instead of treating it as a contradictory cut.
+    // Hand this element's references over to the existing node first (mirrors
+    // checkNeighborFaceCut), then report the reconciliation back through embedded_node: an
+    // enclosing invocation would otherwise keep handing the discarded node to the adjacent face and
+    // to the face and edge neighbors, leaving one physical intersection represented by two
+    // different EFANodes.
+    if (local_embedded && local_embedded != old_emb)
+      switchEmbeddedNode(old_emb, local_embedded);
     local_embedded = old_emb;
+    embedded_node = old_emb;
     cut_exist = true;
   }
 
@@ -2026,9 +2050,8 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
       isPhysicalEdgeCut(face_id, edge_id, position))
   {
     // check if cut has already been added to the neighbor edges
-    checkNeighborFaceCut(face_id, edge_id, position, edge_node1, embedded_node, local_embedded);
-    checkNeighborFaceCut(
-        adj_face_id, adj_edge_id, position, edge_node1, embedded_node, local_embedded);
+    checkNeighborFaceCut(face_id, edge_id, position, edge_node1, local_embedded);
+    checkNeighborFaceCut(adj_face_id, adj_edge_id, position, edge_node1, local_embedded);
 
     if (!local_embedded) // need to create new embedded node
     {
@@ -2123,7 +2146,6 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
                                    unsigned int edge_id,
                                    double position,
                                    EFANode * from_node,
-                                   EFANode * embedded_node,
                                    EFANode *& local_embedded)
 {
   // N.B. this is important. We are checking if the corresponding edge of the neighbor face or of
@@ -2141,13 +2163,10 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
     {
       unsigned int emb_id = neigh_edge->getEmbeddedNodeIndex(position, from_node);
       EFANode * old_emb = neigh_edge->getEmbeddedNode(emb_id);
-
-      if (embedded_node && embedded_node != old_emb)
-        EFAError(
-            "attempting to add edge intersection when one already exists with different node.");
+      // The existing neighboring cut owns this physical intersection. Replace any references to
+      // a different caller-supplied node before using the existing node on the new edge copy.
       if (local_embedded && local_embedded != old_emb)
-        EFAError("attempting to assign contradictory pointer to local_embedded.");
-
+        switchEmbeddedNode(old_emb, local_embedded);
       local_embedded = old_emb;
     }
   } // en_iter
