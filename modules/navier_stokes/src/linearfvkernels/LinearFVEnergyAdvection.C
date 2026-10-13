@@ -46,6 +46,11 @@ LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
 
   if (!isParamValid("cp") && _advected_quantity == AdvectedQuantityEnum::TEMPERATURE)
     paramError("cp", "cp should be specified for temperature advection");
+
+  // The boundary contributions rely on the Rhie-Chow flux being oriented outward from this
+  // variable's cell, which only holds if the variable's one-sided faces are one-sided for the
+  // flow too.
+  _mass_flux_provider.checkBlocks(_var);
 }
 
 Real
