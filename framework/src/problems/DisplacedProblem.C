@@ -1552,14 +1552,12 @@ DisplacedProblem::UpdateDisplacedMeshThread::displaceNodesWithoutDofs()
 
       for (const Elem * const elem : _ref_mesh.getMesh().active_element_ptr_range())
       {
-        // libMesh's nodal_soln reads past the end of the element solution for SECOND order
-        // variables on PYRAMID18 (libMesh/libmesh#4598)
+        const auto node_indices = elem->node_index_range();
         if (!dof_map.variable(var_num).active_on_subdomain(elem->subdomain_id()) ||
-            elem->type() == PYRAMID18 ||
-            std::all_of(elem->node_ref_range().begin(),
-                        elem->node_ref_range().end(),
-                        [sys_num = sys_num, var_num](const Node & node)
-                        { return node.n_dofs(sys_num, var_num) > 0; }))
+            std::all_of(node_indices.begin(),
+                        node_indices.end(),
+                        [elem, sys_num = sys_num, var_num](const unsigned int n)
+                        { return elem->node_ref(n).n_dofs(sys_num, var_num) > 0; }))
           continue;
 
         // libMesh evaluates the element's displacement at nodes without degrees of freedom from

@@ -1,7 +1,7 @@
 # The quadratic displacement disp_z = a x (x + z) is represented exactly by SECOND order Lagrange
 # displacements. The displaced volume, 1 + a / 2, and the integral of z^4 over the displaced mesh,
-# 0.30722669047619 for a = 0.1, are therefore exact only if the face nodes of the TET14 elements,
-# which carry no SECOND order degrees of freedom, are displaced as well.
+# 0.30722669047619 for a = 0.1, are therefore exact only if the face nodes of the TET14 (or
+# PYRAMID18) elements, which carry no SECOND order degrees of freedom, are displaced as well.
 a = 0.1
 
 [Mesh]
