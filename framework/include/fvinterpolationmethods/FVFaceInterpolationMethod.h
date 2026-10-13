@@ -10,14 +10,13 @@
 #pragma once
 
 #include "FaceInfo.h"
-#include "FVTwoSidedFaceInterpolation.h"
 #include "MooseFunctor.h"
 
 /**
  * Abstract base class for interpolation methods that produce a scalar face
  * value from adjacent cell values.
  */
-class FVFaceInterpolationMethod : public FVTwoSidedFaceInterpolation
+class FVFaceInterpolationMethod
 {
 public:
   /**
@@ -27,9 +26,6 @@ public:
    * @param neighbor_value Neighbor-side scalar value.
    */
   virtual Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const = 0;
-
-  FaceValues
-  twoSidedInterpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const final;
 
   /**
    * Convenience overload that evaluates a scalar Moose functor at the adjacent cell centers and

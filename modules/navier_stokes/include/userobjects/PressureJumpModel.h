@@ -53,7 +53,7 @@ public:
   virtual Real computePressureJump(const FaceInfo & fi, Real face_mass_flux) const = 0;
 
   /**
-   * Return whether pressure reconstruction should use independent values from each face side.
+   * Return whether momentum advection should use independent values from each face side.
    * @param fi The face carrying the pressure jump
    */
   virtual bool useOneSidedReconstruction(const FaceInfo & fi) const = 0;
