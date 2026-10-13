@@ -83,7 +83,6 @@ template <bool is_ad>
 GenericReal<is_ad>
 PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpResidual()
 {
-  GenericReal<is_ad> wall_residual = 0;
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
@@ -124,7 +123,6 @@ PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpJacobian()
 {
   if constexpr (!is_ad)
   {
-    Real wall_jacob = 0;
     const Moose::ElemArg elem_arg = Moose::ElemArg();
     const int i = 0;
     const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
@@ -149,11 +147,7 @@ PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpJacobian()
     const auto q_axial = (-G_up - G_down) / _length(elem_arg, state);
     const auto q_convective = convectiveJacobian();
 
-    wall_jacob -= q_radial / A / rho / cp;
-    wall_jacob -= q_axial / A / rho / cp;
-    wall_jacob -= q_convective / A / rho / cp;
-
-    return wall_jacob;
+    return -(q_radial + q_axial + q_convective) / (A * rho * cp);
   }
   else
   {
