@@ -13,6 +13,7 @@
 #include "KokkosAssembly.h"
 #include "KokkosFESystem.h"
 #include "KokkosVariable.h"
+#include "KokkosConfiguration.h"
 
 namespace Moose::Kokkos
 {
@@ -251,21 +252,27 @@ public:
    * @param side The side index of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
+   * @param configuration The configuration on which the geometry is posed
    */
   KOKKOS_FUNCTION
   Datum(const ContiguousElementID elem,
         const unsigned int side,
         const Assembly & assembly,
-        const Array<FESystem> & systems);
+        const Array<FESystem> & systems,
+        const Configuration & configuration);
 
   /**
    * Constructor for node data
    * @param node The contiguous node ID of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
+   * @param configuration The configuration on which the geometry is posed
    */
   KOKKOS_FUNCTION
-  Datum(const ContiguousNodeID node, const Assembly & assembly, const Array<FESystem> & systems);
+  Datum(const ContiguousNodeID node,
+        const Assembly & assembly,
+        const Array<FESystem> & systems,
+        const Configuration & configuration);
 
   /**
    * Get the Kokkos assembly
@@ -331,7 +338,13 @@ public:
   KOKKOS_FUNCTION bool isNodalDefined(const Variable & var) const;
 
   /**
-   * Get the inverse of Jacobian matrix
+   * Get the configuration on which the geometry is posed
+   * @returns The configuration
+   */
+  KOKKOS_FUNCTION const Configuration & configuration() const { return _configuration; }
+
+  /**
+   * Get the inverse of Jacobian matrix of the map from the reference element to the configuration
    * | dxi/dx deta/dx dzeta/dx |
    * | dxi/dy deta/dy dzeta/dy |
    * | dxi/dz deta/dz dzeta/dz |
@@ -341,25 +354,62 @@ public:
   KOKKOS_FUNCTION const Real33 & dxi_dx(const unsigned int qp);
 
   /**
-   * Get the transformed Jacobian weight
+   * Get the transformed Jacobian weight on the configuration
    * @param qp The local quadrature point index
    * @returns The transformed Jacobian weights
    */
   KOKKOS_FUNCTION Real JxW(const unsigned int qp);
 
   /**
-   * Get the physical quadrature point coordinate
+   * Get the quadrature point coordinate on the configuration
    * @param qp The local quadrature point index
-   * @returns The physical quadrature point coordinate
+   * @returns The quadrature point coordinate
    */
   KOKKOS_FUNCTION Real3 q_point(const unsigned int qp);
 
   /**
-   * Get the normal vector on surface
+   * Get the inverse of the deformation gradient, the identity on the reference configuration
    * @param qp The local quadrature point index
-   * @returns The normal vector
+   * @returns The inverse of the deformation gradient
    */
-  KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
+  KOKKOS_FUNCTION const Real33 & F_inv(const unsigned int qp);
+
+  /**
+   * Get the gradient of the logarithm of the coordinate transform factor on the configuration,
+   * which enters the variation of the volume measure under a displacement
+   * @param qp The local quadrature point index
+   * @returns The gradient of the logarithm of the coordinate transform factor
+   */
+  KOKKOS_FUNCTION const Real3 & grad_log_coord(const unsigned int qp);
+
+  /**
+   * Get the gradient of a variable on the configuration, evaluated from its DOF values
+   * @param sys The system number of the variable
+   * @param var The variable number
+   * @param tag The vector tag
+   * @param qp The local quadrature point index
+   * @returns The gradient
+   */
+  KOKKOS_FUNCTION Real3 gradient(const unsigned int sys,
+                                 const unsigned int var,
+                                 const TagID tag,
+                                 const unsigned int qp);
+
+  /**
+   * Push a gradient with respect to the reference position forward to the configuration
+   * @param grad_X The gradient with respect to the reference position
+   * @param qp The local quadrature point index
+   * @returns The gradient on the configuration, F^{-T} grad_X
+   */
+  KOKKOS_FUNCTION Real3 pushForward(const Real3 & grad_X, const unsigned int qp);
+  /**
+   * Push the gradient of a vector field with respect to the reference position forward to the
+   * configuration
+   * @param grad_X The gradient with respect to the reference position, with rows of components
+   * @param qp The local quadrature point index
+   * @returns The gradient on the configuration, grad_X F^{-1}
+   */
+  KOKKOS_FUNCTION Real33 pushForward(const Real33 & grad_X, const unsigned int qp);
 
   /**
    * Set local parallelization option
@@ -383,7 +433,25 @@ public:
    */
   KOKKOS_FUNCTION unsigned int num_local_threads() const { return _num_local_threads; }
 
+  /**
+   * Set whether the hooks of an object are being differentiated with respect to the displacements
+   * of the current configuration. Derivatives with respect to the quadrature point position are
+   * not provided, so reading the quadrature point coordinates or normals in this state aborts.
+   * @param flag Whether the hooks are being differentiated with respect to the displacements
+   */
+  KOKKOS_FUNCTION void displacementVariation(const bool flag) { _displacement_variation = flag; }
+
 protected:
+  /**
+   * Get the outward unit normal vector on the configuration, which only framework classes provide
+   * to the objects they assemble
+   * @param qp The local quadrature point index
+   * @returns The normal vector
+   */
+  KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
+
+  friend class NormalAccessor;
+
   /**
    * Reference of the Kokkos assembly
    */
@@ -414,6 +482,11 @@ protected:
    */
   const dof_id_type _elem_property_idx = libMesh::DofObject::invalid_id;
 
+  /**
+   * Configuration on which the geometry is posed
+   */
+  const Configuration & _configuration;
+
 private:
   /**
    * Compute and cache the physical transformation data
@@ -434,7 +507,13 @@ private:
   Real _JxW;
   Real3 _xyz;
   Real3 _normal;
+  Real33 _F_inv;
+  Real3 _grad_log_coord;
   ///@}
+  /**
+   * Whether the hooks of an object are being differentiated with respect to the displacements
+   */
+  bool _displacement_variation = false;
   /**
    * Thread ID for local parallelization
    */
@@ -448,24 +527,28 @@ private:
 KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
                                     const unsigned int side,
                                     const Assembly & assembly,
-                                    const Array<FESystem> & systems)
+                                    const Array<FESystem> & systems,
+                                    const Configuration & configuration)
   : MeshDatum(elem, side, assembly.kokkosMesh()),
     _assembly(assembly),
     _systems(systems),
     _n_qps(!isSide() ? assembly.getNumQps(_elem) : assembly.getNumFaceQps(_elem, side)),
     _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
     _elem_property_idx(!isSide() ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
-                                 : assembly.getElemFacePropertyIndex(_elem, _side))
+                                 : assembly.getElemFacePropertyIndex(_elem, _side)),
+    _configuration(configuration)
 {
 }
 
 KOKKOS_FUNCTION inline Datum::Datum(const ContiguousNodeID node,
                                     const Assembly & assembly,
-                                    const Array<FESystem> & systems)
+                                    const Array<FESystem> & systems,
+                                    const Configuration & configuration)
   : MeshDatum(libMesh::DofObject::invalid_id, libMesh::invalid_uint, assembly.kokkosMesh()),
     _assembly(assembly),
     _systems(systems),
-    _node(node)
+    _node(node),
+    _configuration(configuration)
 {
 }
 
@@ -516,18 +599,96 @@ Datum::JxW(const unsigned int qp)
 KOKKOS_FUNCTION inline Real3
 Datum::q_point(const unsigned int qp)
 {
+  if (_displacement_variation)
+    ::Kokkos::abort("A Kokkos object posed on the current configuration read the quadrature point "
+                    "coordinates while its Jacobian with respect to the displacements was "
+                    "evaluated. Derivatives with respect to the position are not supported.");
+
   if (!isNodal())
     reinitTransform(qp);
   else
+  {
     _xyz = _assembly.kokkosMesh().getNodePoint(_node);
 
+    if (_configuration.displaced())
+    {
+      const auto & disp = _configuration.displacements();
+
+      for (unsigned int c = 0; c < disp.components(); ++c)
+      {
+        auto & sys = _systems[disp.sys(c)];
+        _xyz(c) +=
+            sys.getVectorDofValue(sys.getNodeLocalDofIndex(_node, 0, disp.var(c)), disp.tag());
+      }
+    }
+  }
+
   return _xyz;
+}
+
+KOKKOS_FUNCTION inline const Real33 &
+Datum::F_inv(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
+
+  return _F_inv;
+}
+
+KOKKOS_FUNCTION inline const Real3 &
+Datum::grad_log_coord(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
+
+  return _grad_log_coord;
+}
+
+KOKKOS_FUNCTION inline Real3
+Datum::gradient(const unsigned int sys,
+                const unsigned int var,
+                const TagID tag,
+                const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  auto & system = _systems[sys];
+  const auto fe = system.getFETypeID(var);
+  const auto n_dofs = _assembly.getNumDofs(_elem.type, fe);
+
+  Real3 grad = 0;
+
+  for (unsigned int i = 0; i < n_dofs; ++i)
+    grad += system.getVectorDofValue(system.getElemLocalDofIndex(_elem.id, i, var), tag) *
+            (!isSide() ? _assembly.getGradPhi(_elem.subdomain, _elem.type, fe)(i, qp)
+                       : _assembly.getGradPhiFace(_elem.subdomain, _elem.type, fe)(_side)(i, qp));
+
+  return dxi_dx(qp) * grad;
+}
+
+KOKKOS_FUNCTION inline Real3
+Datum::pushForward(const Real3 & grad_X, const unsigned int qp)
+{
+  return _configuration.displaced() ? F_inv(qp).transpose() * grad_X : grad_X;
+}
+
+KOKKOS_FUNCTION inline Real33
+Datum::pushForward(const Real33 & grad_X, const unsigned int qp)
+{
+  return _configuration.displaced() ? grad_X * F_inv(qp) : grad_X;
 }
 
 KOKKOS_FUNCTION inline Real3
 Datum::normals(const unsigned int qp)
 {
   KOKKOS_ASSERT(isSide());
+
+  if (_displacement_variation)
+    ::Kokkos::abort("A Kokkos object posed on the current configuration read the normals while "
+                    "its Jacobian with respect to the displacements was evaluated. Derivatives of "
+                    "the normals are not supported.");
 
   if (isSide())
     reinitTransform(qp);
@@ -550,8 +711,80 @@ Datum::reinitTransform(const unsigned int qp)
   else
     _assembly.computePhysicalMap(_elem, _side, qp, &_dxi_dx, &_JxW, &_xyz, &_normal);
 
+  _F_inv.identity();
+  _grad_log_coord = 0;
+
+  if (_configuration.displaced())
+  {
+    // Compose the deformation gradient F = I + grad_X u, evaluated from the reference map, into
+    // the map of the reference element to the current configuration
+    const auto & disp = _configuration.displacements();
+    const auto X = _xyz;
+
+    Real33 F;
+    F.identity();
+
+    for (unsigned int c = 0; c < disp.components(); ++c)
+    {
+      auto & sys = _systems[disp.sys(c)];
+      const auto var = disp.var(c);
+      const auto tag = disp.tag();
+
+      const auto grad_u = !isSide() ? sys.getVectorQpGrad(_elem, _qp_offset + qp, var, tag)
+                                    : sys.getVectorQpGradFace(_elem, _side, _dxi_dx, qp, var, tag);
+      const auto u = !isSide() ? sys.getVectorQpValue(_elem, _qp_offset + qp, var, tag)
+                               : sys.getVectorQpValueFace(_elem, _side, qp, var, tag);
+
+      for (unsigned int d = 0; d < 3; ++d)
+        F(c, d) += grad_u(d);
+
+      _xyz(c) += u;
+    }
+
+    _F_inv = F.inverse();
+
+    const auto F_inv_T = _F_inv.transpose();
+    const auto subdomain = _elem.subdomain;
+    const auto coord = _assembly.coordTransformFactor(subdomain, _xyz);
+
+    // The JxW of the reference map carries the coordinate transform factor at X
+    Real ratio = F.determinant() * coord / _assembly.coordTransformFactor(subdomain, X);
+
+    if (isSide())
+    {
+      const auto n = F_inv_T * _normal;
+      const auto norm = n.norm();
+
+      ratio *= norm;
+      _normal = (1 / norm) * n;
+    }
+
+    _dxi_dx = F_inv_T * _dxi_dx;
+    _JxW *= ratio;
+    _grad_log_coord = (1 / coord) * _assembly.coordTransformFactorGradient(subdomain, _xyz);
+  }
+
   _cached_qp = qp;
 }
+
+/**
+ * Accessor of the outward unit normal vector of a side on the configuration of a Datum. The
+ * framework owns the normals, and the base classes of side objects provide this accessor.
+ */
+class NormalAccessor
+{
+public:
+  /**
+   * Get the normal vector
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The normal vector
+   */
+  KOKKOS_FUNCTION Real3 operator()(Datum & datum, const unsigned int qp) const
+  {
+    return datum.normals(qp);
+  }
+};
 
 /**
  * The Kokkos object that holds thread-private data in the parallel operations of Kokkos kernels
@@ -560,6 +793,18 @@ class AssemblyDatum : public Datum
 {
 public:
   /**
+   * Value and gradient that replace those of the trial function, so that a Jacobian hook evaluates
+   * the derivative of its coefficient along a direction other than a shape function
+   */
+  struct TrialOverride
+  {
+    /// Replacement of the trial function value
+    Real phi;
+    /// Replacement of the trial function gradient on the configuration
+    Real3 grad_phi;
+  };
+
+  /**
    * Constructor for element and side data
    * @param elem The contiguous element ID of the current thread
    * @param side The side index of the current thread
@@ -567,6 +812,7 @@ public:
    * @param systems The Kokkos systems
    * @param ivar The Kokkos variable
    * @param jvar The coupled variable number
+   * @param configuration The configuration on which the geometry is posed
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
@@ -576,8 +822,9 @@ public:
                 const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
+                const Configuration & configuration,
                 const unsigned int comp = 0)
-    : Datum(elem, side, assembly, systems),
+    : Datum(elem, side, assembly, systems, configuration),
       _tag(ivar.tag()),
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
@@ -596,6 +843,7 @@ public:
    * @param systems The Kokkos systems
    * @param ivar The Kokkos variable
    * @param jvar The coupled variable number
+   * @param configuration The configuration on which the geometry is posed
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
@@ -604,8 +852,9 @@ public:
                 const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
+                const Configuration & configuration,
                 const unsigned int comp = 0)
-    : Datum(node, assembly, systems),
+    : Datum(node, assembly, systems, configuration),
       _tag(ivar.tag()),
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
@@ -675,6 +924,21 @@ public:
    * @returns Whether to compute derivatives
    */
   KOKKOS_FUNCTION bool do_derivatives() const { return _do_derivatives; }
+  /**
+   * Get the solution tag ID
+   * @returns The solution tag ID
+   */
+  KOKKOS_FUNCTION TagID tag() const { return _tag; }
+  /**
+   * Set the replacement of the trial function
+   * @param trial The replacement, or nullptr to restore the trial function
+   */
+  KOKKOS_FUNCTION void trialOverride(const TrialOverride * trial) { _trial_override = trial; }
+  /**
+   * Get the replacement of the trial function
+   * @returns The replacement, or nullptr if the trial function is not replaced
+   */
+  KOKKOS_FUNCTION const TrialOverride * trialOverride() const { return _trial_override; }
 
 protected:
   /**
@@ -701,6 +965,10 @@ protected:
    * Whether to compute derivatives for automatic differentiation (AD)
    */
   bool _do_derivatives = true;
+  /**
+   * Replacement of the trial function
+   */
+  const TrialOverride * _trial_override = nullptr;
 };
 
 } // namespace Moose::Kokkos

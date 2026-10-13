@@ -19,9 +19,7 @@ ResidualObject::validParams()
 {
   auto params = ::ResidualObject::validParams();
 
-  params.addCoupledVar("displacements",
-                       "The displacements defining the current configuration for objects "
-                       "that integrate over it");
+  addConfigurationParams(params);
 
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
@@ -59,6 +57,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     FESystemHolder(object),
     _var(object._var),
     _kokkos_var(object._kokkos_var),
+    _configuration(object._configuration),
     _thread(object._thread),
     _dimension(object._dimension),
     _t(object._t),

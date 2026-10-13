@@ -59,7 +59,9 @@ Kernel::computeJacobian()
     _jacobian_dispatcher->parallelFor(policy);
   }
 
-  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()))
+  // An object posed on the current configuration assembles its displacement Jacobian in the
+  // off-diagonal loop from its own hooks
+  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()) || _configuration.displaced())
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 

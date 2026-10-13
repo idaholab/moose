@@ -88,7 +88,7 @@
   [current_configuration]
     design = 'KokkosHeatConduction.md KokkosBodyForce.md'
     issues = '#33860'
-    requirement = 'The Kokkos system shall compute conduction and a volumetric source posed on the current configuration defined by coupled displacements'
+    requirement = 'The Kokkos system shall compute conduction, a volumetric source, and a boundary flux posed on the current configuration given by the mesh displacements'
     [solution]
       type = CSVDiff
       input = 'kokkos_current_configuration.i'
@@ -109,7 +109,7 @@
     [jacobian]
       type = PetscJacobianTester
       input = 'kokkos_current_configuration_jacobian.i'
-      detail = 'with an exact Jacobian, including the derivatives with respect to the displacements, in Cartesian coordinates, and'
+      detail = 'with an exact Jacobian, including the derivatives of the volume and side integrals with respect to the displacements, in Cartesian coordinates, and'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []

@@ -28,7 +28,7 @@ KokkosHeatConduction::validParams()
 }
 
 KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
-  : Moose::Kokkos::KernelGrad(parameters), _deformation(*this)
+  : Moose::Kokkos::KernelGrad(parameters)
 {
   _thermal_conductivity = getKokkosMaterialProperty<Real>("thermal_conductivity");
 

@@ -143,7 +143,8 @@ VectorKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kerne
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(),
+                      _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -161,7 +162,8 @@ VectorKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kerne
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(),
+                      _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -180,8 +182,13 @@ VectorKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(
-      elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      jvar,
+                      _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 

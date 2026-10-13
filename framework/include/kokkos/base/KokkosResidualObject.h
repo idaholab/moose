@@ -14,6 +14,7 @@
 #include "KokkosVariableValue.h"
 #include "KokkosADAssembly.h"
 #include "KokkosMaterialPropertyValue.h"
+#include "KokkosConfiguration.h"
 
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
@@ -93,6 +94,10 @@ protected:
    * Kokkos variable
    */
   Variable _kokkos_var;
+  /**
+   * Configuration on which the weak form is posed
+   */
+  Configuration _configuration;
   /**
    * Kokkos thread object
    */

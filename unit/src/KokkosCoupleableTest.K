@@ -96,14 +96,16 @@ public:
   {
     const auto & elemental_primary = _elemental_value.variable();
     const auto & nodal_primary = _nodal_value.variable();
+    const Moose::Kokkos::Configuration configuration;
     AssemblyDatum elem_datum(0,
                              libMesh::invalid_uint,
                              kokkosAssembly(),
                              kokkosSystems(),
                              elemental_primary,
-                             elemental_primary.var());
+                             elemental_primary.var(),
+                             configuration);
     AssemblyDatum node_datum(
-        0, kokkosAssembly(), kokkosSystems(), nodal_primary, nodal_primary.var());
+        0, kokkosAssembly(), kokkosSystems(), nodal_primary, nodal_primary.var(), configuration);
 
     _results(0) = _elemental_value(elem_datum, 0);
     const auto gradient = _elemental_gradient(elem_datum, 0);

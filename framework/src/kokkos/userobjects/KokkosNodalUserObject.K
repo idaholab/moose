@@ -31,6 +31,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
     ::TransientInterface(this),
     ::RandomInterface(parameters, _fe_problem, _tid, false)
 {
+  _configuration = Configuration(*this);
 }
 
 NodalUserObject::NodalUserObject(const NodalUserObject & object)

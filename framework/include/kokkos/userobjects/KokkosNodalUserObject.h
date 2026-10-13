@@ -59,7 +59,7 @@ NodalUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & obj
 {
   auto node = _bnd ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
 
-  Datum datum(node, kokkosAssembly(), kokkosSystems());
+  Datum datum(node, kokkosAssembly(), kokkosSystems(), _configuration);
 
   object.template execute<Derived>(datum);
 }

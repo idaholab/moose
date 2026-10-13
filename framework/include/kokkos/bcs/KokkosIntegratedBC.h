@@ -141,8 +141,13 @@ IntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) c
 {
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -155,8 +160,13 @@ IntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) c
 {
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -175,7 +185,8 @@ IntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -194,7 +205,8 @@ IntegratedBC::operator()(OffDiagJacobianScalarLoop, const ThreadID tid, const De
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
 
   bc.computeOffDiagJacobianScalarInternal(bc, datum);
 }

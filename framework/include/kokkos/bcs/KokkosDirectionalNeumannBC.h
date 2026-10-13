@@ -26,7 +26,7 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
   {
-    return -_value * datum.normals(qp);
+    return -_value * _normals(datum, qp);
   }
 
 protected:
