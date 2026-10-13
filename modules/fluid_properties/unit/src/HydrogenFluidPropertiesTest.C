@@ -97,7 +97,9 @@ TEST_F(HydrogenFluidPropertiesTest, viscosity)
 {
   const Real tol = 10.0 * REL_TOL_EXTERNAL_VALUE;
 
-  REL_TEST(_fp->mu_from_rho_T(0.0, 298.15), 8.8997e-6, tol);
+  // The dilute-gas limit does not depend on the density correlation, so it can be
+  // compared at the standard tolerance
+  REL_TEST(_fp->mu_from_rho_T(0.0, 298.15), 8.8997e-6, REL_TOL_EXTERNAL_VALUE);
   REL_TEST(_fp->mu_from_rho_T(0.68911, 350.0), 9.9645e-6, tol);
   REL_TEST(_fp->mu_from_rho_T(6.5764, 350.0), 1.0147e-5, tol);
 
