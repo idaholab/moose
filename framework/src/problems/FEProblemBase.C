@@ -157,7 +157,7 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 }
 
 bool
-should_solve_for_spline_dofs(const libMesh::MeshBase & mesh)
+shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
 {
   // With new libMesh, the most accurate thing to do is always solve
   // for spline DoFs when we have them.  With older libMesh, there's a
@@ -3967,7 +3967,7 @@ FEProblemBase::projectSolution()
   }
 
   // Spline node ICs may need to be evaluated indirectly.
-  bool solve_for_spline_dofs = should_solve_for_spline_dofs(_mesh.getMesh());
+  bool solve_for_spline_dofs = shouldSolveForSplineDofs(_mesh.getMesh());
 
   for (auto & sys : _solver_systems)
   {
@@ -4055,7 +4055,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(
   }
 
   // Spline node ICs may need to be evaluated indirectly.
-  bool solve_for_spline_dofs = should_solve_for_spline_dofs(_mesh.getMesh());
+  bool solve_for_spline_dofs = shouldSolveForSplineDofs(_mesh.getMesh());
 
   for (auto & nl : _nl)
   {
