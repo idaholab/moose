@@ -87,9 +87,9 @@ CreateExecutionerAction::setupAutoPreconditioning()
   // override.
   if (preconditioned_nl_sys.empty())
   {
-    const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
-    if (!((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON")) &&
-        !((solve_type.find("LINEAR") != solve_type.items().end()) && (solve_type == "LINEAR")))
+    // Compare as a string because the eigenvalue solve type enumeration has no LINEAR item
+    const std::string & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
+    if (solve_type != "NEWTON" && solve_type != "LINEAR")
       return;
   }
 

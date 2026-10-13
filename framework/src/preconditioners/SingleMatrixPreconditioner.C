@@ -49,9 +49,9 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
   const auto & libmesh_system = nl.system();
   auto cm = std::make_unique<CouplingMatrix>(n_vars);
 
-  // NEWTON and LINEAR solves assume the exact Jacobian, so default to the full coupling unless the
-  // user specified the coupling themselves. This matches the preconditioner that is created
-  // automatically when there is no [Preconditioning] block.
+  // NEWTON and LINEAR solves are best solved with the exact Jacobian, so default to the full
+  // coupling unless the user specified the coupling themselves. This matches the preconditioner
+  // that is created automatically when there is no [Preconditioning] block.
   const auto solve_type = _fe_problem.solverParams(_nl_sys_num)._type;
   const bool full = getParam<bool>("full") ||
                     (!isParamSetByUser("full") && !isParamValid("off_diag_row") &&
