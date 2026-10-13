@@ -21,6 +21,10 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
                                                  AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real precomputeQpPositionJacobianValue(const Moose::Kokkos::Real3 & dx,
+                                                         const unsigned int qp,
+                                                         AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
@@ -29,4 +33,13 @@ KokkosXYBodyForce::precomputeQpResidualValue(const unsigned int qp, AssemblyDatu
 {
   return (datum.q_point(qp)(0) + datum.q_point(qp)(1)) *
          KokkosBodyForce::precomputeQpResidualValue<Derived>(qp, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosXYBodyForce::precomputeQpPositionJacobianValue(const Moose::Kokkos::Real3 & dx,
+                                                     const unsigned int qp,
+                                                     AssemblyDatum & datum) const
+{
+  return (dx(0) + dx(1)) * KokkosBodyForce::precomputeQpResidualValue<Derived>(qp, datum);
 }
