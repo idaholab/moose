@@ -175,6 +175,9 @@ shear_traction = 2
     rho = ${rho}
     u = vel_x
     v = vel_y
+    # The two-term boundary pressure expansion leaves an O(1) pressure error in the boundary
+    # cells on this nonorthogonal mesh, which limits the L2 pressure slope to about 0.5.
+    use_two_term_expansion = false
   []
 []
 
