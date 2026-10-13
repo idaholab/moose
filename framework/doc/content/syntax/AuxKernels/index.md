@@ -101,7 +101,7 @@ Within a group, auxiliary kernels are executed in the following order:
 - nodal auxiliary kernels, which set a single-component field nodal variable
 - nodal vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field nodal variable
 - nodal array auxiliary kernels, which set an array (# of components can be set as needed) field nodal variable
-- mortar nodal auxiliary kernels, which set a single-component field nodal variable defined in a mortar mesh
+- mortar nodal auxiliary kernels, which set a single-component field nodal variable defined on a mortar mesh
 - elemental auxiliary kernels, which set a single-component field elemental variable
 - elemental vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field elemental variable
 - elemental array auxiliary kernels, which set an array (# of components can be set as needed) field elemental variable

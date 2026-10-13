@@ -173,7 +173,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::printExecutionOrdering(
   std::vector<MooseObject *> moose_objs;
   moose_objs.reserve(objs.size());
   for (auto obj_ptr : objs)
-    moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
+    moose_objs.push_back(cast_ptr<MooseObject *>(obj_ptr));
   const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
   // Print string with a DBG prefix and with sufficient line breaks
