@@ -55,6 +55,29 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMHypreAMSInteriorNodes]
+    design = 'MFEMHypreAMS.md'
+    issues = '#33625'
+    type = CSVDiff
+    input = magnetostatic.i
+    # Sample the gauge-invariant b_field rather than a_field. The line is skewed so that no sample
+    # point lies on an element face, where the tangential H(div) components are discontinuous.
+    cli_args = 'Solvers/ams/singular=false '
+               'Solvers/ams/block="1 2" '
+               'Solvers/ams/projection_frequency=1 '
+               'VectorPostprocessors/line_sample/variable=b_field '
+               'VectorPostprocessors/line_sample/start_point="0.013 0.47 -0.43" '
+               'VectorPostprocessors/line_sample/end_point="0.027 0.53 0.43" '
+               'Outputs/CSV/file_base=OutputData/hypreams_interior_nodes '
+               'Outputs/inactive=ParaViewDataCollection'
+    csvdiff = 'OutputData/hypreams_interior_nodes_line_sample_0001.csv'
+    requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
+                  'preconditioner whose interior-node correction is restricted to a subset of '
+                  'subdomains and whose compatible-subspace projection frequency is set.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
