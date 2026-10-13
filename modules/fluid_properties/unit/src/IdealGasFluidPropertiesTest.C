@@ -112,3 +112,18 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->molarMass(), _molar_mass, rel_tol_consistency);
 }
+
+/**
+ * Verify the Gibbs free energy against its definition g = h - T s, with a nonzero reference
+ * internal energy
+ */
+TEST_F(IdealGasFluidPropertiesTest, gibbsFreeEnergy)
+{
+  const Real T = 350.0;
+  const Real p = 2.0e5;
+  const Real v = _fp->v_from_p_T(p, T);
+  const Real e = _fp->e_from_p_T(p, T);
+  REL_TEST(_fp->g_from_v_e(v, e),
+           _fp->h_from_p_T(p, T) - T * _fp->s_from_p_T(p, T),
+           REL_TOL_CONSISTENCY);
+}

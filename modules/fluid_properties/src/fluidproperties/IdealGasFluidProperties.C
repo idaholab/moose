@@ -641,7 +641,8 @@ IdealGasFluidProperties::g_from_v_e(Real v, Real e) const
   const Real p = p_from_v_e(v, e);
   const Real T = T_from_v_e(v, e);
 
-  return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0));
+  return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0)) +
+         _e_ref;
 }
 
 Real
