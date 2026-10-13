@@ -185,6 +185,27 @@ shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
   return returnval;
 }
 
+void
+solveForSplineDofs(SystemBase & moose_sys)
+{
+  libMesh::System & sys = moose_sys.system();
+  libMesh::EquationSystems & es = sys.get_equation_systems();
+
+  // Old libMesh defaults to a *linear* solver tolerance here, which
+  // turns out to be enough in some cases (where a decent
+  // preconditioner converges us way past it) but which in parallel is
+  // too loose for a solve where we're not taking multiple
+  // quasi-Newton steps.
+  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
+  es.parameters.set<Real>("linear solver tolerance") =
+      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+
+  sys.solve_for_unconstrained_dofs(moose_sys.solution());
+  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
+
+  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
+}
+
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -3973,19 +3994,13 @@ FEProblemBase::projectSolution()
   {
     sys->solution().close();
     if (solve_for_spline_dofs)
-    {
-      sys->system().solve_for_unconstrained_dofs(sys->solution());
-      sys->system().get_dof_map().enforce_constraints_exactly(sys->system(), &sys->solution());
-    }
+      solveForSplineDofs(*sys);
     sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
   }
 
   _aux->solution().close();
   if (solve_for_spline_dofs)
-  {
-    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
-    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
-  }
+    solveForSplineDofs(*_aux);
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
@@ -4061,19 +4076,13 @@ FEProblemBase::projectInitialConditionOnCustomRange(
   {
     nl->solution().close();
     if (solve_for_spline_dofs)
-    {
-      nl->system().solve_for_unconstrained_dofs(nl->solution());
-      nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), &nl->solution());
-    }
+      solveForSplineDofs(*nl);
     nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
   }
 
   _aux->solution().close();
   if (solve_for_spline_dofs)
-  {
-    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
-    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
-  }
+    solveForSplineDofs(*_aux);
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
