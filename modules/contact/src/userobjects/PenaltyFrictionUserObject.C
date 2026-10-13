@@ -120,6 +120,21 @@ PenaltyFrictionUserObject::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the maps below hold the discarded attempt's values and keys. Restore the
+  // state saved at the start of the first attempt so the retry starts from the accepted state.
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_friction;
+  _t_step_old_friction = _fe_problem.timeStep();
+  if (retried_timestep)
+  {
+    _dof_to_step_slip = _dof_to_step_slip_start;
+    _dof_to_accumulated_slip = _dof_to_accumulated_slip_start;
+    _dof_to_tangential_traction = _dof_to_tangential_traction_start;
+    _dof_to_frictional_lagrange_multipliers = _dof_to_frictional_lagrange_multipliers_start;
+    _dof_to_local_penalty_friction = _dof_to_local_penalty_friction_start;
+    return;
+  }
+
   // Clear step slip (values used in between AL iterations for penalty adaptivity)
   for (auto & map_pr : _dof_to_step_slip)
   {
@@ -128,36 +143,33 @@ PenaltyFrictionUserObject::timestepSetup()
     step_slip = {0.0, 0.0};
   }
 
-  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
-  // or a rejected step) the accumulated slip and tangential traction history have already been
-  // advanced from the accepted state; advancing them again would overwrite that history with the
-  // discarded attempt's last values.
-  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_friction;
-  _t_step_old_friction = _fe_problem.timeStep();
-
-  if (!retried_timestep)
-    // save off accumulated slip from the last timestep
-    for (auto & map_pr : _dof_to_accumulated_slip)
-    {
-      auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-      old_accumulated_slip = accumulated_slip;
-    }
+  // save off accumulated slip from the last timestep
+  for (auto & map_pr : _dof_to_accumulated_slip)
+  {
+    auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
+    old_accumulated_slip = accumulated_slip;
+  }
 
   for (auto & dof_lp : _dof_to_local_penalty_friction)
     dof_lp.second = _penalty_friction;
 
-  if (!retried_timestep)
-    // save off tangential traction from the last timestep
-    for (auto & map_pr : _dof_to_tangential_traction)
-    {
-      auto & [tangential_traction, old_tangential_traction] = map_pr.second;
-      old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
-                                 MetaPhysicL::raw_value(tangential_traction(1))};
-      tangential_traction = {0.0, 0.0};
-    }
+  // save off tangential traction from the last timestep
+  for (auto & map_pr : _dof_to_tangential_traction)
+  {
+    auto & [tangential_traction, old_tangential_traction] = map_pr.second;
+    old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                               MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {0.0, 0.0};
+  }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
     delta_tangential_lm.setZero();
+
+  _dof_to_step_slip_start = _dof_to_step_slip;
+  _dof_to_accumulated_slip_start = _dof_to_accumulated_slip;
+  _dof_to_tangential_traction_start = _dof_to_tangential_traction;
+  _dof_to_frictional_lagrange_multipliers_start = _dof_to_frictional_lagrange_multipliers;
+  _dof_to_local_penalty_friction_start = _dof_to_local_penalty_friction;
 }
 
 void

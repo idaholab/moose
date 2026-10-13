@@ -35,17 +35,18 @@ public:
   /// Enumeration for fixed point convergence reasons
   enum class MooseFixedPointConvergenceReason
   {
-    UNSOLVED = 0,                  /// Not solved yet
-    CONVERGED_NONLINEAR = 1,       /// Main app nonlinear solve converged, FP unassessed
-    CONVERGED_ABS = 2,             /// FP converged by absolute residual tolerance
-    CONVERGED_RELATIVE = 3,        /// FP converged by relative residual tolerance
-    CONVERGED_PP = 4,              /// FP converged by absolute or relative PP tolerance
-    REACH_MAX_ITS = 5,             /// FP converged by hitting max iterations and accepting
-    CONVERGED_OBJECT = 6,          /// FP converged according to Convergence object
-    DIVERGED_MAX_ITS = -1,         /// FP diverged by hitting max iterations
-    DIVERGED_NONLINEAR = -2,       /// Main app nonlinear solve diverged
-    DIVERGED_FAILED_MULTIAPP = -3, /// Multiapp solve diverged
-    DIVERGED_OBJECT = -4           /// FP diverged according to Convergence object
+    UNSOLVED = 0,                   /// Not solved yet
+    CONVERGED_NONLINEAR = 1,        /// Main app nonlinear solve converged, FP unassessed
+    CONVERGED_ABS = 2,              /// FP converged by absolute residual tolerance
+    CONVERGED_RELATIVE = 3,         /// FP converged by relative residual tolerance
+    CONVERGED_PP = 4,               /// FP converged by absolute or relative PP tolerance
+    REACH_MAX_ITS = 5,              /// FP converged by hitting max iterations and accepting
+    CONVERGED_OBJECT = 6,           /// FP converged according to Convergence object
+    DIVERGED_MAX_ITS = -1,          /// FP diverged by hitting max iterations
+    DIVERGED_NONLINEAR = -2,        /// Main app nonlinear solve diverged
+    DIVERGED_FAILED_MULTIAPP = -3,  /// Multiapp solve diverged
+    DIVERGED_OBJECT = -4,           /// FP diverged according to Convergence object
+    DIVERGED_FAILED_FIXEDPOINT = -5 /// FP failed most likely by a terminator user object
   };
 
   /**
