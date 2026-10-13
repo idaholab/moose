@@ -831,7 +831,7 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 ADReal
 TabulatedFluidProperties::T_from_p_rho(const ADReal & pressure, const ADReal & rho) const
 {
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     auto lambda =
         [&](ADReal p, ADReal current_T, ADReal & new_rho, ADReal & drho_dp, ADReal & drho_dT)

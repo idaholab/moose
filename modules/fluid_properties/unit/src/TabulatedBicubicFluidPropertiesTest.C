@@ -838,6 +838,8 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEGeneratedFromFP)
     _tab_ve_from_fp->T_from_p_rho(p, rho, T, dT_dp, dT_drho);
     REL_TEST(T_ad.derivatives()[0], dT_dp, 0.0001);
     REL_TEST(T_ad.derivatives()[1], dT_drho, 0.0001);
+    // The AD and non-AD overloads must use the same (v, e) tabulation
+    REL_TEST(T_ad.value(), _tab_ve_from_fp->T_from_p_rho(p, rho), REL_TOL_CONSISTENCY);
   }
 
   // AD e_from_p_T
