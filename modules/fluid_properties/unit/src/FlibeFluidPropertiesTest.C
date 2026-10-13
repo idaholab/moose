@@ -85,6 +85,7 @@ TEST_F(FlibeFluidPropertiesTest, isochoricSpecificHeat)
 
   REL_TEST(_fp->cv_from_v_e(v, e), 1.0219369260016974e+03, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->cv_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
 /**

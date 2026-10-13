@@ -85,6 +85,7 @@ TEST_F(FlinakFluidPropertiesTest, isochoricSpecificHeat)
 
   REL_TEST(_fp->cv_from_v_e(v, e), 45.55316141330309, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->cv_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
 /**
