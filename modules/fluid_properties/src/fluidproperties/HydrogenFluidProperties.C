@@ -434,10 +434,8 @@ HydrogenFluidProperties::d2alpha_dtau2(Real delta, Real tau) const
     dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
                std::exp(_phi3[i] * Utility::pow<2>(delta - _D3[i]) +
                         _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
-               (_t3[i] * _t3[i] +
-                2.0 * _beta3[i] * tau * tau *
-                    (1.0 + 2.0 * _beta3[i] * MathUtils::pow(tau - _gamma3[i], 2)) -
-                _t3[i] * (1.0 + 4.0 * _beta3[i] * tau * (tau - _gamma3[i])));
+               (Utility::pow<2>(_t3[i] + 2.0 * _beta3[i] * tau * (tau - _gamma3[i])) - _t3[i] +
+                2.0 * _beta3[i] * tau * tau);
 
   // The Helmholtz free energy is the sum of these two
   return dalpha0 + dalphar / tau / tau;

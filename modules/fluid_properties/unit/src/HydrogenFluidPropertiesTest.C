@@ -150,6 +150,24 @@ TEST_F(HydrogenFluidPropertiesTest, properties)
  * Verify calculation of the derivatives of all properties by comparing with finite
  * differences
  */
+TEST_F(HydrogenFluidPropertiesTest, derivativesNearCritical)
+{
+  const Real tol = REL_TOL_DERIVATIVE;
+
+  // Slightly supercritical state (Tc = 33.145 K, pc = 1.2964 MPa)
+  const Real p = 1.4e6;
+  const Real T = 36.0;
+
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+
+  // The isobaric heat capacity is the temperature derivative of the enthalpy
+  Real h, dh_dp, dh_dT;
+  _fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
+  REL_TEST(_fp->cp_from_p_T(p, T), dh_dT, REL_TOL_CONSISTENCY);
+}
+
 TEST_F(HydrogenFluidPropertiesTest, derivatives)
 {
   const Real tol = REL_TOL_DERIVATIVE;
