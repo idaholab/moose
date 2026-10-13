@@ -285,9 +285,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   const Real contact_pressure_old = _sys.solutionOld()(normal_dof_index);
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(contact_pressure_old,
-                                      _dof_to_old_real_tangential_velocity[dof][0],
-                                      _dof_to_old_real_tangential_velocity[dof][1]);
+  const auto old_slip_rate = oldNodalSlipRate(dof);
+  ADReal mu_ad = computeFrictionValue(contact_pressure_old, old_slip_rate[0], old_slip_rate[1]);
 
   const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
@@ -337,8 +336,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad =
-      computeFrictionValue(contact_pressure_old, _dof_to_old_real_tangential_velocity[dof][0], 0.0);
+  ADReal mu_ad = computeFrictionValue(contact_pressure_old, oldNodalSlipRate(dof)[0], 0.0);
 
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
@@ -380,4 +378,18 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeFrictionValue(
   }
 
   return mu_ad;
+}
+
+std::array<Real, 2>
+ComputeDynamicFrictionalForceLMMechanicalContact::oldNodalSlipRate(
+    const DofObject * const dof) const
+{
+  mooseAssert(dof->processor_id() == this->processor_id(),
+              "Slip rate history is only stored for locally owned dofs");
+
+  // A dof has no history on the first step or when it just entered the mortar interface; it has
+  // not slipped yet
+  const auto it = _dof_to_old_real_tangential_velocity.find(dof);
+  return it != _dof_to_old_real_tangential_velocity.end() ? it->second
+                                                          : std::array<Real, 2>{{0.0, 0.0}};
 }

@@ -78,6 +78,12 @@ protected:
                               const Real & tangential_vel,
                               const Real & tangential_vel_dir);
 
+  /**
+   * Nodal slip rates of the previous step at a locally owned dof, or zero if the dof has no
+   * history yet (first step, or the dof just entered the mortar interface)
+   */
+  std::array<Real, 2> oldNodalSlipRate(const DofObject * const dof) const;
+
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
