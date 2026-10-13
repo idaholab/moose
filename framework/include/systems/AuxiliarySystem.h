@@ -174,6 +174,17 @@ protected:
   template <typename AuxKernelType>
   void computeNodalVarsHelper(const TheWarehouse::Query & query);
 
+  /**
+   * Get every AuxKernel, of any value type, on a thread, in dependency order
+   *
+   * Dependencies are resolved within each execute_on flag, as they are for computing, so that
+   * kernels which only depend on each other under different flags are not a cycle. The flags are
+   * visited in the order they are registered and each kernel is listed once, at its first flag.
+   * @param tid The thread to retrieve the AuxKernels for
+   * @param active_only Whether to exclude disabled AuxKernels
+   */
+  std::vector<AuxKernelBase *> sortedAuxKernels(THREAD_ID tid, bool active_only);
+
   libMesh::System & _sys;
 
   /// solution vector from nonlinear solver

@@ -84,36 +84,9 @@ AuxiliarySystem::initialSetup()
     _aux_scalar_storage.sort(tid);
     _aux_scalar_storage.initialSetup(tid);
 
-    // Replace this with an "inplace" call to initialSetup when implemented (#32362)
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->initialSetup();
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->initialSetup();
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->initialSetup();
+    // Called on every kernel, enabled or not, since a disabled kernel may be enabled later
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/false))
+      aux->initialSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -123,6 +96,49 @@ AuxiliarySystem::initialSetup()
   _kokkos_elemental_aux_storage.sort(/*tid=*/0);
   _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
 #endif
+}
+
+std::vector<AuxKernelBase *>
+AuxiliarySystem::sortedAuxKernels(const THREAD_ID tid, const bool active_only)
+{
+  std::vector<AuxKernelBase *> sorted;
+  std::set<AuxKernelBase *> seen;
+  for (const auto & flag : _app.getExecuteOnEnum().items())
+  {
+    // EXEC_ALL matches every kernel, which would sort across flags again
+    if (flag == AttribExecOns::EXEC_ALL)
+      continue;
+
+    // Sort with an explicit AttribSorted rather than queryInto so that disabled kernels can be
+    // kept: initialSetup must reach every kernel, since a disabled one may be enabled later
+    auto attribs = _fe_problem.theWarehouse()
+                       .query()
+                       .condition<AttribSystem>("AuxKernel")
+                       .condition<AttribThread>(tid)
+                       .condition<AttribExecOns>(flag)
+                       .condition<AttribSorted>(true)
+                       .attributes();
+    std::vector<AuxKernelBase *> flag_kernels;
+    _fe_problem.theWarehouse().queryInto(
+        _fe_problem.theWarehouse().queryID(attribs), flag_kernels, /*show_all=*/!active_only);
+    for (auto * const aux : flag_kernels)
+      if (seen.insert(aux).second)
+        sorted.push_back(aux);
+  }
+
+  // A kernel with an empty execute_on has no flag to be sorted under, but still needs its setup
+  const auto all_attribs = _fe_problem.theWarehouse()
+                               .query()
+                               .condition<AttribSystem>("AuxKernel")
+                               .condition<AttribThread>(tid)
+                               .attributes();
+  std::vector<AuxKernelBase *> all_kernels;
+  _fe_problem.theWarehouse().queryInto(
+      _fe_problem.theWarehouse().queryID(all_attribs), all_kernels, /*show_all=*/!active_only);
+  for (auto * const aux : all_kernels)
+    if (seen.insert(aux).second)
+      sorted.push_back(aux);
+  return sorted;
 }
 
 void
@@ -154,35 +170,8 @@ AuxiliarySystem::timestepSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->timestepSetup();
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->timestepSetup();
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->timestepSetup();
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/true))
+      aux->timestepSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -199,35 +188,8 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.customSetup(exec_type, tid);
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->customSetup(exec_type);
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->customSetup(exec_type);
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->customSetup(exec_type);
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/true))
+      aux->customSetup(exec_type);
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -244,35 +206,8 @@ AuxiliarySystem::subdomainSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->subdomainSetup();
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->subdomainSetup();
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->subdomainSetup();
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/true))
+      aux->subdomainSetup();
   }
 }
 
@@ -284,35 +219,8 @@ AuxiliarySystem::jacobianSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->jacobianSetup();
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->jacobianSetup();
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->jacobianSetup();
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/true))
+      aux->jacobianSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
@@ -329,35 +237,8 @@ AuxiliarySystem::residualSetup()
   for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
-    std::vector<AuxKernel *> nodal_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Real)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_auxkernels);
-    for (auto & nodal_aux : nodal_auxkernels)
-      nodal_aux->residualSetup();
-
-    std::vector<VectorAuxKernel *> nodal_vec_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Vector)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_vec_auxkernels);
-    for (auto & nodal_aux : nodal_vec_auxkernels)
-      nodal_aux->residualSetup();
-
-    std::vector<ArrayAuxKernel *> nodal_array_auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .condition<AttribSystem>("AuxKernel")
-        .condition<AttribAuxKernelType>(AuxKernelType::Array)
-        .condition<AttribThread>(tid)
-        .queryIntoUnsorted(nodal_array_auxkernels);
-    for (auto & nodal_aux : nodal_array_auxkernels)
-      nodal_aux->residualSetup();
+    for (auto * const aux : sortedAuxKernels(tid, /*active_only=*/true))
+      aux->residualSetup();
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
