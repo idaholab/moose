@@ -75,7 +75,6 @@ registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
 // clang-format off
 define_mass_specific_prop_from_p_T(v)
 define_mass_specific_prop_from_p_T(e)
-define_mass_specific_prop_from_p_T(s)
 define_mass_specific_prop_from_p_T(cp)
 define_mass_specific_prop_from_p_T(cv)
 
@@ -249,6 +248,40 @@ std::vector<Real>
 IdealGasMixtureFluidProperties::molarFractionsFromMassFractions(const std::vector<Real> & x) const
 {
   return molarFractionsFromMassFractions_templ(x);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::s_from_p_T_templ(const CppType & p,
+                                                 const CppType & T,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  const auto psi = molarFractionsFromMassFractions(x);
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  // Gibbs-Dalton: each component contributes its entropy at its partial pressure
+  CppType s = 0;
+  for (const auto i : make_range(_n_components))
+    s += x[i] * _component_fps[i]->s_from_p_T(psi[i] * p, T);
+
+  return s;
+}
+
+ADReal
+IdealGasMixtureFluidProperties::s_from_p_T(const ADReal & p,
+                                           const ADReal & T,
+                                           const std::vector<ADReal> & x_secondary) const
+{
+  return s_from_p_T_templ(p, T, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::s_from_p_T(Real p,
+                                           Real T,
+                                           const std::vector<Real> & x_secondary) const
+{
+  return s_from_p_T_templ(p, T, x_secondary);
 }
 
 ADReal
