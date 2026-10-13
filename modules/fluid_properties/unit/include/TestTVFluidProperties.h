@@ -17,7 +17,8 @@
 /**
  * Analytic fluid defined in terms of (T, v) whose enthalpy depends on the specific volume,
  * used to test mixture models that combine component (T, v) derivatives:
- *   p = a T / v + b / v^2,  h = c T + d / v
+ *   p = a T / v + b / v^2,  h = c T + d / v,  e = h - p v
+ * with viscosity and thermal conductivity linear in the internal energy
  */
 class TestTVFluidProperties : public SinglePhaseFluidProperties
 {
@@ -31,6 +32,13 @@ public:
 
   virtual Real h_from_T_v(Real T, Real v) const override;
   virtual void h_from_T_v(Real T, Real v, Real & h, Real & dh_dT, Real & dh_dv) const override;
+
+  virtual Real e_from_T_v(Real T, Real v) const override;
+
+  virtual Real mu_from_v_e(Real v, Real e) const override;
+  virtual Real k_from_v_e(Real v, Real e) const override;
+
+  virtual Real molarMass() const override { return 0.02; }
 
 protected:
   const Real _a;

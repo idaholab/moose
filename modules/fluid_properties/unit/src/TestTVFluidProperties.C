@@ -52,3 +52,21 @@ TestTVFluidProperties::h_from_T_v(Real T, Real v, Real & h, Real & dh_dT, Real &
   dh_dT = _c;
   dh_dv = -_d / (v * v);
 }
+
+Real
+TestTVFluidProperties::e_from_T_v(Real T, Real v) const
+{
+  return h_from_T_v(T, v) - p_from_T_v(T, v) * v;
+}
+
+Real
+TestTVFluidProperties::mu_from_v_e(Real /*v*/, Real e) const
+{
+  return 1e-5 + 1e-11 * e;
+}
+
+Real
+TestTVFluidProperties::k_from_v_e(Real /*v*/, Real e) const
+{
+  return 0.02 + 1e-8 * e;
+}

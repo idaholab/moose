@@ -173,7 +173,7 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
     {                                                                                              \
       const Real vi = v / x[i];                                                                    \
-      const Real ei = _fp_secondary[i]->e_from_T_v(T, vp);                                         \
+      const Real ei = _fp_secondary[i]->e_from_T_v(T, vi);                                         \
       const Real Mi = _fp_secondary[i]->molarMass();                                               \
       const Real yi = _fp_secondary[i]->prop##_from_v_e(vi, ei);                                   \
       y += x[i] * M_star / Mi * yi;                                                                \

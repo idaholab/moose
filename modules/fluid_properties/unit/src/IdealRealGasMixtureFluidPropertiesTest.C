@@ -217,3 +217,40 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, cpVolumeDependentEnthalpy)
 
   Moose::_throw_on_warning = original_throw_on_warning;
 }
+
+/**
+ * Verify that the value and derivative overloads of the transport properties agree when a
+ * secondary component's internal energy depends on the specific volume
+ */
+TEST_F(IdealRealGasMixtureFluidPropertiesTest, transportVolumeDependentSecondary)
+{
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
+
+  // Secondary component whose e(T, v) depends on v and whose transport properties depend on e
+  InputParameters fp_params = _factory.getValidParams("TestTVFluidProperties");
+  _fe_problem->addUserObject("TestTVFluidProperties", "fp_tv_secondary", fp_params);
+  InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
+  params.set<UserObjectName>("fp_primary") = "fp_nitrogen";
+  params.set<std::vector<UserObjectName>>("fp_secondary") = {"fp_tv_secondary"};
+  params.set<bool>("allow_imperfect_jacobians") = true;
+  _fe_problem->addUserObject("IdealRealGasMixtureFluidProperties", "fp_swapped_mix", params);
+  const auto & fp_mix =
+      _fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>("fp_swapped_mix");
+
+  const Real T = 400.0;
+  const Real v = 1.1;
+  const std::vector<Real> x = {0.3};
+
+  Real mu, dmu_dT, dmu_dv;
+  std::vector<Real> dmu_dx;
+  fp_mix.mu_from_T_v(T, v, x, mu, dmu_dT, dmu_dv, dmu_dx);
+  REL_TEST(fp_mix.mu_from_T_v(T, v, x), mu, REL_TOL_CONSISTENCY);
+
+  Real k, dk_dT, dk_dv;
+  std::vector<Real> dk_dx;
+  fp_mix.k_from_T_v(T, v, x, k, dk_dT, dk_dv, dk_dx);
+  REL_TEST(fp_mix.k_from_T_v(T, v, x), k, REL_TOL_CONSISTENCY);
+
+  Moose::_throw_on_warning = original_throw_on_warning;
+}
