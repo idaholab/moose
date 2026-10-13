@@ -232,16 +232,16 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
       std::vector<const Elem *> fine_neighbors;
       neighbor->active_family_tree_by_neighbor(fine_neighbors, elem);
       for (const Elem * fine_neighbor : fine_neighbors)
-        onInterfaceNonConforming(elem, side, bnd_id, fine_neighbor);
+        onInterfaceWithHRefinementMismatch(elem, side, bnd_id, fine_neighbor);
     }
   }
 }
 
 void
-NonlinearThread::onInterfaceNonConforming(const Elem * elem,
-                                          unsigned int side,
-                                          BoundaryID bnd_id,
-                                          const Elem * fine_neighbor)
+NonlinearThread::onInterfaceWithHRefinementMismatch(const Elem * elem,
+                                                    unsigned int side,
+                                                    BoundaryID bnd_id,
+                                                    const Elem * fine_neighbor)
 {
   if (_fe_problem.getDisplacedProblem())
     mooseError("InterfaceKernel '",

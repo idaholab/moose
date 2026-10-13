@@ -87,10 +87,10 @@ protected:
    * that storage - discarding both the prior fine neighbors' contributions and elem's own
    * volumetric Kernel contributions already accumulated earlier in its visit.
    */
-  void onInterfaceNonConforming(const Elem * elem,
-                                unsigned int side,
-                                BoundaryID bnd_id,
-                                const Elem * fine_neighbor);
+  void onInterfaceWithHRefinementMismatch(const Elem * elem,
+                                          unsigned int side,
+                                          BoundaryID bnd_id,
+                                          const Elem * fine_neighbor);
 
   ///@{
   /// Base class version just calls compute on each object for the element
@@ -204,6 +204,6 @@ private:
   /// Whether the subdomain has HDGKernels
   bool _subdomain_has_hdg;
 
-  /// Builds (and caches) the side element for elem/side pairs in onInterfaceNonConforming
+  /// Builds (and caches) the side element for elem/side pairs in onInterfaceWithHRefinementMismatch
   libMesh::ElemSideBuilder _elem_side_builder;
 };
