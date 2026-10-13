@@ -10,6 +10,7 @@
 #include "TabulatedBicubicFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 #include "SinglePhaseFluidProperties.h"
+#include "CheckNaNsTabulatedFluidProperties.h"
 
 #include <fstream>
 
@@ -1223,4 +1224,29 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, gibbsWithoutTemperatureColumn)
   const Real v = _idg_fp->v_from_p_T(p, T);
   const Real e = _idg_fp->e_from_p_T(p, T);
   REL_TEST(fp.g_from_v_e(v, e), _idg_fp->g_from_v_e(v, e), 1e-3);
+}
+
+/**
+ * Verify that NaNs from the (p, T) from (v, e) inversion are replaced by a bound for every
+ * specific volume, including the midpoint of the specific volume range
+ */
+TEST_F(TabulatedBicubicFluidPropertiesTest, checkNaNsMidpoint)
+{
+  InputParameters params = _factory.getValidParams("CheckNaNsTabulatedFluidProperties");
+  params.set<UserObjectName>("input_fp") = "idg_fp";
+  _fe_problem->addUserObject("CheckNaNsTabulatedFluidProperties", "check_nans_fp", params);
+  auto & fp = _fe_problem->getUserObject<CheckNaNsTabulatedFluidProperties>("check_nans_fp");
+  fp.setSpecificVolumeGrid({1.0, 2.0, 3.0});
+
+  for (const auto i : make_range(3u))
+  {
+    Real p = std::numeric_limits<Real>::quiet_NaN();
+    Real T = std::numeric_limits<Real>::quiet_NaN();
+    unsigned int num_nans_p = 0, num_nans_T = 0;
+    fp.checkNaNs(1e5, 1e6, 300, 500, i, p, T, num_nans_p, num_nans_T);
+    EXPECT_FALSE(std::isnan(p));
+    EXPECT_FALSE(std::isnan(T));
+    EXPECT_EQ(num_nans_p, 1u);
+    EXPECT_EQ(num_nans_T, 1u);
+  }
 }
