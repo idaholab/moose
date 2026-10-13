@@ -9,16 +9,15 @@
 
 #include "PipeWallTemperatureScalarKernelBase.h"
 
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "ThermalSolidProperties.h"
 
-template <bool is_ad>
 InputParameters
-PipeWallTemperatureScalarKernelBaseTempl<is_ad>::validParams()
+ADPipeWallTemperatureScalarKernelBase::validParams()
 {
-  InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
-  params += FunctorInterface::validParams();
+  InputParameters params = ADScalarKernel::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Base class for solving the temperature of a radial node of a pipe wall, with axial "
       "conduction to the upstream/downstream nodes of the same radial layer and radial "
@@ -59,29 +58,27 @@ PipeWallTemperatureScalarKernelBaseTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PipeWallTemperatureScalarKernelBaseTempl<is_ad>::PipeWallTemperatureScalarKernelBaseTempl(
+ADPipeWallTemperatureScalarKernelBase::ADPipeWallTemperatureScalarKernelBase(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
-    _Tup(ScalarCoupleable::coupledGenericScalarValue<is_ad>("upstream_wall_temperature")),
-    _Tdown(ScalarCoupleable::coupledGenericScalarValue<is_ad>("downstream_wall_temperature")),
+    _Tup(ScalarCoupleable::adCoupledScalarValue("upstream_wall_temperature")),
+    _Tdown(ScalarCoupleable::adCoupledScalarValue("downstream_wall_temperature")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
-    _area(this->template getFunctor<GenericReal<is_ad>>("area")),
-    _interface_perimeter(this->template getFunctor<GenericReal<is_ad>>("interface_perimeter")),
-    _wall_thickness(this->template getFunctor<GenericReal<is_ad>>("wall_thickness")),
-    _length(this->template getFunctor<GenericReal<is_ad>>("length")),
-    _upstream_spacing(this->template getFunctor<GenericReal<is_ad>>("upstream_spacing")),
-    _downstream_spacing(this->template getFunctor<GenericReal<is_ad>>("downstream_spacing")),
-    _upstream_area(this->template getFunctor<GenericReal<is_ad>>("upstream_area")),
-    _downstream_area(this->template getFunctor<GenericReal<is_ad>>("downstream_area"))
+    _area(this->template getFunctor<ADReal>("area")),
+    _interface_perimeter(this->template getFunctor<ADReal>("interface_perimeter")),
+    _wall_thickness(this->template getFunctor<ADReal>("wall_thickness")),
+    _length(this->template getFunctor<ADReal>("length")),
+    _upstream_spacing(this->template getFunctor<ADReal>("upstream_spacing")),
+    _downstream_spacing(this->template getFunctor<ADReal>("downstream_spacing")),
+    _upstream_area(this->template getFunctor<ADReal>("upstream_area")),
+    _downstream_area(this->template getFunctor<ADReal>("downstream_area"))
 {
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpResidual()
+ADReal
+ADPipeWallTemperatureScalarKernelBase::computeQpResidual()
 {
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
@@ -117,52 +114,9 @@ PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpResidual()
   return -(q_radial + q_axial + q_convective) / (rho * cp * A);
 }
 
-template <bool is_ad>
 Real
-PipeWallTemperatureScalarKernelBaseTempl<is_ad>::computeQpJacobian()
+ADPipeWallTemperatureScalarKernelBase::computeQpJacobian()
 {
-  if constexpr (!is_ad)
-  {
-    const Moose::ElemArg elem_arg = Moose::ElemArg();
-    const int i = 0;
-    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-
-    const auto A = _area(elem_arg, state);
-    const auto k = _sp.k_from_T(Base::_u[i]);
-    const auto cp = _sp.cp_from_T(Base::_u[i]);
-    const auto rho = _sp.rho_from_T(Base::_u[i]);
-
-    const auto A_up = _upstream_area(elem_arg, state);
-    const auto k_up = _sp.k_from_T(_Tup[i]);
-    const auto A_down = _downstream_area(elem_arg, state);
-    const auto k_down = _sp.k_from_T(_Tdown[i]);
-
-    const auto G_up = 1.0 / (_upstream_spacing(elem_arg, state) / (2.0 * k * A) +
-                             _upstream_spacing(elem_arg, state) / (2.0 * k_up * A_up));
-    const auto G_down = 1.0 / (_downstream_spacing(elem_arg, state) / (2.0 * k * A) +
-                               _downstream_spacing(elem_arg, state) / (2.0 * k_down * A_down));
-
-    const auto q_radial =
-        -k * _interface_perimeter(elem_arg, state) / _wall_thickness(elem_arg, state);
-    const auto q_axial = (-G_up - G_down) / _length(elem_arg, state);
-    const auto q_convective = convectiveJacobian();
-
-    return -(q_radial + q_axial + q_convective) / (A * rho * cp);
-  }
-  else
-  {
-    mooseError("computeQpJacobian() should not be called in AD mode");
-    return 0;
-  }
+  mooseError("computeQpJacobian() should not be called in AD mode");
+  return 0;
 }
-
-template <>
-Real
-PipeWallTemperatureScalarKernelBaseTempl<true>::computeQpJacobian()
-{
-  mooseError("Internal error, calling computeQpJacobian in AD class.");
-  return 0.0;
-}
-
-template class PipeWallTemperatureScalarKernelBaseTempl<false>;
-template class PipeWallTemperatureScalarKernelBaseTempl<true>;

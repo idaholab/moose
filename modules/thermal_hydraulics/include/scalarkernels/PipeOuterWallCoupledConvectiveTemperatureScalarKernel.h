@@ -17,43 +17,36 @@ class SinglePhaseFluidProperties;
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary
  * side boundary condition
  */
-template <bool is_ad>
-class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl
-  : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
+class ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
+  : public ADPipeWallTemperatureScalarKernelBase
 {
-  using Base = PipeWallTemperatureScalarKernelBaseTempl<is_ad>;
+  using Base = ADPipeWallTemperatureScalarKernelBase;
 
 public:
-  PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl(const InputParameters & parameters);
-  virtual bool isADObject() const override { return is_ad; };
+  ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tin[0]; }
-  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
+  virtual ADReal otherNodeTemperature() const override { return _Tin[0]; }
+  virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Fluid properties object for the secondary-side fluid
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate of the secondary-side fluid
-  const GenericVariableValue<is_ad> & _m;
+  const ADVariableValue & _m;
   /// Coupled temperature of the inner-surface wall node
-  const GenericVariableValue<is_ad> & _Tin;
+  const ADVariableValue & _Tin;
   /// Coupled secondary-side fluid temperature adjacent to this wall node
-  const GenericVariableValue<is_ad> & _Tf;
+  const ADVariableValue & _Tf;
   /// Coupled secondary-side fluid temperature adjacent to the upstream wall node
-  const GenericVariableValue<is_ad> & _Tfup;
+  const ADVariableValue & _Tfup;
   /// Coupled secondary-side fluid temperature adjacent to the downstream wall node
-  const GenericVariableValue<is_ad> & _Tfdown;
+  const ADVariableValue & _Tfdown;
   /// Secondary-side system reference pressure
-  const Moose::Functor<GenericReal<is_ad>> & _Pref;
+  const Moose::Functor<ADReal> & _Pref;
   /// Cross-sectional area of the secondary-side flow channel adjacent to this wall node
-  const Moose::Functor<GenericReal<is_ad>> & _flow_area;
+  const Moose::Functor<ADReal> & _flow_area;
   /// Wetted perimeter of the secondary-side flow channel adjacent to this wall node
-  const Moose::Functor<GenericReal<is_ad>> & _wetted_perimeter;
+  const Moose::Functor<ADReal> & _wetted_perimeter;
 };
-
-typedef PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<false>
-    PipeOuterWallCoupledConvectiveTemperatureScalarKernel;
-typedef PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<true>
-    ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel;

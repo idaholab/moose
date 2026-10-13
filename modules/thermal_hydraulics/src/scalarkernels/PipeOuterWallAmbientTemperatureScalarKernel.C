@@ -12,12 +12,10 @@
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 
-registerMooseObject("ThermalHydraulicsApp", PipeOuterWallAmbientTemperatureScalarKernel);
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallAmbientTemperatureScalarKernel);
 
-template <bool is_ad>
 InputParameters
-PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::validParams()
+ADPipeOuterWallAmbientTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
   params.addClassDescription(
@@ -35,20 +33,18 @@ PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PipeOuterWallAmbientTemperatureScalarKernelTempl<
-    is_ad>::PipeOuterWallAmbientTemperatureScalarKernelTempl(const InputParameters & parameters)
+ADPipeOuterWallAmbientTemperatureScalarKernel::ADPipeOuterWallAmbientTemperatureScalarKernel(
+    const InputParameters & parameters)
   : Base(parameters),
-    _Tin(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inner_wall_temperature")),
-    _T_ambient(this->template getFunctor<GenericReal<is_ad>>("T_ambient")),
-    _htc_ambient(this->template getFunctor<GenericReal<is_ad>>("htc_ambient")),
-    _ambient_perimeter(this->template getFunctor<GenericReal<is_ad>>("ambient_perimeter"))
+    _Tin(ScalarCoupleable::adCoupledScalarValue("inner_wall_temperature")),
+    _T_ambient(this->template getFunctor<ADReal>("T_ambient")),
+    _htc_ambient(this->template getFunctor<ADReal>("htc_ambient")),
+    _ambient_perimeter(this->template getFunctor<ADReal>("ambient_perimeter"))
 {
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
+ADReal
+ADPipeOuterWallAmbientTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
@@ -58,32 +54,9 @@ PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveLinearHeatRat
          (_T_ambient(elem_arg, state) - Base::_u[0]);
 }
 
-template <bool is_ad>
 Real
-PipeOuterWallAmbientTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
+ADPipeOuterWallAmbientTemperatureScalarKernel::convectiveJacobian() const
 {
-  if constexpr (!is_ad)
-  {
-    const Moose::ElemArg elem_arg = Moose::ElemArg();
-    const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
-
-    // Convective heat transfer with the ambient environment
-    return -_htc_ambient(elem_arg, state) * _ambient_perimeter(elem_arg, state);
-  }
-  else
-  {
-    mooseError("convectiveJacobian() should not be called in AD mode");
-    return 0;
-  }
+  mooseError("convectiveJacobian() should not be called in AD mode");
+  return 0;
 }
-
-template <>
-Real
-PipeOuterWallAmbientTemperatureScalarKernelTempl<true>::convectiveJacobian() const
-{
-  mooseError("Internal error, calling convectiveJacobian in AD class.");
-  return 0.0;
-}
-
-template class PipeOuterWallAmbientTemperatureScalarKernelTempl<false>;
-template class PipeOuterWallAmbientTemperatureScalarKernelTempl<true>;

@@ -13,13 +13,11 @@
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("ThermalHydraulicsApp", PipeOuterWallCoupledConvectiveTemperatureScalarKernel);
 registerMooseObject("ThermalHydraulicsApp",
                     ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel);
 
-template <bool is_ad>
 InputParameters
-PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::validParams()
+ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
   params.addClassDescription(
@@ -62,25 +60,23 @@ PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::
-    PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl(const InputParameters & parameters)
+ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::
+    ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel(const InputParameters & parameters)
   : Base(parameters),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
-    _m(ScalarCoupleable::coupledGenericScalarValue<is_ad>("mass_flow_rate")),
-    _Tin(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inner_wall_temperature")),
-    _Tf(ScalarCoupleable::coupledGenericScalarValue<is_ad>("fluid_temperature")),
-    _Tfup(ScalarCoupleable::coupledGenericScalarValue<is_ad>("upstream_fluid_temperature")),
-    _Tfdown(ScalarCoupleable::coupledGenericScalarValue<is_ad>("downstream_fluid_temperature")),
-    _Pref(this->template getFunctor<GenericReal<is_ad>>("reference_pressure")),
-    _flow_area(this->template getFunctor<GenericReal<is_ad>>("flow_area")),
-    _wetted_perimeter(this->template getFunctor<GenericReal<is_ad>>("wetted_perimeter"))
+    _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
+    _Tin(ScalarCoupleable::adCoupledScalarValue("inner_wall_temperature")),
+    _Tf(ScalarCoupleable::adCoupledScalarValue("fluid_temperature")),
+    _Tfup(ScalarCoupleable::adCoupledScalarValue("upstream_fluid_temperature")),
+    _Tfdown(ScalarCoupleable::adCoupledScalarValue("downstream_fluid_temperature")),
+    _Pref(this->template getFunctor<ADReal>("reference_pressure")),
+    _flow_area(this->template getFunctor<ADReal>("flow_area")),
+    _wetted_perimeter(this->template getFunctor<ADReal>("wetted_perimeter"))
 {
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
+ADReal
+ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
@@ -104,47 +100,9 @@ PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::convectiveLin
   return h * _wetted_perimeter(elem_arg, state) / 2.0 * (_Tf[i] + Tin - 2 * Base::_u[i]);
 }
 
-template <bool is_ad>
 Real
-PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<is_ad>::convectiveJacobian() const
+ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::convectiveJacobian() const
 {
-  if constexpr (!is_ad)
-  {
-    const Moose::ElemArg elem_arg = Moose::ElemArg();
-    const int i = 0;
-    const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
-    // start by getting fluid properties
-    const auto Tin = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tfdown[i] +
-                     1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tfup[i];
-    const auto muf = _fp.mu_from_p_T(_Pref(elem_arg, state), (Base::_u[i] + Tin) / 2);
-    const auto cpf = _fp.cp_from_p_T(_Pref(elem_arg, state), (Base::_u[i] + Tin) / 2);
-    const auto kf = _fp.k_from_p_T(_Pref(elem_arg, state), (Base::_u[i] + Tin) / 2);
-
-    // Decide flow regime for HTC
-    const auto Dh = 4.0 * _flow_area(elem_arg, state) / _wetted_perimeter(elem_arg, state);
-    const auto G = abs(_m[i]) / _flow_area(elem_arg, state);
-    const auto Re = G * Dh / muf;
-    const auto Pr = muf * cpf / kf;
-    // Heat transfer to fluid (Dittus-Boelter)
-    const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * kf / Dh;
-
-    // Convective heat transfer with the secondary-side fluid
-    return -h * _wetted_perimeter(elem_arg, state);
-  }
-  else
-  {
-    mooseError("convectiveJacobian() should not be called in AD mode");
-    return 0;
-  }
+  mooseError("convectiveJacobian() should not be called in AD mode");
+  return 0;
 }
-
-template <>
-Real
-PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<true>::convectiveJacobian() const
-{
-  mooseError("Internal error, calling convectiveJacobian in AD class.");
-  return 0.0;
-}
-
-template class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<false>;
-template class PipeOuterWallCoupledConvectiveTemperatureScalarKernelTempl<true>;
