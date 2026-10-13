@@ -47,6 +47,39 @@ struct enable_bitmask_operators<Interfaces>
 
 std::ostream & operator<<(std::ostream & os, Interfaces & iface);
 
+/**
+ * Classifies AuxKernels by computed value type and by how they are executed. Every AuxKernel is
+ * tagged with exactly one value-type bit and exactly one execution-category bit. A query combines
+ * the bits it accepts: within each of the two groups the query specifies, the object must match one
+ * of the requested bits, and a group the query leaves empty is not constrained.
+ */
+enum class AuxKernelType
+{
+  /// Value types
+  ///@{
+  Real = 1 << 0,
+  Vector = 1 << 1,
+  Array = 1 << 2,
+  ///@}
+  /// Execution categories
+  ///@{
+  Nodal = 1 << 3,
+  Mortar = 1 << 4,
+  Elemental = 1 << 5,
+  ///@}
+  /// Convenience groups
+  ///@{
+  AllValueTypes = (1 << 0) | (1 << 1) | (1 << 2),
+  AllCategories = (1 << 3) | (1 << 4) | (1 << 5)
+  ///@}
+};
+
+template <>
+struct enable_bitmask_operators<AuxKernelType>
+{
+  static const bool enable = true;
+};
+
 #define clonefunc(T)                                                                               \
   virtual std::unique_ptr<Attribute> clone() const override                                        \
   {                                                                                                \
@@ -271,81 +304,32 @@ private:
 };
 
 /**
- * Distinguishes AuxKernels that compute a nodal variable (AuxKernelBase::isNodal()) from those
- * that compute an elemental one. Needed because both share the same AttribSystem tag.
+ * Tracks the AuxKernelType of an AuxKernel: its value type (Real/Vector/Array) and its execution
+ * category (nodal, mortar nodal or elemental). AttribSystem intentionally groups every AuxKernel
+ * under the same "AuxKernel" system-attribute tag (registerSystemAttributeName groups objects that
+ * execute through the same machinery, unlike registerBase which associates input file syntax), so
+ * it cannot select the objects that a given AuxiliarySystem compute loop or queryInto type expects.
+ * Objects that are not AuxKernels have no bits set and match no query.
  */
-class AttribAuxKernelNodal : public Attribute
+class AttribAuxKernelType : public Attribute
 {
 public:
-  typedef bool Key;
+  typedef AuxKernelType Key;
   void setFrom(const Key & k) { _val = k; }
 
-  AttribAuxKernelNodal(TheWarehouse & w) : Attribute(w, "aux_kernel_nodal"), _val(false) {}
-  AttribAuxKernelNodal(TheWarehouse & w, bool is_nodal)
-    : Attribute(w, "aux_kernel_nodal"), _val(is_nodal)
+  AttribAuxKernelType(TheWarehouse & w) : Attribute(w, "aux_kernel_type") {}
+  AttribAuxKernelType(TheWarehouse & w, AuxKernelType type)
+    : Attribute(w, "aux_kernel_type"), _val(type)
   {
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
-  clonefunc(AttribAuxKernelNodal);
+  hashfunc(static_cast<unsigned int>(_val));
+  clonefunc(AttribAuxKernelType);
 
 private:
-  bool _val;
-};
-
-/**
- * Distinguishes mortar nodal AuxKernels (MortarNodalAuxKernelTempl) from plain nodal ones, both of
- * which are nodal AuxKernels sharing the same AttribSystem tag and AttribAuxKernelNodal value.
- */
-class AttribAuxKernelMortar : public Attribute
-{
-public:
-  typedef bool Key;
-  void setFrom(const Key & k) { _val = k; }
-
-  AttribAuxKernelMortar(TheWarehouse & w) : Attribute(w, "aux_kernel_mortar"), _val(false) {}
-  AttribAuxKernelMortar(TheWarehouse & w, bool is_mortar)
-    : Attribute(w, "aux_kernel_mortar"), _val(is_mortar)
-  {
-  }
-  virtual void initFrom(const MooseObject * obj) override;
-  virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
-  clonefunc(AttribAuxKernelMortar);
-
-private:
-  bool _val;
-};
-
-/**
- * Distinguishes the AuxKernel value type (Real/Vector/Array) by its actual C++ type.
- * AttribSystem intentionally groups all three under the same "AuxKernel" system-attribute tag
- * (registerSystemAttributeName groups objects that execute through the same machinery, unlike
- * registerBase which associates input file syntax), so it cannot be used to select a single value
- * type for queries that queryInto<AuxKernel>/<VectorAuxKernel>/<ArrayAuxKernel> specifically.
- */
-class AttribAuxKernelValueType : public Attribute
-{
-public:
-  typedef std::string Key;
-  void setFrom(const Key & k) { _val = k; }
-
-  AttribAuxKernelValueType(TheWarehouse & w) : Attribute(w, "aux_kernel_value_type") {}
-  AttribAuxKernelValueType(TheWarehouse & w, const std::string & value_type)
-    : Attribute(w, "aux_kernel_value_type"), _val(value_type)
-  {
-  }
-  virtual void initFrom(const MooseObject * obj) override;
-  virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
-  clonefunc(AttribAuxKernelValueType);
-
-private:
-  std::string _val;
+  AuxKernelType _val = static_cast<AuxKernelType>(0);
 };
 
 /**

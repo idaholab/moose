@@ -309,64 +309,50 @@ AttribExecutionOrderGroup::isEqual(const Attribute & other) const
 }
 
 void
-AttribAuxKernelNodal::initFrom(const MooseObject * obj)
+AttribAuxKernelType::initFrom(const MooseObject * obj)
 {
+  _val = static_cast<AuxKernelType>(0);
   const auto * aux = dynamic_cast<const AuxKernelBase *>(obj);
-  _val = aux && aux->isNodal();
-}
-bool
-AttribAuxKernelNodal::isMatch(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribAuxKernelNodal *>(&other);
-  return a && (a->_val == _val);
-}
-bool
-AttribAuxKernelNodal::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
-}
+  if (!aux)
+    return;
 
-void
-AttribAuxKernelMortar::initFrom(const MooseObject * obj)
-{
-  _val = dynamic_cast<const MortarNodalAuxKernelTempl<Real> *>(obj) ||
-         dynamic_cast<const MortarNodalAuxKernelTempl<RealVectorValue> *>(obj) ||
-         dynamic_cast<const MortarNodalAuxKernelTempl<RealEigenVector> *>(obj);
-}
-bool
-AttribAuxKernelMortar::isMatch(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribAuxKernelMortar *>(&other);
-  return a && (a->_val == _val);
-}
-bool
-AttribAuxKernelMortar::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
-}
-
-void
-AttribAuxKernelValueType::initFrom(const MooseObject * obj)
-{
   if (dynamic_cast<const AuxKernel *>(obj))
-    _val = "Real";
+    _val = AuxKernelType::Real;
   else if (dynamic_cast<const VectorAuxKernel *>(obj))
-    _val = "Vector";
+    _val = AuxKernelType::Vector;
   else if (dynamic_cast<const ArrayAuxKernel *>(obj))
-    _val = "Array";
+    _val = AuxKernelType::Array;
   else
-    _val = "";
+    return;
+
+  if (dynamic_cast<const MortarNodalAuxKernelTempl<Real> *>(obj) ||
+      dynamic_cast<const MortarNodalAuxKernelTempl<RealVectorValue> *>(obj) ||
+      dynamic_cast<const MortarNodalAuxKernelTempl<RealEigenVector> *>(obj))
+    _val |= AuxKernelType::Mortar;
+  else if (aux->isNodal())
+    _val |= AuxKernelType::Nodal;
+  else
+    _val |= AuxKernelType::Elemental;
 }
 bool
-AttribAuxKernelValueType::isMatch(const Attribute & other) const
+AttribAuxKernelType::isMatch(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribAuxKernelValueType *>(&other);
+  auto a = dynamic_cast<const AttribAuxKernelType *>(&other);
+  if (!a)
+    return false;
+
+  // Each bit group the query requests must share a bit with this object's type
+  const auto query = a->_val;
+  for (const auto group : {AuxKernelType::AllValueTypes, AuxKernelType::AllCategories})
+    if (static_cast<bool>(query & group) && !static_cast<bool>(query & group & _val))
+      return false;
+  return static_cast<bool>(_val);
+}
+bool
+AttribAuxKernelType::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelType *>(&other);
   return a && (a->_val == _val);
-}
-bool
-AttribAuxKernelValueType::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
 }
 
 void

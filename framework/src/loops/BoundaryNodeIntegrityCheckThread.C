@@ -72,7 +72,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
         .query()
         .template condition<AttribSystem>(system_type)
         .template condition<AttribThread>(_tid)
-        .template condition<AttribAuxKernelMortar>(false)
+        .template condition<AttribAuxKernelType>(AuxKernelType::Nodal | AuxKernelType::Elemental)
         .template condition<AttribBoundaries>(boundary_id, true)
         .queryInto(auxkernels);
     if (auxkernels.empty())

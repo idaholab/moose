@@ -119,7 +119,7 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
           .query()
           .template condition<AttribSystem>(system_type)
           .template condition<AttribThread>(tid)
-          .template condition<AttribAuxKernelMortar>(false)
+          .template condition<AttribAuxKernelType>(AuxKernelType::Nodal | AuxKernelType::Elemental)
           .template condition<AttribBoundaries>(boundary_id, true)
           .queryInto(auxkernels);
       if (auxkernels.empty())
