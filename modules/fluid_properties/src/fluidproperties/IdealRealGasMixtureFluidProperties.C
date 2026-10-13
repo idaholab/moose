@@ -251,6 +251,7 @@ InputParameters IdealRealGasMixtureFluidProperties::validParams()
   params.addRequiredParam<std::vector<UserObjectName>>(
       "fp_secondary", "Name of fluid properties user object(s) for secondary vapor component(s)");
   params.addParam<Real>("_T_mix_max", 1300., "Maximum temperature of the mixture");
+  params.deprecateParam("_T_mix_max", "T_mix_max", "04/01/2027");
 
   return params;
 }
@@ -262,7 +263,7 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     _fp_primary(&getUserObject<SinglePhaseFluidProperties>("fp_primary")),
     _fp_secondary_names(getParam<std::vector<UserObjectName>>("fp_secondary")),
     _n_secondary_vapors(_fp_secondary_names.size()),
-    _T_mix_max(getParam<Real>("_T_mix_max"))
+    _T_mix_max(getParam<Real>("T_mix_max"))
 {
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)

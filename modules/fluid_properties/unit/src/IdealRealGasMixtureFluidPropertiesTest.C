@@ -287,3 +287,13 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, threeComponents)
 
   Moose::_throw_on_warning = original_throw_on_warning;
 }
+
+/**
+ * Verify that the maximum mixture temperature can be set with the T_mix_max parameter
+ */
+TEST_F(IdealRealGasMixtureFluidPropertiesTest, maximumTemperatureParameter)
+{
+  InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
+  EXPECT_TRUE(params.have_parameter<Real>("T_mix_max"));
+  EXPECT_EQ(params.get<Real>("T_mix_max"), 1300.0);
+}
