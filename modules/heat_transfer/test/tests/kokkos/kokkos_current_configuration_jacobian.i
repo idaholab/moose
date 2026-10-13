@@ -1,5 +1,6 @@
-# Jacobian of current-configuration heat conduction, a volumetric source, and a boundary flux
-# coupled to a displacement, with respect to the temperature and to nonlinear displacements
+# Jacobian of current-configuration heat conduction with a conductivity varying with the current
+# position, a volumetric source, and a boundary flux coupled to a displacement, with respect to the
+# temperature and to nonlinear displacements
 
 [Mesh]
   type = GeneratedMesh
@@ -68,6 +69,8 @@
   [conduction]
     type = KokkosHeatConductionMaterial
     thermal_conductivity = 10
+    thermal_conductivity_gradient = '2 3 0'
+    use_displaced_mesh = true
   []
 []
 

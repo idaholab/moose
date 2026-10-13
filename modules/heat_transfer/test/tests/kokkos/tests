@@ -109,7 +109,7 @@
     [jacobian]
       type = PetscJacobianTester
       input = 'kokkos_current_configuration_jacobian.i'
-      detail = 'with an exact Jacobian, including the derivatives of the volume and side integrals with respect to the displacements, in Cartesian coordinates, and'
+      detail = 'with an exact Jacobian, including the derivatives of the volume and side integrals and of a conductivity evaluated on the current configuration with respect to the displacements, in Cartesian coordinates, and'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
