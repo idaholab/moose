@@ -40,6 +40,7 @@ public:
 
   /// used by Actions to add CrackFrontDefinitionParams
   static void includeCrackFrontDefinitionParams(InputParameters & params);
+  void updateCrackFrontPoints();
 
   /**
    * Change the number of crack front nodes. As the crack grows, the number of crack fronts nodes
