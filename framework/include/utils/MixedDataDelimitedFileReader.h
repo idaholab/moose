@@ -18,10 +18,11 @@ namespace MooseUtils
  * Utility class for reading delimited data (e.g., CSV data).
  * where the csv has columns of mixed data types
  * @param filename A string for the filename to read.
- * @param comm A pointer to a Communicator object (see below).
  *
- * This class assumes that all data is numeric and can be converted to a C++ double. If a
- * Communicator is provide then it will only read on processor 0 and broadcast the data to all
+ * This class allows csv files to contain columns of mixed data types.
+ * All of the data is internally stored as string data and then converted to the requested type when
+ * getData<T> is called.
+ * If a communicator is provide then it will only read on processor 0 and broadcast the data to all
  * processors. If not provided it will read on all processors.
  */
 class MixedDataDelimitedFileReader : public DelimitedFileOfStringReader
@@ -30,6 +31,7 @@ public:
   MixedDataDelimitedFileReader(const std::string & filename) : DelimitedFileOfStringReader(filename)
   {
   }
+
   MixedDataDelimitedFileReader(const std::string & filename,
                                const libMesh::Parallel::Communicator * comm)
     : DelimitedFileOfStringReader(filename, comm)
@@ -52,14 +54,13 @@ public:
   const std::vector<T> getData(const std::string & name) const
   {
     return convertVector<T>(DelimitedFileOfStringReader::getData(name));
-
   }
 
   /**
    * Converts a column in the data set to a vector of a specified type
    *
    * @tparam T The type to convert the column to
-   * @param index the index of the desired column
+   * @param index_column the index of the desired column
    *
    * @returns The requested column as a vector of the requested type
    *
@@ -74,7 +75,6 @@ public:
   }
 
 protected:
-
   /**
    * Given a column of a data set this will convert it to a vector of the requested type
    *
