@@ -31,7 +31,7 @@ public:
   virtual void finalize() override;
 
 protected:
-  bool isFaceObject() const override { return true; }
+  bool usesFaceCoupledValues() const override { return true; }
 
   /**
    * Whether or not the derived classes are acting on a finite volume variable or not.

@@ -36,5 +36,5 @@ public:
   virtual void threadJoin(const UserObject &) override final {}
 
 protected:
-  bool isFaceObject() const override { return true; }
+  bool usesFaceCoupledValues() const override { return true; }
 };

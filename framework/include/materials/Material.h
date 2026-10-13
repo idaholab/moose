@@ -215,7 +215,7 @@ public:
   virtual void resolveOptionalProperties() override;
 
 protected:
-  bool isFaceObject() const override { return _bnd; }
+  bool usesFaceCoupledValues() const override { return _bnd; }
 
   virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override;
 

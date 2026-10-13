@@ -80,7 +80,7 @@ public:
   void prepareShapes(unsigned int var_num) override final;
 
 protected:
-  bool isFaceObject() const override { return true; }
+  bool usesFaceCoupledValues() const override { return true; }
 
   /// Current element
   const Elem * const & _current_elem;
