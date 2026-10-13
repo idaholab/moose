@@ -100,7 +100,12 @@ DirichletBCBaseTempl<is_ad>::operator()(PresetLoop, const ThreadID tid, const De
   if (dof == libMesh::DofObject::invalid_id)
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(node,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      this->_configuration);
 
   sys.getVectorDofValue(dof, _solution_tag) =
       denseADValue(bc.template computeValue<Derived>(0, datum));

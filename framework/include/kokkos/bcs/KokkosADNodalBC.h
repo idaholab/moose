@@ -105,7 +105,8 @@ ADNodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) cons
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
 
   const auto local_re = bc.template computeQpResidual<Derived>(0, datum);
 

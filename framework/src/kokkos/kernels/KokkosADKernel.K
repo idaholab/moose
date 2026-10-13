@@ -23,6 +23,11 @@ ADKernel::ADKernel(const InputParameters & parameters)
   : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _test(), _grad_test()
 {
   addMooseVariableDependency(&_var);
+
+  if (_configuration.displaced())
+    paramError("use_displaced_mesh",
+               "Kokkos AD objects do not yet differentiate with respect to the displacements of "
+               "the current configuration.");
 }
 
 void

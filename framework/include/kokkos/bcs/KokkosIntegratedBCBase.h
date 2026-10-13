@@ -38,6 +38,12 @@ public:
    * Copy constructor for parallel dispatch
    */
   IntegratedBCBase(const IntegratedBCBase & object);
+
+protected:
+  /**
+   * Outward unit normal vector of the side on the configuration of the BC
+   */
+  const NormalAccessor _normals;
 };
 
 } // namespace Moose::Kokkos

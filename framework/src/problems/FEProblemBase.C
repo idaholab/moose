@@ -3218,9 +3218,30 @@ FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
                                              const std::string & base_name,
                                              bool & reinit_displaced)
 {
-  // Objects without the parameter, such as Kokkos objects, always use the reference mesh
   const bool use_displaced_mesh = parameters.have_parameter<bool>("use_displaced_mesh") &&
                                   parameters.get<bool>("use_displaced_mesh");
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Kokkos objects live on the reference problem. One posed on the current configuration couples
+  // the displacements of the displaced problem and composes the deformation into its geometry.
+  if (parameters.isKokkosObject())
+  {
+    if (use_displaced_mesh)
+    {
+      if (_displaced_problem)
+        parameters.set<std::vector<VariableName>>("_displacements") =
+            std::vector<VariableName>(_displaced_problem->getDisplacementVarNames().begin(),
+                                      _displaced_problem->getDisplacementVarNames().end());
+      else
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    logAdd(base_name, name, ro_name, parameters);
+    return;
+  }
+#endif
 
   if (_displaced_problem && use_displaced_mesh)
   {
@@ -4729,6 +4750,27 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       mooseError("We dont support setting 'variable' to a variable that is not set to the same "
                  "system as the 'solver_sys' parameter");
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Kokkos objects live on the reference problem. One posed on the current configuration couples
+  // the displacements of the displaced problem and composes the deformation into its geometry.
+  if (parameters.isKokkosObject() && parameters.have_parameter<bool>("use_displaced_mesh") &&
+      parameters.get<bool>("use_displaced_mesh"))
+  {
+    if (_displaced_problem)
+      parameters.set<std::vector<VariableName>>("_displacements") =
+          std::vector<VariableName>(_displaced_problem->getDisplacementVarNames().begin(),
+                                    _displaced_problem->getDisplacementVarNames().end());
+    else
+      parameters.set<bool>("use_displaced_mesh") = false;
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = sys_num == _aux->number()
+                                               ? static_cast<SystemBase *>(_aux.get())
+                                               : _solver_systems[sys_num].get();
+    return;
+  }
+#endif
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))

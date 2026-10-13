@@ -176,7 +176,8 @@ ADKernel::operator()(ResidualLoop,
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(),
+                      _configuration);
 
   assembleADTerms(kernel, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }

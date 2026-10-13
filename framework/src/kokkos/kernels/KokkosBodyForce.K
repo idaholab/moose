@@ -21,15 +21,13 @@ KokkosBodyForce::validParams()
   params.declareControllable("value");
   params.addClassDescription("Demonstrates the two ways that scalar values can be introduced "
                              "into kernels, e.g. (controllable) constants and postprocessors. "
-                             "Implements the weak form $(\\psi_i, -f)$, integrated over the "
-                             "current configuration when 'displacements' are coupled.");
+                             "Implements the weak form $(\\psi_i, -f)$.");
   return params;
 }
 
 KokkosBodyForce::KokkosBodyForce(const InputParameters & parameters)
   : Moose::Kokkos::KernelValue(parameters),
     _scale(getParam<Real>("value")),
-    _postprocessor(getPostprocessorValue("postprocessor")),
-    _deformation(*this)
+    _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }

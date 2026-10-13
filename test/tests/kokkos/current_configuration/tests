@@ -3,7 +3,7 @@
   design = 'KokkosElementIntegralVariablePostprocessor.md KokkosSideIntegralVariablePostprocessor.md'
 
   [integrals]
-    requirement = 'The Kokkos system shall integrate over the current configuration defined by coupled displacements, matching integration over the displaced mesh,'
+    requirement = 'The Kokkos system shall integrate over the current configuration given by the mesh displacements, matching integration over the displaced mesh,'
     [cartesian]
       type = CSVDiff
       input = 'kokkos_current_configuration_integrals.i'
@@ -21,14 +21,5 @@
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda xpu'
     []
-  []
-  [use_displaced_mesh]
-    type = RunException
-    input = 'kokkos_current_configuration_integrals.i'
-    cli_args = 'Postprocessors/current_volume/use_displaced_mesh=true'
-    expect_err = 'use_displaced_mesh. is private and cannot be set'
-    requirement = 'The Kokkos system shall reject requests to evaluate Kokkos objects on the displaced mesh.'
-    capabilities = 'kokkos'
-    compute_devices = 'cpu cuda xpu'
   []
 []
