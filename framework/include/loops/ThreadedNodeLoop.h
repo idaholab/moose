@@ -171,6 +171,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::printExecutionOrdering(
   auto & console = _fe_problem.console();
   const auto objects_type = MooseUtils::prettyCppType(objs[0]);
   std::vector<MooseObject *> moose_objs;
+  moose_objs.reserve(objs.size());
   for (auto obj_ptr : objs)
     moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
   const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
