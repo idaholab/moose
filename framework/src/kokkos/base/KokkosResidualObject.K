@@ -65,6 +65,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _t_step(object._t_step),
     _dt(object._dt),
     _dt_old(object._dt_old),
+    _displacement_component(object._displacement_component),
     _vector_tags(object._vector_tags),
     _matrix_tags(object._matrix_tags)
 {
@@ -74,6 +75,40 @@ ResidualObject::ResidualObject(const ResidualObject & object)
   // on copying the tag set from object's \p _vector_tags and \p _matrix_tags arrays
   _vector_tags = object.getVectorTags({});
   _matrix_tags = object.getMatrixTags({});
+}
+
+void
+ResidualObject::dispatchDisplacementJacobian(const ThreadID league_size, const bool vector)
+{
+  if (!_displacement_jacobian_dispatcher)
+    _displacement_jacobian_dispatcher =
+        DispatcherRegistry::build<DisplacementJacobianLoop>(this, type());
+
+  TeamLaunch launch;
+  launch.league_size = league_size;
+
+  const auto max_qps = kokkosAssembly().getMaxQpsPerElem();
+  launch.scratch_bytes = vector ? DisplacementScratchLayout<true>::bytes(max_qps)
+                                : DisplacementScratchLayout<false>::bytes(max_qps);
+
+  // Each nonlinear displacement component of the residual system that the coupling matrix couples
+  // to the residual variable contributes a Jacobian block
+  auto & ivar = const_cast<Variable &>(_kokkos_var);
+  const auto & problem = ivar.mooseVar()->sys().feProblem();
+  const auto residual_sys = _kokkos_var.sys();
+  const auto & disp = _configuration.displacements();
+
+  for (const auto c : make_range(disp.components()))
+  {
+    const auto * moose_var = const_cast<Variable &>(disp).mooseVar(c);
+
+    if (disp.sys(c) != residual_sys || moose_var->kind() != Moose::VarKindType::VAR_SOLVER ||
+        !problem.areCoupled(_kokkos_var.var(), disp.var(c), residual_sys))
+      continue;
+
+    _displacement_component = c;
+    _displacement_jacobian_dispatcher->parallelForTeams(launch);
+  }
 }
 
 } // namespace Moose::Kokkos

@@ -15,6 +15,7 @@
 #include "KokkosADAssembly.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosConfiguration.h"
+#include "KokkosPrecomputeHooks.h"
 
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
@@ -71,6 +72,11 @@ public:
   struct OffDiagJacobianScalarLoop
   {
   };
+  /// Jacobian with respect to one displacement component of an object posed on the current
+  /// configuration, dispatched with one team per element or side
+  struct DisplacementJacobianLoop
+  {
+  };
   ///@}
 
   virtual const MooseVariableBase & variable() const override { return _var; }
@@ -112,6 +118,9 @@ protected:
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
   /// Dispatcher of the residual and Jacobian of a pointwise AD object on the current configuration
   std::unique_ptr<DispatcherBase> _displaced_residual_dispatcher;
+  /// Dispatcher of the Jacobian with respect to the displacements of a precompute object on the
+  /// current configuration
+  std::unique_ptr<DispatcherBase> _displacement_jacobian_dispatcher;
   ///@}
 
   /**
@@ -263,6 +272,18 @@ protected:
                                        const ADSlotTable & table,
                                        bool computing_residual,
                                        bool computing_jacobian) const;
+
+  /**
+   * Displacement component assembled by the current dispatch of DisplacementJacobianLoop
+   */
+  unsigned int _displacement_component = 0;
+
+  /**
+   * Dispatch the Jacobian with respect to each displacement component of a precompute object posed
+   * on the current configuration, one team per element or side
+   * @param league_size The number of elements or sides
+   */
+  void dispatchDisplacementJacobian(ThreadID league_size, bool vector);
 
 private:
   /**

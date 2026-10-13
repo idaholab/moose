@@ -62,6 +62,14 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  /**
+   * The team operation called by Kokkos for each element, assembling the Jacobian with respect to a
+   * displacement component of an object posed on the current configuration
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(DisplacementJacobianLoop,
+                                  const TeamMember<DisplacementJacobianLoop> & team,
+                                  const Derived & kernel) const;
   ///@}
 
   /**
@@ -215,6 +223,35 @@ VectorKernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDat
 {
   ResidualObject::computeJacobianInternal(datum,
                                           precomputeOffDiagJacobianBody<true>(kernel, datum));
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+VectorKernel::operator()(DisplacementJacobianLoop,
+                         const TeamMember<DisplacementJacobianLoop> & team,
+                         const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(team.league_rank());
+  const auto side = libMesh::invalid_uint;
+
+  const auto & disp = _configuration.displacements();
+  const auto c = _displacement_component;
+  const auto jvar = disp.var(c);
+
+  if (!kokkosSystem(_kokkos_var.sys())
+           .isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
+    return;
+
+  AssemblyDatum datum(
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
+
+  assembleDisplacementJacobian<true>(
+      kernel,
+      team,
+      datum,
+      c,
+      [&](const Real local_ke, const unsigned int i, const unsigned int j)
+      { accumulateTaggedElementalMatrix(local_ke, datum.elem().id, i, j, jvar); });
 }
 
 } // namespace Moose::Kokkos
