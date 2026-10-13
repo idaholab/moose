@@ -202,4 +202,29 @@
     min_parallel = 4
     max_parallel = 4
   [../]
+
+  [lower_d_block]
+    issues = '#34002'
+    requirement = 'The system shall partition a mesh containing a lower-dimensional block with an '
+                  'external graph partitioner'
+    [no_weights]
+      type = 'RunApp'
+      input = 'lower_d_block.i'
+      expect_out = 'Solve Converged!'
+      capabilities = 'petsc>=3.9.3 & parmetis'
+      min_parallel = 2
+      detail = 'without weights, and'
+    []
+    [side_and_element_weights]
+      type = 'RunApp'
+      input = 'lower_d_block.i'
+      cli_args = 'Mesh/Partitioner/type=PartitionerWeightTest
+                  Mesh/Partitioner/apply_side_weight=true
+                  Mesh/Partitioner/apply_element_weight=true'
+      expect_out = 'Solve Converged!'
+      capabilities = 'petsc>=3.9.3 & parmetis'
+      min_parallel = 2
+      detail = 'with side and element weights.'
+    []
+  []
 []

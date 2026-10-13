@@ -148,6 +148,10 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   if (_apply_side_weight)
     side_weights.resize(num_edges);
 
+  // Lower-dimensional elements (and the NodeElems that constrain spline nodes) give the mesh more
+  // than one element dimension and add graph links that do not cross a side
+  const bool has_lower_d = mesh.elem_dimensions().size() > 1;
+
   local_elem_id = 0;
   nj = 0;
   std::map<dof_id_type, dof_id_type> global_index_to_weight;
@@ -167,22 +171,46 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       // anything.
       if (neighbor != nullptr && neighbor->active())
       {
-        if (_apply_side_weight)
+        if (_apply_side_weight || has_lower_d)
           global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
-                                         computeSideWeight(*elem, side));
+                                         _apply_side_weight ? computeSideWeight(*elem, side) : 0);
         n_neighbors++;
       }
 
       side++;
     }
-    if (n_neighbors != row.size())
-      mooseError(
-          "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
-    if (_apply_side_weight)
+
+    if (!has_lower_d)
     {
-      mooseAssert(global_index_to_weight.size() == row.size(), "These must match");
-      for (const auto [_, weight] : global_index_to_weight)
-        side_weights[nj++] = weight;
+      if (n_neighbors != row.size())
+        mooseError(
+            "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
+      if (_apply_side_weight)
+      {
+        mooseAssert(global_index_to_weight.size() == row.size(), "These must match");
+        for (const auto [_, weight] : global_index_to_weight)
+          side_weights[nj++] = weight;
+      }
+    }
+    else
+    {
+      // Besides face neighbors, the graph links lower-dimensional elements to their interior
+      // parents and elements to the elements constraining their nodes, so a row can be longer
+      // than the number of face neighbors
+      unsigned int n_face_neighbors = 0;
+      for (const auto global_index : row)
+      {
+        const auto it = global_index_to_weight.find(global_index);
+        const bool is_face_neighbor = it != global_index_to_weight.end();
+        if (is_face_neighbor)
+          n_face_neighbors++;
+        // Links that do not cross a side get the default side weight
+        if (_apply_side_weight)
+          side_weights[nj++] = is_face_neighbor ? it->second : 1;
+      }
+      if (n_face_neighbors != n_neighbors)
+        mooseError(
+            "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
     }
 
     local_elem_id++;
