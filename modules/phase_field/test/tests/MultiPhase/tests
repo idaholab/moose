@@ -106,6 +106,36 @@
     design = 'SwitchingFunctionMultiPhaseMaterial.md'
     issues = '#8113'
   [../]
+  [./switchingfunctionmultiphasekundinmaterial]
+    type = 'Exodiff'
+    input = 'switchingfunctionmultiphasekundinmaterial.i'
+    exodiff = 'switchingfunctionmultiphasekundinmaterial_out.e'
+    requirement = 'The system shall provide the general n-phase switching functions of Kundin et al. for a '
+                  'multi-phase, multi-order parameter KKS phase-field model'
+    design = 'SwitchingFunctionMultiPhaseKundinMaterial.md'
+    issues = '#33611'
+  [../]
+  [./triplejunctionbarrierfunction]
+    type = 'Exodiff'
+    input = 'triplejunctionbarrierfunction.i'
+    exodiff = 'triplejunctionbarrierfunction_out.e'
+    requirement = 'The system shall provide an obstacle-type free energy contribution that '
+                  'suppresses spurious nucleation of a fourth phase at triple junctions, with a '
+                  'uniform or per-triple obstacle coefficient'
+    design = 'TripleJunctionBarrierFunctionMaterial.md'
+    issues = '#33611'
+  [../]
+  [./kundinlagrangemult]
+    type = 'Exodiff'
+    input = 'kundinlagrangemult.i'
+    exodiff = 'kundinlagrangemult_out.e'
+    requirement = 'The system shall support a Lagrange multiplier based constraint that keeps the '
+                  'sum of all phase order parameters equal to one while evolving under the general '
+                  'n-phase Kundin free energy with a triple-junction obstacle term'
+    design = 'SwitchingFunctionConstraintLagrange.md SwitchingFunctionMultiPhaseKundinMaterial.md '
+             'TripleJunctionBarrierFunctionMaterial.md'
+    issues = '#33611'
+  [../]
   [./mixedswitchingfunctionmaterial]
     type = 'Exodiff'
     input = 'mixedswitchingfunctionmaterial.i'
