@@ -347,3 +347,30 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, heatCapacityDifference)
   // function cp
   REL_TEST(_fp_cp->cv_from_p_T(p, T), _fp_cp->cp_from_p_T(p, T) - cp_minus_cv, REL_TOL_CONSISTENCY);
 }
+
+/**
+ * Verify that the finite-difference derivatives remain finite at zero pressure and zero internal
+ * energy, where a purely relative perturbation vanishes
+ */
+TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivativesAtZeroArguments)
+{
+  // e_ref = 0 at T_ref = 0, so the internal energy vanishes at T = 0 for the constant-cv object
+  const Real T = 250.0;
+  Real cp, dcp_dp, dcp_dT;
+  _fp->cp_from_p_T(0.0, T, cp, dcp_dp, dcp_dT);
+  EXPECT_TRUE(std::isfinite(dcp_dp));
+  Real cv, dcv_dp, dcv_dT;
+  _fp_cp->cv_from_p_T(0.0, T, cv, dcv_dp, dcv_dT);
+  EXPECT_TRUE(std::isfinite(dcv_dp));
+  Real e, de_dp, de_dT;
+  _fp_cp->e_from_p_T(0.0, T, e, de_dp, de_dT);
+  EXPECT_TRUE(std::isfinite(de_dp));
+
+  // The constant-cv object reaches e = 0 at T = T_ref = 0; use a pressure that keeps the
+  // density positive
+  const Real p = 1e6;
+  const Real v = _fp->v_from_p_T(p, T);
+  Real cp_ve, dcp_dv, dcp_de;
+  _fp->cp_from_v_e(v, 0.0, cp_ve, dcp_dv, dcp_de);
+  EXPECT_TRUE(std::isfinite(dcp_de));
+}
