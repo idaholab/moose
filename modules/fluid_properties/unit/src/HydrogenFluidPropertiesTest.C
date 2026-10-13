@@ -221,6 +221,15 @@ TEST_F(HydrogenFluidPropertiesTest, derivatives)
   dmu_dT_fd = (_fp->mu_from_p_T(p, T + dT) - _fp->mu_from_p_T(p, T - dT)) / (2.0 * dT);
 
   REL_TEST(dmu_dT, dmu_dT_fd, tol);
+
+  // The temperature derivative must be finite at the collision integral reducing
+  // temperature (30.41 K), where log(T*) = 0
+  const Real T_star = 30.41;
+  rho = 70.0;
+  _fp->mu_from_rho_T(rho, T_star, 0.0, mu, dmu_drho, dmu_dT);
+  dmu_dT_fd =
+      (_fp->mu_from_rho_T(rho, T_star + dT) - _fp->mu_from_rho_T(rho, T_star - dT)) / (2.0 * dT);
+  REL_TEST(dmu_dT, dmu_dT_fd, tol);
 }
 
 /**

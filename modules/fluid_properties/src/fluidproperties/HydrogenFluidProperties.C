@@ -131,7 +131,8 @@ HydrogenFluidProperties::mu_from_rho_T(Real density,
   for (std::size_t i = 0; i < _amu.size(); ++i)
   {
     sum += _amu[i] * MathUtils::pow(logTstar, i);
-    dsum_dT += i * _amu[i] * MathUtils::pow(logTstar, i) / (temperature * logTstar);
+    if (i > 0)
+      dsum_dT += i * _amu[i] * MathUtils::pow(logTstar, i - 1) / temperature;
   }
 
   const Real mu0 =
