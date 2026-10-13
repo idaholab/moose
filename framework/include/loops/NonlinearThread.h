@@ -72,11 +72,11 @@ protected:
   /**
    * Compute and accumulate the interface kernel contribution from a single active fine
    * neighbor when \p elem's own neighbor_ptr(side) is an inactive ancestor, i.e. \p elem is on
-   * the coarser side of a statically non-conforming interface. \p variable 's dofs stay bound to
-   * \p elem (so the primary/boundary side's variable is unaffected by refinement direction),
-   * while \p elem 's face is reinitialized at the physical quadrature points of \p fine_neighbor
-   * with a Jacobian-rescaled weight so the integration measure matches fine_neighbor's true
-   * physical face area.
+   * the coarser side of an interface with h-refinement on the other side. \p variable 's dofs
+   * stay bound to \p elem (so the primary/boundary side's variable is unaffected by refinement
+   * direction), while \p elem 's face is reinitialized at the physical quadrature points of
+   * \p fine_neighbor with a Jacobian-rescaled weight so the integration measure matches
+   * fine_neighbor's true physical face area.
    *
    * elem's own residual/Jacobian contribution must accumulate additively across every active
    * fine neighbor of a given (elem, side) visit, since each one only covers a fraction of elem's
@@ -84,8 +84,9 @@ protected:
    * FEProblemBase::prepare() before this side loop ever started, so elem's face is reinitialized
    * directly through Assembly/SystemBase here rather than through the
    * FEProblemBase::reinitElemFaceRef() convenience bundle, which would unconditionally (re-)zero
-   * that storage - discarding both the prior fine neighbors' contributions and elem's own
-   * volumetric Kernel contributions already accumulated earlier in its visit.
+   * that storage - discarding the prior fine neighbors' contributions as well as every
+   * contribution already accumulated earlier in elem's visit (volumetric Kernels, IntegratedBCs and
+   * InterfaceKernels on other sides, etc.).
    */
   void onInterfaceWithHRefinementMismatch(const Elem * elem,
                                           unsigned int side,

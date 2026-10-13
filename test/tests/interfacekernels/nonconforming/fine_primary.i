@@ -46,6 +46,21 @@
   []
 []
 
+[AuxVariables]
+  [w]
+    block = sol
+  []
+[]
+
+[AuxKernels]
+  [w]
+    type = FunctionAux
+    variable = w
+    function = '1 + y + 2 * z'
+    execute_on = INITIAL
+  []
+[]
+
 [Kernels]
   [diff_gas]
     type = ADMatDiffusion
@@ -71,17 +86,33 @@
   [solid_diff]
     type = ADGenericConstantMaterial
     prop_names = 'diffusivity'
-    prop_values = 1
+    prop_values = 0.25
     block = sol
+  []
+  # The solid-side interface rate depends on an auxiliary variable, which must be evaluated at the
+  # same physical points as the nonlinear variables on each face
+  [solid_rate]
+    type = ADParsedMaterial
+    property_name = k_sol
+    coupled_variables = w
+    expression = 'w'
+    block = sol
+  []
+  [gas_rate]
+    type = ADGenericConstantMaterial
+    prop_names = 'k_gas'
+    prop_values = 2
+    block = gas
   []
 []
 
 [InterfaceKernels]
-  [penalty_diff]
-    type = ADPenaltyInterfaceDiffusion
+  [reaction]
+    type = ADMatInterfaceReaction
     variable = c_H2
     neighbor_var = c_2H
-    penalty = 1
+    forward_rate = k_gas
+    backward_rate = k_sol
     boundary = interface
   []
 []

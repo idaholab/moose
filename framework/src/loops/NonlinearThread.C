@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NonlinearThread.h"
+#include "AuxiliarySystem.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
@@ -249,9 +250,10 @@ NonlinearThread::onInterfaceWithHRefinementMismatch(const Elem * elem,
                "' is defined on boundary ",
                bnd_id,
                ", whose primary (boundary-tagged) side is coarser than its paired side. This "
-               "case is only supported without a displaced mesh problem, because the borrowed "
-               "integration weight used to handle the mismatched refinement is not "
-               "AD-differentiable with respect to mesh displacement.");
+               "case is not supported with a displaced mesh problem: the displaced problem's "
+               "assembly is not reinitialized on these faces, and the borrowed integration "
+               "weight used to handle the mismatched refinement is not AD-differentiable with "
+               "respect to mesh displacement.");
 
   const unsigned int fine_side = fine_neighbor->which_neighbor_am_i(elem);
 
@@ -259,10 +261,10 @@ NonlinearThread::onInterfaceWithHRefinementMismatch(const Elem * elem,
   // are the correct integration measure for the portion of elem's face that fine_neighbor
   // actually covers. Call this directly on the Assembly object (not through FEProblemBase) so no
   // variable/dof binding happens for fine_neighbor in the "elem" role.
-  Assembly & assembly0 = _fe_problem.assembly(_tid, _fe_problem.currentNlSysNum());
-  assembly0.reinitElemFaceRef(fine_neighbor, fine_side, TOLERANCE, nullptr, nullptr);
-  const auto fine_phys_points = assembly0.qPointsFace().stdVector();
-  const auto fine_phys_JxW = assembly0.JxWFace().stdVector();
+  Assembly & current_assembly = _fe_problem.assembly(_tid, _fe_problem.currentNlSysNum());
+  current_assembly.reinitElemFaceRef(fine_neighbor, fine_side, TOLERANCE, nullptr, nullptr);
+  const auto fine_phys_points = current_assembly.qPointsFace().stdVector();
+  const auto fine_phys_JxW = current_assembly.JxWFace().stdVector();
 
   // Find elem's own side-local reference coordinates for those same physical points.
   const Elem & elem_side_elem = _elem_side_builder(*elem, side);
@@ -273,8 +275,8 @@ NonlinearThread::onInterfaceWithHRefinementMismatch(const Elem * elem,
   // Measure elem's own local Jacobian at those points using dummy unit weights, then rescale so
   // that elem's face JxW, once bound for real below, exactly matches fine_neighbor's physical
   // weight computed above.
-  assembly0.reinitElemFaceRef(elem, side, TOLERANCE, &elem_side_ref_points, nullptr);
-  const auto elem_dummy_JxW = assembly0.JxWFace().stdVector();
+  current_assembly.reinitElemFaceRef(elem, side, TOLERANCE, &elem_side_ref_points, nullptr);
+  const auto elem_dummy_JxW = current_assembly.JxWFace().stdVector();
   std::vector<Real> elem_ref_weights(fine_phys_JxW.size());
   for (const auto qp : index_range(elem_ref_weights))
     elem_ref_weights[qp] = fine_phys_JxW[qp] / elem_dummy_JxW[qp];
@@ -287,17 +289,19 @@ NonlinearThread::onInterfaceWithHRefinementMismatch(const Elem * elem,
   // The loop below calls Assembly::reinitElemFaceRef() directly rather than the
   // FEProblemBase/SubProblem method of the same name: that convenience bundle also calls
   // Assembly::prepareResidual()/prepareJacobianBlock(), which would unconditionally re-zero elem's
-  // local residual/Jacobian storage, discarding both the prior fine neighbors' contributions and
-  // elem's own volumetric Kernel contributions already accumulated earlier in this element's
-  // visit. elem's dof indices don't change across fine neighbors, so reinitializing the face at
-  // the new points/weights and recomputing variable values from them is all that is needed; no
-  // further dof preparation step is required.
+  // local residual/Jacobian storage, discarding the prior fine neighbors' contributions as well as
+  // every contribution already accumulated earlier in this element's visit (volumetric Kernels,
+  // IntegratedBCs and InterfaceKernels on other sides, etc.). elem's dof indices don't change
+  // across fine neighbors, so reinitializing the face at the new points/weights and recomputing
+  // variable values from them is all that is needed; no further dof preparation step is required.
   for (const auto sys_num : make_range(_fe_problem.numNonlinearSystems()))
   {
     _fe_problem.assembly(_tid, sys_num)
         .reinitElemFaceRef(elem, side, TOLERANCE, &elem_side_ref_points, &elem_ref_weights);
     _fe_problem.getNonlinearSystemBase(sys_num).reinitElemFace(elem, side, _tid);
   }
+  // Auxiliary variables use the system 0 assembly reinitialized above
+  _fe_problem.getAuxiliarySystem().reinitElemFace(elem, side, _tid);
 
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
   _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
