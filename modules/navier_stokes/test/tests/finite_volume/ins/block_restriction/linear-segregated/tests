@@ -22,4 +22,22 @@
     max_threads = 1
     requirement = "The reconstructed pressure-gradient method shall match the unrestricted reference when inactive blocks adjoin both ends of the block-restricted flow domain."
   []
+  [reconstructed-gradient-block-restricted-blockwise-density]
+    type = CSVDiff
+    input = reconstructed-gradient.i
+    csvdiff = reconstructed-gradient-face-orientation.csv
+    # The inactive blocks get a density 1000 times the fluid density, so evaluating the density
+    # on the non-flow side of the inlet and outlet faces would change the result.
+    cli_args = "Mesh/inactive=delete_outside_blocks
+                FunctorMaterials/rho_by_block/type=PiecewiseByBlockFunctorMaterial
+                FunctorMaterials/rho_by_block/prop_name=rho_by_block
+                FunctorMaterials/rho_by_block/subdomain_to_prop_value='1 1000 2 1 3 1000'
+                UserObjects/rc/rho=rho_by_block LinearFVBCs/pressure-flux/rho=rho_by_block
+                Outputs/file_base=reconstructed-gradient-face-orientation"
+    abs_zero = 1e-10
+    prereq = reconstructed-gradient-block-restricted
+    max_threads = 1
+    issues = '#31995'
+    requirement = "The reconstructed pressure-gradient method shall match the unrestricted reference when the inactive blocks adjoining the block-restricted flow domain have a different density than the fluid."
+  []
 []
