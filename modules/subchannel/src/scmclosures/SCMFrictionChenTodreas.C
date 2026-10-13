@@ -368,6 +368,10 @@ SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & f
   else
   {
     // Transition regime is selected by bulk Reynolds number, same for all channels.
+    // fL and fT are evaluated at the local Reynolds number of the subchannel, as Eq. (35) of
+    // Pacio et al. (2022) is written. The example calculation of that paper, Section 6.1.3,
+    // evaluates fL with the laminar and fT with the turbulent flow split of the subchannel type
+    // instead, which gives a different transition flow split.
     return fL * std::pow((1 - psi), gamma) * (1 - std::pow(psi, lambda)) +
            fT * std::pow(psi, gamma);
   }

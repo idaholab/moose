@@ -11,7 +11,9 @@ subchannel-opt -i pacio_kennedy.i Outputs/file_base=pacio_kennedy_pctd_out
 Two figures are written next to this script:
 
 1. scm_pacio_liang.png: flow split of the interior, edge, and corner subchannels of the 37-pin
-   assembly of Liang et al. (2020) versus the bulk Reynolds number, Fig. 7 of the paper.
+   assembly of Liang et al. (2020) versus the bulk Reynolds number, Fig. 7 of the paper. Besides SCM,
+   the PCTD curve of the paper, and the measurements, it shows a lumped PCTD calculation with the
+   local flow split in the transition regime, solved by this script.
 2. scm_pacio_kennedy.png: bulk friction factor of the 127-pin assembly of Kennedy et al. (2015)
    versus the bulk Reynolds number, Fig. 6 of the paper.
 
@@ -362,6 +364,173 @@ def paper_liang_curve(channel):
     )
 
 
+# Lumped PCTD model of Pacio et al. (2022): one flow split per type of subchannel, interior (1), edge
+# (2), and corner (3), from the governing Eqs. (8)-(11) with the constitutive equations of Section 4
+# and the parameters of Table 5. In the transition regime the example calculation of the paper,
+# Section 6.1.3, evaluates the friction factors of Eq. (35) and the mixing of Eq. (36) with the
+# laminar and turbulent flow splits. This calculation evaluates them with the flow split of the
+# solution instead, at the local Reynolds number of Eq. (14), as SCM does. It differs from SCM only by
+# the lumping of the subchannels of each type.
+PCTD_M, PCTD_GAMMA, PCTD_LAMBDA = 0.18, 0.362, 6.7
+# Wire sweep a and b, Eq. (1); wire drag cwT1 to cwT4, Eq. (21); laminar scalings cwL1 and cwL2,
+# Eqs. (22) and (26); turbulent mixing WmT, Eq. (32); all from Table 5 of the paper
+PCTD_SWEEP, PCTD_DRAG, PCTD_CWL1, PCTD_CWL2, PCTD_WMT = (
+    (-6.9, 12.0),
+    (15.2, -48.0, 148.6, -0.547),
+    0.8,
+    1.2,
+    8.8,
+)
+# Bare-bundle friction constants k1, k2, k3 of Eq. (29), Table 3 of the paper, for interior, edge,
+# and corner, for P/D (or W/D) below 1.1 and from 1.1
+PCTD_BARE_L = (
+    ((26.00, 888.2, -3334.0), (62.97, 216.9, -190.2)),
+    ((26.18, 554.5, -1480.0), (44.40, 256.7, -267.6)),
+    ((26.98, 1636.0, -10050.0), (87.26, 38.59, -55.12)),
+)
+PCTD_BARE_T = (
+    ((0.09378, 1.398, -8.664), (0.1458, 0.03632, -0.03333)),
+    ((0.09377, 0.8732, -3.341), (0.1430, 0.04199, -0.04428)),
+    ((0.1004, 1.625, -11.85), (0.1499, 0.006706, -0.009567)),
+)
+
+
+def pctd_geometry(D, Dw, P, H, W, n):
+    """Geometry, friction constants, and mixing coefficients of the lumped PCTD model for pin
+    diameter D, wire diameter Dw, pitch P, wire lead H, edge pitch W, and n rings of pins around the
+    center pin, Appendix A and Section 4 of the paper"""
+    theta = np.arctan(np.pi * (D + Dw) / H)
+    # Bare flow areas and wetted perimeters, Eqs. (A.7)-(A.12), with sharp corners
+    Ap = np.array(
+        [
+            np.sqrt(3.0) / 4.0 * P**2 - np.pi / 8.0 * D**2,
+            P * (W - D / 2.0) - np.pi / 8.0 * D**2,
+            (W - D / 2.0) ** 2 / np.sqrt(3.0) - np.pi / 24.0 * D**2,
+        ]
+    )
+    Pwp = np.array(
+        [
+            np.pi * D / 2.0,
+            P + np.pi * D / 2.0,
+            np.pi * D / 6.0 + 2.0 / np.sqrt(3.0) * (W - D / 2.0),
+        ]
+    )
+    # Flow areas and wetted perimeters with the wires, Eqs. (A.13)-(A.18); the wetted perimeters
+    # add the wire perimeter pi Dw, which Eqs. (A.16)-(A.18) of the paper omit
+    A = Ap - np.array([1.0 / 8.0, 1.0 / 8.0, 1.0 / 24.0]) * np.pi * Dw**2 / np.cos(
+        theta
+    )
+    Pw = Pwp + np.array([1.0 / 2.0, 1.0 / 2.0, 1.0 / 6.0]) * np.pi * Dw / np.cos(theta)
+    N = np.array([6 * n * n, 6 * n, 6])
+    De = 4.0 * A / Pw
+    Deb = 4.0 * (N @ A) / (N @ Pw)
+    # Projected wire areas, Eqs. (A.21)-(A.23)
+    Ar = np.array([1.0 / 6.0, 1.0 / 4.0, 1.0 / 6.0]) * np.pi * (D + Dw) * Dw
+    # Bare-bundle friction constants, Eq. (29), with W/D for the edge and corner subchannels
+    ratio = np.array([P / D, W / D, W / D])
+    bare = lambda table, i: (
+        lambda k: k[0] + k[1] * (ratio[i] - 1.0) + k[2] * (ratio[i] - 1.0) ** 2
+    )(table[i][int(ratio[i] >= 1.1)])
+    bare_L = np.array([bare(PCTD_BARE_L, i) for i in range(3)])
+    bare_T = np.array([bare(PCTD_BARE_T, i) for i in range(3)])
+    WsT = PCTD_SWEEP[0] * np.log10(H / D) + PCTD_SWEEP[1]
+    WdT = (PCTD_DRAG[0] + PCTD_DRAG[1] * Dw / D + PCTD_DRAG[2] * (Dw / D) ** 2) * (
+        H / D
+    ) ** PCTD_DRAG[3]
+    sweep = WsT * Ar / Ap * np.tan(theta) ** 2
+    drag = 3.0 * Ar[0] / Ap[0] * De[0] / H
+    # Subchannel friction constants, Eqs. (19), (20), (24), (25), (27), and (28)
+    C_T = np.array(
+        [
+            bare_T[0] * Pwp[0] / Pw[0] + WdT * drag * (De[0] / Dw) ** PCTD_M,
+            bare_T[1] * (1.0 + sweep[1]) ** ((3.0 - PCTD_M) / 2.0),
+            bare_T[2] * (1.0 + sweep[2]) ** ((3.0 - PCTD_M) / 2.0),
+        ]
+    )
+    C_L = np.array(
+        [
+            bare_L[0] * Pwp[0] / Pw[0] + PCTD_CWL1 * WdT * drag * De[0] / Dw,
+            bare_L[1] * (1.0 + PCTD_CWL2 * sweep[1]),
+            bare_L[2] * (1.0 + PCTD_CWL2 * sweep[2]),
+        ]
+    )
+    # Turbulent mixing W'_ij / (rho V_b) of Eq. (32) without the Re_b and flow-split factors, with
+    # the contact perimeters of Eqs. (A.24) and (A.25)
+    Pi = np.array(
+        [6.0 * n * (P - D - Dw / 6.0), (6.0 * (W - D) * 2.0 - Dw / 6.0) / 2.0]
+    )
+    k_mix = Pi / 2.0 * np.sqrt(Ar[1] / Ap[1]) * np.tan(theta) * PCTD_WMT
+    return {
+        "De": De,
+        "Deb": Deb,
+        "NA": N * A,
+        "S": N * A / (N @ A),
+        "C_L": C_L,
+        "C_T": C_T,
+        "k_mix": k_mix,
+    }
+
+
+def pctd_flow_split(geometry, Re_b):
+    """Lumped PCTD flow split of the interior, edge, and corner subchannels at the bulk Reynolds
+    number Re_b, with the local flow split in Eqs. (35) and (36) of the transition regime
+    """
+    g = geometry
+    psi = np.clip(
+        np.log(Re_b / RE_LAMINAR) / np.log(RE_TURBULENT / RE_LAMINAR), 0.0, 1.0
+    )
+    w_L = (1.0 - psi) ** PCTD_GAMMA * (1.0 - psi**PCTD_LAMBDA)
+    w_T = psi**PCTD_GAMMA
+
+    def residual(v):
+        X, f_b = v[:3], v[3]
+        Re_i = Re_b * X * g["De"] / g["Deb"]
+        # Eq. (35), which reduces to Eqs. (16) and (15) in the laminar and turbulent regimes
+        f = g["C_L"] / Re_i * w_L + g["C_T"] / Re_i**PCTD_M * w_T
+        # Eq. (36) with WmL = 0; the factor (X_i^(2-m) - X_j^(2-m)) / (X_i - X_j) of Eq. (32)
+        ratio = lambda a, b: (
+            (a ** (2.0 - PCTD_M) - b ** (2.0 - PCTD_M)) / (a - b)
+            if abs(a - b) > 1e-10
+            else (2.0 - PCTD_M) * a ** (1.0 - PCTD_M)
+        )
+        W12, W23 = (
+            g["k_mix"]
+            / Re_b**PCTD_M
+            * w_T
+            * np.array([ratio(X[0], X[1]), ratio(X[1], X[2])])
+        )
+        c = 2.0 * g["Deb"] / g["NA"]
+        # Eqs. (8)-(10): equal bulk friction factor in the three types of subchannels; Eq. (11)
+        return np.array(
+            [
+                f[0] * X[0] ** 2 * g["Deb"] / g["De"][0]
+                + c[0] * W12 * (X[0] - X[1])
+                - f_b,
+                f[1] * X[1] ** 2 * g["Deb"] / g["De"][1]
+                + c[1] * (W12 * (X[1] - X[0]) + W23 * (X[1] - X[2]))
+                - f_b,
+                f[2] * X[2] ** 2 * g["Deb"] / g["De"][2]
+                + c[2] * W23 * (X[2] - X[1])
+                - f_b,
+                g["S"] @ X - 1.0,
+            ]
+        )
+
+    # Newton iterations with a finite-difference Jacobian
+    v = np.array([1.0, 1.0, 1.0, 0.05])
+    for _ in range(100):
+        r = residual(v)
+        if np.max(np.abs(r)) < 1e-13:
+            return v[:3]
+        J = np.empty((4, 4))
+        for k in range(4):
+            dv = np.zeros(4)
+            dv[k] = 1e-7 * max(abs(v[k]), 1e-3)
+            J[:, k] = (residual(v + dv) - r) / dv[k]
+        v = v - np.linalg.solve(J, r)
+    raise RuntimeError(f"Lumped PCTD flow split did not converge at Re_b = {Re_b}")
+
+
 COLORS = {"interior": "black", "edge": "red", "corner": "blue"}
 MARKERS = {"interior": "s", "edge": "o", "corner": "^"}
 
@@ -395,14 +564,27 @@ def load(name, n_rings):
 
 
 Re, X, _ = load("pacio_liang_pctd_out.csv", n_rings=4)
+# Geometry of Liang et al., Table 6 of the paper: n = 3 rings of pins around the center pin
+LIANG_GEOMETRY = pctd_geometry(
+    D=10.0e-3, Dw=0.9e-3, P=10.9e-3, H=95.5e-3, W=11.4e-3, n=3
+)
+Re_lumped = np.geomspace(RE_PLOT[0], RE_PLOT[1], 300)
+X_lumped = np.array([pctd_flow_split(LIANG_GEOMETRY, Re_b) for Re_b in Re_lumped]).T
 fig, ax = plt.subplots(figsize=(7.0, 5.0))
-for channel in COLORS:
+for k, channel in enumerate(COLORS):
     ax.plot(Re, X[channel], color=COLORS[channel], label=f"SCM PCTD, {channel}")
     ax.plot(
         *paper_liang_curve(channel),
         color=COLORS[channel],
         linestyle="--",
         label=f"PCTD paper, {channel}",
+    )
+    ax.plot(
+        Re_lumped,
+        X_lumped[k],
+        color=COLORS[channel],
+        linestyle=":",
+        label=f"PCTD local $Re_i$, {channel}",
     )
     ax.plot(
         *LIANG[channel],

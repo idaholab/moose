@@ -250,7 +250,9 @@ SCMMixingChenTodreas::computeBlockMixingParameters(const unsigned int first_node
   {
     // Flow split of each subchannel type lumped over the axial cell, as in the PCTD model,
     // where the flow split is defined per subchannel type: sum of the mass flow rates over sum of
-    // the density times flow area, averaged over the inlet and outlet of the cell
+    // the density times flow area, averaged over the inlet and outlet of the cell. In the
+    // transition regime, Eq. (36) of Pacio et al. (2022) uses the turbulent flow split instead;
+    // the flow-split term varies as about X^(-0.18), so this changes the mixing by less than 1%.
     Real mdot_sum[3] = {0.0, 0.0, 0.0};
     Real rhoS_sum[3] = {0.0, 0.0, 0.0};
     for (const auto i_ch : make_range(_subchannel_mesh.getNumOfChannels()))

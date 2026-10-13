@@ -142,6 +142,8 @@ f_T \psi^\gamma .
 
 The values of $Re_L$, $Re_T$, $\lambda$, and $\gamma$ are determined by the selected `friction_model`. Table 5 of PCTD compares all coefficients of both parameterizations.
 
+Both $f_L$ and $f_T$ are evaluated at the local Reynolds number of the subchannel, from its current mass flux, as Eq. (35) of PCTD is written. The example calculation of PCTD, its Section 6.1.3, instead evaluates $f_L$ with the laminar flow split and $f_T$ with the turbulent flow split of the subchannel type, computed before the transition regime. In the transition regime this gives a different flow split than the PCTD curves of the paper, up to about 0.14 in the corner subchannel of a 37-pin bundle; the laminar and turbulent regimes are not affected. [friction_factor_closures.md] compares the two.
+
 ### Applicability
 
 For triangular lattices, the closure flags a solution warning when $P/D$, wire-wrap $H/D$, number of pins, or the bulk Reynolds number $Re_b$ is outside the data range associated with the selected friction correlation. Both sets of ranges are the reported ranges of validity in Table 1 of PCTD.

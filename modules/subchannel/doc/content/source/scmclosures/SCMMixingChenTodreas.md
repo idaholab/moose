@@ -120,12 +120,14 @@ C_{mT}\,\psi^{\gamma},
 
 with $\gamma = 0.362$ and $\lambda = 6.7$ of Table 5 of [!cite](pacio2022analysis),
 
-where
+where the intermittency factor is evaluated with the bulk Reynolds number, as in Eq. (34) of [!cite](pacio2022analysis),
 
 !equation
 \psi =
-\frac{\ln(Re/Re_L)}
+\frac{\ln(Re_b/Re_L)}
      {\ln(Re_T/Re_L)} .
+
+In the transition regime, Eq. (36) of [!cite](pacio2022analysis) evaluates the flow-split term with the turbulent flow splits $X_{iT}$ and $X_{jT}$. SCM evaluates it with the current flow split of each subchannel type. Because the flow-split term varies as about $\bar{X}^{-0.18}$, this changes the mixing parameter by less than 1% for flow splits between 0.8 and 1.2.
 
 For both center-edge and edge-corner interfaces, the Pacio mixing parameter uses the edge-subchannel projected wire area $A_{r2}$ and bare flow area $A'_2$:
 
