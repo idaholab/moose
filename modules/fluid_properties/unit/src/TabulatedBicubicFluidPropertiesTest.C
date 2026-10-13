@@ -931,6 +931,16 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
 
     DERIV_TEST(_tab_ve_from_pT->T_from_p_s, p, s, tol);
     DERIV_TEST(_tab_ve_from_pT->rho_from_p_s, p, s, tol);
+
+    // The temperature derivatives must not rely on relative perturbations of the arguments,
+    // which vanish at zero entropy: (dT/ds)_p = T / cp. The CO2 entropy reference puts s = 0
+    // within the range of the tabulation generated from CO2FluidProperties.
+    {
+      const Real s0 = 0.0;
+      Real T0, dT_dp, dT_ds;
+      _tab_pT_from_fp->T_from_p_s(p, s0, T0, dT_dp, dT_ds);
+      REL_TEST(dT_ds, T0 / _tab_pT_from_fp->cp_from_p_T(p, T0), 1e-3);
+    }
   }
 
   {

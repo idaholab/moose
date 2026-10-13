@@ -553,9 +553,11 @@ TabulatedFluidProperties::rho_from_p_T(
     checkInputVariables(pressure, temperature);
     // use finite differencing stencil
     rho = rho_from_p_T(pressure, temperature);
-    Real eps = 1e-8;
-    drho_dp = (rho_from_p_T(pressure * (1 + eps), temperature) - rho) / (eps * pressure);
-    drho_dT = (rho_from_p_T(pressure, temperature * (1 + eps)) - rho) / (eps * temperature);
+    // Relative steps, made absolute at zero so that they do not vanish
+    const Real dp = (pressure == 0 ? 1.0 : std::abs(pressure)) * 1e-8;
+    const Real dT = temperature * 1e-8;
+    drho_dp = (rho_from_p_T(pressure + dp, temperature) - rho) / dp;
+    drho_dT = (rho_from_p_T(pressure, temperature + dT) - rho) / dT;
   }
   else
   {
@@ -699,9 +701,11 @@ TabulatedFluidProperties::e_from_p_T(
     checkInputVariables(pressure, temperature);
     // use finite differencing stencil
     e = e_from_p_T(pressure, temperature);
-    Real eps = 1e-8;
-    de_dp = (e_from_p_T(pressure * (1 + eps), temperature) - e) / (eps * pressure);
-    de_dT = (e_from_p_T(pressure, temperature * (1 + eps)) - e) / (eps * temperature);
+    // Relative steps, made absolute at zero so that they do not vanish
+    const Real dp = (pressure == 0 ? 1.0 : std::abs(pressure)) * 1e-8;
+    const Real dT = temperature * 1e-8;
+    de_dp = (e_from_p_T(pressure + dp, temperature) - e) / dp;
+    de_dT = (e_from_p_T(pressure, temperature + dT) - e) / dT;
   }
   else
   {
@@ -861,9 +865,11 @@ TabulatedFluidProperties::T_from_p_rho(
     Real pressure, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
 {
   T = T_from_p_rho(pressure, rho);
-  Real eps = 1e-8;
-  dT_dp = (T_from_p_rho(pressure * (1 + eps), rho) - T) / (eps * pressure);
-  dT_drho = (T_from_p_rho(pressure, rho * (1 + eps)) - T) / (eps * rho);
+  // Implicit differentiation of rho(p, T) = rho
+  Real rho_pT, drho_dp, drho_dT;
+  rho_from_p_T(pressure, T, rho_pT, drho_dp, drho_dT);
+  dT_dp = -drho_dp / drho_dT;
+  dT_drho = 1.0 / drho_dT;
 }
 
 Real
@@ -895,9 +901,11 @@ TabulatedFluidProperties::T_from_p_s(
     Real pressure, Real s, Real & T, Real & dT_dp, Real & dT_ds) const
 {
   T = T_from_p_s(pressure, s);
-  Real eps = 1e-8;
-  dT_dp = (T_from_p_s(pressure * (1 + eps), s) - T) / (eps * pressure);
-  dT_ds = (T_from_p_s(pressure, s * (1 + eps)) - T) / (eps * s);
+  // Implicit differentiation of s(p, T) = s
+  Real s_pT, ds_dp, ds_dT;
+  s_from_p_T(pressure, T, s_pT, ds_dp, ds_dT);
+  dT_dp = -ds_dp / ds_dT;
+  dT_ds = 1.0 / ds_dT;
 }
 
 Real
