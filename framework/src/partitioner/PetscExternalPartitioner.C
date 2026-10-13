@@ -148,9 +148,17 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   if (_apply_side_weight)
     side_weights.resize(num_edges);
 
-  // Lower-dimensional elements (and the NodeElems that constrain spline nodes) give the mesh more
-  // than one element dimension and add graph links that do not cross a side
-  const bool has_lower_d = mesh.elem_dimensions().size() > 1;
+  // Besides face neighbors, the graph links lower-dimensional elements to their interior parents
+  // and elements to the NodeElems constraining their spline nodes. Such a link may join a local
+  // element to a remote lower-dimensional element, so all ranks must take the same path below
+  bool has_non_face_links = !mesh.get_constraint_rows().empty();
+  for (const auto * const elem : mesh.active_local_element_ptr_range())
+    if (elem->interior_parent())
+    {
+      has_non_face_links = true;
+      break;
+    }
+  comm().max(has_non_face_links);
 
   local_elem_id = 0;
   nj = 0;
@@ -171,7 +179,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       // anything.
       if (neighbor != nullptr && neighbor->active())
       {
-        if (_apply_side_weight || has_lower_d)
+        // Without side weights, the map only identifies the face neighbors, so the 0 is never used
+        if (_apply_side_weight || has_non_face_links)
           global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
                                          _apply_side_weight ? computeSideWeight(*elem, side) : 0);
         n_neighbors++;
@@ -180,7 +189,7 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       side++;
     }
 
-    if (!has_lower_d)
+    if (!has_non_face_links)
     {
       if (n_neighbors != row.size())
         mooseError(
@@ -194,9 +203,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     }
     else
     {
-      // Besides face neighbors, the graph links lower-dimensional elements to their interior
-      // parents and elements to the elements constraining their nodes, so a row can be longer
-      // than the number of face neighbors
+      // A row can be longer than the number of face neighbors: graph indices missing from the map
+      // are the links that do not cross a side
       unsigned int n_face_neighbors = 0;
       for (const auto global_index : row)
       {
@@ -204,7 +212,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
         const bool is_face_neighbor = it != global_index_to_weight.end();
         if (is_face_neighbor)
           n_face_neighbors++;
-        // Links that do not cross a side get the default side weight
+        // Links that do not cross a side have no side to pass to computeSideWeight(), so they get
+        // its default weight of 1
         if (_apply_side_weight)
           side_weights[nj++] = is_face_neighbor ? it->second : 1;
       }

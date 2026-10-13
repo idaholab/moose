@@ -227,4 +227,23 @@
       detail = 'with side and element weights.'
     []
   []
+
+  [spline_mesh]
+    issues = '#34002'
+    requirement = 'The system shall partition an IsoGeometric Analysis mesh, whose spline nodes are '
+                  'constrained by separate node elements, with an external graph partitioner using '
+                  'side and element weights.'
+    type = 'RunApp'
+    input = '../../meshgenerators/file_mesh_generator/2d_diffusion_iga.i'
+    # Keep ParMETIS; the automatic switch to PTScotch for small meshes depends on the rank count
+    cli_args = 'Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/part_package=parmetis
+                Mesh/Partitioner/apply_side_weight=true
+                Mesh/Partitioner/apply_element_weight=true
+                Outputs/vtk=false'
+    expect_out = 'Solve Converged!'
+    capabilities = 'petsc>=3.12.0 & exodus>=8.0 & parmetis'
+    min_parallel = 2
+    recover = false
+  []
 []
