@@ -40,4 +40,25 @@
     issues = '#31995'
     requirement = "The reconstructed pressure-gradient method shall match the unrestricted reference when the inactive blocks adjoining the block-restricted flow domain have a different density than the fluid."
   []
+  [scalar-advection-block-restricted]
+    type = CSVDiff
+    input = 'reconstructed-gradient.i scalar-advection.i'
+    csvdiff = scalar-advection.csv
+    cli_args = 'Mesh/inactive=delete_outside_blocks Outputs/file_base=scalar-advection'
+    abs_zero = 1e-10
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#31995'
+    design = 'LinearFVScalarAdvection.md'
+    requirement = "The system shall advect a passive scalar into a block-restricted flow domain through a boundary whose face element lies outside the domain."
+  []
+  [scalar-advection-block-mismatch]
+    type = RunException
+    input = 'reconstructed-gradient.i scalar-advection.i'
+    cli_args = "Mesh/inactive=delete_outside_blocks restricted_blocks='' Variables/scalar/block=2"
+    expect_err = "includes blocks not in the block restriction of variable 'scalar'"
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#31995'
+    design = 'LinearFVScalarAdvection.md'
+    requirement = "The system shall error if a passive scalar advected with a Rhie-Chow mass flux is not defined on the same blocks as the flow."
+  []
 []

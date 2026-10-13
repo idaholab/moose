@@ -47,6 +47,12 @@ public:
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
+  /**
+   * Check the block consistency between the passed in \p var and us
+   */
+  template <typename VarType>
+  void checkBlocks(const VarType & var) const;
+
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
   const LinearFVGradientReader & pressureGradientField() const;
 
@@ -202,12 +208,6 @@ protected:
   Real velocityBoundaryValue(unsigned int component,
                              const FaceInfo & fi,
                              const Moose::FaceArg & boundary_face) const;
-
-  /**
-   * Check the block consistency between the passed in \p var and us
-   */
-  template <typename VarType>
-  void checkBlocks(const VarType & var) const;
 
   virtual bool supportMeshVelocity() const override { return false; }
 
