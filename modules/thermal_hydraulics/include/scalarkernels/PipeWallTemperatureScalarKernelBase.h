@@ -31,7 +31,7 @@ protected:
 
   /// Temperature of the wall node on the other side of this layer's radial conduction path
   virtual ADReal otherNodeTemperature() const = 0;
-  /// Heat flux exchanged with the fluid or ambient environment on this node's non-radial side
+  /// Heat flux exchanged with the fluid or ambient environment on this node's interface to the fluid/environment
   virtual ADReal convectiveLinearHeatRate() const = 0;
   /// Derivative of convectiveLinearHeatRate() with respect to this node's own temperature
   virtual Real convectiveJacobian() const = 0;
