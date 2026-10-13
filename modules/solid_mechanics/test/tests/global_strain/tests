@@ -1,6 +1,6 @@
 [Tests]
   design = 'SolidMechanics/GlobalStrain/index.md'
-  issues = '#11314'
+  issues = '#11314 #33648'
   [./test]
     type = 'Exodiff'
     input = 'global_strain.i'
@@ -67,4 +67,153 @@
                    for the globalstrain system to correctly compute the deformation
                    behavior maintaining strain periodicity."
   [../]
+  [ADapplied3D_xyz]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest3D.i'
+    exodiff = 'ADGlobalStrainApplied3D_out_xyz.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainApplied3D_out_xyz BCs/B1/variable='dummy' BCs/B2/variable='dummy' BCs/C1/variable='dummy' Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an applied stress tenosr while maintaining periodicity."
+  []
+  [ADapplied3D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest3D.i'
+    exodiff = 'ADGlobalStrainApplied3D_out_xy.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x y' Variables/GS_diag/order=SECOND Variables/GS_off_diag/order=THIRD Outputs/file_base=ADGlobalStrainApplied3D_out_xy
+                BCs/B1/variable=u_x BCs/B2/variable=u_y Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an applied stress tenosr while maintaining periodicity."
+  []
+  [ADapplied3D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest3D.i'
+    exodiff = 'ADGlobalStrainApplied3D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=SECOND Outputs/file_base=ADGlobalStrainApplied3D_out_x
+                BCs/B1/variable=u_x BCs/B2/variable=u_z BCs/C1/variable=u_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an applied stress tenosr while maintaining periodicity."
+  []
+  [ADapplied2D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest2D.i'
+    exodiff = 'ADGlobalStrainApplied2D_out_xy.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainApplied2D_out_xy Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an applied stress tenosr while maintaining periodicity."
+  []
+  [ADapplied2D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest2D.i'
+    exodiff = 'ADGlobalStrainApplied2D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=FIRST
+                Outputs/file_base=ADGlobalStrainApplied2D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an applied stress tenosr while maintaining periodicity."
+  []
+  [ADapplied1D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainAppliedTest2D.i'
+    exodiff = 'ADGlobalStrainApplied1D_out_x.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainApplied1D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain3D_xyz]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest3D.i'
+    exodiff = 'ADGlobalStrainEigenstrain3D_out_xyz.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainEigenstrain3D_out_xyz BCs/B1/variable='dummy' BCs/B2/variable='dummy' BCs/C1/variable='dummy' Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain3D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest3D.i'
+    exodiff = 'ADGlobalStrainEigenstrain3D_out_xy.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x y' Variables/GS_diag/order=SECOND Variables/GS_off_diag/order=THIRD Outputs/file_base=ADGlobalStrainEigenstrain3D_out_xy
+                BCs/B1/variable=u_x BCs/B2/variable=u_y Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain3D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest3D.i'
+    exodiff = 'ADGlobalStrainEigenstrain3D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=SECOND Outputs/file_base=ADGlobalStrainEigenstrain3D_out_x
+                BCs/B1/variable=u_x BCs/B2/variable=u_z BCs/C1/variable=u_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain2D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest2D.i'
+    exodiff = 'ADGlobalStrainEigenstrain2D_out_xy.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainEigenstrain2D_out_xy Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain2D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest2D.i'
+    exodiff = 'ADGlobalStrainEigenstrain2D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=FIRST Outputs/file_base=ADGlobalStrainEigenstrain2D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADeigenstrain1D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainEigenstrainTest1D.i'
+    exodiff = 'ADGlobalStrainEigenstrain1D_out_x.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainEigenstrain1D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with an eigenstrain while maintaining periodicity."
+  []
+  [ADvelocity3D_xyz]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest3D.i'
+    exodiff = 'ADGlobalStrainVelocity3D_out_xyz.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainVelocity3D_out_xyz Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
+  [ADvelocity3D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest3D.i'
+    exodiff = 'ADGlobalStrainVelocity3D_out_xy.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x y' Variables/GS_diag/order=SECOND Variables/GS_off_diag/order=THIRD Outputs/file_base=ADGlobalStrainVelocity3D_out_xy Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
+  [ADvelocity3D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest3D.i'
+    exodiff = 'ADGlobalStrainVelocity3D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=SECOND Outputs/file_base=ADGlobalStrainVelocity3D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
+  [ADvelocity2D_xy]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest2D.i'
+    exodiff = 'ADGlobalStrainVelocity2D_out_xy.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainVelocity2D_out_xy Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
+  [ADvelocity2D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest2D.i'
+    exodiff = 'ADGlobalStrainVelocity2D_out_x.e'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Variables/GS_diag/order=FIRST Variables/GS_off_diag/order=FIRST Outputs/file_base=ADGlobalStrainVelocity2D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
+  [ADvelocity1D_x]
+    type = 'Exodiff'
+    input = 'ADGlobalStrainVelocityTest1D.i'
+    exodiff = 'ADGlobalStrainVelocity1D_out_x.e'
+    cli_args = "Outputs/file_base=ADGlobalStrainVelocity1D_out_x Executioner/abort_on_solve_fail='FALSE'"
+    requirement = "The ADGlobalStrain System shall correctly compute deformation behavior in 3D
+                   with a velocity BC while maintaining periodicity."
+  []
 []
