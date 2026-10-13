@@ -215,7 +215,9 @@ CaloricallyImperfectGas::T_from_e(Real e) const
   else if (e > _max_e)
     return _T_e_lookup.back();
 
-  unsigned int index = std::floor((e - _min_e) / _delta_e);
+  // e == _max_e falls in the last interval, not past the end of the table
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((e - _min_e) / _delta_e), _T_e_lookup.size() - 2);
   Real x = (e - _min_e - index * _delta_e) / _delta_e;
   return x * _T_e_lookup[index + 1] + (1 - x) * _T_e_lookup[index];
 }
@@ -231,7 +233,9 @@ CaloricallyImperfectGas::T_from_h(Real h) const
   else if (h > _max_h)
     return _T_h_lookup.back();
 
-  unsigned int index = std::floor((h - _min_h) / _delta_h);
+  // h == _max_h falls in the last interval, not past the end of the table
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((h - _min_h) / _delta_h), _T_h_lookup.size() - 2);
   Real x = (h - _min_h - index * _delta_h) / _delta_h;
   return x * _T_h_lookup[index + 1] + (1 - x) * _T_h_lookup[index];
 }
@@ -242,7 +246,13 @@ CaloricallyImperfectGas::Z_from_T(Real T) const
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("Z_from_T", T, _min_temperature, _max_temperature);
 
-  unsigned int index = std::floor((T - _min_temperature) / _delta_T);
+  if (T <= _min_temperature)
+    return _Z_T_lookup[0];
+  else if (T >= _max_temperature)
+    return _Z_T_lookup.back();
+
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((T - _min_temperature) / _delta_T), _Z_T_lookup.size() - 2);
   Real x = (T - _min_temperature - index * _delta_T) / _delta_T;
   return x * _Z_T_lookup[index + 1] + (1 - x) * _Z_T_lookup[index];
 }

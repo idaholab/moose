@@ -690,3 +690,46 @@ TEST_F(CaloricallyImperfectGasTest, soundSpeedVaryingGamma)
   DERIV_TEST_CUSTOM_PERTURBATION(fp.c_from_v_e, v, e, 1e-4, 1e-4);
   DERIV_TEST_CUSTOM_PERTURBATION(fp.gamma_from_v_e, v, e, 1e-4, 1e-4);
 }
+
+/**
+ * Verify the lookup tables at and beyond their bounds
+ */
+TEST_F(CaloricallyImperfectGasTest, lookupTableBounds)
+{
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
+
+  InputParameters e_fn_params = _factory.getValidParams("PiecewiseLinear");
+  e_fn_params.set<std::vector<Real>>("x") = {100, 500};
+  e_fn_params.set<std::vector<Real>>("y") = {1e6, 5e6};
+  _fe_problem->addFunction("PiecewiseLinear", "e_lin_fn", e_fn_params);
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_lin_fn";
+  uo_pars.set<FunctionName>("mu") = "default_fn";
+  uo_pars.set<FunctionName>("k") = "default_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 1.0;
+  uo_pars.set<bool>("out_of_bound_error") = false;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_bounds", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_bounds");
+  fp.initialSetup();
+
+  const Real v = 1.0;
+  const Real p = 1e5;
+  // Upper bound of the T(e), T(h) and Z(T) tables
+  REL_TEST(fp.T_from_v_e(v, 5e6), 500.0, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.T_from_p_h(p, fp.h_from_p_T(p, 500.0)), 500.0, REL_TOL_CONSISTENCY);
+  EXPECT_TRUE(std::isfinite(fp.s_from_p_T(p, 500.0)));
+  // Below and above the tables, the values are clamped to the bounds
+  REL_TEST(fp.T_from_v_e(v, 0.5e6), 100.0, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.T_from_v_e(v, 6e6), 500.0, REL_TOL_CONSISTENCY);
+  // s(T, v) = Z(T) + R ln(v), so at fixed v the entropy outside the table equals that at
+  // the nearest bound
+  REL_TEST(fp.s_from_T_v(50.0, v), fp.s_from_T_v(100.0, v), REL_TOL_CONSISTENCY);
+  REL_TEST(fp.s_from_T_v(600.0, v), fp.s_from_T_v(500.0, v), REL_TOL_CONSISTENCY);
+
+  Moose::_throw_on_warning = original_throw_on_warning;
+}
