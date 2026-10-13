@@ -136,6 +136,9 @@ protected:
   void cv_from_T(Real T, Real & cv, Real & dcv_dT) const;
   void cp_from_T(Real T, Real & cp, Real & dcp_dT) const;
   Real Z_from_T(Real T) const;
+
+  /// Signed temperature step for one-sided finite differences that stays within the table
+  Real temperatureStep(Real T) const;
   ///@}
 
   /// molar mass

@@ -187,10 +187,9 @@ CaloricallyImperfectGas::cv_from_T(Real T, Real & cv, Real & dcv_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("cv_from_T (3 args)", T, _min_temperature, _max_temperature);
-  Real pert = 1.0e-7;
   cv = cv_from_T(T);
-  Real cv_pert = cv_from_T(T * (1 + pert));
-  dcv_dT = (cv_pert - cv) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dcv_dT = (cv_from_T(T + dT) - cv) / dT;
 }
 
 void
@@ -198,10 +197,9 @@ CaloricallyImperfectGas::cp_from_T(Real T, Real & cp, Real & dcp_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("cp_from_T (3 args)", T, _min_temperature, _max_temperature);
-  Real pert = 1.0e-7;
   cp = cp_from_T(T);
-  Real cp_pert = cp_from_T(T * (1 + pert));
-  dcp_dT = (cp_pert - cp) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dcp_dT = (cp_from_T(T + dT) - cp) / dT;
 }
 
 Real
@@ -898,9 +896,8 @@ CaloricallyImperfectGas::mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, R
 {
   mu = this->mu_from_p_T(p, T);
   dmu_dp = 0.0;
-  Real pert = 1.0e-7;
-  Real mu2 = this->mu_from_p_T(p, T * (1 + pert));
-  dmu_dT = (mu2 - mu) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dmu_dT = (this->mu_from_p_T(p, T + dT) - mu) / dT;
 }
 
 Real
@@ -914,9 +911,8 @@ CaloricallyImperfectGas::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
 {
   k = k_from_p_T(p, T);
   dk_dp = 0.0;
-  Real pert = 1.0e-7;
-  Real k2 = this->k_from_p_T(p, T * (1 + pert));
-  dk_dT = (k2 - k) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dk_dT = (this->k_from_p_T(p, T + dT) - k) / dT;
 }
 
 Real
@@ -942,11 +938,20 @@ void
 CaloricallyImperfectGas::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
 {
   p = p_from_h_s(h, s);
-  Real pert = 1e-7;
-  Real p_pert = p_from_h_s(h * (1 + pert), s);
-  dp_dh = (p_pert - p) / (h * pert);
-  p_pert = p_from_h_s(h, s * (1 + pert));
-  dp_ds = (p_pert - p) / (s * pert);
+  // From dh = T ds + v dp
+  const Real T = T_from_h(h);
+  const Real rho = rho_from_p_T(p, T);
+  dp_dh = rho;
+  dp_ds = -T * rho;
+}
+
+Real
+CaloricallyImperfectGas::temperatureStep(Real T) const
+{
+  // Relative step for one-sided finite differences, taken backward near the upper bound of
+  // the tabulated temperature range so that the perturbed state stays inside it
+  const Real dT = 1.0e-7 * T;
+  return T + dT > _max_temperature ? -dT : dT;
 }
 
 void

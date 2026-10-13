@@ -733,3 +733,48 @@ TEST_F(CaloricallyImperfectGasTest, lookupTableBounds)
 
   Moose::_throw_on_warning = original_throw_on_warning;
 }
+
+/**
+ * Verify derivatives that were computed with relative finite-difference steps, at states where
+ * the step would vanish (s = 0) or leave the table (T = max_temperature)
+ */
+TEST_F(CaloricallyImperfectGasTest, derivativesAtEdgeStates)
+{
+  InputParameters e_fn_params = _factory.getValidParams("ParsedFunction");
+  e_fn_params.set<std::string>("expression") = "3000 * t + 2 * t * t";
+  _fe_problem->addFunction("ParsedFunction", "e_edge_fn", e_fn_params);
+  _fe_problem->getFunction("e_edge_fn").initialSetup();
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_edge_fn";
+  uo_pars.set<FunctionName>("mu") = "e_edge_fn";
+  uo_pars.set<FunctionName>("k") = "e_edge_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 0.01;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_edge", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_edge");
+  fp.initialSetup();
+
+  // (dp/dh)_s = rho and (dp/ds)_h = -T rho, from dh = T ds + v dp
+  const Real T = 300.0;
+  const Real v = 1.0 / fp.rho_from_p_T(1e5, T);
+  const Real h = fp.h_from_T_v(T, v);
+  // The entropy reference makes s = 0 at the state with Z(T) + R ln(v) = 0
+  const Real s0 = 0.0;
+  Real p, dp_dh, dp_ds;
+  fp.p_from_h_s(h, s0, p, dp_dh, dp_ds);
+  const Real T0 = fp.T_from_p_h(p, h);
+  const Real rho0 = fp.rho_from_p_T(p, T0);
+  REL_TEST(dp_dh, rho0, REL_TOL_DERIVATIVE);
+  REL_TEST(dp_ds, -T0 * rho0, REL_TOL_DERIVATIVE);
+
+  // Temperature derivatives at the upper bound of the table must not leave the table
+  Real cp, dcp_dp, dcp_dT;
+  fp.cp_from_p_T(1e5, 500.0, cp, dcp_dp, dcp_dT);
+  REL_TEST(dcp_dT, 4.0, 1e-4);
+  Real mu, dmu_dp, dmu_dT;
+  fp.mu_from_p_T(1e5, 500.0, mu, dmu_dp, dmu_dT);
+  REL_TEST(dmu_dT, 3000.0 + 4.0 * 500.0, 1e-4);
+}
