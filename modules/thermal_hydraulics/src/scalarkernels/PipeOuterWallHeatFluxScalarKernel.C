@@ -12,12 +12,10 @@
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 
-registerMooseObject("ThermalHydraulicsApp", PipeOuterWallHeatFluxScalarKernel);
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallHeatFluxScalarKernel);
 
-template <bool is_ad>
 InputParameters
-PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::validParams()
+ADPipeOuterWallHeatFluxScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
   params.addClassDescription(
@@ -34,19 +32,17 @@ PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::PipeOuterWallHeatFluxScalarKernelTempl(
+ADPipeOuterWallHeatFluxScalarKernel::ADPipeOuterWallHeatFluxScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    _Tin(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inner_wall_temperature")),
-    _heat_flux(this->template getFunctor<GenericReal<is_ad>>("heat_flux")),
-    _heated_perimeter(this->template getFunctor<GenericReal<is_ad>>("heated_perimeter"))
+    _Tin(ScalarCoupleable::adCoupledScalarValue("inner_wall_temperature")),
+    _heat_flux(this->template getFunctor<ADReal>("heat_flux")),
+    _heated_perimeter(this->template getFunctor<ADReal>("heated_perimeter"))
 {
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
+ADReal
+ADPipeOuterWallHeatFluxScalarKernel::convectiveLinearHeatRate() const
 {
   const Moose::ElemArg elem_arg = Moose::ElemArg();
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
@@ -55,27 +51,9 @@ PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::convectiveLinearHeatRate() const
   return _heat_flux(elem_arg, state) * _heated_perimeter(elem_arg, state);
 }
 
-template <bool is_ad>
 Real
-PipeOuterWallHeatFluxScalarKernelTempl<is_ad>::convectiveJacobian() const
+ADPipeOuterWallHeatFluxScalarKernel::convectiveJacobian() const
 {
-  if constexpr (!is_ad)
-    // The applied heat flux does not depend on this node's own temperature
-    return 0.0;
-  else
-  {
-    mooseError("convectiveJacobian() should not be called in AD mode");
-    return 0;
-  }
+  mooseError("convectiveJacobian() should not be called in AD mode");
+  return 0;
 }
-
-template <>
-Real
-PipeOuterWallHeatFluxScalarKernelTempl<true>::convectiveJacobian() const
-{
-  mooseError("Internal error, calling convectiveJacobian in AD class.");
-  return 0.0;
-}
-
-template class PipeOuterWallHeatFluxScalarKernelTempl<false>;
-template class PipeOuterWallHeatFluxScalarKernelTempl<true>;

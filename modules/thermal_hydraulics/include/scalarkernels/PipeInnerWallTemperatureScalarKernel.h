@@ -16,41 +16,35 @@ class SinglePhaseFluidProperties;
 /**
  * Inner wall path-integrated incompressible conjugate heat transfer kernel
  */
-template <bool is_ad>
-class PipeInnerWallTemperatureScalarKernelTempl
-  : public PipeWallTemperatureScalarKernelBaseTempl<is_ad>
+class ADPipeInnerWallTemperatureScalarKernel : public ADPipeWallTemperatureScalarKernelBase
 {
-  using Base = PipeWallTemperatureScalarKernelBaseTempl<is_ad>;
+  using Base = ADPipeWallTemperatureScalarKernelBase;
 
 public:
-  PipeInnerWallTemperatureScalarKernelTempl(const InputParameters & parameters);
-  virtual bool isADObject() const override { return is_ad; };
+  ADPipeInnerWallTemperatureScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
-  virtual GenericReal<is_ad> otherNodeTemperature() const override { return _Tout[0]; }
-  virtual GenericReal<is_ad> convectiveLinearHeatRate() const override;
+  virtual ADReal otherNodeTemperature() const override { return _Tout[0]; }
+  virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate through the pipe
-  const GenericVariableValue<is_ad> & _m;
+  const ADVariableValue & _m;
   /// Coupled temperature of the outer-surface wall node
-  const GenericVariableValue<is_ad> & _Tout;
+  const ADVariableValue & _Tout;
   /// Coupled fluid temperature adjacent to this wall node
-  const GenericVariableValue<is_ad> & _Tf;
+  const ADVariableValue & _Tf;
   /// Coupled fluid temperature adjacent to the upstream wall node
-  const GenericVariableValue<is_ad> & _Tfup;
+  const ADVariableValue & _Tfup;
   /// Coupled fluid temperature adjacent to the downstream wall node
-  const GenericVariableValue<is_ad> & _Tfdown;
+  const ADVariableValue & _Tfdown;
   /// System reference pressure
-  const Moose::Functor<GenericReal<is_ad>> & _Pref;
+  const Moose::Functor<ADReal> & _Pref;
   /// Cross-sectional area of the fluid flow channel adjacent to this wall node
-  const Moose::Functor<GenericReal<is_ad>> & _flow_area;
+  const Moose::Functor<ADReal> & _flow_area;
   /// Wetted perimeter of the fluid flow channel adjacent to this wall node
-  const Moose::Functor<GenericReal<is_ad>> & _wetted_perimeter;
+  const Moose::Functor<ADReal> & _wetted_perimeter;
 };
-
-typedef PipeInnerWallTemperatureScalarKernelTempl<false> PipeInnerWallTemperatureScalarKernel;
-typedef PipeInnerWallTemperatureScalarKernelTempl<true> ADPipeInnerWallTemperatureScalarKernel;
