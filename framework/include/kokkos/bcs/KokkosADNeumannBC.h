@@ -25,9 +25,10 @@ public:
 
   KokkosADNeumannBC(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<max_ad_slots>
-  precomputeQpResidualValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int /* qp */,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & /* datum */) const
   {
     return -_value;
   }

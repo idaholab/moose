@@ -11,6 +11,7 @@
 
 #include "KokkosVariableValue.h"
 #include "KokkosDenseADReal.h"
+#include "KokkosADGeometry.h"
 
 namespace Moose::Kokkos
 {
@@ -69,6 +70,38 @@ public:
    */
   const std::vector<ADSlotBlock> & hostBlocks() const { return _host_blocks; }
 
+  /**
+   * Leave unused slots so that the next registered quantity starts at a given slot
+   * @param first The slot at which the next registered quantity starts
+   */
+  void reserve(const unsigned int first) { _num_slots = std::max(_num_slots, first); }
+  /**
+   * Register the displacements of the current configuration, whose values and reference gradients
+   * occupy the AD_DISPLACEMENT_SLOTS slots following those of the accessors
+   * @param displacements The displacement variable
+   * @param seeded Whether each component carries derivatives, which holds for the nonlinear
+   * displacements of the residual system that the coupling matrix couples to the residual variable
+   */
+  void addDisplacements(const Variable & displacements, const std::vector<bool> & seeded);
+  /**
+   * Get the first slot of the value of a displacement component, or libMesh::invalid_uint if the
+   * component carries no derivatives
+   */
+  KOKKOS_FUNCTION unsigned int displacementValueSlot(const unsigned int c) const
+  {
+    return _displacement_first[c];
+  }
+  /**
+   * Get the first slot of the reference gradient of a displacement component, or
+   * libMesh::invalid_uint if the component carries no derivatives
+   */
+  KOKKOS_FUNCTION unsigned int displacementGradientSlot(const unsigned int c) const
+  {
+    return _displacement_first[c] == libMesh::invalid_uint
+               ? libMesh::invalid_uint
+               : _displacement_first[c] + AD_VALUE_SLOTS;
+  }
+
 private:
   /// Registered slot blocks
   std::vector<ADSlotBlock> _host_blocks;
@@ -78,6 +111,9 @@ private:
   unsigned int _num_blocks = 0;
   /// Number of slots
   unsigned int _num_slots = 0;
+  /// First slot of each displacement component, or libMesh::invalid_uint
+  unsigned int _displacement_first[3] = {
+      libMesh::invalid_uint, libMesh::invalid_uint, libMesh::invalid_uint};
 };
 
 /**
@@ -108,12 +144,189 @@ struct ADSlotAssignment
 };
 
 /**
- * Accessor of the quadrature point value of a variable as a dense dual number. A time derivative
- * tag seeds the value slot with the derivative of the time derivative with respect to the
- * solution.
- * @tparam slots The number of derivative slots of the residual object
+ * The AssemblyDatum of a pointwise AD residual object, which fixes the number of derivative slots
+ * of its dual numbers. On the current configuration it also carries the geometry as dual numbers
+ * whose derivatives with respect to the displacement slots give the variation of the geometry, so
+ * that every quantity computed from it carries its displacement derivatives.
+ * @tparam slots The number of derivative slots
  */
 template <unsigned int slots>
+class ADAssemblyDatum : public AssemblyDatum
+{
+public:
+  /**
+   * Constructor
+   * @param datum The plain AssemblyDatum of the element, side, or node
+   * @param table The slot table of the residual object
+   */
+  KOKKOS_FUNCTION ADAssemblyDatum(const AssemblyDatum & datum, const ADSlotTable & table)
+    : AssemblyDatum(datum), _table(table)
+  {
+  }
+
+  /**
+   * Get the slot table of the residual object
+   */
+  KOKKOS_FUNCTION const ADSlotTable & table() const { return _table; }
+
+  /**
+   * Get the geometry of a quadrature point as dual numbers
+   * @param qp The local quadrature point index
+   * @returns The geometry
+   */
+  KOKKOS_FUNCTION const ADGeometry<slots> & adGeometry(const unsigned int qp);
+
+  /**
+   * Get the transformed Jacobian weight as a dual number
+   */
+  KOKKOS_FUNCTION DenseADReal<slots> adJxW(const unsigned int qp)
+  {
+    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+      if (_configuration.displaced())
+        return adGeometry(qp).JxW;
+
+    return JxW(qp);
+  }
+
+  /**
+   * Push a gradient with respect to the reference position forward to the configuration, with the
+   * derivatives of the deformation gradient
+   * @param grad_X The gradient with respect to the reference position
+   * @param qp The local quadrature point index
+   */
+  KOKKOS_FUNCTION DenseADReal3<slots> adPushForward(const DenseADReal3<slots> & grad_X,
+                                                    const unsigned int qp)
+  {
+    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+      if (_configuration.displaced())
+        return adGeometry(qp).F_inv.transpose() * grad_X;
+
+    return F_inv(qp).transpose() * grad_X;
+  }
+
+  /**
+   * Pull a gradient coefficient back to the reference element, so that its product with the
+   * reference test function gradient equals its product with the gradient on the configuration,
+   * with the derivatives of the map on the configuration
+   * @param grad The gradient coefficient
+   * @param qp The local quadrature point index
+   */
+  KOKKOS_FUNCTION DenseADReal3<slots> adPullBack(const DenseADReal3<slots> & grad,
+                                                 const unsigned int qp)
+  {
+    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+      if (_configuration.displaced())
+        return adGeometry(qp).dxi_dx.transpose() * grad;
+
+    return dxi_dx(qp).transpose() * grad;
+  }
+
+private:
+  /// Slot table of the residual object
+  const ADSlotTable & _table;
+  /// Quadrature point of the cached dual geometry
+  unsigned int _ad_cached_qp = libMesh::invalid_uint;
+  /// Cached dual geometry
+  ADGeometry<slots> _ad_geometry;
+};
+
+template <unsigned int slots>
+KOKKOS_FUNCTION const ADGeometry<slots> &
+ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  if (_ad_cached_qp == qp)
+    return _ad_geometry;
+
+  const auto & disp = _configuration.displacements();
+  const auto & X = reference_q_point(qp);
+  const auto & ref_dxi_dx = reference_dxi_dx(qp);
+
+  // Deformation gradient F = I + grad_X u and position x = X + u, seeded in the displacement
+  // slots
+  DenseADReal33<slots> F;
+  DenseADReal3<slots> x;
+
+  for (unsigned int d = 0; d < 3; ++d)
+  {
+    F(d, d) = 1;
+    x(d) = X(d);
+  }
+
+  for (unsigned int c = 0; c < disp.components(); ++c)
+  {
+    const auto & sys = system(disp.sys(c));
+    const auto var = disp.var(c);
+    const auto tag = disp.tag();
+    const auto value_slot = _table.displacementValueSlot(c);
+    const auto gradient_slot = _table.displacementGradientSlot(c);
+
+    const Real u = !isSide() ? sys.getVectorQpValue(_elem, _qp_offset + qp, var, tag)
+                             : sys.getVectorQpValueFace(_elem, _side, qp, var, tag);
+    const Real3 grad_u = !isSide()
+                             ? sys.getVectorQpGrad(_elem, _qp_offset + qp, var, tag)
+                             : sys.getVectorQpGradFace(_elem, _side, ref_dxi_dx, qp, var, tag);
+
+    x(c) = X(c) + seededDenseADReal<slots>(u, value_slot, 1);
+
+    for (unsigned int d = 0; d < 3; ++d)
+      F(c, d) += seededDenseADReal<slots>(
+          grad_u(d),
+          gradient_slot == libMesh::invalid_uint ? libMesh::invalid_uint : gradient_slot + d,
+          1);
+  }
+
+  const auto dim = _assembly.getDimension();
+  const auto subdomain = _elem.subdomain;
+
+  auto & g = _ad_geometry;
+  g.F_inv = F.inverse(dim);
+
+  const auto F_inv_T = g.F_inv.transpose();
+
+  // Coordinate transform factor at the current position, with its derivative through the chain
+  // rule on the displacement values
+  const Real3 x_value(denseADValue(x(0)), denseADValue(x(1)), denseADValue(x(2)));
+  const Real coord_value = _assembly.coordTransformFactor(subdomain, x_value);
+  const Real3 coord_gradient = _assembly.coordTransformFactorGradient(subdomain, x_value);
+
+  DenseADReal<slots> coord = coord_value;
+  for (unsigned int d = 0; d < 3; ++d)
+    coord += coord_gradient(d) * (x(d) - x_value(d));
+
+  DenseADReal<slots> ratio =
+      F.determinant(dim) * coord / _assembly.coordTransformFactor(subdomain, X);
+
+  if (isSide())
+  {
+    const auto n = F_inv_T * reference_normal(qp);
+    const auto norm = sqrt(n * n);
+
+    ratio *= norm;
+    g.normal = (1 / norm) * n;
+  }
+
+  DenseADReal33<slots> composed;
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
+        composed(i, j) += F_inv_T(i, k) * ref_dxi_dx(k, j);
+
+  g.dxi_dx = composed;
+  g.JxW = reference_JxW(qp) * ratio;
+  g.q_point = x;
+
+  _ad_cached_qp = qp;
+
+  return g;
+}
+
+/**
+ * Accessor of the quadrature point value of a variable as a dense dual number. A time derivative
+ * tag seeds the value slot with the derivative of the time derivative with respect to the
+ * solution. The number of derivative slots is that of the datum, which the residual object fixes.
+ */
 class ADVariableValue
 {
 public:
@@ -136,11 +349,13 @@ public:
 
   /**
    * Get the value at a quadrature point
-   * @param datum The AssemblyDatum object of the current thread
+   * @param datum The ADAssemblyDatum object of the current thread
    * @param qp The local quadrature point index
    * @returns The value, with its derivative with respect to the slots of the residual object
    */
-  KOKKOS_FUNCTION DenseADReal<slots> operator()(AssemblyDatum & datum, unsigned int qp) const
+  template <unsigned int slots>
+  KOKKOS_FUNCTION DenseADReal<slots> operator()(ADAssemblyDatum<slots> & datum,
+                                                unsigned int qp) const
   {
     KOKKOS_ASSERT(_slot.finalized);
 
@@ -162,11 +377,12 @@ private:
 };
 
 /**
- * Accessor of the quadrature point gradient of a variable as a vector of dense dual numbers, whose
- * component k is seeded in slot k of the slot block of the gradient
- * @tparam slots The number of derivative slots of the residual object
+ * Accessor of the quadrature point gradient of a variable as a vector of dense dual numbers. The
+ * gradient slots hold the gradient with respect to the reference position, whose component k is
+ * seeded in slot k of the slot block of the gradient; on the current configuration the accessor
+ * pushes it forward with the dual deformation gradient, which carries the derivatives with respect
+ * to the displacements.
  */
-template <unsigned int slots>
 class ADVariableGradient
 {
 public:
@@ -190,23 +406,26 @@ public:
 
   /**
    * Get the gradient at a quadrature point
-   * @param datum The AssemblyDatum object of the current thread
+   * @param datum The ADAssemblyDatum object of the current thread
    * @param qp The local quadrature point index
    * @returns The gradient, with its derivatives with respect to the slots of the residual object
    */
-  KOKKOS_FUNCTION DenseADReal3<slots> operator()(AssemblyDatum & datum, unsigned int qp) const
+  template <unsigned int slots>
+  KOKKOS_FUNCTION DenseADReal3<slots> operator()(ADAssemblyDatum<slots> & datum,
+                                                 unsigned int qp) const
   {
     KOKKOS_ASSERT(_slot.finalized);
 
-    const auto grad = _gradient(datum, qp);
     const auto first = _slot.first;
+    const auto displaced = datum.configuration().displaced();
+    const Real3 grad = displaced ? _gradient.reference(datum, qp) : _gradient(datum, qp);
 
     DenseADReal3<slots> result;
     for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
       result(k) = seededDenseADReal<slots>(
           grad(k), first == libMesh::invalid_uint ? libMesh::invalid_uint : first + k, _slot.seed);
 
-    return result;
+    return displaced ? datum.adPushForward(result, qp) : result;
   }
 
   KOKKOS_FUNCTION const Variable & variable() const { return _gradient.variable(); }

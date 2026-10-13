@@ -26,8 +26,8 @@ public:
   /// The AD BC depends on the nodal value of its own variable only
   static constexpr unsigned int max_ad_slots = is_ad ? 1 : 0;
 
-  template <typename Derived>
-  KOKKOS_FUNCTION auto computeValue(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, typename DatumType>
+  KOKKOS_FUNCTION auto computeValue(const unsigned int qp, DatumType & datum) const
   {
     const Real value = _func.value(_t, datum.q_point(qp));
 
@@ -50,7 +50,7 @@ protected:
   auto makeNodalValue()
   {
     if constexpr (is_ad)
-      return this->template adNodalValue<max_ad_slots>();
+      return this->adNodalValue();
     else
       return NoNodalValue();
   }
@@ -59,8 +59,7 @@ protected:
   const Moose::Kokkos::Function _func;
 
   /// Nodal value of the BC variable, with its derivative, read by the AD BC
-  const std::conditional_t<is_ad, Moose::Kokkos::ADVariableValue<max_ad_slots>, NoNodalValue>
-      _nodal_value;
+  const std::conditional_t<is_ad, Moose::Kokkos::ADVariableValue, NoNodalValue> _nodal_value;
 
   using Moose::Kokkos::DirichletBCBaseTempl<is_ad>::_t;
 };

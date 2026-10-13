@@ -41,6 +41,19 @@ public:
    * @param max_slots The number of derivative slots declared by the residual object
    */
   void assign(const MooseObject & object, const Variable & ivar, unsigned int max_slots);
+  /**
+   * Assign the slots of all registered accessors, followed by the displacement slots of the
+   * current configuration
+   * @param object The residual object, for error messages
+   * @param ivar The Kokkos residual variable
+   * @param max_slots The number of derivative slots declared by the residual object, which the
+   * accessors may occupy ahead of the displacement slots
+   * @param displacements The displacement variable of the current configuration
+   */
+  void assign(const MooseObject & object,
+              const Variable & ivar,
+              unsigned int max_slots,
+              const Variable & displacements);
 
   /**
    * Get the slot table
@@ -58,6 +71,12 @@ private:
     /// Whether the accessor reads the gradient
     bool gradient;
   };
+
+  /**
+   * Whether a variable carries derivatives: a nonlinear variable of the residual system, at its
+   * current state, that the coupling matrix couples to the residual variable
+   */
+  bool seeded(const Variable & ivar, const Variable & var, unsigned int comp = 0) const;
 
   /// Registered accessors
   std::vector<Request> _requests;

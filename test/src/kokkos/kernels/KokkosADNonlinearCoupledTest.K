@@ -23,9 +23,9 @@ KokkosADNonlinearCoupledTest::validParams()
 
 KokkosADNonlinearCoupledTest::KokkosADNonlinearCoupledTest(const InputParameters & parameters)
   : ADKernel(parameters),
-    _u(adValue<max_ad_slots>()),
-    _grad_u(adGradient<max_ad_slots>()),
-    _v(adCoupledValue<max_ad_slots>("v")),
-    _grad_v(adCoupledGradient<max_ad_slots>("v"))
+    _u(adValue()),
+    _grad_u(adGradient()),
+    _v(adCoupledValue("v")),
+    _grad_v(adCoupledGradient("v"))
 {
 }

@@ -354,6 +354,14 @@ public:
    * @returns The variable gradient
    */
   KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
+  /**
+   * Get the current variable gradient with respect to the reference position
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature point index
+   * @param comp The variable component
+   * @returns The variable gradient on the reference configuration
+   */
+  KOKKOS_FUNCTION Real3 reference(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
 
   /**
    * Get the Kokkos variable
@@ -367,6 +375,26 @@ private:
    */
   Variable _var;
 };
+
+KOKKOS_FUNCTION inline Real3
+VariableGradient::reference(Datum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  if (!_var.coupled())
+    return Real3(0);
+
+  KOKKOS_ASSERT(!datum.isNodal());
+
+  auto & elem = datum.elem();
+  auto side = datum.side();
+  auto & sys = datum.system(_var.sys(comp));
+
+  return side == libMesh::invalid_uint
+             ? sys.getVectorQpGrad(elem, datum.qpOffset() + qp, _var.var(comp), _var.tag())
+             : sys.getVectorQpGradFace(
+                   elem, side, datum.reference_dxi_dx(qp), qp, _var.var(comp), _var.tag());
+}
 
 KOKKOS_FUNCTION inline Real3
 VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) const

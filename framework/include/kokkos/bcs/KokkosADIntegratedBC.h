@@ -22,12 +22,11 @@ namespace Moose::Kokkos
  * precomputeQpResidualValue() and precomputeQpResidualGrad() hooks, of which at least one must be
  * defined:
  *
- * template <typename Derived>
- * KOKKOS_FUNCTION DenseADReal<max_ad_slots> precomputeQpResidualValue(const unsigned int qp,
- *                                                                     AssemblyDatum & datum) const;
- * template <typename Derived>
- * KOKKOS_FUNCTION DenseADReal3<max_ad_slots> precomputeQpResidualGrad(const unsigned int qp,
- *                                                                     AssemblyDatum & datum) const;
+ * template <typename Derived, unsigned int slots>
+ * KOKKOS_FUNCTION DenseADReal<slots> precomputeQpResidualValue(const unsigned int qp,
+ *                                                              ADAssemblyDatum<slots> & datum)
+ * const; template <typename Derived, unsigned int slots> KOKKOS_FUNCTION DenseADReal3<slots>
+ * precomputeQpResidualGrad(const unsigned int qp, ADAssemblyDatum<slots> & datum) const;
  *
  * The derivative directions of the dual numbers are the quadrature point quantities the BC
  * reads through its AD accessors: one slot for each value and three for each gradient of a
@@ -48,6 +47,14 @@ public:
   /// point terms
   static constexpr bool uses_team_dispatch = true;
 
+  /**
+   * Kokkos function tag of the residual and Jacobian of an object posed on the current
+   * configuration
+   */
+  struct DisplacedResidualLoop
+  {
+  };
+
   ADIntegratedBC(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -61,6 +68,14 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & bc) const;
+  /**
+   * The team operation called by Kokkos for each boundary side of an object posed on the current
+   * configuration, whose dual numbers carry the displacement slots
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
+                                  const TeamMember<DisplacedResidualLoop> & team,
+                                  const Derived & bc) const;
 
   /**
    * Get the slot table of the AD accessors
@@ -70,21 +85,14 @@ public:
 protected:
   /**
    * Create AD accessors of a coupled variable or of the BC variable
-   * @tparam slots The max_ad_slots of the derived class
    */
   ///@{
-  template <unsigned int slots>
-  ADVariableValue<slots> adCoupledValue(const std::string & var_name, unsigned int comp = 0);
-  template <unsigned int slots>
-  ADVariableGradient<slots> adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
-  template <unsigned int slots>
-  ADVariableValue<slots> adCoupledDot(const std::string & var_name, unsigned int comp = 0);
-  template <unsigned int slots>
-  ADVariableValue<slots> adValue();
-  template <unsigned int slots>
-  ADVariableGradient<slots> adGradient();
-  template <unsigned int slots>
-  ADVariableValue<slots> adDot();
+  ADVariableValue adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  ADVariableGradient adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+  ADVariableValue adCoupledDot(const std::string & var_name, unsigned int comp = 0);
+  ADVariableValue adValue();
+  ADVariableGradient adGradient();
+  ADVariableValue adDot();
   ///@}
 
   /// Test function values and gradients, for derived classes that need them in their hooks
@@ -111,56 +119,50 @@ private:
   bool _computing_jacobian = false;
 };
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADIntegratedBC::adCoupledValue(const std::string & var_name, const unsigned int comp)
 {
-  ADVariableValue<slots> value(kokkosCoupledValue(var_name, comp));
+  ADVariableValue value(kokkosCoupledValue(var_name, comp));
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
 
-template <unsigned int slots>
-ADVariableGradient<slots>
+inline ADVariableGradient
 ADIntegratedBC::adCoupledGradient(const std::string & var_name, const unsigned int comp)
 {
-  ADVariableGradient<slots> gradient(kokkosCoupledGradient(var_name, comp));
+  ADVariableGradient gradient(kokkosCoupledGradient(var_name, comp));
   _ad_setup.add(gradient.slot(), gradient.variable(), true);
   return gradient;
 }
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADIntegratedBC::adCoupledDot(const std::string & var_name, const unsigned int comp)
 {
-  ADVariableValue<slots> value(kokkosCoupledDot(var_name, comp));
+  ADVariableValue value(kokkosCoupledDot(var_name, comp));
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADIntegratedBC::adValue()
 {
-  ADVariableValue<slots> value{VariableValue(_var)};
+  ADVariableValue value{VariableValue(_var)};
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
 
-template <unsigned int slots>
-ADVariableGradient<slots>
+inline ADVariableGradient
 ADIntegratedBC::adGradient()
 {
-  ADVariableGradient<slots> gradient{VariableGradient(_var)};
+  ADVariableGradient gradient{VariableGradient(_var)};
   _ad_setup.add(gradient.slot(), gradient.variable(), true);
   return gradient;
 }
 
-template <unsigned int slots>
-ADVariableValue<slots>
+inline ADVariableValue
 ADIntegratedBC::adDot()
 {
-  ADVariableValue<slots> value{VariableValue(_var, Moose::SOLUTION_DOT_TAG)};
+  ADVariableValue value{VariableValue(_var, Moose::SOLUTION_DOT_TAG)};
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
 }
@@ -181,7 +183,28 @@ ADIntegratedBC::operator()(ResidualLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms(bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+  assembleADTerms<Derived::max_ad_slots>(
+      bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+ADIntegratedBC::operator()(DisplacedResidualLoop,
+                           const TeamMember<DisplacedResidualLoop> & team,
+                           const Derived & bc) const
+{
+  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
+
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      _configuration);
+
+  assembleADTerms<Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(
+      bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 } // namespace Moose::Kokkos
