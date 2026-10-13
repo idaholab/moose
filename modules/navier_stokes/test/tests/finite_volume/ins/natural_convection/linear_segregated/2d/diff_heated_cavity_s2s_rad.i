@@ -349,7 +349,6 @@ walls = ${rad_all}
   pressure_pin_value = 0.0
   pressure_pin_point = '0.5 0.0 0.0'
 
-  # momentum_petsc_options = '-ksp_monitor'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
 

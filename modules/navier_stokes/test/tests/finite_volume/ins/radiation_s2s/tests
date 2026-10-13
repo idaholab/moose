@@ -11,6 +11,7 @@
     issues = '#33641'
     max_threads = 1 # Linear FV doesn't support threading at the moment
     recover = false # We don't support recover for SIMPLE at the moment
+    heavy = true
   []
 
   [parallel_plates_convergence]
@@ -53,7 +54,7 @@
                  "VectorPostprocessors/inactive='' "
                  "Executioner/surface_radiation_object_name=gray_lambert "
                  "Outputs/file_base=diff_heated_cavity_slabs_cht_radiation"
-      detail = 'and the same cavity with surface-to-surface radiation exchanged between all cavity walls.'
+      detail = 'for a cavity with surface-to-surface radiation exchanged between all cavity walls.'
       mesh_mode = REPLICATED # UnobstructedPlanarViewFactor does not allow distributed mesh
       max_threads = 1 # Linear FV doesn't support threading at the moment
       recover = false # We don't support recover for SIMPLE at the moment
