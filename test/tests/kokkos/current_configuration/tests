@@ -22,4 +22,23 @@
       compute_devices = 'cpu cuda xpu'
     []
   []
+  [jacobian]
+    requirement = 'The Kokkos system shall assemble exact Jacobians, including the derivatives with respect to the displacements, of a diffusion term, a volumetric source, a position-dependent source, and a flux through the boundary normal posed on the current configuration'
+    design = 'KokkosDiffusion.md KokkosBodyForce.md KokkosDirectionalNeumannBC.md'
+    [cartesian]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_jacobian.i'
+      detail = 'in Cartesian coordinates and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [rz]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_jacobian.i'
+      cli_args = 'Mesh/coord_type=RZ'
+      detail = 'in axisymmetric coordinates.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
 []

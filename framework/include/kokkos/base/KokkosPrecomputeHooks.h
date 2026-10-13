@@ -285,7 +285,10 @@ precomputeOffDiagJacobianScalarTerms(const Object & object,
  * n_c (n . h) of h_c on sides. The variations of the coefficients follow from the Jacobian hooks of
  * the object evaluated along d(grad_x u) and the off-diagonal hooks along d(grad_x v) for each
  * coupled field variable v, through a replacement of the trial function. The variation of the test
- * function gradient contributes -(f_grad . h) e_c to the gradient coefficient.
+ * function gradient contributes -(f_grad . h) e_c to the gradient coefficient. The quadrature point
+ * x = X + u moves by dx = phi_j e_c, and on sides the normal n = F^{-T} N / |F^{-T} N| varies by
+ * dn = -n_c (h - (n . h) n); the position and normal Jacobian hooks of the object contract these
+ * with the derivatives of its coefficients.
  */
 template <typename Object>
 KOKKOS_FUNCTION auto
@@ -304,14 +307,20 @@ precomputeDisplacementJacobianTerms(const Object & object,
   const auto JxW = datum.JxW(qp);
 
   Real dmeasure = h(c) + phi * datum.grad_log_coord(qp)(c);
+  Real3 dn = 0;
 
   if (datum.isSide())
   {
     const auto n = NormalAccessor()(datum, qp);
     dmeasure -= n(c) * (n * h);
+    dn = -n(c) * (h - (n * h) * n);
   }
 
-  datum.displacementVariation(true);
+  Real3 dx = 0;
+  dx(c) = phi;
+
+  datum.displacementVariation(
+      true, has_normal_jacobian_hook<Object>, has_position_jacobian_hook<Object>);
 
   Real f_value = 0, df_value = 0;
   Real3 f_grad = 0, df_grad = 0;
@@ -320,6 +329,19 @@ precomputeDisplacementJacobianTerms(const Object & object,
     f_value = object.template precomputeQpResidualValue<Object>(qp, datum);
   if constexpr (has_precomputeQpResidualGrad_v<Object>)
     f_grad = object.template precomputeQpResidualGrad<Object>(qp, datum);
+
+  if constexpr (has_precomputeQpPositionJacobianValue_v<Object>)
+    df_value += object.template precomputeQpPositionJacobianValue<Object>(dx, qp, datum);
+  if constexpr (has_precomputeQpPositionJacobianGrad_v<Object>)
+    df_grad += object.template precomputeQpPositionJacobianGrad<Object>(dx, qp, datum);
+
+  if (datum.isSide())
+  {
+    if constexpr (has_precomputeQpNormalJacobianValue_v<Object>)
+      df_value += object.template precomputeQpNormalJacobianValue<Object>(dn, qp, datum);
+    if constexpr (has_precomputeQpNormalJacobianGrad_v<Object>)
+      df_grad += object.template precomputeQpNormalJacobianGrad<Object>(dn, qp, datum);
+  }
 
   const auto sys = datum.sys();
   const auto tag = datum.tag();
@@ -355,7 +377,7 @@ precomputeDisplacementJacobianTerms(const Object & object,
   }
 
   datum.trialOverride(nullptr);
-  datum.displacementVariation(false);
+  datum.displacementVariation(false, false, false);
 
   Real3 e_c(0);
   e_c(c) = 1;

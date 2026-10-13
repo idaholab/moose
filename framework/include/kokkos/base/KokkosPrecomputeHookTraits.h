@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "KokkosTypes.h"
+
 #include <type_traits>
 #include <utility>
 
@@ -31,6 +33,15 @@ class AssemblyDatum;
  *   precomputeQpJacobian{Value,Grad,Curl}(j, qp, datum)
  *   precomputeQpOffDiagJacobian{Value,Grad,Curl}(j, jvar, qp, datum)
  *   precomputeQpOffDiagJacobianScalar{Value,Grad,Curl}(j, jvar, qp, datum)
+ *   precomputeQpNormalJacobian{Value,Grad,Curl}(dn, qp, datum)
+ *   precomputeQpPositionJacobian{Value,Grad,Curl}(dx, qp, datum)
+ *
+ * The normal and position Jacobian hooks return the derivative of the residual coefficients along
+ * a variation dn of the normal of a side or dx of the quadrature point position. The framework
+ * supplies dn and dx when it assembles the Jacobian of an object posed on the current configuration
+ * with respect to the displacements, which move the normals and the quadrature points; an object
+ * whose residual reads the normals or the quadrature point coordinates must define the matching
+ * hooks to be used there.
  *
  * The assembly loops evaluate only the terms whose hooks the object defines, so an object pays
  * nothing for the test function quantities it does not use.
@@ -62,6 +73,14 @@ MOOSE_KOKKOS_DETECT_HOOK_FAMILY(
     precomputeQpOffDiagJacobian, 0u, 0u, 0u, std::declval<AssemblyDatum &>());
 MOOSE_KOKKOS_DETECT_HOOK_FAMILY(
     precomputeQpOffDiagJacobianScalar, 0u, 0u, 0u, std::declval<AssemblyDatum &>());
+MOOSE_KOKKOS_DETECT_HOOK_FAMILY(precomputeQpNormalJacobian,
+                                std::declval<const Real3 &>(),
+                                0u,
+                                std::declval<AssemblyDatum &>());
+MOOSE_KOKKOS_DETECT_HOOK_FAMILY(precomputeQpPositionJacobian,
+                                std::declval<const Real3 &>(),
+                                0u,
+                                std::declval<AssemblyDatum &>());
 
 #undef MOOSE_KOKKOS_DETECT_HOOK_FAMILY
 #undef MOOSE_KOKKOS_DETECT_HOOK
@@ -78,6 +97,15 @@ template <typename Object>
 inline constexpr bool has_offdiag_jacobian_hook =
     has_precomputeQpOffDiagJacobianValue_v<Object> ||
     has_precomputeQpOffDiagJacobianGrad_v<Object> || has_precomputeQpOffDiagJacobianCurl_v<Object>;
+template <typename Object>
+inline constexpr bool has_normal_jacobian_hook =
+    has_precomputeQpNormalJacobianValue_v<Object> || has_precomputeQpNormalJacobianGrad_v<Object> ||
+    has_precomputeQpNormalJacobianCurl_v<Object>;
+template <typename Object>
+inline constexpr bool has_position_jacobian_hook =
+    has_precomputeQpPositionJacobianValue_v<Object> ||
+    has_precomputeQpPositionJacobianGrad_v<Object> ||
+    has_precomputeQpPositionJacobianCurl_v<Object>;
 template <typename Object>
 inline constexpr bool has_offdiag_jacobian_scalar_hook =
     has_precomputeQpOffDiagJacobianScalarValue_v<Object> ||

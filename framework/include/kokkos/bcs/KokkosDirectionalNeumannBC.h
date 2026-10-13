@@ -28,6 +28,13 @@ public:
   {
     return -_value * _normals(datum, qp);
   }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real precomputeQpNormalJacobianValue(const Moose::Kokkos::Real3 & dn,
+                                                       const unsigned int /* qp */,
+                                                       AssemblyDatum & /* datum */) const
+  {
+    return -_value * dn;
+  }
 
 protected:
   /// Vector to dot with the normal.

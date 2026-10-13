@@ -435,11 +435,20 @@ public:
 
   /**
    * Set whether the hooks of an object are being differentiated with respect to the displacements
-   * of the current configuration. Derivatives with respect to the quadrature point position are
-   * not provided, so reading the quadrature point coordinates or normals in this state aborts.
+   * of the current configuration. The displacements move the normals and the quadrature points, so
+   * reading either in this state aborts unless the object linearizes its residual in it.
    * @param flag Whether the hooks are being differentiated with respect to the displacements
+   * @param normals_linearized Whether the object provides the normal Jacobian hooks
+   * @param position_linearized Whether the object provides the position Jacobian hooks
    */
-  KOKKOS_FUNCTION void displacementVariation(const bool flag) { _displacement_variation = flag; }
+  KOKKOS_FUNCTION void displacementVariation(const bool flag,
+                                             const bool normals_linearized,
+                                             const bool position_linearized)
+  {
+    _displacement_variation = flag;
+    _normals_linearized = normals_linearized;
+    _position_linearized = position_linearized;
+  }
 
 protected:
   /**
@@ -514,6 +523,14 @@ private:
    * Whether the hooks of an object are being differentiated with respect to the displacements
    */
   bool _displacement_variation = false;
+  /**
+   * Whether the object being differentiated provides the normal Jacobian hooks
+   */
+  bool _normals_linearized = false;
+  /**
+   * Whether the object being differentiated provides the position Jacobian hooks
+   */
+  bool _position_linearized = false;
   /**
    * Thread ID for local parallelization
    */
@@ -599,10 +616,11 @@ Datum::JxW(const unsigned int qp)
 KOKKOS_FUNCTION inline Real3
 Datum::q_point(const unsigned int qp)
 {
-  if (_displacement_variation)
+  if (_displacement_variation && !_position_linearized)
     ::Kokkos::abort("A Kokkos object posed on the current configuration read the quadrature point "
                     "coordinates while its Jacobian with respect to the displacements was "
-                    "evaluated. Derivatives with respect to the position are not supported.");
+                    "evaluated. Define the precomputeQpPositionJacobian{Value,Grad}() hooks to "
+                    "linearize the residual in the position.");
 
   if (!isNodal())
     reinitTransform(qp);
@@ -685,10 +703,11 @@ Datum::normals(const unsigned int qp)
 {
   KOKKOS_ASSERT(isSide());
 
-  if (_displacement_variation)
+  if (_displacement_variation && !_normals_linearized)
     ::Kokkos::abort("A Kokkos object posed on the current configuration read the normals while "
-                    "its Jacobian with respect to the displacements was evaluated. Derivatives of "
-                    "the normals are not supported.");
+                    "its Jacobian with respect to the displacements was evaluated. Define the "
+                    "precomputeQpNormalJacobian{Value,Grad}() hooks to linearize the residual in "
+                    "the normal.");
 
   if (isSide())
     reinitTransform(qp);
