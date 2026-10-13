@@ -29,6 +29,13 @@ as well. However, to enable it one needs to compile MOOSE with the C++ APIs of
 
 - [enable_pytorch.md]
 
+## Random Fields
+
+Spatially correlated Gaussian and non-Gaussian random fields, for example for material
+properties, can be sampled into auxiliary variables from a separable Karhunen-Loeve expansion:
+
+- [random_fields.md]
+
 ## Python Utilities
 
 - [StochasticControl.md]
