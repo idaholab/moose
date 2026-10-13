@@ -422,6 +422,19 @@ public:
                                  const unsigned int qp);
 
   /**
+   * Get the gradient of a vector variable on the configuration, evaluated from its DOF values
+   * @param sys The system number of the variable
+   * @param var The variable number
+   * @param tag The vector tag
+   * @param qp The local quadrature point index
+   * @returns The gradient, with rows of components
+   */
+  KOKKOS_FUNCTION Real33 vectorGradient(const unsigned int sys,
+                                        const unsigned int var,
+                                        const TagID tag,
+                                        const unsigned int qp);
+
+  /**
    * Push a gradient with respect to the reference position forward to the configuration
    * @param grad_X The gradient with respect to the reference position
    * @param qp The local quadrature point index
@@ -761,6 +774,29 @@ Datum::gradient(const unsigned int sys,
   return dxi_dx(qp) * grad;
 }
 
+KOKKOS_FUNCTION inline Real33
+Datum::vectorGradient(const unsigned int sys,
+                      const unsigned int var,
+                      const TagID tag,
+                      const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  auto & system = _systems[sys];
+  const auto fe = system.getFETypeID(var);
+  const auto n_dofs = _assembly.getNumDofs(_elem.type, fe);
+
+  Real33 grad = 0;
+
+  for (unsigned int i = 0; i < n_dofs; ++i)
+    grad +=
+        system.getVectorDofValue(system.getElemLocalDofIndex(_elem.id, i, var), tag) *
+        (!isSide() ? _assembly.getVectorGradPhi(_elem.subdomain, _elem.type, fe)(i, qp)
+                   : _assembly.getVectorGradPhiFace(_elem.subdomain, _elem.type, fe)(_side)(i, qp));
+
+  return grad * dxi_dx(qp).transpose();
+}
+
 KOKKOS_FUNCTION inline Real3
 Datum::pushForward(const Real3 & grad_X, const unsigned int qp)
 {
@@ -901,6 +937,11 @@ public:
     Real phi;
     /// Replacement of the trial function gradient on the configuration
     Real3 grad_phi;
+    /// Replacement of the vector trial function value
+    Real3 vector_phi;
+    /// Replacement of the vector trial function gradient on the configuration, from which the
+    /// replacement of its curl follows
+    Real33 vector_grad_phi;
   };
 
   /**

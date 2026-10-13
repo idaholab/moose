@@ -33,11 +33,6 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _curl_u(_var)
 {
   addMooseVariableDependency(&_var);
-
-  if (_configuration.displaced())
-    paramError("use_displaced_mesh",
-               "Kokkos vector objects do not yet assemble their Jacobian with respect to the "
-               "displacements of the current configuration.");
 }
 
 void
@@ -68,7 +63,9 @@ VectorKernel::computeJacobian()
     _jacobian_dispatcher->parallelFor(policy);
   }
 
-  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()))
+  // An object posed on the current configuration assembles its displacement Jacobian in the
+  // off-diagonal loop from its own hooks
+  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()) || _configuration.displaced())
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
