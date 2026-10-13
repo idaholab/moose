@@ -320,7 +320,7 @@ CO2FluidProperties::d2alpha_ddelta2(Real delta, Real tau) const
                 (_A4[i] * theta * 2.0 / _beta4[i] *
                      std::pow(Utility::pow<2>(delta - 1.0), 1.0 / (2.0 * _beta4[i]) - 1.0) +
                  2.0 * _B4[i] * _a4[i] * std::pow(Utility::pow<2>(delta - 1.0), _a4[i] - 1.0));
-    d2Psi_dd2 = 3.0 * _D4[i] * Psi * (2.0 * _C4[i] * Utility::pow<2>(delta - 1.0) - 1.0);
+    d2Psi_dd2 = 2.0 * _C4[i] * Psi * (2.0 * _C4[i] * Utility::pow<2>(delta - 1.0) - 1.0);
     d2Delta_dd2 = 1.0 / (delta - 1.0) * dDelta_dd +
                   (delta - 1.0) * (delta - 1.0) *
                       (4.0 * _B4[i] * _a4[i] * (_a4[i] - 1.0) *
