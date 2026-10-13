@@ -127,3 +127,21 @@ TEST_F(IdealGasFluidPropertiesTest, gibbsFreeEnergy)
            _fp->h_from_p_T(p, T) - T * _fp->s_from_p_T(p, T),
            REL_TOL_CONSISTENCY);
 }
+
+/**
+ * Verify that the sound speed and its derivatives stay finite for a nonphysical state with
+ * negative temperature, as can occur during nonlinear iterations
+ */
+TEST_F(IdealGasFluidPropertiesTest, soundSpeedNonphysicalState)
+{
+  const Real v = 1.0;
+  // Below the reference internal energy, so that the temperature is negative
+  const Real e = 0.0;
+  EXPECT_LT(_fp->T_from_v_e(v, e), 0.0);
+
+  Real c, dc_dv, dc_de;
+  _fp->c_from_v_e(v, e, c, dc_dv, dc_de);
+  EXPECT_EQ(c, _fp->c_from_v_e(v, e));
+  EXPECT_TRUE(std::isfinite(dc_dv));
+  EXPECT_TRUE(std::isfinite(dc_de));
+}
