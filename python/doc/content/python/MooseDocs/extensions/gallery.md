@@ -51,3 +51,46 @@ are listed in [gallery-settings].
                 object=GalleryComponent
                 id=gallery-settings
                 caption=Settings for the 'gallery' command within the gallery extension.
+
+
+
+## Slideshow
+
+A slideshow is a revolving gallery that displays one image at a time and cycles through them,
+either automatically on a timer or manually using the on-page controls. This is achieved using
+a block-level `!slideshow` command with a `!slide` command inside the block for each slide,
+as shown in [gallery-example-slideshow]. Each
+slide takes an image and an optional `caption`. The paired form of the command
+(`!slide! ... !slide-end!`) also accepts block content, such as a link to the relevant model,
+which follows the caption.
+
+The caption and block content appear beneath the image by default, but `overlay_default=True`
+may be set on the `!slideshow` command to change the default behavior to have the content
+overlaid on the image. Additionally, the choice to overlay the content may be customized
+on each slide by setting the `overlay` option on the corresponding `!slide` command.
+
+The slideshow displays an indicator dot for each image and, by default, advances only when the
+viewer clicks one. Set the `interval` setting to a number of seconds to advance
+automatically; clicking an indicator then stops the automatic advance. The settings for the two commands are listed in
+[slideshow-settings] and [slide-settings].
+
+!devel! example id=gallery-example-slideshow
+               caption=Example use of the 'slideshow' command.
+!slideshow! interval=3 style=max-width:450px;margin-left:auto;margin-right:auto;
+!slide application_logos/griffin_description.png caption=Griffin
+
+!slide application_logos/grizzly_description.png caption=Grizzly
+
+!slide application_logos/sockeye_description.png caption=Sockeye
+!slideshow-end!
+!devel-end!
+
+!devel settings module=MooseDocs.extensions.gallery
+                object=SlideshowComponent
+                id=slideshow-settings
+                caption=Settings for the 'slideshow' command within the gallery extension.
+
+!devel settings module=MooseDocs.extensions.gallery
+                object=SlideComponent
+                id=slide-settings
+                caption=Settings for the 'slide' command within the gallery extension.
