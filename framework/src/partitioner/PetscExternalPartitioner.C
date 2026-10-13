@@ -148,18 +148,6 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   if (_apply_side_weight)
     side_weights.resize(num_edges);
 
-  // Besides face neighbors, the graph links lower-dimensional elements to their interior parents
-  // and elements to the NodeElems constraining their spline nodes. Such a link may join a local
-  // element to a remote lower-dimensional element, so all ranks must take the same path below
-  bool has_non_face_links = !mesh.get_constraint_rows().empty();
-  for (const auto * const elem : mesh.active_local_element_ptr_range())
-    if (elem->interior_parent())
-    {
-      has_non_face_links = true;
-      break;
-    }
-  comm().max(has_non_face_links);
-
   local_elem_id = 0;
   nj = 0;
   std::map<dof_id_type, dof_id_type> global_index_to_weight;
@@ -179,48 +167,32 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       // anything.
       if (neighbor != nullptr && neighbor->active())
       {
-        // Without side weights, the map only identifies the face neighbors, so the 0 is never used
-        if (_apply_side_weight || has_non_face_links)
-          global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
-                                         _apply_side_weight ? computeSideWeight(*elem, side) : 0);
+        global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
+                                       _apply_side_weight ? computeSideWeight(*elem, side) : 1);
         n_neighbors++;
       }
 
       side++;
     }
 
-    if (!has_non_face_links)
+    // Besides face neighbors, the graph links lower-dimensional elements to their interior parents,
+    // elements to the NodeElems constraining their spline nodes, and elements to the active
+    // children of a refined neighbor. Graph indices missing from the map are these links
+    unsigned int n_face_neighbors = 0;
+    for (const auto global_index : row)
     {
-      if (n_neighbors != row.size())
-        mooseError(
-            "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
+      const auto it = global_index_to_weight.find(global_index);
+      const bool is_face_neighbor = it != global_index_to_weight.end();
+      if (is_face_neighbor)
+        n_face_neighbors++;
+      // Links that do not cross a side have no side to pass to computeSideWeight(), so they get
+      // its default weight of 1
       if (_apply_side_weight)
-      {
-        mooseAssert(global_index_to_weight.size() == row.size(), "These must match");
-        for (const auto [_, weight] : global_index_to_weight)
-          side_weights[nj++] = weight;
-      }
+        side_weights[nj++] = is_face_neighbor ? it->second : 1;
     }
-    else
-    {
-      // A row can be longer than the number of face neighbors: graph indices missing from the map
-      // are the links that do not cross a side
-      unsigned int n_face_neighbors = 0;
-      for (const auto global_index : row)
-      {
-        const auto it = global_index_to_weight.find(global_index);
-        const bool is_face_neighbor = it != global_index_to_weight.end();
-        if (is_face_neighbor)
-          n_face_neighbors++;
-        // Links that do not cross a side have no side to pass to computeSideWeight(), so they get
-        // its default weight of 1
-        if (_apply_side_weight)
-          side_weights[nj++] = is_face_neighbor ? it->second : 1;
-      }
-      if (n_face_neighbors != n_neighbors)
-        mooseError(
-            "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
-    }
+    if (n_face_neighbors != n_neighbors)
+      mooseError(
+          "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
 
     local_elem_id++;
   }
