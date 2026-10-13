@@ -69,7 +69,7 @@ SubChannel1PhaseProblem::validParams()
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
-  params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
+  params.addParam<unsigned int>("n_blocks", 1, "The number of blocks in the axial direction");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addRangeCheckedParam<int>(
       "P_maxit",
