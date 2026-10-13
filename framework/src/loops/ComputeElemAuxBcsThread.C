@@ -26,8 +26,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(FEProblemBase & 
                                                                 bool need_materials)
   : _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _query(query),
-    _query_boundary(_query),
+    _all_kernels_query(query),
+    _query_boundary(query),
     _need_materials(need_materials)
 {
 }
@@ -38,7 +38,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(ComputeElemAuxBc
                                                                 Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
-    _query(x._query),
+    _all_kernels_query(x._all_kernels_query),
     _query_boundary(x._query_boundary),
     _need_materials(x._need_materials)
 {
@@ -155,7 +155,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
     return;
 
   std::vector<AuxKernelType *> all_kernels;
-  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  _all_kernels_query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
   if (all_kernels.empty())
     return;
 

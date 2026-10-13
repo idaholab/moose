@@ -46,8 +46,9 @@ protected:
 
   AuxiliarySystem & _aux_sys;
 
-  /// Warehouse to retrieve the auxkernels
-  const TheWarehouse::Query _query;
+  /// Query for every kernel this loop may run, before restricting to a block or boundary. Only
+  /// used to list them in the debug execution output; the loop itself queries the cache below.
+  const TheWarehouse::Query _all_kernels_query;
   /// mutable since printBlockExecutionInformation() is const but the query cache still mutates
   mutable TheWarehouse::QueryCache<AttribThread, AttribSubdomains> _query_subdomain;
 

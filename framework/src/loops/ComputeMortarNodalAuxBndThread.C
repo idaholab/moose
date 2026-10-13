@@ -23,8 +23,7 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     const std::size_t object_container_index)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _query(query),
-    _query_boundary(_query),
+    _query_boundary(query),
     _bnd_id(bnd_id),
     _object_container_index(object_container_index)
 {
@@ -36,7 +35,6 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     ComputeMortarNodalAuxBndThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _query(x._query),
     _query_boundary(x._query_boundary),
     _bnd_id(x._bnd_id),
     _object_container_index(x._object_container_index)

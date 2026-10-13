@@ -20,8 +20,8 @@ ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(FEProblemBase 
                                                                   const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _query(query),
-    _query_boundary(_query)
+    _all_kernels_query(query),
+    _query_boundary(query)
 {
 }
 
@@ -31,7 +31,7 @@ ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(ComputeNodalAu
                                                                   Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _query(x._query),
+    _all_kernels_query(x._all_kernels_query),
     _query_boundary(x._query_boundary)
 {
 }
@@ -86,7 +86,7 @@ ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() cons
 
   std::vector<AuxKernelType *> all_kernels;
   // clone the query until we have a const query, see #32362
-  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  _all_kernels_query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
   if (all_kernels.empty())
     return;
 
