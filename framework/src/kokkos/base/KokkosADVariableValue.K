@@ -32,6 +32,28 @@ ADSlotTable::add(const unsigned int sys, const unsigned int var, const bool grad
 }
 
 void
+ADSlotTable::addDisplacements(const Variable & displacements, const std::vector<bool> & seeded)
+{
+  for (unsigned int c = 0; c < 3; ++c)
+    _displacement_first[c] = libMesh::invalid_uint;
+
+  for (const auto c : make_range(displacements.components()))
+  {
+    const auto first = _num_slots + c * (AD_VALUE_SLOTS + AD_GRADIENT_SLOTS);
+
+    if (seeded[c])
+    {
+      _displacement_first[c] = first;
+      _host_blocks.push_back({displacements.sys(c), displacements.var(c), first, false});
+      _host_blocks.push_back(
+          {displacements.sys(c), displacements.var(c), first + AD_VALUE_SLOTS, true});
+    }
+  }
+
+  _num_slots += AD_DISPLACEMENT_SLOTS;
+}
+
+void
 ADSlotTable::finalize()
 {
   _num_blocks = _host_blocks.size();

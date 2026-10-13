@@ -383,6 +383,32 @@ public:
   KOKKOS_FUNCTION const Real3 & grad_log_coord(const unsigned int qp);
 
   /**
+   * Get the inverse of the Jacobian of the map from the reference element to the reference
+   * configuration, regardless of the configuration of the Datum
+   * @param qp The local quadrature point index
+   * @returns The inverse of the reference map Jacobian
+   */
+  KOKKOS_FUNCTION const Real33 & reference_dxi_dx(const unsigned int qp);
+  /**
+   * Get the transformed Jacobian weight on the reference configuration
+   * @param qp The local quadrature point index
+   * @returns The reference transformed Jacobian weight
+   */
+  KOKKOS_FUNCTION Real reference_JxW(const unsigned int qp);
+  /**
+   * Get the quadrature point coordinate on the reference configuration
+   * @param qp The local quadrature point index
+   * @returns The reference quadrature point coordinate
+   */
+  KOKKOS_FUNCTION const Real3 & reference_q_point(const unsigned int qp);
+  /**
+   * Get the outward unit normal on the reference configuration
+   * @param qp The local quadrature point index
+   * @returns The reference normal
+   */
+  KOKKOS_FUNCTION const Real3 & reference_normal(const unsigned int qp);
+
+  /**
    * Get the gradient of a variable on the configuration, evaluated from its DOF values
    * @param sys The system number of the variable
    * @param var The variable number
@@ -518,6 +544,15 @@ private:
   Real3 _normal;
   Real33 _F_inv;
   Real3 _grad_log_coord;
+  ///@}
+  /**
+   * Cached transformation data of the reference configuration
+   */
+  ///@{
+  Real33 _reference_dxi_dx;
+  Real _reference_JxW;
+  Real3 _reference_xyz;
+  Real3 _reference_normal;
   ///@}
   /**
    * Whether the hooks of an object are being differentiated with respect to the displacements
@@ -664,6 +699,46 @@ Datum::grad_log_coord(const unsigned int qp)
   return _grad_log_coord;
 }
 
+KOKKOS_FUNCTION inline const Real33 &
+Datum::reference_dxi_dx(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
+
+  return _reference_dxi_dx;
+}
+
+KOKKOS_FUNCTION inline Real
+Datum::reference_JxW(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
+
+  return _reference_JxW;
+}
+
+KOKKOS_FUNCTION inline const Real3 &
+Datum::reference_q_point(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
+
+  return _reference_xyz;
+}
+
+KOKKOS_FUNCTION inline const Real3 &
+Datum::reference_normal(const unsigned int qp)
+{
+  KOKKOS_ASSERT(isSide());
+
+  reinitTransform(qp);
+
+  return _reference_normal;
+}
+
 KOKKOS_FUNCTION inline Real3
 Datum::gradient(const unsigned int sys,
                 const unsigned int var,
@@ -729,6 +804,11 @@ Datum::reinitTransform(const unsigned int qp)
   }
   else
     _assembly.computePhysicalMap(_elem, _side, qp, &_dxi_dx, &_JxW, &_xyz, &_normal);
+
+  _reference_dxi_dx = _dxi_dx;
+  _reference_JxW = _JxW;
+  _reference_xyz = _xyz;
+  _reference_normal = _normal;
 
   _F_inv.identity();
   _grad_log_coord = 0;

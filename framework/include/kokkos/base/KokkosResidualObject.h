@@ -110,6 +110,8 @@ protected:
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
+  /// Dispatcher of the residual and Jacobian of a pointwise AD object on the current configuration
+  std::unique_ptr<DispatcherBase> _displaced_residual_dispatcher;
   ///@}
 
   /**
@@ -240,11 +242,13 @@ protected:
    * with one team. The team evaluates the residual hooks once per quadrature point into scratch,
    * then contracts the stored coefficients with the shape functions:
    *
-   *   R_i    = sum_qp (f_v psi_i + f_g . grad psi_i)
-   *   J_ij^b = sum_qp (df_v/ds psi_i + df_g/ds . grad psi_i) dq_s/dU_j
+   *   R_i    = sum_qp (f_v psi_i + f_g . grad_xi psi_i)
+   *   J_ij^b = sum_qp (df_v/ds psi_i + df_g/ds . grad_xi psi_i) dq_s/dU_j
    *
-   * where slot block b of a variable holds its value (dq/dU_j = phi_j) or its gradient components
-   * (dq_k/dU_j = d phi_j / d x_k), and column j indexes the DOFs of that variable.
+   * where f_g is the gradient coefficient pulled back to the reference element, slot block b of a
+   * variable holds its value (dq/dU_j = phi_j) or its gradient components on the reference
+   * configuration (dq_k/dU_j = d phi_j / d X_k), and column j indexes the DOFs of that variable.
+   * @tparam slots The number of derivative slots of the instantiation
    * @param object The residual object of the final derived type
    * @param team The team handle
    * @param datum The AssemblyDatum object of the element or side
@@ -252,10 +256,10 @@ protected:
    * @param computing_residual Whether to assemble the residual
    * @param computing_jacobian Whether to assemble the Jacobian
    */
-  template <typename Object, typename Team>
+  template <unsigned int slots, typename Object, typename Team>
   KOKKOS_FUNCTION void assembleADTerms(const Object & object,
                                        const Team & team,
-                                       AssemblyDatum & datum,
+                                       const AssemblyDatum & datum,
                                        const ADSlotTable & table,
                                        bool computing_residual,
                                        bool computing_jacobian) const;
@@ -504,25 +508,30 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
   }
 }
 
-template <typename Object, typename Team>
+template <unsigned int slots, typename Object, typename Team>
 KOKKOS_FUNCTION void
 ResidualObject::assembleADTerms(const Object & object,
                                 const Team & team,
-                                AssemblyDatum & datum,
+                                const AssemblyDatum & datum,
                                 const ADSlotTable & table,
                                 const bool computing_residual,
                                 const bool computing_jacobian) const
 {
-  constexpr auto slots = Object::max_ad_slots;
   constexpr auto qp_size = ADScratchLayout::qpSize(slots);
   constexpr auto term_size = ADScratchLayout::term_size;
+  constexpr auto map_offset = ADScratchLayout::mapOffset(slots);
 
   const auto n_qps = datum.n_qps();
   ADScratchView scratch(team.team_scratch(0), n_qps * qp_size);
 
+  // Each thread evaluates its quadrature points with its own datum, whose geometry cache is
+  // thread-private
   ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_qps),
                          [&](const unsigned int qp)
-                         { evaluateADTerms(object, datum, qp, &scratch(qp * qp_size)); });
+                         {
+                           ADAssemblyDatum<slots> qp_datum(datum, table);
+                           evaluateADTerms(object, qp_datum, qp, &scratch(qp * qp_size));
+                         });
   team.team_barrier();
 
   const auto & assembly = datum.assembly();
@@ -532,7 +541,7 @@ ResidualObject::assembleADTerms(const Object & object,
   const auto n_idofs = datum.n_idofs();
   const auto & sys = kokkosSystem(datum.sys());
 
-  // Shape function value and physical gradient of an FE type at a quadrature point
+  // Shape function value and reference gradient of an FE type at a quadrature point
   auto shape = [&](const unsigned int fe, const unsigned int i, const unsigned int qp)
   {
     const Real phi = side == libMesh::invalid_uint
@@ -541,7 +550,16 @@ ResidualObject::assembleADTerms(const Object & object,
     const Real3 ref = side == libMesh::invalid_uint
                           ? assembly.getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
                           : assembly.getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-    return ::Kokkos::pair<Real, Real3>(phi, datum.dxi_dx(qp) * ref);
+    return ::Kokkos::pair<Real, Real3>(phi, ref);
+  };
+
+  // Gradient of a shape function on the reference configuration from its reference gradient
+  auto referenceGradient = [&](const Real3 & ref, const unsigned int qp)
+  {
+    const Real * map = &scratch(qp * qp_size + map_offset);
+    return Real3(map[0] * ref(0) + map[1] * ref(1) + map[2] * ref(2),
+                 map[3] * ref(0) + map[4] * ref(1) + map[5] * ref(2),
+                 map[6] * ref(0) + map[7] * ref(1) + map[8] * ref(2));
   };
 
   if (computing_residual)
@@ -581,11 +599,14 @@ ResidualObject::assembleADTerms(const Object & object,
                 const Real * q = &scratch(qp * qp_size);
 
                 if (block.gradient)
+                {
+                  const auto grad_trial = referenceGradient(trial.second, qp);
                   for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
                     local_ke += contractADTerms(q + term_size * (1 + block.first + k),
                                                 test.first,
                                                 test.second) *
-                                trial.second(k);
+                                grad_trial(k);
+                }
                 else
                   local_ke +=
                       contractADTerms(q + term_size * (1 + block.first), test.first, test.second) *

@@ -25,14 +25,15 @@ public:
 
   KokkosADDiffusion(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<max_ad_slots>
-  precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal3<slots>
+  precomputeQpResidualGrad(const unsigned int qp,
+                           Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
   {
     return _grad_u(datum, qp);
   }
 
 private:
   /// Gradient of the kernel variable
-  const Moose::Kokkos::ADVariableGradient<max_ad_slots> _grad_u;
+  const Moose::Kokkos::ADVariableGradient _grad_u;
 };

@@ -23,11 +23,6 @@ ADIntegratedBC::ADIntegratedBC(const InputParameters & parameters)
   : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _test(), _grad_test()
 {
   addMooseVariableDependency(&_var);
-
-  if (_configuration.displaced())
-    paramError("use_displaced_mesh",
-               "Kokkos AD objects do not yet differentiate with respect to the displacements of "
-               "the current configuration.");
 }
 
 void
@@ -36,7 +31,7 @@ ADIntegratedBC::initialSetup()
   IntegratedBCBase::initialSetup();
 
   _max_ad_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
-  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots);
+  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots, _configuration.displacements());
   _ad_slots = _ad_setup.table();
 }
 
@@ -70,14 +65,30 @@ ADIntegratedBC::computeResidualAndJacobian()
 void
 ADIntegratedBC::dispatch()
 {
-  if (!_residual_dispatcher)
-    _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
-
   TeamLaunch launch;
   launch.league_size = numKokkosBoundarySides();
-  launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), _max_ad_slots);
 
-  _residual_dispatcher->parallelForTeams(launch);
+  // An object posed on the current configuration dispatches the instantiation whose dual numbers
+  // also carry the displacement slots
+  if (_configuration.displaced())
+  {
+    if (!_displaced_residual_dispatcher)
+      _displaced_residual_dispatcher =
+          DispatcherRegistry::build<DisplacedResidualLoop>(this, type());
+
+    launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(),
+                                                  _max_ad_slots + AD_DISPLACEMENT_SLOTS);
+    _displaced_residual_dispatcher->parallelForTeams(launch);
+  }
+  else
+  {
+    if (!_residual_dispatcher)
+      _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
+
+    launch.scratch_bytes =
+        ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), _max_ad_slots);
+    _residual_dispatcher->parallelForTeams(launch);
+  }
 }
 
 } // namespace Moose::Kokkos
