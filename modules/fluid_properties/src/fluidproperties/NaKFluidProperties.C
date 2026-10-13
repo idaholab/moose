@@ -23,7 +23,9 @@ NaKFluidProperties::validParams()
 }
 
 NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters), _MNaK((39.102 + 22.9898) / 1000)
+  : SinglePhaseFluidProperties(parameters),
+    _MNaK(1e-3 / (getParam<Real>("weight_fraction_K") / _AwK +
+                  (1 - getParam<Real>("weight_fraction_K")) / _AwNa))
 {
   // We did not implement other weight fractions
   const Real Xk = getParam<Real>("weight_fraction_K");
@@ -32,9 +34,7 @@ NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
                "Only 0.778 weight percent potassium (eutectic) is implemented");
 
   // Compute mole fractions from mass fractions
-  const Real AwK = 39.102;
-  const Real AwNa = 22.9898;
-  _Nk = Xk / AwK / (Xk / AwK + (1 - Xk) / AwNa);
+  _Nk = Xk / _AwK / (Xk / _AwK + (1 - Xk) / _AwNa);
 }
 
 NaKFluidProperties::~NaKFluidProperties() {}
