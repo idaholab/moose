@@ -177,9 +177,9 @@ NaKFluidProperties::cp_from_p_T(
 Real
 NaKFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  Real e, de_dp, de_dT;
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-  return de_dT;
+  // The density correlation does not depend on pressure, so the fluid is incompressible and,
+  // as is conventional for an incompressible liquid, cv = cp
+  return cp_from_p_T(pressure, temperature);
 }
 
 Real

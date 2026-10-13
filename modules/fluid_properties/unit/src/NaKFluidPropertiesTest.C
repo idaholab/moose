@@ -42,7 +42,6 @@ TEST_F(NaKFluidPropertiesTest, properties)
   const std::vector<Real> e_refs = {212729.55153656195, 389814.354287132388, 647367.791031170636};
   const std::vector<Real> k_refs = {24.9636547049999997, 26.2273747049999955, 24.8229547050000008};
   const std::vector<Real> cp_refs = {908.088827709000043, 879.02768370900003, 887.095967709000092};
-  const std::vector<Real> cv_refs = {908.055029910277312, 878.637048045562551, 884.635754614549114};
   const std::vector<Real> mu_refs = {
       0.000336716758684162674, 0.000222908484361340899, 0.000145271584941717932};
 
@@ -77,8 +76,8 @@ TEST_F(NaKFluidPropertiesTest, properties)
     // Isobaric specific heat
     REL_TEST(_fp->cp_from_p_T(p, T), cp_refs[i], tol);
 
-    // Isochoric specific heat
-    REL_TEST(_fp->cv_from_p_T(p, T), cv_refs[i], tol);
+    // Isochoric specific heat, equal to cp for this incompressible model
+    REL_TEST(_fp->cv_from_p_T(p, T), cp_refs[i], tol);
 
     // Dynamic viscosity
     REL_TEST(_fp->mu_from_p_T(p, T), mu_refs[i], tol);
