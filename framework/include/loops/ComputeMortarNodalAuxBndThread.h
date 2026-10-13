@@ -37,8 +37,7 @@ protected:
   /// The auxiliary system
   AuxiliarySystem & _aux_sys;
 
-  /// Warehouse to retrieve the auxkernel
-  const TheWarehouse::Query _query;
+  /// Query cache to retrieve the auxkernel
   TheWarehouse::QueryCache<AttribThread, AttribBoundaries> _query_boundary;
 
   /// The boundary ID for whose nodes we will evaluate the aux kernel on

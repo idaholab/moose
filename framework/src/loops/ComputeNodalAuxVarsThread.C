@@ -25,9 +25,8 @@ ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    // Note: the main query is only here to provide the cache. Maybe we should just pass a cache
-    _query(query),
-    _query_subdomain(_query)
+    _all_kernels_query(query),
+    _query_subdomain(query)
 {
 }
 
@@ -37,7 +36,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(ComputeNodal
                                                                     Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _query(x._query),
+    _all_kernels_query(x._all_kernels_query),
     _query_subdomain(x._query_subdomain)
 {
 }
@@ -141,7 +140,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() con
   std::vector<AuxKernelType *> all_kernels;
   // clone the query until we have a const query, see #32362
   // This is "general" execution ordering so we query for all subdomains
-  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  _all_kernels_query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
   if (all_kernels.empty())
     return;
 
