@@ -68,11 +68,46 @@ function env_test()
 {
     print_sep
     printf "Influential Environment Variables\n\n"
-    reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77\|^CONDA'
+    reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77'
+    reg_exp+='\|^CONDA\|^MAMBA\|^MICROMAMBA'
     reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM\|^http'
     reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE\|^FI_PROVIDER'
     reg_not='CONDA_BACKUP'
     env | sort | grep "${reg_exp}" | grep -v "${reg_not}"
+}
+
+function conda_package_list()
+{
+    if [[ -z "${CONDA_PREFIX}" ]]; then return 0; fi
+
+    print_sep
+    printf "Active Conda Environment Packages\n\n"
+    printf 'CONDA_PREFIX=%s\n' "${CONDA_PREFIX}"
+
+    local package_manager=()
+    if [[ -n "${CONDA_EXE}" && -x "${CONDA_EXE}" ]]; then
+        package_manager=("${CONDA_EXE}")
+    elif [[ -n "${MAMBA_EXE}" && -x "${MAMBA_EXE}" ]]; then
+        package_manager=("${MAMBA_EXE}")
+    elif [[ -n "${MICROMAMBA_EXE}" && -x "${MICROMAMBA_EXE}" ]]; then
+        package_manager=("${MICROMAMBA_EXE}")
+    elif command -v conda &>/dev/null; then
+        package_manager=("conda")
+    elif command -v mamba &>/dev/null; then
+        package_manager=("mamba")
+    elif command -v micromamba &>/dev/null; then
+        package_manager=("micromamba")
+    else
+        print_orange "WARNING: "
+        printf "Unable to list active Conda environment packages; no conda, mamba, or micromamba executable was found.\n\n"
+        return 0
+    fi
+
+    printf 'Package manager: %s\n\n' "$(print_bold "${package_manager[*]}")"
+    if ! "${package_manager[@]}" list -p "${CONDA_PREFIX}"; then
+        print_orange "WARNING: "
+        printf "Unable to list active Conda environment packages.\n\n"
+    fi
 }
 
 function python_test()
@@ -336,6 +371,7 @@ function print_environment()
     if [ "${NO_ENVIRONMENT}" == 1 ]; then return; fi
     local ERR_CNT=0
     env_test
+    conda_package_list
     compiler_test || (( ERR_CNT+=1 ))
     python_test || (( ERR_CNT+=1 ))
     conda_test || (( ERR_CNT+=1 ))
