@@ -40,7 +40,7 @@ requirements:
     - moose-tools 2026.09.22
   host:
     # should eventually become 'mpich {{ mpich_version }}'
-    - mpich 5.0.1
+    - mpich 5.0.2
     - hdf5 {{ hdf5 }}
     - hdf5 {{ hdf5 }} mpi_mpich_*
     # see libfabric entry in conda/conda_build_config.yaml
@@ -51,7 +51,7 @@ requirements:
     - zlib
   run:
     # should eventually become 'mpich {{ mpich_version }}'
-    - mpich 5.0.1
+    - mpich 5.0.2
     - moose-libmesh 2026.10.08_342ad76 mpich_0
     - moose-wasp 2026.08.13_ce25dcd build_2
     # c++ compiler for jit
