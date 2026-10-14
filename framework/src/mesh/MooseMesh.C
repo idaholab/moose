@@ -3438,6 +3438,17 @@ MooseMesh::ghostGhostedBoundaries()
     }
   }
 
+  // Surface elements on a ghosted nodeset are their own faces on that boundary
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+    for (const auto bc_id : _ghosted_boundaries)
+      if (isSurfaceElemOnNodeset(*elem, bc_id))
+      {
+        boundary_elems_to_ghost.insert(elem);
+        for (auto & node : elem->node_ref_range())
+          connected_nodes_to_ghost.insert(&node);
+        break;
+      }
+
   // We really do want to store this by value instead of by reference
   const auto prior_ghost_elems = mesh.extra_ghost_elems();
 
@@ -3649,6 +3660,19 @@ MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const
     if (it->second.find(node_id) != it->second.end())
       found_node = true;
   return found_node;
+}
+
+bool
+MooseMesh::isSurfaceElemOnNodeset(const Elem & elem, const BoundaryID bnd_id) const
+{
+  if (elem.dim() == 0 || elem.dim() + 1 != dimension() || elem.interior_parent() ||
+      _mesh_sideset_ids.count(bnd_id))
+    return false;
+  const auto & binfo = getMesh().get_boundary_info();
+  for (const auto & node : elem.node_ref_range())
+    if (!binfo.has_boundary_id(&node, bnd_id))
+      return false;
+  return true;
 }
 
 bool

@@ -1116,6 +1116,13 @@ public:
   bool isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const;
 
   /**
+   * Returns true if \p elem is a surface element without an interior parent, e.g. of a rigid
+   * surface mesh, and all of its nodes are on the nodeset \p bnd_id, in which case the element is
+   * its own face on that boundary. Always false if \p bnd_id is a sideset.
+   */
+  bool isSurfaceElemOnNodeset(const Elem & elem, BoundaryID bnd_id) const;
+
+  /**
    * Returns true if the requested element is in the list of boundary elements, false otherwise.
    */
   bool isBoundaryElem(dof_id_type elem_id) const;

@@ -239,6 +239,12 @@ public:
                                 const Elem & lower_secondary_elem) const;
 
   /**
+   * @return The interior parent of a lower-dimensional primary element, or the element itself if
+   * it has no interior parent, e.g. when the primary side is a rigid surface mesh
+   */
+  static const Elem & primaryInteriorElem(const Elem & lower_primary_elem);
+
+  /**
    * Compute the normals at given reference points on a secondary element
    * @param secondary_elem The secondary element used to query for associated nodal normals
    * @param xi1_pts The reference points on the secondary element to evaluate the normals at. The

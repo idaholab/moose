@@ -151,6 +151,19 @@ PenetrationInfo::PenetrationInfo()
 
 PenetrationInfo::~PenetrationInfo() { delete _side; }
 
+std::unique_ptr<const Elem>
+PenetrationInfo::buildSide(const Elem & elem, const unsigned int side_num, const bool surface_elem)
+{
+  if (!surface_elem)
+    return elem.build_side_ptr(side_num);
+
+  // Copy the element, because the penetration info owns and deletes its face
+  auto side = elem.disconnected_clone();
+  for (const auto n : elem.node_index_range())
+    side->set_node(n, const_cast<Node *>(elem.node_ptr(n)));
+  return side;
+}
+
 template <>
 void
 dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context)
@@ -220,7 +233,9 @@ dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context)
     dataLoad(stream, pinfo->_elem, context);
     dataLoad(stream, pinfo->_side_num, context);
     // Rebuild the side element.
-    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num).release();
+    pinfo->_side = PenetrationInfo::buildSide(
+                       *pinfo->_elem, pinfo->_side_num, pinfo->_side_num == libMesh::invalid_uint)
+                       .release();
 
     dataLoad(stream, pinfo->_normal, context);
     dataLoad(stream, pinfo->_distance, context);
