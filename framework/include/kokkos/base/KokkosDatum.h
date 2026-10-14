@@ -488,6 +488,13 @@ public:
     _normals_linearized = normals_linearized;
     _position_linearized = position_linearized;
   }
+  /**
+   * Set whether the datum belongs to a pointwise AD object on the current configuration, whose
+   * quadrature point coordinates carry their displacement derivatives only as dual numbers, so
+   * that reading them as plain reals aborts
+   * @param flag Whether the datum belongs to a pointwise AD object on the current configuration
+   */
+  KOKKOS_FUNCTION void adDisplaced(const bool flag) { _ad_displaced = flag; }
 
 protected:
   /**
@@ -580,6 +587,11 @@ private:
    */
   bool _position_linearized = false;
   /**
+   * Whether the datum belongs to a pointwise AD object on the current configuration, whose
+   * quadrature point coordinates carry their displacement derivatives only as dual numbers
+   */
+  bool _ad_displaced = false;
+  /**
    * Thread ID for local parallelization
    */
   unsigned int _local_thread_id = 0;
@@ -669,6 +681,11 @@ Datum::q_point(const unsigned int qp)
                     "coordinates while its Jacobian with respect to the displacements was "
                     "evaluated. Define the precomputeQpPositionJacobian{Value,Grad}() hooks to "
                     "linearize the residual in the position.");
+
+  if (_ad_displaced)
+    ::Kokkos::abort("A pointwise AD Kokkos object posed on the current configuration read the "
+                    "quadrature point coordinates as plain reals, which carry no derivatives with "
+                    "respect to the displacements. Read them as dual numbers with adQPoint().");
 
   if (!isNodal())
     reinitTransform(qp);

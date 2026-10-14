@@ -11,6 +11,7 @@
 
 #include "KokkosMaterial.h"
 #include "KokkosADResidualObject.h"
+#include "KokkosADMaterialProperty.h"
 
 namespace Moose::Kokkos
 {
@@ -68,6 +69,16 @@ public:
 
 protected:
   /**
+   * Declare a pointwise AD material property, which stores the value and the derivatives with
+   * respect to the slots of this material
+   * @tparam T The property data type
+   * @param name The property name or the parameter name containing the property name
+   * @returns The AD material property
+   */
+  template <typename T>
+  ADMaterialProperty<T> declareKokkosADProperty(const std::string & name);
+
+  /**
    * Create AD accessors of a coupled variable
    */
   ///@{
@@ -94,7 +105,28 @@ private:
   ADSlotSetup _ad_setup;
   /// Slot table of the AD accessors
   ADSlotTable _ad_slots;
+  /// Names of the properties holding the derivatives of the declared AD properties
+  std::vector<std::string> _ad_derivative_properties;
 };
+
+template <typename T>
+ADMaterialProperty<T>
+ADMaterial::declareKokkosADProperty(const std::string & name)
+{
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
+
+  // The derivatives are stored for every slot of the instantiation matching the configuration
+  const unsigned int width = DispatcherRegistry::getProperty("max_ad_slots", type()) +
+                             (_configuration.displaced() ? AD_DISPLACEMENT_SLOTS : 0);
+  const auto derivatives_name = adDerivativesPropertyName(prop_name);
+
+  _ad_derivative_properties.push_back(derivatives_name);
+
+  return ADMaterialProperty<T>(declareKokkosPropertyByName<T>(prop_name),
+                               declareKokkosPropertyByName<T, 1>(derivatives_name, {width}));
+}
 
 inline ADVariableValue
 ADMaterial::adCoupledValue(const std::string & var_name, const unsigned int comp)

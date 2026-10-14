@@ -30,6 +30,14 @@ ADMaterial::initialSetup()
                    DispatcherRegistry::getProperty("max_ad_slots", type()),
                    _configuration.displacements());
   _ad_slots = _ad_setup.table();
+
+  for (const auto & prop_name : _ad_derivative_properties)
+    materialData().setKokkosADInputs(
+        _declare_suffix.empty()
+            ? prop_name
+            : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_"),
+        this,
+        _ad_slots.hostBlocks());
 }
 
 } // namespace Moose::Kokkos

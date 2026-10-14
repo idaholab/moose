@@ -1,2 +1,2 @@
-time,current,current_parsed,reference,reference_parsed
-0,5.977701953125,5.977701953125,3.7388888888889,3.7388888888889
+time,current,current_dk_dT,current_dk_ddisp_x,current_dk_ddisp_y,current_dk_dgrad_disp_x,current_parsed,reference,reference_dk_dT,reference_dk_dT_parsed,reference_parsed
+0,5.977701953125,1.75,0.3,-0.7,0,5.977701953125,3.7388888888889,1.75,1.75,3.7388888888889

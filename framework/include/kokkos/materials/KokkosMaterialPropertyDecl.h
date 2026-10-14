@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosArray.h"
+#include "KokkosADSlotBlock.h"
 
 #include "MoosePassKey.h"
 
@@ -81,6 +82,12 @@ struct PropRecord
    * Whether this property is constant over element or subdomain in each subdomain
    */
   std::unordered_map<SubdomainID, PropertyConstantOption> constant_option;
+  /**
+   * For the derivatives of a pointwise AD property, the quadrature point quantity of each block of
+   * stored derivatives in each subdomain, as declared by the material of that subdomain. Stored
+   * derivatives outside every block are zero.
+   */
+  std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> ad_inputs;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -128,6 +135,12 @@ public:
    * @returns The size of the dimension
    */
   unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
+  /**
+   * Get the quadrature point quantities of the stored derivatives of a pointwise AD property
+   * @param subdomain The MOOSE subdomain ID
+   * @returns The slot blocks of the stored derivatives
+   */
+  const std::vector<ADSlotBlock> & adInputs(SubdomainID subdomain) const;
 
   /**
    * Get the property type index for load/store functions
@@ -225,6 +238,15 @@ MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
                "'.");
 
   return libmesh_map_find(_record->dims, subdomain)[i];
+}
+
+inline const std::vector<ADSlotBlock> &
+MaterialPropertyBase::adInputs(SubdomainID subdomain) const
+{
+  if (!_record)
+    mooseError("Cannot get the AD inputs of an uninitialized or default material property.");
+
+  return libmesh_map_find(_record->ad_inputs, subdomain);
 }
 
 template <typename T, unsigned int dimension>

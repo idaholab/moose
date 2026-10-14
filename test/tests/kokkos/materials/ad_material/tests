@@ -6,8 +6,21 @@
     type = CSVDiff
     input = 'kokkos_ad_material.i'
     csvdiff = 'kokkos_ad_material_out.csv'
-    requirement = 'The Kokkos system shall compute material properties with pointwise automatic differentiation on the reference and on the current configuration, matching the same properties computed on the undisplaced and on the displaced mesh.'
+    requirement = 'The Kokkos system shall compute material properties and their derivatives with respect to the coupled variables and the displacements with pointwise automatic differentiation on the reference and on the current configuration, matching the same properties computed on the undisplaced and on the displaced mesh.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
+  []
+  [plain_position_error]
+    type = RunException
+    input = 'kokkos_ad_material.i'
+    cli_args = 'Materials/current_ad/plain_q_point=true'
+    expect_err = 'A pointwise AD Kokkos object posed on the current configuration read the quadrature point coordinates as plain reals'
+    # Kokkos::abort() raises SIGABRT, which the TestHarness reports as exit code -6 for a serial
+    # run; mpiexec reports the signal differently, so the exit code is checked in serial only
+    expect_exit_code = -6
+    max_parallel = 1
+    requirement = 'The Kokkos system shall report an error when a pointwise automatic differentiation object posed on the current configuration reads the quadrature point coordinates without their derivatives with respect to the displacements.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
   []
 []
