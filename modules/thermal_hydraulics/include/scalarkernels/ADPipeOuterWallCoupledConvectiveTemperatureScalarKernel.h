@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PipeWallTemperatureScalarKernelBase.h"
+#include "ADPipeWallTemperatureScalarKernelBase.h"
 
 /**
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary

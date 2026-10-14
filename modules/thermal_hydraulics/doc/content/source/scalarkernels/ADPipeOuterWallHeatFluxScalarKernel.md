@@ -1,4 +1,4 @@
-# PipeOuterWallHeatFluxScalarKernel
+# ADPipeOuterWallHeatFluxScalarKernel
 
 ## Overview
 
@@ -24,7 +24,7 @@ Note, use of this kernel with transient problems also necessitates the use of a
 [ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
 
-This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
+This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
 the prescribed heat flux applied to the non-radial side of the node.
 
@@ -38,7 +38,7 @@ is possible for them to be controlled via [Controls](syntax/Controls/index.md) a
 supplied [Postprocessors](syntax/Postprocessors/index.md), for example.
 
 Some consideration should be given to the
-[!param](/ScalarKernels/PipeOuterWallHeatFluxScalarKernel/is_implicit) parameter. This
+[!param](/ScalarKernels/ADPipeOuterWallHeatFluxScalarKernel/is_implicit) parameter. This
 term allows the user to select whether the solve should be done with the current or the
 previous state values of functor properties. This may allow the system to evolve more
 slowly which may avoid some issues with respect to divergence of particularly unstable
@@ -47,8 +47,8 @@ systems.
 As a reminder, the system of variables should be defined with the
 [!param](/Variables/family) attribute set to `SCALAR` for each variable.
 
-!syntax parameters /ScalarKernels/PipeOuterWallHeatFluxScalarKernel
+!syntax parameters /ScalarKernels/ADPipeOuterWallHeatFluxScalarKernel
 
-!syntax inputs /ScalarKernels/PipeOuterWallHeatFluxScalarKernel
+!syntax inputs /ScalarKernels/ADPipeOuterWallHeatFluxScalarKernel
 
-!syntax children /ScalarKernels/PipeOuterWallHeatFluxScalarKernel
+!syntax children /ScalarKernels/ADPipeOuterWallHeatFluxScalarKernel

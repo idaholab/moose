@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "PipeWallTemperatureScalarKernelBase.h"
+#include "ADPipeWallTemperatureScalarKernelBase.h"
 
 /**
- * Outer wall path-integrated incompressible conjugate heat transfer kernel with an ambient outer
- * boundary condition
+ * Outer wall path-integrated incompressible conjugate heat transfer kernel with an applied heat
+ * flux boundary condition
  */
-class ADPipeOuterWallAmbientTemperatureScalarKernel : public ADPipeWallTemperatureScalarKernelBase
+class ADPipeOuterWallHeatFluxScalarKernel : public ADPipeWallTemperatureScalarKernelBase
 {
   using Base = ADPipeWallTemperatureScalarKernelBase;
 
 public:
-  ADPipeOuterWallAmbientTemperatureScalarKernel(const InputParameters & parameters);
+  ADPipeOuterWallHeatFluxScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
@@ -30,10 +30,8 @@ protected:
 
   /// Coupled temperature of the inner-surface wall node
   const ADVariableValue & _Tin;
-  /// Ambient temperature functor
-  const Moose::Functor<ADReal> & _T_ambient;
-  /// Ambient heat transfer coefficient functor
-  const Moose::Functor<ADReal> & _htc_ambient;
-  /// Perimeter of this wall node exposed to the ambient environment
-  const Moose::Functor<ADReal> & _ambient_perimeter;
+  /// Applied heat flux functor
+  const Moose::Functor<ADReal> & _heat_flux;
+  /// Perimeter of this wall node over which the heat flux is applied
+  const Moose::Functor<ADReal> & _heated_perimeter;
 };
