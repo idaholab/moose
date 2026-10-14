@@ -167,6 +167,8 @@ shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
   // these cases and avoid the solve for them.
   bool have_constraint_rows = !mesh.get_constraint_rows().empty();
 
+  mesh.comm().max(have_constraint_rows);
+
   // Are there any elements we weren't able to properly evaluate on
   // directly?
   bool returnval = false;
@@ -179,9 +181,10 @@ shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
         returnval = true;
         break;
       }
+
+    mesh.comm().max(returnval);
   }
 
-  mesh.comm().max(returnval);
   return returnval;
 }
 
