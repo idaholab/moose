@@ -85,11 +85,11 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _grad_disp.push_back(&adCoupledGradient("displacements", i));
-    _grad_disp_neighbor.push_back(&adCoupledGradient("displacements", i));
+    _grad_disp_neighbor.push_back(&adCoupledNeighborGradient("displacements", i));
   }
 
   // Set non-intervening components to zero
-  for ([[maybe_unused]] const auto i : make_range(_ndisp))
+  for ([[maybe_unused]] const auto i : make_range(_ndisp, 3u))
   {
     _grad_disp.push_back(&_ad_grad_zero);
     _grad_disp_neighbor.push_back(&_ad_grad_zero);
@@ -132,6 +132,8 @@ CohesiveZoneModelBase::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
+  _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
+
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
   _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
@@ -153,9 +155,14 @@ CohesiveZoneModelBase::computeFandR(const Node * const node)
 
   for (const auto i : make_range(Moose::dim))
     for (const auto j : make_range(Moose::dim))
+    {
       if (!std::isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
         throw MooseException("The deformation gradient on the secondary surface is not finite in "
                              "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
+      if (!std::isfinite(MetaPhysicL::raw_value(normalized_F_neighbor(i, j))))
+        throw MooseException("The deformation gradient on the primary surface is not finite in "
+                             "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
+    }
 
   const auto dof_to_interface_F_node = libmesh_map_find(_dof_to_interface_F, node);
 

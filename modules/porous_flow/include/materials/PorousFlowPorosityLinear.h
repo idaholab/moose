@@ -32,9 +32,6 @@ protected:
   /// When calculating nodal porosity, use the strain at the nearest quadpoint to the node
   const bool _strain_at_nearest_qp;
 
-  /// If the linear relationship produces porosity < _porosity_min, then porosity is set to _porosity_min
-  const Real _porosity_min;
-
   /// Porosity at reference porepressure, temperature and volumetric strain
   const VariableValue & _phi_ref;
 
@@ -90,7 +87,4 @@ protected:
   const OptionalMaterialProperty<std::vector<Real>> & _dtemperature_dvar_nodal;
   const OptionalMaterialProperty<std::vector<Real>> & _dtemperature_dvar_qp;
   const MaterialProperty<std::vector<Real>> * _dtemperature_dvar;
-
-  /// If the linear relationship produces porosity < _porosity_min, then porosity is set to _porosity_min.  This means the derivatives of it will be zero.  However, this gives poor NR convergence, so the derivatives are set to _zero_modifier * (values that are relevant for porosity_min) to hint to the NR that porosity is not always constant.
-  const Real _zero_modifier;
 };
