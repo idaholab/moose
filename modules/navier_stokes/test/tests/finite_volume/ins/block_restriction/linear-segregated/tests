@@ -51,6 +51,20 @@
     design = 'LinearFVScalarAdvection.md'
     requirement = "The system shall advect a passive scalar into a block-restricted flow domain through a boundary whose face element lies outside the domain."
   []
+  [turbulent-advection-block-restricted]
+    type = CSVDiff
+    input = 'reconstructed-gradient.i scalar-advection.i'
+    csvdiff = scalar-advection.csv
+    cli_args = 'Mesh/inactive=delete_outside_blocks '
+               'LinearFVKernels/scalar_advection/type=LinearFVTurbulentAdvection '
+               'Outputs/file_base=scalar-advection'
+    abs_zero = 1e-10
+    prereq = scalar-advection-block-restricted
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#31995'
+    design = 'LinearFVTurbulentAdvection.md'
+    requirement = "The system shall advect a turbulence variable into a block-restricted flow domain through a boundary whose face element lies outside the domain."
+  []
   [scalar-advection-block-mismatch]
     type = RunException
     input = 'reconstructed-gradient.i scalar-advection.i'

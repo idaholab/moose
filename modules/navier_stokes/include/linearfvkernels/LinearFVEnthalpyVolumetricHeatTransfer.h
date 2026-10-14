@@ -26,6 +26,9 @@ public:
   Real computeRightHandSideContribution() override;
 
 protected:
+  /// Evaluate the specific heat in the current element, erroring if it is not positive
+  Real positiveCp(const Moose::ElemArg & elem, const Moose::StateArg & state) const;
+
   /// Specific heat used for the current-side temperature linearization
   const Moose::Functor<Real> & _cp;
 };

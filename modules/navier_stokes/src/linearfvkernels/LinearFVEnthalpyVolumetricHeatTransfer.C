@@ -33,14 +33,21 @@ LinearFVEnthalpyVolumetricHeatTransfer::LinearFVEnthalpyVolumetricHeatTransfer(
 }
 
 Real
+LinearFVEnthalpyVolumetricHeatTransfer::positiveCp(const Moose::ElemArg & elem,
+                                                   const Moose::StateArg & state) const
+{
+  const auto cp = _cp(elem, state);
+  if (cp <= 0.0)
+    mooseError(name(), ": cp must stay positive when solving for enthalpy.");
+  return cp;
+}
+
+Real
 LinearFVEnthalpyVolumetricHeatTransfer::computeMatrixContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  const auto cp = _cp(elem, state);
-
-  if (cp <= 0.0)
-    mooseError(name(), ": cp must stay positive when solving for enthalpy.");
+  const auto cp = positiveCp(elem, state);
 
   return _h_solid_fluid(elem, state) * _current_elem_volume / cp;
 }
@@ -50,10 +57,7 @@ LinearFVEnthalpyVolumetricHeatTransfer::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  const auto cp = _cp(elem, state);
-
-  if (cp <= 0.0)
-    mooseError(name(), ": cp must stay positive when solving for enthalpy.");
+  const auto cp = positiveCp(elem, state);
 
   const auto & current_temperature = _is_solid ? _temp_solid : _temp_fluid;
   const auto & other_temperature = _is_solid ? _temp_fluid : _temp_solid;
