@@ -1,0 +1,13 @@
+[Tests]
+  design = 'syntax/Materials/index.md'
+  issues = '#33860'
+
+  [values]
+    type = CSVDiff
+    input = 'kokkos_ad_material.i'
+    csvdiff = 'kokkos_ad_material_out.csv'
+    requirement = 'The Kokkos system shall compute material properties with pointwise automatic differentiation on the reference and on the current configuration, matching the same properties computed on the undisplaced and on the displaced mesh.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

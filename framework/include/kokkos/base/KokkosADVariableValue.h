@@ -191,6 +191,20 @@ public:
   }
 
   /**
+   * Get the quadrature point coordinates on the configuration as dual numbers, whose derivatives on
+   * the current configuration are those of x = X + u with respect to the displacement values
+   */
+  KOKKOS_FUNCTION DenseADReal3<slots> adQPoint(const unsigned int qp)
+  {
+    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+      if (this->_configuration.displaced())
+        return adGeometry(qp).q_point;
+
+    const Real3 x = this->q_point(qp);
+    return DenseADReal3<slots>(x(0), x(1), x(2));
+  }
+
+  /**
    * Push a gradient with respect to the reference position forward to the configuration, with the
    * derivatives of the deformation gradient
    * @param grad_X The gradient with respect to the reference position
