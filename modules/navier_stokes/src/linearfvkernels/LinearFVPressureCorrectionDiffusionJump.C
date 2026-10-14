@@ -20,6 +20,10 @@ LinearFVPressureCorrectionDiffusionJump::validParams()
                              "contribution on internal faces.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object", "The rhie-chow user-object which provides baffle jump information.");
+  // Baffle faces build their half-cell mobilities from the Rhie-Chow momentum inverse, so
+  // non-baffle faces must use the same coefficient.
+  params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
+  params.suppressParameter<MooseFunctorName>("diffusion_tensor");
   return params;
 }
 

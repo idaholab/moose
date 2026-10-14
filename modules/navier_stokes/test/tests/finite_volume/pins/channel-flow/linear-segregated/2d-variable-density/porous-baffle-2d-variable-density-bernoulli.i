@@ -177,7 +177,6 @@ advected_interp_method = 'average'
   [p_diffusion]
     type = LinearFVPressureCorrectionDiffusionJump
     variable = pressure
-    diffusion_tensor = Ainv
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
   []
