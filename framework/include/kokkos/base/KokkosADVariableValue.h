@@ -144,28 +144,30 @@ struct ADSlotAssignment
 };
 
 /**
- * The AssemblyDatum of a pointwise AD residual object, which fixes the number of derivative slots
- * of its dual numbers. On the current configuration it also carries the geometry as dual numbers
- * whose derivatives with respect to the displacement slots give the variation of the geometry, so
- * that every quantity computed from it carries its displacement derivatives.
+ * The datum of a pointwise AD object, which fixes the number of derivative slots of its dual
+ * numbers. On the current configuration it also carries the geometry as dual numbers whose
+ * derivatives with respect to the displacement slots give the variation of the geometry, so that
+ * every quantity computed from it carries its displacement derivatives.
+ * @tparam Base The plain datum: AssemblyDatum for residual objects, which assemble against test
+ * and trial functions, and Datum for materials
  * @tparam slots The number of derivative slots
  */
-template <unsigned int slots>
-class ADAssemblyDatum : public AssemblyDatum
+template <typename Base, unsigned int slots>
+class ADDatumBase : public Base
 {
 public:
   /**
    * Constructor
-   * @param datum The plain AssemblyDatum of the element, side, or node
-   * @param table The slot table of the residual object
+   * @param datum The plain datum of the element, side, or node
+   * @param table The slot table of the object
    */
-  KOKKOS_FUNCTION ADAssemblyDatum(const AssemblyDatum & datum, const ADSlotTable & table)
-    : AssemblyDatum(datum), _table(table)
+  KOKKOS_FUNCTION ADDatumBase(const Base & datum, const ADSlotTable & table)
+    : Base(datum), _table(table)
   {
   }
 
   /**
-   * Get the slot table of the residual object
+   * Get the slot table of the object
    */
   KOKKOS_FUNCTION const ADSlotTable & table() const { return _table; }
 
@@ -182,10 +184,10 @@ public:
   KOKKOS_FUNCTION DenseADReal<slots> adJxW(const unsigned int qp)
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (_configuration.displaced())
+      if (this->_configuration.displaced())
         return adGeometry(qp).JxW;
 
-    return JxW(qp);
+    return this->JxW(qp);
   }
 
   /**
@@ -198,10 +200,10 @@ public:
                                                     const unsigned int qp)
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (_configuration.displaced())
+      if (this->_configuration.displaced())
         return adGeometry(qp).F_inv.transpose() * grad_X;
 
-    return F_inv(qp).transpose() * grad_X;
+    return this->F_inv(qp).transpose() * grad_X;
   }
 
   /**
@@ -215,14 +217,14 @@ public:
                                                  const unsigned int qp)
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (_configuration.displaced())
+      if (this->_configuration.displaced())
         return adGeometry(qp).dxi_dx.transpose() * grad;
 
-    return dxi_dx(qp).transpose() * grad;
+    return this->dxi_dx(qp).transpose() * grad;
   }
 
 private:
-  /// Slot table of the residual object
+  /// Slot table of the object
   const ADSlotTable & _table;
   /// Quadrature point of the cached dual geometry
   unsigned int _ad_cached_qp = libMesh::invalid_uint;
@@ -230,18 +232,18 @@ private:
   ADGeometry<slots> _ad_geometry;
 };
 
-template <unsigned int slots>
+template <typename Base, unsigned int slots>
 KOKKOS_FUNCTION const ADGeometry<slots> &
-ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
+ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
 {
-  KOKKOS_ASSERT(!isNodal());
+  KOKKOS_ASSERT(!this->isNodal());
 
   if (_ad_cached_qp == qp)
     return _ad_geometry;
 
-  const auto & disp = _configuration.displacements();
-  const auto & X = reference_q_point(qp);
-  const auto & ref_dxi_dx = reference_dxi_dx(qp);
+  const auto & disp = this->_configuration.displacements();
+  const auto & X = this->reference_q_point(qp);
+  const auto & ref_dxi_dx = this->reference_dxi_dx(qp);
 
   // Deformation gradient F = I + grad_X u and position x = X + u, seeded in the displacement
   // slots
@@ -256,17 +258,20 @@ ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
 
   for (unsigned int c = 0; c < disp.components(); ++c)
   {
-    const auto & sys = system(disp.sys(c));
+    const auto & sys = this->system(disp.sys(c));
     const auto var = disp.var(c);
     const auto tag = disp.tag();
     const auto value_slot = _table.displacementValueSlot(c);
     const auto gradient_slot = _table.displacementGradientSlot(c);
 
-    const Real u = !isSide() ? sys.getVectorQpValue(_elem, _qp_offset + qp, var, tag)
-                             : sys.getVectorQpValueFace(_elem, _side, qp, var, tag);
-    const Real3 grad_u = !isSide()
-                             ? sys.getVectorQpGrad(_elem, _qp_offset + qp, var, tag)
-                             : sys.getVectorQpGradFace(_elem, _side, ref_dxi_dx, qp, var, tag);
+    const auto & elem = this->_elem;
+    const auto side = this->_side;
+    const auto qp_offset = this->_qp_offset;
+    const Real u = !this->isSide() ? sys.getVectorQpValue(elem, qp_offset + qp, var, tag)
+                                   : sys.getVectorQpValueFace(elem, side, qp, var, tag);
+    const Real3 grad_u = !this->isSide()
+                             ? sys.getVectorQpGrad(elem, qp_offset + qp, var, tag)
+                             : sys.getVectorQpGradFace(elem, side, ref_dxi_dx, qp, var, tag);
 
     x(c) = X(c) + seededDenseADReal<slots>(u, value_slot, 1);
 
@@ -277,8 +282,9 @@ ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
           1);
   }
 
-  const auto dim = _assembly.getDimension();
-  const auto subdomain = _elem.subdomain;
+  const auto & assembly = this->_assembly;
+  const auto dim = assembly.getDimension();
+  const auto subdomain = this->_elem.subdomain;
 
   auto & g = _ad_geometry;
   g.F_inv = F.inverse(dim);
@@ -288,19 +294,19 @@ ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
   // Coordinate transform factor at the current position, with its derivative through the chain
   // rule on the displacement values
   const Real3 x_value(denseADValue(x(0)), denseADValue(x(1)), denseADValue(x(2)));
-  const Real coord_value = _assembly.coordTransformFactor(subdomain, x_value);
-  const Real3 coord_gradient = _assembly.coordTransformFactorGradient(subdomain, x_value);
+  const Real coord_value = assembly.coordTransformFactor(subdomain, x_value);
+  const Real3 coord_gradient = assembly.coordTransformFactorGradient(subdomain, x_value);
 
   DenseADReal<slots> coord = coord_value;
   for (unsigned int d = 0; d < 3; ++d)
     coord += coord_gradient(d) * (x(d) - x_value(d));
 
   DenseADReal<slots> ratio =
-      F.determinant(dim) * coord / _assembly.coordTransformFactor(subdomain, X);
+      F.determinant(dim) * coord / assembly.coordTransformFactor(subdomain, X);
 
-  if (isSide())
+  if (this->isSide())
   {
-    const auto n = F_inv_T * reference_normal(qp);
+    const auto n = F_inv_T * this->reference_normal(qp);
     const auto norm = sqrt(n * n);
 
     ratio *= norm;
@@ -314,13 +320,27 @@ ADAssemblyDatum<slots>::adGeometry(const unsigned int qp)
         composed(i, j) += F_inv_T(i, k) * ref_dxi_dx(k, j);
 
   g.dxi_dx = composed;
-  g.JxW = reference_JxW(qp) * ratio;
+  g.JxW = this->reference_JxW(qp) * ratio;
   g.q_point = x;
 
   _ad_cached_qp = qp;
 
   return g;
 }
+
+/**
+ * The datum of a pointwise AD residual object
+ * @tparam slots The number of derivative slots
+ */
+template <unsigned int slots>
+using ADAssemblyDatum = ADDatumBase<AssemblyDatum, slots>;
+
+/**
+ * The datum of a pointwise AD material
+ * @tparam slots The number of derivative slots
+ */
+template <unsigned int slots>
+using ADMaterialDatum = ADDatumBase<Datum, slots>;
 
 /**
  * Accessor of the quadrature point value of a variable as a dense dual number. A time derivative
@@ -349,12 +369,12 @@ public:
 
   /**
    * Get the value at a quadrature point
-   * @param datum The ADAssemblyDatum object of the current thread
+   * @param datum The AD datum object of the current thread
    * @param qp The local quadrature point index
-   * @returns The value, with its derivative with respect to the slots of the residual object
+   * @returns The value, with its derivative with respect to the slots of the object
    */
-  template <unsigned int slots>
-  KOKKOS_FUNCTION DenseADReal<slots> operator()(ADAssemblyDatum<slots> & datum,
+  template <typename Base, unsigned int slots>
+  KOKKOS_FUNCTION DenseADReal<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                 unsigned int qp) const
   {
     KOKKOS_ASSERT(_slot.finalized);
@@ -406,12 +426,12 @@ public:
 
   /**
    * Get the gradient at a quadrature point
-   * @param datum The ADAssemblyDatum object of the current thread
+   * @param datum The AD datum object of the current thread
    * @param qp The local quadrature point index
-   * @returns The gradient, with its derivatives with respect to the slots of the residual object
+   * @returns The gradient, with its derivatives with respect to the slots of the object
    */
-  template <unsigned int slots>
-  KOKKOS_FUNCTION DenseADReal3<slots> operator()(ADAssemblyDatum<slots> & datum,
+  template <typename Base, unsigned int slots>
+  KOKKOS_FUNCTION DenseADReal3<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                  unsigned int qp) const
   {
     KOKKOS_ASSERT(_slot.finalized);
