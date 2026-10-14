@@ -43,19 +43,9 @@
   [nonpositive-jump-density]
     type = RunException
     input = pressure-jump-errors.i
-    cli_args = 'UserObjects/pressure_jump/density=0'
+    cli_args = 'UserObjects/pressure_jump/density=0 UserObjects/rc/rho=0'
     expect_err = 'density must be positive on pressure-jump face'
     requirement = 'The system shall reject a nonpositive density on a pressure-jump face.'
-    design = 'BernoulliFormLossPressureJump.md'
-    recover = false # we don't support recovery for SIMPLE yet
-    max_threads = 1 # see libmesh issue #3808
-  []
-  [nonpositive-jump-porosity]
-    type = RunException
-    input = pressure-jump-errors.i
-    cli_args = 'UserObjects/pressure_jump/porosity=0'
-    expect_err = 'porosity must be positive on pressure-jump face'
-    requirement = 'The system shall reject a nonpositive porosity on a pressure-jump face.'
     design = 'BernoulliFormLossPressureJump.md'
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
@@ -80,6 +70,49 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [jump-model-density-mismatch]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'UserObjects/pressure_jump/density=3'
+    expect_err = "Pressure jump model 'pressure_jump' uses density '3' but this object uses '2.0'"
+    requirement = 'The system shall reject a pressure-jump model whose density differs from the density of its Rhie-Chow object.'
+    design = 'PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [momentum-pressure-porosity-mismatch]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = 'LinearFVKernels/u_pressure/porosity=1'
+    expect_err = "Momentum pressure kernel 'u_pressure' uses porosity '1' but this object uses 'porosity'"
+    requirement = 'The system shall reject a porous momentum pressure kernel whose porosity differs from the porosity of its Rhie-Chow object.'
+    design = 'PorousRhieChowMassFlux.md LinearPWCNSFVMomentumPressure.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [jump-gradient-multiple-variables]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "Problem/linear_sys_names='u_system pressure_system s_system' "
+               "Variables/s1/type=MooseLinearVariableFVReal Variables/s1/solver_sys=s_system "
+               "Variables/s1/gradient_method=jump_aware "
+               "Variables/s2/type=MooseLinearVariableFVReal Variables/s2/solver_sys=s_system "
+               "Variables/s2/gradient_method=jump_aware "
+               "LinearFVKernels/s1_diffusion/type=LinearFVDiffusion "
+               "LinearFVKernels/s1_diffusion/variable=s1 "
+               "LinearFVKernels/s2_diffusion/type=LinearFVDiffusion "
+               "LinearFVKernels/s2_diffusion/variable=s2 "
+               "LinearFVKernels/active='u_advection u_pressure p_diffusion HbyA_divergence "
+               "s1_diffusion s2_diffusion' "
+               "Executioner/passive_scalar_systems=s_system "
+               "Executioner/passive_scalar_equation_relaxation=1 "
+               "Executioner/passive_scalar_absolute_tolerance=1e-8 Executioner/num_iterations=1"
+    expect_err = "must be used by exactly one pressure variable, but it is used by 2"
+    requirement = 'The system shall reject a pressure-jump Green-Gauss gradient method that is shared by more than one variable.'
+    design = 'FVPressureJumpGreenGaussGradient.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
   [ordinary-pressure-diffusion]
     type = RunException
     input = pressure-jump-errors.i
@@ -93,7 +126,8 @@
   [nonpositive-face-porosity]
     type = RunException
     input = pressure-jump-errors.i
-    cli_args = "UserObjects/rc/pressure_jump_models='' UserObjects/rc/porosity=0"
+    cli_args = "UserObjects/rc/pressure_jump_models='' UserObjects/rc/porosity=0 "
+               "LinearFVKernels/u_pressure/porosity=0"
     expect_err = 'porosity must be positive on face'
     requirement = 'The system shall reject a nonpositive face porosity in the porous momentum flux kernel.'
     design = 'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md'

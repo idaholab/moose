@@ -16,6 +16,7 @@
 #include "LinearSystem.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVPressureCorrectionDiffusionJump.h"
+#include "LinearPWCNSFVMomentumPressure.h"
 #include "MooseLinearVariableFV.h"
 #include "PressureJumpInterface.h"
 #include "PressureJumpModel.h"
@@ -60,6 +61,23 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
         paramError("pressure_jump_models",
                    "Pressure jump models must not act on overlapping boundaries.");
     _pressure_jump_models.push_back(&model);
+
+    // A jump model evaluating different porosity or density than this object would act on a
+    // flow that is not the one being solved.
+    for (const auto & [model_param, rc_param] :
+         {std::make_pair("porosity", NS::porosity), std::make_pair("density", NS::density)})
+      if (model.parameters().have_parameter<MooseFunctorName>(model_param) &&
+          model.getParam<MooseFunctorName>(model_param) != getParam<MooseFunctorName>(rc_param))
+        paramError("pressure_jump_models",
+                   "Pressure jump model '",
+                   model.name(),
+                   "' uses ",
+                   model_param,
+                   " '",
+                   model.getParam<MooseFunctorName>(model_param),
+                   "' but this object uses '",
+                   getParam<MooseFunctorName>(rc_param),
+                   "'.");
   }
 }
 
@@ -71,6 +89,34 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
 {
   RhieChowMassFlux::linkMomentumPressureSystems(
       momentum_systems, pressure_system, momentum_system_numbers);
+
+  // The porous momentum pressure kernels must weight the pressure gradient with the porosity
+  // this object uses to form the face fluxes.
+  for (const auto system_number : momentum_system_numbers)
+  {
+    std::vector<LinearFVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribSysNum>(system_number)
+        .queryInto(kernels);
+
+    for (const auto * const kernel : kernels)
+      if (const auto * const pressure_kernel =
+              dynamic_cast<const LinearPWCNSFVMomentumPressure *>(kernel);
+          pressure_kernel && MooseUtils::setsIntersect(pressure_kernel->blockIDs(), blockIDs()) &&
+          pressure_kernel->getParam<MooseFunctorName>(NS::porosity) !=
+              getParam<MooseFunctorName>(NS::porosity))
+        paramError(NS::porosity,
+                   "Momentum pressure kernel '",
+                   pressure_kernel->name(),
+                   "' uses porosity '",
+                   pressure_kernel->getParam<MooseFunctorName>(NS::porosity),
+                   "' but this object uses '",
+                   getParam<MooseFunctorName>(NS::porosity),
+                   "'.");
+  }
 
   if (hasPressureBaffles() &&
       !dynamic_cast<const LinearFVPressureCorrectionDiffusionJump *>(_p_diffusion_kernel))
@@ -84,8 +130,8 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
 
   if (hasPressureBaffles())
   {
-    const auto * const jump_gradient_method =
-        dynamic_cast<const FVPressureJumpGreenGaussGradient *>(&solution_gradient_reader.method());
+    auto * const jump_gradient_method = dynamic_cast<FVPressureJumpGreenGaussGradient *>(
+        &_fe_problem.getFVGradientMethod(solution_gradient_reader.method().name(), _tid));
     if (!jump_gradient_method)
       mooseError("Pressure variable '",
                  pressure_var->name(),
@@ -94,10 +140,7 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
                  name(),
                  "' has pressure baffles.");
 
-    auto & writable_method =
-        _fe_problem.getFVGradientMethod(solution_gradient_reader.method().name(), _tid);
-    dynamic_cast<FVPressureJumpGreenGaussGradient &>(writable_method)
-        .linkFlowSystem(*this, solution_gradient_reader);
+    jump_gradient_method->linkFlowSystem(*this, solution_gradient_reader);
 
     if (usingReconstructedPressureGradientMethod())
     {
@@ -122,6 +165,9 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
 void
 PorousRhieChowMassFlux::computeHbyA(bool verbose)
 {
+  // This runs before every pressure corrector, so PIMPLE relaxes the jump once per PISO corrector
+  // and the effective relaxation per outer iteration grows with num_piso_iterations. Without a
+  // reconstructed pressure gradient, all those updates use the same face flux.
   updateBaffleJumps();
 
   // Pressure jumps are external data for the variable's gradient method. Refresh that field
@@ -141,15 +187,6 @@ PorousRhieChowMassFlux::meshChanged()
 }
 
 void
-PorousRhieChowMassFlux::initialize()
-{
-  RhieChowMassFlux::initialize();
-
-  for (const auto & pair : _baffle_jump)
-    _baffle_jump[pair.first] = 0.0;
-}
-
-void
 PorousRhieChowMassFlux::setupPorousMeshInformation()
 {
   const auto time_arg = Moose::currentState();
@@ -162,15 +199,6 @@ PorousRhieChowMassFlux::setupPorousMeshInformation()
     }
 
   _cell_volumes->close();
-}
-
-void
-PorousRhieChowMassFlux::initFaceMassFlux()
-{
-  for (auto & fi : _fe_problem.mesh().faceInfo())
-    _baffle_jump[fi->id()];
-
-  RhieChowMassFlux::initFaceMassFlux();
 }
 
 void

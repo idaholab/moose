@@ -568,14 +568,6 @@ RhieChowMassFlux::initFaceMassFlux()
 
   const auto time_arg = Moose::currentState();
 
-  // Ensure coupling functors are initialized for all faces before any boundary pressure BC
-  // queries (e.g., pressure flux BCs) are evaluated during gradient reconstruction.
-  for (auto & fi : _fe_problem.mesh().faceInfo())
-  {
-    _HbyA_flux[fi->id()];
-    _Ainv[fi->id()];
-  }
-
   // We loop through the faces and compute the resulting face fluxes from the
   // initial conditions for velocity
   for (auto & fi : _flow_face_info)

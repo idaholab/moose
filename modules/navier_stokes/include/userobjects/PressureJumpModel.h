@@ -55,13 +55,13 @@ public:
   /// Boundary IDs handled by this model.
   const std::unordered_set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
-protected:
   ///@{ No-op execution hooks because the Rhie-Chow object evaluates this model directly.
   void initialize() final {}
   void execute() final {}
   void finalize() final {}
   ///@}
 
+protected:
   /// Mesh used to resolve boundary names and determine pressure-jump orientation.
   MooseMesh & _moose_mesh;
 

@@ -84,17 +84,11 @@ public:
                             const RealVectorValue & neighbor_gradient,
                             Real face_area) const;
 
-  /// Populate baffle-jump storage before initializing the face mass flux.
-  void initFaceMassFlux() override;
-
   /// Populate baffle-jump storage after initializing the pressure coupling field.
   void initCouplingField() override;
 
   /// Clear face-indexed baffle-jump data after a mesh change.
   void meshChanged() override;
-
-  /// Reset the current baffle-jump values during user object initialization.
-  void initialize() override;
 
 private:
   /// Whether at least one pressure-jump model is configured.
