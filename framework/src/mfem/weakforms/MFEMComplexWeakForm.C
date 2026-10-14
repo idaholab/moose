@@ -13,6 +13,8 @@
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
 #include "MFEMComplexKernel.h"
+#include "MFEMEssentialConstraint.h"
+#include "MFEMComplexEssentialConstraint.h"
 
 registerMooseObject("MooseApp", MFEMComplexWeakForm);
 
@@ -55,6 +57,27 @@ MFEMComplexWeakForm::addKernel(const std::string & name, std::shared_ptr<MFEMKer
     complexEquationSystem().AddComplexKernel(std::move(complex_kernel));
   else
     mooseError("Unsupported kernel of name '", name, "' detected.");
+}
+
+void
+MFEMComplexWeakForm::addConstraint(const std::string & name,
+                                   std::shared_ptr<MFEMConstraint> constraint)
+{
+  if (auto essential_constraint =
+          std::dynamic_pointer_cast<MFEMComplexEssentialConstraint>(constraint))
+    complexEquationSystem().AddComplexEssentialConstraint(std::move(essential_constraint));
+  // ComplexEquationSystem derives from EquationSystem but keeps its constraints
+  // in a separate map, so a real constraint must be rejected outright rather
+  // than registered where nothing will read it.
+  else if (std::dynamic_pointer_cast<MFEMEssentialConstraint>(constraint))
+    mooseError("Constraint '",
+               name,
+               "' of type '",
+               constraint->type(),
+               "' acts on a real variable and cannot be used in a complex (time-harmonic) "
+               "problem. Use its complex counterpart instead.");
+  else
+    mooseError("Unsupported constraint of name '", name, "' detected.");
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>

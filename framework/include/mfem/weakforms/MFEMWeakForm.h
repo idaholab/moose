@@ -30,6 +30,9 @@ protected:
                                     std::shared_ptr<MFEMBoundaryCondition> bc) override;
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
+
+  virtual void addConstraint(const std::string & name,
+                             std::shared_ptr<MFEMConstraint> constraint) override;
 };
 
 #endif
