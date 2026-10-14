@@ -22,6 +22,10 @@ KokkosADQuadraticMaterial::validParams()
   params.addParam<RealVectorValue>(
       "g", RealVectorValue(0, 0, 0), "The coefficient vector of the position");
   params.addParam<MaterialPropertyName>("property_name", "k", "The name of the property");
+  params.addParam<bool>("plain_q_point",
+                        false,
+                        "Whether to read the position as plain reals, to test that this aborts on "
+                        "the current configuration");
   return params;
 }
 
@@ -31,6 +35,7 @@ KokkosADQuadraticMaterial::KokkosADQuadraticMaterial(const InputParameters & par
     _k0(getParam<Real>("k0")),
     _a(getParam<Real>("a")),
     _g(getParam<RealVectorValue>("g")),
-    _k(declareKokkosProperty<Real>("property_name"))
+    _plain_q_point(getParam<bool>("plain_q_point")),
+    _k(declareKokkosADProperty<Real>("property_name"))
 {
 }
