@@ -12,25 +12,10 @@
 #include "KokkosVariableValue.h"
 #include "KokkosDenseADReal.h"
 #include "KokkosADGeometry.h"
+#include "KokkosADSlotBlock.h"
 
 namespace Moose::Kokkos
 {
-
-/**
- * A block of consecutive derivative slots of a pointwise AD residual object, holding the
- * derivatives with respect to one quadrature point quantity of one nonlinear variable
- */
-struct ADSlotBlock
-{
-  /// System number of the variable
-  unsigned int sys;
-  /// Variable number of the variable in its system
-  unsigned int var;
-  /// First slot of the block
-  unsigned int first;
-  /// Whether the block holds the gradient, of AD_GRADIENT_SLOTS slots, or the value, of one slot
-  bool gradient;
-};
 
 /**
  * Slot table of a pointwise AD residual object. The AD accessors of the object register the
@@ -156,6 +141,9 @@ template <typename Base, unsigned int slots>
 class ADDatumBase : public Base
 {
 public:
+  /// Number of derivative slots
+  static constexpr unsigned int ad_slots = slots;
+
   /**
    * Constructor
    * @param datum The plain datum of the element, side, or node
@@ -164,6 +152,10 @@ public:
   KOKKOS_FUNCTION ADDatumBase(const Base & datum, const ADSlotTable & table)
     : Base(datum), _table(table)
   {
+    // On the current configuration the position carries displacement derivatives only as a dual
+    // number
+    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+      this->adDisplaced(this->_configuration.displaced());
   }
 
   /**

@@ -32,8 +32,14 @@ public:
                                            Moose::Kokkos::ADMaterialDatum<slots> & datum) const
   {
     const auto T = _T(datum, qp);
-    const auto k = _k0 + _a * T * T + _g * datum.adQPoint(qp);
-    _k(datum, qp) = Moose::Kokkos::denseADValue(k);
+
+    if (_plain_q_point)
+    {
+      const auto x = datum.q_point(qp);
+      _k(datum, qp) = _k0 + _a * T * T + _g * x;
+    }
+    else
+      _k(datum, qp) = _k0 + _a * T * T + _g * datum.adQPoint(qp);
   }
 
 private:
@@ -45,6 +51,8 @@ private:
   const Real _a;
   /// Coefficient vector of the position
   const Moose::Kokkos::Real3 _g;
+  /// Whether to read the position as plain reals, which aborts on the current configuration
+  const bool _plain_q_point;
   /// The property
-  Moose::Kokkos::MaterialProperty<Real> _k;
+  Moose::Kokkos::ADMaterialProperty<Real> _k;
 };
