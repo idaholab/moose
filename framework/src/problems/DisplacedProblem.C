@@ -296,6 +296,7 @@ DisplacedProblem::updateMesh(bool mesh_changing)
                        /*grainsize=*/1);
 
   Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  udmt.displaceNodesWithoutDofs();
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
 
@@ -354,6 +355,7 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
                        /*grainsize=*/1);
 
   Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  udmt.displaceNodesWithoutDofs();
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -1519,6 +1521,65 @@ DisplacedProblem::UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & 
         {
           displaced_node(direction) = coord;
           _has_displacement = true;
+        }
+      }
+    }
+  }
+}
+
+void
+DisplacedProblem::UpdateDisplacedMeshThread::displaceNodesWithoutDofs()
+{
+  auto & es = _displaced_problem.es();
+  auto & displaced_mesh = _displaced_problem.mesh();
+  std::vector<dof_id_type> dof_indices;
+  std::vector<Number> elem_soln;
+  std::vector<Number> nodal_soln;
+
+  for (const auto & [sys_num, var_num_and_direction] : _sys_to_var_num_and_direction)
+  {
+    const auto & dof_map = es.get_system(sys_num).get_dof_map();
+    const auto & soln = *libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second;
+    const auto & [var_numbers, directions] = var_num_and_direction;
+    for (const auto i : index_range(var_numbers))
+    {
+      const auto var_num = var_numbers[i];
+      const auto & fe_type = dof_map.variable_type(var_num);
+      // Only for Lagrange variables are all element degrees of freedom nodal, and therefore in
+      // the ghosted solution built by init()
+      if (fe_type.family != LAGRANGE)
+        continue;
+
+      for (const Elem * const elem : _ref_mesh.getMesh().active_element_ptr_range())
+      {
+        const auto node_indices = elem->node_index_range();
+        if (!dof_map.variable(var_num).active_on_subdomain(elem->subdomain_id()) ||
+            std::all_of(node_indices.begin(),
+                        node_indices.end(),
+                        [elem, sys_num = sys_num, var_num](const unsigned int n)
+                        { return elem->node_ref(n).n_dofs(sys_num, var_num) > 0; }))
+          continue;
+
+        // libMesh evaluates the element's displacement at nodes without degrees of freedom from
+        // the nodes of the face (or element) they belong to, so elements sharing such a node give
+        // it the same position
+        dof_map.dof_indices(elem, dof_indices, var_num);
+        soln.get(dof_indices, elem_soln);
+        FEInterface::nodal_soln(elem->dim(), fe_type, elem, elem_soln, nodal_soln);
+
+        for (const auto n : elem->node_index_range())
+        {
+          const Node & reference_node = elem->node_ref(n);
+          if (reference_node.n_dofs(sys_num, var_num) > 0)
+            continue;
+
+          Node & displaced_node = displaced_mesh.nodeRef(reference_node.id());
+          const Real coord = reference_node(directions[i]) + nodal_soln[n];
+          if (displaced_node(directions[i]) != coord)
+          {
+            displaced_node(directions[i]) = coord;
+            _has_displacement = true;
+          }
         }
       }
     }
