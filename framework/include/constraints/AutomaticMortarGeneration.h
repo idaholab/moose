@@ -282,13 +282,6 @@ public:
   void computeIncorrectEdgeDroppingInactiveLMNodes();
 
   /**
-   * Send inactive LM nodes to their owning processors and add them to the owners' inactive node
-   * sets. The owner of a node need not own (or even ghost) any secondary element touching it, but
-   * only the owner zeroes the node's LM DoFs.
-   */
-  void pushInactiveLMNodesToOwners();
-
-  /**
    * Get list of secondary elems without any corresponding primary elements.
    * Used to enforce zero values on inactive DoFs of elemental variables.
    */
@@ -498,7 +491,7 @@ private:
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
-  // List of inactive lagrange multiplier nodes (for nodal variables)
+  /// List of inactive lagrange multiplier nodes owned by this processor (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
   /// List of inactive lagrange multiplier nodes (for elemental variables)
