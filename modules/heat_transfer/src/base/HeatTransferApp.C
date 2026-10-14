@@ -56,6 +56,10 @@ HeatTransferApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntax("HeatConductionCG", "Physics/HeatConduction/FiniteElement/*");
   registerSyntax("HeatConductionFV", "Physics/HeatConduction/FiniteVolume/*");
 
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "append_mesh_generator");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_mortar_variable");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_constraint");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_user_object");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_bc");

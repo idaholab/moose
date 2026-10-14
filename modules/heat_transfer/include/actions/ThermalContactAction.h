@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MortarGapHeatTransferAction.h"
 
 #include "MooseEnum.h"
 
-class ThermalContactAction : public Action
+class ThermalContactAction : public MortarGapHeatTransferAction
 {
 public:
   static InputParameters validParams();
@@ -22,6 +22,11 @@ public:
   virtual void act() override;
 
 protected:
+  virtual std::vector<VariableName> temperatureVariables() const override;
+  virtual BoundaryName primaryBoundary() const override;
+  virtual BoundaryName secondaryBoundary() const override;
+  virtual std::vector<BoundaryName> gapFluxBoundaries() const override;
+
   virtual void addAuxKernels();
   virtual void addAuxVariables();
   virtual void addBCs();
@@ -30,6 +35,7 @@ protected:
   virtual void addSecondaryFluxVector();
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm) override;
 
+  const bool _mortar;
   const bool _quadrature;
   const MooseEnum _order;
   const AuxVariableName _penetration_var_name;
