@@ -27,23 +27,29 @@ ADSlotSetup::add(ADSlotAssignment & slot, const Variable & var, const bool gradi
 }
 
 bool
-ADSlotSetup::seeded(const Variable & ivar, const Variable & var, const unsigned int comp) const
+ADSlotSetup::seeded(const Variable * ivar, const Variable & var, const unsigned int comp) const
 {
-  auto & ivar_copy = const_cast<Variable &>(ivar);
-  const auto & residual_var = *ivar_copy.mooseVar();
-  const auto & problem = residual_var.sys().feProblem();
-  const auto residual_sys = residual_var.sys().number();
-
-  // Derivatives exist with respect to the current state of nonlinear variables of the residual
-  // system that the coupling matrix couples to the residual variable
-  if (!var.coupled() || var.old() || var.sys(comp) != residual_sys)
+  // Derivatives exist with respect to the current state of nonlinear variables
+  if (!var.coupled() || var.old())
     return false;
 
   const auto * moose_var = const_cast<Variable &>(var).mooseVar(comp);
   if (moose_var->kind() != Moose::VarKindType::VAR_SOLVER)
     return false;
 
-  return problem.areCoupled(ivar.var(), var.var(comp), residual_sys);
+  if (!ivar)
+    return true;
+
+  // A residual object differentiates with respect to the variables of the residual system that the
+  // coupling matrix couples to the residual variable
+  const auto & residual_var = *const_cast<Variable *>(ivar)->mooseVar();
+  const auto & problem = residual_var.sys().feProblem();
+  const auto residual_sys = residual_var.sys().number();
+
+  if (var.sys(comp) != residual_sys)
+    return false;
+
+  return problem.areCoupled(ivar->var(), var.var(comp), residual_sys);
 }
 
 void
@@ -57,6 +63,23 @@ ADSlotSetup::assign(const MooseObject & object,
                     const Variable & ivar,
                     const unsigned int max_slots,
                     const Variable & displacements)
+{
+  assignSlots(object, &ivar, max_slots, displacements);
+}
+
+void
+ADSlotSetup::assign(const MooseObject & object,
+                    const unsigned int max_slots,
+                    const Variable & displacements)
+{
+  assignSlots(object, nullptr, max_slots, displacements);
+}
+
+void
+ADSlotSetup::assignSlots(const MooseObject & object,
+                         const Variable * ivar,
+                         const unsigned int max_slots,
+                         const Variable & displacements)
 {
   _table = ADSlotTable();
 
@@ -84,12 +107,12 @@ ADSlotSetup::assign(const MooseObject & object,
   }
 
   if (_table.numSlots() > max_slots)
-    object.mooseError("The pointwise AD residual of this object reads ",
+    object.mooseError("The pointwise AD computation of this object reads ",
                       _table.numSlots(),
                       " derivative slots, more than its declared max_ad_slots of ",
                       max_slots,
                       ". Increase max_ad_slots in the class to the number of value and gradient "
-                      "slots its residual depends on.");
+                      "slots its computation depends on.");
 
   if (displacements.coupled())
   {

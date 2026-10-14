@@ -790,6 +790,33 @@ registerADResidualObjectDispatchers(const std::string & objectname)
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosMaterialFunction(classname, alias)
 
+// AD Material
+
+#define callRegisterKokkosADMaterialFunction(classname, objectname)                                \
+  static char registerKokkosADMaterial##classname()                                                \
+  {                                                                                                \
+    static_assert(Moose::Kokkos::HasMaxADSlots<classname>::value,                                  \
+                  "A Kokkos AD material must declare 'static constexpr unsigned int "              \
+                  "max_ad_slots', the number of derivative directions its properties read: one "   \
+                  "for each coupled value and three for each coupled gradient.");                  \
+                                                                                                   \
+    Moose::Kokkos::DispatcherRegistry::setProperty(                                                \
+        "max_ad_slots", objectname, classname::max_ad_slots);                                      \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_ad_material_##classname,             \
+                                            __COUNTER__) = registerKokkosADMaterial##classname()
+
+#define registerKokkosADMaterial(app, classname)                                                   \
+  registerKokkosMaterial(app, classname);                                                          \
+  callRegisterKokkosADMaterialFunction(classname, #classname)
+
+#define registerKokkosADMaterialAliased(app, classname, alias)                                     \
+  registerKokkosMaterialAliased(app, classname, alias);                                            \
+  callRegisterKokkosADMaterialFunction(classname, alias)
+
 // AuxKernel
 
 #define callRegisterKokkosAuxKernelFunction(classname, objectname)                                 \
