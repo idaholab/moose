@@ -6,8 +6,8 @@ This user object computes the wall heat transfer coefficient $h$ of a lumped flo
 of the [Path-integrated incompressible flow model](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md)
 from the Dittus-Boelter correlation, [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#dittus_boelter),
 and supplies it as a [functor](/Functors/index.md) named after the object itself. The
-conjugate heat transfer scalar kernels, [PipeInnerWallTemperatureScalarKernel.md] and
-[PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], consume it through their
+conjugate heat transfer scalar kernels, [ADPipeInnerWallTemperatureScalarKernel.md] and
+[ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], consume it through their
 `heat_transfer_coefficient` parameter, which lets a single definition of the correlation
 serve both the primary and secondary sides of a segment.
 
@@ -31,9 +31,6 @@ For the same reason, the `reference_pressure`, `flow_area`, and `wetted_perimete
 parameters must be given as plain numbers, postprocessors, or scalar variables, all of
 which are element-independent. A [Function](syntax/Functions/index.md) name is not valid
 here, since evaluating a function requires a spatial point that this object cannot supply.
-
-Because the coefficient is a functor, it can be reported with a
-[FunctorElementalAux.md] or controlled through [Controls](syntax/Controls/index.md).
 
 !syntax parameters /UserObjects/ADDittusBoelterHTCUserObject
 

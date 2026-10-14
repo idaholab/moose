@@ -183,8 +183,8 @@ where
 
 Since the outer boundary of the wall may be subject to a number of boundary conditions, a number of kernels are provided for flexibility in modeling the per-length heat transfer term. The base kernels include:
 
-- Ambient convection: [PipeOuterWallAmbientTemperatureScalarKernel.md]
-- Coupled secondary-side convection: [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]
-- Applied heat flux: [PipeOuterWallHeatFluxScalarKernel.md]
+- Ambient convection: [ADPipeOuterWallAmbientTemperatureScalarKernel.md]
+- Coupled secondary-side convection: [ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]
+- Applied heat flux: [ADPipeOuterWallHeatFluxScalarKernel.md]
 
-An optional standalone term for radiative heat transfer [PipeOuterWallRadiationScalarKernel.md] may also be added to any of the base outer wall temperature kernels (but it really only makes sense for the ambient and coupled convection kernels).
+An optional standalone term for radiative heat transfer [ADPipeOuterWallRadiationScalarKernel.md] may also be added to any of the base outer wall temperature kernels (but it really only makes sense for the ambient and coupled convection kernels).
