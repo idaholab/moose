@@ -1,4 +1,4 @@
-# PipeOuterWallCoupledConvectiveTemperatureScalarKernel
+# ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
 
 ## Overview
 
@@ -16,7 +16,7 @@ q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
 
 where $h$ is the secondary-side heat transfer coefficient, supplied as a
 [functor](/Functors/index.md) through the
-[!param](/ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
+[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
 parameter. [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
 correlation. $T_{in,f}$ upwinds the upstream/downstream secondary-side fluid temperature
 according to the sign of the secondary-side mass flow rate $\dot{m}$:
@@ -28,7 +28,7 @@ Note, use of this kernel with transient problems also necessitates the use of a
 [ADScalarTimeDerivative.md] (or its non-AD equivalent) with `coefficient = 1` on the same scalar
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
 
-This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
+This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
 the convective heat exchange with the secondary-side flowing fluid.
 
@@ -43,7 +43,7 @@ them to be controlled via [Controls](syntax/Controls/index.md) as supplied
 [Postprocessors](syntax/Postprocessors/index.md), for example.
 
 Some consideration should be given to the
-[!param](/ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel/is_implicit)
+[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/is_implicit)
 parameter. This term allows the user to select whether the solve should be done with the
 current or the previous state values of functor properties. This may allow the system to
 evolve more slowly which may avoid some issues with respect to divergence of particularly
@@ -52,8 +52,8 @@ unstable systems.
 As a reminder, the system of variables should be defined with the
 [!param](/Variables/family) attribute set to `SCALAR` for each variable.
 
-!syntax parameters /ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel
+!syntax parameters /ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
 
-!syntax inputs /ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel
+!syntax inputs /ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
 
-!syntax children /ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel
+!syntax children /ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel

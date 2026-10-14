@@ -1,4 +1,4 @@
-# PipeOuterWallAmbientTemperatureScalarKernel
+# ADPipeOuterWallAmbientTemperatureScalarKernel
 
 ## Overview
 
@@ -22,7 +22,7 @@ Note, use of this kernel with transient problems also necessitates the use of a
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels
 together form the complete transient equation.
 
-This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
+This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
 the convective heat exchange with the ambient environment.
 
@@ -37,7 +37,7 @@ functors, it is possible for them to be controlled via
 [Postprocessors](syntax/Postprocessors/index.md), for example.
 
 Some consideration should be given to the
-[!param](/ScalarKernels/PipeOuterWallAmbientTemperatureScalarKernel/is_implicit) parameter. This
+[!param](/ScalarKernels/ADPipeOuterWallAmbientTemperatureScalarKernel/is_implicit) parameter. This
 term allows the user to select whether the solve should be done with the current or the
 previous state values of functor properties. This may allow the system to evolve more
 slowly which may avoid some issues with respect to divergence of particularly unstable
@@ -46,8 +46,8 @@ systems.
 As a reminder, the system of variables should be defined with the
 [!param](/Variables/family) attribute set to `SCALAR` for each variable.
 
-!syntax parameters /ScalarKernels/PipeOuterWallAmbientTemperatureScalarKernel
+!syntax parameters /ScalarKernels/ADPipeOuterWallAmbientTemperatureScalarKernel
 
-!syntax inputs /ScalarKernels/PipeOuterWallAmbientTemperatureScalarKernel
+!syntax inputs /ScalarKernels/ADPipeOuterWallAmbientTemperatureScalarKernel
 
-!syntax children /ScalarKernels/PipeOuterWallAmbientTemperatureScalarKernel
+!syntax children /ScalarKernels/ADPipeOuterWallAmbientTemperatureScalarKernel

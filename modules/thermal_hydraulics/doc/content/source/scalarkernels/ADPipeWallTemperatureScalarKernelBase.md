@@ -1,11 +1,11 @@
-# PipeWallTemperatureScalarKernelBase
+# ADPipeWallTemperatureScalarKernelBase
 
 ## Overview
 
-This object acts as a base class for [PipeInnerWallTemperatureScalarKernel.md],
-[PipeOuterWallAmbientTemperatureScalarKernel.md],
-[PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and
-[PipeOuterWallHeatFluxScalarKernel.md]. It implements the physics shared by every radial
+This object acts as a base class for [ADPipeInnerWallTemperatureScalarKernel.md],
+[ADPipeOuterWallAmbientTemperatureScalarKernel.md],
+[ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and
+[ADPipeOuterWallHeatFluxScalarKernel.md]. It implements the physics shared by every radial
 node of a two-radial-node lumped pipe wall model: axial conduction to the
 upstream/downstream nodes of the same radial layer, and radial conduction to the node on the
 other side of the wall. It does not implement the heat exchange on this node's non-radial

@@ -1,4 +1,4 @@
-# PipeInnerWallTemperatureScalarKernel
+# ADPipeInnerWallTemperatureScalarKernel
 
 ## Overview
 
@@ -11,14 +11,14 @@ Note, use of this kernel with transient problems also necessitates the use of a
 [ADScalarTimeDerivative.md] (or its non-AD equivalent) with `coefficient = 1` on the same scalar
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
 
-This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
+This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
 the convective heat exchange with the primary flowing fluid.
 
 This kernel takes a solid properties object based on the
 [ThermalSolidProperties.md] base class. The convective heat transfer coefficient $h$ is
 supplied as a [functor](/Functors/index.md) through the
-[!param](/ScalarKernels/PipeInnerWallTemperatureScalarKernel/heat_transfer_coefficient)
+[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/heat_transfer_coefficient)
 parameter; [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
 correlation. All geometry inputs (the flow channel's wetted perimeter, this node's and its
 upstream/downstream neighbors' wall cross-sectional areas, the radial interface perimeter
@@ -30,7 +30,7 @@ being functors, it is possible for them to be controlled via
 [Postprocessors](syntax/Postprocessors/index.md), for example.
 
 Some consideration should be given to the
-[!param](/ScalarKernels/PipeInnerWallTemperatureScalarKernel/is_implicit) parameter. This
+[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/is_implicit) parameter. This
 term allows the user to select whether the solve should be done with the current or the
 previous state values of functor properties. This may allow the system to evolve more
 slowly which may avoid some issues with respect to divergence of particularly unstable
@@ -39,8 +39,8 @@ systems.
 As a reminder, the system of variables should be defined with the
 [!param](/Variables/family) attribute set to `SCALAR` for each variable.
 
-!syntax parameters /ScalarKernels/PipeInnerWallTemperatureScalarKernel
+!syntax parameters /ScalarKernels/ADPipeInnerWallTemperatureScalarKernel
 
-!syntax inputs /ScalarKernels/PipeInnerWallTemperatureScalarKernel
+!syntax inputs /ScalarKernels/ADPipeInnerWallTemperatureScalarKernel
 
-!syntax children /ScalarKernels/PipeInnerWallTemperatureScalarKernel
+!syntax children /ScalarKernels/ADPipeInnerWallTemperatureScalarKernel
