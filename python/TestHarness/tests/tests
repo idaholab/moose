@@ -328,6 +328,12 @@
     input = test_SubprocessRunner.py
     requirement = 'The system shall wait for specified application output before delivering a signal.'
   []
+  [monitor_processes]
+    type = PythonUnitTest
+    input = test_MonitorProcesses.py
+    requirement = 'The system shall measure a process tree memory usage excluding file-backed memory, '
+                  'on Linux kernels both with and without the smaps_rollup Pss_File breakdown.'
+  []
   [test_method]
     type = PythonUnitTest
     input = test_GetExecutable.py

@@ -266,7 +266,10 @@ class TestHarness:
     #     job output in test/*/tests/*/output_files
     # 8 - Store tests/*/tests/*/tester/json_metadata values a dict instead of a file path
     # 9 - Store tests/*/tests/*/max_memory if available
-    RESULTS_VERSION = 9
+    # 10 - tests/*/tests/*/max_memory on Linux 5.3+ no longer counts file-backed memory
+    #      (executable/library pages), which was split across however many other
+    #      processes happened to be running at the same time
+    RESULTS_VERSION = 10
 
     # Validation version history:
     # 1 - Initial tracking of version
