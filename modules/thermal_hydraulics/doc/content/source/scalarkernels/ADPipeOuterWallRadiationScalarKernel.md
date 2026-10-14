@@ -1,13 +1,13 @@
-# PipeOuterWallRadiationScalarKernel
+# ADPipeOuterWallRadiationScalarKernel
 
 ## Overview
 
 This class adds a radiative heat transfer term, exchanged with an ambient/surrounding
 environment, to the outer-surface radial node of a pipe wall. Unlike
-[PipeOuterWallAmbientTemperatureScalarKernel.md], [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and [PipeOuterWallHeatFluxScalarKernel.md], it does not implement the
+[ADPipeOuterWallAmbientTemperatureScalarKernel.md], [ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md], and [ADPipeOuterWallHeatFluxScalarKernel.md], it does not implement the
 axial or radial conduction terms of the wall node's equation; it is a purely additive
 term, meant to be added alongside another scalar kernel acting on the same outer-surface
-wall scalar variable (such as [PipeOuterWallAmbientTemperatureScalarKernel.md] and [PipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]), analogous
+wall scalar variable (such as [ADPipeOuterWallAmbientTemperatureScalarKernel.md] and [ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]), analogous
 to how [ODETimeDerivative.md] supplies the time-derivative term rather than the full
 equation; it adds the following term for [!eqref](modules/thermal_hydraulics/theory_manual/path_integrated_incompressible_model/index.md#discretized_outer_pipe_temperature)
 
@@ -32,12 +32,12 @@ node's own temperature for the normalization above (the same object and `area` v
 supplied to this node's other kernel should be used here, for consistency).
 
 Some consideration should be given to the
-[!param](/ScalarKernels/PipeOuterWallRadiationScalarKernel/is_implicit) parameter. This
+[!param](/ScalarKernels/ADPipeOuterWallRadiationScalarKernel/is_implicit) parameter. This
 term allows the user to select whether the solve should be done with the current or the
 previous state values of functor properties.
 
-!syntax parameters /ScalarKernels/PipeOuterWallRadiationScalarKernel
+!syntax parameters /ScalarKernels/ADPipeOuterWallRadiationScalarKernel
 
-!syntax inputs /ScalarKernels/PipeOuterWallRadiationScalarKernel
+!syntax inputs /ScalarKernels/ADPipeOuterWallRadiationScalarKernel
 
-!syntax children /ScalarKernels/PipeOuterWallRadiationScalarKernel
+!syntax children /ScalarKernels/ADPipeOuterWallRadiationScalarKernel
