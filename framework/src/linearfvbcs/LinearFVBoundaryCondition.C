@@ -132,7 +132,9 @@ LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
   return face;
 }
 
-// For now this assume reals only, considering this system doesn't support AD. If we need
-// vectors/tensors we might add it here later.
+// For now this assume non-AD types only, considering this system doesn't support AD. If we need
+// tensors we might add them here later.
 template Moose::FaceArg LinearFVBoundaryCondition::functorFaceArg<Moose::Functor<Real>>(
     const Moose::Functor<Real> &, const FaceInfo *, Moose::FV::LimiterType, bool) const;
+template Moose::FaceArg LinearFVBoundaryCondition::functorFaceArg<Moose::Functor<RealVectorValue>>(
+    const Moose::Functor<RealVectorValue> &, const FaceInfo *, Moose::FV::LimiterType, bool) const;
