@@ -40,13 +40,6 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
   printGeneralExecutionInformation();
 
-  // Spline node ICs will need to be evaluated indirectly.
-  bool have_indirect_constraints = !_fe_problem.mesh().getMesh().get_constraint_rows().empty();
-
-  // We should get rid of this communication after the next libMesh
-  // update gives us a cached n_constraint_rows().
-  _fe_problem.mesh().getMesh().comm().max(have_indirect_constraints);
-
   // Iterate over all the elements in the range
   for (const auto & elem : range)
   {
