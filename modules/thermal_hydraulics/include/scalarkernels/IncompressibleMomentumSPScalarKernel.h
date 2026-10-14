@@ -26,7 +26,7 @@ protected:
   virtual GenericReal<is_ad> pressureDrop() const override { return _dPc[0]; };
   virtual Real computeQpJacobian() override;
   /// Coupled reference pressure drop from inlet to outlet of the path
-  const VariableValue & _dPc;
+  const GenericVariableValue<is_ad> & _dPc;
 };
 
 typedef IncompressibleMomentumSPScalarKernelTempl<false> IncompressibleMomentumSPScalarKernel;
