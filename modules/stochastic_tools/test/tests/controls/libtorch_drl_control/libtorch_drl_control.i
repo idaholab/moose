@@ -93,17 +93,15 @@
     seed = 11
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    responses = 'center_temp env_temp'
+    observations = 'center_temp env_temp'
 
     input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
-    action_standard_deviations = '0.1'
-    action_scaling_factors = 200
+    observation_scaling_factors = '0.03 0.03'
+    observation_shift_factors = '270 270'
+    action_scaling_factors = 100
 
     filename = 'mynet_control.net'
-    torch_script_format = false
-    num_neurons_per_layer = '16 6'
+    num_neurons_per_layer = '4 2'
     activation_function = 'relu'
 
     execute_on = 'TIMESTEP_BEGIN'
@@ -111,12 +109,11 @@
   [src_control_empty]
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    responses = 'center_temp env_temp'
+    observations = 'center_temp env_temp'
 
     input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
-    action_standard_deviations = '0.1'
+    observation_scaling_factors = '0.03 0.03'
+    observation_shift_factors = '270 270'
     action_scaling_factors = 100
 
     execute_on = 'TIMESTEP_BEGIN'

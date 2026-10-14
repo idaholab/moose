@@ -2238,7 +2238,7 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 
@@ -2253,6 +2253,8 @@ Coupleable::adCoupledGradientDot(const std::string & var_name, unsigned int comp
 
   if (!_c_is_implicit)
     mooseError("Not implemented");
+  mooseAssert(!usesFaceCoupledValues(),
+              "The AD gradient time derivative is not computed on element faces");
 
   if (!_coupleable_neighbor)
     return var->adGradSlnDot();
@@ -2370,7 +2372,7 @@ Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 

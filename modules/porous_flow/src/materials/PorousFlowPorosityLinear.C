@@ -42,21 +42,6 @@ PorousFlowPorosityLinear::validParams()
   params.addParam<Real>("P_coeff", 0.0, "Effective porepressure coefficient");
   params.addParam<Real>("T_coeff", 0.0, "Temperature coefficient");
   params.addParam<Real>("epv_coeff", 0.0, "Volumetric-strain coefficient");
-  params.addRangeCheckedParam<Real>(
-      "porosity_min",
-      0.0,
-      "porosity_min >= 0",
-      "Minimum allowed value of the porosity: if the linear relationship gives "
-      "values less than this value, then porosity is set to this value instead");
-  params.addParam<Real>(
-      "zero_modifier",
-      1E-3,
-      "If the linear relationship produces porosity < porosity_min, then porosity is set "
-      "porosity_min.  This means the derivatives of it will be zero.  However, these zero "
-      "derivatives often result in poor NR convergence, so the derivatives are set to "
-      "_zero_modifier * (values that are relevant for min porosity) to hint to the NR that "
-      "porosity is not always constant");
-  params.addParamNamesToGroup("zero_modifier", "Advanced");
   params.addClassDescription(
       "This Material calculates the porosity in PorousFlow simulations using the relationship "
       "porosity_ref + P_coeff * (P - P_ref) + T_coeff * (T - T_ref) + epv_coeff * (epv - epv_ref), "
@@ -68,7 +53,6 @@ PorousFlowPorosityLinear::validParams()
 PorousFlowPorosityLinear::PorousFlowPorosityLinear(const InputParameters & parameters)
   : PorousFlowPorosityBase(parameters),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
-    _porosity_min(getParam<Real>("porosity_min")),
     _phi_ref(coupledValue("porosity_ref")),
     _P_ref(nodalOrQpValue("P_ref")),
     _T_ref(nodalOrQpValue("T_ref")),
@@ -96,8 +80,7 @@ PorousFlowPorosityLinear::PorousFlowPorosityLinear(const InputParameters & param
     _dtemperature_dvar_nodal(
         getOptionalMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
     _dtemperature_dvar_qp(
-        getOptionalMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")),
-    _zero_modifier(getParam<Real>("zero_modifier"))
+        getOptionalMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar"))
 {
 }
 
@@ -155,10 +138,7 @@ PorousFlowPorosityLinear::computeQpProperties()
     porosity += _epv_coeff * (_vol_strain_qp[qp_to_use] - _epv_ref[0]);
   }
 
-  if (porosity < _porosity_min)
-    _porosity[_qp] = _porosity_min;
-  else
-    _porosity[_qp] = porosity;
+  _porosity[_qp] = porosity;
 
   (*_dporosity_dvar)[_qp].resize(_num_var);
   (*_dporosity_dgradvar)[_qp].resize(_num_var);
@@ -169,10 +149,7 @@ PorousFlowPorosityLinear::computeQpProperties()
       deriv += _P_coeff * (*_dpf_dvar)[_qp][pvar];
     if (_uses_T)
       deriv += _T_coeff * (*_dtemperature_dvar)[_qp][pvar];
-    if (porosity < _porosity_min)
-      (*_dporosity_dvar)[_qp][pvar] = _zero_modifier * deriv;
-    else
-      (*_dporosity_dvar)[_qp][pvar] = deriv;
+    (*_dporosity_dvar)[_qp][pvar] = deriv;
 
     RealGradient deriv_grad(0.0, 0.0, 0.0);
     if (_uses_volstrain)
@@ -181,9 +158,8 @@ PorousFlowPorosityLinear::computeQpProperties()
           (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
       deriv_grad += _epv_coeff * _dvol_strain_qp_dvar[qp_to_use][pvar];
     }
-    if (porosity < _porosity_min)
-      (*_dporosity_dgradvar)[_qp][pvar] = _zero_modifier * deriv_grad;
-    else
-      (*_dporosity_dgradvar)[_qp][pvar] = deriv_grad;
+    (*_dporosity_dgradvar)[_qp][pvar] = deriv_grad;
   }
+
+  applyPorosityMin();
 }

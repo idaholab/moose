@@ -41,7 +41,9 @@ MoosePreconditioner::validParams()
                         false,
                         "Set to true if you want the full set of couplings between variables "
                         "simply for convenience so you don't have to set every off_diag_row "
-                        "and off_diag_column combination.");
+                        "and off_diag_column combination. The single matrix preconditioner "
+                        "defaults this to true for NEWTON and LINEAR solves if no coupling is "
+                        "specified.");
   params.addParam<NonlinearSystemName>(
       "nl_sys",
       "The nonlinear system whose linearization this preconditioner should be applied to.");

@@ -82,7 +82,10 @@ class ListingExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         """Only add the moose input parser JavaScript if the page needs it."""
-        find_moose_code_token = lambda token: token.get("language", None) == "moose"
+
+        def find_moose_code_token(token):
+            return token.get("language", None) == "moose"
+
         if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
             self.translator.renderer.addJavaScript(
                 "moose_input_parser", "js/moose_input_parser.js", page
@@ -170,7 +173,6 @@ class LocalListingCommand(command.CommandComponent):
         except:
             return content
         for node in moosetree.iterate(root):
-            # Add reference to moose syntax
             fullpath = "/".join([n.name for n in node.path])
             moose_node = syntax_ext.find(
                 fullpath, node_type=SyntaxNode, throw_on_missing=False
@@ -455,7 +457,22 @@ class InputListingCommand(FileListingCommand):
         hit = pyhit.load(filename)
         out = []
         for block in blocks.split():
-            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.rstrip("/")))
+            # This first check will attempt to do a strict search for the node
+            # For example, this will ensure that we get the Kernels block when:
+            # - we specify block=Kernels
+            # - AuxKernels block shows in the input file first so it matched first on a looser check
+            # This same bug would exist for anything that ends with the same
+            # thing that another starts with
+            node = moosetree.find(
+                hit, lambda n: n.name == block.rstrip("/").split("/")[-1]
+            )
+            # The first rule is not sufficient to cover all existing use cases
+            # In particular only using the first rule would break the use of
+            # block/something that is heavily used throughout documentation.
+            if node is None:
+                node = moosetree.find(
+                    hit, lambda n: n.fullpath.endswith(block.rstrip("/"))
+                )
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
@@ -465,7 +482,7 @@ class InputListingCommand(FileListingCommand):
             render = str(node.render())
             if node.parent != hit:
                 render = render.replace(
-                    f"[{node.name}]", f'[{node.fullpath.strip("/")}]', 1
+                    f"[{node.name}]", f"[{node.fullpath.strip('/')}]", 1
                 )
             out.append(render)
         return pyhit.parse("\n".join(out)) if out else hit
@@ -518,7 +535,6 @@ def get_listing_options(token):
 
 
 class RenderListing(floats.RenderFloat):
-
     def createLatex(self, parent, token, page):
 
         ctoken = token(1)
@@ -557,7 +573,6 @@ class RenderListing(floats.RenderFloat):
 
 
 class RenderListingCode(core.RenderCode):
-
     def createLatex(self, parent, token, page):
         opts = get_listing_options(token)
         latex.Environment(

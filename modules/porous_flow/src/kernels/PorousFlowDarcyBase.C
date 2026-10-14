@@ -277,7 +277,12 @@ PorousFlowDarcyBaseTempl<is_ad>::computeProtoFluxWithoutMobility()
     _proto_flux[ph].assign(num_nodes, 0.0);
     for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
     {
-      const Real jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      // The AD weight carries the displacement derivatives on a displaced mesh. Elsewhere use the
+      // Real weight, as ADKernel does: XFEM rescales only the Real weight.
+      GenericReal<is_ad> jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      if constexpr (is_ad)
+        if (this->_use_displaced_mesh)
+          jxw_coord = this->_ad_JxW[_qp] * this->_ad_coord[_qp];
       for (_i = 0; _i < num_nodes; ++_i)
         _proto_flux[ph][_i] += jxw_coord * darcyQp(ph);
     }

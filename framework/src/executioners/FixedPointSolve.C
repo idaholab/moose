@@ -529,6 +529,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_fail_step)
   {
     _fail_step = false;
+    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_FIXEDPOINT;
     return false;
   }
 
@@ -594,6 +595,9 @@ FixedPointSolve::printFixedPointConvergenceReason()
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_OBJECT:
       _console << "DIVERGED_OBJECT (see Convergence object)";
+      break;
+    case MooseFixedPointConvergenceReason::DIVERGED_FAILED_FIXEDPOINT:
+      _console << "Fixed point iteration marked as failed";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling

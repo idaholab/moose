@@ -119,6 +119,7 @@
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'using default geometric subpatch-plane normals for a curved HEX27 mortar interface.'
     recover = false
+    min_slots = 2
   []
   [continuity_sphere_hex20-debug-mesh]
     type = 'Exodiff'
@@ -132,6 +133,7 @@
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'using default geometric subpatch-plane normals for a curved HEX20 mortar interface.'
     recover = false
+    min_slots = 2
   []
   [subpatch-plane-modes]
     issues = '#33282'
@@ -145,6 +147,7 @@
                  'Outputs/file_base=continuity_sphere_hex8_geometric'
       detail = 'the default geometric subpatch normal and'
       recover = false
+      min_slots = 2
     []
     [hex8-averaged-nodal-normal-debug-mesh]
       type = 'Exodiff'
@@ -155,6 +158,7 @@
                  'Outputs/file_base=continuity_sphere_hex8_averaged'
       detail = 'an explicitly selected averaged nodal normal.'
       recover = false
+      min_slots = 2
     []
   []
   [triangulation-modes]
@@ -175,6 +179,7 @@
       detail = 'a vertex-fan from an existing polygon vertex,'
       map = False
       partial = True
+      min_slots = 2
     []
     [ear_clipping]
       type = 'Exodiff'
@@ -185,6 +190,7 @@
       detail = 'an ear-clipping algorithm,'
       map = False
       partial = True
+      min_slots = 2
     []
     [delaunay]
       type = 'Exodiff'
@@ -196,6 +202,7 @@
                'edges, and'
       map = False
       partial = True
+      min_slots = 2
     []
     [centroid-with-retessellation]
       type = 'Exodiff'
@@ -208,6 +215,7 @@
                'clipped polygons when triangulate_triangles is enabled.'
       map = False
       partial = True
+      min_slots = 2
     []
   []
   [continuity_tet4]
@@ -234,6 +242,7 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    min_slots = 2
   []
   [continuity_tet14]
     type = 'Exodiff'
@@ -248,6 +257,7 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    min_slots = 2
   []
   [continuity_tet10-debug-mesh]
     type = 'Exodiff'
@@ -261,6 +271,7 @@
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'using default geometric subpatch-plane normals for a TET10 mortar interface.'
     recover = false
+    min_slots = 2
   []
   [continuity_tet14-debug-mesh]
     type = 'Exodiff'
@@ -274,6 +285,7 @@
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'using default geometric subpatch-plane normals for a TET14 mortar interface.'
     recover = false
+    min_slots = 2
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
@@ -318,6 +330,7 @@
                   'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    min_slots = 2
   []
   [continuity_penalty_tet14]
     type = 'Exodiff'
@@ -330,6 +343,7 @@
                   'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    min_slots = 2
   []
   [continuity_penalty_sphere_hex8]
     type = 'Exodiff'

@@ -82,9 +82,6 @@ protected:
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
-  /// A map from node to two interpolated, physical tangential velocities
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_real_tangential_velocity;
-
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
 
