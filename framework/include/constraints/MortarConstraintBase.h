@@ -102,6 +102,8 @@ public:
                           const std::unordered_set<const Elem *> & inactive_lm_elems);
 
 protected:
+  bool usesFaceCoupledValues() const override { return true; }
+
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
   /// Reference to the finite element problem

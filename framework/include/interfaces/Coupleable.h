@@ -1607,6 +1607,12 @@ private:
 
 protected:
   /**
+   * Whether this object evaluates coupled variables on element faces, so that it must request
+   * coupled AD gradients through the face accessors. Base classes of face objects override this.
+   */
+  virtual bool usesFaceCoupledValues() const { return false; }
+
+  /**
    * Deprecated method. Use \p getFieldVar instead
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
    * element variable

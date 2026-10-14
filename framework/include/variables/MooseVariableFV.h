@@ -269,6 +269,11 @@ public:
   {
     return _element_data->adGradSln();
   }
+  /// Finite volume variables do not distinguish face and volume AD gradient requests
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
+  {
+    return adGradSln();
+  }
 
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this

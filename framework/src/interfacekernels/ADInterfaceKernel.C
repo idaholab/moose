@@ -44,7 +44,7 @@ ADInterfaceKernelTempl<T>::ADInterfaceKernelTempl(const InputParameters & parame
     _var(*this->mooseVariable()),
     _normals(_assembly.normals()),
     _u(_var.adSln()),
-    _grad_u(_var.adGradSln()),
+    _grad_u(_var.adGradSlnFace()),
     _ad_JxW(_assembly.adJxWFace()),
     _ad_coord(_assembly.adCoordTransformation()),
     _ad_q_point(_assembly.adQPoints()),

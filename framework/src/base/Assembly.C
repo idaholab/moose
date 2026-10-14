@@ -2184,45 +2184,48 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
           _ad_curvatures[qp] = _curvatures[qp];
     }
 
-    for (const auto & it : _fe_face[dim])
+    if (_need_ad_grad_phi_face)
     {
-      FEBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
+      for (const auto & it : _fe_face[dim])
+      {
+        FEBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_grad_phi_data_face[fe_type];
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-    for (const auto & it : _vector_fe_face[dim])
-    {
-      FEVectorBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
+          grad_phi[i].resize(n_qp);
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
+        const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
 
-      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
+      for (const auto & it : _vector_fe_face[dim])
+      {
+        FEVectorBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
 
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
+          grad_phi[i].resize(n_qp);
+
+        const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
     }
   }
 }
