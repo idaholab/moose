@@ -19,6 +19,19 @@
       detail = 'three dimensional mortar mesh.'
     []
   []
+  [non_contiguous_node_ids]
+    issues = '#34030'
+    requirement = 'The system shall build the same three dimensional mortar segment mesh when the '
+                  'mesh node ids are not contiguous.'
+    type = JSONDiff
+    input = 'mortar_stats_reporter_3d.i'
+    jsondiff = 'mortar_stats_reporter_3d_out.json'
+    cli_args = 'Mesh/allow_renumbering=false'
+    keep_reporter_types = true
+    skip_keys = 'number_of_parts part'
+    absent_out = 'Some secondary elements on mortar interface'
+    prereq = 'mortar_stats_reporter/3d'
+  []
   [adjacent_corner_mortar_segment_mesh]
     issues = '#33282'
     requirement = 'The system shall be able to build a three dimensional mortar segment mesh for '
