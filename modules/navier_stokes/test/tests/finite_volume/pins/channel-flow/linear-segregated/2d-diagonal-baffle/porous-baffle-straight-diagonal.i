@@ -304,7 +304,6 @@ advected_interp_method = 'upwind'
   [p_diffusion]
     type = LinearFVPressureCorrectionDiffusionJump
     variable = pressure
-    diffusion_tensor = Ainv
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = true
   []
