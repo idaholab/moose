@@ -125,4 +125,13 @@
     design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSMultiSplitCHCRes.md'
     requirement = 'The damped nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with log-based phase free energies'
   []
+
+  [ADKKSMultiphase]
+    type = 'Exodiff'
+    input = 'ADKKSMultiphase.i'
+    exodiff = 'ADKKSMultiphase_out.e'
+    issues = '#33647'
+    requirement = 'The AD KKS multiphase system shall correctly replicate the results of the non-AD counterparts.'
+    design = 'ADKKSMultiACBulkF.md ADKKSMultiACBulkC.md ADKKSPhaseChemicalPotential.md ADKKSMultiPhaseConcentration.md'
+  []
 []

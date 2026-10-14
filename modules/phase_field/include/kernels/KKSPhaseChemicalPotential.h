@@ -9,55 +9,70 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-
 /**
- * Enforce the equality of the chemical potentials in the two phases.
- * Eq. (21) in the original KKS paper.
+ * Enforces equality of the chemical potentials in two phases,
  *
- * \f$ dF_a/dc_a = dF_b/dc_b \f$
+ * \f$ \frac{1}{k_a}\frac{\partial F_a}{\partial c_a}
+ *     = \frac{1}{k_b}\frac{\partial F_b}{\partial c_b}. \f$
  *
- * We need to supply two free energy functions (i.e. KKSBaseMaterial) by giving
- * two "base names" ('Fa', 'Fb'). We supply concentration \f$ c_a \f$ as the non-linear
- * variable and \f$ c_b \f$ as a coupled variable
- * (compare this to KKSPhaseConcentration, where the non-linear variable is
- * the other phase concentration \f$ c_b \f$!)
- *
- * \see KKSPhaseConcentration
+ * The nonlinear variable is \f$c_a\f$ and `cb` supplies \f$c_b\f$.
+ * The template provides the shared AD/non-AD residual implementation. The
+ * non-AD specialization below adds the explicitly calculated Jacobians.
  */
-class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+template <bool is_ad>
+class KKSPhaseChemicalPotentialTempl
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>
 {
 public:
   static InputParameters validParams();
 
+  KKSPhaseChemicalPotentialTempl(const InputParameters & parameters);
+
+protected:
+  GenericReal<is_ad> computeQpResidual() override;
+  void initialSetup() override;
+
+  /// Name of the coupled phase-b concentration.
+  const VariableName _cb_name;
+
+  /// Actual free-energy material-property names supplied through the input parameters.
+  const MaterialPropertyName _fa_name;
+  const MaterialPropertyName _fb_name;
+
+  /// First free-energy derivatives used by both the AD and non-AD residuals.
+  const GenericMaterialProperty<Real, is_ad> & _dfadca;
+  const GenericMaterialProperty<Real, is_ad> & _dfbdcb;
+
+  /// Site fractions used by sublattice KKS; both default to one for ordinary KKS.
+  const Real _ka;
+  const Real _kb;
+
+  usingGenericKernelMembers;
+};
+
+/**
+ * Non-AD implementation. It retains the upstream hand-calculated diagonal and
+ * off-diagonal Jacobians.
+ */
+class KKSPhaseChemicalPotential : public KKSPhaseChemicalPotentialTempl<false>
+{
+public:
   KKSPhaseChemicalPotential(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  virtual void initialSetup();
+  Real computeQpJacobian() override;
+  Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-private:
-  /// coupled variable for cb
-  unsigned int _cb_var;
-  VariableName _cb_name;
-
-  /// material properties we need to access
-  const MaterialProperty<Real> & _dfadca;
-  const MaterialProperty<Real> & _dfbdcb;
   const MaterialProperty<Real> & _d2fadca2;
   const MaterialProperty<Real> & _d2fbdcbca;
 
   std::vector<const MaterialProperty<Real> *> _d2fadcadarg;
   std::vector<const MaterialProperty<Real> *> _d2fbdcbdarg;
-
-  ///@{ site fractions
-  const Real _ka;
-  const Real _kb;
-  ///@}
 };
+
+/// AD implementation. Its Jacobian is generated from the shared AD residual.
+using ADKKSPhaseChemicalPotential = KKSPhaseChemicalPotentialTempl<true>;

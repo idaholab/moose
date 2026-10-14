@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -18,30 +18,45 @@
  * lambda lagrange multiplier non-linear variables to
  * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
  */
-class SwitchingFunctionConstraintEta
-  : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+template <bool is_ad>
+class SwitchingFunctionConstraintEtaTempl
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>
 {
 public:
   static InputParameters validParams();
 
-  SwitchingFunctionConstraintEta(const InputParameters & parameters);
+  SwitchingFunctionConstraintEtaTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int);
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Switching function name
   VariableName _eta_name;
 
   ///@{ Switching function drivatives
-  const MaterialProperty<Real> & _dh;
-  const MaterialProperty<Real> & _d2h;
-  std::vector<const MaterialProperty<Real> *> _d2ha;
-  const JvarMap & _d2ha_map;
+  const GenericMaterialProperty<Real, is_ad> & _dh;
   ///@}
 
   /// Lagrange multiplier
-  const VariableValue & _lambda;
+  const GenericVariableValue<is_ad> & _lambda;
+
+  usingGenericKernelMembers;
+};
+
+class SwitchingFunctionConstraintEta : public SwitchingFunctionConstraintEtaTempl<false>
+{
+public:
+  SwitchingFunctionConstraintEta(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int) override;
+
+  const MaterialProperty<Real> & _d2h;
+  std::vector<const MaterialProperty<Real> *> _d2ha;
+  const JvarMap & _d2ha_map;
+
   unsigned int _lambda_var;
 };
+
+using ADSwitchingFunctionConstraintEta = SwitchingFunctionConstraintEtaTempl<true>;
