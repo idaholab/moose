@@ -1,19 +1,23 @@
 # Two radial wall nodes bridge a fixed primary-fluid temperature Tf1 to a fixed
 # secondary-fluid temperature Tf2 through three conductances in series: primary-side
-# convection (PipeInnerWallTemperatureScalarKernel), radial conduction through the wall,
-# and secondary-side convection (PipeOuterWallCoupledConvectiveTemperatureScalarKernel) -
-# a double-pipe-style conjugate heat transfer arrangement. The analytical Tin/Tout below
-# are the steady state of that series-resistance circuit, solved algebraically at parse
-# time with both streams' water properties fixed at representative constants (mu_f, cp_f,
-# k_f), giving a simple linear system.
+# convection (ADPipeInnerWallTemperatureScalarKernel), radial conduction through the wall,
+# and secondary-side convection
+# (ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel) - a double-pipe-style
+# conjugate heat transfer arrangement. Each side's Dittus-Boelter coefficient is supplied
+# by its own ADDittusBoelterHTCUserObject. The analytical Tin/Tout below are the steady
+# state of that series-resistance circuit, solved algebraically at parse time with both
+# streams' water properties fixed at representative constants (mu_f, cp_f, k_f), giving a
+# simple linear system.
 #
-# As in pipewall_ambient.i, the numeric kernels instead evaluate water properties locally
-# at each wall node's own running temperature on both the primary and secondary sides, so
-# the two convective coefficients each differ slightly from their analytical counterparts.
-# That is the dominant source of the ~3e-4 to 7e-4 relative mismatch seen in the gold
-# file; it is not a convergence or solve-tolerance artifact, since end_time = 100 s is
-# well beyond this system's thermal time constants. The test therefore only requires
-# approximate agreement with the analytical values, not agreement to roundoff.
+# The ~7e-4 to 1e-3 relative mismatch against those analytical values comes from the
+# constants, not from the solve: the HTC objects evaluate water properties through the
+# fluid_properties Water97FluidProperties at each stream's bulk film temperature. The
+# secondary stream sits at Tf2 = 283.15 K, where water's viscosity is about 30% higher
+# than the mu_f used in the cross-check, which lowers h2 by about 11% and accounts for
+# essentially all of the difference. This system is at steady state by end_time = 100 s
+# (raising end_time to 5000 s leaves the result unchanged), so transient decay contributes
+# nothing here. The test therefore only requires approximate agreement with the analytical
+# values, not agreement to roundoff.
 
 length = 1.0
 
@@ -142,7 +146,7 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
   []
 
   [inner]
-    type = PipeInnerWallTemperatureScalarKernel
+    type = ADPipeInnerWallTemperatureScalarKernel
     variable = Tin_wall
     mass_flow_rate = m1v
     outer_wall_temperature = Tout_wall
@@ -152,9 +156,7 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    reference_pressure = ${Pin}
-    fluid_properties = water
-    flow_area = ${flow_area1}
+    heat_transfer_coefficient = h1
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -167,12 +169,12 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     is_implicit = true
   []
   [inner_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tin_wall
   []
 
   [outer]
-    type = PipeOuterWallCoupledConvectiveTemperatureScalarKernel
+    type = ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
     variable = Tout_wall
     mass_flow_rate = m2v
     inner_wall_temperature = Tin_wall
@@ -182,9 +184,7 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     upstream_fluid_temperature = Tf2v
     downstream_fluid_temperature = Tf2v
     solid_properties = wall_sp
-    reference_pressure = ${Pin}
-    fluid_properties = water
-    flow_area = ${flow_area2}
+    heat_transfer_coefficient = h2
     wetted_perimeter = ${wetted_perimeter2}
     area = ${area_out}
     interface_perimeter = ${interface_perimeter}
@@ -197,8 +197,33 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     is_implicit = true
   []
   [outer_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tout_wall
+  []
+[]
+
+[UserObjects]
+  [h1]
+    type = ADDittusBoelterHTCUserObject
+    mass_flow_rate = m1v
+    fluid_properties = water
+    T_fluid = Tf1v
+    T_fluid_inlet = Tf1v
+    T_fluid_outlet = Tf1v
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
+    wetted_perimeter = ${wetted_perimeter1}
+  []
+  [h2]
+    type = ADDittusBoelterHTCUserObject
+    mass_flow_rate = m2v
+    fluid_properties = water
+    T_fluid = Tf2v
+    T_fluid_inlet = Tf2v
+    T_fluid_outlet = Tf2v
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area2}
+    wetted_perimeter = ${wetted_perimeter2}
   []
 []
 

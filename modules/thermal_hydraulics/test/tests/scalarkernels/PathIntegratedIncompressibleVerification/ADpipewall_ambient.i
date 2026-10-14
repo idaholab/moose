@@ -1,23 +1,24 @@
 # Two radial wall nodes (inner surface, outer surface) bridge a fixed primary-fluid
 # temperature Tf1 to a fixed ambient temperature Tamb through three conductances in
-# series: fluid-side convection (PipeInnerWallTemperatureScalarKernel, Dittus-Boelter),
-# radial conduction through the wall, and ambient convection
-# (PipeOuterWallAmbientTemperatureScalarKernel). The analytical Tin/Tout below are the
-# steady state of that series-resistance circuit, solved algebraically at parse time
-# with fluid properties evaluated once at the fixed Tf1 (mu1, cp1, k1 below), giving a
-# simple linear system.
+# series: fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
+# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject), radial conduction
+# through the wall, and ambient convection
+# (ADPipeOuterWallAmbientTemperatureScalarKernel). The analytical Tin/Tout below are the
+# steady state of that series-resistance circuit, solved algebraically at parse time with
+# fluid properties evaluated once at the fixed Tf1 (mu1, cp1, k1 below), giving a simple
+# linear system.
 #
-# The numeric solution instead evaluates water properties locally at the wall node's own
-# running temperature (via the fluid_properties Water97FluidProperties, not the fixed mu1/cp1/k1
-# constants), so its convective coefficient differs slightly from the analytical one -
-# the inner wall settles about 0.3 K below Tf1, and water's viscosity/conductivity vary
-# over that span by amounts that shift the Dittus-Boelter h by a few tenths of a percent.
-# That is the dominant source of the ~2e-4 relative mismatch seen in the gold file; it is
-# not a convergence or solve-tolerance artifact (the run reaches end_time = 100 s, which
-# is roughly 8-16 wall thermal time constants here, so transient decay contributes only
-# ~1e-5 relative error, confirmed by linearizing the two-node system with fixed
-# properties). The test therefore only requires approximate agreement with the analytical
-# values, not agreement to roundoff.
+# The remaining ~2e-4 relative mismatch against those analytical values is incomplete
+# transient decay, not a property-evaluation or solve-tolerance artifact: the wall is still
+# approaching steady state at end_time = 100 s. Raising end_time to 5000 s drops the
+# mismatch to ~3e-6 while leaving everything else unchanged. Two smaller effects are
+# present but are an order of magnitude below that: the HTC object evaluates water
+# properties through the fluid_properties Water97FluidProperties rather than the fixed
+# mu1/cp1/k1 constants (worth ~0.17% in h, hence ~2e-5 in Tin here), and it evaluates them
+# at the segment's bulk film temperature, which in this input equals Tf1 exactly because
+# Tf1v is held constant and both the upstream and downstream fluid temperatures are Tf1v.
+# The test therefore only requires approximate agreement with the analytical values, not
+# agreement to roundoff.
 
 length = 1.0
 
@@ -118,7 +119,7 @@ Tout_analytical = '${fparse Tamb + q / G3}'
   []
 
   [inner]
-    type = PipeInnerWallTemperatureScalarKernel
+    type = ADPipeInnerWallTemperatureScalarKernel
     variable = Tin_wall
     mass_flow_rate = m1v
     outer_wall_temperature = Tout_wall
@@ -128,9 +129,7 @@ Tout_analytical = '${fparse Tamb + q / G3}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    reference_pressure = ${Pin}
-    fluid_properties = water
-    flow_area = ${flow_area1}
+    heat_transfer_coefficient = h
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -143,12 +142,12 @@ Tout_analytical = '${fparse Tamb + q / G3}'
     is_implicit = true
   []
   [inner_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tin_wall
   []
 
   [outer]
-    type = PipeOuterWallAmbientTemperatureScalarKernel
+    type = ADPipeOuterWallAmbientTemperatureScalarKernel
     variable = Tout_wall
     inner_wall_temperature = Tin_wall
     upstream_wall_temperature = Tout_wall
@@ -168,8 +167,22 @@ Tout_analytical = '${fparse Tamb + q / G3}'
     is_implicit = true
   []
   [outer_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tout_wall
+  []
+[]
+
+[UserObjects]
+  [h]
+    type = ADDittusBoelterHTCUserObject
+    mass_flow_rate = m1v
+    fluid_properties = water
+    T_fluid = Tf1v
+    T_fluid_inlet = Tf1v
+    T_fluid_outlet = Tf1v
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
+    wetted_perimeter = ${wetted_perimeter1}
   []
 []
 

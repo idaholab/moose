@@ -1,17 +1,16 @@
 # Two radial wall nodes bridge a fixed primary-fluid temperature Tf1 to a prescribed
-# outer-wall heat flux q_flux (PipeOuterWallHeatFluxScalarKernel), with no other path out
-# of the outer node. In steady state all of the applied heat must flow inward through the
-# fluid-side convection (PipeInnerWallTemperatureScalarKernel, Dittus-Boelter) and radial
+# outer-wall heat flux q_flux (ADPipeOuterWallHeatFluxScalarKernel), with no other path
+# out of the outer node. In steady state all of the applied heat must flow inward through
+# the fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
+# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject) and radial
 # conduction resistances in series, which is the series circuit solved algebraically below
 # for Tin_analytical/Tout_analytical using fluid properties fixed at Tf1 (mu1, cp1, k1).
 #
-# As in pipewall_ambient.i, the numeric solution evaluates water properties locally at the
-# wall node's own temperature rather than at the fixed Tf1, so its Dittus-Boelter h differs
-# slightly from the analytical one; here the wall runs about 1-2 K above Tf1 (heat flows
-# into the fluid), smaller than the ~0.3 K excursion in the ambient case, so the expected
-# relative mismatch is correspondingly smaller (~1e-4 in the gold file) but is still of the
-# same property-evaluation origin, not a convergence or solve-tolerance effect; end_time =
-# 100 s is well beyond this system's thermal time constants.
+# The remaining ~4e-5 relative mismatch against those analytical values is incomplete
+# transient decay rather than a property-evaluation or solve-tolerance effect: raising
+# end_time from 100 s to 5000 s drops it to ~7e-6. The HTC object's use of
+# Water97FluidProperties at the segment's bulk film temperature, rather than the fixed
+# mu1/cp1/k1 constants, is worth only ~0.17% in h here, well below that.
 
 length = 1.0
 
@@ -113,7 +112,7 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
   []
 
   [inner]
-    type = PipeInnerWallTemperatureScalarKernel
+    type = ADPipeInnerWallTemperatureScalarKernel
     variable = Tin_wall
     mass_flow_rate = m1v
     outer_wall_temperature = Tout_wall
@@ -123,9 +122,7 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    reference_pressure = ${Pin}
-    fluid_properties = water
-    flow_area = ${flow_area1}
+    heat_transfer_coefficient = h1
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -138,12 +135,12 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
     is_implicit = true
   []
   [inner_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tin_wall
   []
 
   [outer]
-    type = PipeOuterWallHeatFluxScalarKernel
+    type = ADPipeOuterWallHeatFluxScalarKernel
     variable = Tout_wall
     inner_wall_temperature = Tin_wall
     upstream_wall_temperature = Tout_wall
@@ -162,8 +159,22 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
     is_implicit = true
   []
   [outer_dt]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = Tout_wall
+  []
+[]
+
+[UserObjects]
+  [h1]
+    type = ADDittusBoelterHTCUserObject
+    mass_flow_rate = m1v
+    fluid_properties = water
+    T_fluid = Tf1v
+    T_fluid_inlet = Tf1v
+    T_fluid_outlet = Tf1v
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
+    wetted_perimeter = ${wetted_perimeter1}
   []
 []
 
