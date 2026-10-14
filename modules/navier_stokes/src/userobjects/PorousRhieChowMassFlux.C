@@ -292,30 +292,12 @@ PorousRhieChowMassFlux::pressureJumpInterfaceData(const FaceInfo & fi,
                                            pressureDiffusionUsesNonorthogonalCorrection(),
                                            getSignedBaffleJump(fi, /*elem_side=*/true));
 
-  if (!data.valid)
-    mooseError("Cannot construct the pressure-jump operator on face ",
-               fi.id(),
-               ". The projected element and neighbor half-cell distances, normal pressure "
-               "diffusion coefficients, face area, and resulting conductances must be finite and "
-               "positive, and the corrections must be finite. Got element distance ",
-               data.elem_normal_distance,
-               ", neighbor distance ",
-               data.neighbor_normal_distance,
-               ", element normal diffusion ",
-               data.elem_normal_diffusion,
-               ", neighbor normal diffusion ",
-               data.neighbor_normal_diffusion,
-               ", face area ",
-               data.face_area,
-               ", element conductance ",
-               data.elem_conductance,
-               ", neighbor conductance ",
-               data.neighbor_conductance,
-               ", element correction ",
-               data.elem_correction,
-               ", and neighbor correction ",
-               data.neighbor_correction,
-               ".");
+  // A valid mesh gives positive projected half-cell distances, and a positive momentum diagonal
+  // and density give positive conductances.
+  mooseAssert(data.valid,
+              "Cannot construct the pressure-jump operator on face " + std::to_string(fi.id()) +
+                  ": the half-cell distances, normal pressure diffusion coefficients, face area, "
+                  "and conductances must be finite and positive, and the corrections finite.");
 
   return data;
 }
