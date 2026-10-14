@@ -28,4 +28,31 @@
     requirement = "The system shall support the ability to group variables when using a single "
                   "matrix preconditioner."
   []
+  [newton_default_full]
+    requirement = "The system shall build the full coupling matrix by default in a user-specified "
+                  "single matrix preconditioner when performing a Newton solve, so that"
+    issues = '#33983'
+    [default]
+      type = CSVDiff
+      input = 'smp_newton_default_full.i'
+      csvdiff = 'smp_newton_default_full_out.csv'
+      detail = "a coupled problem converges in a single Newton iteration, and"
+    []
+    [multi_system]
+      type = RunApp
+      input = '../../misc/multiple-nl-systems/different-vars-per-system.i'
+      cli_args = "Preconditioning/inactive=v Outputs/exodus=false"
+      expect_out = 'MOOSE Preconditioner:\s+\[u\]: SMP \[v\]: SMP \(auto\)'
+      detail = "nonlinear systems without a user-specified preconditioner still receive the "
+               "automatically created preconditioner, including when"
+    []
+    [multi_system_solve_type_override]
+      type = RunApp
+      input = '../../misc/multiple-nl-systems/different-vars-per-system.i'
+      cli_args = "Executioner/solve_type=PJFNK Preconditioning/u/solve_type=NEWTON "
+                 "Preconditioning/inactive=v Outputs/exodus=false"
+      expect_out = 'MOOSE Preconditioner:\s+\[u\]: SMP \[v\]: SMP \(auto\)'
+      detail = "a user-specified preconditioner overrides the solve type of the executioner."
+    []
+  []
 []
