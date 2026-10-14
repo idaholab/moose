@@ -237,6 +237,23 @@ nonorthogonal = false
   []
 []
 
+[AuxVariables]
+  [reconstructed_grad_p]
+    family = MONOMIAL_VEC
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [reconstructed_grad_p]
+    type = LinearFVGradientAux
+    variable = reconstructed_grad_p
+    linear_fv_variable = pressure
+    gradient_method = reconstructed
+    execute_on = FINAL
+  []
+[]
+
 [Functions]
   [normal_coordinate]
     type = ParsedFunction
@@ -349,10 +366,10 @@ nonorthogonal = false
     execute_on = FINAL
   []
   [L2gradp]
-    type = TestLinearFVGradientL2Error
-    variable = pressure
-    gradient_method = reconstructed
-    exact_gradient = '0 0 0'
+    type = ElementVectorL2Error
+    variable = reconstructed_grad_p
+    function_x = 0
+    function_y = 0
     execute_on = FINAL
   []
   [boundary_mass_balance]
