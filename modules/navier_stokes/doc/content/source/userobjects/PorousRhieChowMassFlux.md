@@ -24,7 +24,12 @@ current face mass flux and under-relaxed with
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_relaxation). See
 [porous_rhie_chow_baffle.md] for the discrete coupling.
 
-Before each pressure corrector, the object updates the jump from the preceding corrected face flux.
+Before each pressure corrector, the object updates the jump from the preceding corrected face flux. With
+[PIMPLE.md], this happens before each of the $n+1$ pressure correctors of an outer iteration, so
+the effective relaxation grows with
+[!param](/Executioner/PIMPLE/num_piso_iterations). Without a reconstructed pressure gradient, the
+face flux is only recomputed after the last corrector, so a relaxation factor $\omega$ acts per
+outer iteration as $1 - (1 - \omega)^{n+1}$.
 The pressure variable's [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md)
 then removes that jump when interpolating pressure across each baffle. A zero jump recovers the
 standard Green-Gauss face value exactly.

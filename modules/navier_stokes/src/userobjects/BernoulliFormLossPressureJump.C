@@ -83,8 +83,10 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
 
   if (elem_rho <= 0.0 || neighbor_rho <= 0.0)
     mooseError(name(), ": density must be positive on pressure-jump face ", fi.id(), ".");
-  if (elem_porosity <= 0.0 || neighbor_porosity <= 0.0)
-    mooseError(name(), ": porosity must be positive on pressure-jump face ", fi.id(), ".");
+  // The porosity matches the Rhie-Chow object's, whose porous momentum flux already rejects
+  // nonpositive values on every face.
+  mooseAssert(elem_porosity > 0.0 && neighbor_porosity > 0.0,
+              "Porosity must be positive on pressure-jump face " + std::to_string(fi.id()) + ".");
 
   Real face_rho = 0.0;
   Moose::FV::interpolate(

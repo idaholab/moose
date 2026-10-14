@@ -67,9 +67,12 @@ FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  mooseAssert(variable_numbers.size() == 1,
-              "FVPressureJumpGreenGaussGradient must be registered for exactly one pressure "
-              "variable.");
+  if (variable_numbers.size() != 1)
+    mooseError("FVPressureJumpGreenGaussGradient '",
+               name(),
+               "' must be used by exactly one pressure variable, but it is used by ",
+               variable_numbers.size(),
+               ".");
 
   if (_pressure_system)
   {

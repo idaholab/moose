@@ -354,35 +354,11 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
 
-    const auto state_arg = determineState();
-
-    RealGradient grad_elem[3];
-    Real trace_elem = 0;
-    RealVectorValue deviatoric_vector_elem;
-
-    for (const auto dir : make_range(_dim))
-    {
-      grad_elem[dir] = velocityGradientField(dir).gradient(*elem_info);
-      trace_elem += grad_elem[dir](dir);
-    }
-
-    if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
-    {
-      const auto & radial_var = velocityVar(_rz_radial_coord);
-      const Real elem_value =
-          radial_var.getElemValue(*elem_info, state_arg) / elem_info->centroid()(_rz_radial_coord);
-      trace_elem += elem_value;
-    }
-
-    for (const auto dir : make_range(_dim))
-    {
-      grad_elem[dir](dir) -= 2. / 3 * trace_elem;
-      deviatoric_vector_elem(dir) = grad_elem[dir](_index);
-    }
-
-    // We support internal boundaries too so we have to make sure the normal points always outward
-    grad_contrib += _mu(face_arg, state_arg) * deviatoric_vector_elem * _boundary_normal_factor *
-                    _current_face_info->normal();
+    // A zero correction vector restricts the cell correction to its deviatoric part; the
+    // boundary nonorthogonal correction is added above. We support internal boundaries too so
+    // we have to make sure the normal points always outward.
+    grad_contrib += _mu(face_arg, determineState()) * _boundary_normal_factor *
+                    computeCellStressExplicitCorrection(*elem_info, RealVectorValue());
   }
 
   return grad_contrib;
