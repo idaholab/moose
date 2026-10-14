@@ -96,7 +96,12 @@ f = \max\left(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb},
 The heat transfer coefficient is computed using the Dittus-Boelter correlation [!citep](dittus1930heat):
 
 !equation id=dittus_boelter
-h = 0.023 Re^{0.8} Pr^{0.4} \,
+h = 0.023 Re^{0.8} Pr^{0.4} \frac{k_f}{D_h} \,
+
+where the fluid properties entering $Re$ and $Pr$ are evaluated at the segment's bulk film
+temperature, the mean of the segment fluid temperature and its upwinded inlet value. For
+the conjugate heat transfer kernels below, this coefficient is supplied by
+[ADDittusBoelterHTCUserObject.md].
 
 ## Junctions
 

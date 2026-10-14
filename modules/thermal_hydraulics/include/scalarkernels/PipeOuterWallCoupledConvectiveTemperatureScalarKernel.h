@@ -11,8 +11,6 @@
 
 #include "PipeWallTemperatureScalarKernelBase.h"
 
-class SinglePhaseFluidProperties;
-
 /**
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary
  * side boundary condition
@@ -31,8 +29,6 @@ protected:
   virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
-  /// Fluid properties object for the secondary-side fluid
-  const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate of the secondary-side fluid
   const ADVariableValue & _m;
   /// Coupled temperature of the inner-surface wall node
@@ -43,10 +39,8 @@ protected:
   const ADVariableValue & _Tfup;
   /// Coupled secondary-side fluid temperature adjacent to the downstream wall node
   const ADVariableValue & _Tfdown;
-  /// Secondary-side system reference pressure
-  const Moose::Functor<ADReal> & _Pref;
-  /// Cross-sectional area of the secondary-side flow channel adjacent to this wall node
-  const Moose::Functor<ADReal> & _flow_area;
   /// Wetted perimeter of the secondary-side flow channel adjacent to this wall node
   const Moose::Functor<ADReal> & _wetted_perimeter;
+  /// Secondary-side heat transfer coefficient
+  const Moose::Functor<ADReal> & _h;
 };

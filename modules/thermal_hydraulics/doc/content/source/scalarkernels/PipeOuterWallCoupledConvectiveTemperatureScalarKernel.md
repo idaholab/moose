@@ -14,23 +14,18 @@ This kernel implements a secondary side, coupled convective heat transfer term f
 !equation
 q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
 
-where $h$ is computed internally from a Dittus-Boelter correlation using the hydraulic
-diameter of the secondary-side flow channel, $D_h = 4 A_f / P_w$, with $A_f$ the flow
-channel's cross-sectional area:
-
-!equation
-h = 0.023 \, Re^{0.8} Pr^{0.4} \frac{k_f}{D_h}, \qquad
-Re = \frac{G D_h}{\mu_f}, \qquad G = \frac{|\dot{m}|}{A_f}, \qquad
-Pr = \frac{\mu_f c_{p,f}}{k_f}
-
-where $\dot{m}$ is the secondary-side mass flow rate and $\mu_f$, $c_{p,f}$, and $k_f$ are the secondary-side fluid viscosity, specific heat, and thermal conductivity, evaluated at the reference pressure and the mean of $T_f$ and $T_{in,f}$. $T_{in,f}$ upwinds the
-upstream/downstream secondary-side fluid temperature according to the sign of $\dot{m}$:
+where $h$ is the secondary-side heat transfer coefficient, supplied as a
+[functor](/Functors/index.md) through the
+[!param](/ScalarKernels/PipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
+parameter. [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
+correlation. $T_{in,f}$ upwinds the upstream/downstream secondary-side fluid temperature
+according to the sign of the secondary-side mass flow rate $\dot{m}$:
 
 !equation
 T_{in,f} = \frac{1}{2} \left(1-\frac{|\dot{m}|}{\dot{m}} \right) T_{d,f} + \frac{1}{2} \left(1+\frac{|\dot{m}|}{\dot{m}} \right) T_{u,f}
 
 Note, use of this kernel with transient problems also necessitates the use of a
-[ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
+[ADScalarTimeDerivative.md] (or its non-AD equivalent) with `coefficient = 1` on the same scalar
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
 
 This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
@@ -38,13 +33,12 @@ axial and radial conduction terms shared by every radial node of the wall; this 
 the convective heat exchange with the secondary-side flowing fluid.
 
 This kernel takes a solid properties object based on the
-[ThermalSolidProperties.md] base class and a fluid properties object based on the
-[SinglePhaseFluidProperties.md] base class, representing the secondary-side fluid. All
-geometry inputs (the secondary-side flow channel's area and wetted perimeter, this
-node's and its upstream/downstream neighbors' wall cross-sectional areas, the radial
-interface perimeter and thickness, this node's control-volume length, and the axial
-spacings to each neighbor) are defined as functors, which should allow versatility in
-accepting a variety of input arguments. Furthermore, being functors, it is possible for
+[ThermalSolidProperties.md] base class. The heat transfer coefficient and all geometry
+inputs (the secondary-side flow channel's wetted perimeter, this node's and its
+upstream/downstream neighbors' wall cross-sectional areas, the radial interface perimeter
+and thickness, this node's control-volume length, and the axial spacings to each neighbor)
+are defined as functors, which should allow versatility in accepting a variety of input
+arguments. Furthermore, being functors, it is possible for
 them to be controlled via [Controls](syntax/Controls/index.md) as supplied
 [Postprocessors](syntax/Postprocessors/index.md), for example.
 

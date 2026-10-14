@@ -11,8 +11,6 @@
 
 #include "PipeWallTemperatureScalarKernelBase.h"
 
-class SinglePhaseFluidProperties;
-
 /**
  * Inner wall path-integrated incompressible conjugate heat transfer kernel
  */
@@ -29,8 +27,6 @@ protected:
   virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
 
-  /// Fluid properties object
-  const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate through the pipe
   const ADVariableValue & _m;
   /// Coupled temperature of the outer-surface wall node
@@ -41,10 +37,8 @@ protected:
   const ADVariableValue & _Tfup;
   /// Coupled fluid temperature adjacent to the downstream wall node
   const ADVariableValue & _Tfdown;
-  /// System reference pressure
-  const Moose::Functor<ADReal> & _Pref;
-  /// Cross-sectional area of the fluid flow channel adjacent to this wall node
-  const Moose::Functor<ADReal> & _flow_area;
   /// Wetted perimeter of the fluid flow channel adjacent to this wall node
   const Moose::Functor<ADReal> & _wetted_perimeter;
+  /// Heat transfer coefficient from functor material
+  const Moose::Functor<ADReal> & _h;
 };
