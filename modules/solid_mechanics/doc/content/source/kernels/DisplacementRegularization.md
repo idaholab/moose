@@ -61,7 +61,7 @@ component:
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/displacement_regularization/displacement_regularization_default_factor.i block=Kernels
+!listing modules/solid_mechanics/test/tests/displacement_regularization/cantilever.i block=Kernels
 
 !syntax parameters /Kernels/DisplacementRegularization
 

@@ -40,7 +40,7 @@ protected:
   const DisplacementRegularizationType _regularization_type;
   /// User coefficient multiplying the selected regularization term.
   const Real _coefficient;
-  /// Mesh dimension used for the default LuLu factor and the 1D HuHu-LuLu guard.
+  /// Mesh dimension used for the default LuLu factor.
   const unsigned int _dim;
   /// LuLu correction factor used only by HuHu-LuLu.
   const Real _lulu_factor;
@@ -55,8 +55,6 @@ protected:
 class DisplacementRegularization : public DisplacementRegularizationTempl<false>
 {
 public:
-  static InputParameters validParams();
-
   DisplacementRegularization(const InputParameters & parameters);
 
 protected:

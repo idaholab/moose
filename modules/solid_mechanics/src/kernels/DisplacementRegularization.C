@@ -113,17 +113,6 @@ DisplacementRegularizationTempl<is_ad>::DisplacementRegularizationTempl(
       this->isParamValid("lulu_factor"))
     this->paramError("lulu_factor", "Only used when 'regularization = huhu_lulu'.");
 
-  if (_regularization_type == DisplacementRegularizationType::HuhuLulu && _dim == 1 &&
-      !this->isParamValid("lulu_factor"))
-  {
-    // In 1D the Hessian and Laplacian contractions are the same, so the default factor makes the
-    // combined HuHu-LuLu contribution vanish identically.
-    this->paramError("regularization",
-                     "The 'huhu_lulu' regularization with the default 'lulu_factor' of 1 / dim "
-                     "vanishes identically in 1D. Use 'huhu' or 'lulu', or set 'lulu_factor' "
-                     "explicitly.");
-  }
-
   if (_regularization_type == DisplacementRegularizationType::HuhuLulu &&
       _lulu_factor > defaultLuluFactor(_dim))
   {
@@ -139,12 +128,6 @@ DisplacementRegularizationTempl<is_ad>::computeQpResidual()
 {
   return _coefficient *
          regularization(_second_u[_qp], _second_test[_i][_qp], _regularization_type, _lulu_factor);
-}
-
-InputParameters
-DisplacementRegularization::validParams()
-{
-  return DisplacementRegularizationTempl<false>::validParams();
 }
 
 DisplacementRegularization::DisplacementRegularization(const InputParameters & parameters)

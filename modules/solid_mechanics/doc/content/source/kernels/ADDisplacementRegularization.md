@@ -17,7 +17,9 @@ are accepted with a warning because they may cause negative strain-energy contri
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/displacement_regularization/ad_displacement_regularization_default_factor.i block=Kernels
+The cantilever test uses this kernel by setting `reg_kernel = ADDisplacementRegularization`:
+
+!listing modules/solid_mechanics/test/tests/displacement_regularization/cantilever.i block=Kernels
 
 !syntax parameters /Kernels/ADDisplacementRegularization
 
