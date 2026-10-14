@@ -33,7 +33,9 @@ function do_build(){
     #fi
     # Now add ADDITIONAL_ARGS to the below configure_petsc arguments
 
-    # The mpich 5.0.2 mpicc no longer adds an rpath to $PREFIX/lib, and PETSc does not
+    # The conda-forge mpich 5.0.2 mpicc no longer adds an rpath to $PREFIX/lib: the
+    # feedstock builds with --with-wrapper-dl-type=none and relied on mpich copying its
+    # configure LDFLAGS into the wrappers, which mpich 5.0.2 stopped doing. PETSc does not
     # pass LDFLAGS to the OpenBLAS build, so getarch built with mpicc cannot find libmpi
     # when OpenBLAS runs it. getarch needs no MPI, so build it with the plain compiler.
     # This replaces the --download-openblas-make-options from configure_petsc.sh, so
