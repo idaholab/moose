@@ -1,0 +1,52 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+
+#pragma once
+
+#include "FVGreenGaussGradient.h"
+
+class LinearFVGradientReader;
+class PorousRhieChowMassFlux;
+
+/**
+ * Green-Gauss pressure gradient that removes prescribed jumps before interpolating across baffles.
+ */
+class FVPressureJumpGreenGaussGradient : public FVGreenGaussGradient
+{
+public:
+  static InputParameters validParams();
+  FVPressureJumpGreenGaussGradient(const InputParameters & params);
+
+  /// Link this method to the porous Rhie-Chow object that supplies pressure jumps.
+  void linkFlowSystem(PorousRhieChowMassFlux & rc,
+                      const LinearFVGradientReader & pressure_gradient);
+
+private:
+  void computeGradientWithoutLimiter(
+      SystemBase & system,
+      GradientContainer & gradient,
+      const std::unordered_set<unsigned int> & variable_numbers) const override;
+
+  InternalFaceValues internalFaceValues(const FaceInfo & fi,
+                                        const ElemInfo & elem_info,
+                                        const ElemInfo & neighbor_info,
+                                        Real elem_value,
+                                        Real neighbor_value) const override;
+
+  /// Porous Rhie-Chow object supplying baffle locations and signed pressure jumps after linkage.
+  const PorousRhieChowMassFlux * _rhie_chow = nullptr;
+
+  /// Published gradient used to lag the explicit half-cell correction during reconstruction.
+  const LinearFVGradientReader * _pressure_gradient = nullptr;
+
+  /// Pressure system to which this method is linked.
+  const SystemBase * _pressure_system = nullptr;
+
+  /// Pressure variable number within the linked system.
+  unsigned int _pressure_variable_number = libMesh::invalid_uint;
+};

@@ -48,6 +48,10 @@ LinearFVTurbulentAdvection::LinearFVTurbulentAdvection(const InputParameters & p
     _mass_face_flux(0.0),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
+  // The boundary contributions rely on the Rhie-Chow flux being oriented outward from this
+  // variable's cell, which only holds if the variable's one-sided faces are one-sided for the
+  // flow too.
+  _mass_flux_provider.checkBlocks(_var);
 }
 
 void
@@ -226,10 +230,9 @@ LinearFVTurbulentAdvection::computeBoundaryMatrixContribution(const LinearFVBoun
 
   const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
 
-  // We support internal boundaries too so we have to make sure the normal points always outward
-  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
-
-  return boundary_value_matrix_contrib * factor * _mass_face_flux * _current_face_area;
+  // Rhie-Chow mass fluxes on one-sided boundary faces are already oriented outward from the
+  // active cell, even when the active cell is the FaceInfo neighbor.
+  return boundary_value_matrix_contrib * _mass_face_flux * _current_face_area;
 }
 
 Real
@@ -238,11 +241,8 @@ LinearFVTurbulentAdvection::computeBoundaryRHSContribution(const LinearFVBoundar
   const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
-  // We support internal boundaries too so we have to make sure the normal points always outward
-  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
-
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * factor * _mass_face_flux * _current_face_area;
+  return -boundary_value_rhs_contrib * _mass_face_flux * _current_face_area;
 }
 
 void

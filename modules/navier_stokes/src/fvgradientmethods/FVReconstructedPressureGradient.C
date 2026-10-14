@@ -14,6 +14,7 @@
 #include "LinearFVGradientReader.h"
 #include "LinearSystem.h"
 #include "MooseMesh.h"
+#include "PorousRhieChowMassFlux.h"
 #include "RhieChowMassFlux.h"
 #include "SystemBase.h"
 
@@ -46,6 +47,12 @@ FVReconstructedPressureGradient::validParams()
       0.1,
       "0.0<gradient_relaxation<=1.0",
       "Relaxation factor applied when updating the reconstructed pressure-coupling gradient.");
+  params.addParam<MooseEnum>(
+      "baffle_velocity_gradient_reconstruction",
+      MooseEnum("one-sided shared", "one-sided"),
+      "Whether the lagged velocity gradient in the cell-velocity reconstruction is taken from "
+      "each side of a pressure baffle independently or interpolated across the baffle. Only has "
+      "an effect on pressure-baffle faces of a PorousRhieChowMassFlux.");
   return params;
 }
 
@@ -53,7 +60,9 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
   : FVGradientMethod(params),
     MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
-    _gradient_relaxation(getParam<Real>("gradient_relaxation"))
+    _gradient_relaxation(getParam<Real>("gradient_relaxation")),
+    _use_one_sided_baffle_velocity_gradient(
+        getParam<MooseEnum>("baffle_velocity_gradient_reconstruction") == "one-sided")
 {
 }
 
@@ -61,7 +70,7 @@ void
 FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
                                                 const LinearFVGradientReader & pressure_gradient)
 {
-  mooseAssert(&pressure_gradient.system() == &rc.pressureSystem(),
+  mooseAssert(pressure_gradient.system().number() == rc.pressureSystem().number(),
               "First binding must use the pressure system owned by the RhieChowMassFlux.");
 
   mooseAssert(pressure_gradient.variableNumber() == rc.pressureVariableNumber(),
@@ -70,6 +79,7 @@ FVReconstructedPressureGradient::linkFlowSystem(RhieChowMassFlux & rc,
   if (!_rhie_chow)
   {
     _rhie_chow = &rc;
+    _porous_rhie_chow = dynamic_cast<const PorousRhieChowMassFlux *>(&rc);
     _pressure_system = &pressure_gradient.system();
     _pressure_variable_number = pressure_gradient.variableNumber();
     _momentum_systems.reserve(rc.dimension());
@@ -138,7 +148,7 @@ FVReconstructedPressureGradient::validateSetup(const RhieChowMassFlux & rc) cons
 {
   checkFlowSystem(rc);
 
-  mooseAssert(_pressure_system == &rc.pressureSystem() &&
+  mooseAssert(_pressure_system && _pressure_system->number() == rc.pressureSystem().number() &&
                   _pressure_variable_number == rc.pressureVariableNumber(),
               "FVReconstructedPressureGradient must be linked to the pressure field owned by its "
               "bound RhieChowMassFlux.");
@@ -372,10 +382,12 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 {
   const auto dimension = rc.dimension();
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
-  // At a domain boundary or the edge of the Rhie-Chow block restriction, use the owned cell's
-  // gradient (zero Hessian approximation). Otherwise interpolate the two lagged cell gradients to
-  // the face.
-  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
+  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a baffle configured for
+  // one-sided reconstruction, use the owned cell's gradient (zero Hessian approximation).
+  // Otherwise interpolate the two lagged cell gradients to the face.
+  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
+      (_use_one_sided_baffle_velocity_gradient && _porous_rhie_chow &&
+       _porous_rhie_chow->faceIsBaffle(fi)))
     return elem_gradient;
 
   const auto & velocity = rc.velocityVariable(velocity_component);
@@ -419,8 +431,9 @@ FVReconstructedPressureGradient::assembleFaceProjection(
   const auto pressure_face_type =
       fi->faceType({_pressure_variable_number, _pressure_system->number()});
   // On one-sided pressure faces, RhieChow stores the flux outward from the pressure cell. On
-  // two-sided faces, it stores the flux relative to FaceInfo::normal(), so only the neighbor cell
-  // needs the opposite orientation.
+  // two-sided faces, it stores the flux relative to FaceInfo::normal(), so only the neighbor
+  // cell needs the opposite orientation. Boundary conditions are already reflected in this
+  // corrected flux, including zero normal flux on impermeable boundaries.
   const Real normal_alignment =
       pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
   const Real face_flux = rc.getVolumetricFaceFlux(*fi);

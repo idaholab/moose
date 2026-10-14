@@ -1,0 +1,2 @@
+time,p_baffle_1_jump,p_baffle_1_left,p_baffle_1_right,p_baffle_2_jump,p_baffle_2_left,p_baffle_2_right,p_jump,p_left,p_right,u_block_1,u_block_2,u_block_jump
+1,0.029062037880264,0.25062470737158,0.27968674525184,-0.030937016306172,0.030937016325362,1.9190727959874e-11,0.25062470740257,0.25062470740257,0,0.1,0.1,1.3877787807814e-17

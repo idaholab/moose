@@ -19,6 +19,7 @@
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
+class PetscVectorReader;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;
@@ -45,6 +46,12 @@ public:
 
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+
+  /**
+   * Check the block consistency between the passed in \p var and us
+   */
+  template <typename VarType>
+  void checkBlocks(const VarType & var) const;
 
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
   const LinearFVGradientReader & pressureGradientField() const;
@@ -102,11 +109,11 @@ public:
                                      bool subtract_mesh_velocity) const override;
 
   /// Initialize the container for face velocities
-  void initFaceMassFlux();
+  virtual void initFaceMassFlux();
   /// Initialize the coupling fields (HbyA and Ainv)
-  void initCouplingField();
+  virtual void initCouplingField();
   /// Update the values of the face velocities in the containers
-  void computeFaceMassFlux();
+  virtual void computeFaceMassFlux();
 
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
@@ -158,15 +165,16 @@ public:
    * @param pressure_system Reference to the pressure system
    * @param momentum_system_numbers The numbers of these systems
    */
-  void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   LinearSystem & pressure_system,
-                                   const std::vector<unsigned int> & momentum_system_numbers);
+  virtual void
+  linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
+                              LinearSystem & pressure_system,
+                              const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
    * Computes the inverse of the diagonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation.
    */
-  void computeHbyA(const bool verbose);
+  virtual void computeHbyA(bool verbose);
 
 protected:
   /// Update cell velocity from the supplied momentum-coupling pressure gradient.
@@ -185,6 +193,9 @@ protected:
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
 
+  /// Compute the pressure-gradient flux contribution for a single face
+  Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
+
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 
@@ -193,11 +204,10 @@ protected:
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
-  /**
-   * Check the block consistency between the passed in \p var and us
-   */
-  template <typename VarType>
-  void checkBlocks(const VarType & var) const;
+  /// Get the prescribed velocity value on a Dirichlet boundary face
+  Real velocityBoundaryValue(unsigned int component,
+                             const FaceInfo & fi,
+                             const Moose::FaceArg & boundary_face) const;
 
   virtual bool supportMeshVelocity() const override { return false; }
 
@@ -302,7 +312,6 @@ protected:
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
 
-private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;

@@ -23,6 +23,7 @@ class ElemInfo;
 class FaceInfo;
 class FEProblemBase;
 class RhieChowMassFlux;
+class PorousRhieChowMassFlux;
 
 /**
  * Gradient method that reconstructs and relaxes the pressure gradient used for Rhie-Chow
@@ -187,8 +188,14 @@ private:
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
 
+  /// Whether baffle faces use the gradient from each face side instead of a shared gradient.
+  const bool _use_one_sided_baffle_velocity_gradient;
+
   /// Rhie-Chow object that owns this stateful reconstruction method.
   const RhieChowMassFlux * _rhie_chow = nullptr;
+
+  /// Porous Rhie-Chow object used to identify pressure-baffle faces.
+  const PorousRhieChowMassFlux * _porous_rhie_chow = nullptr;
 
   /// Pressure system that owns the reconstructed pressure variable.
   const SystemBase * _pressure_system = nullptr;
