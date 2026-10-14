@@ -70,8 +70,7 @@ LinearSolverBase::SetOperator(const mfem::Operator & op)
 
   // SetOperatorImpl() calls SetOperator() on the wrapped mfem solver. In most cases, this will
   // redundantly reset the operator on the preconditioner. For others it requires the preconditioner
-  // be already set (e.g. AME), thus why it follows SetPreconditioner(). Repeating SetOperator() for
-  // BoomerAMG when used as a preconditioner will also reset it to one V-cycle as expected.
+  // be already set (e.g. AME), thus why it follows SetPreconditioner().
   SetOperatorImpl(op);
 }
 } // namespace Moose::MFEM
