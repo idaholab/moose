@@ -8,7 +8,7 @@ This class implements the steady-state residual of the inner wall conjugate heat
 0 = \frac{1}{A_{i,w} \rho_w c_{p,w}} \left[ \frac{k_w P_{m,w} \left( T_{o,w} - T_{i,w} \right)}{\delta} + \frac{G_{i,u} \left( T_{i,u} - T_{i,w} \right) + G_{i,d} \left( T_{i,d} - T_{i,w} \right)}{L} + h \frac{P_{i,w}}{2} \left( T_f + T_{in} - 2T_{i,w} \right) \right]
 
 Note, use of this kernel with transient problems also necessitates the use of a
-[ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
+[ADScalarTimeDerivative.md] (or its non-AD equivalent) with `coefficient = 1` on the same scalar
 variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
 
 This kernel derives from [PipeWallTemperatureScalarKernelBase.md], which implements the
@@ -16,12 +16,15 @@ axial and radial conduction terms shared by every radial node of the wall; this 
 the convective heat exchange with the primary flowing fluid.
 
 This kernel takes a solid properties object based on the
-[ThermalSolidProperties.md] base class and a fluid properties object based on the
-[SinglePhaseFluidProperties.md] base class. All geometry inputs (the flow channel's area
-and wetted perimeter, this node's and its upstream/downstream neighbors' wall
-cross-sectional areas, the radial interface perimeter and thickness, this node's
-control-volume length, and the axial spacings to each neighbor) are defined as functors,
-which should allow versatility in accepting a variety of input arguments. Furthermore,
+[ThermalSolidProperties.md] base class. The convective heat transfer coefficient $h$ is
+supplied as a [functor](/Functors/index.md) through the
+[!param](/ScalarKernels/PipeInnerWallTemperatureScalarKernel/heat_transfer_coefficient)
+parameter; [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
+correlation. All geometry inputs (the flow channel's wetted perimeter, this node's and its
+upstream/downstream neighbors' wall cross-sectional areas, the radial interface perimeter
+and thickness, this node's control-volume length, and the axial spacings to each neighbor)
+are likewise defined as functors, which should allow versatility in accepting a variety of
+input arguments. Furthermore,
 being functors, it is possible for them to be controlled via
 [Controls](syntax/Controls/index.md) as supplied
 [Postprocessors](syntax/Postprocessors/index.md), for example.
