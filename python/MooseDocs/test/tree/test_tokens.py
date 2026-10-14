@@ -57,6 +57,26 @@ class TestTokens(unittest.TestCase):
         self.assertEqual(t2(2).name, "Word")
         self.assertEqual(t2(2)["content"], "Word")
 
+    def testText(self):
+        from MooseDocs.extensions import core
+
+        # 'HeatPipe3Phase Component' tokenizes to Word, Number, Word, Space, Word
+        token = Test(None)
+        core.Word(token, content="HeatPipe")
+        core.Number(token, content="3")
+        core.Word(token, content="Phase")
+        core.Space(token, count=1)
+        core.Word(token, content="Component")
+        self.assertEqual(token.text(), "HeatPipe3Phase Component")
+        self.assertEqual(token.text("-"), "HeatPipe3Phase-Component")
+
+        # Punctuation still separates words
+        token = Test(None)
+        core.Word(token, content="Foo")
+        core.Punctuation(token, content="-")
+        core.Word(token, content="bar")
+        self.assertEqual(token.text(), "Foo bar")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
