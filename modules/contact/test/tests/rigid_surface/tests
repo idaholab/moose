@@ -1,0 +1,68 @@
+[Tests]
+  design = 'syntax/Contact/index.md'
+  issues = '#33990'
+  [rigid_surface]
+    requirement = 'The system shall enforce contact between a deformable body and a rigid surface '
+                  'mesh without an interior parent, and recover the analytical uniaxial contact '
+                  'pressure.'
+    [mortar_2d]
+      type = CSVDiff
+      input = rigid_surface_2d.i
+      csvdiff = rigid_surface_2d_out.csv
+      detail = 'Frictionless mortar contact against EDGE2 surface elements in 2D.'
+    []
+    [mortar_2d_second_order]
+      type = CSVDiff
+      input = rigid_surface_2d.i
+      csvdiff = rigid_surface_2d_second_order_out.csv
+      cli_args = 'Mesh/block/elem_type=QUAD9 Mesh/line/elem_type=EDGE3 '
+                 'Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+                 'Outputs/file_base=rigid_surface_2d_second_order_out'
+      detail = 'Frictionless mortar contact against EDGE3 surface elements in 2D.'
+    []
+    [node_face_2d]
+      type = CSVDiff
+      input = rigid_surface_2d.i
+      csvdiff = rigid_surface_2d_node_face_out.csv
+      cli_args = "Contact/rigid/formulation=kinematic Contact/rigid/primary_surface_blocks='' "
+                 "Outputs/file_base=rigid_surface_2d_node_face_out"
+      detail = 'Frictionless node-face contact against EDGE2 surface elements in 2D.'
+    []
+    [mortar_3d]
+      type = CSVDiff
+      input = rigid_surface_3d.i
+      csvdiff = rigid_surface_3d_out.csv
+      detail = 'Frictionless mortar contact against QUAD4 surface elements in 3D.'
+    []
+    [node_face_3d]
+      type = CSVDiff
+      input = rigid_surface_3d.i
+      csvdiff = rigid_surface_3d_node_face_out.csv
+      cli_args = "Contact/rigid/formulation=kinematic Contact/rigid/primary_surface_blocks='' "
+                 "Outputs/file_base=rigid_surface_3d_node_face_out"
+      detail = 'Frictionless node-face contact against QUAD4 surface elements in 3D.'
+    []
+  []
+  [rigid_surface_friction]
+    type = CSVDiff
+    input = rigid_surface_2d.i
+    csvdiff = rigid_surface_2d_friction_out.csv
+    # The same frictional problem with a solid primary also fails to converge in parallel
+    max_parallel = 1
+    cli_args = 'Contact/rigid/model=coulomb Contact/rigid/friction_coefficient=0.5 '
+               'Contact/rigid/c_tangential=1e2 Materials/elasticity/poissons_ratio=0.3 '
+               'Postprocessors/analytical_stress_yy/outputs=none '
+               'Outputs/file_base=rigid_surface_2d_friction_out'
+    requirement = 'The system shall enforce frictional mortar contact against a rigid surface mesh '
+                  'without an interior parent, so that friction prevents the lateral expansion of '
+                  'the contact surface.'
+  []
+  [surface_blocks_node_face_error]
+    type = RunException
+    input = rigid_surface_2d.i
+    cli_args = 'Contact/rigid/formulation=kinematic'
+    expect_err = 'Primary surface blocks are only used by mortar formulations'
+    requirement = 'The system shall report an error if primary surface blocks are given for a '
+                  'node-face contact formulation, which does not use them.'
+  []
+[]
