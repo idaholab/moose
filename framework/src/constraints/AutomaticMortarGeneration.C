@@ -1567,7 +1567,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
   {
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
-    const Elem & primary_ip = primaryInteriorElem(*primary_elem);
+    const Elem & primary_interior_elem = primaryInteriorElem(*primary_elem);
 
     // Every process owning a row on a secondary node or either volume parent needs the complete
     // secondary face-star coupling, including when that process also owns the lower-dimensional
@@ -1575,7 +1575,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
     std::set<processor_id_type> secondary_face_coupling_processors{
         secondary_elem->processor_id(),
         secondary_elem->interior_parent()->processor_id(),
-        primary_ip.processor_id()};
+        primary_interior_elem.processor_id()};
     for (const auto n : secondary_elem->node_index_range())
       secondary_face_coupling_processors.insert(secondary_elem->node_ptr(n)->processor_id());
 
@@ -1586,7 +1586,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
 
     // LowerPrimary
     for (const auto processor : secondary_face_coupling_processors)
-      coupling_info[processor].emplace_back(secondary_elem->id(), primary_ip.id());
+      coupling_info[processor].emplace_back(secondary_elem->id(), primary_interior_elem.id());
 
     // Lower-LowerDimensionalPrimary
     for (const auto processor : secondary_face_coupling_processors)
@@ -1598,14 +1598,15 @@ AutomaticMortarGeneration::buildCouplingInformation()
 
     // SecondaryPrimary
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
-        secondary_elem->interior_parent()->id(), primary_ip.id());
+        secondary_elem->interior_parent()->id(), primary_interior_elem.id());
 
     // PrimaryLower
-    coupling_info[primary_ip.processor_id()].emplace_back(primary_ip.id(), secondary_elem->id());
+    coupling_info[primary_interior_elem.processor_id()].emplace_back(primary_interior_elem.id(),
+                                                                     secondary_elem->id());
 
     // PrimarySecondary
-    coupling_info[primary_ip.processor_id()].emplace_back(primary_ip.id(),
-                                                          secondary_elem->interior_parent()->id());
+    coupling_info[primary_interior_elem.processor_id()].emplace_back(
+        primary_interior_elem.id(), secondary_elem->interior_parent()->id());
   }
 
   // A face pair may produce several mortar segments. Remove repeated entries before communication.
