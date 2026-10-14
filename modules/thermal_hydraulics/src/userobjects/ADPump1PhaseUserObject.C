@@ -13,6 +13,7 @@
 #include "VolumeJunction1Phase.h"
 #include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
+#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPump1PhaseUserObject);
 
@@ -21,19 +22,17 @@ ADPump1PhaseUserObject::validParams()
 {
   InputParameters params = ADVolumeJunction1PhaseUserObject::validParams();
 
-  params.addRequiredParam<Real>("head", "Pump head, [m]");
+  params.addRequiredParam<FunctionName>("head", "Function specifying the pump head [m]");
   params.addRequiredParam<Real>("gravity_magnitude", "Gravity constant, [m/s^2]");
 
   params.addClassDescription("Computes and caches flux and residual vectors for a 1-phase pump");
-
-  params.declareControllable("head");
 
   return params;
 }
 
 ADPump1PhaseUserObject::ADPump1PhaseUserObject(const InputParameters & params)
   : ADVolumeJunction1PhaseUserObject(params),
-    _head(getParam<Real>("head")),
+    _head_fn(getFunction("head")),
     _g(getParam<Real>("gravity_magnitude"))
 {
 }
@@ -53,7 +52,8 @@ ADPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
   const ADRealVectorValue uvec(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
 
   // compute momentum and energy source terms
-  const ADRealVectorValue S_momentum = 0.5 * rho * _g * _head * _A_ref * di;
+  const Real head = _head_fn.value(_t, Point());
+  const ADRealVectorValue S_momentum = 0.5 * rho * _g * head * _A_ref * di;
   const ADReal S_energy = S_momentum * uvec;
 
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -= S_momentum(0);

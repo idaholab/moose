@@ -31,7 +31,6 @@ FlowChannel1PhaseBase::validParams()
   params.addParam<Real>("T_ref", 273.15, "Reference temperature [K]");
   params.addParam<Real>("vel_ref", 1.0, "Reference velocity [m/s]");
 
-  params.declareControllable("initial_p initial_T initial_vel");
   params.addParamNamesToGroup("initial_p initial_T initial_vel", "Variable initialization");
   params.addParamNamesToGroup("rdg_slope_reconstruction", "Numerical scheme");
 

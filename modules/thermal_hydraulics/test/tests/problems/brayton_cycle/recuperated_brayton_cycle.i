@@ -542,7 +542,7 @@ hs_power = 105750
   []
   [total_power]
     type = TotalPower
-    power = 0
+    power = power_fn
   []
   [heat_generation]
     type = HeatSourceFromTotalPower
@@ -720,20 +720,6 @@ hs_power = 105750
     type = SetRealValueControl
     parameter = Functions/motor_torque_fn/value
     value = logic:value
-  []
-  # Determines when to turn on heat source
-  [power_logic]
-    type = ParsedFunctionControl
-    function = 'power_fn'
-    symbol_names = 'power_fn'
-    symbol_values = 'power_fn'
-  []
-  # Applies heat source to the total_power block
-  [power_applied]
-    type = SetComponentRealValueControl
-    component = total_power
-    parameter = power
-    value = power_logic:value
   []
 []
 

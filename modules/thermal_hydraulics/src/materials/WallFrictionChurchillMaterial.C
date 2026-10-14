@@ -10,6 +10,7 @@
 #include "WallFrictionChurchillMaterial.h"
 #include "WallFrictionModels.h"
 #include "Numerics.h"
+#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", WallFrictionChurchillMaterial);
 
@@ -28,8 +29,7 @@ WallFrictionChurchillMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
 
-  params.addRequiredParam<Real>("roughness", "Surface roughness");
-  params.declareControllable("roughness");
+  params.addRequiredParam<FunctionName>("roughness", "Function specifying the surface roughness");
   return params;
 }
 
@@ -45,7 +45,7 @@ WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParamete
     _rho(getMaterialProperty<Real>("rho")),
     _vel(getMaterialProperty<Real>("vel")),
     _D_h(getMaterialProperty<Real>("D_h")),
-    _roughness(getParam<Real>("roughness"))
+    _roughness_fn(getFunction("roughness"))
 {
 }
 
@@ -54,7 +54,8 @@ WallFrictionChurchillMaterial::computeQpProperties()
 {
   Real Re = THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
 
-  const Real f_F = WallFriction::FanningFrictionFactorChurchill(Re, _roughness, _D_h[_qp]);
+  const Real roughness = _roughness_fn.value(_t, _q_point[_qp]);
+  const Real f_F = WallFriction::FanningFrictionFactorChurchill(Re, roughness, _D_h[_qp]);
 
   _f_D[_qp] = WallFriction::DarcyFrictionFactor(f_F);
   _df_D_drhoA[_qp] = 0;

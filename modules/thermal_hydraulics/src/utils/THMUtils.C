@@ -72,4 +72,21 @@ allGatherADVectorMapSum(const Parallel::Communicator & comm,
           existing[i] += it.second[i];
       }
 }
+
+bool
+realIsValidBool(Real value)
+{
+  return MooseUtils::absoluteFuzzyEqual(value, 0.) || MooseUtils::absoluteFuzzyEqual(value, 1.);
+}
+
+bool
+realToBool(Real value)
+{
+  if (MooseUtils::absoluteFuzzyEqual(value, 0.))
+    return false;
+  else if (MooseUtils::absoluteFuzzyEqual(value, 1.))
+    return true;
+  else
+    mooseError("Cannot convert the value ", value, " to a boolean value; it must be 0 or 1.");
+}
 }

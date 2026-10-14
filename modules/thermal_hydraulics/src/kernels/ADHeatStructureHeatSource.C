@@ -16,7 +16,8 @@ ADHeatStructureHeatSource::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Adds a heat source term for the energy equation");
-  params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
+  params.addRequiredParam<FunctionName>("power_fraction",
+                                        "Function specifying the fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addRequiredParam<Real>("num_units", "The number of units");
   params.addRequiredParam<FunctionName>("power_shape_function",
@@ -24,13 +25,12 @@ ADHeatStructureHeatSource::validParams()
   params.addRequiredParam<PostprocessorName>("power_shape_integral_pp",
                                              "Power shape integral post-processor name");
   params.addParam<Real>("scale", 1.0, "Scaling factor for residual");
-  params.declareControllable("power_fraction");
   return params;
 }
 
 ADHeatStructureHeatSource::ADHeatStructureHeatSource(const InputParameters & parameters)
   : ADKernel(parameters),
-    _power_fraction(getParam<Real>("power_fraction")),
+    _power_fraction_fn(getFunction("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
     _power_shape_function(getFunction("power_shape_function")),
     _power_shape_integral(getPostprocessorValue("power_shape_integral_pp")),
@@ -42,7 +42,8 @@ ADHeatStructureHeatSource::ADHeatStructureHeatSource(const InputParameters & par
 ADReal
 ADHeatStructureHeatSource::computeQpResidual()
 {
-  const ADReal power = _power_fraction * _total_power[0];
+  const Real power_fraction = _power_fraction_fn.value(_t, _q_point[_qp]);
+  const ADReal power = power_fraction * _total_power[0];
   const ADReal power_density =
       power / (_num_units * _power_shape_integral) * _power_shape_function.value(_t, _q_point[_qp]);
   return -_scale * power_density * _test[_i][_qp];

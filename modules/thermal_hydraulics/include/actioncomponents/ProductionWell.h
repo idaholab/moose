@@ -22,7 +22,6 @@ public:
 
 protected:
   virtual void addTHMComponents() override;
-  virtual void addControlLogic() override;
 
   /// Adds outlet component
   void addOutlet();

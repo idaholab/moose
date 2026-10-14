@@ -59,28 +59,6 @@
   []
 []
 
-[Functions]
-  [p_fn]
-    type = PiecewiseLinear
-    x = '0   1'
-    y = '1e5 1.001e5'
-  []
-[]
-
-[ControlLogic]
-  [outlet_p_fn]
-    type = GetFunctionValueControl
-    function = p_fn
-  []
-
-  [set_outlet_value]
-    type = SetComponentRealValueControl
-    component = outlet
-    parameter = p
-    value = outlet_p_fn:value
-  []
-[]
-
 [Postprocessors]
   [outlet_p]
     type = RealComponentParameterValuePostprocessor

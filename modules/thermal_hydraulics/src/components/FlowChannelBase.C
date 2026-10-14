@@ -75,7 +75,7 @@ FlowChannelBase::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function");
-  params.addParam<Real>("roughness", 0.0, "Roughness [m]");
+  params.addParam<FunctionName>("roughness", "0", "Function specifying the roughness [m]");
   params.addParam<FunctionName>("f", "Wall friction factor [-]");
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannelBase::getConvHeatTransGeometry("PIPE"),
@@ -122,7 +122,7 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
                        : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
                              180 / M_PI),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
-    _roughness(getParam<Real>("roughness")),
+    _roughness_fn_name(getParam<FunctionName>("roughness")),
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
     _pipe_location(getEnumParam<EPipeLocation>("pipe_location")),
     _PoD(getParam<Real>("PoD")),

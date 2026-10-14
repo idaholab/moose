@@ -48,8 +48,8 @@
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
 
-    rho = 996.556340388366266
-    vel = 2
+    rho = inlet_rho_fn
+    vel = inlet_vel_fn
   []
 
   [outlet]
@@ -70,22 +70,6 @@
     type = PiecewiseLinear
     x = '1 2'
     y = '1 2'
-  []
-[]
-
-[ControlLogic]
-  [inlet_rho_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = rho
-    function = inlet_rho_fn
-  []
-
-  [inlet_vel_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = vel
-    function = inlet_vel_fn
   []
 []
 
@@ -116,14 +100,12 @@
 
 [Postprocessors]
   [rho_inlet]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = rho
+    type = FunctionValuePostprocessor
+    function = inlet_rho_fn
   []
   [vel_inlet]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = vel
+    type = FunctionValuePostprocessor
+    function = inlet_vel_fn
   []
 []
 

@@ -26,8 +26,8 @@ public:
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 
-  /// Pump head, [m]
-  const Real & _head;
+  /// Function specifying the pump head [m]
+  const Function & _head_fn;
   /// Gravity constant, i.e., 9.8 [m/s^2]
   const Real & _g;
 

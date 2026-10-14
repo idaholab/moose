@@ -57,7 +57,7 @@
     type = Pump1Phase
     connections = 'pipe1:out pipe2:in'
     position = '1.02 0 0'
-    head = 0
+    head = pump_head_fn
     volume = 0.567
     A_ref = 0.567
 
@@ -88,20 +88,10 @@
   []
 []
 
-[ControlLogic]
-  [pump_head_ctrl]
-    type = TimeFunctionComponentControl
-    component = pump
-    parameter = head
-    function = pump_head_fn
-  []
-[]
-
 [Postprocessors]
   [pump_head]
-    type = RealComponentParameterValuePostprocessor
-    component = pump
-    parameter = head
+    type = FunctionValuePostprocessor
+    function = pump_head_fn
   []
 []
 
