@@ -296,6 +296,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
                        /*grainsize=*/1);
 
   Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  // Stop on all processes before any geometric operation sees a non-finite displaced mesh
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
 
@@ -354,6 +356,8 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
                        /*grainsize=*/1);
 
   Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  // Stop on all processes before any geometric operation sees a non-finite displaced mesh
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -1515,6 +1519,14 @@ DisplacedProblem::UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & 
         Real coord = reference_node(direction) +
                      (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
                          reference_node.dof_number(sys_num, var_numbers[i], 0));
+        // A non-finite displacement (e.g. after a failed linear solve) would corrupt every
+        // downstream geometric operation. Throw so the solve can be stopped and the step cut.
+        if (!std::isfinite(coord))
+          throw MooseException("Non-finite displaced coordinate in direction ",
+                               direction,
+                               " at node ",
+                               displaced_node.id(),
+                               ".");
         if (displaced_node(direction) != coord)
         {
           displaced_node(direction) = coord;
