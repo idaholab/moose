@@ -319,9 +319,7 @@ outOfPlaneNormal(const Elem & primary_elem)
 
   const libMesh::Point in_plane_vector1 = primary_elem.point(1) - primary_elem.point(0);
   const libMesh::Point in_plane_vector2 = primary_elem.point(2) - primary_elem.point(0);
-
-  libMesh::Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
-  return out_of_plane_normal / out_of_plane_normal.norm();
+  return in_plane_vector1.cross(in_plane_vector2).unit();
 }
 
 void

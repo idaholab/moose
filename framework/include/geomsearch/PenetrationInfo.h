@@ -107,8 +107,8 @@ public:
   Real _slip_tol;
 
   /**
-   * Build the contact face \p side_num of a primary element, or a copy of the element itself if
-   * it is a surface element that is its own face (see MooseMesh::isSurfaceElemOnNodeset)
+   * Build the contact face for side \p side_num of a primary element, or copy \p elem directly
+   * when the element itself is the contact face (see MooseMesh::isSurfaceElemOnNodeset).
    */
   static std::unique_ptr<const Elem>
   buildSide(const Elem & elem, unsigned int side_num, bool surface_elem);

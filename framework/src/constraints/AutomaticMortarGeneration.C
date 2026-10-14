@@ -1734,7 +1734,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
   {
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
-    const Elem & primary_ip = primaryInteriorElem(*primary_elem);
+    const Elem & primary_interior_elem = primaryInteriorElem(*primary_elem);
 
     // LowerSecondary
     coupling_info[secondary_elem->processor_id()].emplace_back(
@@ -1747,11 +1747,11 @@ AutomaticMortarGeneration::buildCouplingInformation()
 
     // LowerPrimary
     coupling_info[secondary_elem->processor_id()].emplace_back(secondary_elem->id(),
-                                                               primary_ip.id());
+                                                               primary_interior_elem.id());
     if (secondary_elem->processor_id() != _mesh.processor_id())
       // We want to keep information for nonlocal lower-dimensional secondary element point
       // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(primary_ip.id());
+      _mortar_interface_coupling[secondary_elem->id()].insert(primary_interior_elem.id());
 
     // Lower-LowerDimensionalPrimary
     coupling_info[secondary_elem->processor_id()].emplace_back(secondary_elem->id(),
@@ -1767,14 +1767,15 @@ AutomaticMortarGeneration::buildCouplingInformation()
 
     // SecondaryPrimary
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
-        secondary_elem->interior_parent()->id(), primary_ip.id());
+        secondary_elem->interior_parent()->id(), primary_interior_elem.id());
 
     // PrimaryLower
-    coupling_info[primary_ip.processor_id()].emplace_back(primary_ip.id(), secondary_elem->id());
+    coupling_info[primary_interior_elem.processor_id()].emplace_back(primary_interior_elem.id(),
+                                                                     secondary_elem->id());
 
     // PrimarySecondary
-    coupling_info[primary_ip.processor_id()].emplace_back(primary_ip.id(),
-                                                          secondary_elem->interior_parent()->id());
+    coupling_info[primary_interior_elem.processor_id()].emplace_back(
+        primary_interior_elem.id(), secondary_elem->interior_parent()->id());
   }
 
   // Push the coupling information

@@ -3439,15 +3439,24 @@ MooseMesh::ghostGhostedBoundaries()
   }
 
   // Surface elements on a ghosted nodeset are their own faces on that boundary
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-    for (const auto bc_id : _ghosted_boundaries)
-      if (isSurfaceElemOnNodeset(*elem, bc_id))
-      {
-        boundary_elems_to_ghost.insert(elem);
-        for (auto & node : elem->node_ref_range())
-          connected_nodes_to_ghost.insert(&node);
-        break;
-      }
+  std::vector<BoundaryID> ghosted_nodesets;
+  for (const auto bc_id : _ghosted_boundaries)
+    if (!_mesh_sideset_ids.count(bc_id))
+      ghosted_nodesets.push_back(bc_id);
+  if (!ghosted_nodesets.empty())
+    for (const auto & elem : mesh.active_local_element_ptr_range())
+    {
+      if (elem->dim() + 1u != dimension() || elem->interior_parent())
+        continue;
+      for (const auto bc_id : ghosted_nodesets)
+        if (isSurfaceElemOnNodeset(*elem, bc_id))
+        {
+          boundary_elems_to_ghost.insert(elem);
+          for (auto & node : elem->node_ref_range())
+            connected_nodes_to_ghost.insert(&node);
+          break;
+        }
+    }
 
   // We really do want to store this by value instead of by reference
   const auto prior_ghost_elems = mesh.extra_ghost_elems();
