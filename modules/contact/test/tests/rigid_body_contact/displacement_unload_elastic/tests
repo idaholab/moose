@@ -1,0 +1,26 @@
+[Tests]
+  design = 'LevelSetContactor.md SphereContactor.md'
+  issues = '#33801'
+  [hertz_unload]
+    type = 'CSVDiff'
+    input = 'hertz_unload.i'
+    csvdiff = 'hertz_unload_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'A rigid contactor prescribed with a Function-driven up-and-back triangle '
+                  'translation shall correctly load and then unload a Hertz elastic-half-space, '
+                  'exercising the SSLS + ConstantBounds active-set transitions in both '
+                  'directions (nodes engaging on load, releasing on unload).'
+  []
+  [hertz_unload_parallel]
+    type = 'RunApp'
+    input = 'hertz_unload.i'
+    min_parallel = 4
+    cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/end_time=0.3'
+    requirement = 'The RigidBodyContactSparsity augmentation shall preallocate the LM/disp '
+                  'cross-node coupling on all ranks correctly, including at partition '
+                  'boundaries where the LM DoF owner does not own the containing lower-d '
+                  'element.  A four-rank run with error_on_jacobian_nonzero_reallocation must '
+                  'not fire a malloc during Jacobian assembly.'
+  []
+[]

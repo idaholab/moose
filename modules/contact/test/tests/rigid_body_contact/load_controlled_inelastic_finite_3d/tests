@@ -1,0 +1,15 @@
+[Tests]
+  design = 'RigidBodyLoadControl.md LevelSetContactor.md'
+  issues = '#33801'
+  [hertz_load_finite_3d]
+    type = 'CSVDiff'
+    input = 'hertz_load_finite_3d.i'
+    csvdiff = 'hertz_load_finite_3d_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'The system shall drive a rigid contactor in 3D large-deformation J2 '
+                  'plasticity via a Scalar Lagrange multiplier so the integrated normal contact '
+                  'reaction matches a prescribed target force.'
+  []
+[]
