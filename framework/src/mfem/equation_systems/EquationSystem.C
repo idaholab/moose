@@ -33,7 +33,17 @@ EquationSystem::DeleteHBlocks()
         _jacobian_blocks(i, j) = nullptr;
       delete _h_blocks(i, j);
     }
+
+  for (const auto i : make_range(_h_blocks_pa.NumRows()))
+    for (const auto j : make_range(_h_blocks_pa.NumCols()))
+    {
+      if (_jacobian_blocks_pa.NumRows() && _jacobian_blocks_pa(i, j) == _h_blocks_pa(i, j))
+        _jacobian_blocks_pa(i, j) = nullptr;
+      delete _h_blocks_pa(i, j);
+    }
+
   _h_blocks.DeleteAll();
+  _h_blocks_pa.DeleteAll();
 }
 
 void
@@ -43,7 +53,14 @@ EquationSystem::DeleteJacobianBlocks()
     for (const auto j : make_range(_jacobian_blocks.NumCols()))
       if (!_h_blocks.NumRows() || _jacobian_blocks(i, j) != _h_blocks(i, j))
         delete _jacobian_blocks(i, j);
+
+  for (const auto i : make_range(_jacobian_blocks_pa.NumRows()))
+    for (const auto j : make_range(_jacobian_blocks_pa.NumCols()))
+      if (!_h_blocks_pa.NumRows() || _jacobian_blocks_pa(i, j) != _h_blocks_pa(i, j))
+        delete _jacobian_blocks_pa(i, j);
+
   _jacobian_blocks.DeleteAll();
+  _jacobian_blocks_pa.DeleteAll();
 }
 
 bool
@@ -274,29 +291,79 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                    mfem::BlockVector & trueX,
                                    mfem::BlockVector & trueRHS)
 {
-  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
-              "Non-legacy assembly is only supported for single test and trial variable systems");
+  // Allocate block operator
+  DeleteHBlocks();
+  _h_blocks_pa.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _h_blocks_pa = nullptr;
+  // Zero out RHS and sync memory
+  trueRHS = 0.0;
+  trueRHS.SyncToBlocks();
 
-  auto & test_var_name = _test_var_names.at(0);
-  mfem::Vector aux_x, aux_rhs;
-  mfem::OperatorPtr aux_a;
+  auto * const block_op = new mfem::BlockOperator(_block_true_offsets);
 
-  auto blf = _blfs.Get(test_var_name);
-  blf->FormLinearSystem(_ess_tdof_lists.at(0),
-                        *_var_ess_constraints.at(0),
-                        *_lfs.Get(test_var_name),
-                        aux_a,
-                        aux_x,
-                        aux_rhs,
-                        /*copy_interior=*/true);
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (const auto j : index_range(_trial_var_names))
+    {
+      auto trial_var_name = _trial_var_names.at(j);
 
-  trueX.GetBlock(0) = aux_x;
-  trueRHS.GetBlock(0) = aux_rhs;
+      mfem::Vector aux_x, aux_rhs;
+      mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
+      mfem::OperatorPtr aux_a;
+
+      if (test_var_name == trial_var_name)
+      {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+
+        auto blf = _blfs.Get(test_var_name);
+        blf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *_var_ess_constraints.at(j),
+                              *_lfs.Get(test_var_name),
+                              aux_a,
+                              aux_x,
+                              aux_rhs,
+                              /*copy_interior=*/true);
+        trueX.GetBlock(j) = aux_x;
+      }
+      else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
+                                          _ess_tdof_lists.at(i),
+                                          *_var_ess_constraints.at(j),
+                                          aux_lf = 0.,
+                                          aux_a,
+                                          aux_x,
+                                          aux_rhs);
+      }
+      else
+        continue;
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks_pa(i, j) = aux_a.Ptr();
+      aux_a.SetOperatorOwner(false);
+
+      // add to block operator.
+      if (_h_blocks_pa(i, j))
+        block_op->SetBlock(i, j, _h_blocks_pa(i, j));
+    }
+  }
+
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
 
-  op.Reset(aux_a.Ptr());
-  aux_a.SetOperatorOwner(false);
+  // workaround to make sure the PA tests still work if we only have a single
+  // variable/preconditioner. otherwise, we would have to modify all PA tests
+  // to use MFEMBlockDiagonalPreconditioner.
+  if (block_op->NumRowBlocks() == 1 && block_op->NumColBlocks() == 1)
+  {
+    // The block is owned by _h_blocks_pa, not by op
+    op.Reset(_h_blocks_pa(0, 0), /*own_A=*/false);
+    delete block_op;
+    return;
+  }
+
+  op.Reset(block_op);
 }
 
 void
@@ -400,6 +467,13 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
+    // With partial assembly, Mult() applies whatever AssemblePA stored at the last Setup(), and
+    // unlike AssembleGradPA (re-run by every GetGradient call) nothing refreshes it. Integrators
+    // whose PA data depends on the solution, e.g. NLCurlCurlIntegrator through k(|curl u|), must
+    // be re-assembled at the current state, which the grid functions hold as of the
+    // SetTrialVariablesFromTrueVectors call above. This is a no-op for legacy assembly and for
+    // forms without integrators, since the underlying NonlinearForm::ext will be a nullptr
+    nlf->Setup();
     nlf->AddMult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
@@ -424,7 +498,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
-      _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      auto * const jacobian_block = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      // Both summands already carry a unit diagonal on the essential rows: the bilinear form's
+      // comes from ParBilinearForm::FormLinearSystem, which eliminates with the DIAG_ONE policy,
+      // and the nonlinear form's from ParNonlinearForm::GetGradient, which ends in
+      // OperatorHandle::EliminateRowsCols. Their sum therefore has a diagonal of two on the
+      // essential rows the nonlinear integrators touch and one on the rest, so it is not the
+      // gradient of Mult(). Re-eliminating restores the unit diagonal everywhere; the returned
+      // eliminated part is discarded because these rows and columns are already zero.
+      delete jacobian_block->EliminateRowsCols(_ess_tdof_lists.at(i));
+      _jacobian_blocks(i, i) = jacobian_block;
     }
     else
       _jacobian_blocks(i, i) = _h_blocks(i, i);
@@ -443,15 +526,73 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
   if (IsNonlinear())
   {
-    if (_assembly_level != mfem::AssemblyLevel::LEGACY)
-      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
-                 "assembly in EquationSystem.");
-    const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
+      const_cast<EquationSystem *>(this)->FormJacobianOperator(u);
+    else if (_assembly_level == mfem::AssemblyLevel::LEGACY)
+      const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    else
+      mooseError(
+          "MFEM nonlinear solvers that require GetGradient() currently require legacy or partial "
+          "assembly in EquationSystem.");
   }
   else
     _jacobian = _linear_operator;
 
   return *_jacobian;
+}
+
+void
+EquationSystem::FormJacobianOperator(const mfem::Vector & u)
+{
+  DeleteJacobianBlocks();
+  _jacobian_blocks_pa.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _jacobian_blocks_pa = nullptr;
+
+  auto * const block_op = new mfem::BlockOperator(_block_true_offsets);
+
+  const mfem::BlockVector update_vector(const_cast<mfem::Vector &>(u), _block_true_offsets);
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    if (_nlfs.Has(test_var_name))
+    {
+      auto nlf = _nlfs.Get(test_var_name);
+      mfem::Operator * nlf_grad = &nlf->GetGradient(update_vector.GetBlock(i));
+
+      // Check if it casts into ConstrainedOperator so we can set the diagonal policy. Without
+      // this, we get 2s on the diagonal of essential rows when we should have 1s, due to the
+      // linear operator already contributing 1s.
+      mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+      mooseAssert(c_nlf_grad, "Could not cast the nlf gradient into Constrained Operator");
+      c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
+      // Guard against dereferencing nullptr inside JacobianSumOperator.
+      mooseAssert(_h_blocks_pa(i, i), "Bilinear Operator is null!");
+      auto * const jacobian_block = new JacobianSumOperator(nlf_grad, _h_blocks_pa(i, i), nlf);
+      _jacobian_blocks_pa(i, i) = jacobian_block;
+    }
+    else
+      _jacobian_blocks_pa(i, i) = _h_blocks_pa(i, i);
+    for (const auto j : index_range(_trial_var_names))
+    {
+      if (i != j) // nlf->GetGradient only contributes to on-diagonal blocks
+        _jacobian_blocks_pa(i, j) = _h_blocks_pa(i, j);
+
+      // add to block_op
+      if (_jacobian_blocks_pa(i, j))
+        block_op->SetBlock(i, j, _jacobian_blocks_pa(i, j));
+    }
+  }
+
+  if (block_op->NumRowBlocks() == 1 && block_op->NumColBlocks() == 1)
+  {
+    // The block is owned by _jacobian_blocks_pa, not by _jacobian
+    _jacobian.Reset(_jacobian_blocks_pa(0, 0), /*own_A=*/false);
+    delete block_op;
+    return;
+  }
+
+  _jacobian.Reset(block_op);
 }
 
 void
@@ -505,6 +646,9 @@ EquationSystem::BuildNonlinearForms()
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
+    if (_assembly_level != mfem::AssemblyLevel::FULL &&
+        _assembly_level != mfem::AssemblyLevel::ELEMENT)
+      nlf->SetAssemblyLevel(_assembly_level);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);

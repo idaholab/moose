@@ -29,6 +29,12 @@ public:
 protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
+  /// Rebuild the smoother from the Schur complement diagonal when it is in use
+  void SetOperatorImpl(mfem::Operator & op) override;
+
+private:
+  /// Whether to build the diagonal from an approximate Schur complement instead of the operator
+  const bool _use_schur_complement;
 };
 
 #endif
