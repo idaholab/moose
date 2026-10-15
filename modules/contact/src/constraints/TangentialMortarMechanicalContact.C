@@ -81,7 +81,7 @@ void
 TangentialMortarMechanicalContact::precomputeQpQuantities()
 {
   // Interpolate each nodal tangential pressure with its own Householder tangent frame.
-  const auto direction = cast_int<unsigned int>(int(_direction));
+  const auto direction = cast_int<unsigned int>(static_cast<int>(_direction));
   // The interpolation basis and nodal coefficient lookup both belong to this direction's tangential
   // Lagrange multiplier, preserving their node-for-node correspondence.
   const auto & phi = _weighted_velocities_uo.tangentialTractionBasis(direction);

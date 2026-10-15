@@ -66,7 +66,7 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
   // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
-  // needs the secondary face one-ring ghosted and coupled.
+  // needs the secondary face point-neighbor ghosted and coupled.
   params.set<bool>("ghost_point_neighbors") = true;
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;

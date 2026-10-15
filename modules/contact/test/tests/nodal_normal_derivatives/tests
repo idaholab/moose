@@ -272,7 +272,6 @@
                'Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
     capabilities = 'ad_size>=200'
     expect_out = 'The number of nodes in contact is [1-9][0-9]*'
-    mesh_mode = REPLICATED
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     requirement = 'Quasistatic mortar contact shall execute with active HEX27 elements and QUAD9 '
                   'interface faces when sufficient AD storage is available.'

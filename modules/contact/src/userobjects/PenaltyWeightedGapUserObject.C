@@ -215,7 +215,7 @@ PenaltyWeightedGapUserObject::nodalContactPressure(const Node & node) const
   // A node only enters this map once it has received a weighted-gap contribution, so a node on a
   // partially integrated element may be absent. Absent means no contact pressure, matching how the
   // interpolated pressure in reinit() treats it.
-  return findValue(_dof_to_normal_pressure, static_cast<const DofObject *>(&node), ADReal(0));
+  return findValue(_dof_to_normal_pressure, cast_ptr<const DofObject *>(&node), ADReal(0));
 }
 
 void
