@@ -73,19 +73,25 @@
   []
 []
 
-[ControlLogic]
-  [inlet_rho_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = rho
+[ChainControls]
+  [inlet_rho_ctrl_fn]
+    type = GetFunctionValueChainControl
     function = inlet_rho_fn
   []
+  [inlet_rho_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::inlet/rho
+    value = inlet_rho_ctrl_fn:value
+  []
 
-  [inlet_vel_ctrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = vel
+  [inlet_vel_ctrl_fn]
+    type = GetFunctionValueChainControl
     function = inlet_vel_fn
+  []
+  [inlet_vel_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::inlet/vel
+    value = inlet_vel_ctrl_fn:value
   []
 []
 

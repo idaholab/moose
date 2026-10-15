@@ -107,7 +107,7 @@
       type = 'CSVDiff'
       input = 'phy.form_loss.i'
       csvdiff = 'phy.form_loss_crtl.csv'
-      cli_args = 'Components/junction/K=1 ControlLogic/active=K_crtl Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl'
+      cli_args = "Components/junction/K=1 ChainControls/active='K_crtl_fn K_crtl' Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl"
       rel_err = 2e-4
       recover = false
       restep = false # Test is prescribed to abort on failed timestep
