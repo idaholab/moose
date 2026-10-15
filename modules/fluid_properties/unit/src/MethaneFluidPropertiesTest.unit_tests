@@ -1,0 +1,10 @@
+[Tests]
+  design = 'MethaneFluidProperties.md'
+  issues = '#34070'
+
+  [derivatives_near_critical]
+    type = GoogleTest
+    unit_test = MethaneFluidPropertiesTest.derivativesNearCritical
+    requirement = 'The system shall compute derivatives of the methane density, internal energy and enthalpy with respect to pressure and temperature, and an isobaric heat capacity equal to the temperature derivative of the enthalpy, near the critical point where the Gaussian terms of the Setzmann and Wagner equation of state are significant.'
+  []
+[]
