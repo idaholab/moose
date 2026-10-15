@@ -155,6 +155,60 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
+
+bool
+shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
+{
+  // With new libMesh, the most accurate thing to do is always solve
+  // for spline DoFs when we have them.  With older libMesh, there's a
+  // bug that prevents that solve from working on meshes where we
+  // store some spline DoFs directly on assembly element vertices,
+  // including a mesh in our regression tests.  For now we can detect
+  // these cases and avoid the solve for them.
+  bool have_constraint_rows = !mesh.get_constraint_rows().empty();
+
+  mesh.comm().max(have_constraint_rows);
+
+  // Are there any elements we weren't able to properly evaluate on
+  // directly?
+  bool returnval = false;
+  if (have_constraint_rows)
+  {
+    for (const auto & elem : mesh.active_local_element_ptr_range())
+      if (elem->mapping_type() == libMesh::INVALID_MAP // newer libMesh
+          || elem->type() == libMesh::NODEELEM)        // older libMesh
+      {
+        returnval = true;
+        break;
+      }
+
+    mesh.comm().max(returnval);
+  }
+
+  return returnval;
+}
+
+void
+solveForSplineDofs(SystemBase & moose_sys)
+{
+  libMesh::System & sys = moose_sys.system();
+  libMesh::EquationSystems & es = sys.get_equation_systems();
+
+  // Old libMesh defaults to a *linear* solver tolerance here, which
+  // turns out to be enough in some cases (where a decent
+  // preconditioner converges us way past it) but which in parallel is
+  // too loose for a solve where we're not taking multiple
+  // quasi-Newton steps.
+  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
+  es.parameters.set<Real>("linear solver tolerance") =
+      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+
+  sys.solve_for_unconstrained_dofs(moose_sys.solution());
+  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
+
+  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
+}
+
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -3971,13 +4025,20 @@ FEProblemBase::projectSolution()
     }
   }
 
+  // Spline node ICs may need to be evaluated indirectly.
+  bool solve_for_spline_dofs = shouldSolveForSplineDofs(_mesh.getMesh());
+
   for (auto & sys : _solver_systems)
   {
     sys->solution().close();
+    if (solve_for_spline_dofs)
+      solveForSplineDofs(*sys);
     sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (solve_for_spline_dofs)
+    solveForSplineDofs(*_aux);
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
@@ -4046,13 +4107,20 @@ FEProblemBase::projectInitialConditionOnCustomRange(
     }
   }
 
+  // Spline node ICs may need to be evaluated indirectly.
+  bool solve_for_spline_dofs = shouldSolveForSplineDofs(_mesh.getMesh());
+
   for (auto & nl : _nl)
   {
     nl->solution().close();
+    if (solve_for_spline_dofs)
+      solveForSplineDofs(*nl);
     nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (solve_for_spline_dofs)
+    solveForSplineDofs(*_aux);
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
