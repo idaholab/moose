@@ -11,6 +11,7 @@
 
 import os
 import sys
+import time
 from collections import defaultdict
 from multiprocessing import get_context
 from multiprocessing.context import ForkProcess
@@ -172,6 +173,8 @@ class MemoryMonitor:
     def _sampler(parent_pid: int, interval: float, stop_event, samples: DictProxy):
         """Run the sampler process; internal method called by start()."""
         while not stop_event.is_set():
+            start = time.monotonic()
+
             # Get the entire flattened process tree, removing process 0 as
             # it's the exit condition when searching recursively
             all_processes: dict[int, psutil.Process] = {
@@ -207,8 +210,10 @@ class MemoryMonitor:
             samples.clear()
             samples.update(result)
 
-            # Wait, but wake early if stop_event is set
-            stop_event.wait(interval)
+            # Wait out the rest of the interval, so that a slow pass (many or
+            # large processes) does not lengthen the sampling period; wake early
+            # if stop_event is set
+            stop_event.wait(max(0.0, interval - (time.monotonic() - start)))
 
     def start(self):
         """Start the sampler process."""
