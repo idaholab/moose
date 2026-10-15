@@ -12,12 +12,12 @@
 #include "KokkosVectorNodalBC.h"
 #include "KokkosParsedFunction.h"
 
-class KokkosVectorFunctionDirichletBC : public Moose::Kokkos::VectorNodalBC
+class KokkosParsedVectorFunctionDirichletBC : public Moose::Kokkos::VectorNodalBC
 {
 public:
   static InputParameters validParams();
 
-  KokkosVectorFunctionDirichletBC(const InputParameters & parameters);
+  KokkosParsedVectorFunctionDirichletBC(const InputParameters & parameters);
 
   template <typename Derived>
   KOKKOS_FUNCTION Moose::Kokkos::Real3 computeQpResidual(const unsigned int qp,
@@ -33,8 +33,8 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorFunctionDirichletBC::computeQpResidual(const unsigned int qp,
-                                                   AssemblyDatum & datum) const
+KokkosParsedVectorFunctionDirichletBC::computeQpResidual(const unsigned int qp,
+                                                         AssemblyDatum & datum) const
 {
   const auto & function_x = static_cast<const KokkosParsedFunction &>(_function_x);
   const auto & function_y = static_cast<const KokkosParsedFunction &>(_function_y);
