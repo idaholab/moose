@@ -1,0 +1,16 @@
+[Tests]
+  [mechanical_properties]
+    type = CSVDiff
+    input = '../../mechanical_solid_properties.i'
+    cli_args = "
+      solid_properties_class=MechanicalCopperProperties
+      file_base=copper_mechanical
+      T_min=4.0
+      T_max=300.0"
+    csvdiff = 'copper_mechanical_vpp_0000.csv'
+    mesh_mode = 'replicated'
+    requirement = "The system shall compute mechanical properties for OFHC copper."
+    design = 'MechanicalCopperProperties.md MechanicalSolidPropertiesMaterial.md'
+    issues = '#XXXXX'
+  []
+[]
