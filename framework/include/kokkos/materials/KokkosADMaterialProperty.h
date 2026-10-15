@@ -47,6 +47,50 @@ adConstantPropertyValue(const std::string & prop_name)
 }
 
 /**
+ * An input of a pointwise AD material property: an AD accessor of the declaring material, whose
+ * quantity is one of those the property has derivatives with respect to
+ */
+class ADPropertyInput
+{
+public:
+  /**
+   * Constructor
+   * @param value The AD accessor of a variable value
+   */
+  ADPropertyInput(const ADVariableValue & value)
+    : _slot(&const_cast<ADVariableValue &>(value).slot()), _gradient(false)
+  {
+  }
+  /**
+   * Constructor
+   * @param gradient The AD accessor of a variable gradient
+   */
+  ADPropertyInput(const ADVariableGradient & gradient)
+    : _slot(&const_cast<ADVariableGradient &>(gradient).slot()), _gradient(true)
+  {
+  }
+
+  /**
+   * Get the slot assignment of the accessor
+   */
+  const ADSlotAssignment & slot() const { return *_slot; }
+  /**
+   * Get whether the accessor reads a gradient
+   */
+  bool gradient() const { return _gradient; }
+  /**
+   * Get the number of slots of the quantity of the accessor
+   */
+  unsigned int numSlots() const { return _gradient ? AD_GRADIENT_SLOTS : AD_VALUE_SLOTS; }
+
+private:
+  /// Slot assignment of the accessor
+  const ADSlotAssignment * _slot;
+  /// Whether the accessor reads a gradient
+  bool _gradient;
+};
+
+/**
  * Writeable access to a pointwise AD property at a quadrature point, which stores the value and
  * the derivatives of a dual number of the declaring material
  * @tparam slots The number of derivative slots of the declaring material
@@ -57,12 +101,18 @@ class ADMaterialPropertyValue
 public:
   /**
    * Constructor
-   * @param value The value of the property at the quadrature point
-   * @param derivatives The derivatives of the property at the quadrature point
+   * @param value The property holding the value
+   * @param derivatives The property holding the derivatives
+   * @param map The storage index of the derivative with respect to each slot of the material
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature point index
    */
-  KOKKOS_FUNCTION ADMaterialPropertyValue(const MaterialPropertyValue<Real, 0> & value,
-                                          const MaterialPropertyValue<Real, 1> & derivatives)
-    : _value(value), _derivatives(derivatives)
+  KOKKOS_FUNCTION ADMaterialPropertyValue(const MaterialProperty<Real> & value,
+                                          const MaterialProperty<Real, 1> & derivatives,
+                                          const Array<unsigned int> & map,
+                                          const Datum & datum,
+                                          const unsigned int qp)
+    : _value(value, datum, qp), _derivatives(derivatives, datum, qp), _map(map)
   {
   }
 
@@ -72,10 +122,23 @@ public:
    */
   KOKKOS_FUNCTION void operator=(const DenseADReal<slots> & dual)
   {
+    KOKKOS_ASSERT(_map.size() == slots);
+
     _value = denseADValue(dual);
 
     for (unsigned int s = 0; s < slots; ++s)
-      _derivatives(s) = denseADDerivative(dual, s);
+    {
+      const auto d = denseADDerivative(dual, s);
+
+      if (_map[s] != libMesh::invalid_uint)
+        _derivatives(_map[s]) = d;
+#ifndef NDEBUG
+      else if (d != 0)
+        ::Kokkos::abort("A Kokkos AD material property has a derivative with respect to a "
+                        "quadrature point quantity missing from the input list of its "
+                        "declaration. Add the accessor of the quantity to the input list.");
+#endif
+    }
   }
 
 private:
@@ -83,14 +146,18 @@ private:
   MaterialPropertyValue<Real, 0> _value;
   /// Derivatives of the property
   MaterialPropertyValue<Real, 1> _derivatives;
+  /// Storage index of the derivative with respect to each slot of the material, or
+  /// libMesh::invalid_uint for a slot outside the input list
+  const Array<unsigned int> & _map;
 };
 
 /**
  * A pointwise AD material property, declared by a Kokkos AD material. The value is an ordinary
- * property of the declared name, which any consumer reads; the derivatives with respect to the
- * slots of the declaring material are a companion property with one entry per slot, named by
- * adDerivativesPropertyName(), whose record lists the quadrature point quantity of each slot block
- * in each subdomain.
+ * property of the declared name, which any consumer reads; the derivatives are a companion property
+ * named by adDerivativesPropertyName(), with one entry per slot of the declaring material, or per
+ * slot of the inputs of the property when its declaration lists them, followed on the current
+ * configuration by the displacement slots. The record of the companion lists the quadrature point
+ * quantity of each block of stored derivatives in each subdomain.
  * @tparam T The property data type
  */
 template <typename T>
@@ -106,8 +173,9 @@ public:
    * @param derivatives The property holding the derivatives
    */
   ADMaterialProperty(const MaterialProperty<Real> & value,
-                     const MaterialProperty<Real, 1> & derivatives)
-    : _value(value), _derivatives(derivatives)
+                     const MaterialProperty<Real, 1> & derivatives,
+                     const Array<unsigned int> & map)
+    : _value(value), _derivatives(derivatives), _map(map)
   {
   }
 
@@ -126,7 +194,7 @@ public:
   KOKKOS_FUNCTION ADMaterialPropertyValue<slots> operator()(const DatumType & datum,
                                                             const unsigned int qp) const
   {
-    return ADMaterialPropertyValue<slots>(_value(datum, qp), _derivatives(datum, qp));
+    return ADMaterialPropertyValue<slots>(_value, _derivatives, _map, datum, qp);
   }
 #endif
 
@@ -135,6 +203,9 @@ private:
   MaterialProperty<Real> _value;
   /// Property holding the derivatives
   MaterialProperty<Real, 1> _derivatives;
+  /// Storage index of the derivative with respect to each slot of the material, shared with the
+  /// declaring material, which fills it during initial setup
+  Array<unsigned int> _map;
 };
 
 /**

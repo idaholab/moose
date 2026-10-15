@@ -31,13 +31,72 @@ ADMaterial::initialSetup()
                    _configuration.displacements());
   _ad_slots = _ad_setup.table();
 
-  for (const auto & prop_name : _ad_derivative_properties)
+  const unsigned int max_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
+
+  for (auto & declaration : _ad_properties)
+  {
+    auto & map = declaration.map;
+    std::vector<ADSlotBlock> stored;
+
+    if (declaration.inputs.empty())
+    {
+      // Every slot is stored at its own index
+      for (const auto s : make_range(map.size()))
+        map[s] = s;
+
+      stored = _ad_slots.hostBlocks();
+    }
+    else
+    {
+      for (const auto s : make_range(map.size()))
+        map[s] = libMesh::invalid_uint;
+
+      // The listed inputs are stored consecutively in the order of the list, and the displacement
+      // slots follow them. Inputs that carry no derivatives keep their storage, which stays zero.
+      unsigned int index = 0;
+      for (const auto & input : declaration.inputs)
+      {
+        const auto first = input.slot().first;
+
+        if (first != libMesh::invalid_uint)
+        {
+          for (const auto k : make_range(input.numSlots()))
+            map[first + k] = index + k;
+
+          for (const auto & block : _ad_slots.hostBlocks())
+            if (block.first == first && block.gradient == input.gradient())
+            {
+              auto moved = block;
+              moved.first = index;
+              stored.push_back(moved);
+            }
+        }
+
+        index += input.numSlots();
+      }
+
+      for (const auto s : make_range(max_slots, map.size()))
+        map[s] = index + s - max_slots;
+
+      for (const auto & block : _ad_slots.hostBlocks())
+        if (block.displacement_component != libMesh::invalid_uint)
+        {
+          auto moved = block;
+          moved.first = index + block.first - max_slots;
+          stored.push_back(moved);
+        }
+    }
+
+    map.copyToDevice();
+
     materialData().setKokkosADInputs(
         _declare_suffix.empty()
-            ? prop_name
-            : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_"),
+            ? declaration.derivatives_name
+            : MooseUtils::join(
+                  std::vector<std::string>({declaration.derivatives_name, _declare_suffix}), "_"),
         this,
-        _ad_slots.hostBlocks());
+        stored);
+  }
 }
 
 } // namespace Moose::Kokkos
