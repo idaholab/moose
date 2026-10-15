@@ -73,6 +73,14 @@
     requirement = "The system shall report a failure if a test is missing its gold file"
     collections = 'FAILURE_ANALYSIS'
   []
+  [missing_output]
+    type = PythonUnitTest
+    input = test_MissingOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall report a failure if a test does not produce the file it is to compare against its gold file"
+    issues = '#21309'
+    collections = 'FAILURE_ANALYSIS'
+  []
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
