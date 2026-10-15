@@ -10,14 +10,13 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ADFunctorInterface.h"
 
 class ThermalSolidProperties;
 
 /**
  * Base class for path-integrated incompressible conjugate heat transfer kernels
  */
-class ADPipeWallTemperatureScalarKernelBase : public ADScalarKernel, public ADFunctorInterface
+class ADPipeWallTemperatureScalarKernelBase : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 
@@ -45,19 +44,19 @@ protected:
   /// Property state integration flag
   const bool _is_implicit;
   /// Cross-sectional area of this wall layer
-  const Moose::Functor<ADReal> & _area;
+  const Function & _area;
   /// Perimeter of the interface between the inner and outer wall nodes
-  const Moose::Functor<ADReal> & _interface_perimeter;
+  const Function & _interface_perimeter;
   /// Radial conduction-path distance between the inner and outer wall nodes
-  const Moose::Functor<ADReal> & _wall_thickness;
+  const Function & _wall_thickness;
   /// Axial length of this node's control volume
-  const Moose::Functor<ADReal> & _length;
+  const Function & _length;
   /// Axial distance from this node to the upstream node
-  const Moose::Functor<ADReal> & _upstream_spacing;
+  const Function & _upstream_spacing;
   /// Axial distance from this node to the downstream node
-  const Moose::Functor<ADReal> & _downstream_spacing;
+  const Function & _downstream_spacing;
   /// Cross-sectional area of the upstream node's wall layer
-  const Moose::Functor<ADReal> & _upstream_area;
+  const Function & _upstream_area;
   /// Cross-sectional area of the downstream node's wall layer
-  const Moose::Functor<ADReal> & _downstream_area;
+  const Function & _downstream_area;
 };

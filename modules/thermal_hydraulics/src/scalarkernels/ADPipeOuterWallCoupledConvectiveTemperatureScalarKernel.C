@@ -9,7 +9,7 @@
 
 #include "ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.h"
 
-#include "FunctorInterface.h"
+#include "Function.h"
 #include "ScalarCoupleable.h"
 
 registerMooseObject("ThermalHydraulicsApp",
@@ -19,6 +19,7 @@ InputParameters
 ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Solves for the temperature of the outer-surface radial node of a pipe wall, "
       "convectively coupled to a secondary-side flowing fluid, such as the shell side of a "
@@ -45,7 +46,7 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
       {},
       "Secondary-side fluid temperature adjacent to the downstream wall node. Takes a scalar "
       "variable name");
-  params.addRequiredParam<MooseFunctorName>(
+  params.addRequiredParam<FunctionName>(
       "wetted_perimeter",
       "Wetted perimeter of the secondary-side flow channel adjacent to this node [m]");
   params.addRequiredParam<MooseFunctorName>(
@@ -58,12 +59,13 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
 ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::
     ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel(const InputParameters & parameters)
   : Base(parameters),
+    ADFunctorInterface(this),
     _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
     _Tin(ScalarCoupleable::adCoupledScalarValue("inner_wall_temperature")),
     _Tf(ScalarCoupleable::adCoupledScalarValue("fluid_temperature")),
     _Tfup(ScalarCoupleable::adCoupledScalarValue("upstream_fluid_temperature")),
     _Tfdown(ScalarCoupleable::adCoupledScalarValue("downstream_fluid_temperature")),
-    _wetted_perimeter(this->template getFunctor<ADReal>("wetted_perimeter")),
+    _wetted_perimeter(getFunction("wetted_perimeter")),
     _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
 {
 }
@@ -79,7 +81,7 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::convectiveLinearHeatRat
                    1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tfup[i];
 
   // Convective heat transfer with the secondary-side fluid
-  return _h(elem_arg, state) * _wetted_perimeter(elem_arg, state) / 2.0 *
+  return _h(elem_arg, state) * _wetted_perimeter.value(Base::_t, Point()) / 2.0 *
          (_Tf[i] + Tin - 2 * Base::_u[i]);
 }
 
