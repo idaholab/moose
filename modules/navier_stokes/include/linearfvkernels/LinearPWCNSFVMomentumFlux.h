@@ -75,7 +75,8 @@ private:
   bool isInternalBaffleFace() const;
 
   /**
-   * Compute the correction that replaces the shared advected state with a one-sided state.
+   * Compute the correction that replaces the shared advected state with the baffle face state:
+   * the upstream interstitial tangential velocity and this side's extrapolated normal velocity.
    * @param elem_side Whether to compute the correction for the element side
    */
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;

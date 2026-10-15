@@ -11,8 +11,9 @@ the face mass flux and the porosity on each side of the face. The advection cont
 into a cell row is scaled by that cell's inverse porosity, so the mass flux transports interstitial
 velocity.
 
-At a pressure baffle the superficial velocity jumps, so each side of the advection operator uses
-its own face state instead of the state interpolated across the baffle. The
+At a pressure baffle the superficial velocity jumps, so the advection operator does not use the
+state interpolated across the baffle. Both sides advect the upstream interstitial tangential
+velocity, and each side advects its own normal velocity. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
 Bernoulli pressure jump and any irreversible form loss, as described below.
 
@@ -79,25 +80,47 @@ $\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contribu
 
 where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
 [!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). On a pressure
-baffle, the shared interpolated state is replaced by the face state of each row, extrapolated from
-that row's cell with its own velocity gradient:
+baffle, the shared interpolated state is replaced by a baffle face state built from the face
+velocities extrapolated from each row's cell with its own velocity gradient,
 
 \begin{equation}
-\begin{aligned}
-  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}
-    \left(U_{i,P}+\nabla U_{i,P}\mathbin{\cdot}\boldsymbol{r}_P\right), \\
-  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}
-    \left(U_{i,N}-\nabla U_{i,N}\mathbin{\cdot}\boldsymbol{r}_N\right),
-\end{aligned}
-\label{eq:pw-momentum-one-sided-advection}
+  \boldsymbol{V}_P = \boldsymbol{U}_P+\nabla\boldsymbol{U}_P\,\boldsymbol{r}_P, \qquad
+  \boldsymbol{V}_N = \boldsymbol{U}_N-\nabla\boldsymbol{U}_N\,\boldsymbol{r}_N,
 \end{equation}
 
 with $\boldsymbol{r}_P=\boldsymbol{x}_f-\boldsymbol{x}_P$ and
 $\boldsymbol{r}_N=\boldsymbol{x}_N-\boldsymbol{x}_f$. The gradients come from
 [FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md), so they do not see the
-jump, and the face states are exact for a velocity that is linear on each side. The implicit
-stencil keeps the shared interpolation weights and the difference is deferred to the right-hand
-side.
+jump. Both rows advect the interstitial tangential velocity of the upstream side $u$ ($P$ if
+$\phi_f\ge0$, otherwise $N$),
+
+\begin{equation}
+  \boldsymbol{w}_{t,f} = \frac{1}{\epsilon_u}
+    \left(\mathbf{I}-\boldsymbol{n}_f\boldsymbol{n}_f\right)\boldsymbol{V}_u,
+\end{equation}
+
+and each row its own normal velocity:
+
+\begin{equation}
+\begin{aligned}
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}V^{*}_{i,P}, \qquad
+  R_{N,i,f}^{\mathrm{adv}} = -|S_f|\frac{\phi_f}{\epsilon_N}V^{*}_{i,N}, \\
+  \boldsymbol{V}^{*}_s &= \epsilon_s\boldsymbol{w}_{t,f}
+    + \left(\boldsymbol{V}_s\mathbin{\cdot}\boldsymbol{n}_f\right)\boldsymbol{n}_f,
+    \qquad s\in\{P,N\}.
+\end{aligned}
+\label{eq:pw-momentum-one-sided-advection}
+\end{equation}
+
+The tangential momentum flux $\phi_f\boldsymbol{w}_{t,f}$ is then the same on both sides, so the
+baffle is no source of tangential momentum, and an inviscid stream crossing the baffle keeps its
+interstitial tangential velocity. If each side advected its own extrapolated state instead, the
+face would act as the source $\phi_f(\boldsymbol{w}_{t,P}-\boldsymbol{w}_{t,N})$, and an inviscid
+solution would keep whatever tangential jump the iteration produced. The normal momentum fluxes
+still differ between the sides; the pressure jump below balances them. The face states are exact
+for a velocity that is linear on each side with a continuous interstitial tangential velocity. The
+implicit stencil keeps the shared interpolation weights and the difference is deferred to the
+right-hand side.
 
 Rather than representing the omitted porosity-gradient term as a volumetric or distributional
 advection force, the interface model replaces its normal kinetic-head effect with the reversible

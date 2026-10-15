@@ -419,6 +419,13 @@ advected_interp_method = 'upwind'
     prop_values = '${eps_zone_2}'
     block = 'porous_zone_2'
   []
+  [interstitial_tangential_velocity]
+    # The diagonal baffle runs from (1.7, 0) to (2.3, 1), so its unit tangent is (0.6, 1) / |(0.6, 1)|.
+    type = ParsedFunctorMaterial
+    property_name = interstitial_tangential_velocity_functor
+    functor_names = 'superficial_u superficial_v porosity'
+    expression = '(0.6 * superficial_u + superficial_v) / (sqrt(1.36) * porosity)'
+  []
   [forch_zone_1]
     type = GenericVectorFunctorMaterial
     prop_names = 'forch'
@@ -517,6 +524,24 @@ advected_interp_method = 'upwind'
     num_points = 13
     sort_by = y
   []
+  [ut_left_of_interface]
+    type = LineValueSampler
+    variable = interstitial_tangential_velocity
+    warn_discontinuous_face_values = false
+    start_point = '1.695266272189349 0.0384615384615385 0'
+    end_point = '2.227810650887574 0.9615384615384615 0'
+    num_points = 13
+    sort_by = y
+  []
+  [ut_right_of_interface]
+    type = LineValueSampler
+    variable = interstitial_tangential_velocity
+    warn_discontinuous_face_values = false
+    start_point = '1.772189349112426 0.0384615384615385 0'
+    end_point = '2.304733727810651 0.9615384615384615 0'
+    num_points = 13
+    sort_by = y
+  []
 
   [skew_pressure_profile]
     # This skew line intersects cells over unequal distances, so list one interior point per cell.
@@ -554,6 +579,9 @@ advected_interp_method = 'upwind'
   [porosity_aux]
     type = MooseLinearVariableFVReal
   []
+  [interstitial_tangential_velocity]
+    type = MooseLinearVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -561,6 +589,12 @@ advected_interp_method = 'upwind'
     type = FunctorAux
     variable = porosity_aux
     functor = porosity
+    execute_on = timestep_end
+  []
+  [interstitial_tangential_velocity]
+    type = FunctorAux
+    variable = interstitial_tangential_velocity
+    functor = interstitial_tangential_velocity_functor
     execute_on = timestep_end
   []
 []

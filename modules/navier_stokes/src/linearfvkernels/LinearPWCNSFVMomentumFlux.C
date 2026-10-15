@@ -223,20 +223,37 @@ LinearPWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_si
 
   const auto state_arg = determineState();
 
-  const Real u_elem = _var.getElemValue(*_current_face_info->elemInfo(), state_arg);
-  const Real u_neighbor = _var.getElemValue(*_current_face_info->neighborInfo(), state_arg);
+  const auto & fi = *_current_face_info;
+  const Real u_elem = _var.getElemValue(*fi.elemInfo(), state_arg);
+  const Real u_neighbor = _var.getElemValue(*fi.neighborInfo(), state_arg);
   // Keep the shared internal-face stencil, then explicitly replace the interpolated state on
-  // baffle faces so each side advects its own face state. Interpolating across the baffle would
-  // mix the two sides of the velocity jump, and the cell value alone would miss the variation
-  // between the cell center and the face.
+  // baffle faces. Interpolating across the baffle would mix the two sides of the velocity jump,
+  // and the cell value alone would miss the variation between the cell center and the face.
   const Real shared_advected_state = _adv_interp_result.weights_matrix.first * u_elem +
                                      _adv_interp_result.weights_matrix.second * u_neighbor;
-  const Real one_sided_advected_state =
-      _porous_mass_flux_provider.baffleFaceVelocity(*_current_face_info, elem_side)(_index);
+
+  // With V_s the velocity of side s extrapolated to the face, both sides advect the interstitial
+  // tangential velocity u_t,f = (I - n n) V_up / eps_up of the upstream side, so the tangential
+  // momentum flux mdot u_t,f leaving one side enters the other and the face is no source of
+  // tangential momentum. Each side keeps its own normal velocity V_s . n, and the pressure jump
+  // balances the normal momentum difference. Side s therefore advects
+  //   V*_s = eps_s u_t,f + (V_s . n) n.
+  const auto & normal = fi.normal();
+  const bool upstream_elem_side = _face_mass_flux >= 0.0;
+  const auto upstream_velocity =
+      _porous_mass_flux_provider.baffleFaceVelocity(fi, upstream_elem_side);
+  const auto interstitial_tangential_velocity =
+      (upstream_velocity - (upstream_velocity * normal) * normal) *
+      inversePorosity(upstream_elem_side);
+  const Real own_normal_velocity =
+      _porous_mass_flux_provider.baffleFaceVelocity(fi, elem_side) * normal;
+  const Real baffle_advected_state =
+      interstitial_tangential_velocity(_index) / inversePorosity(elem_side) +
+      own_normal_velocity * normal(_index);
   const Real factor = elem_side ? 1.0 : -1.0;
 
   return factor * _face_mass_flux * inversePorosity(elem_side) *
-         (shared_advected_state - one_sided_advected_state) * _current_face_area;
+         (shared_advected_state - baffle_advected_state) * _current_face_area;
 }
 
 bool
