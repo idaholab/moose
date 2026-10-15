@@ -73,7 +73,7 @@ public:
    * Get whether the displacement slots are registered, so that the object dispatches the
    * instantiation carrying them
    */
-  bool hasDisplacements() const { return _has_displacements; }
+  KOKKOS_FUNCTION bool hasDisplacements() const { return _has_displacements; }
   /**
    * Get the first slot of the value of a displacement component, or libMesh::invalid_uint if the
    * component carries no derivatives

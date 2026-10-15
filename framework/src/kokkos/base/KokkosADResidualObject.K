@@ -87,9 +87,10 @@ ADSlotSetup::assign(const MooseObject & object,
 void
 ADSlotSetup::assign(const MooseObject & object,
                     const unsigned int max_slots,
-                    const Variable & displacements)
+                    const Variable & displacements,
+                    const Mesh & mesh)
 {
-  assignSlots(object, nullptr, max_slots, displacements);
+  assignSlots(object, nullptr, max_slots, displacements, &mesh);
 }
 
 void
@@ -165,7 +166,7 @@ ADSlotSetup::assignSlots(const MooseObject & object,
           continue;
         }
 
-        if (ivar && seeded(*ivar, input.sys, input.var))
+        if (!ivar || seeded(*ivar, input.sys, input.var))
           _table.add(input.sys, input.var, input.gradient);
       }
 
@@ -207,11 +208,11 @@ ADSlotSetup::assignSlots(const MooseObject & object,
   _table.finalize();
 
   if (mesh)
-    assignProperties(*ivar, *mesh);
+    assignProperties(ivar, *mesh);
 }
 
 void
-ADSlotSetup::assignProperties(const Variable & ivar, const Mesh & mesh)
+ADSlotSetup::assignProperties(const Variable * ivar, const Mesh & mesh)
 {
   for (const auto & request : _property_requests)
   {
@@ -238,7 +239,7 @@ ADSlotSetup::assignProperties(const Variable & ivar, const Mesh & mesh)
           first =
               input.gradient ? _table.displacementGradientSlot(c) : _table.displacementValueSlot(c);
         }
-        else if (seeded(ivar, input.sys, input.var))
+        else if (!ivar || seeded(*ivar, input.sys, input.var))
           for (const auto & block : _table.hostBlocks())
             if (block.displacement_component == libMesh::invalid_uint && block.sys == input.sys &&
                 block.var == input.var && block.gradient == input.gradient)

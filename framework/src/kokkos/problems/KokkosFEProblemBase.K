@@ -9,6 +9,7 @@
 
 #include "KokkosTypes.h"
 #include "KokkosFunction.h"
+#include "KokkosADMaterial.h"
 #include "KokkosUserObject.h"
 #include "KokkosPostprocessor.h"
 #include "KokkosVectorPostprocessor.h"
@@ -460,6 +461,17 @@ FEProblemBase::initKokkos()
   for (unsigned int s = 0; s < numLinearSystems(); ++s)
     allocate_system(getLinearSystem(s));
   allocate_system(getAuxiliarySystem());
+
+  // Resolve the slots of AD materials, which fix the sizes of the derivatives of their properties
+
+  for (const auto & material : _kokkos_materials.getObjects())
+    if (auto * ad_material = dynamic_cast<Moose::Kokkos::ADMaterial *>(material.get()))
+      ad_material->resolveADSlots();
+
+  for (const auto type : {Moose::FACE_MATERIAL_DATA, Moose::NEIGHBOR_MATERIAL_DATA})
+    for (const auto & material : _kokkos_materials[type].getObjects())
+      if (auto * ad_material = dynamic_cast<Moose::Kokkos::ADMaterial *>(material.get()))
+        ad_material->resolveADSlots();
 
   // Initialize Kokkos material properties
 
