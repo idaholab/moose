@@ -105,6 +105,26 @@ The multiple contact pairs feature is not yet available for mortar contact.
 
 !listing test/tests/multiple_contact_pairs/multiple_pairs.i block=Contact
 
+## Rigid surface meshes
+
+The primary side of a contact pair may be a rigid surface mesh: a block of surface elements (for
+example `EDGE2` or `EDGE3` elements in 2D, or `QUAD4`, `QUAD9` or `TRI3` elements in 3D) that is
+not attached to any volume element. The primary boundary is a nodeset on all of the surface nodes,
+which can be generated with [ParsedGenerateNodeset.md] using `included_subdomains`. The
+displacement variables must be defined on the surface block, and Dirichlet boundary conditions on
+every displacement component prescribe the surface motion. Since the surface has no kernels or
+materials, the [!param](/Problem/FEProblem/kernel_coverage_check) and
+[!param](/Problem/FEProblem/material_coverage_check) must be disabled.
+
+For mortar formulations, the surface block is given in
+[!param](/Contact/ContactAction/primary_surface_blocks), so that no lower-dimensional primary block
+is generated. Node/face formulations use surface elements whose nodes are all in the primary
+nodeset as contact faces without additional input. Their contact normal follows the right-hand
+rule from the surface element node ordering and must point toward the secondary body; otherwise
+no contact is detected. [OrientSurfaceMeshGenerator.md] can orient `TRI` and `QUAD` surfaces.
+
+!listing test/tests/rigid_surface/rigid_surface_3d.i block=Mesh Contact
+
 ## Explicit dynamics
 
 For explicit dynamics contact setup, the action [ExplicitDynamicsContactAction](/actions/ExplicitDynamicsContactAction.md) is to be used.
