@@ -27,6 +27,9 @@ struct PressureJumpInterfaceData
   Real neighbor_conductance = 0.0;
   Real elem_correction = 0.0;
   Real neighbor_correction = 0.0;
+  /// One-sided H/A mass fluxes A rho_s (H/A)_s . n, oriented along the face normal
+  Real elem_hbya_flux = 0.0;
+  Real neighbor_hbya_flux = 0.0;
   Real transmissibility = 0.0;
   Real correction = 0.0;
   Real elem_normal_distance = 0.0;
@@ -49,6 +52,8 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
                           const RealVectorValue & neighbor_diffusion,
                           const RealVectorValue & elem_gradient,
                           const RealVectorValue & neighbor_gradient,
+                          const RealVectorValue & elem_rho_hbya,
+                          const RealVectorValue & neighbor_rho_hbya,
                           const Real face_area,
                           const bool use_nonorthogonal_correction,
                           const Real elem_jump)
@@ -103,15 +108,31 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
   if (!elem_valid || !neighbor_valid)
     return data;
 
+  data.elem_hbya_flux = face_area * (elem_rho_hbya * normal);
+  data.neighbor_hbya_flux = face_area * (neighbor_rho_hbya * normal);
   data.transmissibility = 1.0 / (1.0 / data.elem_conductance + 1.0 / data.neighbor_conductance);
   data.correction = data.transmissibility * (data.elem_correction / data.elem_conductance +
                                              data.neighbor_correction / data.neighbor_conductance);
   data.valid = std::isfinite(data.transmissibility) && data.transmissibility > 0.0 &&
-               std::isfinite(data.correction);
+               std::isfinite(data.correction) && std::isfinite(data.elem_hbya_flux) &&
+               std::isfinite(data.neighbor_hbya_flux);
   return data;
 }
 
-/** Compute the single element-to-neighbor flux after eliminating the interface pressures. */
+/**
+ * Compute the H/A part of the face mass flux after eliminating the interface pressures. Each side
+ * carries mdot = -h_s + (pressure flux of side s), so continuity of mdot weights the side H/A
+ * fluxes h_s with the same series weights T / T_s as the pressure.
+ */
+inline Real
+pressureJumpHbyAFlux(const PressureJumpInterfaceData & data)
+{
+  return data.transmissibility * (data.elem_hbya_flux / data.elem_conductance +
+                                  data.neighbor_hbya_flux / data.neighbor_conductance);
+}
+
+/** Compute the pressure part of the element-to-neighbor flux after eliminating the interface
+ * pressures. The face mass flux is this minus pressureJumpHbyAFlux. */
 inline Real
 pressureJumpFlux(const PressureJumpInterfaceData & data,
                  const Real elem_pressure,
@@ -121,17 +142,19 @@ pressureJumpFlux(const PressureJumpInterfaceData & data,
          data.correction;
 }
 
-/** Recover one side's face pressure from the common oriented flux. */
+/** Recover one side's face pressure from the common oriented face mass flux. */
 inline Real
 pressureJumpOneSidedFaceValue(const PressureJumpInterfaceData & data,
                               const Real cell_pressure,
-                              const Real flux,
+                              const Real mass_flux,
                               const bool elem_side)
 {
   if (elem_side)
-    return cell_pressure - (flux + data.elem_correction) / data.elem_conductance;
+    return cell_pressure -
+           (mass_flux + data.elem_hbya_flux + data.elem_correction) / data.elem_conductance;
 
-  return cell_pressure + (flux + data.neighbor_correction) / data.neighbor_conductance;
+  return cell_pressure + (mass_flux + data.neighbor_hbya_flux + data.neighbor_correction) /
+                             data.neighbor_conductance;
 }
 }
 }

@@ -118,6 +118,26 @@ pressures are reconstructed values, not degrees of freedom. Rearranged,
 $p_P-p_N=J_P+(Q_f^p+R_f)/T_f$: the cell-center difference equals the jump only when the face
 carries no pressure flux and $R_f=0$.
 
+The $\boldsymbol H/\boldsymbol A$ part of the face flux, which carries the body forces, is
+eliminated the same way. Each side obeys its own form of
+[eq:pressure-jump-momentum-rearrangement], so the complete mass flux through the half cell on side
+$s$ is $Q_f=-h_s+Q_f^p$ with the one-sided flux
+$h_s=|S_f|\rho_s(\boldsymbol H/\boldsymbol A)_s\mathbin{\cdot}\boldsymbol n_f$, and $Q_f$ is the
+same on both sides. Eliminating the face pressures as above gives
+
+\begin{equation}
+  Q_f=T_f\left[(p_P-p_N)-J_P\right]-R_f-H_f,
+  \qquad
+  H_f=T_f\left(\frac{h_P}{\tau_P}+\frac{h_N}{\tau_N}\right).
+\label{eq:pressure-jump-face-hbya-flux}
+\end{equation}
+
+The $\boldsymbol H/\boldsymbol A$ flux therefore uses the same series weights $T_f/\tau_s$ as the
+pressure rather than a geometric average. A fluid at rest across a porosity or density jump has
+$h_s=\tau_s(p_s-p_f^s)-r_s$ on each side, so the face flux vanishes even though $h_P\neq h_N$.
+[PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) stores $H_f$ as the baffle-face
+`HbyA` flux, which the separate [LinearFVDivergence](LinearFVDivergence.md) object assembles.
+
 A baffle face requires finite, positive half-cell distances, normal mobilities, face area, and
 conductances, and finite corrections. Debug builds assert these conditions and report the face ID.
 
@@ -177,8 +197,10 @@ convergence of the outer iteration the jump law and discrete continuity hold sim
 A Green-Gauss gradient computed through a baffle would contain a spurious $J_f/h$ contribution and
 contaminate $r_P$ and $r_N$.
 [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md) avoids this by recovering
-$p_f^P$ and $p_f^N$ from [eq:pressure-jump-half-cell-flux] and using each only in the surface sum
-of its own cell. This solution gradient is distinct from
+$p_f^P=p_P-(Q_f+h_P+r_P)/\tau_P$ and $p_f^N=p_N+(Q_f+h_N+r_N)/\tau_N$ from the complete
+half-cell fluxes, with $Q_f$ from [eq:pressure-jump-face-hbya-flux], and using each only in the
+surface sum of its own cell. Including $h_s$ lets each face pressure follow the body-force
+pressure slope of its own side, for example the hydrostatic gradient. This solution gradient is distinct from
 [FVReconstructedPressureGradient](FVReconstructedPressureGradient.md), which remains the
 pressure-velocity coupling gradient used by the momentum predictor.
 

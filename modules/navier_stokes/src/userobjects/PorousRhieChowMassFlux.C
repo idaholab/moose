@@ -200,37 +200,17 @@ PorousRhieChowMassFlux::computeHbyA(bool verbose)
 
   RhieChowMassFlux::computeHbyA(verbose);
 
-  // The superficial velocity jumps with density across a baffle while rho U.n stays continuous.
-  // Interpolating rho H/A instead of the product of interpolated rho and H/A keeps the face flux
-  // from reading the velocity jump as a mass-flux error that the pressure would have to offset.
+  // Each side of a baffle carries its own momentum relation rho_s U_s.n = -h_s + (pressure flux),
+  // with h_s = rho_s (H/A)_s.n. Continuity of the mass flux weights the side H/A fluxes with the
+  // same half-cell conductances as the pressure, so a body force balanced by the pressure on each
+  // side (a fluid at rest across a porosity or density jump) gives zero face flux. The face area
+  // is 1 to match computeFacePressureGradientFlux, and the pressure gradients only enter the
+  // nonorthogonal correction, which the H/A flux does not use.
   if (hasPressureBaffles())
-  {
-    const auto time_arg = Moose::currentState();
     for (const auto * const fi : _flow_face_info)
-    {
-      if (!_vel[0]->isInternalFace(*fi) || !faceIsBaffle(*fi))
-        continue;
-
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-      RealVectorValue face_rho_hbya;
-      for (const auto component : index_range(_HbyA_raw))
-      {
-        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-        const auto neighbor_dof =
-            neighbor_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-        Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                               face_rho_hbya(component),
-                               elem_rho * (*_HbyA_raw[component])(elem_dof),
-                               neighbor_rho * (*_HbyA_raw[component])(neighbor_dof),
-                               *fi,
-                               true);
-      }
-      _HbyA_flux[fi->id()] = face_rho_hbya * fi->normal();
-    }
-  }
+      if (_vel[0]->isInternalFace(*fi) && faceIsBaffle(*fi))
+        _HbyA_flux[fi->id()] = NS::FV::pressureJumpHbyAFlux(
+            pressureJumpInterfaceData(*fi, RealVectorValue(), RealVectorValue(), 1.0));
 }
 
 void
@@ -372,7 +352,8 @@ PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_i
 bool
 PorousRhieChowMassFlux::pressureDiffusionDataReady() const
 {
-  return _p_diffusion_kernel && _Ainv_raw.size() == dimension();
+  return _p_diffusion_kernel && _Ainv_raw.size() == dimension() &&
+         _HbyA_raw.size() == dimension();
 }
 
 bool
@@ -397,12 +378,22 @@ PorousRhieChowMassFlux::pressureJumpInterfaceData(const FaceInfo & fi,
 
   const auto & elem_info = *fi.elemInfo();
   const auto & neighbor_info = *fi.neighborInfo();
+  const auto time_arg = Moose::currentState();
+  const Real elem_rho = _rho(makeElemArg(fi.elemPtr()), time_arg);
+  const Real neighbor_rho = _rho(makeElemArg(fi.neighborPtr()), time_arg);
   RealVectorValue elem_diffusion;
   RealVectorValue neighbor_diffusion;
+  RealVectorValue elem_rho_hbya;
+  RealVectorValue neighbor_rho_hbya;
   for (const auto component : make_range(dimension()))
   {
     elem_diffusion(component) = cellPressureDiffusionCoefficient(elem_info, component);
     neighbor_diffusion(component) = cellPressureDiffusionCoefficient(neighbor_info, component);
+    const auto system_number = _global_momentum_system_numbers[component];
+    elem_rho_hbya(component) =
+        elem_rho * (*_HbyA_raw[component])(elem_info.dofIndices()[system_number][0]);
+    neighbor_rho_hbya(component) =
+        neighbor_rho * (*_HbyA_raw[component])(neighbor_info.dofIndices()[system_number][0]);
   }
 
   data = NS::FV::pressureJumpInterfaceData(fi.normal(),
@@ -412,6 +403,8 @@ PorousRhieChowMassFlux::pressureJumpInterfaceData(const FaceInfo & fi,
                                            neighbor_diffusion,
                                            elem_gradient,
                                            neighbor_gradient,
+                                           elem_rho_hbya,
+                                           neighbor_rho_hbya,
                                            face_area,
                                            pressureDiffusionUsesNonorthogonalCorrection(),
                                            getSignedBaffleJump(fi, /*elem_side=*/true));

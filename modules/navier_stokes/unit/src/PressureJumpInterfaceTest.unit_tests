@@ -1,5 +1,6 @@
 [Tests]
-  design = 'LinearFVPressureCorrectionDiffusionJump.md LinearPWCNSFVMomentumFlux.md'
+  design = 'LinearFVPressureCorrectionDiffusionJump.md LinearPWCNSFVMomentumFlux.md '
+           'FVPressureJumpGreenGaussGradient.md'
   issues = '#31995'
 
   [orthogonal_isotropic]
@@ -17,14 +18,19 @@
     unit_test = PressureJumpInterface.OrientationReversal
     requirement = 'The system shall preserve the pressure-jump interface coefficients and reverse the flux sign when the interface orientation and element-neighbor ordering are reversed.'
   []
-  [rejects_degenerate_half_cell]
+  [rejects_invalid_geometry_and_coefficients]
     type = GoogleTest
-    unit_test = PressureJumpInterface.RejectsDegenerateHalfCell
-    requirement = 'The system shall reject pressure-jump interface data with a nonpositive projected half-cell distance.'
+    unit_test = PressureJumpInterface.RejectsInvalidGeometryAndCoefficients
+    requirement = 'The system shall reject pressure-jump interface data with a nonpositive projected half-cell distance, a nonpositive or nonfinite normal mobility, or a zero face area.'
   []
   [manufactured_piecewise_linear_pressure]
     type = GoogleTest
     unit_test = PressureJumpInterface.ManufacturedPiecewiseLinearPressure
     requirement = 'The system shall recover the conservative flux and both one-sided pressures for a manufactured piecewise-linear pressure field across an anisotropic interface.'
+  []
+  [hydrostatic_balance_across_jump]
+    type = GoogleTest
+    unit_test = PressureJumpInterface.HydrostaticBalanceAcrossJump
+    requirement = 'The system shall weight the one-sided H/A fluxes with the half-cell conductances so that a fluid at rest, with a body force balanced by the pressure gradient on each side of a pressure-jump interface, has zero face mass flux and the one-sided linear face pressures.'
   []
 []
