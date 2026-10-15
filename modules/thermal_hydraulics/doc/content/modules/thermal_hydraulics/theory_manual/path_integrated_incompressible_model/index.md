@@ -99,9 +99,9 @@ The heat transfer coefficient is computed using the Dittus-Boelter correlation [
 h = 0.023 Re^{0.8} Pr^{0.4} \frac{k_f}{D_h} \,
 
 where the fluid properties entering $Re$ and $Pr$ are evaluated at the segment's bulk film
-temperature, the mean of the segment fluid temperature and its upwinded inlet value. For
-the conjugate heat transfer kernels below, this coefficient is supplied by
-[ADDittusBoelterHTCUserObject.md].
+temperature, the mean of the segment fluid temperature and its upwinded inlet value. The
+conjugate heat transfer kernels below compute this coefficient through
+[DittusBoelterHTCInterface.md].
 
 ## Junctions
 

@@ -1,8 +1,8 @@
 # Two radial wall nodes (inner surface, outer surface) bridge a fixed primary-fluid
 # temperature Tf1 to a fixed ambient temperature Tamb through three conductances in
-# series: fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
-# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject), radial conduction
-# through the wall, and ambient convection
+# series: fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, which computes
+# its own Dittus-Boelter coefficient), radial conduction through the wall, and ambient
+# convection
 # (ADPipeOuterWallAmbientTemperatureScalarKernel). The analytical Tin/Tout below are the
 # steady state of that series-resistance circuit, solved algebraically at parse time with
 # fluid properties evaluated once at the fixed Tf1 (mu1, cp1, k1 below), giving a simple
@@ -12,7 +12,7 @@
 # transient decay, not a property-evaluation or solve-tolerance artifact: the wall is still
 # approaching steady state at end_time = 100 s. Raising end_time to 5000 s drops the
 # mismatch to ~3e-6 while leaving everything else unchanged. Two smaller effects are
-# present but are an order of magnitude below that: the HTC object evaluates water
+# present but are an order of magnitude below that: the kernel evaluates water
 # properties through the fluid_properties Water97FluidProperties rather than the fixed
 # mu1/cp1/k1 constants (worth ~0.17% in h, hence ~2e-5 in Tin here), and it evaluates them
 # at the segment's bulk film temperature, which in this input equals Tf1 exactly because
@@ -129,7 +129,9 @@ Tout_analytical = '${fparse Tamb + q / G3}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    heat_transfer_coefficient = h
+    fluid_properties = water
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -169,20 +171,6 @@ Tout_analytical = '${fparse Tamb + q / G3}'
   [outer_dt]
     type = ADScalarTimeDerivative
     variable = Tout_wall
-  []
-[]
-
-[UserObjects]
-  [h]
-    type = ADDittusBoelterHTCUserObject
-    mass_flow_rate = m1v
-    fluid_properties = water
-    T_fluid = Tf1v
-    T_fluid_inlet = Tf1v
-    T_fluid_outlet = Tf1v
-    reference_pressure = ${Pin}
-    flow_area = ${flow_area1}
-    wetted_perimeter = ${wetted_perimeter1}
   []
 []
 
