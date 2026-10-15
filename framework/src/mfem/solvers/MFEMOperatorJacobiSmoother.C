@@ -71,7 +71,7 @@ MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::OperatorJacobiSmoother & s
 }
 
 void
-MFEMOperatorJacobiSmoother::SetOperatorImpl(mfem::Operator & op)
+MFEMOperatorJacobiSmoother::SetOperatorImpl(const mfem::Operator & op)
 {
   // non-schur mode - fall back to normal route
   if (!_use_schur_complement)
