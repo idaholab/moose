@@ -1,4 +1,7 @@
-# Testing Jacobian resulting from PorousFlowPorosityVinsomeWesterveld in a THM situation
+# Testing Jacobian resulting from PorousFlowPorosityVinsomeWesterveld in a THM situation.
+# The linear coefficients are chosen so that the linear terms and the thermal-opening term
+# contribute derivatives of similar size (about 0.1).  The test is also run with the linear
+# terms switched off, to check the thermal-opening term alone.
 [GlobalParams]
   PorousFlowDictator = dictator
   strain_at_nearest_qp = true
@@ -63,11 +66,11 @@
     type = PorousFlowPorosityVinsomeWesterveld
     porosity_ref = 0.5
     P_ref = 0.5
-    P_coeff = 1.0
+    P_coeff = 0.1
     T_ref = -3.0
-    T_coeff = 1.0
+    T_coeff = 0.1
     epv_ref = 2.5
-    epv_coeff = 1.0
+    epv_coeff = 0.1
     thermal_opening_coeff = 0.3
     matrix_thermal_diffusivity = 0.1
     matrix_reference_temperature = 5.0

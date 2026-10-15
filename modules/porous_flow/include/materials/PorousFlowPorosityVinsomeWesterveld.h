@@ -31,7 +31,7 @@
  * p = (a theta / d + I_old - d^3 (theta - theta_old) / a) / (3 d^2 + a),   a = kappa dt
  * I = I_old + a (theta / d - p)
  *
- * so I is linear in the current temperature, and dI/dtheta is a scalar.
+ * so I is linear in the current temperature, and dI/dT is a scalar.
  */
 class PorousFlowPorosityVinsomeWesterveld : public PorousFlowPorosityLinear
 {
@@ -49,7 +49,8 @@ protected:
   /// Change of porosity per unit matrix heat content (units 1/K when porosity is an aperture)
   const Real _thermal_opening_coeff;
 
-  /// Thermal diffusivity of the matrix (m^2/s)
+  /// Thermal diffusivity of the matrix in the direction normal to the fracture (m^2/s), assumed
+  /// constant (independent of temperature and saturation)
   const Real _kappa;
 
   /// Undisturbed (reference) matrix temperature

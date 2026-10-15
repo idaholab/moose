@@ -26,11 +26,14 @@ PorousFlowPorosityVinsomeWesterveld::validParams()
       "the aperture of a lower-dimensional fracture this coefficient has units 1/K.  Porosity "
       "changes by -thermal_opening_coeff * I, so cooling (I < 0) opens the fracture when this "
       "coefficient is positive");
-  params.addRequiredRangeCheckedParam<Real>("matrix_thermal_diffusivity",
-                                            "matrix_thermal_diffusivity > 0",
-                                            "Thermal diffusivity of the matrix adjacent to the "
-                                            "fracture (thermal conductivity divided by "
-                                            "volumetric heat capacity), m^2/s");
+  params.addRequiredRangeCheckedParam<Real>(
+      "matrix_thermal_diffusivity",
+      "matrix_thermal_diffusivity > 0",
+      "Thermal diffusivity of the matrix adjacent to the "
+      "fracture (thermal conductivity divided by "
+      "volumetric heat capacity), m^2/s.  This is the diffusivity in the "
+      "direction normal to the fracture (or the matrix is "
+      "assumed isotropic), and it is assumed constant");
   params.addRequiredCoupledVar(
       "matrix_reference_temperature",
       "Undisturbed temperature of the matrix adjacent to the fracture.  This should usually be a "
@@ -94,8 +97,8 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
   const Real theta = (*_temperature)[_qp] - _T_matrix_ref[_qp];
   _theta[_qp] = theta;
 
-  // dI/dtheta, used for the Jacobian
-  Real dI_dtheta = 0.0;
+  // dI/dT, used for the Jacobian (equal to dI/dtheta, because theta = T - T_matrix_ref)
+  Real dI_dT = 0.0;
 
   const Real time = _t - _start_time;
   const Real a = _kappa * std::min(_dt, time);
@@ -116,12 +119,12 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
                    denom;
     _heat_content[_qp] = _heat_content_old[_qp] + a * (theta / d - p);
 
-    const Real dp_dtheta = (a / d - Utility::pow<3>(d) / a) / denom;
-    dI_dtheta = a * (1.0 / d - dp_dtheta);
+    const Real dp_dT = (a / d - Utility::pow<3>(d) / a) / denom;
+    dI_dT = a * (1.0 / d - dp_dT);
   }
 
   _porosity[_qp] -= _thermal_opening_coeff * _heat_content[_qp];
   for (unsigned int pvar = 0; pvar < _num_var; ++pvar)
     (*_dporosity_dvar)[_qp][pvar] -=
-        _thermal_opening_coeff * dI_dtheta * (*_dtemperature_dvar)[_qp][pvar];
+        _thermal_opening_coeff * dI_dT * (*_dtemperature_dvar)[_qp][pvar];
 }

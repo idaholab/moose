@@ -5,6 +5,11 @@
 # where I is the Vinsome-Westerveld approximation to the matrix heat content.
 # The exact heat content for a step change is I = 2 * theta * sqrt(kappa * t / pi), which is
 # also output for comparison.
+# With dt = 3.15E6 the error at t = 3.15E7 is -5.1%.  The error decreases approximately linearly
+# as dt decreases (-3.5% with dt = 3.15E5, -3.3% with dt = 3.15E3), but it does not go to zero:
+# for a step change, the Vinsome-Westerveld profile itself gives I = (12/11) * theta * sqrt(kappa * t),
+# which is 3.3% smaller in magnitude than the exact value at all times.  The error depends only on
+# the number of time steps since the step change (t / dt), not on kappa or on the size of dt.
 [GlobalParams]
   PorousFlowDictator = dictator
 []
@@ -89,7 +94,7 @@
     type = PorousFlowTemperature
     temperature = T
   []
-  [porosity]
+  [porosity_VW]
     type = PorousFlowPorosityVinsomeWesterveld
     porosity_ref = 0.1
     thermal_opening_coeff = 1E-5
