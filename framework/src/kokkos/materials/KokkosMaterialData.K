@@ -56,11 +56,12 @@ MaterialData::getKokkosPropertyHelper(
 void
 MaterialData::setKokkosADInputs(const std::string & prop_name,
                                 const MaterialBase * declarer,
-                                const std::vector<Moose::Kokkos::ADSlotBlock> & inputs)
+                                const std::vector<Moose::Kokkos::ADSlotBlock> & inputs,
+                                const unsigned int width)
 {
   auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  storage.setKokkosADInputs(prop_name, declarer, inputs);
+  storage.setKokkosADInputs(prop_name, declarer, inputs, width);
 }
 
 bool
