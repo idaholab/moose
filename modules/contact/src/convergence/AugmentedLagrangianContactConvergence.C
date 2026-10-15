@@ -154,10 +154,9 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
         for (const auto & pmuo : pmuos)
           pmuo->augmentedLagrangianSetup();
 
-        // The residual held by SNES was evaluated with the old multipliers. Recompute it so the
-        // next Newton step and line search use the residual of the updated problem. PETSc's
-        // Newton line search solver recomputes the residual norm from this vector at the start
-        // of the next iteration.
+        // Recompute the residual with the updated multipliers so the next Newton step and line
+        // search use it. PETSc's Newton line search solver takes the residual norm from this
+        // vector at the start of each iteration.
         SNES snes = nonlinear_sys.getSNES();
         Vec x, f;
         LibmeshPetscCallA(this->_communicator.get(), SNESGetSolution(snes, &x));
