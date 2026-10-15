@@ -427,6 +427,12 @@ moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
 
+ifeq ($(ENABLE_MFEM),true)
+  moose_mfem_srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.cxx")
+  moose_objects += $(patsubst %.cxx, %.$(obj-suffix), $(moose_mfem_srcfiles))
+  moose_deps    += $(patsubst %.cxx, %.$(obj-suffix).d, $(moose_mfem_srcfiles))
+endif
+
 # clang static analyzer files
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))

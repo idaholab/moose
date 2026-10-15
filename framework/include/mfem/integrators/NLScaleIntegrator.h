@@ -27,6 +27,8 @@ private:
   mfem::NonlinearFormIntegrator * _integrator{nullptr};
   mfem::real_t _scale;
   bool _own_integrator;
+  /// Unscaled contribution of _integrator, scaled when added to the output of the PA methods
+  mutable mfem::Vector _pa_work;
 
 public:
   NLScaleIntegrator(mfem::NonlinearFormIntegrator * integ)
@@ -99,6 +101,15 @@ public:
                                 mfem::FaceElementTransformations & Tr,
                                 const mfem::Vector & elfun,
                                 mfem::DenseMatrix & elmat) override;
+
+  using mfem::NonlinearFormIntegrator::AssemblePA; // make sure the overload with 2 fespaces is
+                                                   // visible
+  virtual void AssemblePA(const mfem::FiniteElementSpace & fes) override;
+  virtual void AssembleGradPA(const mfem::Vector & x,
+                              const mfem::FiniteElementSpace & fes) override;
+  virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  virtual void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  virtual void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
   virtual mfem::real_t GetElementEnergy(const mfem::FiniteElement & el,
                                         mfem::ElementTransformation & Tr,
