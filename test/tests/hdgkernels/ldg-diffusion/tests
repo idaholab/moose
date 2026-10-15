@@ -45,7 +45,6 @@
       input = test.py
       test_case = TestRTTri
       detail = 'simplex elements and'
-      min_slots = 2 # memory intensive
       max_threads = 1 # static condensation doesn't currently support threading
     []
     [quad]

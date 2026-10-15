@@ -17,7 +17,7 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     recover = false
-    min_slots = 3 # memory heavy, needs extra slot for --n-threads=2 coverage builds
+    min_slots = 2 # memory heavy, needs extra slot for --n-threads=2 coverage builds
   []
   [MFEMDiffusionLOR]
     type = CSVDiff
@@ -32,7 +32,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    min_slots = 2
   []
   [MFEMGradDivLOR]
     type = CSVDiff
