@@ -39,6 +39,13 @@ public:
   virtual void
   operator()(const libMesh::Point & p, const Real time, DenseVector<Number> & output) override;
 
+  /**
+   * This function serves exactly one variable, the one its boundary condition is registered for,
+   * but libMesh asks it for the component at that variable's offset within the whole system. So
+   * every component asked for is that one variable's, whatever the index.
+   */
+  virtual Number component(unsigned int i, const libMesh::Point & p, Real time = 0) override;
+
 private:
   /// The boundary condition this function sources its value from
   const NodalBCBase & _bc;

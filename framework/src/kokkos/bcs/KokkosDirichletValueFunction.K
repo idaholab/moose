@@ -34,7 +34,14 @@ DirichletValueFunction::operator()(const libMesh::Point & p,
                                    const Real time,
                                    DenseVector<Number> & output)
 {
-  output(0) = _bc.hostValue(p, time);
+  for (const auto i : make_range(output.size()))
+    output(i) = _bc.hostValue(p, time);
+}
+
+Number
+DirichletValueFunction::component(unsigned int, const libMesh::Point & p, const Real time)
+{
+  return _bc.hostValue(p, time);
 }
 
 } // namespace Moose::Kokkos

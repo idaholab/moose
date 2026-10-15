@@ -235,6 +235,9 @@ NonlinearSystemBase::setupKokkosDirichletConstraints()
 void
 NonlinearSystemBase::refreshKokkosDirichletConstraints()
 {
+  // libMesh projects a DirichletBoundary at libMesh::System::time, which nothing else in MOOSE
+  // maintains
+  _sys.time = _fe_problem.time();
   _sys.reinit_constraints();
 
   _fe_problem.getKokkosFESystems()[number()].setupConstraintOperator();
