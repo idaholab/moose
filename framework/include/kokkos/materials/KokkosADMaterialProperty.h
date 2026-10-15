@@ -46,9 +46,12 @@ adConstantPropertyValue(const std::string & prop_name)
   return {};
 }
 
+class ADMaterialPropertyReader;
+
 /**
  * An input of a pointwise AD material property: an AD accessor of the declaring material, whose
- * quantity is one of those the property has derivatives with respect to
+ * quantity is one of those the property has derivatives with respect to, or an AD material property
+ * read by the declaring material, all of whose inputs the property depends on
  */
 class ADPropertyInput
 {
@@ -69,25 +72,32 @@ public:
     : _slot(&const_cast<ADVariableGradient &>(gradient).slot()), _gradient(true)
   {
   }
+  /**
+   * Constructor
+   * @param property The reader of an AD material property
+   */
+  ADPropertyInput(const ADMaterialPropertyReader & property) : _property(&property) {}
 
   /**
-   * Get the slot assignment of the accessor
+   * Get the slot assignment of the accessor, or nullptr for a property
    */
-  const ADSlotAssignment & slot() const { return *_slot; }
+  const ADSlotAssignment * slot() const { return _slot; }
   /**
    * Get whether the accessor reads a gradient
    */
   bool gradient() const { return _gradient; }
   /**
-   * Get the number of slots of the quantity of the accessor
+   * Get the reader of the property, or nullptr for an accessor
    */
-  unsigned int numSlots() const { return _gradient ? AD_GRADIENT_SLOTS : AD_VALUE_SLOTS; }
+  const ADMaterialPropertyReader * property() const { return _property; }
 
 private:
   /// Slot assignment of the accessor
-  const ADSlotAssignment * _slot;
+  const ADSlotAssignment * _slot = nullptr;
   /// Whether the accessor reads a gradient
-  bool _gradient;
+  bool _gradient = false;
+  /// Reader of the property
+  const ADMaterialPropertyReader * _property = nullptr;
 };
 
 /**
@@ -122,7 +132,7 @@ public:
    */
   KOKKOS_FUNCTION void operator=(const DenseADReal<slots> & dual)
   {
-    KOKKOS_ASSERT(_map.size() == slots);
+    KOKKOS_ASSERT(_map.size() >= slots);
 
     _value = denseADValue(dual);
 
@@ -241,6 +251,10 @@ public:
    * Get the slot map, written by the reader during initial setup
    */
   ADPropertySlotMap & slotMap() { return _map; }
+  /**
+   * Get the slot map
+   */
+  const ADPropertySlotMap & slotMap() const { return _map; }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**

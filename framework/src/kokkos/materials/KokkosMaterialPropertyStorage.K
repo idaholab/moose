@@ -168,13 +168,17 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
 void
 MaterialPropertyStorage::setKokkosADInputs(const std::string & prop_name,
                                            const ::MaterialBase * declarer,
-                                           const std::vector<ADSlotBlock> & inputs)
+                                           const std::vector<ADSlotBlock> & inputs,
+                                           const unsigned int width)
 {
   auto & record = libmesh_map_find(_kokkos_prop_records, prop_name);
   auto & blocks = declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
   for (const auto block : blocks)
+  {
     record.ad_inputs[block] = inputs;
+    record.dims[block] = {width};
+  }
 }
 
 MaterialPropertyBase &

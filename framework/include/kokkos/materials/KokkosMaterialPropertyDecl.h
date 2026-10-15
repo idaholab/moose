@@ -140,6 +140,10 @@ public:
    * @returns The slot blocks of the stored derivatives in each subdomain
    */
   const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & adInputs() const;
+  /**
+   * Get the materials declaring this property
+   */
+  const std::set<const ::MaterialBase *> & declarers() const;
 
   /**
    * Get the property type index for load/store functions
@@ -246,6 +250,15 @@ MaterialPropertyBase::adInputs() const
     mooseError("Cannot get the AD inputs of an uninitialized or default material property.");
 
   return _record->ad_inputs;
+}
+
+inline const std::set<const ::MaterialBase *> &
+MaterialPropertyBase::declarers() const
+{
+  if (!_record)
+    mooseError("Cannot get the declarers of an uninitialized or default material property.");
+
+  return _record->declarers;
 }
 
 template <typename T, unsigned int dimension>

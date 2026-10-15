@@ -35,7 +35,15 @@ namespace Moose::Kokkos
  *
  *   static constexpr unsigned int max_ad_slots = ...;
  *
- * and creates its accessors with adCoupledValue() and adCoupledGradient().
+ * and creates its accessors with adCoupledValue() and adCoupledGradient(). A pointwise AD material
+ * property declared by another AD material, read with getKokkosADMaterialProperty(), carries the
+ * derivatives with respect to the inputs of its own material, which share the slots of the
+ * accessors reading the same quantities and count toward max_ad_slots; a dependence on the
+ * displacements adds the displacement slots even on the reference configuration.
+ *
+ * The slots of AD materials are resolved before the properties are allocated, in an order in which
+ * every material comes after the declarers of the AD properties it reads, so that the stored
+ * derivatives of a property compose through any number of materials.
  */
 class ADMaterial : public Material
 {
@@ -44,7 +52,20 @@ public:
 
   ADMaterial(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
+  /**
+   * Assign the slots of this material and fix the number of stored derivatives of the AD
+   * properties it declares, before the properties are allocated. The declarers of the AD properties
+   * this material reads are resolved first.
+   */
+  void resolveADSlots();
+  /**
+   * Get whether the slots of this material are resolved
+   */
+  bool adSlotsResolved() const { return _ad_slots_resolved; }
+  /**
+   * Get the AD materials declaring the AD properties this material reads
+   */
+  std::set<const ADMaterial *> adPropertyDeclarers() const;
 
   /**
    * Get the slot table of the AD accessors
@@ -73,10 +94,11 @@ protected:
    * respect to the slots of this material
    * @tparam T The property data type
    * @param name The property name or the parameter name containing the property name
-   * @param inputs The AD accessors of the quantities the property depends on, which size its
-   * stored derivatives; when empty, the property stores the derivatives with respect to every slot
-   * of this material. On the current configuration the displacement slots are always stored.
-   * Debug builds abort when a derivative with respect to a quantity outside the list is nonzero.
+   * @param inputs The AD accessors of the quantities the property depends on, and the readers of
+   * the AD properties it depends on through all of their inputs, which size its stored
+   * derivatives; when empty, the property stores the derivatives with respect to every slot of this
+   * material. The displacement slots are always stored when this material carries them. Debug
+   * builds abort when a derivative with respect to a quantity outside the list is nonzero.
    * @returns The AD material property
    */
   template <typename T>
@@ -90,6 +112,15 @@ protected:
   ADVariableValue adCoupledValue(const std::string & var_name, unsigned int comp = 0);
   ADVariableGradient adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
   ///@}
+
+  /**
+   * Get a pointwise AD material property declared by another Kokkos AD material
+   * @tparam T The property data type
+   * @param name The property name or the parameter name containing the property name
+   * @returns The reader of the property
+   */
+  template <typename T>
+  ADMaterialPropertyReader getKokkosADMaterialProperty(const std::string & name);
 
 private:
   /**
@@ -110,6 +141,12 @@ private:
   ADSlotSetup _ad_setup;
   /// Slot table of the AD accessors
   ADSlotTable _ad_slots;
+  /// Whether the slots are resolved
+  bool _ad_slots_resolved = false;
+  /// Whether the slots are being resolved, to detect cyclic dependencies
+  bool _ad_slots_resolving = false;
+  /// Derivatives of the AD properties this material reads, whose records name their declarers
+  std::vector<MaterialProperty<Real, 1>> _ad_read_derivatives;
   /// A declared AD property
   struct ADPropertyDeclaration
   {
@@ -134,29 +171,35 @@ ADMaterial::declareKokkosADProperty(const std::string & name,
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  // The derivatives are stored for the slots of the listed inputs, or for every slot of the
-  // instantiation matching the configuration, followed by the displacement slots
-  const unsigned int max_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
-  const unsigned int displacement_slots = _configuration.displaced() ? AD_DISPLACEMENT_SLOTS : 0;
-
-  unsigned int input_slots = max_slots;
-  if (!inputs.empty())
-  {
-    input_slots = 0;
-    for (const auto & input : inputs)
-      input_slots += input.numSlots();
-  }
-
   auto & declaration = _ad_properties.emplace_back();
   declaration.derivatives_name = adDerivativesPropertyName(prop_name);
   declaration.inputs = inputs;
-  declaration.map.create(max_slots + displacement_slots);
+  // Every slot of the widest instantiation has a storage index, whose values and the number of
+  // stored derivatives are fixed when the slots are resolved
+  declaration.map.create(DispatcherRegistry::getProperty("max_ad_slots", type()) +
+                         AD_DISPLACEMENT_SLOTS);
 
-  return ADMaterialProperty<T>(
-      declareKokkosPropertyByName<T>(prop_name),
-      declareKokkosPropertyByName<T, 1>(declaration.derivatives_name,
-                                        {input_slots + displacement_slots}),
-      declaration.map);
+  return ADMaterialProperty<T>(declareKokkosPropertyByName<T>(prop_name),
+                               declareKokkosPropertyByName<T, 1>(declaration.derivatives_name, {0}),
+                               declaration.map);
+}
+
+template <typename T>
+ADMaterialPropertyReader
+ADMaterial::getKokkosADMaterialProperty(const std::string & name)
+{
+  static_assert(std::is_same_v<T, Real>, "Kokkos AD material properties are of type Real.");
+
+  const auto prop_name = getMaterialPropertyName(name);
+  if (const auto value = adConstantPropertyValue(prop_name))
+    return ADMaterialPropertyReader(*value);
+
+  ADMaterialPropertyReader reader(
+      getKokkosMaterialPropertyByName<Real>(prop_name),
+      getKokkosMaterialPropertyByName<Real, 1>(adDerivativesPropertyName(prop_name)));
+  _ad_setup.addProperty(reader.slotMap(), reader.derivatives().adInputs());
+  _ad_read_derivatives.push_back(reader.derivatives());
+  return reader;
 }
 
 inline ADVariableValue
@@ -192,9 +235,9 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADMaterial::dispatchADProperties(const Datum & datum, const Derived & material) const
 {
-  // A material on the current configuration evaluates the instantiation whose dual numbers also
-  // carry the displacement slots
-  if (_configuration.displaced())
+  // A material on the current configuration, or reading a property that depends on the
+  // displacements, evaluates the instantiation whose dual numbers also carry the displacement slots
+  if (_ad_slots.hasDisplacements())
     computeADProperties<Derived, Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(datum, material);
   else
     computeADProperties<Derived, Derived::max_ad_slots>(datum, material);
