@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosIntegratedBCBase.h"
+#include "KokkosADMaterialProperty.h"
 
 namespace Moose::Kokkos
 {
@@ -36,7 +37,11 @@ namespace Moose::Kokkos
  *   static constexpr unsigned int max_ad_slots = ...;
  *
  * and creates its accessors with adCoupledValue(), adCoupledGradient(), adCoupledDot(), or their
- * counterparts on the BC variable.
+ * counterparts on the BC variable. A pointwise AD material property, read with
+ * getKokkosADMaterialProperty(), carries the derivatives with respect to the inputs of its
+ * declaring material: those coupled to the BC variable share the slots of the accessors reading
+ * the same quantities and count toward max_ad_slots, and a dependence on the displacements selects
+ * the instantiation carrying the displacement slots even on the reference configuration.
  */
 class ADIntegratedBC : public IntegratedBCBase
 {
@@ -94,6 +99,15 @@ protected:
   ADVariableGradient adGradient();
   ADVariableValue adDot();
   ///@}
+
+  /**
+   * Get a pointwise AD material property declared by a Kokkos AD material
+   * @tparam T The property data type
+   * @param name The property name or the parameter name containing the property name
+   * @returns The reader of the property
+   */
+  template <typename T>
+  ADMaterialPropertyReader getKokkosADMaterialProperty(const std::string & name);
 
   /// Test function values and gradients, for derived classes that need them in their hooks
   ///@{
@@ -165,6 +179,23 @@ ADIntegratedBC::adDot()
   ADVariableValue value{VariableValue(_var, Moose::SOLUTION_DOT_TAG)};
   _ad_setup.add(value.slot(), value.variable(), false);
   return value;
+}
+
+template <typename T>
+ADMaterialPropertyReader
+ADIntegratedBC::getKokkosADMaterialProperty(const std::string & name)
+{
+  static_assert(std::is_same_v<T, Real>, "Kokkos AD material properties are of type Real.");
+
+  const auto prop_name = getMaterialPropertyName(name);
+  if (const auto value = adConstantPropertyValue(prop_name))
+    return ADMaterialPropertyReader(*value);
+
+  ADMaterialPropertyReader reader(
+      getKokkosMaterialPropertyByName<Real>(prop_name),
+      getKokkosMaterialPropertyByName<Real, 1>(adDerivativesPropertyName(prop_name)));
+  _ad_setup.addProperty(reader.slotMap(), reader.derivatives().adInputs());
+  return reader;
 }
 
 template <typename Derived>

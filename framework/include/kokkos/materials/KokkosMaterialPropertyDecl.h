@@ -137,10 +137,9 @@ public:
   unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
   /**
    * Get the quadrature point quantities of the stored derivatives of a pointwise AD property
-   * @param subdomain The MOOSE subdomain ID
-   * @returns The slot blocks of the stored derivatives
+   * @returns The slot blocks of the stored derivatives in each subdomain
    */
-  const std::vector<ADSlotBlock> & adInputs(SubdomainID subdomain) const;
+  const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & adInputs() const;
 
   /**
    * Get the property type index for load/store functions
@@ -240,13 +239,13 @@ MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
   return libmesh_map_find(_record->dims, subdomain)[i];
 }
 
-inline const std::vector<ADSlotBlock> &
-MaterialPropertyBase::adInputs(SubdomainID subdomain) const
+inline const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> &
+MaterialPropertyBase::adInputs() const
 {
   if (!_record)
     mooseError("Cannot get the AD inputs of an uninitialized or default material property.");
 
-  return libmesh_map_find(_record->ad_inputs, subdomain);
+  return _record->ad_inputs;
 }
 
 template <typename T, unsigned int dimension>

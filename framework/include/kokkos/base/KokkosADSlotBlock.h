@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "libmesh/libmesh.h"
+
 namespace Moose::Kokkos
 {
 
@@ -26,6 +28,9 @@ struct ADSlotBlock
   unsigned int first;
   /// Whether the block holds the gradient, of AD_GRADIENT_SLOTS slots, or the value, of one slot
   bool gradient;
+  /// Component of the current configuration of the object that the variable displaces, or
+  /// libMesh::invalid_uint if the variable is not a displacement
+  unsigned int displacement_component = libMesh::invalid_uint;
 };
 
 } // namespace Moose::Kokkos

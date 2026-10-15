@@ -11,6 +11,10 @@
 
 #include "KokkosMaterialProperty.h"
 #include "KokkosDenseADReal.h"
+#include "KokkosADVariableValue.h"
+
+#include <optional>
+#include <sstream>
 
 namespace Moose::Kokkos
 {
@@ -23,6 +27,23 @@ inline std::string
 adDerivativesPropertyName(const std::string & prop_name)
 {
   return prop_name + "_ad_derivatives";
+}
+
+/**
+ * Parse a material property name that gives a constant value
+ * @param prop_name The property name
+ * @returns The constant value, or nothing if the name does not parse cleanly as a number
+ */
+inline std::optional<Real>
+adConstantPropertyValue(const std::string & prop_name)
+{
+  std::istringstream ss(prop_name);
+  Real value;
+
+  if (ss >> value && ss.eof())
+    return value;
+
+  return {};
 }
 
 /**
@@ -114,6 +135,83 @@ private:
   MaterialProperty<Real> _value;
   /// Property holding the derivatives
   MaterialProperty<Real, 1> _derivatives;
+};
+
+/**
+ * Read access to a pointwise AD material property by a pointwise AD object, which assembles the
+ * stored value and derivatives into a dual number of the slots of the reader through the slot map
+ * of the subdomain
+ */
+class ADMaterialPropertyReader
+{
+public:
+  ADMaterialPropertyReader() = default;
+  /**
+   * Constructor
+   * @param value The property holding the value
+   * @param derivatives The property holding the derivatives
+   */
+  ADMaterialPropertyReader(const MaterialProperty<Real> & value,
+                           const MaterialProperty<Real, 1> & derivatives)
+    : _value(value), _derivatives(derivatives)
+  {
+  }
+  /**
+   * Constructor for a constant property, which carries no derivatives
+   * @param value The constant value
+   */
+  ADMaterialPropertyReader(const Real value) : _value(value) { _map.finalized = true; }
+
+  /**
+   * Get the property holding the derivatives
+   */
+  const MaterialProperty<Real, 1> & derivatives() const { return _derivatives; }
+  /**
+   * Get the slot map, written by the reader during initial setup
+   */
+  ADPropertySlotMap & slotMap() { return _map; }
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get the property at a quadrature point
+   * @param datum The AD datum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The property, with its derivatives with respect to the slots of the reader
+   */
+  template <typename Base, unsigned int slots>
+  KOKKOS_FUNCTION DenseADReal<slots> operator()(ADDatumBase<Base, slots> & datum,
+                                                const unsigned int qp) const
+  {
+    KOKKOS_ASSERT(_map.finalized);
+
+    DenseADReal<slots> result = Real(_value(datum, qp));
+
+    if constexpr (slots > 0)
+    {
+      result.derivatives() = 0;
+
+      if (!_derivatives)
+        return result;
+
+      const auto & map = _map.slots[datum.subdomain()];
+      const auto derivatives = _derivatives(datum, qp);
+
+      for (unsigned int s = 0; s < map.size(); ++s)
+        if (map[s] != libMesh::invalid_uint)
+          result.derivatives()[map[s]] += derivatives(s);
+    }
+
+    return result;
+  }
+#endif
+
+private:
+  /// Property holding the value
+  MaterialProperty<Real> _value;
+  /// Property holding the derivatives
+  MaterialProperty<Real, 1> _derivatives;
+  /// Slot of the reader for each stored derivative in each subdomain
+  ADPropertySlotMap _map;
 };
 
 } // namespace Moose::Kokkos

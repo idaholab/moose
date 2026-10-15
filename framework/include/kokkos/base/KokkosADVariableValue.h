@@ -63,11 +63,17 @@ public:
   /**
    * Register the displacements of the current configuration, whose values and reference gradients
    * occupy the AD_DISPLACEMENT_SLOTS slots following those of the accessors
-   * @param displacements The displacement variable
+   * @param components The system and variable numbers of each displacement component
    * @param seeded Whether each component carries derivatives, which holds for the nonlinear
    * displacements of the residual system that the coupling matrix couples to the residual variable
    */
-  void addDisplacements(const Variable & displacements, const std::vector<bool> & seeded);
+  void addDisplacements(const std::vector<std::pair<unsigned int, unsigned int>> & components,
+                        const std::vector<bool> & seeded);
+  /**
+   * Get whether the displacement slots are registered, so that the object dispatches the
+   * instantiation carrying them
+   */
+  bool hasDisplacements() const { return _has_displacements; }
   /**
    * Get the first slot of the value of a displacement component, or libMesh::invalid_uint if the
    * component carries no derivatives
@@ -99,6 +105,8 @@ private:
   /// First slot of each displacement component, or libMesh::invalid_uint
   unsigned int _displacement_first[3] = {
       libMesh::invalid_uint, libMesh::invalid_uint, libMesh::invalid_uint};
+  /// Whether the displacement slots are registered
+  bool _has_displacements = false;
 };
 
 /**
@@ -126,6 +134,20 @@ struct ADSlotAssignment
     if (seed_source)
       seed = *seed_source;
   }
+};
+
+/**
+ * Map from the stored derivatives of a pointwise AD material property to the slots of an object
+ * reading it. Each stored derivative of the declaring material is a derivative with respect to a
+ * quadrature point quantity, which maps to the slot of the reader for the same quantity, or to
+ * libMesh::invalid_uint when the reader carries no derivatives with respect to it.
+ */
+struct ADPropertySlotMap
+{
+  /// Slot of the reader for each stored derivative, indexed by contiguous subdomain ID
+  Array<Array<unsigned int>> slots;
+  /// Whether the reader has assigned the map
+  bool finalized = false;
 };
 
 /**
