@@ -98,6 +98,10 @@ ComputeDiracThread::subdomainChanged()
 void
 ComputeDiracThread::onElement(const Elem * elem)
 {
+  // Evaluate Dirac kernels on FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   const bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
   if (!has_dirac_kernels_on_elem)
     return;

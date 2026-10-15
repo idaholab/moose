@@ -61,6 +61,10 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
 void
 FlagElementsThread::onElement(const Elem * elem)
 {
+  // Flag FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   mooseAssert(elem->active(), "This thread should only act on active elements");
 
   // By default do nothing, and only grab the marker from the solution if the current variable is

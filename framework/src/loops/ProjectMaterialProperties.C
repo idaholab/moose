@@ -63,6 +63,10 @@ ProjectMaterialProperties::subdomainChanged()
 void
 ProjectMaterialProperties::onElement(const Elem * elem)
 {
+  // Consider materials on FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   // This check mirrors the check in ComputeMaterialsObjectThread::onElement as it must because it
   // is possible that there are no materials on this element's subdomain, e.g. if we are doing
   // mortar, in which case the properties will not have been resized in

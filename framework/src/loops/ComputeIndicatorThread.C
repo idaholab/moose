@@ -84,6 +84,10 @@ ComputeIndicatorThread::subdomainChanged()
 void
 ComputeIndicatorThread::onElement(const Elem * elem)
 {
+  // Evaluate indicators on FE elements, never a spline NodeElem
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   for (auto * var : _aux_sys._elem_vars[_tid])
     var->prepareAux();
 

@@ -52,6 +52,11 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
 
         const Elem * elem = *el;
 
+        // Skip spline nodes; their Jacobian entries only accumulate
+        // indirectly from integration on assembly elements
+        if (elem->mapping_type() == libMesh::INVALID_MAP)
+          continue;
+
         preElement(elem);
 
         _old_subdomain = _subdomain;

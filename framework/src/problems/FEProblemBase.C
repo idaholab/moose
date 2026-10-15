@@ -155,6 +155,36 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
+
+bool
+should_solve_for_spline_dofs(const libMesh::MeshBase & mesh)
+{
+  // With new libMesh, the most accurate thing to do is always solve
+  // for spline DoFs when we have them.  With older libMesh, there's a
+  // bug that prevents that solve from working on meshes where we
+  // store some spline DoFs directly on assembly element vertices,
+  // including a mesh in our regression tests.  For now we can detect
+  // these cases and avoid the solve for them.
+  bool have_constraint_rows = !mesh.get_constraint_rows().empty();
+
+  // Are there any elements we weren't able to properly evaluate on
+  // directly?
+  bool returnval = false;
+  if (have_constraint_rows)
+  {
+    for (const auto & elem : mesh.active_local_element_ptr_range())
+      if (elem->mapping_type() == libMesh::INVALID_MAP // newer libMesh
+          || elem->type() == libMesh::NODEELEM)        // older libMesh
+      {
+        returnval = true;
+        break;
+      }
+  }
+
+  mesh.comm().max(returnval);
+  return returnval;
+}
+
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -3936,13 +3966,26 @@ FEProblemBase::projectSolution()
     }
   }
 
+  // Spline node ICs may need to be evaluated indirectly.
+  bool solve_for_spline_dofs = should_solve_for_spline_dofs(_mesh.getMesh());
+
   for (auto & sys : _solver_systems)
   {
     sys->solution().close();
+    if (solve_for_spline_dofs)
+    {
+      sys->system().solve_for_unconstrained_dofs(sys->solution());
+      sys->system().get_dof_map().enforce_constraints_exactly(sys->system(), &sys->solution());
+    }
     sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (solve_for_spline_dofs)
+  {
+    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
+    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
+  }
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
@@ -4011,13 +4054,26 @@ FEProblemBase::projectInitialConditionOnCustomRange(
     }
   }
 
+  // Spline node ICs may need to be evaluated indirectly.
+  bool solve_for_spline_dofs = should_solve_for_spline_dofs(_mesh.getMesh());
+
   for (auto & nl : _nl)
   {
     nl->solution().close();
+    if (solve_for_spline_dofs)
+    {
+      nl->system().solve_for_unconstrained_dofs(nl->solution());
+      nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), &nl->solution());
+    }
     nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
   }
 
   _aux->solution().close();
+  if (solve_for_spline_dofs)
+  {
+    _aux->system().solve_for_unconstrained_dofs(_aux->solution());
+    _aux->system().get_dof_map().enforce_constraints_exactly(_aux->system(), &_aux->solution());
+  }
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 

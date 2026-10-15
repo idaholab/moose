@@ -1860,6 +1860,13 @@ Assembly::reinit(const Elem * elem)
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
+
+  // If we're on e.g. a spline node then we may have an algebraic
+  // system with constraints to be added, but we won't be getting it
+  // by assembling with an FE
+  if (elem->mapping_type() == libMesh::INVALID_MAP)
+    return;
+
   setVolumeQRule(elem);
   reinitFE(elem);
 
