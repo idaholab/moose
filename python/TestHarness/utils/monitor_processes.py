@@ -116,26 +116,23 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
         The process memory in bytes, if available.
 
     """
-    # Prefer PSS if available
-    if MEMORY_PSS:
-        try:
-            with open(f"/proc/{process.pid}/smaps_rollup", "rb") as f:
-                fields = _parse_kb_fields(f.read())
-            return _rollup_memory(fields, MEMORY_PSS_EXCLUDE_FILE)
-        except (FileNotFoundError, ProcessLookupError):
-            pass
-    # Otherwise, use RSS (will double count shared memory)
-    else:
+    # Without PSS, use RSS (will double count shared memory)
+    if not MEMORY_PSS:
         try:
             return process.memory_info().rss
         except psutil.NoSuchProcess:
-            pass
+            return None
 
-    return None
+    try:
+        with open(f"/proc/{process.pid}/smaps_rollup", "rb") as f:
+            fields = _parse_kb_fields(f.read())
+    except (FileNotFoundError, ProcessLookupError):
+        return None
+    return _rollup_memory(fields, MEMORY_PSS_EXCLUDE_FILE)
 
 
 class MemoryMonitor:
-    """Monitor that runs in a separate thread to track children memory usage."""
+    """Monitor that runs in a separate process to track children memory usage."""
 
     def __init__(self, parent_pid: int, interval: float = 0.1):
         """Initialize state."""
@@ -162,7 +159,7 @@ class MemoryMonitor:
         Get the last samples; child PID to cumulative memory usage in bytes.
 
         This returns a copy so that the dict can be accessed without
-        locking (required for synchronization with the other thread).
+        locking (required for synchronization with the sampler process).
         Thus, you should get a copy to this once and then use it many
         times as needed.
         """
@@ -176,35 +173,29 @@ class MemoryMonitor:
             start = time.monotonic()
 
             # Get the entire flattened process tree, removing process 0 as
-            # it's the exit condition when searching recursively
+            # it's the exit condition when walking up parents (on macOS, it
+            # is listed as its own parent)
             all_processes: dict[int, psutil.Process] = {
                 p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
             }
             if 0 in all_processes:
                 del all_processes[0]
 
-            # Get the processes that are immediate children of the parent
-            children_pids = set(
-                pid for pid, p in all_processes.items() if p.info["ppid"] == parent_pid
-            )
+            def top_level_child(pid: int) -> Optional[int]:
+                """Get the direct child of parent_pid that pid is or descends from."""
+                while (ppid := all_processes[pid].info["ppid"]) != parent_pid:
+                    if ppid not in all_processes:
+                        return None
+                    pid = ppid
+                return pid
 
-            # Recursively check if any of the processes in "children_pids"
-            # are a parent of this process at any level
-            def in_children_pids(p: psutil.Process) -> Optional[int]:
-                ppid = p.info["ppid"]
-                # Found a parent
-                if ppid in children_pids:
-                    return ppid
-                # Recursively check
-                return in_children_pids(pp) if (pp := all_processes.get(ppid)) else None
-
-            # Accumulate memory from relevant processes
+            # Accumulate the memory of each direct child and all of its descendants
             result = defaultdict(int)
             for pid, p in all_processes.items():
-                if (
-                    ppid := pid if pid in children_pids else in_children_pids(p)
-                ) is not None and (memory := get_process_memory(p)) is not None:
-                    result[ppid] += memory
+                if (child := top_level_child(pid)) is not None and (
+                    memory := get_process_memory(p)
+                ) is not None:
+                    result[child] += memory
 
             # And update the shared state
             samples.clear()
@@ -233,7 +224,6 @@ class MemoryMonitor:
             ),
             daemon=True,
         )
-        assert self._process is not None
         self._process.start()
 
     def stop(self):
