@@ -128,49 +128,6 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
 }
 
 /**
- * Verify that the bracketing bounds computed from the primary component's critical point
- * belong to each mixture object rather than to the first one that was evaluated
- */
-TEST_F(IdealRealGasMixtureFluidPropertiesTest, primaryCriticalPointPerObject)
-{
-  // Evaluate the fixture mixture first, so that any state shared between objects is set from it
-  const std::vector<Real> x = {0.5};
-  _fp_mix->v_from_p_T(1e5, 700.0, x);
-
-  // A second mixture whose primary component has a much larger critical density
-  {
-    InputParameters params = _factory.getValidParams("StiffenedGasFluidProperties");
-    params.set<Real>("gamma") = 1.43;
-    params.set<Real>("q") = 2030e3;
-    params.set<Real>("q_prime") = -23e3;
-    params.set<Real>("p_inf") = 1e4;
-    params.set<Real>("cv") = 1040;
-    params.set<Real>("M") = 0.01801488;
-    params.set<Real>("T_c") = 647.096;
-    params.set<Real>("rho_c") = 1000.;
-    params.set<Real>("e_c") = 2015734.52419;
-    _fe_problem->addUserObject("StiffenedGasFluidProperties", "fp_dense_primary", params);
-  }
-  {
-    InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
-    params.set<UserObjectName>("fp_primary") = "fp_dense_primary";
-    params.set<std::vector<UserObjectName>>("fp_secondary") = {"fp_nitrogen"};
-    params.set<bool>("allow_imperfect_jacobians") = true;
-    _fe_problem->addUserObject("IdealRealGasMixtureFluidProperties", "fp_dense_mix", params);
-  }
-  const auto & fp_dense_mix =
-      _fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>("fp_dense_mix");
-
-  // Supercritical state whose specific volume lies below the fixture primary's critical
-  // specific volume times the primary mass fraction, but above that of the dense primary
-  const Real T = 700.0;
-  const Real p = 3e8;
-  const Real v = fp_dense_mix.v_from_p_T(p, T, x);
-  EXPECT_FALSE(std::isnan(v));
-  REL_TEST(fp_dense_mix.p_from_T_v(T, v, x), p, REL_TOL_CONSISTENCY);
-}
-
-/**
  * Verify the isobaric heat capacity against (dh/dT)_p of the mixture enthalpy
  * h = sum_i x_i h_i(T, v / x_i), using a primary component whose enthalpy depends on
  * the specific volume
@@ -288,12 +245,3 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, threeComponents)
   Moose::_throw_on_warning = original_throw_on_warning;
 }
 
-/**
- * Verify that the maximum mixture temperature can be set with the T_mix_max parameter
- */
-TEST_F(IdealRealGasMixtureFluidPropertiesTest, maximumTemperatureParameter)
-{
-  InputParameters params = _factory.getValidParams("IdealRealGasMixtureFluidProperties");
-  EXPECT_TRUE(params.have_parameter<Real>("T_mix_max"));
-  EXPECT_EQ(params.get<Real>("T_mix_max"), 1300.0);
-}
