@@ -99,6 +99,10 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  # The hypre solve differs with the number of processors, and the default nl_rel_tol = 1e-8 leaves
+  # differences in the far-field order parameter values above the abs_zero = 1e-6 floor of the
+  # exodiff check
+  nl_rel_tol = 1e-12
   num_steps = 6
   dt = 0.25
 []
