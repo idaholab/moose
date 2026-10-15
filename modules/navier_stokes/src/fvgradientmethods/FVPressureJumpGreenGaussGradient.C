@@ -90,12 +90,13 @@ FVGreenGaussGradient::InternalFaceValues
 FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
                                                      const ElemInfo & elem_info,
                                                      const ElemInfo & neighbor_info,
+                                                     const MooseLinearVariableFV<Real> & variable,
                                                      const Real elem_value,
                                                      const Real neighbor_value) const
 {
   if (!_rhie_chow || !_rhie_chow->faceIsBaffle(fi))
     return FVGreenGaussGradient::internalFaceValues(
-        fi, elem_info, neighbor_info, elem_value, neighbor_value);
+        fi, elem_info, neighbor_info, variable, elem_value, neighbor_value);
 
   mooseAssert(_pressure_gradient, "A linked pressure gradient is required on pressure-jump faces.");
 
