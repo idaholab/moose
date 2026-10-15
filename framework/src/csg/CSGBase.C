@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -1259,6 +1259,9 @@ CSGBase::getLinkedCSGObjects(const CSGUniverse & univ,
                              std::set<std::string> & linked_cell_names,
                              std::set<std::string> & linked_surface_names) const
 {
+  // A universe referenced from many lattice positions only needs its subtree walked once
+  if (!linked_universe_names.insert(univ.getName()).second)
+    return;
   linked_universe_names.insert(univ.getName());
   const auto & univ_cells = univ.getAllCells();
   for (const CSGCell & cell : univ_cells)

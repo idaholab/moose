@@ -15,6 +15,7 @@
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVCHTBCInterface.h"
 #include "FEProblemBase.h"
+#include "GrayLambertSurfaceRadiationBase.h"
 
 namespace NS
 {
@@ -25,6 +26,7 @@ InputParameters
 CHTHandler::validParams()
 {
   auto params = emptyInputParameters();
+  params += UserObjectInterface::validParams();
   params += NonADFunctorInterface::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "cht_interfaces",
@@ -64,6 +66,11 @@ CHTHandler::validParams()
       "cht_solid_flux_relaxation",
       {},
       "The relaxation factors for the boundary flux when being updated on the solid side.");
+  params.addParam<UserObjectName>(
+      "surface_radiation_object_name",
+      "Name of the Gray-Lambert surface-radiation user object. On matching CHT interfaces, "
+      "its net outward heat flux density is removed from the heat flux transferred to the "
+      "receiving domain.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "thermal_resistance",
@@ -75,7 +82,7 @@ CHTHandler::validParams()
   params.addParamNamesToGroup(
       "cht_interfaces max_cht_fpi cht_heat_flux_tolerance cht_fluid_temperature_relaxation "
       "cht_solid_temperature_relaxation cht_fluid_flux_relaxation "
-      "cht_solid_flux_relaxation thermal_resistance",
+      "cht_solid_flux_relaxation surface_radiation_object_name thermal_resistance",
       "Conjugate Heat Transfer");
 
   return params;
@@ -83,6 +90,7 @@ CHTHandler::validParams()
 
 CHTHandler::CHTHandler(const InputParameters & params)
   : MooseObject(params),
+    UserObjectInterface(this),
     NonADFunctorInterface(this),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
@@ -90,10 +98,14 @@ CHTHandler::CHTHandler(const InputParameters & params)
     _cht_boundary_names(getParam<std::vector<BoundaryName>>("cht_interfaces")),
     _cht_boundary_ids(_mesh.getBoundaryIDs(_cht_boundary_names)),
     _max_cht_fpi(getParam<unsigned int>("max_cht_fpi")),
-    _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance"))
+    _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance")),
+    _surface_radiation_uo(nullptr)
 {
   if (isParamSetByUser("cht_interfaces") && !_cht_boundary_names.size())
     paramError("cht_interfaces", "You must declare at least one interface!");
+  if (isParamValid("surface_radiation_object_name") && _cht_boundary_names.empty())
+    paramError("surface_radiation_object_name",
+               "Surface radiation coupling requires at least one entry in 'cht_interfaces'.");
 
   const auto & thermal_resistance_names =
       getParam<std::vector<MooseFunctorName>>("thermal_resistance");
@@ -131,6 +143,28 @@ CHTHandler::linkEnergySystems(SystemBase * solid_energy_system,
 void
 CHTHandler::deduceCHTBoundaryCoupling()
 {
+  // CHTHandler is constructed with the segregated solve object, potentially before user objects
+  // exist. Resolve the optional surface-radiation object here, during initial setup.
+  _surface_radiation_uo = nullptr;
+  _surface_radiation_boundary_ids.clear();
+  if (isParamValid("surface_radiation_object_name"))
+  {
+    _surface_radiation_uo =
+        &getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name");
+    _surface_radiation_boundary_ids = _surface_radiation_uo->getSurfaceIDs();
+
+    const bool has_cht_surface =
+        std::any_of(_cht_boundary_ids.begin(),
+                    _cht_boundary_ids.end(),
+                    [this](const auto boundary_id)
+                    { return _surface_radiation_boundary_ids.count(boundary_id); });
+
+    if (!has_cht_surface)
+      paramError("surface_radiation_object_name",
+                 "The supplied surface-radiation user object does not contain any of the "
+                 "boundaries listed in 'cht_interfaces'.");
+  }
+
   if (_solid_energy_system->nVariables() != 1)
     mooseError("We should have only one variable in the solid energy system: ",
                _energy_system->name(),
@@ -327,6 +361,7 @@ CHTHandler::setupConjugateHeatTransferContainers()
   _boundary_heat_flux.clear();
   _boundary_temperature.clear();
   _integrated_boundary_heat_flux.clear();
+  _integrated_boundary_surface_radiation_heat_flux.clear();
 
   for (const auto bd_index : index_range(_cht_boundary_ids))
   {
@@ -360,6 +395,8 @@ CHTHandler::setupConjugateHeatTransferContainers()
     auto & flux_container = _boundary_heat_flux.back();
 
     _integrated_boundary_heat_flux.push_back(std::vector<Real>({0.0, 0.0}));
+    if (_surface_radiation_uo)
+      _integrated_boundary_surface_radiation_heat_flux.push_back(0.0);
 
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
         _problem.mesh(), combined_set, "interface_temperature_to_solid_" + bd_name);
@@ -437,7 +474,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
     auto & other_kernel = _cht_conduction_kernels[other_side];
 
     // We get the relaxation from the other side, so if we are fluid side we get the solid
-    // relaxation
+    // relaxation. Use each field's matching relaxation-factor family.
     const auto temperature_relaxation = _cht_temperature_relaxation_factor[other_side][bd_index];
     const auto flux_relaxation = _cht_flux_relaxation_factor[other_side][bd_index];
 
@@ -449,6 +486,17 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
     auto & integrated_flux = _integrated_boundary_heat_flux[bd_index][side];
     // We are recomputing this so, time to zero this out
     integrated_flux = 0.0;
+
+    // GrayLambertSurfaceRadiationBase returns one sideset-averaged net outward flux density.
+    // It is therefore constant over all FaceInfo objects belonging to this CHT patch.
+    Real surface_radiation_flux = 0.0;
+    if (_surface_radiation_uo)
+    {
+      _integrated_boundary_surface_radiation_heat_flux[bd_index] = 0.0;
+      if (_surface_radiation_boundary_ids.count(_cht_boundary_ids[bd_index]))
+        surface_radiation_flux =
+            _surface_radiation_uo->getSurfaceHeatFluxDensity(_cht_boundary_ids[bd_index]);
+    }
 
     const auto & bd_fi_container = _cht_face_info[bd_index];
 
@@ -493,7 +541,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
       // minus sign is due to the normal differences
 
       // Conductive flux
-      auto flux = other_kernel->computeBoundaryFlux(*other_bc);
+      auto source_flux = other_kernel->computeBoundaryFlux(*other_bc);
 
       // If participating media radiation system exists we add the heat flux from the fluid
       // to the solid region.
@@ -504,12 +552,16 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
           _cht_pm_radiation_kernels[sys_i]->setCurrentFaceArea(1.0);
           _cht_pm_radiation_boundary_conditions[bd_index][sys_i]->setupFaceData(
               fi, fi->faceType(std::make_pair(0, _cht_pm_radiation_system_numbers[sys_i])));
-          flux += _cht_pm_radiation_kernels[sys_i]->computeBoundaryFlux(
+          source_flux += _cht_pm_radiation_kernels[sys_i]->computeBoundaryFlux(
               *_cht_pm_radiation_boundary_conditions[bd_index][sys_i]);
         }
 
+      // source_flux is positive outward from the source domain, while surface_radiation_flux is
+      // positive outward from the solid. The coupling functor is positive into the receiving
+      // domain, so subtract the surface-to-surface radiation that bypasses the transparent fluid.
+      const Real coupling_flux = source_flux - surface_radiation_flux;
       const auto relaxed_flux =
-          flux_relaxation * flux + (1 - flux_relaxation) * flux_container[fi->id()];
+          flux_relaxation * coupling_flux + (1 - flux_relaxation) * flux_container[fi->id()];
       flux_container[fi->id()] = relaxed_flux;
 
       // Store the temperature seen by this side after the thermal resistance drop.
@@ -518,8 +570,13 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
           temperature_relaxation * (boundary_temperature - thermal_resistance * relaxed_flux) +
           (1 - temperature_relaxation) * temperature_container[fi->id()];
 
-      // We do the integral here
-      integrated_flux += flux * fi->faceArea() * fi->faceCoord();
+      // Integrate the source-domain and surface-radiation fluxes separately. This avoids counting
+      // surface radiation twice when coupling fields are updated in both directions.
+      const Real coordinate_area = fi->faceArea() * fi->faceCoord();
+      integrated_flux += source_flux * coordinate_area;
+      if (_surface_radiation_uo)
+        _integrated_boundary_surface_radiation_heat_flux[bd_index] +=
+            surface_radiation_flux * coordinate_area;
     }
   }
 }
@@ -532,6 +589,8 @@ CHTHandler::sumIntegratedFluxes()
     auto & integrated_fluxes = _integrated_boundary_heat_flux[i];
     _problem.comm().sum(integrated_fluxes[NS::CHTSide::SOLID]);
     _problem.comm().sum(integrated_fluxes[NS::CHTSide::FLUID]);
+    if (_surface_radiation_uo)
+      _problem.comm().sum(_integrated_boundary_surface_radiation_heat_flux[i]);
   }
 }
 
@@ -543,7 +602,11 @@ CHTHandler::printIntegratedFluxes() const
     auto & integrated_fluxes = _integrated_boundary_heat_flux[i];
     _console << " Iteration " << _fpi_it << " Boundary " << _cht_boundary_names[i]
              << " flux on solid side " << integrated_fluxes[NS::CHTSide::SOLID]
-             << " flux on fluid side: " << integrated_fluxes[NS::CHTSide::FLUID] << std::endl;
+             << " flux on fluid side: " << integrated_fluxes[NS::CHTSide::FLUID];
+    if (_surface_radiation_uo)
+      _console << " net outward surface-radiation flux: "
+               << _integrated_boundary_surface_radiation_heat_flux[i];
+    _console << std::endl;
   }
 }
 
@@ -551,7 +614,11 @@ void
 CHTHandler::resetIntegratedFluxes()
 {
   for (const auto i : index_range(_integrated_boundary_heat_flux))
+  {
     _integrated_boundary_heat_flux[i] = std::vector<Real>({0.0, 0.0});
+    if (_surface_radiation_uo)
+      _integrated_boundary_surface_radiation_heat_flux[i] = 0.0;
+  }
 }
 
 bool
@@ -560,18 +627,24 @@ CHTHandler::converged() const
   if (_fpi_it >= _max_cht_fpi)
     return true;
 
-  for (const auto & boundary_flux : _integrated_boundary_heat_flux)
+  for (const auto i : index_range(_integrated_boundary_heat_flux))
   {
+    const auto & boundary_flux = _integrated_boundary_heat_flux[i];
     const Real f1 = boundary_flux[0];
     const Real f2 = boundary_flux[1];
+    const Real radiation_flux =
+        _surface_radiation_uo ? _integrated_boundary_surface_radiation_heat_flux[i] : 0.0;
 
-    // Special case: both are zero at startup not converged yet
-    if (_fpi_it != 0 && (f1 == 0.0 && f2 == 0.0))
-      return true;
+    // An interface whose fluxes are all zero after the first iteration is balanced. Skip it so
+    // that the remaining interfaces are still checked.
+    if (_fpi_it != 0 && f1 == 0.0 && f2 == 0.0 && radiation_flux == 0.0)
+      continue;
 
-    // These fluxes should be of opposite sign
-    const Real diff = std::abs(f1 + f2);
-    const Real denom = std::max({std::fabs(f1), std::fabs(f2), Real(1e-14)});
+    // Surface radiation leaves the solid but is not deposited in a transparent fluid, giving the
+    // interface balance Q_s,out + Q_f,out - Q_rad,out = 0.
+    const Real diff = std::abs(f1 + f2 - radiation_flux);
+    const Real denom =
+        std::max({std::fabs(f1), std::fabs(f2), std::fabs(radiation_flux), Real(1e-14)});
     const Real rel_diff = diff / denom;
 
     if (rel_diff >= _cht_heat_flux_tolerance)

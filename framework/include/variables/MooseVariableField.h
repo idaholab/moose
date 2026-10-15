@@ -116,6 +116,11 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
 
   /**
+   * AD grad solution getter for objects evaluating on element faces
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const = 0;
+
+  /**
    * AD grad of time derivative solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const = 0;

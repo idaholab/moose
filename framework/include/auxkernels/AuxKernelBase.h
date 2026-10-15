@@ -83,6 +83,10 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  /// Elemental aux kernels restricted to a boundary are evaluated at the face quadrature points of
+  /// the boundary sides; nodal aux kernels are evaluated at nodes even when boundary restricted
+  bool usesFaceCoupledValues() const override { return !_c_nodal && boundaryRestricted(); }
+
   /// Base MooseVariable
   MooseVariableFieldBase & _var;
 

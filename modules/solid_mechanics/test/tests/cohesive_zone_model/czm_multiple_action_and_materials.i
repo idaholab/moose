@@ -7,15 +7,11 @@
     nz = 4
     zmin = 0
     zmax = 4
-  [../]
-  [./subdomain_id]
-    type = SubdomainPerElementGenerator
-    input = msh
     subdomain_ids = '0 1 2 3'
-  []
+  [../]
   [./split]
     type = BreakMeshByBlockGenerator
-    input = subdomain_id
+    input = msh
     split_interface = true
   []
   [add_side_sets]

@@ -461,6 +461,8 @@ public:
   adGradSlnNeighborDot() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
+  adGradSlnFace() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> &
   adCurlSlnNeighbor() const override;

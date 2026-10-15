@@ -42,6 +42,10 @@ private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
   const ADVariableValue _lambda_dummy;
 
+  /// An empty gradient for constructing _grad_u_secondary and _grad_u_primary when the derived
+  /// class does not use the primal gradients
+  const ADVariableGradient _grad_u_dummy;
+
 protected:
   /// The LM solution
   const ADVariableValue & _lambda;
@@ -52,9 +56,11 @@ protected:
   /// The primal solution on the primary side
   const ADVariableValue & _u_primary;
 
-  /// The primal solution gradient on the secondary side
+  /// The primal solution gradient on the secondary side. Empty unless the private parameter
+  /// _compute_primal_gradients is true.
   const ADVariableGradient & _grad_u_secondary;
 
-  /// The primal solution gradient on the primary side
+  /// The primal solution gradient on the primary side. Empty unless the private parameter
+  /// _compute_primal_gradients is true.
   const ADVariableGradient & _grad_u_primary;
 };
