@@ -11,10 +11,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "NLCurlCurlIntegrator.h"
-
-#include "libmesh/ignore_warnings.h"
-#include "mfem/fem/integ/bilininteg_hcurl_kernels.hpp"
-#include "libmesh/restore_warnings.h"
+#include "NLCurlCurlPAKernels.h"
 
 namespace Moose::MFEM
 {
