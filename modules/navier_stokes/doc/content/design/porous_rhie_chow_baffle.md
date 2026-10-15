@@ -32,9 +32,9 @@ interpolate velocity across the baffle uses one-sided states instead:
 - [FVVelocityJumpGreenGaussGradient.md] computes the velocity gradients from face states
   extrapolated within each side, so the gradient does not read the jump as a slope. It is required
   as the default gradient method of every velocity variable.
-- [LinearPWCNSFVMomentumFlux.md] advects each side's extrapolated face state and splits the
-  viscous traction into a shear part carried by the continuous interstitial tangential velocity and
-  a normal part evaluated on each side.
+- [LinearPWCNSFVMomentumFlux.md] advects the upstream interstitial tangential velocity and each
+  side's extrapolated normal velocity, and splits the viscous traction into a shear part carried by
+  the continuous interstitial tangential velocity and a normal part evaluated on each side.
 - [FVReconstructedPressureGradient.md] recovers each side's face normal velocity from the shared
   mass flux and that side's density.
 - The Rhie-Chow face flux combines the one-sided fluxes $\rho_s(\mathbf{H}/\mathbf{A})_s\cdot\mathbf{n}$
