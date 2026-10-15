@@ -31,4 +31,13 @@
     design = "syntax/Mesh/index.md"
     issues = "#12580"
   [../]
+
+  [break_mesh_opening]
+    type = 'Exodiff'
+    input = 'break_mesh_opening.i'
+    exodiff = 'break_mesh_opening_out.e'
+    requirement = "The system shall be able to output a distributed ~displaced~ mesh whose disjoint neighbor boundaries, such as those created by breaking the mesh between blocks, have moved apart."
+    design = "syntax/Outputs/index.md meshgenerators/BreakMeshByBlockGenerator.md"
+    issues = "#34041"
+  []
 []
