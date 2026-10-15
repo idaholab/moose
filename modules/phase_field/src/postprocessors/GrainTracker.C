@@ -102,7 +102,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(declareRestartableData<unsigned int>("max_curr_grain_id", invalid_id)),
-    _is_transient(_subproblem.isTransient())
+    _is_transient(_subproblem.isTransient()),
+    _backup_t_step(std::numeric_limits<int>::min())
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -114,6 +115,75 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
 }
 
 GrainTracker::~GrainTracker() {}
+
+void
+GrainTracker::timestepSetup()
+{
+  SetupInterface::timestepSetup();
+
+  // timestepSetup() runs once per timestep attempt. Finding the state already saved for this
+  // timestep means the previous attempt ran timestep_end and was rejected, so start the retry from
+  // the state before that attempt.
+  if (_t_step == _backup_t_step)
+    restoreStepState();
+}
+
+void
+GrainTracker::backupStepState()
+{
+  _backup_t_step = _t_step;
+
+  _feature_sets_backup.clear();
+  for (const auto & feature : _feature_sets)
+    _feature_sets_backup.emplace_back(feature.duplicate());
+
+  _first_time_backup = _first_time;
+  _max_curr_grain_id_backup = _max_curr_grain_id;
+  _reserve_grain_first_index_backup = _reserve_grain_first_index;
+  _feature_count_backup = _feature_count;
+  _feature_id_to_local_index_backup = _feature_id_to_local_index;
+  _feature_maps_backup = _feature_maps;
+  _var_index_maps_backup = _var_index_maps;
+  _halo_ids_backup = _halo_ids;
+  _ghosted_entity_ids_backup = _ghosted_entity_ids;
+  _entity_var_to_features_backup = _entity_var_to_features;
+
+  // The solution history is only saved before the first remap of the timestep
+  _solution_old_backup.reset();
+  _solution_older_backup.reset();
+}
+
+void
+GrainTracker::restoreStepState()
+{
+  _feature_sets.clear();
+  for (const auto & feature : _feature_sets_backup)
+    _feature_sets.emplace_back(feature.duplicate());
+
+  _first_time = _first_time_backup;
+  _max_curr_grain_id = _max_curr_grain_id_backup;
+  _reserve_grain_first_index = _reserve_grain_first_index_backup;
+  _feature_count = _feature_count_backup;
+  _feature_id_to_local_index = _feature_id_to_local_index_backup;
+  _feature_maps = _feature_maps_backup;
+  _var_index_maps = _var_index_maps_backup;
+  _halo_ids = _halo_ids_backup;
+  _ghosted_entity_ids = _ghosted_entity_ids_backup;
+  _entity_var_to_features = _entity_var_to_features_backup;
+
+  // The rejected attempt remapped the old and older solutions, and rejecting the timestep copied
+  // the remapped old solution into the current one, so undo all three
+  if (_solution_old_backup)
+  {
+    _sys.solutionOld() = *_solution_old_backup;
+    _sys.solutionOlder() = *_solution_older_backup;
+    _sys.solution() = *_solution_old_backup;
+    _sys.solutionOld().close();
+    _sys.solutionOlder().close();
+    _sys.solution().close();
+    _sys.system().update();
+  }
+}
 
 Real
 GrainTracker::getEntityValue(dof_id_type entity_id,
@@ -232,6 +302,12 @@ GrainTracker::initialize()
   if (_t_step < _tracking_step)
     return;
 
+  // Save the state on the first timestep_end execution of a timestep, before this execution changes
+  // it, so that it can be restored if the timestep is rejected
+  if (_is_transient && _fe_problem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_END &&
+      _t_step != _backup_t_step)
+    backupStepState();
+
   /**
    * If we are passed the first time, we need to save the existing grains before beginning the
    * tracking on the current step. We'll do that with a swap since the _feature_sets contents will
@@ -264,6 +340,11 @@ GrainTracker::meshChanged()
 
     _communicator.gather(0, range, _all_ranges);
   }
+
+  // The saved solution history is not projected onto a changed mesh
+  _solution_old_backup.reset();
+  _solution_older_backup.reset();
+  _backup_t_step = std::numeric_limits<int>::min();
 
   FeatureFloodCount::meshChanged();
 }
@@ -1142,6 +1223,13 @@ GrainTracker::remapGrains()
   // Perform swaps if any occurred
   if (!grain_id_to_new_var.empty())
   {
+    // Save the old and older solutions before the first remap of a timestep
+    if (_is_transient && _t_step == _backup_t_step && !_solution_old_backup)
+    {
+      _solution_old_backup = _sys.solutionOld().clone();
+      _solution_older_backup = _sys.solutionOlder().clone();
+    }
+
     // Cache for holding values during swaps
     std::vector<std::map<Node *, CacheValues>> cache(_n_vars);
 
