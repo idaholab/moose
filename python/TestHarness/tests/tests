@@ -226,8 +226,8 @@
     type = PythonUnitTest
     input = test_FailedTests.py
     min_slots = 2 # calls TestHarness, which could use threads
-    requirement = "The system shall run only tests which previously have failed"
-    issues = '#14512'
+    requirement = "The system shall run only tests which previously have failed and mark those that now pass as passing in the previous results, unless all of them now pass or it is requested to leave the previous results unchanged"
+    issues = '#14512 #33905'
   []
   [python_version]
     type = PythonUnitTest
