@@ -1,0 +1,16 @@
+[Tests]
+  [jk2lb_electromagnetic_csvdiff]
+    type = CSVDiff
+    input = '../../electromagnetic_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ElectromagneticCryogenicJK2LBProperties
+      file_base=jk2lb_electromagnetic
+      T_min=2.0
+      T_max=300.0"
+    csvdiff = 'jk2lb_electromagnetic_vpp_0000.csv'
+    mesh_mode = 'replicated'
+    requirement = "The system shall compute electromagnetic properties for JK2LB austenitic stainless steel using quintic polynomial correlation from Lu et al. (2009)."
+    design = 'ElectromagneticCryogenicJK2LBProperties.md ElectromagneticSolidPropertiesMaterial.md'
+    issues = '#33677'
+  []
+[]
