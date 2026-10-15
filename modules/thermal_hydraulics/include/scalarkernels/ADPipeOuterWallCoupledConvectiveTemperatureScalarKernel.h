@@ -10,13 +10,15 @@
 #pragma once
 
 #include "ADPipeWallTemperatureScalarKernelBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary
  * side boundary condition
  */
 class ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
-  : public ADPipeWallTemperatureScalarKernelBase
+  : public ADPipeWallTemperatureScalarKernelBase,
+    public ADFunctorInterface
 {
   using Base = ADPipeWallTemperatureScalarKernelBase;
 
@@ -40,7 +42,7 @@ protected:
   /// Coupled secondary-side fluid temperature adjacent to the downstream wall node
   const ADVariableValue & _Tfdown;
   /// Wetted perimeter of the secondary-side flow channel adjacent to this wall node
-  const Moose::Functor<ADReal> & _wetted_perimeter;
+  const Function & _wetted_perimeter;
   /// Secondary-side heat transfer coefficient
   const Moose::Functor<ADReal> & _h;
 };

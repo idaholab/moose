@@ -30,8 +30,8 @@ protected:
 
   /// Coupled temperature of the inner-surface wall node
   const ADVariableValue & _Tin;
-  /// Applied heat flux functor
-  const Moose::Functor<ADReal> & _heat_flux;
+  /// Applied heat flux function
+  const Function & _heat_flux;
   /// Perimeter of this wall node over which the heat flux is applied
-  const Moose::Functor<ADReal> & _heated_perimeter;
+  const Function & _heated_perimeter;
 };

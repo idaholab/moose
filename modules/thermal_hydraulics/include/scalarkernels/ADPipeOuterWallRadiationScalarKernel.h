@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ADFunctorInterface.h"
 
 class ThermalSolidProperties;
 
@@ -18,7 +17,7 @@ class ThermalSolidProperties;
  * Outer wall radiative heat transfer kernel for the path-integrated incompressible conjugate heat
  * transfer model
  */
-class ADPipeOuterWallRadiationScalarKernel : public ADScalarKernel, public ADFunctorInterface
+class ADPipeOuterWallRadiationScalarKernel : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 
@@ -35,17 +34,17 @@ protected:
   /// Property state integration flag
   const bool _is_implicit;
   /// Cross-sectional area of this wall layer
-  const Moose::Functor<ADReal> & _area;
+  const Function & _area;
   /// Perimeter of this wall node exposed to the radiative environment
-  const Moose::Functor<ADReal> & _perimeter;
-  /// Ambient temperature functor
-  const Moose::Functor<ADReal> & _T_ambient;
-  /// Emissivity functor
-  const Moose::Functor<ADReal> & _emissivity;
-  /// View factor functor
-  const Moose::Functor<ADReal> & _view_factor;
-  /// Functor by which to scale the radiative heat transfer term
-  const Moose::Functor<ADReal> & _scale;
+  const Function & _perimeter;
+  /// Ambient temperature function
+  const Function & _T_ambient;
+  /// Emissivity function
+  const Function & _emissivity;
+  /// View factor function
+  const Function & _view_factor;
+  /// Function by which to scale the radiative heat transfer term
+  const Function & _scale;
   /// Stefan-Boltzmann constant
   const Real _sigma;
 };
