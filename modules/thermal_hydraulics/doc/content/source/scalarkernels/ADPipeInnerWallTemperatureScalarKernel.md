@@ -17,10 +17,13 @@ the convective heat exchange with the primary flowing fluid.
 
 This kernel takes a solid properties object based on the
 [ThermalSolidProperties.md] base class. The convective heat transfer coefficient $h$ is
-supplied as a [functor](/Functors/index.md) through the
-[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/heat_transfer_coefficient)
-parameter; [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
-correlation. Unlike $h$, the wetted perimeter and all of the geometry inputs inherited
+computed by the kernel itself from the Dittus-Boelter correlation through
+[DittusBoelterHTCInterface.md], which adds the
+[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/fluid_properties),
+[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/reference_pressure), and
+[!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/flow_area) parameters; the
+correlation draws its remaining inputs from the mass flow rate and fluid temperatures
+already coupled above. The wetted perimeter and all of the geometry inputs inherited
 from [ADPipeWallTemperatureScalarKernelBase.md] (this node's and its upstream/downstream
 neighbors' wall cross-sectional areas, the radial interface perimeter and thickness, this
 node's control-volume length, and the axial spacings to each neighbor) are defined as

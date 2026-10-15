@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ADPipeWallTemperatureScalarKernelBase.h"
-#include "ADFunctorInterface.h"
+#include "DittusBoelterHTCInterface.h"
 
 /**
  * Outer wall path-integrated incompressible conjugate heat transfer kernel with a coupled secondary
@@ -18,7 +18,7 @@
  */
 class ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel
   : public ADPipeWallTemperatureScalarKernelBase,
-    public ADFunctorInterface
+    public DittusBoelterHTCInterface
 {
   using Base = ADPipeWallTemperatureScalarKernelBase;
 
@@ -30,6 +30,12 @@ protected:
   virtual ADReal otherNodeTemperature() const override { return _Tin[0]; }
   virtual ADReal convectiveLinearHeatRate() const override;
   virtual Real convectiveJacobian() const override;
+
+  virtual const ADReal & massFlowRate() const override { return _m[0]; }
+  virtual const ADReal & fluidTemperature() const override { return _Tf[0]; }
+  virtual const ADReal & inletFluidTemperature() const override { return _Tfup[0]; }
+  virtual const ADReal & outletFluidTemperature() const override { return _Tfdown[0]; }
+  virtual Real wettedPerimeter(Real t) const override;
 
   /// Coupled mass flow rate of the secondary-side fluid
   const ADVariableValue & _m;
@@ -43,6 +49,4 @@ protected:
   const ADVariableValue & _Tfdown;
   /// Wetted perimeter of the secondary-side flow channel adjacent to this wall node
   const Function & _wetted_perimeter;
-  /// Secondary-side heat transfer coefficient
-  const Moose::Functor<ADReal> & _h;
 };

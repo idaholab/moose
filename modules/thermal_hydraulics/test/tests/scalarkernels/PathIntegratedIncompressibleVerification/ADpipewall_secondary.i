@@ -3,14 +3,14 @@
 # convection (ADPipeInnerWallTemperatureScalarKernel), radial conduction through the wall,
 # and secondary-side convection
 # (ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel) - a double-pipe-style
-# conjugate heat transfer arrangement. Each side's Dittus-Boelter coefficient is supplied
-# by its own ADDittusBoelterHTCUserObject. The analytical Tin/Tout below are the steady
+# conjugate heat transfer arrangement. Each kernel computes its own side's Dittus-Boelter
+# coefficient. The analytical Tin/Tout below are the steady
 # state of that series-resistance circuit, solved algebraically at parse time with both
 # streams' water properties fixed at representative constants (mu_f, cp_f, k_f), giving a
 # simple linear system.
 #
 # The ~7e-4 to 1e-3 relative mismatch against those analytical values comes from the
-# constants, not from the solve: the HTC objects evaluate water properties through the
+# constants, not from the solve: the kernels evaluate water properties through the
 # fluid_properties Water97FluidProperties at each stream's bulk film temperature. The
 # secondary stream sits at Tf2 = 283.15 K, where water's viscosity is about 30% higher
 # than the mu_f used in the cross-check, which lowers h2 by about 11% and accounts for
@@ -156,7 +156,9 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    heat_transfer_coefficient = h1
+    fluid_properties = water
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -184,7 +186,9 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     upstream_fluid_temperature = Tf2v
     downstream_fluid_temperature = Tf2v
     solid_properties = wall_sp
-    heat_transfer_coefficient = h2
+    fluid_properties = water
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area2}
     wetted_perimeter = ${wetted_perimeter2}
     area = ${area_out}
     interface_perimeter = ${interface_perimeter}
@@ -199,31 +203,6 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
   [outer_dt]
     type = ADScalarTimeDerivative
     variable = Tout_wall
-  []
-[]
-
-[UserObjects]
-  [h1]
-    type = ADDittusBoelterHTCUserObject
-    mass_flow_rate = m1v
-    fluid_properties = water
-    T_fluid = Tf1v
-    T_fluid_inlet = Tf1v
-    T_fluid_outlet = Tf1v
-    reference_pressure = ${Pin}
-    flow_area = ${flow_area1}
-    wetted_perimeter = ${wetted_perimeter1}
-  []
-  [h2]
-    type = ADDittusBoelterHTCUserObject
-    mass_flow_rate = m2v
-    fluid_properties = water
-    T_fluid = Tf2v
-    T_fluid_inlet = Tf2v
-    T_fluid_outlet = Tf2v
-    reference_pressure = ${Pin}
-    flow_area = ${flow_area2}
-    wetted_perimeter = ${wetted_perimeter2}
   []
 []
 

@@ -18,7 +18,7 @@ InputParameters
 ADPipeInnerWallTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
-  params += ADFunctorInterface::validParams();
+  params += DittusBoelterHTCInterface::validParams();
   params.addClassDescription(
       "Solves for the temperature of the inner-surface radial node of a pipe wall.");
   params.addCoupledVar("mass_flow_rate",
@@ -45,8 +45,6 @@ ADPipeInnerWallTemperatureScalarKernel::validParams()
       "name");
   params.addRequiredParam<FunctionName>(
       "wetted_perimeter", "Wetted perimeter of the fluid flow channel adjacent to this node [m]");
-  params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
-                                            "Heat transfer coefficient of the fluid [W/(m^2-K)]");
 
   return params;
 }
@@ -54,29 +52,34 @@ ADPipeInnerWallTemperatureScalarKernel::validParams()
 ADPipeInnerWallTemperatureScalarKernel::ADPipeInnerWallTemperatureScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
+    DittusBoelterHTCInterface(this),
     _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
     _Tout(ScalarCoupleable::adCoupledScalarValue("outer_wall_temperature")),
     _Tf(ScalarCoupleable::adCoupledScalarValue("fluid_temperature")),
     _Tfup(ScalarCoupleable::adCoupledScalarValue("upstream_fluid_temperature")),
     _Tfdown(ScalarCoupleable::adCoupledScalarValue("downstream_fluid_temperature")),
-    _wetted_perimeter(getFunction("wetted_perimeter")),
-    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
+    _wetted_perimeter(getFunction("wetted_perimeter"))
 {
+}
+
+Real
+ADPipeInnerWallTemperatureScalarKernel::wettedPerimeter(const Real t) const
+{
+  return _wetted_perimeter.value(t, Point());
 }
 
 ADReal
 ADPipeInnerWallTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
-  const Moose::ElemArg elem_arg = Moose::ElemArg();
   const int i = 0;
-  const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
+  // Time at which the correlation's pressure and flow area inputs are evaluated
+  const Real t_props = Base::_is_implicit ? _t : _t_old;
   // Upwind the segment inlet temperature on the flow direction
   const auto Tin = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tfdown[i] +
                    1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tfup[i];
 
   // Convective heat transfer with the fluid
-  return _h(elem_arg, state) * _wetted_perimeter.value(_t, Point()) / 2.0 *
+  return wallHeatTransferCoefficient(t_props) * _wetted_perimeter.value(_t, Point()) / 2.0 *
          (_Tf[i] + Tin - 2 * Base::_u[i]);
 }
 
