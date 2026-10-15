@@ -10,7 +10,10 @@
              'LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
-    abs_zero = 1e-8
+    # The outlet pressure is pinned near zero, so p_clean_out and the outlet end of the pressure
+    # profile are 1e-10 to 1.7e-5 against a 1e5 pressure drop and only reflect the solver
+    # tolerances. Every other nonzero value in these files exceeds 1e-3.
+    abs_zero = 1e-4
   []
   [straight-diagonal-complete-stress]
     type = 'CSVDiff'
@@ -29,6 +32,8 @@
                "Outputs/file_base=porous-baffle-straight-diagonal-complete-stress_out"
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
-    abs_zero = 1e-8
+    # p_clean_out is 2.5e-7 against a 1e5 pressure drop and only reflects the solver tolerances.
+    # Every other nonzero value in these files exceeds 1e-3.
+    abs_zero = 1e-6
   []
 []
