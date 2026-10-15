@@ -35,6 +35,14 @@ public:
    * @param gradient Whether the accessor reads the gradient
    */
   void add(ADSlotAssignment & slot, const Variable & var, bool gradient);
+  /**
+   * Register an AD material property read by the object, whose stored derivatives are mapped to
+   * the slots of the object
+   * @param map The slot map of the reader
+   * @param inputs The slot blocks of the stored derivatives in each subdomain
+   */
+  void addProperty(ADPropertySlotMap & map,
+                   const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & inputs);
 
   /**
    * Assign the slots of all registered accessors
@@ -56,6 +64,22 @@ public:
               const Variable & ivar,
               unsigned int max_slots,
               const Variable & displacements);
+  /**
+   * Assign the slots of all registered accessors and the slot maps of all registered AD material
+   * properties, followed by the displacement slots of the current configuration or of the
+   * properties that depend on the displacements
+   * @param object The residual object, for error messages
+   * @param ivar The Kokkos residual variable
+   * @param max_slots The number of derivative slots declared by the residual object, which the
+   * accessors and the property inputs may occupy ahead of the displacement slots
+   * @param displacements The displacement variable of the current configuration
+   * @param mesh The Kokkos mesh, which numbers the subdomains of the slot maps
+   */
+  void assign(const MooseObject & object,
+              const Variable & ivar,
+              unsigned int max_slots,
+              const Variable & displacements,
+              const Mesh & mesh);
   /**
    * Assign the slots of all registered accessors of a material, followed by the displacement slots
    * of the current configuration
@@ -93,7 +117,8 @@ private:
   void assignSlots(const MooseObject & object,
                    const Variable * ivar,
                    unsigned int max_slots,
-                   const Variable & displacements);
+                   const Variable & displacements,
+                   const Mesh * mesh = nullptr);
 
   /**
    * Whether a variable carries derivatives: a nonlinear variable at its current state, which for a
@@ -103,8 +128,34 @@ private:
    */
   bool seeded(const Variable * ivar, const Variable & var, unsigned int comp = 0) const;
 
+  /// A registered AD material property
+  struct PropertyRequest
+  {
+    /// Slot map written into the reader
+    ADPropertySlotMap * map;
+    /// Slot blocks of the stored derivatives in each subdomain
+    const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> * inputs;
+  };
+
+  /**
+   * Whether a variable carries derivatives for a residual object: a variable of the residual
+   * system, all of which are nonlinear, that the coupling matrix couples to the residual variable
+   * @param ivar The Kokkos residual variable
+   * @param sys The system number of the variable
+   * @param var The variable number in its system
+   */
+  bool seeded(const Variable & ivar, unsigned int sys, unsigned int var) const;
+  /**
+   * Assign the slot maps of the registered AD material properties
+   * @param ivar The Kokkos residual variable
+   * @param mesh The Kokkos mesh
+   */
+  void assignProperties(const Variable & ivar, const Mesh & mesh);
+
   /// Registered accessors
   std::vector<Request> _requests;
+  /// Registered AD material properties
+  std::vector<PropertyRequest> _property_requests;
   /// Slot table built from the registered accessors
   ADSlotTable _table;
 };
