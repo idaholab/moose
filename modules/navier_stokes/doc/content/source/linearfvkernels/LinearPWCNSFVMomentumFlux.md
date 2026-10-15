@@ -11,10 +11,8 @@ the face mass flux and the porosity on each side of the face. The advection cont
 into a cell row is scaled by that cell's inverse porosity, so the mass flux transports interstitial
 velocity.
 
-At a porous baffle,
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction)
-selects whether this kernel uses the local velocity state for each side of the advection operator
-or the shared state supplied by the configured interpolation method. The
+At a pressure baffle the superficial velocity jumps, so each side of the advection operator uses
+its own face state instead of the state interpolated across the baffle. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
 Bernoulli pressure jump and any irreversible form loss, as described below.
 
@@ -26,7 +24,10 @@ the jump-safe harmonic two-point normal-stress treatment instead of the standard
 face-interpolated stress. When nonorthogonal or deviatoric stress corrections are requested,
 this treatment includes their side-local gradient contributions in the same half-cell resistance
 balance, producing a single conservative viscous traction without interpolating a gradient across
-a material jump. Porosity must be positive on every active face.
+a material jump. This treatment is required when the
+[PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) object has pressure baffles, where it is
+further adapted to the velocity jump as described in [#baffle-stress]. Porosity must be positive
+on every active face.
 
 ## Advection treatment across a porosity jump
 
@@ -77,17 +78,26 @@ $\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contribu
 \end{equation}
 
 where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). When
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction) is
-`one-sided`, the shared interpolated state is replaced by the state local to each row:
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). On a pressure
+baffle, the shared interpolated state is replaced by the face state of each row, extrapolated from
+that row's cell with its own velocity gradient:
 
 \begin{equation}
 \begin{aligned}
-  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}U_{i,P}, \\
-  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}U_{i,N}.
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}
+    \left(U_{i,P}+\nabla U_{i,P}\mathbin{\cdot}\boldsymbol{r}_P\right), \\
+  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}
+    \left(U_{i,N}-\nabla U_{i,N}\mathbin{\cdot}\boldsymbol{r}_N\right),
 \end{aligned}
 \label{eq:pw-momentum-one-sided-advection}
 \end{equation}
+
+with $\boldsymbol{r}_P=\boldsymbol{x}_f-\boldsymbol{x}_P$ and
+$\boldsymbol{r}_N=\boldsymbol{x}_N-\boldsymbol{x}_f$. The gradients come from
+[FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md), so they do not see the
+jump, and the face states are exact for a velocity that is linear on each side. The implicit
+stencil keeps the shared interpolation weights and the difference is deferred to the right-hand
+side.
 
 Rather than representing the omitted porosity-gradient term as a volumetric or distributional
 advection force, the interface model replaces its normal kinetic-head effect with the reversible
@@ -245,6 +255,58 @@ so the additional porosity-gradient term requires a separate volumetric treatmen
 baffle model that includes an independent viscous or tangential surface force requires a
 corresponding traction-jump condition instead of the continuous-viscous-traction assumption used
 here.
+
+## Stress treatment on a pressure baffle id=baffle-stress
+
+On a pressure baffle the superficial velocity itself jumps: mass conservation keeps
+$\rho\boldsymbol{U}\mathbin{\cdot}\boldsymbol{n}_f$ continuous, so the normal superficial
+velocity jumps with density, and the absence of a tangential baffle force keeps the interstitial
+tangential velocity $\boldsymbol{w}=(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)
+\boldsymbol{U}/\epsilon$ continuous, so the tangential superficial velocity jumps with porosity.
+A common superficial face velocity, as in [eq:pw-momentum-half-cell-tractions], would read these
+jumps as gradients. The baffle stress therefore treats the two parts of the traction separately.
+
+The tangential part uses one interstitial face velocity $\boldsymbol{w}_f$, seen as
+$\epsilon_s\boldsymbol{w}_f$ from side $s$. Requiring one shear traction on both half-cells and
+eliminating $\boldsymbol{w}_f$ gives
+
+\begin{equation}
+\begin{aligned}
+  \boldsymbol{t}_f^{t} &= T_f^{t}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)\left[
+    \frac{\boldsymbol{U}_N+d_N\boldsymbol{c}_N}{\epsilon_N}
+    -\frac{\boldsymbol{U}_P-d_P\boldsymbol{c}_P}{\epsilon_P}\right], \\
+  T_f^{t} &= \left(\frac{d_P}{\mu_P\epsilon_P}+\frac{d_N}{\mu_N\epsilon_N}\right)^{-1},
+\end{aligned}
+\label{eq:pw-momentum-baffle-shear}
+\end{equation}
+
+where $\boldsymbol{c}_s$ collects the nonorthogonal corrections of
+[eq:pw-momentum-nonorthogonal-corrections] for all velocity components. For equal porosity this
+reduces to [eq:pw-momentum-discontinuous-stress].
+
+The normal part is evaluated separately on each side against that side's face normal velocity
+$\phi_f/\rho_s$:
+
+\begin{equation}
+\begin{aligned}
+  t_{P,f}^{n} &= \frac{\mu_P}{d_P}\left(\frac{\phi_f}{\rho_P}
+    -\boldsymbol{U}_P\mathbin{\cdot}\boldsymbol{n}_f
+    +d_P\boldsymbol{c}_P\mathbin{\cdot}\boldsymbol{n}_f\right), \\
+  t_{N,f}^{n} &= \frac{\mu_N}{d_N}\left(\boldsymbol{U}_N\mathbin{\cdot}\boldsymbol{n}_f
+    +d_N\boldsymbol{c}_N\mathbin{\cdot}\boldsymbol{n}_f-\frac{\phi_f}{\rho_N}\right).
+\end{aligned}
+\label{eq:pw-momentum-baffle-normal}
+\end{equation}
+
+The two normal stresses need not balance. Their difference is a normal viscous stress jump that
+the inviscid [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) does not include,
+consistent with that model. Component $i$ of the traction on side $s$ is
+$t_{i,f}^{t}+t_{s,f}^{n}n_{f,i}$. The part proportional to $U_i$ is assembled implicitly, using
+the tangential coefficients of [eq:pw-momentum-baffle-shear] and the ordinary two-point
+transmissibility of [eq:pw-momentum-harmonic-transmissibility] for the normal part; the remainder,
+including the coupling to the other velocity components, is lagged on the right-hand side. With
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_deviatoric_terms) enabled, each side adds
+its own deviatoric correction $\mu_s c_{s,i}^{\mathrm{dev}}$ explicitly.
 
 ## Example Input Syntax
 

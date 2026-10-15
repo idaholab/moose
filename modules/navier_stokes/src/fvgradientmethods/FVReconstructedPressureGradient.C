@@ -47,12 +47,6 @@ FVReconstructedPressureGradient::validParams()
       0.1,
       "0.0<gradient_relaxation<=1.0",
       "Relaxation factor applied when updating the reconstructed pressure-coupling gradient.");
-  params.addParam<MooseEnum>(
-      "baffle_velocity_gradient_reconstruction",
-      MooseEnum("one-sided shared", "one-sided"),
-      "Whether the lagged velocity gradient in the cell-velocity reconstruction is taken from "
-      "each side of a pressure baffle independently or interpolated across the baffle. Only has "
-      "an effect on pressure-baffle faces of a PorousRhieChowMassFlux.");
   return params;
 }
 
@@ -60,9 +54,7 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
   : FVGradientMethod(params),
     MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
-    _gradient_relaxation(getParam<Real>("gradient_relaxation")),
-    _use_one_sided_baffle_velocity_gradient(
-        getParam<MooseEnum>("baffle_velocity_gradient_reconstruction") == "one-sided")
+    _gradient_relaxation(getParam<Real>("gradient_relaxation"))
 {
 }
 
@@ -382,12 +374,12 @@ FVReconstructedPressureGradient::reconstructionVelocityGradient(
 {
   const auto dimension = rc.dimension();
   const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
-  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a baffle configured for
-  // one-sided reconstruction, use the owned cell's gradient (zero Hessian approximation).
-  // Otherwise interpolate the two lagged cell gradients to the face.
+  // At a domain boundary, the edge of the Rhie-Chow block restriction, or a pressure baffle, use
+  // the owned cell's gradient (zero Hessian approximation). The velocity jumps across a baffle,
+  // so the neighbor gradient describes a different field. Otherwise interpolate the two lagged
+  // cell gradients to the face.
   if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()) ||
-      (_use_one_sided_baffle_velocity_gradient && _porous_rhie_chow &&
-       _porous_rhie_chow->faceIsBaffle(fi)))
+      (_porous_rhie_chow && _porous_rhie_chow->faceIsBaffle(fi)))
     return elem_gradient;
 
   const auto & velocity = rc.velocityVariable(velocity_component);
@@ -436,7 +428,12 @@ FVReconstructedPressureGradient::assembleFaceProjection(
   // corrected flux, including zero normal flux on impermeable boundaries.
   const Real normal_alignment =
       pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
-  const Real face_flux = rc.getVolumetricFaceFlux(*fi);
+  // The superficial normal velocity jumps with density across a pressure baffle. Each side
+  // recovers its own face value from the shared mass flux and its own density.
+  const bool baffle_face = pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH &&
+                           _porous_rhie_chow && _porous_rhie_chow->faceIsBaffle(*fi);
+  const Real face_flux = baffle_face ? _porous_rhie_chow->baffleNormalVelocity(*fi, elem_has_info)
+                                     : rc.getVolumetricFaceFlux(*fi);
   mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
   Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 

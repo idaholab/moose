@@ -62,6 +62,35 @@ public:
   /// Whether a face is governed by a pressure-jump model.
   bool faceIsBaffle(const FaceInfo & fi) const;
 
+  /// Whether at least one pressure-jump model is configured.
+  bool hasPressureBaffles() const { return !_pressure_jump_models.empty(); }
+
+  /**
+   * Return the superficial velocity at a baffle face as seen from one side.
+   *
+   * The velocity is extrapolated from the side's cell center with that side's velocity gradient,
+   * which is exact for a velocity that is linear on each side and needs no data from across the
+   * baffle. Before the velocity gradients are linked, the cell velocity is returned.
+   * @param fi The baffle face
+   * @param elem_side Whether to return the element-side state
+   */
+  RealVectorValue baffleFaceVelocity(const FaceInfo & fi, bool elem_side) const;
+
+  /**
+   * Return the face-normal superficial velocity mdot_f / rho_s on one side of a baffle face,
+   * oriented along FaceInfo::normal().
+   * @param fi The baffle face
+   * @param elem_side Whether to use the element-side density
+   */
+  Real baffleNormalVelocity(const FaceInfo & fi, bool elem_side) const;
+
+  /**
+   * Return the published gradient of one velocity component, available once pressure baffles
+   * have been linked to the momentum systems.
+   * @param component The velocity component
+   */
+  const LinearFVGradientReader & velocityGradient(unsigned int component) const;
+
   /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
   Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 
@@ -91,9 +120,6 @@ public:
   void meshChanged() override;
 
 private:
-  /// Whether at least one pressure-jump model is configured.
-  bool hasPressureBaffles() const { return !_pressure_jump_models.empty(); }
-
   /// Cache cell volume times porosity in the pressure-system degree-of-freedom ordering.
   void setupPorousMeshInformation();
 
@@ -111,6 +137,9 @@ private:
 
   /// Under-relaxation factor applied when updating pressure jumps.
   const Real _pressure_jump_relaxation;
+
+  /// Published velocity gradients, one per component, read by the baffle face states.
+  std::vector<const LinearFVGradientReader *> _velocity_gradients;
 
   /// Restartable face field storing pressure as non-owner minus owner.
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;

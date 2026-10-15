@@ -1,29 +1,85 @@
 [Tests]
   issues = '#31995'
-  design = 'FVReconstructedPressureGradient.md LinearPWCNSFVMomentumFlux.md '
-           'LinearFVPressureCorrectionDiffusionJump.md'
+  design = 'FVVelocityJumpGreenGaussGradient.md FVReconstructedPressureGradient.md '
+           'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md'
 
-  [continuous-properties]
-    type = MMSTest
-    input = test.py
-    test_case = TestContinuousProperties
-    requirement = 'The system shall reconstruct a manufactured piecewise-linear velocity field '
-                  'and zero pressure gradient across a zero-jump interface with continuous '
-                  'material properties with decreasing velocity, pressure-gradient, and pressure '
-                  'oscillation errors using both shared and side-local velocity gradients.'
-    heavy = true
-    max_threads = 1 # see libmesh issue #3808
-  []
+  [exactness]
+    requirement = 'The system shall reproduce a velocity field that is linear on each side of a '
+                  'pressure baffle, together with the piecewise-constant pressure and the zero '
+                  'pressure gradient, to round-off on a uniform mesh'
 
-  [density-jump-equal-porosity]
-    type = MMSTest
-    input = test.py
-    test_case = TestDensityJumpEqualPorosity
-    requirement = 'The system shall reconstruct a manufactured piecewise-linear velocity field '
-                  'with a density jump and equal porosity with decreasing velocity, '
-                  'pressure-gradient, and pressure oscillation errors using both shared and '
-                  'side-local velocity gradients.'
-    heavy = true
-    max_threads = 1 # see libmesh issue #3808
+    [continuous]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = continuous.csv
+      cli_args = 'Outputs/file_base=continuous'
+      abs_zero = 1e-10
+      detail = 'with continuous material properties and a sheared tangential velocity,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [slope-jump]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = slope-jump.csv
+      cli_args = 'tangential_slope_right=0.5 Outputs/file_base=slope-jump'
+      abs_zero = 1e-10
+      detail = 'with an inviscid tangential velocity whose slope differs between the sides,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [density-jump]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = density-jump.csv
+      cli_args = 'rho_right=2 Outputs/file_base=density-jump'
+      abs_zero = 1e-10
+      detail = 'with a density jump and both normal and tangential velocity,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [porosity-jump]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = porosity-jump.csv
+      cli_args = 'eps_right=0.5 Outputs/file_base=porosity-jump'
+      abs_zero = 1e-10
+      detail = 'with a porosity jump and a Bernoulli pressure jump,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [viscous-density-jump]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = viscous-density-jump.csv
+      cli_args = 'mu_left=0.01 mu_right=0.01 rho_right=2 Outputs/file_base=viscous-density-jump'
+      abs_zero = 1e-10
+      detail = 'with viscosity and a density jump,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [viscous-porosity-jump]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = viscous-porosity-jump.csv
+      cli_args = 'mu_left=0.01 mu_right=0.02 tangential_slope_right=0.1 eps_right=0.5 '
+                 'Outputs/file_base=viscous-porosity-jump'
+      abs_zero = 1e-10
+      detail = 'with viscosity and porosity jumps that carry one shear traction, and'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [skewed]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = skewed.csv
+      cli_args = 'skew=0.25 nonorthogonal=true mu_left=0.01 mu_right=0.02 '
+                 'tangential_slope_right=0.1 eps_right=0.5 rho_right=2 Outputs/file_base=skewed'
+      abs_zero = 1e-10
+      detail = 'on a uniform parallelogram mesh with nonorthogonal correction and jumps in '
+               'density, porosity, and viscosity.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
   []
 []

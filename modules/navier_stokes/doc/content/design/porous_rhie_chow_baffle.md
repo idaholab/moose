@@ -20,11 +20,28 @@ is therefore
 \end{equation}
 
 [LinearPWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$
-factor to each cell row. Its
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/baffle_advection_reconstruction) parameter
-selects local or shared velocity states at porous baffles. Independently,
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/baffle_velocity_gradient_reconstruction)
-controls whether cell-velocity reconstruction uses shared or side-local lagged velocity gradients.
+factor to each cell row.
+
+## Velocity jump
+
+Across a baffle, mass conservation keeps $\rho\mathbf{U}\cdot\mathbf{n}$ continuous and the
+absence of a tangential baffle force keeps the interstitial tangential velocity continuous, so the
+superficial velocity jumps wherever density or porosity does. Every operator that would otherwise
+interpolate velocity across the baffle uses one-sided states instead:
+
+- [FVVelocityJumpGreenGaussGradient.md] computes the velocity gradients from face states
+  extrapolated within each side, so the gradient does not read the jump as a slope. It is required
+  as the default gradient method of every velocity variable.
+- [LinearPWCNSFVMomentumFlux.md] advects each side's extrapolated face state and splits the
+  viscous traction into a shear part carried by the continuous interstitial tangential velocity and
+  a normal part evaluated on each side.
+- [FVReconstructedPressureGradient.md] recovers each side's face normal velocity from the shared
+  mass flux and that side's density.
+- The Rhie-Chow face flux interpolates $\rho\mathbf{H}/\mathbf{A}$ rather than the product of the
+  interpolated density and $\mathbf{H}/\mathbf{A}$.
+
+With these, a velocity field that is linear on each side of a baffle, together with its
+piecewise-constant pressure, is reproduced to round-off on uniform meshes.
 
 ## Pressure jump
 

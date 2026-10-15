@@ -9,10 +9,13 @@
 
 #include "PorousRhieChowMassFlux.h"
 
+#include "MathFVUtils.h"
 #include "MooseMesh.h"
 #include "NS.h"
 #include "FVPressureJumpGreenGaussGradient.h"
 #include "FVReconstructedPressureGradient.h"
+#include "FVVelocityJumpGreenGaussGradient.h"
+#include "LinearFVGradientReader.h"
 #include "LinearSystem.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVPressureCorrectionDiffusionJump.h"
@@ -157,6 +160,26 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
                  name(),
                  "' must use the pressure variable's FVPressureJumpGreenGaussGradient or an "
                  "FVReconstructedPressureGradient based on it when pressure baffles are present.");
+
+    // Velocity gradients that interpolate across a baffle turn the physical velocity jump into
+    // a slope. Every consumer of the default velocity gradient must see the one-sided states.
+    _velocity_gradients.clear();
+    for (auto * const velocity : _vel)
+    {
+      const auto & velocity_gradient = velocity->requestCellGradients();
+      auto * const velocity_gradient_method = dynamic_cast<FVVelocityJumpGreenGaussGradient *>(
+          &_fe_problem.getFVGradientMethod(velocity_gradient.method().name(), _tid));
+      if (!velocity_gradient_method)
+        mooseError("Velocity variable '",
+                   velocity->name(),
+                   "' must use FVVelocityJumpGreenGaussGradient as its default gradient method "
+                   "when PorousRhieChowMassFlux '",
+                   name(),
+                   "' has pressure baffles.");
+
+      velocity_gradient_method->linkFlowSystem(*this);
+      _velocity_gradients.push_back(&velocity_gradient);
+    }
   }
 
   setupPorousMeshInformation();
@@ -176,6 +199,38 @@ PorousRhieChowMassFlux::computeHbyA(bool verbose)
     _pressure_system->updateFVGradient(basePressureGradientField());
 
   RhieChowMassFlux::computeHbyA(verbose);
+
+  // The superficial velocity jumps with density across a baffle while rho U.n stays continuous.
+  // Interpolating rho H/A instead of the product of interpolated rho and H/A keeps the face flux
+  // from reading the velocity jump as a mass-flux error that the pressure would have to offset.
+  if (hasPressureBaffles())
+  {
+    const auto time_arg = Moose::currentState();
+    for (const auto * const fi : _flow_face_info)
+    {
+      if (!_vel[0]->isInternalFace(*fi) || !faceIsBaffle(*fi))
+        continue;
+
+      const auto & elem_info = *fi->elemInfo();
+      const auto & neighbor_info = *fi->neighborInfo();
+      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+      RealVectorValue face_rho_hbya;
+      for (const auto component : index_range(_HbyA_raw))
+      {
+        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+        const auto neighbor_dof =
+            neighbor_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+        Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                               face_rho_hbya(component),
+                               elem_rho * (*_HbyA_raw[component])(elem_dof),
+                               neighbor_rho * (*_HbyA_raw[component])(neighbor_dof),
+                               *fi,
+                               true);
+      }
+      _HbyA_flux[fi->id()] = face_rho_hbya * fi->normal();
+    }
+  }
 }
 
 void
@@ -260,6 +315,47 @@ bool
 PorousRhieChowMassFlux::faceIsBaffle(const FaceInfo & fi) const
 {
   return getPressureJumpModel(fi) != nullptr;
+}
+
+RealVectorValue
+PorousRhieChowMassFlux::baffleFaceVelocity(const FaceInfo & fi, const bool elem_side) const
+{
+  mooseAssert(fi.neighborPtr() && faceIsBaffle(fi), "Baffle face states require a baffle face.");
+
+  const auto & cell_info = elem_side ? *fi.elemInfo() : *fi.neighborInfo();
+  const auto state = Moose::currentState();
+  RealVectorValue velocity;
+  for (const auto component : index_range(_vel))
+    velocity(component) = _vel[component]->getElemValue(cell_info, state);
+
+  // Gradient history is initialized before the velocity gradients are linked.
+  if (_velocity_gradients.empty())
+    return velocity;
+
+  const auto cell_to_face = fi.faceCentroid() - cell_info.centroid();
+  for (const auto component : index_range(_vel))
+    velocity(component) += _velocity_gradients[component]->gradient(cell_info) * cell_to_face;
+
+  return velocity;
+}
+
+Real
+PorousRhieChowMassFlux::baffleNormalVelocity(const FaceInfo & fi, const bool elem_side) const
+{
+  mooseAssert(fi.neighborPtr() && faceIsBaffle(fi), "Baffle face states require a baffle face.");
+
+  // Mass conservation makes rho U.n continuous, so each side recovers its own normal velocity
+  // from the shared face mass flux.
+  const Elem * const elem = elem_side ? fi.elemPtr() : fi.neighborPtr();
+  return _face_mass_flux.evaluate(&fi) / _rho(makeElemArg(elem), Moose::currentState());
+}
+
+const LinearFVGradientReader &
+PorousRhieChowMassFlux::velocityGradient(const unsigned int component) const
+{
+  mooseAssert(component < _velocity_gradients.size(),
+              "Velocity gradients are linked only when pressure baffles are present.");
+  return *_velocity_gradients[component];
 }
 
 Real

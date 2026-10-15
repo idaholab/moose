@@ -17,8 +17,9 @@ class PorousRhieChowMassFlux;
  * Momentum flux kernel for porous equations written in superficial velocity.
  *
  * The advective contribution is divided by the porosity on each side of a face. Internal baffle
- * faces may use one-sided advected states, and the stress contribution may use a two-point
- * transmissibility.
+ * faces advect the one-sided face states of the porous Rhie-Chow object and use a stress
+ * discretization consistent with the velocity jump. Elsewhere, the stress contribution may use a
+ * two-point transmissibility.
  */
 class LinearPWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
 {
@@ -67,23 +68,38 @@ private:
   /// Whether to use a two-point harmonic transmissibility for the stress term.
   const bool _use_two_point_stress_transmissibility;
 
-  /// Whether baffle advection uses the velocity state local to each face side.
-  const bool _use_one_sided_baffle_advection;
-
   /// Compute the geometry and material data used by the harmonic stress discretization.
   TwoPointStressData twoPointStressData() const;
 
   /// Whether the current face is an internal face represented by a pressure-jump model.
   bool isInternalBaffleFace() const;
 
-  /// Whether the current baffle face requires a one-sided advected state on each side.
-  bool needsInternalBaffleAdvectionCorrection() const;
-
   /**
    * Compute the correction that replaces the shared advected state with a one-sided state.
    * @param elem_side Whether to compute the correction for the element side
    */
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
+
+  /// Implicit coefficients and deferred right-hand sides of the stress on a baffle face.
+  struct BaffleStressData
+  {
+    /// Coefficients of the element row on the element and neighbor values.
+    Real elem_elem;
+    Real elem_neighbor;
+    /// Coefficients of the neighbor row on the element and neighbor values.
+    Real neighbor_elem;
+    Real neighbor_neighbor;
+    /// Explicit parts of the element and neighbor rows.
+    Real elem_rhs;
+    Real neighbor_rhs;
+  };
+
+  /**
+   * Compute the stress on the current baffle face, per unit face area. The interstitial
+   * tangential velocity is continuous and carries one shear traction, while each side evaluates
+   * its normal stress against its own face normal velocity.
+   */
+  BaffleStressData baffleStressData() const;
 
   /**
    * Return the inverse porosity on one side of the current face.

@@ -30,10 +30,9 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    the pressure gradient used before a reconstructed coupling gradient exists. At an internal face,
    the lagged gradients of the two neighboring cells are averaged to a face value
    $(\nabla\mathbf{u})^{\text{lag}}_f$; at a domain boundary, or at the edge of this method's block
-   restriction, the owning cell's lagged gradient is used directly. On a pressure-baffle face,
-   [!param](/FVGradientMethods/FVReconstructedPressureGradient/baffle_velocity_gradient_reconstruction)
-   independently selects either this shared average or the gradient local to each cell side. This
-   numerical reconstruction choice does not alter the physical pressure jump.
+   restriction, the owning cell's lagged gradient is used directly. The velocity jumps across a
+   pressure baffle of a [PorousRhieChowMassFlux.md], so a baffle face also uses the owning cell's
+   gradient, which [FVVelocityJumpGreenGaussGradient.md] computes without the jump.
 
 2. Turn each corrected face flux into a face equation for the cell velocity. A first-order Taylor
    expansion of the velocity from the cell centroid to the face centroid gives
@@ -44,7 +43,8 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    \end{equation}
 
    Replacing $\mathbf{u}_f\cdot\mathbf{n}_f$ with the corrected face-normal velocity
-   $q_f/|\mathbf{S}_f|$ and moving the already-known Taylor term to the right-hand side gives, for
+   $q_f/|\mathbf{S}_f|$ (on a pressure baffle, the side's own value $\phi_f/\rho_P$, since
+   mass conservation keeps only $\rho\mathbf{u}\cdot\mathbf{n}_f$ continuous) and moving the already-known Taylor term to the right-hand side gives, for
    every face of $P$, one linear equation for the unknown cell velocity,
 
    \begin{equation}
