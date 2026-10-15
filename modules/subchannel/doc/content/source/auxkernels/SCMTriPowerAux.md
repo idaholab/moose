@@ -6,7 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve.
+This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve. The pin power correction factor is recomputed at every time step from the current value of [!param](/AuxKernels/SCMTriPowerAux/power) and the axial power profile function, so the total power remains conserved when either changes in time.
 
 ## Caveat
 
