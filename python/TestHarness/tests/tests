@@ -338,8 +338,8 @@
     type = PythonUnitTest
     input = test_MonitorProcesses.py
     required_python_packages = 'psutil'
-    requirement = 'The system shall measure a process tree memory usage excluding file-backed memory, '
-                  'on Linux kernels both with and without the smaps_rollup Pss_File breakdown.'
+    requirement = "The system shall measure a process's memory usage as its proportional set size, "
+                  "excluding file-backed memory when the kernel reports it separately."
     issues = '#33796'
   []
   [test_method]
