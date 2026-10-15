@@ -8,6 +8,8 @@ offset = 0.00
 []
 
 [Mesh]
+  # The contact-pressure CSV is sorted by node id, so keep ids independent of the mesh mode
+  allow_renumbering = false
   [top_block]
     type = GeneratedMeshGenerator
     dim = 3
