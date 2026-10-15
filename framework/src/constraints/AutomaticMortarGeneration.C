@@ -1914,9 +1914,6 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
   // linearized element does not have the same volume as the warped element
   const Real tol = (dim() == 3) ? 0.1 : TOLERANCE;
 
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_inactive_nodes_set;
-  const auto my_pid = _mesh.processor_id();
-
   // List of inactive nodes on local secondary elements
   std::unordered_set<dof_id_type> inactive_node_ids;
 
@@ -1947,55 +1944,20 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
           inactive_node_ids.insert(el->node_id(n));
       }
 
-  // Assemble list of procs that nodes contribute to
-  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-  {
-    const auto secondary_subd_id = pr.second;
-
-    // Loop through all elements not on my processor
-    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
-    {
-      // Get processor_id
-      const auto pid = el->processor_id();
-
-      // If element is in my subdomain, skip
-      if (pid == my_pid)
-        continue;
-
-      // If element on proc pid shares any of my inactive nodes, mark to send
-      for (const auto n : make_range(el->n_nodes()))
-      {
-        const auto node_id = el->node_id(n);
-        if (inactive_node_ids.find(node_id) != inactive_node_ids.end())
-          proc_to_inactive_nodes_set[pid].insert(node_id);
-      }
-    }
-  }
-
-  // Send list of inactive nodes
-  {
-    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes_vector;
-    for (const auto & proc_set : proc_to_inactive_nodes_set)
-      proc_to_inactive_nodes_vector[proc_set.first].insert(
-          proc_to_inactive_nodes_vector[proc_set.first].end(),
-          proc_set.second.begin(),
-          proc_set.second.end());
-
-    // First push data
-    auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
-                                                     const std::vector<dof_id_type> & sent_data)
-    {
-      if (pid == _mesh.processor_id())
-        mooseError("Should not be communicating with self.");
-      for (const auto pr : sent_data)
-        inactive_node_ids.insert(pr);
-    };
-    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
-  }
-  _inactive_local_lm_nodes.clear();
+  // Only the owner of a node zeroes its LM DoFs, but the owner need not own (or even ghost) any
+  // secondary lower-dimensional element touching it, so send each inactive node to its owner,
+  // which takes the union
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes;
   for (const auto node_id : inactive_node_ids)
-    _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+    proc_to_inactive_nodes[_mesh.node_ptr(node_id)->processor_id()].push_back(node_id);
+
+  _inactive_local_lm_nodes.clear();
+  auto action_functor = [this](const processor_id_type, const std::vector<dof_id_type> & sent_data)
+  {
+    for (const auto node_id : sent_data)
+      _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes, action_functor);
 }
 
 void
@@ -2007,8 +1969,10 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
     return;
   }
 
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
-  const auto my_pid = _mesh.processor_id();
+  // Only the owner of a node zeroes its LM DoFs, but the owner need not own (or even ghost) any
+  // secondary lower-dimensional element touching it. Each processor therefore sends every node of
+  // its local secondary elements to the node's owner, flagged as active if a local mortar segment
+  // touches it. A node is inactive if no processor flags it as active.
 
   // List of active nodes on local secondary elements
   std::unordered_set<dof_id_type> active_local_nodes;
@@ -2023,62 +1987,40 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
       active_local_nodes.insert(secondary_elem->node_id(n));
   }
 
-  // Assemble list of procs that nodes contribute to
-  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-  {
-    const auto secondary_subd_id = pr.second;
-
-    // Loop through all elements not on my processor
-    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
-    {
-      // Get processor_id
-      const auto pid = el->processor_id();
-
-      // If element is in my subdomain, skip
-      if (pid == my_pid)
-        continue;
-
-      // If element on proc pid shares any of my active nodes, mark to send
-      for (const auto n : make_range(el->n_nodes()))
-      {
-        const auto node_id = el->node_id(n);
-        if (active_local_nodes.find(node_id) != active_local_nodes.end())
-          proc_to_active_nodes_set[pid].insert(node_id);
-      }
-    }
-  }
-
-  // Send list of active nodes
-  {
-    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_active_nodes_vector;
-    for (const auto & proc_set : proc_to_active_nodes_set)
-    {
-      proc_to_active_nodes_vector[proc_set.first].reserve(proc_to_active_nodes_set.size());
-      for (const auto node_id : proc_set.second)
-        proc_to_active_nodes_vector[proc_set.first].push_back(node_id);
-    }
-
-    // First push data
-    auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
-                                                      const std::vector<dof_id_type> & sent_data)
-    {
-      if (pid == _mesh.processor_id())
-        mooseError("Should not be communicating with self.");
-      active_local_nodes.insert(sent_data.begin(), sent_data.end());
-    };
-    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_active_nodes_vector, action_functor);
-  }
-
-  // Every proc has correct list of active local nodes, now take complement (list of inactive nodes)
-  // and store to use later to zero LM DoFs on inactive nodes
-  _inactive_local_lm_nodes.clear();
+  // List of all nodes on local secondary elements
+  std::unordered_set<dof_id_type> local_nodes;
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(
              /*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
-        if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
-          _inactive_local_lm_nodes.insert(el->node_ptr(n));
+        local_nodes.insert(el->node_id(n));
+
+  // Pairs of (node id, 1 if active on the sending processor and 0 otherwise)
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned char>>>
+      proc_to_nodes;
+  for (const auto node_id : local_nodes)
+    proc_to_nodes[_mesh.node_ptr(node_id)->processor_id()].emplace_back(
+        node_id, active_local_nodes.count(node_id));
+
+  std::unordered_set<dof_id_type> candidate_nodes, active_nodes;
+  auto action_functor = [&candidate_nodes, &active_nodes](
+                            const processor_id_type,
+                            const std::vector<std::pair<dof_id_type, unsigned char>> & sent_data)
+  {
+    for (const auto & [node_id, active] : sent_data)
+    {
+      candidate_nodes.insert(node_id);
+      if (active)
+        active_nodes.insert(node_id);
+    }
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_nodes, action_functor);
+
+  // Store the owned inactive nodes to use later to zero LM DoFs on inactive nodes
+  _inactive_local_lm_nodes.clear();
+  for (const auto node_id : candidate_nodes)
+    if (!active_nodes.count(node_id))
+      _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)
