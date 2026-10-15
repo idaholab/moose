@@ -6,7 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This AuxKernel does the same thing as the [SCMQuadPowerIC](SCMQuadPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve.
+This AuxKernel does the same thing as the [SCMQuadPowerIC](SCMQuadPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve. The pin powers and pin power correction factors are recomputed once per time step, at the start of the time step, from the value of [!param](/AuxKernels/SCMQuadPowerAux/power) and from the axial power profile function evaluated at the new time. [!param](/AuxKernels/SCMQuadPowerAux/execute_on) only controls when `q_prime` is filled from these stored values; executing this object more often, for example on `LINEAR` or `MULTIAPP_FIXED_POINT_END`, does not update them. Because postprocessors and transfers execute after the start of the time step, a [!param](/AuxKernels/SCMQuadPowerAux/power) postprocessor that changes in time is applied one time step late, and changes to it during fixed point iterations within a time step are not picked up.
 
 ## Caveat
 
