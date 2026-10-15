@@ -334,6 +334,7 @@
     required_python_packages = 'psutil'
     requirement = 'The system shall measure a process tree memory usage excluding file-backed memory, '
                   'on Linux kernels both with and without the smaps_rollup Pss_File breakdown.'
+    issues = '#33796'
   []
   [test_method]
     type = PythonUnitTest
