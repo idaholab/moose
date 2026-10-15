@@ -10,7 +10,6 @@ porous-baffle calculations in the linear finite volume SIMPLE workflow.
 Compared with the base object, it adds:
 
 - cell-porosity scaling of the pressure-coupling fields,
-- harmonic interpolation of the pressure-diffusion coefficient by default,
 - porous-baffle pressure jumps stored and relaxed on coupled interface faces,
 - compatibility with [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md), which
   reconstructs the pressure separately on each side of every baffle, and
