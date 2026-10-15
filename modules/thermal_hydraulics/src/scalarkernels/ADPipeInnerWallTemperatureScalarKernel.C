@@ -9,7 +9,7 @@
 
 #include "ADPipeInnerWallTemperatureScalarKernel.h"
 
-#include "FunctorInterface.h"
+#include "Function.h"
 #include "ScalarCoupleable.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeInnerWallTemperatureScalarKernel);
@@ -18,6 +18,7 @@ InputParameters
 ADPipeInnerWallTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Solves for the temperature of the inner-surface radial node of a pipe wall.");
   params.addCoupledVar("mass_flow_rate",
@@ -42,7 +43,7 @@ ADPipeInnerWallTemperatureScalarKernel::validParams()
       {},
       "Fluid temperature adjacent to the downstream wall node. Takes a scalar variable "
       "name");
-  params.addRequiredParam<MooseFunctorName>(
+  params.addRequiredParam<FunctionName>(
       "wetted_perimeter", "Wetted perimeter of the fluid flow channel adjacent to this node [m]");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient of the fluid [W/(m^2-K)]");
@@ -53,12 +54,13 @@ ADPipeInnerWallTemperatureScalarKernel::validParams()
 ADPipeInnerWallTemperatureScalarKernel::ADPipeInnerWallTemperatureScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
+    ADFunctorInterface(this),
     _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
     _Tout(ScalarCoupleable::adCoupledScalarValue("outer_wall_temperature")),
     _Tf(ScalarCoupleable::adCoupledScalarValue("fluid_temperature")),
     _Tfup(ScalarCoupleable::adCoupledScalarValue("upstream_fluid_temperature")),
     _Tfdown(ScalarCoupleable::adCoupledScalarValue("downstream_fluid_temperature")),
-    _wetted_perimeter(this->template getFunctor<ADReal>("wetted_perimeter")),
+    _wetted_perimeter(getFunction("wetted_perimeter")),
     _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
 {
 }
@@ -74,7 +76,7 @@ ADPipeInnerWallTemperatureScalarKernel::convectiveLinearHeatRate() const
                    1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tfup[i];
 
   // Convective heat transfer with the fluid
-  return _h(elem_arg, state) * _wetted_perimeter(elem_arg, state) / 2.0 *
+  return _h(elem_arg, state) * _wetted_perimeter.value(_t, Point()) / 2.0 *
          (_Tf[i] + Tin - 2 * Base::_u[i]);
 }
 

@@ -17,7 +17,7 @@ equation; it adds the following term for [!eqref](modules/thermal_hydraulics/the
 where
 
 - $\sigma$ is the Stefan-Boltzmann constant,
-- $f$ is an optional functor by which to scale the term,
+- $f$ is an optional function by which to scale the term,
 - $\varepsilon$ is the surface emissivity,
 - $F$ is the view factor for the portion of the outer wall surface exposed to the radiative environment at the ambient temperature,
 - $P_{o,w}$ is the total perimeter of this wall node,
@@ -34,7 +34,7 @@ supplied to this node's other kernel should be used here, for consistency).
 Some consideration should be given to the
 [!param](/ScalarKernels/ADPipeOuterWallRadiationScalarKernel/is_implicit) parameter. This
 term allows the user to select whether the solve should be done with the current or the
-previous state values of functor properties.
+previous state values of function properties.
 
 !syntax parameters /ScalarKernels/ADPipeOuterWallRadiationScalarKernel
 
