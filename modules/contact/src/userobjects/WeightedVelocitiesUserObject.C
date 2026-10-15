@@ -73,13 +73,26 @@ WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
               "AD contact tangents should only be requested while recording nodal-normal "
               "derivatives.");
   const Node * const node = lower_secondary_elem.node_ptr(nodal_index);
-  if (const auto it = _ad_nodal_tangents.find(node); it != _ad_nodal_tangents.end())
-    return it->second;
+  auto it = _ad_nodal_tangents.find(node);
+  if (it == _ad_nodal_tangents.end())
+    it = _ad_nodal_tangents
+             .emplace(node,
+                      Moose::Mortar::householderTangents(
+                          contactNormal(lower_secondary_elem, nodal_index)))
+             .first;
 
-  return _ad_nodal_tangents
-      .emplace(node,
-               Moose::Mortar::householderTangents(contactNormal(lower_secondary_elem, nodal_index)))
-      .first->second;
+#ifndef NDEBUG
+  // A cached frame must belong to the current geometry. The tolerance matches the stored versus AD
+  // nodal normal check in AutomaticMortarGeneration::computeADNodalNormals.
+  const auto & stored_tangents = amg().getNodalTangents(lower_secondary_elem);
+  for (const auto direction : make_range(2))
+    mooseAssert(
+        (MetaPhysicL::raw_value(it->second[direction]) - stored_tangents[direction][nodal_index])
+                .norm() < 1e-10,
+        "The stored and AD secondary nodal tangents must use the same geometry state.");
+#endif
+
+  return it->second;
 }
 
 void
@@ -175,6 +188,7 @@ WeightedVelocitiesUserObject::selfInitialize()
 {
   _dof_to_weighted_tangential_velocity.clear();
   _dof_to_real_tangential_velocity.clear();
+  _ad_nodal_tangents.clear();
 }
 
 void
@@ -182,7 +196,6 @@ WeightedVelocitiesUserObject::initialize()
 {
   // Clear weighted gaps
   WeightedGapUserObject::initialize();
-  _ad_nodal_tangents.clear();
   selfInitialize();
 }
 
