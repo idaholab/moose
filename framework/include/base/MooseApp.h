@@ -485,6 +485,12 @@ public:
   bool isRestarting() const;
 
   /**
+   * Whether this restart reads its mesh from the restart checkpoint, as recovery does, instead of
+   * building it from the Mesh block (requested with \p Problem/restart_use_checkpoint_mesh)
+   */
+  bool isRestartingFromCheckpointMesh() const { return _restart_from_checkpoint_mesh; }
+
+  /**
    * Whether or not this is a split mesh operation.
    */
   bool isSplitMesh() const;
@@ -976,6 +982,11 @@ public:
   void setRecover(bool value);
   ///@}
 
+  /**
+   * Sets whether this restart reads its mesh from the restart checkpoint
+   */
+  void setRestartFromCheckpointMesh(bool value) { _restart_from_checkpoint_mesh = value; }
+
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
 
@@ -1420,6 +1431,9 @@ protected:
 
   /// Whether or not this is a restart run
   bool _restart;
+
+  /// Whether this restart reads its mesh from the restart checkpoint
+  bool _restart_from_checkpoint_mesh;
 
   /// Whether or not we are performing a split mesh operation (--split-mesh)
   bool _split_mesh;
