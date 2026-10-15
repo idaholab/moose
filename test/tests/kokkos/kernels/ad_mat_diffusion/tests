@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosADMatDiffusion.md'
+
+  [jacobian]
+    requirement = 'The Kokkos system shall assemble exact Jacobians by automatic differentiation of kernels and boundary conditions reading material properties computed by automatic differentiation, including the derivatives of the properties with respect to coupled variables and to the displacements, for objects on the current and on the reference configuration and for properties declared by different materials on different blocks,'
+    [cartesian]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_mat_diffusion_jacobian.i'
+      detail = 'in Cartesian coordinates,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [rz]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_mat_diffusion_jacobian.i'
+      cli_args = 'Mesh/coord_type=RZ'
+      detail = 'in axisymmetric coordinates, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [constant]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_mat_diffusion_jacobian.i'
+      cli_args = 'Kernels/current/diffusivity=1 BCs/reference/property=2.5'
+      detail = 'with constant values given in place of property names.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

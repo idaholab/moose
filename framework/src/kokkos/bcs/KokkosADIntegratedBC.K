@@ -31,7 +31,7 @@ ADIntegratedBC::initialSetup()
   IntegratedBCBase::initialSetup();
 
   _max_ad_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
-  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots, _configuration.displacements());
+  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots, _configuration.displacements(), kokkosMesh());
   _ad_slots = _ad_setup.table();
 }
 
@@ -68,9 +68,10 @@ ADIntegratedBC::dispatch()
   TeamLaunch launch;
   launch.league_size = numKokkosBoundarySides();
 
-  // An object posed on the current configuration dispatches the instantiation whose dual numbers
-  // also carry the displacement slots
-  if (_configuration.displaced())
+  // An object posed on the current configuration, or reading a property that depends on the
+  // displacements, dispatches the instantiation whose dual numbers also carry the displacement
+  // slots
+  if (_ad_slots.hasDisplacements())
   {
     if (!_displaced_residual_dispatcher)
       _displaced_residual_dispatcher =
