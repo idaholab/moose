@@ -1,14 +1,14 @@
 # Two radial wall nodes bridge a fixed primary-fluid temperature Tf1 to a prescribed
 # outer-wall heat flux q_flux (ADPipeOuterWallHeatFluxScalarKernel), with no other path
 # out of the outer node. In steady state all of the applied heat must flow inward through
-# the fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
-# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject) and radial
-# conduction resistances in series, which is the series circuit solved algebraically below
+# the fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, which computes its
+# own Dittus-Boelter coefficient) and radial conduction resistances in series, which is
+# the series circuit solved algebraically below
 # for Tin_analytical/Tout_analytical using fluid properties fixed at Tf1 (mu1, cp1, k1).
 #
 # The remaining ~4e-5 relative mismatch against those analytical values is incomplete
 # transient decay rather than a property-evaluation or solve-tolerance effect: raising
-# end_time from 100 s to 5000 s drops it to ~7e-6. The HTC object's use of
+# end_time from 100 s to 5000 s drops it to ~7e-6. The kernel's use of
 # Water97FluidProperties at the segment's bulk film temperature, rather than the fixed
 # mu1/cp1/k1 constants, is worth only ~0.17% in h here, well below that.
 
@@ -122,7 +122,9 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    heat_transfer_coefficient = h1
+    fluid_properties = water
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -161,20 +163,6 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
   [outer_dt]
     type = ADScalarTimeDerivative
     variable = Tout_wall
-  []
-[]
-
-[UserObjects]
-  [h1]
-    type = ADDittusBoelterHTCUserObject
-    mass_flow_rate = m1v
-    fluid_properties = water
-    T_fluid = Tf1v
-    T_fluid_inlet = Tf1v
-    T_fluid_outlet = Tf1v
-    reference_pressure = ${Pin}
-    flow_area = ${flow_area1}
-    wetted_perimeter = ${wetted_perimeter1}
   []
 []
 
