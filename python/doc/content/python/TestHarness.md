@@ -266,7 +266,7 @@ Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHa
 
 #### MOOSE_MAX_MEMORY_PER_SLOT
 
-Set `MOOSE_MAX_MEMORY_PER_SLOT` to a float or integer to influence the `--max-memory-per-slot` command line option, limiting the amount of estimated memory per slot (MPI process or thread) each job can use in MB. If the `--max-memory-per-slot` command line option is set, it will take precident over this variable.
+Set `MOOSE_MAX_MEMORY_PER_SLOT` to a float or integer to influence the `--max-memory-per-slot` command line option, limiting the amount of estimated memory per slot (MPI process or thread) each job can use in MB. If the `--max-memory-per-slot` command line option is set, it will take precedence over this variable.
 
 On Linux, the memory measured for a job excludes file-backed memory, such as the pages
 backing the test executable and its shared libraries. Those pages are typically mapped by
