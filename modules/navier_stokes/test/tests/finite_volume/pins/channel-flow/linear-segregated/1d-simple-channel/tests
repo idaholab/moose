@@ -32,23 +32,23 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
-  [shared-baffle-velocity-gradient-reconstruction]
-    type = RunApp
-    input = form-loss-orientation.i
-    cli_args = 'FVGradientMethods/reconstructed/baffle_velocity_gradient_reconstruction=shared'
-    requirement = 'The system shall support interpolating the lagged velocity gradient across a '
-                  'pressure baffle independently of the physical pressure-jump model.'
-    design = 'FVReconstructedPressureGradient.md'
+  [reject-ordinary-velocity-gradient]
+    type = RunException
+    input = porous-baffle-1d.i
+    cli_args = 'Variables/superficial_u/gradient_method=green-gauss'
+    expect_err = "Velocity variable 'superficial_u' must use FVVelocityJumpGreenGaussGradient as its default gradient method"
+    requirement = 'The system shall reject ordinary Green-Gauss as the velocity variable gradient when internal pressure jumps are present.'
+    design = 'FVVelocityJumpGreenGaussGradient.md PorousRhieChowMassFlux.md'
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
 
-  [shared-baffle-advection-reconstruction]
-    type = RunApp
-    input = form-loss-orientation.i
-    cli_args = 'LinearFVKernels/u_advection/baffle_advection_reconstruction=shared'
-    requirement = 'The system shall support shared momentum advection across a pressure baffle '
-                  'independently of the physical pressure-jump model.'
+  [reject-interpolated-baffle-stress]
+    type = RunException
+    input = porous-baffle-1d.i
+    cli_args = 'LinearFVKernels/u_advection/use_two_point_stress_transmissibility=false'
+    expect_err = 'Must be true when PorousRhieChowMassFlux'
+    requirement = 'The system shall reject the interpolated-viscosity momentum stress when internal pressure jumps are present.'
     design = 'LinearPWCNSFVMomentumFlux.md'
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808

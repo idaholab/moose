@@ -1,16 +1,24 @@
-# Manufactured pressure-baffle problem with piecewise-linear superficial velocity. In coordinates
-# normal (r) and tangent (t) to the interface, rho * U_r is constant and
-# U_t = tangential_velocity + tangential_slope_s * r on side s. Thus mass is conserved, while the
-# two exact one-sided velocity gradients are known and can differ at the interface. The default
-# equal porosity and interpolated-density jump make the exact pressure and its gradient zero for
-# both the continuous-density and density-jump variants.
+# Manufactured pressure-baffle problem whose superficial velocity is linear on each side of the
+# baffle. In coordinates normal (r) and tangent (t) to the interface:
+#  - rho_s * U_r = mass_flux on both sides, so mass is conserved and U_r jumps with density;
+#  - U_t = eps_s * tangential_velocity + tangential_slope_s * r, so the interstitial tangential
+#    velocity U_t / eps is continuous at r = 0 while the one-sided slopes may differ.
+# The forcing balances advection and reaction exactly, so the pressure is constant on each side.
+# Its jump is the BernoulliFormLossPressureJump with the interpolated face density
+# rho_f = (rho_left + rho_right) / 2 and side velocities mass_flux / (rho_f eps_s):
+#   p_right - p_left = mass_flux^2 / (2 rho_f) * (1 / eps_left^2 - 1 / eps_right^2).
+# With viscosity, both sides must carry the same shear traction,
+# mu_left * tangential_slope_left = mu_right * tangential_slope_right; the normal velocity is
+# constant on each side and carries no viscous stress. A consistent scheme reproduces this
+# piecewise-linear solution to round-off on uniform meshes.
 
 rho_left = 1
 rho_right = 1
 eps_left = 1
 eps_right = 1
 mass_flux = 0.02
-mu = 0
+mu_left = 0
+mu_right = 0
 reaction = 10
 tangential_velocity = 0.1
 tangential_slope_left = 0.2
@@ -19,8 +27,6 @@ interface = 0.5
 skew = 0
 nx = 8
 ny = 8
-gradient_policy = one-sided
-advection_policy = one-sided
 pressure_gradient_method = reconstructed
 nonorthogonal = false
 
@@ -68,10 +74,12 @@ nonorthogonal = false
   [jump_aware]
     type = FVPressureJumpGreenGaussGradient
   []
+  [velocity_jump_aware]
+    type = FVVelocityJumpGreenGaussGradient
+  []
   [reconstructed]
     type = FVReconstructedPressureGradient
     base_gradient_method = jump_aware
-    baffle_velocity_gradient_reconstruction = ${gradient_policy}
     gradient_relaxation = 1
   []
 []
@@ -108,11 +116,13 @@ nonorthogonal = false
     type = MooseLinearVariableFVReal
     solver_sys = u_system
     initial_condition = ${mass_flux}
+    gradient_method = velocity_jump_aware
   []
   [superficial_v]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
     initial_condition = ${tangential_velocity}
+    gradient_method = velocity_jump_aware
   []
   [pressure]
     type = MooseLinearVariableFVReal
@@ -127,8 +137,7 @@ nonorthogonal = false
     type = LinearPWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method_name = average
-    baffle_advection_reconstruction = ${advection_policy}
-    mu = ${mu}
+    mu = viscosity
     u = superficial_u
     v = superficial_v
     momentum_component = x
@@ -140,8 +149,7 @@ nonorthogonal = false
     type = LinearPWCNSFVMomentumFlux
     variable = superficial_v
     advected_interp_method_name = average
-    baffle_advection_reconstruction = ${advection_policy}
-    mu = ${mu}
+    mu = viscosity
     u = superficial_u
     v = superficial_v
     momentum_component = y
@@ -235,6 +243,17 @@ nonorthogonal = false
     property_name = porosity
     expression = 'if(x-${skew}*y<${interface},${eps_left},${eps_right})'
   []
+  [viscosity]
+    type = ParsedFunctorMaterial
+    property_name = viscosity
+    expression = 'if(x-${skew}*y<${interface},${mu_left},${mu_right})'
+  []
+  [pressure_error]
+    type = ParsedFunctorMaterial
+    property_name = pressure_error
+    functor_names = 'pressure exact_pressure'
+    expression = 'pressure-exact_pressure'
+  []
 []
 
 [AuxVariables]
@@ -269,9 +288,15 @@ nonorthogonal = false
   []
   [exact_tangential_velocity]
     type = ParsedFunction
-    expression = 'velocity+if(x-skew*y<interface,slope_left,slope_right)*r'
-    symbol_names = 'skew interface velocity slope_left slope_right r'
-    symbol_values = '${skew} ${interface} ${tangential_velocity} ${tangential_slope_left} ${tangential_slope_right} normal_coordinate'
+    expression = 'velocity*porosity+if(x-skew*y<interface,slope_left,slope_right)*r'
+    symbol_names = 'skew interface velocity porosity slope_left slope_right r'
+    symbol_values = '${skew} ${interface} ${tangential_velocity} exact_porosity ${tangential_slope_left} ${tangential_slope_right} normal_coordinate'
+  []
+  [exact_pressure]
+    type = ParsedFunction
+    expression = 'if(x-skew*y<interface,0,mass_flux^2/(rho_left+rho_right)*(1/eps_left^2-1/eps_right^2))'
+    symbol_names = 'skew interface mass_flux rho_left rho_right eps_left eps_right'
+    symbol_values = '${skew} ${interface} ${mass_flux} ${rho_left} ${rho_right} ${eps_left} ${eps_right}'
   []
   [exact_u]
     type = ParsedFunction
@@ -309,10 +334,6 @@ nonorthogonal = false
     symbol_names = 'skew interface eps_left eps_right'
     symbol_values = '${skew} ${interface} ${eps_left} ${eps_right}'
   []
-  [zero]
-    type = ConstantFunction
-    value = 0
-  []
 []
 
 [Executioner]
@@ -328,7 +349,10 @@ nonorthogonal = false
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.5
-  num_iterations = 1000
+  # A solution that is exact to round-off stalls the normalized residuals near 1e-6 instead of
+  # meeting the absolute tolerances, so run a fixed number of iterations instead.
+  num_iterations = 200
+  continue_on_max_its = true
   pressure_absolute_tolerance = 1e-11
   momentum_absolute_tolerance = 1e-11
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -362,7 +386,7 @@ nonorthogonal = false
   [L2p]
     type = ElementL2FunctorError
     approximate = pressure
-    exact = zero
+    exact = exact_pressure
     execute_on = FINAL
   []
   [L2gradp]
@@ -381,22 +405,10 @@ nonorthogonal = false
     rhie_chow_user_object = rc
     execute_on = FINAL
   []
-  [p_max]
-    type = ElementExtremeValue
-    variable = pressure
-    value_type = max
-    execute_on = FINAL
-  []
-  [p_min]
-    type = ElementExtremeValue
-    variable = pressure
-    value_type = min
-    execute_on = FINAL
-  []
-  [pressure_error_range]
-    type = ParsedPostprocessor
-    expression = 'p_max-p_min'
-    pp_names = 'p_max p_min'
+  [max_pressure_error]
+    type = ElementExtremeFunctorValue
+    functor = pressure_error
+    value_type = max_abs
     execute_on = FINAL
   []
 []

@@ -9,6 +9,9 @@ inlet_u = 0.1
   [jump_aware]
     type = FVPressureJumpGreenGaussGradient
   []
+  [velocity_jump_aware]
+    type = FVVelocityJumpGreenGaussGradient
+  []
   [reconstructed]
     type = FVReconstructedPressureGradient
     base_gradient_method = jump_aware
@@ -76,6 +79,7 @@ inlet_u = 0.1
     type = MooseLinearVariableFVReal
     solver_sys = u_system
     initial_condition = ${inlet_u}
+    gradient_method = velocity_jump_aware
   []
   [pressure]
     type = MooseLinearVariableFVReal

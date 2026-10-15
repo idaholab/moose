@@ -188,9 +188,6 @@ private:
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
 
-  /// Whether baffle faces use the gradient from each face side instead of a shared gradient.
-  const bool _use_one_sided_baffle_velocity_gradient;
-
   /// Rhie-Chow object that owns this stateful reconstruction method.
   const RhieChowMassFlux * _rhie_chow = nullptr;
 
