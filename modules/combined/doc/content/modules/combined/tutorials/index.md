@@ -7,6 +7,7 @@ physics modules can be used together:
 - [Using Stochastic Tools with Multiphysics Models](combined/examples/stm_thermomechanics.md)
 - [Using dimensionality reduction and full-field reconstruction with multiphysics models](combined/examples/stm_laserwelding_dimred.md)
 - [Coupling electromagnetics and heat transfer modules for wire heating](combined/examples/current_heating_of_wire.md)
+- [ITER Cable Electro-Thermo-Mechanics: Finite strain with thermal expansion and Lorentz forces](combined/examples/iter_cable.md)
 
 # Solid Isotropic Material Penalization (SIMP) Topology Optimization
 
