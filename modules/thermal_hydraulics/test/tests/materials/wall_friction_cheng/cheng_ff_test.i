@@ -218,6 +218,10 @@ PoD = 1.10
 []
 
 [Postprocessors]
+  [warnings]
+    type = ADElementAverageMaterialProperty
+    mat_prop = warnings
+  []
   [PoD_105_interior_sqr_lam]
     type = ADElementAverageMaterialProperty
     mat_prop = PoD_105_interior_sqr_lam

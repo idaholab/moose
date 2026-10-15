@@ -58,7 +58,14 @@ StrainEnergyRateDensityTempl<is_ad>::initialSetup()
         dynamic_cast<GenericStressUpdateBase<is_ad> *>(&getMaterialByName(models[i]));
 
     if (inelastic_model_stress_update)
+    {
       _inelastic_models.push_back(inelastic_model_stress_update);
+
+      // inelastic_model_stress_update is called directly rather than through the normal material
+      // property system, so its own dependencies must be added to ours for them to stay active
+      const auto & model_deps = inelastic_model_stress_update->getMatPropDependencies();
+      _material_property_dependencies.insert(model_deps.begin(), model_deps.end());
+    }
   }
 }
 
