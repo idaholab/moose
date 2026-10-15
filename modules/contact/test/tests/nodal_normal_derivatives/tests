@@ -115,8 +115,8 @@
     design = 'ContactAction.md PenaltyFrictionUserObject.md '
              'ComputeWeightedGapLMMechanicalContact.md'
     requirement = 'Three-dimensional augmented-Lagrange mortar-penalty friction shall solve with '
-                  'nodal traction-vector interpolation and without displacement derivatives of the '
-                  'normal and tangent directions.'
+                  'nodal traction-vector interpolation and displacement derivatives of the normal '
+                  'and tangent directions.'
   []
 
   [mortar_penalty_friction_jacobian]

@@ -47,7 +47,7 @@ convergence in the non-linear solve.
 Mechanical mortar contact uses normalized, weighted secondary nodal normals to evaluate the
 weighted gap. Quasistatic local-basis contact includes the displacement derivatives of the nodal
 normal directions in Jacobian evaluations. This behavior applies to the `mortar` and
-non-augmented `mortar_penalty` formulations with `frictionless` or `coulomb` contact and
+`mortar_penalty` formulations, including augmented-Lagrangian `mortar_penalty`, with `frictionless` or `coulomb` contact and
 [!param](/Constraints/ComputeWeightedGapLMMechanicalContact/interpolate_normals) set to `false`.
 The contact force is assembled by interpolating the nodal traction vector,
 $\sum_j \Phi_j z_j \boldsymbol{n}_j$. This is the transpose of the weighted gap, so the discrete
@@ -73,11 +73,6 @@ The corresponding weighted-gap or weighted-velocity user objects and primal norm
 tangential-friction, and penalty contact constraints use the same linearized directions.
 Mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices are unchanged;
 their weighted contributions are already contained in $\boldsymbol{G}_A$.
-
-Augmented-Lagrangian `mortar_penalty` contact retains the same nodal traction-vector interpolation,
-but its inner Newton Jacobian does not include displacement derivatives of the normal and tangent
-directions. Including the direction derivatives in this formulation requires separate treatment of
-the nonsmooth active-set and Coulomb return-map generalized Jacobian and its globalization.
 
 Dynamic mortar contact includes these derivatives in the primal normal-traction and
 tangential-friction constraints, but its dynamic weighted-gap and weighted-velocity constraints do

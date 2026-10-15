@@ -52,11 +52,8 @@ WeightedGapUserObject::addNodalNormalCoupling(InputParameters & params)
         obj_params.get<SubdomainName>("secondary_subdomain");
     rm_params.set<SubdomainName>("primary_subdomain") =
         obj_params.get<SubdomainName>("primary_subdomain");
-    // Augmented-Lagrangian penalty contact, selected by penetration_tolerance, and objects that
-    // disable ghost_point_neighbors do not include nodal-normal derivatives.
-    rm_params.set<bool>("ghost_point_neighbors") =
-        obj_params.get<bool>("ghost_point_neighbors") &&
-        !obj_params.isParamValid("penetration_tolerance");
+    // Objects that disable ghost_point_neighbors do not include nodal-normal derivatives.
+    rm_params.set<bool>("ghost_point_neighbors") = obj_params.get<bool>("ghost_point_neighbors");
   };
   params.addRelationshipManager("AugmentSparsityOnInterface",
                                 Moose::RelationshipManagerType::COUPLING,
