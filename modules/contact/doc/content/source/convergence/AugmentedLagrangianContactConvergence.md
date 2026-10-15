@@ -5,6 +5,9 @@ The augmented Lagrangian contact algorithm involves a nested solution strategy; 
 `AugmentedLagrangianContactFEProblemConvergence` and  `AugmentedLagrangianContactReferenceConvergence`
 track the convergence of the nested solution procedure described above, allow interaction with the solver at each iteration until the tolerance criteria are met, and allow for updating the Lagrangian multipliers as prescribed by [AugmentedLagrangianContactProblem.md].
 
+After updating the multipliers, the nonlinear residual is recomputed, so the next Newton step and any
+line search, such as `line_search = bt`, use the residual of the updated problem.
+
 ## AugmentedLagrangianContactFEProblemConvergence
 
 !syntax description /Convergence/AugmentedLagrangianContactFEProblemConvergence

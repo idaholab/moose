@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#34078'
+  design = 'AugmentedLagrangianContactConvergence.md'
+  [bt_line_search]
+    type = CSVDiff
+    input = bt_line_search.i
+    csvdiff = bt_line_search_out.csv
+    requirement = 'The system shall recompute the nonlinear residual after updating the augmented '
+                  'Lagrangian contact multipliers so that a backtracking line search can be used.'
+  []
+[]
