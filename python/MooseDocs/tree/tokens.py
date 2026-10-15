@@ -85,7 +85,7 @@ class Token(NodeBase):
         strings = []
         for node in moosetree.iterate(self):
             if node.name in ["Word", "Number", "String"]:
-                # The lexer splits a word such as 'HeatPipe3Phase' into adjacent Word and Number
+                # The lexer splits a word such as 'ElementL2Error' into adjacent Word and Number
                 # tokens with no Space between them, so join those without the separator
                 if (
                     node.name in ["Word", "Number"]
