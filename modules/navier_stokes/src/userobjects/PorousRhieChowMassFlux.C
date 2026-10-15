@@ -34,7 +34,6 @@ PorousRhieChowMassFlux::validParams()
   InputParameters params = RhieChowMassFlux::validParams();
   params.addClassDescription(
       "Rhie-Chow mass flux object specialized for porous flow/baffle cases.");
-  params.set<MooseEnum>("pressure_diffusion_interpolation") = "harmonic";
 
   params.addParam<MooseFunctorName>(
       NS::porosity, "1", "Porosity functor (defaults to 1 for non-porous calculations).");

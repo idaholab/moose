@@ -144,8 +144,7 @@ conductances, and finite corrections. Debug builds assert these conditions and r
 Faces that are not baffles use the inherited
 [LinearFVPressureCorrectionDiffusion](LinearFVPressureCorrectionDiffusion.md) treatment, with the
 face `Ainv` interpolated according to
-[!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) (harmonic by default for
-[PorousRhieChowMassFlux](PorousRhieChowMassFlux.md)). Boundary faces likewise use the inherited
+[!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation). Boundary faces likewise use the inherited
 boundary treatment.
 
 ## Assembly
