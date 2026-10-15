@@ -23,7 +23,15 @@
       type = PetscJacobianTester
       input = 'kokkos_ad_mat_diffusion_jacobian.i'
       cli_args = 'Kernels/current/diffusivity=1 BCs/reference/property=2.5'
-      detail = 'with constant values given in place of property names.'
+      detail = 'with constant values given in place of property names, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [input_list]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_mat_diffusion_jacobian.i'
+      cli_args = "Materials/k/S=u Materials/k/b=0.8 Materials/k/listed_inputs='S T' Materials/kc_1/S=T Materials/kc_1/b=-0.6 Materials/kc_1/listed_inputs='S T'"
+      detail = 'with properties whose declarations list their inputs in an order differing from that of the slots of their materials.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
