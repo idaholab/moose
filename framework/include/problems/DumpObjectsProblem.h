@@ -68,7 +68,6 @@ public:
   virtual void computeIndicators() override {}
   virtual void computeMarkers() override {}
   virtual bool adaptMesh() override { return false; }
-  virtual void addLineSearch(const InputParameters & /*parameters*/) override {}
 
 protected:
   void dumpObjectHelper(const std::string & system,

@@ -10,6 +10,7 @@
 #include "MortarPressureComponentAux.h"
 #include "SystemBase.h"
 #include "AutomaticMortarGeneration.h"
+#include "LMWeightedGapUserObject.h"
 
 registerMooseObject("ContactApp", MortarPressureComponentAux);
 
@@ -27,6 +28,12 @@ MortarPressureComponentAux::validParams()
   params.addCoupledVar(
       "lm_var_z",
       "Lagrange multiplier variable along the z direction (only exist for 3D problems).");
+  params.addParam<UserObjectName>(
+      "weighted_gap_uo",
+      "A weighted gap user object with 'derive_c_from_elasticity = true' whose per-node physical "
+      "stiffness scale should be applied to lm_var_x/y/z before projecting them. Needed only "
+      "when those Lagrange multipliers use 'c_normal_strategy = physical', whose raw dof value "
+      "is not yet in physical pressure units.");
   params.addRequiredParam<MooseEnum>("component",
                                      MooseEnum("normal tangent1 tangent2"),
                                      "The component of the Lagrange multiplier to compute.");
@@ -44,6 +51,9 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
     _lm_var_x(&coupledValueLower("lm_var_x")),
     _lm_var_y(&coupledValueLower("lm_var_y")),
     _lm_var_z(params.isParamValid("lm_var_z") ? &coupledValueLower("lm_var_z") : nullptr),
+    _weighted_gap_uo(isParamValid("weighted_gap_uo")
+                         ? &getUserObject<LMWeightedGapUserObject>("weighted_gap_uo")
+                         : nullptr),
     _fe_problem(*params.get<FEProblemBase *>("_fe_problem_base")),
     _primary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("primary_boundary"))),
     _secondary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("secondary_boundary"))),
@@ -112,8 +122,16 @@ MortarPressureComponentAux::computeValue()
       break;
     }
 
-  Point lm_vector_value(
-      (*_lm_var_x)[_qp], (*_lm_var_y)[_qp], _lm_var_z == nullptr ? 0.0 : (*_lm_var_z)[_qp]);
+  Real scale = 1.0;
+  if (_weighted_gap_uo && _weighted_gap_uo->deriveCFromElasticity())
+  {
+    const auto * const dof = static_cast<const DofObject *>(_current_node);
+    scale = libmesh_map_find(_weighted_gap_uo->dofToDerivedC(), dof)[0];
+  }
+
+  Point lm_vector_value(scale * (*_lm_var_x)[_qp],
+                        scale * (*_lm_var_y)[_qp],
+                        _lm_var_z == nullptr ? 0.0 : scale * (*_lm_var_z)[_qp]);
 
   Real pressure_component_value = 0.0;
 

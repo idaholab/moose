@@ -125,6 +125,49 @@ TYPED_TEST(FrictionProjectionTest, PositiveWeightRelationship)
     EXPECT_NEAR(raw_value(hsw[i]), raw_value(weight * ac[i]), 1e-14);
 }
 
+TYPED_TEST(FrictionProjectionTest, PenetrationSignConvention)
+{
+  using T = TypeParam;
+
+  // Deep penetration: a negative weighted_gap scaled by a positive c gives a negative
+  // scaled_normal_gap, which frictionalContactResidual() must grow into a larger friction cone
+  // via augmentedNormalPressure() = normal_pressure - scaled_normal_gap.
+  const T normal_pressure = 1.0;
+  const T c = 0.5;
+  const T weighted_gap = -6.0;
+  const T scaled_normal_gap = c * weighted_gap;
+
+  // A known stick root: zero tangential velocity leaves the augmented tangential pressure equal
+  // to the tangential pressure itself, and that value lies inside the (correctly) enlarged cone.
+  const std::array<T, 1> tangential_pressure = {1.0};
+  const std::array<T, 1> tangential_velocity = {0.0};
+  const T c_t = 1.0e3;
+  const T dt = 1.0;
+  const T mu = 0.5;
+  const T epsilon = 1e-7;
+
+  const auto residual =
+      ContactUtils::frictionalContactResidual(tangential_pressure,
+                                              tangential_velocity,
+                                              c_t,
+                                              dt,
+                                              normal_pressure,
+                                              scaled_normal_gap,
+                                              mu,
+                                              epsilon,
+                                              ContactUtils::FrictionProjectionDegree::TWO);
+  EXPECT_DOUBLE_EQ(raw_value(residual[0]), 0.0);
+
+  // Reversing the sign in the augmentation (the historical bug: normal_pressure +
+  // scaled_normal_gap) shrinks the cone under penetration instead of growing it, and wrongly
+  // turns this same stick state into a nonzero (slip) residual.
+  const T buggy_augmented_normal_pressure = normal_pressure + scaled_normal_gap;
+  const T buggy_radius = ContactUtils::coulombFrictionRadius(mu, buggy_augmented_normal_pressure);
+  const auto buggy_residual = ContactUtils::hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, tangential_pressure, buggy_radius);
+  EXPECT_NE(raw_value(buggy_residual[0]), 0.0);
+}
+
 TYPED_TEST(FrictionProjectionTest, DegreeTwoDegenerateState)
 {
   using T = TypeParam;

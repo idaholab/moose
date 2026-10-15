@@ -22,10 +22,11 @@ public:
 
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
+  bool hasHeterogeneousJacobianRowSupport() const override;
 
   /// The displacement component that this object applies to
   const MooseEnum _component;
 
   /// The weighted gap user object which supplies the contact force
-  WeightedGapUserObject & _weighted_gap_uo;
+  const WeightedGapUserObject & _weighted_gap_uo;
 };

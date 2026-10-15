@@ -307,6 +307,15 @@ protected:
                    Real scaling_factor);
 
   /**
+   * Add residual derivatives whose row supports differ into the Jacobian.
+   */
+  template <typename Residuals, typename Indices>
+  void addJacobianWithHeterogeneousRowSupport(Assembly & assembly,
+                                              const Residuals & residuals,
+                                              const Indices & dof_indices,
+                                              Real scaling_factor);
+
+  /**
    * Add the provided residual derivatives into the Jacobian for the provided dof indices. This
    * overload is meant for array variables because it takes an array of scaling factors
    */
@@ -589,6 +598,17 @@ TaggingInterface::addJacobian(Assembly & assembly,
                               Real scaling_factor)
 {
   assembly.cacheJacobian(
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
+}
+
+template <typename Residuals, typename Indices>
+void
+TaggingInterface::addJacobianWithHeterogeneousRowSupport(Assembly & assembly,
+                                                         const Residuals & residuals,
+                                                         const Indices & dof_indices,
+                                                         Real scaling_factor)
+{
+  assembly.cacheJacobianWithHeterogeneousRowSupport(
       residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 

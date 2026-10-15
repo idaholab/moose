@@ -11,6 +11,8 @@
 
 #include "MortarNodalAuxKernel.h"
 
+class LMWeightedGapUserObject;
+
 /**
  * Compute worn-out depth based on Archard's wear law
  */
@@ -31,8 +33,17 @@ protected:
 
   void computeQpIProperties();
 
+  /// Recover the physical value of _normal_pressure at the current node, applying the
+  /// weighted_gap_uo's per-node derived stiffness scale if 'normal_pressure' is a LM variable
+  /// using c_normal_strategy = physical.
+  Real physicalNormalPressure() const;
+
   // Mortar normal contact pressure
   const VariableValue & _normal_pressure;
+
+  /// Weighted gap user object providing the physical stiffness scale for _normal_pressure, or
+  /// nullptr if 'normal_pressure' is not a physically-scaled Lagrange multiplier
+  const LMWeightedGapUserObject * const _weighted_gap_uo;
 
   /// Friction coefficient used to compute Archard's law
   const Real _friction_coefficient;
