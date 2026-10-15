@@ -15,7 +15,7 @@ import time
 from collections import defaultdict
 from multiprocessing import get_context
 from multiprocessing.context import ForkProcess
-from multiprocessing.managers import DictProxy
+from multiprocessing.managers import NamespaceProxy, SyncManager
 from typing import Optional
 
 import psutil
@@ -145,11 +145,14 @@ class MemoryMonitor:
         self._process: Optional[ForkProcess] = None
         """The Multiprocessing process."""
 
-        self._manager = None
+        self._manager: Optional[SyncManager] = None
         """Manager for sharing data with the Multiprocessing process, once started."""
 
-        self._samples: Optional[DictProxy[int, int]] = None
-        """The shareable samples (child pid -> memory in bytes), once started."""
+        self._shared: Optional[NamespaceProxy] = None
+        """
+        Shared state whose "samples" attribute is the latest samples (child pid ->
+        memory in bytes), once started.
+        """
 
         self._stop_event = None
         """Event to stop the Multiprocessing process, once started."""
@@ -158,16 +161,14 @@ class MemoryMonitor:
         """
         Get the last samples; child PID to cumulative memory usage in bytes.
 
-        This returns a copy so that the dict can be accessed without
-        locking (required for synchronization with the sampler process).
-        Thus, you should get a copy to this once and then use it many
-        times as needed.
+        Each call fetches a copy from the sampler process, so you should get
+        it once and then use it many times as needed.
         """
-        assert self._samples is not None
-        return self._samples.copy()
+        assert self._shared is not None
+        return self._shared.samples
 
     @staticmethod
-    def _sampler(parent_pid: int, interval: float, stop_event, samples: DictProxy):
+    def _sampler(parent_pid: int, interval: float, stop_event, shared: NamespaceProxy):
         """Run the sampler process; internal method called by start()."""
         while not stop_event.is_set():
             start = time.monotonic()
@@ -197,9 +198,9 @@ class MemoryMonitor:
                 ) is not None:
                     result[child] += memory
 
-            # And update the shared state
-            samples.clear()
-            samples.update(result)
+            # And update the shared state; a single assignment, so a reader never
+            # sees a partially updated set of samples
+            shared.samples = dict(result)
 
             # Wait out the rest of the interval, so that a slow pass (many or
             # large processes) does not lengthen the sampling period; wake early
@@ -212,7 +213,7 @@ class MemoryMonitor:
 
         ctx = get_context("fork")
         self._manager = ctx.Manager()
-        self._samples = self._manager.dict()
+        self._shared = self._manager.Namespace(samples={})
         self._stop_event = ctx.Event()
         self._process = ctx.Process(
             target=self._sampler,
@@ -220,7 +221,7 @@ class MemoryMonitor:
                 self._parent_pid,
                 self._interval,
                 self._stop_event,
-                self._samples,
+                self._shared,
             ),
             daemon=True,
         )
@@ -238,3 +239,7 @@ class MemoryMonitor:
                 process.join()
             self._process = None
             self._stop_event = None
+        if self._manager is not None:
+            self._manager.shutdown()
+            self._manager = None
+            self._shared = None
