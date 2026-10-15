@@ -93,12 +93,13 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
             dof_indices_neighbor[face_i] =
                 face_info->neighborInfo()->dofIndices()[_system_number][_current_var->number()];
 
-            const auto face_values = _gradient_method.internalFaceValues(
-                *face_info,
-                *face_info->elemInfo(),
-                *face_info->neighborInfo(),
-                solution_reader(dof_indices_elem[face_i]),
-                solution_reader(dof_indices_neighbor[face_i]));
+            const auto face_values =
+                _gradient_method.internalFaceValues(*face_info,
+                                                    *face_info->elemInfo(),
+                                                    *face_info->neighborInfo(),
+                                                    *_current_var,
+                                                    solution_reader(dof_indices_elem[face_i]),
+                                                    solution_reader(dof_indices_neighbor[face_i]));
 
             const auto surface_vector =
                 face_info->normal() * face_info->faceArea() * face_info->faceCoord();

@@ -34,6 +34,7 @@ FVGreenGaussGradient::InternalFaceValues
 FVGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
                                          const ElemInfo & /*elem_info*/,
                                          const ElemInfo & /*neighbor_info*/,
+                                         const MooseLinearVariableFV<Real> & /*variable*/,
                                          Real elem_value,
                                          Real neighbor_value) const
 {
