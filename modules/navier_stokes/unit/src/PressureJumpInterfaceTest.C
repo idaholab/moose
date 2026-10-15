@@ -10,6 +10,7 @@
 
 #include "PressureJumpInterface.h"
 
+#include <cmath>
 #include <limits>
 
 TEST(PressureJumpInterface, OrthogonalIsotropic)
@@ -20,7 +21,7 @@ TEST(PressureJumpInterface, OrthogonalIsotropic)
   const RealVectorValue gradient(3.0, -4.0, 0.0);
 
   const auto data = NS::FV::pressureJumpInterfaceData(
-      normal, half_cell, half_cell, diffusion, diffusion, gradient, gradient, 3.0, true, 0.0);
+      normal, half_cell, half_cell, diffusion, diffusion, gradient, gradient, {}, {}, 3.0, true, 0.0);
 
   ASSERT_TRUE(data.valid);
   EXPECT_TRUE(data.is_baffle);
@@ -52,6 +53,8 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
                                                       neighbor_diffusion,
                                                       elem_gradient,
                                                       neighbor_gradient,
+                                                      RealVectorValue(),
+                                                      RealVectorValue(),
                                                       1.7,
                                                       true,
                                                       jump);
@@ -111,6 +114,8 @@ TEST(PressureJumpInterface, ManufacturedPiecewiseLinearPressure)
                                                       neighbor_diffusion,
                                                       elem_gradient,
                                                       neighbor_gradient,
+                                                      RealVectorValue(),
+                                                      RealVectorValue(),
                                                       face_area,
                                                       true,
                                                       jump);
@@ -125,6 +130,66 @@ TEST(PressureJumpInterface, ManufacturedPiecewiseLinearPressure)
   EXPECT_NEAR(flux, expected_flux, 1e-13);
   EXPECT_NEAR(recovered_elem_face_pressure, elem_face_pressure, 1e-13);
   EXPECT_NEAR(recovered_neighbor_face_pressure, neighbor_face_pressure, 1e-13);
+}
+
+TEST(PressureJumpInterface, HydrostaticBalanceAcrossJump)
+{
+  // At rest each side balances its body force with its own pressure gradient,
+  // rho_s (H/A)_s = -(rho_s / A_s) grad(p)_s. With jumps in the diffusion coefficients and the
+  // gradients, the one-sided H/A fluxes h_s differ. Each side's own flux is still zero, so the
+  // face mass flux must vanish and the recovered face pressures must be the one-sided linear
+  // extrapolations.
+  const RealVectorValue normal(0.8, 0.6, 0.0);
+  const Point elem_to_face(0.5, 0.1, 0.0);
+  const Point face_to_neighbor(0.35, 0.3, 0.0);
+  const RealVectorValue elem_diffusion(2.0, 5.0, 1.0);
+  const RealVectorValue neighbor_diffusion(7.0, 3.0, 1.0);
+  const RealVectorValue elem_gradient(1.2, -0.4, 0.0);
+  const RealVectorValue neighbor_gradient(-0.3, 2.1, 0.0);
+  const Real face_area = 1.7;
+  const Real elem_face_pressure = 11.0;
+  const Real jump = 2.5;
+  const Real neighbor_face_pressure = elem_face_pressure - jump;
+  const Real elem_pressure = elem_face_pressure - elem_gradient * elem_to_face;
+  const Real neighbor_pressure = neighbor_face_pressure + neighbor_gradient * face_to_neighbor;
+
+  RealVectorValue elem_rho_hbya;
+  RealVectorValue neighbor_rho_hbya;
+  for (const auto i : make_range(Moose::dim))
+  {
+    elem_rho_hbya(i) = -elem_diffusion(i) * elem_gradient(i);
+    neighbor_rho_hbya(i) = -neighbor_diffusion(i) * neighbor_gradient(i);
+  }
+
+  const auto data = NS::FV::pressureJumpInterfaceData(normal,
+                                                      elem_to_face,
+                                                      face_to_neighbor,
+                                                      elem_diffusion,
+                                                      neighbor_diffusion,
+                                                      elem_gradient,
+                                                      neighbor_gradient,
+                                                      elem_rho_hbya,
+                                                      neighbor_rho_hbya,
+                                                      face_area,
+                                                      true,
+                                                      jump);
+  ASSERT_TRUE(data.valid);
+  // The test is meaningful only if the side H/A fluxes differ; with equal fluxes any weighting of
+  // them gives the same face value.
+  ASSERT_GT(std::abs(data.elem_hbya_flux - data.neighbor_hbya_flux), 1.0);
+
+  const Real mass_flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure) -
+                         NS::FV::pressureJumpHbyAFlux(data);
+
+  EXPECT_NEAR(mass_flux, 0.0, 1e-13);
+  EXPECT_NEAR(NS::FV::pressureJumpOneSidedFaceValue(
+                  data, elem_pressure, mass_flux, /*elem_side=*/true),
+              elem_face_pressure,
+              1e-13);
+  EXPECT_NEAR(NS::FV::pressureJumpOneSidedFaceValue(
+                  data, neighbor_pressure, mass_flux, /*elem_side=*/false),
+              neighbor_face_pressure,
+              1e-13);
 }
 
 TEST(PressureJumpInterface, OrientationReversal)
@@ -144,6 +209,8 @@ TEST(PressureJumpInterface, OrientationReversal)
                                                          neighbor_diffusion,
                                                          elem_gradient,
                                                          neighbor_gradient,
+                                                         RealVectorValue(),
+                                                         RealVectorValue(),
                                                          1.7,
                                                          true,
                                                          2.5);
@@ -154,6 +221,8 @@ TEST(PressureJumpInterface, OrientationReversal)
                                                          elem_diffusion,
                                                          neighbor_gradient,
                                                          elem_gradient,
+                                                         RealVectorValue(),
+                                                         RealVectorValue(),
                                                          1.7,
                                                          true,
                                                          -2.5);
@@ -179,6 +248,8 @@ TEST(PressureJumpInterface, RejectsInvalidGeometryAndCoefficients)
                                              Point(0.5, 0.0, 0.0),
                                              elem_diffusion,
                                              RealVectorValue(1.0, 1.0, 1.0),
+                                             RealVectorValue(),
+                                             RealVectorValue(),
                                              RealVectorValue(),
                                              RealVectorValue(),
                                              face_area,

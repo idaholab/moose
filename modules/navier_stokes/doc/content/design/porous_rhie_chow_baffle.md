@@ -37,11 +37,15 @@ interpolate velocity across the baffle uses one-sided states instead:
   a normal part evaluated on each side.
 - [FVReconstructedPressureGradient.md] recovers each side's face normal velocity from the shared
   mass flux and that side's density.
-- The Rhie-Chow face flux interpolates $\rho\mathbf{H}/\mathbf{A}$ rather than the product of the
-  interpolated density and $\mathbf{H}/\mathbf{A}$.
+- The Rhie-Chow face flux combines the one-sided fluxes $\rho_s(\mathbf{H}/\mathbf{A})_s\cdot\mathbf{n}$
+  with the half-cell conductance weights of the pressure operator
+  ([LinearFVPressureCorrectionDiffusionJump.md]) rather than interpolating
+  $\mathbf{H}/\mathbf{A}$, which also carries the body forces, to the face.
 
 With these, a velocity field that is linear on each side of a baffle, together with its
-piecewise-constant pressure, is reproduced to round-off on uniform meshes.
+piecewise-constant pressure, is reproduced to round-off on uniform meshes, and a fluid at rest
+under a porosity-weighted buoyancy force keeps zero velocity and the hydrostatic pressure across
+porosity and density jumps.
 
 ## Pressure jump
 

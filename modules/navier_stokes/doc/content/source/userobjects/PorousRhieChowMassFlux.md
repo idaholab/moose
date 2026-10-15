@@ -37,8 +37,11 @@ standard Green-Gauss face value exactly.
 The superficial velocity also jumps across a baffle wherever density or porosity does. Every
 velocity variable must therefore use
 [FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md) as its default gradient
-method, and the face flux interpolates $\rho\mathbf{H}/\mathbf{A}$ across baffle faces so the
-velocity jump is not read as a mass-flux error.
+method. On baffle faces the $\rho\mathbf{H}/\mathbf{A}$ flux of each side is weighted with the same
+half-cell conductances as the pressure (see
+[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md)), so neither
+the velocity jump nor a body force balanced by the pressure on each side is read as a mass-flux
+error.
 
 This is the user object expected by
 [LinearPWCNSFVMomentumFlux.md],

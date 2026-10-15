@@ -117,11 +117,13 @@ FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
                                             _pressure_gradient->gradient(neighbor_info),
                                             fi.faceArea() * fi.faceCoord());
 
-  // Eliminate the interface pressures to obtain one conservative flux, then recover the
-  // one-sided face value used in each cell's Green-Gauss surface sum.
-  const Real flux = NS::FV::pressureJumpFlux(face_operator, elem_value, neighbor_value);
-  return {
-      NS::FV::pressureJumpOneSidedFaceValue(face_operator, elem_value, flux, /*elem_side=*/true),
-      NS::FV::pressureJumpOneSidedFaceValue(
-          face_operator, neighbor_value, flux, /*elem_side=*/false)};
+  // Eliminate the interface pressures to obtain one conservative mass flux, then recover the
+  // one-sided face value used in each cell's Green-Gauss surface sum. Each side's H/A flux enters
+  // its face value, so the face pressure carries the body force, e.g. the hydrostatic slope.
+  const Real mass_flux = NS::FV::pressureJumpFlux(face_operator, elem_value, neighbor_value) -
+                         NS::FV::pressureJumpHbyAFlux(face_operator);
+  return {NS::FV::pressureJumpOneSidedFaceValue(
+              face_operator, elem_value, mass_flux, /*elem_side=*/true),
+          NS::FV::pressureJumpOneSidedFaceValue(
+              face_operator, neighbor_value, mass_flux, /*elem_side=*/false)};
 }
