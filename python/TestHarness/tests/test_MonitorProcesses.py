@@ -9,7 +9,6 @@
 
 """Test TestHarness.utils.monitor_processes."""
 
-import sys
 import unittest
 from typing import Optional
 from unittest.mock import Mock, mock_open, patch
@@ -18,13 +17,6 @@ from TestHarness.utils.monitor_processes import (
     _parse_kb_fields,
     _rollup_memory,
     get_process_memory,
-)
-
-# All of this file's parsing targets /proc/<pid>/{smaps_rollup,status}, which
-# only exist on Linux; skip entirely elsewhere (e.g. macOS, where TestHarness's
-# own python tests also run).
-LINUX_ONLY = unittest.skipUnless(
-    sys.platform.startswith("linux"), "requires Linux (/proc parsing)"
 )
 
 # A smaps_rollup sample as produced on Linux 5.3+, which breaks Pss down into
@@ -59,7 +51,6 @@ SwapPss:               0 kB
 """
 
 
-@LINUX_ONLY
 class TestParseKbFields(unittest.TestCase):
     """Test _parse_kb_fields()."""
 
@@ -74,7 +65,6 @@ class TestParseKbFields(unittest.TestCase):
         self.assertEqual(len(fields), 11)
 
 
-@LINUX_ONLY
 class TestRollupMemory(unittest.TestCase):
     """Test _rollup_memory()."""
 
@@ -96,7 +86,6 @@ class TestRollupMemory(unittest.TestCase):
         self.assertIsNone(_rollup_memory(fields, True))
 
 
-@LINUX_ONLY
 class TestGetProcessMemory(unittest.TestCase):
     """Test get_process_memory() with smaps_rollup."""
 
