@@ -95,8 +95,8 @@
     variables = 'velocity pressure'
     preconditioners = 'velocity_jacobi pressure_schur'
   []
-  [gmres]
-    type = MFEMGMRESSolver
+  [minres]
+    type = MFEMMINRESSolver
     preconditioner = block_diagonal
     l_tol = 1e-12
   []

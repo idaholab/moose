@@ -35,9 +35,6 @@ protected:
 private:
   /// Whether to build the diagonal from an approximate Schur complement instead of the operator
   const bool _use_schur_complement;
-  /// Essential true DoFs of schur_complement_variable. mfem::OperatorJacobiSmoother keeps a
-  /// pointer to this array rather than a copy.
-  mfem::Array<int> _ess_tdofs;
 };
 
 #endif

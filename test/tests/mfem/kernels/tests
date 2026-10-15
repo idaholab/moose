@@ -381,7 +381,7 @@
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM with partial assembly.'
     capabilities = 'mfem'
     cli_args = 'Executioner/assembly_level=partial '
-               'Solvers/active="gmres block_diagonal velocity_jacobi pressure_schur"'
+               'Solvers/active="minres block_diagonal velocity_jacobi pressure_schur"'
     compute_devices = 'cpu cuda'
     recover = false
   []

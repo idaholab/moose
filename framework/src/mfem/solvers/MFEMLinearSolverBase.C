@@ -61,6 +61,7 @@ LinearSolverBase::SetPreconditioner(T & solver)
 
 template void LinearSolverBase::SetPreconditioner(mfem::CGSolver &);
 template void LinearSolverBase::SetPreconditioner(mfem::GMRESSolver &);
+template void LinearSolverBase::SetPreconditioner(mfem::MINRESSolver &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreFGMRES &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreGMRES &);
 template void LinearSolverBase::SetPreconditioner(mfem::HyprePCG &);
