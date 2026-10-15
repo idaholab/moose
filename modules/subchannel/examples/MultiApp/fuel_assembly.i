@@ -75,14 +75,13 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   P_out = ${P_out}
 
   # Solver parameters
-  n_blocks = 10
   implicit = true
   segregated = false
   staggered_pressure = false
 
   # Tolerances
   P_tol = 1.0e-4
-  T_tol = 1.0e-8
+  T_tol = 1.0e-6
 
   # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'
