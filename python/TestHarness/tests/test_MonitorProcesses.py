@@ -26,6 +26,7 @@ from TestHarness.utils.monitor_processes import (
     MEMORY_PSS_EXCLUDE_FILE,
     MemoryMonitor,
     _parse_kb_fields,
+    _read_rollup,
     _rollup_memory,
     get_process_memory,
 )
@@ -256,8 +257,7 @@ class TestProcessMemory(unittest.TestCase):
             f.flush()
             with run_child("file", SIZE, f.name) as (pid,):
                 memory = measure(pid)
-                with open(f"/proc/{pid}/smaps_rollup", "rb") as rollup:
-                    pss = _parse_kb_fields(rollup.read())[b"Pss"] * 1024
+                pss = _read_rollup(pid)[b"Pss"] * 1024
 
         self.assertAlmostEqual(memory, self.baseline, delta=TOLERANCE)
         # Check that the file's pages were resident, and so would have been

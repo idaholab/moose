@@ -50,13 +50,14 @@ def _parse_kb_fields(data: bytes) -> dict[bytes, int]:
     return fields
 
 
-def _has_pss_file() -> bool:
-    """Whether this kernel's smaps_rollup breaks out Pss_File (Linux 5.3+)."""
-    with open(f"/proc/{os.getpid()}/smaps_rollup", "rb") as f:
-        return b"Pss_File" in _parse_kb_fields(f.read())
+def _read_rollup(pid: int) -> dict[bytes, int]:
+    """Read and parse /proc/<pid>/smaps_rollup; see _parse_kb_fields()."""
+    with open(f"/proc/{pid}/smaps_rollup", "rb") as f:
+        return _parse_kb_fields(f.read())
 
 
-MEMORY_PSS_EXCLUDE_FILE = MEMORY_PSS and _has_pss_file()
+# Pss_File was added to smaps_rollup in Linux 5.3
+MEMORY_PSS_EXCLUDE_FILE = MEMORY_PSS and b"Pss_File" in _read_rollup(os.getpid())
 """Whether or not to exclude file-backed pages (Pss_File) from the PSS memory count."""
 
 
@@ -124,8 +125,7 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
             return None
 
     try:
-        with open(f"/proc/{process.pid}/smaps_rollup", "rb") as f:
-            fields = _parse_kb_fields(f.read())
+        fields = _read_rollup(process.pid)
     except (FileNotFoundError, ProcessLookupError):
         return None
     return _rollup_memory(fields, MEMORY_PSS_EXCLUDE_FILE)
