@@ -35,9 +35,6 @@ class RunLocal(Scheduler):
         self._memory_monitor: Optional[MemoryMonitor] = None
         """The MemoryMonitor for sampling child process memory, if any."""
 
-        if self.scheduler_options.monitor_job_memory:
-            self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.1)
-
     def buildRunner(self, job, options) -> Runner:
         """Build a SubprocessRunner."""
         return SubprocessRunner(job, options, self.scheduler_options)
