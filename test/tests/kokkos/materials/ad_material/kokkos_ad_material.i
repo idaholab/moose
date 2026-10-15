@@ -1,7 +1,8 @@
 # Integrals of a Kokkos AD material property k = k0 + a T^2 + g . x and of its stored derivatives
 # on the reference and the current configuration, compared against the same quantities computed by
-# a ParsedMaterial on the undisplaced and the displaced mesh. The slots of the material are T, then
-# on the current configuration the value and reference gradient of each displacement component.
+# a ParsedMaterial on the undisplaced and the displaced mesh. The slots of the material are T and
+# the unused S, then on the current configuration the value and reference gradient of each
+# displacement component.
 
 [Mesh]
   type = GeneratedMesh
@@ -82,19 +83,19 @@
   [current_dk_ddisp_x]
     type = KokkosADDerivativeSlotMaterial
     ad_property = k_current
-    slot = 1
+    slot = 2
     property_name = dk_ddisp_x_current
   []
   [current_dk_dgrad_disp_x]
     type = KokkosADDerivativeSlotMaterial
     ad_property = k_current
-    slot = 2
+    slot = 3
     property_name = dk_dgrad_disp_x_current
   []
   [current_dk_ddisp_y]
     type = KokkosADDerivativeSlotMaterial
     ad_property = k_current
-    slot = 5
+    slot = 6
     property_name = dk_ddisp_y_current
   []
   [dk_dT_parsed]

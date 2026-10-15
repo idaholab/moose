@@ -10,6 +10,27 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
+  [input_list]
+    type = CSVDiff
+    input = 'kokkos_ad_material_inputs.i'
+    csvdiff = 'kokkos_ad_material_inputs_out.csv'
+    requirement = 'The Kokkos system shall store the derivatives of a material property computed with pointwise automatic differentiation with respect to the inputs listed in its declaration, in the order of the list and followed by the derivatives with respect to the displacements.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+  [input_list_error]
+    type = RunException
+    input = 'kokkos_ad_material_inputs.i'
+    cli_args = 'Materials/k/listed_inputs=T'
+    expect_err = 'A Kokkos AD material property has a derivative with respect to a quadrature point quantity missing from the input list of its declaration'
+    # Kokkos::abort() raises SIGABRT, which the TestHarness reports as exit code -6 for a serial
+    # run; mpiexec reports the signal differently, so the exit code is checked in serial only
+    expect_exit_code = -6
+    max_parallel = 1
+    requirement = 'The Kokkos system shall report an error in debug builds when a material property computed with pointwise automatic differentiation has a nonzero derivative with respect to an input missing from the input list of its declaration.'
+    capabilities = 'kokkos & method=dbg'
+    compute_devices = 'cpu'
+  []
   [plain_position_error]
     type = RunException
     input = 'kokkos_ad_material.i'
