@@ -25,6 +25,20 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /**
+   * Checks whether the given boundary ID has neighbors after a stitch.
+   *
+   * @param[in] mesh  Mesh
+   * @param[in] boundary_id  Boundary ID corresponding to the stitch surface
+   * @param[in] active_side_list  List of BC tuples (elem,side,boundary ID)
+   * @param[in] mg_name  Mesh generator name of secondary mesh in a stitch step
+   */
+  void
+  checkFullBoundaryHasNeighbor(const MeshBase & mesh,
+                               const BoundaryID boundary_id,
+                               const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list,
+                               const MeshGeneratorName & mg_name) const;
+
   // Holds pointers to the pointers to the meshes.
   std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
 
@@ -37,4 +51,7 @@ protected:
 
   /// Whether to merge boundaries if they have the same name but different boundary IDs
   const bool _merge_boundaries_with_same_name;
+
+  /// Whether the boundaries in each pair must stitch along the whole of each boundary
+  const bool _require_boundaries_fully_stitch;
 };
