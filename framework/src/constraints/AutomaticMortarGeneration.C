@@ -1786,6 +1786,41 @@ AutomaticMortarGeneration::buildCouplingInformation()
       _mortar_interface_coupling[i].insert(j);
   };
   TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
+
+  // The push above sends a secondary lower-dimensional element's couplings only to the processes
+  // owning it, its nodes, or its segments' volume parents. The AugmentSparsityOnInterface
+  // point-neighbor ghosting also needs the couplings of every nonlocal secondary lower-dimensional
+  // element this process can see, so pull them from the owner, which holds the complete set after
+  // the push
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
+  for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
+    for (const Elem * const secondary_elem :
+         as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
+                  _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
+      if (secondary_elem->processor_id() != _mesh.processor_id())
+        secondary_elems_to_query[secondary_elem->processor_id()].push_back(secondary_elem->id());
+
+  auto gather_functor = [this](processor_id_type,
+                               const std::vector<dof_id_type> & secondary_elem_ids,
+                               std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    coupled_elem_ids.resize(secondary_elem_ids.size());
+    for (const auto i : index_range(secondary_elem_ids))
+      if (const auto it = _mortar_interface_coupling.find(secondary_elem_ids[i]);
+          it != _mortar_interface_coupling.end())
+        coupled_elem_ids[i].assign(it->second.begin(), it->second.end());
+  };
+  auto act_on_data_functor = [this](processor_id_type,
+                                    const std::vector<dof_id_type> & secondary_elem_ids,
+                                    const std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    for (const auto i : index_range(secondary_elem_ids))
+      _mortar_interface_coupling[secondary_elem_ids[i]].insert(coupled_elem_ids[i].begin(),
+                                                               coupled_elem_ids[i].end());
+  };
+  std::vector<dof_id_type> * example = nullptr;
+  TIMPI::pull_parallel_vector_data(
+      _mesh.comm(), secondary_elems_to_query, gather_functor, act_on_data_functor, example);
 }
 
 std::vector<AutomaticMortarGeneration::MsmSubdomainStats>
