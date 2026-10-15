@@ -1,4 +1,4 @@
-reg_kernel = DisplacementRegularization
+reg_kernel = SecondDerivativeRegularization
 regularization_type = huhu
 coefficient = 10
 
@@ -12,8 +12,8 @@ coefficient = 10
   elem_type = QUAD9
   xmax = 10
   ymax = 1
-  nx = 10
-  ny = 2
+  nx = 1
+  ny = 1
 []
 
 [Physics/SolidMechanics/QuasiStatic]

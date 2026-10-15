@@ -1,12 +1,12 @@
-reg_kernel = DisplacementRegularization
+reg_kernel = SecondDerivativeRegularization
 regularization_type = huhu
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
   elem_type = QUAD9
-  nx = 4
-  ny = 4
+  nx = 2
+  ny = 2
 []
 
 [Variables]
