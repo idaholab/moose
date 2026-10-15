@@ -363,6 +363,14 @@ public:
   }
 
   /**
+   * Request that every process receive the mortar interface couplings of all nonlocal secondary
+   * lower-dimensional elements it can see. Consumers that apply a node's constraint on every
+   * process contributing to it, rather than only on the node's owner, need these couplings to
+   * preallocate the rows of their local elements.
+   */
+  void requestNonlocalSecondaryCouplings() { _nonlocal_secondary_couplings = true; }
+
+  /**
    * @return The primary-secondary boundary ID pair
    */
   const std::pair<BoundaryID, BoundaryID> & primarySecondaryBoundaryIDPair() const;
@@ -612,6 +620,10 @@ private:
 
   /// Whether the mortar segment mesh is distributed
   const bool _distributed;
+
+  /// Whether buildCouplingInformation() also gathers the couplings of nonlocal secondary
+  /// lower-dimensional elements
+  bool _nonlocal_secondary_couplings = false;
 
   /// Newton solve tolerance for node projections
   Real _newton_tolerance = 1e-12;

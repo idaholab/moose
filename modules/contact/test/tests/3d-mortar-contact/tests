@@ -511,6 +511,20 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
+  [penalty-sparsity]
+    type = 'RunApp'
+    input = 'penalty-sparsity.i'
+    # The input partitions the mesh into three slabs across the interface
+    min_parallel = 3
+    max_parallel = 3
+    # The weighted gap of a contact node carries up to 78 derivatives
+    capabilities = 'ad_size>=100'
+    requirement = 'The system shall preallocate every Jacobian entry assembled by mortar penalty '
+                  'contact in 3D when the secondary faces around a contact node are owned by '
+                  'other processes.'
+    design = 'AutomaticMortarGeneration.md PenaltyWeightedGapUserObject.md'
+    issues = '#34065'
+  []
   [frictional-mortar-3d-al]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-al.i'
