@@ -60,15 +60,15 @@ class TestTokens(unittest.TestCase):
     def testText(self):
         from MooseDocs.extensions import core
 
-        # 'HeatPipe3Phase Component' tokenizes to Word, Number, Word, Space, Word
+        # 'ElementL2Error Postprocessor' tokenizes to Word, Number, Word, Space, Word
         token = Test(None)
-        core.Word(token, content="HeatPipe")
-        core.Number(token, content="3")
-        core.Word(token, content="Phase")
+        core.Word(token, content="ElementL")
+        core.Number(token, content="2")
+        core.Word(token, content="Error")
         core.Space(token, count=1)
-        core.Word(token, content="Component")
-        self.assertEqual(token.text(), "HeatPipe3Phase Component")
-        self.assertEqual(token.text("-"), "HeatPipe3Phase-Component")
+        core.Word(token, content="Postprocessor")
+        self.assertEqual(token.text(), "ElementL2Error Postprocessor")
+        self.assertEqual(token.text("-"), "ElementL2Error-Postprocessor")
 
         # Punctuation still separates words
         token = Test(None)
