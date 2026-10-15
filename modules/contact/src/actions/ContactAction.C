@@ -883,6 +883,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
       params.set<Real>("minimum_projection_angle") = getParam<Real>("minimum_projection_angle");
       params.set<MooseEnum>("mortar_3d_subpatch_plane") =
           getParam<MooseEnum>("mortar_3d_subpatch_plane");
+      params.set<bool>("ghost_point_neighbors") = true;
       addRelationshipManagers(input_rm_type, params);
     }
   }
