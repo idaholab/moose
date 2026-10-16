@@ -24,6 +24,8 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
+template <typename T>
+class SparseMatrix;
 class NonlinearImplicitSystem;
 } // namespace libMesh
 
@@ -45,6 +47,14 @@ public:
    * TimeIntegration method.
    */
   virtual void postResidual(NumericVector<Number> & /*residual*/) {}
+
+  /**
+   * Callback to the NonLinearTimeIntegratorInterface called after the element, face and Dirac
+   * contributions to the system Jacobian are computed, before constraints and nodal boundary
+   * conditions modify its rows. Integrators whose postResidual() weights the time and non-time
+   * residuals differently apply the same weights to the Jacobian here.
+   */
+  virtual void postJacobian(libMesh::SparseMatrix<Number> & /*jacobian*/) {}
 
   /**
    * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
