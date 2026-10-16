@@ -69,6 +69,11 @@ public:
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
 protected:
+  /// Atomic weight of potassium (g/mol)
+  static constexpr Real _AwK = 39.102;
+  /// Atomic weight of sodium (g/mol)
+  static constexpr Real _AwNa = 22.9898;
+
   /// NaK molar mass (kg/mol)
   const Real _MNaK;
 

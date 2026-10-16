@@ -1,0 +1,20 @@
+[Tests]
+  design = 'IdealRealGasMixtureFluidProperties.md'
+  issues = '#34070'
+
+  [cp_volume_dependent_enthalpy]
+    type = GoogleTest
+    unit_test = IdealRealGasMixtureFluidPropertiesTest.cpVolumeDependentEnthalpy
+    requirement = 'The system shall compute the isobaric heat capacity of an ideal-real gas mixture whose primary component enthalpy depends on specific volume.'
+  []
+  [transport_volume_dependent_secondary]
+    type = GoogleTest
+    unit_test = IdealRealGasMixtureFluidPropertiesTest.transportVolumeDependentSecondary
+    requirement = 'The system shall compute the same viscosity and thermal conductivity of an ideal-real gas mixture with and without derivatives when a secondary component internal energy depends on specific volume.'
+  []
+  [three_components]
+    type = GoogleTest
+    unit_test = IdealRealGasMixtureFluidPropertiesTest.threeComponents
+    requirement = 'The system shall compute derivatives of the pressure, internal energy and entropy of an ideal-real gas mixture of three components with respect to temperature, specific volume and the secondary mass fractions.'
+  []
+[]

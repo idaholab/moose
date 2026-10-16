@@ -95,6 +95,11 @@ TEST_F(NitrogenFluidPropertiesTest, thermalConductivity)
 
   const Real p = _fp->p_from_rho_T(5.0 * 1000.0 * _fp->molarMass(), 300.0);
   REL_TEST(_fp->k_from_p_T(p, 300.0), 32.7694e-3, tol);
+
+  // Liquid state, where the highest-order residual term (delta^10) dominates. The
+  // reference value includes the critical enhancement, which is not implemented and
+  // contributes well under 1% at this state
+  REL_TEST(_fp->k_from_rho_T(25.0 * 1000.0 * _fp->molarMass(), 100.0), 103.834e-3, 1.0e-2);
 }
 
 /**
@@ -173,6 +178,7 @@ TEST_F(NitrogenFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
 
   // Viscosity from density and temperature

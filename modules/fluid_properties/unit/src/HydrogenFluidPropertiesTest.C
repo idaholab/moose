@@ -28,8 +28,8 @@ TEST_F(HydrogenFluidPropertiesTest, molarMass)
  */
 TEST_F(HydrogenFluidPropertiesTest, criticalProperties)
 {
-  ABS_TEST(_fp->criticalPressure(), 1.315e6, REL_TOL_SAVED_VALUE);
-  ABS_TEST(_fp->criticalTemperature(), 33.19, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalPressure(), 1.2964e6, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalTemperature(), 33.145, REL_TOL_SAVED_VALUE);
   ABS_TEST(_fp->criticalDensity(), 31.26226704, REL_TOL_SAVED_VALUE);
 }
 
@@ -48,7 +48,7 @@ TEST_F(HydrogenFluidPropertiesTest, triplePointProperties)
  */
 TEST_F(HydrogenFluidPropertiesTest, vapor)
 {
-  const Real tol = 10.0 * REL_TOL_EXTERNAL_VALUE;
+  const Real tol = REL_TOL_EXTERNAL_VALUE;
 
   // Vapor pressure
   REL_TEST(_fp->vaporPressure(14.0), 7.541e3, tol);
@@ -97,7 +97,9 @@ TEST_F(HydrogenFluidPropertiesTest, viscosity)
 {
   const Real tol = 10.0 * REL_TOL_EXTERNAL_VALUE;
 
-  REL_TEST(_fp->mu_from_rho_T(0.0, 298.15), 8.8997e-6, tol);
+  // The dilute-gas limit does not depend on the density correlation, so it can be
+  // compared at the standard tolerance
+  REL_TEST(_fp->mu_from_rho_T(0.0, 298.15), 8.8997e-6, REL_TOL_EXTERNAL_VALUE);
   REL_TEST(_fp->mu_from_rho_T(0.68911, 350.0), 9.9645e-6, tol);
   REL_TEST(_fp->mu_from_rho_T(6.5764, 350.0), 1.0147e-5, tol);
 
@@ -150,6 +152,24 @@ TEST_F(HydrogenFluidPropertiesTest, properties)
  * Verify calculation of the derivatives of all properties by comparing with finite
  * differences
  */
+TEST_F(HydrogenFluidPropertiesTest, derivativesNearCritical)
+{
+  const Real tol = REL_TOL_DERIVATIVE;
+
+  // Slightly supercritical state (Tc = 33.145 K, pc = 1.2964 MPa)
+  const Real p = 1.4e6;
+  const Real T = 36.0;
+
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+
+  // The isobaric heat capacity is the temperature derivative of the enthalpy
+  Real h, dh_dp, dh_dT;
+  _fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
+  REL_TEST(_fp->cp_from_p_T(p, T), dh_dT, REL_TOL_CONSISTENCY);
+}
+
 TEST_F(HydrogenFluidPropertiesTest, derivatives)
 {
   const Real tol = REL_TOL_DERIVATIVE;
@@ -161,6 +181,7 @@ TEST_F(HydrogenFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
 
   // Viscosity from density and temperature
@@ -200,6 +221,15 @@ TEST_F(HydrogenFluidPropertiesTest, derivatives)
   _fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
   dmu_dT_fd = (_fp->mu_from_p_T(p, T + dT) - _fp->mu_from_p_T(p, T - dT)) / (2.0 * dT);
 
+  REL_TEST(dmu_dT, dmu_dT_fd, tol);
+
+  // The temperature derivative must be finite at the collision integral reducing
+  // temperature (30.41 K), where log(T*) = 0
+  const Real T_star = 30.41;
+  rho = 70.0;
+  _fp->mu_from_rho_T(rho, T_star, 0.0, mu, dmu_drho, dmu_dT);
+  dmu_dT_fd =
+      (_fp->mu_from_rho_T(rho, T_star + dT) - _fp->mu_from_rho_T(rho, T_star - dT)) / (2.0 * dT);
   REL_TEST(dmu_dT, dmu_dT_fd, tol);
 }
 

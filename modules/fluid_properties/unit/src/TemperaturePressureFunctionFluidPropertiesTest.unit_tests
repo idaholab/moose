@@ -1,0 +1,15 @@
+[Tests]
+  design = 'TemperaturePressureFunctionFluidProperties.md'
+  issues = '#34070'
+
+  [heat_capacity_difference]
+    type = GoogleTest
+    unit_test = TemperaturePressureFunctionFluidPropertiesTest.heatCapacityDifference
+    requirement = 'The system shall compute isobaric and isochoric heat capacities from temperature and pressure functions that satisfy cp - cv = T alpha^2 / (rho kappa_T), with alpha the thermal expansion coefficient and kappa_T the isothermal compressibility.'
+  []
+  [derivatives_at_zero_arguments]
+    type = GoogleTest
+    unit_test = TemperaturePressureFunctionFluidPropertiesTest.derivativesAtZeroArguments
+    requirement = 'The system shall compute finite derivatives of the heat capacities and internal energy defined from temperature and pressure functions at zero pressure and zero internal energy.'
+  []
+[]
