@@ -95,6 +95,19 @@ Mesh::initMap()
     _maps->boundary_node_ids[boundary];
   }
 
+  auto add_ghost_elem = [&](const Elem * const elem)
+  {
+    if (_maps->ghost_elem_id_mapping.count(elem))
+      return;
+
+    _maps->ghost_elem_id_mapping[elem] = _num_local_elems + _num_ghost_elems++;
+    elem_types.emplace(elem->type(), elem->p_level());
+
+    for (auto & node : elem->node_ref_range())
+      if (node.processor_id() != _mesh.processor_id())
+        ghost_nodes.insert(const_cast<Node *>(&node));
+  };
+
   // Enumerate one off-process neighbor layer for element-side geometry data.
   if (_needs_element_side_geometry)
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
@@ -102,13 +115,27 @@ Mesh::initMap()
       {
         const auto neighbor = elem->neighbor_ptr(side);
         if (neighbor && neighbor != libMesh::remote_elem &&
-            neighbor->processor_id() != _mesh.processor_id() &&
-            !_maps->ghost_elem_id_mapping.count(neighbor))
-        {
-          _maps->ghost_elem_id_mapping[neighbor] = _num_local_elems + _num_ghost_elems++;
-          elem_types.emplace(neighbor->type(), neighbor->p_level());
-        }
+            neighbor->processor_id() != _mesh.processor_id())
+          add_ghost_elem(neighbor);
       }
+
+  // Enumerate the off-process elements that Kokkos objects read. Sorting by ID makes the contiguous
+  // IDs independent of the iteration order of the providers' sets.
+  std::unordered_set<const Elem *> provided_elems;
+  for (const auto & provider : _ghost_element_providers)
+    provider(provided_elems);
+
+  std::vector<const Elem *> sorted_provided_elems;
+  for (const auto elem : provided_elems)
+    if (elem->active() && elem->processor_id() != _mesh.processor_id())
+      sorted_provided_elems.push_back(elem);
+
+  std::sort(sorted_provided_elems.begin(),
+            sorted_provided_elems.end(),
+            [](const Elem * a, const Elem * b) { return a->id() < b->id(); });
+
+  for (const auto elem : sorted_provided_elems)
+    add_ghost_elem(elem);
 
   // Setup node maps
 
@@ -250,6 +277,10 @@ Mesh::initElement()
     for (const auto node : elem->node_index_range())
       _nodes(node, eid) = getContiguousNodeID(elem->node_ptr(node));
   }
+
+  for (const auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+    for (const auto node : ghost_elem->node_index_range())
+      _nodes(node, ghost_eid) = getContiguousNodeID(ghost_elem->node_ptr(node));
 
   for (const auto boundary : _mesh.meshBoundaryIds())
     _boundary_nodes[getContiguousBoundaryID(boundary)].copySet<false, true>(

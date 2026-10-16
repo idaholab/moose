@@ -17,6 +17,7 @@
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
+#include "AutomaticMortarGeneration.h"
 #include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
@@ -378,6 +379,25 @@ FEProblemBase::initKokkos()
 
   if (adaptivity().isOn())
     mooseError("Kokkos does not support adaptivity yet.");
+
+  // Kokkos objects on a mortar interface read the elements coupled across it, which the mortar
+  // relationship managers ghost
+  if (_has_mortar)
+    _mesh.getKokkosMesh()->addGhostElementProvider(
+        [this](std::unordered_set<const Elem *> & elems)
+        {
+          for (const bool displaced : {false, true})
+            for (const auto & [_, config] : getMortarInterfaces(displaced))
+              for (const auto & [elem_id, coupled_ids] : config.amg->mortarInterfaceCoupling())
+              {
+                if (const auto elem = _mesh.queryElemPtr(elem_id))
+                  elems.insert(elem);
+
+                for (const auto coupled_id : coupled_ids)
+                  if (const auto coupled = _mesh.queryElemPtr(coupled_id))
+                    elems.insert(coupled);
+              }
+        });
 
   // Initialize Kokkos mesh
   _mesh.getKokkosMesh()->update();

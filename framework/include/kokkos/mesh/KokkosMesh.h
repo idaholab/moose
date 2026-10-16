@@ -88,6 +88,18 @@ public:
   }
 
   /**
+   * Register a provider of off-process elements that Kokkos objects read, such as the primary
+   * interior parents across a mortar interface. Every update() enumerates the active elements the
+   * providers list as ghost elements, with their nodes, node coordinates, and DOF indices. The
+   * elements must be geometrically and algebraically ghosted on this process.
+   * @param provider The function that inserts the needed off-process elements into a set
+   */
+  void addGhostElementProvider(std::function<void(std::unordered_set<const Elem *> &)> provider)
+  {
+    _ghost_element_providers.push_back(std::move(provider));
+  }
+
+  /**
    * Get the number of subdomains
    * @returns The number of subdomains
    */
@@ -112,6 +124,11 @@ public:
    * @returns The total number of elements
    */
   dof_id_type getNumLocalAndPossiblyOneNeighborLayerGhostElements() const;
+  /**
+   * Get the number of ghost elements
+   * @returns The number of ghost elements
+   */
+  dof_id_type getNumGhostElements() const { return _num_ghost_elems; }
   /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -551,9 +568,14 @@ private:
    */
   dof_id_type _num_local_elems = 0;
   /**
-   * Number of ghost (off-process neighbor) elements
+   * Number of ghost elements: the off-process side neighbors of local elements when element-side
+   * geometry is needed, and the elements listed by the ghost element providers
    */
   dof_id_type _num_ghost_elems = 0;
+  /**
+   * Providers of off-process elements that Kokkos objects read
+   */
+  std::vector<std::function<void(std::unordered_set<const Elem *> &)>> _ghost_element_providers;
   /**
    * Number of local nodes including semi-local nodes
    */
