@@ -17,9 +17,9 @@ class PorousRhieChowMassFlux;
  * Momentum flux kernel for porous equations written in superficial velocity.
  *
  * The advective contribution is divided by the porosity on each side of a face. Internal baffle
- * faces advect the one-sided face states of the porous Rhie-Chow object and use a stress
- * discretization consistent with the velocity jump. Elsewhere, the stress contribution may use a
- * two-point transmissibility.
+ * faces advect the upstream interstitial tangential velocity with each side's normal velocity and
+ * transmit only a shear traction that depends on which sides are clear fluid. Elsewhere, the stress
+ * contribution may use a two-point transmissibility.
  */
 class LinearPWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
 {
@@ -96,11 +96,18 @@ private:
   };
 
   /**
-   * Compute the stress on the current baffle face, per unit face area. The interstitial
-   * tangential velocity is continuous and carries one shear traction, while each side evaluates
-   * its normal stress against its own face normal velocity.
+   * Compute the stress on the current baffle face, per unit face area. Only a shear traction is
+   * transmitted: between two clear sides with the harmonic two-point transmissibility, from a
+   * clear side against the superficial cell velocity of a porous side, and none between two
+   * porous sides.
    */
   BaffleStressData baffleStressData() const;
+
+  /**
+   * Whether one side of the current face is clear fluid, i.e. has unit porosity.
+   * @param elem_side Whether to check the element side
+   */
+  bool isClearFluidSide(bool elem_side) const;
 
   /**
    * Return the inverse porosity on one side of the current face.

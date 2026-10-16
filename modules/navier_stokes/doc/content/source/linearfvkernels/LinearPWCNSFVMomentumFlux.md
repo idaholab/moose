@@ -17,8 +17,9 @@ velocity, and each side advects its own normal velocity. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
 Bernoulli pressure jump and any irreversible form loss, as described below.
 
-The stress discretization does not add another baffle loss; it assumes that there is no separate
-singular viscous surface force and therefore preserves the viscous traction across the interface.
+The stress discretization does not add another baffle loss. Away from baffles it preserves the
+viscous traction across a porosity or viscosity jump; on a baffle it transmits only the shear
+traction described in [#baffle-stress].
 Set
 [!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_two_point_stress_transmissibility) to use
 the jump-safe harmonic two-point normal-stress treatment instead of the standard
@@ -283,53 +284,46 @@ here.
 
 On a pressure baffle the superficial velocity itself jumps: mass conservation keeps
 $\rho\boldsymbol{U}\mathbin{\cdot}\boldsymbol{n}_f$ continuous, so the normal superficial
-velocity jumps with density, and the absence of a tangential baffle force keeps the interstitial
-tangential velocity $\boldsymbol{w}=(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)
-\boldsymbol{U}/\epsilon$ continuous, so the tangential superficial velocity jumps with porosity.
-A common superficial face velocity, as in [eq:pw-momentum-half-cell-tractions], would read these
-jumps as gradients. The baffle stress therefore treats the two parts of the traction separately.
+velocity jumps with density, and the tangential superficial velocity jumps with porosity. A common
+superficial face velocity, as in [eq:pw-momentum-half-cell-tractions], would read these jumps as
+gradients. A baffle represents an interface that is sharp on the mesh scale, and the viscous
+(Brinkman) layer on the porous side of such an interface is of the order of the square root of the
+permeability, much thinner than the adjacent cells. The baffle stress is therefore a shear traction
+that depends on the kind of fluid on each side. A side of unit porosity is clear fluid; any other
+side is a porous medium.
 
-The tangential part uses one interstitial face velocity $\boldsymbol{w}_f$, seen as
-$\epsilon_s\boldsymbol{w}_f$ from side $s$. Requiring one shear traction on both half-cells and
-eliminating $\boldsymbol{w}_f$ gives
+- Between two porous sides, the shear in the Brinkman layers is negligible against the drag, and no
+  traction is transmitted.
+- A clear side shears against the porous side as against a rough wall that moves with the
+  superficial velocity of the porous cell.
+- Between two clear sides, the traction is the ordinary two-point traction.
+
+With $C$ the set of clear sides, the traction is
 
 \begin{equation}
 \begin{aligned}
-  \boldsymbol{t}_f^{t} &= T_f^{t}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)\left[
-    \frac{\boldsymbol{U}_N+d_N\boldsymbol{c}_N}{\epsilon_N}
-    -\frac{\boldsymbol{U}_P-d_P\boldsymbol{c}_P}{\epsilon_P}\right], \\
-  T_f^{t} &= \left(\frac{d_P}{\mu_P\epsilon_P}+\frac{d_N}{\mu_N\epsilon_N}\right)^{-1},
+  \boldsymbol{t}_f &= T_f^{b}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)\left[
+    \left(\boldsymbol{U}_N+\delta_N d_N\boldsymbol{c}_N\right)
+    -\left(\boldsymbol{U}_P-\delta_P d_P\boldsymbol{c}_P\right)\right], \\
+  T_f^{b} &= \left(\sum_{s\in C}\frac{d_s}{\mu_s}\right)^{-1},
 \end{aligned}
 \label{eq:pw-momentum-baffle-shear}
 \end{equation}
 
-where $\boldsymbol{c}_s$ collects the nonorthogonal corrections of
-[eq:pw-momentum-nonorthogonal-corrections] for all velocity components. For equal porosity this
-reduces to [eq:pw-momentum-discontinuous-stress].
+where $\delta_s$ is one for a clear side and zero for a porous side, $\boldsymbol{c}_s$ collects
+the nonorthogonal corrections of [eq:pw-momentum-nonorthogonal-corrections] for all velocity
+components, and the traction is zero if neither side is clear. For two clear sides this is the
+tangential part of [eq:pw-momentum-discontinuous-stress].
 
-The normal part is evaluated separately on each side against that side's face normal velocity
-$\phi_f/\rho_s$:
-
-\begin{equation}
-\begin{aligned}
-  t_{P,f}^{n} &= \frac{\mu_P}{d_P}\left(\frac{\phi_f}{\rho_P}
-    -\boldsymbol{U}_P\mathbin{\cdot}\boldsymbol{n}_f
-    +d_P\boldsymbol{c}_P\mathbin{\cdot}\boldsymbol{n}_f\right), \\
-  t_{N,f}^{n} &= \frac{\mu_N}{d_N}\left(\boldsymbol{U}_N\mathbin{\cdot}\boldsymbol{n}_f
-    +d_N\boldsymbol{c}_N\mathbin{\cdot}\boldsymbol{n}_f-\frac{\phi_f}{\rho_N}\right).
-\end{aligned}
-\label{eq:pw-momentum-baffle-normal}
-\end{equation}
-
-The two normal stresses need not balance. Their difference is a normal viscous stress jump that
-the inviscid [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) does not include,
-consistent with that model. Component $i$ of the traction on side $s$ is
-$t_{i,f}^{t}+t_{s,f}^{n}n_{f,i}$. The part proportional to $U_i$ is assembled implicitly, using
-the tangential coefficients of [eq:pw-momentum-baffle-shear] and the ordinary two-point
-transmissibility of [eq:pw-momentum-harmonic-transmissibility] for the normal part; the remainder,
-including the coupling to the other velocity components, is lagged on the right-hand side. With
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_deviatoric_terms) enabled, each side adds
-its own deviatoric correction $\mu_s c_{s,i}^{\mathrm{dev}}$ explicitly.
+No normal viscous stress acts on a baffle face. The
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) carries the normal momentum
+balance, and a two-point normal stress would read the jump of $\phi_f/\rho_s$ as a gradient.
+The element row adds $-\boldsymbol{t}_f$ and the neighbor row $+\boldsymbol{t}_f$, so momentum is
+conserved; on a porous side the drag absorbs the traction. The part proportional to $U_i$ is
+assembled implicitly with the coefficient $T_f^{b}(1-n_{f,i}^2)$; the remainder, including the
+coupling to the other velocity components, is lagged on the right-hand side. With
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_deviatoric_terms) enabled, each clear side
+adds its own deviatoric correction $\mu_s c_{s,i}^{\mathrm{dev}}$ explicitly.
 
 ## Example Input Syntax
 
