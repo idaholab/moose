@@ -16,5 +16,5 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for bad output supplied by executed commands
         """
 
-        out = self.runTests("-i", "non_unicode", exit_code=132).output
-        self.assertIn("non-unicode characters in output", out)
+        out = self.runTests("-i", "non_unicode", "-v").output
+        self.assertRegex(out, r"non_unicode.*INVALID UTF-8 IN STDOUT.*OK")

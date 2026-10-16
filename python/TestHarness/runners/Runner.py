@@ -154,7 +154,7 @@ class Runner(OutputInterface):
             )
             if os.access(file_path, os.R_OK):
                 with open(file_path, "r+b") as f:
-                    run_output.appendOutput(self.readOutput(f))
+                    run_output.appendOutput(self.readOutput(f, file_path))
             else:
                 self.job.setStatus(self.job.error, "FILE TIMEOUT")
                 self.appendOutput(f"File {file_path} unavailable")
@@ -185,17 +185,21 @@ class Runner(OutputInterface):
         """
         raise Exception("sendSignal not supported for this Runner")
 
-    def readOutput(self, stream):
+    def readOutput(self, stream, name="output"):
         """
         Helper for reading output from a stream, and setting an error state
         if the read failed.
+
+        A stream that is not valid UTF-8 is flagged with a caveat. A test's
+        result is determined by its own checks, and launchers such as mpiexec
+        can write arbitrary bytes that are unrelated to the application.
         """
         output = ""
         try:
             stream.seek(0)
             output = stream.read().decode("utf-8")
         except UnicodeDecodeError:
-            self.job.setStatus(self.job.error, "non-unicode characters in output")
+            self.job.addCaveats(f"invalid UTF-8 in {name}")
         except:
             self.job.setStatus(self.job.error, "error reading output")
         if output and output[-1] != "\n":
