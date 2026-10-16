@@ -37,6 +37,35 @@
     run_sim = True
     requirement = 'The system shall compute an exact Jacobian for an array reaction kernel implemented with automatic differentiation.'
   []
+  [ad_coupling]
+    issues = '#34104'
+    requirement = 'The system shall provide automatic differentiation values and gradients of coupled array variables'
+    [values]
+      type = 'Exodiff'
+      input = 'ad_array_coupling.i'
+      exodiff = 'ad_array_coupling_out.e'
+      detail = 'for use in residual computations,'
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_array_coupling.i'
+      run_sim = True
+      detail = 'with exact derivatives with respect to the coupled array variable degrees of freedom, and'
+    []
+    [default_reference]
+      type = 'CSVDiff'
+      input = 'ad_array_coupling_default_reference.i'
+      csvdiff = 'ad_array_coupling_default_out.csv'
+      detail = 'with constant default values and zero gradients for an uncoupled variable, compared with a body force of the same constant value'
+    []
+    [default]
+      type = 'CSVDiff'
+      input = 'ad_array_coupling_default.i'
+      csvdiff = 'ad_array_coupling_default_out.csv'
+      prereq = 'ad_coupling/default_reference'
+      detail = 'in the coupling kernel.'
+    []
+  []
   [test_diffusion_reaction_dg]
     type = 'Exodiff'
     input = 'array_diffusion_reaction_dg.i'
