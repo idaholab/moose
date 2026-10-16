@@ -11,6 +11,9 @@
 
 #include "IncompressibleMomentumSPBase.h"
 
+/**
+ * Regular path-integrated incompressible momentum kernel
+ */
 template <bool is_ad>
 class IncompressibleMomentumSPScalarKernelTempl : public IncompressibleMomentumSPBaseTempl<is_ad>
 {

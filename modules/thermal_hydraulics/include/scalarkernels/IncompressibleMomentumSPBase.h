@@ -15,6 +15,9 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Path-integrated incompressible momentum kernel base class
+ */
 template <bool is_ad>
 class IncompressibleMomentumSPBaseTempl
   : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
