@@ -7,10 +7,16 @@
 # Its jump is the BernoulliFormLossPressureJump with the interpolated face density
 # rho_f = (rho_left + rho_right) / 2 and side velocities mass_flux / (rho_f eps_s):
 #   p_right - p_left = mass_flux^2 / (2 rho_f) * (1 / eps_left^2 - 1 / eps_right^2).
-# With viscosity, both sides must carry the same shear traction,
-# mu_left * tangential_slope_left = mu_right * tangential_slope_right; the normal velocity is
-# constant on each side and carries no viscous stress. A consistent scheme reproduces this
-# piecewise-linear solution to round-off on uniform meshes.
+# With viscosity, the baffle transmits only a shear traction, and only from a clear side (unit
+# porosity). Between two clear sides it is continuous,
+# mu_left * tangential_slope_left = mu_right * tangential_slope_right. Two porous sides transmit
+# none, so viscous cases with porosity below one on both sides need zero slopes. A clear side
+# shears against the superficial cell velocity of a porous side at the projected half-cell
+# distance d, so with the clear side on the left the traction balance on both rows requires
+#   mu_left * tangential_slope_left = mu_right * tangential_slope_right and
+#   (tangential_slope_left - tangential_slope_right) * d = (1 - eps_right) * tangential_velocity.
+# The normal velocity is constant on each side and carries no viscous stress. A consistent scheme
+# reproduces this piecewise-linear solution to round-off on uniform meshes.
 
 rho_left = 1
 rho_right = 1

@@ -33,8 +33,9 @@ interpolate velocity across the baffle uses one-sided states instead:
   extrapolated within each side, so the gradient does not read the jump as a slope. It is required
   as the default gradient method of every velocity variable.
 - [LinearPWCNSFVMomentumFlux.md] advects the upstream interstitial tangential velocity and each
-  side's extrapolated normal velocity, and splits the viscous traction into a shear part carried by
-  the continuous interstitial tangential velocity and a normal part evaluated on each side.
+  side's extrapolated normal velocity. The baffle transmits only a shear traction, chosen by the
+  kind of fluid on each side: two-point between clear sides (unit porosity), from a clear side
+  against the porous cell velocity, and none between porous sides.
 - [FVReconstructedPressureGradient.md] recovers each side's face normal velocity from the shared
   mass flux and that side's density.
 - The Rhie-Chow face flux combines the one-sided fluxes $\rho_s(\mathbf{H}/\mathbf{A})_s\cdot\mathbf{n}$

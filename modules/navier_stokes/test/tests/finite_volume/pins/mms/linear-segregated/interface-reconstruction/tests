@@ -62,10 +62,24 @@
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = viscous-porosity-jump.csv
-      cli_args = 'mu_left=0.01 mu_right=0.02 tangential_slope_right=0.1 eps_right=0.5 '
-                 'Outputs/file_base=viscous-porosity-jump'
+      # Clear left side: with d = 1 / (2 nx) = 1 / 16, the slopes 1.6 and 0.8 satisfy
+      # mu_left * 1.6 = mu_right * 0.8 and (1.6 - 0.8) * d = (1 - eps_right) * 0.1.
+      cli_args = 'mu_left=0.01 mu_right=0.02 tangential_slope_left=1.6 tangential_slope_right=0.8 '
+                 'eps_right=0.5 Outputs/file_base=viscous-porosity-jump'
       abs_zero = 1e-10
-      detail = 'with viscosity and porosity jumps that carry one shear traction, and'
+      detail = 'with viscosity and a clear side shearing against a porous side,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [viscous-porous-porous]
+      type = CSVDiff
+      input = interface-reconstruction.i
+      csvdiff = viscous-porous-porous.csv
+      cli_args = 'mu_left=0.01 mu_right=0.02 eps_left=0.8 eps_right=0.5 rho_right=2 '
+                 'tangential_slope_left=0 tangential_slope_right=0 '
+                 'Outputs/file_base=viscous-porous-porous'
+      abs_zero = 1e-10
+      detail = 'with viscosity and two porous sides that transmit no shear traction, and'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []
@@ -73,8 +87,12 @@
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = skewed.csv
+      # Clear left side: the projected half-cell distance is d = 1 / (2 nx sqrt(1 + skew^2)), and
+      # the slopes satisfy the clear-porous balance of the viscous-porosity-jump case.
       cli_args = 'skew=0.25 nonorthogonal=true mu_left=0.01 mu_right=0.02 '
-                 'tangential_slope_right=0.1 eps_right=0.5 rho_right=2 Outputs/file_base=skewed'
+                 'tangential_slope_left=1.6492422502470643 '
+                 'tangential_slope_right=0.8246211251235321 eps_right=0.5 rho_right=2 '
+                 'Outputs/file_base=skewed'
       abs_zero = 1e-10
       detail = 'on a uniform parallelogram mesh with nonorthogonal correction and jumps in '
                'density, porosity, and viscosity.'
