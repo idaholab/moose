@@ -101,13 +101,13 @@ Assembly::initQuadrature()
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
-    auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
-    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
     for (auto & [elem_type_and_p_level, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
       const auto [elem_type, p_level] = elem_type_and_p_level;
       auto elem = &libMesh::ReferenceElem::get(elem_type);
+      auto qrule = assembly.writeableQRule(elem->dim(), subdomain, {});
+      auto qrule_face = assembly.writeableQRuleFace(elem->dim(), subdomain, {});
 
       _q_points_face(sid, elem_type_id).create(elem->n_sides());
       _weights_face(sid, elem_type_id).create(elem->n_sides());
@@ -314,45 +314,46 @@ Assembly::initShape()
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
-    auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
-    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
       const bool is_vector_fe = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
 
-      std::unique_ptr<FEBase> fe;
-      std::unique_ptr<FEBase> fe_face;
-      std::unique_ptr<FEVectorBase> vector_fe;
-      std::unique_ptr<FEVectorBase> vector_fe_face;
-
-      if (is_vector_fe)
-      {
-        vector_fe = FEVectorBase::build(_dimension, fe_type);
-        vector_fe_face = FEVectorBase::build(_dimension, fe_type);
-
-        vector_fe->add_p_level_in_reinit(fe_type.p_refinement);
-        vector_fe_face->add_p_level_in_reinit(fe_type.p_refinement);
-
-        vector_fe->attach_quadrature_rule(qrule);
-        vector_fe_face->attach_quadrature_rule(qrule_face);
-      }
-      else
-      {
-        fe = FEBase::build(_dimension, fe_type);
-        fe_face = FEBase::build(_dimension, fe_type);
-
-        fe->add_p_level_in_reinit(fe_type.p_refinement);
-        fe_face->add_p_level_in_reinit(fe_type.p_refinement);
-
-        fe->attach_quadrature_rule(qrule);
-        fe_face->attach_quadrature_rule(qrule_face);
-      }
-
       for (auto & [elem_type_and_p_level, elem_type_id] : kokkosMesh().getElementTypeMap())
       {
         const auto [elem_type, p_level] = elem_type_and_p_level;
         auto elem = buildReferenceElem(elem_type, p_level);
+        const auto dim = elem->dim();
+        auto qrule = assembly.writeableQRule(dim, subdomain, {});
+        auto qrule_face = assembly.writeableQRuleFace(dim, subdomain, {});
+
+        std::unique_ptr<FEBase> fe;
+        std::unique_ptr<FEBase> fe_face;
+        std::unique_ptr<FEVectorBase> vector_fe;
+        std::unique_ptr<FEVectorBase> vector_fe_face;
+
+        if (is_vector_fe)
+        {
+          vector_fe = FEVectorBase::build(dim, fe_type);
+          vector_fe_face = FEVectorBase::build(dim, fe_type);
+
+          vector_fe->add_p_level_in_reinit(fe_type.p_refinement);
+          vector_fe_face->add_p_level_in_reinit(fe_type.p_refinement);
+
+          vector_fe->attach_quadrature_rule(qrule);
+          vector_fe_face->attach_quadrature_rule(qrule_face);
+        }
+        else
+        {
+          fe = FEBase::build(dim, fe_type);
+          fe_face = FEBase::build(dim, fe_type);
+
+          fe->add_p_level_in_reinit(fe_type.p_refinement);
+          fe_face->add_p_level_in_reinit(fe_type.p_refinement);
+
+          fe->attach_quadrature_rule(qrule);
+          fe_face->attach_quadrature_rule(qrule_face);
+        }
 
         if (is_vector_fe)
         {
@@ -445,11 +446,14 @@ Assembly::initShape()
     {
       const auto [elem_type, p_level] = elem_type_and_p_level;
       const auto & reference_elem = libMesh::ReferenceElem::get(elem_type);
+      const auto dim = reference_elem.dim();
       auto fe_type = FEType(reference_elem.default_order(), LAGRANGE);
       auto shape_deriv_ptr = libMesh::FEInterface::shape_deriv_function(fe_type, &reference_elem);
+      auto qrule = assembly.writeableQRule(dim, subdomain, {});
+      auto qrule_face = assembly.writeableQRuleFace(dim, subdomain, {});
 
-      std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
-      std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
+      std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+      std::unique_ptr<FEBase> fe_face(FEBase::build(dim, fe_type));
 
       fe->add_p_level_in_reinit(false);
       fe_face->add_p_level_in_reinit(false);
@@ -525,18 +529,18 @@ Assembly::initShape()
         {
           Point reference_point;
 
-          if (_dimension == 1)
+          if (dim == 1)
             reference_point = side ? Point(1) : Point(-1);
-          else if (_dimension == 2)
+          else if (dim == 2)
             for (const auto i : index_range(psi))
               reference_point.add_scaled(side_ptr->point(i), psi[i][qp]);
 
           for (const auto i : index_range(phi))
           {
-            if (_dimension < 3)
+            if (dim < 3)
               _normal_dx_dxi(sid, elem_type_id)(side)(i, qp) =
                   shape_deriv_ptr(fe_type, elem.get(), i, 0, reference_point, false);
-            if (_dimension == 2)
+            if (dim == 2)
               _normal_dx_deta(sid, elem_type_id)(side)(i, qp) =
                   shape_deriv_ptr(fe_type, elem.get(), i, 1, reference_point, false);
           }

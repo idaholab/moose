@@ -148,6 +148,7 @@ Mesh::initElement()
 
   _num_sides.create(num_elem_types);
   _num_nodes.create(num_elem_types);
+  _elem_dims.create(num_elem_types);
   _num_side_nodes.create(num_elem_types);
   _local_side_node.create(num_elem_types);
 
@@ -158,6 +159,7 @@ Mesh::initElement()
 
     _num_sides[elem_type_id] = elem->n_sides();
     _num_nodes[elem_type_id] = elem->n_nodes();
+    _elem_dims[elem_type_id] = elem->dim();
 
     _num_side_nodes[elem_type_id].create(elem->n_sides());
     _local_side_node[elem_type_id].create(elem->n_nodes(), elem->n_sides());
@@ -178,6 +180,7 @@ Mesh::initElement()
 
   _num_sides.moveToDevice();
   _num_nodes.moveToDevice();
+  _elem_dims.moveToDevice();
   _num_side_nodes.copyToDevice();
   _local_side_node.copyToDevice();
 

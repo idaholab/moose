@@ -356,6 +356,16 @@ public:
     return _num_nodes[elem_type];
   }
   /**
+   * Get the dimension of an element type, which is lower than the mesh dimension for the elements
+   * of lower-dimensional subdomains
+   * @param elem_type The element type ID
+   * @returns The dimension of the element type
+   */
+  KOKKOS_FUNCTION unsigned int getElementDimension(unsigned int elem_type) const
+  {
+    return _elem_dims[elem_type];
+  }
+  /**
    * Get the number of nodes on a side of an element type
    * @param elem_type The element type ID
    * @param side The side index
@@ -572,6 +582,10 @@ private:
    * Number of nodes of each element type
    */
   Array<unsigned int> _num_nodes;
+  /**
+   * Dimension of each element type
+   */
+  Array<unsigned int> _elem_dims;
   /**
    * Number of nodes per side of each element side
    */

@@ -331,6 +331,25 @@ public:
   KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
 
   /**
+   * Get the inverse of the Jacobian of the map of a reference element of a dimension, which is the
+   * right inverse J^T (J J^T)^{-1} of the map of an element embedded in a higher-dimensional mesh
+   * @param J The Jacobian of the map, with rows of the derivatives with respect to the reference
+   * coordinates
+   * @param dim The dimension of the reference element
+   * @returns The inverse of the Jacobian
+   */
+  KOKKOS_FUNCTION Real33 inverseMap(const Real33 & J, const unsigned int dim) const;
+  /**
+   * Get the measure of the map of a reference element of a dimension, which is
+   * sqrt(det(J J^T)) for an element embedded in a higher-dimensional mesh
+   * @param J The Jacobian of the map, with rows of the derivatives with respect to the reference
+   * coordinates
+   * @param dim The dimension of the reference element
+   * @returns The measure of the map
+   */
+  KOKKOS_FUNCTION Real mapMeasure(const Real33 & J, const unsigned int dim) const;
+
+  /**
    * Get the list of boundaries to cache face material properties
    * @returns The list of boundaries
    */
@@ -516,6 +535,24 @@ Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
   return gradient;
 }
 
+KOKKOS_FUNCTION inline Real33
+Assembly::inverseMap(const Real33 & J, const unsigned int dim) const
+{
+  if (dim == _dimension)
+    return J.inverse(dim);
+
+  return J.transpose() * (J * J.transpose()).inverse(dim);
+}
+
+KOKKOS_FUNCTION inline Real
+Assembly::mapMeasure(const Real33 & J, const unsigned int dim) const
+{
+  if (dim == _dimension)
+    return J.determinant(dim);
+
+  return ::Kokkos::sqrt((J * J.transpose()).determinant(dim));
+}
+
 KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
@@ -544,12 +581,13 @@ Assembly::computePhysicalMap(const ElementInfo info,
     xyz += phi(node, qp) * points;
   }
 
+  const auto dim = kokkosMesh().getElementDimension(elem_type);
+
   if (dxi_dx)
-    *dxi_dx = J.inverse(_dimension);
+    *dxi_dx = inverseMap(J, dim);
 
   if (JxW)
-    *JxW =
-        J.determinant(_dimension) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
+    *JxW = mapMeasure(J, dim) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
 
   if (q_points)
     *q_points = xyz;
@@ -582,6 +620,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
   Real3 dxyz_dxi;
   Real3 dxyz_deta;
 
+  const auto dim = kokkosMesh().getElementDimension(elem_type);
+
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
@@ -594,20 +634,20 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     if (normal)
     {
-      if (_dimension < 3)
+      if (dim < 3)
         dxyz_dxi += normal_dx_dxi(node, qp) * points;
-      if (_dimension == 2)
+      if (dim == 2)
         dxyz_deta += normal_dx_deta(node, qp) * points;
     }
   }
 
   if (dxi_dx)
-    *dxi_dx = J.inverse(_dimension);
+    *dxi_dx = inverseMap(J, dim);
 
   if (q_points)
     *q_points = xyz;
 
-  if (JxW || (normal && _dimension > 1))
+  if (JxW || (normal && dim > 1))
   {
     J = 0;
 
@@ -622,14 +662,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   }
 
   if (JxW)
-    *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
+    *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(dim - 1)) *
            _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
 
   if (normal)
   {
-    if (_dimension == 3)
+    if (dim == 3)
       *normal = J.row(0).cross_product(J.row(1));
-    else if (_dimension == 2)
+    else if (dim == 2)
       *normal = J.row(0).cross_product(dxyz_dxi.cross_product(dxyz_deta));
     else
       *normal = side ? dxyz_dxi : -dxyz_dxi;
