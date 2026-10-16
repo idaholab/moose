@@ -122,14 +122,14 @@
 [VectorPostprocessors]
   [line_sample_e_field]
     type = MFEMVariableLineValueSampler
-    variable = 'e_field'
+    variables = 'e_field'
     start_point = '-0.99 -0.99 0.99'
     end_point = '0.99 0.99 -0.99'
     num_points = 114
   []
   [line_sample_db_dt_field]
     type = MFEMVariableLineValueSampler
-    variable = 'db_dt_field'
+    variables = 'db_dt_field'
     start_point = '-0.99 -0.99 0.99'
     end_point = '0.99 0.99 -0.99'
     num_points = 114

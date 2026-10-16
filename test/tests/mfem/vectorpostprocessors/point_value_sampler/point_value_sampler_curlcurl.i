@@ -6,7 +6,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = 'e_field'
+    variables = 'e_field'
     points = '0.99 0.99 -0.49  0.99 0.99 0.49'
   []
 []

@@ -129,7 +129,7 @@
 [VectorPostprocessors]
   [line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'electric_potential'
+    variables = 'electric_potential'
     start_point = '0 0.5 -0.5'
     end_point = '0 0.5 0.5'
     num_points = 101

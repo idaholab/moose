@@ -32,14 +32,14 @@ public:
   void finalize() override;
 
 private:
-  int getFESpaceContinuityType() const override;
+  int getFESpaceContinuityType(size_t i_var) const override;
 
   /// Grid function being sampled.
-  const mfem::GridFunction & _var;
+  std::vector<std::reference_wrapper<mfem::GridFunction>> _vars;
   /// Values interpolated from the grid function.
-  mfem::Vector _interp_vals;
+  std::vector<mfem::Vector> _interp_vals;
   /// VectorPostprocessor output columns for the variable components.
-  std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_vals;
+  std::vector<std::vector<std::reference_wrapper<VectorPostprocessorValue>>> _declared_vals;
 };
 
 #endif // MOOSE_MFEM_ENABLED

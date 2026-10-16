@@ -19,7 +19,7 @@
     cli_args = 'AuxVariables/inactive="" '
                'AuxKernels/inactive="" '
                'AuxKernels/average_field/time_skip=2 '
-               'VectorPostprocessors/line_sample/variable=average_temperature '
+               'VectorPostprocessors/line_sample/variables=average_temperature '
                'Outputs/CSV/file_base=OutputData/HeatTransferTimeAverage/ht_time_average'
     csvdiff = 'OutputData/HeatTransferTimeAverage/ht_time_average_line_sample_0001.csv
                 OutputData/HeatTransferTimeAverage/ht_time_average_line_sample_0002.csv

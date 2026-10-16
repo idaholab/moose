@@ -35,7 +35,7 @@
   [MFEMValueSamplerBoundaryDiscontinuousWarningRT]
     type = RunException
     input = point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/variable=rt_vector'
+    cli_args = 'VectorPostprocessors/point_sample/variables=rt_vector'
     expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(div\).*continuous normal trace.*tangential component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
@@ -48,7 +48,7 @@
   [MFEMValueSamplerBoundaryDiscontinuousWarningND]
     type = RunException
     input = point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/variable=nd_vector'
+    cli_args = 'VectorPostprocessors/point_sample/variables=nd_vector'
     expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(curl\).*continuous tangential trace.*normal component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
@@ -68,11 +68,31 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
+  [MFEMValueSamplerBoundaryDiscontinuousWarningL2MultiVariableFirst]
+    type = RunException
+    input = point_value_sampler_boundary_warn.i
+    cli_args = 'VectorPostprocessors/point_sample/variables="l2_scalar h1_scalar"'
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
+    requirement = "The system shall issue a warning if an attempt is made to sample an L2 variable near an element boundary. This should still occur when the first variable is continuous but the second is discontinuous."
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMValueSamplerBoundaryDiscontinuousWarningL2MultiVariableSecond]
+    type = RunException
+    input = point_value_sampler_boundary_warn.i
+    cli_args = 'VectorPostprocessors/point_sample/variables="h1_scalar l2_scalar"'
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
+    requirement = "The system shall issue a warning if an attempt is made to sample an L2 variable near an element boundary. This should still occur when the first variable is continuous but the second is discontinuous."
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
   [MFEMComplexVariableValueSamplerPointNotFoundError]
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
-               'VectorPostprocessors/point_sample/variable=l2_complex '
+               'VectorPostprocessors/point_sample/variables=l2_complex '
                'VectorPostprocessors/point_sample/points="0 0 1000"'
     expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" could not find point at'
     design = 'MFEMComplexVariablePointValueSampler.md'
@@ -86,7 +106,7 @@
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
-               'VectorPostprocessors/point_sample/variable=l2_complex'
+               'VectorPostprocessors/point_sample/variables=l2_complex'
     expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
     design = 'MFEMComplexVariablePointValueSampler.md'
     issues = '#30076 #32988'
@@ -164,5 +184,32 @@
                   'mesh belonging to its submesh finite element space.'
     capabilities = 'mfem'
     recover = false
+  []
+  [MFEMVariableSamplerBaseMultiVariableMultiMeshError]
+    type = RunException
+    input = point_value_sampler_multi_variables_different_meshes.i
+    expect_err = 'In MFEMVariableSamplerBase: all variables must be on the same mesh. Found: submesh_variable which is not on the same mesh as: parent_variable.'
+    requirement = 'The system shall issue an error when variables from different meshes are sampled with the same sampler instance.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMVariablePointValueSamplerMultiVariable]
+    type = CSVDiff
+    input = point_value_sampler_multi_variable.i
+    csvdiff = 'OutputData/point_value_sampler_multi_variable_point_sampler_0001.csv'
+    requirement = 'The system shall be able to sample multiple variables at arbitrary points using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMComplexVariablePointValueSamplerMultiVariable]
+    type = CSVDiff
+    input = complex_point_value_sampler_multi_variable.i
+    csvdiff = 'OutputData/complex_point_value_sampler_multi_variable_point_sampler_0001.csv'
+    requirement = 'The system shall be able to sample multiple complex variables at arbitrary points using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
   []
 []

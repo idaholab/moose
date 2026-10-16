@@ -103,7 +103,7 @@ kappa_r = '${fparse -mu*omega*sigma/kappa_i/2}'
 [VectorPostprocessors]
   [line_sample]
     type = MFEMComplexVariableLineValueSampler
-    variable = 'u'
+    variables = 'u'
     start_point = '0 0 0'
     end_point = '1 1 0'
     num_points = 101
