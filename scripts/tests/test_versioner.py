@@ -46,6 +46,31 @@ class Test(unittest.TestCase):
             Versioner().get_packages("foobar")
         self.assertIn("Reference foobar is not valid", str(e.exception))
 
+    def testGetPackagesNoAppInfo(self):
+        # get_app_info() returns None outside of a git repository (e.g. a
+        # build tree that only mirrors the source); get_packages() should
+        # still succeed instead of raising on the "app" package's name/hash
+        with patch.object(Versioner, "get_app_info", return_value=None):
+            packages = Versioner().get_packages("HEAD")
+        self.assertEqual("unknown", packages["app"].name)
+        self.assertEqual("unknown", packages["app"].hash)
+
+    def testGetPackagesFailedDependency(self):
+        # A package that fails to build should not take down the whole
+        # catalog, and "app" (which depends on moose-dev) should be skipped
+        # too rather than raising a KeyError later on when resolving it.
+        real_conda_meta_path = Versioner.conda_meta_path
+
+        def conda_meta_path(conda_dir):
+            if conda_dir == "conda/moose-dev":
+                raise RuntimeError("boom")
+            return real_conda_meta_path(conda_dir)
+
+        with patch.object(Versioner, "conda_meta_path", side_effect=conda_meta_path):
+            packages = Versioner().get_packages("HEAD")
+        self.assertNotIn("moose-dev", packages)
+        self.assertNotIn("app", packages)
+
     def testCLI(self):
         versioner = Versioner()
         packages = versioner.get_packages("HEAD")
