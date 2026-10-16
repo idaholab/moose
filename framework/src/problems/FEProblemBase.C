@@ -5726,11 +5726,13 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       }
 
     // Execute MortarUserObjects
+    if (!mortar.empty())
     {
-      for (auto obj : mortar)
-        obj->initialize();
-      if (!mortar.empty())
+      try
       {
+        for (auto obj : mortar)
+          obj->initialize();
+
         auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
         {
           // go over mortar interfaces and construct functors
@@ -5760,6 +5762,22 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
         if (_displaced_problem)
           create_and_run_mortar_functors(true);
       }
+      catch (...)
+      {
+        translateCaughtException("computeUserObjectsInternal");
+      }
+
+      auto has_exception = _has_exception;
+      _communicator.max(has_exception);
+
+      if (has_exception)
+      {
+        if (Moose::isSolverExecFlag(_current_execute_on_flag))
+          return;
+
+        checkExceptionAndStopSolve();
+      }
+
       for (auto obj : mortar)
         obj->finalize();
     }
@@ -8177,7 +8195,7 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::handleException(const std::string & calling_method)
+FEProblemBase::translateCaughtException(const std::string & calling_method)
 {
   auto create_exception_message =
       [&calling_method](const std::string & exception_type, const auto & exception)
@@ -8227,7 +8245,12 @@ FEProblemBase::handleException(const std::string & calling_method)
         setException(message);
     }
   }
+}
 
+void
+FEProblemBase::handleException(const std::string & calling_method)
+{
+  translateCaughtException(calling_method);
   checkExceptionAndStopSolve();
 }
 
