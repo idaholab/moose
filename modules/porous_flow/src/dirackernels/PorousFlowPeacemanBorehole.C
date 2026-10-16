@@ -321,11 +321,21 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
                                          const Real & half_len,
                                          const Elem * ele,
                                          const Real & rad) const
-// Peaceman's form for the borehole well constant
 {
   if (_well_constant > 0)
     return _well_constant;
+  return peacemanWellConstant(perm, rot, half_len, ele, rad, _re_constant);
+}
 
+Real
+PorousFlowPeacemanBorehole::peacemanWellConstant(const RealTensorValue & perm,
+                                                 const RealTensorValue & rot,
+                                                 Real half_len,
+                                                 const Elem * ele,
+                                                 Real rad,
+                                                 Real re_constant)
+// Peaceman's form for the borehole well constant
+{
   // rot_perm has its "2" component lying along the half segment.
   // We want to determine the eigenvectors of rot(0:1, 0:1), since, when
   // rotated back to the original frame we will determine the element
@@ -395,11 +405,11 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
 
   Real r0;
   if (eig_val1 <= 0.0)
-    r0 = _re_constant * ll1;
+    r0 = re_constant * ll1;
   else if (eig_val2 <= 0.0)
-    r0 = _re_constant * ll2;
+    r0 = re_constant * ll2;
   else
-    r0 = _re_constant *
+    r0 = re_constant *
          std::sqrt(std::sqrt(eig_val1 / eig_val2) * std::pow(ll2, 2) +
                    std::sqrt(eig_val2 / eig_val1) * std::pow(ll1, 2)) /
          (std::pow(eig_val1 / eig_val2, 0.25) + std::pow(eig_val2 / eig_val1, 0.25));
@@ -409,13 +419,14 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
   const Real halfPi = acos(0.0);
 
   if (r0 <= rad)
-    mooseError("The effective element size (about 0.2-times-true-ele-size) for an element "
-               "containing a Peaceman-type borehole must be (much) larger than the borehole radius "
-               "for the Peaceman formulation to be correct.  Your element has effective size ",
-               r0,
-               " and the borehole radius is ",
-               rad,
-               "\n");
+    ::mooseError(
+        "The effective element size (about 0.2-times-true-ele-size) for an element "
+        "containing a Peaceman-type borehole must be (much) larger than the borehole radius "
+        "for the Peaceman formulation to be correct.  Your element has effective size ",
+        r0,
+        " and the borehole radius is ",
+        rad,
+        "\n");
 
   return 4 * halfPi * effective_perm * half_len / std::log(r0 / rad);
 }

@@ -35,6 +35,23 @@ public:
    */
   static InputParameters validParams();
 
+  /**
+   * Peaceman's form of the well constant of one borehole half segment, as used by
+   * PorousFlowPeacemanBorehole.  It is also used by FVPorousFlowPeacemanBorehole
+   * @param perm permeability (or thermal conductivity) tensor
+   * @param rot rotation matrix that rotates the half-segment direction to the z axis
+   * @param half_len length of the half segment
+   * @param ele element containing the borehole point
+   * @param rad borehole radius
+   * @param re_constant dimensionless constant used in evaluating the borehole effective radius
+   */
+  static Real peacemanWellConstant(const RealTensorValue & perm,
+                                   const RealTensorValue & rot,
+                                   Real half_len,
+                                   const Elem * ele,
+                                   Real rad,
+                                   Real re_constant);
+
   PorousFlowPeacemanBorehole(const InputParameters & parameters);
 
   void virtual initialSetup() override;
