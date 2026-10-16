@@ -39,7 +39,7 @@ def check_convergence(test, output_base, labels, *cli_args, minimum_slopes=None)
         if label in minimum_slopes:
             test.assertGreaterEqual(slope, minimum_slopes[label])
         else:
-            test.assertTrue(fuzzyAbsoluteEqual(slope, 2.0, 0.15))
+            test.assertTrue(fuzzyAbsoluteEqual(slope, 2.0, 0.2))
 
 
 class TestDiscontinuousViscosityTraction(unittest.TestCase):

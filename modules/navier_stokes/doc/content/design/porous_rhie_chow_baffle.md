@@ -24,8 +24,8 @@ factor to each cell row.
 
 ## Velocity jump
 
-Across a baffle, mass conservation keeps $\rho\mathbf{U}\cdot\mathbf{n}$ continuous and the
-absence of a tangential baffle force keeps the interstitial tangential velocity continuous, so the
+Across a baffle, mass conservation keeps $\rho\mathbf{U}\cdot\mathbf{n}$ continuous, and a
+stream crossing the baffle carries its interstitial tangential velocity with it, so the
 superficial velocity jumps wherever density or porosity does. Every operator that would otherwise
 interpolate velocity across the baffle uses one-sided states instead:
 

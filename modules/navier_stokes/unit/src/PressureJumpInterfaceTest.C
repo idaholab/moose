@@ -20,8 +20,18 @@ TEST(PressureJumpInterface, OrthogonalIsotropic)
   const RealVectorValue diffusion(2.0, 2.0, 2.0);
   const RealVectorValue gradient(3.0, -4.0, 0.0);
 
-  const auto data = NS::FV::pressureJumpInterfaceData(
-      normal, half_cell, half_cell, diffusion, diffusion, gradient, gradient, {}, {}, 3.0, true, 0.0);
+  const auto data = NS::FV::pressureJumpInterfaceData(normal,
+                                                      half_cell,
+                                                      half_cell,
+                                                      diffusion,
+                                                      diffusion,
+                                                      gradient,
+                                                      gradient,
+                                                      {},
+                                                      {},
+                                                      3.0,
+                                                      true,
+                                                      0.0);
 
   ASSERT_TRUE(data.valid);
   EXPECT_TRUE(data.is_baffle);
@@ -74,10 +84,10 @@ TEST(PressureJumpInterface, ConservesFluxAndPreservesJump)
   const Real neighbor_half_flux =
       data.neighbor_conductance * (neighbor_face_pressure - neighbor_pressure) -
       data.neighbor_correction;
-  const Real recovered_elem_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
-      data, elem_pressure, flux, /*elem_side=*/true);
-  const Real recovered_neighbor_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
-      data, neighbor_pressure, flux, /*elem_side=*/false);
+  const Real recovered_elem_face_pressure =
+      NS::FV::pressureJumpOneSidedFaceValue(data, elem_pressure, flux, /*elem_side=*/true);
+  const Real recovered_neighbor_face_pressure =
+      NS::FV::pressureJumpOneSidedFaceValue(data, neighbor_pressure, flux, /*elem_side=*/false);
 
   EXPECT_NEAR(elem_face_pressure - neighbor_face_pressure, jump, 1e-13);
   EXPECT_NEAR(assembled_flux, flux, 1e-13);
@@ -122,10 +132,10 @@ TEST(PressureJumpInterface, ManufacturedPiecewiseLinearPressure)
   ASSERT_TRUE(data.valid);
 
   const Real flux = NS::FV::pressureJumpFlux(data, elem_pressure, neighbor_pressure);
-  const Real recovered_elem_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
-      data, elem_pressure, flux, /*elem_side=*/true);
-  const Real recovered_neighbor_face_pressure = NS::FV::pressureJumpOneSidedFaceValue(
-      data, neighbor_pressure, flux, /*elem_side=*/false);
+  const Real recovered_elem_face_pressure =
+      NS::FV::pressureJumpOneSidedFaceValue(data, elem_pressure, flux, /*elem_side=*/true);
+  const Real recovered_neighbor_face_pressure =
+      NS::FV::pressureJumpOneSidedFaceValue(data, neighbor_pressure, flux, /*elem_side=*/false);
 
   EXPECT_NEAR(flux, expected_flux, 1e-13);
   EXPECT_NEAR(recovered_elem_face_pressure, elem_face_pressure, 1e-13);
@@ -182,10 +192,10 @@ TEST(PressureJumpInterface, HydrostaticBalanceAcrossJump)
                          NS::FV::pressureJumpHbyAFlux(data);
 
   EXPECT_NEAR(mass_flux, 0.0, 1e-13);
-  EXPECT_NEAR(NS::FV::pressureJumpOneSidedFaceValue(
-                  data, elem_pressure, mass_flux, /*elem_side=*/true),
-              elem_face_pressure,
-              1e-13);
+  EXPECT_NEAR(
+      NS::FV::pressureJumpOneSidedFaceValue(data, elem_pressure, mass_flux, /*elem_side=*/true),
+      elem_face_pressure,
+      1e-13);
   EXPECT_NEAR(NS::FV::pressureJumpOneSidedFaceValue(
                   data, neighbor_pressure, mass_flux, /*elem_side=*/false),
               neighbor_face_pressure,
