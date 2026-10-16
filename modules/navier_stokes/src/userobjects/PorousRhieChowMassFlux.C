@@ -351,8 +351,7 @@ PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_i
 bool
 PorousRhieChowMassFlux::pressureDiffusionDataReady() const
 {
-  return _p_diffusion_kernel && _Ainv_raw.size() == dimension() &&
-         _HbyA_raw.size() == dimension();
+  return _p_diffusion_kernel && _Ainv_raw.size() == dimension() && _HbyA_raw.size() == dimension();
 }
 
 bool
