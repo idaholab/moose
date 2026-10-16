@@ -110,7 +110,7 @@
   [PCG]
     type = MFEMHyprePCG
     preconditioner = boomeramg
-    l_tol = 1e-8
+    l_tol = 1e-12
   []
 []
 

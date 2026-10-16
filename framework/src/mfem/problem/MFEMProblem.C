@@ -901,18 +901,19 @@ MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
 std::string
 MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num))
 {
-  mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
+  mooseAssert(solver_sys_num == 0, "All mfem systems must use the same solver right now.");
 
   std::vector<std::string> solvers;
 
-  if (getProblemData().nonlinear_solver)
-    solvers.push_back(MooseUtils::prettyCppType(getProblemData().nonlinear_solver.get()));
+  if (const auto * ns = getProblemData().nonlinear_solver.get())
+    solvers.push_back(MooseUtils::prettyCppType(ns));
 
-  if (getProblemData().jacobian_solver)
+  if (const auto * js = getProblemData().jacobian_solver.get())
   {
-    solvers.push_back(MooseUtils::prettyCppType(getProblemData().jacobian_solver.get()));
-    if (const auto * prec = getProblemData().jacobian_solver->GetPreconditioner())
-      solvers.push_back(MooseUtils::prettyCppType(prec));
+    solvers.push_back(MooseUtils::prettyCppType(js));
+    if (const std::string * pc = js->queryParam<MFEMSolverName>("preconditioner"))
+      solvers.push_back(MooseUtils::prettyCppType(
+          &getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase", *pc)));
   }
 
   return solvers.empty() ? "None" : MooseUtils::stringJoin(solvers);
