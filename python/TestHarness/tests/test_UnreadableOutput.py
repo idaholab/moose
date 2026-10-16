@@ -18,3 +18,9 @@ class TestHarnessTester(TestHarnessTestCase):
 
         out = self.runTests("-i", "non_unicode", "-v").output
         self.assertRegex(out, r"non_unicode.*INVALID UTF-8 IN STDOUT.*OK")
+        # Invalid bytes are kept in the output as escapes
+        self.assertIn("before\\xff\\xfeafter", out)
+        # Each invalid sequence is reported with its location
+        self.assertIn("Begin invalid UTF-8 in stdout", out)
+        self.assertRegex(out, r"offset 6 of \d+: invalid start byte: b'\\xff'")
+        self.assertRegex(out, r"offset 7 of \d+: invalid start byte: b'\\xfe'")
