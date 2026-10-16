@@ -18,7 +18,9 @@ class AutomaticMortarGeneration;
  * mortar interface over its mortar segments. The variable is evaluated on the device at the
  * reference points of each segment quadrature point on the lower-dimensional secondary and
  * primary elements, reading the primary element across processes, and the integral is checked
- * against the same evaluation through libMesh on the host.
+ * against the same evaluation through libMesh on the host. The dual basis coefficients of the
+ * variable on each secondary element are computed on the device from the segment quadrature and
+ * checked against those libMesh computes on the host.
  */
 class KokkosMortarSegmentIntegral : public Moose::Kokkos::GeneralPostprocessor
 {
@@ -33,6 +35,13 @@ public:
   virtual PostprocessorValue getValue() const override { return _integral; }
 
   KOKKOS_FUNCTION void operator()(const Moose::Kokkos::ThreadID qp, Real & sum) const;
+
+  /// Kokkos function tag of the dual coefficient computation
+  struct DualCoeffLoop
+  {
+  };
+
+  KOKKOS_FUNCTION void operator()(DualCoeffLoop, const Moose::Kokkos::ThreadID secondary) const;
 
 private:
   /// The mortar interface
@@ -58,6 +67,21 @@ private:
   Moose::Kokkos::Array<Moose::Kokkos::Real3> _primary_xi;
   Moose::Kokkos::Array<Real> _JxW;
   ///@}
+
+  /**
+   * Secondary element data for the dual basis, indexed by the local secondary element
+   */
+  ///@{
+  /// Range of the segment quadrature points of each secondary element
+  Moose::Kokkos::Array<dof_id_type> _secondary_qp_begin;
+  /// Dual coefficients computed on the device, (i, j) of each secondary element flattened
+  Moose::Kokkos::Array<Real> _dual_coeff;
+  /// Dual coefficients computed by libMesh on the host, flattened like _dual_coeff
+  std::vector<Real> _host_dual_coeff;
+  ///@}
+
+  /// Maximum number of shape functions of the variable on a secondary element
+  static constexpr unsigned int max_shapes = 9;
 
   /// The integral evaluated on the device
   Real _integral = 0;

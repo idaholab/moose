@@ -13,6 +13,8 @@
 #include "MooseVariableFieldBase.h"
 #include "MortarUtils.h"
 
+#include "libmesh/fe.h"
+#include "libmesh/fe_dual_coeffs.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/kokkos_fe_evaluator.h"
 #include "libmesh/quadrature.h"
@@ -89,6 +91,12 @@ KokkosMortarSegmentIntegral::compute()
 
   _host_integral = 0;
 
+  // libMesh computes the dual basis coefficients of each secondary element from its segment
+  // quadrature, which they are checked against
+  std::unique_ptr<libMesh::FEBase> fe(libMesh::FEBase::build(_amg.dim() - 1, _fe_type));
+  std::vector<dof_id_type> secondary_qp_begin = {0};
+  _host_dual_coeff.clear();
+
   for (const auto & [secondary_id, msm_elems] : _amg.secondariesToMortarSegments())
   {
     // The map also lists secondary elements of other processes, which a distributed mesh need not
@@ -96,6 +104,9 @@ KokkosMortarSegmentIntegral::compute()
     const auto secondary = mesh.getMesh().query_elem_ptr(secondary_id);
     if (!secondary || secondary->processor_id() != processor_id())
       continue;
+
+    std::vector<Point> secondary_pts;
+    std::vector<Real> secondary_JxW;
 
     for (const auto msm_elem : msm_elems)
     {
@@ -134,8 +145,20 @@ KokkosMortarSegmentIntegral::compute()
 
         _host_integral += JxW_msm[qp] * host_value(*msinfo.secondary_elem, xi1[qp]) *
                           host_value(*msinfo.primary_elem, xi2[qp]);
+
+        secondary_pts.push_back(xi1[qp]);
+        secondary_JxW.push_back(JxW_msm[qp]);
       }
     }
+
+    secondary_qp_begin.push_back(JxW.size());
+
+    fe->reinit_dual_shape_coeffs(secondary, secondary_pts, secondary_JxW);
+    const auto & coeff = fe->get_dual_coeff();
+    mooseAssert(coeff.m() <= max_shapes, "Too many shape functions");
+    for (const auto i : make_range(max_shapes))
+      for (const auto j : make_range(max_shapes))
+        _host_dual_coeff.push_back(i < coeff.m() && j < coeff.n() ? coeff(i, j) : 0);
   }
 
   const auto n = JxW.size();
@@ -170,6 +193,61 @@ KokkosMortarSegmentIntegral::compute()
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<Moose::Kokkos::ThreadID>> policy(0, n);
   ::Kokkos::parallel_reduce(policy, *this, _integral);
   ::Kokkos::fence();
+
+  const auto n_secondary = secondary_qp_begin.size() - 1;
+  _secondary_qp_begin.create(secondary_qp_begin.size());
+  for (const auto i : index_range(secondary_qp_begin))
+    _secondary_qp_begin[i] = secondary_qp_begin[i];
+  _secondary_qp_begin.copyToDevice();
+
+  _dual_coeff.create(n_secondary * max_shapes * max_shapes);
+  _dual_coeff = 0;
+
+  ::Kokkos::RangePolicy<ExecSpace, DualCoeffLoop, ::Kokkos::IndexType<Moose::Kokkos::ThreadID>>
+      dual_policy(0, n_secondary);
+  ::Kokkos::parallel_for(dual_policy, *this);
+  ::Kokkos::fence();
+
+  _dual_coeff.copyToHost();
+}
+
+KOKKOS_FUNCTION void
+KokkosMortarSegmentIntegral::operator()(DualCoeffLoop,
+                                        const Moose::Kokkos::ThreadID secondary) const
+{
+  const auto begin = _secondary_qp_begin[secondary];
+  const auto n_qp = _secondary_qp_begin[secondary + 1] - begin;
+  const auto elem = _secondary_elem[begin];
+  const auto type = _secondary_type[begin];
+  const auto n_shapes =
+      kokkosAssembly().getNumDofs(kokkosMesh().getElementInfo(elem).type, _fe_type_id);
+  const libMesh::FEShapeKey key{_fe_type.family, type, _fe_type.order};
+
+  Real A[max_shapes][max_shapes], D[max_shapes][max_shapes], rhs[max_shapes], x[max_shapes];
+  auto matrix = [](Real(&M)[max_shapes][max_shapes])
+  {
+    return [&M](const unsigned int i, const unsigned int j) -> Real & { return M[i][j]; };
+  };
+  auto vector = [](Real(&v)[max_shapes])
+  {
+    return [&v](const unsigned int i) -> Real & { return v[i]; };
+  };
+  auto A_ref = matrix(A);
+  auto D_ref = matrix(D);
+  auto rhs_ref = vector(rhs);
+  auto x_ref = vector(x);
+
+  const auto JxW = [&](const unsigned int qp) { return _JxW[begin + qp]; };
+  const auto phi = [&](const unsigned int i, const unsigned int qp)
+  {
+    const auto & xi = _secondary_xi[begin + qp];
+    return libMesh::Kokkos::shape(key, i, xi(0), xi(1), xi(2));
+  };
+  auto coeff = [&](const unsigned int i, const unsigned int j) -> Real &
+  { return _dual_coeff[(secondary * max_shapes + i) * max_shapes + j]; };
+
+  libMesh::compute_dual_coeffs(
+      _fe_type.family, type, n_shapes, n_qp, JxW, phi, A_ref, D_ref, rhs_ref, x_ref, coeff);
 }
 
 KOKKOS_FUNCTION void
@@ -201,6 +279,21 @@ KokkosMortarSegmentIntegral::operator()(const Moose::Kokkos::ThreadID qp, Real &
 void
 KokkosMortarSegmentIntegral::finalize()
 {
+  Real max_dual_error = 0, max_dual_coeff = 0;
+  for (const auto i : index_range(_host_dual_coeff))
+  {
+    max_dual_error = std::max(max_dual_error, std::abs(_dual_coeff[i] - _host_dual_coeff[i]));
+    max_dual_coeff = std::max(max_dual_coeff, std::abs(_host_dual_coeff[i]));
+  }
+  comm().max(max_dual_error);
+  comm().max(max_dual_coeff);
+
+  if (max_dual_error > getParam<Real>("tolerance") * std::max(max_dual_coeff, Real(1)))
+    mooseError("The dual basis coefficients computed on the device differ from those computed by "
+               "libMesh on the host by up to ",
+               max_dual_error,
+               ".");
+
   gatherSum(_integral);
   gatherSum(_host_integral);
 
