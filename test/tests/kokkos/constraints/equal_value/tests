@@ -1,0 +1,79 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosEqualValueConstraint.md'
+
+  [equal_value]
+    requirement = 'The Kokkos system shall constrain the value of a variable to be the same on both sides of a nonconforming interface with a mortar Lagrange multiplier, matching the solution of EqualValueConstraint,'
+    [2d]
+      type = CSVDiff
+      input = 'equal_value.i'
+      csvdiff = 'equal_value_out.csv'
+      detail = 'in two dimensions with a standard Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [2d_dual]
+      type = CSVDiff
+      input = 'equal_value.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/file_base=equal_value_dual_out'
+      csvdiff = 'equal_value_dual_out.csv'
+      detail = 'in two dimensions with a dual Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [2d_second_order]
+      type = CSVDiff
+      input = 'equal_value.i'
+      cli_args = 'Mesh/second_order=true Variables/u/order=SECOND Variables/lambda/order=SECOND Variables/lambda/use_dual=true Outputs/file_base=equal_value_second_order_out'
+      csvdiff = 'equal_value_second_order_out.csv'
+      detail = 'in two dimensions with second order variables and a dual Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = CSVDiff
+      input = 'equal_value_3d.i'
+      csvdiff = 'equal_value_3d_out.csv'
+      detail = 'in three dimensions with a standard Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_dual]
+      type = CSVDiff
+      input = 'equal_value_3d.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/file_base=equal_value_3d_dual_out'
+      csvdiff = 'equal_value_3d_dual_out.csv'
+      detail = 'in three dimensions with a dual Lagrange multiplier basis, and'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_second_order]
+      type = CSVDiff
+      input = 'equal_value_3d.i'
+      cli_args = 'Mesh/second_order=true Variables/u/order=SECOND Variables/lambda/order=SECOND Variables/lambda/use_dual=true Outputs/file_base=equal_value_3d_second_order_out'
+      csvdiff = 'equal_value_3d_second_order_out.csv'
+      detail = 'in three dimensions with second order variables and a dual Lagrange multiplier basis.'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+  [jacobian]
+    requirement = 'The Kokkos system shall assemble the exact Jacobian of a mortar equal value constraint'
+    [standard]
+      type = PetscJacobianTester
+      input = 'equal_value.i'
+      cli_args = 'Outputs/csv=false'
+      detail = 'with a standard Lagrange multiplier basis and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [dual]
+      type = PetscJacobianTester
+      input = 'equal_value_3d.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/csv=false'
+      detail = 'with a dual Lagrange multiplier basis.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

@@ -137,6 +137,33 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addKokkosConstraint(const std::string & c_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  checkKokkosObject("addKokkosConstraint", c_name, name, parameters);
+
+  parallel_object_only();
+
+  _has_constraints = true;
+
+  // The Lagrange multiplier is the variable of a Kokkos mortar constraint
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Constraint to a linear variable/system, which is not "
+               "supported at the moment!");
+
+  bool reinit_displaced = false;
+  setResidualObjectParamsAndLog(
+      c_name, name, parameters, nl_sys_num, "KokkosConstraint", reinit_displaced);
+
+  _nl[nl_sys_num]->addKokkosConstraint(c_name, name, parameters);
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
 FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
                                        const std::string & name,
                                        InputParameters & parameters)

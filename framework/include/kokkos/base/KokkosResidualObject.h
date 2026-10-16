@@ -232,6 +232,36 @@ protected:
                                                          const unsigned int jvar) const;
 
   /**
+   * Accumulate a residual contribution to a DOF of any variable of this object's system to the
+   * tagged vectors, for objects whose residual spans several variables, such as mortar constraints
+   * @param local_re The residual contribution
+   * @param var The variable of the row
+   * @param elem The contiguous element ID
+   * @param i The element-local DOF index
+   */
+  KOKKOS_FUNCTION void accumulateTaggedResidual(const Real local_re,
+                                                const Variable & var,
+                                                const ContiguousElementID elem,
+                                                const unsigned int i) const;
+  /**
+   * Accumulate a Jacobian contribution between DOFs of any variables of this object's system and
+   * elements to the tagged matrices
+   * @param local_ke The Jacobian contribution
+   * @param ivar The variable of the row
+   * @param ielem The contiguous element ID of the row
+   * @param i The element-local DOF index of the row
+   * @param jvar The variable of the column
+   * @param jelem The contiguous element ID of the column
+   * @param j The element-local DOF index of the column
+   */
+  KOKKOS_FUNCTION void accumulateTaggedMatrix(const Real local_ke,
+                                              const Variable & ivar,
+                                              const ContiguousElementID ielem,
+                                              const unsigned int i,
+                                              const Variable & jvar,
+                                              const ContiguousElementID jelem,
+                                              const unsigned int j) const;
+  /**
    * The common loop structure template for computing elemental residual
    * @param datum The AssemblyDatum object of the current thread
    * @param body The quadrature point loop body
@@ -315,6 +345,54 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
 
     if (sys.isResidualTagActive(tag))
       ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), scaled_local_re);
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedResidual(const Real local_re,
+                                         const Variable & var,
+                                         const ContiguousElementID elem,
+                                         const unsigned int i) const
+{
+  if (!local_re)
+    return;
+
+  auto & sys = kokkosSystem(var.sys());
+  auto dof = sys.getElemLocalDofIndex(elem, i, var.var());
+  const auto scaled_local_re = local_re * sys.getVariableScalingFactor(var.var());
+
+  for (unsigned int t = 0; t < _vector_tags.size(); ++t)
+  {
+    auto tag = _vector_tags[t];
+
+    if (sys.isResidualTagActive(tag))
+      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), scaled_local_re);
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedMatrix(const Real local_ke,
+                                       const Variable & ivar,
+                                       const ContiguousElementID ielem,
+                                       const unsigned int i,
+                                       const Variable & jvar,
+                                       const ContiguousElementID jelem,
+                                       const unsigned int j) const
+{
+  if (!local_ke)
+    return;
+
+  auto & sys = kokkosSystem(ivar.sys());
+  auto row = sys.getElemLocalDofIndex(ielem, i, ivar.var());
+  auto col = sys.getElemGlobalDofIndex(jelem, j, jvar.var());
+  const auto scaled_local_ke = local_ke * sys.getVariableScalingFactor(ivar.var());
+
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
+  {
+    auto tag = _matrix_tags[t];
+
+    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), scaled_local_ke);
   }
 }
 

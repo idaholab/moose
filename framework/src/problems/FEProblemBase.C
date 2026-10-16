@@ -3444,6 +3444,11 @@ FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (parameters.isKokkosObject())
+    return addKokkosConstraint(c_name, name, parameters);
+#endif
+
   parallel_object_only();
 
   _has_constraints = true;

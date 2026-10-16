@@ -632,6 +632,22 @@ registerResidualObjectDispatchers(const std::string & objectname)
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
 
+// Mortar constraints, dispatched with one team per secondary element
+
+#define registerKokkosMortarConstraint(app, classname)                                             \
+  registerMooseObject(app, classname);                                                             \
+  static char registerKokkosMortarConstraint##classname()                                          \
+  {                                                                                                \
+    Moose::Kokkos::DispatcherRegistry::addTeamDispatcher<classname::MortarLoop, classname>(        \
+        #classname);                                                                               \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_mortar_constraint_##classname,       \
+                                            __COUNTER__) =                                         \
+      registerKokkosMortarConstraint##classname()
+
 // AD Kernel, NodalKernel, BC
 
 namespace Moose::Kokkos
