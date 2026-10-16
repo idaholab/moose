@@ -7,9 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
 import os
+
+from FileTester import FileTester
+
+from TestHarness import util
 
 
 class CSVDiff(FileTester):
@@ -49,7 +51,9 @@ class CSVDiff(FileTester):
         FileTester.__init__(self, name, params)
 
     def getOutputFiles(self, options):
-        return super().getOutputFiles(options) + self.specs["csvdiff"]
+        return super().getOutputFiles(options) + [
+            os.path.join(self.specs["output_dir"], f) for f in self.specs["csvdiff"]
+        ]
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):
@@ -103,7 +107,7 @@ class CSVDiff(FileTester):
             csvdiff.append(
                 os.path.join(self.getTestDir(), self.specs["gold_dir"], file)
                 + " "
-                + os.path.join(self.getTestDir(), file)
+                + os.path.join(self.getTestDir(), self.specs["output_dir"], file)
             )
 
             if self.specs.isValid("rel_err"):
@@ -174,7 +178,7 @@ class CSVDiff(FileTester):
             for command in commands:
                 exo_output = util.runCommand(command)
                 output += "Running csvdiff: " + command + "\n" + exo_output
-                if not "Files are the same" in exo_output:
+                if "Files are the same" not in exo_output:
                     self.setStatus(self.diff, "CSVDIFF")
                     break
 
