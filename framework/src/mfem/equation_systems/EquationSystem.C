@@ -400,6 +400,13 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
+    // With partial assembly, Mult() applies whatever AssemblePA stored at the last Setup(), and
+    // unlike AssembleGradPA (re-run by every GetGradient call) nothing refreshes it. Integrators
+    // whose PA data depends on the solution, e.g. NLCurlCurlIntegrator through k(|curl u|), must
+    // be re-assembled at the current state, which the grid functions hold as of the
+    // SetTrialVariablesFromTrueVectors call above. This is a no-op for legacy assembly and for
+    // forms without integrators, since the underlying NonlinearForm::ext will be a nullptr
+    nlf->Setup();
     nlf->AddMult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
@@ -424,7 +431,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
-      _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      auto * const jacobian_block = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      // Both summands already carry a unit diagonal on the essential rows: the bilinear form's
+      // comes from ParBilinearForm::FormLinearSystem, which eliminates with the DIAG_ONE policy,
+      // and the nonlinear form's from ParNonlinearForm::GetGradient, which ends in
+      // OperatorHandle::EliminateRowsCols. Their sum therefore has a diagonal of two on the
+      // essential rows the nonlinear integrators touch and one on the rest, so it is not the
+      // gradient of Mult(). Re-eliminating restores the unit diagonal everywhere; the returned
+      // eliminated part is discarded because these rows and columns are already zero.
+      delete jacobian_block->EliminateRowsCols(_ess_tdof_lists.at(i));
+      _jacobian_blocks(i, i) = jacobian_block;
     }
     else
       _jacobian_blocks(i, i) = _h_blocks(i, i);
@@ -443,15 +459,44 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
   if (IsNonlinear())
   {
-    if (_assembly_level != mfem::AssemblyLevel::LEGACY)
-      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
-                 "assembly in EquationSystem.");
-    const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
+      FormJacobianOperator(u);
+    else if (_assembly_level == mfem::AssemblyLevel::LEGACY)
+      const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    else
+      mooseError(
+          "MFEM nonlinear solvers that require GetGradient() currently require legacy or partial "
+          "assembly in EquationSystem.");
   }
   else
     _jacobian = _linear_operator;
 
   return *_jacobian;
+}
+
+void
+EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
+{
+  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+              "Non-legacy assembly is only supported for single test and trial variable systems");
+
+  const auto & test_var_name = _test_var_names.at(0);
+  auto nlf = _nlfs.Get(test_var_name);
+
+  mfem::Operator * nlf_grad = &nlf->GetGradient(u);
+
+  // Check if it casts into ConstrainedOperator so we can set the diagonal policy. Without
+  // this, we get 2s on the diagonal of essential rows when we should have 1s, due to the
+  // linear operator already contributing 1s.
+  mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+  mooseAssert(c_nlf_grad, "Could not cast the nlf gradient into Constrained Operator");
+  c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
+  // ComplexEquationSystem::FormSystemOperator does not store aux_a. So we
+  // guard against dereferencing nullptr here.
+  mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
+
+  _jacobian.Reset(new JacobianSumOperator(nlf_grad, _linear_operator.Ptr(), nlf));
 }
 
 void
@@ -505,6 +550,9 @@ EquationSystem::BuildNonlinearForms()
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
+    if (_assembly_level != mfem::AssemblyLevel::FULL &&
+        _assembly_level != mfem::AssemblyLevel::ELEMENT)
+      nlf->SetAssemblyLevel(_assembly_level);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
