@@ -573,6 +573,31 @@ NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n) const
   return _eigen_sys.get_eigenpair(n);
 }
 
+std::pair<Real, Real>
+NonlinearEigenSystem::getConvergedEigenvector(dof_id_type n, NumericVector<Number> & vec)
+{
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+
+  if (n >= n_converged_eigenvalues)
+    mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
+
+  // With condensed degrees of freedom, the eigen solver works on the condensed layout, so we fill
+  // the corresponding subvector and leave the condensed entries at zero
+  if (eigenOperatorsCondensed())
+  {
+    vec.zero();
+    auto subvec = vec.get_subvector(_eigen_sys.local_non_condensed_dofs_vector);
+    const auto eigenvalue = _eigen_sys.get_eigen_solver().get_eigenpair(n, *subvec);
+    vec.restore_subvector(std::move(subvec), _eigen_sys.local_non_condensed_dofs_vector);
+    vec.close();
+    return eigenvalue;
+  }
+
+  const auto eigenvalue = _eigen_sys.get_eigen_solver().get_eigenpair(n, vec);
+  vec.close();
+  return eigenvalue;
+}
+
 void
 NonlinearEigenSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 {
