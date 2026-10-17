@@ -9,6 +9,7 @@
 
 #include "NASA7Polynomials.h"
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 namespace
 {
@@ -162,5 +163,14 @@ speciesData(const std::string & name)
       return data;
 
   mooseError("Unknown NASA-7 species '", name, "'.");
+}
+
+std::string
+speciesNames()
+{
+  std::vector<std::string> names;
+  for (const auto & data : species_data)
+    names.push_back(data.name);
+  return MooseUtils::join(names, " ");
 }
 }

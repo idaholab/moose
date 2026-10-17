@@ -46,12 +46,18 @@ struct SpeciesData
   Coefficients high;
 };
 
+/// Pressure at which the standard-state entropy of the built-in species applies [Pa]
+constexpr Real reference_pressure = 101325.0;
+
 /**
  * Data of a built-in species
  *
  * @param[in] name   species name: H2, O2, H2O, CH4, CO, CO2, or N2
  */
 const SpeciesData & speciesData(const std::string & name);
+
+/// Names of the built-in species, separated by spaces
+std::string speciesNames();
 
 /**
  * Coefficients of the polynomial that applies at a temperature. The low-temperature polynomial
@@ -85,7 +91,7 @@ hOverRT(const SpeciesData & data, const CppType & T)
 
 /**
  * Standard-state molar entropy divided by the gas constant, s/R, at the reference pressure of the
- * data (101325 Pa for the built-in species)
+ * data (reference_pressure for the built-in species)
  */
 template <typename CppType>
 CppType
