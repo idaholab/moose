@@ -73,7 +73,7 @@ class TestReadOutput(unittest.TestCase):
 
     def testValidOutputIsUnchanged(self):
         """Valid UTF-8 output is returned as is with no caveat."""
-        self.assertEqual(self.read("café\n".encode("utf-8")), "café\n")
+        self.assertEqual(self.read("caf\u00e9\n".encode("utf-8")), "caf\u00e9\n")
         self.runner.job.addCaveats.assert_not_called()
         self.runner.job.setStatus.assert_not_called()
 
