@@ -1,0 +1,329 @@
+[Tests]
+  design = '/Remeshing/index.md'
+  issues = '#13610'
+
+  [stateful_requires_projection]
+    type = RunException
+    input = 'stateful_requires_projection.i'
+    expect_err = 'is not projected for remeshing'
+    requirement = 'The system shall report an error when a stateful material property is declared in '
+                  'a simulation that uses remeshing without that property being projected into an '
+                  'auxiliary variable.'
+  []
+
+  [amr_mutually_exclusive]
+    type = RunException
+    input = 'amr_mutually_exclusive.i'
+    expect_err = 'cannot both be active in the same simulation'
+    requirement = 'The system shall report an error when adaptivity and remeshing are both active '
+                  'in the same simulation.'
+  []
+
+  [ale_interface_tracking]
+    type = Exodiff
+    input = 'ale_interface_tracking.i'
+    # 'sequence = true' writes one file per time step because Exodus stores the nodal coordinates
+    # once, when the file is created. Without it the moved coordinates would never reach the gold
+    # and this comparison would degenerate into a solution-only check.
+    exodiff = 'ale_interface_tracking_out.e '
+              'ale_interface_tracking_out.e-s002 '
+              'ale_interface_tracking_out.e-s003'
+    # A recovered run resumes from a checkpointed X0 and d, which this feature does not yet cover.
+    # A repeated time step is covered and is deliberately left on: no criterion can fire in this
+    # run, so the retry exercises the re-entry path where the failed attempt only moved the mesh.
+    # The engine restores the pseudo-displacement the step started from before moving the mesh
+    # again, so 'interface_centroid_x' stays at 0.5 * t however often the step is retried. Without
+    # that restore the retried step advances the interface twice and every row after it is wrong.
+    recover = false
+    design = '/Remeshing/index.md LaplaceSmoother.md MeshMotionCriterion.md '
+             'ElementQualityCriterion.md'
+    requirement = 'The system shall move the nodes of the reference mesh to follow a circular '
+                  'interface whose velocity is prescribed by functions, writing the updated node '
+                  'coordinates and the diffusion solution computed on the moved mesh at every time '
+                  'step, while thresholds chosen so that no criterion can fire keep the mesh '
+                  'topology unchanged.'
+  []
+
+  [ale_interface_tracking_positions]
+    type = CSVDiff
+    input = 'ale_interface_tracking.i'
+    # Golded as text so that the invariants of a regenerated gold can be read and checked by eye.
+    # The interface travels in x only, so 'interface_centroid_x' has to equal 0.5 * t and both y
+    # columns have to be identically zero; 'interior_mean_disp_x' has to sit strictly between zero
+    # and 'interface_centroid_x', which the maximum principle guarantees because the smoother makes
+    # each component of the pseudo-displacement harmonic, and 'wall_centroid_x' has to stay pinned
+    # at zero. A gold captured from a run that had lost the transverse or the interior part of the
+    # pseudo-displacement would violate those relations on inspection, which a binary comparison
+    # alone cannot reveal.
+    csvdiff = 'ale_interface_tracking_out.csv'
+    prereq = 'ale_interface_tracking'
+    should_execute = false
+    delete_output_before_running = false
+    # This block does not execute; it reads the artifact the prereq wrote, so under a restep run it
+    # compares the prereq's retried run against this same gold
+    recover = false
+    design = '/Remeshing/index.md LaplaceSmoother.md'
+    requirement = 'The system shall harmonically interpolate the prescribed motion of a moving '
+                  'boundary into the interior of the mesh, leaving the pinned boundaries at rest, '
+                  'holding every component of the motion that the prescribed velocity does not '
+                  'drive at zero, and displacing the interior by less than the boundary that '
+                  'drives it.'
+  []
+
+  [ale_remesh_reset]
+    type = CSVDiff
+    input = 'ale_remesh_reset.i'
+    csvdiff = 'ale_remesh_reset_out.csv'
+    # The engine moves and remeshes the mesh at the start of the step, before the solve, so a
+    # TIMESTEP_END postprocessor reports the post-remesh mesh that the step was solved on
+    #
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered: the retried step here is one on which no criterion fires, so the engine restores the
+    # pseudo-displacement the step started from and moves the mesh once.
+    recover = false
+    design = '/Remeshing/index.md MeshMotionCriterion.md PatchDelaunayRemesher.md '
+             'LaplaceSmoother.md RemeshCount.md MaxPseudoDisplacement.md'
+    requirement = 'The system shall return the accumulated pseudo-displacement to zero and adopt '
+                  'the replaced mesh as the new reference configuration on the time step where a '
+                  'mesh motion criterion triggers a remesh, reporting the remesh count, the largest '
+                  'pseudo-displacement magnitude, and the element count at the end of every step.'
+  []
+
+  [true_disp_quality_remesh]
+    type = Exodiff
+    input = 'true_disp_quality_remesh.i'
+    # A single output written at FINAL is one file whose mesh is the post-remesh mesh, so this needs
+    # neither 'sequence = true' nor a displaced output. The assertion is the displacement field, and
+    # the displaced coordinates are only that field added to the reference coordinates. The remesh
+    # count and the element count ride along as Exodus global variables so that a run where no
+    # element is ever replaced cannot pass as a silently empty comparison
+    exodiff = 'true_disp_quality_remesh_out.e'
+    # The displacement variables are transient, so a recovered run resolves from a checkpointed old
+    # state rather than from the one the remesh transfer wrote. A repeated step does not: the
+    # executioner restores the solutions before it re-enters the step, so the retry resolves from
+    # the same old state the failed attempt did.
+    recover = false
+    design = '/Remeshing/index.md ElementQualityCriterion.md PatchDelaunayRemesher.md '
+             'RemeshCount.md'
+    requirement = 'The system shall replace elements of the reference mesh of a true displacement '
+                  'problem when a prescribed boundary displacement degrades the element quality of '
+                  'the displaced configuration past a threshold, carrying every displacement state '
+                  'onto the new elements so that the final displacement field, the remesh count '
+                  'and the element count match the reference output.'
+  []
+
+  [stateful_property_transfer]
+    type = CSVDiff
+    input = 'stateful_property_transfer.i'
+    csvdiff = 'stateful_property_transfer_out.csv'
+    # The accumulated state is a piecewise constant auxiliary variable, which the remesh transfer
+    # reproduces on a new element exactly, so the only error in the integral column is the round-off
+    # of the projection. 1e-8 is orders of magnitude below the jump that restarting the accumulation
+    # on the replaced elements would produce
+    rel_err = 1e-8
+    abs_zero = 1e-10
+    # The projected state is checkpointed independently of the mesh the remesh produced, which a
+    # recovered run cannot reconcile. A repeated time step is covered, and the retried step here is
+    # one on which a remesh fires: the engine keeps the mesh that attempt replaced and does not
+    # remesh or accumulate again, so 'remesh_count' and the integral advance once.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md RemeshCount.md'
+    requirement = 'The system shall carry a stateful material property across a mesh replacement '
+                  'through the auxiliary variables of the projected stateful material storage, so '
+                  'that the integral of the property over the domain continues to accumulate '
+                  'without a jump on the step where the elements are replaced.'
+  []
+
+  [parallel_remesh]
+    type = CSVDiff
+    input = 'parallel_remesh.i'
+    csvdiff = 'parallel_remesh_out.csv'
+    # The wall velocity is graded along the wall on purpose. A spatially uniform wall velocity
+    # produces a spatially uniform strain field on this rectangle, which parks large symmetric
+    # families of candidate triangles on the Delaunay area threshold at once, so a one ulp change
+    # in the node coordinates flips a whole family together. The grading breaks those families and
+    # raises the activation threshold of the element count by orders of magnitude, which is what
+    # the sibling 'distributed_remesh' gold relies on. The slope is 0.6 rather than the sibling's
+    # 0.3 so that the peak wall motion stays at 0.06 per step, above the 0.05 per step a uniform
+    # 0.5 produced, and the remesh cadence is not weakened by the change.
+    #
+    # The gold is pinned to the default bjacobi and ilu linear solve of the smoother as much as to
+    # the rank count, and both pins are load-bearing. bjacobi carries one block per rank, so the
+    # Krylov iterate the smoother converges to is rank dependent: the largest pseudo-displacement
+    # moves by 4.29e-9 between one rank and three on a bit identical mesh, and a Delaunay area
+    # threshold tie-break that the last bits of the node coordinates decide amplifies that into
+    # whole elements; five exact LU solves differing only in their fill-reducing ordering landed on
+    # 86 elements and on 82. Tightening 'l_tol' re-rolls the element count rather than converging
+    # it. A PETSc bump that changes the bjacobi or the ilu internals, or any change to the linear
+    # solve the smoother performs, legitimately moves that column; regold rather than loosen it.
+    #
+    # 'remesh_count' and 'moved_volume' are the robust assertions: the count held across every
+    # perturbation that was measured, and the area is 1 - 0.3*t exactly, so a regenerated gold can
+    # be checked by eye. 'u_l2' is the transfer detector, the column a lost ghost or a dropped
+    # remesh transfer shows up in, and is kept at the default tolerance for that reason.
+    min_parallel = 3
+    max_parallel = 3
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered on every rank alike: the retried step here is one on which a remesh fires, and the
+    # engine keeps the mesh that attempt replaced rather than replacing it a second time, so no
+    # rank re-enters the collectives of a surgery its neighbors have already performed.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md LaplaceSmoother.md RemeshCount.md '
+             'MaxPseudoDisplacement.md'
+    requirement = 'The system shall remesh a moving mesh problem carried on a replicated mesh in '
+                  'parallel, reporting a remesh count, element count, largest pseudo-displacement '
+                  'magnitude, solution norm and moved mesh volume that match the reference output, '
+                  'with the volume equal to the area the graded wall motion leaves behind.'
+  []
+
+  [distributed_remesh]
+    type = CSVDiff
+    input = 'distributed_remesh.i'
+    csvdiff = 'distributed_remesh_out.csv'
+    # A rank replaces only the elements it owns and grows no cavity past a partition seam, so the
+    # element set this run reaches is a property of the partition rather than of the problem. Three
+    # ranks and an explicit GridPartitioner are what make that partition the same three horizontal
+    # strips on every machine and in every run, which is the only reason this gold reproduces. The
+    # partitioner in the input is not an optimization and must not be removed: the default
+    # partitioner is free to hand out a different partition on a different build of METIS or a
+    # different processor count, and every column of this gold would move with it.
+    #
+    # This gold is pinned to the default bjacobi and ilu linear solve of the smoother as much as to
+    # the rank count. bjacobi carries one block per rank, so the Krylov iterate the smoother
+    # converges to is rank dependent, and a PETSc bump that changes the bjacobi or the ilu
+    # internals will legitimately move these columns.
+    min_parallel = 3
+    max_parallel = 3
+    # There is deliberately no serial or replicated counterpart of this gold to compare against.
+    # Cutting the cavities at the seams gives the distributed run a different, equally valid mesh
+    # than the one a replicated run reaches from the same input, so asserting agreement between the
+    # two would assert something the system does not promise. What the gold does pin is that every
+    # rank enters the collectives, that a rank whose own record is empty still drops the ghost
+    # copies of what its neighbors deleted, that the reference mesh and the displaced mesh both
+    # stay conforming across the seam, and that the element count, the remesh count and the
+    # solution norm therefore evolve without a jump when the failing region crosses a seam.
+    #
+    # A mesh generator that cannot be built in parallel makes MOOSE fall back to a replicated mesh
+    # and say so rather than fail, and this test would then pass while exercising the replicated
+    # path it exists to leave. The console header is asserted so that such a fallback fails here.
+    # The header is column-padded, so \s+ is required; do not simplify this to a single space.
+    expect_out = 'Parallel Type:\s+distributed'
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered, and the retried step here is one on which a remesh fires: the engine keeps the mesh
+    # that attempt replaced, so no rank re-enters the surgery collectives or the ghost-layer rebuild
+    # a second time. The harness skips this block under a restep sweep even so, because a block
+    # carrying 'expect_out' is skipped in that mode; the coverage comes from the siblings above.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md LaplaceSmoother.md RemeshCount.md '
+             'MaxPseudoDisplacement.md'
+    requirement = 'The system shall remesh a moving mesh problem carried on a distributed mesh, '
+                  'with each processor replacing only the elements it owns, reporting a remesh '
+                  'count, element count, largest pseudo-displacement magnitude, displaced volume '
+                  'and solution norm that advance without an anomaly where the failing region '
+                  'crosses from one processor to the next.'
+  []
+
+  [edge_remesh_cycle]
+    type = CSVDiff
+    input = 'edge_remesh_cycle.i'
+    csvdiff = 'edge_remesh_cycle_out.csv'
+    # This is the refine-and-coarsen path. One 'TriEdgeRemesher' splits the edges that are long
+    # against the target, collapses the ones that are short and swaps for shape inside one event.
+    # Every operation is exact arithmetic on nodes and midpoints already decided and the candidates
+    # are processed in sorted order, so 'n_elements' is asserted raw here, which the Delaunay path
+    # of 'PatchDelaunayRemesher' cannot do.
+    #
+    # The input carries an [Adaptivity] block that supplies only [Indicators], with no marker and no
+    # steps, next to the [Remeshing] block. Such a block computes its indicator fields and leaves
+    # the mesh alone, so it is admitted rather than rejected as a second system replacing the mesh.
+    # This test fails at setup if the two systems are made mutually exclusive again.
+    #
+    # 'initial_remesh_cycles = 5' remeshes the initial condition before the transient, so the first
+    # row of the gold reports a remesh count of five and an element count far from the 120 the mesh
+    # generator built: the background has already coarsened toward the 0.4 ceiling and the front
+    # has already refined toward the 0.04 floor when the initial values are taken. The two integral
+    # columns are zero in that row because they only execute at TIMESTEP_END.
+    #
+    # 'n_elements' breathes between the high and the low hundreds rather than settling, because
+    # the split and the collapse pass trade elements around the moving front from event to event.
+    # That is bounded churn, not a runaway: a runaway shows as a count that climbs without the low
+    # rows ever returning. Do not expect this column to flatten.
+    #
+    # 'wake_min_h' reads a position-masked box rather than a subdomain, because a subdomain seam
+    # pins its vertices against collapse and would hold the minimum at the refined size forever.
+    # It dips to the 0.03 scale while the front is inside the box and returns to 0.354 once the
+    # front has left, which is the coarsening claim: only the collapse pass can raise it.
+    #
+    # 'u_integral_post_remesh' in a row against 'u_integral' in the row above is the transfer
+    # detector, and the difference between them is the resampling of the collapse and swap
+    # operations, which is in the gold. The front is resolved on purpose: the 0.04 floor matches
+    # the 0.04 front width, and the time derivative is mass lumped, which together hold the Gibbs
+    # over- and undershoot of the linear elements to the few-percent scale.
+    #
+    # Pinned to one rank. A three-rank replicated run was measured to reproduce this gold to the
+    # bit, but the swap pass accepts on a 1e-6 quality-improvement margin and the collapse pass on
+    # thresholds the solution feeds through the sizing field, and how those margins behave across
+    # PETSc builds and rank counts has not been established. Do not relax this without golds
+    # captured on the rank counts it is relaxed to.
+    max_parallel = 1
+    # A recovered run resumes from a checkpointed mesh rather than the one the remesh transfer
+    # wrote, and the initial remesh cycles are deliberately skipped on recovery. A repeated time
+    # step is covered: a remesh fires on every step of this run, so the retry lands on the re-entry
+    # path where the engine keeps the mesh the failed attempt produced.
+    recover = false
+    design = '/Remeshing/index.md TriEdgeRemesher.md IndicatorThresholdCriterion.md RemeshCount.md'
+    requirement = 'The system shall adapt a triangle mesh toward a target element size field with '
+                  'edge splits, collapses and swaps, remeshing the initial condition before the '
+                  'transient starts, and report a deterministic element count, a solution '
+                  'integral that does not jump across a mesh replacement, and a smallest element '
+                  'size in the swept region that falls while the front is inside it and rises once '
+                  'it has gone.'
+  []
+
+  [edge_remesh_distributed_refused]
+    type = RunException
+    input = 'edge_remesh_cycle.i'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=edge_remesh_distributed_refused_out'
+    expect_err = 'cannot run on a distributed mesh'
+    # The remesher is constructed when the [Remeshing] sub-blocks are, before the engine's own
+    # setup checks run, so this fires at construction. It is refused because its surgery is
+    # performed identically on every processor of a replicated mesh and is not confined to the
+    # elements a processor owns.
+    design = '/Remeshing/index.md TriEdgeRemesher.md'
+    requirement = 'The system shall report an error when the edge-operation remesher is used on a '
+                  'distributed mesh.'
+  []
+
+  [distributed_remesh_exodus_refused]
+    type = RunException
+    input = 'distributed_remesh.i'
+    # X0 and d are keyed by node id, and Exodus output of a distributed mesh that a remesh event
+    # left non-contiguously numbered renumbers it, through 'handleExodusIOMeshRenumbering()' in
+    # framework/src/outputs/Exodus.C, which announces the renumbering through
+    # FEProblemBase::meshChanged() alone; the engine does not rebuild its bookkeeping on that
+    # notification. Why the combination is refused rather than absorbed by re-snapshotting X0 is
+    # set out in the parallel section of syntax/Remeshing/index.md. Do not "fix" this block by
+    # making Exodus output work through a re-snapshot: the remesh cadence, and every column
+    # downstream of it, would then depend on whether the user turned Exodus output on.
+    #
+    # Asserted at setup rather than at the corruption it prevents, because the setup refusal binds
+    # the behavior that was chosen rather than the symptom, and fails before the run burns three
+    # time steps. The symptom is worth recording even so: a contiguous renumbering reuses most of
+    # the id range, so most keys still resolve, to the wrong node, and only the minority that fall
+    # off the end of the new range fail a lookup. A fix that merely refilled the missing keys
+    # would have turned a crash into a mesh quietly wrong everywhere.
+    #
+    # Pinned to three ranks and paired with the input's GridPartitioner for the reason the
+    # 'distributed_remesh' block above sets out. Only a distributed mesh reaches this path,
+    # because MooseMesh::init() disables renumbering for every other kind, which is why the sibling
+    # Exodiff blocks on replicated meshes are untouched by the refusal.
+    min_parallel = 3
+    max_parallel = 3
+    # A distinct file base so that the CSV this run would write cannot land on the artifacts of
+    # 'distributed_remesh', which shares this input
+    cli_args = 'Outputs/exodus=true Outputs/file_base=distributed_remesh_exodus_refused_out'
+    expect_err = 'cannot be combined with the Exodus output'
+    requirement = 'The system shall report an error when remeshing is combined with Exodus output '
+                  'on a distributed mesh.'
+  []
+[]

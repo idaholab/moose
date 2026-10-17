@@ -9,6 +9,7 @@
 
 #include "MeshTriangulationUtils.h"
 #include "MooseMeshUtils.h"
+#include "MooseObject.h"
 #include "CastUniquePointer.h"
 
 #include "libmesh/elem.h"
@@ -22,26 +23,56 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
 
+#include <utility>
+
 namespace MeshTriangulationUtils
 {
 
+namespace
+{
+/**
+ * Report an error about the triangulation option \p param. A mesh generator caller registers the
+ * option as an input parameter of type \p T, so the error carries the parameter name and its
+ * input file location; a caller that fills the options directly has no such parameter and gets a
+ * plain error.
+ */
+template <typename T, typename... Args>
+[[noreturn]] void
+optionError(const MooseObject & moose_object, const std::string & param, Args &&... args)
+{
+  if (moose_object.parameters().have_parameter<T>(param))
+    moose_object.paramError(param, std::forward<Args>(args)...);
+  else
+    moose_object.mooseError(std::forward<Args>(args)...);
+}
+}
+
 std::set<std::size_t>
-outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayOptions & opts)
+outerBoundaryIds(const MooseObject & moose_object,
+                 MeshBase & boundary_mesh,
+                 const XYDelaunayOptions & opts)
 {
   std::set<std::size_t> bdy_ids;
 
   if (!opts.input_boundary_names.empty())
   {
     if (!opts.input_subdomain_names.empty())
-      mg.paramError(
+      optionError<std::vector<SubdomainName>>(
+          moose_object,
           "input_subdomain_names",
-          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
+          "The 'input_boundary_names' and 'input_subdomain_names' triangulation options cannot "
+          "both specify an outer boundary.");
 
     for (const auto & name : opts.input_boundary_names)
     {
       auto bcid = MooseMeshUtils::getBoundaryID(name, boundary_mesh);
       if (bcid == BoundaryInfo::invalid_id)
-        mg.paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
+        optionError<std::vector<BoundaryName>>(
+            moose_object,
+            "input_boundary_names",
+            "The 'input_boundary_names' triangulation option lists ",
+            name,
+            ", which is not a boundary name in the input mesh.");
 
       bdy_ids.insert(bcid);
     }
@@ -63,9 +94,12 @@ outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayO
     for (auto i : index_range(subdomain_ids))
     {
       if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
-        mg.paramError("input_subdomain_names",
-                      opts.input_subdomain_names[i],
-                      " was not found in the boundary mesh");
+        optionError<std::vector<SubdomainName>>(
+            moose_object,
+            "input_subdomain_names",
+            "The 'input_subdomain_names' triangulation option lists ",
+            opts.input_subdomain_names[i],
+            ", which was not found in the boundary mesh.");
 
       bdy_ids.insert(subdomain_ids[i]);
     }
@@ -75,7 +109,7 @@ outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayO
 }
 
 std::unique_ptr<MeshBase>
-triangulateWithDelaunay(MeshGenerator & mg,
+triangulateWithDelaunay(const MooseObject & moose_object,
                         std::unique_ptr<MeshBase> boundary_mesh,
                         std::vector<std::unique_ptr<MeshBase>> hole_meshes,
                         const XYDelaunayOptions & xyd_opts)
@@ -90,7 +124,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   // If we're using a user-requested subset of boundaries on that
   // mesh, get their ids.
-  const std::set<std::size_t> bdy_ids = outerBoundaryIds(mg, *mesh, xyd_opts);
+  const std::set<std::size_t> bdy_ids = outerBoundaryIds(moose_object, *mesh, xyd_opts);
 
   if (!bdy_ids.empty())
     poly2tri.set_outer_boundary_ids(bdy_ids);
@@ -134,15 +168,19 @@ triangulateWithDelaunay(MeshGenerator & mg,
   }
   if (stitch_second_order_holes &&
       (xyd_opts.tri_elem_type == "TRI3" || xyd_opts.tri_elem_type == "DEFAULT"))
-    mg.paramError(
+    optionError<MooseEnum>(
+        moose_object,
         "tri_element_type",
         "Cannot use first order elements with stitched quadratic element holes. Please try "
-        "to specify a higher-order tri_element_type or reduce the order of the hole inputs.");
+        "to specify a higher-order 'tri_element_type' triangulation option or reduce the order of "
+        "the hole inputs.");
 
   if (!triangulator_hole_ptrs.empty())
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
 
-  if (xyd_opts.desired_area_func != "")
+  if (xyd_opts.desired_area_function)
+    poly2tri.set_desired_area_function(xyd_opts.desired_area_function);
+  else if (xyd_opts.desired_area_func != "")
   {
     // poly2tri will clone this so it's fine going out of scope
     libMesh::ParsedFunction<Real> area_func{xyd_opts.desired_area_func};
@@ -150,8 +188,13 @@ triangulateWithDelaunay(MeshGenerator & mg,
   }
   else if (xyd_opts.use_auto_area_func)
   {
+    // The interpolation behind the auto area function allgathers its sample points over the
+    // communicator it is handed. Those samples are the boundary segments of this very mesh, so the
+    // mesh's own communicator is the one that holds them: a wider communicator would mix in the
+    // samples of the meshes the other ranks are triangulating, and a caller that triangulates a
+    // different number of meshes on each rank would enter mismatched collectives.
     poly2tri.set_auto_area_function(
-        mg.comm(),
+        mesh->comm(),
         xyd_opts.auto_area_function_num_points,
         xyd_opts.auto_area_function_power,
         xyd_opts.auto_area_func_default_size > 0.0 ? xyd_opts.auto_area_func_default_size : 0.0,
@@ -177,13 +220,13 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   poly2tri.triangulate();
 
-  finalizeTriangulation(mg, *mesh, hole_meshes, holes_with_midpoints, xyd_opts);
+  finalizeTriangulation(moose_object, *mesh, hole_meshes, holes_with_midpoints, xyd_opts);
 
   return mesh;
 }
 
 void
-finalizeTriangulation(MeshGenerator & mg,
+finalizeTriangulation(const MooseObject & moose_object,
                       UnstructuredMesh & mesh,
                       std::vector<std::unique_ptr<MeshBase>> & holes,
                       const std::vector<bool> & holes_with_midpoints,
@@ -223,9 +266,11 @@ finalizeTriangulation(MeshGenerator & mg,
       if (opts.has_output_subdomain_id)
       {
         if (id != output_subdomain_id)
-          mg.paramError("output_subdomain_name",
-                        "name has been used by the input meshes and the corresponding id is not "
-                        "equal to 'output_subdomain_id'");
+          optionError<SubdomainName>(
+              moose_object,
+              "output_subdomain_name",
+              "The 'output_subdomain_name' triangulation option has been used by the input meshes "
+              "and the corresponding id is not equal to 'output_subdomain_id'.");
       }
       else
         output_subdomain_id = id;
@@ -485,7 +530,11 @@ finalizeTriangulation(MeshGenerator & mg,
   for (auto const & id_name_pair : main_subdomain_map)
     main_subdomain_map_name_list.emplace(id_name_pair.second);
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-    mg.paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
+    optionError<std::vector<MeshGeneratorName>>(
+        moose_object,
+        "holes",
+        "The hole meshes contain subdomain name maps with conflicts. Check the meshes given as the "
+        "'holes' triangulation option.");
 
   mesh.unset_is_prepared();
 }
