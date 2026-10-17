@@ -5,7 +5,7 @@
 This is the Kokkos version of [HeatConductionTimeDerivative](HeatConductionTimeDerivative.md). See the original document for details.
 
 !alert note
-Kokkos-MOOSE does not support displaced meshes yet. Therefore, the Kokkos version sets [!param](/Kernels/KokkosHeatConductionTimeDerivative/use_displaced_mesh) to false in contrast to the original version which sets [!param](/Kernels/HeatConductionTimeDerivative/use_displaced_mesh) to true by default.
+The Kokkos version defaults [!param](/Kernels/KokkosHeatConductionTimeDerivative/use_displaced_mesh) to false, whereas the original version integrates over the displaced mesh by default. On the reference configuration so [!param](/Kernels/KokkosHeatConductionTimeDerivative/density) is the reference density. Conservation of mass, $\rho\,dv = \rho_0\,dV$, makes this the same term as the current-configuration integral with the current density.
 
 ## Example Input Syntax
 

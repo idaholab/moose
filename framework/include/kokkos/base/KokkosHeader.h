@@ -59,17 +59,19 @@
 #define KOKKOS_INLINE_FUNCTION inline
 #define KOKKOS_VIRTUAL virtual
 #define KOKKOS_OVERRIDE override
+// Like the Kokkos definitions, these strip one level of parentheses from code, so that callers
+// such as MetaPhysicL can pass statements containing commas
 #undef KOKKOS_IF_ON_HOST
 #define KOKKOS_IF_ON_HOST(code)                                                                    \
   if (!omp_get_level())                                                                            \
   {                                                                                                \
-    code                                                                                           \
+    KOKKOS_IMPL_STRIP_PARENS(code)                                                                 \
   }
 #undef KOKKOS_IF_ON_DEVICE
 #define KOKKOS_IF_ON_DEVICE(code)                                                                  \
   if (omp_get_level())                                                                             \
   {                                                                                                \
-    code                                                                                           \
+    KOKKOS_IMPL_STRIP_PARENS(code)                                                                 \
   }
 #endif
 

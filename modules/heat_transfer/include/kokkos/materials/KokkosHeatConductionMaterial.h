@@ -27,15 +27,26 @@ public:
 private:
   const Real _my_thermal_conductivity;
   const Real _my_specific_heat;
+  /// Gradient of the thermal conductivity with respect to the position
+  const Moose::Kokkos::Real3 _thermal_conductivity_gradient;
+  /// Whether the thermal conductivity varies with the position
+  const bool _position_dependent;
 
   Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
   Moose::Kokkos::MaterialProperty<Real> _specific_heat;
+  Moose::Kokkos::MaterialProperty<Moose::Kokkos::Real3> _d_thermal_conductivity_dx;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 KokkosHeatConductionMaterial::computeQpProperties(const unsigned int qp, Datum & datum) const
 {
-  _thermal_conductivity(datum, qp) = _my_thermal_conductivity;
+  _thermal_conductivity(datum, qp) =
+      _position_dependent
+          ? _my_thermal_conductivity + _thermal_conductivity_gradient * datum.q_point(qp)
+          : _my_thermal_conductivity;
   _specific_heat(datum, qp) = _my_specific_heat;
+
+  if (_position_dependent)
+    _d_thermal_conductivity_dx(datum, qp) = _thermal_conductivity_gradient;
 }

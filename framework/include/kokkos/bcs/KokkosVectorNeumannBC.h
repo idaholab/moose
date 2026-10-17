@@ -23,8 +23,8 @@ public:
   KokkosVectorNeumannBC(const KokkosVectorNeumannBC & object);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidual(const unsigned int,
-                                                            AssemblyDatum &) const
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualValue(const unsigned int,
+                                                                 AssemblyDatum &) const
   {
     return -_values;
   }
