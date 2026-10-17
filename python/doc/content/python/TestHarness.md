@@ -264,9 +264,17 @@ Ran 2 tests in 2.9 seconds.
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
 
-#### MOOSE_MAX_MEMORY
+#### MOOSE_MAX_MEMORY_PER_SLOT
 
-Set `MOOSE_MAX_MEMORY` to a float or integer to influence the `--max-memory` command line option, limiting the amount of estimated memory per process each job can use in MB. If the `--max-memory` command line option is set, it will take precident over this variable.
+Set `MOOSE_MAX_MEMORY_PER_SLOT` to a float or integer to influence the `--max-memory-per-slot` command line option, limiting the amount of estimated memory per slot (MPI process or thread) each job can use in MB. If the `--max-memory-per-slot` command line option is set, it will take precedence over this variable.
+
+On Linux, the memory measured for a job excludes file-backed memory, such as the pages
+backing the test executable and its shared libraries. Those pages are typically mapped by
+every running job, so counting them would charge a job for memory it shares with everything
+else that happens to be running at the same time, rather than for memory the job itself
+needed. This exclusion requires Linux 5.3 or newer; on older kernels and on platforms
+other than Linux, the measured memory includes those pages, so the same limit may be
+reached sooner.
 
 # Validation
 
