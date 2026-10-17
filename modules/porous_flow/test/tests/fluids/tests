@@ -150,4 +150,41 @@
     issues = "#11716 #23609 #24381"
     design = 'PorousFlowMultiComponentFluid.md'
   []
+  [tabulated_fvf]
+    requirement = "The system shall be able to compute fluid density, viscosity, internal energy and enthalpy from a table of pressure, formation volume factor and viscosity, interpolating the reciprocal formation volume factor and the reciprocal of its product with viscosity linearly in pressure,"
+    issues = "#34051"
+    design = 'TabulatedFVFFluidProperties.md'
+    [interpolate]
+      type = 'CSVDiff'
+      input = 'tabulated_fvf.i'
+      csvdiff = 'tabulated_fvf.csv'
+      rel_err = 1.0E-5
+      detail = "at a pressure inside the tabulated range,"
+    []
+    [extrapolate]
+      type = 'CSVDiff'
+      input = 'tabulated_fvf.i'
+      csvdiff = 'tabulated_fvf_extrapolate.csv'
+      rel_err = 1.0E-5
+      cli_args = 'Variables/pp/initial_condition=35e6 Outputs/file_base=tabulated_fvf_extrapolate'
+      prereq = 'tabulated_fvf/interpolate'
+      detail = "at a pressure above the tabulated range, with linear extrapolation,"
+    []
+    [clamp]
+      type = 'CSVDiff'
+      input = 'tabulated_fvf.i'
+      csvdiff = 'tabulated_fvf_clamp.csv'
+      rel_err = 1.0E-5
+      cli_args = 'Variables/pp/initial_condition=35e6 FluidProperties/oil/out_of_bounds=clamp Outputs/file_base=tabulated_fvf_clamp'
+      prereq = 'tabulated_fvf/extrapolate'
+      detail = "at a pressure above the tabulated range, holding the end values constant, and"
+    []
+    [non_increasing_pressure]
+      type = 'RunException'
+      input = 'tabulated_fvf.i'
+      cli_args = "FluidProperties/oil/pressure='2.0E6 1.0E7 1.0E7 3.0E7'"
+      expect_err = 'Tabulated pressures must be strictly increasing'
+      detail = "report an error if the tabulated pressures are not strictly increasing."
+    []
+  []
 []
