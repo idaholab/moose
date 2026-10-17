@@ -41,6 +41,8 @@
     variable = auxGrad_T_x
     vector_variable = grad_T
     component = 'x'
+    # Needs to execute after the auxkernel setting the gradient
+    execution_order_group = 1
   []
 []
 

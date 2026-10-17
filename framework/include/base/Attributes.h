@@ -47,6 +47,39 @@ struct enable_bitmask_operators<Interfaces>
 
 std::ostream & operator<<(std::ostream & os, Interfaces & iface);
 
+/**
+ * Classifies AuxKernels by computed value type and by how they are executed. Every AuxKernel is
+ * tagged with exactly one value-type bit and exactly one execution-category bit. A query combines
+ * the bits it accepts: within each of the two groups the query specifies, the object must match one
+ * of the requested bits, and a group the query leaves empty is not constrained.
+ */
+enum class AuxKernelType
+{
+  /// Value types
+  ///@{
+  Real = 1 << 0,
+  Vector = 1 << 1,
+  Array = 1 << 2,
+  ///@}
+  /// Execution categories
+  ///@{
+  Nodal = 1 << 3,
+  Mortar = 1 << 4,
+  Elemental = 1 << 5,
+  ///@}
+  /// Convenience groups
+  ///@{
+  AllValueTypes = (1 << 0) | (1 << 1) | (1 << 2),
+  AllCategories = (1 << 3) | (1 << 4) | (1 << 5)
+  ///@}
+};
+
+template <>
+struct enable_bitmask_operators<AuxKernelType>
+{
+  static const bool enable = true;
+};
+
 #define clonefunc(T)                                                                               \
   virtual std::unique_ptr<Attribute> clone() const override                                        \
   {                                                                                                \
@@ -268,6 +301,68 @@ public:
 
 private:
   int _val = 0;
+};
+
+/**
+ * Tracks the AuxKernelType of an AuxKernel: its value type (Real/Vector/Array) and its execution
+ * category (nodal, mortar nodal or elemental). AttribSystem intentionally groups every AuxKernel
+ * under the same "AuxKernel" system-attribute tag (registerSystemAttributeName groups objects that
+ * execute through the same machinery, unlike registerBase which associates input file syntax), so
+ * it cannot select the objects that a given AuxiliarySystem compute loop or queryInto type expects.
+ * Objects that are not AuxKernels have no bits set and match no query.
+ */
+class AttribAuxKernelType : public Attribute
+{
+public:
+  typedef AuxKernelType Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelType(TheWarehouse & w) : Attribute(w, "aux_kernel_type") {}
+  AttribAuxKernelType(TheWarehouse & w, AuxKernelType type)
+    : Attribute(w, "aux_kernel_type"), _val(type)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(static_cast<unsigned int>(_val));
+  clonefunc(AttribAuxKernelType);
+
+private:
+  AuxKernelType _val = static_cast<AuxKernelType>(0);
+};
+
+/**
+ * Whether an AuxKernel is boundary restricted (BoundaryRestrictable::boundaryRestricted()).
+ * The old ExecuteMooseObjectWarehouse-based dispatch treated block and boundary restriction as
+ * mutually exclusive (MooseObjectWarehouseBase::addObject's if/else-if): a boundary-restricted
+ * nodal AuxKernel is handled entirely by the boundary-node loop, never by the block-based one -
+ * unlike AttribSubdomains, which (correctly, for its own purpose) treats a block-unrestricted
+ * object as matching every block. Without this, a boundary-restricted-but-block-unrestricted
+ * AuxKernel would incorrectly also run once per node in the general block-based sweep.
+ */
+class AttribAuxKernelBoundaryRestricted : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelBoundaryRestricted(TheWarehouse & w)
+    : Attribute(w, "aux_kernel_boundary_restricted"), _val(false)
+  {
+  }
+  AttribAuxKernelBoundaryRestricted(TheWarehouse & w, bool is_boundary_restricted)
+    : Attribute(w, "aux_kernel_boundary_restricted"), _val(is_boundary_restricted)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribAuxKernelBoundaryRestricted);
+
+private:
+  bool _val;
 };
 
 /**
