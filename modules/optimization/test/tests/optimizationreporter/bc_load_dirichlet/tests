@@ -1,0 +1,42 @@
+[Tests]
+  issues = '#33487'
+  design = 'SideOptimizationDirichletFunctionInnerProduct.md ParsedOptimizationFunction.md Optimize.md'
+  [bc_dirichlet_inv]
+    requirement = 'The system shall invert for the value of a strongly imposed Dirichlet boundary '
+                  'condition parameterized by a function, using the normal diffusive flux of the '
+                  'adjoint solution as the objective gradient,'
+    [split]
+      type = CSVDiff
+      input = main.i
+      csvdiff = 'main_out_OptimizationReporter_0001.csv main_out_optInfo_0001.csv'
+      max_threads = 1
+      rel_err = 1e-2
+      abs_zero = 1e-1
+      recover = false
+      detail = 'with the forward and adjoint problems in separate sub-applications.'
+    []
+    [auto_adjoint]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      csvdiff = 'main_auto_adjoint_out_OptimizationReporter_0001.csv '
+                'main_auto_adjoint_out_optInfo_0001.csv'
+      max_threads = 1
+      rel_err = 1e-2
+      abs_zero = 1e-1
+      recover = false
+      detail = 'with the forward and adjoint problems in a single sub-application whose adjoint '
+               'boundary data is homogenized automatically.'
+    []
+  []
+  [bc_dirichlet_grad_check]
+    type = TaoGradientTester
+    input = main_auto_adjoint.i
+    cli_args = 'Outputs/csv=false forward:Mesh/gmg/nx=80 forward:Mesh/gmg/ny=5'
+    max_rel_tol = 5e-5
+    tao_fd_delta = 1e-3
+    requirement = 'The system shall compute an objective gradient that agrees with finite '
+                  'differences when parameterized Dirichlet boundary data is imposed strongly and '
+                  'the gradient is evaluated from the normal diffusive flux of the adjoint '
+                  'solution.'
+  []
+[]
