@@ -84,9 +84,8 @@ public:
 };
 
 /**
- * Host functor wrapper class that allocates a functor on device and creates its device wrapper.
- * This class holds the actual device instance of the functor and manages its allocation and
- * deallocation, and the device wrapper simply keeps a pointer to it.
+ * Host functor wrapper class that allocates a functor and its wrapper on device. This class owns
+ * both device allocations, and the device wrapper simply keeps a pointer to the functor.
  * @tparam Object The functor class type
  */
 template <typename Object>
@@ -120,6 +119,10 @@ private:
    * Copy of the functor on device
    */
   Object * _functor_device = nullptr;
+  /**
+   * Functor wrapper on device
+   */
+  FunctorWrapperDevice<Object> * _wrapper_device = nullptr;
 };
 
 template <typename Object>
@@ -127,10 +130,11 @@ FunctorWrapperDeviceBase *
 FunctorWrapperHost<Object>::allocate()
 {
   // Allocate storage for device wrapper on device
-  auto wrapper_device = static_cast<FunctorWrapperDevice<Object> *>(
+  _wrapper_device = static_cast<FunctorWrapperDevice<Object> *>(
       ::Kokkos::kokkos_malloc<ExecSpace::memory_space>(sizeof(FunctorWrapperDevice<Object>)));
 
   // Allocate device wrapper on device using placement new to populate vtable with device pointers
+  auto wrapper_device = _wrapper_device;
   ::Kokkos::parallel_for(
       1, KOKKOS_LAMBDA(const int) { new (wrapper_device) FunctorWrapperDevice<Object>(); });
 
@@ -142,7 +146,7 @@ FunctorWrapperHost<Object>::allocate()
   ::Kokkos::Impl::DeepCopy<MemSpace, ::Kokkos::HostSpace>(
       &(wrapper_device->_functor), &_functor_device, sizeof(Object *));
 
-  return wrapper_device;
+  return _wrapper_device;
 }
 
 template <typename Object>
@@ -167,6 +171,7 @@ FunctorWrapperHost<Object>::freeFunctor()
 template <typename Object>
 FunctorWrapperHost<Object>::~FunctorWrapperHost()
 {
+  ::Kokkos::kokkos_free<ExecSpace::memory_space>(_wrapper_device);
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(_functor_device);
 }
 
