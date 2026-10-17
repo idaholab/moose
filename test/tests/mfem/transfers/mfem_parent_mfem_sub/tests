@@ -121,6 +121,7 @@
         prereq = MFEMCopyTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []
@@ -144,6 +145,7 @@
         prereq = MFEMCopyTransfer/ToSubFromParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []

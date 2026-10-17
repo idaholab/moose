@@ -52,5 +52,6 @@
     command = 'python3 check_citation_keys.py'
     requirement = "The system shall ensure that every citation key registered in source code is "
                   "defined in a documentation BibTeX file."
+    min_slots = 2 # memory heavy
   []
 []
