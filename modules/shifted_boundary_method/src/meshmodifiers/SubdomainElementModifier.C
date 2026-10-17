@@ -10,9 +10,6 @@
 #include "SubdomainElementModifier.h"
 #include "SBMUtils.h"
 
-#include <algorithm>
-#include <optional>
-#include <utility>
 #include <vector>
 
 registerMooseObject("ShiftedBoundaryMethodApp", SubdomainElementModifier);
@@ -48,60 +45,22 @@ SubdomainElementModifier::computeSubdomainID()
   if (all_checkers.empty())
     mooseError("SubdomainElementModifier: subdomain checker collection is empty!");
 
-  std::optional<SubdomainID> fully_inside_subdomain;
-  std::optional<SubdomainID> best_intercepted_subdomain;
-  std::vector<std::pair<SubdomainID, Real>> intercepted_candidates;
-  Real max_ratio = 0.0;
-
-  for (const auto & [sub_id, checker_ptr] : all_checkers)
+  // Compute the occupancy of the element with respect to each subdomain's in/out checker.
+  std::vector<SBMUtils::SubdomainOccupancy> candidate_occupancies;
+  candidate_occupancies.reserve(all_checkers.size());
+  for (const auto & [subdomain_id, checker_ptr] : all_checkers)
   {
-    unsigned int num_inside_nodes = 0;
-    for (const auto i : make_range(elem->n_nodes()))
-      if (checker_ptr->sideness(elem->point(i)) != SurfaceGeometry::SurfaceSide::OUTSIDE)
-        ++num_inside_nodes;
-
     const auto * const checker = checker_ptr.get();
-    const Real ratio_active = SBMUtils::activeElementFraction(
-        *elem,
-        _qrule_order,
-        [checker](const Point & point)
-        { return checker->sideness(point) != SurfaceGeometry::SurfaceSide::OUTSIDE; });
-
-    if (num_inside_nodes == elem->n_nodes() && ratio_active == 1.0)
-    {
-      if (!fully_inside_subdomain || sub_id < *fully_inside_subdomain)
-        fully_inside_subdomain = sub_id;
-      continue;
-    }
-    // All nodes may be outside even when a closed geometry lies within the element or its surface
-    // crosses the element. Retain the checker if either nodes or quadrature points find activity.
-    const bool has_active_region = num_inside_nodes != 0 || ratio_active > 0.0;
-    if (!has_active_region)
-      continue;
-
-    intercepted_candidates.emplace_back(sub_id, ratio_active);
-    max_ratio = std::max(max_ratio, ratio_active);
+    const auto is_in_domain = [checker](const Point & point)
+    { return checker->sideness(point) != SurfaceGeometry::SurfaceSide::OUTSIDE; };
+    candidate_occupancies.push_back(
+        {subdomain_id, SBMUtils::elementDomainOccupancy(*elem, _qrule_order, is_in_domain)});
   }
 
-  if (fully_inside_subdomain)
-    return *fully_inside_subdomain;
+  // Select the subdomain ID based on the measured occupancies and the intercepted-subdomain policy.
+  const auto subdomain = SBMUtils::selectSubdomainFromOccupancies(
+      candidate_occupancies, _intercepted_subdomain_policy, _lambda);
 
-  // Iteration order is deterministic (subdomainCheckers() is id-ordered), but fuzzy-equal ratios
-  // can still tie. Compare every candidate against the fixed exact maximum, then resolve fuzzy
-  // ties by the lowest subdomain ID.
-  for (const auto & [sub_id, ratio_active] : intercepted_candidates)
-    if (MooseUtils::absoluteFuzzyEqual(ratio_active, max_ratio) &&
-        (!best_intercepted_subdomain || sub_id < *best_intercepted_subdomain))
-      best_intercepted_subdomain = sub_id;
-
-  // If the element is outside all checked subdomains, leave its current subdomain unchanged by
-  // returning Moose::INVALID_BLOCK_ID.
-  if (!best_intercepted_subdomain)
-    return Moose::INVALID_BLOCK_ID;
-
-  if (_mark_intercepted)
-    return _subdomain_id_intercepted;
-
-  return SBMUtils::isInactive(max_ratio, _lambda) ? Moose::INVALID_BLOCK_ID
-                                                  : *best_intercepted_subdomain;
+  // INVALID_BLOCK_ID tells ElementSubdomainModifier to retain the current subdomain.
+  return subdomain.value_or(Moose::INVALID_BLOCK_ID);
 }
