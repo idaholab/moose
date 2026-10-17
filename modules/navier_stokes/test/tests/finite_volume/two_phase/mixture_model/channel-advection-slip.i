@@ -153,8 +153,8 @@ velocity_interp_method = 'rc'
   [phase_2_advection]
     type = INSFVScalarFieldAdvection
     variable = phase_2
-    u_slip = 'vel_slip_x'
-    v_slip = 'vel_slip_y'
+    u_slip = 'vel_drift_x'
+    v_slip = 'vel_drift_y'
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = 'upwind'
   []
@@ -250,11 +250,14 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
     u = 'vel_x'
     v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
+    rho = 'rho_mixture'
+    mu = ${mu}
     rho_d = ${rho_d}
     particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
+    use_dispersed_phase_drag_model = true
+    rho_c = ${rho}
+    fd = 'phase_2'
+    drift_velocity_name = 'vel_drift_x'
     outputs = 'out'
     output_properties = 'vel_slip_x'
   []
@@ -264,20 +267,23 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
     u = 'vel_x'
     v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
+    rho = 'rho_mixture'
+    mu = ${mu}
     rho_d = ${rho_d}
     particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
+    use_dispersed_phase_drag_model = true
+    rho_c = ${rho}
+    fd = 'phase_2'
+    drift_velocity_name = 'vel_drift_y'
     outputs = 'out'
     output_properties = 'vel_slip_y'
   []
   [CD]
     type = NSFVDispersePhaseDragFunctorMaterial
-    rho = 'rho_mixture'
-    mu = mu_mixture
-    u = 'vel_x'
-    v = 'vel_y'
+    rho = ${rho}
+    mu = ${mu}
+    u = 'vel_slip_x'
+    v = 'vel_slip_y'
     particle_diameter = ${dp}
   []
   [mixing_material]

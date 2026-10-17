@@ -85,8 +85,6 @@ k_d = 1
         # Drift flux parameters
         add_drift_flux_momentum_terms = true
         density_interp_method = 'average'
-        # This has to be consistent with the friction model
-        slip_linear_friction_name = 'Darcy_coefficient'
 
         # Base phase material properties
         phase_1_density_name = ${rho}
@@ -94,7 +92,8 @@ k_d = 1
         phase_1_specific_heat_name = ${cp}
         phase_1_thermal_conductivity_name = ${k}
 
-        # Not used because the 'slip_linear_friction_name' is set
+        # The drag is solved inside the slip closure; the drag material this also creates feeds
+        # the Darcy friction of the momentum equation above
         use_dispersed_phase_drag_model = true
         particle_diameter = ${dp}
 

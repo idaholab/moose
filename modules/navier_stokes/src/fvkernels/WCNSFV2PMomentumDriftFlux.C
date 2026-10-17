@@ -20,11 +20,15 @@ InputParameters
 WCNSFV2PMomentumDriftFlux::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
-  params.addClassDescription("Implements the drift momentum flux source.");
+  params.addClassDescription(
+      "Implements the diffusion (drift) stress of the two-phase mixture model, "
+      "div(beta_d beta_c / rho_m * u_slip (x) u_slip), on the left hand side of the mixture "
+      "momentum equation.");
   params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
+  params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
 
   params.renameParam("fd", "fraction_dispersed", "");
@@ -41,6 +45,7 @@ WCNSFV2PMomentumDriftFlux::WCNSFV2PMomentumDriftFlux(const InputParameters & par
   : INSFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _rho_d(getFunctor<ADReal>("rho_d")),
+    _rho_c(getFunctor<ADReal>("rho_c")),
     _f_d(getFunctor<ADReal>("fd")),
     _u_slip(getFunctor<ADReal>("u_slip")),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
@@ -84,16 +89,22 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 
   const auto uslipdotn = _normal * u_slip_vel_vec;
 
-  ADReal face_rho_fd;
+  // The exact diffusion stress coefficient, beta_d beta_c / rho_m, evaluated on the face. It
+  // vanishes wherever either phase is absent and the harmonic mean is not defined there, so those
+  // faces fall back to the arithmetic average.
+  ADReal face_coefficient;
   if (onBoundary(*_face_info))
-    face_rho_fd = _rho_d(makeCDFace(*_face_info), state) * _f_d(makeCDFace(*_face_info), state);
+    face_coefficient = diffusionStressCoefficient(makeCDFace(*_face_info), state);
   else
-    Moose::FV::interpolate(_density_interp_method,
-                           face_rho_fd,
-                           _rho_d(elemArg(), state) * _f_d(elemArg(), state),
-                           _rho_d(neighborArg(), state) * _f_d(neighborArg(), state),
-                           *_face_info,
-                           true);
+  {
+    const auto elem_coefficient = diffusionStressCoefficient(elemArg(), state);
+    const auto neighbor_coefficient = diffusionStressCoefficient(neighborArg(), state);
+    const auto interp_method = (elem_coefficient > 0.0 && neighbor_coefficient > 0.0)
+                                   ? _density_interp_method
+                                   : Moose::FV::InterpMethod::Average;
+    Moose::FV::interpolate(
+        interp_method, face_coefficient, elem_coefficient, neighbor_coefficient, *_face_info, true);
+  }
 
   if (populate_a_coeffs)
   {
@@ -107,7 +118,7 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
         _ae = (uslipdotn * (*_v_slip)(elemArg(), state)).derivatives()[dof_number];
       else
         _ae = (uslipdotn * (*_w_slip)(elemArg(), state)).derivatives()[dof_number];
-      _ae *= -face_rho_fd;
+      _ae *= face_coefficient;
     }
     if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
@@ -119,11 +130,13 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
         _an = (uslipdotn * (*_v_slip)(neighborArg(), state)).derivatives()[dof_number];
       else
         _an = (uslipdotn * (*_w_slip)(neighborArg(), state)).derivatives()[dof_number];
-      _an *= face_rho_fd;
+      _an *= -face_coefficient;
     }
   }
 
-  return -face_rho_fd * uslipdotn * u_slip_vel_vec(_index);
+  // Summing the phase momentum equations puts +div(sum_k a_k rho_k u_Mk u_Mk) on the left hand
+  // side, hence the positive sign
+  return face_coefficient * uslipdotn * u_slip_vel_vec(_index);
 }
 
 void
