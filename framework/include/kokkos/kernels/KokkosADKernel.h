@@ -127,12 +127,17 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+
   for (unsigned int i = datum.local_thread_id(); i < datum.n_dofs(); i += datum.num_local_threads())
   {
     ADReal local_re = 0;
 
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
       local_re += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
+
+    local_re *= scaling_factor;
 
     if (_computing_residual)
       accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i);
