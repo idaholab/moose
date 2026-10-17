@@ -46,8 +46,14 @@ GrainForceAndTorqueSum::initialize()
     _torque_values[i] = 0.0;
     for (unsigned int j = 0; j < _num_forces; ++j)
     {
-      _force_values[i] += (_sum_forces[j]->getForceValues())[i];
-      _torque_values[i] += (_sum_forces[j]->getTorqueValues())[i];
+      const auto & force_values = _sum_forces[j]->getForceValues();
+      const auto & torque_values = _sum_forces[j]->getTorqueValues();
+
+      if (force_values.size() != _grain_num || torque_values.size() != _grain_num)
+        continue;
+
+      _force_values[i] += force_values[i];
+      _torque_values[i] += torque_values[i];
     }
   }
 
@@ -59,14 +65,23 @@ GrainForceAndTorqueSum::initialize()
 
     for (unsigned int i = 0; i < _c_jacobians.size(); ++i)
       for (unsigned int j = 0; j < _num_forces; ++j)
-        _c_jacobians[i] += (_sum_forces[j]->getForceCJacobians())[i];
+      {
+        const auto & c_jacobians = _sum_forces[j]->getForceCJacobians();
+        if (c_jacobians.size() == _c_jacobians.size())
+          _c_jacobians[i] += c_jacobians[i];
+      }
 
     for (unsigned int i = 0; i < _grain_num; ++i)
     {
       _eta_jacobians[i].resize(6 * _grain_num * total_dofs, 0.0);
       for (unsigned int j = 0; j < _eta_jacobians[i].size(); ++j)
         for (unsigned int k = 0; k < _num_forces; ++k)
-          _eta_jacobians[i][j] += (_sum_forces[k]->getForceEtaJacobians())[i][j];
+        {
+          const auto & eta_jacobians = _sum_forces[k]->getForceEtaJacobians();
+          if (eta_jacobians.size() == _grain_num &&
+              eta_jacobians[i].size() == _eta_jacobians[i].size())
+            _eta_jacobians[i][j] += eta_jacobians[i][j];
+        }
     }
   }
 }
