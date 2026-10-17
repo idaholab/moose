@@ -161,6 +161,27 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
         for (const auto & pmuo : pmuos)
           pmuo->augmentedLagrangianSetup();
 
+        // Recompute the residual with the updated multipliers so the next Newton step and line
+        // search use it. PETSc's Newton line search solver takes the residual norm from this
+        // vector at the start of each iteration.
+        SNES snes = nonlinear_sys.getSNES();
+        Vec x, f;
+        LibmeshPetscCallA(this->_communicator.get(), SNESGetSolution(snes, &x));
+        LibmeshPetscCallA(this->_communicator.get(), SNESGetFunction(snes, &f, nullptr, nullptr));
+        LibmeshPetscCallA(this->_communicator.get(), SNESComputeFunction(snes, x, f));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
+        PetscBool domainerror;
+        LibmeshPetscCallA(this->_communicator.get(),
+                          SNESGetFunctionDomainError(snes, &domainerror));
+        if (domainerror)
+          return Convergence::MooseConvergenceStatus::DIVERGED;
+#else
+        SNESConvergedReason snes_reason;
+        LibmeshPetscCallA(this->_communicator.get(), SNESGetConvergedReason(snes, &snes_reason));
+        if (snes_reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+          return Convergence::MooseConvergenceStatus::DIVERGED;
+#endif
+
         // force it to keep iterating
         reason = Convergence::MooseConvergenceStatus::ITERATING;
         Moose::out << "Augmented Lagrangian Multiplier needs updating.";
