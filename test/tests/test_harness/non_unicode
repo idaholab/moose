@@ -1,6 +1,6 @@
 [Tests]
   [non_unicode]
     type = RunCommand
-    command = "printf 'before\xff\xfeafter\n'"
+    command = "printf 'before\377\376after\n'"
   []
 []
