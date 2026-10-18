@@ -44,8 +44,6 @@ SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   Registry::registerObjectsTo(f, {"SolidPropertiesApp"});
   Registry::registerActionsTo(af, {"SolidPropertiesApp"});
 
-  registerSyntaxTask(
-      "AddSolidPropertiesDeprecatedAction", "Modules/SolidProperties/*", "add_solid_properties");
   registerSyntaxTask("AddSolidPropertiesAction", "SolidProperties/*", "add_solid_properties");
   registerMooseObjectTask("add_solid_properties", SolidProperties, false);
 
