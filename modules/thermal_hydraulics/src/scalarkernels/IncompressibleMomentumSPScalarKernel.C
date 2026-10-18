@@ -34,7 +34,8 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 template <bool is_ad>
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::IncompressibleMomentumSPScalarKernelTempl(
     const InputParameters & parameters)
-  : Base(parameters), _dPc(ScalarCoupleable::coupledScalarValue("reference_pressure_drop"))
+  : Base(parameters),
+    _dPc(ScalarCoupleable::coupledGenericScalarValue<is_ad>("reference_pressure_drop"))
 {
 }
 

@@ -834,6 +834,12 @@ protected:
   void computeJacobianInternal(const std::set<TagID> & tags);
 
   /**
+   * Set the PETSc options used for assembling the matrices of the given tags
+   * @param tags The matrix tags
+   */
+  void setMatrixOptions(const std::set<TagID> & tags);
+
+  /**
    * Compute Jacobian with Kokkos objects
    */
 #ifdef MOOSE_KOKKOS_ENABLED

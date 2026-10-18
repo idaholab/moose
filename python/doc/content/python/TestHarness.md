@@ -68,8 +68,10 @@ through, but some of the important ones are:
     the object was run on. See
     [!file text=Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
     example.
-  - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
-    in the command line arguments (`cli_args`).
+
+  `Executioner/abort_on_solve_fail=true` does not prevent restep testing: the
+  forcefully failed timestep is still retried, while any other failed solve
+  still aborts the simulation.
 
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
 - `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems

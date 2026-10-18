@@ -41,7 +41,7 @@ protected:
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables
-  std::vector<const VariableValue *> _T;
+  std::vector<const GenericVariableValue<is_ad> *> _T;
   /// Property state integration flag
   const bool _is_implicit;
   /// System reference pressure
