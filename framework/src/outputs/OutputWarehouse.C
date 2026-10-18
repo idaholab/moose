@@ -246,6 +246,14 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
 
     _last_message_ended_in_newline = this_message_ends_in_newline;
   }
+  else if (_app.actionWarehouse().hasTask("add_output") &&
+           _app.actionWarehouse().isTaskComplete("add_output"))
+  {
+    // No Console exists and none can be added anymore (e.g. console = false): drop the message,
+    // otherwise the buffer grows without bound and every flush copies it
+    buffer.clear();
+    buffer.str("");
+  }
 
   _last_buffer = &buffer;
 
