@@ -98,7 +98,9 @@ class TestReadOutput(unittest.TestCase):
         self.assertIn("offset 6 of 14: invalid start byte: b'\\xff'", out)
         self.assertIn("offset 7 of 14: invalid start byte: b'\\xfe'", out)
         # The caveat names the stream, and the test is not failed
-        self.runner.job.addCaveats.assert_called_once_with("invalid UTF-8 in stdout")
+        self.runner.job.addCaveats.assert_called_once_with(
+            "invalid output characters in stdout"
+        )
         self.runner.job.setStatus.assert_not_called()
 
     def testInvalidOutputWithoutTrailingNewline(self):
