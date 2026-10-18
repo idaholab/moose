@@ -10,6 +10,17 @@
 # for a step change, the Vinsome-Westerveld profile itself gives I = (12/11) * theta * sqrt(kappa * t),
 # which is 3.3% smaller in magnitude than the exact value at all times.  The error depends only on
 # the number of time steps since the step change (t / dt), not on kappa or on the size of dt.
+#
+# Single time step, computed by hand (the vinsome_westerveld_one_step test runs this input file
+# with dt = 4E6 and num_steps = 1):
+#   theta = T - matrix_reference_temperature = 50 - 200 = -150,  theta_old = 0,  I_old = 0
+#   kappa = 1E-6,  t = dt = 4E6
+#   a = kappa * dt = 4
+#   d = sqrt(kappa * t) / 2 = 1
+#   p = (a * theta / d + I_old - d^3 * (theta - theta_old) / a) / (3 * d^2 + a)
+#     = (4 - 1/4) * theta / 7 = 15 * theta / 28 = -80.357142857
+#   I = I_old + a * (theta / d - p) = 4 * (theta - 15 * theta / 28) = 13 * theta / 7 = -278.57142857
+#   porosity = 0.1 - 1E-5 * I = 0.10278571429
 [GlobalParams]
   PorousFlowDictator = dictator
 []

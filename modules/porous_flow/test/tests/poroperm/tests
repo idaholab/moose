@@ -298,4 +298,31 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []
+  [vinsome_westerveld_one_step]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Executioner/dt=4E6 Executioner/num_steps=1 Outputs/file_base=vinsome_westerveld_one_step_out'
+    csvdiff = vinsome_westerveld_one_step_out.csv
+    requirement = 'The system shall calculate porosity using the Vinsome-Westerveld thermal-opening method in agreement with a hand calculation of a single time step.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_start_time]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Materials/porosity_VW/vw_start_time=1E7 Outputs/file_base=vinsome_westerveld_start_time_out'
+    csvdiff = vinsome_westerveld_start_time_out.csv
+    requirement = 'The system shall set the Vinsome-Westerveld thermal-opening term to zero before the user-specified start time, and treat the fracture-face temperature change at the start time as a step change.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_no_temperature]
+    type = RunException
+    input = vinsome_westerveld.i
+    cli_args = "Materials/active='ps porosity_VW'"
+    expect_err = 'a temperature Material is required'
+    requirement = 'The system shall produce an error if the Vinsome-Westerveld porosity is used without a temperature Material.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
 []

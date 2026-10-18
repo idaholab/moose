@@ -69,35 +69,22 @@ These values assume the fracture opening is not resisted by the in-situ stress, 
 
 - Heat conduction in the matrix is one-dimensional, normal to the fracture, and the matrix is semi-infinite.  The thermal diffusivity is the value in the direction normal to the fracture (or the matrix is assumed isotropic), and it is constant: it does not depend on temperature or saturation.
 - Only conductive heat transfer between the fracture and the matrix is considered.  Fluid flow between the fracture and the matrix is not included in the calculation of $I$.  When the cooled zones of neighbouring fractures overlap, $I$ will be overestimated in magnitude.
-- The matrix is at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time).  Before [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) the thermal-opening term is zero.  Because the diffusion length $d$ is measured from [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time), this should be the time at which the fracture-face temperature first starts to change (for instance, when injection begins), as in [!cite](vinsome1980).
+- The matrix is at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time).  Before [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) the thermal-opening term is zero, and any difference between the fracture-face temperature and [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) is treated as a step change at that time.  Because the diffusion length $d$ is measured from [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time), this should be the time at which the fracture-face temperature first starts to change (for instance, when injection begins), as in [!cite](vinsome1980).
 - The profile [eq:vw_profile] is an approximation.  In the example below, for a step change in the fracture-face temperature, the computed $I$ is $3.3\%$ smaller in magnitude than the exact value once the time step is small compared with the elapsed time, and the error is larger when the time step is comparable to the elapsed time (see below).
 - The heat lost by the matrix is not removed from the simulation by this Material: the thermal-opening term only modifies porosity.  The heat exchange between the fracture and the matrix is computed by the usual PorousFlow kernels.
 
 ## Verification
 
-A step change $\theta = -150\,$K in the fracture-face temperature at $t = 0$ has the exact solution $I = 2\theta\sqrt{\kappa t / \pi}$.  [vw_step_results] compares this with the Vinsome-Westerveld result for $\kappa = 10^{-6}\,$m$^{2}\,$s$^{-1}$, using ten time steps of $3.15\times 10^{6}\,$s (approximately one year in total).  For this step change, the error depends only on the number of time steps taken since the step, that is, on the elapsed time divided by the time step.  It does not depend on $\kappa$ or on the size of the time step itself: the error is $-17.7\%$ after one time step of any size, $-5.1\%$ after ten, and approaches $-3.3\%$ when many time steps are used.
+For a step change $\theta$ in the fracture-face temperature at $t = 0$, the exact matrix temperature is $T - T_{\mathrm{ref}} = \theta\,\mathrm{erfc}\left(z / 2\sqrt{\kappa t}\right)$, and integrating over $z$ gives $I(t) = \frac{2}{\sqrt{\pi}}\theta\sqrt{\kappa t}$.  The Vinsome-Westerveld equations can also be solved exactly in this case, if the time step is infinitesimally small.  Writing $p = \alpha\theta/d$ and $q = \beta\theta/d^{2}$, the heat-conduction equation at $z = 0$ (where $\partial T/\partial t = 0$ because $\theta$ is constant) gives $1 - 2\alpha + 2\beta = 0$, so $I = 3\alpha\theta d$.  The energy balance $\mathrm{d}I/\mathrm{d}t = \kappa(\theta/d - p)$, with $d = \sqrt{\kappa t}/2$, then gives $\alpha = 8/11$ and $I(t) = \frac{12}{11}\theta\sqrt{\kappa t}$.  The ratio of the two is $6\sqrt{\pi}/11 = 0.967$, so the assumed profile underestimates the magnitude of $I$ by $3.3\%$ at all times.
 
-!table id=vw_step_results caption=Matrix heat content for a step change in the fracture-face temperature
-| Time (s) | Vinsome-Westerveld $I$ (K$\,$m) | Exact $I$ (K$\,$m) | Difference |
-| --- | --- | --- | --- |
-| $3.15\times 10^{6}$ | $-247.2$ | $-300.4$ | $-17.7\%$ |
-| $1.575\times 10^{7}$ | $-625.0$ | $-671.7$ | $-7.0\%$ |
-| $3.15\times 10^{7}$ | $-901.7$ | $-950.0$ | $-5.1\%$ |
+With a finite time step there is an additional error.  For a step change, this depends only on the number of time steps since the step ($t/\Delta t$), not on $\kappa$ or on the size of $\Delta t$, as shown in [vw_step_results].
 
+!table id=vw_step_results caption=Error in the matrix heat content for a step change in the fracture-face temperature
+| Number of time steps since the step | 1 | 10 | 20 | 40 | 100 | 1000 | 10000 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Error in $I$ | $-17.7\%$ | $-5.08\%$ | $-4.16\%$ | $-3.72\%$ | $-3.47\%$ | $-3.34\%$ | $-3.32\%$ |
 
-The part of the error that comes from the time discretisation decreases approximately linearly with the time step, as shown in [vw_dt_convergence].  The remaining $3.3\%$ is the error of the assumed profile [eq:vw_profile], not of the time discretisation.  For a step change, the continuous form of the method gives $I = \frac{12}{11}\theta\sqrt{\kappa t}$, compared with the exact $I = \frac{2}{\sqrt{\pi}}\theta\sqrt{\kappa t}$, so the ratio is $6\sqrt{\pi}/11 = 0.967$ at all times.
-
-!table id=vw_dt_convergence caption=Error in the matrix heat content at the end of the step-change test (t = 3.15E7 s) as the time step is reduced
-| Time step (s) | Vinsome-Westerveld $I$ (K$\,$m) | Difference from exact |
-| --- | --- | --- |
-| $3.15\times 10^{6}$ | $-901.7$ | $-5.08\%$ |
-| $1.575\times 10^{6}$ | $-910.4$ | $-4.16\%$ |
-| $7.875\times 10^{5}$ | $-914.6$ | $-3.72\%$ |
-| $3.15\times 10^{5}$ | $-916.9$ | $-3.47\%$ |
-| $3.15\times 10^{4}$ | $-918.3$ | $-3.34\%$ |
-| $3.15\times 10^{3}$ | $-918.4$ | $-3.32\%$ |
-
-The input file for this test is
+The input file for the step-change test ($\theta = -150\,$K, $\kappa = 10^{-6}\,$m$^{2}\,$s$^{-1}$) is
 
 !listing modules/porous_flow/test/tests/poroperm/vinsome_westerveld.i block=Materials/porosity_VW
 

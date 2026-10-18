@@ -101,13 +101,16 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
   Real dI_dT = 0.0;
 
   const Real time = _t - _start_time;
-  const Real a = _kappa * std::min(_dt, time);
   if (time <= 0.0)
+  {
+    // Before vw_start_time the matrix is undisturbed, so any difference between the fracture-face
+    // temperature and matrix_reference_temperature at vw_start_time is treated as a step change
+    _theta[_qp] = 0.0;
     _heat_content[_qp] = 0.0;
-  else if (a <= 0.0)
-    _heat_content[_qp] = _heat_content_old[_qp];
+  }
   else
   {
+    const Real a = _kappa * std::min(_dt, time);
     // Vinsome and Westerveld (1980): the profile is
     // (theta + p z + q z^2) exp(-z / d), with d = sqrt(kappa t) / 2.
     // Imposing the heat-conduction equation at z = 0 and the energy balance
