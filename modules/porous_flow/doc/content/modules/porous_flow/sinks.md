@@ -304,6 +304,38 @@ ensures superior numerical convergence.
 !alert note
 You should almost always set `use_mobility=true`.  The exceptions are when using the volumetric version of PorousFlow (when `multiply_by_density = false` appears in your input file) or in non-fluid simulations (`function_of = temperature`).
 
+#### Phase mobility and total mobility
+
+For fluid leaving the porespace, the mobility above is that of `fluid_phase` alone,
+$k_{\mathrm{r}}\rho/\mu$.  That is correct for a *production* well, whose stream carries whatever is
+mobile at the node.
+
+It is not correct for an *injection* well, and for gas injection it would be fatal.  The relative
+permeability of a phase is zero when none of that phase is present, so a gas injector completed in a
+block that is fully saturated with water would have a phase mobility of exactly zero, and since the
+mobility multiplies the flux, such a well would inject nothing at all.
+
+So for fluid entering the porespace, [`PorousFlowPeacemanBorehole`](PorousFlowPeacemanBorehole.md)
+weights the flux by the density of `fluid_phase` multiplied by the total mobility of all phases,
+
+\begin{equation}
+\rho_{\beta} \sum_{\beta'} \frac{k_{\mathrm{r}\beta'}}{\mu_{\beta'}} \ ,
+\end{equation}
+
+where $\beta$ is `fluid_phase`.  This is nonzero in a fully water-saturated block, so the injector starts flowing.
+The density remains that of `fluid_phase` because it is the injected fluid whose mass is being added.  This is the
+standard treatment of injecting well connections in reservoir simulators.  In a single-phase model the two
+mobilities are identical.
+
+The direction is decided at each point from the sign of its flux, so a borehole whose `character`
+changes sign (one that injects fluid and later produces it back) is weighted correctly in both
+directions.  Because the mobility already includes the relative permeability, `use_mobility = true`
+cannot be combined with `use_relative_permeability = true`.
+
+[`PorousFlowPolyLineSink`](PorousFlowPolyLineSink.md) does not switch to the total mobility when injecting, because its `fluxes`
+table is a mass rate per unit length rather than a conductance, so an injecting poly-line sink
+needs no mobility weighting at all.
+
 
 ### The character
 
