@@ -61,6 +61,8 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  # this input and ad_array_robin.i share a gold file, so both converge far below the CSVDiff
+  # relative tolerance of 5.5e-6 for their results to agree regardless of the solver path
   nl_rel_tol = 1e-12
 []
 

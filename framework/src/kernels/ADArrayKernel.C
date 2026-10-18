@@ -73,7 +73,7 @@ ADArrayKernel::computeResidual()
 }
 
 void
-ADArrayKernel::computeJacobian()
+ADArrayKernel::computeResidualsForJacobian()
 {
   _local_ad_re.resize(_test.size() * _count);
   for (auto & residual : _local_ad_re)
@@ -90,7 +90,20 @@ ADArrayKernel::computeJacobian()
       _assembly.saveLocalADArray(_local_ad_re, _i, _test.size(), _work_vector);
     }
   }
+}
 
+void
+ADArrayKernel::computeJacobian()
+{
+  computeResidualsForJacobian();
+  addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
+}
+
+void
+ADArrayKernel::computeResidualAndJacobian()
+{
+  computeResidualsForJacobian();
+  addResiduals(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
   addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
 }
 

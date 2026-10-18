@@ -28,6 +28,7 @@ public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeResidualAndJacobian() override;
   virtual void jacobianSetup() override;
 
   virtual const ArrayMooseVariable & variable() const override { return _var; }
@@ -73,6 +74,9 @@ protected:
   std::vector<ADReal> _local_ad_re;
 
 private:
+  /// Fill _local_ad_re with the AD residuals of all test functions on the current element
+  void computeResidualsForJacobian();
+
   /// Work vector for residual and diag jacobian
   ADRealEigenVector _work_vector;
 

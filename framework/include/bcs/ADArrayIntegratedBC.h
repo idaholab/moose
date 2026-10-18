@@ -32,6 +32,7 @@ public:
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  virtual void computeResidualAndJacobian() override;
 
 protected:
   /**
@@ -47,6 +48,15 @@ protected:
 
   /// The array variable this boundary condition acts on
   ArrayMooseVariable & _var;
+
+  /// Quadrature weights times the face Jacobian, with derivatives on a displaced mesh
+  const MooseArray<ADReal> & _ad_JxW;
+
+  /// Coordinate transformation factors, with derivatives on a displaced mesh
+  const MooseArray<ADReal> & _ad_coord;
+
+  /// Whether this boundary condition is evaluated on the displaced mesh
+  const bool _use_displaced_mesh;
 
   /// normals at quadrature points
   const MooseArray<ADPoint> & _normals;
@@ -67,6 +77,9 @@ protected:
   const unsigned int _count;
 
 private:
+  /// Fill _local_ad_re with the AD residuals of all test functions on the current face
+  void computeResidualsForJacobian();
+
   /// Work vector for the residual at a quadrature point
   ADRealEigenVector _work_vector;
 

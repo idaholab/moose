@@ -32,6 +32,9 @@ ADArrayIntegratedBC::ADArrayIntegratedBC(const InputParameters & parameters)
                                             Moose::VarFieldType::VAR_FIELD_ARRAY),
     ADFunctorInterface(this),
     _var(*mooseVariable()),
+    _ad_JxW(_assembly.adJxWFace()),
+    _ad_coord(_assembly.adCoordTransformation()),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _normals(_assembly.adNormals()),
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
@@ -53,11 +56,14 @@ ADArrayIntegratedBC::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  // computeQpResidual() reads the current quadrature point and test function from _qp and _i
+  for (const auto qp : make_range(_qrule->n_points()))
   {
+    _qp = qp;
     initQpResidual();
-    for (_i = 0; _i < _test.size(); _i++)
+    for (const auto i : index_range(_test))
     {
+      _i = i;
       _work_vector.setZero();
       computeQpResidual(_work_vector);
       auto raw_work_vector = MetaPhysicL::raw_value(_work_vector);
@@ -70,25 +76,44 @@ ADArrayIntegratedBC::computeResidual()
 }
 
 void
-ADArrayIntegratedBC::computeJacobian()
+ADArrayIntegratedBC::computeResidualsForJacobian()
 {
   _local_ad_re.resize(_test.size() * _count);
   for (auto & residual : _local_ad_re)
     residual = 0;
 
   precalculateJacobian();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (const auto qp : make_range(_qrule->n_points()))
   {
+    _qp = qp;
+    // on a displaced mesh the surface measure depends on the displacements, so its derivatives
+    // enter the Jacobian
+    const ADReal jxw_c = _use_displaced_mesh ? ADReal(_ad_JxW[_qp] * _ad_coord[_qp])
+                                             : ADReal(_JxW[_qp] * _coord[_qp]);
     initQpResidual();
-    for (_i = 0; _i < _test.size(); _i++)
+    for (const auto i : index_range(_test))
     {
+      _i = i;
       _work_vector.setZero();
       computeQpResidual(_work_vector);
-      _work_vector *= _JxW[_qp] * _coord[_qp];
+      _work_vector *= jxw_c;
       _assembly.saveLocalADArray(_local_ad_re, _i, _test.size(), _work_vector);
     }
   }
+}
 
+void
+ADArrayIntegratedBC::computeJacobian()
+{
+  computeResidualsForJacobian();
+  addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
+}
+
+void
+ADArrayIntegratedBC::computeResidualAndJacobian()
+{
+  computeResidualsForJacobian();
+  addResiduals(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
   addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
 }
 

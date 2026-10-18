@@ -14,14 +14,35 @@
       input = 'ad_array_robin.i'
       csvdiff = 'robin_out.csv'
       prereq = 'ad_array_integrated_bc/reference'
-      detail = 'for a Robin condition on every component, and'
+      detail = 'for a Robin condition on every component,'
     []
     [jacobian]
       type = PetscJacobianTester
       input = 'ad_array_robin.i'
       cli_args = 'Outputs/csv=false'
       run_sim = true
-      detail = 'with an exact Jacobian.'
+      detail = 'with an exact Jacobian,'
+    []
+    [together]
+      type = CSVDiff
+      input = 'ad_array_robin.i'
+      csvdiff = 'robin_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'ad_array_integrated_bc/robin'
+      detail = 'when the residual and Jacobian are computed together,'
+    []
+    [together_jacobian]
+      type = PetscJacobianTester
+      input = 'ad_array_robin.i'
+      cli_args = 'Outputs/csv=false Executioner/residual_and_jacobian_together=true'
+      run_sim = true
+      detail = 'with an exact Jacobian when computed together with the residual, and'
+    []
+    [displaced]
+      type = PetscJacobianTester
+      input = 'ad_array_robin_displaced.i'
+      run_sim = true
+      detail = 'with an exact Jacobian including the derivatives of the face measure on a displaced mesh.'
     []
   []
   [errors]
