@@ -53,8 +53,37 @@ The derivatives of the properties are computed by forward-mode automatic differe
 expressions above, so they are exact.
 
 This class provides the properties from pressure and temperature, from temperature and specific
-volume, and the internal energy from pressure and density. It does not provide viscosity or
-thermal conductivity.
+volume, from specific volume and internal energy, and from pressure and enthalpy, as well as the
+pressure from enthalpy and entropy and the internal energy from pressure and density and from
+specific volume and enthalpy. It does not provide viscosity or thermal conductivity.
+
+## Temperature from internal energy or enthalpy
+
+The properties from specific volume and internal energy, and those from enthalpy, require the
+temperature at which the internal energy or the enthalpy takes a given value. The temperature is
+found with the 1D Newton solver of the [fluid properties utilities](utils/FluidPropertiesUtils.md),
+whose relative tolerance and maximum number of iterations are set with
+[!param](/FluidProperties/NASA7IdealGasFluidProperties/tolerance) and
+[!param](/FluidProperties/NASA7IdealGasFluidProperties/max_newton_its). Two choices make this
+inversion robust:
+
+- The iteration starts at the upper end of the temperature range of the data, and
+  [!param](/FluidProperties/NASA7IdealGasFluidProperties/T_initial_guess) is not used. The
+  internal energy and the enthalpy are convex functions of temperature over nearly all of that
+  range, because the heat capacity increases with temperature, so the iterates approach the
+  solution from above. An iteration started below the solution can overshoot far beyond the
+  range, where the extrapolated polynomials eventually make the energy decrease with temperature
+  and produce a second, spurious solution. For the built-in species, the solution is found up to
+  at least 1.7 times the upper end of the range.
+- The internal energy and the enthalpy include the enthalpy of formation, so they can be zero:
+  the internal energy of N$_2$, for example, vanishes near 417 K. The Newton solver tests
+  convergence relative to the target value, which close to zero would demand accuracy below
+  roundoff. The equation is therefore offset by a constant that makes both of its sides close to
+  $c_v T$ (or $c_p T$), which turns the test into one on the relative error in temperature.
+
+At the midpoint temperature of the data, where the two polynomials do not match exactly, the same
+internal energy or enthalpy is also reached slightly above the midpoint temperature, by less than
+$3 \times 10^{-4}$ K for the built-in species. The inversion may return either temperature.
 
 ## Temperature range
 
