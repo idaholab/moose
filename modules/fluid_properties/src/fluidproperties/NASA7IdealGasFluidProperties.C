@@ -206,6 +206,153 @@ NASA7IdealGasFluidProperties::e_from_p_rho_template(const CppType & p, const Cpp
   return e_from_T(p / (rho * _R_specific));
 }
 
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::T_from_energy(const CppType & y, const Real k) const
+{
+  // Start at the upper end of the temperature range of the data. y(T) is convex over nearly all of
+  // that range, because the heat capacity increases with temperature, so Newton's method started
+  // above the solution approaches it from above. Started below it, the first step can overshoot
+  // far beyond the range, where the extrapolated polynomials eventually give dy/dT <= 0 and a
+  // second, spurious solution. For the built-in species, this start finds the solution up to at
+  // least 1.7 T_max.
+  const Real T0 = _data.T_max;
+
+  // The energies include the enthalpy of formation, so they can be close to zero, where the
+  // convergence test of NewtonSolve, which is relative to the target value, would demand accuracy
+  // below roundoff. Solve y(T) + shift = y + shift instead, with the shift (dy/dT) T - y(T) at T0.
+  // Both sides are then close to (dy/dT) T, and the convergence test bounds the relative error in
+  // temperature.
+  const Real shift = _R_specific * T0 * (NASA7::cpOverR(_data, T0) - NASA7::hOverRT(_data, T0));
+
+  const auto shifted_y = [this, k, shift](const CppType & /*y*/,
+                                          const CppType & T,
+                                          CppType & y_T,
+                                          CppType & dy_T_dy,
+                                          CppType & dy_T_dT)
+  {
+    y_T = _R_specific * T * (NASA7::hOverRT(_data, T) - k) + shift;
+    dy_T_dy = 0;
+    dy_T_dT = _R_specific * (NASA7::cpOverR(_data, T) - k);
+  };
+
+  const CppType target = y + shift;
+  return FluidPropertiesUtils::NewtonSolve(y,
+                                           target,
+                                           T0,
+                                           _tolerance,
+                                           shifted_y,
+                                           name() + "::T_from_energy",
+                                           _max_newton_its,
+                                           _verbose_newton)
+      .first;
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::T_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  const auto T = T_from_energy(e, 1);
+  checkTemperature(T);
+  return T;
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::p_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  const auto T = T_from_energy(e, 1);
+  checkTemperature(T);
+  return _R_specific * T / v;
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::c_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  using std::sqrt;
+  const auto T = T_from_energy(e, 1);
+  return sqrt(gamma_from_T(T) * _R_specific * T);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::cp_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  return cp_from_T(T_from_energy(e, 1));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::cv_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  return cv_from_T(T_from_energy(e, 1));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::gamma_from_v_e_template(const CppType & /*v*/,
+                                                      const CppType & e) const
+{
+  return gamma_from_T(T_from_energy(e, 1));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::s_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  return s_from_T_v_template(T_from_energy(e, 1), v);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::g_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  using std::log;
+  const auto T = T_from_energy(e, 1);
+  checkTemperature(T);
+  const auto p = _R_specific * T / v;
+  // g = h - T s
+  return _R_specific * T *
+         (NASA7::hOverRT(_data, T) - NASA7::sOverR(_data, T) + log(p / NASA7::reference_pressure));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::T_from_p_h_template(const CppType & /*p*/, const CppType & h) const
+{
+  const auto T = T_from_energy(h, 0);
+  checkTemperature(T);
+  return T;
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::s_from_h_p_template(const CppType & h, const CppType & p) const
+{
+  return s_from_p_T_template(p, T_from_energy(h, 0));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::p_from_h_s_template(const CppType & h, const CppType & s) const
+{
+  using std::exp;
+  const auto T = T_from_energy(h, 0);
+  checkTemperature(T);
+  // Inverse of s = R_s (s0/R - ln(p / p_ref))
+  return NASA7::reference_pressure * exp(NASA7::sOverR(_data, T) - s / _R_specific);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::e_from_v_h_template(const CppType & /*v*/, const CppType & h) const
+{
+  const auto T = T_from_energy(h, 0);
+  checkTemperature(T);
+  return h - _R_specific * T;
+}
+
 /**
  * Defines the value and derivative methods of a property, for Real and AD arguments, from the
  * value template of the property. The derivatives come from forward-mode dual numbers.
@@ -266,6 +413,18 @@ definePropertyFromTemplate(h, T, v)
 definePropertyFromTemplate(s, T, v)
 definePropertyFromTemplate(cv, T, v)
 definePropertyFromTemplate(e, p, rho)
+definePropertyFromTemplate(T, v, e)
+definePropertyFromTemplate(p, v, e)
+definePropertyFromTemplate(c, v, e)
+definePropertyFromTemplate(cp, v, e)
+definePropertyFromTemplate(cv, v, e)
+definePropertyFromTemplate(gamma, v, e)
+definePropertyFromTemplate(s, v, e)
+definePropertyFromTemplate(g, v, e)
+definePropertyFromTemplate(T, p, h)
+definePropertyFromTemplate(s, h, p)
+definePropertyFromTemplate(p, h, s)
+definePropertyFromTemplate(e, v, h)
 // clang-format on
 
 #undef definePropertyFromTemplate

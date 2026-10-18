@@ -18,8 +18,9 @@ public:
   NASA7IdealGasFluidPropertiesTest();
 
 protected:
-  /// Builds the fluid properties object of a species, named after the species
-  const NASA7IdealGasFluidProperties & buildFluidProperties(const std::string & species);
+  /// Builds a fluid properties object for a species
+  const NASA7IdealGasFluidProperties & buildFluidProperties(const std::string & species,
+                                                            const std::string & name);
 
   const NASA7IdealGasFluidProperties * _fp_h2o;
   const NASA7IdealGasFluidProperties * _fp_n2;
@@ -27,16 +28,17 @@ protected:
 
 inline NASA7IdealGasFluidPropertiesTest::NASA7IdealGasFluidPropertiesTest()
   : MooseObjectUnitTest("FluidPropertiesApp"),
-    _fp_h2o(&buildFluidProperties("H2O")),
-    _fp_n2(&buildFluidProperties("N2"))
+    _fp_h2o(&buildFluidProperties("H2O", "h2o")),
+    _fp_n2(&buildFluidProperties("N2", "n2"))
 {
 }
 
 inline const NASA7IdealGasFluidProperties &
-NASA7IdealGasFluidPropertiesTest::buildFluidProperties(const std::string & species)
+NASA7IdealGasFluidPropertiesTest::buildFluidProperties(const std::string & species,
+                                                       const std::string & name)
 {
   InputParameters params = _factory.getValidParams("NASA7IdealGasFluidProperties");
   params.set<MooseEnum>("species") = species;
-  _fe_problem->addUserObject("NASA7IdealGasFluidProperties", species, params);
-  return _fe_problem->getUserObject<NASA7IdealGasFluidProperties>(species);
+  _fe_problem->addUserObject("NASA7IdealGasFluidProperties", name, params);
+  return _fe_problem->getUserObject<NASA7IdealGasFluidProperties>(name);
 }

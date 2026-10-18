@@ -217,8 +217,155 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, outOfRange)
   _fp_h2o->cp_from_p_T(p, 3600);
   EXPECT_EQ(flagCount(*_app, true), warnings + 2);
 
+  // A temperature found by inverting the internal energy is checked once
+  const Real e = _fp_n2->e_from_p_T(p, 250);
+  const auto warnings_before_inversion = flagCount(*_app, true);
+  REL_TEST(_fp_n2->T_from_v_e(1, e), 250, REL_TOL_CONSISTENCY);
+  EXPECT_EQ(flagCount(*_app, true), warnings_before_inversion + 1);
+
   // A non-positive temperature is an invalid solution
   const auto errors = flagCount(*_app, false);
   _fp_n2->e_from_p_T(p, -10);
   EXPECT_EQ(flagCount(*_app, false), errors + 1);
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, inverses)
+{
+  for (const auto * fp : {_fp_h2o, _fp_n2})
+  {
+    // States on each side of the midpoint temperature
+    for (const auto & [p, T] :
+         {std::pair<Real, Real>(1e5, 600.0), std::pair<Real, Real>(3e6, 1500.0)})
+    {
+      const Real v = fp->v_from_p_T(p, T);
+      const Real e = fp->e_from_p_T(p, T);
+      const Real h = fp->h_from_p_T(p, T);
+      const Real s = fp->s_from_p_T(p, T);
+
+      REL_TEST(fp->T_from_v_e(v, e), T, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->p_from_v_e(v, e), p, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->c_from_v_e(v, e), fp->c_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      REL_TEST(fp->cp_from_v_e(v, e), fp->cp_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      REL_TEST(fp->cv_from_v_e(v, e), fp->cv_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      REL_TEST(fp->gamma_from_v_e(v, e), fp->gamma_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      REL_TEST(fp->s_from_v_e(v, e), s, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->g_from_v_e(v, e), h - T * s, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->s_from_h_p(h, p), s, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->p_from_h_s(h, s), p, REL_TOL_CONSISTENCY);
+      REL_TEST(fp->e_from_v_h(v, h), e, REL_TOL_CONSISTENCY);
+
+      // (ds/dv)_e = p/T, (ds/de)_v = 1/T, (dp/dh)_s = rho, and (dp/ds)_h = -rho T
+      Real value, d_d1, d_d2;
+      fp->s_from_v_e(v, e, value, d_d1, d_d2);
+      REL_TEST(d_d1, p / T, REL_TOL_CONSISTENCY);
+      REL_TEST(d_d2, 1 / T, REL_TOL_CONSISTENCY);
+      fp->p_from_h_s(h, s, value, d_d1, d_d2);
+      REL_TEST(d_d1, 1 / v, REL_TOL_CONSISTENCY);
+      REL_TEST(d_d2, -T / v, REL_TOL_CONSISTENCY);
+    }
+
+    // At the midpoint temperature the two polynomials do not match exactly, and the internal
+    // energy and enthalpy of the low-temperature polynomial are also reached by the
+    // high-temperature polynomial slightly above it, less than 3e-4 K for the built-in species. The
+    // inversion may return either temperature.
+    const Real p = 2e5;
+    const Real T_mid = 1000;
+    const Real v = fp->v_from_p_T(p, T_mid);
+    ABS_TEST(fp->T_from_v_e(v, fp->e_from_p_T(p, T_mid)), T_mid, 1e-3);
+    ABS_TEST(fp->T_from_p_h(p, fp->h_from_p_T(p, T_mid)), T_mid, 1e-3);
+  }
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, energyNearZero)
+{
+  // The internal energy of N2 includes its enthalpy of formation, zero, and it passes through zero
+  // near 417 K. A convergence test relative to the target energy would demand accuracy below
+  // roundoff there.
+  const Real v = 1;
+  for (const Real e : {-1e-3, 0.0, 1e-3})
+  {
+    const Real T = _fp_n2->T_from_v_e(v, e);
+    ABS_TEST(_fp_n2->e_from_T_v(T, v), e, REL_TOL_CONSISTENCY * _fp_n2->cv_from_T_v(T, v) * T);
+  }
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, inverseDerivatives)
+{
+  // One state on each side of the midpoint temperature
+  for (const auto & [fp, T] : {std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_h2o, 700),
+                               std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_n2, 1500)})
+  {
+    const Real p = 2e5;
+    const Real v = fp->v_from_p_T(p, T);
+    const Real e = fp->e_from_p_T(p, T);
+    const Real h = fp->h_from_p_T(p, T);
+    const Real s = fp->s_from_p_T(p, T);
+
+    DERIV_TEST(fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->p_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->c_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->cv_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->gamma_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->g_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->T_from_p_h, p, h, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
+
+    const ADReal p_ad = p;
+    const ADReal v_ad = v;
+    const ADReal e_ad = e;
+    const ADReal h_ad = h;
+    const ADReal s_ad = s;
+
+    AD_DERIV_TEST(fp->T_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->p_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->c_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->cp_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->cv_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->gamma_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->s_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->g_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->T_from_p_h, p_ad, h_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->s_from_h_p, h_ad, p_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->p_from_h_s, h_ad, s_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->e_from_v_h, v_ad, h_ad, REL_TOL_DERIVATIVE);
+
+    // The AD overloads carry the derivatives of their arguments: (dT/de)_v = 1/cv
+    DNDerivativeType de_de;
+    Moose::derivInsert(de_de, 0, 1);
+    const ADReal e_seeded(e, de_de);
+    REL_TEST(fp->T_from_v_e(v_ad, e_seeded).derivatives()[0],
+             1 / fp->cv_from_p_T(p, T),
+             REL_TOL_CONSISTENCY);
+  }
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, inverseRange)
+{
+  // Invert the internal energy and enthalpy of every built-in species at temperatures spread
+  // geometrically from half the lower end of the range of its data to 1.5 times the upper end,
+  // so that the inversion is exercised far from any initial guess and in extrapolation
+  // The internal energy and enthalpy of an ideal gas do not depend on pressure or specific volume
+  const Real p = 1e5;
+  const Real v = 1;
+  // 60 geometric intervals place consecutive temperatures about 7% apart
+  const unsigned int n = 60;
+  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  {
+    const std::string name = "sweep_" + species;
+    const auto & fp = buildFluidProperties(species, name);
+    const auto & data = NASA7::speciesData(species);
+    const Real T_low = data.T_min / 2;
+    const Real T_high = 1.5 * data.T_max;
+    for (const auto i : make_range(n + 1))
+    {
+      const Real T = T_low * std::pow(T_high / T_low, Real(i) / n);
+      REL_TEST(fp.T_from_v_e(v, fp.e_from_T_v(T, v)), T, REL_TOL_CONSISTENCY);
+      REL_TEST(fp.T_from_p_h(p, fp.h_from_p_T(p, T)), T, REL_TOL_CONSISTENCY);
+    }
+  }
 }

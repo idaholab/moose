@@ -20,6 +20,26 @@
   [out_of_range]
     type = GoogleTest
     unit_test = NASA7IdealGasFluidPropertiesTest.outOfRange
-    requirement = 'The system shall extrapolate NASA 7-coefficient polynomials outside the temperature range of their data and count each such evaluation as a solution warning, and shall flag a non-positive temperature as an invalid solution.'
+    requirement = 'The system shall extrapolate NASA 7-coefficient polynomials outside the temperature range of their data and count each such evaluation, including the evaluation of a temperature found by inverting the internal energy, as a solution warning, and shall flag a non-positive temperature as an invalid solution.'
+  []
+  [inverses]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverses
+    requirement = 'The system shall compute the temperature of an ideal gas from NASA 7-coefficient polynomials from its specific volume and internal energy and from its pressure and enthalpy by Newton iteration, together with the properties that depend on these variable sets, consistently with the properties from pressure and temperature, and within the mismatch of the two polynomials at the temperature where they meet.'
+  []
+  [energy_near_zero]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.energyNearZero
+    requirement = 'The system shall compute the temperature of an ideal gas from NASA 7-coefficient polynomials whose specific internal energy, which includes the enthalpy of formation, is close to zero.'
+  []
+  [inverse_range]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverseRange
+    requirement = 'The system shall compute the temperature of each built-in NASA 7-coefficient ideal gas from its specific internal energy and from its specific enthalpy from half the lower end to 1.5 times the upper end of the temperature range of its data.'
+  []
+  [inverse_derivatives]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverseDerivatives
+    requirement = 'The system shall compute the derivatives of the properties of an ideal gas from NASA 7-coefficient polynomials from the (specific volume, internal energy), (pressure, enthalpy), (enthalpy, entropy), and (specific volume, enthalpy) variable sets, with real and automatic differentiation arguments, in agreement with finite differences.'
   []
 []

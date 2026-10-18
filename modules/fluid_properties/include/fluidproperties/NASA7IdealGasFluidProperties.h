@@ -42,6 +42,18 @@ public:
   propfuncWithDefinitionOverride(s, T, v);
   propfuncWithDefinitionOverride(cv, T, v);
   propfuncWithDefinitionOverride(e, p, rho);
+  propfuncWithDefinitionOverride(T, v, e);
+  propfuncWithDefinitionOverride(p, v, e);
+  propfuncWithDefinitionOverride(c, v, e);
+  propfuncWithDefinitionOverride(cp, v, e);
+  propfuncWithDefinitionOverride(cv, v, e);
+  propfuncWithDefinitionOverride(gamma, v, e);
+  propfuncWithDefinitionOverride(s, v, e);
+  propfuncWithDefinitionOverride(g, v, e);
+  propfuncWithDefinitionOverride(T, p, h);
+  propfuncWithDefinitionOverride(s, h, p);
+  propfuncWithDefinitionOverride(p, h, s);
+  propfuncWithDefinitionOverride(e, v, h);
 
   std::string fluidName() const override;
   Real molarMass() const override;
@@ -71,6 +83,13 @@ private:
   template <typename CppType>
   CppType gamma_from_T(const CppType & T) const;
   ///@}
+
+  /**
+   * Temperature at which R_s T (h/(RT) - k) equals y, by Newton's method: k = 1 for the specific
+   * internal energy and k = 0 for the specific enthalpy. The temperature range is not checked.
+   */
+  template <typename CppType>
+  CppType T_from_energy(const CppType & y, const Real k) const;
 };
 
 #pragma GCC diagnostic pop
