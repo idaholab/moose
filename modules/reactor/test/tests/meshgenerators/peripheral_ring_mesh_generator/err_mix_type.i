@@ -42,6 +42,7 @@
     stitch_boundaries_pairs = '10 10'
     parallel_type = 'replicated'
     prevent_boundary_ids_overlap = false
+    require_boundaries_fully_stitch = false # testing for other error
   []
   [pr]
     type = PeripheralRingMeshGenerator
