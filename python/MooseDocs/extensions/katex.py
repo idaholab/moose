@@ -77,7 +77,10 @@ class KatexExtension(command.CommandExtension):
     def postTokenize(self, page, ast):
         labels = dict()
         count = 0
-        func = lambda n: (n.name == "Equation") and (n["label"] is not None)
+
+        def func(n):
+            return (n.name == "Equation") and (n["label"] is not None)
+
         for node in moosetree.iterate(ast, func):
             count += 1
             node["number"] = count
@@ -117,10 +120,15 @@ class EquationCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_id(setting: str) -> str:
+            return setting
+
         settings["id"] = (
             None,
             "The equation label for referencing within text, if provided "
             "the equation is numbered.",
+            validation_id,
         )
         return settings
 

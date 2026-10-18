@@ -66,13 +66,22 @@ class ExampleCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
-        settings["prefix"] = ("Example", settings["prefix"][1])
+
+        def validation_prefix(setting: str) -> str:
+            return setting
+
+        settings["prefix"] = ("Example", settings["prefix"][1], validation_prefix)
+
+        def validation_requires_extension(setting: str) -> str:
+            return setting
+
         settings["requires_extension"] = (
             None,
             "The dotted module name of an extension (e.g. 'MooseDocs.extensions.civet') that "
             "this example's content depends on. If that extension is not loaded for the "
             "current documentation build, the raw command text is shown but not "
             "tokenized/executed, and a note is displayed explaining why.",
+            validation_requires_extension,
         )
         return settings
 
@@ -109,13 +118,30 @@ class SettingsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["module"] = (None, "The name of the module containing the object.")
+
+        def validation_module(setting: str) -> str:
+            return setting
+
+        settings["module"] = (
+            None,
+            "The name of the module containing the object.",
+            validation_module,
+        )
+
+        def validation_object(setting: str) -> str:
+            return setting
+
         settings["object"] = (
             None,
             "The name of the object to import from the 'module'.",
+            validation_object,
         )
         settings.update(floats.caption_settings())
-        settings["prefix"] = ("Table", settings["prefix"][1])
+
+        def validation_prefix(setting: str) -> str:
+            return setting
+
+        settings["prefix"] = ("Table", settings["prefix"][1], validation_prefix)
 
         return settings
 

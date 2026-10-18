@@ -11,6 +11,7 @@ import os
 from ..base import components, LatexRenderer, HTMLRenderer, MarkdownReader
 from ..tree import tokens, html, latex
 from . import command, materialicon
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -86,16 +87,36 @@ class AlertCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["title"] = (None, "The optional alert title.")
-        settings["center-title"] = (False, "Center the title.")
+
+        def validation_title(setting: str) -> str:
+            return setting
+
+        settings["title"] = (None, "The optional alert title.", validation_title)
+
+        settings["center-title"] = (False, "Center the title.", validation.boolean)
+
+        def validation_prefix(setting: str) -> str:
+            if setting.lower() == "true":
+                return True
+            if setting.lower() == "false":
+                return False
+            return setting
+
         settings["prefix"] = (
             None,
             "Enable/disable the title being prefixed with the alert brand.",
+            validation_prefix,
         )
-        settings["icon"] = (True, "Enable/disable the title icon.")
+
+        settings["icon"] = (True, "Enable/disable the title icon.", validation.boolean)
+
+        def validation_icon_name(setting: str) -> str:
+            return setting
+
         settings["icon-name"] = (
             None,
             "Set the icon name, see material icon for available options.",
+            validation_icon_name,
         )
         return settings
 

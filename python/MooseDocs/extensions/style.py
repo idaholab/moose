@@ -11,6 +11,7 @@ from ..base import components, renderers
 from ..common import exceptions
 from ..tree import tokens, html, latex
 from . import command
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -44,14 +45,36 @@ class StyleCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_halign(setting: str) -> str:
+            return setting
+
         settings["halign"] = (
             None,
             "The horizontal alignment ('center', 'left', or 'right')",
+            validation_halign,
         )
-        settings["border"] = (None, "The size of the border in pixels")
-        settings["color"] = (None, "Set the color of content.")
-        settings["fontsize"] = (None, "Set the font size.")
-        settings["fontweight"] = (None, "Set the font weight.")
+
+        settings["border"] = (
+            None,
+            "The size of the border in pixels",
+            validation.floating_point,
+        )
+
+        def validation_color(setting: str) -> str:
+            return setting
+
+        settings["color"] = (None, "Set the color of content.", validation_color)
+
+        def validation_fontsize(setting: str) -> str:
+            return setting
+
+        settings["fontsize"] = (None, "Set the font size.", validation_fontsize)
+
+        def validation_fontweight(setting: str) -> str:
+            return setting
+
+        settings["fontweight"] = (None, "Set the font weight.", validation_fontweight)
         return settings
 
     def createToken(self, parent, info, page, settings):

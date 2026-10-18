@@ -145,7 +145,7 @@ executed with the custom flag. This is done by adding this new flag to an existi
 parameters. For example, the following adds the `EXEC_ADAPT_MESH` and `EXEC_COMPUTE_MARKERS` flags to a `Transfer` object
 and then sets the default to be `{LevelSet::EXEC_COMPUTE_MARKERS, LevelSet::EXEC_ADAPT_MESH}`:
 
-!listing modules/level_set/src/transfers/LevelSetMeshRefinementTransfer.C strip-leading-whitespace=1 start=ExecFlagEnum end=params.set<bool>
+!listing modules/level_set/src/transfers/LevelSetMeshRefinementTransfer.C strip-leading-whitespace=true start=ExecFlagEnum end=params.set<bool>
 
 
 ### 3. Use the Execute Flag
@@ -155,4 +155,4 @@ execution flags, which will spawn calculations. For example, the `LevelSetProble
 a custom method that uses the `EXEC_ADAPT_MESH` and `EXEC_COMPUTE_MARKERS` flags to perform
 an additional [`MultiAppTransfer`](Transfers/index.md) execution:
 
-!listing modules/level_set/src/base/LevelSetProblem.C strip-leading-whitespace=1 line=LevelSet::EXEC_ADAPT_MESH
+!listing modules/level_set/src/base/LevelSetProblem.C strip-leading-whitespace=true line=LevelSet::EXEC_ADAPT_MESH

@@ -11,6 +11,7 @@ from ..common import exceptions
 from ..base import components
 from ..tree import tokens, html, latex
 from . import core, command, materialicon
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -65,29 +66,48 @@ class ColumnCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_width(setting: str) -> str:
+            return setting
+
         settings["width"] = (
             None,
             "The default width of the column (HTML output only).",
+            validation_width,
         )
-        settings["icon"] = (None, "Material icon to place at top of column.")
-        settings["small"] = (12, "The number of columns for small displays (1-12).")
+
+        def validation_icon(setting: str) -> str:
+            return setting
+
+        settings["icon"] = (
+            None,
+            "Material icon to place at top of column.",
+            validation_icon,
+        )
+        settings["small"] = (
+            12,
+            "The number of columns for small displays (1-12).",
+            validation.number_of_columns,
+        )
         settings["medium"] = (
             12,
             "The number of columns for medium displays (1-12), "
             "this is used by the LaTeX output for determining the number "
             "of columns.",
+            validation.number_of_columns,
         )
-        settings["large"] = (12, "The number of columns for large displays (1-12).")
+        settings["large"] = (
+            12,
+            "The number of columns for large displays (1-12).",
+            validation.number_of_columns,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
 
         sml = []
         for s in ["small", "medium", "large"]:
-            sml.append(int(settings[s]))
-            if sml[-1] < 1 or sml[-1] > 12:
-                msg = "The '{}' setting must be an integer between 1 and 12."
-                raise exceptions.MooseDocsException(msg, s)
+            sml.append(settings[s])
 
         col = ColumnToken(
             parent,

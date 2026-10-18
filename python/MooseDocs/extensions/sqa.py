@@ -30,6 +30,7 @@ from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from . import core, command, floats, autolink, civet, appsyntax, table, modal
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -357,51 +358,88 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_category(setting: str) -> str:
+            return setting
+
         config["category"] = (
             None,
             "Provide the category, as listed in the extension 'categories' configuration.",
+            validation_category,
         )
+
+        def validation_collections(setting: str) -> str:
+            return setting
+
         config["collections"] = (
             None,
             "Limit the Requirement list to the specified collections (e.g., 'FUNCTIONAL FAILURE_ANALYSIS').",
+            validation_collections,
         )
+
+        def validation_types(setting: str) -> str:
+            return setting
+
         config["types"] = (
             None,
             "Limit the Requirement list to the specified test types (e.g., 'RunException Exodiff').",
+            validation_types,
         )
 
         config["link"] = (
             True,
             "Enable/disable the linking of test specifications and " "test files.",
+            validation.boolean,
         )
         config["link-spec"] = (
             True,
             "Enable/disable the link of the test specification only, "
             "the 'link' setting must be true.",
+            validation.boolean,
         )
         config["link-design"] = (
             True,
             "Enable/disable the link of the test design only, "
             "the 'link' setting must be true.",
+            validation.boolean,
         )
         config["link-issues"] = (
             True,
             "Enable/disable the link of the test issues only, "
             "the 'link' setting must be true.",
+            validation.boolean,
         )
         config["link-prerequisites"] = (
             True,
             "Enable/disable the link of the test prerequisites, "
             "the 'link' setting must be true.",
+            validation.boolean,
         )
-        config["link-results"] = (True, "Enable/disable the link to the test results.")
-        config["link-collections"] = (True, "Enable/disable the collections badge(s).")
-        config["link-types"] = (True, "Enable/disable the types badge(s).")
+        config["link-results"] = (
+            True,
+            "Enable/disable the link to the test results.",
+            validation.boolean,
+        )
+        config["link-collections"] = (
+            True,
+            "Enable/disable the collections badge(s).",
+            validation.boolean,
+        )
+        config["link-types"] = (
+            True,
+            "Enable/disable the types badge(s).",
+            validation.boolean,
+        )
         config["link-verification"] = (
             True,
             "Enable/disable the verification file link.",
+            validation.boolean,
         )
-        config["link-validation"] = (True, "Enable/disable the validation file link.")
+        config["link-validation"] = (
+            True,
+            "Enable/disable the validation file link.",
+            validation.boolean,
+        )
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -667,8 +705,20 @@ class SQADependenciesCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["suffix"] = (None, "Provide the filename suffix to include.")
-        config["category"] = (None, "Provide the category.")
+
+        def validation_suffix(setting: str) -> str:
+            return setting
+
+        config["suffix"] = (
+            None,
+            "Provide the filename suffix to include.",
+            validation_suffix,
+        )
+
+        def validation_category(setting: str) -> str:
+            return setting
+
+        config["category"] = (None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -703,8 +753,20 @@ class SQADocumentCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["suffix"] = (None, "Provide the filename suffix to include.")
-        config["category"] = (None, "Provide the category.")
+
+        def validation_suffix(setting: str) -> str:
+            return setting
+
+        config["suffix"] = (
+            None,
+            "Provide the filename suffix to include.",
+            validation_suffix,
+        )
+
+        def validation_category(setting: str) -> str:
+            return setting
+
+        config["category"] = (None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -728,7 +790,11 @@ class SQAReportCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["category"] = (None, "Provide the category.")
+
+        def validation_category(setting: str) -> str:
+            return setting
+
+        config["category"] = (None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -857,7 +923,11 @@ class SQARecordCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config["category"] = (None, "Provide the category.")
+
+        def validation_category(setting: str) -> str:
+            return setting
+
+        config["category"] = (None, "Provide the category.", validation_category)
         return config
 
     def createToken(self, parent, info, page, settings):

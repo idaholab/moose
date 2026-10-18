@@ -10,6 +10,7 @@
 from .. import common
 from ..base import RevealRenderer, Translator
 from . import command
+from ..common import setting_validation as validation
 
 
 def make_extension(**kwargs):
@@ -33,7 +34,8 @@ class IncludeExtension(command.CommandExtension):
 
 class IncludeCommand(command.CommandComponent):
     COMMAND = "include"
-    SUBCOMMAND = "md"  # TODO: get this from the reader inside the __init__ method.
+    # TODO: get this from the reader inside the __init__ method.
+    SUBCOMMAND = "md"
 
     @staticmethod
     def defaultSettings():
@@ -42,6 +44,7 @@ class IncludeCommand(command.CommandComponent):
         settings["optional"] = (
             False,
             "Toggle the include as optional when the file doesn't exist.",
+            validation.boolean,
         )
         return settings
 
@@ -69,6 +72,7 @@ class IncludeSlides(IncludeCommand):
         settings["vertical"] = (
             True,
             "Included content will be included as vertical slides.",
+            validation.boolean,
         )
         return settings
 

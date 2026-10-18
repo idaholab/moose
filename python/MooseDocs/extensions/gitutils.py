@@ -68,9 +68,14 @@ class SubmoduleHashCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_url(setting: str) -> str:
+            return setting
+
         settings["url"] = (
             None,
             "If provided, prefix the hash with the url to create a link.",
+            validation_url,
         )
         return settings
 
