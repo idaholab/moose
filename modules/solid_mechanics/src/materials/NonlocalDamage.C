@@ -47,6 +47,11 @@ NonlocalDamageTempl<is_ad>::initialSetup()
     this->paramError("damage_model",
                      "Damage Model " + _local_damage_model_name +
                          " is not compatible with NonlocalDamage model");
+
+  // _local_damage_model is called directly rather than through the normal material property
+  // system, so its own dependencies must be added to ours for them to stay active
+  const auto & local_deps = _local_damage_model->getMatPropDependencies();
+  this->_material_property_dependencies.insert(local_deps.begin(), local_deps.end());
 }
 
 template <bool is_ad>

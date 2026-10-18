@@ -125,9 +125,20 @@ ADComputeMultipleInelasticStress::initialSetup()
         mooseError("Model " + models[i] +
                    " requires an isotropic elasticity tensor, but the one supplied is not "
                    "guaranteed isotropic");
+
+      // rrr is called directly rather than through the normal material property system, so its
+      // own dependencies must be added to ours for them to stay active
+      const auto & rrr_deps = rrr->getMatPropDependencies();
+      _material_property_dependencies.insert(rrr_deps.begin(), rrr_deps.end());
     }
     else
       mooseError("Model " + models[i] + " is not compatible with ADComputeMultipleInelasticStress");
+  }
+
+  if (_damage_model)
+  {
+    const auto & damage_deps = _damage_model->getMatPropDependencies();
+    _material_property_dependencies.insert(damage_deps.begin(), damage_deps.end());
   }
 }
 

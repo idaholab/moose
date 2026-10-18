@@ -7,12 +7,12 @@
 
 [Materials]
   [face_source]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     property = face_property
     value = 2
   []
   [boundary]
-    type = BoundaryMaterialReinitTest
+    type = MaterialReinitTest
     boundary = left
     property = boundary_property
     value = 3

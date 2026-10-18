@@ -176,6 +176,7 @@ Material::resolveOptionalProperties()
 {
   for (auto & proxy : _optional_property_proxies)
     proxy->resolve(*this);
+  resolveZeroMaterialPropertyDependencies();
 }
 
 void
