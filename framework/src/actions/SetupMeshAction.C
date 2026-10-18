@@ -15,6 +15,7 @@
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "AddMeshGeneratorAction.h"
+#include "CreateProblemAction.h"
 
 #include <functional>
 #include <algorithm>
@@ -189,6 +190,38 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
 }
 
 std::string
+SetupMeshAction::checkpointMeshRestartFileBase() const
+{
+  if (_app.isRecovering())
+    return "";
+
+  // The Problem is created after the mesh, so read its parameters from the input directly
+  const auto read_params = [](const InputParameters & params)
+  {
+    if (!params.have_parameter<bool>("restart_use_checkpoint_mesh") ||
+        !params.get<bool>("restart_use_checkpoint_mesh") ||
+        !params.isParamValid("restart_file_base"))
+      return std::string();
+    return std::string(params.get<FileNameNoExtension>("restart_file_base"));
+  };
+
+  std::string restart_file_base;
+  if (const auto problem_action = _awh.getActionByTask<CreateProblemAction>("create_problem"))
+    restart_file_base = read_params(problem_action->getObjectParams());
+  else
+  {
+    auto params = _factory.getValidParams("FEProblem");
+    _app.builder().extractParams("Problem", params);
+    restart_file_base = read_params(params);
+  }
+
+  if (restart_file_base.empty())
+    return "";
+
+  return MooseUtils::convertLatestCheckpoint(restart_file_base);
+}
+
+std::string
 SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) const
 {
   // Get the split_file extension, if there is one, and use that to decide
@@ -238,6 +271,17 @@ SetupMeshAction::act()
   if (_current_task == "setup_mesh")
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
+
+    // Read the mesh from the restart checkpoint the same way recovery does: mesh generators are
+    // still constructed so that their mesh meta-data can be restored, but they are not executed
+    if (!_app.useMasterMesh())
+      if (const auto restart_file_base = checkpointMeshRestartFileBase();
+          !restart_file_base.empty())
+      {
+        _app.setRestart(true);
+        _app.setRestartRecoverFileBase(restart_file_base);
+        _app.setRestartFromCheckpointMesh(true);
+      }
 
     const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
 
@@ -312,8 +356,10 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are not using the pre-split mesh
       // 3. We are not: recovering/restarting and we are the master application
+      // 4. We are not reading the mesh from the restart checkpoint
       if (!_app.getMeshGeneratorNames().empty() && !_use_split &&
-          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
+          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()) &&
+          !_app.isRestartingFromCheckpointMesh())
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();
         auto mesh_base =

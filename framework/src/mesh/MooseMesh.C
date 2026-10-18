@@ -2905,7 +2905,8 @@ MooseMesh::init()
 
   TIME_SECTION("init", 2);
 
-  if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
+  if (_allow_recovery &&
+      ((_app.isRecovering() && _app.isUltimateMaster()) || _app.isRestartingFromCheckpointMesh()))
   {
     // Some partitioners are not idempotent.  Some recovery data
     // files require partitioning to match mesh partitioning.  This
