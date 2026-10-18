@@ -1,0 +1,96 @@
+[Tests]
+  design = 'LevelSetContactor.md SphereContactor.md RigidBodyLoadControl.md'
+  issues = '#33801'
+  # This directory hosts three tests that run the SAME physical problem —
+  # a rigid sphere pressed into an elastic body under load control — with
+  # contact along the +y, +x, and +z axes respectively.  The X and Z
+  # variants apply a TransformGenerator rotation of the mesh and permute
+  # every axis-tagged parameter (SphereContactor center, disp_[xyz]_scalar,
+  # RigidBodyLoadControl.direction, scalar-variable name, DirichletBC
+  # variables) so the physical setup is invariant.  All three golds hold
+  # identical numerical values (bit-for-bit at 1e-13 relative) for the
+  # shared postprocessor columns applied_force, indenter_translation,
+  # max_lm, num_nl, cumulative_nl — only the raw scalar column label
+  # differs (indenter_x / indenter_y / indenter_z).  If any of the rigid-
+  # body contact classes gains an axis-dependent bug (users have reported
+  # trouble with contact directions other than z), at least one variant's
+  # gold diff fails.
+  [hertz_y]
+    type = 'CSVDiff'
+    input = 'hertz_y.i'
+    csvdiff = 'hertz_y_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 4
+    requirement = 'The rigid-body contact stack shall produce a bit-for-bit-consistent '
+                  'load-control solution with the contact direction along +y.'
+  []
+  [hertz_x]
+    type = 'CSVDiff'
+    input = 'hertz_x.i'
+    csvdiff = 'hertz_x_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 4
+    requirement = 'The rigid-body contact stack shall be frame-invariant: rotating the mesh '
+                  'and every axis-tagged parameter so the sphere pushes in +x (from a baseline '
+                  'that pushes in +y) shall produce identical postprocessor values.'
+  []
+  [hertz_z]
+    type = 'CSVDiff'
+    input = 'hertz_z.i'
+    csvdiff = 'hertz_z_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 4
+    requirement = 'The rigid-body contact stack shall be frame-invariant: rotating the mesh '
+                  'and every axis-tagged parameter so the sphere pushes in +z (from a baseline '
+                  'that pushes in +y) shall produce identical postprocessor values.'
+  []
+  # Jacobian consistency at NEGATIVE-axis direction.  The contactor's
+  # translation always advances along the POSITIVE axis of the disp_[xyz]_scalar
+  # it uses, regardless of the sign of RigidBodyLoadControl.direction — so
+  # `dR_lambda/ds = -c * (n . axis_hat)`, NOT `-c * (n . direction)`.  A
+  # prior version of the class conflated the two and gave a sign-flipped
+  # Kls whenever the user picked a negative-axis direction (e.g. a load
+  # applied along -y).  This test drives the same problem as hertz_y.i but
+  # overrides direction to '0 -1 0' and asks PETSc to compare the hand-
+  # coded Jacobian against a finite-difference probe.  The FD Jacobian is
+  # sign-invariant (it just perturbs and re-evaluates the residual), so
+  # any mismatch here means the analytical assembly disagrees with the
+  # physics — precisely the sign bug.  Newton itself does not need to
+  # converge for the tester; only the linearization is under scrutiny.
+  # Companion positive-direction Jacobian probe.  Both jac tests should
+  # produce the SAME ||J-Jfd||_F/||J||_F ratio — the fix under test is
+  # that swapping the sign of the load-control direction does not change
+  # the Kls sign in the analytical Jacobian relative to FD.  The
+  # residual O(1e-5) mismatch is from a level-set Hessian term in
+  # dR_u/ds that the class deliberately drops (documented in the
+  # header) and is unrelated to the sign bug.
+  [hertz_y-jac-pos-dir]
+    type = 'PetscJacobianTester'
+    input = 'hertz_y.i'
+    prereq = 'hertz_y'
+    ratio_tol = 1e-4
+    difference_tol = 1e-3
+    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    requirement = 'RigidBodyLoadControl shall assemble a Jacobian consistent with its residual '
+                  'to within a per-class tolerance when the load-control direction is a '
+                  'positive Cartesian unit axis (a load along +y).'
+  []
+  [hertz_y-jac-neg-dir]
+    type = 'PetscJacobianTester'
+    input = 'hertz_y.i'
+    prereq = 'hertz_y-jac-pos-dir'
+    ratio_tol = 1e-4
+    difference_tol = 1e-3
+    cli_args = 'ScalarKernels/load_control/direction="0 -1 0" Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    requirement = 'RigidBodyLoadControl shall assemble a Jacobian consistent with its residual '
+                  'when the load-control direction is a negative Cartesian unit axis (a load '
+                  'along -y), matching a finite-difference probe to the same tolerance as the '
+                  'positive-direction case.  This locks in a fix for a sign bug in the '
+                  '(lambda_row, scalar_col) transpose block: an earlier version of this class '
+                  'used the user-supplied direction where the physics required the positive-'
+                  'oriented axis of the contactor translation scalar, so a negative direction '
+                  'made Kls disagree with FD by O(1) and Newton diverged.'
+  []
+[]

@@ -1,0 +1,15 @@
+[Tests]
+  design = 'SphereContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
+  issues = '#33801'
+  [hertz_inelastic_finite]
+    type = 'CSVDiff'
+    input = 'hertz_inelastic_finite.i'
+    csvdiff = 'hertz_inelastic_finite_csv.csv hertz_inelastic_finite_csv_contact_lm_0010.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'The system shall solve a rigid-sphere / J2-plasticity contact problem in '
+                  'the finite-strain (total-Lagrangian) regime using the analytic-level-set '
+                  'nodal-NCP contact stack.'
+  []
+[]

@@ -1,0 +1,14 @@
+[Tests]
+  design = 'LevelSetContactor.md SphereContactor.md'
+  issues = '#33801'
+  [hertz_moving]
+    type = 'CSVDiff'
+    input = 'hertz_moving.i'
+    csvdiff = 'hertz_moving_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'A rigid contactor shall support Function-driven per-axis translation, '
+                  'reproducing a Hertz elastic-half-space setup driven by the contactor moving '
+                  'upward into a top-pinned deformable body.'
+  []
+[]

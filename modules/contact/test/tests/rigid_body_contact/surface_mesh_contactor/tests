@@ -1,0 +1,14 @@
+[Tests]
+  design = 'SurfaceMeshContactor.md LevelSetContactorAux.md'
+  issues = '#33801'
+  [sphere_sdf]
+    type = 'CSVDiff'
+    input = 'sphere_sdf.i'
+    csvdiff = 'sphere_sdf_csv.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'SurfaceMeshContactor shall reproduce the signed distance and outward normal '
+                  'of an analytic sphere within mesh-discretization tolerances when driven by a '
+                  '2x-subdivided icosphere.'
+  []
+[]
