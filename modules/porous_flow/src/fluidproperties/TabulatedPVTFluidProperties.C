@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TabulatedFVFFluidProperties.h"
+#include "TabulatedPVTFluidProperties.h"
 
 #include <algorithm>
 
-registerMooseObject("PorousFlowApp", TabulatedFVFFluidProperties);
+registerMooseObject("PorousFlowApp", TabulatedPVTFluidProperties);
 
 InputParameters
-TabulatedFVFFluidProperties::validParams()
+TabulatedPVTFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRequiredRangeCheckedParam<Real>(
@@ -44,7 +44,7 @@ TabulatedFVFFluidProperties::validParams()
   return params;
 }
 
-TabulatedFVFFluidProperties::TabulatedFVFFluidProperties(const InputParameters & parameters)
+TabulatedPVTFluidProperties::TabulatedPVTFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
     _density_sc(getParam<Real>("density_sc")),
     _p(getParam<std::vector<Real>>("pressure")),
@@ -79,13 +79,13 @@ TabulatedFVFFluidProperties::TabulatedFVFFluidProperties(const InputParameters &
 }
 
 std::string
-TabulatedFVFFluidProperties::fluidName() const
+TabulatedPVTFluidProperties::fluidName() const
 {
-  return "tabulated_fvf";
+  return "tabulated_pvt";
 }
 
 Real
-TabulatedFVFFluidProperties::molarMass() const
+TabulatedPVTFluidProperties::molarMass() const
 {
   if (!isParamValid("molar_mass"))
     paramError("molar_mass",
@@ -94,7 +94,7 @@ TabulatedFVFFluidProperties::molarMass() const
 }
 
 void
-TabulatedFVFFluidProperties::interpolate(Real p,
+TabulatedPVTFluidProperties::interpolate(Real p,
                                          const std::vector<Real> & y,
                                          Real & value,
                                          Real & dvalue_dp) const
@@ -124,7 +124,7 @@ TabulatedFVFFluidProperties::interpolate(Real p,
 }
 
 Real
-TabulatedFVFFluidProperties::rho_from_p_T(Real p, Real T) const
+TabulatedPVTFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   Real rho, drho_dp, drho_dT;
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);
@@ -132,7 +132,7 @@ TabulatedFVFFluidProperties::rho_from_p_T(Real p, Real T) const
 }
 
 void
-TabulatedFVFFluidProperties::rho_from_p_T(
+TabulatedPVTFluidProperties::rho_from_p_T(
     Real p, Real /*T*/, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   Real inv_B, dinv_B_dp;
@@ -150,7 +150,7 @@ TabulatedFVFFluidProperties::rho_from_p_T(
 }
 
 Real
-TabulatedFVFFluidProperties::mu_from_p_T(Real p, Real T) const
+TabulatedPVTFluidProperties::mu_from_p_T(Real p, Real T) const
 {
   Real mu, dmu_dp, dmu_dT;
   mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
@@ -158,7 +158,7 @@ TabulatedFVFFluidProperties::mu_from_p_T(Real p, Real T) const
 }
 
 void
-TabulatedFVFFluidProperties::mu_from_p_T(
+TabulatedPVTFluidProperties::mu_from_p_T(
     Real p, Real /*T*/, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real inv_B, dinv_B_dp, inv_B_mu, dinv_B_mu_dp;
@@ -178,13 +178,13 @@ TabulatedFVFFluidProperties::mu_from_p_T(
 }
 
 Real
-TabulatedFVFFluidProperties::e_from_p_T(Real /*p*/, Real T) const
+TabulatedPVTFluidProperties::e_from_p_T(Real /*p*/, Real T) const
 {
   return _cv * T;
 }
 
 void
-TabulatedFVFFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
+TabulatedPVTFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
   e = e_from_p_T(p, T);
   de_dp = 0.0;
@@ -192,7 +192,7 @@ TabulatedFVFFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, 
 }
 
 Real
-TabulatedFVFFluidProperties::h_from_p_T(Real p, Real T) const
+TabulatedPVTFluidProperties::h_from_p_T(Real p, Real T) const
 {
   Real h, dh_dp, dh_dT;
   h_from_p_T(p, T, h, dh_dp, dh_dT);
@@ -200,7 +200,7 @@ TabulatedFVFFluidProperties::h_from_p_T(Real p, Real T) const
 }
 
 void
-TabulatedFVFFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
+TabulatedPVTFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   Real rho, drho_dp, drho_dT;
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);

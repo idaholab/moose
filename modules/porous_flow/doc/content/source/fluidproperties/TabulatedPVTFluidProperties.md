@@ -1,10 +1,10 @@
-# TabulatedFVFFluidProperties
+# TabulatedPVTFluidProperties
 
-!syntax description /FluidProperties/TabulatedFVFFluidProperties
+!syntax description /FluidProperties/TabulatedPVTFluidProperties
 
 ## Overview
 
-`TabulatedFVFFluidProperties` provides isothermal fluid properties from a table of
+`TabulatedPVTFluidProperties` provides isothermal fluid properties from a table of
 pressure $p$, formation volume factor $B$ and dynamic viscosity $\mu$. This is the format used
 for dead oil (`PVDO`) and dry gas (`PVDG`) tables in black-oil reservoir simulators, so
 existing PVT data can be used directly in PorousFlow.
@@ -51,14 +51,14 @@ e = c_v T, \qquad h = e + \frac{p}{\rho}.
 
 ## Example input syntax
 
-!listing modules/porous_flow/test/tests/fluids/tabulated_fvf.i block=FluidProperties
+!listing modules/porous_flow/test/tests/fluids/tabulated_pvt.i block=FluidProperties
 
 The object is used with [PorousFlowSingleComponentFluid](PorousFlowSingleComponentFluid.md), so it
 can be used for one phase of a two-phase oil-water simulation with, for example,
 `PorousFlow2PhasePS`.
 
-!syntax parameters /FluidProperties/TabulatedFVFFluidProperties
+!syntax parameters /FluidProperties/TabulatedPVTFluidProperties
 
-!syntax inputs /FluidProperties/TabulatedFVFFluidProperties
+!syntax inputs /FluidProperties/TabulatedPVTFluidProperties
 
-!syntax children /FluidProperties/TabulatedFVFFluidProperties
+!syntax children /FluidProperties/TabulatedPVTFluidProperties

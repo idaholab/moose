@@ -1,4 +1,4 @@
-# Test the properties calculated by TabulatedFVFFluidProperties
+# Test the properties calculated by TabulatedPVTFluidProperties
 # Table (PVDO style):
 #   p (Pa)   B (rm3/sm3)   mu (Pa.s)
 #   2.0E6    1.062         1.04E-3
@@ -17,7 +17,7 @@
 
 [FluidProperties]
   [oil]
-    type = TabulatedFVFFluidProperties
+    type = TabulatedPVTFluidProperties
     density_sc = 850
     pressure = '2.0E6 1.0E7 2.0E7 3.0E7'
     formation_volume_factor = '1.062 1.050 1.038 1.028'
@@ -116,6 +116,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = tabulated_fvf
+  file_base = tabulated_pvt
   csv = true
 []

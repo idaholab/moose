@@ -15,12 +15,12 @@
  * Fluid properties from a table of pressure, formation volume factor and
  * viscosity (PVDO/PVDG style)
  */
-class TabulatedFVFFluidProperties : public SinglePhaseFluidProperties
+class TabulatedPVTFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   static InputParameters validParams();
 
-  TabulatedFVFFluidProperties(const InputParameters & parameters);
+  TabulatedPVTFluidProperties(const InputParameters & parameters);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -28,16 +28,20 @@ public:
   virtual std::string fluidName() const override;
   virtual Real molarMass() const override;
 
+  using SinglePhaseFluidProperties::rho_from_p_T;
   virtual Real rho_from_p_T(Real p, Real T) const override;
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
+  using SinglePhaseFluidProperties::mu_from_p_T;
   virtual Real mu_from_p_T(Real p, Real T) const override;
   virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
+  using SinglePhaseFluidProperties::e_from_p_T;
   virtual Real e_from_p_T(Real p, Real T) const override;
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
 
+  using SinglePhaseFluidProperties::h_from_p_T;
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
