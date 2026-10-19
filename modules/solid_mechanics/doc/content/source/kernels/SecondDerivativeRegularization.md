@@ -1,17 +1,16 @@
-# DisplacementRegularization
+# SecondDerivativeRegularization
 
-!syntax description /Kernels/DisplacementRegularization
+!syntax description /Kernels/SecondDerivativeRegularization
 
 ## Description
 
-`DisplacementRegularization` adds a regularization term to one displacement component in
-the solid mechanics displacement equation. For vector-valued displacement variables, add
-one scalar kernel per component.
+`SecondDerivativeRegularization` adds a regularization term based on second derivatives of a
+scalar nonlinear variable. For vector-valued fields, add one scalar kernel per component.
 
-!include modules/solid_mechanics/common/supplementalDisplacementRegularization.md
+!include modules/solid_mechanics/common/supplementalSecondDerivativeRegularization.md
 
-For displacement component $u$, test function $v$, coefficient $k$, and mesh dimension
-$d$, the supported options are
+For nonlinear variable $u$, test function $v$, coefficient $k$, and mesh dimension $d$,
+the supported options are
 
 \begin{equation}
 R_i^{\mathrm{HuHu}} = \int_\Omega k \, u_{,jk} v_{i,jk} \, d\Omega ,
@@ -29,13 +28,13 @@ R_i^{\mathrm{HuHu-LuLu}} =
 \end{equation}
 
 Here $u_{,jk}$ and $v_{i,jk}$ are Hessian components, $\Delta u$ and
-$\Delta v_i$ are Laplacians, and $c_L$ is [!param](/Kernels/DisplacementRegularization/lulu_factor).
+$\Delta v_i$ are Laplacians, and $c_L$ is [!param](/Kernels/SecondDerivativeRegularization/lulu_factor).
 The names HuHu and LuLu follow terminology used for third-medium contact regularization
 [!cite](frederiksen2025improved,bluhm2021internal), but the kernel only contributes the
 regularization term and is not tied to contact-specific infrastructure.
 
-For [!param](/Kernels/DisplacementRegularization/regularization) set to `huhu_lulu`,
-[!param](/Kernels/DisplacementRegularization/lulu_factor) defaults to $1 / d$. Values larger
+For [!param](/Kernels/SecondDerivativeRegularization/regularization) set to `huhu_lulu`,
+[!param](/Kernels/SecondDerivativeRegularization/lulu_factor) defaults to $1 / d$. Values larger
 than $1 / d$ are accepted with a warning because they may cause negative strain-energy
 contributions.
 
@@ -45,13 +44,13 @@ component:
 ```text
 [Kernels]
   [regularize_x]
-    type = DisplacementRegularization
+    type = SecondDerivativeRegularization
     variable = disp_x
     regularization = huhu_lulu
     coefficient = 1
   []
   [regularize_y]
-    type = DisplacementRegularization
+    type = SecondDerivativeRegularization
     variable = disp_y
     regularization = huhu_lulu
     coefficient = 1
@@ -61,12 +60,12 @@ component:
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/displacement_regularization/cantilever.i block=Kernels
+!listing modules/solid_mechanics/test/tests/second_derivative_regularization/cantilever.i block=Kernels
 
-!syntax parameters /Kernels/DisplacementRegularization
+!syntax parameters /Kernels/SecondDerivativeRegularization
 
-!syntax inputs /Kernels/DisplacementRegularization
+!syntax inputs /Kernels/SecondDerivativeRegularization
 
-!syntax children /Kernels/DisplacementRegularization
+!syntax children /Kernels/SecondDerivativeRegularization
 
 !bibtex bibliography

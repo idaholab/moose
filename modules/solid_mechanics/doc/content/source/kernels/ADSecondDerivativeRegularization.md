@@ -1,28 +1,26 @@
-# ADDisplacementRegularization
+# ADSecondDerivativeRegularization
 
-!syntax description /Kernels/ADDisplacementRegularization
+!syntax description /Kernels/ADSecondDerivativeRegularization
 
 ## Description
 
-`ADDisplacementRegularization` is the automatic-differentiation version of
-[DisplacementRegularization.md]. It supports the same HuHu, LuLu, and HuHu-LuLu
-displacement regularization options and computes Jacobian contributions through MOOSE's AD
+`ADSecondDerivativeRegularization` is the automatic-differentiation version of
+[SecondDerivativeRegularization.md]. It supports the same HuHu, LuLu, and HuHu-LuLu
+second-derivative regularization options and computes Jacobian contributions through MOOSE's AD
 infrastructure.
 
-!include modules/solid_mechanics/common/supplementalDisplacementRegularization.md
+!include modules/solid_mechanics/common/supplementalSecondDerivativeRegularization.md
 
-For `regularization = huhu_lulu`, [!param](/Kernels/ADDisplacementRegularization/lulu_factor)
+For `regularization = huhu_lulu`, [!param](/Kernels/ADSecondDerivativeRegularization/lulu_factor)
 defaults to $1 / d$, where $d$ is the mesh dimension. Values larger than $1 / d$
 are accepted with a warning because they may cause negative strain-energy contributions.
 
 ## Example Input File Syntax
 
-The cantilever test uses this kernel by setting `reg_kernel = ADDisplacementRegularization`:
+!listing modules/solid_mechanics/test/tests/second_derivative_regularization/scalar_regularization.i block=Kernels replace=['${reg_kernel}','ADSecondDerivativeRegularization']
 
-!listing modules/solid_mechanics/test/tests/displacement_regularization/cantilever.i block=Kernels
+!syntax parameters /Kernels/ADSecondDerivativeRegularization
 
-!syntax parameters /Kernels/ADDisplacementRegularization
+!syntax inputs /Kernels/ADSecondDerivativeRegularization
 
-!syntax inputs /Kernels/ADDisplacementRegularization
-
-!syntax children /Kernels/ADDisplacementRegularization
+!syntax children /Kernels/ADSecondDerivativeRegularization

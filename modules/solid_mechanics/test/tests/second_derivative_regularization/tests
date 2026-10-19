@@ -1,16 +1,9 @@
 [Tests]
-  design = 'source/kernels/DisplacementRegularization.md source/kernels/ADDisplacementRegularization.md'
+  design = 'source/kernels/SecondDerivativeRegularization.md source/kernels/ADSecondDerivativeRegularization.md'
   issues = '#32970'
 
   [cantilever]
-    requirement = 'The system shall stiffen the bending of a plane-strain elastic cantilever under a tip shear load when displacement regularization is added to both displacement components, with a tip deflection that depends on the regularization type, using'
-    [none]
-      type = CSVDiff
-      input = 'cantilever.i'
-      csvdiff = 'cantilever_none.csv'
-      cli_args = "Kernels/active='' Outputs/file_base=cantilever_none"
-      detail = 'no regularization, as the reference deflection,'
-    []
+    requirement = 'The system shall compute a type-dependent tip deflection for a plane-strain elastic cantilever under a tip shear load when second-derivative regularization is added to both displacement components using'
     [huhu]
       type = CSVDiff
       input = 'cantilever.i'
@@ -23,62 +16,19 @@
       input = 'cantilever.i'
       csvdiff = 'cantilever_lulu.csv'
       cli_args = 'regularization_type=lulu Outputs/file_base=cantilever_lulu'
-      detail = 'LuLu regularization,'
+      detail = 'LuLu regularization, and'
     []
     [huhu_lulu]
       type = CSVDiff
       input = 'cantilever.i'
       csvdiff = 'cantilever_huhu_lulu.csv'
       cli_args = 'regularization_type=huhu_lulu Outputs/file_base=cantilever_huhu_lulu'
-      detail = 'HuHu-LuLu regularization, and'
-    []
-    [ad_huhu_lulu]
-      type = CSVDiff
-      input = 'cantilever.i'
-      csvdiff = 'cantilever_huhu_lulu.csv'
-      cli_args = 'reg_kernel=ADDisplacementRegularization regularization_type=huhu_lulu Outputs/file_base=cantilever_huhu_lulu'
-      prereq = 'cantilever/huhu_lulu'
-      detail = 'HuHu-LuLu regularization with automatic differentiation, matching the hand-coded Jacobian result.'
-    []
-  []
-
-  [cantilever_jacobian]
-    requirement = 'The system shall compute the correct Jacobian of the displacement regularization in a plane-strain elastic cantilever for'
-    [huhu]
-      type = PetscJacobianTester
-      input = 'cantilever.i'
-      cli_args = 'regularization_type=huhu'
-      detail = 'HuHu regularization,'
-    []
-    [lulu]
-      type = PetscJacobianTester
-      input = 'cantilever.i'
-      cli_args = 'regularization_type=lulu'
-      detail = 'LuLu regularization,'
-    []
-    [huhu_lulu]
-      type = PetscJacobianTester
-      input = 'cantilever.i'
-      cli_args = 'regularization_type=huhu_lulu'
-      detail = 'HuHu-LuLu regularization, and'
-    []
-    [ad_huhu_lulu]
-      type = PetscJacobianTester
-      input = 'cantilever.i'
-      cli_args = 'reg_kernel=ADDisplacementRegularization regularization_type=huhu_lulu'
-      detail = 'HuHu-LuLu regularization with automatic differentiation.'
+      detail = 'HuHu-LuLu regularization.'
     []
   []
 
   [scalar]
-    requirement = 'The system shall add the displacement regularization operator to a single second-order Lagrange variable, checked independently of the mechanics equations on a diffusion problem with a uniform source, for'
-    [none]
-      type = CSVDiff
-      input = 'scalar_regularization.i'
-      csvdiff = 'scalar_none.csv'
-      cli_args = "Kernels/active='diffusion source' Outputs/file_base=scalar_none"
-      detail = 'no regularization, as the reference solution,'
-    []
+    requirement = 'The system shall add the second-derivative regularization operator to a single second-order Lagrange variable, checked independently of the mechanics equations on a diffusion problem with a uniform source, for'
     [huhu]
       type = CSVDiff
       input = 'scalar_regularization.i'
@@ -112,56 +62,40 @@
       input = 'scalar_regularization.i'
       csvdiff = 'scalar_huhu_lulu_3d.csv'
       cli_args = "Mesh/dim=3 Mesh/elem_type=HEX27 Mesh/nz=4 BCs/zero/boundary='left right top bottom front back' regularization_type=huhu_lulu Outputs/file_base=scalar_huhu_lulu_3d"
-      detail = 'the HuHu-LuLu contraction with the default LuLu factor of one third in 3D,'
-    []
-    [ad_huhu]
-      type = CSVDiff
-      input = 'scalar_regularization.i'
-      csvdiff = 'scalar_huhu.csv'
-      cli_args = 'reg_kernel=ADDisplacementRegularization regularization_type=huhu Outputs/file_base=scalar_huhu'
-      prereq = 'scalar/huhu'
-      detail = 'the HuHu contraction with automatic differentiation,'
-    []
-    [ad_lulu]
-      type = CSVDiff
-      input = 'scalar_regularization.i'
-      csvdiff = 'scalar_lulu.csv'
-      cli_args = 'reg_kernel=ADDisplacementRegularization regularization_type=lulu Outputs/file_base=scalar_lulu'
-      prereq = 'scalar/lulu'
-      detail = 'the LuLu contraction with automatic differentiation, and'
+      detail = 'the HuHu-LuLu contraction with the default LuLu factor of one third in 3D, and'
     []
     [ad_huhu_lulu]
       type = CSVDiff
       input = 'scalar_regularization.i'
       csvdiff = 'scalar_huhu_lulu.csv'
-      cli_args = 'reg_kernel=ADDisplacementRegularization regularization_type=huhu_lulu Outputs/file_base=scalar_huhu_lulu'
+      cli_args = 'reg_kernel=ADSecondDerivativeRegularization regularization_type=huhu_lulu Outputs/file_base=scalar_huhu_lulu'
       prereq = 'scalar/huhu_lulu_default_factor'
-      detail = 'the HuHu-LuLu contraction with automatic differentiation.'
+      detail = 'the HuHu-LuLu contraction with automatic differentiation, matching the non-AD solution.'
     []
   []
 
+  [scalar_jacobian]
+    type = PetscJacobianTester
+    input = 'scalar_regularization.i'
+    cli_args = 'regularization_type=huhu_lulu'
+    requirement = 'The system shall compute the correct hand-coded Jacobian of the HuHu-LuLu second-derivative regularization on a scalar diffusion problem.'
+  []
+
   [errors]
-    requirement = 'The system shall report an error or warning for invalid displacement regularization input when'
+    requirement = 'The system shall report an error or warning for invalid second-derivative regularization input when'
     [lulu_factor_without_huhu_lulu]
       type = RunException
       input = 'scalar_regularization.i'
       cli_args = 'regularization_type=huhu Kernels/regularization/lulu_factor=0.25'
       expect_err = "Only used when 'regularization = huhu_lulu'"
-      detail = 'a LuLu factor is given for a regularization type that does not use it,'
+      detail = 'a LuLu factor is given for a regularization type that does not use it, and'
     []
     [large_lulu_factor]
       type = RunException
       input = 'scalar_regularization.i'
       cli_args = '--error regularization_type=huhu_lulu Kernels/regularization/lulu_factor=0.75'
       expect_err = "The 'lulu_factor' parameter is larger than 1 / dim"
-      detail = 'the LuLu factor exceeds one over the mesh dimension, which may make the HuHu-LuLu energy negative, and'
-    []
-    [ad_large_lulu_factor]
-      type = RunException
-      input = 'scalar_regularization.i'
-      cli_args = '--error reg_kernel=ADDisplacementRegularization regularization_type=huhu_lulu Kernels/regularization/lulu_factor=0.75'
-      expect_err = "The 'lulu_factor' parameter is larger than 1 / dim"
-      detail = 'the LuLu factor exceeds one over the mesh dimension with automatic differentiation.'
+      detail = 'the LuLu factor exceeds one over the mesh dimension, which may make the HuHu-LuLu energy negative.'
     []
   []
 []

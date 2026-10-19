@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DisplacementRegularization.h"
+#include "SecondDerivativeRegularization.h"
 
-registerMooseObject("SolidMechanicsApp", DisplacementRegularization);
-registerMooseObject("SolidMechanicsApp", ADDisplacementRegularization);
+registerMooseObject("SolidMechanicsApp", SecondDerivativeRegularization);
+registerMooseObject("SolidMechanicsApp", ADSecondDerivativeRegularization);
 
 namespace
 {
@@ -20,17 +20,17 @@ regularizationType()
   return MooseEnum("huhu lulu huhu_lulu");
 }
 
-DisplacementRegularizationType
+SecondDerivativeRegularizationType
 regularizationType(const MooseEnum & regularization)
 {
   if (regularization == "huhu")
-    return DisplacementRegularizationType::Huhu;
+    return SecondDerivativeRegularizationType::Huhu;
   if (regularization == "lulu")
-    return DisplacementRegularizationType::Lulu;
+    return SecondDerivativeRegularizationType::Lulu;
   if (regularization == "huhu_lulu")
-    return DisplacementRegularizationType::HuhuLulu;
+    return SecondDerivativeRegularizationType::HuhuLulu;
 
-  mooseError("Unknown displacement regularization type '", regularization, "'.");
+  mooseError("Unknown second-derivative regularization type '", regularization, "'.");
 }
 
 Real
@@ -54,36 +54,36 @@ template <typename SolutionSecond, typename TestSecond>
 auto
 regularization(const SolutionSecond & second_u,
                const TestSecond & second_test,
-               const DisplacementRegularizationType type,
+               const SecondDerivativeRegularizationType type,
                const Real lulu_factor)
 {
   switch (type)
   {
-    case DisplacementRegularizationType::Huhu:
+    case SecondDerivativeRegularizationType::Huhu:
       return second_u.contract(second_test);
-    case DisplacementRegularizationType::Lulu:
+    case SecondDerivativeRegularizationType::Lulu:
       return second_u.tr() * second_test.tr();
-    case DisplacementRegularizationType::HuhuLulu:
+    case SecondDerivativeRegularizationType::HuhuLulu:
       // HuHu-LuLu keeps the Hessian contraction and subtracts a scaled Laplacian contraction.
       return second_u.contract(second_test) - lulu_factor * second_u.tr() * second_test.tr();
   }
 
-  mooseError("Unknown displacement regularization type.");
+  mooseError("Unknown second-derivative regularization type.");
 }
 }
 
 template <bool is_ad>
 InputParameters
-DisplacementRegularizationTempl<is_ad>::validParams()
+SecondDerivativeRegularizationTempl<is_ad>::validParams()
 {
   InputParameters params = GenericKernel<is_ad>::validParams();
   if constexpr (is_ad)
-    params.addClassDescription("Adds a solid mechanics displacement regularization term using "
-                               "HuHu, LuLu, or HuHu-LuLu Hessian/Laplacian contractions. The "
-                               "Jacobian is computed using automatic differentiation.");
+    params.addClassDescription("Adds a second-derivative regularization term using HuHu, LuLu, "
+                               "or HuHu-LuLu Hessian/Laplacian contractions. The Jacobian is "
+                               "computed using automatic differentiation.");
   else
-    params.addClassDescription("Adds a solid mechanics displacement regularization term using "
-                               "HuHu, LuLu, or HuHu-LuLu Hessian/Laplacian contractions.");
+    params.addClassDescription("Adds a second-derivative regularization term using HuHu, LuLu, "
+                               "or HuHu-LuLu Hessian/Laplacian contractions.");
   params.addRequiredParam<MooseEnum>(
       "regularization",
       regularizationType(),
@@ -98,7 +98,7 @@ DisplacementRegularizationTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-DisplacementRegularizationTempl<is_ad>::DisplacementRegularizationTempl(
+SecondDerivativeRegularizationTempl<is_ad>::SecondDerivativeRegularizationTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
     _regularization_type(regularizationType(this->template getParam<MooseEnum>("regularization"))),
@@ -107,13 +107,14 @@ DisplacementRegularizationTempl<is_ad>::DisplacementRegularizationTempl(
     _lulu_factor(this->isParamValid("lulu_factor") ? this->template getParam<Real>("lulu_factor")
                                                    : defaultLuluFactor(_dim)),
     _second_u(secondSln<is_ad>(this->_var)),
-    _second_test(this->secondTest())
+    _second_test(this->secondTest()),
+    _second_phi(this->_var.secondPhi())
 {
-  if (_regularization_type != DisplacementRegularizationType::HuhuLulu &&
+  if (_regularization_type != SecondDerivativeRegularizationType::HuhuLulu &&
       this->isParamValid("lulu_factor"))
     this->paramError("lulu_factor", "Only used when 'regularization = huhu_lulu'.");
 
-  if (_regularization_type == DisplacementRegularizationType::HuhuLulu &&
+  if (_regularization_type == SecondDerivativeRegularizationType::HuhuLulu &&
       _lulu_factor > defaultLuluFactor(_dim))
   {
     // The bound c_L <= 1 / dim keeps the HuHu-LuLu quadratic form nonnegative.
@@ -124,24 +125,19 @@ DisplacementRegularizationTempl<is_ad>::DisplacementRegularizationTempl(
 
 template <bool is_ad>
 GenericReal<is_ad>
-DisplacementRegularizationTempl<is_ad>::computeQpResidual()
+SecondDerivativeRegularizationTempl<is_ad>::computeQpResidual()
 {
   return _coefficient *
          regularization(_second_u[_qp], _second_test[_i][_qp], _regularization_type, _lulu_factor);
 }
 
-DisplacementRegularization::DisplacementRegularization(const InputParameters & parameters)
-  : DisplacementRegularizationTempl<false>(parameters), _second_phi(_var.secondPhi())
-{
-}
-
 Real
-DisplacementRegularization::computeQpJacobian()
+SecondDerivativeRegularization::computeQpJacobian()
 {
   return _coefficient *
          regularization(
              _second_phi[_j][_qp], _second_test[_i][_qp], _regularization_type, _lulu_factor);
 }
 
-template class DisplacementRegularizationTempl<false>;
-template class DisplacementRegularizationTempl<true>;
+template class SecondDerivativeRegularizationTempl<false>;
+template class SecondDerivativeRegularizationTempl<true>;

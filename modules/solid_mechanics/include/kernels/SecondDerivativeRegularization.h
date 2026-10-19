@@ -11,7 +11,7 @@
 
 #include "GenericKernel.h"
 
-enum class DisplacementRegularizationType
+enum class SecondDerivativeRegularizationType
 {
   Huhu,
   Lulu,
@@ -19,25 +19,22 @@ enum class DisplacementRegularizationType
 };
 
 /**
- * Adds displacement regularization terms based on Hessian and Laplacian contractions of one scalar
- * displacement component.
- *
- * Vector-valued mechanics variables are regularized component-wise by adding one kernel per
- * displacement component.
+ * Adds regularization terms based on Hessian and Laplacian contractions of a scalar nonlinear
+ * variable.
  */
 template <bool is_ad>
-class DisplacementRegularizationTempl : public GenericKernel<is_ad>
+class SecondDerivativeRegularizationTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  DisplacementRegularizationTempl(const InputParameters & parameters);
+  SecondDerivativeRegularizationTempl(const InputParameters & parameters);
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Selected regularization contraction.
-  const DisplacementRegularizationType _regularization_type;
+  const SecondDerivativeRegularizationType _regularization_type;
   /// User coefficient multiplying the selected regularization term.
   const Real _coefficient;
   /// Mesh dimension used for the default LuLu factor.
@@ -48,20 +45,19 @@ protected:
   const GenericVariableSecond<is_ad> & _second_u;
   /// Second derivatives of test functions.
   const VariableTestSecond & _second_test;
+  /// Second derivatives of trial functions used by the hand-coded Jacobian.
+  const VariablePhiSecond & _second_phi;
 
   usingGenericKernelMembers;
 };
 
-class DisplacementRegularization : public DisplacementRegularizationTempl<false>
+class SecondDerivativeRegularization : public SecondDerivativeRegularizationTempl<false>
 {
 public:
-  DisplacementRegularization(const InputParameters & parameters);
+  using SecondDerivativeRegularizationTempl<false>::SecondDerivativeRegularizationTempl;
 
 protected:
   virtual Real computeQpJacobian() override;
-
-  /// Second derivatives of trial functions.
-  const VariablePhiSecond & _second_phi;
 };
 
-using ADDisplacementRegularization = DisplacementRegularizationTempl<true>;
+using ADSecondDerivativeRegularization = SecondDerivativeRegularizationTempl<true>;
