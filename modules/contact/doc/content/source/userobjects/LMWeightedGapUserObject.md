@@ -13,6 +13,12 @@ partially covered (edge-dropping) mortar interfaces; see
 [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for details and
 current limitations.
 
+Setting [!param](/UserObjects/LMWeightedGapUserObject/derive_c_from_elasticity) to `true` derives a
+per-node contact stiffness from the elasticity tensors of the two contacting bodies, which the
+mortar contact constraints use when `use_derived_c = true`. It is normally set by
+[ContactAction](/ContactAction.md) with `c_strategy = physical`, which describes the stiffness and
+its use.
+
 !syntax parameters /UserObjects/LMWeightedGapUserObject
 
 !syntax inputs /UserObjects/LMWeightedGapUserObject
