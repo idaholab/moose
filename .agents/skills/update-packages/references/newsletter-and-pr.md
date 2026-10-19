@@ -171,10 +171,14 @@ gh pr edit <n> --add-label "PR: Updates packages"
 Package-update PRs end with these three commits, in this order:
 
 ```
-Update packages                      # versioner.yaml bumps + regenerated templates
 Update newsletter with package changes
+Update packages                      # versioner.yaml bumps + regenerated templates
 Update versioner hashes
 ```
+
+The bump and the hash commit are the last two, because the hash block is keyed on the bump
+commit. The newsletter comes before them, with block titles that already carry the versions
+the bump will set.
 
 Everything else — submodule bumps, pin sweeps, def-file changes, source fixes, regolds —
 comes before them, one logical change per commit. Past PRs have run to 60+ commits; that is

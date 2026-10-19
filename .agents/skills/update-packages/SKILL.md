@@ -131,6 +131,13 @@ Apply the rules in `references/versioner.md`, which cover:
 Commit this as its own commit naming the packages touched, e.g.
 `Update packages` or `Bump versions of tools, libmesh, petsc and moose-dev`.
 
+When the branch is otherwise ready to merge, make a final bump as a new commit on top;
+do not rewrite earlier bumps. Set every date-versioned package (`tools`, `build`, `mpi`,
+`pyhit`, `moose-dev`) to the current date. Leave `libmesh`, `wasp` and `pprof` alone,
+because their dates come from their pinned commits. This commit and the hash commit
+(Step 7) must be the last two commits on the branch, so land the newsletter (Step 6)
+before it.
+
 ## Step 4 — Regenerate the templated files
 
 ```bash
@@ -185,7 +192,11 @@ Exact structure, heading levels, and bullet phrasing conventions (including the
 - Every package whose version was bumped gets a block, including ones that only moved
   because a dependency did.
 
-Commit as `Update newsletter with package changes`.
+Commit as `Update newsletter with package changes`, before the final version bump so that
+the bump and the hash commit remain the last two commits. The block titles must carry the
+versions that bump will set, so settle the date first. If the branch outlives its target
+month, move the entries to the new month's file and restore the old one to its state on
+`next`.
 
 ## Step 7 — Append the versioner hashes
 
