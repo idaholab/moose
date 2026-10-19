@@ -40,14 +40,15 @@ where
 Integrating the above momentum equation along a 1D flow path consisting of $N$ segments results in the following equations, ignoring conservation of mass since it has been substituted in the conservation of momentum and energy equations already:
 
 !equation id=discretized_momentum
-\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g L_i \sin{\alpha_i} + \Delta P_p \,
+\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g \Delta h_i + \Delta P_p \,
 
 where
 
-- $L_i$ is the length of segment $i$, and
-- $\Delta P_c$ is the characteristic pressure drop from inlet to outlet.
+- $L_i$ is the length of segment $i$,
+- $\Delta P_c$ is the characteristic pressure drop from inlet to outlet, and
+- $\Delta h_i$ is the height difference between the inlet and the outlet of a segment.
 
-A core assumption of this model is that the flow path consists of N segments, that the segments may have different cross sections, but within each segment, the cross section is assumed to be approximately constant. For example, a segment may have elbows, support structures, etc. within it but the overall cross section shouldn't change significantly over the length of the segment. Other properties are permitted to be unique to each segment as well, including viscosity, surface roughness, flow angle with respect to the horizontal, and length.
+A core assumption of this model is that the flow path consists of N segments, that the segments may have different cross sections, but within each segment, the cross section is assumed to be approximately constant. For example, a segment may have elbows, support structures, etc. within it but the overall cross section shouldn't change significantly over the length of the segment. Other properties are permitted to be unique to each segment as well, including viscosity, surface roughness, height change, and length.
 
 Input parameters are all given as functors, which enables flexibility in controllability, state changes in time, etc. However, caution should be exercised in changing parameters in time, as the parameters are assumed to be constant in time in the mathematical derivation. Hence, allowing the parameters to vary in time is intended only for long-running transients where the change over time is small, or for cases where the immediate transient effects of changing a parameter in time are unimportant to the phenomena of interest. This isn't the model to use for studying rapid transient effects.
 

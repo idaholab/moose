@@ -35,7 +35,7 @@
     input = ADgrav.i
     csvdiff = 'ADgrav_out.csv'
     design = 'ADIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'gravity=9.81 alpha=1.570795'
+    cli_args = 'gravity=9.81 dH=1.0'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction losses and gravity losses.'
   []
   [grav_CPAD]
@@ -43,7 +43,7 @@
     input = ADgravCP.i
     csvdiff = 'ADgravCP_out.csv'
     design = 'ADCoupledPressureIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'gravity=9.81 alpha=1.570795'
+    cli_args = 'gravity=9.81 dH=1.0'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction losses and gravity losses.'
   []
   [pump_regularAD]
@@ -67,7 +67,7 @@
     input = ADfull.i
     csvdiff = 'ADfull_out.csv'
     design = 'ADIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 pump=10130'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_CPAD]
@@ -75,7 +75,7 @@
     input = ADfullCP.i
     csvdiff = 'ADfullCP_out.csv'
     design = 'ADCoupledPressureIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 pump=10130'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_regularADexp]
@@ -83,7 +83,7 @@
     input = ADfull_exp.i
     csvdiff = 'ADfull_exp_out.csv'
     design = 'ADIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_CPADexp]
@@ -91,7 +91,7 @@
     input = ADfullCP_exp.i
     csvdiff = 'ADfullCP_exp_out.csv'
     design = 'ADCoupledPressureIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [reverse_flow_regularAD]
@@ -99,7 +99,7 @@
     input = ADregular_reverse.i
     csvdiff = 'ADregular_reverse_out.csv'
     design = 'ADIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 dP=10130'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 dP=10130'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction, forms, and gravity while mass flows in the opposite direction.'
   []
   [reverse_flow_CPAD]
@@ -107,7 +107,7 @@
     input = ADcoupledpressure_reverse.i
     csvdiff = 'ADcoupledpressure_reverse_out.csv'
     design = 'ADCoupledPressureIncompressibleMomentumSPScalarKernel.md'
-    cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 min=-1.0'
+    cli_args = 'forms=1.0 gravity=9.81 dH=1.0 min=-1.0'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction, forms, and gravity while mass flows in the opposite direction.'
   []
   [twoseg_regularAD]

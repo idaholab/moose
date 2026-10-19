@@ -43,10 +43,9 @@ ADIncompressibleMomentumSPBase::validParams()
       std::vector<MooseFunctorName>({}),
       "Component flow lengths per segment. Takes a vector of functors.");
   params.addParam<std::vector<MooseFunctorName>>(
-      "alphas",
+      "height_changes",
       std::vector<MooseFunctorName>({}),
-      "Component flow angles per segment with respect to horizontal (-pi/2 downward to pi/2 "
-      "upward). Takes a vector of functors.");
+      "Height change from inlet to outlet of each segment. Takes a vector of functors.");
   params.addParam<std::vector<MooseFunctorName>>(
       "forms_losses",
       std::vector<MooseFunctorName>({}),
@@ -77,7 +76,7 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _areas(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
     _perimeters(this->template getParam<std::vector<MooseFunctorName>>("perimeters").size()),
     _lengths(this->template getParam<std::vector<MooseFunctorName>>("lengths").size()),
-    _alphas(this->template getParam<std::vector<MooseFunctorName>>("alphas").size()),
+    _dHs(this->template getParam<std::vector<MooseFunctorName>>("height_changes").size()),
     _forms_losses(this->template getParam<std::vector<MooseFunctorName>>("forms_losses").size()),
     _dPps(this->template getParam<std::vector<MooseFunctorName>>("pump_pressures").size()),
     _roughnesses(this->template getParam<std::vector<MooseFunctorName>>("roughnesses").size()),
@@ -86,13 +85,13 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
   const auto & area_names = MooseBase::getParam<std::vector<MooseFunctorName>>("areas");
   const auto & perimeter_names = MooseBase::getParam<std::vector<MooseFunctorName>>("perimeters");
   const auto & length_names = MooseBase::getParam<std::vector<MooseFunctorName>>("lengths");
-  const auto & alpha_names = MooseBase::getParam<std::vector<MooseFunctorName>>("alphas");
+  const auto & dH_names = MooseBase::getParam<std::vector<MooseFunctorName>>("height_changes");
   const auto & forms_loss_names =
       MooseBase::getParam<std::vector<MooseFunctorName>>("forms_losses");
   const auto & dPp_names = MooseBase::getParam<std::vector<MooseFunctorName>>("pump_pressures");
   const auto & roughness_names = MooseBase::getParam<std::vector<MooseFunctorName>>("roughnesses");
   if (_n_segments != area_names.size() || _n_segments != perimeter_names.size() ||
-      _n_segments != length_names.size() || _n_segments != alpha_names.size() ||
+      _n_segments != length_names.size() || _n_segments != dH_names.size() ||
       _n_segments != forms_loss_names.size() || _n_segments != dPp_names.size() ||
       _n_segments != roughness_names.size() || _n_segments != _n_temps)
   {
@@ -105,7 +104,7 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _areas[j] = &(this->template getFunctor<ADReal>(area_names[j]));
     _perimeters[j] = &(this->template getFunctor<ADReal>(perimeter_names[j]));
     _lengths[j] = &(this->template getFunctor<ADReal>(length_names[j]));
-    _alphas[j] = &(this->template getFunctor<ADReal>(alpha_names[j]));
+    _dHs[j] = &(this->template getFunctor<ADReal>(dH_names[j]));
     _forms_losses[j] = &(this->template getFunctor<ADReal>(forms_loss_names[j]));
     _dPps[j] = &(this->template getFunctor<ADReal>(dPp_names[j]));
     _roughnesses[j] = &(this->template getFunctor<ADReal>(roughness_names[j]));
@@ -144,8 +143,7 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
     // Gravity
     // get local density for natural circulation aspect
     auto rhol = _fp.rho_from_p_T(_Pref(qp, state), (*(_T[j]))[i]);
-    momentum_residual +=
-        rhol * _gravity(qp, state) * (*(_lengths[j]))(qp, state) * sin((*(_alphas[j]))(qp, state));
+    momentum_residual += rhol * _gravity(qp, state) * (*(_dHs[j]))(qp, state);
     // Pump pressure
     momentum_residual -= (*(_dPps[j]))(qp, state);
   }
