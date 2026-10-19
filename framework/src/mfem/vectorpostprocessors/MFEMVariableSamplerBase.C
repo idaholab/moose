@@ -43,8 +43,25 @@ variableMesh(const InputParameters & parameters)
 {
   auto & problem =
       cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
-  return const_cast<mfem::ParMesh &>(
-      problem.getMFEMVariableMesh(parameters.get<VariableName>("variable")));
+  auto & variables = parameters.get<std::vector<VariableName>>("variables");
+  auto & first_variable = variables[0];
+  auto & mesh = const_cast<mfem::ParMesh &>(problem.getMFEMVariableMesh(first_variable));
+
+  // ensure that all variables are on the same mesh
+  for (const auto & variable : variables)
+  {
+    if (&problem.getMFEMVariableMesh(variable) != &mesh)
+    {
+      mooseError("In MFEMVariableSamplerBase:"
+                 " all variables must be on the same mesh. Found: ",
+                 variable,
+                 " which is not on the same mesh as: ",
+                 first_variable,
+                 ".");
+    }
+  }
+
+  return mesh;
 }
 }
 
@@ -52,8 +69,8 @@ InputParameters
 MFEMVariableSamplerBase::validParams()
 {
   InputParameters params = MFEMSamplerBase::validParams();
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "variable", "The variable that this VectorPostprocessor samples");
+  MFEMExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
+      params, "variables", "The variables that this VectorPostprocessor samples");
   MooseEnum avg_type(getL2AverageTypeOptions(), "ARITHMETIC");
   params.addParam<MooseEnum>("side_interpolation_type",
                              avg_type,
@@ -64,7 +81,7 @@ MFEMVariableSamplerBase::validParams()
 MFEMVariableSamplerBase::MFEMVariableSamplerBase(const InputParameters & parameters,
                                                  const std::vector<Point> & points)
   : MFEMSamplerBase(parameters, points, variableMesh(parameters)),
-    _var_name(getParam<VariableName>("variable"))
+    _var_names(getParam<std::vector<VariableName>>("variables"))
 {
   _finder.SetL2AvgType(static_cast<mfem::FindPointsGSLIB::AvgType>(
       getParam<MooseEnum>("side_interpolation_type").getEnum<L2AverageType>()));
@@ -75,38 +92,62 @@ MFEMVariableSamplerBase::initialSetup()
 {
   MFEMSamplerBase::initialSetup();
 
-  const auto continuity_type = getFESpaceContinuityType();
-  if (continuity_type == mfem::FiniteElementCollection::CONTINUOUS)
+  // Early return if all sampled variables are continuous
+  bool all_continuous = true;
+  for (const auto i_var : index_range(_var_names))
+  {
+    const auto continuity_type = getFESpaceContinuityType(i_var);
+    if (continuity_type != mfem::FiniteElementCollection::CONTINUOUS)
+    {
+      all_continuous = false;
+      break;
+    }
+  }
+
+  if (all_continuous)
     return;
 
   const auto & point_codes = _finder.GetCode();
   for (const auto i : index_range(_query_points))
     if (PointLocationCode(point_codes[i]) == PointLocationCode::BORDER)
-      switch (continuity_type)
+      for (const auto i_var : index_range(_var_names))
       {
-        case mfem::FiniteElementCollection::DISCONTINUOUS:
-          mooseWarning(typeAndName(),
-                       " found a point on an element boundary but the FE space is discontinuous at "
-                       "element boundaries: ",
-                       _query_points[i],
-                       ".");
-          break;
-        case mfem::FiniteElementCollection::TANGENTIAL:
-          mooseWarning(typeAndName(),
-                       " found point ",
-                       _query_points[i],
-                       " on an element boundary. The H(curl) finite element space has a continuous "
-                       "tangential trace there, but the normal component may differ between "
-                       "elements. The element selected by GSLIB will supply the sampled value.");
-          break;
-        case mfem::FiniteElementCollection::NORMAL:
-          mooseWarning(typeAndName(),
-                       " found point ",
-                       _query_points[i],
-                       " on an element boundary. The H(div) finite element space has a continuous "
-                       "normal trace there, but the tangential component may differ between "
-                       "elements. The element selected by GSLIB will supply the sampled value.");
-          break;
+        const auto continuity_type = getFESpaceContinuityType(i_var);
+        switch (continuity_type)
+        {
+          case mfem::FiniteElementCollection::DISCONTINUOUS:
+            mooseWarning(
+                typeAndName(),
+                " found a point on an element boundary but the FE space is discontinuous at "
+                "element boundaries: ",
+                _query_points[i],
+                ". ",
+                _var_names[i_var],
+                " is discontinuous.");
+            break;
+          case mfem::FiniteElementCollection::TANGENTIAL:
+            mooseWarning(
+                typeAndName(),
+                " found point ",
+                _query_points[i],
+                " on an element boundary. The H(curl) finite element space has a continuous "
+                "tangential trace there, but the normal component may differ between "
+                "elements. The element selected by GSLIB will supply the sampled value.",
+                _var_names[i_var],
+                " has tangential continuity.");
+            break;
+          case mfem::FiniteElementCollection::NORMAL:
+            mooseWarning(
+                typeAndName(),
+                " found point ",
+                _query_points[i],
+                " on an element boundary. The H(div) finite element space has a continuous "
+                "normal trace there, but the tangential component may differ between "
+                "elements. The element selected by GSLIB will supply the sampled value.",
+                _var_names[i_var],
+                " has normal continuity.");
+            break;
+        }
       }
 }
 

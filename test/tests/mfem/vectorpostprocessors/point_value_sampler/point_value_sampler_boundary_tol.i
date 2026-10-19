@@ -31,7 +31,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = 'h1_scalar'
+    variables = 'h1_scalar'
     # this point is considered found
     # unless tolerance is tightened, then it is outside the mesh
     points = '0.01 0.01 -2.37501'

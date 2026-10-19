@@ -26,46 +26,60 @@ MFEMVariableValueSamplerBase::validParams()
 MFEMVariableValueSamplerBase::MFEMVariableValueSamplerBase(const InputParameters & parameters,
                                                            const std::vector<Point> & points)
   : MFEMVariableSamplerBase(parameters, points),
-    _var(*getMFEMProblem().getGridFunction(_var_name)),
-    _interp_vals(points.size())
+    _interp_vals(_var_names.size(), mfem::Vector(points.size()))
 {
-  // declare value vectors for outputting
-  const auto val_dim = _var.VectorDim();
-  for (const auto i : make_range(val_dim))
+  _vars.reserve(_var_names.size());
+  _declared_vals.reserve(_var_names.size());
+
+  for (const auto & var_name : _var_names)
   {
-    auto & declared = this->declareVector(_var_name + "_" + std::to_string(i));
-    declared.resize(points.size());
-    _declared_vals.push_back(declared);
+    auto & var = *getMFEMProblem().getGridFunction(var_name);
+    _vars.push_back(var);
+
+    // declare value vectors for outputting
+    std::vector<std::reference_wrapper<VectorPostprocessorValue>> declared_vals;
+    const auto val_dim = var.VectorDim();
+    for (const auto i : make_range(val_dim))
+    {
+      auto & declared = this->declareVector(var_name + "_" + std::to_string(i));
+      declared.resize(points.size());
+      declared_vals.push_back(declared);
+    }
+    _declared_vals.push_back(declared_vals);
   }
 }
 
 int
-MFEMVariableValueSamplerBase::getFESpaceContinuityType() const
+MFEMVariableValueSamplerBase::getFESpaceContinuityType(size_t i_var) const
 {
-  return _var.FESpace()->FEColl()->GetContType();
+  return _vars[i_var].get().FESpace()->FEColl()->GetContType();
 }
 
 void
 MFEMVariableValueSamplerBase::execute()
 {
-  _finder.Interpolate(_var, _interp_vals);
+  for (size_t i_var = 0; i_var < _vars.size(); i_var++)
+    _finder.Interpolate(_vars[i_var], _interp_vals[i_var]);
 }
 
 void
 MFEMVariableValueSamplerBase::finalize()
 {
-  _interp_vals.HostReadWrite();
+  for (size_t i_var = 0; i_var < _vars.size(); i_var++)
+  {
+    _interp_vals[i_var].HostReadWrite();
 
-  const auto val_dims = _var.VectorDim();
-  const auto num_points = _declared_points[0].get().size();
-  const auto val_fespace_ordering = _var.FESpace()->GetOrdering();
-  for (const auto i_dim : make_range(val_dims))
-    for (const auto i_point : make_range(num_points))
-    {
-      const auto mfem_idx =
-          Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
-      _declared_vals[i_dim].get()[i_point] = _interp_vals[mfem_idx];
-    }
+    const auto val_dims = _vars[i_var].get().VectorDim();
+    const auto num_points = _declared_points[0].get().size();
+    const auto val_fespace_ordering = _vars[i_var].get().FESpace()->GetOrdering();
+    for (const auto i_dim : make_range(val_dims))
+      for (const auto i_point : make_range(num_points))
+      {
+        const auto mfem_idx =
+            Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
+        _declared_vals[i_var][i_dim].get()[i_point] = _interp_vals[i_var][mfem_idx];
+      }
+  }
 }
 
 #endif // MOOSE_MFEM_ENABLED
