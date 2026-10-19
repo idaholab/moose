@@ -79,6 +79,20 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
                                                        : getParam<Real>("penalty")),
     _slip_tolerance(isParamValid("slip_tolerance") ? getParam<Real>("slip_tolerance") : 0.0),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _dof_to_step_slip(
+        declareRestartableData<std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>>>(
+            "dof_to_step_slip")),
+    _dof_to_accumulated_slip(
+        declareRestartableData<std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>>>(
+            "dof_to_accumulated_slip")),
+    _dof_to_tangential_traction(
+        declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>>(
+            "dof_to_tangential_traction")),
+    _dof_to_frictional_lagrange_multipliers(
+        declareRestartableData<std::unordered_map<dof_id_type, TwoVector>>(
+            "dof_to_frictional_lagrange_multipliers")),
+    _dof_to_local_penalty_friction(declareRestartableData<std::unordered_map<dof_id_type, Real>>(
+        "dof_to_local_penalty_friction")),
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
     _adaptivity_friction(
         getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
@@ -187,7 +201,7 @@ Real
 PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
                                                         const unsigned int component) const
 {
-  const auto it = _dof_to_tangential_traction.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_tangential_traction.find(node->id());
 
   if (it != _dof_to_tangential_traction.end())
     return MetaPhysicL::raw_value(it->second.first(component));
@@ -199,7 +213,7 @@ Real
 PenaltyFrictionUserObject::getAccumulatedSlip(const Node * const node,
                                               const unsigned int component) const
 {
-  const auto it = _dof_to_accumulated_slip.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_accumulated_slip.find(node->id());
 
   if (it != _dof_to_accumulated_slip.end())
     return MetaPhysicL::raw_value(it->second.first(component));
@@ -223,8 +237,7 @@ Real
 PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * const node,
                                                                 const unsigned int component) const
 {
-  const auto it =
-      _dof_to_frictional_lagrange_multipliers.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_frictional_lagrange_multipliers.find(node->id());
 
   if (it != _dof_to_frictional_lagrange_multipliers.end())
     return MetaPhysicL::raw_value(it->second[component]);
@@ -237,8 +250,7 @@ PenaltyFrictionUserObject::nodalTangentialPressure(const Node & node,
                                                    const unsigned int direction) const
 {
   mooseAssert(direction < 2, "There are at most two tangent directions.");
-  return libmesh_map_find(_dof_to_tangential_traction, static_cast<const DofObject *>(&node))
-      .first(direction);
+  return libmesh_map_find(_dof_to_tangential_traction, node.id()).first(direction);
 }
 
 void
@@ -265,19 +277,19 @@ PenaltyFrictionUserObject::reinit()
     // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    const auto penalty_friction = findValue(
-        _dof_to_local_penalty_friction, cast_ptr<const DofObject *>(node), _penalty_friction);
+    const auto penalty_friction =
+        findValue(_dof_to_local_penalty_friction, node->id(), _penalty_friction);
 
     // utilized quantities
     const auto & normal_pressure = _dof_to_normal_pressure[node];
 
     // map the tangential traction and accumulated slip
-    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node];
-    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node->id()];
+    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node->id()];
 
     Real normal_lm = -1;
-    if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
-      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+    if (_dof_to_lagrange_multiplier.find(node->id()) != _dof_to_lagrange_multiplier.end())
+      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node->id());
 
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
@@ -291,7 +303,7 @@ PenaltyFrictionUserObject::reinit()
 
       // frictional lagrange multiplier (delta lambda^(k)_T)
       const auto & tangential_lm =
-          _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : zero;
+          _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node->id()] : zero;
 
       // tangential trial traction (Simo 3.12)
       // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
@@ -328,7 +340,7 @@ PenaltyFrictionUserObject::reinit()
       accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
 
       // Keep track of slip vector for adaptive penalty
-      auto & [step_slip, old_step_slip] = _dof_to_step_slip[node];
+      auto & [step_slip, old_step_slip] = _dof_to_step_slip[node->id()];
       step_slip = MetaPhysicL::raw_value(slip_distance);
     }
     else
@@ -369,8 +381,9 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
 
   std::pair<Real, dof_id_type> max_slip{0.0, 0};
 
-  for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
+  for (const auto & [node_id, traction_pair] : _dof_to_tangential_traction)
   {
+    const DofObject * const dof_object = _subproblem.mesh().nodePtr(node_id);
     const auto & tangential_traction = traction_pair.first;
     auto normal_pressure = _dof_to_normal_pressure[dof_object];
 
@@ -435,14 +448,15 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 
   PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
 
-  for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+  for (auto & [node_id, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
   {
-    auto & penalty_friction = _dof_to_local_penalty_friction[dof_object];
+    const DofObject * const dof_object = _subproblem.mesh().nodePtr(node_id);
+    auto & penalty_friction = _dof_to_local_penalty_friction[node_id];
     if (penalty_friction == 0.0)
       penalty_friction = _penalty_friction;
 
     // normal quantities
-    const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, dof_object);
+    const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node_id);
 
     // tangential quantities
     const auto & real_tangential_velocity =
@@ -450,7 +464,7 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     const TwoVector slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
                                      MetaPhysicL::raw_value(real_tangential_velocity[1])};
 
-    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[dof_object];
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node_id];
 
     const TwoVector tangential_trial_traction =
         old_tangential_traction + tangential_lm + penalty_friction * slip_velocity * _dt;
@@ -480,7 +494,7 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     }
     else if (_adaptivity_friction == AdaptivityFrictionalPenalty::FRICTION_LIMIT)
     {
-      const auto & step_slip = libmesh_map_find(_dof_to_step_slip, dof_object);
+      const auto & step_slip = libmesh_map_find(_dof_to_step_slip, node_id);
       // No change of direction: Adjust penalty factor for the frictional problem
       if (step_slip.first.dot(step_slip.second) > 0.0 && abs(normal_lm) > TOLERANCE &&
           _slip_tolerance < _dt * slip_velocity.norm())
