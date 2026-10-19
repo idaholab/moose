@@ -1,5 +1,8 @@
 # Friction Factor Closures Verification
 
+!alert note
+These results were obtained with commit f556f2e309c2c9dc9c67005e71c4f175a476cef7
+
 ## Test Description
 
 &nbsp;
