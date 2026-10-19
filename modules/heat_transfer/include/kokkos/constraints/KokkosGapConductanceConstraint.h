@@ -29,7 +29,8 @@ public:
                                          const Moose::Kokkos::MortarDatum & datum,
                                          Real & d_secondary,
                                          Real & d_primary,
-                                         Real & d_lambda) const;
+                                         Real & d_lambda,
+                                         Real & d_gap) const;
 
 private:
   /// The gap width at a point, bounded below by the minimum gap
@@ -69,7 +70,8 @@ KokkosGapConductanceConstraint::computeQpJacobian(const MortarSide side,
                                                   const Moose::Kokkos::MortarDatum & datum,
                                                   Real & d_secondary,
                                                   Real & d_primary,
-                                                  Real & d_lambda) const
+                                                  Real & d_lambda,
+                                                  Real & d_gap) const
 {
   switch (side)
   {
@@ -80,9 +82,15 @@ KokkosGapConductanceConstraint::computeQpJacobian(const MortarSide side,
       d_lambda = 1;
       break;
     case MortarSide::Lower:
+    {
+      const auto l = gapWidth(datum);
       d_lambda = 1;
-      d_primary = -_k / gapWidth(datum);
-      d_secondary = _k / gapWidth(datum);
+      d_primary = -_k / l;
+      d_secondary = _k / l;
+      // The gap width follows the gap above the minimum gap and is constant below it
+      if (datum.gap > _min_gap)
+        d_gap = _k * (datum.u_primary - datum.u_secondary) / (l * l);
       break;
+    }
   }
 }

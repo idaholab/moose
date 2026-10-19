@@ -51,11 +51,21 @@ struct MortarDatum
  *
  *   Real computeQpResidual(MortarSide side, const MortarDatum & datum) const;
  *
- * and their derivatives with respect to the secondary, primary, and Lagrange multiplier values
- * from
+ * and their derivatives with respect to the secondary, primary, and Lagrange multiplier values and
+ * the gap from
  *
  *   void computeQpJacobian(MortarSide side, const MortarDatum & datum, Real & d_secondary,
- *                          Real & d_primary, Real & d_lambda) const;
+ *                          Real & d_primary, Real & d_lambda, Real & d_gap) const;
+ *
+ * On the current configuration (use_displaced_mesh = true) the segments come from the mortar
+ * interface of the displaced mesh and are repacked before every evaluation. The gap
+ * g = (x_primary - x_secondary) . n then depends on the displacements u through
+ * x = X + u, and the base assembles the displacement columns
+ *
+ *   d g / d u_secondary,j = -n phi_secondary,j,  d g / d u_primary,j = n phi_primary,j
+ *
+ * from d_gap. The normal, the segment quadrature points, and their weights are held fixed in this
+ * linearization, as in the non-Kokkos mortar constraints.
  *
  * One team assembles one local secondary element.
  */
@@ -139,6 +149,17 @@ private:
   /// Whether the row variable of a side is coupled to the column variable of a side
   bool _coupled[3][3];
 
+  /// Displacement components of the current configuration, one variable each
+  Variable _disp_var[3];
+  /// Number of displacement components whose Jacobian columns the constraint assembles
+  unsigned int _n_disp = 0;
+  /// FE type ID, family, and order of the displacement variables
+  unsigned int _disp_fe = 0;
+  libMesh::FEFamily _disp_family = libMesh::LAGRANGE;
+  libMesh::Order _disp_order = libMesh::FIRST;
+  /// Whether the row variable of a side is coupled to a displacement component
+  bool _disp_coupled[3][3];
+
   /// Whether the Lagrange multiplier uses a dual basis
   bool _use_dual;
 
@@ -164,6 +185,8 @@ private:
   /// Gap at each point: the distance from the secondary to the primary face along the interpolated
   /// secondary normal
   Array<Real> _gap;
+  /// Interpolated secondary normal at each point
+  Array<Real3> _normal;
   ///@}
 };
 
@@ -190,6 +213,12 @@ MortarConstraint::operator()(MortarLoop,
     const auto & xi = _xi[side][qp];
     const libMesh::FEShapeKey key{_side_family[side], _type[side][qp], _side_order[side]};
     return libMesh::Kokkos::shape(key, i, xi(0), xi(1), xi(2));
+  };
+  const auto disp_shape = [&](const unsigned int side, const unsigned int j, const dof_id_type qp)
+  {
+    const auto & xi = _xi[side][qp];
+    const libMesh::FEShapeKey key{_disp_family, _type[side][qp], _disp_order};
+    return libMesh::Kokkos::shape(key, j, xi(0), xi(1), xi(2));
   };
 
   // The dual basis coefficients of the Lagrange multiplier on this secondary element, computed
@@ -256,33 +285,61 @@ MortarConstraint::operator()(MortarLoop,
       const auto row_elem = _elem[side][qp];
       const auto & row_var = _side_var[side];
 
-      Real f = 0, d[3] = {0, 0, 0};
+      Real f = 0, d[3] = {0, 0, 0}, d_gap = 0;
       if (_computing_residual)
         f = constraint.computeQpResidual(static_cast<MortarSide>(side), datum);
       if (_computing_jacobian)
-        constraint.computeQpJacobian(static_cast<MortarSide>(side), datum, d[S], d[P], d[L]);
+        constraint.computeQpJacobian(static_cast<MortarSide>(side), datum, d[S], d[P], d[L], d_gap);
 
       // The threads of the team split the test functions of the side
-      ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_dofs(side, qp)),
-                             [&](const unsigned int i)
-                             {
-                               const auto w = _JxW[qp] * basis(side, i, qp);
+      ::Kokkos::parallel_for(
+          ::Kokkos::TeamThreadRange(team, n_dofs(side, qp)),
+          [&](const unsigned int i)
+          {
+            const auto w = _JxW[qp] * basis(side, i, qp);
 
-                               if (_computing_residual)
-                                 accumulateTaggedResidual(w * f, row_var, row_elem, i);
+            if (_computing_residual)
+              accumulateTaggedResidual(w * f, row_var, row_elem, i);
 
-                               if (_computing_jacobian)
-                                 for (unsigned int col = 0; col < 3; ++col)
-                                   if (d[col] && _coupled[side][col])
-                                     for (unsigned int j = 0; j < n_dofs(col, qp); ++j)
-                                       accumulateTaggedMatrix(w * d[col] * basis(col, j, qp),
-                                                              row_var,
-                                                              row_elem,
-                                                              i,
-                                                              _side_var[col],
-                                                              _elem[col][qp],
-                                                              j);
-                             });
+            if (_computing_jacobian)
+            {
+              for (unsigned int col = 0; col < 3; ++col)
+                if (d[col] && _coupled[side][col])
+                  for (unsigned int j = 0; j < n_dofs(col, qp); ++j)
+                    accumulateTaggedMatrix(w * d[col] * basis(col, j, qp),
+                                           row_var,
+                                           row_elem,
+                                           i,
+                                           _side_var[col],
+                                           _elem[col][qp],
+                                           j);
+
+              // The gap moves with the displacements of both faces
+              if (d_gap)
+                for (unsigned int c = 0; c < _n_disp; ++c)
+                  if (_disp_coupled[side][c])
+                    for (const unsigned int face : {S, P})
+                    {
+                      // A face whose block the displacement does not span stays in place
+                      const auto elem = _elem[face][qp];
+                      const auto & info = mesh.getElementInfo(elem);
+                      if (!kokkosSystem(_disp_var[c].sys())
+                               .isVariableActive(_disp_var[c].var(), info.subdomain))
+                        continue;
+                      const auto n_disp_dofs = assembly.getNumDofs(info.type, _disp_fe);
+                      const auto sign = face == S ? -1 : 1;
+                      for (unsigned int j = 0; j < n_disp_dofs; ++j)
+                        accumulateTaggedMatrix(w * d_gap * sign * _normal[qp](c) *
+                                                   disp_shape(face, j, qp),
+                                               row_var,
+                                               row_elem,
+                                               i,
+                                               _disp_var[c],
+                                               elem,
+                                               j);
+                    }
+            }
+          });
     }
   }
 }

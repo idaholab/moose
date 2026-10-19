@@ -81,9 +81,7 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     _interface(std::make_shared<Interface>(this, _fe_problem)),
     _use_dual(_var.useDual())
 {
-  if (_configuration.displaced())
-    paramError("use_displaced_mesh",
-               "Kokkos mortar constraints cannot yet be posed on the current configuration.");
+  _configuration = Configuration(*this);
 
   // Sides are indexed by MortarSide: the secondary and primary primal variables and the Lagrange
   // multiplier, all on lower-dimensional elements
@@ -100,6 +98,30 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     for (const auto col : make_range(3u))
       _coupled[row][col] =
           _fe_problem.areCoupled(vars[row]->number(), vars[col]->number(), _sys.number());
+
+  // The Jacobian columns of the displacements that are solution variables of this system
+  if (_configuration.displaced())
+  {
+    auto disp = _configuration.displacements();
+    for (const auto c : make_range(disp.components()))
+    {
+      const auto & disp_var = *disp.mooseVar(c);
+      if (disp.sys(c) != _sys.number() || disp_var.kind() != Moose::VarKindType::VAR_SOLVER)
+        continue;
+
+      if (_n_disp &&
+          (disp_var.feType().order != _disp_order || disp_var.feType().family != _disp_family))
+        paramError("use_displaced_mesh", "The displacements must share one finite element type.");
+
+      _disp_var[c].init(disp_var);
+      _disp_family = disp_var.feType().family;
+      _disp_order = disp_var.feType().order;
+      for (const auto row : make_range(3u))
+        _disp_coupled[row][c] =
+            _fe_problem.areCoupled(vars[row]->number(), disp_var.number(), _sys.number());
+      _n_disp = c + 1;
+    }
+  }
 }
 
 MortarConstraint::MortarConstraint(const MortarConstraint & object)
@@ -108,12 +130,17 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _secondary_var(object._secondary_var),
     _primary_var(object._primary_var),
     _interface(object._interface),
+    _n_disp(object._n_disp),
+    _disp_fe(object._disp_fe),
+    _disp_family(object._disp_family),
+    _disp_order(object._disp_order),
     _use_dual(object._use_dual),
     _computing_residual(object._computing_residual),
     _computing_jacobian(object._computing_jacobian),
     _secondary_qp_begin(object._secondary_qp_begin),
     _JxW(object._JxW),
-    _gap(object._gap)
+    _gap(object._gap),
+    _normal(object._normal)
 {
   for (const auto side : make_range(3u))
   {
@@ -124,8 +151,12 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _side_fe[side] = object._side_fe[side];
     _side_family[side] = object._side_family[side];
     _side_order[side] = object._side_order[side];
+    _disp_var[side] = object._disp_var[side];
     for (const auto col : make_range(3u))
+    {
       _coupled[side][col] = object._coupled[side][col];
+      _disp_coupled[side][col] = object._disp_coupled[side][col];
+    }
   }
 }
 
@@ -147,12 +178,17 @@ MortarConstraint::packSegments()
   const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
   for (const auto side : make_range(3u))
     _side_fe[side] = kokkosAssembly().getFETypeID(vars[side]->feType());
+  for (const auto c : make_range(_n_disp))
+    if (_disp_var[c].initialized())
+      _disp_fe = kokkosAssembly().getFETypeID(
+          const_cast<Variable &>(_disp_var[c]).mooseFieldVar()->feType());
 
   std::vector<dof_id_type> secondary_qp_begin = {0};
   std::vector<ContiguousElementID> elems[3];
   std::vector<libMesh::ElemType> types[3];
   std::vector<Point> xis[3];
   std::vector<Real> JxW, gap;
+  std::vector<Point> normal;
 
   // The reference coordinates on an interior parent of a reference point on its lower-dimensional
   // side element, whose nodes are the nodes of that side in order
@@ -197,9 +233,14 @@ MortarConstraint::packSegments()
             msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule, xi2);
       }
 
+      // The segment elements of the current configuration belong to the displaced mesh, whose
+      // elements share their IDs with the reference mesh that the Kokkos mesh mirrors
       const Elem * const side_elems[3] = {msinfo.secondary_elem->interior_parent(),
                                           msinfo.primary_elem->interior_parent(),
                                           msinfo.secondary_elem};
+      const Elem * reference_elems[3];
+      for (const auto side : make_range(3u))
+        reference_elems[side] = mesh.elemPtr(side_elems[side]->id());
 
       const auto normals = amg.getNormals(*msinfo.secondary_elem, xi1);
 
@@ -211,7 +252,7 @@ MortarConstraint::packSegments()
 
         for (const auto side : make_range(3u))
         {
-          elems[side].push_back(kokkos_mesh.getContiguousElementID(side_elems[side]));
+          elems[side].push_back(kokkos_mesh.getContiguousElementID(reference_elems[side]));
           types[side].push_back(side_elems[side]->type());
           xis[side].push_back(side_xi[side]);
         }
@@ -222,6 +263,7 @@ MortarConstraint::packSegments()
             libMesh::FEMap::map(side_elems[0]->dim(), side_elems[0], side_xi[0]);
         const auto x_primary = libMesh::FEMap::map(side_elems[1]->dim(), side_elems[1], side_xi[1]);
         gap.push_back((x_primary - x_secondary) * normals[qp]);
+        normal.push_back(normals[qp]);
       }
     }
 
@@ -232,6 +274,7 @@ MortarConstraint::packSegments()
   _secondary_qp_begin.create(secondary_qp_begin.size());
   _JxW.create(n);
   _gap.create(n);
+  _normal.create(n);
 
   for (const auto i : index_range(secondary_qp_begin))
     _secondary_qp_begin[i] = secondary_qp_begin[i];
@@ -240,6 +283,7 @@ MortarConstraint::packSegments()
   {
     _JxW[qp] = JxW[qp];
     _gap[qp] = gap[qp];
+    _normal[qp] = normal[qp];
   }
 
   for (const auto side : make_range(3u))
@@ -263,6 +307,7 @@ MortarConstraint::packSegments()
   _secondary_qp_begin.copyToDevice();
   _JxW.copyToDevice();
   _gap.copyToDevice();
+  _normal.copyToDevice();
 
   _interface->needs_packing = false;
 }
@@ -270,7 +315,8 @@ MortarConstraint::packSegments()
 void
 MortarConstraint::dispatch(const bool residual, const bool jacobian)
 {
-  if (_interface->needs_packing)
+  // The segments of the current configuration move with the displacements of every evaluation
+  if (_interface->needs_packing || _configuration.displaced())
     packSegments();
 
   if (_secondary_qp_begin.size() < 2)

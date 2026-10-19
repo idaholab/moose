@@ -28,7 +28,8 @@ public:
                                          const Moose::Kokkos::MortarDatum & datum,
                                          Real & d_secondary,
                                          Real & d_primary,
-                                         Real & d_lambda) const;
+                                         Real & d_lambda,
+                                         Real & d_gap) const;
 };
 
 KOKKOS_FUNCTION inline Real
@@ -54,7 +55,8 @@ KokkosEqualValueConstraint::computeQpJacobian(const MortarSide side,
                                               const Moose::Kokkos::MortarDatum &,
                                               Real & d_secondary,
                                               Real & d_primary,
-                                              Real & d_lambda) const
+                                              Real & d_lambda,
+                                              Real &) const
 {
   switch (side)
   {

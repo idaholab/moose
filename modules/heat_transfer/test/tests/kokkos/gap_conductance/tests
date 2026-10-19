@@ -58,4 +58,65 @@
       compute_devices = 'cpu cuda'
     []
   []
+  [current_configuration]
+    requirement = 'The Kokkos system shall compute the heat flux through a gap of constant conductance between nonconforming meshes with a mortar Lagrange multiplier on the current configuration given by the mesh displacements,'
+    [solution]
+      type = CSVDiff
+      input = 'gap_conductance_prescribed_displacement.i'
+      # The differences between the two solutions are roundoff
+      abs_zero = 1e-12
+      csvdiff = 'gap_conductance_prescribed_displacement_out.csv'
+      detail = 'matching the solution of GapConductanceConstraint on the displaced mesh in two dimensions with a standard Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [solution_dual]
+      type = CSVDiff
+      input = 'gap_conductance_prescribed_displacement.i'
+      cli_args = 'Variables/lambda/use_dual=true Variables/lambda_reference/use_dual=true Outputs/file_base=gap_conductance_prescribed_displacement_dual_out'
+      # The differences between the two solutions are roundoff
+      abs_zero = 1e-12
+      csvdiff = 'gap_conductance_prescribed_displacement_dual_out.csv'
+      detail = 'matching the solution of GapConductanceConstraint on the displaced mesh in two dimensions with a dual Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [solution_3d]
+      type = CSVDiff
+      input = 'gap_conductance_prescribed_displacement_3d.i'
+      # The differences between the two solutions are roundoff
+      abs_zero = 1e-12
+      csvdiff = 'gap_conductance_prescribed_displacement_3d_out.csv'
+      detail = 'matching the solution of GapConductanceConstraint on the displaced mesh in three dimensions with a standard Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [solution_3d_dual]
+      type = CSVDiff
+      input = 'gap_conductance_prescribed_displacement_3d.i'
+      cli_args = 'Variables/lambda/use_dual=true Variables/lambda_reference/use_dual=true Outputs/file_base=gap_conductance_prescribed_displacement_3d_dual_out'
+      # The differences between the two solutions are roundoff
+      abs_zero = 1e-12
+      csvdiff = 'gap_conductance_prescribed_displacement_3d_dual_out.csv'
+      detail = 'matching the solution of GapConductanceConstraint on the displaced mesh in three dimensions with a dual Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'gap_conductance_displaced_jacobian.i'
+      cli_args = 'Outputs/csv=false'
+      detail = 'with an exact Jacobian with respect to the displacements with a standard Lagrange multiplier basis, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [jacobian_dual]
+      type = PetscJacobianTester
+      input = 'gap_conductance_displaced_jacobian.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/csv=false'
+      detail = 'with an exact Jacobian with respect to the displacements with a dual Lagrange multiplier basis.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
 []

@@ -2,11 +2,17 @@
 
 !if! function=hasCapability('kokkos')
 
-This is the Kokkos version of [GapConductanceConstraint](GapConductanceConstraint.md) on the
-reference configuration. See the original document for details. The gap width at each mortar
-segment quadrature point is the distance from the secondary to the primary face along the
-interpolated secondary normal; it is computed once on the host when the mortar segments are packed.
-The Lagrange multiplier may use a standard or a dual basis.
+This is the Kokkos version of [GapConductanceConstraint](GapConductanceConstraint.md). See the
+original document for details. The gap width at each mortar segment quadrature point is the distance
+from the secondary to the primary face along the interpolated secondary normal. The Lagrange
+multiplier may use a standard or a dual basis.
+
+With [!param](/Constraints/KokkosGapConductanceConstraint/use_displaced_mesh) set to true, the
+constraint is posed on the current configuration given by the displacements of the `[Mesh]` block,
+which it couples without a `displacements` parameter. The mortar segments come from the displaced
+mesh and are rebuilt before every evaluation, and the Jacobian includes the derivatives of the gap
+with respect to the displacements, holding the normals and the segment quadrature fixed, as the
+original version does.
 
 !alert note
 The Kokkos version always uses the correct edge dropping treatment: secondary elements partially
