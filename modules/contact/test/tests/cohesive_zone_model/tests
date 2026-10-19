@@ -306,4 +306,14 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
   []
+  [rigid_rotation]
+    type = CSVDiff
+    issues = '#34130'
+    input = czm_rigid_rotation.i
+    csvdiff = czm_rigid_rotation_out.csv
+    requirement = 'The system shall compute the local displacement jump of a mortar cohesive zone '
+                  'model in the frame of the current interface, so that a rigid rotation of the '
+                  'bonded bodies does not change the normal and tangential jumps.'
+    abs_zero = 1.0e-10
+  []
 []
