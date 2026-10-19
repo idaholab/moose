@@ -223,6 +223,16 @@
       custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
   []
+  [normal_near_negative_x]
+    type = 'CSVDiff'
+    input = frictional-lm-mortar-normal-near-negative-x.i
+    csvdiff = 'frictional-lm-mortar-normal-near-negative-x_out.csv'
+    requirement = 'The system shall solve two-dimensional frictional mortar contact with Lagrange '
+                  'multipliers when the secondary surface normal is close to the negative x '
+                  'direction.'
+    issues = '#34145'
+    restep = false # Test is prescribed to abort on failed timestep
+  []
   [split_secondary]
     type = 'Exodiff'
     input = 'variational-frictional.i'

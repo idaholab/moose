@@ -2174,7 +2174,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
 
     _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
     _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)] =
-        Moose::Mortar::householderTangents(nodal_normal);
+        Moose::Mortar::nodalTangents(nodal_normal, dim);
   }
 }
 
