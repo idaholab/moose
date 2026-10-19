@@ -25,6 +25,10 @@ MortarConstraint::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += MortarConsumerInterface::validParams();
+  // The mortar loop integrates every segment of a partially covered secondary element and keeps
+  // its Lagrange multiplier degrees of freedom active
+  params.set<bool>("correct_edge_dropping") = true;
+  params.suppressParameter<bool>("correct_edge_dropping");
 
   // The Lagrange multiplier is the variable of the constraint, on the lower-dimensional secondary
   // elements
@@ -108,7 +112,8 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _computing_residual(object._computing_residual),
     _computing_jacobian(object._computing_jacobian),
     _secondary_qp_begin(object._secondary_qp_begin),
-    _JxW(object._JxW)
+    _JxW(object._JxW),
+    _gap(object._gap)
 {
   for (const auto side : make_range(3u))
   {
@@ -147,7 +152,7 @@ MortarConstraint::packSegments()
   std::vector<ContiguousElementID> elems[3];
   std::vector<libMesh::ElemType> types[3];
   std::vector<Point> xis[3];
-  std::vector<Real> JxW;
+  std::vector<Real> JxW, gap;
 
   // The reference coordinates on an interior parent of a reference point on its lower-dimensional
   // side element, whose nodes are the nodes of that side in order
@@ -196,6 +201,8 @@ MortarConstraint::packSegments()
                                           msinfo.primary_elem->interior_parent(),
                                           msinfo.secondary_elem};
 
+      const auto normals = amg.getNormals(*msinfo.secondary_elem, xi1);
+
       for (const auto qp : make_range(qrule->n_points()))
       {
         const Point side_xi[3] = {parent_point(*msinfo.secondary_elem, xi1[qp]),
@@ -210,6 +217,11 @@ MortarConstraint::packSegments()
         }
 
         JxW.push_back(JxW_msm[qp] * coord_msm[qp]);
+
+        const auto x_secondary =
+            libMesh::FEMap::map(side_elems[0]->dim(), side_elems[0], side_xi[0]);
+        const auto x_primary = libMesh::FEMap::map(side_elems[1]->dim(), side_elems[1], side_xi[1]);
+        gap.push_back((x_primary - x_secondary) * normals[qp]);
       }
     }
 
@@ -219,12 +231,16 @@ MortarConstraint::packSegments()
   const auto n = JxW.size();
   _secondary_qp_begin.create(secondary_qp_begin.size());
   _JxW.create(n);
+  _gap.create(n);
 
   for (const auto i : index_range(secondary_qp_begin))
     _secondary_qp_begin[i] = secondary_qp_begin[i];
 
   for (const auto qp : make_range(n))
+  {
     _JxW[qp] = JxW[qp];
+    _gap[qp] = gap[qp];
+  }
 
   for (const auto side : make_range(3u))
   {
@@ -246,6 +262,7 @@ MortarConstraint::packSegments()
 
   _secondary_qp_begin.copyToDevice();
   _JxW.copyToDevice();
+  _gap.copyToDevice();
 
   _interface->needs_packing = false;
 }

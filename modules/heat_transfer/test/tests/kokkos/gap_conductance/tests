@@ -1,0 +1,61 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosGapConductanceConstraint.md'
+
+  [gap_conductance]
+    requirement = 'The Kokkos system shall compute the heat flux through a gap of constant conductance between nonconforming meshes with a mortar Lagrange multiplier, matching the solution of GapConductanceConstraint,'
+    [2d]
+      type = CSVDiff
+      input = 'gap_conductance.i'
+      csvdiff = 'gap_conductance_out.csv'
+      detail = 'in two dimensions with a standard Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [2d_dual]
+      type = CSVDiff
+      input = 'gap_conductance.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/file_base=gap_conductance_dual_out'
+      csvdiff = 'gap_conductance_dual_out.csv'
+      detail = 'in two dimensions with a dual Lagrange multiplier basis,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = CSVDiff
+      input = 'gap_conductance_3d.i'
+      csvdiff = 'gap_conductance_3d_out.csv'
+      detail = 'in three dimensions with a standard Lagrange multiplier basis, and'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_dual]
+      type = CSVDiff
+      input = 'gap_conductance_3d.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/file_base=gap_conductance_3d_dual_out'
+      csvdiff = 'gap_conductance_3d_dual_out.csv'
+      detail = 'in three dimensions with a dual Lagrange multiplier basis.'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+  [jacobian]
+    requirement = 'The Kokkos system shall assemble the exact Jacobian of a mortar gap conductance constraint'
+    [standard]
+      type = PetscJacobianTester
+      input = 'gap_conductance.i'
+      cli_args = 'Outputs/csv=false'
+      detail = 'with a standard Lagrange multiplier basis and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [dual]
+      type = PetscJacobianTester
+      input = 'gap_conductance_3d.i'
+      cli_args = 'Variables/lambda/use_dual=true Outputs/csv=false'
+      detail = 'with a dual Lagrange multiplier basis.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

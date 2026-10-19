@@ -32,6 +32,8 @@ struct MortarDatum
   Real u_primary;
   /// Lagrange multiplier value
   Real lambda;
+  /// Signed distance from the secondary to the primary face along the secondary normal
+  Real gap;
 };
 
 /**
@@ -159,6 +161,9 @@ private:
   Array<Real3> _xi[3];
   /// Quadrature weight of each point, including the coordinate transform factor
   Array<Real> _JxW;
+  /// Gap at each point: the distance from the secondary to the primary face along the interpolated
+  /// secondary normal
+  Array<Real> _gap;
   ///@}
 };
 
@@ -244,7 +249,7 @@ MortarConstraint::operator()(MortarLoop,
 
   for (dof_id_type qp = begin; qp < end; ++qp)
   {
-    const MortarDatum datum{value(S, qp), value(P, qp), value(L, qp)};
+    const MortarDatum datum{value(S, qp), value(P, qp), value(L, qp), _gap[qp]};
 
     for (unsigned int side = 0; side < 3; ++side)
     {
