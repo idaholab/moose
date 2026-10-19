@@ -111,7 +111,8 @@
       type = RunException
       input = parallel_exception_element_user_object.i
       cli_args = 'UserObjects/exception/execute_on=LINEAR'
-      expect_err = 'Aborting as solve did not converge\n+A std::exception was raised during FEProblemBase::computeUserObjectsInternal\nExceptionElementUserObject intentional execute exception'
+      expect_err = 'Aborting as solve did not converge.*^A std::exception was raised during FEProblemBase::computeUserObjectsInternal\nExceptionElementUserObject intentional execute exception'
+      absent_out = 'raised during FEProblemBase::compute(ResidualTags|JacobianTags|ResidualAndJacobian)'
       min_parallel = 2
       max_parallel = 2
       detail = 'during residual evaluation.'
