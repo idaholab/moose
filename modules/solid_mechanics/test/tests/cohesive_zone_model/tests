@@ -279,6 +279,14 @@
       difference_tol = 2.0
       detail = 'and accurately compute the hand-coded Jacobian under mixed-mode loading using the Benzeggagh-Kenane criterion.'
     []
+    [bilinear_mixed_jacobian_zero_jump]
+      type = PetscJacobianTester
+      input = 'bilinear_mixed_jacobian.i'
+      cli_args = "ICs/disp_x_ic/value=0 ICs/disp_y_ic/value=0"
+      ratio_tol = 1e-6
+      difference_tol = 2.0
+      detail = 'and accurately compute the hand-coded Jacobian at zero displacement jump.'
+    []
     [normal]
       type = Exodiff
       input = 'bilinear_mixed.i'
