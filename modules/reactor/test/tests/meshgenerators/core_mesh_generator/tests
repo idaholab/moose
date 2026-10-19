@@ -638,4 +638,19 @@
       mesh_mode = REPLICATED
     []
   []
+  issues = '#33088'
+  [param_errors]
+    design = 'meshgenerators/AssemblyMeshGenerator.md'
+    requirement = 'The system shall throw an error for core definitions in --csg-only mode where '
+    [core_lattice_missing_assembly_reference]
+      detail = 'the core lattice references a assembly that does not exist'
+      type = RunException
+      input = core_square.i
+       cli_args ='Mesh/inactive=translate
+                  Mesh/cmg/pattern="5 1; 1 0"
+                  --csg-only'
+      expect_err = "Core lattice contains an index that exceeds the number of input assemblies"
+      mesh_mode = REPLICATED
+    []
+  []
 []
