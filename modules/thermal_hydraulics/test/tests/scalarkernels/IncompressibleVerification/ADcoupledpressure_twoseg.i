@@ -53,7 +53,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = CoupledPressureIncompressibleMomentumSPScalarKernel
+    type = ADCoupledPressureIncompressibleMomentumSPScalarKernel
     variable = 'dPc'
     coupled_mass_flow_rate = 'm1'
     temperatures = 'T1 T1'

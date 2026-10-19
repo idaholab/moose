@@ -46,7 +46,7 @@ area = '${fparse 3.14159* ${R}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = IncompressibleMomentumSPScalarKernel
+    type = ADIncompressibleMomentumSPScalarKernel
     variable = 'm1'
     reference_pressure_drop = 'dPc'
     temperatures = 'T1'
@@ -63,7 +63,7 @@ area = '${fparse 3.14159* ${R}^2}'
     is_implicit = True
   []
   [pipe1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'm1'
   []
   [temp]
