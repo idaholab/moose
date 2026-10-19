@@ -32,12 +32,14 @@ TabulatedPVTFluidProperties::validParams()
       "cv", 2000.0, "cv>0", "Constant specific heat capacity at constant volume (J/kg/K)");
   params.addRangeCheckedParam<Real>(
       "molar_mass", "molar_mass>0", "Molar mass of the fluid (kg/mol). Only needed if requested");
-  MooseEnum out_of_bounds("extrapolate clamp", "extrapolate");
+  MooseEnum out_of_bounds("throw_exception move_to_bounds linear_extrapolation", "throw_exception");
   params.addParam<MooseEnum>(
       "out_of_bounds",
       out_of_bounds,
-      "Behaviour for pressures outside the table: 'extrapolate' linearly from the end intervals, "
-      "or 'clamp' to the end values (which gives zero pressure derivatives)");
+      "Behaviour for pressures outside the tabulated range: 'throw_exception' (the time step "
+      "is cut), 'move_to_bounds' (use the end values of the table, giving zero pressure "
+      "derivatives) or 'linear_extrapolation' (extrapolate linearly from the end intervals). "
+      "Results using the last two options outside the table should be used with care");
   params.addClassDescription(
       "Isothermal fluid properties from a table of pressure, formation volume factor and "
       "viscosity (PVDO/PVDG style). 1/B and 1/(B mu) are interpolated linearly in pressure.");
@@ -49,7 +51,7 @@ TabulatedPVTFluidProperties::TabulatedPVTFluidProperties(const InputParameters &
     _density_sc(getParam<Real>("density_sc")),
     _p(getParam<std::vector<Real>>("pressure")),
     _cv(getParam<Real>("cv")),
-    _extrapolate(getParam<MooseEnum>("out_of_bounds") == "extrapolate")
+    _out_of_bounds(getParam<MooseEnum>("out_of_bounds").getEnum<OutOfBounds>())
 {
   const auto & B = getParam<std::vector<Real>>("formation_volume_factor");
   const auto & mu = getParam<std::vector<Real>>("viscosity");
@@ -101,20 +103,30 @@ TabulatedPVTFluidProperties::interpolate(Real p,
 {
   const std::size_t n = _p.size();
 
-  if (!_extrapolate && p <= _p.front())
-  {
-    value = y.front();
-    dvalue_dp = 0.0;
-    return;
-  }
-  if (!_extrapolate && p >= _p.back())
-  {
-    value = y.back();
-    dvalue_dp = 0.0;
-    return;
-  }
+  if (p < _p.front() || p > _p.back())
+    switch (_out_of_bounds)
+    {
+      case OutOfBounds::THROW_EXCEPTION:
+        throw MooseException(name(),
+                             ": pressure ",
+                             p,
+                             " Pa is outside the tabulated range [",
+                             _p.front(),
+                             ", ",
+                             _p.back(),
+                             "] Pa. Extend the table, or set 'out_of_bounds' to "
+                             "'move_to_bounds' or 'linear_extrapolation'.");
 
-  // Index i of the interval [_p[i], _p[i+1]] used for interpolation (or extrapolation)
+      case OutOfBounds::MOVE_TO_BOUNDS:
+        value = (p < _p.front()) ? y.front() : y.back();
+        dvalue_dp = 0.0;
+        return;
+
+      case OutOfBounds::LINEAR_EXTRAPOLATION:
+        break;
+    }
+
+  // Index i of the interval [_p[i], _p[i+1]] used for interpolation (or linear extrapolation)
   const auto it = std::upper_bound(_p.begin(), _p.end(), p);
   std::size_t i = (it == _p.begin()) ? 0 : static_cast<std::size_t>(it - _p.begin()) - 1;
   i = std::min(i, n - 2);

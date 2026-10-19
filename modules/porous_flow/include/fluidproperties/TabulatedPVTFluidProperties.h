@@ -72,6 +72,12 @@ protected:
   /// Constant specific heat capacity at constant volume (J/kg/K)
   const Real _cv;
 
-  /// Whether to extrapolate linearly or clamp to the end values outside the table
-  const bool _extrapolate;
+  /// Behaviour for pressures outside the tabulated range
+  enum class OutOfBounds
+  {
+    THROW_EXCEPTION,
+    MOVE_TO_BOUNDS,
+    LINEAR_EXTRAPOLATION
+  };
+  const OutOfBounds _out_of_bounds;
 };

@@ -17,8 +17,9 @@ class TabulatedPVTFluidPropertiesTest : public MooseObjectUnitTest
 public:
   TabulatedPVTFluidPropertiesTest() : MooseObjectUnitTest("PorousFlowApp")
   {
-    _fp = &buildFP("fp", "extrapolate");
-    _fp_clamp = &buildFP("fp_clamp", "clamp");
+    _fp = &buildFP("fp", "linear_extrapolation");
+    _fp_bounds = &buildFP("fp_bounds", "move_to_bounds");
+    _fp_throw = &buildFP("fp_throw", "throw_exception");
   }
 
 protected:
@@ -51,6 +52,10 @@ protected:
   const Real _cv = 2000.0;
   const Real _molar_mass = 0.2;
 
+  /// out_of_bounds = linear_extrapolation
   const TabulatedPVTFluidProperties * _fp;
-  const TabulatedPVTFluidProperties * _fp_clamp;
+  /// out_of_bounds = move_to_bounds
+  const TabulatedPVTFluidProperties * _fp_bounds;
+  /// out_of_bounds = throw_exception (the default)
+  const TabulatedPVTFluidProperties * _fp_throw;
 };

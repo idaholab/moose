@@ -31,8 +31,10 @@ TEST_F(TabulatedPVTFluidPropertiesTest, tableValues)
   {
     REL_TEST(_fp->rho_from_p_T(_p[i], T), _rho_sc / _B[i], REL_TOL_CONSISTENCY);
     REL_TEST(_fp->mu_from_p_T(_p[i], T), _mu[i], REL_TOL_CONSISTENCY);
-    REL_TEST(_fp_clamp->rho_from_p_T(_p[i], T), _rho_sc / _B[i], REL_TOL_CONSISTENCY);
-    REL_TEST(_fp_clamp->mu_from_p_T(_p[i], T), _mu[i], REL_TOL_CONSISTENCY);
+    REL_TEST(_fp_bounds->rho_from_p_T(_p[i], T), _rho_sc / _B[i], REL_TOL_CONSISTENCY);
+    REL_TEST(_fp_bounds->mu_from_p_T(_p[i], T), _mu[i], REL_TOL_CONSISTENCY);
+    REL_TEST(_fp_throw->rho_from_p_T(_p[i], T), _rho_sc / _B[i], REL_TOL_CONSISTENCY);
+    REL_TEST(_fp_throw->mu_from_p_T(_p[i], T), _mu[i], REL_TOL_CONSISTENCY);
   }
 }
 
@@ -66,7 +68,8 @@ TEST_F(TabulatedPVTFluidPropertiesTest, interpolation)
 }
 
 /**
- * Outside the table, 1/B and 1/(B mu) are extrapolated linearly from the end intervals
+ * With out_of_bounds = linear_extrapolation, 1/B and 1/(B mu) are extrapolated linearly from
+ * the end intervals outside the table
  */
 TEST_F(TabulatedPVTFluidPropertiesTest, extrapolation)
 {
@@ -94,22 +97,22 @@ TEST_F(TabulatedPVTFluidPropertiesTest, extrapolation)
 }
 
 /**
- * With out_of_bounds = clamp, the end values are used outside the table
+ * With out_of_bounds = move_to_bounds, the end values are used outside the table
  */
-TEST_F(TabulatedPVTFluidPropertiesTest, clamp)
+TEST_F(TabulatedPVTFluidPropertiesTest, moveToBounds)
 {
   const Real T = 350.0;
   Real rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT;
 
-  _fp_clamp->rho_from_p_T(3.5e7, T, rho, drho_dp, drho_dT);
-  _fp_clamp->mu_from_p_T(3.5e7, T, mu, dmu_dp, dmu_dT);
+  _fp_bounds->rho_from_p_T(3.5e7, T, rho, drho_dp, drho_dT);
+  _fp_bounds->mu_from_p_T(3.5e7, T, mu, dmu_dp, dmu_dT);
   REL_TEST(rho, _rho_sc / _B[3], REL_TOL_CONSISTENCY);
   REL_TEST(mu, _mu[3], REL_TOL_CONSISTENCY);
   ABS_TEST(drho_dp, 0.0, REL_TOL_CONSISTENCY);
   ABS_TEST(dmu_dp, 0.0, REL_TOL_CONSISTENCY);
 
-  _fp_clamp->rho_from_p_T(1.0e6, T, rho, drho_dp, drho_dT);
-  _fp_clamp->mu_from_p_T(1.0e6, T, mu, dmu_dp, dmu_dT);
+  _fp_bounds->rho_from_p_T(1.0e6, T, rho, drho_dp, drho_dT);
+  _fp_bounds->mu_from_p_T(1.0e6, T, mu, dmu_dp, dmu_dT);
   REL_TEST(rho, _rho_sc / _B[0], REL_TOL_CONSISTENCY);
   REL_TEST(mu, _mu[0], REL_TOL_CONSISTENCY);
   ABS_TEST(drho_dp, 0.0, REL_TOL_CONSISTENCY);
@@ -133,9 +136,17 @@ TEST_F(TabulatedPVTFluidPropertiesTest, derivatives)
     DERIV_TEST(_fp->e_from_p_T, p, T, tol);
     DERIV_TEST(_fp->h_from_p_T, p, T, tol);
 
-    DERIV_TEST(_fp_clamp->rho_from_p_T, p, T, tol);
-    DERIV_TEST(_fp_clamp->mu_from_p_T, p, T, tol);
-    DERIV_TEST(_fp_clamp->h_from_p_T, p, T, tol);
+    DERIV_TEST(_fp_bounds->rho_from_p_T, p, T, tol);
+    DERIV_TEST(_fp_bounds->mu_from_p_T, p, T, tol);
+    DERIV_TEST(_fp_bounds->h_from_p_T, p, T, tol);
+  }
+
+  // Inside the table, the default (throw_exception) object behaves like the others
+  for (const Real p : {5.0e6, 1.5e7, 2.5e7})
+  {
+    DERIV_TEST(_fp_throw->rho_from_p_T, p, T, tol);
+    DERIV_TEST(_fp_throw->mu_from_p_T, p, T, tol);
+    DERIV_TEST(_fp_throw->h_from_p_T, p, T, tol);
   }
 }
 
@@ -165,6 +176,35 @@ TEST_F(TabulatedPVTFluidPropertiesTest, ad)
   REL_TEST(ad_mu.value(), mu, REL_TOL_CONSISTENCY);
   REL_TEST(ad_mu.derivatives()[0], dmu_dp, REL_TOL_CONSISTENCY);
   ABS_TEST(ad_mu.derivatives()[1], dmu_dT, REL_TOL_CONSISTENCY);
+}
+
+/**
+ * With out_of_bounds = throw_exception (the default), an exception is thrown outside the table so
+ * that the time step can be cut, but not at the end points of the table
+ */
+TEST_F(TabulatedPVTFluidPropertiesTest, throwException)
+{
+  const Real T = 350.0;
+
+  EXPECT_THROW(_fp_throw->rho_from_p_T(3.5e7, T), MooseException);
+  EXPECT_THROW(_fp_throw->mu_from_p_T(3.5e7, T), MooseException);
+  EXPECT_THROW(_fp_throw->h_from_p_T(3.5e7, T), MooseException);
+  EXPECT_THROW(_fp_throw->rho_from_p_T(1.0e6, T), MooseException);
+  EXPECT_THROW(_fp_throw->mu_from_p_T(1.0e6, T), MooseException);
+
+  EXPECT_NO_THROW(_fp_throw->rho_from_p_T(_p.front(), T));
+  EXPECT_NO_THROW(_fp_throw->rho_from_p_T(_p.back(), T));
+
+  try
+  {
+    _fp_throw->rho_from_p_T(3.5e7, T);
+    FAIL() << "missing expected exception";
+  }
+  catch (const MooseException & err)
+  {
+    EXPECT_NE(std::string(err.what()).find("is outside the tabulated range"), std::string::npos)
+        << err.what();
+  }
 }
 
 /**

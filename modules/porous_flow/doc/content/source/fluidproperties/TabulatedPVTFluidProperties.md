@@ -34,10 +34,17 @@ piecewise-linear interpolants, so they can be used in the Jacobian.
 
 Outside the tabulated pressure range, the behaviour is set by `out_of_bounds`:
 
-- `extrapolate` (default): $1/B$ and $1/(B\mu)$ are extrapolated linearly using the first or last
-  interval of the table. An exception is thrown (causing the time step to be cut) if the
-  extrapolated values become non-positive.
-- `clamp`: the end values of the table are used, and the pressure derivatives are zero.
+- `throw_exception` (default): an exception is thrown, so the time step is cut. This ensures that
+  no results are computed with properties outside the range of the PVT data.
+- `move_to_bounds`: the end values of the table are used, and the pressure derivatives are zero.
+- `linear_extrapolation`: $1/B$ and $1/(B\mu)$ are extrapolated linearly using the first or last
+  interval of the table. An exception is still thrown if the extrapolated values become
+  non-positive.
+
+!alert warning
+With `move_to_bounds` or `linear_extrapolation`, results in parts of the domain where the pressure
+lies outside the table should be used with care: the fluid properties there are not supported by
+the PVT data. Where possible, extend the table to cover the expected pressure range instead.
 
 ## Thermal properties
 
