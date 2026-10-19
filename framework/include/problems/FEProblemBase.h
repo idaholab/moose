@@ -2980,6 +2980,25 @@ public:
   /// Tell the problem that the system convergence check(s) may proceed as normal
   void resetFailNextSystemConvergenceCheck() { _fail_next_system_convergence_check = false; }
 
+  /**
+   * Tell the problem that the current nonlinear convergence check changed the residual, e.g. by
+   * updating Lagrange multipliers, so it must be recomputed before the next nonlinear iteration
+   */
+  void setRecomputeResidualAfterConvergenceCheck()
+  {
+    _recompute_residual_after_convergence_check = true;
+  }
+  /// Whether the residual must be recomputed after the current nonlinear convergence check
+  bool getRecomputeResidualAfterConvergenceCheck() const
+  {
+    return _recompute_residual_after_convergence_check;
+  }
+  /// Clear the request to recompute the residual after the nonlinear convergence check
+  void resetRecomputeResidualAfterConvergenceCheck()
+  {
+    _recompute_residual_after_convergence_check = false;
+  }
+
   /*
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
@@ -3677,6 +3696,8 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_system_convergence_check;
+  /// Whether the residual must be recomputed after the current nonlinear convergence check
+  bool _recompute_residual_after_convergence_check;
   const bool _allow_invalid_solution;
   const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;

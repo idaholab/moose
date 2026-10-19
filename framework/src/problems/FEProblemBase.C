@@ -627,6 +627,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_system_convergence_check(false),
+    _recompute_residual_after_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),

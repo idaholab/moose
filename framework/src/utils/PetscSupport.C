@@ -431,7 +431,7 @@ petscSetupOutput(CommandLine * cmd_line)
 }
 
 PetscErrorCode
-petscNonlinearConverged(SNES /*snes*/,
+petscNonlinearConverged(SNES snes,
                         PetscInt it,
                         PetscReal /*xnorm*/,
                         PetscReal /*snorm*/,
@@ -472,6 +472,31 @@ petscNonlinearConverged(SNES /*snes*/,
     case Convergence::MooseConvergenceStatus::DIVERGED:
       *reason = SNES_DIVERGED_DTOL;
       break;
+  }
+
+  // Recompute the residual if the convergence check changed it. PETSc's Newton line search solver
+  // takes the residual norm for the next Newton step and line search from this vector.
+  if (problem.getRecomputeResidualAfterConvergenceCheck())
+  {
+    problem.resetRecomputeResidualAfterConvergenceCheck();
+    if (*reason == SNES_CONVERGED_ITERATING)
+    {
+      Vec x, f;
+      PetscCall(SNESGetSolution(snes, &x));
+      PetscCall(SNESGetFunction(snes, &f, nullptr, nullptr));
+      PetscCall(SNESComputeFunction(snes, x, f));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
+      PetscBool domainerror;
+      PetscCall(SNESGetFunctionDomainError(snes, &domainerror));
+      if (domainerror)
+        *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
+#else
+      SNESConvergedReason snes_reason;
+      PetscCall(SNESGetConvergedReason(snes, &snes_reason));
+      if (snes_reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+        *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
+#endif
+    }
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
