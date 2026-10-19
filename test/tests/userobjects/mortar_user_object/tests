@@ -32,7 +32,7 @@
     input = test.i
     issues = '#33908'
     cli_args = 'Problem/solve=true Variables/u/family=LAGRANGE Kernels/diff/type=Diffusion Kernels/diff/variable=u UserObjects/weighted_gap_uo/throw_on_rank=1 Outputs/exodus=false'
-    expect_err = 'Aborting as solve did not converge.*A std::exception was raised during FEProblemBase::computeUserObjectsInternal.*TestWeightedGapUserObject intentional execute exception'
+    expect_err = 'Aborting as solve did not converge\n+A std::exception was raised during FEProblemBase::computeUserObjectsInternal\nTestWeightedGapUserObject intentional execute exception'
     min_parallel = 2
     max_parallel = 2
     valgrind = 'none'
