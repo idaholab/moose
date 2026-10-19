@@ -217,11 +217,14 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 {
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
 
-  // Get normal LM
+  // Get normal LM. With 'use_derived_c' the stored value y represents the multiplier D*y.
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  const Real contact_scale = normalContactScale(dof);
+  if (_use_derived_c)
+    contact_pressure *= contact_scale;
   // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
   contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
@@ -238,9 +241,15 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
 
-  // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  // With 'use_derived_c', the tangential constraint uses the same per-node stiffness as the normal
+  // constraint, and the friction multipliers use the same change of variables as the normal
+  // multiplier. The shear stiffness of an isotropic body is the same order as its normal
+  // stiffness, so the tangential multiplier columns land at the order of the elasticity block too.
+  const Real c = _normalize_c ? contact_scale / *_normalization_ptr : contact_scale;
+  const Real c_t = _use_derived_c ? c : (_normalize_c ? _c_t / *_normalization_ptr : _c_t);
+  if (_use_derived_c)
+    for (const auto i : make_range(num_tangents))
+      friction_lm_values[i] *= contact_scale;
 
   // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
   // tangential velocity divided by the integral of the same test function, which is the nodal
@@ -262,8 +271,17 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
                                                         mu_ad,
                                                         ADReal(_epsilon),
                                                         _friction_projection_degree);
-  const ADReal dof_residual = residual[0];
-  const ADReal dof_residual_dir = residual[1];
+  // With 'use_derived_c', this rescales the friction rows the same way
+  // ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof rescales the normal multiplier
+  // row: from a pressure-scale equation to a force-scale one matching the coupled displacement
+  // (elasticity) equations, without moving the residual's root since
+  // equationCompensation()*contactNormalization() is a positive constant.
+  const ADReal dof_residual = _use_derived_c ? equationCompensation(*_friction_vars[0]) *
+                                                   contactNormalization() * residual[0]
+                                             : residual[0];
+  const ADReal dof_residual_dir = _use_derived_c ? equationCompensation(*_friction_vars[1]) *
+                                                       contactNormalization() * residual[1]
+                                                 : residual[1];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
@@ -286,17 +304,21 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal friction_lm_value = (*_sys.currentSolution())(friction_dof_index);
   Moose::derivInsert(friction_lm_value.derivatives(), friction_dof_index, 1.);
 
-  // Get normal LM
+  // Get normal LM; see enforceConstraintOnDof3d() for the treatment of the derived scale
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  const Real contact_scale = normalContactScale(dof);
+  if (_use_derived_c)
+    contact_pressure *= contact_scale;
   // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
   contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
-  // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const Real c = _normalize_c ? contact_scale / *_normalization_ptr : contact_scale;
+  const Real c_t = _use_derived_c ? c : (_normalize_c ? _c_t / *_normalization_ptr : _c_t);
+  if (_use_derived_c)
+    friction_lm_value *= contact_scale;
 
   // Compute the friction coefficient (constant or function) from the projected nodal slip rate, as
   // in enforceConstraintOnDof3d()
@@ -305,7 +327,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
 
-  const ADReal dof_residual =
+  const ADReal raw_residual =
       Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
                                                         tangential_velocity,
                                                         ADReal(c_t),
@@ -315,6 +337,11 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
                                                         mu_ad,
                                                         ADReal(_epsilon),
                                                         _friction_projection_degree)[0];
+
+  // See enforceConstraintOnDof3d() for the row compensation
+  const ADReal dof_residual = _use_derived_c ? equationCompensation(*_friction_vars[0]) *
+                                                   contactNormalization() * raw_residual
+                                             : raw_residual;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

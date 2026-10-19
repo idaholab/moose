@@ -11,6 +11,8 @@
 
 #include "AuxKernel.h"
 
+class LMWeightedGapUserObject;
+
 /**
  * Computes the frictional pressure vector for three-dimensional mortar mechanical contact.
  */
@@ -30,6 +32,10 @@ private:
 
   /// Tangent along the second direction
   const MooseArray<Real> * const _tangent_two;
+
+  /// User object providing the derived contact stiffness scale that relates the stored tangential
+  /// multiplier values to the tangential pressures, or nullptr if the values are the pressures
+  const LMWeightedGapUserObject * const _weighted_gap_uo;
 
   /// Fe problem to obtain primary/secondary ids
   const FEProblemBase & _fe_problem;

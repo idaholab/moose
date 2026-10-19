@@ -10,6 +10,10 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
+#include "RankFourTensor.h"
+#include "MaterialProperty.h"
+
+#include <array>
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature_gauss.h"
@@ -63,10 +67,20 @@ public:
                               : covered_normalization;
   }
 
+  /// Whether the physical contact stiffness scales are derived from the elasticity tensors
+  bool deriveCFromElasticity() const { return _derive_c_from_elasticity; }
+
+  /**
+   * @return The derived contact stiffness scale D at \p dof. A contact Lagrange multiplier's
+   * stored value y represents the multiplier D y. This is 1 unless derive_c_from_elasticity = true,
+   * and it is 1 at a node that has not yet had mortar coverage, where the multiplier is inactive.
+   */
+  Real derivedScale(const DofObject * dof) const;
+
 protected:
+  virtual void computeQpIProperties() override;
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return true; }
-  virtual void computeQpIProperties() override;
 
   /// The node-based scaling steps, kept out of initialize()/finalize()/computeQpIProperties() so
   /// that a class inheriting this one through more than one path can run them without invoking the
@@ -107,6 +121,26 @@ protected:
                       const MooseVariable & reference_var,
                       const std::string & reference_var_name) const;
 
+  // Non-virtual helpers so diamond-derived classes can call them without re-entering the base chain
+  void finalizeDerivedC();
+  void accumulateDerivedCIfNeeded();
+
+  /// Whether to derive the physical contact stiffness scales from elasticity tensor material
+  /// properties
+  const bool _derive_c_from_elasticity;
+
+  /// Whether the elasticity tensor material property was declared as an AD property
+  const bool _elasticity_tensor_is_ad;
+
+  /// This process's partial sums of (D * w, w) for covered secondary nodes that do not have a
+  /// derived scale yet, where w is the mortar test function weight
+  std::unordered_map<dof_id_type, std::array<Real, 2>> _derived_c_sums;
+
+  /// Derived scale D keyed by secondary node id, identical on every process. A node's scale is
+  /// derived the first time the node has mortar coverage and then stays fixed, so the change of
+  /// variables it defines never changes the meaning of a stored, nonzero multiplier value.
+  std::unordered_map<dof_id_type, Real> & _dof_to_derived_c;
+
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;
 
@@ -146,4 +180,20 @@ protected:
   /// Finite element and quadrature rule used to evaluate fullNodalIntegrals()
   std::unique_ptr<libMesh::FEBase> _nodal_scaling_fe;
   std::unique_ptr<libMesh::QGauss> _nodal_scaling_qrule;
+
+private:
+  template <bool is_ad>
+  void fetchElasticityTensorProperties(const std::string & sec_name, const std::string & pri_name);
+
+  template <bool is_ad>
+  void accumulateDerivedC();
+
+  /// Non-AD elasticity tensor on secondary side (non-null when !_elasticity_tensor_is_ad)
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_secondary = nullptr;
+  /// Non-AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_primary = nullptr;
+  /// AD elasticity tensor on secondary side (non-null when _elasticity_tensor_is_ad)
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_secondary_ad = nullptr;
+  /// AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_primary_ad = nullptr;
 };

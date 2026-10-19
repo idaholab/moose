@@ -15,6 +15,9 @@
 
 #include "libmesh/fe.h"
 
+#include <cmath>
+#include <map>
+
 registerMooseObject("ContactApp", LMWeightedGapUserObject);
 
 InputParameters
@@ -34,6 +37,26 @@ LMWeightedGapUserObject::newParams()
       "Whether to apply the node-based Lagrange-multiplier scaling of Popp et al. (2013) to "
       "improve the conditioning of the linear system when secondary elements are only partially "
       "covered (edge dropping). See the documentation for the current limitations.");
+  params.addParam<bool>("derive_c_from_elasticity",
+                        false,
+                        "Compute a physical stiffness per normal length from the contact surface "
+                        "material properties and adjacent element depths.");
+  params.addParam<std::string>(
+      "secondary_base_name",
+      "",
+      "Base name prefix of the elasticity_tensor material property on the secondary body. "
+      "Must match the base_name used on the secondary material block that computes the "
+      "elasticity tensor.");
+  params.addParam<std::string>(
+      "primary_base_name",
+      "",
+      "Base name prefix of the elasticity_tensor material property on the primary body. "
+      "Must match the base_name used on the primary material block that computes the "
+      "elasticity tensor.");
+  params.addParam<bool>("elasticity_tensor_is_ad",
+                        false,
+                        "Whether the elasticity tensor material property was declared as an AD "
+                        "property.");
   return params;
 }
 
@@ -51,6 +74,10 @@ LMWeightedGapUserObject::validParams()
 
 LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters),
+    _derive_c_from_elasticity(getParam<bool>("derive_c_from_elasticity")),
+    _elasticity_tensor_is_ad(getParam<bool>("elasticity_tensor_is_ad")),
+    _dof_to_derived_c(
+        declareRestartableData<std::unordered_map<dof_id_type, Real>>("dof_to_derived_c")),
     _lm_var(getVar("lm_variable", 0)),
     _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
@@ -91,6 +118,20 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
     _nodal_scaling_fe = FEBase::build(lower_dim, fe_type);
     _nodal_scaling_qrule = std::make_unique<QGauss>(lower_dim, fe_type.default_quadrature_order());
     _nodal_scaling_fe->attach_quadrature_rule(_nodal_scaling_qrule.get());
+  }
+
+  if (_derive_c_from_elasticity)
+  {
+    const std::string sec_base = getParam<std::string>("secondary_base_name");
+    const std::string pri_base = getParam<std::string>("primary_base_name");
+    const std::string sec_name =
+        sec_base.empty() ? "elasticity_tensor" : sec_base + "_elasticity_tensor";
+    const std::string pri_name =
+        pri_base.empty() ? "elasticity_tensor" : pri_base + "_elasticity_tensor";
+    if (_elasticity_tensor_is_ad)
+      fetchElasticityTensorProperties<true>(sec_name, pri_name);
+    else
+      fetchElasticityTensorProperties<false>(sec_name, pri_name);
   }
 }
 
@@ -148,7 +189,8 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
-  // Under node-based scaling, the stored multiplier is zhat_j = kappa_j*lambda_j.
+  // Under node-based scaling, the multiplier is zhat_j = kappa_j*lambda_j, and with derived
+  // physical scaling the stored value is y_j with zhat_j = D_j y_j.
   // nodalContactPressure() and getNormalContactPressure() return the physical pressure lambda_j.
   return _lm_var->adSlnLower();
 }
@@ -165,6 +207,7 @@ LMWeightedGapUserObject::finalize()
 {
   WeightedGapUserObject::finalize();
   finalizeNodalScaling();
+  finalizeDerivedC();
 }
 
 void
@@ -172,6 +215,7 @@ LMWeightedGapUserObject::computeQpIProperties()
 {
   WeightedGapUserObject::computeQpIProperties();
   computeQpINodalScaling();
+  accumulateDerivedCIfNeeded();
 }
 
 void
@@ -282,9 +326,11 @@ LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
   ADReal nodal_pressure = (*_lm_var->sys().currentSolution())(dof_index);
   if (Moose::doDerivatives(_subproblem, _sys))
     Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
-  // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
-  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
-  return nodal_pressure / nodalScale(_subproblem.mesh().nodePtr(node.id()));
+  // Recover the physical pressure lambda_j = D_j y_j / kappa_j (Popp 2013 eq. 39 for kappa_j).
+  // nodalScale() is keyed by displaced-mesh node pointers, so resolve the supplied node id through
+  // that mesh.
+  const auto * const dof = _subproblem.mesh().nodePtr(node.id());
+  return nodal_pressure * derivedScale(dof) / nodalScale(dof);
 }
 
 Real
@@ -298,8 +344,159 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
                "your Lagrange multiplier");
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
-  // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
-  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
-  return (*_lm_var->sys().currentSolution())(dof_number) /
-         nodalScale(_subproblem.mesh().nodePtr(node->id()));
+  // Recover the physical pressure lambda_j = D_j y_j / kappa_j (Popp 2013 eq. 39 for kappa_j).
+  // nodalScale() is keyed by the displaced-mesh node pointer, and callers may pass a different
+  // pointer of the same id, so map through the mesh to match.
+  const auto * const dof = _subproblem.mesh().nodePtr(node->id());
+  return (*_lm_var->sys().currentSolution())(dof_number)*derivedScale(dof) / nodalScale(dof);
 }
+
+Real
+LMWeightedGapUserObject::derivedScale(const DofObject * const dof) const
+{
+  return findValue(_dof_to_derived_c, dof->id(), Real(1));
+}
+
+void
+LMWeightedGapUserObject::finalizeDerivedC()
+{
+  if (!_derive_c_from_elasticity)
+    return;
+
+  // Every process that touches a node's mortar segments uses that node's scale, and a node's set of
+  // touching processes can grow as the contact surfaces slide, so gather the partial sums for newly
+  // covered nodes on every process. Every process sums them in the same order, which makes the
+  // resulting scales identical everywhere.
+  std::vector<dof_id_type> ids;
+  std::vector<Real> scale_sums, weight_sums;
+  for (const auto & [id, sums] : _derived_c_sums)
+  {
+    ids.push_back(id);
+    scale_sums.push_back(sums[0]);
+    weight_sums.push_back(sums[1]);
+  }
+  _derived_c_sums.clear();
+  _communicator.allgather(ids, /*identical_buffer_sizes=*/false);
+  _communicator.allgather(scale_sums, /*identical_buffer_sizes=*/false);
+  _communicator.allgather(weight_sums, /*identical_buffer_sizes=*/false);
+
+  std::map<dof_id_type, std::array<Real, 2>> global_sums;
+  for (const auto i : index_range(ids))
+  {
+    auto & [scale_sum, weight_sum] = global_sums[ids[i]];
+    scale_sum += scale_sums[i];
+    weight_sum += weight_sums[i];
+  }
+
+  for (const auto & [id, sums] : global_sums)
+  {
+    const auto & [scale_sum, weight_sum] = sums;
+    // A node whose covered test function integral vanishes gets its scale from a later coverage
+    if (weight_sum <= 0)
+      continue;
+    const Real scale = scale_sum / weight_sum;
+    if (!std::isfinite(scale) || scale <= 0)
+      mooseError(
+          "The physical contact stiffness scale at node ", id, " must be finite and positive.");
+    _dof_to_derived_c.emplace(id, scale);
+  }
+}
+
+void
+LMWeightedGapUserObject::accumulateDerivedCIfNeeded()
+{
+  if (!_derive_c_from_elasticity || _dof_to_derived_c.count(_lower_secondary_elem->node_id(_i)))
+    return;
+  if (_elasticity_tensor_is_ad)
+    accumulateDerivedC<true>();
+  else
+    accumulateDerivedC<false>();
+}
+
+template <bool is_ad>
+void
+LMWeightedGapUserObject::fetchElasticityTensorProperties(const std::string & sec_name,
+                                                         const std::string & pri_name)
+{
+  if constexpr (is_ad)
+  {
+    _elasticity_tensor_secondary_ad = &getGenericMaterialProperty<RankFourTensor, true>(sec_name);
+    _elasticity_tensor_primary_ad =
+        &getGenericNeighborMaterialProperty<RankFourTensor, true>(pri_name);
+  }
+  else
+  {
+    _elasticity_tensor_secondary = &getGenericMaterialProperty<RankFourTensor, false>(sec_name);
+    _elasticity_tensor_primary =
+        &getGenericNeighborMaterialProperty<RankFourTensor, false>(pri_name);
+  }
+}
+
+template <bool is_ad>
+void
+LMWeightedGapUserObject::accumulateDerivedC()
+{
+  const GenericMaterialProperty<RankFourTensor, is_ad> * sec_ptr;
+  const GenericMaterialProperty<RankFourTensor, is_ad> * pri_ptr;
+  if constexpr (is_ad)
+  {
+    sec_ptr = _elasticity_tensor_secondary_ad;
+    pri_ptr = _elasticity_tensor_primary_ad;
+  }
+  else
+  {
+    sec_ptr = _elasticity_tensor_secondary;
+    pri_ptr = _elasticity_tensor_primary;
+  }
+
+  const RealVectorValue & n = _normals[_i];
+  GenericReal<is_ad> C_nn_sec_generic = 0;
+  GenericReal<is_ad> C_nn_pri_generic = 0;
+  for (const auto a : make_range(3))
+    for (const auto b : make_range(3))
+      for (const auto c : make_range(3))
+        for (const auto d : make_range(3))
+        {
+          const Real w = n(a) * n(b) * n(c) * n(d);
+          C_nn_sec_generic += w * (*sec_ptr)[_qp](a, b, c, d);
+          C_nn_pri_generic += w * (*pri_ptr)[_qp](a, b, c, d);
+        }
+
+  const Real C_nn_sec = MetaPhysicL::raw_value(C_nn_sec_generic);
+  const Real C_nn_pri = MetaPhysicL::raw_value(C_nn_pri_generic);
+  const auto & reference_mesh = _fe_problem.mesh();
+  const auto * const reference_secondary_face = reference_mesh.elemPtr(_lower_secondary_elem->id());
+  const auto * const reference_primary_face = reference_mesh.elemPtr(_lower_primary_elem->id());
+  const auto * const reference_secondary_parent =
+      reference_mesh.elemPtr(_lower_secondary_elem->interior_parent()->id());
+  const auto * const reference_primary_parent =
+      reference_mesh.elemPtr(_lower_primary_elem->interior_parent()->id());
+  const Real secondary_face_measure = reference_secondary_face->volume();
+  const Real primary_face_measure = reference_primary_face->volume();
+  const Real secondary_parent_volume = reference_secondary_parent->volume();
+  const Real primary_parent_volume = reference_primary_parent->volume();
+  if (!std::isfinite(C_nn_sec) || C_nn_sec <= 0.0 || !std::isfinite(C_nn_pri) || C_nn_pri <= 0.0)
+    mooseError("The normal acoustic stiffness on both contact bodies must be finite and positive ",
+               "when physical contact scaling is used.");
+  if (!std::isfinite(secondary_face_measure) || secondary_face_measure <= 0.0 ||
+      !std::isfinite(primary_face_measure) || primary_face_measure <= 0.0 ||
+      !std::isfinite(secondary_parent_volume) || secondary_parent_volume <= 0.0 ||
+      !std::isfinite(primary_parent_volume) || primary_parent_volume <= 0.0)
+    mooseError("The normal contact lengths on both contact bodies must be finite and positive ",
+               "when physical contact scaling is used.");
+
+  const Real h_secondary = secondary_parent_volume / secondary_face_measure;
+  const Real h_primary = primary_parent_volume / primary_face_measure;
+  const Real physical_scale = 1.0 / (h_secondary / C_nn_sec + h_primary / C_nn_pri);
+  const Real test_weight = (*_test)[_i][_qp] * _qp_factor;
+  auto & [scale_sum, weight_sum] = _derived_c_sums[_lower_secondary_elem->node_id(_i)];
+  scale_sum += physical_scale * test_weight;
+  weight_sum += test_weight;
+}
+
+template void LMWeightedGapUserObject::fetchElasticityTensorProperties<false>(const std::string &,
+                                                                              const std::string &);
+template void LMWeightedGapUserObject::fetchElasticityTensorProperties<true>(const std::string &,
+                                                                             const std::string &);
+template void LMWeightedGapUserObject::accumulateDerivedC<false>();
+template void LMWeightedGapUserObject::accumulateDerivedC<true>();

@@ -10,6 +10,7 @@
 #include "MortarFrictionalPressureVectorAux.h"
 #include "SystemBase.h"
 #include "AutomaticMortarGeneration.h"
+#include "LMWeightedGapUserObject.h"
 
 registerMooseObject("ContactApp", MortarFrictionalPressureVectorAux);
 
@@ -29,6 +30,11 @@ MortarFrictionalPressureVectorAux::validParams()
       "tangent_two",
       "Second tangent vector Lagrange's multiplier for computing the mortar "
       "frictional pressure vector.");
+  params.addParam<UserObjectName>(
+      "weighted_gap_uo",
+      "The mortar contact user object whose derived contact stiffness scale relates the stored "
+      "tangential Lagrange multiplier values to the tangential pressures. Needed only when that "
+      "user object has 'derive_c_from_elasticity = true'.");
   params.addRequiredParam<unsigned int>("component",
                                         "Cartesian component of frictional tangent vector");
 
@@ -45,6 +51,9 @@ MortarFrictionalPressureVectorAux::MortarFrictionalPressureVectorAux(const Input
   : AuxKernel(params),
     _tangent_one(&coupledValueLower("tangent_one")),
     _tangent_two(&coupledValueLower("tangent_two")),
+    _weighted_gap_uo(isParamValid("weighted_gap_uo")
+                         ? &getUserObject<LMWeightedGapUserObject>("weighted_gap_uo")
+                         : nullptr),
     _fe_problem(*params.get<FEProblemBase *>("_fe_problem_base")),
     _primary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("primary_boundary"))),
     _secondary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("secondary_boundary"))),
@@ -123,5 +132,6 @@ MortarFrictionalPressureVectorAux::computeValue()
   const Real tangent_vector_component =
       tangent_one_component * (*_tangent_one)[_qp] + tangent_two_component * (*_tangent_two)[_qp];
 
-  return tangent_vector_component;
+  return _weighted_gap_uo ? _weighted_gap_uo->derivedScale(_current_node) * tangent_vector_component
+                          : tangent_vector_component;
 }
