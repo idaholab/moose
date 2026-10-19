@@ -81,8 +81,7 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _forms_losses(this->template getParam<std::vector<MooseFunctorName>>("forms_losses").size()),
     _dPps(this->template getParam<std::vector<MooseFunctorName>>("pump_pressures").size()),
     _roughnesses(this->template getParam<std::vector<MooseFunctorName>>("roughnesses").size()),
-    _gravity(this->template getFunctor<ADReal>("g")),
-    _functor_point(getParam<Point>("functor_evaluation_point"))
+    _gravity(this->template getFunctor<ADReal>("g"))
 {
   const auto & area_names = MooseBase::getParam<std::vector<MooseFunctorName>>("areas");
   const auto & perimeter_names = MooseBase::getParam<std::vector<MooseFunctorName>>("perimeters");
@@ -113,22 +112,11 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
   }
 }
 
-void
-ADIncompressibleMomentumSPBase::initialSetup()
-{
-  ADScalarKernel::initialSetup();
-
-  // Locate the element that spatially varying functors will be evaluated on
-  auto pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  _functor_elem = (*pl)(_functor_point);
-}
-
 ADReal
 ADIncompressibleMomentumSPBase::computeQpResidual()
 {
   ADReal momentum_residual = 0;
-  const auto qp = functorArg();
+  const Moose::ElemArg qp = Moose::ElemArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting global fluid properties
