@@ -289,4 +289,31 @@
     requirement = 'The system shall report an error if a boundary is listed more than once for '
                   'automatic pairing.'
   []
+  [mortar_user_object_aux]
+    design = 'MortarUserObjectAux.md'
+    issues = '#34138'
+    requirement = 'The system shall output mortar contact quantities to auxiliary variables,'
+    [active_set_frictionless_penalty]
+      type = RunApp
+      input = frictionless-penalty-weighted-gap.i
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=5 "
+                 "Postprocessors/active='' Outputs/exodus=false AuxVariables/q/block=3 "
+                 "AuxKernels/q/type=MortarUserObjectAux AuxKernels/q/variable=q "
+                 "AuxKernels/q/boundary=10 AuxKernels/q/user_object=weighted_gap_uo "
+                 "AuxKernels/q/contact_quantity=active_set"
+      detail = 'including the active set from a frictionless penalty user object, and'
+    []
+    [delta_tangential_lm_lagrange_multiplier]
+      type = RunException
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
+      cli_args = "Executioner/end_time=5 Outputs/exodus=false AuxVariables/q/block=3 "
+                 "AuxKernels/q/type=MortarUserObjectAux AuxKernels/q/variable=q "
+                 "AuxKernels/q/boundary=10 AuxKernels/q/user_object=weighted_velocities_uo "
+                 "AuxKernels/q/contact_quantity=delta_tangential_lm_one"
+      expect_err = "The 'DELTA_TANGENTIAL_LM_ONE' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+      detail = 'report an error when the tangential multiplier increment is requested from a '
+               'Lagrange multiplier friction user object.'
+    []
+  []
 []
