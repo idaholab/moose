@@ -62,7 +62,7 @@ This is accomplished with a [PiecewiseLinear.md] function:
 
 However, we cannot use this function directly because [ShaftConnectedMotor.md] treats
 the time coordinate in its functions as the shaft speed. Therefore we use control
-control as follows, which controls a constant-value function to drop the time coordinate:
+as follows, which controls a constant-value function to drop the time coordinate:
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
          block=Functions/motor_torque_fn
