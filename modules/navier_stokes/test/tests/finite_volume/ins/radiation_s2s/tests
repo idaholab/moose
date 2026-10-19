@@ -56,6 +56,7 @@
                  "Outputs/file_base=diff_heated_cavity_slabs_cht_radiation"
       detail = 'for a cavity with surface-to-surface radiation exchanged between all cavity walls.'
       mesh_mode = REPLICATED # UnobstructedPlanarViewFactor does not allow distributed mesh
+      valgrind = none # long running test
       max_threads = 1 # Linear FV doesn't support threading at the moment
       recover = false # We don't support recover for SIMPLE at the moment
     []
