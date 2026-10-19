@@ -159,6 +159,9 @@ SCMMixingChenTodreas::computeBulkMixingParameters() const
       Cm = CmT;
     else
     {
+      // Intermittency factor from the bulk Reynolds number. Cheng and Todreas (1986) Eqs.
+      // (10a)-(10c) and (11) use one per subchannel type, with the bounds Re_bL and Re_bT scaled by
+      // the laminar and turbulent flow splits; see SCMMixingChenTodreas.md
       const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
 
       const Real gamma = 2.0 / 3.0;
@@ -206,6 +209,9 @@ SCMMixingChenTodreas::computeBulkMixingParameters() const
       Cs = CsT;
     else
     {
+      // Intermittency factor from the bulk Reynolds number. Cheng and Todreas (1986) Eqs.
+      // (10a)-(10c) and (11) use one per subchannel type, with the bounds Re_bL and Re_bT scaled by
+      // the laminar and turbulent flow splits; see SCMMixingChenTodreas.md
       const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
       const Real gamma = 2.0 / 3.0;
 
@@ -242,6 +248,9 @@ SCMMixingChenTodreas::computeBlockMixingParameters(const unsigned int first_node
   // over the gaps of SCM gives the crossflow of Pacio:
   // - center-edge: Pi12 = 6 n (P - D - Dw / 6) over the 6 n pin-pin gaps of width P - D;
   // - edge-corner: Pi23 = [6 (W - D) 2 - Dw / 6] / 2 over the 12 pin-duct gaps of width W - D.
+  // Eq. (A.25) subtracts Dw / 6 once from the whole edge-corner perimeter, while Eq. (A.24)
+  // subtracts it from every center-edge gap. The corrigendum of Pacio et al., Nucl. Eng. Des. 395
+  // (2022) 111846, corrects their implementation to be consistent with Eq. (A.25) as printed.
   const Real perimeter_ratio_center_edge =
       (pitch - pin_diameter - wire_diameter / 6.0) / (pitch - pin_diameter);
   const Real perimeter_ratio_edge_corner = (0.5 * dpgap - wire_diameter / 144.0) / dpgap;
@@ -255,6 +264,7 @@ SCMMixingChenTodreas::computeBlockMixingParameters(const unsigned int first_node
     // the flow-split term varies as about X^(-0.18), so this changes the mixing by less than 1%.
     Real mdot_sum[3] = {0.0, 0.0, 0.0};
     Real rhoS_sum[3] = {0.0, 0.0, 0.0};
+    Real S_sum[3] = {0.0, 0.0, 0.0};
     for (const auto i_ch : make_range(_subchannel_mesh.getNumOfChannels()))
     {
       const Node * const node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -265,10 +275,19 @@ SCMMixingChenTodreas::computeBlockMixingParameters(const unsigned int first_node
       mdot_sum[i_type] += 0.5 * (_mdot_soln(node_in) + _mdot_soln(node_out));
       rhoS_sum[i_type] += 0.25 * (_rho_soln(node_in) + _rho_soln(node_out)) *
                           (_S_soln(node_in) + _S_soln(node_out));
+      S_sum[i_type] += 0.5 * (_S_soln(node_in) + _S_soln(node_out));
     }
-    const Real X_center = mdot_sum[0] / rhoS_sum[0] / bulk_V;
-    const Real X_edge = mdot_sum[1] / rhoS_sum[1] / bulk_V;
-    const Real X_corner = mdot_sum[2] / rhoS_sum[2] / bulk_V;
+    // Velocity of each type relative to the inlet bulk velocity. The density drops along a heated
+    // assembly, so the local bulk velocity rises above bulk_V; normalize so that the area-weighted
+    // flow splits sum to one, Pacio et al. (2022) Eq. (11), with S the fraction of the flow area
+    const Real V_center = mdot_sum[0] / rhoS_sum[0] / bulk_V;
+    const Real V_edge = mdot_sum[1] / rhoS_sum[1] / bulk_V;
+    const Real V_corner = mdot_sum[2] / rhoS_sum[2] / bulk_V;
+    const Real S_total = S_sum[0] + S_sum[1] + S_sum[2];
+    const Real norm = (S_sum[0] * V_center + S_sum[1] * V_edge + S_sum[2] * V_corner) / S_total;
+    const Real X_center = V_center / norm;
+    const Real X_edge = V_edge / norm;
+    const Real X_corner = V_corner / norm;
 
     _beta_pacio_center_edge[iz] =
         computePacioMixingParameter(X_center, X_edge, perimeter_ratio_center_edge);

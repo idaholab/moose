@@ -38,14 +38,14 @@ and
 !equation
 Re_T = 10^4 \times 10^{0.7(P/D - 1)} .
 
-In the intermittent regime, the interpolation factor is
+In the intermittent regime, the interpolation factor is evaluated with the bulk Reynolds number,
 
 !equation
 \psi =
-\frac{\ln(Re/Re_L)}
+\frac{\ln(Re_b/Re_L)}
      {\ln(Re_T/Re_L)} ,
 
-and the mixing coefficient is interpolated according to
+which simplifies Cheng and Todreas (1986). Their Eqs. (10a) to (10c) and (11) use one interpolation factor per type of subchannel, from the local Reynolds number $Re_i$ between the bounds $Re_{iL} = Re_L X_{iL} D_{h,i} / D_{h,b}$ and $Re_{iT} = Re_T X_{iT} D_{h,i} / D_{h,b}$, with the laminar and turbulent flow splits $X_{iL}$ and $X_{iT}$. The mixing coefficient is interpolated according to
 
 !equation
 C_m = C_{mL} + \left(C_{mT}-C_{mL}\right)\psi^{2/3} .
@@ -76,7 +76,7 @@ X_i = \frac{V_i}{\bar{V}},
 \qquad
 X_j = \frac{V_j}{\bar{V}},
 
-where $V_i$ and $V_j$ are the axial velocities of the two types of subchannels on either side of the gap and $\bar{V}$ is the bundle bulk velocity. As in the PCTD model, where the flow split is defined per type of subchannel, the velocity of each type (interior, edge, or corner) is lumped over all subchannels of that type in each axial cell: the sum of their mass flow rates divided by the sum of their density times flow area. The Pacio mixing coefficients are therefore computed once per axial cell for the center-edge and edge-corner gaps, before the turbulent crossflow is computed. The Cheng-Todreas (1986) mixing and sweep-flow coefficients depend only on the geometry and the bulk Reynolds number and are computed once per solve.
+where $V_i$ and $V_j$ are the axial velocities of the two types of subchannels on either side of the gap and $\bar{V}$ is the bundle bulk velocity. As in the PCTD model, where the flow split is defined per type of subchannel, the velocity of each type (interior, edge, or corner) is lumped over all subchannels of that type in each axial cell: the sum of their mass flow rates divided by the sum of their density times flow area. The velocities of the three types are divided by their area-weighted mean, so that the flow splits satisfy the mass balance of Eq. (11) of [!cite](pacio2022analysis) at every axial level, also in a heated assembly, where the bulk velocity rises above its inlet value as the density decreases. The Pacio mixing coefficients are therefore computed once per axial cell for the center-edge and edge-corner gaps, before the turbulent crossflow is computed. The Cheng-Todreas (1986) mixing and sweep-flow coefficients depend only on the geometry and the bulk Reynolds number and are computed once per solve.
 
 For the turbulent regime, the flow-split dependence is evaluated from Eq. (31) of [!cite](pacio2022analysis):
 
@@ -143,7 +143,7 @@ The last factor adapts the lumped crossflow of [!cite](pacio2022analysis) to the
 - center-edge gaps: $\Pi_{12} = 6 n \left(P - D - D_w/6\right)$ over the $6 n$ pin-pin gaps of width $g = P - D$, so $\Pi_{gap} = P - D - D_w/6$;
 - edge-corner gaps: $\Pi_{23} = \left[12 \left(W - D\right) - D_w/6\right]/2$ over the 12 pin-duct gaps of width $g = W - D$, so $\Pi_{gap} = \left(W - D\right)/2 - D_w/144$,
 
-where $n$ is the number of pin rings around the center pin and $W - D$ is the pin-to-duct gap. The text of [!cite](pacio2022analysis) states that half of the geometric perimeter is used for $\Pi_{12}$, while its Eqs. (A.24) and (A.25) apply the factor of one half to $\Pi_{23}$; the equations are used here.
+where $n$ is the number of pin rings around the center pin and $W - D$ is the pin-to-duct gap. The text of [!cite](pacio2022analysis) states that half of the geometric perimeter is used for $\Pi_{12}$, while its Eqs. (A.24) and (A.25) apply the factor of one half to $\Pi_{23}$; the equations are used here. Eq. (A.25) subtracts the wire term $D_w/6$ once from the whole edge-corner perimeter, while Eq. (A.24) subtracts it from every center-edge gap. The corrigendum of the paper, Nucl. Eng. Des. 395 (2022) 111846, corrects the authors' implementation to be consistent with Eq. (A.25) as printed, so that form is used here.
 
 The Pacio mixing treatment is therefore applied according to the following interface behavior:
 

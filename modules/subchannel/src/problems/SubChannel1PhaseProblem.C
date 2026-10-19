@@ -1969,6 +1969,10 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto Sj_out = (*_S_flow_soln)(node_out_j);
       auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
       auto Sij = dz * gap;
+      // Mass flux of the gap: total mass flow rate of the two subchannels over their total flow
+      // area, averaged over the inlet and outlet of the cell. This is the area-weighted mean of rho
+      // V of the two subchannels; Eq. (30) of Pacio et al. (2022) uses the arithmetic mean rho (V_i
+      // + V_j) / 2, which differs when the two subchannels have different flow areas
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));

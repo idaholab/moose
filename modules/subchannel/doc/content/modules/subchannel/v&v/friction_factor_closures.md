@@ -186,16 +186,16 @@ The temperature is also compared with the published DASSH results of [DASSH Exam
 !table id=tab-XX09-SS17-T caption=Subchannel temperature in K at the TTC thermocouples of EBR-II XX09, SHRT-17 steady state, $z = 0.322$ m, and its error against the experiment over the nine thermocouples. The published DASSH results use the CTD friction and flow split and model the thimble.
 | Thermocouple | SCM UCTD | SCM PCTD | DASSH UCTD | DASSH CTD, published | Experiment |
 | :- | -: | -: | -: | -: | -: |
-| TTC-27 | 775.7 | 762.4 | 784.4 | 765.0 | 761.1 |
+| TTC-27 | 775.7 | 762.3 | 784.4 | 765.0 | 761.1 |
 | TTC-28 | 816.6 | 808.9 | 831.1 | 805.9 | 792.5 |
 | TTC-29 | 827.1 | 824.2 | 840.4 | 816.9 | 800.2 |
 | TTC-30 | 828.1 | 826.3 | 841.4 | 818.9 | 805.9 |
 | TTC-31 | 828.1 | 826.3 | 841.4 | 819.0 | 813.9 |
-| TTC-32 | 827.1 | 824.2 | 840.4 | 817.1 | 810.6 |
+| TTC-32 | 827.1 | 824.1 | 840.4 | 817.1 | 810.6 |
 | TTC-33 | 816.5 | 808.7 | 831.0 | 807.1 | 811.6 |
 | TTC-34 | 774.9 | 761.0 | 784.0 | 770.0 | 785.0 |
 | TTC-35 | 738.5 | 749.3 | 725.0 | 722.4 | 728.2 |
-| Mean error | 13.8 | 9.2 | 23.4 | 3.7 | |
+| Mean error | 13.8 | 9.1 | 23.4 | 3.7 | |
 | Root mean square error | 17.4 | 17.1 | 27.8 | 10.5 | |
 
 !media media_scripts/verification/friction_model_verification/friction_model/scm_friction_factor_closures.py
