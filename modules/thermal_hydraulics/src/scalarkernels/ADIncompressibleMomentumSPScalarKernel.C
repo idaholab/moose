@@ -7,21 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IncompressibleMomentumSPScalarKernel.h"
+#include "ADIncompressibleMomentumSPScalarKernel.h"
 
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("ThermalHydraulicsApp", IncompressibleMomentumSPScalarKernel);
 registerMooseObject("ThermalHydraulicsApp", ADIncompressibleMomentumSPScalarKernel);
 
-template <bool is_ad>
 InputParameters
-IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
+ADIncompressibleMomentumSPScalarKernel::validParams()
 {
-  InputParameters params = IncompressibleMomentumSPBaseTempl<is_ad>::validParams();
-  params += FunctorInterface::validParams();
+  InputParameters params = ADIncompressibleMomentumSPBase::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate.");
   params.addCoupledVar("reference_pressure_drop",
@@ -31,20 +29,8 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-IncompressibleMomentumSPScalarKernelTempl<is_ad>::IncompressibleMomentumSPScalarKernelTempl(
+ADIncompressibleMomentumSPScalarKernel::ADIncompressibleMomentumSPScalarKernel(
     const InputParameters & parameters)
-  : Base(parameters),
-    _dPc(ScalarCoupleable::coupledGenericScalarValue<is_ad>("reference_pressure_drop"))
+  : Base(parameters), _dPc(ScalarCoupleable::adCoupledScalarValue("reference_pressure_drop"))
 {
 }
-
-template <bool is_ad>
-Real
-IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobian()
-{
-  return Base::computeQpJacobianMDot();
-}
-
-template class IncompressibleMomentumSPScalarKernelTempl<false>;
-template class IncompressibleMomentumSPScalarKernelTempl<true>;

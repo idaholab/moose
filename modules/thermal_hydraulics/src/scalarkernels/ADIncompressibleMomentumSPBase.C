@@ -7,19 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IncompressibleMomentumSPBase.h"
+#include "ADIncompressibleMomentumSPBase.h"
 
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 #include "PhysicalConstants.h"
 
-template <bool is_ad>
 InputParameters
-IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
+ADIncompressibleMomentumSPBase::validParams()
 {
-  InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
-  params += FunctorInterface::validParams();
+  InputParameters params = ADScalarKernel::validParams();
+  params += ADFunctorInterface::validParams();
   params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
   params.addCoupledVar("temperatures",
                        {},
@@ -66,15 +65,13 @@ IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
-    const InputParameters & parameters)
+ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _n_temps(ScalarCoupleable::coupledScalarComponents("temperatures")),
     _T(_n_temps),
     _is_implicit(this->template getParam<bool>("is_implicit")),
-    _Pref(this->template getFunctor<GenericReal<is_ad>>("reference_pressure")),
+    _Pref(this->template getFunctor<ADReal>("reference_pressure")),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
     _n_segments(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
     _areas(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
@@ -84,7 +81,7 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     _forms_losses(this->template getParam<std::vector<MooseFunctorName>>("forms_losses").size()),
     _dPps(this->template getParam<std::vector<MooseFunctorName>>("pump_pressures").size()),
     _roughnesses(this->template getParam<std::vector<MooseFunctorName>>("roughnesses").size()),
-    _gravity(this->template getFunctor<GenericReal<is_ad>>("g"))
+    _gravity(this->template getFunctor<ADReal>("g"))
 {
   const auto & area_names = MooseBase::getParam<std::vector<MooseFunctorName>>("areas");
   const auto & perimeter_names = MooseBase::getParam<std::vector<MooseFunctorName>>("perimeters");
@@ -104,22 +101,21 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
   }
   for (const auto j : make_range(_n_segments))
   {
-    _T[j] = &(ScalarCoupleable::coupledGenericScalarValue<is_ad>("temperatures", j));
-    _areas[j] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[j]));
-    _perimeters[j] = &(this->template getFunctor<GenericReal<is_ad>>(perimeter_names[j]));
-    _lengths[j] = &(this->template getFunctor<GenericReal<is_ad>>(length_names[j]));
-    _alphas[j] = &(this->template getFunctor<GenericReal<is_ad>>(alpha_names[j]));
-    _forms_losses[j] = &(this->template getFunctor<GenericReal<is_ad>>(forms_loss_names[j]));
-    _dPps[j] = &(this->template getFunctor<GenericReal<is_ad>>(dPp_names[j]));
-    _roughnesses[j] = &(this->template getFunctor<GenericReal<is_ad>>(roughness_names[j]));
+    _T[j] = &(ScalarCoupleable::adCoupledScalarValue("temperatures", j));
+    _areas[j] = &(this->template getFunctor<ADReal>(area_names[j]));
+    _perimeters[j] = &(this->template getFunctor<ADReal>(perimeter_names[j]));
+    _lengths[j] = &(this->template getFunctor<ADReal>(length_names[j]));
+    _alphas[j] = &(this->template getFunctor<ADReal>(alpha_names[j]));
+    _forms_losses[j] = &(this->template getFunctor<ADReal>(forms_loss_names[j]));
+    _dPps[j] = &(this->template getFunctor<ADReal>(dPp_names[j]));
+    _roughnesses[j] = &(this->template getFunctor<ADReal>(roughness_names[j]));
   }
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
+ADReal
+ADIncompressibleMomentumSPBase::computeQpResidual()
 {
-  GenericReal<is_ad> momentum_residual = 0;
+  ADReal momentum_residual = 0;
   const Moose::ElemArg qp = Moose::ElemArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
@@ -130,7 +126,7 @@ IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
   // Global rescale factor so the mass flow rate's transient term has a unit coefficient,
   // matching the coefficient of ODETimeDerivative kernel: the path's lumped L_over_A_sum is
   // Sum_j(length_j / area_j), so the whole equation is divided through by that single sum.
-  GenericReal<is_ad> L_over_A_sum = 0;
+  ADReal L_over_A_sum = 0;
   for (const auto j : make_range(_n_segments))
     L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
   const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
@@ -159,101 +155,18 @@ IncompressibleMomentumSPBaseTempl<is_ad>::computeQpResidual()
   return momentum_residual * inv_L_over_A_sum;
 }
 
-template <bool is_ad>
 Real
-IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobianMDot()
-{
-  if constexpr (!is_ad)
-  {
-    Real momentum_jacob = 0;
-    const Moose::ElemArg qp = Moose::ElemArg();
-    const int i = 0;
-    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-    // start by getting global fluid properties
-    const auto Tave = ((*(_T[0]))[i] + (*(_T[_n_temps - 1]))[i]) / 2;
-    const auto mu = _fp.mu_from_p_T(_Pref(qp, state), Tave);
-    const auto rhog = _fp.rho_from_p_T(_Pref(qp, state), Tave);
-    // Global rescale factor, see computeQpResidual()
-    Real L_over_A_sum = 0;
-    for (const auto j : make_range(_n_segments))
-      L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
-    const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
-    // loop over segments
-    for (const auto j : make_range(_n_segments))
-    {
-      // Decide flow regime for friction factor
-      const auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
-      const auto G = massFlowRate() / (*(_areas[j]))(qp, state);
-      const auto fd = computeFrictionFactor(mu, G, Dh, j);
-      // Friction
-      momentum_jacob +=
-          fd * (*(_lengths[j]))(qp, state) / Dh * G / rhog / (*(_areas[j]))(qp, state);
-      // Form losses
-      momentum_jacob += (*(_forms_losses[j]))(qp, state) * G / rhog / (*(_areas[j]))(qp, state);
-    }
-
-    return momentum_jacob * inv_L_over_A_sum;
-  }
-  else
-  {
-    mooseError("computeQpJacobian() should not be called in AD mode");
-    return 0;
-  }
-}
-
-template <bool is_ad>
-Real
-IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobianDP()
-{
-  if constexpr (!is_ad)
-  {
-    const Moose::ElemArg qp = Moose::ElemArg();
-    const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-    // Global rescale factor, see computeQpResidual()
-    Real L_over_A_sum = 0;
-    for (const auto j : make_range(_n_segments))
-      L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
-    const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
-    // reference pressure drop is subtracted once, scaled by inv_L_over_A_sum, so its derivative is
-    // -inv_L_over_A_sum
-    return -inv_L_over_A_sum;
-  }
-  else
-  {
-    mooseError("computeQpJacobian() should not be called in AD mode");
-    return 0;
-  }
-}
-
-template <bool is_ad>
-Real
-IncompressibleMomentumSPBaseTempl<is_ad>::computeQpJacobian()
-{
-  if constexpr (!is_ad)
-  {
-    return 0;
-  }
-  else
-  {
-    mooseError("computeQpJacobian() should not be called in AD mode");
-    return 0;
-  }
-}
-
-template <>
-Real
-IncompressibleMomentumSPBaseTempl<true>::computeQpJacobian()
+ADIncompressibleMomentumSPBase::computeQpJacobian()
 {
   mooseError("Internal error, calling computeQpJacobian in AD class.");
   return 0.0;
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericReal<is_ad> & mu,
-                                                                const GenericReal<is_ad> & G,
-                                                                const GenericReal<is_ad> & Dh,
-                                                                const unsigned int j)
+ADReal
+ADIncompressibleMomentumSPBase::computeFrictionFactor(const ADReal & mu,
+                                                      const ADReal & G,
+                                                      const ADReal & Dh,
+                                                      const unsigned int j)
 {
   const Moose::ElemArg qp = Moose::ElemArg();
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
@@ -268,6 +181,3 @@ IncompressibleMomentumSPBaseTempl<is_ad>::computeFrictionFactor(const GenericRea
   else // transition, conservative interpolation between the two
     return std::max((f_turb - f_lam) / 1700 * Re + f_lam, std::max(f_lam, f_turb));
 }
-
-template class IncompressibleMomentumSPBaseTempl<false>;
-template class IncompressibleMomentumSPBaseTempl<true>;
