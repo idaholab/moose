@@ -30,7 +30,7 @@ SCMQuadPowerAux::validParams()
       "1.0",
       "Axial shape of the heat rate as a function of the distance from the start of the "
       "heated section [Unitless]. Its magnitude does not matter because each pin is "
-      "rescaled to its assigned power. It should depend only on z");
+      "rescaled to its assigned power");
   return params;
 }
 
@@ -110,16 +110,19 @@ SCMQuadPowerAux::initialSetup()
     // Compute axial location of nodes.
     auto z2 = z_grid[iz];
     auto z1 = z_grid[iz - 1];
-    Point p1(0, 0, z1 - unheated_length_entry);
-    Point p2(0, 0, z2 - unheated_length_entry);
-    auto heat1 = _axial_heat_rate.value(_t, p1);
-    auto heat2 = _axial_heat_rate.value(_t, p2);
     if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
         MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
+        // Evaluate the axial shape at this pin's nodes, where computeValue() assigns q_prime and
+        // the solver integrates it, so the correction also holds for shapes that vary between pins
+        const Point shift(0, 0, unheated_length_entry);
+        auto heat1 =
+            _axial_heat_rate.value(_t, Point(*_quadMesh.getPinNode(i_pin, iz - 1) - shift));
+        auto heat2 = _axial_heat_rate.value(_t, Point(*_quadMesh.getPinNode(i_pin, iz) - shift));
+
         // Compute the height of this element.
         auto dz = z2 - z1;
 

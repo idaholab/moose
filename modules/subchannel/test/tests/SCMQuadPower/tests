@@ -18,4 +18,13 @@
     abs_zero = 1e-7
     requirement = 'The system will populate a sinusoidal linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
+  [SCMQuadPower_pin_dependent_axial_shape]
+    type = CSVDiff
+    input = 'two_pin_shapes.i'
+    csvdiff = 'two_pin_shapes_out.csv two_pin_shapes_out_q_prime_profiles_0001.csv'
+    recover = False
+    abs_zero = 1e-7
+    issues = '#34082'
+    requirement = 'The system will assign a different axial linear heat rate shape to each fuel pin in a quadrilateral lattice from a single function of the pin position, while conserving the power assigned to each pin by the radial power distribution, using an initial condition and auxiliary kernel.'
+  []
 []
