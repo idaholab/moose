@@ -1,5 +1,5 @@
 [Tests]
-  design = 'source/kernels/SecondDerivativeRegularization.md source/kernels/ADSecondDerivativeRegularization.md'
+  design = 'source/kernels/SecondDerivativeRegularization.md'
   issues = '#32970'
 
   [cantilever]
