@@ -12,7 +12,7 @@
 #include "AbaqusUELMesh.h"
 #include "MooseMain.h"
 #include "DataFileUtils.h"
-#include "AbaqusInputParser.h"
+
 namespace
 {
 
@@ -56,8 +56,6 @@ TEST(AbaqusUELTest, EmptyMesh)
   EXPECT_EQ(mesh->getElements().size(), 0u);
 }
 
-// Assembly instantiation currently raises a runtime error in Instance::Instance.
-// Disable this test until instantiation is completed.
 TEST(AbaqusUELTest, Square)
 {
   auto mesh = loadUELMesh("square.inp");
@@ -98,10 +96,9 @@ TEST(AbaqusUELTest, Square)
 
 TEST(AbaqusUELTest, ParseErrors)
 {
-  // Current implementation treats Part-only files as unsupported in flat mode
-  const std::string expect = "Unsupported block part";
-  exceptionTest("error_coord.inp", expect);
-  exceptionTest("error_unknown_uel.inp", expect);
-  exceptionTest("error_node_count.inp", expect);
-  exceptionTest("error_node_num.inp", expect);
+  exceptionTest("error_coord.inp", "Normal directions are not yet supported");
+  exceptionTest("error_unknown_uel.inp", "Name 'U1' not found in Abaqus input.");
+  exceptionTest("error_node_count.inp",
+                "Wrong number of nodes for user element of type 'U1' in Abaqus input.");
+  exceptionTest("error_node_num.inp", "Invalid node number in Abaqus input.");
 }

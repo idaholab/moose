@@ -23,9 +23,6 @@ public:
 
   AbaqusUELStepUserObject(const InputParameters & parameters);
 
-  /// Get initial dt
-  Real getInitialDt() const { return _steps[_current_step]._dt; }
-
   /// Get current step
   unsigned int getStep() const { return _current_step; }
   const Real & getStepFraction() const { return _current_step_fraction; }
@@ -39,6 +36,7 @@ public:
   /// get a vector of all variables that have BCs applied
   std::map<Abaqus::AbaqusID, std::string> getVariables() const;
 
+  void initialSetup() override;
   void timestepSetup() override;
 
   /// DLOAD getters for current step (begin/end)
@@ -56,6 +54,9 @@ protected:
   void execute() override {}
   void finalize() override {}
 
+  /// point the begin/end step data at the step preceding and at the current step
+  void setCurrentStepData();
+
   /// Step start times
   std::vector<Real> _times;
 
@@ -66,13 +67,13 @@ protected:
   AbaqusUELMesh & _uel_mesh;
 
   /// simulation steps
-  const Abaqus::ObjectStore<Abaqus::Step> _steps;
+  const Abaqus::ObjectStore<Abaqus::Step> & _steps;
 
   /// Map from abaqus variable ID to MooseVariable*
   std::unordered_map<Abaqus::AbaqusID, MooseVariableFieldBase *> _var_map;
 
   /// Current step number
-  unsigned int _current_step;
+  unsigned int & _current_step;
 
   /// Get current fraction (from 0 beginning to 1 end)
   Real _current_step_fraction;
@@ -82,10 +83,10 @@ protected:
       _current_step_bcs;
 
   /// applied forces for deactivated BCs
-  Abaqus::VariableValueMap<Real> _current_step_begin_forces;
+  Abaqus::VariableValueMap<Real> & _current_step_begin_forces;
 
-  /// applied forces for deactivated BCs
-  Abaqus::VariableValueMap<Real> _current_step_begin_solution;
+  /// solution values at the beginning of the step for newly activated BCs
+  Abaqus::VariableValueMap<Real> & _current_step_begin_solution;
 
   /// Distributed loads for the beginning and end of the current step
   std::pair<const std::unordered_map<Abaqus::Index, std::vector<Abaqus::DLoad>> *,

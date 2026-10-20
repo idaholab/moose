@@ -8,18 +8,25 @@
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarnessTestCase import TestHarnessTestCase
-import json
 
 
 class TestHarnessTester(TestHarnessTestCase):
     def testGlobalCapabilitiesPropagated(self):
-        result = self.runTests("-i", "global_capabilities", "--dry-run")
-        self.assertTrue("[NEEDS: FOO]" in result.output)
+        # The capability set on the parent block reaches the child, where "foo" is unknown
+        result = self.runTests(
+            "-i", "global_capabilities", minimal_capabilities=True, exit_code=132
+        )
+        assert result.harness is not None
+        test = self.getJobWithName(result.harness, "always_ok")
+        self.assertEqual(test.getTester().getStatusMessage(), "UNKNOWN CAPABILITIES")
+        self.assertIn(
+            "The following capabilities are unknown: foo", test.getTester().getOutput()
+        )
 
     def testGlobalPrereqPropagated(self):
-        try:
-            self.runTests("-i", "global_prereq", "--dry-run")
-        except:
-            self.assertTrue(True)
-            return
-        self.assertTrue(False)
+        # The parent prereq also reaches "pre" itself, which then depends on itself
+        result = self.runTests("-i", "global_prereq", "--dry-run", exit_code=132)
+        self.assertRegex(
+            result.output,
+            r"test_harness\.parent/pre.*FAILED \(unknown dependency pre\)",
+        )

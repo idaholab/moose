@@ -15,7 +15,7 @@
 class AbaqusUELMesh;
 
 /**
- * This class implements algebraic coupling fur Abaqus user defined elements (UELs).
+ * This class implements algebraic coupling for Abaqus user defined elements (UELs).
  */
 class AbaqusUELRelationshipManager : public RelationshipManager
 {
@@ -48,5 +48,5 @@ public:
   virtual bool operator>=(const RelationshipManager & other) const override;
 
 private:
-  AbaqusUELMesh * _uel_mesh;
+  const AbaqusUELMesh * const _uel_mesh;
 };

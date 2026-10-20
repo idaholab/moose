@@ -551,14 +551,14 @@ public:
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
    * various boundary information on parallel meshes. Also calls update() internally.
    */
-  void prepare();
+  virtual void prepare();
 
   /**
    * Deprecated method; \p mesh_to_clone is no longer supported and must be null. Use the
    * no-argument prepare() instead.
    * @param mesh_to_clone Must be null; mesh cloning is handled elsewhere now
    */
-  virtual bool prepare(const MeshBase * mesh_to_clone);
+  void prepare(const MeshBase * mesh_to_clone);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

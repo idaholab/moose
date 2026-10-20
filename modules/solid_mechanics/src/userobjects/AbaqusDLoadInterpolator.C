@@ -11,6 +11,8 @@
 #include "AbaqusUELMesh.h"
 #include "AbaqusUELStepUserObject.h"
 
+#include <map>
+
 registerMooseObject("SolidMechanicsApp", AbaqusDLoadInterpolator);
 
 InputParameters
@@ -20,18 +22,17 @@ AbaqusDLoadInterpolator::validParams()
   params.addClassDescription("Interpolates Abaqus *Dload values at the beginning of each timestep "
                              "and stores per-element JDLTYP/ADLMAG arrays.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
-  params.addParam<UserObjectName>("step_user_object",
-                                  UserObjectName("step_uo"),
-                                  "Step user object providing begin/end DLOAD maps.");
+  params.addRequiredParam<UserObjectName>("step_user_object",
+                                          "Step user object providing begin/end DLOAD maps.");
   return params;
 }
 
 AbaqusDLoadInterpolator::AbaqusDLoadInterpolator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _uel_mesh(
-        [this]() -> AbaqusUELMesh &
+        [this]() -> const AbaqusUELMesh &
         {
-          auto * mesh = dynamic_cast<AbaqusUELMesh *>(&_fe_problem.mesh());
+          const auto * mesh = dynamic_cast<const AbaqusUELMesh *>(&_fe_problem.mesh());
           if (!mesh)
             mooseError("AbaqusDLoadInterpolator requires an AbaqusUELMesh.");
           return *mesh;
@@ -41,7 +42,7 @@ AbaqusDLoadInterpolator::AbaqusDLoadInterpolator(const InputParameters & paramet
 }
 
 void
-AbaqusDLoadInterpolator::timestepSetup()
+AbaqusDLoadInterpolator::execute()
 {
   _types.clear();
   _magnitudes.clear();
@@ -56,7 +57,7 @@ AbaqusDLoadInterpolator::timestepSetup()
     if (!begin_list && !end_list)
       continue;
 
-    std::unordered_map<int, std::pair<Real, Real>> by_face; // begin, end
+    std::map<int, std::pair<Real, Real>> by_face; // begin, end
     if (begin_list)
       for (const auto & dl : *begin_list)
         by_face[dl._jdltyp].first = dl._magnitude;

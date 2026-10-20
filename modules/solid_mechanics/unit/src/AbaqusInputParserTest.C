@@ -9,13 +9,12 @@
 
 #include "gtest/gtest.h"
 
-#include <fstream>
+#include <algorithm>
 #include <sstream>
 #include <string>
 
 #include "AbaqusInputParser.h"
 #include "AbaqusInputObjects.h"
-#include "DataFileUtils.h"
 
 using namespace Abaqus;
 
@@ -24,8 +23,8 @@ namespace
 
 // Utility: find first child of a block by type string
 template <typename NodeT>
-static NodeT *
-find_child(Abaqus::BlockNode & node, const std::string & type)
+NodeT *
+findChild(Abaqus::BlockNode & node, const std::string & type)
 {
   for (const auto & child : node._children)
     if (child && child->_type == type)
@@ -165,9 +164,9 @@ TEST(AbaqusInputParserTest, NsetMultipleLines)
   InputParser parser;
   parser.parse(in);
 
-  auto * asmb = find_child<BlockNode>(parser, "assembly");
+  auto * asmb = findChild<BlockNode>(parser, "assembly");
   ASSERT_NE(asmb, nullptr);
-  auto * nset = find_child<OptionNode>(*asmb, "nset");
+  auto * nset = findChild<OptionNode>(*asmb, "nset");
   ASSERT_NE(nset, nullptr);
 
   EXPECT_TRUE(nset->_header.has("nset"));
@@ -197,9 +196,9 @@ TEST(AbaqusInputParserTest, NsetContinuationAndMultipleLines)
   InputParser parser;
   parser.parse(in);
 
-  auto * asmb = find_child<BlockNode>(parser, "assembly");
+  auto * asmb = findChild<BlockNode>(parser, "assembly");
   ASSERT_NE(asmb, nullptr);
-  auto * nset = find_child<OptionNode>(*asmb, "nset");
+  auto * nset = findChild<OptionNode>(*asmb, "nset");
   ASSERT_NE(nset, nullptr);
 
   EXPECT_EQ(nset->_header.get<std::string>("nset"), "A");
@@ -243,20 +242,20 @@ TEST(AbaqusInputParserTest, SquareInpTreeAndAssembly)
 
   EXPECT_FALSE(parser.isFlat());
 
-  auto * part = find_child<BlockNode>(parser, "part");
-  auto * asmb = find_child<BlockNode>(parser, "assembly");
+  auto * part = findChild<BlockNode>(parser, "part");
+  auto * asmb = findChild<BlockNode>(parser, "assembly");
   ASSERT_NE(part, nullptr);
   ASSERT_NE(asmb, nullptr);
 
-  EXPECT_NE(find_child<OptionNode>(*part, "node"), nullptr);
-  EXPECT_NE(find_child<OptionNode>(*part, "user element"), nullptr);
-  EXPECT_NE(find_child<OptionNode>(*part, "element"), nullptr);
-  EXPECT_NE(find_child<OptionNode>(*part, "uel property"), nullptr);
+  EXPECT_NE(findChild<OptionNode>(*part, "node"), nullptr);
+  EXPECT_NE(findChild<OptionNode>(*part, "user element"), nullptr);
+  EXPECT_NE(findChild<OptionNode>(*part, "element"), nullptr);
+  EXPECT_NE(findChild<OptionNode>(*part, "uel property"), nullptr);
 
-  auto * inst = find_child<BlockNode>(*asmb, "instance");
+  auto * inst = findChild<BlockNode>(*asmb, "instance");
   ASSERT_NE(inst, nullptr);
 
-  auto * nset_any = find_child<OptionNode>(*asmb, "nset");
+  auto * nset_any = findChild<OptionNode>(*asmb, "nset");
   ASSERT_NE(nset_any, nullptr);
   EXPECT_TRUE(nset_any->_header.has("nset"));
   EXPECT_TRUE(nset_any->_header.has("instance"));
@@ -275,8 +274,8 @@ TEST(AbaqusInputParserTest, FlatFileDetection)
 
   EXPECT_TRUE(parser.isFlat());
   // Has Part and Step blocks
-  EXPECT_NE(find_child<BlockNode>(parser, "part"), nullptr);
-  EXPECT_NE(find_child<BlockNode>(parser, "step"), nullptr);
+  EXPECT_NE(findChild<BlockNode>(parser, "part"), nullptr);
+  EXPECT_NE(findChild<BlockNode>(parser, "step"), nullptr);
 }
 
 TEST(AbaqusInputParserTest, AssemblyScopedSetsAndIndices)
@@ -609,10 +608,7 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelElsetNumericMerged)
   EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
 }
 
-// Intentionally expected-to-fail test capturing the bare numeric elset issue.
-// A part-level *Elset with a simple numeric data line (no GENERATE) should populate the set,
-// but currently the option data lines are not captured (option._data.size() == 0 observed),
-// yielding an empty set. This test asserts the intended behavior and will fail until fixed.
+// A part-level *Elset with a bare numeric data line (no GENERATE) populates the set.
 TEST(AbaqusInputParserTest, PartLevelElsetNumericBareLine)
 {
   std::istringstream in("*Part, name=P\n"
@@ -644,7 +640,6 @@ TEST(AbaqusInputParserTest, PartLevelElsetNumericBareLine)
   // EXPECTED: PE should contain element id 1 resolved to the part-local index.
   ASSERT_TRUE(part._elsets.find("PE") != part._elsets.end());
   const auto & pe_part = part._elsets.at("PE");
-  // This currently fails (size()==0); keep as 1 to encode intended behavior.
   ASSERT_EQ(pe_part.size(), 1u);
 }
 
@@ -841,4 +836,108 @@ TEST(AbaqusInputParserTest, AmplitudeStepTimeUnsupported)
     std::string msg(e.what());
     ASSERT_NE(msg.find("TIME=TOTAL TIME"), std::string::npos) << msg;
   }
+}
+
+TEST(AbaqusInputParserTest, InstanceTranslationAndRotation)
+{
+  // I1 is translated only. I2 is translated by (0,1,0), then rotated by 90 degrees about the axis
+  // through a=(1,0,0) and b=(1,0,1), i.e. a z-parallel axis that does not pass through the origin.
+  std::istringstream in("*Part, name=P\n"
+                        "*Node\n"
+                        "1, 0., 0., 0.\n"
+                        "2, 1., 0., 0.\n"
+                        "3, 2., 0., 0.\n"
+                        "*End Part\n"
+                        "*Assembly, name=A\n"
+                        "*Instance, name=I1, part=P\n"
+                        "10., 0., 0.\n"
+                        "*End Instance\n"
+                        "*Instance, name=I2, part=P\n"
+                        "0., 1., 0.\n"
+                        "1., 0., 0., 1., 0., 1., 90.\n"
+                        "*End Instance\n"
+                        "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+  EXPECT_FALSE(parser.isFlat());
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  const auto & i1 = model.getInstance("I1");
+  const auto & i2 = model.getInstance("I2");
+
+  // I1: p + (10,0,0)
+  const Real gold_i1[3][3] = {{10., 0., 0.}, {11., 0., 0.}, {12., 0., 0.}};
+
+  // I2: q = p + (0,1,0) - a, rotated by +90 degrees about +z (right-hand rule, (x,y) -> (-y,x)),
+  // then shifted back by a:
+  //   (0,0,0) -> q=(-1,1,0) -> (-1,-1,0) -> (0,-1,0)
+  //   (1,0,0) -> q=( 0,1,0) -> (-1, 0,0) -> (0, 0,0)
+  //   (2,0,0) -> q=( 1,1,0) -> (-1, 1,0) -> (0, 1,0)
+  const Real gold_i2[3][3] = {{0., -1., 0.}, {0., 0., 0.}, {0., 1., 0.}};
+
+  for (const auto n : make_range(3))
+  {
+    const auto id = std::to_string(n + 1);
+    const auto & p1 = model._nodes[model.getNodeIndex(id, &i1)]._point;
+    const auto & p2 = model._nodes[model.getNodeIndex(id, &i2)]._point;
+    for (const auto d : make_range(3))
+    {
+      EXPECT_NEAR(p1(d), gold_i1[n][d], 1e-12) << "I1 node " << id << " component " << d;
+      EXPECT_NEAR(p2(d), gold_i2[n][d], 1e-12) << "I2 node " << id << " component " << d;
+    }
+  }
+}
+
+TEST(AbaqusInputParserTest, EmptyPositionalFields)
+{
+  // An empty field in a positional data line takes the Abaqus default for that position:
+  // *Boundary "N1, 1,, 0.5": the last DOF defaults to the first DOF.
+  // *Static ", 2.0": the initial increment defaults to the step time period.
+  std::istringstream in("*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*Nset, nset=N1\n"
+                        "1, 2\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        ", 2.0\n"
+                        "*Boundary\n"
+                        "N1, 1,, 0.5\n"
+                        "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  // the empty field is kept, so later fields stay in position
+  auto * step_block = findChild<Abaqus::BlockNode>(parser, "step");
+  ASSERT_NE(step_block, nullptr);
+  auto * boundary = findChild<Abaqus::OptionNode>(*step_block, "boundary");
+  ASSERT_NE(boundary, nullptr);
+  ASSERT_EQ(boundary->_data.size(), 1u);
+  ASSERT_EQ(boundary->_data[0].size(), 4u);
+  EXPECT_TRUE(boundary->_data[0][2].empty());
+
+  Abaqus::FlatModel model;
+  model.parse(parser);
+
+  ASSERT_EQ(model._step.size(), 1u);
+  const auto & step = model._step[0];
+
+  // *Static defaults
+  EXPECT_DOUBLE_EQ(step._duration, 2.0);
+  EXPECT_DOUBLE_EQ(step._dt, 2.0);
+  EXPECT_DOUBLE_EQ(step._dt_min, 1e-5 * 2.0);
+  EXPECT_EQ(step._dt_max, std::numeric_limits<Real>::max());
+
+  // only DOF 1 is constrained, with value 0.5 on both nodes of N1
+  const auto & bcs = step._bc_var_node_value_map;
+  ASSERT_EQ(bcs.size(), 1u);
+  ASSERT_TRUE(bcs.find(1) != bcs.end());
+  const auto & node_value = bcs.at(1);
+  ASSERT_EQ(node_value.size(), 2u);
+  EXPECT_DOUBLE_EQ(node_value.at(model.getNodeIndex("1")), 0.5);
+  EXPECT_DOUBLE_EQ(node_value.at(model.getNodeIndex("2")), 0.5);
 }

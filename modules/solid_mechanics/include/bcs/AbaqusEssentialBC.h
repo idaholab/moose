@@ -1,4 +1,3 @@
-
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -11,8 +10,7 @@
 #pragma once
 
 #include "AbaqusInputObjects.h"
-#include "AbaqusUELStepUserObject.h"
-#include "DirichletBCBase.h"
+#include "NodalBC.h"
 
 class AbaqusUELStepUserObject;
 
@@ -40,9 +38,8 @@ protected:
   const Real & _current_step_fraction;
 
   /// BC data for the current variable/step
-  typedef std::unordered_map<Abaqus::Index, Real> NodeValueMap;
-  const NodeValueMap * _current_step_begin_forces;
-  const NodeValueMap * _current_step_begin_solution;
-  const NodeValueMap * _current_step_begin_values;
-  const NodeValueMap * _current_step_end_values;
+  using NodeValueMap = std::unordered_map<Abaqus::Index, Real>;
+  const NodeValueMap * _current_step_begin_solution = nullptr;
+  const NodeValueMap * _current_step_begin_values = nullptr;
+  const NodeValueMap * _current_step_end_values = nullptr;
 };

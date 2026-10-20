@@ -14,7 +14,8 @@
 #include "AbaqusUELStepUserObject.h"
 
 /**
- * Calculates the gravitational force proportional to nodal mass
+ * Applies the reaction force of a deactivated Abaqus boundary condition, ramped to zero over the
+ * step
  */
 class AbaqusForceBC : public NodalKernel
 {
@@ -26,7 +27,7 @@ public:
   void residualSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override;
+  Real computeQpResidual() override;
 
   const AbaqusUELStepUserObject & _step_uo;
 
@@ -36,6 +37,6 @@ protected:
   const Real & _current_step_fraction;
 
   /// BC data for the current variable/step
-  typedef std::unordered_map<Abaqus::Index, Real> NodeValueMap;
-  const NodeValueMap * _current_step_begin_forces;
+  using NodeValueMap = std::unordered_map<Abaqus::Index, Real>;
+  const NodeValueMap * _current_step_begin_forces = nullptr;
 };

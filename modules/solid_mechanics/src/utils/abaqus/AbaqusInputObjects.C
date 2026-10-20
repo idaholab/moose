@@ -12,6 +12,7 @@
 #include "MooseStringUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/libmesh_common.h"
+#include "libmesh/utility.h"
 
 #include <iostream>
 #include <limits>
@@ -20,28 +21,24 @@
 
 namespace Abaqus
 {
+// convert a list-valued data line, skipping empty fields
 template <typename T>
 std::vector<T>
 vecTo(const std::vector<std::string> & in)
 {
   std::vector<T> out;
-  std::transform(in.begin(),
-                 in.end(),
-                 std::back_inserter(out),
-                 [](const std::string & str) { return MooseUtils::convert<T>(str); });
+  for (const auto & str : in)
+    if (!str.empty())
+      out.push_back(MooseUtils::convert<T>(str));
   return out;
 }
 
-// do not complain when trying to convert floating point numbers to int
-std::vector<int>
-vecToInt(const std::vector<std::string> & in)
+// convert positional data field i, returning default_value if the field is empty or absent
+template <typename T>
+T
+fieldTo(const std::vector<std::string> & data, std::size_t i, const T & default_value)
 {
-  std::vector<int> out;
-  std::transform(in.begin(),
-                 in.end(),
-                 std::back_inserter(out),
-                 [](const std::string & str) { return std::stoi(str); });
-  return out;
+  return i < data.size() && !data[i].empty() ? MooseUtils::convert<T>(data[i]) : default_value;
 }
 
 UserElement::UserElement(const OptionNode & option)
@@ -49,17 +46,19 @@ UserElement::UserElement(const OptionNode & option)
   const auto & map = option._header;
   _coords = map.get<int>("coordinates");
   _n_nodes = map.get<std::size_t>("nodes");
+  if (_n_nodes == 0)
+    mooseError("The NODES parameter of *User Element must be positive.");
   _n_statev = map.get<int>("variables", 1);
   _n_properties = map.get<int>("properties", 0);
   _n_iproperties = map.get<int>("i properties", 0);
-  _symmetric = !map.get<bool>("unsym");
+  _symmetric = !map.get<bool>("unsymm");
   _type = map.get<std::string>("type");
 
   // parse type string (should be UX with X being an integer from 1 to 9,999)
   if (_type.empty() || (_type[0] != 'U' && _type[0] != 'u'))
     mooseError("Invalid type string in UEL definition: ", _type);
-  _type_id = std::stoi(_type.substr(1));
-  if (_type_id < 1 || _type_id > 9999)
+  if (!MooseUtils::convert<std::size_t>(_type.substr(1), _type_id, false) || _type_id < 1 ||
+      _type_id > 9999)
     mooseError("Invalid type string in UEL definition: ", _type);
 
   // available bits for the dof mask
@@ -92,7 +91,7 @@ UserElement::UserElement(const OptionNode & option)
       {
         const auto v = col[i];
         if (v > bits)
-          mooseError("Currently variables numbers >= ", bits, " are not supported.");
+          mooseError("Currently variable numbers > ", bits, " are not supported.");
         if (v < 1)
           mooseError("Invalid variable number in Abaqus input.");
 
@@ -101,7 +100,7 @@ UserElement::UserElement(const OptionNode & option)
       }
   }
 
-  // check if any node numbers were omitted, and if so, set them to the preceeding node's variables
+  // check if any node numbers were omitted, and if so, set them to the preceding node's variables
   for (const auto i : make_range(_n_nodes - 1))
     if (!seen_node.count(i + 1))
     {
@@ -156,9 +155,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
         mooseError("Normal directions are not yet supported");
 
       const auto id = MooseUtils::convert<AbaqusID>(data[0]);
-      Point p(MooseUtils::convert<Real>(data[1]),
-              data.size() > 2 ? MooseUtils::convert<Real>(data[2]) : 0,
-              data.size() > 3 ? MooseUtils::convert<Real>(data[3]) : 0);
+      Point p(fieldTo<Real>(data, 1, 0), fieldTo<Real>(data, 2, 0), fieldTo<Real>(data, 3, 0));
 
       Index index = _nodes.size();
       _nodes.push_back(Node{id, p, 0});
@@ -202,7 +199,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
       for (const auto i : index_range(col))
         if (i > 0)
         {
-          const auto node_index = _node_id_to_index.at(col[i]);
+          const auto node_index = libmesh_map_find(_node_id_to_index, col[i]);
           element._nodes.push_back(node_index);
           _nodes[node_index]._var_mask |= uel._var_mask[i - 1];
         }
@@ -229,7 +226,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   else if (key == "uel property")
   {
     const auto & map = option._header;
-    const auto & elset = _elsets.at(map.get<std::string>("elset"));
+    const auto & elset = libmesh_map_find(_elsets, map.get<std::string>("elset"));
 
     // locate space
     _properties.emplace_back();
@@ -238,9 +235,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
     for (const auto & data : option._data)
     {
       const auto dprop = vecTo<Real>(data);
-      const auto iprop = vecToInt(data);
       props.first.insert(props.first.end(), dprop.begin(), dprop.end());
-      props.second.insert(props.second.end(), iprop.begin(), iprop.end());
     }
 
     // assign properties to elements
@@ -254,10 +249,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
         elem._properties.first = nullptr;
 
       if (uel._n_iproperties > 0)
-      {
         mooseError("integer properties not supported yet (fix conversion to skip floats in data)");
-        elem._properties.second = &(props.second[uel._n_properties]);
-      }
       else
         elem._properties.second = nullptr;
     }
@@ -279,7 +271,7 @@ Part::processNodeSet(const OptionNode & option, Instance * instance, const Assem
     const auto & source_part = instance ? instance->_part : *this;
 
     // get element set to copy nodes from
-    const auto & elset = source_part._elsets.at(map.get<std::string>("elset"));
+    const auto & elset = libmesh_map_find(source_part._elsets, map.get<std::string>("elset"));
 
     // get or create node set
     auto & nset = _nsets[map.get<std::string>("nset")];
@@ -355,10 +347,10 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
       const auto begin = MooseUtils::convert<AbaqusID>(data[0]);
       const auto end = MooseUtils::convert<AbaqusID>(data[1]);
       const auto step = MooseUtils::convert<AbaqusID>(data[2]);
-      if (step == 0)
-        mooseError("Zero step in generated set.");
+      if (step <= 0)
+        mooseError("Non-positive increment in generated set.");
       for (AbaqusID item = begin; item <= end; item += step)
-        unique_items.insert(id_to_index.at(item) + offset);
+        unique_items.insert(libmesh_map_find(id_to_index, item) + offset);
     }
     else
     {
@@ -370,6 +362,8 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
       for (const auto i : index_range(data))
       {
         const auto & atom = data[i];
+        if (atom.empty())
+          continue;
 
         // 1) Referencing an existing set by name
         const auto it = set_map.find(atom);
@@ -403,7 +397,7 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
               is_nodal ? inst._part._node_id_to_index : inst._part._element_id_to_index;
           const auto inst_offset = is_nodal ? inst._local_to_global_node_index_offset
                                             : inst._local_to_global_element_index_offset;
-          unique_items.insert(local_map.at(id) + inst_offset);
+          unique_items.insert(libmesh_map_find(local_map, id) + inst_offset);
           continue;
         }
 
@@ -412,7 +406,7 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
           mooseError(
               "Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
         const auto item = MooseUtils::convert<AbaqusID>(atom);
-        unique_items.insert(id_to_index.at(item) + offset);
+        unique_items.insert(libmesh_map_find(id_to_index, item) + offset);
       }
     }
   }
@@ -452,7 +446,7 @@ Step::parse(const BlockNode & block)
 bool
 Step::optionFunc(const std::string & key, const OptionNode & option)
 {
-  // User element definitions
+  // Essential boundary conditions
   if (key == "boundary")
   {
     const auto op = MooseUtils::toLower(option._header.get<std::string>("op", "mod"));
@@ -496,12 +490,11 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
 
       // starting and ending Abaqus Variable (DOF) ID
       const auto first_dof_id = MooseUtils::convert<AbaqusID>(data[1]);
-      const auto last_dof_id =
-          data.size() > 2 ? MooseUtils::convert<AbaqusID>(data[2]) : first_dof_id;
+      const auto last_dof_id = fieldTo<AbaqusID>(data, 2, first_dof_id);
 
       // the applied BC value defaults to 0
 
-      const Real value = data.size() > 3 ? MooseUtils::convert<Real>(data[3]) : 0.0;
+      const Real value = fieldTo<Real>(data, 3, 0.0);
 
       // fill in data
       for (AbaqusID dof_id = first_dof_id; dof_id <= last_dof_id; ++dof_id)
@@ -516,25 +509,12 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   {
     if (option._data.size() != 1)
       mooseError("Expected 1 data line for *Static option");
-    const auto col = vecTo<Real>(option._data[0]);
+    const auto & col = option._data[0];
 
-    if (col.size() > 0)
-      _dt = col[0];
-
-    if (col.size() > 1)
-      _duration = col[1];
-    else
-      _duration = 1.0;
-
-    if (col.size() > 2)
-      _dt_min = col[2];
-    else
-      _dt_min = 1e-5 * _duration;
-
-    if (col.size() >= 3)
-      _dt_max = col[3];
-    else
-      _dt_max = std::numeric_limits<Real>::max();
+    _duration = fieldTo<Real>(col, 1, 1.0);
+    _dt = fieldTo<Real>(col, 0, _duration);
+    _dt_min = fieldTo<Real>(col, 2, 1e-5 * _duration);
+    _dt_max = fieldTo<Real>(col, 3, std::numeric_limits<Real>::max());
   }
   else if (key == "dload")
   {
@@ -579,8 +559,8 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
     // loop over data lines
     for (const auto & data : option._data)
     {
-      if (data.size() < 2)
-        mooseError("At least two fields are required in each DLOAD data line");
+      if (data.size() < 3)
+        mooseError("DLOAD line requires type and magnitude: '<elset|elem>, <type>, <mag>'");
 
       // Resolve element targets: elset name or single element id (possibly instance-scoped)
       const std::vector<Index> * element_set_ptr = nullptr;
@@ -608,8 +588,6 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
       }
 
       // Type and magnitude
-      if (data.size() < 3)
-        mooseError("DLOAD line requires type and magnitude: '<elset|elem>, <type>, <mag>'");
       const auto jdltyp = parse_jdltyp(data[1]);
       const Real magnitude = MooseUtils::convert<Real>(data[2]);
 
@@ -689,27 +667,30 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  RealVectorValue a(0, 0, 0);
   const auto & data = block._data;
 
   // translation
   if (data.size() > 0)
   {
-    const auto col = vecTo<Real>(data[0]);
+    const auto & col = data[0];
     if (col.size() > 3)
       mooseError("Too many values in instance translation data line");
-    for (const auto i : col)
-      translation(i) = col[i];
+    for (const auto i : index_range(col))
+      translation(i) = fieldTo<Real>(col, i, 0);
   }
 
   // rotation
   if (data.size() > 1)
   {
-    const auto col = vecTo<Real>(data[1]);
-    if (col.size() != 7)
+    if (data[1].size() != 7)
       mooseError("Invalid number of values in instance rotation data line");
+    std::vector<Real> col(7);
+    for (const auto i : index_range(col))
+      col[i] = fieldTo<Real>(data[1], i, 0);
 
-    // axis of rotation (normalized)
-    RealVectorValue a(col[0], col[1], col[2]);
+    // axis of rotation (normalized) through point a
+    a = RealVectorValue(col[0], col[1], col[2]);
     RealVectorValue b(col[3], col[4], col[5]);
     auto n = b - a;
     const auto norm = n.norm();
@@ -748,7 +729,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
     auto model_node = part_node;
 
     // transform instantiated node
-    model_node._point = rotation * (model_node._point + translation);
+    model_node._point = a + rotation * (model_node._point + translation - a);
 
     // add the mesh point to the model level list
     model._nodes.push_back(model_node);
@@ -855,7 +836,7 @@ FieldIC::FieldIC(const OptionNode & option, const Model & model)
 
     // freeze state of the node set
     if (_nsets.find(name) == _nsets.end())
-      _nsets[name] = model._nsets.at(name);
+      _nsets[name] = libmesh_map_find(model._nsets, name);
 
     // add node set name and initial value to the list
     _value.emplace_back(name, value);
@@ -952,7 +933,7 @@ FlatModel::getNodeIndex(const std::string & key, const Instance * instance) cons
 {
   if (instance)
     mooseError("Instance-scoped lookup is not supported in FlatModel.");
-  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+  return libmesh_map_find(_model._node_id_to_index, MooseUtils::convert<AbaqusID>(key));
 }
 
 Index
@@ -960,7 +941,7 @@ FlatModel::getElementIndex(const std::string & key, const Instance * instance) c
 {
   if (instance)
     mooseError("Instance-scoped lookup is not supported in FlatModel.");
-  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+  return libmesh_map_find(_model._element_id_to_index, MooseUtils::convert<AbaqusID>(key));
 }
 
 const Instance &
@@ -1015,7 +996,7 @@ AssemblyModel::getNodeIndex(const std::string & key, const Instance * instance) 
     if (parts.size() != 1)
       mooseError("Instance-scoped node lookup expects a clean integer id but got '", key, "'.");
     const auto node_id = MooseUtils::convert<AbaqusID>(key);
-    const auto local_index = instance->_part._node_id_to_index.at(node_id);
+    const auto local_index = libmesh_map_find(instance->_part._node_id_to_index, node_id);
     return local_index + instance->_local_to_global_node_index_offset;
   }
 
@@ -1031,10 +1012,10 @@ AssemblyModel::getNodeIndex(const std::string & key, const Instance * instance) 
     if (!_assembly->_instance.has(instance_name))
       mooseError("Instance '", instance_name, "' not found while resolving node '", key, "'.");
     const auto & inst = _assembly->_instance[instance_name];
-    const auto local_index = inst._part._node_id_to_index.at(node_id);
+    const auto local_index = libmesh_map_find(inst._part._node_id_to_index, node_id);
     return local_index + inst._local_to_global_node_index_offset;
   }
-  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+  return libmesh_map_find(_model._node_id_to_index, MooseUtils::convert<AbaqusID>(key));
 }
 
 Index
@@ -1047,7 +1028,7 @@ AssemblyModel::getElementIndex(const std::string & key, const Instance * instanc
     if (parts.size() != 1)
       mooseError("Instance-scoped element lookup expects a clean integer id but got '", key, "'.");
     const auto elem_id = MooseUtils::convert<AbaqusID>(key);
-    const auto local_index = instance->_part._element_id_to_index.at(elem_id);
+    const auto local_index = libmesh_map_find(instance->_part._element_id_to_index, elem_id);
     return local_index + instance->_local_to_global_element_index_offset;
   }
 
@@ -1062,10 +1043,10 @@ AssemblyModel::getElementIndex(const std::string & key, const Instance * instanc
     if (!_assembly->_instance.has(instance_name))
       mooseError("Instance '", instance_name, "' not found while resolving element '", key, "'.");
     const auto & inst = _assembly->_instance[instance_name];
-    const auto local_index = inst._part._element_id_to_index.at(elem_id);
+    const auto local_index = libmesh_map_find(inst._part._element_id_to_index, elem_id);
     return local_index + inst._local_to_global_element_index_offset;
   }
-  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+  return libmesh_map_find(_model._element_id_to_index, MooseUtils::convert<AbaqusID>(key));
 }
 
 const Instance &

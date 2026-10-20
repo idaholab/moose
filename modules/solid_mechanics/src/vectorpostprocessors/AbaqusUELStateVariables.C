@@ -10,6 +10,7 @@
 #include "AbaqusUELStateVariables.h"
 #include "AbaqusUELMeshUserElement.h"
 #include "Conversion.h"
+#include "IndirectSort.h"
 
 #include <algorithm>
 #include <numeric>
@@ -25,9 +26,9 @@ AbaqusUELStateVariables::validParams()
       "column_names",
       {},
       "Custom column names. Names are applied in order starting at the first state variable. "
-      "Custom names nit supplied will get automatically assigned names.");
+      "Custom names not supplied will get automatically assigned names.");
   params.addRangeCheckedParam<unsigned int>(
-      "split", 1, "split>0", "split the statevariables in this many sub sections");
+      "split", 1, "split>0", "Split the state variables into this many sections");
   params.addClassDescription("Outputs the state variables for all UEL user elements");
   return params;
 }
@@ -56,11 +57,6 @@ AbaqusUELStateVariables::AbaqusUELStateVariables(const InputParameters & paramet
 }
 
 void
-AbaqusUELStateVariables::initialSetup()
-{
-}
-
-void
 AbaqusUELStateVariables::initialize()
 {
   _id_vector.clear();
@@ -77,18 +73,18 @@ AbaqusUELStateVariables::execute()
   for (const auto i : _active_elements)
   {
     const auto abaqus_elem_id = _uel_elements[i]._id;
-    const auto it = statev.find(abaqus_elem_id);
+    const auto it = statev.find(i);
     if (it != statev.end() && it->second.size() == nstatev)
     {
       const auto nbatch = nstatev / _split;
 
-      for (const auto i : make_range(_split))
+      for (const auto p : make_range(_split))
       {
         _id_vector.push_back(abaqus_elem_id);
         if (_split_vector)
-          _split_vector->push_back(i + 1);
+          _split_vector->push_back(p + 1);
         for (const auto j : make_range(nbatch))
-          _value_vectors[j]->push_back(it->second[i * nbatch + j]);
+          _value_vectors[j]->push_back(it->second[p * nbatch + j]);
       }
     }
   }
@@ -116,7 +112,7 @@ AbaqusUELStateVariables::finalize()
   std::iota(perm.begin(), perm.end(), 0);
   std::stable_sort(perm.begin(),
                    perm.end(),
-                   [&](std::size_t a, std::size_t b)
+                   [this](std::size_t a, std::size_t b)
                    {
                      if (_id_vector[a] != _id_vector[b])
                        return _id_vector[a] < _id_vector[b];
@@ -125,23 +121,9 @@ AbaqusUELStateVariables::finalize()
                      return false;
                    });
 
-  auto reorder = [&perm, n](VectorPostprocessorValue & v)
-  {
-    if (v.size() != n)
-      return;
-    VectorPostprocessorValue tmp(n);
-    for (std::size_t k = 0; k < n; ++k)
-      tmp[k] = v[perm[k]];
-    v.swap(tmp);
-  };
-  reorder(_id_vector);
+  Moose::applyIndices(_id_vector, perm);
   if (_split_vector)
-    reorder(*_split_vector);
+    Moose::applyIndices(*_split_vector, perm);
   for (auto & vec : _value_vectors)
-    reorder(*vec);
-}
-
-void
-AbaqusUELStateVariables::threadJoin(const UserObject &)
-{
+    Moose::applyIndices(*vec, perm);
 }

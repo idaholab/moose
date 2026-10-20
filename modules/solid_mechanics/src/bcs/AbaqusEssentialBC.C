@@ -22,8 +22,8 @@ AbaqusEssentialBC::validParams()
       "Applies boundary conditions from an Abaqus input read through AbaqusUELMesh");
   params.addRequiredParam<Abaqus::AbaqusID>("abaqus_var_id", "Abaqus variable (DOF) id number.");
   params.addRequiredParam<UserObjectName>("step_user_object", "Step user object");
-  // we generate a union of all nodes where any BC applies and suss in the individual case
-  // if we really need to set a value for the current variable (shouldApply)
+  // we generate a union of all nodes where any BC applies and decide per node (shouldApply)
+  // whether a value must be set for the current variable
   params.set<std::vector<BoundaryName>>("boundary") = {"abaqus_bc_union_boundary"};
   return params;
 }
@@ -69,14 +69,14 @@ AbaqusEssentialBC::computeQpResidual()
 {
   const auto id = _current_node->id();
   const Real & d = _current_step_fraction;
-  Real end_value = _current_step_end_values->at(id);
+  const Real end_value = libmesh_map_find(*_current_step_end_values, id);
 
   const auto * cbs = _current_step_begin_solution;
   if (cbs)
   {
     if (const auto it = cbs->find(id); it != cbs->end())
     {
-      // BC is being actibated during this step
+      // BC is being activated during this step
       const auto begin_value = it->second;
       const Real value = d * end_value + (1.0 - d) * begin_value;
       return _u[_qp] - value;

@@ -1,0 +1,20 @@
+[Tests]
+  design = 'AbaqusUELMesh.md'
+  issues = '#29382'
+
+  [empty_mesh]
+    type = GoogleTest
+    unit_test = AbaqusUELTest.EmptyMesh
+    requirement = 'The system shall build an Abaqus UEL mesh with no user elements from an Abaqus input file that defines none.'
+  []
+  [square]
+    type = GoogleTest
+    unit_test = AbaqusUELTest.Square
+    requirement = 'The system shall build one user element from an Abaqus input file with the node ids, node coordinates, and per-node subdomain ids that the file defines.'
+  []
+  [parse_errors]
+    type = GoogleTest
+    unit_test = AbaqusUELTest.ParseErrors
+    requirement = 'The system shall report an error when an Abaqus input file defines node normal directions, uses an undefined user element type, gives a user element the wrong number of nodes, or uses an invalid node number.'
+  []
+[]

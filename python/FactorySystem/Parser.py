@@ -44,6 +44,7 @@ class Parser:
         self.root = None
         self.errors = []
         self.fname = ""
+        self._defaults_node = None
 
     def parse(self, filename, default_values=None):
 
@@ -66,6 +67,7 @@ class Parser:
             if isinstance(default_values, dict):
                 defaults = default_values
             else:
+                self._defaults_node = default_values
                 defaults = {k: v for k, v in default_values.params()}
         else:
             defaults = {}
@@ -207,9 +209,12 @@ class Parser:
                     else:
                         params[key] = value
                 elif key == "allow_override":
-                    print(
-                        f'WARNING: {default_values.filename()}:{default_values.line(key)}: unused parameter "{key}"'
-                    )
+                    source = self._defaults_node
+                    if source is not None and key in source:
+                        location = f"{source.filename(key)}:{source.line(key)}"
+                    else:
+                        location = self.fname
+                    print(f'WARNING: {location}: unused parameter "{key}"')
 
             # Extract the parameters from the hit node
             self.extractParams(params, node)

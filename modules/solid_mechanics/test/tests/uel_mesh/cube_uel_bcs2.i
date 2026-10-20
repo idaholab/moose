@@ -1,7 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
   file = CUBE_UEL_BCS2.inp
-  debug = true
 []
 
 [Problem]
@@ -68,13 +67,6 @@
     element_sets = CUBE
     external_fields = "field1 field2"
   []
-[]
-
-[Preconditioning]
-  # [fdp]
-  #   type = FDP
-  #   full = true
-  # []
 []
 
 [VectorPostprocessors]

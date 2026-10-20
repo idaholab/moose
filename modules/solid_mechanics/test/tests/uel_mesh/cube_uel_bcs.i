@@ -1,7 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
   file = CUBE_UEL_BCS.inp
-  debug = true
 []
 
 [Problem]
@@ -63,6 +62,10 @@
   []
   [step_uo]
     type = AbaqusUELStepUserObject
+  []
+  [dload_uo]
+    type = AbaqusDLoadInterpolator
+    step_user_object = step_uo
   []
 []
 

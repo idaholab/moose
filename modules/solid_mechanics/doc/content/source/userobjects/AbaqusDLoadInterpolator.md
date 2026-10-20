@@ -13,11 +13,11 @@ standard `NDLOAD/JDLTYP/ADLMAG/MDLOAD` interface.
 
 ## Usage
 
-- `step_user_object`: name of the [AbaqusUELStepUserObject](AbaqusUELStepUserObject.md) that holds
-  the current step state and DLOAD definitions. Defaults to `step_uo`.
+- [!param](/UserObjects/AbaqusDLoadInterpolator/step_user_object): name of the [AbaqusUELStepUserObject](AbaqusUELStepUserObject.md) that holds
+  the current step state and DLOAD definitions.
 
 This user object executes on `INITIAL` and `TIMESTEP_BEGIN` and is intended to be referenced by
-`AbaqusUELMeshUserElement` via its `dload_interpolator` parameter (default: `dload_uo`).
+`AbaqusUELMeshUserElement` via its [!param](/UserObjects/AbaqusUELMeshUserElement/dload_interpolator) parameter (default: `dload_uo`).
 
 !syntax parameters /UserObjects/AbaqusDLoadInterpolator
 

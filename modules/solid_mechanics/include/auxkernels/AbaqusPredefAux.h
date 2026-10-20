@@ -17,9 +17,10 @@
 
 class AbaqusUELMesh;
 class AbaqusUELStepUserObject;
+class Function;
 
 /**
- * Accumulate values from one auxiliary variable into another
+ * Set a nodal AuxVariable from Abaqus *Initial Conditions and step-level *Field values
  */
 class AbaqusPredefAux : public AuxKernel
 {
@@ -27,16 +28,14 @@ public:
   static InputParameters validParams();
 
   AbaqusPredefAux(const InputParameters & parameters);
-  void initialSetup();
-  void timestepSetup();
+  void initialSetup() override;
 
 protected:
-  virtual Real computeValue();
-  void update();
+  Real computeValue() override;
 
-  AbaqusUELMesh * _uel_mesh;
+  const AbaqusUELMesh * const _uel_mesh;
 
-  Abaqus::AbaqusID _var_id;
+  const Abaqus::AbaqusID _var_id;
 
   /// optional step user object providing time-varying *Field values; nullptr if the input has
   /// no step_user_object (i.e. only static *Initial Conditions are in use)
@@ -44,4 +43,7 @@ protected:
 
   // prepare data in a map for easy retrieval
   std::unordered_map<Abaqus::Index, Real> _ic_data;
+
+  /// amplitude functions looked up so far, keyed by Abaqus amplitude name
+  std::map<std::string, const Function *> _amplitude_functions;
 };

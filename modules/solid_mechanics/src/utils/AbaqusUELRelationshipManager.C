@@ -10,17 +10,11 @@
 #include "AbaqusUELRelationshipManager.h"
 #include "AbaqusUELMesh.h"
 
-#include "libmesh/coupling_matrix.h"
 #include "libmesh/elem.h"
-#include "libmesh/periodic_boundaries.h"
-#include "libmesh/remote_elem.h"
 #include "libmesh/int_range.h"
 #include "libmesh/libmesh_logging.h"
 
-// C++ Includes
-#include <unordered_set>
-
-registerMooseObject("MooseApp", AbaqusUELRelationshipManager);
+registerMooseObject("SolidMechanicsApp", AbaqusUELRelationshipManager);
 
 using namespace libMesh;
 
@@ -28,11 +22,13 @@ InputParameters
 AbaqusUELRelationshipManager::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
+  params.addClassDescription(
+      "Ghosts the node-elements that Abaqus UEL connectivity needs across processors");
   return params;
 }
 
 AbaqusUELRelationshipManager::AbaqusUELRelationshipManager(const InputParameters & params)
-  : RelationshipManager(params), _uel_mesh(dynamic_cast<AbaqusUELMesh *>(_moose_mesh))
+  : RelationshipManager(params), _uel_mesh(dynamic_cast<const AbaqusUELMesh *>(_moose_mesh))
 {
   if (!_uel_mesh)
     mooseError("Must use an AbaqusUELMesh with the AbaqusUELRelationshipManager.");
@@ -65,28 +61,30 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
   // loop over each NodeElement
   for (const Elem * const elem : as_range(range_begin, range_end))
   {
-    // find the list of UEL Elements the NodeElment is part of
+    // find the list of UEL Elements the NodeElement is part of
     const auto it = node_to_uel_map.find(elem->id());
     if (it == node_to_uel_map.end())
-      mooseError("Element not found in NodeToUELMap.");
+      continue;
 
     // iterate over the UEL Elements connected to the current node elem
     for (const auto uel_elem_index : it->second)
       // iterate over the NodeElements
       for (const auto nodeelem_index : elements[uel_elem_index]._nodes)
       {
-        const auto coupled_elem = _mesh->elem_ptr(nodeelem_index);
-        mooseAssert(coupled_elem, "Element not found. Internal error");
-        if (coupled_elem->processor_id() != p)
+        // after remote elements are deleted from a distributed mesh, this rank holds only its own
+        // and its ghosted node-elements
+        const auto coupled_elem = _mesh->query_elem_ptr(nodeelem_index);
+        if (coupled_elem && coupled_elem->processor_id() != p)
           coupled_elements.emplace(coupled_elem, nullptr);
       }
   }
 }
 
 bool
-AbaqusUELRelationshipManager::operator>=(const RelationshipManager & /*other*/) const
+AbaqusUELRelationshipManager::operator>=(const RelationshipManager & other) const
 {
-  return false;
+  const auto * rm = dynamic_cast<const AbaqusUELRelationshipManager *>(&other);
+  return rm && baseGreaterEqual(*rm);
 }
 
 std::unique_ptr<GhostingFunctor>

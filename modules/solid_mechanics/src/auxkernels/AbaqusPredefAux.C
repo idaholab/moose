@@ -41,7 +41,7 @@ AbaqusPredefAux::validParams()
 
 AbaqusPredefAux::AbaqusPredefAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _uel_mesh(dynamic_cast<AbaqusUELMesh *>(&_mesh)),
+    _uel_mesh(dynamic_cast<const AbaqusUELMesh *>(&_mesh)),
     _var_id(getParam<Abaqus::AbaqusID>("field")),
     _step_uo(isParamValid("step_user_object")
                  ? &getUserObject<AbaqusUELStepUserObject>("step_user_object")
@@ -57,29 +57,17 @@ AbaqusPredefAux::AbaqusPredefAux(const InputParameters & parameters)
 void
 AbaqusPredefAux::initialSetup()
 {
-  update();
-}
-
-void
-AbaqusPredefAux::timestepSetup()
-{
-  update();
-}
-
-void
-AbaqusPredefAux::update()
-{
   _ic_data.clear();
 
   for (const auto & ic : _uel_mesh->getFieldICs())
     if (ic._var == _var_id)
     {
       for (const auto & [nodeset_name, value] : ic._value)
-        for (const auto node_index : ic._nsets.at(nodeset_name))
+        for (const auto node_index : libmesh_map_find(ic._nsets, nodeset_name))
           _ic_data[node_index] = value;
       return;
     }
-  paramWarning("field", "No field `*Initial condition` block found for variable=", _var_id);
+  paramWarning("field", "No `*Initial Conditions` block found for variable=", _var_id);
 }
 
 Real
@@ -102,10 +90,13 @@ AbaqusPredefAux::computeValue()
   const auto & assignment = end_it->second;
 
   if (!assignment._amplitude.empty())
+  {
     // amplitude(t) scaled by the value given on the *Field line
-    return getFunctionByName(Abaqus::amplitudeFunctionName(assignment._amplitude))
-               .value(_t, Point()) *
-           assignment._value;
+    auto & function = _amplitude_functions[assignment._amplitude];
+    if (!function)
+      function = &getFunctionByName(Abaqus::amplitudeFunctionName(assignment._amplitude));
+    return function->value(_t, Point()) * assignment._value;
+  }
 
   // no amplitude: linearly ramp from the value at the beginning of the step (the value assigned
   // in a prior step, or the *Initial Conditions/zero baseline if this is the first assignment)

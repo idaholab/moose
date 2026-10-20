@@ -28,12 +28,13 @@ AbaqusUELMesh::validParams()
       "cannot generally be represented by libMesh meshes. This mesh manages the custom "
       "connectivity and DOF assignment.");
   params.addRequiredParam<FileName>("file", "The path to the Abaqus input to read.");
-  params.addParam<bool>("debug", false, "Enable additional debug output.");
+  // the UEL connectivity refers to NodeElems by id, so libMesh must not renumber them
+  params.set<bool>("allow_renumbering") = false;
+  params.suppressParameter<bool>("allow_renumbering");
   return params;
 }
 
-AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters)
-  : MooseMesh(parameters), _debug(getParam<bool>("debug"))
+AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters) : MooseMesh(parameters)
 {
   // The libMesh mesh consists of disconnected NodeElems, so the default Metis/ParMETIS
   // partitioners see an empty connectivity graph. Install a partitioner that builds the graph
@@ -42,11 +43,20 @@ AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters)
   // safely go out of scope (same idiom as PartitionerAction).
   AbaqusUELPartitioner partitioner(*this);
   setCustomPartitioner(&partitioner);
+
+  // the UEL model data is parsed in buildMesh(), so the mesh is rebuilt rather than read from the
+  // checkpoint when recovering
+  allowRecovery(false);
 }
 
 AbaqusUELMesh::AbaqusUELMesh(const AbaqusUELMesh & other_mesh)
-  : MooseMesh(other_mesh), _debug(other_mesh._debug)
+  : MooseMesh(other_mesh),
+    _model(other_mesh._model),
+    _node_to_uel_map(other_mesh._node_to_uel_map),
+    _uel_block_ids(other_mesh._uel_block_ids)
 {
+  AbaqusUELPartitioner partitioner(*this);
+  setCustomPartitioner(&partitioner);
 }
 
 std::unique_ptr<MooseMesh>
@@ -63,55 +73,44 @@ AbaqusUELMesh::buildMesh()
   in.open(getParam<FileName>("file").c_str(), std::ios::in);
   if (!in.good())
     paramError("file", "Error opening mesh file.");
-  _input.parse(in);
+  Abaqus::InputParser input;
+  input.parse(in);
 
-  if (_input.isFlat())
+  if (input.isFlat())
   {
     mooseInfo("Flat input file format detected.");
-    _model = std::make_unique<Abaqus::FlatModel>();
+    _model = std::make_shared<Abaqus::FlatModel>();
   }
   else
   {
     mooseInfo("Hierarchical input file format detected.");
-    _model = std::make_unique<Abaqus::AssemblyModel>();
+    _model = std::make_shared<Abaqus::AssemblyModel>();
   }
 
   // build data structures
-  _model->parse(_input);
+  _model->parse(input);
 
   // instantiate elements
   instantiateElements();
 
-  // create blocks to restrict each variable
-  setupLibmeshSubdomains();
+  // build the map from nodes to the UEL elements that contain them
+  buildNodeToUELMap();
 
   // setup libmesh node sets for abaqus node sets
   setupNodeSets();
 
   _mesh->prepare_for_use();
-
-  // get set of all subdomain IDs
-  for (const auto & elem :
-       as_range(_mesh->active_local_elements_begin(), _mesh->active_local_elements_end()))
-    _uel_block_ids.insert(elem->subdomain_id());
 }
 
-bool
-AbaqusUELMesh::prepare(const MeshBase * mesh_to_clone)
+void
+AbaqusUELMesh::prepare()
 {
   // // set the correct processor ID for each element
   // for (const auto i : index_range(_elements))
   //   _elements[i].pid = elemPtr(_elements[i].nodes[i %
   //   _elements[i].nodes.size()])->processor_id();
 
-  // if (_debug)
-  // {
-  //   for (auto & elem : _elements)
-  //     _console << elem.pid << ' ';
-  //   _console << std::endl;
-  // }
-
-  return MooseMesh::prepare(mesh_to_clone);
+  MooseMesh::prepare();
 }
 
 void
@@ -136,20 +135,11 @@ AbaqusUELMesh::instantiateElements()
 }
 
 void
-AbaqusUELMesh::setupLibmeshSubdomains()
+AbaqusUELMesh::buildNodeToUELMap()
 {
-
-  // iterate over all elements
-  for (const auto & elem_index : index_range(_model->_elements))
-  {
-    const auto & elem = _model->_elements[elem_index];
-    const auto & nodes = elem._nodes;
-    // const auto & uel = elem._uel;
-
-    // build node to elem map
-    for (const auto i : index_range(nodes))
-      _node_to_uel_map[nodes[i]].push_back(elem_index);
-  }
+  for (const auto elem_index : index_range(_model->_elements))
+    for (const auto node_index : _model->_elements[elem_index]._nodes)
+      _node_to_uel_map[node_index].push_back(elem_index);
 }
 
 void
@@ -158,24 +148,25 @@ AbaqusUELMesh::setupNodeSets()
   BoundaryInfo & boundary_info = _mesh->get_boundary_info();
 
   // Get the BoundaryIDs from the mesh
-  std::vector<BoundaryName> nodeset_names = {"abaqus_bc_union_boundary"};
-  for (const auto & pair : _node_set)
-    nodeset_names.push_back(pair.first);
-
-  std::vector<boundary_id_type> nodeset_ids =
+  const std::vector<BoundaryName> nodeset_names = {"abaqus_bc_union_boundary"};
+  const std::vector<boundary_id_type> nodeset_ids =
       MooseMeshUtils::getBoundaryIDs(*_mesh, nodeset_names, true);
 
   // add BC nodes to unified set
-  auto add_bc_nodes = [&](const auto & step)
+  auto add_bc_nodes = [this, &boundary_info, &nodeset_ids](const auto & step)
   {
-    for (const auto & node_value_map : step._bc_var_node_value_map)
-      for (const auto node_value : node_value_map.second)
+    for (const auto & [var_id, node_value_map] : step._bc_var_node_value_map)
+    {
+      libmesh_ignore(var_id);
+      for (const auto & [node_index, value] : node_value_map)
       {
-        const auto node = _mesh->query_node_ptr(node_value.first);
+        libmesh_ignore(value);
+        const auto node = _mesh->query_node_ptr(node_index);
         if (!node)
-          mooseError("Node ", node_value.first, " not found\n");
+          mooseError("Node ", node_index, " not found");
         boundary_info.add_node(node, nodeset_ids[0]);
       }
+    }
   };
 
   for (const auto i : index_range(nodeset_names))
@@ -185,7 +176,7 @@ AbaqusUELMesh::setupNodeSets()
   for (const auto & step : _model->_step)
     add_bc_nodes(step);
 
-  _mesh->set_isnt_prepared();
+  _mesh->unset_is_prepared();
 }
 
 const Abaqus::UserElement &
@@ -209,24 +200,4 @@ AbaqusUELMesh::getVarName(const Abaqus::AbaqusID var_id) const
     return std::string("rot_") + coord[var_id - 4];
 
   return "var_" + Moose::stringify(var_id);
-}
-
-void
-AbaqusUELMesh::addNodeset(BoundaryID id)
-{
-  _mesh_nodeset_ids.insert(id);
-}
-
-const std::unordered_map<Abaqus::Index, Real> &
-AbaqusUELMesh::getBCFor(const Abaqus::AbaqusID var_id)
-{
-  // accidental insertion... or should we throw an error
-  return _model->_bc_var_node_value_map[var_id];
-}
-
-const std::unordered_map<Abaqus::Index, Real> &
-AbaqusUELMesh::getBCFor(const Abaqus::AbaqusID var_id, const std::string & step_name)
-{
-  // accidental insertion... or should we throw an error
-  return _model->_step[step_name]._bc_var_node_value_map[var_id];
 }

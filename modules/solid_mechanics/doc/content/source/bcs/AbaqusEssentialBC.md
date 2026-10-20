@@ -13,9 +13,11 @@ and prescribes nodal values for a specific Abaqus variable ID across time steps.
   nodes that appear in any Abaqus `*Boundary` definition. This is automatically created by
   `AbaqusUELMesh`.
 - For a node that is newly activated in the current step, the value is ramped from the current
-  solution at the beginning of the step to the step’s target value using the step fraction `d in [0,1]`:
-  `value = d * end_value + (1 - d) * begin_solution`.
-- For a node that remains constrained across the step, the value is ramped between the step’s
+  solution at the beginning of the step to the step's target value using the step fraction `d in [0,1]`:
+  `value = d * end_value + (1 - d) * begin_solution`, where `end_value` is the target value at the
+  end of the step and `begin_solution` is the solution at the node when the step begins (both
+  provided by [AbaqusUELStepUserObject](userobjects/AbaqusUELStepUserObject.md)).
+- For a node that remains constrained across the step, the value is ramped between the step's
   begin and end values: `value = d * end_value + (1 - d) * begin_value`.
 - If a node has no constraint for the current variable in the current step, this BC does not apply
   at that node.

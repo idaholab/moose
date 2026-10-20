@@ -13,6 +13,8 @@
 #include <map>
 #include <memory>
 #include <istream>
+#include <type_traits>
+#include <vector>
 
 #include "Conversion.h"
 #include "MooseUtils.h"
@@ -28,7 +30,7 @@ class HeaderMap
 {
 public:
   HeaderMap() {}
-  HeaderMap(const std::vector<std::string> fields);
+  HeaderMap(std::vector<std::string> fields);
   std::string stringify(const std::string & indent = "") const;
 
   bool has(const std::string & key) const;
@@ -43,7 +45,7 @@ private:
 
 struct InputNode
 {
-  InputNode(std::vector<std::string> line);
+  InputNode(const std::vector<std::string> & line);
   virtual ~InputNode() = default;
   virtual std::string stringify(const std::string & indent = "") const = 0;
 
@@ -56,39 +58,17 @@ struct InputNode
 
 struct OptionNode : public InputNode
 {
-  OptionNode(std::vector<std::string> line) : InputNode(line) {}
-  virtual std::string stringify(const std::string & indent = "") const;
+  OptionNode(const std::vector<std::string> & line) : InputNode(line) {}
+  std::string stringify(const std::string & indent = "") const override;
 };
 
-struct BlockNode;
 struct BlockNode : public InputNode
 {
-  BlockNode(std::vector<std::string> line) : InputNode(line) {}
-  virtual std::string stringify(const std::string & indent = "") const;
+  BlockNode(const std::vector<std::string> & line) : InputNode(line) {}
+  std::string stringify(const std::string & indent = "") const override;
 
   template <typename To, typename Tc>
-  void forAll(To && option_func, Tc && block_func) const
-  {
-    for (const auto & child : _children)
-    {
-      const auto & key = child->_type;
-      auto * option = dynamic_cast<OptionNode *>(child.get());
-      auto * block = dynamic_cast<BlockNode *>(child.get());
-
-      if (option)
-      {
-        if constexpr (!std::is_same_v<To, std::nullptr_t>)
-          option_func(key, *option);
-      }
-      else if (block)
-      {
-        if constexpr (!std::is_same_v<Tc, std::nullptr_t>)
-          block_func(key, *block);
-      }
-      else
-        throw std::runtime_error("Internal error (mismatching block type)");
-    }
-  }
+  void forAll(To && option_func, Tc && block_func) const;
 
   std::vector<std::unique_ptr<InputNode>> _children;
 };
@@ -117,11 +97,36 @@ private:
   std::vector<std::vector<std::string>> _lines;
 
   /// currently parsed line
-  std::size_t _current_line;
+  std::size_t _current_line = 0;
 
   /// are we parsing a flat or assembly based input?
-  bool _is_flat;
+  bool _is_flat = true;
 };
+
+template <typename To, typename Tc>
+void
+BlockNode::forAll(To && option_func, Tc && block_func) const
+{
+  for (const auto & child : _children)
+  {
+    const auto & key = child->_type;
+    const auto * option = dynamic_cast<const OptionNode *>(child.get());
+    const auto * block = dynamic_cast<const BlockNode *>(child.get());
+
+    if (option)
+    {
+      if constexpr (!std::is_same_v<To, std::nullptr_t>)
+        option_func(key, *option);
+    }
+    else if (block)
+    {
+      if constexpr (!std::is_same_v<Tc, std::nullptr_t>)
+        block_func(key, *block);
+    }
+    else
+      throw std::runtime_error("Internal error (mismatching block type)");
+  }
+}
 
 template <typename T>
 T

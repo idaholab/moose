@@ -18,8 +18,8 @@ AbaqusTotalUELEnergy::validParams()
   InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription(
       "Computes and reports the sum of a UEL energy component over the mesh.");
-  params.addParam<std::vector<UserObjectName>>("uel_user_object",
-                                               "AbaqusUserElement user objects.");
+  params.addRequiredParam<std::vector<UserObjectName>>("uel_user_object",
+                                                       "AbaqusUserElement user objects.");
   params.addRequiredRangeCheckedParam<std::size_t>(
       "component", "component < 8", "Zero-based index into the 8 element energy array.");
   return params;
