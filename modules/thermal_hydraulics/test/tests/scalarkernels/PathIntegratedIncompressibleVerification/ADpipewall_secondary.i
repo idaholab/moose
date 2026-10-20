@@ -4,7 +4,7 @@
 # and secondary-side convection
 # (ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel) - a double-pipe-style
 # conjugate heat transfer arrangement. Each side's Dittus-Boelter coefficient is supplied
-# by its own ADDittusBoelterHTCUserObject. The analytical Tin/Tout below are the steady
+# by its own ADDittusBoelterHTCFunctorMaterial. The analytical Tin/Tout below are the steady
 # state of that series-resistance circuit, solved algebraically at parse time with both
 # streams' water properties fixed at representative constants (mu_f, cp_f, k_f), giving a
 # simple linear system.
@@ -202,9 +202,9 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
   []
 []
 
-[UserObjects]
+[FunctorMaterials]
   [h1]
-    type = ADDittusBoelterHTCUserObject
+    type = ADDittusBoelterHTCFunctorMaterial
     mass_flow_rate = m1v
     fluid_properties = water
     T_fluid = Tf1v
@@ -215,7 +215,7 @@ Tout_analytical = '${fparse Tf2 + q / G3}'
     wetted_perimeter = ${wetted_perimeter1}
   []
   [h2]
-    type = ADDittusBoelterHTCUserObject
+    type = ADDittusBoelterHTCFunctorMaterial
     mass_flow_rate = m2v
     fluid_properties = water
     T_fluid = Tf2v

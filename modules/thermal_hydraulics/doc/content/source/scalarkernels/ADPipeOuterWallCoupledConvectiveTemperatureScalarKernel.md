@@ -17,7 +17,7 @@ q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
 where $h$ is the secondary-side heat transfer coefficient, supplied as a
 [functor](/Functors/index.md) through the
 [!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
-parameter. [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
+parameter. [ADDittusBoelterHTCFunctorMaterial.md] provides it from a Dittus-Boelter
 correlation. $T_{in,f}$ upwinds the upstream/downstream secondary-side fluid temperature
 according to the sign of the secondary-side mass flow rate $\dot{m}$:
 
