@@ -24,7 +24,7 @@
 
 ## Civet Failures
 
-- Troubleshoot errors only occuring on your PRs using our
+- Troubleshoot errors only occurring on your PRs using our
   [Apptainer containers](help/inl/apptainer.md).
 
 Numerous questions/answers can also be found in on the following resources.

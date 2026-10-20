@@ -22,7 +22,7 @@ conda create -n custom-libmesh moose-libmesh-vtk moose-petsc moose-build
 
 If you need to do libMesh development, you'll additionally need to include the packages `autoconf automake libtool cppunit` in the conda environment.
 
-Then activate the new environment and run the libMesh installation script:
+Then activate the new environment and run the libMesh and WASP installation scripts:
 
 ```bash
 conda activate custom-libmesh
@@ -46,7 +46,7 @@ To use a custom PETSc (and libMesh), the following Conda environment can be crea
 conda create -n custom-petsc moose-build
 ```
 
-Then activate the new environment and run the PETSc and libMesh installation scripts:
+Then activate the new environment and run the PETSc, libMesh and WASP installation scripts:
 
 ```bash
 conda activate custom-petsc
