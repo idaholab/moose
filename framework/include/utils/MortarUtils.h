@@ -30,6 +30,29 @@ std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_ele
                                                          unsigned int sub_elem);
 
 /**
+ * The secondary nodal normals of a mortar interface and their derivatives with respect to the
+ * positions of the secondary face nodes they depend on
+ */
+struct NodalNormalSensitivities
+{
+  /// Normalized nodal normal
+  Point normal;
+  /// The nodes whose positions the normal depends on, and the derivative of the normal with respect
+  /// to each: entry (i, c) is d normal_i / d x_c of that node
+  std::vector<std::pair<const Node *, RealTensorValue>> sensitivities;
+};
+
+/**
+ * Compute the secondary nodal normals of a mortar interface with their derivatives with respect to
+ * the positions of the secondary face nodes, by the routine the mortar contact objects linearize
+ * @param amg The mortar interface
+ * @param mesh The mesh whose nodes the sensitivities refer to
+ * @returns The nodal normal of each secondary node
+ */
+std::unordered_map<const Node *, NodalNormalSensitivities>
+computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg, const MeshBase & mesh);
+
+/**
  * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
  * @param msm_elem The mortar segment element that we will be mapping quadrature points from
  * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)

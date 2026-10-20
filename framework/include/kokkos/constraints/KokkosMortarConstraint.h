@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosResidualObject.h"
+#include "KokkosMortarInterfaceData.h"
 #include "MortarConsumerInterface.h"
 #include "MortarExecutorInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
@@ -84,12 +85,7 @@ public:
   virtual void computeResidualAndJacobian() override;
 
   /// The side whose test functions a residual coefficient multiplies
-  enum class MortarSide : unsigned int
-  {
-    Secondary = 0,
-    Primary = 1,
-    Lower = 2
-  };
+  using MortarSide = Moose::Kokkos::MortarSide;
 
   /// Kokkos function tag of the residual and Jacobian computation, one team per secondary element
   struct MortarLoop
@@ -125,28 +121,22 @@ protected:
 
 private:
   /**
-   * The host-side mortar interface state of the constraint, which the device copies of the
-   * constraint do not carry: the mortar interface, and the notification that its segment mesh
-   * coverage changed
+   * The host-side mortar interface of the constraint, which the device copies of the constraint do
+   * not carry
    */
-  class Interface : public MortarConsumerInterface, public MortarExecutorInterface
+  class Interface : public MortarConsumerInterface
   {
   public:
-    Interface(const MooseObject * object, FEProblemBase & problem);
-
-    virtual void mortarSetup(const AutomaticMortarGeneration &) override { needs_packing = true; }
+    Interface(const MooseObject * object) : MortarConsumerInterface(object) {}
 
     using MortarConsumerInterface::amg;
-
-    /// Whether the segment data must be repacked before the next dispatch
-    bool needs_packing = true;
   };
 
-  /// The host-side mortar interface state, shared by the copies of the constraint
+  /// The host-side mortar interface, shared by the copies of the constraint
   std::shared_ptr<Interface> _interface;
 
-  /// Pack the mortar segment quadrature points of the local secondary elements
-  void packSegments();
+  /// The geometry of the interface, shared by the Kokkos objects posed on it
+  MortarInterfaceData & _interface_data;
 
   /// Pack the owned Lagrange multiplier degrees of freedom that no mortar segment reaches
   void packInactiveDofs();
@@ -184,32 +174,14 @@ private:
   /// Whether the current dispatch assembles the residual and the Jacobian
   bool _computing_residual = false, _computing_jacobian = false;
 
-  /**
-   * Mortar segment quadrature point data, ordered by local secondary element
-   */
-  ///@{
-  /// Range of the quadrature points of each local secondary element
-  Array<dof_id_type> _secondary_qp_begin;
-  /// Contiguous ID of the element of each side at each point: the interior parents of the
-  /// secondary and primary faces, on which the primal variables live, and the lower-dimensional
-  /// secondary element, on which the Lagrange multiplier lives
-  Array<ContiguousElementID> _elem[3];
-  /// Element type of the element of each side at each point
-  Array<libMesh::ElemType> _type[3];
-  /// Reference coordinates of each point on the element of each side
-  Array<Real3> _xi[3];
-  /// Quadrature weight of each point, including the coordinate transform factor
-  Array<Real> _JxW;
-  /// Gap at each point: the distance from the secondary to the primary face along the interpolated
-  /// secondary normal
-  Array<Real> _gap;
-  /// Interpolated secondary normal at each point
-  Array<Real3> _normal;
-  ///@}
+  /// The geometry of the interface as of the current dispatch
+  MortarInterfaceGeometry _geometry;
 
   /// Local indices of the owned Lagrange multiplier degrees of freedom that no mortar segment
   /// reaches
   Array<dof_id_type> _inactive_dofs;
+  /// The revision of the interface geometry that the inactive degrees of freedom were packed for
+  unsigned int _inactive_revision = 0;
 };
 
 template <typename Derived>
@@ -234,23 +206,25 @@ MortarConstraint::operator()(MortarLoop,
   constexpr auto L = static_cast<unsigned int>(MortarSide::Lower);
 
   const auto secondary = team.league_rank();
-  const auto begin = _secondary_qp_begin[secondary];
-  const auto end = _secondary_qp_begin[secondary + 1];
+  const auto begin = _geometry.secondary_qp_begin[secondary];
+  const auto end = _geometry.secondary_qp_begin[secondary + 1];
   const auto & mesh = kokkosMesh();
   const auto & assembly = kokkosAssembly();
 
   const auto n_dofs = [&](const unsigned int side, const dof_id_type qp)
-  { return assembly.getNumDofs(mesh.getElementInfo(_elem[side][qp]).type, _side_fe[side]); };
+  {
+    return assembly.getNumDofs(mesh.getElementInfo(_geometry.elem[side][qp]).type, _side_fe[side]);
+  };
   const auto lagrange = [&](const unsigned int side, const unsigned int i, const dof_id_type qp)
   {
-    const auto & xi = _xi[side][qp];
-    const libMesh::FEShapeKey key{_side_family[side], _type[side][qp], _side_order[side]};
+    const auto & xi = _geometry.xi[side][qp];
+    const libMesh::FEShapeKey key{_side_family[side], _geometry.type[side][qp], _side_order[side]};
     return libMesh::Kokkos::shape(key, i, xi(0), xi(1), xi(2));
   };
   const auto disp_shape = [&](const unsigned int side, const unsigned int j, const dof_id_type qp)
   {
-    const auto & xi = _xi[side][qp];
-    const libMesh::FEShapeKey key{_disp_family, _type[side][qp], _disp_order};
+    const auto & xi = _geometry.xi[side][qp];
+    const libMesh::FEShapeKey key{_disp_family, _geometry.type[side][qp], _disp_order};
     return libMesh::Kokkos::shape(key, j, xi(0), xi(1), xi(2));
   };
 
@@ -267,12 +241,12 @@ MortarConstraint::operator()(MortarLoop,
     auto x_ref = [&x](const unsigned int i) -> Real & { return x[i]; };
     auto coeff_ref = [&dual_coeff](const unsigned int i, const unsigned int j) -> Real &
     { return dual_coeff[i][j]; };
-    const auto JxW = [&](const unsigned int qp) { return _JxW[begin + qp]; };
+    const auto JxW = [&](const unsigned int qp) { return _geometry.JxW[begin + qp]; };
     const auto phi = [&](const unsigned int i, const unsigned int qp)
     { return lagrange(L, i, begin + qp); };
 
     libMesh::compute_dual_coeffs(_side_family[L],
-                                 _type[L][begin],
+                                 _geometry.type[L][begin],
                                  n_lambda,
                                  end - begin,
                                  JxW,
@@ -300,7 +274,7 @@ MortarConstraint::operator()(MortarLoop,
   {
     const auto & var = _side_var[side];
     const auto & sys = kokkosSystem(var.sys());
-    const auto elem = _elem[side][qp];
+    const auto elem = _geometry.elem[side][qp];
 
     Real u = 0;
     for (unsigned int i = 0; i < n_dofs(side, qp); ++i)
@@ -311,11 +285,14 @@ MortarConstraint::operator()(MortarLoop,
 
   for (dof_id_type qp = begin; qp < end; ++qp)
   {
-    const MortarDatum datum{value(S, qp), value(P, qp), value(L, qp), _gap[qp]};
+    const auto & n = _geometry.normal[qp];
+    const auto & d = _geometry.gap_vector[qp];
+    const MortarDatum datum{
+        value(S, qp), value(P, qp), value(L, qp), d(0) * n(0) + d(1) * n(1) + d(2) * n(2)};
 
     for (unsigned int side = 0; side < 3; ++side)
     {
-      const auto row_elem = _elem[side][qp];
+      const auto row_elem = _geometry.elem[side][qp];
       const auto & row_var = _side_var[side];
 
       Real f = 0, d[3] = {0, 0, 0}, d_gap = 0;
@@ -329,7 +306,7 @@ MortarConstraint::operator()(MortarLoop,
           ::Kokkos::TeamThreadRange(team, n_dofs(side, qp)),
           [&](const unsigned int i)
           {
-            const auto w = _JxW[qp] * basis(side, i, qp);
+            const auto w = _geometry.JxW[qp] * basis(side, i, qp);
 
             if (_computing_residual)
               accumulateTaggedResidual(w * f, row_var, row_elem, i);
@@ -344,7 +321,7 @@ MortarConstraint::operator()(MortarLoop,
                                            row_elem,
                                            i,
                                            _side_var[col],
-                                           _elem[col][qp],
+                                           _geometry.elem[col][qp],
                                            j);
 
               // The gap moves with the displacements of both faces
@@ -354,7 +331,7 @@ MortarConstraint::operator()(MortarLoop,
                     for (const unsigned int face : {S, P})
                     {
                       // A face whose block the displacement does not span stays in place
-                      const auto elem = _elem[face][qp];
+                      const auto elem = _geometry.elem[face][qp];
                       const auto & info = mesh.getElementInfo(elem);
                       if (!kokkosSystem(_disp_var[c].sys())
                                .isVariableActive(_disp_var[c].var(), info.subdomain))
@@ -362,7 +339,7 @@ MortarConstraint::operator()(MortarLoop,
                       const auto n_disp_dofs = assembly.getNumDofs(info.type, _disp_fe);
                       const auto sign = face == S ? -1 : 1;
                       for (unsigned int j = 0; j < n_disp_dofs; ++j)
-                        accumulateTaggedMatrix(w * d_gap * sign * _normal[qp](c) *
+                        accumulateTaggedMatrix(w * d_gap * sign * _geometry.normal[qp](c) *
                                                    disp_shape(face, j, qp),
                                                row_var,
                                                row_elem,

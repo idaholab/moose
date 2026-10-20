@@ -67,11 +67,6 @@ MortarConstraint::validParams()
   return params;
 }
 
-MortarConstraint::Interface::Interface(const MooseObject * object, FEProblemBase & problem)
-  : MortarConsumerInterface(object), MortarExecutorInterface(problem)
-{
-}
-
 MortarConstraint::MortarConstraint(const InputParameters & parameters)
   : ResidualObject(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
@@ -79,7 +74,8 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     _primary_var(isParamValid("primary_variable")
                      ? _sys.getVariable(_tid, getParam<VariableName>("primary_variable"))
                      : _secondary_var),
-    _interface(std::make_shared<Interface>(this, _fe_problem)),
+    _interface(std::make_shared<Interface>(this)),
+    _interface_data(_fe_problem.getKokkosMortarInterfaceData(_interface->amg())),
     _use_dual(_var.useDual())
 {
   _configuration = Configuration(*this);
@@ -131,6 +127,7 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _secondary_var(object._secondary_var),
     _primary_var(object._primary_var),
     _interface(object._interface),
+    _interface_data(object._interface_data),
     _n_disp(object._n_disp),
     _disp_fe(object._disp_fe),
     _disp_family(object._disp_family),
@@ -138,17 +135,11 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _use_dual(object._use_dual),
     _computing_residual(object._computing_residual),
     _computing_jacobian(object._computing_jacobian),
-    _secondary_qp_begin(object._secondary_qp_begin),
-    _JxW(object._JxW),
-    _gap(object._gap),
-    _normal(object._normal),
+    _geometry(object._geometry),
     _inactive_dofs(object._inactive_dofs)
 {
   for (const auto side : make_range(3u))
   {
-    _elem[side] = object._elem[side];
-    _type[side] = object._type[side];
-    _xi[side] = object._xi[side];
     _side_var[side] = object._side_var[side];
     _side_fe[side] = object._side_fe[side];
     _side_family[side] = object._side_family[side];
@@ -160,160 +151,6 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
       _disp_coupled[side][col] = object._disp_coupled[side][col];
     }
   }
-}
-
-void
-MortarConstraint::packSegments()
-{
-  const auto & mesh = _fe_problem.mesh();
-  const auto & kokkos_mesh = *mesh.getKokkosMesh();
-  const auto & amg = _interface->amg();
-  auto & assembly = _fe_problem.assembly(0, _sys.number());
-  const auto & qrule = assembly.qRuleMortar();
-  const auto & JxW_msm = assembly.jxWMortar();
-  const auto & coord_msm = assembly.mortarCoordTransformation();
-  const auto secondary_sub_elem_index =
-      amg.dim() == 3 ? amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem") : 0;
-  const auto primary_sub_elem_index =
-      amg.dim() == 3 ? amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem") : 0;
-
-  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
-  for (const auto side : make_range(3u))
-    _side_fe[side] = kokkosAssembly().getFETypeID(vars[side]->feType());
-  for (const auto c : make_range(_n_disp))
-    if (_disp_var[c].initialized())
-      _disp_fe = kokkosAssembly().getFETypeID(
-          const_cast<Variable &>(_disp_var[c]).mooseFieldVar()->feType());
-
-  std::vector<dof_id_type> secondary_qp_begin = {0};
-  std::vector<ContiguousElementID> elems[3];
-  std::vector<libMesh::ElemType> types[3];
-  std::vector<Point> xis[3];
-  std::vector<Real> JxW, gap;
-  std::vector<Point> normal;
-
-  // The reference coordinates on an interior parent of a reference point on its lower-dimensional
-  // side element, whose nodes are the nodes of that side in order
-  const auto parent_point = [](const Elem & lower, const Point & xi)
-  {
-    const auto parent = lower.interior_parent();
-    const auto side = parent->which_side_am_i(&lower);
-    const auto & reference_parent = libMesh::ReferenceElem::get(parent->type());
-    const auto reference_side = reference_parent.build_side_ptr(side);
-    return libMesh::FEMap::map(lower.dim(), reference_side.get(), xi);
-  };
-
-  for (const auto & [secondary_id, msm_elems] : amg.secondariesToMortarSegments())
-  {
-    // The map also lists secondary elements of other processes, which a distributed mesh need not
-    // hold
-    const auto secondary = mesh.getMesh().query_elem_ptr(secondary_id);
-    if (!secondary || secondary->processor_id() != processor_id() || msm_elems.empty())
-      continue;
-
-    for (const auto msm_elem : msm_elems)
-    {
-      _fe_problem.reinitMortarElem(msm_elem, 0);
-      const auto & msinfo = libmesh_map_find(amg.mortarSegmentMeshElemToInfo(), msm_elem);
-
-      std::vector<Point> xi1, xi2;
-      if (msm_elem->dim() == 1)
-        for (const auto qp : make_range(qrule->n_points()))
-        {
-          const Real eta = qrule->qp(qp)(0);
-          xi1.push_back(0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b);
-          xi2.push_back(0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b);
-        }
-      else if (amg.mortar3DQpMapping() == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
-        Moose::Mortar::mapQPoints3dFromReference(
-            *msm_elem, amg.mortarSegmentReferencePoints(*msm_elem), *qrule, xi1, xi2);
-      else
-      {
-        Moose::Mortar::projectQPoints3d(
-            msm_elem, msinfo.secondary_elem, secondary_sub_elem_index, *qrule, xi1);
-        Moose::Mortar::projectQPoints3d(
-            msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule, xi2);
-      }
-
-      // The segment elements of the current configuration belong to the displaced mesh, whose
-      // elements share their IDs with the reference mesh that the Kokkos mesh mirrors
-      const Elem * const side_elems[3] = {msinfo.secondary_elem->interior_parent(),
-                                          msinfo.primary_elem->interior_parent(),
-                                          msinfo.secondary_elem};
-      const Elem * reference_elems[3];
-      for (const auto side : make_range(3u))
-        reference_elems[side] = mesh.elemPtr(side_elems[side]->id());
-
-      const auto normals = amg.getNormals(*msinfo.secondary_elem, xi1);
-
-      for (const auto qp : make_range(qrule->n_points()))
-      {
-        const Point side_xi[3] = {parent_point(*msinfo.secondary_elem, xi1[qp]),
-                                  parent_point(*msinfo.primary_elem, xi2[qp]),
-                                  xi1[qp]};
-
-        for (const auto side : make_range(3u))
-        {
-          elems[side].push_back(kokkos_mesh.getContiguousElementID(reference_elems[side]));
-          types[side].push_back(side_elems[side]->type());
-          xis[side].push_back(side_xi[side]);
-        }
-
-        JxW.push_back(JxW_msm[qp] * coord_msm[qp]);
-
-        const auto x_secondary =
-            libMesh::FEMap::map(side_elems[0]->dim(), side_elems[0], side_xi[0]);
-        const auto x_primary = libMesh::FEMap::map(side_elems[1]->dim(), side_elems[1], side_xi[1]);
-        gap.push_back((x_primary - x_secondary) * normals[qp]);
-        normal.push_back(normals[qp]);
-      }
-    }
-
-    secondary_qp_begin.push_back(JxW.size());
-  }
-
-  const auto n = JxW.size();
-  _secondary_qp_begin.create(secondary_qp_begin.size());
-  _JxW.create(n);
-  _gap.create(n);
-  _normal.create(n);
-
-  for (const auto i : index_range(secondary_qp_begin))
-    _secondary_qp_begin[i] = secondary_qp_begin[i];
-
-  for (const auto qp : make_range(n))
-  {
-    _JxW[qp] = JxW[qp];
-    _gap[qp] = gap[qp];
-    _normal[qp] = normal[qp];
-  }
-
-  for (const auto side : make_range(3u))
-  {
-    _elem[side].create(n);
-    _type[side].create(n);
-    _xi[side].create(n);
-
-    for (const auto qp : make_range(n))
-    {
-      _elem[side][qp] = elems[side][qp];
-      _type[side][qp] = types[side][qp];
-      _xi[side][qp] = xis[side][qp];
-    }
-
-    _elem[side].copyToDevice();
-    _type[side].copyToDevice();
-    _xi[side].copyToDevice();
-  }
-
-  _secondary_qp_begin.copyToDevice();
-  _JxW.copyToDevice();
-  _gap.copyToDevice();
-  _normal.copyToDevice();
-
-  packInactiveDofs();
-
-  _interface->needs_packing = false;
 }
 
 void
@@ -351,20 +188,33 @@ MortarConstraint::packInactiveDofs()
 void
 MortarConstraint::dispatch(const bool residual, const bool jacobian)
 {
-  // The segments of the current configuration move with the displacements of every evaluation
-  if (_interface->needs_packing || _configuration.displaced())
-    packSegments();
+  _geometry = _interface_data.update();
+
+  // The FE type IDs exist once the Kokkos assembly is initialized
+  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
+  for (const auto side : make_range(3u))
+    _side_fe[side] = kokkosAssembly().getFETypeID(vars[side]->feType());
+  for (const auto c : make_range(_n_disp))
+    if (_disp_var[c].initialized())
+      _disp_fe = kokkosAssembly().getFETypeID(
+          const_cast<Variable &>(_disp_var[c]).mooseFieldVar()->feType());
+
+  if (_interface_data.revision() != _inactive_revision)
+  {
+    packInactiveDofs();
+    _inactive_revision = _interface_data.revision();
+  }
 
   _computing_residual = residual;
   _computing_jacobian = jacobian;
 
-  if (_secondary_qp_begin.size() > 1)
+  if (_geometry.secondary_qp_begin.size() > 1)
   {
     if (!_residual_dispatcher)
       _residual_dispatcher = DispatcherRegistry::build<MortarLoop>(this, type());
 
     TeamLaunch launch;
-    launch.league_size = _secondary_qp_begin.size() - 1;
+    launch.league_size = _geometry.secondary_qp_begin.size() - 1;
     _residual_dispatcher->parallelForTeams(launch);
   }
 

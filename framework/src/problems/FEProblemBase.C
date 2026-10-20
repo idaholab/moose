@@ -9,6 +9,7 @@
 
 #ifdef MOOSE_KOKKOS_ENABLED
 #include "KokkosMaterialPropertyStorage.h"
+#include "KokkosMortarInterfaceData.h"
 #endif
 
 #include "FEProblemBase.h"

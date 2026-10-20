@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "KokkosMortarInterfaceData.h"
 #include "KokkosTypes.h"
 #include "KokkosFunction.h"
 #include "KokkosADMaterial.h"
@@ -395,6 +396,15 @@ FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType
   mooseError(
       "FEProblemBase::getKokkosMaterialPropertyStorageConsumers(): Invalid MaterialDataType ",
       type);
+}
+
+Moose::Kokkos::MortarInterfaceData &
+FEProblemBase::getKokkosMortarInterfaceData(const AutomaticMortarGeneration & amg)
+{
+  auto & data = _kokkos_mortar_interface_data[&amg];
+  if (!data)
+    data = std::make_unique<Moose::Kokkos::MortarInterfaceData>(*this, amg);
+  return *data;
 }
 
 void
