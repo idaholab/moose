@@ -13,18 +13,24 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Provides forms loss coefficient computed using RELAP/ATHENA MHD loss model
+ */
 class ADMHDFormLossFunctorMaterial : public FunctorMaterial
 {
 public:
-  static InputParameters validParams();
-
   ADMHDFormLossFunctorMaterial(const InputParameters & parameters);
+  static InputParameters validParams();
+  virtual void initialSetup() override;
 
 protected:
-  /// Coupled temperature variable
-  const ADVariableValue & _T;
+  /// Spatial argument used for every functor evaluation
+  Moose::ElemPointArg functorArg() const { return {_functor_elem, _functor_point, false}; }
+
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+  /// Coupled temperature variable
+  const ADVariableValue & _T;
   /// Coupled mass flow rate through the segment
   const ADVariableValue & _m;
   /// Coupled temperature of the upstream segment
@@ -49,4 +55,8 @@ protected:
   const Moose::Functor<ADReal> & _tw;
   /// Magnetic field strength
   const Moose::Functor<ADReal> & _B;
+  /// Point at which spatially varying functors are evaluated
+  const Point _functor_point;
+  /// Element containing _functor_point (nullptr if outside the mesh / not on this process)
+  const Elem * _functor_elem = nullptr;
 };

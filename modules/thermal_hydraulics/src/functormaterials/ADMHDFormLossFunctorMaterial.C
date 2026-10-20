@@ -10,6 +10,8 @@
 #include "ADMHDFormLossFunctorMaterial.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
+#include "MooseMesh.h"
+#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADMHDFormLossFunctorMaterial);
 
@@ -17,6 +19,7 @@ InputParameters
 ADMHDFormLossFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
+  params.addClassDescription("Computes forms loss coefficient using RELAP/ATHENA MHD model.");
   params.addCoupledVar("temperature",
                        {},
                        "Fluid temperature in segment. Takes a "
@@ -46,6 +49,10 @@ ADMHDFormLossFunctorMaterial::validParams()
   params.addRequiredParam<MooseFunctorName>("sigma_w", "Wall conductivity [1/ohm*m]");
   params.addRequiredParam<MooseFunctorName>("wall_thickness", "Wall thickness [m]");
   params.addRequiredParam<MooseFunctorName>("field_strength", "Magnetic field strength [T]");
+  params.addParam<Point>("functor_evaluation_point",
+                         Point(),
+                         "Point at which spatially varying functors (functions, field variables, "
+                         "functor material properties) are evaluated");
   return params;
 }
 
@@ -64,13 +71,14 @@ ADMHDFormLossFunctorMaterial::ADMHDFormLossFunctorMaterial(const InputParameters
     _sigf(this->template getFunctor<ADReal>("sigma_f")),
     _sigw(this->template getFunctor<ADReal>("sigma_w")),
     _tw(this->template getFunctor<ADReal>("wall_thickness")),
-    _B(this->template getFunctor<ADReal>("field_strength"))
+    _B(this->template getFunctor<ADReal>("field_strength")),
+    _functor_point(getParam<Point>("functor_evaluation_point"))
 {
   addFunctorProperty<ADReal>(
       getParam<std::string>("functor_name"),
       [this](const auto & /*geom_arg*/, const auto & /*state*/) -> ADReal
       {
-        const Moose::ElemArg qp = Moose::ElemArg();
+        const auto qp = functorArg();
         const int i = 0;
         const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
         // start by getting fluid properties
@@ -84,18 +92,29 @@ ADMHDFormLossFunctorMaterial::ADMHDFormLossFunctorMaterial(const InputParameters
         const auto G = _m[i] / _area(qp, state);
 
         // Hartmann number and conductance ratio
-        const auto M = _B * Dh / 2.0 * sqrt(_sigf / mu);
-        const auto phi = 2.0 * _sigw * _tw / _sigf / Dh;
+        const auto M = _B(qp, state) * Dh / 2.0 * sqrt(_sigf(qp, state) / mu);
+        const auto phi = 2.0 * _sigw(qp, state) * _tw(qp, state) / _sigf(qp, state) / Dh;
 
         // Assuming circular geometry and uniform, perpendicular magnetc field for now,
         // since limited information on delta & fconfig is available otherwise.
         const auto delta = 0;
         const auto fconfig = 1;
-        const auto FWF =
-            (1 / (M - 1) + phi / (1 + phi + delta)) * fconfig * _sigf * pow(_B, 2) / rho;
+        const auto FWF = (1 / (M - 1) + phi / (1 + phi + delta)) * fconfig * _sigf(qp, state) *
+                         pow(_B(qp, state), 2) / rho;
 
         // Must convert to unitless, since FWF has units of 1/s and forms losses are expected to be
         // unitless
         return 2.0 * FWF * rho * _length(qp, state) / G;
       });
+}
+
+void
+ADMHDFormLossFunctorMaterial::initialSetup()
+{
+  FunctorMaterial::initialSetup();
+
+  // Locate the element that spatially varying functors will be evaluated on
+  auto pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+  _functor_elem = (*pl)(_functor_point);
 }
