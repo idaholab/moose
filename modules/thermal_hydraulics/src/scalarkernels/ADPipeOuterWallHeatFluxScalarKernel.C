@@ -9,7 +9,7 @@
 
 #include "ADPipeOuterWallHeatFluxScalarKernel.h"
 
-#include "Function.h"
+#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallHeatFluxScalarKernel);
@@ -25,8 +25,8 @@ ADPipeOuterWallHeatFluxScalarKernel::validParams()
                        {},
                        "Temperature of the inner-surface wall node, on the other side of this "
                        "layer's radial conduction path. Takes a scalar variable name");
-  params.addRequiredParam<FunctionName>("heat_flux", "Applied heat flux function [W/m^2]");
-  params.addRequiredParam<FunctionName>(
+  params.addRequiredParam<MooseFunctorName>("heat_flux", "Applied heat flux functor [W/m^2]");
+  params.addRequiredParam<MooseFunctorName>(
       "heated_perimeter", "Perimeter of this wall node over which the heat flux is applied [m]");
 
   return params;
@@ -36,16 +36,19 @@ ADPipeOuterWallHeatFluxScalarKernel::ADPipeOuterWallHeatFluxScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
     _Tin(ScalarCoupleable::adCoupledScalarValue("inner_wall_temperature")),
-    _heat_flux(getFunction("heat_flux")),
-    _heated_perimeter(getFunction("heated_perimeter"))
+    _heat_flux(this->template getFunctor<ADReal>("heat_flux")),
+    _heated_perimeter(this->template getFunctor<ADReal>("heated_perimeter"))
 {
 }
 
 ADReal
 ADPipeOuterWallHeatFluxScalarKernel::convectiveLinearHeatRate() const
 {
+  const Moose::ElemArg elem_arg = Moose::ElemArg();
+  const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
+
   // Prescribed heat flux applied to this node, positive into the wall
-  return _heat_flux.value(Base::_t, Point()) * _heated_perimeter.value(Base::_t, Point());
+  return _heat_flux(elem_arg, state) * _heated_perimeter(elem_arg, state);
 }
 
 Real

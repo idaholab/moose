@@ -30,10 +30,10 @@ protected:
 
   /// Coupled temperature of the inner-surface wall node
   const ADVariableValue & _Tin;
-  /// Ambient temperature function
-  const Function & _T_ambient;
-  /// Ambient heat transfer coefficient function
-  const Function & _htc_ambient;
+  /// Ambient temperature functor
+  const Moose::Functor<ADReal> & _T_ambient;
+  /// Ambient heat transfer coefficient functor
+  const Moose::Functor<ADReal> & _htc_ambient;
   /// Perimeter of this wall node exposed to the ambient environment
-  const Function & _ambient_perimeter;
+  const Moose::Functor<ADReal> & _ambient_perimeter;
 };
