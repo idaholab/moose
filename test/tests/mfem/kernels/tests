@@ -408,4 +408,15 @@
       detail = 'or a boundary ID.'
     []
   []
+  [MFEMElasticityEigenproblem]
+    type = CSVDiff
+    input = elasticity_eigenproblem.i
+    csvdiff = 'OutputData/ElasticityEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a linear elasticity eigenproblem on a vector H1 space with Dirichlet BCs using MFEM.'
+    design = 'MFEMEigenproblem.md'
+    issues = '#34193'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
