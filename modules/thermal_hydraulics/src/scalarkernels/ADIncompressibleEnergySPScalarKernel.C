@@ -46,6 +46,8 @@ ADIncompressibleEnergySPScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>("area", "Segment/Component flow area [m^2]");
   params.addRequiredParam<MooseFunctorName>("perimeter", "Segment/Component wetted perimeter [m]");
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
+  params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
+                                            "Heat transfer coefficient of the fluid [W/(m^2-K)]");
 
   return params;
 }
@@ -63,7 +65,8 @@ ADIncompressibleEnergySPScalarKernel::ADIncompressibleEnergySPScalarKernel(
     _Pref(this->template getFunctor<ADReal>("reference_pressure")),
     _area(this->template getFunctor<ADReal>("area")),
     _perimeter(this->template getFunctor<ADReal>("perimeter")),
-    _length(this->template getFunctor<ADReal>("length"))
+    _length(this->template getFunctor<ADReal>("length")),
+    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
 {
 }
 
@@ -77,19 +80,19 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   // start by getting fluid properties
   const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
                   1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
-  const auto mu = _fp.mu_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  // const auto mu = _fp.mu_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
   const auto rho = _fp.rho_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
   const auto cp = _fp.cp_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
-  const auto k = _fp.k_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  // const auto k = _fp.k_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
 
   // Compute HTC quantities
-  const auto Dh = 4.0 * _area(qp, state) / _perimeter(qp, state);
-  const auto G = abs(_m[i]) / _area(qp, state);
-  const auto Re = G * Dh / mu;
-  const auto Pr = mu * cp / k;
+  // const auto Dh = 4.0 * _area(qp, state) / _perimeter(qp, state);
+  // const auto G = abs(_m[i]) / _area(qp, state);
+  // const auto Re = G * Dh / mu;
+  // const auto Pr = mu * cp / k;
   // Heat transfer to fluid (Dittus-Boelter)
-  const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * k / Dh;
-  const auto q = h * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
+  // const auto h = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4) * k / Dh;
+  const auto q = _h(qp, state) * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
   // Advection component
   energy_residual += (_m[i] / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] -
                       _m[i] / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i] + abs(_m[i]) * Base::_u[i]) /
