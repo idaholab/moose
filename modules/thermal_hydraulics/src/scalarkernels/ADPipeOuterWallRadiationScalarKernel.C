@@ -12,6 +12,8 @@
 #include "ADFunctorInterface.h"
 #include "ThermalSolidProperties.h"
 #include "PhysicalConstants.h"
+#include "MooseMesh.h"
+#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallRadiationScalarKernel);
 
@@ -41,6 +43,10 @@ ADPipeOuterWallRadiationScalarKernel::validParams()
   params.addParam<Real>("stefan_boltzmann_constant",
                         PhysicalConstants::stefan_boltzmann_constant,
                         "Stefan-Boltzmann constant");
+  params.addParam<Point>("functor_evaluation_point",
+                         Point(),
+                         "Point at which spatially varying functors (functions, field variables, "
+                         "functor material properties) are evaluated");
 
   return params;
 }
@@ -57,14 +63,26 @@ ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     _emissivity(this->template getFunctor<ADReal>("emissivity")),
     _view_factor(this->template getFunctor<ADReal>("view_factor")),
     _scale(this->template getFunctor<ADReal>("scale")),
-    _sigma(this->template getParam<Real>("stefan_boltzmann_constant"))
+    _sigma(this->template getParam<Real>("stefan_boltzmann_constant")),
+    _functor_point(getParam<Point>("functor_evaluation_point"))
 {
+}
+
+void
+ADPipeOuterWallRadiationScalarKernel::initialSetup()
+{
+  ADScalarKernel::initialSetup();
+
+  // Locate the element that spatially varying functors will be evaluated on
+  auto pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+  _functor_elem = (*pl)(_functor_point);
 }
 
 ADReal
 ADPipeOuterWallRadiationScalarKernel::computeQpResidual()
 {
-  const Moose::ElemArg elem_arg = Moose::ElemArg();
+  const auto elem_arg = functorArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 

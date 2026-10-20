@@ -11,6 +11,8 @@
 
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
+#include "MooseMesh.h"
+#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeInnerWallTemperatureScalarKernel);
 
@@ -66,7 +68,7 @@ ADPipeInnerWallTemperatureScalarKernel::ADPipeInnerWallTemperatureScalarKernel(
 ADReal
 ADPipeInnerWallTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
-  const Moose::ElemArg elem_arg = Moose::ElemArg();
+  const auto elem_arg = functorArg();
   const int i = 0;
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
   // Upwind the segment inlet temperature on the flow direction

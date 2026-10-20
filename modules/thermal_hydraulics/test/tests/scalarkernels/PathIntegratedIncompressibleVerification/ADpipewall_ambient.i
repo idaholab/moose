@@ -1,7 +1,7 @@
 # Two radial wall nodes (inner surface, outer surface) bridge a fixed primary-fluid
 # temperature Tf1 to a fixed ambient temperature Tamb through three conductances in
 # series: fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
-# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject), radial conduction
+# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCFunctorMaterial), radial conduction
 # through the wall, and ambient convection
 # (ADPipeOuterWallAmbientTemperatureScalarKernel). The analytical Tin/Tout below are the
 # steady state of that series-resistance circuit, solved algebraically at parse time with
@@ -172,9 +172,9 @@ Tout_analytical = '${fparse Tamb + q / G3}'
   []
 []
 
-[UserObjects]
+[FunctorMaterials]
   [h]
-    type = ADDittusBoelterHTCUserObject
+    type = ADDittusBoelterHTCFunctorMaterial
     mass_flow_rate = m1v
     fluid_properties = water
     T_fluid = Tf1v

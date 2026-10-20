@@ -9,7 +9,7 @@
 # The remaining ~2e-4 relative mismatch against the analytical values is incomplete
 # transient decay rather than a property-evaluation or solve-tolerance effect: raising
 # end_time from 100 s to 5000 s drops it to ~3e-6. The Dittus-Boelter coefficient comes
-# from ADDittusBoelterHTCUserObject, which evaluates Water97FluidProperties at the
+# from ADDittusBoelterHTCFunctorMaterial, which evaluates Water97FluidProperties at the
 # segment's bulk film temperature instead of the single fixed Tf1 used to build the
 # cross-check; that is worth only ~0.17% in h, well below the transient contribution.
 
@@ -174,9 +174,9 @@ Tout_analytical = 292.1600915387281
   []
 []
 
-[UserObjects]
+[FunctorMaterials]
   [h1]
-    type = ADDittusBoelterHTCUserObject
+    type = ADDittusBoelterHTCFunctorMaterial
     mass_flow_rate = m1v
     fluid_properties = water
     T_fluid = Tf1v

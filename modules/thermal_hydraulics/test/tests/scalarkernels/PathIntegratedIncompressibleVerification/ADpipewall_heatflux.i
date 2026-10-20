@@ -2,7 +2,7 @@
 # outer-wall heat flux q_flux (ADPipeOuterWallHeatFluxScalarKernel), with no other path
 # out of the outer node. In steady state all of the applied heat must flow inward through
 # the fluid-side convection (ADPipeInnerWallTemperatureScalarKernel, with the
-# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCUserObject) and radial
+# Dittus-Boelter coefficient supplied by ADDittusBoelterHTCFunctorMaterial) and radial
 # conduction resistances in series, which is the series circuit solved algebraically below
 # for Tin_analytical/Tout_analytical using fluid properties fixed at Tf1 (mu1, cp1, k1).
 #
@@ -164,9 +164,9 @@ Tout_analytical = '${fparse Tin_analytical + Qflux / G2}'
   []
 []
 
-[UserObjects]
+[FunctorMaterials]
   [h1]
-    type = ADDittusBoelterHTCUserObject
+    type = ADDittusBoelterHTCFunctorMaterial
     mass_flow_rate = m1v
     fluid_properties = water
     T_fluid = Tf1v

@@ -19,7 +19,7 @@ This kernel takes a solid properties object based on the
 [ThermalSolidProperties.md] base class. The convective heat transfer coefficient $h$ is
 supplied as a [functor](/Functors/index.md) through the
 [!param](/ScalarKernels/ADPipeInnerWallTemperatureScalarKernel/heat_transfer_coefficient)
-parameter; [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
+parameter; [ADDittusBoelterHTCFunctorMaterial.md] provides it from a Dittus-Boelter
 correlation. All geometry inputs (the flow channel's wetted perimeter, this node's and its
 upstream/downstream neighbors' wall cross-sectional areas, the radial interface perimeter
 and thickness, this node's control-volume length, and the axial spacings to each neighbor)
