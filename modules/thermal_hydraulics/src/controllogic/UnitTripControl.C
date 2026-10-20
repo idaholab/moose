@@ -9,6 +9,7 @@
 
 #include "UnitTripControl.h"
 #include "THMParsedFunctionWrapper.h"
+#include "THMUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", UnitTripControl);
 
@@ -82,14 +83,10 @@ UnitTripControl::execute()
   }
 
   Real result = _condition_ptr->evaluate(_t, Point(0., 0., 0.));
-  if (result == 0.)
-    _state = false;
-  else if (result == 1.)
-  {
-    _state = true;
-    _tripped = true;
-  }
-  else
+  if (!THM::realIsValidBool(result))
     mooseError(name(),
                ": The user-provided condition expression did not return a boolean value (0 or 1).");
+  _state = THM::realToBool(result);
+  if (_state)
+    _tripped = true;
 }

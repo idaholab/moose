@@ -12,6 +12,7 @@
 #include "ADBoundaryFlux3EqnGhostBase.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes boundary flux from a specified stagnation pressure and temperature
@@ -26,11 +27,11 @@ protected:
   virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U1,
                                                    const Point & point) const override;
 
-  /// Specified stagnation pressure
-  const Real & _p0;
+  /// Function specifying the stagnation pressure
+  const Function & _p0_fn;
 
-  /// Specified stagnation temperature
-  const Real & _T0;
+  /// Function specifying the stagnation temperature
+  const Function & _T0_fn;
   /// Reversibility
   const bool & _reversible;
 

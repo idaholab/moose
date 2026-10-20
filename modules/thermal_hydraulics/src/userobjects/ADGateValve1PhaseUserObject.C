@@ -30,8 +30,8 @@ ADGateValve1PhaseUserObject::validParams()
 {
   InputParameters params = ADFlowJunctionUserObject::validParams();
 
-  params.addRequiredParam<Real>("open_area_fraction",
-                                "Fraction of possible flow area that is open");
+  params.addRequiredParam<FunctionName>(
+      "open_area_fraction", "Function specifying the fraction of possible flow area that is open");
   params.addParam<Real>("open_area_fraction_min", 1e-10, "Minimum open area fraction");
 
   params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
@@ -45,15 +45,13 @@ ADGateValve1PhaseUserObject::validParams()
 
   params.addClassDescription("Gate valve user object for 1-phase flow");
 
-  params.declareControllable("open_area_fraction");
-
   return params;
 }
 
 ADGateValve1PhaseUserObject::ADGateValve1PhaseUserObject(const InputParameters & params)
   : ADFlowJunctionUserObject(params),
 
-    _f_open(getParam<Real>("open_area_fraction")),
+    _f_open_fn(getFunction("open_area_fraction")),
     _f_open_min(getParam<Real>("open_area_fraction_min")),
 
     _A(adCoupledValue("A")),
@@ -181,9 +179,10 @@ ADGateValve1PhaseUserObject::finalize()
   const ADReal & A1 = _areas[0];
   const ADReal & A2 = _areas[1];
   const ADReal A = std::min(A1, A2);
-  const ADReal A_flow = _f_open * A;
+  const Real f_open = _f_open_fn.value(_t, Point());
+  const ADReal A_flow = f_open * A;
 
-  if (_f_open > _f_open_min)
+  if (f_open > _f_open_min)
   {
     // compute flow contribution
     std::vector<ADReal> U_flow1 = _solutions[0];

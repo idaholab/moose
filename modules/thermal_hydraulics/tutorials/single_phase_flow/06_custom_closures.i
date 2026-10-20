@@ -54,6 +54,10 @@ m_dot_sec_in = 1. # kg/s
       0    0
       10 ${m_dot_sec_in}'
   []
+  [pump_head_fn]
+    type = ConstantFunction
+    value = 0 # controlled
+  []
 []
 
 [FluidProperties]
@@ -376,7 +380,7 @@ m_dot_sec_in = 1. # kg/s
     connections = 'bottom_1:out bottom_2:in'
     volume = 1e-4
     A_ref = ${A_pipe}
-    head = 0
+    head = pump_head_fn
   []
 
   [bottom_2]
@@ -397,7 +401,7 @@ m_dot_sec_in = 1. # kg/s
   [inlet_sec]
     type = InletMassFlowRateTemperature1Phase
     input = 'hx/sec:in'
-    m_dot = 0
+    m_dot = m_dot_sec_fn
     T = 300
   []
 
@@ -425,22 +429,9 @@ m_dot_sec_in = 1. # kg/s
   []
 
   [set_pump_head]
-    type = SetComponentRealValueControl
-    component = pump
-    parameter = head
+    type = SetRealValueControl
+    parameter = Functions/pump_head_fn/value
     value = pid:output
-  []
-
-  [m_dot_sec_inlet_ctrl]
-    type = GetFunctionValueControl
-    function = m_dot_sec_fn
-  []
-
-  [set_m_dot_sec_ctrl]
-    type = SetComponentRealValueControl
-    component = inlet_sec
-    parameter = m_dot
-    value = m_dot_sec_inlet_ctrl:value
   []
 []
 

@@ -14,6 +14,7 @@
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 #include "THMUtils.h"
+#include "Function.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
@@ -39,7 +40,7 @@ ADVolumeJunction1PhaseUserObject::validParams()
 
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
 
-  params.addRequiredParam<Real>("K", "Form loss coefficient [-]");
+  params.addRequiredParam<FunctionName>("K", "Function specifying the form loss coefficient [-]");
   params.addRequiredParam<Real>("A_ref", "Reference area [m^2]");
 
   params.addParam<bool>("apply_velocity_scaling",
@@ -50,7 +51,6 @@ ADVolumeJunction1PhaseUserObject::validParams()
   params.addClassDescription(
       "Computes and caches flux and residual vectors for a 1-phase volume junction");
 
-  params.declareControllable("K");
   return params;
 }
 
@@ -62,7 +62,7 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
     _rhouA(adCoupledValue("rhouA")),
     _rhoEA(adCoupledValue("rhoEA")),
 
-    _K(getParam<Real>("K")),
+    _K_fn(getFunction("K")),
     _A_ref(getParam<Real>("A_ref")),
 
     _apply_velocity_scaling(getParam<bool>("apply_velocity_scaling")),
@@ -229,7 +229,8 @@ ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & fl
 
   std::vector<ADReal> residual(_n_scalar_eq, 0.0);
 
-  if (is_primary_connection && std::abs(_K) > 1e-10)
+  const Real K = _K_fn.value(_t, Point());
+  if (is_primary_connection && std::abs(K) > 1e-10)
   {
     const auto & rhoAi = Ui[THMVACE3D::RHOA];
     const auto & rhouAi = Ui[THMVACE3D::RHOUA];
@@ -252,9 +253,9 @@ ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & fl
     const ADReal p0_in = _fp.p_from_h_s(h0_in, s0_in);
     ADReal S_loss;
     if (_A_ref == 0)
-      S_loss = _K * (p0_in - p_in) * Ai;
+      S_loss = K * (p0_in - p_in) * Ai;
     else
-      S_loss = _K * (p0_in - p_in) * _A_ref;
+      S_loss = K * (p0_in - p_in) * _A_ref;
     if (uni > 0) // flow is out of the junction
     {
       residual[VolumeJunction1Phase::RHOUV_INDEX] -= ni(0) * S_loss;

@@ -48,4 +48,25 @@ void allGatherADVectorMap(const Parallel::Communicator & comm,
  */
 void allGatherADVectorMapSum(const Parallel::Communicator & comm,
                              std::map<dof_id_type, std::vector<ADReal>> & this_map);
+
+/**
+ * Returns true if a Real value can be converted to a bool value by \c realToBool
+ *
+ * The value is convertible if it is equal, within fuzzy tolerance, to 0 or 1.
+ *
+ * @param[in] value   Real value to check
+ * @returns  Whether \c value can be converted to a bool value
+ */
+bool realIsValidBool(Real value);
+
+/**
+ * Converts a Real value to a bool value
+ *
+ * The value must be equal, within fuzzy tolerance, to 0 (false) or 1 (true);
+ * any other value is an error.
+ *
+ * @param[in] value   Real value to convert, which must be 0 or 1
+ * @returns  The bool value corresponding to \c value
+ */
+bool realToBool(Real value);
 }

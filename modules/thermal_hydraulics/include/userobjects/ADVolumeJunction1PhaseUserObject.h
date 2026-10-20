@@ -50,8 +50,8 @@ protected:
   /// rho*E*A of the connected flow channels
   const ADVariableValue & _rhoEA;
 
-  /// Form loss coefficient
-  const Real & _K;
+  /// Function specifying the form loss coefficient
+  const Function & _K_fn;
   /// Reference area
   const Real & _A_ref;
 

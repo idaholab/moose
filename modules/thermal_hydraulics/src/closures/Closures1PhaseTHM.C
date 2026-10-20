@@ -88,10 +88,9 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
       params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
       params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
       params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-      params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
+      params.set<FunctionName>("roughness") = flow_channel.getParam<FunctionName>("roughness");
       const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
       _sim.addMaterial(class_name, obj_name, params);
-      flow_channel.connectObject(params, obj_name, "roughness");
       break;
     }
     case WallFFClosureType::CHENG_TODREAS:
@@ -151,10 +150,9 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
       params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
       params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
       params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-      params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
+      params.set<FunctionName>("roughness") = flow_channel.getParam<FunctionName>("roughness");
       const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
       _sim.addMaterial(class_name, obj_name, params);
-      flow_channel.connectObject(params, obj_name, "roughness");
       break;
     }
     default:
