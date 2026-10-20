@@ -10,13 +10,11 @@
 #pragma once
 
 #include "ADPipeWallTemperatureScalarKernelBase.h"
-#include "ADFunctorInterface.h"
 
 /**
  * Inner wall path-integrated incompressible conjugate heat transfer kernel
  */
-class ADPipeInnerWallTemperatureScalarKernel : public ADPipeWallTemperatureScalarKernelBase,
-                                               public ADFunctorInterface
+class ADPipeInnerWallTemperatureScalarKernel : public ADPipeWallTemperatureScalarKernelBase
 {
   using Base = ADPipeWallTemperatureScalarKernelBase;
 
@@ -40,7 +38,7 @@ protected:
   /// Coupled fluid temperature adjacent to the downstream wall node
   const ADVariableValue & _Tfdown;
   /// Wetted perimeter of the fluid flow channel adjacent to this wall node
-  const Function & _wetted_perimeter;
+  const Moose::Functor<ADReal> & _wetted_perimeter;
   /// Heat transfer coefficient from functor material
   const Moose::Functor<ADReal> & _h;
 };
