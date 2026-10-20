@@ -88,14 +88,8 @@ Exodus::validParams()
   //
   // We used to truncate at 32, so we make this user-configurable to
   // make it easier to match old gold files.
-  //
-  // We're still defaulting to 32 until our apps in CI start using
-  // this option (and/or re-golding) downstream.
-  //
-  // If someone tries to set truncation at less than 32 they're
-  // probably making a mistake.
   params.addRangeCheckedParam<unsigned int>("max_output_name_length",
-                                            32,
+                                            80,
                                             "32<=max_output_name_length<=80",
                                             "Maximum length for names in Exodus file output.");
 
