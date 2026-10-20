@@ -511,7 +511,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mesh_divisions(numThreads()),
     _functions(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_functions(numThreads()),
+    _kokkos_functions(/*num_threads=*/1),
 #endif
     _convergences(numThreads()),
     _nonlocal_kernels(numThreads()),
@@ -540,7 +540,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _discrete_materials(numThreads()),
     _all_materials(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_materials(numThreads()),
+    _kokkos_materials(/*num_threads=*/1),
 #endif
     _indicators(numThreads()),
     _internal_side_indicators(numThreads()),
