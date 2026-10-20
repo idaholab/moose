@@ -21,6 +21,7 @@ class ADIncompressibleMomentumSPBase : public ADScalarKernel, public ADFunctorIn
 public:
   ADIncompressibleMomentumSPBase(const InputParameters & parameters);
   static InputParameters validParams();
+  virtual void initialSetup() override;
 
 protected:
   virtual ADReal computeQpResidual() override;
@@ -31,6 +32,9 @@ protected:
                                        const unsigned int j);
   virtual ADReal massFlowRate() const = 0;
   virtual ADReal pressureDrop() const = 0;
+  /// Spatial argument used for every functor evaluation
+  Moose::ElemPointArg functorArg() const { return {_functor_elem, _functor_point, false}; }
+
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables
@@ -59,4 +63,8 @@ protected:
   std::vector<const Moose::Functor<ADReal> *> _roughnesses;
   /// Gravitational acceleration in the vertical downward direction
   const Moose::Functor<ADReal> & _gravity;
+  /// Point at which spatially varying functors are evaluated
+  const Point _functor_point;
+  /// Element containing _functor_point (nullptr if outside the mesh / not on this process)
+  const Elem * _functor_elem = nullptr;
 };
