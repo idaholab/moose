@@ -5,6 +5,7 @@
     type = CSVDiff
     input = progressive_debonding.i
     csvdiff = progressive_debonding_out.csv
+    restep = false
     requirement = 'The system shall have an example of a mortar cohesive zone interface whose normal '
                   'strength varies along the interface, so that the weak part debonds before the '
                   'strong part.'
