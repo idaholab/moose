@@ -45,4 +45,6 @@ protected:
   const Moose::Functor<ADReal> & _perimeter;
   /// Length of the segment
   const Moose::Functor<ADReal> & _length;
+  /// Heat transfer coefficient from functor material
+  const Moose::Functor<ADReal> & _h;
 };
