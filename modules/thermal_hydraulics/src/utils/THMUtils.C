@@ -11,6 +11,8 @@
 #include "MooseUtils.h"
 #include "MooseTypes.h"
 #include "MooseApp.h"
+#include "InputParameterWarehouse.h"
+#include "MooseObjectParameterName.h"
 #include "MooseBase.h"
 #include "TransientBase.h"
 #include <set>
@@ -128,5 +130,21 @@ informExperimental(const MooseBase & moose_base)
         moose_base._console,
         moose_base.messagePrefix(true),
         "This class is experimental: its input syntax and behavior are subject to change.");
+}
+
+void
+connectComponentControllableParam(const MooseBase & component,
+                                  const std::string & param,
+                                  const std::string & object_type,
+                                  const std::string & object_name,
+                                  const std::string & object_param)
+{
+  const std::string & target = object_param.empty() ? param : object_param;
+  component.connectControllableParams(param, object_type, object_name, target);
+
+  const auto base_type = component.getMooseApp().getFactory().getValidParams(object_type).getBase();
+  component.getMooseApp().getInputParameterWarehouse().addControllableParameterAlias(
+      MooseObjectParameterName("component", component.name(), param, "::"),
+      MooseObjectParameterName(base_type, object_name, target));
 }
 }
