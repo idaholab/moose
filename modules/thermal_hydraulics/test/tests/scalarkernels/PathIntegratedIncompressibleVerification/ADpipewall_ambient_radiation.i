@@ -8,9 +8,9 @@
 #
 # The remaining ~2e-4 relative mismatch against the analytical values is incomplete
 # transient decay rather than a property-evaluation or solve-tolerance effect: raising
-# end_time from 100 s to 5000 s drops it to ~3e-6. The inner-wall kernel computes its
-# Dittus-Boelter coefficient from Water97FluidProperties evaluated at the segment's bulk
-# film temperature, instead of the single fixed Tf1 used to build the
+# end_time from 100 s to 5000 s drops it to ~3e-6. The Dittus-Boelter coefficient comes
+# from ADDittusBoelterHTCUserObject, which evaluates Water97FluidProperties at the
+# segment's bulk film temperature instead of the single fixed Tf1 used to build the
 # cross-check; that is worth only ~0.17% in h, well below the transient contribution.
 
 length = 1.0
@@ -121,9 +121,7 @@ Tout_analytical = 292.1600915387281
     upstream_fluid_temperature = Tf1v
     downstream_fluid_temperature = Tf1v
     solid_properties = wall_sp
-    fluid_properties = water
-    reference_pressure = ${Pin}
-    flow_area = ${flow_area1}
+    heat_transfer_coefficient = h1
     wetted_perimeter = ${wetted_perimeter1}
     area = ${area_in}
     interface_perimeter = ${interface_perimeter}
@@ -173,6 +171,20 @@ Tout_analytical = 292.1600915387281
   [outer_dt]
     type = ADScalarTimeDerivative
     variable = Tout_wall
+  []
+[]
+
+[UserObjects]
+  [h1]
+    type = ADDittusBoelterHTCUserObject
+    mass_flow_rate = m1v
+    fluid_properties = water
+    T_fluid = Tf1v
+    T_fluid_inlet = Tf1v
+    T_fluid_outlet = Tf1v
+    reference_pressure = ${Pin}
+    flow_area = ${flow_area1}
+    wetted_perimeter = ${wetted_perimeter1}
   []
 []
 
