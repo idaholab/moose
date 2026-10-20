@@ -15,6 +15,9 @@
 #include "mfem/miniapps/common/mesh_extras.hpp"
 #include "libmesh/restore_warnings.h"
 
+const std::string MFEMKernel::COEFFICIENT_PARAM = "coefficient";
+const std::string MFEMKernel::MATRIX_COEFFICIENT_PARAM = "matrix_coefficient";
+
 InputParameters
 MFEMKernel::validParams()
 {

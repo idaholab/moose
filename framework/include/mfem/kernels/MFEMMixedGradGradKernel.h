@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMMixedBilinearFormKernel.h"
+#include "MFEMProblem.h"
 
 /**
  * \f[
@@ -26,9 +27,6 @@ public:
   MFEMMixedGradGradKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
-
-protected:
-  mfem::Coefficient & _coef;
 };
 
 #endif

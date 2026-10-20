@@ -26,9 +26,6 @@ public:
   MFEMCurlCurlKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
-
-protected:
-  mfem::Coefficient & _coef;
 };
 
 #endif

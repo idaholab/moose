@@ -23,21 +23,24 @@ MFEMDiffusionKernel::validParams()
                              "arising from the weak form of the Laplacian operator "
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of property for diffusion coefficient k.");
+      MFEMKernel::COEFFICIENT_PARAM, "1.", "Name of property for diffusion coefficient k.");
+  params.addParam<MFEMMatrixCoefficientName>(MFEMKernel::MATRIX_COEFFICIENT_PARAM,
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMKernel(parameters)
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMDiffusionKernel::createBFIntegrator()
 {
-  return new mfem::DiffusionIntegrator(_coef);
+  auto coeffs = getMFEMProblem().getCoefficients().resolveCoefficientVariant(
+      _pars, MFEMKernel::COEFFICIENT_PARAM, MFEMKernel::MATRIX_COEFFICIENT_PARAM);
+  return std::visit([](auto & c) { return new mfem::DiffusionIntegrator(c); }, coeffs);
 }
 
 #endif
