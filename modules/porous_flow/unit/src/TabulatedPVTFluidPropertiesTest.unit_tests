@@ -26,16 +26,21 @@
     [extrapolation]
       type = GoogleTest
       unit_test = TabulatedPVTFluidPropertiesTest.extrapolation
-      detail = 'extrapolating linearly from the end intervals outside the tabulated pressure range when requested;'
+      detail = 'extrapolating linearly from the end intervals outside the tabulated pressure range if out-of-bounds pressures are ignored;'
     []
-    [throw_exception]
+    [throw]
       type = GoogleTest
       unit_test = TabulatedPVTFluidPropertiesTest.throwException
       detail = 'throwing an exception by default for pressures outside the tabulated range;'
     []
-    [move_to_bounds]
+    [invalid_solution]
       type = GoogleTest
-      unit_test = TabulatedPVTFluidPropertiesTest.moveToBounds
+      unit_test = TabulatedPVTFluidPropertiesTest.invalidSolution
+      detail = 'using the end values of the table outside the tabulated pressure range while declaring the solution invalid or recording a warning, when requested;'
+    []
+    [set_to_closest_bound]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.setToClosestBound
       detail = 'using the end values of the table outside the tabulated pressure range when requested;'
     []
     [derivatives]

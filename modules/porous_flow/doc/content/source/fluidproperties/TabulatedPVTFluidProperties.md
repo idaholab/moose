@@ -32,19 +32,24 @@ with pressure than $B$ does, particularly for gases. The viscosity is recovered 
 The derivatives of density and viscosity with respect to pressure are computed exactly from the
 piecewise-linear interpolants, so they can be used in the Jacobian.
 
-Outside the tabulated pressure range, the behaviour is set by `out_of_bounds`:
+The interpolation uses the MOOSE `LinearInterpolation` utility.
 
-- `throw_exception` (default): an exception is thrown, so the time step is cut. This ensures that
-  no results are computed with properties outside the range of the PVT data.
-- `move_to_bounds`: the end values of the table are used, and the pressure derivatives are zero.
-- `linear_extrapolation`: $1/B$ and $1/(B\mu)$ are extrapolated linearly using the first or last
-  interval of the table. An exception is still thrown if the extrapolated values become
-  non-positive.
+Outside the tabulated pressure range, the behavior is set by `out_of_bounds_behavior`, which has
+the same options as [TabulatedFluidProperties](TabulatedFluidProperties.md):
+
+- `throw` (default): an exception is thrown, so the time step is cut. This ensures that no results
+  are computed with properties outside the range of the PVT data.
+- `set_to_closest_bound`: the pressure is moved to the closest bound of the table, so the end values
+  of the table are used and the pressure derivatives are zero.
+- `declare_invalid`: as `set_to_closest_bound`, but the solution is also marked as invalid.
+- `warn_invalid`: as `set_to_closest_bound`, but a solution warning is also recorded.
+- `ignore`: $1/B$ and $1/(B\mu)$ are extrapolated linearly using the first or last interval of the
+  table. An exception is still thrown if the extrapolated values become non-positive.
 
 !alert warning
-With `move_to_bounds` or `linear_extrapolation`, results in parts of the domain where the pressure
-lies outside the table should be used with care: the fluid properties there are not supported by
-the PVT data. Where possible, extend the table to cover the expected pressure range instead.
+With any option other than `throw`, results in parts of the domain where the pressure lies outside
+the table should be used with care: the fluid properties there are not supported by the PVT data.
+Where possible, extend the table to cover the expected pressure range instead.
 
 ## Thermal properties
 

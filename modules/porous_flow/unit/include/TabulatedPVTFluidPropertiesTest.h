@@ -17,9 +17,11 @@ class TabulatedPVTFluidPropertiesTest : public MooseObjectUnitTest
 public:
   TabulatedPVTFluidPropertiesTest() : MooseObjectUnitTest("PorousFlowApp")
   {
-    _fp = &buildFP("fp", "linear_extrapolation");
-    _fp_bounds = &buildFP("fp_bounds", "move_to_bounds");
-    _fp_throw = &buildFP("fp_throw", "throw_exception");
+    _fp = &buildFP("fp", "ignore");
+    _fp_bounds = &buildFP("fp_bounds", "set_to_closest_bound");
+    _fp_throw = &buildFP("fp_throw", "throw");
+    _fp_declare_invalid = &buildFP("fp_declare_invalid", "declare_invalid");
+    _fp_warn_invalid = &buildFP("fp_warn_invalid", "warn_invalid");
   }
 
 protected:
@@ -37,10 +39,10 @@ protected:
   }
 
   const TabulatedPVTFluidProperties & buildFP(const std::string & name,
-                                              const std::string & out_of_bounds)
+                                              const std::string & out_of_bounds_behavior)
   {
     InputParameters params = validFPParams();
-    params.set<MooseEnum>("out_of_bounds") = out_of_bounds;
+    params.set<MooseEnum>("out_of_bounds_behavior") = out_of_bounds_behavior;
     _fe_problem->addUserObject("TabulatedPVTFluidProperties", name, params);
     return _fe_problem->getUserObject<TabulatedPVTFluidProperties>(name);
   }
@@ -52,10 +54,14 @@ protected:
   const Real _cv = 2000.0;
   const Real _molar_mass = 0.2;
 
-  /// out_of_bounds = linear_extrapolation
+  /// out_of_bounds_behavior = ignore (linear extrapolation)
   const TabulatedPVTFluidProperties * _fp;
-  /// out_of_bounds = move_to_bounds
+  /// out_of_bounds_behavior = set_to_closest_bound
   const TabulatedPVTFluidProperties * _fp_bounds;
-  /// out_of_bounds = throw_exception (the default)
+  /// out_of_bounds_behavior = throw (the default)
   const TabulatedPVTFluidProperties * _fp_throw;
+  /// out_of_bounds_behavior = declare_invalid
+  const TabulatedPVTFluidProperties * _fp_declare_invalid;
+  /// out_of_bounds_behavior = warn_invalid
+  const TabulatedPVTFluidProperties * _fp_warn_invalid;
 };

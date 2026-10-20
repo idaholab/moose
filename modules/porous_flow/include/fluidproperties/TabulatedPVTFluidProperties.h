@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SinglePhaseFluidProperties.h"
+#include "LinearInterpolation.h"
 
 /**
  * Fluid properties from a table of pressure, formation volume factor and
@@ -49,13 +50,13 @@ public:
 
 protected:
   /**
-   * Piecewise-linear interpolation of a tabulated quantity in pressure
+   * Interpolate a tabulated quantity in pressure, applying the out-of-bounds behavior
    * @param p pressure (Pa)
-   * @param y tabulated values at the pressures in _p
+   * @param table interpolation of the tabulated quantity
    * @param[out] value interpolated value at p
    * @param[out] dvalue_dp derivative of the interpolated value with respect to p
    */
-  void interpolate(Real p, const std::vector<Real> & y, Real & value, Real & dvalue_dp) const;
+  void interpolate(Real p, const LinearInterpolation & table, Real & value, Real & dvalue_dp) const;
 
   /// Density at standard (surface) conditions (kg/m^3)
   const Real _density_sc;
@@ -63,21 +64,25 @@ protected:
   /// Tabulated pressures (Pa), strictly increasing
   const std::vector<Real> _p;
 
-  /// Reciprocal of the formation volume factor, 1/B, at each tabulated pressure
-  std::vector<Real> _inv_B;
+  /// Interpolation of the reciprocal of the formation volume factor, 1/B, in pressure
+  LinearInterpolation _inv_B_table;
 
-  /// Reciprocal of the product of formation volume factor and viscosity, 1/(B mu)
-  std::vector<Real> _inv_B_mu;
+  /// Interpolation of the reciprocal of the product of formation volume factor and viscosity,
+  /// 1/(B mu), in pressure
+  LinearInterpolation _inv_B_mu_table;
 
   /// Constant specific heat capacity at constant volume (J/kg/K)
   const Real _cv;
 
-  /// Behaviour for pressures outside the tabulated range
-  enum class OutOfBounds
+  /// Property evaluation behavior outside the tabulated pressure range (as in
+  /// TabulatedFluidProperties). Must remain in the same order as the MooseEnum in validParams
+  enum class OOBBehavior
   {
-    THROW_EXCEPTION,
-    MOVE_TO_BOUNDS,
-    LINEAR_EXTRAPOLATION
+    Ignore,
+    Throw,
+    DeclareInvalid,
+    WarnInvalid,
+    SetToClosestBound
   };
-  const OutOfBounds _out_of_bounds;
+  const OOBBehavior _OOBBehavior;
 };

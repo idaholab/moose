@@ -9,7 +9,7 @@
 
 #include "TabulatedPVTFluidProperties.h"
 
-#include <algorithm>
+#include "Conversion.h"
 
 registerMooseObject("PorousFlowApp", TabulatedPVTFluidProperties);
 
@@ -32,14 +32,17 @@ TabulatedPVTFluidProperties::validParams()
       "cv", 2000.0, "cv>0", "Constant specific heat capacity at constant volume (J/kg/K)");
   params.addRangeCheckedParam<Real>(
       "molar_mass", "molar_mass>0", "Molar mass of the fluid (kg/mol). Only needed if requested");
-  MooseEnum out_of_bounds("throw_exception move_to_bounds linear_extrapolation", "throw_exception");
+  // Same options and wording as TabulatedFluidProperties
+  MooseEnum OOBBehavior("ignore throw declare_invalid warn_invalid set_to_closest_bound", "throw");
   params.addParam<MooseEnum>(
-      "out_of_bounds",
-      out_of_bounds,
-      "Behaviour for pressures outside the tabulated range: 'throw_exception' (the time step "
-      "is cut), 'move_to_bounds' (use the end values of the table, giving zero pressure "
-      "derivatives) or 'linear_extrapolation' (extrapolate linearly from the end intervals). "
-      "Results using the last two options outside the table should be used with care");
+      "out_of_bounds_behavior",
+      OOBBehavior,
+      "Property evaluation behavior when evaluated outside the tabulated pressure range. "
+      "'ignore': 1/B and 1/(B mu) are extrapolated linearly from the end intervals of the table; "
+      "'throw': an exception is thrown, so the time step is cut; 'set_to_closest_bound': the "
+      "pressure is moved to the closest bound of the table; 'declare_invalid' and 'warn_invalid': "
+      "as 'set_to_closest_bound', but the solution is also marked as invalid or a warning is "
+      "recorded. Results computed outside the table should be used with care");
   params.addClassDescription(
       "Isothermal fluid properties from a table of pressure, formation volume factor and "
       "viscosity (PVDO/PVDG style). 1/B and 1/(B mu) are interpolated linearly in pressure.");
@@ -51,7 +54,7 @@ TabulatedPVTFluidProperties::TabulatedPVTFluidProperties(const InputParameters &
     _density_sc(getParam<Real>("density_sc")),
     _p(getParam<std::vector<Real>>("pressure")),
     _cv(getParam<Real>("cv")),
-    _out_of_bounds(getParam<MooseEnum>("out_of_bounds").getEnum<OutOfBounds>())
+    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior").getEnum<OOBBehavior>())
 {
   const auto & B = getParam<std::vector<Real>>("formation_volume_factor");
   const auto & mu = getParam<std::vector<Real>>("viscosity");
@@ -67,17 +70,25 @@ TabulatedPVTFluidProperties::TabulatedPVTFluidProperties(const InputParameters &
     if (_p[i] <= _p[i - 1])
       paramError("pressure", "Tabulated pressures must be strictly increasing");
 
-  _inv_B.resize(_p.size());
-  _inv_B_mu.resize(_p.size());
+  std::vector<Real> inv_B(_p.size());
+  std::vector<Real> inv_B_mu(_p.size());
   for (std::size_t i = 0; i < _p.size(); ++i)
   {
     if (B[i] <= 0.0)
       paramError("formation_volume_factor", "All entries must be positive");
     if (mu[i] <= 0.0)
       paramError("viscosity", "All entries must be positive");
-    _inv_B[i] = 1.0 / B[i];
-    _inv_B_mu[i] = 1.0 / (B[i] * mu[i]);
+    inv_B[i] = 1.0 / B[i];
+    inv_B_mu[i] = 1.0 / (B[i] * mu[i]);
   }
+
+  // Extrapolate linearly beyond the table for 'ignore' (and for 'throw', so that the one-sided
+  // derivative is used exactly at the end points). Otherwise, the interpolation returns the end
+  // values with zero derivative outside the table
+  const bool extrapolate =
+      (_OOBBehavior == OOBBehavior::Ignore || _OOBBehavior == OOBBehavior::Throw);
+  _inv_B_table = LinearInterpolation(_p, inv_B, extrapolate);
+  _inv_B_mu_table = LinearInterpolation(_p, inv_B_mu, extrapolate);
 }
 
 std::string
@@ -97,42 +108,33 @@ TabulatedPVTFluidProperties::molarMass() const
 
 void
 TabulatedPVTFluidProperties::interpolate(Real p,
-                                         const std::vector<Real> & y,
+                                         const LinearInterpolation & table,
                                          Real & value,
                                          Real & dvalue_dp) const
 {
-  const std::size_t n = _p.size();
-
   if (p < _p.front() || p > _p.back())
-    switch (_out_of_bounds)
+    switch (_OOBBehavior)
     {
-      case OutOfBounds::THROW_EXCEPTION:
-        throw MooseException(name(),
-                             ": pressure ",
-                             p,
-                             " Pa is outside the tabulated range [",
-                             _p.front(),
-                             ", ",
-                             _p.back(),
-                             "] Pa. Extend the table, or set 'out_of_bounds' to "
-                             "'move_to_bounds' or 'linear_extrapolation'.");
+      case OOBBehavior::Ignore:
+      case OOBBehavior::SetToClosestBound:
+        break;
 
-      case OutOfBounds::MOVE_TO_BOUNDS:
-        value = (p < _p.front()) ? y.front() : y.back();
-        dvalue_dp = 0.0;
-        return;
+      case OOBBehavior::Throw:
+        throw MooseException(
+            "Pressure " + Moose::stringify(p) + " is outside the range of tabulated pressure (" +
+            Moose::stringify(_p.front()) + ", " + Moose::stringify(_p.back()) + ").");
 
-      case OutOfBounds::LINEAR_EXTRAPOLATION:
+      case OOBBehavior::DeclareInvalid:
+        flagInvalidSolution("Pressure out of bounds");
+        break;
+
+      case OOBBehavior::WarnInvalid:
+        flagSolutionWarning("Pressure out of bounds");
         break;
     }
 
-  // Index i of the interval [_p[i], _p[i+1]] used for interpolation (or linear extrapolation)
-  const auto it = std::upper_bound(_p.begin(), _p.end(), p);
-  std::size_t i = (it == _p.begin()) ? 0 : static_cast<std::size_t>(it - _p.begin()) - 1;
-  i = std::min(i, n - 2);
-
-  dvalue_dp = (y[i + 1] - y[i]) / (_p[i + 1] - _p[i]);
-  value = y[i] + dvalue_dp * (p - _p[i]);
+  value = table.sample(p);
+  dvalue_dp = table.sampleDerivative(p);
 }
 
 Real
@@ -148,7 +150,7 @@ TabulatedPVTFluidProperties::rho_from_p_T(
     Real p, Real /*T*/, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   Real inv_B, dinv_B_dp;
-  interpolate(p, _inv_B, inv_B, dinv_B_dp);
+  interpolate(p, _inv_B_table, inv_B, dinv_B_dp);
 
   if (inv_B <= 0.0)
     throw MooseException(name(),
@@ -174,8 +176,8 @@ TabulatedPVTFluidProperties::mu_from_p_T(
     Real p, Real /*T*/, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real inv_B, dinv_B_dp, inv_B_mu, dinv_B_mu_dp;
-  interpolate(p, _inv_B, inv_B, dinv_B_dp);
-  interpolate(p, _inv_B_mu, inv_B_mu, dinv_B_mu_dp);
+  interpolate(p, _inv_B_table, inv_B, dinv_B_dp);
+  interpolate(p, _inv_B_mu_table, inv_B_mu, dinv_B_mu_dp);
 
   if (inv_B <= 0.0 || inv_B_mu <= 0.0)
     throw MooseException(name(),
