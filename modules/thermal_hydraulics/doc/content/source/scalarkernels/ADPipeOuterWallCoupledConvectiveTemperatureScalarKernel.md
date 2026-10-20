@@ -14,15 +14,11 @@ This kernel implements a secondary side, coupled convective heat transfer term f
 !equation
 q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
 
-where $h$ is the secondary-side heat transfer coefficient, computed by the kernel itself
-from the Dittus-Boelter correlation through [DittusBoelterHTCInterface.md], which adds the
-[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/fluid_properties),
-[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/reference_pressure),
-and
-[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/flow_area)
-parameters; the correlation draws its remaining inputs from the secondary-side mass flow
-rate and fluid temperatures already coupled above. $T_{in,f}$ upwinds the
-upstream/downstream secondary-side fluid temperature
+where $h$ is the secondary-side heat transfer coefficient, supplied as a
+[functor](/Functors/index.md) through the
+[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
+parameter. [ADDittusBoelterHTCUserObject.md] provides it from a Dittus-Boelter
+correlation. $T_{in,f}$ upwinds the upstream/downstream secondary-side fluid temperature
 according to the sign of the secondary-side mass flow rate $\dot{m}$:
 
 !equation
@@ -37,7 +33,7 @@ axial and radial conduction terms shared by every radial node of the wall; this 
 the convective heat exchange with the secondary-side flowing fluid.
 
 This kernel takes a solid properties object based on the
-[ThermalSolidProperties.md] base class. The secondary-side flow channel's
+[ThermalSolidProperties.md] base class. Unlike $h$, the secondary-side flow channel's
 wetted perimeter and all of the geometry inputs inherited from
 [ADPipeWallTemperatureScalarKernelBase.md] (this node's and its upstream/downstream
 neighbors' wall cross-sectional areas, the radial interface perimeter and thickness,
