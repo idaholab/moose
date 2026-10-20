@@ -29,19 +29,12 @@
   []
   [SCMQuadPower_postprocessor_power]
     type = CSVDiff
-    input = 'two_pin_shapes.i'
-    csvdiff = 'two_pin_shapes_out.csv two_pin_shapes_out_q_prime_profiles_0001.csv'
-    # The same power supplied by a postprocessor, which is not output so the gold files are shared
-    cli_args = 'Postprocessors/power_pp/type=FunctionValuePostprocessor '
-               'Postprocessors/power_pp/function=30000 '
-               'Postprocessors/power_pp/execute_on=initial '
-               'Postprocessors/power_pp/outputs=none '
-               'ICs/q_prime_IC/power=power_pp'
-    prereq = 'SCMQuadPower_pin_dependent_axial_shape'
+    input = 'postprocessor_power.i'
+    csvdiff = 'postprocessor_power_out.csv'
     recover = False
     abs_zero = 1e-7
     issues = '#34082'
-    requirement = 'The system will assign the fuel pin power in a quadrilateral lattice using an initial condition when the total power is supplied by a postprocessor.'
+    requirement = 'The system will assign the fuel pin linear heat rate in a quadrilateral lattice using an initial condition when the total power is supplied by a postprocessor, so that the linear heat rate integrated over the pins equals that power.'
   []
   [SCMQuadPower_time_dependent_power]
     type = CSVDiff
