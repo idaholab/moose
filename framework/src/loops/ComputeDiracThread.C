@@ -168,10 +168,20 @@ ComputeDiracThread::onElement(const Elem * elem)
 void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
+  // Also add the residuals and Jacobians that DiracKernels cached with explicit dof indices (eg
+  // through TaggingInterface::addResiduals or addJacobian with AD, for instance into the equation
+  // of a scalar variable), which the element blocks do not hold.  Nothing flushes the cache after
+  // the Dirac loop otherwise
   if (_compute_type != Moose::ComputeType::Jacobian)
+  {
     _fe_problem.addResidual(_tid);
+    _fe_problem.addCachedResidual(_tid);
+  }
   if (_compute_type != Moose::ComputeType::Residual)
+  {
     _fe_problem.addJacobian(_tid);
+    _fe_problem.addCachedJacobian(_tid);
+  }
 }
 
 void

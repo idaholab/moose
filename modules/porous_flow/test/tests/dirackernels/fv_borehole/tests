@@ -1,0 +1,108 @@
+[Tests]
+  design = 'FVPorousFlowPeacemanBorehole.md'
+  issues = '#34110'
+
+  [rate_control]
+    requirement = 'The system shall be able to prescribe the total mass rate of a Peaceman borehole in a finite-volume simulation, computing the bottomhole pressure as a variable that is fully coupled with the fluid flow,'
+    [single_phase]
+      type = CSVDiff
+      input = fv_borehole_rate.i
+      csvdiff = fv_borehole_rate_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for a single-phase fluid that is produced and then injected,'
+    []
+    [two_phase_injection]
+      type = CSVDiff
+      input = fv_borehole_2ph_rate.i
+      csvdiff = fv_borehole_2ph_rate_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for gas injected into a reservoir filled with water,'
+    []
+    [two_phase_injection_parallel]
+      type = CSVDiff
+      input = fv_borehole_2ph_rate.i
+      csvdiff = fv_borehole_2ph_rate_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      min_parallel = 2
+      max_parallel = 2
+      prereq = rate_control/two_phase_injection
+      detail = 'for gas injected into a reservoir filled with water, in parallel, and'
+    []
+    [two_phase_production]
+      type = CSVDiff
+      input = fv_borehole_2ph_rate.i
+      cli_args = 'Variables/sgas/initial_condition=0.3 Functions/rate/expression=1 Outputs/file_base=fv_borehole_2ph_rate_produce_out'
+      csvdiff = fv_borehole_2ph_rate_produce_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for water and gas produced from a reservoir containing both phases.'
+    []
+  []
+
+  [bhp_control]
+    requirement = 'The system shall be able to prescribe the bottomhole pressure of a Peaceman borehole in a finite-volume simulation, and record the borehole outflow,'
+    [single_phase]
+      type = CSVDiff
+      input = fv_borehole_bhp.i
+      csvdiff = fv_borehole_bhp_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for a single-phase fluid that is produced and then injected,'
+    []
+    [two_phase_injection]
+      type = CSVDiff
+      input = fv_borehole_2ph_bhp.i
+      csvdiff = fv_borehole_2ph_bhp_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for gas injected into a reservoir filled with water, and'
+    []
+    [two_phase_production]
+      type = CSVDiff
+      input = fv_borehole_2ph_bhp.i
+      cli_args = 'Variables/sgas/initial_condition=0.3 Functions/bottom_p/expression=9.98E6 Outputs/file_base=fv_borehole_2ph_bhp_produce_out'
+      csvdiff = fv_borehole_2ph_bhp_produce_out.csv
+      # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+      abs_zero = 1E-8
+      detail = 'for water and gas produced from a reservoir containing both phases.'
+    []
+  []
+
+  [producer_only]
+    type = CSVDiff
+    input = fv_borehole_bhp.i
+    cli_args = 'DiracKernels/bh/allow_crossflow=false Outputs/file_base=fv_borehole_bhp_producer_out'
+    csvdiff = fv_borehole_bhp_producer_out.csv
+    # the rates computed from the change in fluid mass carry round-off noise of about 1E-10 kg/s
+    abs_zero = 1E-8
+    requirement = 'The system shall be able to restrict a finite-volume Peaceman borehole with positive character to production, so that no fluid is injected when the bottomhole pressure exceeds the porepressure.'
+  []
+
+  [errors]
+    requirement = 'The system shall report an error if a finite-volume Peaceman borehole'
+    [rate_without_bottom_p]
+      type = RunException
+      input = fv_borehole_bhp.i
+      cli_args = 'DiracKernels/bh/control=rate'
+      expect_err = 'rate and bottom_p must be given for control = rate'
+      detail = 'is rate controlled but has no rate or no bottomhole-pressure variable,'
+    []
+    [bhp_without_bottom_p_or_t]
+      type = RunException
+      input = fv_borehole_rate.i
+      cli_args = 'DiracKernels/bh/control=bhp'
+      expect_err = 'bottom_p_or_t must be given for control = bhp'
+      detail = 'is controlled by the bottomhole pressure but has no bottomhole-pressure function, or'
+    []
+    [rate_without_mobility]
+      type = RunException
+      input = fv_borehole_rate.i
+      cli_args = 'DiracKernels/bh/use_mobility=false'
+      expect_err = 'use_mobility = true is required'
+      detail = 'is rate controlled but its fluxes are not mass fluxes.'
+    []
+  []
+[]
