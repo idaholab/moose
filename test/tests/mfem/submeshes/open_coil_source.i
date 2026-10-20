@@ -78,7 +78,7 @@
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
-    l_tol = 1e-12
+    l_tol = 1e-16
   []
 []
 

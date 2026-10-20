@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create a MOOSE Issue"
+  short_description: "Draft and open a MOOSE issue that follows the repository templates"
+  default_prompt: "Use $issue-create to draft a MOOSE issue for this change."

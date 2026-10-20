@@ -65,7 +65,9 @@ Choose by what actually needs to hold:
   earns its place only as a pure "does it run" smoke check.
 - Every user-facing `mooseError`/`paramError` deserves a `RunException` with `expect_err` matching
   a stable fragment of the message, or a C++ unit test.
-- `AnalyzeJacobian` or `PetscJacobianTester` for hand-coded Jacobians.
+- `PetscJacobianTester` for hand-coded Jacobians. `references/jacobian-tests.md` covers what the
+  test must exercise, how to size its tolerances, and how to tell a wrong Jacobian from
+  finite-difference noise.
 
 ## Creating the gold file
 

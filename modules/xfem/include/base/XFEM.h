@@ -347,6 +347,11 @@ private:
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
+  /// The timestep index at which the state marks were added. Marks added at the end of a timestep
+  /// are meant for the next one, so marks from the current timestep can only come from an attempt
+  /// that was later rejected (e.g. by --test-restep) and must not cut the mesh.
+  int _state_marked_t_step;
+
   /// Data structure for storing information about all 2D elements to be cut by geometry
   std::map<const Elem *, std::vector<Xfem::GeomMarkedElemInfo2D>> _geom_marked_elems_2d;
 

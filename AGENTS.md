@@ -121,6 +121,11 @@ that request requires.
 - Give the TestHarness enough job slots for each test: `-j` must be at least
   the requested `-p` process count or `--n-threads` thread count. When MPI
   processes and threads are combined, use at least their product.
+- When adding or changing a hand-coded Jacobian, including off-diagonal
+  couplings, add or update a `PetscJacobianTester` test that exercises every
+  coupling and coordinate system the change affects. A correct residual does
+  not imply a correct Jacobian, and only a finite-difference comparison catches
+  a missing or wrong term.
 
 ## 8. Goal-Driven Execution
 

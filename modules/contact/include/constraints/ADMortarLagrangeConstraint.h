@@ -38,6 +38,13 @@ protected:
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
 
+  /**
+   * Compute quantities that depend on the quadrature point but not on the test function index.
+   * Called once per quadrature point, before computeQpResidual() is evaluated for each test
+   * function at that point.
+   */
+  virtual void precomputeQpQuantities() {}
+
   /// Nodal map from secondary interior parent to lower dimensional domain
   std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
 
