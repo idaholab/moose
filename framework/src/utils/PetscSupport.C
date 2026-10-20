@@ -485,17 +485,10 @@ petscNonlinearConverged(SNES snes,
       PetscCall(SNESGetSolution(snes, &x));
       PetscCall(SNESGetFunction(snes, &f, nullptr, nullptr));
       PetscCall(SNESComputeFunction(snes, x, f));
-#if PETSC_VERSION_LESS_THAN(3, 25, 0)
-      PetscBool domainerror;
-      PetscCall(SNESGetFunctionDomainError(snes, &domainerror));
-      if (domainerror)
+      // An exception during the residual evaluation stops the solve by failing the next
+      // convergence check, so stop now rather than solving with the invalid residual
+      if (problem.getFailNextNonlinearConvergenceCheck())
         *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
-#else
-      SNESConvergedReason snes_reason;
-      PetscCall(SNESGetConvergedReason(snes, &snes_reason));
-      if (snes_reason == SNES_DIVERGED_FUNCTION_DOMAIN)
-        *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
-#endif
     }
   }
 
