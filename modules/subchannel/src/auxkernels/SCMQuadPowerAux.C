@@ -40,10 +40,7 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
     _power(getPostprocessorValue("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
-    _axial_heat_rate(getFunction("axial_heat_rate")),
-    // NaN compares unequal to any value, so the first execution computes the correction
-    _correction_power(std::numeric_limits<Real>::quiet_NaN()),
-    _correction_time(std::numeric_limits<Real>::quiet_NaN())
+    _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   if (processor_id() > 0)
     return;
@@ -55,8 +52,6 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
   // Matrix sizing
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
-  _pin_power_correction.resize(n_pins, 1);
-  _pin_power_correction.setOnes();
 
   Real vin;
   std::ifstream inFile;
@@ -87,7 +82,20 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
 }
 
 void
-SCMQuadPowerAux::computePinPowerCorrection()
+SCMQuadPowerAux::initialSetup()
+{
+  computeShapeIntegral();
+}
+
+void
+SCMQuadPowerAux::timestepSetup()
+{
+  // The axial power shape may depend on time, and the time is advanced before this is called
+  computeShapeIntegral();
+}
+
+void
+SCMQuadPowerAux::computeShapeIntegral()
 {
   if (processor_id() > 0)
     return;
@@ -97,17 +105,9 @@ SCMQuadPowerAux::computePinPowerCorrection()
   auto z_grid = _quadMesh.getZGrid();
   auto heated_length = _quadMesh.getHeatedLength();
   auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
-  auto sum = _power_dis.sum();
 
-  // full (100%) power of one pin [W]
-  auto fpin_power = _power / sum;
-  // actual pin power [W]
-  _ref_power = _power_dis * fpin_power;
-  // Convert the actual pin power to a linear heat rate [W/m]
-  _ref_qprime = _ref_power / heated_length;
-
-  _estimate_power.resize(n_pins, 1);
-  _estimate_power.setZero();
+  _shape_integral.resize(n_pins, 1);
+  _shape_integral.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute axial location of nodes.
@@ -143,44 +143,15 @@ SCMQuadPowerAux::computePinPowerCorrection()
           heat2 = 0.0;
         }
 
-        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
+        _shape_integral(i_pin) += (heat1 + heat2) * dz / 2.0;
       }
     }
   }
-
-  // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
-  // divide by a wrong non-zero number which is not correct but this error doesn't mess things
-  // cause _ref_qprime(i_pin) = 0.0
-  auto total_power = 0.0;
-  for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
-  {
-    total_power += _estimate_power(i_pin);
-    if (_estimate_power(i_pin) == 0.0)
-      _estimate_power(i_pin) = 1.0;
-  }
-  // We need to correct the linear power assigned to the nodes of each pin
-  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned
-  // by the user.
-  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
-  _console << "###########################################" << std::endl;
-  _console << "Total power estimation by Aux kernel before correction: " << total_power << " [W] "
-           << std::endl;
-  _console << "Aux Power correction vector :\n" << _pin_power_correction << " \n";
 }
 
 Real
 SCMQuadPowerAux::computeValue()
 {
-  // Recompute when the power or the time changed since the last computation. The power
-  // postprocessor is a dependency of this object, so on every execute_on flag they share it
-  // executes first and holds its current value here.
-  if (_power != _correction_power || _t != _correction_time)
-  {
-    computePinPowerCorrection();
-    _correction_power = _power;
-    _correction_time = _t;
-  }
-
   Point p = *_current_node;
   auto heated_length = _quadMesh.getHeatedLength();
   auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
@@ -192,7 +163,15 @@ SCMQuadPowerAux::computeValue()
       MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
     auto i_pin = _quadMesh.getPinIndexFromPoint(p);
-    return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    // A pin with a zero axial shape receives no power
+    if (_shape_integral(i_pin) == 0.0)
+      return 0.0;
+    // The power postprocessor is a dependency of this object, so it executes first on every
+    // execute_on flag they share and holds its current value here
+    const auto pin_power = _power * _power_dis(i_pin) / _power_dis.sum();
+    // Dividing by the trapezoidal integral of the shape makes the trapezoidal integral of
+    // q_prime over the pin, which the subchannel solver uses, equal the pin power
+    return pin_power * _axial_heat_rate.value(_t, P) / _shape_integral(i_pin);
   }
   else
     return 0.0;
