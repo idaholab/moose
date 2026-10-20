@@ -124,12 +124,15 @@ TabulatedPVTFluidProperties::interpolate(Real p,
             "Pressure " + Moose::stringify(p) + " is outside the range of tabulated pressure (" +
             Moose::stringify(_p.front()) + ", " + Moose::stringify(_p.back()) + ").");
 
+      // The messages must differ: the solution invalidity registry identifies an entry by its
+      // object type and message, and requires each entry to be either an error or a warning
       case OOBBehavior::DeclareInvalid:
-        flagInvalidSolution("Pressure out of bounds");
+        flagInvalidSolution("Pressure outside the tabulated range: set to the closest bound");
         break;
 
       case OOBBehavior::WarnInvalid:
-        flagSolutionWarning("Pressure out of bounds");
+        flagSolutionWarning("Pressure outside the tabulated range: set to the closest bound "
+                            "(warning only)");
         break;
     }
 
