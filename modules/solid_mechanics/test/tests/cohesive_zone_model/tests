@@ -15,8 +15,6 @@
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Physics/SolidMechanics/QuasiStatic/all/strain=SMALL  "
-                 "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
-                 "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_jacobian_small_strain_out Outputs/exodus=true"
       recover = false
       detail = "The small strain cohesive zone model shall converge quadratically when using the "
@@ -48,8 +46,6 @@
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Physics/SolidMechanics/QuasiStatic/all/strain=SMALL  "
-                 "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
-                 "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_small_strain_incremental_out Outputs/exodus=true"
       recover = false
       detail = "The small strain cohesive zone model shall return the same results of the total "
@@ -80,6 +76,7 @@
       detail = "The system shall allow using multiple CohesiveZoneAction and different cohesive "
                "materials for different boundaries"
       cli_args = "Physics/SolidMechanics/CohesiveZone/strain=FINITE"
+      abs_zero = 1e-6
       recover = false
       allow_test_objects = true
     []
@@ -128,6 +125,7 @@
                  "ion tangent_traction normal_jump tangent_jump'  "
                  "Physics/SolidMechanics/CohesiveZone/material_output_order=FIRST "
                  "Outputs/file_base=czm_multiple_action_common_output_out"
+      abs_zero = 1e-6
       recover = false
       allow_test_objects = true
     []
@@ -143,6 +141,7 @@
                  "Physics/SolidMechanics/CohesiveZone/czm_ik_23/additional_generate_output='no"
                  "rmal_jump tangent_jump' "
                  "Outputs/file_base=czm_multiple_action_additional_outputs_on_different_block_out"
+      abs_zero = 1e-6
       recover = false
       allow_test_objects = true
     []
@@ -155,6 +154,7 @@
                  "T Physics/SolidMechanics/CohesiveZone/czm_ik_23/material_output_order=FIRST "
                  "Outputs/file_base=czm_multiple_action_differnt_outputs_orders_on_different_block_ou"
                  "t"
+      abs_zero = 1e-6
       recover = false
       allow_test_objects = true
     []
@@ -392,8 +392,6 @@
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Physics/SolidMechanics/QuasiStatic/all/strain=SMALL  "
-                 "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
-                 "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_jacobian_3DC_out Outputs/exodus=true"
       recover = false
       detail = "The system shall converge quadratically when using the handcoded Jacobian of the 3DC "

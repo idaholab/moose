@@ -12,6 +12,8 @@ As an option, the interface can be split into $Q$ different sidesets, where $Q$ 
 
 Two types of block restricted option are provided, namely `surrounding_blocks` and `block_pairs`. The `surrounding_blocks` will create interfaces surrounding specified block. When `surrounding_blocks` is provided, the additional boundary `interface_transition` can be added by setting `add_transition_interface=true`. The `interface_transition` boundary identifies the interface between the provided blocks and the rest of the mesh. The `block_pairs` option will create interfaces  only \emph{between} the specified block pairs. Multiple block pairs can be provided, and they are separated by semicolon (`;`). The `block_pairs` option does not work with `add_transition_interface`. By default when no block restricted option is used, interfaces will be generated between all blocks. In addition, the `add_interface_on_two_sides` parameter allows to generate interface boundaries on both sides of the interface which can be used to enforce thermal and mechanical contact at the interface.
 
+Elements on the two sides of a generated interface are connected as disjoint neighbors, which libMesh matches by the position of their sides. Because the two sides separate when the mesh deforms, a broken mesh cannot be used with a displaced mesh: set `use_displaced_mesh = false` in the `[Mesh]` block. Finite deformation cohesive zone models can use the Lagrangian solid mechanics kernels (`new_system = true`), which work on the reference mesh, or the mortar-based cohesive zone model, which does not break the mesh.
+
 ## Example Input File Syntax
 
 ### Single Interface
