@@ -11,7 +11,9 @@
 #include "MooseUtils.h"
 #include "MooseTypes.h"
 #include "MooseApp.h"
+#include "MooseBase.h"
 #include "TransientBase.h"
+#include <set>
 #include "libmesh/vector_value.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -114,5 +116,17 @@ implicitTimeIntegrationFlag(MooseApp & app)
   const auto ti_type = trex->getTimeScheme();
   return !(ti_type == Moose::TI_EXPLICIT_TVD_RK_2 || ti_type == Moose::TI_EXPLICIT_MIDPOINT ||
            ti_type == Moose::TI_EXPLICIT_EULER);
+}
+
+void
+informExperimental(const MooseBase & moose_base)
+{
+  // Only give info once per type
+  static std::set<std::string> informed_types;
+  if (informed_types.insert(moose_base.type()).second)
+    moose::internal::mooseInfoStreamRepeated(
+        moose_base._console,
+        moose_base.messagePrefix(true),
+        "This class is experimental: its input syntax and behavior are subject to change.");
 }
 }
