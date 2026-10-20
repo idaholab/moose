@@ -91,15 +91,40 @@
       input = 'dirk-2d-heat.i'
       cli_args = 'Mesh/nx=3 Mesh/ny=3 Executioner/solve_type=NEWTON Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=lu Outputs/exodus=false Executioner/TimeIntegrator/type=LStableDirk2 Executioner/residual_and_jacobian_together=true'
       run_sim = true
-      detail = 'and when the residual and the Jacobian are computed together.'
+      detail = 'when the residual and the Jacobian are computed together,'
+    []
+    [constraint_midpoint]
+      type = PetscJacobianTester
+      input = 'dirk-constraint.i'
+      run_sim = true
+      detail = 'with a nodal constraint for the implicit midpoint method, whose update stage does not depend on the constraint, and'
+    []
+    [constraint_dirk2]
+      type = PetscJacobianTester
+      input = 'dirk-constraint.i'
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk2'
+      run_sim = true
+      detail = 'with a nodal constraint for the two-stage L-stable DIRK method.'
     []
   []
   [variable_restriction]
-    type = RunException
-    input = 'dirk-2d-heat.i'
-    cli_args = 'Executioner/TimeIntegrator/variables=u'
-    expect_err = 'LStableDirk2 weights the time and non-time residuals of its stages differently and does not support integrating a subset of the variables'
     issues = '#34102'
-    requirement = 'The system shall report an error if a multistage time integrator that weights the time and non-time residuals differently is restricted to a subset of the variables.'
+    requirement = 'The system shall support multistage time integrators that weight the time and non-time residuals differently'
+    [all_variables]
+      type = 'Exodiff'
+      input = 'dirk-2d-heat.i'
+      exodiff = 'dirk-2d-heat_out.e'
+      cli_args = 'Executioner/TimeIntegrator/variables=u'
+      prereq = 'group/dirk-2d-heat'
+      detail = 'when they are restricted to a list of variables that covers the whole system, and'
+    []
+    [subset]
+      type = RunException
+      input = 'dirk-2d-heat.i'
+      cli_args = 'Variables/v/order=FIRST Kernels/v_diff/type=Diffusion Kernels/v_diff/variable=v '
+                 'Executioner/TimeIntegrator/variables=u'
+      expect_err = 'LStableDirk2 weights the time and non-time residuals of its stages differently and does not support integrating a subset of the variables'
+      detail = 'report an error when they are restricted to a subset of the variables.'
+    []
   []
 []

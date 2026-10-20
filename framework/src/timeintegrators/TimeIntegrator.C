@@ -85,6 +85,14 @@ TimeIntegrator::init()
     return;
   }
 
+  // the stage weights of weightNonTimeJacobian() apply to all rows of the Jacobian, which belong
+  // to this integrator only if it integrates all variables of the system
+  if (_Ke_time)
+    paramError("variables",
+               type(),
+               " weights the time and non-time residuals of its stages differently and does not "
+               "support integrating a subset of the variables");
+
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars)
   {
@@ -160,13 +168,6 @@ TimeIntegrator::requestTimeJacobian()
 {
   if (!_nl)
     return;
-  // the weights apply to all rows of the Jacobian, which belong to this integrator only if it
-  // integrates all variables of the system
-  if (_var_restriction)
-    paramError("variables",
-               type(),
-               " weights the time and non-time residuals of its stages differently and does not "
-               "support integrating a subset of the variables");
   _Ke_time = &_nl->addMatrix(_fe_problem.getMatrixTagID("TIME"));
 }
 

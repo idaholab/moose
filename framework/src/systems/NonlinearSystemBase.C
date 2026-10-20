@@ -3216,8 +3216,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  postJacobian(tags);
-
   // Have no idea how to have constraints work
   // with the tag system
   PARALLEL_TRY
@@ -3264,6 +3262,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
   }
   PARALLEL_CATCH;
+
+  // constraint residuals are part of the non-time residual, so their Jacobians are weighted too
+  postJacobian(tags);
 
   computeNodalBCsJacobian(tags);
   closeTaggedMatrices(tags);
