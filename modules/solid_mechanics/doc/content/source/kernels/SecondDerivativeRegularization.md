@@ -55,27 +55,10 @@ For [!param](/Kernels/SecondDerivativeRegularization/regularization) set to `huh
 than $1 / d$ are accepted with a warning because they may cause negative strain-energy
 contributions.
 
-For vector-valued mechanics fields, add one scalar regularization kernel per displacement
-component:
-
-```text
-[Kernels]
-  [regularize_x]
-    type = SecondDerivativeRegularization
-    variable = disp_x
-    regularization = huhu_lulu
-    coefficient = 1
-  []
-  [regularize_y]
-    type = SecondDerivativeRegularization
-    variable = disp_y
-    regularization = huhu_lulu
-    coefficient = 1
-  []
-[]
-```
-
 ## Example Input File Syntax
+
+For vector-valued mechanics fields, add one scalar regularization kernel per displacement
+component, as in the cantilever test:
 
 !listing modules/solid_mechanics/test/tests/second_derivative_regularization/cantilever.i block=Kernels
 

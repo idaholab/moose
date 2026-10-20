@@ -77,13 +77,8 @@ InputParameters
 SecondDerivativeRegularizationTempl<is_ad>::validParams()
 {
   InputParameters params = GenericKernel<is_ad>::validParams();
-  if constexpr (is_ad)
-    params.addClassDescription("Adds a second-derivative regularization term using HuHu, LuLu, "
-                               "or HuHu-LuLu Hessian/Laplacian contractions. The Jacobian is "
-                               "computed using automatic differentiation.");
-  else
-    params.addClassDescription("Adds a second-derivative regularization term using HuHu, LuLu, "
-                               "or HuHu-LuLu Hessian/Laplacian contractions.");
+  params.addClassDescription("Adds a second-derivative regularization term using HuHu, LuLu, "
+                             "or HuHu-LuLu Hessian/Laplacian contractions.");
   params.addRequiredParam<MooseEnum>(
       "regularization",
       regularizationType(),
@@ -116,11 +111,8 @@ SecondDerivativeRegularizationTempl<is_ad>::SecondDerivativeRegularizationTempl(
 
   if (_regularization_type == SecondDerivativeRegularizationType::HuhuLulu &&
       _lulu_factor > defaultLuluFactor(_dim))
-  {
-    // The bound c_L <= 1 / dim keeps the HuHu-LuLu quadratic form nonnegative.
     this->mooseWarning("The 'lulu_factor' parameter is larger than 1 / dim. This may cause "
                        "negative strain energy contributions for the HuHu-LuLu regularization.");
-  }
 }
 
 template <bool is_ad>
@@ -131,9 +123,13 @@ SecondDerivativeRegularizationTempl<is_ad>::computeQpResidual()
          regularization(_second_u[_qp], _second_test[_i][_qp], _regularization_type, _lulu_factor);
 }
 
+template <bool is_ad>
 Real
-SecondDerivativeRegularization::computeQpJacobian()
+SecondDerivativeRegularizationTempl<is_ad>::computeQpJacobian()
 {
+  mooseAssert(!is_ad,
+              "In ADSecondDerivativeRegularization, computeQpJacobian should not be called. Check "
+              "computeJacobian implementation.");
   return _coefficient *
          regularization(
              _second_phi[_j][_qp], _second_test[_i][_qp], _regularization_type, _lulu_factor);

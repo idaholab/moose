@@ -32,6 +32,7 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
   /// Selected regularization contraction.
   const SecondDerivativeRegularizationType _regularization_type;
@@ -51,13 +52,5 @@ protected:
   usingGenericKernelMembers;
 };
 
-class SecondDerivativeRegularization : public SecondDerivativeRegularizationTempl<false>
-{
-public:
-  using SecondDerivativeRegularizationTempl<false>::SecondDerivativeRegularizationTempl;
-
-protected:
-  virtual Real computeQpJacobian() override;
-};
-
-using ADSecondDerivativeRegularization = SecondDerivativeRegularizationTempl<true>;
+typedef SecondDerivativeRegularizationTempl<false> SecondDerivativeRegularization;
+typedef SecondDerivativeRegularizationTempl<true> ADSecondDerivativeRegularization;

@@ -3,7 +3,7 @@
   issues = '#32970'
 
   [cantilever]
-    requirement = 'The system shall compute a type-dependent tip deflection for a plane-strain elastic cantilever under a tip shear load when second-derivative regularization is added to both displacement components using'
+    requirement = 'The system shall compute a regularization type-dependent tip deflection for a plane-strain elastic cantilever under a tip shear load when second-derivative regularization is added to both displacement components using'
     [huhu]
       type = CSVDiff
       input = 'cantilever.i'
@@ -28,7 +28,7 @@
   []
 
   [scalar]
-    requirement = 'The system shall add the second-derivative regularization operator to a single second-order Lagrange variable, checked independently of the mechanics equations on a diffusion problem with a uniform source, for'
+    requirement = 'The system shall add the second-derivative regularization operator to a single second-order Lagrange variable diffusion problem with a uniform source, for'
     [huhu]
       type = CSVDiff
       input = 'scalar_regularization.i'
