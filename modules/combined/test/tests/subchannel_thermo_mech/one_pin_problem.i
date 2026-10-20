@@ -157,6 +157,20 @@ heated_length = 1.0
     []
 []
 
+[VectorPostprocessors]
+    # Pin surface temperature at the SCM axial nodes, interpolated linearly in the pin model when the
+    # Tpin_interpolated transfer is active
+    [Tpin_profile]
+        type = LineValueSampler
+        variable = Tpin
+        start_point = '0 0 0'
+        end_point = '0 0 ${heated_length}'
+        num_points = 26 # n_cells + 1, one point per SCM axial node
+        sort_by = z
+        execute_on = 'timestep_end'
+    []
+[]
+
 [Outputs]
     exodus = true
     csv = true
@@ -218,13 +232,23 @@ heated_length = 1.0
 []
 
 [Transfers]
-    [Tpin] # send pin surface temperature to pin model,
+    # Tpin_interpolated replaces Tpin when the pin model uses the right_interpolated boundary condition
+    inactive = Tpin_interpolated
+    [Tpin] # send the nearest SCM pin surface temperature to each pin surface node
         type = MultiAppGeneralFieldNearestLocationTransfer
         to_multi_app = sub
         variable = Pin_surface_temperature
         source_variable = Tpin
         execute_on = 'timestep_end'
         greedy_search = true
+    []
+
+    [Tpin_interpolated] # alternative: send the pin surface temperature profile to the pin model
+        type = MultiAppReporterTransfer
+        to_multi_app = sub
+        from_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        to_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        execute_on = 'timestep_end'
     []
 
     [diameter] # send diameter information from pin model to subchannel

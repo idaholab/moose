@@ -5,6 +5,12 @@ T_in = 359.15
     displacements = 'disp_x disp_y'
 []
 
+[Problem]
+    # Residual of the heat conduction and heat source kernels. At the nodes of the Dirichlet
+    # boundary, it is the heat flowing through that boundary
+    extra_tag_vectors = 'heat_residual'
+[]
+
 [Mesh]
     second_order = true
     [PinMesh]
@@ -22,6 +28,13 @@ T_in = 359.15
 []
 
 [Functions]
+    [Tpin_fn] # linear interpolation of the SCM pin surface temperature along the pin axis
+        type = PiecewiseLinearFromVectorPostprocessor
+        vectorpostprocessor_name = Tpin_profile
+        argument_column = z
+        value_column = Tpin
+        component = y
+    []
     [volumetric_heat_rate] # Defined such as to be consistent with the IC in SCM
         type = ParsedFunction
         expression = '(4.0 * 100000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
@@ -52,6 +65,10 @@ T_in = 359.15
     []
     # q_prime on the nodes, so that the transfer to the subchannel nodes is not ambiguous
     [q_prime_nodal]
+    []
+    [heat_residual]
+        # Same order as temperature, to hold the residual at every temperature node
+        order = SECOND
     []
 []
 
@@ -89,6 +106,12 @@ T_in = 359.15
         v = q_prime
         execute_on = 'TIMESTEP_END'
     []
+    [HeatResidual]
+        type = TagVectorAux
+        variable = heat_residual
+        v = temperature
+        vector_tag = 'heat_residual'
+    []
     [Deformation]
         type = ParsedAux
         variable = pin_diameter_deformed
@@ -103,12 +126,14 @@ T_in = 359.15
         type = HeatConduction
         variable = temperature
         use_displaced_mesh = true
+        extra_vector_tags = 'heat_residual'
     []
     [heat_source]
         type = HeatSource
         variable = temperature
         function = volumetric_heat_rate
         use_displaced_mesh = false
+        extra_vector_tags = 'heat_residual'
     []
 []
 
@@ -139,6 +164,8 @@ T_in = 359.15
 []
 
 [BCs]
+    # right_interpolated replaces right when SCM sends Tpin with the Tpin_interpolated transfer
+    inactive = right_interpolated
     [left]
         type = NeumannBC
         variable = temperature
@@ -149,6 +176,12 @@ T_in = 359.15
         variable = temperature
         boundary = 'right'
         v = Pin_surface_temperature
+    []
+    [right_interpolated]
+        type = FunctionDirichletBC
+        variable = temperature
+        boundary = 'right'
+        function = Tpin_fn
     []
     [no_x]
         type = DirichletBC
@@ -208,8 +241,24 @@ T_in = 359.15
 []
 
 [Postprocessors]
-    # Heat rate through the pin surface, preserved by the q_prime transfer to SCM
+    # Heat rate through the pin surface from the residual at the pin surface nodes, preserved by the
+    # q_prime transfer to SCM. The weak form balances it with the heat source, so it equals the pin
+    # power up to the nonlinear tolerance on any mesh
+    [pin_surface_residual]
+        type = NodalSum
+        variable = heat_residual
+        boundary = right
+        outputs = none
+    []
     [pin_surface_heat_rate]
+        # The residual is negative for heat leaving the pin
+        type = ParsedPostprocessor
+        expression = '-pin_surface_residual'
+        pp_names = 'pin_surface_residual'
+    []
+    # Heat rate through the pin surface from the temperature gradient, which exceeds the heat source
+    # by the discretization error of the gradient
+    [pin_surface_heat_rate_gradient]
         type = SideDiffusiveFluxIntegral
         variable = temperature
         boundary = right
@@ -235,6 +284,19 @@ T_in = 359.15
     []
 []
 
+[VectorPostprocessors]
+    # Filled by the Tpin_interpolated transfer from SCM: pin surface temperature at the SCM axial nodes
+    [Tpin_profile]
+        type = ConstantVectorPostprocessor
+        vector_names = 'z Tpin'
+        value = '0 ${heated_length}; ${T_in} ${T_in}'
+    []
+[]
+
 [Outputs]
     exodus = true
+    [csv]
+        type = CSV
+        show = 'pin_surface_heat_rate pin_surface_heat_rate_gradient total_power'
+    []
 []
