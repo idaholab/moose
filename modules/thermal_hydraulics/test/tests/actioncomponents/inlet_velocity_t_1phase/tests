@@ -1,0 +1,36 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'InletVelocityTemperature1PhaseAC.md'
+
+  [phy]
+    requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in a flow channel ActionComponent in steady state from the inlet flow velocity and temperature, using the same inputs and reference results as the classic InletVelocityTemperature1Phase Component,'
+
+    [velocity_t_3eqn]
+      type = 'Exodiff'
+      input = 'phy.velocity_t_3eqn.i'
+      exodiff = 'phy.velocity_t_3eqn.e'
+      gold_dir = '../../components/inlet_velocity_t_1phase/gold'
+      custom_cmp = '../../components/inlet_velocity_t_1phase/rdg_1phase.exodiff'
+      max_time = 600
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'and'
+    []
+    [reversed_flow]
+      type = 'Exodiff'
+      input = 'phy.reversed_flow.i'
+      exodiff = 'phy.reversed_flow.e'
+      gold_dir = '../../components/inlet_velocity_t_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'handle flow reversal.'
+    []
+  []
+  [clg:velocity_t_3eqn]
+    type = 'CSVDiff'
+    input = 'clg.velocity_t_3eqn.i'
+    csvdiff = 'clg.velocity_t_3eqn_out.csv'
+    gold_dir = '../../components/inlet_velocity_t_1phase/gold'
+    max_parallel = 13 # https://github.com/idaholab/moose/issues/24537
+    restep = false # Test is prescribed to abort on failed timestep
+    requirement = 'The system shall be able to control the velocity and temperature at an inlet of a single phase flow channel ActionComponent specified by velocity and temperature, using the same input and reference results as the classic InletVelocityTemperature1Phase Component.'
+  []
+[]
