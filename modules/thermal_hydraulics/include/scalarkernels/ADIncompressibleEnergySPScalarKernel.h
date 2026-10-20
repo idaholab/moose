@@ -21,10 +21,14 @@ class ADIncompressibleEnergySPScalarKernel : public ADScalarKernel, public ADFun
 public:
   ADIncompressibleEnergySPScalarKernel(const InputParameters & parameters);
   static InputParameters validParams();
+  virtual void initialSetup() override;
 
 protected:
   virtual ADReal computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  /// Spatial argument used for every functor evaluation
+  Moose::ElemPointArg functorArg() const { return {_functor_elem, _functor_point, false}; }
+
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate through the segment
@@ -47,4 +51,8 @@ protected:
   const Moose::Functor<ADReal> & _length;
   /// Heat transfer coefficient from functor material
   const Moose::Functor<ADReal> & _h;
+  /// Point at which spatially varying functors are evaluated
+  const Point _functor_point;
+  /// Element containing _functor_point (nullptr if outside the mesh / not on this process)
+  const Elem * _functor_elem = nullptr;
 };

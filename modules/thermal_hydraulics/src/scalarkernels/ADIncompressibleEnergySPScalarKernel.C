@@ -48,6 +48,10 @@ ADIncompressibleEnergySPScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient of the fluid [W/(m^2-K)]");
+  params.addParam<Point>("functor_evaluation_point",
+                         Point(),
+                         "Point at which spatially varying functors (functions, field variables, "
+                         "functor material properties) are evaluated");
 
   return params;
 }
@@ -66,15 +70,27 @@ ADIncompressibleEnergySPScalarKernel::ADIncompressibleEnergySPScalarKernel(
     _area(this->template getFunctor<ADReal>("area")),
     _perimeter(this->template getFunctor<ADReal>("perimeter")),
     _length(this->template getFunctor<ADReal>("length")),
-    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
+    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient")),
+    _functor_point(getParam<Point>("functor_evaluation_point"))
 {
+}
+
+void
+ADIncompressibleEnergySPScalarKernel::initialSetup()
+{
+  ADScalarKernel::initialSetup();
+
+  // Locate the element that spatially varying functors will be evaluated on
+  auto pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+  _functor_elem = (*pl)(_functor_point);
 }
 
 ADReal
 ADIncompressibleEnergySPScalarKernel::computeQpResidual()
 {
   ADReal energy_residual = 0;
-  const Moose::ElemArg qp = Moose::ElemArg();
+  const auto qp = functorArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting fluid properties
