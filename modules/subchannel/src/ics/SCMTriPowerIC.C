@@ -47,7 +47,6 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     mooseError(name(), ": This object requires a pin mesh.");
 
   auto n_pins = _mesh.getNumOfPins();
-  auto heated_length = _mesh.getHeatedLength();
 
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
@@ -79,14 +78,6 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     i++;
   }
   inFile.close();
-
-  auto sum = _power_dis.sum();
-  // full (100%) power of one pin [W]
-  auto fpin_power = _power / sum;
-  // actual pin power [W]
-  _ref_power = _power_dis * fpin_power;
-  // Convert the actual pin power to a linear heat rate [W/m]
-  _ref_qprime = _ref_power / heated_length;
 }
 
 void
@@ -99,6 +90,16 @@ SCMTriPowerIC::initialSetup()
   auto z_grid = _mesh.getZGrid();
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
+
+  // The power postprocessor executes on INITIAL before initial conditions are set up, so its
+  // value is only available here, not in the constructor
+  auto sum = _power_dis.sum();
+  // full (100%) power of one pin [W]
+  auto fpin_power = _power / sum;
+  // actual pin power [W]
+  _ref_power = _power_dis * fpin_power;
+  // Convert the actual pin power to a linear heat rate [W/m]
+  _ref_qprime = _ref_power / heated_length;
 
   _estimate_power.resize(n_pins, 1);
   _estimate_power.setZero();
