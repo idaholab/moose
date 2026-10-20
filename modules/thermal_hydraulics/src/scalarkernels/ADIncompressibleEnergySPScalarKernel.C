@@ -44,6 +44,8 @@ ADIncompressibleEnergySPScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>("area", "Segment/Component flow area [m^2]");
   params.addRequiredParam<MooseFunctorName>("perimeter", "Segment/Component wetted perimeter [m]");
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
+  params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
+                                            "Heat transfer coefficient of the fluid [W/(m^2-K)]");
 
   return params;
 }
