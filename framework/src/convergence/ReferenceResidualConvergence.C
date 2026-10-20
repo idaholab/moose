@@ -313,9 +313,9 @@ ReferenceResidualConvergence::updateReferenceResidual()
   std::unique_ptr<NumericVector<Number>> inactive_residual;
   SNES snes = nonlinear_sys.getSNES();
   PetscBool is_vi;
-  LibmeshPetscCallA(_fe_problem.comm().get(),
-                    PetscObjectTypeCompareAny(
-                        (PetscObject)snes, &is_vi, SNESVINEWTONRSLS, SNESVINEWTONSSLS, ""));
+  LibmeshPetscCallA(
+      _fe_problem.comm().get(),
+      PetscObjectTypeCompareAny((PetscObject)snes, &is_vi, SNESVINEWTONRSLS, SNESVINEWTONSSLS, ""));
   if (is_vi)
   {
     Vec x, f;
