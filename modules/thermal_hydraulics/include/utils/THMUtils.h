@@ -12,6 +12,7 @@
 #include "libmesh/parallel.h"
 
 class MooseApp;
+class MooseBase;
 
 namespace THM
 {
@@ -74,4 +75,11 @@ Real parseConnectionNormal(const BoundaryName & connection);
  * legacy explicit integrators that need this flag set.
  */
 bool implicitTimeIntegrationFlag(MooseApp & app);
+
+/**
+ * Informs the user that a class is experimental, once per registered type.
+ *
+ * @param[in] moose_base  The MooseBase being constructed
+ */
+void informExperimental(const MooseBase & moose_base);
 }
