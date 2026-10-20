@@ -23,8 +23,6 @@ class SCMQuadPowerAux : public AuxKernel
 public:
   SCMQuadPowerAux(const InputParameters & params);
   virtual Real computeValue() override;
-  virtual void initialSetup() override;
-  virtual void timestepSetup() override { initialSetup(); }
 
 protected:
   const QuadSubChannelMesh & _quadMesh;
@@ -45,6 +43,13 @@ protected:
   Eigen::MatrixXd _pin_power_correction;
   /// Matrix which will hold the total estimated power of each pin [W]
   Eigen::MatrixXd _estimate_power;
+  /// Value of the power postprocessor when the pin powers and corrections were last computed [W]
+  Real _correction_power;
+  /// Time at which the pin powers and corrections were last computed [s]
+  Real _correction_time;
+
+  /// Compute the pin powers and the per-pin correction to the trapezoidal power estimate
+  void computePinPowerCorrection();
 
 public:
   static InputParameters validParams();

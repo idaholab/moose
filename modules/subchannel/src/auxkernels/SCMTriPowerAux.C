@@ -40,7 +40,10 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     _power(getPostprocessorValue("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
-    _axial_heat_rate(getFunction("axial_heat_rate"))
+    _axial_heat_rate(getFunction("axial_heat_rate")),
+    // NaN compares unequal to any value, so the first execution computes the correction
+    _correction_power(std::numeric_limits<Real>::quiet_NaN()),
+    _correction_time(std::numeric_limits<Real>::quiet_NaN())
 {
   if (processor_id() > 0)
     return;
@@ -82,7 +85,7 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
 }
 
 void
-SCMTriPowerAux::initialSetup()
+SCMTriPowerAux::computePinPowerCorrection()
 {
   if (processor_id() > 0)
     return;
@@ -164,6 +167,16 @@ SCMTriPowerAux::initialSetup()
 Real
 SCMTriPowerAux::computeValue()
 {
+  // Recompute when the power or the time changed since the last computation. The power
+  // postprocessor is a dependency of this object, so on every execute_on flag they share it
+  // executes first and holds its current value here.
+  if (_power != _correction_power || _t != _correction_time)
+  {
+    computePinPowerCorrection();
+    _correction_power = _power;
+    _correction_time = _t;
+  }
+
   Point p = *_current_node;
   auto heated_length = _triMesh.getHeatedLength();
   auto unheated_length_entry = _triMesh.getHeatedLengthEntry();

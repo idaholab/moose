@@ -6,7 +6,12 @@
 
 !! Intentional comment to provide extra spacing
 
-This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve. The pin powers and pin power correction factors are recomputed once per time step, at the start of the time step, from the value of [!param](/AuxKernels/SCMTriPowerAux/power) and from the axial power profile function evaluated at the new time. [!param](/AuxKernels/SCMTriPowerAux/execute_on) only controls when `q_prime` is filled from these stored values; executing this object more often, for example on `LINEAR` or `MULTIAPP_FIXED_POINT_END`, does not update them. Because postprocessors and transfers execute after the start of the time step, a [!param](/AuxKernels/SCMTriPowerAux/power) postprocessor that changes in time is applied one time step late, and changes to it during fixed point iterations within a time step are not picked up.
+This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC kernel, but is more versatile in the sense that it can populate `q_prime` not only during initialization but at multiple times during the solve. Every time it is executed, as set by [!param](/AuxKernels/SCMTriPowerAux/execute_on), it does two things:
+
+- If the value of [!param](/AuxKernels/SCMTriPowerAux/power) or the simulation time changed since the last execution, it recomputes the pin powers and the per-pin correction factors from the current value of [!param](/AuxKernels/SCMTriPowerAux/power) and the axial power profile function evaluated at the current time.
+- It sets `q_prime` at each pin node from the pin power, the correction factor and the axial power profile function.
+
+The [!param](/AuxKernels/SCMTriPowerAux/power) postprocessor executes before this object on every execution flag they share, so `q_prime` uses its current value. Execute both on the same flags, for example `TIMESTEP_BEGIN` so that the solver uses the power of the current time step; otherwise a time-dependent power is applied one execution late.
 
 ## Caveat
 
