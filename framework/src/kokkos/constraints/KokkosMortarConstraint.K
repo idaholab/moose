@@ -14,6 +14,7 @@
 #include "MortarUtils.h"
 
 #include "libmesh/fe_map.h"
+#include "libmesh/petsc_vector.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/reference_elem.h"
 
@@ -140,7 +141,8 @@ MortarConstraint::MortarConstraint(const MortarConstraint & object)
     _secondary_qp_begin(object._secondary_qp_begin),
     _JxW(object._JxW),
     _gap(object._gap),
-    _normal(object._normal)
+    _normal(object._normal),
+    _inactive_dofs(object._inactive_dofs)
 {
   for (const auto side : make_range(3u))
   {
@@ -309,7 +311,41 @@ MortarConstraint::packSegments()
   _gap.copyToDevice();
   _normal.copyToDevice();
 
+  packInactiveDofs();
+
   _interface->needs_packing = false;
+}
+
+void
+MortarConstraint::packInactiveDofs()
+{
+  const auto & amg = _interface->amg();
+  const auto & dof_map = _sys.dofMap();
+  const auto & solution =
+      static_cast<const libMesh::PetscVector<Number> &>(*_sys.system().current_local_solution);
+  const auto sys_num = _sys.number();
+  const auto var_num = _var.number();
+
+  // The non-Kokkos mortar constraints pin the same degrees of freedom in zeroInactiveLMDofs()
+  std::vector<dof_id_type> dofs;
+  if (_var.isNodal())
+  {
+    for (const auto node : amg.getInactiveLMNodes())
+      if (node->processor_id() == processor_id() && node->n_comp(sys_num, var_num))
+        dofs.push_back(node->dof_number(sys_num, var_num, 0));
+  }
+  else
+    for (const auto elem : amg.getInactiveLMElems())
+      for (const auto comp : make_range(elem->n_comp(sys_num, var_num)))
+        dofs.push_back(elem->dof_number(sys_num, var_num, comp));
+
+  _inactive_dofs.create(dofs.size());
+  for (const auto i : index_range(dofs))
+  {
+    mooseAssert(dof_map.local_index(dofs[i]), "Inactive Lagrange multiplier DOF is not local");
+    _inactive_dofs[i] = solution.map_global_to_local_index(dofs[i]);
+  }
+  _inactive_dofs.copyToDevice();
 }
 
 void
@@ -319,18 +355,27 @@ MortarConstraint::dispatch(const bool residual, const bool jacobian)
   if (_interface->needs_packing || _configuration.displaced())
     packSegments();
 
-  if (_secondary_qp_begin.size() < 2)
-    return;
-
   _computing_residual = residual;
   _computing_jacobian = jacobian;
 
-  if (!_residual_dispatcher)
-    _residual_dispatcher = DispatcherRegistry::build<MortarLoop>(this, type());
+  if (_secondary_qp_begin.size() > 1)
+  {
+    if (!_residual_dispatcher)
+      _residual_dispatcher = DispatcherRegistry::build<MortarLoop>(this, type());
 
-  TeamLaunch launch;
-  launch.league_size = _secondary_qp_begin.size() - 1;
-  _residual_dispatcher->parallelForTeams(launch);
+    TeamLaunch launch;
+    launch.league_size = _secondary_qp_begin.size() - 1;
+    _residual_dispatcher->parallelForTeams(launch);
+  }
+
+  // A process may own inactive degrees of freedom without holding any mortar segment
+  if (_inactive_dofs.size())
+  {
+    if (!_inactive_dispatcher)
+      _inactive_dispatcher = DispatcherRegistry::build<InactiveLoop>(this, type());
+
+    _inactive_dispatcher->parallelFor(Policy(0, _inactive_dofs.size()));
+  }
 }
 
 void

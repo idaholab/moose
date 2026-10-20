@@ -102,6 +102,16 @@
       capabilities = 'kokkos & mumps'
       compute_devices = 'cpu cuda xpu'
     []
+    [sliding]
+      type = CSVDiff
+      input = 'gap_conductance_sliding.i'
+      # The differences between the two solutions are roundoff
+      abs_zero = 1e-12
+      csvdiff = 'gap_conductance_sliding_out.csv'
+      detail = 'matching the solution of GapConductanceConstraint on the displaced mesh while the interface slides by more than an element, re-pairing the mortar segments between time steps and leaving part of the Lagrange multiplier without a primary counterpart,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
     [jacobian]
       type = PetscJacobianTester
       input = 'gap_conductance_displaced_jacobian.i'

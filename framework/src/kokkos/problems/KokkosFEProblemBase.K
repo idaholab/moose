@@ -417,22 +417,43 @@ FEProblemBase::initKokkos()
     mooseError("Kokkos does not support adaptivity yet.");
 
   // Kokkos objects on a mortar interface read the elements coupled across it, which the mortar
-  // relationship managers ghost
+  // relationship managers ghost. The pairing of an interface on the displaced mesh changes as the
+  // mesh moves, so every element of that interface is ghosted, as the relationship managers do.
   if (_has_mortar)
     _mesh.getKokkosMesh()->addGhostElementProvider(
         [this](std::unordered_set<const Elem *> & elems)
         {
-          for (const bool displaced : {false, true})
-            for (const auto & [_, config] : getMortarInterfaces(displaced))
-              for (const auto & [elem_id, coupled_ids] : config.amg->mortarInterfaceCoupling())
-              {
-                if (const auto elem = _mesh.queryElemPtr(elem_id))
-                  elems.insert(elem);
+          for (const auto & [_, config] : getMortarInterfaces(false))
+            for (const auto & [elem_id, coupled_ids] : config.amg->mortarInterfaceCoupling())
+            {
+              if (const auto elem = _mesh.queryElemPtr(elem_id))
+                elems.insert(elem);
 
-                for (const auto coupled_id : coupled_ids)
-                  if (const auto coupled = _mesh.queryElemPtr(coupled_id))
-                    elems.insert(coupled);
-              }
+              for (const auto coupled_id : coupled_ids)
+                if (const auto coupled = _mesh.queryElemPtr(coupled_id))
+                  elems.insert(coupled);
+            }
+
+          // The interface elements are the elements with a side on the primary or secondary
+          // boundary and the lower-dimensional elements on those sides
+          const auto & binfo = _mesh.getMesh().get_boundary_info();
+          const auto on_boundary =
+              [&binfo](const Elem & elem, const BoundaryID primary, const BoundaryID secondary)
+          {
+            for (const auto side : elem.side_index_range())
+              if (binfo.has_boundary_id(&elem, side, primary) ||
+                  binfo.has_boundary_id(&elem, side, secondary))
+                return true;
+            return false;
+          };
+          for (const auto & [boundaries, _] : getMortarInterfaces(true))
+            for (const auto elem : _mesh.getMesh().active_element_ptr_range())
+            {
+              const auto * const parent = elem->interior_parent();
+              if (on_boundary(*elem, boundaries.first, boundaries.second) ||
+                  (parent && on_boundary(*parent, boundaries.first, boundaries.second)))
+                elems.insert(elem);
+            }
         });
 
   // Initialize Kokkos mesh

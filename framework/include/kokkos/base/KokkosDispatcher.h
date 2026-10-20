@@ -640,6 +640,8 @@ registerResidualObjectDispatchers(const std::string & objectname)
   {                                                                                                \
     Moose::Kokkos::DispatcherRegistry::addTeamDispatcher<classname::MortarLoop, classname>(        \
         #classname);                                                                               \
+    Moose::Kokkos::DispatcherRegistry::addDispatcher<classname::InactiveLoop, classname>(          \
+        #classname);                                                                               \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

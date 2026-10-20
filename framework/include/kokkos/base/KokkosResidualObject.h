@@ -262,6 +262,23 @@ protected:
                                               const ContiguousElementID jelem,
                                               const unsigned int j) const;
   /**
+   * Accumulate an unscaled residual and diagonal Jacobian contribution to one DOF of a system in
+   * the tagged vectors and matrices, for equations that are not physics, such as the pinning of
+   * unused degrees of freedom
+   * @param sys_num The system number
+   * @param dof The local DOF index
+   * @param local_re The residual contribution
+   * @param local_ke The diagonal Jacobian contribution
+   * @param residual Whether to accumulate the residual contribution
+   * @param jacobian Whether to accumulate the Jacobian contribution
+   */
+  KOKKOS_FUNCTION void accumulateTaggedDofDiagonal(const unsigned int sys_num,
+                                                   const dof_id_type dof,
+                                                   const Real local_re,
+                                                   const Real local_ke,
+                                                   const bool residual,
+                                                   const bool jacobian) const;
+  /**
    * The common loop structure template for computing elemental residual
    * @param datum The AssemblyDatum object of the current thread
    * @param body The quadrature point loop body
@@ -393,6 +410,30 @@ ResidualObject::accumulateTaggedMatrix(const Real local_ke,
 
     if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
       ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), scaled_local_ke);
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedDofDiagonal(const unsigned int sys_num,
+                                            const dof_id_type dof,
+                                            const Real local_re,
+                                            const Real local_ke,
+                                            const bool residual,
+                                            const bool jacobian) const
+{
+  auto & sys = kokkosSystem(sys_num);
+
+  if (residual)
+    for (unsigned int t = 0; t < _vector_tags.size(); ++t)
+      if (sys.isResidualTagActive(_vector_tags[t]))
+        ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, _vector_tags[t]), local_re);
+
+  if (jacobian)
+  {
+    const auto col = sys.localToGlobalDofIndex(dof);
+    for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
+      if (sys.isMatrixTagActive(_matrix_tags[t]))
+        ::Kokkos::atomic_add(&sys.getMatrixValue(dof, col, _matrix_tags[t]), local_ke);
   }
 }
 

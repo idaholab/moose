@@ -67,7 +67,8 @@ struct MortarDatum
  * from d_gap. The normal, the segment quadrature points, and their weights are held fixed in this
  * linearization, as in the non-Kokkos mortar constraints.
  *
- * One team assembles one local secondary element.
+ * One team assembles one local secondary element. The equation of each Lagrange multiplier degree
+ * of freedom that no mortar segment reaches becomes lambda = 0.
  */
 class MortarConstraint : public ResidualObject,
                          public CoupleableMooseVariableDependencyIntermediateInterface
@@ -95,12 +96,23 @@ public:
   {
   };
 
+  /// Kokkos function tag of the pinning of the inactive Lagrange multiplier degrees of freedom
+  struct InactiveLoop
+  {
+  };
+
   /**
    * The team operation called by Kokkos for each local secondary element
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(MortarLoop, const TeamMember<MortarLoop> & team, const Derived & constraint) const;
+
+  /**
+   * The operation called by Kokkos for each inactive Lagrange multiplier degree of freedom
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(InactiveLoop, const ThreadID tid, const Derived &) const;
 
   /// Maximum number of shape functions of a variable on a lower-dimensional element
   static constexpr unsigned int max_shapes = 9;
@@ -135,6 +147,12 @@ private:
 
   /// Pack the mortar segment quadrature points of the local secondary elements
   void packSegments();
+
+  /// Pack the owned Lagrange multiplier degrees of freedom that no mortar segment reaches
+  void packInactiveDofs();
+
+  /// The dispatcher of the pinning of the inactive Lagrange multiplier degrees of freedom
+  std::unique_ptr<DispatcherBase> _inactive_dispatcher;
 
   /// Dispatch the mortar loop
   void dispatch(bool residual, bool jacobian);
@@ -188,7 +206,22 @@ private:
   /// Interpolated secondary normal at each point
   Array<Real3> _normal;
   ///@}
+
+  /// Local indices of the owned Lagrange multiplier degrees of freedom that no mortar segment
+  /// reaches
+  Array<dof_id_type> _inactive_dofs;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+MortarConstraint::operator()(InactiveLoop, const ThreadID tid, const Derived &) const
+{
+  const auto & var = _side_var[static_cast<unsigned int>(MortarSide::Lower)];
+  const auto dof = _inactive_dofs[tid];
+  const auto lambda = kokkosSystem(var.sys()).getVectorDofValue(dof, var.tag());
+
+  accumulateTaggedDofDiagonal(var.sys(), dof, lambda, 1, _computing_residual, _computing_jacobian);
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void
