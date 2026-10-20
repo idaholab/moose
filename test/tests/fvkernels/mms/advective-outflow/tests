@@ -15,7 +15,6 @@
       input = test.py
       test_case = TestOutflow
       detail = 'a weighted averaging advection interpolation, and'
-      min_slots = 2
     []
     [minmod]
       type = MMSTest
@@ -38,7 +37,6 @@
     test_case = UpwindLimiter
     requirement = 'The system shall display first order convergence with an upwind limiter.'
     issues = '#14549'
-    min_slots = 2 # memory heavy
   []
   [CentralDifferenceLimiter]
     type = MMSTest
@@ -46,7 +44,6 @@
     test_case = CentralDifferenceLimiter
     requirement = 'The system shall display second order convergence with a central-differencing limiter.'
     issues = '#14549'
-    min_slots = 2 # memory heavy
   []
   [VanLeerLimiter]
     type = MMSTest
@@ -54,7 +51,6 @@
     test_case = VanLeerLimiter
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
     issues = '#14549'
-    min_slots = 2 # memory heavy
   []
   [MinModLimiter]
     type = MMSTest
@@ -62,7 +58,6 @@
     test_case = MinModLimiter
     requirement = 'The system shall display second order convergence with a min-mod limiter.'
     issues = '#14549'
-    min_slots = 2 # memory heavy
   []
   [SOULimiter]
     type = MMSTest
@@ -70,7 +65,6 @@
     test_case = SOULimiter
     requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
     issues = '#14549'
-    min_slots = 2 # memory heavy
   []
   [QUICKLimiter]
     type = MMSTest
@@ -94,14 +88,14 @@
       type = MMSTest
       input = test.py
       test_case = KTLimitedUpwind
-      min_slots = 3 # memory heavy and 2 MPI slots crashes
+      min_slots = 2 # memory heavy
       detail = 'with upwind interpolation of face values and resulting first order convergence'
     []
     [KTLimitedVanLeer]
       type = MMSTest
       input = test.py
       test_case = KTLimitedVanLeer
-      min_slots = 2 # memory heavy and 2 MPI slots crashes
+      min_slots = 2 # memory heavy
       detail = 'with central difference interpolation with Van-Leer limiting of face values and resulting two and a half order convergence' # I don't actually know where this additional half order is coming from
     []
   []

@@ -9,7 +9,6 @@
       input = 'fsp_test.i'
       exodiff = 'out.e'
       max_parallel = 1
-      min_slots = 2
 
       detail = "a single subdomain and"
     []
@@ -76,7 +75,6 @@
       exodiff = penalty-fsp-test_out.e
       type = Exodiff
       rel_err = 8e-3
-      min_slots = 2
     []
     [condensed]
       detail = 'field split preconditioner on a statically condensed system.'
