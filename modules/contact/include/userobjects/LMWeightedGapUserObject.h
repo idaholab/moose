@@ -71,11 +71,19 @@ public:
   bool deriveCFromElasticity() const { return _derive_c_from_elasticity; }
 
   /**
-   * @return The derived contact stiffness scale D at \p dof. A contact Lagrange multiplier's
-   * stored value y represents the multiplier D y. This is 1 unless derive_c_from_elasticity = true,
-   * and it is 1 at a node that has not yet had mortar coverage, where the multiplier is inactive.
+   * @return The derived normal contact stiffness D_n at \p dof. The normal contact Lagrange
+   * multiplier's stored value y represents the multiplier D_n y. This is 1 unless
+   * derive_c_from_elasticity = true, and it is 1 at a node that has not yet had mortar coverage,
+   * where the multiplier is inactive.
    */
-  Real derivedScale(const DofObject * dof) const;
+  Real derivedNormalScale(const DofObject * dof) const;
+
+  /**
+   * @return The derived tangential (shear) contact stiffness D_t at \p dof. The tangential contact
+   * Lagrange multipliers' stored values y represent the multipliers D_t y. Otherwise this follows
+   * the conventions of derivedNormalScale().
+   */
+  Real derivedTangentialScale(const DofObject * dof) const;
 
 protected:
   virtual void computeQpIProperties() override;
@@ -132,14 +140,14 @@ protected:
   /// Whether the elasticity tensor material property was declared as an AD property
   const bool _elasticity_tensor_is_ad;
 
-  /// This process's partial sums of (D * w, w) for covered secondary nodes that do not have a
-  /// derived scale yet, where w is the mortar test function weight
-  std::unordered_map<dof_id_type, std::array<Real, 2>> _derived_c_sums;
+  /// This process's partial sums of (D_n * w, D_t * w, w) for covered secondary nodes that do not
+  /// have derived scales yet, where w is the mortar test function weight
+  std::unordered_map<dof_id_type, std::array<Real, 3>> _derived_c_sums;
 
-  /// Derived scale D keyed by secondary node id, identical on every process. A node's scale is
-  /// derived the first time the node has mortar coverage and then stays fixed, so the change of
-  /// variables it defines never changes the meaning of a stored, nonzero multiplier value.
-  std::unordered_map<dof_id_type, Real> & _dof_to_derived_c;
+  /// Derived (D_n, D_t) keyed by secondary node id, identical on every process. A node's scales are
+  /// derived the first time the node has mortar coverage and then stay fixed, so the change of
+  /// variables they define never changes the meaning of a stored, nonzero multiplier value.
+  std::unordered_map<dof_id_type, std::array<Real, 2>> & _dof_to_derived_c;
 
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;

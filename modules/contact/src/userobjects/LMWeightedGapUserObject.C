@@ -76,8 +76,8 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
   : WeightedGapUserObject(parameters),
     _derive_c_from_elasticity(getParam<bool>("derive_c_from_elasticity")),
     _elasticity_tensor_is_ad(getParam<bool>("elasticity_tensor_is_ad")),
-    _dof_to_derived_c(
-        declareRestartableData<std::unordered_map<dof_id_type, Real>>("dof_to_derived_c")),
+    _dof_to_derived_c(declareRestartableData<std::unordered_map<dof_id_type, std::array<Real, 2>>>(
+        "dof_to_derived_c")),
     _lm_var(getVar("lm_variable", 0)),
     _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
@@ -330,7 +330,7 @@ LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
   // nodalScale() is keyed by displaced-mesh node pointers, so resolve the supplied node id through
   // that mesh.
   const auto * const dof = _subproblem.mesh().nodePtr(node.id());
-  return nodal_pressure * derivedScale(dof) / nodalScale(dof);
+  return nodal_pressure * derivedNormalScale(dof) / nodalScale(dof);
 }
 
 Real
@@ -348,13 +348,19 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
   // nodalScale() is keyed by the displaced-mesh node pointer, and callers may pass a different
   // pointer of the same id, so map through the mesh to match.
   const auto * const dof = _subproblem.mesh().nodePtr(node->id());
-  return (*_lm_var->sys().currentSolution())(dof_number)*derivedScale(dof) / nodalScale(dof);
+  return (*_lm_var->sys().currentSolution())(dof_number)*derivedNormalScale(dof) / nodalScale(dof);
 }
 
 Real
-LMWeightedGapUserObject::derivedScale(const DofObject * const dof) const
+LMWeightedGapUserObject::derivedNormalScale(const DofObject * const dof) const
 {
-  return findValue(_dof_to_derived_c, dof->id(), Real(1));
+  return findValue(_dof_to_derived_c, dof->id(), std::array<Real, 2>{{1, 1}})[0];
+}
+
+Real
+LMWeightedGapUserObject::derivedTangentialScale(const DofObject * const dof) const
+{
+  return findValue(_dof_to_derived_c, dof->id(), std::array<Real, 2>{{1, 1}})[1];
 }
 
 void
@@ -368,37 +374,41 @@ LMWeightedGapUserObject::finalizeDerivedC()
   // covered nodes on every process. Every process sums them in the same order, which makes the
   // resulting scales identical everywhere.
   std::vector<dof_id_type> ids;
-  std::vector<Real> scale_sums, weight_sums;
+  std::vector<Real> normal_sums, tangential_sums, weight_sums;
   for (const auto & [id, sums] : _derived_c_sums)
   {
     ids.push_back(id);
-    scale_sums.push_back(sums[0]);
-    weight_sums.push_back(sums[1]);
+    normal_sums.push_back(sums[0]);
+    tangential_sums.push_back(sums[1]);
+    weight_sums.push_back(sums[2]);
   }
   _derived_c_sums.clear();
   _communicator.allgather(ids, /*identical_buffer_sizes=*/false);
-  _communicator.allgather(scale_sums, /*identical_buffer_sizes=*/false);
+  _communicator.allgather(normal_sums, /*identical_buffer_sizes=*/false);
+  _communicator.allgather(tangential_sums, /*identical_buffer_sizes=*/false);
   _communicator.allgather(weight_sums, /*identical_buffer_sizes=*/false);
 
-  std::map<dof_id_type, std::array<Real, 2>> global_sums;
+  std::map<dof_id_type, std::array<Real, 3>> global_sums;
   for (const auto i : index_range(ids))
   {
-    auto & [scale_sum, weight_sum] = global_sums[ids[i]];
-    scale_sum += scale_sums[i];
+    auto & [normal_sum, tangential_sum, weight_sum] = global_sums[ids[i]];
+    normal_sum += normal_sums[i];
+    tangential_sum += tangential_sums[i];
     weight_sum += weight_sums[i];
   }
 
   for (const auto & [id, sums] : global_sums)
   {
-    const auto & [scale_sum, weight_sum] = sums;
-    // A node whose covered test function integral vanishes gets its scale from a later coverage
+    const auto & [normal_sum, tangential_sum, weight_sum] = sums;
+    // A node whose covered test function integral vanishes gets its scales from a later coverage
     if (weight_sum <= 0)
       continue;
-    const Real scale = scale_sum / weight_sum;
-    if (!std::isfinite(scale) || scale <= 0)
-      mooseError(
-          "The physical contact stiffness scale at node ", id, " must be finite and positive.");
-    _dof_to_derived_c.emplace(id, scale);
+    const std::array<Real, 2> scales{{normal_sum / weight_sum, tangential_sum / weight_sum}};
+    for (const auto scale : scales)
+      if (!std::isfinite(scale) || scale <= 0)
+        mooseError(
+            "The physical contact stiffness scales at node ", id, " must be finite and positive.");
+    _dof_to_derived_c.emplace(id, scales);
   }
 }
 
@@ -449,21 +459,33 @@ LMWeightedGapUserObject::accumulateDerivedC()
     pri_ptr = _elasticity_tensor_primary;
   }
 
+  // The acoustic tensor Q_ij = C_ikjl n_k n_l gives the stiffness of a body against a traction
+  // wave along the contact normal n: n.Q.n is the normal (constrained) modulus, and t.Q.t is the
+  // shear modulus for a tangent t. The tangential modulus is averaged over the tangent plane,
+  // (tr Q - n.Q.n) / (dim - 1) with the trace over the mesh dimensions, which is independent of
+  // the tangent basis; the friction law needs a single tangential constant per node so that the
+  // regularized slip stays parallel to the slip velocity.
   const RealVectorValue & n = _normals[_i];
-  GenericReal<is_ad> C_nn_sec_generic = 0;
-  GenericReal<is_ad> C_nn_pri_generic = 0;
-  for (const auto a : make_range(3))
-    for (const auto b : make_range(3))
-      for (const auto c : make_range(3))
-        for (const auto d : make_range(3))
-        {
-          const Real w = n(a) * n(b) * n(c) * n(d);
-          C_nn_sec_generic += w * (*sec_ptr)[_qp](a, b, c, d);
-          C_nn_pri_generic += w * (*pri_ptr)[_qp](a, b, c, d);
-        }
+  const auto dim = _subproblem.mesh().dimension();
+  const auto acoustic_moduli = [&n, dim](const auto & C)
+  {
+    Real normal = 0, trace = 0;
+    for (const auto i : make_range(3))
+      for (const auto j : make_range(3))
+      {
+        Real Q_ij = 0;
+        for (const auto k : make_range(3))
+          for (const auto l : make_range(3))
+            Q_ij += MetaPhysicL::raw_value(C(i, k, j, l)) * n(k) * n(l);
+        normal += n(i) * Q_ij * n(j);
+        if (i == j && i < dim)
+          trace += Q_ij;
+      }
+    return std::array<Real, 2>{{normal, (trace - normal) / (dim - 1)}};
+  };
+  const auto [C_nn_sec, C_tt_sec] = acoustic_moduli((*sec_ptr)[_qp]);
+  const auto [C_nn_pri, C_tt_pri] = acoustic_moduli((*pri_ptr)[_qp]);
 
-  const Real C_nn_sec = MetaPhysicL::raw_value(C_nn_sec_generic);
-  const Real C_nn_pri = MetaPhysicL::raw_value(C_nn_pri_generic);
   const auto & reference_mesh = _fe_problem.mesh();
   const auto * const reference_secondary_face = reference_mesh.elemPtr(_lower_secondary_elem->id());
   const auto * const reference_primary_face = reference_mesh.elemPtr(_lower_primary_elem->id());
@@ -475,9 +497,10 @@ LMWeightedGapUserObject::accumulateDerivedC()
   const Real primary_face_measure = reference_primary_face->volume();
   const Real secondary_parent_volume = reference_secondary_parent->volume();
   const Real primary_parent_volume = reference_primary_parent->volume();
-  if (!std::isfinite(C_nn_sec) || C_nn_sec <= 0.0 || !std::isfinite(C_nn_pri) || C_nn_pri <= 0.0)
-    mooseError("The normal acoustic stiffness on both contact bodies must be finite and positive ",
-               "when physical contact scaling is used.");
+  for (const auto modulus : {C_nn_sec, C_tt_sec, C_nn_pri, C_tt_pri})
+    if (!std::isfinite(modulus) || modulus <= 0.0)
+      mooseError("The normal and shear acoustic stiffnesses on both contact bodies must be finite "
+                 "and positive when physical contact scaling is used.");
   if (!std::isfinite(secondary_face_measure) || secondary_face_measure <= 0.0 ||
       !std::isfinite(primary_face_measure) || primary_face_measure <= 0.0 ||
       !std::isfinite(secondary_parent_volume) || secondary_parent_volume <= 0.0 ||
@@ -487,10 +510,14 @@ LMWeightedGapUserObject::accumulateDerivedC()
 
   const Real h_secondary = secondary_parent_volume / secondary_face_measure;
   const Real h_primary = primary_parent_volume / primary_face_measure;
-  const Real physical_scale = 1.0 / (h_secondary / C_nn_sec + h_primary / C_nn_pri);
+  // The two adjacent element layers act as springs in series
+  const Real normal_scale = 1.0 / (h_secondary / C_nn_sec + h_primary / C_nn_pri);
+  const Real tangential_scale = 1.0 / (h_secondary / C_tt_sec + h_primary / C_tt_pri);
   const Real test_weight = (*_test)[_i][_qp] * _qp_factor;
-  auto & [scale_sum, weight_sum] = _derived_c_sums[_lower_secondary_elem->node_id(_i)];
-  scale_sum += physical_scale * test_weight;
+  auto & [normal_sum, tangential_sum, weight_sum] =
+      _derived_c_sums[_lower_secondary_elem->node_id(_i)];
+  normal_sum += normal_scale * test_weight;
+  tangential_sum += tangential_scale * test_weight;
   weight_sum += test_weight;
 }
 

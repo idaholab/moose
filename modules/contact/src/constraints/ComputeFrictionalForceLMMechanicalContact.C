@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "MortarContactUtils.h"
 #include "WeightedVelocitiesUserObject.h"
+#include "LMWeightedGapUserObject.h"
 
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
@@ -241,15 +242,14 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
 
-  // With 'use_derived_c', the tangential constraint uses the same per-node stiffness as the normal
-  // constraint, and the friction multipliers use the same change of variables as the normal
-  // multiplier. The shear stiffness of an isotropic body is the same order as its normal
-  // stiffness, so the tangential multiplier columns land at the order of the elasticity block too.
+  // With 'use_derived_c', the tangential constraint uses the derived shear stiffness D_t as its
+  // constant, and the friction multipliers are represented as D_t times their stored values, which
+  // puts their Jacobian columns at the order of the elasticity block.
   const Real c = _normalize_c ? contact_scale / *_normalization_ptr : contact_scale;
-  const Real c_t = _use_derived_c ? c : (_normalize_c ? _c_t / *_normalization_ptr : _c_t);
+  const Real c_t = tangentialConstant(dof);
   if (_use_derived_c)
     for (const auto i : make_range(num_tangents))
-      friction_lm_values[i] *= contact_scale;
+      friction_lm_values[i] *= _lm_weighted_gap_uo->derivedTangentialScale(dof);
 
   // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
   // tangential velocity divided by the integral of the same test function, which is the nodal
@@ -316,9 +316,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   const Real c = _normalize_c ? contact_scale / *_normalization_ptr : contact_scale;
-  const Real c_t = _use_derived_c ? c : (_normalize_c ? _c_t / *_normalization_ptr : _c_t);
+  const Real c_t = tangentialConstant(dof);
   if (_use_derived_c)
-    friction_lm_value *= contact_scale;
+    friction_lm_value *= _lm_weighted_gap_uo->derivedTangentialScale(dof);
 
   // Compute the friction coefficient (constant or function) from the projected nodal slip rate, as
   // in enforceConstraintOnDof3d()
@@ -347,6 +347,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
                           std::array<ADReal, 1>{{dof_residual}},
                           std::array<dof_id_type, 1>{{friction_dof_index}},
                           _friction_vars[0]->scalingFactor());
+}
+
+Real
+ComputeFrictionalForceLMMechanicalContact::tangentialConstant(const DofObject * const dof) const
+{
+  const Real scale = _use_derived_c ? _lm_weighted_gap_uo->derivedTangentialScale(dof) : _c_t;
+  return _normalize_c ? scale / *_normalization_ptr : scale;
 }
 
 ADReal

@@ -132,6 +132,7 @@ MortarFrictionalPressureVectorAux::computeValue()
   const Real tangent_vector_component =
       tangent_one_component * (*_tangent_one)[_qp] + tangent_two_component * (*_tangent_two)[_qp];
 
-  return _weighted_gap_uo ? _weighted_gap_uo->derivedScale(_current_node) * tangent_vector_component
-                          : tangent_vector_component;
+  return _weighted_gap_uo
+             ? _weighted_gap_uo->derivedTangentialScale(_current_node) * tangent_vector_component
+             : tangent_vector_component;
 }

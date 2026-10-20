@@ -23,24 +23,29 @@ generated Lagrange-multiplier user object to improve the conditioning of partial
 For the `mortar` formulation, [!param](/Contact/ContactAction/c_strategy) chooses how the contact
 constants are set. With the default `user` strategy, [!param](/Contact/ContactAction/c_normal) and
 [!param](/Contact/ContactAction/c_tangential) are used as given. With the `physical` strategy, the
-action derives a contact stiffness $D_j$ at each secondary node $j$ from the elasticity tensors of
-the two contacting bodies:
+action derives a normal and a tangential contact stiffness at each secondary node $j$ from the
+elasticity tensors of the two contacting bodies. Each body's acoustic tensor for the contact normal
+$\mathbf{n}$, $Q_{ik} = C_{ijkl} n_j n_l$, gives its normal modulus $M = \mathbf{n} \cdot Q \mathbf{n}$
+and its shear modulus $G = (\operatorname{tr} Q - M) / (d - 1)$, the average over the tangent plane in
+$d$ dimensions. For an isotropic body these are the constrained modulus $\lambda + 2\mu$ and the shear
+modulus $\mu$. The two element layers adjacent to the contact face act as springs in series:
 
 !equation
-D_j = \left( \frac{h_s}{C_{nn,s}} + \frac{h_p}{C_{nn,p}} \right)^{-1},
-\qquad C_{nn} = n_a n_b n_c n_d C_{abcd},
+D_{n,j} = \left( \frac{h_s}{M_s} + \frac{h_p}{M_p} \right)^{-1}, \qquad
+D_{t,j} = \left( \frac{h_s}{G_s} + \frac{h_p}{G_p} \right)^{-1},
 
-where $C_{nn}$ is the normal acoustic stiffness of a body for the contact normal $\mathbf{n}$, and
-$h$ is the depth normal to the contact face of the element adjacent to the face, computed as the
-element volume divided by the face measure. $D_j$ is the stiffness of the two element layers in
-series, averaged over the mortar segments with the mortar test function. It is used as both the
-normal and tangential contact constant, since the shear and normal stiffness of an isotropic body
-are of the same order, with [!param](/Contact/ContactAction/normalize_c) implied.
+where $h$ is the depth of an element normal to the contact face, computed as the element volume
+divided by the face measure, and the subscripts $s$ and $p$ denote the secondary and primary bodies.
+Both stiffnesses are averaged over the mortar segments with the mortar test function. $D_{n,j}$ is
+used as the normal contact constant and $D_{t,j}$ as the tangential one, with
+[!param](/Contact/ContactAction/normalize_c) implied. The normal constant balances a gap against a
+normal pressure and the tangential constant balances a slip increment against a tangential
+pressure, so each takes the stiffness of the deformation it measures.
 
-The contact multipliers are also represented as $D_j$ times their stored values, and the multiplier
-rows are rescaled from pressure to force units. These two changes put the multiplier rows and columns
+The normal and tangential multipliers are also represented as $D_{n,j}$ and $D_{t,j}$ times their
+stored values, and the multiplier rows are rescaled from pressure to force units. These two changes put the multiplier rows and columns
 of the Jacobian at the order of the elasticity block, so the user does not choose the multiplier
-scaling. Each node's $D_j$ is fixed the first time the node has mortar coverage, which keeps the
+scaling. Each node's stiffnesses are fixed the first time the node has mortar coverage, which keeps the
 meaning of the stored multiplier values unchanged as the contact surfaces move. The physical
 strategy cannot be combined with user-set contact constants or multiplier scaling, with automatic
 scaling, or with [!param](/Contact/ContactAction/mortar_dynamics). For Coulomb friction it requires

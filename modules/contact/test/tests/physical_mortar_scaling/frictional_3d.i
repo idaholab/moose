@@ -11,6 +11,16 @@
   []
 []
 
+[Materials]
+  # A nonzero Poisson's ratio separates the normal and shear contact stiffnesses
+  [tensor]
+    poissons_ratio := 0.3
+  []
+  [tensor_1000]
+    poissons_ratio := 0.3
+  []
+[]
+
 [BCs]
   [topx]
     function := '0.05 * t'

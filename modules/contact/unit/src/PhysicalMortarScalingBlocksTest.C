@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFieldBase.h"
 #include "MortarTestUtils.h"
+#include "LMWeightedGapUserObject.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/nonlinear_implicit_system.h"
@@ -221,6 +222,60 @@ expectFrictionlessBlocksSameOrder(const std::string & input_file, bool want_clos
   expectSameOrder(blocks.Jdd, blocks.Jdl, "Jdd vs Jdl");
   expectSameOrder(blocks.Jdd, off_diag, "Jdd vs " + off_diag_label);
   expectSameOrder(blocks.Jdl, off_diag, "Jdl vs " + off_diag_label);
+}
+
+// Verify the derived contact stiffnesses against their closed forms on the fixture's flat contact
+// face, using a nonzero Poisson's ratio so that the normal and shear moduli differ. For an
+// isotropic body the acoustic tensor along the normal gives the constrained modulus lambda + 2 mu
+// normal to the face and the shear modulus mu along it, and each element layer of depth h
+// contributes a spring of stiffness modulus / h in series.
+TEST(PhysicalMortarScalingBlocks, DerivedScalesMatchIsotropicModuli)
+{
+  const Real nu = 0.3;
+  const std::string nu_arg = std::to_string(nu);
+  std::vector<std::string> str_args = {"contact-unit",
+                                       "-i",
+                                       inputPath(__FILE__, "frictionless_physical_closed.i"),
+                                       "Materials/tensor/poissons_ratio=" + nu_arg,
+                                       "Materials/tensor_1000/poissons_ratio=" + nu_arg};
+  std::vector<char *> argv_vec;
+  for (auto & arg : str_args)
+    argv_vec.push_back(arg.data());
+  const int argc = static_cast<int>(argv_vec.size());
+  auto app = Moose::createMooseApp("ContactApp", argc, argv_vec.data());
+  app->run();
+  auto & problem = app->getExecutioner()->feProblem();
+
+  const auto & uo = dynamic_cast<const LMWeightedGapUserObject &>(
+      problem.getUserObjectBase("lm_weightedgap_object_mortar"));
+
+  // Material and element depth values of frictionless_physical.i
+  const auto moduli = [nu](const Real E)
+  {
+    const Real lambda = E * nu / ((1 + nu) * (1 - 2 * nu));
+    const Real mu = E / (2 * (1 + nu));
+    return std::array<Real, 2>{{lambda + 2 * mu, mu}};
+  };
+  const auto [M_top, mu_top] = moduli(1e8);
+  const auto [M_bottom, mu_bottom] = moduli(1e9);
+  const Real h_top = 0.5 / 3;
+  const Real h_bottom = 0.05 / 2;
+  const Real expected_normal = 1 / (h_top / M_top + h_bottom / M_bottom);
+  const Real expected_tangential = 1 / (h_top / mu_top + h_bottom / mu_bottom);
+
+  const auto & mesh = problem.mesh();
+  unsigned int num_checked = 0;
+  for (const auto id : mesh.getNodeList(mesh.getBoundaryID("top_bottom")))
+  {
+    const Node & node = mesh.nodeRef(id);
+    // Nodes that have not had mortar coverage keep the unit scale
+    if (uo.derivedNormalScale(&node) == 1)
+      continue;
+    EXPECT_NEAR(uo.derivedNormalScale(&node) / expected_normal, 1, 1e-10);
+    EXPECT_NEAR(uo.derivedTangentialScale(&node) / expected_tangential, 1, 1e-10);
+    ++num_checked;
+  }
+  EXPECT_GT(num_checked, 0) << "no contact node has derived scales";
 }
 
 TEST(PhysicalMortarScalingBlocks, AllOpenBlocksSameOrder)

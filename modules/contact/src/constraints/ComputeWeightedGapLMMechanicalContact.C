@@ -278,7 +278,7 @@ ComputeWeightedGapLMMechanicalContact::contactNormalization() const
 Real
 ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * const dof) const
 {
-  const Real scale = _use_derived_c ? _lm_weighted_gap_uo->derivedScale(dof) : _c;
+  const Real scale = _use_derived_c ? _lm_weighted_gap_uo->derivedNormalScale(dof) : _c;
   if (!std::isfinite(scale) || scale <= 0.0)
     mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
   return scale;

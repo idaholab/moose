@@ -102,7 +102,7 @@ LMWeightedVelocitiesUserObject::nodalTangentialPressure(const Node & node,
   ADReal nodal_pressure = (*lm_var->sys().currentSolution())(dof_index);
   if (Moose::doDerivatives(_subproblem, _sys))
     Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
-  return nodal_pressure * derivedScale(&node);
+  return nodal_pressure * derivedTangentialScale(&node);
 }
 
 const VariableTestValue &
