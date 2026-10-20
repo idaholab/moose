@@ -1,4 +1,4 @@
-// AbaqusUELMesh//* This file is part of the MOOSE framework
+//* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -14,13 +14,10 @@
 #include "AbaqusInputParser.h"
 #include "AbaqusInputObjects.h"
 
-#include <list>
-#include <stdexcept>
-
 class AbaqusUELMeshUserElement;
 
 /**
- * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
+ * Mesh that reads an Abaqus input with user elements and builds one NodeElem per UEL node
  */
 class AbaqusUELMesh : public MooseMesh
 {
@@ -33,13 +30,6 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
-
-  virtual bool prepare(const MeshBase * mesh_to_clone) override;
-
-  // const std::vector<std::size_t> & getNodeSet(const std::string & elset) const;
-  // const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
-  // const auto & getICBlocks() const { return _abaqus_ics; }
-  // const auto & getProperties() const { return _properties; }
 
   std::string getVarName(const Abaqus::AbaqusID var_id) const;
   const Abaqus::UserElement & getUEL(const std::string & type) const;
@@ -69,22 +59,13 @@ public:
   /// initial condition getters
   const auto & getFieldICs() const { return _model->_field_ics; }
 
-  /// get boundary conditions for variable
-  const std::unordered_map<Abaqus::Index, Real> & getBCFor(const Abaqus::AbaqusID var_id);
-  const std::unordered_map<Abaqus::Index, Real> & getBCFor(const Abaqus::AbaqusID var_id,
-                                                           const std::string & step_name);
-
-  void addNodeset(BoundaryID id);
-
 protected:
-  Abaqus::InputParser _input;
-  std::unique_ptr<Abaqus::Model> _model;
+  /// parsed Abaqus model, shared with clones of this mesh (e.g. the displaced mesh)
+  std::shared_ptr<Abaqus::Model> _model;
 
   void instantiateElements();
-  void setupLibmeshSubdomains();
+  void buildNodeToUELMap();
   void setupNodeSets();
-
-  dof_id_type _max_node_id;
 
   /// A map from nodes (i.e. node elements) to user elements (index into _model->_elements)
   /// libMesh node IDs are AbaqusIDs.
@@ -92,16 +73,4 @@ protected:
 
   /// all subdomain IDs used for UEL variable restriction
   std::set<SubdomainID> _uel_block_ids;
-
-  /// UEL node sets
-  std::map<std::string, std::vector<std::size_t>> _node_set;
-
-  /// UEL element sets
-  std::map<std::string, std::vector<std::size_t>> _element_set;
-
-  /// variable names (zero based indexing)
-  std::vector<std::string> _var_names;
-
-  /// enable additional debugging output
-  const bool _debug;
 };

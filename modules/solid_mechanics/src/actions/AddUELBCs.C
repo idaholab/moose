@@ -12,9 +12,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Conversion.h"
-#include "AbaqusUELMesh.h"
 #include "MooseTypes.h"
-#include <dirent.h>
 #include <memory>
 
 registerMooseAction("SolidMechanicsApp", AddUELBCs, "add_user_object");
@@ -29,7 +27,7 @@ AddUELBCs::validParams()
   return params;
 }
 
-AddUELBCs::AddUELBCs(const InputParameters & params) : Action(params), _uel_mesh(nullptr) {}
+AddUELBCs::AddUELBCs(const InputParameters & params) : Action(params) {}
 
 void
 AddUELBCs::act()
@@ -48,7 +46,6 @@ AddUELBCs::act()
     return;
   }
 
-  _uel_mesh = dynamic_cast<AbaqusUELMesh *>(_mesh.get());
   mooseAssert(_step_uo, "Step user object should have been constructed, but it wasn't.");
   const auto var_list = _step_uo->getVariables();
 

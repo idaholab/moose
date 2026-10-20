@@ -1,5 +1,7 @@
 # AddUELBCs
 
+!syntax description /BCs/Abaqus/AddUELBCs
+
 ## Description
 
 The `AddUELBCs` action configures Abaqus-style boundary conditions from an
@@ -25,3 +27,4 @@ Use the `BCs/Abaqus` action block to auto-add the step user object, essential BC
 
 !listing modules/solid_mechanics/test/tests/uel_mesh/elastic_action.i block=BCs
 
+!syntax parameters /BCs/Abaqus/AddUELBCs

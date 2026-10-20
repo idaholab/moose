@@ -13,7 +13,6 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
-#include "libmesh/linear_partitioner.h"
 #include "libmesh/int_range.h"
 #include "libmesh/utility.h"
 
@@ -21,7 +20,7 @@
 
 using namespace libMesh;
 
-AbaqusUELPartitioner::AbaqusUELPartitioner(AbaqusUELMesh & uel_mesh)
+AbaqusUELPartitioner::AbaqusUELPartitioner(const AbaqusUELMesh & uel_mesh)
   : Partitioner(), _uel_mesh(uel_mesh)
 {
 }
@@ -37,15 +36,10 @@ AbaqusUELPartitioner::partition(MeshBase & mesh, const unsigned int n)
 {
   // ParMETIS works on a distributed graph, so every rank must hold a chunk of the elements. A
   // replicated mesh has every element on every rank, so we first hand out a linear partitioning
-  // to distribute the work before building the dual graph. This mirrors
-  // PetscExternalPartitioner::preLinearPartition.
+  // to distribute the work before building the dual graph, using the same helper as
+  // PetscExternalPartitioner.
   if (mesh.is_replicated() && n > 1)
-  {
-    auto old_partitioner = std::move(mesh.partitioner());
-    mesh.partitioner() = std::make_unique<LinearPartitioner>();
-    mesh.partition(mesh.n_processors());
-    mesh.partitioner() = std::move(old_partitioner);
-  }
+    PetscExternalPartitioner::preLinearPartition(mesh);
 
   Partitioner::partition(mesh, n);
 }

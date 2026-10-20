@@ -1,7 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
   file = ELASTIC_PATCH.inp
-  debug = true
 []
 
 [Variables]

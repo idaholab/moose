@@ -9,12 +9,14 @@
 
 #pragma once
 
+#include <deque>
 #include <limits>
+#include <list>
 #include <string>
 #include <map>
 #include <memory>
-#include <istream>
-#include <variant>
+#include <unordered_map>
+#include <vector>
 
 #include "AbaqusInputParser.h"
 #include "Conversion.h"
@@ -35,8 +37,6 @@ using Index = std::size_t;
 // maps from variable_id and node index to a value (used for BCs)
 template <typename T>
 using VariableValueMap = std::unordered_map<AbaqusID, std::unordered_map<Index, T>>;
-
-using IndexList = std::variant<Index, std::vector<Index>>;
 
 /**
  * Distributed load specification for an element (from *Dload)
@@ -117,7 +117,7 @@ public:
   void merge(const ObjectStore & other);
 
 private:
-  std::vector<T> _object;
+  std::deque<T> _object;
   std::map<std::string, std::size_t> _name_to_id;
 };
 
@@ -136,8 +136,9 @@ struct UserElement
   int _n_iproperties;
   bool _symmetric;
 
-  std::string _type;    // TODO: is this needed?
-  std::size_t _type_id; // TODO: is this needed?
+  /// UEL type string (e.g. U1) and its integer id passed to the UEL as JTYPE
+  std::string _type;
+  std::size_t _type_id;
 
   /// list of abaqus variables active at each node
   std::vector<std::vector<AbaqusID>> _vars;
@@ -169,7 +170,7 @@ struct Element
   /// original Abaqus ID (unique only at the part level)
   AbaqusID _id;
 
-  /// UEL Defintion
+  /// UEL definition
   const UserElement & _uel;
 
   /// index into the corresponding node list (either at part level or model level)
@@ -197,9 +198,6 @@ struct Part
   void processElementSet(const OptionNode & option,
                          Instance * instance = nullptr,
                          const AssemblyModel * asmb = nullptr);
-
-  const std::vector<std::size_t> & getNodeSet(const std::string & nset) const;
-  const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
 
   template <bool is_nodal>
   void processSetHelper(const OptionNode & option, Instance * instance, const AssemblyModel * asmb);
@@ -268,7 +266,7 @@ struct Step
   /// (mapping from Abaqus field variable ID to a (node index, assignment) map)
   VariableValueMap<FieldAssignment> _field_var_node_value_map;
 
-  /// Model acces to get node sets
+  /// Model access to get node sets
   const Model & _model;
 
   /// Step time data
@@ -327,9 +325,6 @@ struct Model : public Part, public Step
   bool optionFunc(const std::string & key, const OptionNode & option);
   bool blockFunc(const std::string & key, const BlockNode & block);
 
-  /// A map from nodes (i.e. node elements) to user elements (ids)
-  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
-
   /// field initial conditions
   std::vector<FieldIC> _field_ics;
 
@@ -346,10 +341,11 @@ struct Model : public Part, public Step
 struct FlatModel : public Model
 {
   FlatModel() = default;
-  virtual void parse(const BlockNode & root);
+  void parse(const BlockNode & root) override;
 
-  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
-  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
+  Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const override;
+  Index getElementIndex(const std::string & key,
+                        const Instance * instance = nullptr) const override;
 };
 
 /**
@@ -358,7 +354,7 @@ struct FlatModel : public Model
 struct AssemblyModel : public Model
 {
   AssemblyModel() = default;
-  virtual void parse(const BlockNode & root);
+  void parse(const BlockNode & root) override;
 
   /// Parts
   ObjectStore<Part> _part;
@@ -366,10 +362,11 @@ struct AssemblyModel : public Model
   /// Assemblies
   std::unique_ptr<Assembly> _assembly;
 
-  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
-  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
+  Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const override;
+  Index getElementIndex(const std::string & key,
+                        const Instance * instance = nullptr) const override;
 
-  virtual const Instance & getInstance(const std::string & name) const;
+  const Instance & getInstance(const std::string & name) const override;
 };
 
 /**
@@ -382,7 +379,7 @@ ObjectStore<T>::id(const std::string & name) const
   auto it = _name_to_id.find(name);
   if (it != _name_to_id.end())
     return it->second;
-  throw std::runtime_error("Invalid name in ObjectStore lookup.");
+  mooseError("Name '", name, "' not found in Abaqus input.");
 }
 
 template <typename T>
@@ -408,10 +405,10 @@ template <typename... Args>
 std::size_t
 ObjectStore<T>::add(const std::string & name, Args &&... args)
 {
+  if (_name_to_id.find(name) != _name_to_id.end())
+    mooseError("Duplicate name '", name, "' in Abaqus input.");
   const auto id = _object.size();
   _object.emplace_back(std::forward<Args>(args)...);
-  if (_name_to_id.find(name) != _name_to_id.end())
-    throw std::runtime_error("Duplicate name in ObjectStore.");
   _name_to_id[name] = id;
   return id;
 }

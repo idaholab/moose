@@ -27,7 +27,7 @@ class AbaqusUELMesh;
 class AbaqusUELPartitioner : public libMesh::Partitioner
 {
 public:
-  AbaqusUELPartitioner(AbaqusUELMesh & uel_mesh);
+  AbaqusUELPartitioner(const AbaqusUELMesh & uel_mesh);
 
   virtual std::unique_ptr<libMesh::Partitioner> clone() const override;
 
@@ -38,5 +38,5 @@ protected:
   virtual void _do_partition(libMesh::MeshBase & mesh, const unsigned int n) override;
 
 private:
-  AbaqusUELMesh & _uel_mesh;
+  const AbaqusUELMesh & _uel_mesh;
 };

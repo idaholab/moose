@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 
 /**
- * Calcualtes velocity using Newmark time integration scheme
+ * Calculates velocity using Newmark time integration scheme
  */
 class NewmarkVelAux : public AuxKernel
 {

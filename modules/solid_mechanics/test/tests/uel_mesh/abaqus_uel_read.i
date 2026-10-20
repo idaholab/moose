@@ -1,7 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
   file = PATCH_UEL.inp
-  debug = true
 []
 
 [Variables]

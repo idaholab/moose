@@ -18,15 +18,11 @@ via node elements and a custom connectivity map, enabling arbitrary Abaqus UEL g
   contributions into the system. Contributions are also tagged with the `AbaqusUELTag` vector tag
   for post-processing of concentrated reaction forces.
 
-When using this object, add `AbaqusUELTag` to the problem’s extra tag vectors so that reaction
+When using this object, add `AbaqusUELTag` to the problem's extra tag vectors so that reaction
 forces can be accessed by other objects such as
 [AbaqusUELStepUserObject](AbaqusUELStepUserObject.md):
 
-```
-[Problem]
-  extra_tag_vectors = 'AbaqusUELTag'
-[]
-```
+!listing modules/solid_mechanics/test/tests/uel_mesh/elastic.i block=Problem
 
 ## Interface
 
@@ -39,23 +35,23 @@ internally and persisted across time steps.
 
 ## Usage
 
-- `uel_type`: must match the UEL type name in the Abaqus input (`*User Element, type=...`).
-- `element_sets`: one or more Abaqus element sets to operate on; elements are filtered to those of
+- [!param](/UserObjects/AbaqusUELMeshUserElement/uel_type): must match the UEL type name in the Abaqus input (`*User Element, type=...`).
+- [!param](/UserObjects/AbaqusUELMeshUserElement/element_sets): one or more Abaqus element sets to operate on; elements are filtered to those of
   the specified `uel_type`.
-- `plugin`: path to the compiled UEL plugin; the loader appends a method suffix and `.plugin`.
-- `dload_interpolator`: name of the [AbaqusDLoadInterpolator](AbaqusDLoadInterpolator.md) that
+- [!param](/UserObjects/AbaqusUELMeshUserElement/plugin): path to the compiled UEL plugin; the loader appends a method suffix and `.plugin`.
+- [!param](/UserObjects/AbaqusUELMeshUserElement/dload_interpolator): name of the [AbaqusDLoadInterpolator](AbaqusDLoadInterpolator.md) that
   provides per-element `NDLOAD`/`JDLTYP`/`ADLMAG` arrays at the beginning of the timestep. Defaults
   to `dload_uo`.
-- `external_fields`: optional list of AuxVariables to pass as PREDEF fields to the UEL. Values are
+- [!param](/UserObjects/AbaqusUELMeshUserElement/external_fields): optional list of AuxVariables to pass as PREDEF fields to the UEL. Values are
   typically supplied by [AbaqusPredefAux](auxkernels/AbaqusPredefAux.md).
-- `use_energy`: set to true if the UEL writes energy quantities.
+- [!param](/UserObjects/AbaqusUELMeshUserElement/use_energy): set to true if the UEL writes energy quantities.
 
 ### Distributed Loads (DLOAD)
 
 `*Dload` entries in the Abaqus input are parsed per step and pre-interpolated by
 [AbaqusDLoadInterpolator](AbaqusDLoadInterpolator.md), which supplies `NDLOAD`, `JDLTYP`, and
 `ADLMAG` arrays to this user object. Magnitudes are linearly ramped from the previous step values
-to the current step values using the step fraction `d ∈ [0, 1]` from
+to the current step values using the step fraction `d in [0, 1]` from
 [AbaqusUELStepUserObject](AbaqusUELStepUserObject.md).
 
 Example configuration (from a test):

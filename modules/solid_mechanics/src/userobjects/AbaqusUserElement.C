@@ -9,42 +9,19 @@
 
 #include "AbaqusUserElement.h"
 #include "SystemBase.h"
-#include "Executioner.h"
 #include "UELThread.h"
-
-#define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("SolidMechanicsApp", AbaqusUserElement);
 
 InputParameters
 AbaqusUserElement::validParams()
 {
-  auto params = GeneralUserObject::validParams();
+  auto params = AbaqusUELUserObjectBase<dof_id_type, std::map>::validParams();
   params += BlockRestrictable::validParams();
-  params += TaggingInterface::validParams();
   params.addClassDescription("Coupling UserObject to use Abaqus UEL plugins in MOOSE");
-
-  // execute during residual and Jacobian evaluation
-  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
-  exec_enum = {EXEC_PRE_KERNELS};
-  params.suppressParameter<ExecFlagEnum>("execute_on");
-
-  // Avoid uninitialized residual objects
-  params.suppressParameter<bool>("force_preic");
 
   // coupled variables
   params.addParam<std::vector<NonlinearVariableName>>("variables", "Nonlinear coupled variables");
-  // auxiliary variables (including temperature)
-  params.addParam<std::vector<AuxVariableName>>(
-      "external_fields",
-      {},
-      "Auxiliary field variables (or 'predefined field variables') passed to the UEL plugin. Some "
-      "plugins may assume that the first field is temperature when there are multiple external "
-      "fields.");
-
-  // UEL plugin file
-  params.addRequiredParam<FileName>("plugin", "UEL plugin file");
 
   params.addRequiredParam<std::vector<Real>>(
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
@@ -53,19 +30,13 @@ AbaqusUserElement::validParams()
 
   params.addParam<int>("jtype", 0, "Abaqus element type integer");
 
-  params.addParam<bool>(
-      "use_energy", false, "Set to true of the UEL plugin makes use of the ENERGY parameter");
-
   return params;
 }
 
 AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
-  : GeneralUserObject(params),
+  : AbaqusUELUserObjectBase<dof_id_type, std::map>(params,
+                                                   params.get<unsigned int>("num_state_vars")),
     BlockRestrictable(this),
-    TaggingInterface(this),
-    _plugin(getParam<FileName>("plugin")),
-    _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
-    _uel(_library.getFunction<uel_t>("uel_")),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
     _dim(_moose_mesh.dimension()),
@@ -74,11 +45,6 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _props(getParam<std::vector<Real>>("constant_properties")),
     _nprops(_props.size()),
-    _nstatev(getParam<unsigned int>("num_state_vars")),
-    _statev_index_current(0),
-    _statev_index_old(1),
-    _t_step_old(declareRestartableData<int>("uel_tstep_old", -1)),
-    _use_energy(getParam<bool>("use_energy")),
     _jtype(getParam<int>("jtype"))
 {
   // coupled variables must be nonlinear scalar fields
@@ -101,11 +67,10 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
                                              Moose::VarKindType::VAR_AUXILIARY,
                                              Moose::VarFieldType::VAR_FIELD_STANDARD);
     _aux_variables.push_back(aux_var);
-    aux_var->sys().addVariableToZeroOnResidual(aux_variable_name);
 
     // check block restriction
     if (!aux_var->hasBlocks(blockIDs()))
-      paramError("aux_variables", "must be defined on all blocks the UEL is operating on.");
+      paramError("external_fields", "must be defined on all blocks the UEL is operating on.");
   }
 }
 
@@ -122,32 +87,6 @@ AbaqusUserElement::meshChanged()
 }
 
 void
-AbaqusUserElement::timestepSetup()
-{
-  // In case we are on the same timestep, that means this is being redone and we
-  // don't want to swap the stateful data yet
-  if (_t_step == _t_step_old)
-    return;
-
-  // swap the current and old state data after a converged timestep
-  if (_app.getExecutioner()->lastSolveConverged())
-  {
-    std::swap(_statev_index_old, _statev_index_current);
-    if (_use_energy)
-      for (const auto & [key, value] : _energy)
-        _energy_old[key] = value;
-    _t_step_old = _t_step;
-  }
-  else
-  {
-    // last timestep did not converge, restore energy from energy_old
-    if (_use_energy)
-      for (const auto & [key, value] : _energy_old)
-        _energy[key] = value;
-  }
-}
-
-void
 AbaqusUserElement::initialize()
 {
 }
@@ -161,7 +100,7 @@ AbaqusUserElement::execute()
     Threads::parallel_reduce(*_elem_range, ut);
 
     // copy over PNEWDT
-    _pnewdt = ut._min_pnewdt;
+    _pnewdt = ut.minPNewDt();
   }
   PARALLEL_CATCH;
 }
@@ -173,25 +112,18 @@ AbaqusUserElement::setupElemRange()
       std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(_sub_ids),
                                        _mesh.active_local_subdomain_set_elements_end(_sub_ids));
 
-  // prepopulate the statev map outside of a threaded region
-  if (_nstatev > 0)
-    for (const auto & elem : *_elem_range)
+  // prepopulate the statev and energy maps outside of a threaded region
+  for (const auto & elem : *_elem_range)
+  {
+    if (_nstatev > 0)
     {
       _statev[0][elem->id()].resize(_nstatev);
       _statev[1][elem->id()].resize(_nstatev);
     }
-}
-
-const std::array<Real, 8> *
-AbaqusUserElement::getUELEnergy(dof_id_type element_id) const
-{
-  const auto it = _energy.find(element_id);
-
-  // if this UO does not have the data for the requested element we return null
-  // this allows the querying object to try multiple (block restricted) AbaqusUserElement
-  // user objects until it finds the value (or else error out)
-  if (it == _energy.end())
-    return nullptr;
-
-  return &it->second;
+    if (_use_energy)
+    {
+      _energy.try_emplace(elem->id());
+      _energy_old.try_emplace(elem->id());
+    }
+  }
 }

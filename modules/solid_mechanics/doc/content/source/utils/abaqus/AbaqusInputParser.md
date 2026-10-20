@@ -28,6 +28,6 @@
 
 ## Developer Notes
 
-- Keep the parser “dumb”: Do not embed model-level assumptions here. Semantics belong in `AbaqusInputObjects`.
+- Keep the parser "dumb": Do not embed model-level assumptions here. Semantics belong in `AbaqusInputObjects`.
 - HeaderMap conversions: Use `map.get<T>(key, default)` to retrieve values with proper types and defaults.
 

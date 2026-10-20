@@ -15,7 +15,7 @@
 class AbaqusUELMeshUserElement;
 
 /**
- *
+ * Outputs the state variables of every user element processed by an AbaqusUELMeshUserElement
  */
 class AbaqusUELStateVariables : public GeneralVectorPostprocessor
 {
@@ -24,11 +24,9 @@ public:
 
   AbaqusUELStateVariables(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   const AbaqusUELMeshUserElement & _uel;

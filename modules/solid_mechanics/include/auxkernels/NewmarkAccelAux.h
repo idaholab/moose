@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 
 /**
- *Computes Acceleration using Newmark Time integration scheme
+ * Computes acceleration using the Newmark time integration scheme
  */
 class NewmarkAccelAux : public AuxKernel
 {

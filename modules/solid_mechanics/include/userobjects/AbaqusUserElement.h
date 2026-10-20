@@ -9,10 +9,8 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "AbaqusUELUserObjectBase.h"
 #include "BlockRestrictable.h"
-#include "TaggingInterface.h"
-#include "DynamicLibraryLoader.h"
 
 class MooseMesh;
 namespace libMesh
@@ -23,68 +21,13 @@ class MeshBase;
 /**
  * This user-object is a testbed for implementing a custom element.
  */
-class AbaqusUserElement : public GeneralUserObject,
-                          public BlockRestrictable,
-                          public TaggingInterface
+class AbaqusUserElement : public AbaqusUELUserObjectBase<dof_id_type, std::map>,
+                          public BlockRestrictable
 {
 public:
-  /// function type for the external UMAT function
-  typedef void (*uel_t)(
-      Real RHS[],    // (MLVARX,*)      Residual vector contribution for the current element
-      Real AMATRX[], // (NDOFEL,NDOFEL) Jacobian contribution for the current element
-      Real SVARS[],  // (NSVARS)        Persistent state variable values for the current element
-      Real ENERGY[], // (8)             Energy quantities at the start of the current
-                     //                 increment (to be updated by the UEL routine)
-      int * NDOFEL,  // Number of degrees of freedom (DOFs) for the current element
-      int * NRHS,    // NRHS=1: RHS should contain the residual vector,
-                     // NRHS=2: not implemented (modified Riks static procedure)
-      int * NSVARS,  // Number of persistent state variables for the element
-      Real PROPS[],  // (NPROPS) Static property values (parameters) defined for use with this
-                     // element.
-      int * NPROPS,  //
-      Real COORDS[], // (MCRD,NNODE) Undisplaced coordinates of the element nodes
-                     //              COORDS(K1,K2) is the K1th coordinate of the
-                     //              K2th node of the element
-      int * MCRD,  // Maximum number of coordinates needed at any node point (COORDINATES keyword -
-                   // unsupported)
-      int * NNODE, // Number of nodes in the current element
-      Real U[],    // (NDOFEL)   Total values of the variables
-      Real DU[],   // (MLVARX,*) Incremental values of the variables for the current increment
-                   //            for right-hand-side
-      Real V[],    // (NDOFEL) Time rate of change of the variables (velocities,
-                   //          rates of rotation). Defined for implicit dynamics only (LFLAGS(1)
-                   //          11 or 12)
-      Real A[],    // (NDOFEL) Accelerations of the variables. Defined for implicit dynamics
-                   //          only (LFLAGS(1) 11 or 12).
-      int * JTYPE, // Integer defining the element type. This is the user-defined integer value n in
-                   // element type Un
-      Real TIME[], // (2) step time and total time
-      Real * DTIME,  // Time increment
-      int * KSTEP,   // Step number (as per Abaqus definition) can be set by the user
-      int * KINC,    // Increment number (MOOSE time step)
-      int * JELEM,   // User-defined element number
-      Real PRAMS[],  // (*) parameters associated with the solution procedure
-      int * NDLOAD,  // Number of applied loads to the element (unused)
-      int JDLTYP[],  // (MDLOAD, *) array containing the integers used to define distributed load
-                     //             types for the element
-      Real ADLMAG[], // (MDLOAD,*)
-      Real PREDEF[], // (2,NPREDF,NNODE) predefined field variables, such as temperature in an
-                     //                  uncoupled stress/displacement analysis
-      int * NPREDF,  // Number of predefined field (auxiliary) variables, including temperature
-      int LFLAGS[],  // (*) flags that define the current solution procedure
-      int * MLVARX,  // used when several displacement or right-hand-side vectors are used
-      Real DDLMAG[], // (MDLOAD,*)
-      int * MDLOAD,  // Total number of distributed loads and/or fluxes defined on this element
-      Real * PNEWDT, // Recommended new timestep (unused)
-      int JPROPS[],  // (NJPROP) NJPROP integer property values defined for the current element
-      int * NJPROP,  // Number of user defined integer properties
-      Real * PERIOD  // Current step time period (unused)
-  );
-
   static InputParameters validParams();
   AbaqusUserElement(const InputParameters & params);
 
-  virtual void timestepSetup() override;
   virtual void initialSetup() override;
   virtual void meshChanged() override;
 
@@ -101,21 +44,11 @@ public:
 
   const uel_t & getPlugin() const { return _uel; }
 
-  const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
   const Real & getPNewDt() const { return _pnewdt; }
 
 protected:
   /// setup the range of elements this object operates on
   void setupElemRange();
-
-  /// The plugin file name
-  FileName _plugin;
-
-  /// The plugin library wrapper
-  DynamicLibraryLoader _library;
-
-  /// Function pointer to the dynamically loaded function
-  const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on
   MooseMesh & _moose_mesh;
@@ -148,23 +81,8 @@ protected:
   std::vector<Real> _props;
   int _nprops;
 
-  /// stateful data
-  int _nstatev;
-  std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
-  std::size_t _statev_index_current;
-  std::size_t _statev_index_old;
-  int & _t_step_old;
-
-  /// energy data
-  const bool _use_energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy_old;
-
   /// Abaqus element type
   const int _jtype;
-
-  /// timestep scaling factor
-  Real _pnewdt;
 
   friend class UELThread;
 };

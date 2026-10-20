@@ -11,7 +11,7 @@
 
 #include "Action.h"
 
-class AbaqusUELMesh;
+class AbaqusUELStepUserObject;
 
 class AddUELBCs : public Action
 {
@@ -23,7 +23,5 @@ public:
   virtual void act() override;
 
 private:
-  AbaqusUELMesh * _uel_mesh;
-
   std::shared_ptr<AbaqusUELStepUserObject> _step_uo;
 };

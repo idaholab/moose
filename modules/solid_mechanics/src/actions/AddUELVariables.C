@@ -15,7 +15,6 @@
 #include "AbaqusUELMesh.h"
 
 #include "libmesh/fe_type.h"
-#include "libmesh/string_to_enum.h"
 
 registerMooseAction("SolidMechanicsApp", AddUELVariables, "add_variable");
 
@@ -32,8 +31,7 @@ AddUELVariables::AddUELVariables(const InputParameters & params) : Action(params
 void
 AddUELVariables::act()
 {
-  const auto fe_type = FEType{Utility::string_to_enum<Order>("FIRST"),
-                              Utility::string_to_enum<FEFamily>("LAGRANGE")};
+  const FEType fe_type(FIRST, LAGRANGE);
   auto type = AddVariableAction::variableType(fe_type);
   auto var_params = _factory.getValidParams(type);
 
@@ -41,18 +39,18 @@ AddUELVariables::act()
   const auto uel_mesh = std::dynamic_pointer_cast<AbaqusUELMesh>(_mesh);
   if (!uel_mesh)
     mooseError("Must use an AbaqusUELMesh for UEL support.");
-  const auto uels = uel_mesh->getUELs();
-  std::set<std::size_t> all_vars;
+  const auto & uels = uel_mesh->getUELs();
+  std::set<Abaqus::AbaqusID> all_vars;
   // iterate over all UEL types
   for (const auto & uel : uels)
-    // each UEL has a list ov vars on each node; iterate over the nodal lists
+    // each UEL has a list of vars on each node; iterate over the nodal lists
     for (const auto & node_vars : uel._vars)
       // iterate over the variables active on the current node
       for (const auto & var : node_vars)
         all_vars.insert(var);
 
   // get all variable blocks
-  const auto all_blocks = uel_mesh->getVarBlocks();
+  const auto & all_blocks = uel_mesh->getVarBlocks();
 
   // create all variables
   for (const auto & var : all_vars)

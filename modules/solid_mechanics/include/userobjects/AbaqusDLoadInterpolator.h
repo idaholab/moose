@@ -27,10 +27,8 @@ public:
 
   AbaqusDLoadInterpolator(const InputParameters & parameters);
 
-  void timestepSetup() override;
-
   void initialize() override {}
-  void execute() override {}
+  void execute() override;
   void finalize() override {}
 
   /// Get JDLTYP array for element (nullptr if none)
@@ -39,7 +37,7 @@ public:
   const std::vector<Real> * getMagnitudes(Abaqus::Index elem_index) const;
 
 protected:
-  AbaqusUELMesh & _uel_mesh;
+  const AbaqusUELMesh & _uel_mesh;
   const AbaqusUELStepUserObject & _step_uo;
 
   std::unordered_map<Abaqus::Index, std::vector<int>> _types;

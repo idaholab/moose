@@ -9,12 +9,12 @@
 variable=<N>` data for a given Abaqus field number and assigns the corresponding value to nodes in
 the referenced Abaqus node sets.
 
-- Parameter `field` selects the Abaqus field number (`variable=` in the Abaqus `*Initial Condition`).
+- Parameter [!param](/AuxKernels/AbaqusPredefAux/field) selects the Abaqus field number (`variable=` in the Abaqus `*Initial Condition`).
 - Requires a nodal AuxVariable target; errors if the variable is not nodal.
 - Updates on `INITIAL` by default (and on step changes) so values are available to components such as
   [AbaqusUELMeshUserElement](userobjects/AbaqusUELMeshUserElement.md) via its `external_fields`
   option.
-- Only nodes present in the field’s node sets receive values; all others get 0.0.
+- Only nodes present in the field's node sets receive values; all others get 0.0.
 
 ## Usage
 

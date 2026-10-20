@@ -136,9 +136,13 @@ uel_(double RHS[],
   // Young's Modulus
   auto Y = PROPS[0];
 
-  // Coarse interpolation for testing spatially varying external fields
-  const double temperature = 1.0 / 3.0 * (PREDEF[0] + PREDEF[4] + PREDEF[8]);
-  const double voltage = 1.0 / 3.0 * (PREDEF[2] + PREDEF[6] + PREDEF[10]);
+  // Coarse interpolation for testing spatially varying external fields. PREDEF holds the value at
+  // the end of the increment and the increment; the UMAT this element mirrors sees the value at the
+  // start of the increment, which is their difference.
+  const double temperature =
+      1.0 / 3.0 * ((PREDEF[0] - PREDEF[1]) + (PREDEF[4] - PREDEF[5]) + (PREDEF[8] - PREDEF[9]));
+  const double voltage =
+      1.0 / 3.0 * ((PREDEF[2] - PREDEF[3]) + (PREDEF[6] - PREDEF[7]) + (PREDEF[10] - PREDEF[11]));
 
   Y *= (temperature + voltage) / 1000;
 

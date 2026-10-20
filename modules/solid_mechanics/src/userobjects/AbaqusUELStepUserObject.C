@@ -17,8 +17,6 @@
 #include "AbaqusUELStepUserObject.h"
 #include "libmesh/libmesh_common.h"
 #include <functional>
-#include <limits>
-#include <algorithm>
 
 registerMooseObject("SolidMechanicsApp", AbaqusUELStepUserObject);
 
@@ -27,10 +25,8 @@ AbaqusUELStepUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
-      "Maps the time steps and the load step simulation times. It can be "
-      "used in either direction depending on the simulation setup. It "
-      "generates steps to be used in StepPeriod to control the enabled/disabled state of objects "
-      "with user-provided simulation steps.");
+      "Tracks the current Abaqus *Step and provides the boundary condition, distributed load, and "
+      "predefined field data at the beginning and end of that step.");
 
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
   return params;
@@ -49,10 +45,14 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
           return std::ref(*uel_mesh);
         }()),
     _steps(_uel_mesh.getSteps()),
-    _current_step(libMesh::invalid_uint),
+    _current_step(declareRestartableData<unsigned int>("current_step", libMesh::invalid_uint)),
     _current_step_fraction(0.0),
     _current_step_bcs({&_uel_mesh.getModel()._bc_var_node_value_map,
                        &_uel_mesh.getModel()._bc_var_node_value_map}),
+    _current_step_begin_forces(
+        declareRestartableData<Abaqus::VariableValueMap<Real>>("current_step_begin_forces")),
+    _current_step_begin_solution(
+        declareRestartableData<Abaqus::VariableValueMap<Real>>("current_step_begin_solution")),
     _current_step_dloads({&_uel_mesh.getModel()._dloads, &_uel_mesh.getModel()._dloads}),
     _current_step_fields({&_uel_mesh.getModel()._field_var_node_value_map,
                           &_uel_mesh.getModel()._field_var_node_value_map})
@@ -62,7 +62,7 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
   for (const auto i : index_range(_times))
     _times[i] = i == 0 ? 0.0 : _steps[i - 1]._duration + _times[i - 1];
 
-  // get a MooseVariable for all variables occuring in *Boundary options
+  // get a MooseVariable for all variables occurring in *Boundary options
   auto populateVarMap = [this](const Abaqus::Step & step)
   {
     for (const auto & pair : step._bc_var_node_value_map)
@@ -83,16 +83,31 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
 }
 
 void
+AbaqusUELStepUserObject::initialSetup()
+{
+  // after recovery the current step is restored, so the step data pointers must be rebuilt
+  if (_current_step != libMesh::invalid_uint)
+    setCurrentStepData();
+}
+
+void
+AbaqusUELStepUserObject::setCurrentStepData()
+{
+  const Abaqus::Step & begin = _current_step == 0
+                                   ? static_cast<const Abaqus::Step &>(_uel_mesh.getModel())
+                                   : _steps[_current_step - 1];
+  const Abaqus::Step & end = _steps[_current_step];
+  _current_step_bcs = {&begin._bc_var_node_value_map, &end._bc_var_node_value_map};
+  _current_step_dloads = {&begin._dloads, &end._dloads};
+  _current_step_fields = {&begin._field_var_node_value_map, &end._field_var_node_value_map};
+}
+
+void
 AbaqusUELStepUserObject::timestepSetup()
 {
   // no steps - nothing to do
   if (_steps.empty())
     return;
-
-  if (_current_execute_flag == EXEC_INITIAL)
-    mooseInfoRepeated("EXEC_INITIAL  ", _fe_problem.timeStep());
-  if (_current_execute_flag == EXEC_TIMESTEP_BEGIN)
-    mooseInfoRepeated("EXEC_TIMESTEP_BEGIN  ", _fe_problem.timeStep());
 
   // determine current step and check if we changed into a new step
   std::size_t next_step = 0;
@@ -109,18 +124,13 @@ AbaqusUELStepUserObject::timestepSetup()
   if (next_step != _current_step)
   {
     if (_current_step != libMesh::invalid_uint && next_step != _current_step + 1)
-      mooseError("Cannot step backwards!");
-
-    // shift bc state (beginning and end of new step) forward
-    _current_step_bcs = {_current_step_bcs.second, &_steps[next_step]._bc_var_node_value_map};
-    // shift dload state forward
-    _current_step_dloads = {_current_step_dloads.second, &_steps[next_step]._dloads};
-    // shift predefined field state forward
-    _current_step_fields = {_current_step_fields.second,
-                            &_steps[next_step]._field_var_node_value_map};
+      mooseError(next_step < _current_step
+                     ? "Cannot step backwards!"
+                     : "A single time step may not skip over an entire Abaqus step.");
 
     // transitioning to a new step
     _current_step = next_step;
+    setCurrentStepData();
 
     const auto & bc_begin = *_current_step_bcs.first;
     const auto & bc_end = *_current_step_bcs.second;
@@ -137,7 +147,7 @@ AbaqusUELStepUserObject::timestepSetup()
     for (const auto & [var_id, begin_node_value_map] : bc_begin)
     {
       // get the moose variable we're operating on
-      const auto & var = *_var_map[var_id];
+      const auto & var = *libmesh_map_find(_var_map, var_id);
 
       // now iterate over all nodes where this variable was active at the beginning of the step
       const auto end_it = bc_end.find(var_id);
@@ -147,8 +157,9 @@ AbaqusUELStepUserObject::timestepSetup()
         {
           // this is a deactivated BC, so we need to store the concentrated force at the beginning
           // of the timestep
-          const auto * node_elem = _uel_mesh.elemPtr(pair.first);
-          mooseAssert(node_elem, "Node element not found for UEL element");
+          const auto * node_elem = _uel_mesh.queryElemPtr(pair.first);
+          if (!node_elem)
+            continue;
 
           // only the owning rank reads/stores per-node data: the consuming nodal kernel runs on
           // local nodes, and the dof must be locally owned to read it from the (ghosted) vector
@@ -173,7 +184,7 @@ AbaqusUELStepUserObject::timestepSetup()
     for (const auto & [var_id, end_node_value_map] : bc_end)
     {
       // get the moose variable we're operating on
-      const auto & var = *_var_map[var_id];
+      const auto & var = *libmesh_map_find(_var_map, var_id);
 
       // now iterate over all nodes where this variable is activated at the end of the step
       const auto begin_it = bc_begin.find(var_id);
@@ -184,8 +195,9 @@ AbaqusUELStepUserObject::timestepSetup()
         {
           // this is a newly activated BC, so we need to store the solution value at the beginning
           // of the timestep
-          const auto * node_elem = _uel_mesh.elemPtr(pair.first);
-          mooseAssert(node_elem, "Node element not found for UEL element");
+          const auto * node_elem = _uel_mesh.queryElemPtr(pair.first);
+          if (!node_elem)
+            continue;
 
           // only the owning rank reads/stores per-node data: the consuming nodal BC runs on local
           // nodes, and the dof must be locally owned to read it from the (ghosted) vector

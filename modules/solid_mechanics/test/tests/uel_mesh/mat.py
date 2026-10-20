@@ -27,5 +27,6 @@ nofd = read_matrix("mat_nofd.dat")
 # %%
 plt.imshow(fd - nofd)
 plt.colorbar()
+plt.show()
 
 # %%

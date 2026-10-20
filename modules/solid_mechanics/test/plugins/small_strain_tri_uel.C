@@ -33,7 +33,7 @@ uel_(double RHS[],
      int * /*MCRD*/,
      int * /*NNODE*/,
      double U_[],
-     double DU_[],
+     double /*DU_*/[],
      double /*V_*/[],
      double /*A_*/[],
      int * /*JTYPE*/,
@@ -63,10 +63,6 @@ uel_(double RHS[],
   // solution at the end of the increment
   Eigen::Matrix<Real, 6, 1> u;
   u << U_[0], U_[1], U_[2], U_[3], U_[4], U_[5];
-
-  // current solution increment
-  Eigen::Matrix<Real, 6, 1> du;
-  du << DU_[0], DU_[1], DU_[2], DU_[3], DU_[4], DU_[5];
 
   const auto & x1 = COORDS[0];
   const auto & y1 = COORDS[1];

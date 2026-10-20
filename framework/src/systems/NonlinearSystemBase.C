@@ -974,13 +974,15 @@ NonlinearSystemBase::setInitialSolution()
         {
           const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (const auto & preset_bc : preset_bcs)
-            preset_bc->computeValue(initial_solution);
+            if (preset_bc->shouldApply())
+              preset_bc->computeValue(initial_solution);
         }
         if (has_ad_preset_nodal_bcs)
         {
           const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (const auto & preset_bc : preset_bcs_res)
-            preset_bc->computeValue(initial_solution);
+            if (preset_bc->shouldApply())
+              preset_bc->computeValue(initial_solution);
         }
       }
     }

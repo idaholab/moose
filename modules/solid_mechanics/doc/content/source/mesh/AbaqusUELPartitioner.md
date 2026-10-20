@@ -62,8 +62,8 @@ space-filling-curve libraries.
 
 ParMETIS expects a distributed graph, i.e. every rank must own a chunk of the elements. On a
 replicated mesh every rank holds every element, so `partition()` first applies a linear
-partitioning to hand each rank a contiguous block before the dual graph is built. This mirrors
-`PetscExternalPartitioner::preLinearPartition()`.
+partitioning to hand each rank a contiguous block before the dual graph is built. This step calls
+the shared static helper `PetscExternalPartitioner::preLinearPartition()`.
 
 ## Related Objects
 

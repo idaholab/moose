@@ -104,6 +104,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
     _need_JxW_neighbor(false),
+    _JxW_msm(nullptr),
     _qrule_msm(nullptr),
     _custom_mortar_qrule(false),
     _current_qrule_lower(nullptr),
@@ -168,10 +169,11 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   // request phi, dphi, xyz, JxW, etc. data
   helpersRequestData();
 
-  // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
-  // of discretization
+  // no mortar in 0D meshes
   if (_mesh_dimension > 0)
   {
+    // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE
+    // regardless of discretization
     const auto mortar_helper_type =
         FEType(_mesh_dimension == 2 ? helper_order : FIRST, LAGRANGE).set_p_refinement(false);
     _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, mortar_helper_type);
@@ -431,8 +433,10 @@ Assembly::buildVectorLowerDFE(FEType type) const
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
   unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  if (_mesh_dimension == 0)
+    return;
   const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
-  if (ending_dim < dim || _mesh_dimension == 0)
+  if (ending_dim < dim)
     return;
   for (; dim <= ending_dim; dim++)
   {
@@ -459,8 +463,10 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
   unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  if (_mesh_dimension == 0)
+    return;
   const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
-  if (ending_dim < dim || _mesh_dimension == 0)
+  if (ending_dim < dim)
     return;
   for (; dim <= ending_dim; dim++)
   {
@@ -776,6 +782,7 @@ Assembly::clearCachedQRules()
 void
 Assembly::setMortarQRule(Order order)
 {
+  mooseAssert(_qrule_msm, "Mortar quadrature rule is not built on a 0-D mesh");
   if (order != _qrule_msm->get_order())
   {
     // If custom mortar qrule has not yet been specified

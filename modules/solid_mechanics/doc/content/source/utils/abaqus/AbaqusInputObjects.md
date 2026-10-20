@@ -2,7 +2,7 @@
 
 ## Overview
 
-- Purpose: Convert the parser’s syntax tree into a validated model of parts, instances, assemblies, sets, user elements, and steps that downstream code can consume.
+- Purpose: Convert the parser's syntax tree into a validated model of parts, instances, assemblies, sets, user elements, and steps that downstream code can consume.
 - Scope: Semantic interpretation of `*Node`, `*Element`, `*User Element`, `*Nset`, `*Elset`, `*UEL PROPERTY`, and `*Step` (`*Boundary`, `*Static`, etc.).
 
 ## Model Types
@@ -18,7 +18,7 @@
 - APIs: `Model::getNodeIndex(key, instance)` and `Model::getElementIndex(key, instance)`.
   - FlatModel: errors if `instance != nullptr`; accepts clean integer keys only.
   - AssemblyModel:
-    - If `instance` is provided: `key` must be a clean integer; lookup uses the instance’s part-local maps and adds the instance’s global offset.
+    - If `instance` is provided: `key` must be a clean integer; lookup uses the instance's part-local maps and adds the instance's global offset.
     - If `instance == nullptr`: supports `instanceName.id` (inline) or plain integers.
 
 ## Instance Access
@@ -42,7 +42,7 @@
   - Ambiguity: header `instance=` and inline `NAME.id` are mutually exclusive within the same set; using both causes an error.
 
 - Elset-to-Nset copy:
-  - `*Nset, elset=S, instance=NAME` copies nodes from elements in `S` taken from the specified instance; indices are shifted by the instance’s node offset.
+  - `*Nset, elset=S, instance=NAME` copies nodes from elements in `S` taken from the specified instance; indices are shifted by the instance's node offset.
 
 ## Boundary Conditions
 

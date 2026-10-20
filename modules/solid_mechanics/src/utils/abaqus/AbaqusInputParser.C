@@ -12,6 +12,8 @@
 #include "MooseStringUtils.h"
 #include "MooseUtils.h"
 
+#include <set>
+
 namespace Abaqus
 {
 
@@ -20,6 +22,8 @@ HeaderMap::HeaderMap(std::vector<std::string> fields)
   fields.erase(fields.begin());
   for (const auto & field : fields)
   {
+    if (MooseUtils::trim(field).empty())
+      continue;
     std::vector<std::string> pair;
     MooseUtils::tokenize(field, pair, 2, "=");
     _map[MooseUtils::toLower(MooseUtils::removeExtraWhitespace(pair[0]))] =
@@ -91,7 +95,7 @@ InputParser::parse(std::istream & in)
   // check if this is a flat or assembly based file
   _is_flat = true;
   forAll(nullptr,
-         [this](const std::string & key, BlockNode &)
+         [this](const std::string & key, const BlockNode &)
          {
            // if we find an assembly block, this is not a flat file
            if (key == "assembly")
@@ -105,22 +109,15 @@ InputParser::loadFile(std::istream & in)
   _current_line = 0;
 
   std::string s, ss;
-  while (true)
+  while (std::getline(in, s))
   {
-    if (in.eof())
-      break;
-
-    // read line
-    std::getline(in, s);
     ss = s;
 
     // continuation lines
     while (ss.length() > 0 && ss.back() == ',')
     {
-      std::getline(in, s);
-
       // error, expected a continuation line but got EOF
-      if (in.eof())
+      if (!std::getline(in, s))
         mooseError("Expected a continuation line but got EOF in Abaqus input file");
 
       ss += s;
@@ -130,9 +127,8 @@ InputParser::loadFile(std::istream & in)
     if (ss.empty() || (ss.length() >= 2 && ss.substr(0, 2) == "**"))
       continue;
 
-    // tokenize and trim
-    std::vector<std::string> items;
-    MooseUtils::tokenize(ss, items, 1, ",");
+    // split and trim, keeping empty fields since Abaqus data lines are positional
+    auto items = MooseUtils::split(ss, ",");
     for (auto & item : items)
       item = MooseUtils::removeExtraWhitespace(item);
 
@@ -155,7 +151,11 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
   {
     const auto & line = _lines[_current_line];
     if (line[0][0] != '*')
+    {
       node._data.push_back(line);
+      _current_line++;
+      continue;
+    }
     const auto keyword = MooseUtils::toLower(line[0].substr(1));
 
     // subblock end
@@ -180,7 +180,7 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
     else
       mooseError("Unknown keyword '" + line[0] +
                  "' in Abaqus input file. Add this to abaqus_blocks or abaqus_options in "
-                 "InputParser.C to parse it.");
+                 "AbaqusInputParser.C to parse it.");
   }
 }
 
@@ -199,7 +199,7 @@ InputParser::parseOption(const std::vector<std::string> & head_line)
   return node;
 }
 
-InputNode::InputNode(std::vector<std::string> line)
+InputNode::InputNode(const std::vector<std::string> & line)
 {
   _type = line[0];
   if (!_type.empty() && _type[0] == '*')

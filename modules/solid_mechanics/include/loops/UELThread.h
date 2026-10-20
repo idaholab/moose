@@ -14,7 +14,6 @@
 #include "libmesh/elem_range.h"
 #include "AuxiliarySystem.h"
 
-class AbaqusUserElement;
 class UELThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -24,6 +23,9 @@ public:
   UELThread(UELThread & x, Threads::split split);
 
   void join(const UELThread & other);
+
+  /// recommended time increment ratio (minimum over all elements)
+  Real minPNewDt() const { return _min_pnewdt; }
 
 protected:
   virtual void pre() override;
@@ -73,8 +75,12 @@ private:
   /// state variable copy
   std::vector<Real> _statev_copy;
 
-  /// recommended timestep rescaling (minimum over all elements)
-  Real _min_pnewdt;
+  /// energy copy
+  std::array<Real, 8> _energy_copy;
 
-  friend class AbaqusUserElement;
+  /// arguments for the UEL plugin call on the current element
+  Abaqus::UELArguments _uel_args;
+
+  /// recommended time increment ratio (minimum over all elements)
+  Real _min_pnewdt;
 };

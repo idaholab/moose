@@ -2,10 +2,6 @@
   issues = '#29382'
   design = 'AbaqusUELMeshUserElement.md AbaqusEssentialBC.md AbaqusForceBC.md'
 
-  # AbaqusUELMesh installs its own AbaqusUELPartitioner, which builds the dual graph from the UEL
-  # connectivity and partitions it with ParMETIS (via PETSc). This replaces the previous linear
-  # partitioner workaround that was needed because the disconnected NodeElem mesh produced an empty
-  # connectivity graph for the standard partitioners.
   capabilities = 'installation_type=in_tree'
 
   [build_uel_plugin_opt]
@@ -30,6 +26,7 @@
     input = abaqus_uel_read.i
     exodiff = abaqus_uel_read_in.e
     cli_args = '--mesh-only'
+    recover = false
     requirement = 'The system shall be able to load an Abaqus input file with UEL user elements.'
   []
 
@@ -88,5 +85,20 @@
     cli_args = 'Outputs/file_base=CUBE_UEL_BCS_out Mesh/file=CUBE_UEL_BCS.inp Executioner/dt=0.5 Executioner/end_time=3.0'
     requirement = 'The system shall be able to load an Abaqus input file with a UEL user element and apply distributed loads that vary over multiple steps and output UEL state variables.'
     prereq = 'multistep_uel'
+  []
+
+  [amplitude_field]
+    type = CSVDiff
+    input = amplitude_field.i
+    csvdiff = amplitude_field_out.csv
+    design = 'AddUELFunctions.md AbaqusPredefAux.md'
+    requirement = 'The system shall create a function for each Abaqus amplitude table and apply a predefined field that follows that amplitude.'
+  []
+  [cube_uel_bcs]
+    type = CSVDiff
+    input = cube_uel_bcs.i
+    csvdiff = per_variable_bcs_statev_0030.csv
+    cli_args = 'Outputs/file_base=per_variable_bcs Outputs/exodus=false'
+    requirement = 'The system shall apply Abaqus boundary conditions that are defined for each variable in a single step to a UEL mesh.'
   []
 []
