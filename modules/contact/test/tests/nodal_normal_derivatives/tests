@@ -156,8 +156,12 @@
     # The penalty formulation provides a smooth initial active set and comparable contact and bulk
     # Jacobian blocks. The checked Jacobian precedes a forced full Newton step that can invert an
     # element, so the solve aborts once the Jacobian check is complete.
-    ratio_tol = 6.4e-4
-    difference_tol = 3.1
+    # The tolerances sit at the geometric mean of the measured ratio and difference with the
+    # nodal-normal derivatives included (1.70e-3, 9.04) and suppressed (2.32e-3, 12.3), so the test
+    # fails if the derivatives are dropped. These values use the TRI6 dual basis of libMesh #4536,
+    # which changes the interface operator and therefore both measurements.
+    ratio_tol = 2.0e-3
+    difference_tol = 10.6
     capabilities = 'ad_size>=200'
     # Finite-difference Jacobian testing requires one residual evaluation per degree of freedom.
     max_time = 600
