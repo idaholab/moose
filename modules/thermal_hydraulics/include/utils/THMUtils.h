@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "MooseTypes.h"
 
 #include "libmesh/parallel.h"
@@ -82,4 +84,28 @@ bool implicitTimeIntegrationFlag(MooseApp & app);
  * @param[in] moose_base  The MooseBase being constructed
  */
 void informExperimental(const MooseBase & moose_base);
+
+/**
+ * Makes a controllable parameter of an ActionComponent controllable the way classic THM
+ * Components are, and passes the control on to the MOOSE object that uses it
+ *
+ * The parameter is connected to the object's parameter (see
+ * MooseBase::connectControllableParams()), which makes it controllable by the name the framework
+ * gives an Action's parameters. It is also given the classic name, 'component/<name>/<param>'
+ * (see Component::connectObject()), so that the controls and postprocessors written for classic
+ * Components work unchanged.
+ *
+ * The parameter must have been declared controllable in the component's validParams().
+ *
+ * @param[in] component  The ActionComponent
+ * @param[in] param  Name of the component's controllable parameter
+ * @param[in] object_type  Type of the object, added by the component, that uses the parameter
+ * @param[in] object_name  Name of the object
+ * @param[in] object_param  Name of the object's parameter; defaults to \p param
+ */
+void connectComponentControllableParam(const MooseBase & component,
+                                       const std::string & param,
+                                       const std::string & object_type,
+                                       const std::string & object_name,
+                                       const std::string & object_param = "");
 }
