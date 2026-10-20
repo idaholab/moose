@@ -39,6 +39,8 @@ T_in = 359.15
 
 [AuxVariables]
     [Pin_surface_temperature]
+        # Same order as temperature, so the MatchedValueBC has a value at every boundary node
+        order = SECOND
     []
     [pin_diameter_deformed]
         # order = CONSTANT
@@ -47,6 +49,9 @@ T_in = 359.15
     [q_prime]
         order = CONSTANT
         family = MONOMIAL
+    []
+    # q_prime on the nodes, so that the transfer to the subchannel nodes is not ambiguous
+    [q_prime_nodal]
     []
 []
 
@@ -77,6 +82,12 @@ T_in = 359.15
         boundary = 'right'
         execute_on = 'TIMESTEP_END'
         use_displaced_mesh = true
+    []
+    [QPrimeNodal]
+        type = ProjectionAux
+        variable = q_prime_nodal
+        v = q_prime
+        execute_on = 'TIMESTEP_END'
     []
     [Deformation]
         type = ParsedAux
@@ -124,11 +135,6 @@ T_in = 359.15
         type = HeatConductionMaterial
         thermal_conductivity = 1.0
         block = 0
-    []
-    [density]
-        type = Density
-        block = 0
-        density = 1.0
     []
 []
 
@@ -202,6 +208,14 @@ T_in = 359.15
 []
 
 [Postprocessors]
+    # Heat rate through the pin surface, preserved by the q_prime transfer to SCM
+    [pin_surface_heat_rate]
+        type = SideDiffusiveFluxIntegral
+        variable = temperature
+        boundary = right
+        diffusivity = thermal_conductivity
+        use_displaced_mesh = true
+    []
     [total_power]
         type = ElementIntegralFunctorPostprocessor
         functor = volumetric_heat_rate

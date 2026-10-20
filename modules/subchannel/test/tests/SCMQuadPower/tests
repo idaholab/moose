@@ -90,4 +90,13 @@
     issues = '#34082'
     requirement = 'The system will report an error when the total power postprocessor of the quadrilateral lattice power initial condition does not execute on initial, since it would not have been computed when the initial condition is set.'
   []
+  [pin_power_on_initial]
+    type = RunApp
+    input = 'test_with_pins.i'
+    cli_args = "Postprocessors/Total_power_SCMPinPowerPostprocessor/execute_on='initial timestep_end' Outputs/file_base=pin_power_on_initial"
+    recover = False
+    issues = '#34154'
+    design = 'SCMPinPowerPostprocessor.md'
+    requirement = 'The system shall compute the heat rate from the fuel pins to the coolant before the first subchannel solve.'
+  []
 []

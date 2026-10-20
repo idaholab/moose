@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#34154'
+  design = 'SCMPinPowerPostprocessor.md'
+  [one_pin]
+    type = CSVDiff
+    input = one_pin_problem.i
+    csvdiff = one_pin_problem_out.csv
+    # The visualization app only projects the solution onto a detailed mesh
+    cli_args = "Outputs/exodus=false MultiApps/active=sub Transfers/active='Tpin diameter q_prime'"
+    capabilities = 'method!=dbg'
+    recover = false
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall couple a subchannel model to a thermo-mechanical pin model and preserve the pin power transferred back to the coolant.'
+  []
+[]
