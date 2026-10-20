@@ -282,7 +282,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
       -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
   if (abs(reported_gap) > _penetration_tolerance)
   {
-    mooseInfoRepeated("Penetration tolerance fail max_gap = ",
+    mooseInfoRepeated("Gap tolerance fail max_gap = ",
                       reported_gap,
                       " (gap_tol=",
                       _penetration_tolerance,
@@ -292,7 +292,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     return false;
   }
   else
-    mooseInfoRepeated("Penetration tolerance success max_gap = ",
+    mooseInfoRepeated("Gap tolerance success max_gap = ",
                       reported_gap,
                       " (gap_tol=",
                       _penetration_tolerance,
