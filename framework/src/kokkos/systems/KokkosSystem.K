@@ -303,6 +303,23 @@ System::setupSparsity()
 }
 
 void
+System::updateSparsity()
+{
+  mooseAssert(_dof_map.n_local_dofs() == _num_local_dofs &&
+                  _dof_map.get_send_list().size() == _num_ghost_dofs,
+              "Kokkos system error: the sparsity pattern can be updated only for an unchanged DOF "
+              "numbering.");
+
+  if (dynamic_cast<AuxiliarySystem *>(&_system))
+    return;
+
+  setupSparsity();
+
+  for (const auto tag : make_range(_matrices.size()))
+    _matrices[tag].destroy();
+}
+
+void
 System::buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const
 {
   const auto & col_idx = _sparsity.col_idx;

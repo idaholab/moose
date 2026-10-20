@@ -77,6 +77,22 @@ protected:
                                               SubdomainID secondary_subdomain_id,
                                               const AutomaticMortarGeneration & amg) const;
 
+  /**
+   * Couple the query element to the elements that the mortar segments may pair it with after the
+   * interface moves by up to one element: the mortar interface couplings of the query element and
+   * of its interface point neighbors, together with the interface point neighbors of those
+   * couplings. The displaced-mesh geometric ghosting holds the whole interface, which contains
+   * every element this adds.
+   */
+  void coupleMovingInterfaceNeighbors(const processor_id_type p,
+                                      const Elem * const query_elem,
+                                      map_type & coupled_elements,
+                                      const BoundaryID primary_boundary_id,
+                                      const BoundaryID secondary_boundary_id,
+                                      const SubdomainID primary_subdomain_id,
+                                      const SubdomainID secondary_subdomain_id,
+                                      const AutomaticMortarGeneration & amg) const;
+
   void ghostHigherDNeighbors(const processor_id_type p,
                              const Elem * const query_elem,
                              map_type & coupled_elements,

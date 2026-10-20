@@ -398,6 +398,15 @@ FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType
 }
 
 void
+FEProblemBase::updateKokkosSparsity()
+{
+  for (auto & system : _kokkos_systems.constructedEntries())
+    system.updateSparsity();
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
+    system.updateSparsity();
+}
+
+void
 FEProblemBase::initKokkos()
 {
   TIME_SECTION("InitializeKokkos", 1, "Initializing Kokkos");

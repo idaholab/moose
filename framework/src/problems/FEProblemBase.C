@@ -1465,8 +1465,11 @@ FEProblemBase::initialSetup()
     updateMortarMesh();
   }
 
-  // Possibly reinit one more time to get ghosting correct
-  reinitBecauseOfGhostingOrNewGeomObjects();
+  // Possibly reinit one more time to get ghosting correct, including the pairing of displaced
+  // mortar interfaces moved by the initial displacements
+  reinitBecauseOfGhostingOrNewGeomObjects(
+      /*mortar_changed=*/_mortar_data->hasDisplacedObjects() &&
+      _mortar_data->displacedCouplingGrew());
 
   if (_displaced_mesh)
     _displaced_problem->updateMesh();
@@ -1802,6 +1805,18 @@ FEProblemBase::timestepSetup()
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
     //     we're ready to update the sparsity pattern
     es().reinit_systems();
+  }
+
+  // A displaced mortar interface re-pairs as the mesh moves. The coupling functor pads the
+  // pattern by one interface element around each pairing, and the pattern follows the pairing of
+  // the converged configuration of the previous step.
+  if (_t_step > 1 && _mortar_data->hasDisplacedObjects() && _mortar_data->displacedCouplingGrew())
+  {
+    reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
+#ifdef MOOSE_KOKKOS_ENABLED
+    if (_has_kokkos_objects)
+      updateKokkosSparsity();
+#endif
   }
 
   _control_warehouse.timestepSetup();

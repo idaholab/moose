@@ -889,6 +889,11 @@ public:
    * @returns The array of Kokkos System objects
    */
   ///@{
+  /**
+   * Update the sparsity patterns that the Kokkos systems copy from their DOF maps, after the
+   * patterns were rebuilt with the same DOF numbering
+   */
+  void updateKokkosSparsity();
   Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
   const Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() const
   {

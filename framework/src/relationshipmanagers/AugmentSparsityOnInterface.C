@@ -118,6 +118,60 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
 }
 
 void
+AugmentSparsityOnInterface::coupleMovingInterfaceNeighbors(
+    const processor_id_type p,
+    const Elem * const query_elem,
+    map_type & coupled_elements,
+    const BoundaryID primary_boundary_id,
+    const BoundaryID secondary_boundary_id,
+    const SubdomainID primary_subdomain_id,
+    const SubdomainID secondary_subdomain_id,
+    const AutomaticMortarGeneration & amg) const
+{
+  const auto & binfo = _mesh->get_boundary_info();
+  const auto on_interface = [&](const Elem & elem)
+  {
+    if (elem.subdomain_id() == primary_subdomain_id ||
+        elem.subdomain_id() == secondary_subdomain_id)
+      return true;
+    for (const auto side : elem.side_index_range())
+      if (binfo.has_boundary_id(&elem, side, primary_boundary_id) ||
+          binfo.has_boundary_id(&elem, side, secondary_boundary_id))
+        return true;
+    return false;
+  };
+
+  // The element and its point neighbors on the interface
+  const auto with_interface_neighbors = [&](const Elem & elem)
+  {
+    std::set<const Elem *> neighbors;
+    elem.find_point_neighbors(neighbors);
+    std::set<const Elem *> result = {&elem};
+    for (const auto * const neighbor : neighbors)
+      if (on_interface(*neighbor))
+        result.insert(neighbor);
+    return result;
+  };
+
+  if (!on_interface(*query_elem))
+    return;
+
+  const auto & mic = amg.mortarInterfaceCoupling();
+  for (const auto * const near : with_interface_neighbors(*query_elem))
+  {
+    const auto it = mic.find(near->id());
+    if (it == mic.end())
+      continue;
+
+    for (const auto coupled_id : it->second)
+      if (const Elem * const coupled = _mesh->query_elem_ptr(coupled_id))
+        for (const auto * const padded : with_interface_neighbors(*coupled))
+          if (padded->processor_id() != p)
+            coupled_elements.emplace(padded, _null_mat);
+  }
+}
+
+void
 AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
     const processor_id_type p,
     const Elem * const query_elem,
@@ -358,6 +412,17 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
       ghostMortarInterfaceCouplings(p, elem, coupled_elements, *amg);
+
+      // The pairing of a moving interface changes between sparsity pattern rebuilds
+      if (_is_coupling_functor && _use_displaced_mesh)
+        coupleMovingInterfaceNeighbors(p,
+                                       elem,
+                                       coupled_elements,
+                                       primary_boundary_id,
+                                       secondary_boundary_id,
+                                       primary_subdomain_id,
+                                       secondary_subdomain_id,
+                                       *amg);
 
       if (_ghost_point_neighbors)
         ghostLowerDSecondaryElemPointNeighbors(
