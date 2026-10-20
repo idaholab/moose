@@ -30,8 +30,9 @@ SCMQuadPowerIC::validParams()
   params.addParam<FunctionName>(
       "axial_heat_rate",
       "1.0",
-      "user provided normalized function of axial heat rate [Unitless]. "
-      "The integral over pin heated length should equal the heated length");
+      "Axial shape of the heat rate as a function of the distance from the start of the "
+      "heated section [Unitless]. Its magnitude does not matter because each pin is "
+      "rescaled to its assigned power. It should depend only on z");
   return params;
 }
 

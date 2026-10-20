@@ -25,10 +25,12 @@ SCMQuadPowerAux::validParams()
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
       "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
-  params.addParam<FunctionName>("axial_heat_rate",
-                                "1.0",
-                                "user provided normalized function of axial heat rate [Unitless]. "
-                                "The integral over pin length should equal the heated length");
+  params.addParam<FunctionName>(
+      "axial_heat_rate",
+      "1.0",
+      "Axial shape of the heat rate as a function of the distance from the start of the "
+      "heated section [Unitless]. Its magnitude does not matter because each pin is "
+      "rescaled to its assigned power. It should depend only on z");
   return params;
 }
 
