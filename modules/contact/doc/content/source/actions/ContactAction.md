@@ -45,7 +45,10 @@ pressure, so each takes the stiffness of the deformation it measures.
 The normal and tangential multipliers are also represented as $D_{n,j}$ and $D_{t,j}$ times their
 stored values, and the multiplier rows are rescaled from pressure to force units. These two changes put the multiplier rows and columns
 of the Jacobian at the order of the elasticity block, so the user does not choose the multiplier
-scaling. Each node's stiffnesses are fixed the first time the node has mortar coverage, which keeps the
+scaling. The multiplier variables therefore hold scaled values, so objects that need the contact
+pressure should use the `contact_pressure` output, which applies the scale, and should not couple
+the normal multiplier variable directly. Each node's stiffnesses are fixed the first time the node
+has mortar coverage, which keeps the
 meaning of the stored multiplier values unchanged as the contact surfaces move. The physical
 strategy cannot be combined with user-set contact constants or multiplier scaling, with automatic
 scaling, or with [!param](/Contact/ContactAction/mortar_dynamics). For Coulomb friction it requires
