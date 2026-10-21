@@ -6,7 +6,7 @@ dP = -10130
 Tin = 700
 rho = 10545.35
 mu = 0.00209528
-alpha = 0.0
+dH = 0.0
 epsilon = 0.0001
 forms = 0.0
 pump = 0.0
@@ -67,7 +67,7 @@ t_w = 0.001
 
 [ScalarKernels]
   [pipe1_mom]
-    type = IncompressibleMomentumSPScalarKernel
+    type = ADIncompressibleMomentumSPScalarKernel
     variable = 'm1'
     reference_pressure_drop = 'dPc'
     temperatures = 'T1'
@@ -76,7 +76,7 @@ t_w = 0.001
     areas = '${area1}'
     perimeters = '${fparse 2*3.14159* ${R}}'
     lengths = '${len1}'
-    alphas = '${alpha}'
+    height_changes = '${dH}'
     forms_losses = KMHD
     pump_pressures = '${pump}'
     roughnesses = '${epsilon}'
@@ -84,7 +84,7 @@ t_w = 0.001
     is_implicit = True
   []
   [pipe1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'm1'
   []
   [temp]
@@ -135,7 +135,7 @@ t_w = 0.001
   []
   [analytical_mdot]
     type = ParsedPostprocessor
-    expression = 'sqrt(-(${dP} + ${rho} * ${gravity} * ${len1} * sin(${alpha}) - ${pump}) / (f * ${len1} / 4 / ${R} / ${rho} / ${area1}^2 + (${forms} + Kmhd) / 2 / ${rho} / ${area1}^2))'
+    expression = 'sqrt(-(${dP} + ${rho} * ${gravity} * ${len1} * sin(${dH}) - ${pump}) / (f * ${len1} / 4 / ${R} / ${rho} / ${area1}^2 + (${forms} + Kmhd) / 2 / ${rho} / ${area1}^2))'
     pp_names = 'f Kmhd'
     execute_on = 'TIMESTEP_END'
   []
