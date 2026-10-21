@@ -17,6 +17,7 @@
 #include "MFEMHypreFGMRES.h"
 #include "MFEMHyprePCG.h"
 #include "MFEMHypreBoomerAMG.h"
+#include "MFEMHypreDiagScale.h"
 #include "MFEMHypreADS.h"
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
@@ -264,6 +265,28 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
   ASSERT_NE(solver_downcast, nullptr);
   testDiffusionSolve<mfem::HypreBoomerAMG>(solver, 1e-5);
+}
+
+/**
+ * Test MFEMHypreDiagScale creates an mfem::HypreDiagScale preconditioner that a hypre Krylov
+ * solver accepts.
+ */
+TEST_F(MFEMSolverTest, MFEMHypreDiagScale)
+{
+  // Construct preconditioner
+  InputParameters prec_params = _factory.getValidParams("MFEMHypreDiagScale");
+  MFEMHypreDiagScale & prec =
+      addObject<MFEMHypreDiagScale>("MFEMHypreDiagScale", "prec1", prec_params);
+  ASSERT_NE(dynamic_cast<mfem::HypreDiagScale *>(&prec.GetSolver()), nullptr);
+
+  // Construct solver
+  InputParameters solver_params = _factory.getValidParams("MFEMHyprePCG");
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
+  solver_params.set<MFEMSolverName>("preconditioner") = "prec1";
+  MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::HyprePCG>(solver, 1e-5);
 }
 
 /**

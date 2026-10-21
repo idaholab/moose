@@ -7,4 +7,11 @@
     design = 'MFEMMINRESSolver.md'
     requirement = 'The system shall solve an MFEM linear system with the MINRES method.'
   []
+  [hypre_diag_scale]
+    type = GoogleTest
+    unit_test = MFEMSolverTest.MFEMHypreDiagScale
+    design = 'MFEMHypreDiagScale.md'
+    requirement = 'The system shall precondition a hypre conjugate gradient solve of an MFEM linear '
+                  'system with diagonal scaling.'
+  []
 []
