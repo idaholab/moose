@@ -334,6 +334,15 @@
     input = test_SubprocessRunner.py
     requirement = 'The system shall wait for specified application output before delivering a signal.'
   []
+  [monitor_processes]
+    type = PythonUnitTest
+    input = test_MonitorProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall measure the memory usage of a process and its descendants, "
+                  "splitting memory shared between processes proportionally and excluding "
+                  "file-backed memory when the kernel reports it separately."
+    issues = '#33796'
+  []
   [test_method]
     type = PythonUnitTest
     input = test_GetExecutable.py

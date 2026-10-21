@@ -7,7 +7,6 @@
     test_case = TestAdvection1DUpwind
     requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a one-dimensional domain.'
     max_threads = 1 # see libmesh issue #3808
-    min_slots = 2 # memory intensive
   []
   [mms-1d-linear]
     type = MMSTest
@@ -24,7 +23,6 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
-    min_slots = 2
   []
   [mms-1d-vanleer]
     type = PythonUnitTest
@@ -43,7 +41,6 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
-    min_slots = 2
   []
   [mms-2d-upwind]
     type = MMSTest
@@ -76,7 +73,6 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
-    min_slots = 2
   []
   [mms-2d-minmod]
     type = PythonUnitTest
@@ -86,7 +82,6 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
-    min_slots = 2
   []
   [mms-2d-upwind-tris]
     type = MMSTest

@@ -23,7 +23,6 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
-        min_slots = 2 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]
@@ -122,8 +121,8 @@
         prereq = MFEMCopyTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
-        min_slots = 2 # occasionally uses lots of memory
       []
     []
     [ToSubFromParent]
@@ -146,8 +145,8 @@
         prereq = MFEMCopyTransfer/ToSubFromParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
-        min_slots = 2 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]
