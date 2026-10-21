@@ -203,6 +203,37 @@
 []
 
 [Postprocessors]
+  # Water saturation at a few points, for the regression test
+  [sw_x10]
+    type = PointValue
+    variable = swater
+    point = '10.1 0 0'
+  []
+  [sw_x20]
+    type = PointValue
+    variable = swater
+    point = '20.1 0 0'
+  []
+  [sw_x30]
+    type = PointValue
+    variable = swater
+    point = '30.1 0 0'
+  []
+  [sw_x40]
+    type = PointValue
+    variable = swater
+    point = '40.1 0 0'
+  []
+  [sw_x50]
+    type = PointValue
+    variable = swater
+    point = '50.1 0 0'
+  []
+  [p_inlet]
+    type = PointValue
+    variable = pwater
+    point = '0 0 0'
+  []
   [water_in_place]
     type = PorousFlowFluidMass
     fluid_component = 0
