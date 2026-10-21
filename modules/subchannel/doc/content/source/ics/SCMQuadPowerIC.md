@@ -13,6 +13,8 @@ The user must provide the  total power of the subassembly [!param](/ICs/SCMQuadP
 If the first entry is 1.0, that means that the pin with index 0 is at 100% power. If the 5th entry has a value of 0.0 that means that pin with index 4 has 0% power, etc.
 The pin and subchannel indexes are presented in [user notes page](user_notes.md).
 
+If [!param](/ICs/SCMQuadPowerIC/power) is a postprocessor, its `execute_on` must include `INITIAL`, so that it executes before the initial conditions are set; otherwise this object reports an error. This does not apply to a [Receiver.md] postprocessor, whose value is set by a transfer.
+
 The radial power distribution is normalized by the sum of its entries, so the pin powers always add up to [!param](/ICs/SCMQuadPowerIC/power). A pin with 100% power has a value of power which is equal to the total power of the subassembly divided by the sum of the entries. If the entries sum to the number of heated pins, a pin with 100% power has the average pin power.
 
 The total power of pin with index 6 is calculated as the product of the 100% pin power, times the value on the 7th line of the radial power distribution .txt file.

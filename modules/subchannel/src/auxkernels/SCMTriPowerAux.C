@@ -170,7 +170,7 @@ SCMTriPowerAux::computeShapeIntegral()
     // The correction is the factor between q_prime and the uncorrected average linear heat
     // rate of each pin, the pin power over the heated length
     Eigen::MatrixXd correction = Eigen::MatrixXd::Zero(n_pins, 1);
-    for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
+    for (const auto i_pin : make_range(n_pins))
       if (_shape_integral(i_pin) != 0.0)
         correction(i_pin) = heated_length / _shape_integral(i_pin);
     _console << "###########################################" << std::endl;

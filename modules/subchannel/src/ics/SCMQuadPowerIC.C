@@ -9,6 +9,7 @@
 
 #include "SCMQuadPowerIC.h"
 #include "Function.h"
+#include "Receiver.h"
 #include "QuadSubChannelMesh.h"
 
 using namespace std;
@@ -87,6 +88,15 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
 void
 SCMQuadPowerIC::initialSetup()
 {
+  // A power postprocessor executes before initial conditions only if it executes on INITIAL;
+  // otherwise it still holds its default of zero here. A Receiver is set by a transfer instead,
+  // so its execute_on does not control its value.
+  if (!isDefaultPostprocessorValue("power") &&
+      !dynamic_cast<const Receiver *>(&getUserObjectBase("power")) &&
+      !getUserObjectBase("power").getExecuteOnEnum().isValueSet(EXEC_INITIAL))
+    paramError("power",
+               "The 'execute_on' parameter of the power postprocessor must include 'initial'");
+
   if (processor_id() > 0)
     return;
   auto n_pins = _mesh.getNumOfPins();

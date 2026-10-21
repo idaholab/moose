@@ -9,6 +9,7 @@
 
 #include "SCMTriPowerIC.h"
 #include "Function.h"
+#include "Receiver.h"
 #include "TriSubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriPowerIC);
@@ -83,6 +84,15 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 void
 SCMTriPowerIC::initialSetup()
 {
+  // A power postprocessor executes before initial conditions only if it executes on INITIAL;
+  // otherwise it still holds its default of zero here. A Receiver is set by a transfer instead,
+  // so its execute_on does not control its value.
+  if (!isDefaultPostprocessorValue("power") &&
+      !dynamic_cast<const Receiver *>(&getUserObjectBase("power")) &&
+      !getUserObjectBase("power").getExecuteOnEnum().isValueSet(EXEC_INITIAL))
+    paramError("power",
+               "The 'execute_on' parameter of the power postprocessor must include 'initial'");
+
   if (processor_id() > 0)
     return;
   auto n_pins = _mesh.getNumOfPins();

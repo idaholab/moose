@@ -79,4 +79,12 @@
     issues = '#34082'
     requirement = 'The system will not warn about the execution order of the total power postprocessor of the triangular lattice power auxiliary kernel when that postprocessor is a Receiver filled by a transfer.'
   []
+  [SCMTriPower_ic_power_not_initial_error]
+    type = RunException
+    input = 'postprocessor_power.i'
+    cli_args = 'Postprocessors/power_pp/execute_on=timestep_end'
+    expect_err = "The 'execute_on' parameter of the power postprocessor must include 'initial'"
+    issues = '#34082'
+    requirement = 'The system will report an error when the total power postprocessor of the triangular lattice power initial condition does not execute on initial, since it would not have been computed when the initial condition is set.'
+  []
 []
