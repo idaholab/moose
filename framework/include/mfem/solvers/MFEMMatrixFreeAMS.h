@@ -26,11 +26,29 @@ public:
   void ConstructSolver() override;
 
 protected:
-  // Constructs the mfem::MatrixFreeAMS solver for the given operator.
-  virtual void SetOperatorImpl(const mfem::Operator & op) override;
   virtual void SetSolverParameters(mfem::MatrixFreeAMS &) override {}
 
 private:
+  // Constructs the mfem::MatrixFreeAMS solver for the given operator.
+  void BuildSolver(const mfem::Operator & op);
+
+  /**
+   * Rebuilds the mfem::MatrixFreeAMS solver on every SetOperator call. mfem::MatrixFreeAMS keeps a
+   * reference to the operator it was built with and its own SetOperator is a no-op, but within a
+   * Newton solve the Krylov solver passes each new Jacobian to its preconditioner only through
+   * mfem::Solver::SetOperator.
+   */
+  class Rebuilder : public mfem::Solver
+  {
+  public:
+    explicit Rebuilder(MFEMMatrixFreeAMS & owner) : _owner(owner) {}
+    void SetOperator(const mfem::Operator & op) override;
+    void Mult(const mfem::Vector & x, mfem::Vector & y) const override;
+
+  private:
+    MFEMMatrixFreeAMS & _owner;
+  };
+
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
   const int _inner_pi_its;
@@ -39,6 +57,8 @@ private:
   mfem::Solver * _smoother = nullptr;
   /// Default smoother, used when "smoother" is not set
   std::unique_ptr<mfem::Solver> _default_smoother;
+  /// Solver built by BuildSolver(); declared last so it is destroyed before the smoother it uses
+  std::unique_ptr<mfem::MatrixFreeAMS> _matrix_free_ams;
 };
 
 #endif

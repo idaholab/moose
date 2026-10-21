@@ -100,24 +100,40 @@ MFEMMatrixFreeAMS::ConstructSolver()
     _default_smoother = std::make_unique<mfem::OperatorJacobiSmoother>(0.25);
     _smoother = _default_smoother.get();
   }
-  // Deferred: construction of the mfem::MatrixFreeAMS solver is postponed until the operator is set
+  _solver = std::make_unique<Rebuilder>(*this);
 }
 
 void
-MFEMMatrixFreeAMS::SetOperatorImpl(const mfem::Operator & op)
+MFEMMatrixFreeAMS::BuildSolver(const mfem::Operator & op)
 {
   _smoother->SetOperator(op);
 
-  _solver = std::make_unique<mfem::MatrixFreeAMS>(*_a,
-                                                  const_cast<mfem::Operator &>(op),
-                                                  *_a->ParFESpace(),
-                                                  &_alpha_coef,
-                                                  &_beta_coef,
-                                                  nullptr,
-                                                  _ess_bdr_markers,
-                                                  _inner_pi_its,
-                                                  _inner_g_its,
-                                                  new SmootherReference(*_smoother));
+  _matrix_free_ams = std::make_unique<mfem::MatrixFreeAMS>(*_a,
+                                                           const_cast<mfem::Operator &>(op),
+                                                           *_a->ParFESpace(),
+                                                           &_alpha_coef,
+                                                           &_beta_coef,
+                                                           nullptr,
+                                                           _ess_bdr_markers,
+                                                           _inner_pi_its,
+                                                           _inner_g_its,
+                                                           new SmootherReference(*_smoother));
+}
+
+void
+MFEMMatrixFreeAMS::Rebuilder::SetOperator(const mfem::Operator & op)
+{
+  height = op.Height();
+  width = op.Width();
+  _owner.BuildSolver(op);
+}
+
+void
+MFEMMatrixFreeAMS::Rebuilder::Mult(const mfem::Vector & x, mfem::Vector & y) const
+{
+  mooseAssert(_owner._matrix_free_ams,
+              "MatrixFreeAMS preconditioner was not initialized with an operator before use.");
+  _owner._matrix_free_ams->Mult(x, y);
 }
 
 template <>
