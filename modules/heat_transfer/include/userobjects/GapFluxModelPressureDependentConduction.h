@@ -11,11 +11,14 @@
 
 #include "GapFluxModelBase.h"
 
+class MortarContactPressureProvider;
+
 /**
  * Gap flux model used to compute the conductance across a closed gap along which
  * two solid materials are in contact. This class computes the closed gap
- * conductance as a function of the mechanical normal contact pressure. The normal
- * contact pressure is coupled as a Lagrange Multiplier in this mortar-based approach.
+ * conductance as a function of the mechanical normal contact pressure. The pressure is obtained
+ * from a mortar contact user object when one is given, and otherwise from a coupled variable that
+ * holds a prescribed pressure.
  */
 class GapFluxModelPressureDependentConduction : public GapFluxModelBase
 {
@@ -32,8 +35,14 @@ protected:
   const ADVariableValue & _secondary_T;
   ///@}
 
-  /// Pressure (lagrange multiplier) variable
-  const ADVariableValue & _contact_pressure;
+  /// The contact pressure at the current quadrature point
+  ADReal contactPressure() const;
+
+  /// Mortar contact object that provides the physical contact pressure, or nullptr
+  const MortarContactPressureProvider * const _contact_pressure_provider;
+
+  /// Prescribed contact pressure variable, or nullptr when the pressure comes from the provider
+  const ADVariableValue * const _contact_pressure;
 
   /// Parameter used to scale the closed gap interface conductance value
   const Real _scaling;

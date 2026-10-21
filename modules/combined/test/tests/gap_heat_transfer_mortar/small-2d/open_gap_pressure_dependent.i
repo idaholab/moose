@@ -217,7 +217,7 @@
     primary_hardness = 1.0
     secondary_hardness = 1.0
     boundary = moving_block_right
-    contact_pressure = interface_normal_lm
+    contact_pressure_uo = lm_weightedgap_object_interface
   []
 []
 

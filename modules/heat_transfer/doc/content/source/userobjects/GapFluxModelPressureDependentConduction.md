@@ -6,9 +6,18 @@
 
 `GapFluxModelPressureDependentConduction` computes a conductive heat flux across
 a closed gap between two solid bodies as a function of the normal mechanical pressure
-at the interface. The normal contact pressure is included in this calculation as
-a Lagrange multiplier associated with a lower-dimensional domain. This class
-requires the use of [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md).
+at the interface. This class requires the use of
+[ModularGapConductanceConstraint](ModularGapConductanceConstraint.md).
+
+When the contact pressure comes from a mortar mechanical contact solve, pass the mortar contact
+user object through [!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure_uo).
+The [Contact action](ContactAction.md) names that object `lm_weightedgap_object_<contact block name>`.
+The contact Lagrange multiplier variable can store a scaled pressure, for example under node-based
+scaling or `c_strategy = physical`, so the user object recovers the physical pressure from it.
+Coupling a solution variable through
+[!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure) is an error.
+[!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure) accepts an
+auxiliary variable that holds a prescribed contact pressure.
 
 The thermal conductance of the interface is calculated as
 \begin{equation}
