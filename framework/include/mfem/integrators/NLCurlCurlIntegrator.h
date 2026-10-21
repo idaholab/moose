@@ -21,7 +21,7 @@ namespace Moose::MFEM
  * Produces the matrix
  *   k(|curl u|) I + |curl u| dk/d|curl u| (curl u_hat \otimes curl u_hat)
  */
-class NLCurlCurlJacMatrixCoefficient : public mfem::MatrixCoefficient
+class NLCurlCurlJacMatrixCoefficient : public mfem::SymmetricMatrixCoefficient
 {
 public:
   NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
@@ -29,7 +29,8 @@ public:
                                  mfem::VectorCoefficient & curlu_vec,
                                  mfem::real_t curlu_zero_tol);
 
-  void Eval(mfem::DenseMatrix & K,
+  using mfem::SymmetricMatrixCoefficient::Eval;
+  void Eval(mfem::DenseSymmetricMatrix & K,
             mfem::ElementTransformation & T,
             const mfem::IntegrationPoint & ip) override;
   void SetTime(mfem::real_t t) override;
