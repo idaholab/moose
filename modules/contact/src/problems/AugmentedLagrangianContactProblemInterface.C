@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AugmentedLagrangianContactProblemInterface.h"
+#include "FEProblemBase.h"
+#include "Convergence.h"
 
 InputParameters
 AugmentedLagrangianContactProblemInterface::validParams()
@@ -20,7 +22,22 @@ AugmentedLagrangianContactProblemInterface::validParams()
 }
 
 AugmentedLagrangianContactProblemInterface::AugmentedLagrangianContactProblemInterface(
-    const InputParameters & params)
-  : _maximum_number_lagrangian_iterations(params.get<int>("maximum_lagrangian_update_iterations"))
+    const InputParameters & /*params*/, FEProblemBase & problem)
+  : _problem(problem)
 {
+}
+
+const AugmentedLagrangianContactConvergenceBase &
+AugmentedLagrangianContactProblemInterface::getAugmentedLagrangianContactConvergence() const
+{
+  mooseAssert(_problem.numNonlinearSystems() == 1, "Multiple nonlinear systems are not supported.");
+
+  const auto & name = _problem.getNonlinearConvergenceNames()[0];
+  const auto * const convergence = dynamic_cast<const AugmentedLagrangianContactConvergenceBase *>(
+      &_problem.getConvergence(name));
+  if (!convergence)
+    mooseError("The nonlinear convergence object '",
+               name,
+               "' is not an augmented Lagrangian contact convergence.");
+  return *convergence;
 }

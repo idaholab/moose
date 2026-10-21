@@ -25,15 +25,8 @@ AddMaterialAction::AddMaterialAction(const InputParameters & params) : MooseObje
 void
 AddMaterialAction::act()
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosMaterial(_type, _name, _moose_object_pars);
+  if (!_moose_object_pars.get<bool>("_interface"))
+    _problem->addMaterial(_type, _name, _moose_object_pars);
   else
-#endif
-  {
-    if (!_moose_object_pars.get<bool>("_interface"))
-      _problem->addMaterial(_type, _name, _moose_object_pars);
-    else
-      _problem->addInterfaceMaterial(_type, _name, _moose_object_pars);
-  }
+    _problem->addInterfaceMaterial(_type, _name, _moose_object_pars);
 }

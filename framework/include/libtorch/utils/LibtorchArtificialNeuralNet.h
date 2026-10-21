@@ -13,6 +13,7 @@
 
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <torch/serialize/archive.h>
 #include "LibtorchNeuralNetBase.h"
 #include "MooseError.h"
 #include "DataIO.h"
@@ -22,16 +23,25 @@
 namespace Moose
 {
 
-// A class that describes a simple feed-forward neural net.
+/**
+ * Simple feed-forward neural net with optional affine input and output scaling.
+ */
 class LibtorchArtificialNeuralNet : public torch::nn::Module, public LibtorchNeuralNetBase
 {
 public:
   /**
-   * Construct using input parameters
-   * @param name Name of the neural network
-   * @param num_inputs The number of input neurons/parameters
-   * @param num_neurons_per_layer Number of neurons per hidden layer
-   * @param num_outputs The number of output neurons
+   * Build a plain feed-forward neural network.
+   * @param name Name of the neural network module.
+   * @param num_inputs Number of input neurons or parameters.
+   * @param num_outputs Number of output neurons.
+   * @param num_neurons_per_layer Hidden-layer widths.
+   * @param activation_function Hidden-layer activation names.
+   * @param device_type Torch device used by the module.
+   * @param scalar_type Torch scalar type used by the module.
+   * @param build_on_construct Whether to build the torch modules right away.
+   * @param input_shift_factors Optional affine input shifts.
+   * @param input_scaling_factors Optional affine input scales.
+   * @param output_scaling_factors Optional output scaling factors.
    */
   LibtorchArtificialNeuralNet(const std::string name,
                               const unsigned int num_inputs,
@@ -39,59 +49,142 @@ public:
                               const std::vector<unsigned int> & num_neurons_per_layer,
                               const std::vector<std::string> & activation_function = {"relu"},
                               const torch::DeviceType device_type = torch::kCPU,
-                              const torch::ScalarType scalar_type = torch::kDouble);
+                              const torch::ScalarType scalar_type = torch::kDouble,
+                              const bool build_on_construct = true,
+                              const std::vector<Real> & input_shift_factors = {},
+                              const std::vector<Real> & input_scaling_factors = {},
+                              const std::vector<Real> & output_scaling_factors = {});
 
   /**
-   * Copy construct an artificial neural network
-   * @param nn The neural network which needs to be copied
+   * Copy-construct a feed-forward neural network.
+   * @param nn Neural network to copy.
+   * @param build_on_construct Whether to rebuild the module structure during the copy.
    */
-  LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn);
+  LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn,
+                              const bool build_on_construct = true);
 
   /**
-   * Add layers to the neural network
-   * @param layer_name The name of the layer to be added
-   * @param parameters A map of parameter names and the corresponding values which
-   *                   describe the neural net layer architecture
+   * Add one linear layer to the network.
+   * @param layer_name Name of the layer to add.
+   * @param parameters Small parameter map that describes the layer shape.
    */
   virtual void addLayer(const std::string & layer_name,
                         const std::unordered_map<std::string, unsigned int> & parameters);
 
   /**
-   * Overriding the forward substitution function for the neural network, unfortunately
-   * this cannot be const since it creates a graph in the background
-   * @param x Input tensor for the evaluation
+   * Run a forward pass through the network.
+   * @param x Input tensor for the evaluation.
    */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
-  /// Return the name of the neural network
+  /**
+   * Return the name of the neural network.
+   */
   const std::string & name() const { return _name; }
-  /// Return the number of neurons on the input layer
+  /**
+   * Return the number of neurons on the input layer.
+   */
   unsigned int numInputs() const { return _num_inputs; }
-  /// Return the number of neurons on the output layer
+  /**
+   * Return the number of neurons on the output layer.
+   */
   unsigned int numOutputs() const { return _num_outputs; }
-  /// Return the number of hidden layers
+  /**
+   * Return the number of hidden layers.
+   */
   unsigned int numHiddenLayers() const { return _num_neurons_per_layer.size(); }
-  /// Return the hidden layer architecture
+  /**
+   * Return the hidden layer architecture.
+   */
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
-  /// Return the multi enum containing the activation functions
+  /**
+   * Return the multi enum containing the activation functions.
+   */
   const MultiMooseEnum & activationFunctions() const { return _activation_function; }
-  /// Return the device which is used by this neural network
+  /**
+   * Return the device used by this neural network.
+   */
   torch::DeviceType deviceType() const { return _device_type; }
-  /// Return the data type which is used by this neural network
+  /**
+   * Return the data type used by this neural network.
+   */
   torch::ScalarType dataType() const { return _data_type; }
-  /// Construct the neural network
-  void constructNeuralNetwork();
+  /**
+   * Return the affine input shift factors used before evaluation.
+   */
+  const std::vector<Real> & inputShiftFactors() const { return _input_shift_factors; }
+  /**
+   * Return the affine input scaling factors used before evaluation.
+   */
+  const std::vector<Real> & inputScalingFactors() const { return _input_scaling_factors; }
+  /**
+   * Return the output scaling factors applied after evaluation.
+   */
+  const std::vector<Real> & outputScalingFactors() const { return _output_scaling_factors; }
+  /**
+   * Construct the neural network.
+   */
+  virtual void constructNeuralNetwork();
 
-  /// Store the network architecture in a json file (for debugging, visualization)
+  /**
+   * Update cached affine metadata vectors from the registered libtorch buffers.
+   */
+  void synchronizeAffineFactorsFromBuffers();
+
+  /**
+   * Map an activation name to the orthogonal-initialization gain we want to use.
+   * @param activation Activation name to look up.
+   */
+  Real determineGain(const std::string & activation);
+
+  /**
+   * Initialize the trainable weights and biases.
+   * @param generator Optional torch random-number generator used for reproducible initialization.
+   */
+  virtual void initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt);
+
+  /**
+   * Store the network architecture in a JSON object for debugging or visualization.
+   * @param json JSON object that receives the network architecture.
+   */
   void store(nlohmann::json & json) const;
 
 protected:
+  /**
+   * Set affine metadata by either accepting the user values or filling defaults.
+   * @param factors User-provided affine factors.
+   * @param expected_size Expected number of entries.
+   * @param default_value Default value used when the vector is empty.
+   * @param factor_name Name used in error messages.
+   */
+  static std::vector<Real> setAffineFactors(const std::vector<Real> & factors,
+                                            unsigned int expected_size,
+                                            Real default_value,
+                                            const std::string & factor_name);
+
+  /**
+   * Initialize the registered affine metadata buffers used by serialization.
+   */
+  void initializeAffineBuffers();
+
+  /**
+   * Apply affine preprocessing to the raw input tensor.
+   * @param x Raw input tensor.
+   */
+  virtual torch::Tensor preprocessInput(const torch::Tensor & x) const;
+
+  /**
+   * Apply the configured output scaling to a network output tensor.
+   * @param y Raw network output tensor.
+   */
+  virtual torch::Tensor scaleOutput(const torch::Tensor & y) const;
+
   /// Name of the neural network
   const std::string _name;
   /// Submodules that hold linear operations and the corresponding
   /// weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
-  // Number of neurons on the input layer
+  /// Number of neurons on the input layer
   const unsigned int _num_inputs;
   /// Number of neurons on the output layer
   const unsigned int _num_outputs;
@@ -104,18 +197,54 @@ protected:
   const torch::DeviceType _device_type;
   /// The data type used in this neural network
   const torch::ScalarType _data_type;
+  /// Affine preprocessing applied to the flattened input
+  std::vector<Real> _input_shift_factors;
+  /// Multiplicative affine preprocessing applied after shifting the input
+  std::vector<Real> _input_scaling_factors;
+  /// Multiplicative scaling applied after the network output is formed
+  std::vector<Real> _output_scaling_factors;
+  /// Registered libtorch buffer holding the affine input shifts
+  torch::Tensor _input_shift_tensor;
+  /// Registered libtorch buffer holding the affine input scaling factors
+  torch::Tensor _input_scale_tensor;
+  /// Registered libtorch buffer holding the output scaling factors
+  torch::Tensor _output_scale_tensor;
 };
 
+/**
+ * Dump an artificial neural network into JSON for reporter output and debugging.
+ * @param json JSON object that receives the serialized state.
+ * @param network Artificial neural network pointer to serialize.
+ */
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
 
+/**
+ * Load an artificial-neural-network checkpoint written as a native libtorch state archive.
+ * @param nn Artificial neural network that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ */
+void loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
+                                          const std::string & filename);
 }
 
+/**
+ * Serialize the artificial-neural-network metadata needed for restart.
+ * @param stream Stream that receives the serialized data.
+ * @param nn Artificial neural network shared pointer to serialize.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchArtificialNeuralNet>(
     std::ostream & stream,
     std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
     void * context);
 
+/**
+ * Deserialize the artificial-neural-network metadata needed for restart.
+ * @param stream Stream that provides the serialized data.
+ * @param nn Artificial neural network shared pointer to populate.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchArtificialNeuralNet>(
     std::istream & stream,
@@ -125,10 +254,22 @@ void dataLoad<Moose::LibtorchArtificialNeuralNet>(
 // This is needed because the reporter which is used to ouput the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
 // we are only interested in the JSON output and we don't want to output everything
+/**
+ * Placeholder serializer for reporter-only artificial-neural-network pointers.
+ * @param stream Stream that would receive the serialized data.
+ * @param nn Reporter neural network pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchArtificialNeuralNet const>(
     std::ostream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);
 
+/**
+ * Placeholder deserializer for reporter-only artificial-neural-network pointers.
+ * @param stream Stream that would provide the serialized data.
+ * @param nn Reporter neural network pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchArtificialNeuralNet const>(
     std::istream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);

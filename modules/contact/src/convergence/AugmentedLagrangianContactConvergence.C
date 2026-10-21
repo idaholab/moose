@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AugmentedLagrangianContactConvergence.h"
+#include "AugmentedLagrangianContactProblemInterface.h"
 
 // MOOSE includes
 #include "AuxiliarySystem.h"
@@ -46,8 +47,17 @@ AugmentedLagrangianContactConvergence<T>::validParams()
 template <class T>
 AugmentedLagrangianContactConvergence<T>::AugmentedLagrangianContactConvergence(
     const InputParameters & params)
-  : T(params), AugmentedLagrangianContactProblemInterface(params)
+  : T(params), AugmentedLagrangianContactConvergenceBase(params)
 {
+}
+
+template <class T>
+void
+AugmentedLagrangianContactConvergence<T>::preLoop()
+{
+  T::preLoop();
+
+  _lagrangian_iteration_number = 0;
 }
 
 template <class T>
@@ -58,9 +68,6 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
   auto reason = T::checkConvergence(iter);
 
   auto & fe_problem_base = this->getMooseApp().feProblem();
-
-  auto aug_contact = dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&fe_problem_base);
-  _lagrangian_iteration_number = aug_contact->getLagrangianIterationNumber();
 
   bool repeat_augmented_lagrange_step = false;
 

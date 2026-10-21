@@ -9,6 +9,16 @@
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
   [../]
+  [./pressureAugLag_num_al]
+    type = 'CSVDiff'
+    input = 'pressureAugLag.i'
+    csvdiff = 'pressureAugLag_num_al.csv'
+    cli_args = 'Postprocessors/num_al/type=NumAugmentedLagrangeIterations Outputs/exodus=false '
+               'Outputs/csv=true Outputs/file_base=pressureAugLag_num_al'
+    max_parallel = 1
+    requirement = 'The contact system shall report the number of augmented Lagrangian iterations '
+                  'taken in a time step.'
+  [../]
 
   [./pressurePenalty]
     type = 'Exodiff'

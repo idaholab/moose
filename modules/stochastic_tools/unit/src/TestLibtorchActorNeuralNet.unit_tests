@@ -1,0 +1,59 @@
+[Tests]
+  design = 'LibtorchDRLControl.md LibtorchDRLControlTrainer.md'
+  issues = '#19571'
+
+  [artificial_net_affine_scaling]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.artificialNetAppliesAffineInputAndOutputScaling
+    design = 'LibtorchArtificialNeuralNet.md'
+    requirement = 'The system shall shift and scale the inputs of a feedforward neural network and scale its outputs.'
+  []
+  [bounded_beta_log_probability]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.boundedBetaLogProbability
+    requirement = 'The system shall compute the log-probability of an action drawn from a bounded Beta policy, including the Jacobian of the map from the unit interval to the action bounds.'
+  []
+  [bounded_beta_large_logits]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.boundedBetaStaysFiniteForLargeLogits
+    requirement = 'The system shall keep the actions, log-probabilities, and gradients of a bounded Beta policy finite for large distribution-parameter logits.'
+  []
+  [gaussian_state_independent_std]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.gaussianActorUsesPhysicalActionScalingAndStateIndependentStd
+    requirement = 'The system shall evaluate a Gaussian policy in physical action units, account for the action scaling in its log-probability, and by default use a standard deviation that is independent of the observation.'
+  []
+  [gaussian_state_dependent_std]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.gaussianActorCanUseStateDependentStdWhenRequested
+    requirement = 'The system shall optionally compute the standard deviation of a Gaussian policy from the observation.'
+  []
+  [copied_policy_sampling]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.explicitGeneratorKeepsGaussianSamplingStableAcrossCopies
+    requirement = 'The system shall sample identical actions from a policy and its copy when both use identically seeded random number generators.'
+  []
+  [seeded_initialization]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.explicitGeneratorMakesInitializationIndependentOfConstructionOrder
+    requirement = 'The system shall initialize policy network parameters identically from identically seeded random number generators, independent of the order in which the networks are constructed.'
+  []
+  [load_archive]
+    type = GoogleTest
+    unit_test = LibtorchActorNeuralNetTest.loadActorStateAcceptsTorchSaveArchive
+    requirement = 'The system shall restore the parameters, buffers, and outputs of a policy network from a libtorch archive.'
+  []
+  [load_errors]
+    requirement = 'The system shall report an error when loading a policy network archive whose'
+    [hidden_layer_mismatch]
+      type = GoogleTest
+      unit_test = LibtorchActorNeuralNetTest.loadActorStateRejectsHiddenLayerMismatch
+      detail = 'hidden-layer structure differs from that of the receiving network;'
+    []
+    [boundedness_mismatch]
+      type = GoogleTest
+      unit_test = LibtorchActorNeuralNetTest.loadActorStateRejectsBoundednessMismatch
+      detail = 'action distribution is unbounded while that of the receiving network is bounded.'
+    []
+  []
+[]

@@ -21,8 +21,10 @@ MFEMHypreBoomerAMG::validParams()
   InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreBoomerAMG>::validParams();
   params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
                              "of MFEM equation systems.");
-  params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
-  params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
+  params.addParam<mfem::real_t>("l_tol", 0, "Set the relative tolerance.");
+  params.addParam<int>("l_max_its", 1, "Set the maximum number of iterations.");
+  params.suppressParameter<mfem::real_t>("l_tol"); // mfem/mfem#5627
+  params.suppressParameter<int>("l_max_its");      // mfem/mfem#5627
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<MFEMFESpaceName>(
       "fespace",

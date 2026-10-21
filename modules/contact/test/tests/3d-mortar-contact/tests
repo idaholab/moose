@@ -31,6 +31,7 @@
                   'container size of less than 50.'
   []
   [frictionless-mortar-3d-action]
+    issues = '#13080 #23802 #24255'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraints using the contact action with'
     [first]
@@ -38,7 +39,6 @@
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'mortar quadrature designed to integrate linear polynomials on triangles'
       rel_err = 1.0e-5
       abs_zero = 1.0e-5
@@ -50,7 +50,6 @@
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       csvdiff = 'frictionless-mortar-3d-action-second_contact-pressure_0002.csv'
-      mesh_mode = 'REPLICATED' # see issue 24255
       cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second Contact/mortar/c_normal=1'
       detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
       rel_err = 5.0e-5
@@ -118,7 +117,7 @@
     []
   []
   [frictionless-mortar-3d-action-subpatch-plane-forwarding]
-    issues = '#33282'
+    issues = '#33282 #24255'
     requirement = 'The contact action shall correctly forward the selected 3D mortar subpatch '
                   'plane mode by'
     [mortar]
@@ -130,7 +129,6 @@
                  'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-averaged'
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'forwarding the plane mode for a Lagrange-multiplier mortar formulation,'
       valgrind = 'none'
       recover = false
@@ -147,7 +145,6 @@
                  'Executioner/end_time=0 Postprocessors/active="" VectorPostprocessors/active="" '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-penalty-action-averaged'
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'forwarding the plane mode for a mortar penalty formulation,'
       valgrind = 'none'
       recover = false
@@ -208,11 +205,11 @@
     []
   []
   [frictionless-mortar-3d-action-correct-edge-dropping]
+    issues = '#13080 #23802 #24255'
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictionless-mortar-3d-action-correct-edge-dropping_out_contact-pressure_0002.csv'
-    mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using the contact action and selecting the temporary flag correct edge '
                   'dropping.'
@@ -277,13 +274,20 @@
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
+      custom_cmp = 'frictionless-mortar-3d-delaunay-msm.cmp'
+      # Mortar segment geometry and coordinate factors do not carry displacement derivatives, so
+      # use an absolute nonlinear tolerance for this moving-interface solve.
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
-                 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+                 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Executioner/nl_abs_tol=1e-8 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-delaunay '
                  'Contact/mortar/c_normal=1'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       valgrind = 'none'
+      # Near-cocircular overlap polygons can select either valid diagonal across toolchains. Partial
+      # matching compares the common elements and every node coordinate.
+      map = false
+      partial = true
       prereq = 'frictionless-mortar-3d-action/first'
     []
   []
@@ -375,7 +379,11 @@
       input = 'frictionless-mortar-3d.i'
       capabilities = 'ad_size>=150'
       exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
-      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+      custom_cmp = 'frictionless-mortar-3d-delaunay-msm.cmp'
+      # Mortar segment geometry and coordinate factors do not carry displacement derivatives, so
+      # use an absolute nonlinear tolerance for this moving-interface solve.
+      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Executioner/nl_abs_tol=1e-8 '
+                 'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-direct-delaunay '
                  'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
                  'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
@@ -386,6 +394,10 @@
                  'Constraints/normal_z/triangulation=delaunay '
                  'UserObjects/weighted_gap_uo/triangulation=delaunay'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
+      # Near-cocircular overlap polygons can select either valid diagonal across toolchains. Partial
+      # matching compares the common elements and every node coordinate.
+      map = false
+      partial = true
       prereq = 'frictionless-mortar-3d-debug-mesh'
     []
   []

@@ -85,6 +85,17 @@
     override_rel_err = '1.0e-6 1.0e-6'
     override_abs_zero = '1.0e-4 1.0e-4'
   []
+  [undisplaced_traction_error]
+    type = RunException
+    issues = '#34143'
+    design = 'constraints/MortarGenericTraction.md'
+    input = traction_curve_modeI.i
+    cli_args = 'Constraints/c_x/use_displaced_mesh=false'
+    expect_err = "'use_displaced_mesh' must be true for the MortarGenericTraction object"
+    requirement = 'The system shall report an error if a mortar cohesive zone traction is applied '
+                  'on the undisplaced mesh, where the cohesive zone user object does not compute '
+                  'it.'
+  []
   [traction_curve_modeI_dt_refined]
     type = CSVDiff
     issues = '#33045'

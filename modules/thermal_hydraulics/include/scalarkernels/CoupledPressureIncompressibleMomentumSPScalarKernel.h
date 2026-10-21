@@ -27,7 +27,7 @@ protected:
   virtual GenericReal<is_ad> pressureDrop() const override { return -Base::_u[0]; };
   virtual Real computeQpJacobian() override;
   /// Coupled mass flow rate through the flow path
-  const VariableValue & _mc;
+  const GenericVariableValue<is_ad> & _mc;
 };
 
 typedef CoupledPressureIncompressibleMomentumSPScalarKernelTempl<false>

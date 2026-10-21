@@ -40,7 +40,6 @@ MFEMHypreFGMRES::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreFGMRES>(getMFEMProblem().getComm());
   SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
@@ -52,6 +51,15 @@ MFEMHypreFGMRES::SetSolverParameters(mfem::HypreFGMRES & solver)
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetKDim(getParam<int>("kdim"));
   solver.SetPrintLevel(getParam<int>("print_level"));
+}
+
+void
+MFEMHypreFGMRES::SetPreconditionerImpl()
+{
+  if (auto * prec = dynamic_cast<mfem::HypreSolver *>(&_preconditioner->GetSolver()))
+    cast_ref<mfem::HypreFGMRES &>(GetSolver()).SetPreconditioner(*prec);
+  else
+    paramError("preconditioner", "MFEMHypreFGMRES requires a hypre solver as its preconditioner");
 }
 
 #endif

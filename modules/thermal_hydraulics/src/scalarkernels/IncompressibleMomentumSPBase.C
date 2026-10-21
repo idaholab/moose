@@ -104,7 +104,7 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
   }
   for (const auto j : make_range(_n_segments))
   {
-    _T[j] = &(ScalarCoupleable::coupledScalarValue("temperatures", j));
+    _T[j] = &(ScalarCoupleable::coupledGenericScalarValue<is_ad>("temperatures", j));
     _areas[j] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[j]));
     _perimeters[j] = &(this->template getFunctor<GenericReal<is_ad>>(perimeter_names[j]));
     _lengths[j] = &(this->template getFunctor<GenericReal<is_ad>>(length_names[j]));
