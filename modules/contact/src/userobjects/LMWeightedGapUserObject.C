@@ -470,8 +470,8 @@ LMWeightedGapUserObject::accumulateDerivedC()
   const auto acoustic_moduli = [&n, dim](const auto & C)
   {
     Real normal = 0, trace = 0;
-    for (const auto i : make_range(3))
-      for (const auto j : make_range(3))
+    for (const auto i : make_range(3u))
+      for (const auto j : make_range(3u))
       {
         Real Q_ij = 0;
         for (const auto k : make_range(3))
