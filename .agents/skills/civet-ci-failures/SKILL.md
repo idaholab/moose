@@ -159,6 +159,7 @@ you act on it and rewrite the row with what you find.
 | `curl: (N)` / `FATAL:` in a container build | *(hypothesis)* A download or the container build failed. Spurious; re-run. Generalized from a single upstream outage. |
 | `fatal: unable to access` / `Empty reply from server` / `Could not resolve host` | A git clone or fetch failed during a build, so the remote was never reached. Spurious as far as the branch is concerned. Check which host the failing URL names: submodules hosted outside `github.com` and `github.inl.gov` are outside MOOSE's control, and when one of those hosts is down a re-run only succeeds once it recovers. |
 | `fatal: remote error` | *(hypothesis)* The ref being fetched is not on the remote, usually a submodule bumped to a commit that was never pushed upstream. Push it, then re-run. The remedy was confirmed once in practice; the pattern itself has never been matched against real output. |
+| `CONFLICT (submodule)` in a fetch-and-branch step | CIVET merges the head into the base before it tests. The base moved a submodule to a commit that the head does not have. The report then shows every other job as blocked by failed dependencies. Rebase the head onto the base. Resolve the submodule to the commit that already contains the other commit (`git merge-base --is-ancestor`). If neither commit contains the other, merge the submodule first. |
 
 Which cause the report shows is decided by precedence: a real compiler or linker diagnostic wins
 outright, then a failure of the surrounding machinery, then the build system's own complaint. Lines
@@ -186,6 +187,17 @@ per step rather than per job — a fetch step commonly runs in a base image whil
 and test run in a versioned one — so the container shown is the one belonging to the invocation
 shown. Reproducing the command outside it can behave differently, which is why the two are reported
 together.
+
+A test can pass in one job and fail in another with the same commit and container. Then the
+difference is the build host. The logged environment of each test includes `HWLOC_XMLFILE`. Its
+file name contains the host name (e.g. `hwloc_topo_<host>.xml`). Run `--grep HWLOC_XMLFILE` on the
+two jobs to see whether they ran on different hardware. A failure that follows the host and not the
+code is a rounding-sensitivity problem. The `brittle-numerics-root-cause` skill shows how to
+reproduce it locally.
+
+The TestHarness keeps only the beginning and the end of the output of a long test. The logged
+solver history of a long transient is therefore incomplete. To find where a run diverges,
+reproduce the run locally. The CI log does not contain the middle of the run.
 
 ## Watching an event to completion
 
@@ -223,6 +235,10 @@ rather than waiting.
 
 - Private ("controlled apps") recipes return HTTP 403 for their logs. Those failures are invisible
   to this tool and need the CIVET web UI.
+- The TestHarness memory column of a failing-test line can read `[   ?MB]`. The report can then
+  include that column and the status word in the test name (e.g. `[   ?MB]     DIFF test:a.b`).
+  The `--re` pattern of the reproduce command then contains them too. Delete them to get the test
+  name.
 - Completeness is judged from statuses that have been posted, so a job CIVET has not reported on at
   all is invisible.
 - `--recipes` matches jobs to recipes by display name, which can appear in more than one branch of
