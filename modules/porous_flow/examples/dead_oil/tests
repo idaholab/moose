@@ -1,0 +1,18 @@
+[Tests]
+  design = 'porous_flow/dead_oil_waterflood.md'
+  issues = '#34051'
+  [waterflood_1d]
+    type = CSVDiff
+    input = 'waterflood_1d.i'
+    cli_args = 'Mesh/nx=50 Executioner/end_time=2.16e6 Outputs/csv/sync_times=2.16e6'
+    csvdiff = 'waterflood_1d.csv'
+    requirement = 'PorousFlow shall be able to simulate a one-dimensional waterflood of a dead-oil reservoir, with oil properties interpolated from a table of pressure, formation volume factor and viscosity, in agreement with the Buckley-Leverett solution.'
+  []
+  [waterflood_2d]
+    type = CSVDiff
+    input = 'waterflood_2d.i'
+    cli_args = 'Mesh/nx=10 Mesh/ny=10 Executioner/dtmax=4e6 Outputs/exodus/enable=false'
+    csvdiff = 'waterflood_2d.csv'
+    requirement = 'PorousFlow shall be able to simulate a waterflood of a dead-oil reservoir with a constant-rate injection well and a production well at fixed bottomhole pressure, reporting oil and water production rates, water cut and cumulative oil production.'
+  []
+[]
