@@ -25,8 +25,6 @@
  *
  *   B_r = -dA_theta/dz
  *   B_z =  dA_theta/dr + A_theta/r
- *
- * using r = x directly.
  */
 class MFEMMeridionalCurlAux : public MFEMAuxKernel
 {
@@ -41,11 +39,8 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Name of source MFEMVariable storing A_theta.
-  const VariableName _source_var_name;
-
-  /// Reference to source scalar grid function.
-  const mfem::ParGridFunction & _source_var;
+  /// Custom coefficient implementing meridional curl
+  MeridionalCurlVectorCoefficient _curl_coef;
 };
 
 #endif

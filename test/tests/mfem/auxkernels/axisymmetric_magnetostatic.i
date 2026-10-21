@@ -34,10 +34,6 @@
 []
 
 [Functions]
-  [zero]
-    type = MFEMParsedFunction
-    expression = 0
-  []
   # Meridional radius R = x
   [R]
     type = MFEMParsedFunction
@@ -117,16 +113,19 @@
   [essential]
     type = MFEMScalarDirichletBC
     variable = Atheta
-    boundary = outer
-    coefficient = 1
+    boundary = skin
   []
 []
 
 [Solvers]
-  [PCG]
-    type = MFEMHyprePCG
-    l_tol = 1e-8
+  [BoomerAMG]
+    type = MFEMHypreBoomerAMG
   []
+   [PCG]
+     type = MFEMHyprePCG
+     l_tol = 1e-8
+    preconditioner = BoomerAMG
+   []
 []
 
 [VectorPostprocessors]
@@ -136,6 +135,12 @@
     start_point = '2.899 -1.98 0'
     end_point = '2.899 1.98 0'
     num_points = 10
+  []
+[Postprocessors]
+  [norm] # should be sqrt(8*pi)
+    type = MFEMVectorL2Error
+    variable = B
+    function = '0. 0.'
   []
 []
 

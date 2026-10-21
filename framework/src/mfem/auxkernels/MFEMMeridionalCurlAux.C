@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMMeridionalCurlAux);
 namespace
 {
 
-class MeridionalCurlAthetaVectorCoefficient : public mfem::VectorCoefficient
+class MeridionalCurlVectorCoefficient : public mfem::VectorCoefficient
 {
 public:
   MeridionalCurlAthetaVectorCoefficient(mfem::Coefficient & a_theta,
@@ -51,7 +51,7 @@ public:
 
     V.SetSize(2);
     V[0] = -dA_dz;
-    V[1] = dA_dr + a_theta * inv_r;
+    V[1] = dA_dr + A / r;
   }
 
 private:
@@ -79,20 +79,15 @@ MFEMMeridionalCurlAux::validParams()
 
 MFEMMeridionalCurlAux::MFEMMeridionalCurlAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _source_var_name(getParam<VariableName>("source")),
-    _source_var(*getMFEMProblem().getGridFunction(_source_var_name))
+    _curl_coef(getScalarCoefficientByName(getParam<VariableName>("source")),
+               getVectorCoefficientByName(getParam<VariableName>("source") + "_grad"))
 {
 }
 
 void
 MFEMMeridionalCurlAux::execute()
 {
-  mfem::GridFunctionCoefficient a_theta_coef(&_source_var);
-  mfem::GradientGridFunctionCoefficient grad_a_theta_coef(&_source_var);
-
-  MeridionalCurlAthetaVectorCoefficient curl_coef(a_theta_coef, grad_a_theta_coef);
-
-  _result_var.ProjectCoefficient(curl_coef);
+  _result_var.ProjectCoefficient(_curl_coef);
 }
 
 #endif
