@@ -77,8 +77,6 @@ public:
   virtual void ComputeNonlinearResidual(const mfem::Vector & u, mfem::Vector & residual) const;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
-  /// Get partially-assembled Jacobian
-  void FormJacobianOperator(const mfem::Vector & u) const;
   /// Get operator handle for linear component of system operator
   mfem::OperatorHandle & GetLinearOperator() const { return _linear_operator; };
 
@@ -217,6 +215,8 @@ protected:
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+  /// Get partially-assembled Jacobian
+  void FormJacobianOperator(const mfem::Vector & u) const;
   /// Compute Jacobian matrix at the provided vector of true DoFs of trial variables
   void FormJacobianMatrix(const mfem::Vector & u);
 
@@ -327,7 +327,6 @@ protected:
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
-
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;

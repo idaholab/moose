@@ -49,8 +49,6 @@ protected:
 class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator
 {
 public:
-  using mfem::NonlinearFormIntegrator::AssemblePA;
-
   NLCurlCurlIntegrator(mfem::Coefficient & k,
                        mfem::Coefficient & curlu_dk_dcurlu,
                        mfem::VectorCoefficient & curlu_vec,
@@ -66,6 +64,7 @@ public:
                                    const mfem::Vector & elfun,
                                    mfem::DenseMatrix & elmat) override;
 
+  using mfem::NonlinearFormIntegrator::AssemblePA;
   void AssemblePA(const mfem::FiniteElementSpace & fes) override;
   void AssembleGradPA(const mfem::Vector & x, const mfem::FiniteElementSpace & fes) override;
   void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
@@ -73,8 +72,9 @@ public:
   void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
   /// Performs the setup for both AssemblePA and AssembleGradPA, then returns
-  /// the integration rule we need for projecting coefficients.
-  const mfem::IntegrationRule * PreAssemblySetup(const mfem::FiniteElementSpace & fes);
+  /// the integration rule we need for projecting coefficients. This also
+  /// ensures that _qspace_ir is set correctly.
+  void PreAssemblySetup(const mfem::FiniteElementSpace & fes);
 
 protected:
   mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
@@ -93,7 +93,7 @@ protected:
   /// both of which are symmetric.
   const bool _symmetric = true; ///< False if using a nonsymmetric matrix coefficient
   /// Number of matrix elements to store per quadpoint. Since we only support 3D matrices
-  /// with scalar k, we can set this to 6.
+  /// with scalar k, we can set this to 6 (the no. of distinct entries for a 3x3 symmetric matrix)
   const int _ndata = 6;
 
   /// Coefficient for k(s)
@@ -101,7 +101,7 @@ protected:
   /// Coefficient for s*k'(s), with s = |curl u|
   mfem::Coefficient & _curlu_dk_dcurlu_coef;
   /// Coefficient for the curl of u
-  mfem::VectorCoefficient & _curlu_vec;
+  mfem::VectorCoefficient & _curlu_coef;
 
   /// Tolerance for zero-ing out 1.0 / |curl u| when forming jacobian operator
   mfem::real_t _curlu_zero_tol;

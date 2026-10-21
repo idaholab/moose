@@ -101,16 +101,16 @@ NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
 
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
                                            mfem::Coefficient & curlu_dk_dcurlu,
-                                           mfem::VectorCoefficient & curlu_vec,
+                                           mfem::VectorCoefficient & curlu,
                                            mfem::real_t curlu_zero_tol,
                                            const mfem::IntegrationRule * ir)
   : mfem::NonlinearFormIntegrator(ir), // so the PA path sees the rule
     _curlcurl_res_integ(k, ir),
-    _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
+    _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir),
     _k_coef(k),
     _curlu_dk_dcurlu_coef(curlu_dk_dcurlu),
-    _curlu_vec(curlu_vec),
+    _curlu_coef(curlu),
     _curlu_zero_tol(curlu_zero_tol)
 {
 }
@@ -139,25 +139,25 @@ void
 NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
                                      const mfem::FiniteElementSpace & fes)
 {
-  const mfem::IntegrationRule * ir = PreAssemblySetup(fes);
+  PreAssemblySetup(fes);
 
-  mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  k_coeff.Project(_k_coef);
-  mfem::CoefficientVector dk_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  dk_coeff.Project(_curlu_dk_dcurlu_coef);
-  mfem::CoefficientVector curl_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  curl_coeff.Project(_curlu_vec);
+  mfem::CoefficientVector k_cv(*_qspace, mfem::CoefficientStorage::FULL);
+  k_cv.Project(_k_coef);
+  mfem::CoefficientVector curlu_dk_dcurlu_cv(*_qspace, mfem::CoefficientStorage::FULL);
+  curlu_dk_dcurlu_cv.Project(_curlu_dk_dcurlu_coef);
+  mfem::CoefficientVector curlu_cv(*_qspace, mfem::CoefficientStorage::FULL);
+  curlu_cv.Project(_curlu_coef);
 
   // This doesn't clear out what's in the array
   _pa_grad_data.SetSize(_ndata * _nq * _ne, mfem::Device::GetMemoryType());
 
   NLCurlCurlGradPASetup(_quad1D,
                         _ne,
-                        ir->GetWeights(),
+                        _qspace_ir->GetWeights(),
                         _geom->J,
-                        curl_coeff,
-                        k_coeff,
-                        dk_coeff,
+                        curlu_cv,
+                        k_cv,
+                        curlu_dk_dcurlu_cv,
                         _pa_grad_data,
                         _curlu_zero_tol);
 }
@@ -167,13 +167,13 @@ NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
 void
 NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 {
-  const mfem::IntegrationRule * ir = PreAssemblySetup(fes);
+  PreAssemblySetup(fes);
 
-  mfem::CoefficientVector k_coeff(*_qspace, mfem::CoefficientStorage::FULL);
-  k_coeff.Project(_k_coef);
+  mfem::CoefficientVector k_cv(*_qspace, mfem::CoefficientStorage::FULL);
+  k_cv.Project(_k_coef);
 
   _pa_res_data.SetSize(_ndata * _nq * _ne, mfem::Device::GetMemoryType());
-  NLCurlCurlPASetup(_quad1D, _ne, ir->GetWeights(), _geom->J, k_coeff, _pa_res_data);
+  NLCurlCurlPASetup(_quad1D, _ne, _qspace_ir->GetWeights(), _geom->J, k_cv, _pa_res_data);
 }
 
 void
@@ -240,7 +240,7 @@ NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
 
 // This gets called by both AssemblePA and AssembleGradPA, since they
 // both need to store the transformation jacobians.
-const mfem::IntegrationRule *
+void
 NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
 {
   const mfem::FiniteElement * fel = fes.GetTypicalFE();
@@ -282,8 +282,6 @@ NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes)
     _qspace_mesh_sequence = mesh->GetSequence();
     _qspace_ir = rule;
   }
-
-  return rule;
 }
 
 // For now, no multithreading. this will be very slow
