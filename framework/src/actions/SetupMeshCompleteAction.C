@@ -150,7 +150,8 @@ SetupMeshCompleteAction::act()
                    "boundary pairs, such as those created by BreakMeshByBlockGenerator. Set "
                    "'use_displaced_mesh = false' in the [Mesh] block and use the Lagrangian "
                    "solid mechanics kernels ('new_system = true'), or use the mortar-based "
-                   "cohesive zone model, which does not break the mesh.");
+                   "cohesive zone model, which does not rely on pairing elements through the "
+                   "disjoint neighbor machinery.");
 
       mooseAssert(_mesh->prepared(), "The reference mesh should already be fully prepared here");
       _displaced_mesh = _mesh->safeClone();
