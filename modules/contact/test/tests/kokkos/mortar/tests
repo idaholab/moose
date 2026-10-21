@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosWeightedGapUserObject.md KokkosComputeWeightedGapLMMechanicalContact.md KokkosNormalMortarMechanicalContact.md'
+
+  [frictionless]
+    requirement = 'The Kokkos system shall enforce frictionless mortar mechanical contact with a Lagrange multiplier at the secondary nodes on the current configuration'
+    [weighted_gap]
+      type = Exodiff
+      input = 'frictionless_weighted_gap.i'
+      exodiff = 'frictionless_weighted_gap_out.e'
+      detail = 'matching the solution of the non-Kokkos weighted gap contact objects, and'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'frictionless_weighted_gap.i'
+      cli_args = 'Executioner/end_time=20 Outputs/exodus=false'
+      detail = 'with an exact Jacobian, including the derivatives of the nodal normals.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]
