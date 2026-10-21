@@ -11,7 +11,6 @@
     capabilities = 'method!=dbg'
     recover = false
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall couple a subchannel model to a thermo-mechanical pin model, transferring the pin surface temperature from the nearest subchannel node, and preserve the pin power transferred back to the coolant.'
   []
   [one_pin_interpolated]
@@ -30,7 +29,6 @@
     # affect it
     allow_warnings = true
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall couple a subchannel model to a thermo-mechanical pin model, interpolating the pin surface temperature linearly along the pin, and preserve the pin power transferred back to the coolant.'
   []
 []
