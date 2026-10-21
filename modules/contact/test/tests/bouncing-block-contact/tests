@@ -300,7 +300,8 @@
                  "Postprocessors/active='' Outputs/exodus=false AuxVariables/q/block=3 "
                  "AuxKernels/q/type=MortarUserObjectAux AuxKernels/q/variable=q "
                  "AuxKernels/q/boundary=10 AuxKernels/q/user_object=weighted_gap_uo "
-                 "AuxKernels/q/contact_quantity=active_set"
+                 "AuxKernels/q/contact_quantity=active_set "
+                 "Outputs/file_base=active_set_frictionless_penalty"
       detail = 'including the active set from a frictionless penalty user object, and'
     []
     [delta_tangential_lm_lagrange_multiplier]
