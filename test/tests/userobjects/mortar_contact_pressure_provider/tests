@@ -1,0 +1,12 @@
+[Tests]
+  design = 'UserObjects/index.md'
+  issues = '#32856'
+  [provider]
+    type = RunApp
+    input = 'provider.i'
+    expect_out = 'Contact pressure integral: 1.5\n'
+    requirement = 'The system shall let mortar objects obtain the physical contact pressure of a '
+                  'mortar interface from an object that stores a scaled pressure, by interpolating '
+                  'its nodal physical pressures with its traction basis.'
+  []
+[]
