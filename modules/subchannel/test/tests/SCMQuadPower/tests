@@ -45,4 +45,41 @@
     issues = '#34082'
     requirement = 'The system will assign the current value of a time-dependent total power postprocessor to the fuel pins in a quadrilateral lattice using an auxiliary kernel, without lagging it by one time step.'
   []
+  [SCMQuadPower_power_execute_on_warning]
+    type = RunException
+    input = 'transient_power.i'
+    cli_args = 'Postprocessors/power/execute_on=timestep_end Executioner/num_steps=1'
+    expect_err = 'The power postprocessor does not execute on every execute_on flag of this object, so q_prime may use a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the quadrilateral lattice power auxiliary kernel does not execute on all of its execution flags.'
+  []
+  [SCMQuadPower_power_force_postaux_warning]
+    type = RunException
+    input = 'transient_power.i'
+    cli_args = 'Postprocessors/power/force_postaux=true Executioner/num_steps=1'
+    expect_err = 'The power postprocessor sets force_postaux, so it executes after this object and q_prime uses a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the quadrilateral lattice power auxiliary kernel is forced to execute after auxiliary kernels.'
+  []
+  [SCMQuadPower_verbose]
+    type = RunApp
+    input = 'transient_power.i'
+    cli_args = 'AuxKernels/q_prime_AUX/verbose=true Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'Aux Power correction vector'
+    issues = '#34082'
+    requirement = 'The system will report the per-pin power correction of the quadrilateral lattice power auxiliary kernel when requested.'
+  []
+  [SCMQuadPower_receiver_power_no_warning]
+    type = RunApp
+    input = 'transient_power.i'
+    # A Receiver with an execute_on and force_postaux that would otherwise trigger both warnings.
+    # Its value is set by a transfer, so neither check applies and warnings remain errors here.
+    cli_args = 'Postprocessors/received_power/type=Receiver Postprocessors/received_power/default=1e4 '
+               'Postprocessors/received_power/execute_on=timestep_end '
+               'Postprocessors/received_power/force_postaux=true '
+               'AuxKernels/q_prime_AUX/power=received_power Executioner/num_steps=1 Outputs/csv=false'
+    recover = False
+    issues = '#34082'
+    requirement = 'The system will not warn about the execution order of the total power postprocessor of the quadrilateral lattice power auxiliary kernel when that postprocessor is a Receiver filled by a transfer.'
+  []
 []

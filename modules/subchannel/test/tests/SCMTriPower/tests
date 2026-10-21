@@ -40,4 +40,43 @@
     issues = '#34082'
     requirement = 'The system will assign the pin linear heat rate in a triangular lattice using an initial condition when the total power is supplied by a postprocessor, so that the linear heat rate integrated over the pins equals that power.'
   []
+  [SCMTriPower_power_execute_on_warning]
+    type = RunException
+    input = 'postprocessor_power.i'
+    # Adds the power aux kernel, executing on a flag the power postprocessor does not execute on
+    cli_args = "AuxVariables/q_prime_aux/block=fuel_pins AuxKernels/q_prime_AUX/type=SCMTriPowerAux AuxKernels/q_prime_AUX/variable=q_prime_aux AuxKernels/q_prime_AUX/power=power_pp AuxKernels/q_prime_AUX/filename=seven_pin_power_profile.txt AuxKernels/q_prime_AUX/axial_heat_rate=axial_heat_rate Outputs/csv=false AuxKernels/q_prime_AUX/execute_on='initial timestep_end'"
+    expect_err = 'The power postprocessor does not execute on every execute_on flag of this object, so q_prime may use a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the triangular lattice power auxiliary kernel does not execute on all of its execution flags.'
+  []
+  [SCMTriPower_power_force_postaux_warning]
+    type = RunException
+    input = 'postprocessor_power.i'
+    cli_args = 'AuxVariables/q_prime_aux/block=fuel_pins AuxKernels/q_prime_AUX/type=SCMTriPowerAux AuxKernels/q_prime_AUX/variable=q_prime_aux AuxKernels/q_prime_AUX/power=power_pp AuxKernels/q_prime_AUX/filename=seven_pin_power_profile.txt AuxKernels/q_prime_AUX/axial_heat_rate=axial_heat_rate Outputs/csv=false AuxKernels/q_prime_AUX/execute_on=initial Postprocessors/power_pp/force_postaux=true'
+    expect_err = 'The power postprocessor sets force_postaux, so it executes after this object and q_prime uses a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the triangular lattice power auxiliary kernel is forced to execute after auxiliary kernels.'
+  []
+  [SCMTriPower_verbose]
+    type = RunApp
+    input = 'postprocessor_power.i'
+    cli_args = 'AuxVariables/q_prime_aux/block=fuel_pins AuxKernels/q_prime_AUX/type=SCMTriPowerAux AuxKernels/q_prime_AUX/variable=q_prime_aux AuxKernels/q_prime_AUX/power=power_pp AuxKernels/q_prime_AUX/filename=seven_pin_power_profile.txt AuxKernels/q_prime_AUX/axial_heat_rate=axial_heat_rate Outputs/csv=false AuxKernels/q_prime_AUX/execute_on=initial AuxKernels/q_prime_AUX/verbose=true'
+    expect_out = 'Aux Power correction vector'
+    issues = '#34082'
+    requirement = 'The system will report the per-pin power correction of the triangular lattice power auxiliary kernel when requested.'
+  []
+  [SCMTriPower_receiver_power_no_warning]
+    type = RunApp
+    input = 'postprocessor_power.i'
+    # A Receiver with an execute_on and force_postaux that would otherwise trigger both warnings.
+    # Its value is set by a transfer, so neither check applies and warnings remain errors here.
+    cli_args = "AuxVariables/q_prime_aux/block=fuel_pins AuxKernels/q_prime_AUX/type=SCMTriPowerAux AuxKernels/q_prime_AUX/variable=q_prime_aux AuxKernels/q_prime_AUX/filename=seven_pin_power_profile.txt AuxKernels/q_prime_AUX/axial_heat_rate=axial_heat_rate Outputs/csv=false AuxKernels/q_prime_AUX/execute_on='initial timestep_end' "
+               "Postprocessors/received_power/type=Receiver Postprocessors/received_power/default=7000 "
+               "Postprocessors/received_power/execute_on=initial "
+               "Postprocessors/received_power/force_postaux=true "
+               "AuxKernels/q_prime_AUX/power=received_power"
+    recover = False
+    issues = '#34082'
+    requirement = 'The system will not warn about the execution order of the total power postprocessor of the triangular lattice power auxiliary kernel when that postprocessor is a Receiver filled by a transfer.'
+  []
 []

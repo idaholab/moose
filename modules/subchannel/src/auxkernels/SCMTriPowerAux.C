@@ -9,6 +9,7 @@
 
 #include "SCMTriPowerAux.h"
 #include "Function.h"
+#include "Receiver.h"
 #include "TriSubChannelMesh.h"
 #include "SCM.h"
 
@@ -31,6 +32,8 @@ SCMTriPowerAux::validParams()
       "Axial shape of the heat rate as a function of the distance from the start of the "
       "heated section [Unitless]. Its magnitude does not matter because each pin is "
       "rescaled to its assigned power");
+  params.addParam<bool>(
+      "verbose", false, "Print the per-pin power correction every time it is computed");
   return params;
 }
 
@@ -40,7 +43,8 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     _power(getPostprocessorValue("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
-    _axial_heat_rate(getFunction("axial_heat_rate"))
+    _axial_heat_rate(getFunction("axial_heat_rate")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (processor_id() > 0)
     return;
@@ -82,6 +86,23 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
 void
 SCMTriPowerAux::initialSetup()
 {
+  // q_prime uses the value the power postprocessor holds when this object executes, so it is
+  // current only if the postprocessor executes before this object on the same flags. A
+  // Receiver is filled by a transfer instead, so its execute_on does not set when it changes.
+  if (!isDefaultPostprocessorValue("power") &&
+      !dynamic_cast<const Receiver *>(&getUserObjectBase("power")))
+  {
+    const auto & power_pp = getUserObjectBase("power");
+    if (!power_pp.getExecuteOnEnum().isValueSet(getExecuteOnEnum()))
+      paramWarning("power",
+                   "The power postprocessor does not execute on every execute_on flag of this "
+                   "object, so q_prime may use a lagged power");
+    if (power_pp.getParam<bool>("force_postaux"))
+      paramWarning("power",
+                   "The power postprocessor sets force_postaux, so it executes after this object "
+                   "and q_prime uses a lagged power");
+  }
+
   computeShapeIntegral();
 }
 
@@ -142,6 +163,18 @@ SCMTriPowerAux::computeShapeIntegral()
         _shape_integral(i_pin) += (heat1 + heat2) * dz / 2.0;
       }
     }
+  }
+
+  if (_verbose)
+  {
+    // The correction is the factor between q_prime and the uncorrected average linear heat
+    // rate of each pin, the pin power over the heated length
+    Eigen::MatrixXd correction = Eigen::MatrixXd::Zero(n_pins, 1);
+    for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
+      if (_shape_integral(i_pin) != 0.0)
+        correction(i_pin) = heated_length / _shape_integral(i_pin);
+    _console << "###########################################" << std::endl;
+    _console << "Aux Power correction vector :\n" << correction << " \n";
   }
 }
 

@@ -37,6 +37,8 @@ protected:
   /// matrix that holds the values of the relative pin power
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
+  /// Whether to print the per-pin power correction every time it is computed
+  const bool _verbose;
   /// Trapezoidal integral of the axial power shape over each pin on the SCM axial grid [m]
   Eigen::MatrixXd _shape_integral;
 
