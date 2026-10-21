@@ -1,4 +1,4 @@
-# Checks that MFEMScaledVectorAux projects the product of a scalar coefficient and a vector
+# Checks that MFEMVectorProjectionAux projects the product of a scalar coefficient and a vector
 # coefficient onto a vector auxvariable. Three scalar coefficients are covered: the default unit
 # one, a spatially varying one given by a function, and one taking the value of a postprocessor.
 # The vector coefficient is a variable in each case, so this also covers rescaling a vector
@@ -81,18 +81,18 @@
 
 [AuxKernels]
   [copy]
-    type = MFEMScaledVectorAux
+    type = MFEMVectorProjectionAux
     variable = unscaled
     vector_coefficient = source_field
   []
   [scale_by_function]
-    type = MFEMScaledVectorAux
+    type = MFEMVectorProjectionAux
     variable = function_scaled
     vector_coefficient = source_field
     coefficient = ramp
   []
   [scale_by_postprocessor]
-    type = MFEMScaledVectorAux
+    type = MFEMVectorProjectionAux
     variable = postprocessor_scaled
     vector_coefficient = source_field
     coefficient = DummyComparison
