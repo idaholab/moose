@@ -64,10 +64,10 @@
     type = CSVDiff
     input = scaledvector.i
     csvdiff = 'OutputData/ScaledVector.csv'
-    design = 'MFEMVectorProjectionAux.md'
+    design = 'MFEMVectorProjectionAux.md MFEMComplexVectorProjectionAux.md'
     issues = '#33653'
     requirement = 'The system shall have the ability to project the product of a scalar coefficient, including one obtained from a postprocessor, '
-                  'and a vector coefficient onto an MFEM vector auxvariable.'
+                  'and a vector coefficient onto MFEM real and complex vector auxvariables.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false

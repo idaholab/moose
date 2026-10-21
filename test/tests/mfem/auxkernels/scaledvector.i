@@ -2,8 +2,9 @@
 # coefficient onto a vector auxvariable. Three scalar coefficients are covered: the default unit
 # one, a spatially varying one given by a function, and one taking the value of a postprocessor.
 # The vector coefficient is a variable in each case, so this also covers rescaling a vector
-# variable. Each result is compared against the product written out explicitly as a vector
-# function.
+# variable. MFEMComplexVectorProjectionAux is checked in the same way, scaling distinct real and
+# imaginary parts by the spatially varying function. Each result is compared against the product
+# written out explicitly as a vector function.
 
 [Mesh]
   type = MFEMFileMesh
@@ -50,6 +51,10 @@
     type = MFEMVariable
     fespace = L2VectorFESpace
   []
+  [complex_function_scaled]
+    type = MFEMComplexVariable
+    fespace = L2VectorFESpace
+  []
 []
 
 [Functions]
@@ -68,6 +73,18 @@
     expression_x = '1 * (1 + x + 2*y + 3*z)'
     expression_y = '2 * (1 + x + 2*y + 3*z)'
     expression_z = '3 * (1 + x + 2*y + 3*z)'
+  []
+  [imag_source]
+    type = ParsedVectorFunction
+    expression_x = '-3'
+    expression_y = '1'
+    expression_z = '2'
+  []
+  [expected_imag_function_scaled]
+    type = ParsedVectorFunction
+    expression_x = '-3 * (1 + x + 2*y + 3*z)'
+    expression_y = '1 * (1 + x + 2*y + 3*z)'
+    expression_z = '2 * (1 + x + 2*y + 3*z)'
   []
 []
 
@@ -97,6 +114,13 @@
     vector_coefficient = source_field
     coefficient = DummyComparison
   []
+  [complex_scale_by_function]
+    type = MFEMComplexVectorProjectionAux
+    variable = complex_function_scaled
+    vector_coefficient_real = source_field
+    vector_coefficient_imag = imag_source
+    coefficient = ramp
+  []
 []
 
 [Postprocessors]
@@ -123,6 +147,12 @@
     type = MFEMVectorL2Error
     variable = postprocessor_scaled
     function = source
+  []
+  [ComplexFunctionScaledError]
+    type = MFEMComplexVectorL2Error
+    variable = complex_function_scaled
+    function_real = expected_function_scaled
+    function_imag = expected_imag_function_scaled
   []
 []
 
