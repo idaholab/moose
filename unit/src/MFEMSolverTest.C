@@ -23,6 +23,7 @@
 #include "MFEMMUMPS.h"
 #include "MFEMGMRESSolver.h"
 #include "MFEMCGSolver.h"
+#include "MFEMMINRESSolver.h"
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMVectorFESpace.h"
 
@@ -224,6 +225,23 @@ TEST_F(MFEMSolverTest, MFEMCGSolver)
   MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
 
   testDiffusionSolve<mfem::CGSolver>(solver, 1e-5);
+}
+
+/**
+ * Test MFEMMINRESSolver creates an mfem::MINRESSolver solver successfully.
+ */
+TEST_F(MFEMSolverTest, MFEMMINRESSolver)
+{
+  // Build required kernel inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMMINRESSolver");
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
+
+  // Construct kernel
+  MFEMMINRESSolver & solver =
+      addObject<MFEMMINRESSolver>("MFEMMINRESSolver", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::MINRESSolver>(solver, 1e-5);
 }
 
 /**

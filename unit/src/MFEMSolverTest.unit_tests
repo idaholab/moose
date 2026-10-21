@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#34206'
+
+  [minres]
+    type = GoogleTest
+    unit_test = MFEMSolverTest.MFEMMINRESSolver
+    design = 'MFEMMINRESSolver.md'
+    requirement = 'The system shall solve an MFEM linear system with the MINRES method.'
+  []
+[]
