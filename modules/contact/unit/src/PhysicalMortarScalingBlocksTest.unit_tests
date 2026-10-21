@@ -1,0 +1,40 @@
+[Tests]
+  design = 'ContactAction.md LMWeightedGapUserObject.md'
+  issues = '#32856'
+
+  [derived_scales_match_isotropic_moduli]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.DerivedScalesMatchIsotropicModuli
+    requirement = 'The system shall derive the normal and tangential mortar contact stiffnesses from the constrained and shear moduli of isotropic elastic bodies and the depths of the element layers adjacent to the contact surface.'
+  []
+  [all_open_blocks_same_order]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.AllOpenBlocksSameOrder
+    requirement = 'The system shall assemble the normal mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at contact nodes that are open, when the contact constants are derived from the material elasticity tensors.'
+  []
+  [all_open_blocks_same_order_displacement_scaled]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.AllOpenBlocksSameOrderDisplacementScaled
+    requirement = 'The system shall assemble the normal mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at open contact nodes when the displacement variables are scaled, when the contact constants are derived from the material elasticity tensors.'
+  []
+  [all_closed_blocks_same_order]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.AllClosedBlocksSameOrder
+    requirement = 'The system shall assemble the normal mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at contact nodes that are closed, when the contact constants are derived from the material elasticity tensors.'
+  []
+  [all_closed_blocks_same_order_displacement_scaled]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.AllClosedBlocksSameOrderDisplacementScaled
+    requirement = 'The system shall assemble the normal mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at closed contact nodes when the displacement variables are scaled, when the contact constants are derived from the material elasticity tensors.'
+  []
+  [frictional_blocks_same_order]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.FrictionalBlocksSameOrder
+    requirement = 'The system shall assemble the frictional mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at open, sticking, and slipping contact nodes, when the contact constants are derived from the material elasticity tensors.'
+  []
+  [frictional_blocks_same_order_unscaled]
+    type = GoogleTest
+    unit_test = PhysicalMortarScalingBlocks.FrictionalBlocksSameOrderUnscaled
+    requirement = 'The system shall assemble the frictional mortar contact multiplier Jacobian rows and columns at the order of magnitude of the elasticity block at open, sticking, and slipping contact nodes when the displacement variables are unscaled, when the contact constants are derived from the material elasticity tensors.'
+  []
+[]
