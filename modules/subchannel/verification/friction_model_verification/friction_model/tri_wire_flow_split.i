@@ -46,7 +46,6 @@ n_corner = 6
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
   P_out = ${P_out}
   compute_density = true
   compute_viscosity = true

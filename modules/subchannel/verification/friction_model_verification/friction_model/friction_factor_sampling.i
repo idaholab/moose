@@ -31,7 +31,6 @@ z_ff = 2.9
 
 [SubChannel]
   fp = water
-  n_blocks = 1
   P_out = ${P_out}
   compute_density = true
   compute_viscosity = true
