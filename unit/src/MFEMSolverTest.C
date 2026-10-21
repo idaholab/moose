@@ -18,6 +18,7 @@
 #include "MFEMHyprePCG.h"
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMHypreDiagScale.h"
+#include "MFEMHypreSmoother.h"
 #include "MFEMHypreADS.h"
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
@@ -290,6 +291,55 @@ TEST_F(MFEMSolverTest, MFEMHypreDiagScale)
 }
 
 /**
+ * Test MFEMHypreSmoother creates an mfem::HypreSmoother preconditioner of the default type that
+ * an MFEM native Krylov solver accepts.
+ */
+TEST_F(MFEMSolverTest, MFEMHypreSmoother)
+{
+  // Construct preconditioner
+  InputParameters prec_params = _factory.getValidParams("MFEMHypreSmoother");
+  MFEMHypreSmoother & prec =
+      addObject<MFEMHypreSmoother>("MFEMHypreSmoother", "prec1", prec_params);
+  ASSERT_NE(dynamic_cast<mfem::HypreSmoother *>(&prec.GetSolver()), nullptr);
+
+  // Construct solver
+  InputParameters solver_params = _factory.getValidParams("MFEMCGSolver");
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
+  solver_params.set<MFEMSolverName>("preconditioner") = "prec1";
+  MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::CGSolver>(solver, 1e-5);
+}
+
+/**
+ * Test MFEMHypreSmoother with l1 Jacobi relaxation and positive l1 norms preconditions
+ * MFEMMINRESSolver.
+ */
+TEST_F(MFEMSolverTest, MFEMHypreSmootherl1Jacobi)
+{
+  // Construct preconditioner
+  InputParameters prec_params = _factory.getValidParams("MFEMHypreSmoother");
+  prec_params.set<MooseEnum>("smoother_type") = "l1Jacobi";
+  prec_params.set<bool>("positive_diagonal") = true;
+  MFEMHypreSmoother & prec =
+      addObject<MFEMHypreSmoother>("MFEMHypreSmoother", "prec1", prec_params);
+  auto * const smoother = dynamic_cast<mfem::HypreSmoother *>(&prec.GetSolver());
+  ASSERT_NE(smoother, nullptr);
+  ASSERT_TRUE(smoother->IsPositiveDiagonal());
+
+  // Construct solver
+  InputParameters solver_params = _factory.getValidParams("MFEMMINRESSolver");
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
+  solver_params.set<MFEMSolverName>("preconditioner") = "prec1";
+  MFEMMINRESSolver & solver =
+      addObject<MFEMMINRESSolver>("MFEMMINRESSolver", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::MINRESSolver>(solver, 1e-5);
+}
+
+/**
  * Test MFEMHypreADS creates an mfem::HypreADS solver successfully.
  */
 TEST_F(MFEMSolverTest, MFEMHypreADS)
@@ -458,6 +508,19 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
       addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::HypreBoomerAMG>>(solver, 1e-5, false);
+}
+
+TEST_F(MFEMSolverTest, MFEMHypreSmootherLOR)
+{
+  InputParameters solver_params = _factory.getValidParams("MFEMHypreSmoother");
+  solver_params.set<bool>("low_order_refined") = true;
+  solver_params.set<MooseEnum>("smoother_type") = "l1Jacobi";
+  solver_params.set<bool>("positive_diagonal") = true;
+
+  MFEMHypreSmoother & solver =
+      addObject<MFEMHypreSmoother>("MFEMHypreSmoother", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::LORSolver<mfem::HypreSmoother>>(solver, 1e-5, false);
 }
 
 #endif

@@ -14,4 +14,24 @@
     requirement = 'The system shall precondition a hypre conjugate gradient solve of an MFEM linear '
                   'system with diagonal scaling.'
   []
+  [hypre_smoother]
+    design = 'MFEMHypreSmoother.md'
+    requirement = 'The system shall apply a hypre smoother to an MFEM linear system'
+    [default_type]
+      type = GoogleTest
+      unit_test = MFEMSolverTest.MFEMHypreSmoother
+      detail = 'of the default type, as the preconditioner of a conjugate gradient solve,'
+    []
+    [l1_jacobi]
+      type = GoogleTest
+      unit_test = MFEMSolverTest.MFEMHypreSmootherl1Jacobi
+      detail = 'with l1 Jacobi relaxation and positive l1 norms, as the preconditioner of a MINRES '
+               'solve, and'
+    []
+    [low_order_refined]
+      type = GoogleTest
+      unit_test = MFEMSolverTest.MFEMHypreSmootherLOR
+      detail = 'built on a low-order-refined discretization, as the solver.'
+    []
+  []
 []
