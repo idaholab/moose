@@ -13,6 +13,8 @@ This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC k
 
 The [!param](/AuxKernels/SCMTriPowerAux/power) postprocessor executes before this object on every execution flag they share, so `q_prime` uses its current value, including within fixed point iterations. Execute both on the same flags, for example `TIMESTEP_BEGIN` so that the solver uses the power of the current time step; otherwise a time-dependent power is applied one execution late.
 
+The axial power profile function [!param](/AuxKernels/SCMTriPowerAux/axial_heat_rate) may depend on time: both the integral and `q_prime` are evaluated at the current time, so its amplitude and its shape can change between time steps while each pin keeps its assigned power. It must not depend on values that change during a time step, such as postprocessors, because the integral is computed at the start of the time step, before they execute, while `q_prime` uses their updated values. The pin powers then no longer match [!param](/AuxKernels/SCMTriPowerAux/power).
+
 ## Caveat
 
 !! Intentional comment to provide extra spacing
