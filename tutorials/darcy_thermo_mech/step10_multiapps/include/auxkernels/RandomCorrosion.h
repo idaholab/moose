@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "AuxKernel.h"
+#include "MooseRandom.h"
 #include "libmesh/bounding_box.h"
 
 /**
@@ -55,6 +56,9 @@ protected:
 private:
   /// The vector of random points to apply "corrosion"
   std::vector<Point> _points;
+
+  /// Generator for the "corrosion" points, reseeded at the start of each time step
+  MooseRandom _generator;
 
   /// The bounding box of the domain, used for generating "corrosion" points
   BoundingBox _box;
