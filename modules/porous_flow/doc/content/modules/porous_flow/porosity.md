@@ -24,6 +24,16 @@ In this case
 
 Here the "ref" values are reference values, $P_{f}$ is the [effective fluid pressure](PorousFlowEffectiveFluidPressure.md), $T$ is the [temperature](PorousFlowTemperature.md) and $\epsilon^{\mathrm{total}}_{ii}$ is the [total volumetric strain](PorousFlowVolumetricStrain.md).  These may be spatially-varying `AuxVariables` to define a heterogeneous porosity distribution.  $A$, $B$ and $C$ are real-valued coefficients.  A lower-bound on porosity, $\phi \geq \phi_{\mathrm{min}}$, may also be defined.
 
+## Linear with thermal opening: [PorousFlowPorosityVinsomeWesterveld](/PorousFlowPorosityVinsomeWesterveld.md)
+
+This adds a thermal-opening term to the linear relationship:
+
+\begin{equation}
+\phi = \phi_{\mathrm{ref}} + A(P_{f} - P_{f\ \mathrm{ref}}) + B(T - T_{\mathrm{ref}}) + C(\epsilon^{\mathrm{total}}_{ii} - \epsilon^{\mathrm{total}}_{ii\ \mathrm{ref}}) - D\, I \ ,
+\end{equation}
+
+where $D$ is a real-valued coefficient and $I$ is the heat content of the matrix adjacent to a lower-dimensional fracture.  $I$ is computed using the semi-analytic method of [!cite](vinsome1980), so the opening of the fracture depends on how much of the matrix has cooled (or heated), even when the cooled layer is too thin to be resolved by the mesh.
+
 ## Exponential: [PorousFlowPorosity](/PorousFlowPorosity.md)
 
 Using [PorousFlowPorosity](/PorousFlowPorosity.md) with appropriately set flags,

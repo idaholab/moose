@@ -34,7 +34,7 @@ SolverBase::SolverBase(const InputParameters & parameters)
 }
 
 void
-SolverBase::SetOperator(mfem::Operator & op)
+SolverBase::SetOperator(const mfem::Operator & op)
 {
   UpdateEquationSystemContext();
   SetOperatorImpl(op);

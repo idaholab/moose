@@ -65,4 +65,59 @@
     mesh_mode = REPLICATED
     prereq = 'dm_contact_precon_no_adaptivity'
   []
+
+  [force_balance]
+    design = 'ContactAction.md NormalMortarMechanicalContact.md'
+    issues = '#33657'
+    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
+                  'curved interface.'
+    # abs_zero checks the normalized force imbalance against zero.
+    [dual]
+      type = 'CSVDiff'
+      input = 'mortar_mechanical_contact_force_balance.i'
+      csvdiff = 'dual_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/use_dual=true '
+                 'Outputs/file_base=dual_mortar_force_balance'
+      detail = 'The forces shall balance with a dual (biorthogonal) Lagrange multiplier basis.'
+    []
+    [standard]
+      type = 'CSVDiff'
+      input = 'mortar_mechanical_contact_force_balance.i'
+      csvdiff = 'std_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/use_dual=false '
+                 'Outputs/file_base=std_mortar_force_balance'
+      detail = 'The forces shall balance with a standard Lagrange multiplier basis.'
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'mortar_mechanical_contact_force_balance.i'
+      csvdiff = 'penalty_mortar_force_balance.csv'
+      abs_zero = 1e-8
+      # Match the penalty scale to the bulk stiffness while retaining robust convergence.
+      cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
+                 'Outputs/file_base=penalty_mortar_force_balance'
+      detail = 'The forces shall balance with a penalty formulation.'
+    []
+  []
+
+  [force_balance_friction]
+    design = 'ContactAction.md NormalMortarMechanicalContact.md'
+    issues = '#33378'
+    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
+                  'curved, frictional interface.'
+    # The penalty formulation checks normal and tangential force balance without PDASS active-set
+    # parameters.
+    [penalty]
+      type = 'CSVDiff'
+      input = 'mortar_mechanical_contact_force_balance_friction.i'
+      csvdiff = 'penalty_mortar_force_balance_friction.csv'
+      abs_zero = 1e-8
+      cli_args = 'Contact/leftright/formulation=mortar_penalty Contact/leftright/penalty=1e6 '
+                 'Contact/leftright/penalty_friction=1e5 '
+                 'Outputs/file_base=penalty_mortar_force_balance_friction'
+      detail = 'The normal and frictional forces shall balance with a penalty formulation.'
+    []
+  []
 []

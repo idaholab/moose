@@ -39,7 +39,15 @@ MFEMHypreAME::ConstructSolver()
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  SetPreconditioner(*_eigensolver);
+}
+
+void
+MFEMHypreAME::SetPreconditionerImpl()
+{
+  if (auto * prec = dynamic_cast<mfem::HypreSolver *>(&_preconditioner->GetSolver()))
+    _eigensolver->SetPreconditioner(*prec);
+  else
+    paramError("preconditioner", "MFEMHypreAME requires a hypre solver as its preconditioner");
 }
 
 #endif

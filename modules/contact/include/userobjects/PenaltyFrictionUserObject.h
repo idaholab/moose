@@ -33,6 +33,7 @@ public:
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void reinit() override;
+  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const override;
   virtual void timestepSetup() override;
 
   virtual Real getFrictionalContactPressure(const Node * const node,

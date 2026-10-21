@@ -232,6 +232,15 @@ PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * con
     return 0.0;
 }
 
+ADReal
+PenaltyFrictionUserObject::nodalTangentialPressure(const Node & node,
+                                                   const unsigned int direction) const
+{
+  mooseAssert(direction < 2, "There are at most two tangent directions.");
+  return libmesh_map_find(_dof_to_tangential_traction, static_cast<const DofObject *>(&node))
+      .first(direction);
+}
+
 void
 PenaltyFrictionUserObject::reinit()
 {
@@ -454,8 +463,9 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     }
     else
     {
-      tangential_lm = -tangential_trial_traction / tangential_trial_traction_norm *
-                          penalty_friction * normal_lm -
+      // Project the total tangential traction onto the Coulomb cone
+      tangential_lm = tangential_trial_traction / tangential_trial_traction_norm *
+                          abs(_friction_coefficient * normal_lm) -
                       old_tangential_traction;
     }
 

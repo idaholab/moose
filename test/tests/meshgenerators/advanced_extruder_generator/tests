@@ -218,6 +218,16 @@
     cli_args = '--mesh-only'
     recover = false
   []
+  [side_boundary]
+    type = Exodiff
+    input = named_boundaries.i
+    exodiff = side_boundary_in.e
+    exodiff_opts = '-pedantic'
+    issues = '#34094'
+    requirement = 'The system shall be able to add the exterior sides and nodes of the extruded mesh to a named side boundary.'
+    cli_args = 'Mesh/extrude/side_boundary=lateral --mesh-only side_boundary_in.e'
+    recover = false
+  []
   [extrude_along_2D_curve]
     type = Exodiff
     input = 'extrude_along_curve_2D.i'

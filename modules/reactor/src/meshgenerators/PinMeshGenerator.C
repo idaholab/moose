@@ -433,7 +433,30 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
   }
-
+  else
+  {
+    // Since subgenerators are not called, error checking on input parameters needs to happen here
+    if (_pitch > getReactorParam<Real>(RGMB::assembly_pitch))
+      paramError("pitch", "Pin pitch must not exceed assembly pitch defined in ReactorMeshParams");
+    auto has_radii = _ring_radii.size() > 0;
+    if (has_radii)
+    {
+      if (!checkInputVectorInAscendingOrder(_ring_radii))
+        paramError("ring_radii", "This parameter must be strictly ascending.");
+      if (_ring_radii.back() > _pitch / 2.)
+        paramError("ring_radii", "Ring radii of pin must not exceed half the pin pitch");
+    }
+    auto has_ducts = _duct_halfpitch.size() > 0;
+    if (has_ducts)
+    {
+      if (!checkInputVectorInAscendingOrder(_duct_halfpitch))
+        paramError("duct_halfpitch", "This parameter must be strictly ascending.");
+      if (_duct_halfpitch.back() > _pitch / 2.)
+        paramError("duct_halfpitch", "Duct halfpitches of pin must not exceed half the pin pitch");
+    }
+    if (has_radii && has_ducts && (_ring_radii.back() > _duct_halfpitch.front()))
+      paramError("ring_radii", "Ring radii of pin must not exceed duct halfpitches of pin");
+  }
   generateMetadata();
 }
 

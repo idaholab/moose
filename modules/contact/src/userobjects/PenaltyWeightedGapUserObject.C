@@ -20,6 +20,9 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  // The weighted-gap object supplies penalty contact's nodal-normal point-neighbor matrix coupling.
+  addNodalNormalCoupling(params);
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -110,6 +113,13 @@ PenaltyWeightedGapUserObject::test() const
   return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
 }
 
+const VariableTestValue &
+PenaltyWeightedGapUserObject::tractionBasis() const
+{
+  // Penalty contact interpolates traction and weighted gap with the same basis.
+  return test();
+}
+
 const ADVariableValue &
 PenaltyWeightedGapUserObject::contactPressure() const
 {
@@ -197,6 +207,15 @@ PenaltyWeightedGapUserObject::reinit()
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_pressure[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
   }
+}
+
+ADReal
+PenaltyWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  // A node only enters this map once it has received a weighted-gap contribution, so a node on a
+  // partially integrated element may be absent. Absent means no contact pressure, matching how the
+  // interpolated pressure in reinit() treats it.
+  return findValue(_dof_to_normal_pressure, cast_ptr<const DofObject *>(&node), ADReal(0));
 }
 
 void

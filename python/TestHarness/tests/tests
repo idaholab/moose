@@ -222,6 +222,12 @@
     requirement = "The system shall detect and report unreadable output in executed commands"
     issues = '#14370'
   []
+  [runner_read_output]
+    type = PythonUnitTest
+    input = test_RunnerReadOutput.py
+    requirement = "The system shall keep output that is not valid UTF-8 as escapes and describe the location of each invalid sequence."
+    issues = '#34111'
+  []
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py
@@ -268,10 +274,19 @@
   [schema_expect_err]
     type = PythonUnitTest
     input = test_SchemaDiff.py
+    test_case = TestHarnessTester
     min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report multiple failures resulting from SchemaDiff operations."
     required_python_packages = 'deepdiff xmltodict'
     collections = 'FAILURE_ANALYSIS'
+  []
+  [schema_string_lists]
+    type = PythonUnitTest
+    input = test_SchemaDiff.py
+    test_case = TestSchemaDiffStringLists
+    requirement = "The system shall report a SchemaDiff difference between whitespace-separated lists of values that differ beyond the tolerances, including lists of negative values."
+    required_python_packages = 'deepdiff packaging'
+    issues = '#33873'
   []
   [test_show_last_results]
     type = PythonUnitTest
@@ -318,6 +333,15 @@
     type = PythonUnitTest
     input = test_SubprocessRunner.py
     requirement = 'The system shall wait for specified application output before delivering a signal.'
+  []
+  [monitor_processes]
+    type = PythonUnitTest
+    input = test_MonitorProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall measure the memory usage of a process and its descendants, "
+                  "splitting memory shared between processes proportionally and excluding "
+                  "file-backed memory when the kernel reports it separately."
+    issues = '#33796'
   []
   [test_method]
     type = PythonUnitTest

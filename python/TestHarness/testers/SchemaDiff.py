@@ -176,12 +176,12 @@ class SchemaDiff(RunApp):
                             x = float(split1[i])
                             y = float(split2[i])
                             if x != y:
-                                if x < self.abs_zero and y < self.abs_zero:
-                                    return True
+                                if abs(x) < self.abs_zero and abs(y) < self.abs_zero:
+                                    continue
                                 if self.rel_err == 0 or y == 0:
                                     if abs(x - y) > self.rel_err:
                                         return False
-                                elif abs(x - y) / y > self.rel_err:
+                                elif abs(x - y) / abs(y) > self.rel_err:
                                     return False
                         return True  # if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
                     except ValueError:

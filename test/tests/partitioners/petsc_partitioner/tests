@@ -202,4 +202,74 @@
     min_parallel = 4
     max_parallel = 4
   [../]
+
+  [lower_d_block]
+    issues = '#34002'
+    requirement = 'The system shall partition a mesh containing a lower-dimensional block with an '
+                  'external graph partitioner'
+    [no_weights]
+      type = 'RunApp'
+      input = 'lower_d_block.i'
+      expect_out = 'Solve Converged!'
+      capabilities = 'petsc>=3.9.3 & parmetis'
+      min_parallel = 2
+      detail = 'without weights, and'
+    []
+    [side_and_element_weights]
+      type = 'RunApp'
+      input = 'lower_d_block.i'
+      cli_args = 'Mesh/Partitioner/type=PartitionerWeightTest
+                  Mesh/Partitioner/apply_side_weight=true
+                  Mesh/Partitioner/apply_element_weight=true'
+      expect_out = 'Solve Converged!'
+      capabilities = 'petsc>=3.9.3 & parmetis'
+      min_parallel = 2
+      detail = 'with side and element weights.'
+    []
+  []
+
+  [spline_mesh]
+    issues = '#34002'
+    requirement = 'The system shall partition an IsoGeometric Analysis mesh, whose spline nodes are '
+                  'constrained by separate node elements, with an external graph partitioner using '
+                  'side and element weights.'
+    type = 'RunApp'
+    input = '../../meshgenerators/file_mesh_generator/2d_diffusion_iga.i'
+    # Keep ParMETIS; the automatic switch to PTScotch for small meshes depends on the rank count
+    cli_args = 'Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/part_package=parmetis
+                Mesh/Partitioner/apply_side_weight=true
+                Mesh/Partitioner/apply_element_weight=true
+                Outputs/vtk=false'
+    expect_out = 'Solve Converged!'
+    capabilities = 'petsc>=3.12.0 & exodus>=8.0 & parmetis'
+    min_parallel = 2
+    recover = false
+  []
+
+  [adapted_mesh]
+    issues = '#34002'
+    requirement = 'The system shall repartition a locally refined mesh, in which elements neighbor '
+                  'the children of a refined element, with an external graph partitioner using side '
+                  'and element weights.'
+    type = 'RunApp'
+    input = 'petsc_partitioner.i'
+    cli_args = "Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/apply_side_weight=true
+                Mesh/Partitioner/apply_element_weight=true
+                Adaptivity/marker=box
+                Adaptivity/steps=1
+                Adaptivity/Markers/box/type=BoxMarker
+                Adaptivity/Markers/box/bottom_left='0 0 0'
+                Adaptivity/Markers/box/top_right='0.3 0.3 0'
+                Adaptivity/Markers/box/inside=refine
+                Adaptivity/Markers/box/outside=do_nothing
+                Executioner/nl_abs_tol=1e-12
+                Outputs/file_base=petsc_partitioner_adapted_mesh_out
+                Outputs/exodus=false
+                Outputs/out/enable=false"
+    expect_out = 'Solve Converged!'
+    capabilities = 'petsc>=3.9.3 & parmetis'
+    min_parallel = 2
+  []
 []
