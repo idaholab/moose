@@ -756,10 +756,10 @@ projectQPoints3d(const Elem * const msm_elem,
   }
 }
 
-std::unordered_map<const Node *, NodalNormalSensitivities>
-computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg, const MeshBase & mesh)
+std::unordered_map<dof_id_type, NodalNormalSensitivities>
+computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg)
 {
-  const auto dim = mesh.mesh_dimension();
+  const auto dim = amg.dim();
 
   // Each coordinate of each node is an independent variable with derivative index
   // dim * (node ID) + component
@@ -771,13 +771,15 @@ computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg, const Mes
     return point;
   };
 
+  mooseAssert(ADReal::do_derivatives,
+              "Nodal normal sensitivities are computed only while derivatives are recorded.");
   std::unordered_map<const Node *, ADRealVectorValue> ad_normals;
   amg.computeADNodalNormals(coordinate, ad_normals);
 
-  std::unordered_map<const Node *, NodalNormalSensitivities> normals;
+  std::unordered_map<dof_id_type, NodalNormalSensitivities> normals;
   for (const auto & [node, ad_normal] : ad_normals)
   {
-    auto & entry = normals[node];
+    auto & entry = normals[node->id()];
     std::map<dof_id_type, RealTensorValue> by_node;
     for (const auto i : make_range(Moose::dim))
     {
@@ -790,8 +792,7 @@ computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg, const Mes
       }
     }
 
-    for (const auto & [node_id, tensor] : by_node)
-      entry.sensitivities.emplace_back(mesh.node_ptr(node_id), tensor);
+    entry.sensitivities.assign(by_node.begin(), by_node.end());
   }
 
   return normals;

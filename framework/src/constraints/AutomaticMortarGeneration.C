@@ -465,6 +465,7 @@ AutomaticMortarGeneration::initOutput()
 void
 AutomaticMortarGeneration::clear()
 {
+  ++_build_count;
   _msm_elem_to_reference_points.clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();

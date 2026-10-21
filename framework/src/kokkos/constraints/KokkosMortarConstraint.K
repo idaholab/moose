@@ -22,23 +22,14 @@ namespace Moose::Kokkos
 {
 
 InputParameters
-MortarConstraint::validParams()
+MortarConstraintBase::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += MortarConsumerInterface::validParams();
-  // The mortar loop integrates every segment of a partially covered secondary element and keeps
-  // its Lagrange multiplier degrees of freedom active
+  // The mortar loops integrate every segment of a partially covered secondary element and keep its
+  // Lagrange multiplier degrees of freedom active
   params.set<bool>("correct_edge_dropping") = true;
   params.suppressParameter<bool>("correct_edge_dropping");
-
-  // The Lagrange multiplier is the variable of the constraint, on the lower-dimensional secondary
-  // elements
-  params.addRequiredParam<VariableName>("secondary_variable",
-                                        "Primal variable on the secondary surface.");
-  params.addParam<VariableName>(
-      "primary_variable",
-      "Primal variable on the primary surface. If this parameter is not provided then the primary "
-      "variable is the secondary variable.");
 
   params.addRelationshipManager("AugmentSparsityOnInterface",
                                 Moose::RelationshipManagerType::COUPLING,
@@ -62,41 +53,36 @@ MortarConstraint::validParams()
   params.addRelationshipManager("GhostHigherDLowerDPointNeighbors",
                                 Moose::RelationshipManagerType::GEOMETRIC);
 
+  params.addParam<bool>("compute_lm_residuals",
+                        true,
+                        "Whether to compute the residuals of the Lagrange multiplier. A constraint "
+                        "that only applies the force of the Lagrange multiplier to the primal "
+                        "variables leaves its rows to another constraint.");
+
   params.registerBase("Constraint");
 
   return params;
 }
 
-MortarConstraint::MortarConstraint(const InputParameters & parameters)
+MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   : ResidualObject(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    _secondary_var(_sys.getVariable(_tid, getParam<VariableName>("secondary_variable"))),
-    _primary_var(isParamValid("primary_variable")
-                     ? _sys.getVariable(_tid, getParam<VariableName>("primary_variable"))
-                     : _secondary_var),
-    _interface(std::make_shared<Interface>(this)),
+    _interface(std::make_shared<MortarConsumer>(this)),
     _interface_data(_fe_problem.getKokkosMortarInterfaceData(_interface->amg())),
-    _use_dual(_var.useDual())
+    _lm_family(_var.feType().family),
+    _lm_order(_var.feType().order),
+    _use_dual(_var.useDual()),
+    _compute_lm_residuals(getParam<bool>("compute_lm_residuals"))
 {
   _configuration = Configuration(*this);
 
-  // Sides are indexed by MortarSide: the secondary and primary primal variables and the Lagrange
-  // multiplier, all on lower-dimensional elements
-  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
-  for (const auto side : make_range(3u))
-  {
-    _side_var[side].init(*vars[side]);
-    _side_family[side] = vars[side]->feType().family;
-    _side_order[side] = vars[side]->feType().order;
-    addMooseVariableDependency(const_cast<MooseVariableFieldBase *>(vars[side]));
-  }
-
-  for (const auto row : make_range(3u))
-    for (const auto col : make_range(3u))
-      _coupled[row][col] =
-          _fe_problem.areCoupled(vars[row]->number(), vars[col]->number(), _sys.number());
+  _lm_var.init(_var);
+  addMooseVariableDependency(&_var);
 
   // The Jacobian columns of the displacements that are solution variables of this system
+  _n_vars = _sys.nVariables();
+  _disp_coupled.create(3 * _n_vars);
+  _disp_coupled = false;
   if (_configuration.displaced())
   {
     auto disp = _configuration.displacements();
@@ -113,48 +99,43 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
       _disp_var[c].init(disp_var);
       _disp_family = disp_var.feType().family;
       _disp_order = disp_var.feType().order;
-      for (const auto row : make_range(3u))
-        _disp_coupled[row][c] =
-            _fe_problem.areCoupled(vars[row]->number(), disp_var.number(), _sys.number());
+      for (const auto row : make_range(_n_vars))
+        _disp_coupled[_n_vars * c + row] =
+            _fe_problem.areCoupled(row, disp_var.number(), _sys.number());
       _n_disp = c + 1;
     }
   }
+  _disp_coupled.copyToDevice();
 }
 
-MortarConstraint::MortarConstraint(const MortarConstraint & object)
+MortarConstraintBase::MortarConstraintBase(const MortarConstraintBase & object)
   : ResidualObject(object),
     CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
-    _secondary_var(object._secondary_var),
-    _primary_var(object._primary_var),
     _interface(object._interface),
     _interface_data(object._interface_data),
+    _geometry(object._geometry),
+    _lm_var(object._lm_var),
+    _lm_fe(object._lm_fe),
+    _lm_family(object._lm_family),
+    _lm_order(object._lm_order),
+    _use_dual(object._use_dual),
     _n_disp(object._n_disp),
     _disp_fe(object._disp_fe),
     _disp_family(object._disp_family),
     _disp_order(object._disp_order),
-    _use_dual(object._use_dual),
+    _disp_coupled(object._disp_coupled),
+    _n_vars(object._n_vars),
     _computing_residual(object._computing_residual),
     _computing_jacobian(object._computing_jacobian),
-    _geometry(object._geometry),
+    _compute_lm_residuals(object._compute_lm_residuals),
     _inactive_dofs(object._inactive_dofs)
 {
-  for (const auto side : make_range(3u))
-  {
-    _side_var[side] = object._side_var[side];
-    _side_fe[side] = object._side_fe[side];
-    _side_family[side] = object._side_family[side];
-    _side_order[side] = object._side_order[side];
-    _disp_var[side] = object._disp_var[side];
-    for (const auto col : make_range(3u))
-    {
-      _coupled[side][col] = object._coupled[side][col];
-      _disp_coupled[side][col] = object._disp_coupled[side][col];
-    }
-  }
+  for (const auto c : make_range(3u))
+    _disp_var[c] = object._disp_var[c];
 }
 
 void
-MortarConstraint::packInactiveDofs()
+MortarConstraintBase::packInactiveDofs()
 {
   const auto & amg = _interface->amg();
   const auto & dof_map = _sys.dofMap();
@@ -186,20 +167,18 @@ MortarConstraint::packInactiveDofs()
 }
 
 void
-MortarConstraint::dispatch(const bool residual, const bool jacobian)
+MortarConstraintBase::dispatch(const bool residual, const bool jacobian)
 {
-  _geometry = _interface_data.update();
+  _geometry = _interface_data.update(jacobian);
 
   // The FE type IDs exist once the Kokkos assembly is initialized
-  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
-  for (const auto side : make_range(3u))
-    _side_fe[side] = kokkosAssembly().getFETypeID(vars[side]->feType());
+  _lm_fe = kokkosAssembly().getFETypeID(_var.feType());
   for (const auto c : make_range(_n_disp))
     if (_disp_var[c].initialized())
       _disp_fe = kokkosAssembly().getFETypeID(
           const_cast<Variable &>(_disp_var[c]).mooseFieldVar()->feType());
 
-  if (_interface_data.revision() != _inactive_revision)
+  if (_compute_lm_residuals && _interface_data.revision() != _inactive_revision)
   {
     packInactiveDofs();
     _inactive_revision = _interface_data.revision();
@@ -208,18 +187,10 @@ MortarConstraint::dispatch(const bool residual, const bool jacobian)
   _computing_residual = residual;
   _computing_jacobian = jacobian;
 
-  if (_geometry.secondary_qp_begin.size() > 1)
-  {
-    if (!_residual_dispatcher)
-      _residual_dispatcher = DispatcherRegistry::build<MortarLoop>(this, type());
-
-    TeamLaunch launch;
-    launch.league_size = _geometry.secondary_qp_begin.size() - 1;
-    _residual_dispatcher->parallelForTeams(launch);
-  }
+  dispatchMortar(_geometry.secondary_qp_begin.size() ? _geometry.secondary_qp_begin.size() - 1 : 0);
 
   // A process may own inactive degrees of freedom without holding any mortar segment
-  if (_inactive_dofs.size())
+  if (_compute_lm_residuals && _inactive_dofs.size())
   {
     if (!_inactive_dispatcher)
       _inactive_dispatcher = DispatcherRegistry::build<InactiveLoop>(this, type());
@@ -229,21 +200,96 @@ MortarConstraint::dispatch(const bool residual, const bool jacobian)
 }
 
 void
-MortarConstraint::computeResidual()
+MortarConstraintBase::computeResidual()
 {
   dispatch(true, false);
 }
 
 void
-MortarConstraint::computeJacobian()
+MortarConstraintBase::computeJacobian()
 {
   dispatch(false, true);
 }
 
 void
-MortarConstraint::computeResidualAndJacobian()
+MortarConstraintBase::computeResidualAndJacobian()
 {
   dispatch(true, true);
+}
+
+InputParameters
+MortarConstraint::validParams()
+{
+  InputParameters params = MortarConstraintBase::validParams();
+
+  // The Lagrange multiplier is the variable of the constraint, on the lower-dimensional secondary
+  // elements
+  params.addRequiredParam<VariableName>("secondary_variable",
+                                        "Primal variable on the secondary surface.");
+  params.addParam<VariableName>(
+      "primary_variable",
+      "Primal variable on the primary surface. If this parameter is not provided then the primary "
+      "variable is the secondary variable.");
+
+  return params;
+}
+
+MortarConstraint::MortarConstraint(const InputParameters & parameters)
+  : MortarConstraintBase(parameters),
+    _secondary_var(_sys.getVariable(_tid, getParam<VariableName>("secondary_variable"))),
+    _primary_var(isParamValid("primary_variable")
+                     ? _sys.getVariable(_tid, getParam<VariableName>("primary_variable"))
+                     : _secondary_var)
+{
+  // Sides are indexed by MortarSide: the secondary and primary primal variables and the Lagrange
+  // multiplier, all on lower-dimensional elements
+  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
+  for (const auto side : make_range(3u))
+  {
+    _side_var[side].init(*vars[side]);
+    _side_family[side] = vars[side]->feType().family;
+    _side_order[side] = vars[side]->feType().order;
+    addMooseVariableDependency(const_cast<MooseVariableFieldBase *>(vars[side]));
+  }
+
+  for (const auto row : make_range(3u))
+    for (const auto col : make_range(3u))
+      _coupled[row][col] =
+          _fe_problem.areCoupled(vars[row]->number(), vars[col]->number(), _sys.number());
+}
+
+MortarConstraint::MortarConstraint(const MortarConstraint & object)
+  : MortarConstraintBase(object),
+    _secondary_var(object._secondary_var),
+    _primary_var(object._primary_var)
+{
+  for (const auto side : make_range(3u))
+  {
+    _side_var[side] = object._side_var[side];
+    _side_fe[side] = object._side_fe[side];
+    _side_family[side] = object._side_family[side];
+    _side_order[side] = object._side_order[side];
+    for (const auto col : make_range(3u))
+      _coupled[side][col] = object._coupled[side][col];
+  }
+}
+
+void
+MortarConstraint::dispatchMortar(const ThreadID n_secondary)
+{
+  const MooseVariableFieldBase * const vars[3] = {&_secondary_var, &_primary_var, &_var};
+  for (const auto side : make_range(3u))
+    _side_fe[side] = kokkosAssembly().getFETypeID(vars[side]->feType());
+
+  if (!n_secondary)
+    return;
+
+  if (!_residual_dispatcher)
+    _residual_dispatcher = DispatcherRegistry::build<MortarLoop>(this, type());
+
+  TeamLaunch launch;
+  launch.league_size = n_secondary;
+  _residual_dispatcher->parallelForTeams(launch);
 }
 
 } // namespace Moose::Kokkos

@@ -262,6 +262,28 @@ protected:
                                               const ContiguousElementID jelem,
                                               const unsigned int j) const;
   /**
+   * Accumulate a residual contribution to a local DOF of a variable of this object's system in the
+   * tagged vectors
+   * @param local_re The residual contribution
+   * @param var The variable of the DOF
+   * @param dof The local DOF index
+   */
+  KOKKOS_FUNCTION void accumulateTaggedDofResidual(const Real local_re,
+                                                   const Variable & var,
+                                                   const dof_id_type dof) const;
+  /**
+   * Accumulate a Jacobian contribution to the row of a local DOF of a variable of this object's
+   * system in the tagged matrices
+   * @param local_ke The Jacobian contribution
+   * @param var The variable of the row
+   * @param row The local DOF index of the row
+   * @param col The global DOF index of the column
+   */
+  KOKKOS_FUNCTION void accumulateTaggedDofMatrix(const Real local_ke,
+                                                 const Variable & var,
+                                                 const dof_id_type row,
+                                                 const dof_id_type col) const;
+  /**
    * Accumulate an unscaled residual and diagonal Jacobian contribution to one DOF of a system in
    * the tagged vectors and matrices, for equations that are not physics, such as the pinning of
    * unused degrees of freedom
@@ -403,6 +425,43 @@ ResidualObject::accumulateTaggedMatrix(const Real local_ke,
   auto row = sys.getElemLocalDofIndex(ielem, i, ivar.var());
   auto col = sys.getElemGlobalDofIndex(jelem, j, jvar.var());
   const auto scaled_local_ke = local_ke * sys.getVariableScalingFactor(ivar.var());
+
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
+  {
+    auto tag = _matrix_tags[t];
+
+    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), scaled_local_ke);
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedDofResidual(const Real local_re,
+                                            const Variable & var,
+                                            const dof_id_type dof) const
+{
+  if (!local_re)
+    return;
+
+  auto & sys = kokkosSystem(var.sys());
+  const auto scaled_local_re = local_re * sys.getVariableScalingFactor(var.var());
+
+  for (unsigned int t = 0; t < _vector_tags.size(); ++t)
+    if (sys.isResidualTagActive(_vector_tags[t]))
+      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, _vector_tags[t]), scaled_local_re);
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedDofMatrix(const Real local_ke,
+                                          const Variable & var,
+                                          const dof_id_type row,
+                                          const dof_id_type col) const
+{
+  if (!local_ke)
+    return;
+
+  auto & sys = kokkosSystem(var.sys());
+  const auto scaled_local_ke = local_ke * sys.getVariableScalingFactor(var.var());
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {

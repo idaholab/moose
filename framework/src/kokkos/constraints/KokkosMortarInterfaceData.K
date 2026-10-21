@@ -34,15 +34,23 @@ MortarInterfaceData::mortarSetup(const AutomaticMortarGeneration & amg)
 }
 
 const MortarInterfaceGeometry &
-MortarInterfaceData::update()
+MortarInterfaceData::update(const bool sensitivities)
 {
-  if (_needs_packing || _amg.onDisplaced())
+  // A displaced interface rebuilds its mortar segment mesh as the displacements move it
+  if (_needs_packing || _amg.buildCount() != _packed_build_count)
   {
     packSegments();
     if (_need_normals)
       packNodalNormals();
     _needs_packing = false;
+    _packed_build_count = _amg.buildCount();
     ++_revision;
+  }
+
+  if (sensitivities && _need_normals && _sensitivity_revision != _revision)
+  {
+    packSensitivities();
+    _sensitivity_revision = _revision;
   }
 
   return _geometry;
@@ -70,6 +78,7 @@ MortarInterfaceData::packSegments()
   std::vector<Point> gap_vector, normal;
 
   _local_secondary_elems.clear();
+  _amg_secondary_elems.clear();
 
   // The reference coordinates on an interior parent of a reference point on its lower-dimensional
   // side element, whose nodes are the nodes of that side in order
@@ -91,6 +100,8 @@ MortarInterfaceData::packSegments()
       continue;
 
     _local_secondary_elems.push_back(secondary);
+    _amg_secondary_elems.push_back(
+        libmesh_map_find(_amg.mortarSegmentMeshElemToInfo(), *msm_elems.begin()).secondary_elem);
 
     for (const auto msm_elem : msm_elems)
     {
@@ -184,16 +195,16 @@ MortarInterfaceData::packSegments()
 void
 MortarInterfaceData::packNodalNormals()
 {
-  const auto & mesh = _problem.mesh();
-  const auto & kokkos_mesh = *mesh.getKokkosMesh();
-  const auto normals = Moose::Mortar::computeNodalNormalSensitivities(_amg, mesh.getMesh());
+  const auto & kokkos_mesh = *_problem.mesh().getKokkosMesh();
 
   // The normals of the nodes of the local secondary elements, in the order of the elements
   std::unordered_map<const Node *, dof_id_type> normal_index;
-  std::vector<const Node *> normal_nodes;
+  _normal_nodes.clear();
   std::vector<dof_id_type> elem_node_normal(_local_secondary_elems.size() *
                                                 MortarInterfaceGeometry::max_face_nodes,
                                             libMesh::DofObject::invalid_id);
+  std::vector<ContiguousNodeID> normal_node;
+  std::vector<Point> nodal_normal;
 
   for (const auto e : index_range(_local_secondary_elems))
   {
@@ -201,46 +212,65 @@ MortarInterfaceData::packNodalNormals()
     mooseAssert(elem.n_nodes() <= MortarInterfaceGeometry::max_face_nodes,
                 "Too many nodes on a secondary face");
 
+    const auto normals = _amg.getNodalNormals(*_amg_secondary_elems[e]);
+
     for (const auto k : make_range(elem.n_nodes()))
     {
       const auto node = elem.node_ptr(k);
-      const auto [it, inserted] = normal_index.emplace(node, normal_nodes.size());
+      const auto [it, inserted] = normal_index.emplace(node, _normal_nodes.size());
       if (inserted)
-        normal_nodes.push_back(node);
+      {
+        _normal_nodes.push_back(node);
+        normal_node.push_back(kokkos_mesh.getContiguousNodeID(node));
+        nodal_normal.push_back(normals[k]);
+      }
       elem_node_normal[MortarInterfaceGeometry::max_face_nodes * e + k] = it->second;
     }
   }
 
-  std::vector<ContiguousNodeID> normal_node;
-  std::vector<Real3> nodal_normal;
+  auto & g = _geometry;
+  g.elem_node_normal = elem_node_normal;
+  g.normal_node = normal_node;
+
+  g.nodal_normal.create(nodal_normal.size());
+  for (const auto i : index_range(nodal_normal))
+    g.nodal_normal[i] = nodal_normal[i];
+  g.nodal_normal.copyToDevice();
+}
+
+void
+MortarInterfaceData::packSensitivities()
+{
+  const auto & mesh = _problem.mesh();
+  const auto & kokkos_mesh = *mesh.getKokkosMesh();
+  const auto normals = Moose::Mortar::computeNodalNormalSensitivities(_amg);
+  const auto & node_to_secondary_elems = _amg.nodesToSecondaryElem();
+
   std::vector<dof_id_type> sensitivity_begin = {0};
-  std::vector<ContiguousNodeID> sensitivity_node;
+  std::vector<ContiguousElementID> sensitivity_elem;
+  std::vector<unsigned int> sensitivity_elem_node;
   std::vector<Real33> sensitivity;
 
-  for (const auto node : normal_nodes)
+  for (const auto node : _normal_nodes)
   {
-    const auto & entry = libmesh_map_find(normals, node);
-    normal_node.push_back(kokkos_mesh.getContiguousNodeID(mesh.nodePtr(node->id())));
-    nodal_normal.push_back(entry.normal);
-
-    for (const auto & [dependency, tensor] : entry.sensitivities)
+    for (const auto & [dependency, tensor] : libmesh_map_find(normals, node->id()).sensitivities)
     {
-      sensitivity_node.push_back(kokkos_mesh.getContiguousNodeID(mesh.nodePtr(dependency->id())));
+      // The normal depends only on the nodes of the secondary faces, each of which lies on an
+      // interior parent of the secondary surface
+      const auto & lower_elems = libmesh_map_find(node_to_secondary_elems, dependency);
+      mooseAssert(lower_elems.size(), "A secondary node lies on no secondary element");
+      const auto parent = mesh.elemPtr(lower_elems.front()->interior_parent()->id());
+      sensitivity_elem.push_back(kokkos_mesh.getContiguousElementID(parent));
+      sensitivity_elem_node.push_back(parent->get_node_index(mesh.nodePtr(dependency)));
       sensitivity.push_back(tensor);
     }
     sensitivity_begin.push_back(sensitivity.size());
   }
 
   auto & g = _geometry;
-  g.elem_node_normal = elem_node_normal;
-  g.normal_node = normal_node;
   g.sensitivity_begin = sensitivity_begin;
-  g.sensitivity_node = sensitivity_node;
-
-  g.nodal_normal.create(nodal_normal.size());
-  for (const auto i : index_range(nodal_normal))
-    g.nodal_normal[i] = nodal_normal[i];
-  g.nodal_normal.copyToDevice();
+  g.sensitivity_elem = sensitivity_elem;
+  g.sensitivity_elem_node = sensitivity_elem_node;
 
   g.sensitivity.create(sensitivity.size());
   for (const auto i : index_range(sensitivity))
