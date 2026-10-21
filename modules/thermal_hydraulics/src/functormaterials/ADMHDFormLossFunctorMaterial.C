@@ -85,7 +85,6 @@ ADMHDFormLossFunctorMaterial::ADMHDFormLossFunctorMaterial(const InputParameters
         const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
                         1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
         const auto mu = _fp.mu_from_p_T(_Pref(qp, state), (_T[i] + in) / 2);
-        const auto rho = _fp.rho_from_p_T(_Pref(qp, state), (_T[i] + in) / 2);
         // auto sigf = _fp.sig_from_p_T(_Pref(qp, state), (_T[i] + in) / 2);
 
         const auto Dh = 4.0 * _area(qp, state) / _perimeter(qp, state);
@@ -100,11 +99,11 @@ ADMHDFormLossFunctorMaterial::ADMHDFormLossFunctorMaterial(const InputParameters
         const auto delta = 0;
         const auto fconfig = 1;
         const auto FWF = (1 / (M - 1) + phi / (1 + phi + delta)) * fconfig * _sigf(qp, state) *
-                         pow(_B(qp, state), 2) / rho;
+                         pow(_B(qp, state), 2);
 
         // Must convert to unitless, since FWF has units of 1/s and forms losses are expected to be
         // unitless
-        return 2.0 * FWF * rho * _length(qp, state) / G;
+        return 2.0 * FWF * _length(qp, state) / G;
       });
 }
 
