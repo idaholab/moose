@@ -42,34 +42,11 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/quadrature_nodal.h"
 
 #include <numeric>
 #include <cmath>
-
-namespace
-{
-/// Compute the vertex-averaged unit normal of a 2D element: the average of the per-vertex
-/// cross-product normals. This reduces to the face normal for triangles and planar quads, and is
-/// robust for warped quads. Returns the zero point for degenerate (e.g. colinear) elements.
-Point
-elemVertexAveragedNormal(const Elem & elem)
-{
-  const auto n_vertices = elem.n_vertices();
-  Point normal;
-  for (const auto i : make_range(n_vertices))
-  {
-    const Point & p = elem.point(i);
-    const Point edge_to_next = elem.point((i + 1) % n_vertices) - p;
-    const Point edge_to_prev = elem.point((i + n_vertices - 1) % n_vertices) - p;
-    const Point vertex_normal = edge_to_next.cross(edge_to_prev);
-    const auto vertex_normal_norm_sq = vertex_normal.norm_sq();
-    if (vertex_normal_norm_sq > 0)
-      normal += vertex_normal / std::sqrt(vertex_normal_norm_sq);
-  }
-  const auto norm_sq = normal.norm_sq();
-  return norm_sq > 0 ? normal / std::sqrt(norm_sq) : Point();
-}
-}
 
 registerMooseObject("MooseApp", AdvancedExtruderGenerator);
 registerMooseObjectRenamed("MooseApp",
@@ -1795,34 +1772,40 @@ AdvancedExtruderGenerator::radialExpansionRatio(const Real t) const
 std::unordered_map<dof_id_type, Point>
 AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
 {
-  // Gather the normal of every element connected to each node
-  std::unordered_map<dof_id_type, std::vector<Point>> node_to_elem_normals;
+  // Evaluate the geometric map of each element at its nodes with a nodal quadrature rule, as done
+  // for mortar nodal normals. On curved (higher-order) elements this captures the local surface
+  // normal at each node rather than a single per-element normal.
+  libMesh::QNodal qrule(2);
+  const auto & qweights = qrule.get_weights();
+  std::unique_ptr<FEBase> fe(FEBase::build(2, FEType(FIRST, LAGRANGE)));
+  fe->attach_quadrature_rule(&qrule);
+  const auto & dxyzdxi = fe->get_dxyzdxi();
+  const auto & dxyzdeta = fe->get_dxyzdeta();
+  const auto & q_points = fe->get_xyz();
+
+  // Sum the JxW-weighted normals of the elements connected to each node
+  std::unordered_map<dof_id_type, Point> node_normals;
   for (const auto & elem : input.element_ptr_range())
   {
-    const Point elem_normal = elemVertexAveragedNormal(*elem);
-    // Skip degenerate elements that do not define a normal
-    if (elem_normal.norm_sq() == 0)
-      continue;
-    for (const auto n : make_range(elem->n_nodes()))
-      node_to_elem_normals[elem->node_id(n)].push_back(elem_normal);
+    fe->reinit(elem);
+    const auto qpoint_to_node = MooseMeshUtils::nodalQuadraturePointToNodeMap(*elem, q_points);
+    // The weighted normal JxW * n is the quadrature weight times the area vector
+    // dxyz/dxi x dxyz/deta, which has the orientation of the element's node ordering
+    for (const auto qp : index_range(q_points))
+    for (const auto qp : index_range(q_points))
+      node_normals[elem->node_id(qpoint_to_node[qp])] +=
+          qweights[qp] * dxyzdxi[qp].cross(dxyzdeta[qp]);
   }
 
-  // Average the normals of all the elements connected to each node. The input surface mesh is
-  // expected to have consistently oriented elements.
-  std::unordered_map<dof_id_type, Point> node_normals;
-  node_normals.reserve(node_to_elem_normals.size());
-  for (const auto & [node_id, normals] : node_to_elem_normals)
+  // The input surface mesh is expected to have consistently oriented elements.
+  for (auto & [node_id, normal] : node_normals)
   {
-    Point averaged_normal;
-    for (const auto & elem_normal : normals)
-      averaged_normal += elem_normal;
-
-    if (averaged_normal.norm_sq() == 0)
+    if (normal.norm_sq() == 0)
       mooseError("The averaged normal at node ",
                  node_id,
                  " is zero; an extrusion direction cannot be determined. This can happen if the "
                  "connected elements do not have consistent orientations.");
-    node_normals[node_id] = averaged_normal.unit();
+    normal = normal.unit();
   }
 
   return node_normals;

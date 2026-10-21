@@ -52,9 +52,10 @@ This is useful to grow boundary layers off of a curved surface. The [!param](/Me
 [!param](/Mesh/AdvancedExtruderGenerator/num_layers) and [!param](/Mesh/AdvancedExtruderGenerator/biases) parameters are
 used as usual to control the layer thicknesses and grading; only the extrusion direction changes.
 
-The direction at each node is computed as the average of the normals of all the elements connected to that node. Each
-element normal is itself the average of its per-vertex normals, so the result reduces to the face normal for triangles and
-planar quadrilaterals. The input surface mesh is expected to have consistently oriented elements. To flip the overall
+The direction at each node is computed as the area-weighted average of the normals of all the elements connected to that
+node, using the same nodal quadrature as the mortar nodal normals. Each element normal is evaluated at the node itself, so
+curved (higher-order) surface elements contribute their local normal at that node rather than a single per-element normal.
+The input surface mesh is expected to have consistently oriented elements, which [OrientSurfaceMeshGenerator.md] can enforce. To flip the overall
 growth direction (inward versus outward), negate the [!param](/Mesh/AdvancedExtruderGenerator/heights).
 
 This option is only supported when extruding a 2D surface mesh into 3D, and is not currently implemented for distributed

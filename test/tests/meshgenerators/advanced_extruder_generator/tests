@@ -288,4 +288,24 @@
     requirement = 'The system shall be able to extrude each node of a 2D surface mesh along the averaged normal of the elements it is connected to, for example to create boundary layers.'
     mesh_mode = 'REPLICATED'
   []
+  [extrude_along_node_normals_polygons]
+    type = CSVDiff
+    input = 'polygons_node_normals.i'
+    csvdiff = 'polygons_node_normals_out_div_out_0001.csv'
+    recover = false
+    issues = '#34096'
+    requirement = 'The system shall be able to extrude each node of a 2D polygon mesh along the averaged normal of the elements it is connected to.'
+    # no support yet for distributed polygon extrusion since sides have to be shared
+    mesh_mode = 'REPLICATED'
+  []
+  [extrude_along_node_normals_curved]
+    type = Exodiff
+    input = 'extrude_along_normals.i'
+    exodiff = 'extrude_along_normals_curved.e'
+    cli_args = 'Mesh/gmg/elem_type=QUAD9 --mesh-only extrude_along_normals_curved.e'
+    recover = false
+    issues = '#34096'
+    requirement = 'The system shall be able to extrude each node of a curved, second-order 2D surface mesh along the averaged normal of the elements it is connected to, with each element normal evaluated at the node.'
+    mesh_mode = 'REPLICATED'
+  []
 []
