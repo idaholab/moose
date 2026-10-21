@@ -19,6 +19,8 @@ InputParameters
 ADMHDFormLossFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
+  params.addRequiredParam<std::string>(
+      "K_name", "Name to give the loss coefficient functor material property");
   params.addClassDescription("Computes forms loss coefficient using RELAP/ATHENA MHD model.");
   params.addCoupledVar("temperature",
                        {},
@@ -75,7 +77,7 @@ ADMHDFormLossFunctorMaterial::ADMHDFormLossFunctorMaterial(const InputParameters
     _functor_point(getParam<Point>("functor_evaluation_point"))
 {
   addFunctorProperty<ADReal>(
-      getParam<std::string>("functor_name"),
+      getParam<std::string>("K_name"),
       [this](const auto & /*geom_arg*/, const auto & /*state*/) -> ADReal
       {
         const auto qp = functorArg();
