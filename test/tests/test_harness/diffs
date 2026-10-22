@@ -3,6 +3,7 @@
     type = Exodiff
     input = exodiff.i
     exodiff = exodiff_out.e
+    cli_args = 'Outputs/exodus=true'
   []
   [csvdiff]
     type = CSVDiff
