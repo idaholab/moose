@@ -15,12 +15,21 @@ magnetic vector potential in magnetostatic systems in the steady state - users s
 
 If only part of the domain has a zero mass term (e.g. a zero-conductivity region embedded in a
 conducting domain), the `block` parameter may be set to the list of subdomains in which the mass
-term vanishes. The solver then restricts the `HypreAMS` interior-node correction to the nodes
-lying strictly inside those subdomains, excluding nodes on the interface with the rest of the
-domain and on the domain boundary (which are constrained by the essential boundary condition).
-The `projection_frequency` parameter controls how many iterations elapse between successive
-projections of the iterate onto the compatible $H(\mathrm{curl})$ subspace; leaving it at `0`
-disables periodic projection.
+term vanishes. `HypreAMS` then regularizes the gradients of the nodal basis functions supported
+in those subdomains, which span the null space of the operator there. Nodes on the interface
+with the rest of the domain and on essential boundaries are excluded, because the gradients of
+their basis functions are not in that null space. Nodes on boundaries with natural boundary
+conditions are kept. An integrated boundary condition that adds a bilinear term on a boundary
+of these subdomains, such as [MFEMVectorFEMassIntegratedBC.md], also removes those gradients
+from the null space; it is not detected, so a subdomain adjoining such a boundary should not be
+listed in `block`.
+
+When `block` is set, `HypreAMS` also periodically projects the right-hand side of each
+preconditioner application onto the compatible subspace orthogonal to these gradients. The
+[!param](/Solvers/MFEMHypreAMS/projection_frequency) parameter sets the number of iterations
+between projections; if it is unset, hypre projects every fifth iteration. Restricting to
+subdomains is not supported together with
+[!param](/Solvers/MFEMHypreAMS/low_order_refined).
 
 A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
 [!param](/Solvers/MFEMHypreAMS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
