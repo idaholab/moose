@@ -36,7 +36,7 @@
  *     type = MFEMGeometricMultigridSolver
  *     variable          = u
  *     fespace_hierarchy = h1_hierarchy
- *     smoothers         = chebyshev   # use on all interior levels
+ *     smoothers         = chebyshev   # one per level above the coarsest
  *     coarse_solver     = boomeramg
  *     assembly_levels   = legacy      # use on all levels
  *   []

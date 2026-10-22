@@ -58,9 +58,9 @@ MFEMGeometricMultigridSolver::validParams()
                                        "Name of the trial variable this preconditioner acts on.");
   params.addRequiredParam<std::vector<MFEMSolverName>>(
       "smoothers",
-      "Names of LinearSolverBase objects used as smoothers on the interior levels "
-      "(levels 1 to N-1). May have length 1 (used on all interior levels) or "
-      "N-1 (one per interior level, ordered coarse-to-fine).");
+      "Names of LinearSolverBase objects used as smoothers on levels 1 to N-1, one per level, "
+      "ordered coarse-to-fine. Each level needs its own solver object, distinct from the "
+      "coarse solver.");
   params.addRequiredParam<MFEMSolverName>(
       "coarse_solver", "Name of the LinearSolverBase used on the coarsest level.");
   params.addParam<std::vector<std::string>>(
@@ -102,6 +102,23 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
   for (const auto i : make_range(N))
     _assembly_levels[i] = ParseAssemblyLevel(n_asm == 1 ? asm_strs[0] : asm_strs[i]);
 
+  // A solver is set up for the operator of one level, so each level needs its own solver object.
+  const int n_smooth = _smoother_names.size();
+  if (n_smooth != N - 1)
+    paramError("smoothers",
+               "must have one entry per level above the coarsest (N-1 = ",
+               N - 1,
+               "), got ",
+               n_smooth,
+               ", because each level needs its own solver object.");
+  std::set<std::string> level_solver_names = {_coarse_solver_name};
+  for (const auto & smoother_name : _smoother_names)
+    if (!level_solver_names.insert(smoother_name).second)
+      paramError("smoothers",
+                 "names solver '",
+                 smoother_name,
+                 "' for more than one level, but each level needs its own solver object.");
+
   ConstructSolver();
 }
 
@@ -142,17 +159,9 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   const int N = _hierarchy->GetNumLevels();
   const int finest_level = _hierarchy->GetFinestLevelIndex();
 
-  // Validate smoother vector length (levels 1 to N-1 each need a smoother).
-  const int n_smooth = _smoother_names.size();
-  if (n_smooth != 1 && n_smooth != N - 1)
-    paramError("smoothers", "must have length 1 or N-1 = ", N - 1, ", got ", n_smooth, ".");
-
   auto get_smoother = [&](int level) -> Moose::MFEM::LinearSolverBase &
   {
-    if (level == 0)
-      return problem.getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase",
-                                                                  _coarse_solver_name);
-    const std::string & sname = (n_smooth == 1) ? _smoother_names[0] : _smoother_names[level - 1];
+    const auto & sname = (level == 0) ? _coarse_solver_name : _smoother_names[level - 1];
     return problem.getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase", sname);
   };
 

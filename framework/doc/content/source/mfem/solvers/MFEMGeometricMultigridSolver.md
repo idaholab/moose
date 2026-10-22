@@ -7,7 +7,14 @@
 `MFEMGeometricMultigridSolver` defines a geometric multigrid preconditioner
 backed by `mfem::GeometricMultigrid`. It uses an
 [MFEMFESpaceHierarchy.md] to define the multigrid levels, a coarse-level solver,
-and one or more linear solvers as smoothers for the remaining levels.
+and one linear solver as the smoother of each remaining level.
+
+A solver is set up for the operator of a single level, so each entry of
+[!param](/Solvers/MFEMGeometricMultigridSolver/smoothers) must name a different
+solver object, also distinct from
+[!param](/Solvers/MFEMGeometricMultigridSolver/coarse_solver). A hierarchy of
+three levels or more therefore needs as many smoother objects as levels above
+the coarsest, even when they share a type and parameters.
 
 The finest-level operator is supplied by the outer solver. Coarser level
 operators are rediscretized from the equation system on each hierarchy level
