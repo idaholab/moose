@@ -44,7 +44,19 @@
       type = Exodiff
       input = 'frictional_cartesian.i'
       exodiff = 'frictional_cartesian_out.e'
-      detail = 'with the Kokkos objects.'
+      detail = 'with the Kokkos objects in two dimensions, and'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = Exodiff
+      input = 'frictional_cartesian_3d.i'
+      exodiff = 'frictional_cartesian_3d_out.e'
+      rel_err = 1e-6
+      # The tangential multipliers of the symmetric problem vanish in exact arithmetic and settle at
+      # the nonlinear tolerance, well below the contact pressure
+      abs_zero = 1e-7
+      detail = 'with the Kokkos objects in three dimensions with a dual multiplier basis.'
       capabilities = 'kokkos & mumps'
       compute_devices = 'cpu cuda xpu'
     []
