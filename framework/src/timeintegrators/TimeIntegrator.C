@@ -89,9 +89,10 @@ TimeIntegrator::init()
   // to this integrator only if it integrates all variables of the system
   if (_Ke_time)
     paramError("variables",
+               "The ",
                type(),
-               " weights the time and non-time residuals of its stages differently and does not "
-               "support integrating a subset of the variables");
+               " time integrator weights the time and non-time residuals of its stages "
+               "differently, so it must integrate all variables of the system");
 
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars)
@@ -178,6 +179,9 @@ TimeIntegrator::weightNonTimeJacobian(SparseMatrix<Number> & jacobian, const Rea
   if (weight == 1)
     return;
   // J_time + w J_non_time = w J + (1 - w) J_time, where J = J_time + J_non_time
+  // In the separate Jacobian assembly the cached element contributions are not assembled into
+  // these matrices yet; only the constraint assembly and the combined residual and Jacobian
+  // assembly close them earlier.
   jacobian.close();
   _Ke_time->close();
   jacobian.scale(weight);

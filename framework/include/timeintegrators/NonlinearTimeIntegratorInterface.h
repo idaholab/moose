@@ -49,8 +49,8 @@ public:
   virtual void postResidual(NumericVector<Number> & /*residual*/) {}
 
   /**
-   * Callback to the NonLinearTimeIntegratorInterface called after the element, face and Dirac
-   * contributions to the system Jacobian are computed, before constraints and nodal boundary
+   * Callback to the NonLinearTimeIntegratorInterface called after the element, face, Dirac and
+   * constraint contributions to the system Jacobian are computed, before nodal boundary
    * conditions modify its rows. Integrators whose postResidual() weights the time and non-time
    * residuals differently apply the same weights to the Jacobian here.
    */
