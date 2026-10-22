@@ -54,6 +54,29 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "baffle_jump", _moose_mesh, blockIDs(), "baffle_jump"))
 {
+  // A face on this object's blocks must be either fully internal or fully external to the
+  // pressure and velocity variables too; a face that is one-sided for a momentum variable but
+  // two-sided for this object has no baffle treatment.
+  if (_p->blockIDs() != blockIDs())
+    paramError(NS::pressure,
+               "Pressure variable '",
+               _p->name(),
+               "' must have the same block restriction as this object. Variable blocks: ",
+               Moose::stringify(_p->blockIDs()),
+               "; this object's blocks: ",
+               Moose::stringify(blockIDs()),
+               ".");
+  for (const auto * const velocity : _vel)
+    if (velocity->blockIDs() != blockIDs())
+      paramError("u",
+                 "Velocity variable '",
+                 velocity->name(),
+                 "' must have the same block restriction as this object. Variable blocks: ",
+                 Moose::stringify(velocity->blockIDs()),
+                 "; this object's blocks: ",
+                 Moose::stringify(blockIDs()),
+                 ".");
+
   std::unordered_set<BoundaryID> pressure_jump_boundary_ids;
   for (const auto & model_name : getParam<std::vector<UserObjectName>>("pressure_jump_models"))
   {

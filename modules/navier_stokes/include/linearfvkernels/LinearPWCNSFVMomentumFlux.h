@@ -71,9 +71,6 @@ private:
   /// Compute the geometry and material data used by the harmonic stress discretization.
   TwoPointStressData twoPointStressData() const;
 
-  /// Whether the current face is an internal face represented by a pressure-jump model.
-  bool isInternalBaffleFace() const;
-
   /**
    * Compute the correction that replaces the shared advected state with the baffle face state:
    * the upstream interstitial tangential velocity and this side's extrapolated normal velocity.

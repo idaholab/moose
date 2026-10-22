@@ -139,7 +139,7 @@ LinearPWCNSFVMomentumFlux::addMatrixContribution()
   const Real adv_neighbor = computeInternalAdvectionNeighborMatrixContribution();
 
   BaffleStressData stress;
-  if (isInternalBaffleFace())
+  if (_porous_mass_flux_provider.faceIsBaffle(*_current_face_info))
     stress = baffleStressData();
   else
   {
@@ -172,7 +172,7 @@ LinearPWCNSFVMomentumFlux::addMatrixContribution()
 Real
 LinearPWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  const bool correct_baffle = isInternalBaffleFace();
+  const bool correct_baffle = _porous_mass_flux_provider.faceIsBaffle(*_current_face_info);
   const Real stress_rhs =
       (correct_baffle ? baffleStressData().elem_rhs : computeInternalStressRHSContribution()) *
       _current_face_area;
@@ -186,7 +186,7 @@ LinearPWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 Real
 LinearPWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  const bool correct_baffle = isInternalBaffleFace();
+  const bool correct_baffle = _porous_mass_flux_provider.faceIsBaffle(*_current_face_info);
   const Real stress_rhs =
       (correct_baffle ? baffleStressData().neighbor_rhs : -computeInternalStressRHSContribution()) *
       _current_face_area;
@@ -218,7 +218,7 @@ LinearPWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
 Real
 LinearPWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_side) const
 {
-  if (!isInternalBaffleFace())
+  if (!_porous_mass_flux_provider.faceIsBaffle(*_current_face_info))
     return 0.0;
 
   const auto state_arg = determineState();
@@ -254,13 +254,6 @@ LinearPWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_si
 
   return factor * _face_mass_flux * inversePorosity(elem_side) *
          (shared_advected_state - baffle_advected_state) * _current_face_area;
-}
-
-bool
-LinearPWCNSFVMomentumFlux::isInternalBaffleFace() const
-{
-  return _current_face_type == FaceInfo::VarFaceNeighbors::BOTH &&
-         _porous_mass_flux_provider.faceIsBaffle(*_current_face_info);
 }
 
 LinearPWCNSFVMomentumFlux::BaffleStressData
