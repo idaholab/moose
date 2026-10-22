@@ -13,6 +13,8 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to compute the meridional curl associated with an azimuthal scalar field A_theta.
  *
@@ -26,8 +28,6 @@
  *   B_r = -dA_theta/dz
  *   B_z =  dA_theta/dr + A_theta/r
  */
-namespace Moose::MFEM
-{
 class MeridionalCurlVectorCoefficient : public mfem::VectorCoefficient
 {
 public:
@@ -44,7 +44,7 @@ private:
   mfem::Coefficient & _a_theta;
   mfem::VectorCoefficient & _grad_a_theta;
 };
-};
+}
 
 /**
  * Auxiliary kernel computing the meridional curl associated
