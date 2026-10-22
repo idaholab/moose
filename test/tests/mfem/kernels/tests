@@ -146,6 +146,18 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMDiffusionDGNeumannRobin]
+    type = CSVDiff
+    input = dg_diffusion_neumann_robin.i
+    csvdiff = 'OutputData/DGDiffusionNeumannRobin.csv'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with DG '
+                  'kernels and Neumann and Robin BCs.'
+    design = 'MFEMIntegratedBC.md MFEMBoundaryIntegratedBC.md MFEMConvectiveHeatFluxBC.md'
+    issues = '#34199'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
   [MFEMGradDiv]
     type = CSVDiff
     input = graddiv.i
