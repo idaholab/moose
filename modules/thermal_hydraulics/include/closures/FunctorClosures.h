@@ -21,7 +21,9 @@ public:
 
   FunctorClosures(const InputParameters & params);
 
-  virtual void addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel) override;
-  virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
-                                           const FlowChannelBase & flow_channel) override;
+  virtual void
+  addMooseObjectsFlowChannel(const FlowChannelClosuresInterface & flow_channel) override;
+  virtual void
+  addMooseObjectsHeatTransfer(const HeatTransferClosuresInterface & heat_transfer,
+                              const FlowChannelClosuresInterface & flow_channel) override;
 };

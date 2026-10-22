@@ -62,14 +62,14 @@ This is accomplished with a [PiecewiseLinear.md] function:
 
 However, we cannot use this function directly because [ShaftConnectedMotor.md] treats
 the time coordinate in its functions as the shaft speed. Therefore we use control
-logic as follows, which controls a constant-value function to drop the time coordinate:
+control as follows, which controls a constant-value function to drop the time coordinate:
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
          block=Functions/motor_torque_fn
          link=False
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
-         block=ControlLogic
+         block=ChainControls
          link=False
 
 The compressor and turbine components are modeled using [ShaftConnectedCompressor1Phase.md]:

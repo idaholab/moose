@@ -66,6 +66,38 @@ THM::stringToEnum(const std::string & s)
   return stringToEnum<FlowChannelBase::EPipeLocation>(s, FlowChannelBase::_pipe_location_to_enum);
 }
 
+FlowChannelClosuresInterface::HeatTransferGeometry
+FlowChannelBase::getClosuresHeatTransferGeometry() const
+{
+  switch (getHeatTransferGeometry())
+  {
+    case EConvHeatTransGeom::PIPE:
+      return FlowChannelClosuresInterface::HeatTransferGeometry::PIPE;
+    case EConvHeatTransGeom::ROD_BUNDLE:
+      return FlowChannelClosuresInterface::HeatTransferGeometry::ROD_BUNDLE;
+    case EConvHeatTransGeom::HEX_ROD_BUNDLE:
+      return FlowChannelClosuresInterface::HeatTransferGeometry::HEX_ROD_BUNDLE;
+    default:
+      mooseError(name(), ": Unknown value of 'heat_transfer_geom' parameter.");
+  }
+}
+
+FlowChannelClosuresInterface::PipeLocation
+FlowChannelBase::getClosuresPipeLocation() const
+{
+  switch (getPipeLocation())
+  {
+    case EPipeLocation::INTERIOR:
+      return FlowChannelClosuresInterface::PipeLocation::INTERIOR;
+    case EPipeLocation::EDGE:
+      return FlowChannelClosuresInterface::PipeLocation::EDGE;
+    case EPipeLocation::CORNER:
+      return FlowChannelClosuresInterface::PipeLocation::CORNER;
+    default:
+      mooseError(name(), ": Unknown value of 'pipe_location' parameter.");
+  }
+}
+
 InputParameters
 FlowChannelBase::validParams()
 {

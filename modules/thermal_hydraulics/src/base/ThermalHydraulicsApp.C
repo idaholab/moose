@@ -83,6 +83,33 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
+  s.registerActionSyntax("FlowChannel1PhasePhysics",
+                         "Physics/ThermalHydraulics/FlowChannel1Phase/*");
+
+  // Lets multiple Physics instances of the same kind (flow channels, heat structures, ...) share
+  // bare-named variables (rhoA, A, p, T_solid, ...) across their blocks - see
+  // THMVariableCoordinator. Must run after every component's variables have been requested, and
+  // before anything that couples to those variables by name.
+  s.registerTaskName("THM:flush_shared_variables", false);
+  s.addDependency("THM:flush_shared_variables", "add_variables_physics");
+  s.addDependency("THM:flush_shared_variables", "add_variable");
+  s.addDependency("THM:flush_shared_variables", "add_aux_variable");
+  s.addDependency("check_integrity_early_physics", "THM:flush_shared_variables");
+  s.addDependency("add_ics_physics", "THM:flush_shared_variables");
+  s.addDependency("add_ic", "THM:flush_shared_variables");
+  s.addDependency("add_material", "THM:flush_shared_variables");
+  s.addDependency("add_user_object", "THM:flush_shared_variables");
+  s.addDependency("add_kernel", "THM:flush_shared_variables");
+  s.addDependency("add_dg_kernel", "THM:flush_shared_variables");
+  s.addDependency("add_bc", "THM:flush_shared_variables");
+  s.addDependency("add_aux_kernel", "THM:flush_shared_variables");
+
+  // Closures objects (see ClosuresBase/ClosuresRegistry) must exist before a Physics that
+  // consumes them (e.g. FlowChannel1PhasePhysics) looks them up.
+  s.addDependency("init_component_physics", "THM:add_closures");
+  s.addDependency("add_material", "THM:add_closures");
+  s.addDependency("check_integrity", "THM:add_closures");
+
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
 

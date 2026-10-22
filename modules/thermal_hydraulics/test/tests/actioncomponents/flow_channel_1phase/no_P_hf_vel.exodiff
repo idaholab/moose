@@ -1,0 +1,16 @@
+# The ActionComponent flow channel only creates the heated perimeter (P_hf) variable when a heat
+# transfer component is connected, and always outputs the velocity as a scalar ('vel') rather than
+# the classic vector (vel_x, vel_y, vel_z); the velocity is rhouA / rhoA, which are compared.
+COORDINATES
+TIME STEPS
+ELEMENT VARIABLES
+	A
+	H
+	T
+	e
+	p
+	rho
+	rhoA
+	rhoEA
+	rhouA
+	v
