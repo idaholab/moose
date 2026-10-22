@@ -95,7 +95,6 @@ pressure_gradient_method = reconstructed
     boundary = baffle
     porosity = porosity
     density = density
-    use_interpolated_density = true
   []
   [rc]
     type = PorousRhieChowMassFlux

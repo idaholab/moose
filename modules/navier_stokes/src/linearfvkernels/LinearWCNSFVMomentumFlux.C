@@ -77,6 +77,19 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _coord_type(getBlockCoordSystem()),
     _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord())
 {
+  // A face where this kernel's variable is defined on both sides but the kernel itself is not
+  // (VarFaceNeighbors::BOTH with the kernel restricted to only one side) would need boundary-like
+  // treatment that this kernel does not implement.
+  if (blockIDs() != _var.blockIDs())
+    paramError("block",
+               "Must match the block restriction of variable '",
+               _var.name(),
+               "' (",
+               Moose::stringify(_var.blockIDs()),
+               "). This kernel's blocks are ",
+               Moose::stringify(blockIDs()),
+               ".");
+
   auto get_velocity_var = [&](const std::string & param_name)
   {
     return dynamic_cast<MooseLinearVariableFVReal *>(

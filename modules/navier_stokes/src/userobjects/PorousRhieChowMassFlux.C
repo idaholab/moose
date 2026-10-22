@@ -92,6 +92,20 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
   RhieChowMassFlux::linkMomentumPressureSystems(
       momentum_systems, pressure_system, momentum_system_numbers);
 
+  // A pressure jump represents a baffle interior to the flow domain. A boundary with no
+  // flow-block element on one side is a domain boundary, not a baffle. The boundary element
+  // range this check needs is not yet built when this object is constructed.
+  for (const auto * const model : _pressure_jump_models)
+    for (const auto boundary_id : model->boundaryIDs())
+      if (_moose_mesh.isBoundaryFullyExternalToSubdomains(boundary_id, blockIDs()))
+        paramError("pressure_jump_models",
+                   "Pressure jump model '",
+                   model->name(),
+                   "' boundary '",
+                   _moose_mesh.getBoundaryName(boundary_id),
+                   "' is not internal to this object's blocks. Pressure-jump baffles must lie "
+                   "strictly inside the flow domain.");
+
   // The porous momentum pressure kernels must weight the pressure gradient with the porosity
   // this object uses to form the face fluxes.
   for (const auto system_number : momentum_system_numbers)
@@ -138,9 +152,7 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
       mooseError("Pressure variable '",
                  pressure_var->name(),
                  "' must use FVPressureJumpGreenGaussGradient as its default gradient method "
-                 "when PorousRhieChowMassFlux '",
-                 name(),
-                 "' has pressure baffles.");
+                 "when this object has pressure baffles.");
 
     jump_gradient_method->linkFlowSystem(*this, solution_gradient_reader);
 
@@ -150,15 +162,13 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
         mooseError("FVReconstructedPressureGradient '",
                    reconstructedGradientMethod().name(),
                    "' must use the pressure variable's FVPressureJumpGreenGaussGradient as its "
-                   "base_gradient_method when PorousRhieChowMassFlux '",
-                   name(),
-                   "' has pressure baffles.");
+                   "base_gradient_method when this object has pressure baffles.");
     }
     else if (&pressureGradientField().method() != &solution_gradient_reader.method())
-      mooseError("Momentum pressure kernels coupled to PorousRhieChowMassFlux '",
-                 name(),
-                 "' must use the pressure variable's FVPressureJumpGreenGaussGradient or an "
-                 "FVReconstructedPressureGradient based on it when pressure baffles are present.");
+      mooseError(
+          "Momentum pressure kernels coupled to this object must use the pressure "
+          "variable's FVPressureJumpGreenGaussGradient or an FVReconstructedPressureGradient "
+          "based on it when pressure baffles are present.");
 
     // Velocity gradients that interpolate across a baffle turn the physical velocity jump into
     // a slope. Every consumer of the default velocity gradient must see the one-sided states.
@@ -172,9 +182,7 @@ PorousRhieChowMassFlux::linkMomentumPressureSystems(
         mooseError("Velocity variable '",
                    velocity->name(),
                    "' must use FVVelocityJumpGreenGaussGradient as its default gradient method "
-                   "when PorousRhieChowMassFlux '",
-                   name(),
-                   "' has pressure baffles.");
+                   "when this object has pressure baffles.");
 
       velocity_gradient_method->linkFlowSystem(*this);
       _velocity_gradients.push_back(&velocity_gradient);

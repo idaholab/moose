@@ -29,18 +29,13 @@ BernoulliFormLossPressureJump::validParams()
       reference_velocity_side,
       "Reference-velocity sides for each the pressure-jump boundaries. The default is "
       "lower_porosity.");
-  params.addParam<bool>("use_interpolated_density",
-                        false,
-                        "Use the face-interpolated density in the reversible Bernoulli term "
-                        "instead of the owner and non-owner densities.");
   return params;
 }
 
 BernoulliFormLossPressureJump::BernoulliFormLossPressureJump(const InputParameters & params)
   : PressureJumpModel(params),
     _porosity(getFunctor<Real>("porosity")),
-    _density(getFunctor<Real>("density")),
-    _use_interpolated_density(getParam<bool>("use_interpolated_density"))
+    _density(getFunctor<Real>("density"))
 {
   const auto & boundary_names = getParam<std::vector<BoundaryName>>("boundary");
   const auto & form_loss = getParam<std::vector<Real>>("form_loss");
@@ -82,7 +77,7 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
   const auto neighbor_porosity = _porosity(makeElemArg(fi.neighborPtr()), time);
 
   if (elem_rho <= 0.0 || neighbor_rho <= 0.0)
-    mooseError(name(), ": density must be positive on pressure-jump face ", fi.id(), ".");
+    mooseError("density must be positive on pressure-jump face ", fi.id(), ".");
   // The porosity matches the Rhie-Chow object's, whose porous momentum flux already rejects
   // nonpositive values on every face.
   mooseAssert(elem_porosity > 0.0 && neighbor_porosity > 0.0,
@@ -93,28 +88,17 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
       Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, fi, true);
 
   const bool elem_is_owner = elemIsOwner(fi);
-  const Real rho_owner = elem_is_owner ? elem_rho : neighbor_rho;
-  const Real rho_non_owner = elem_is_owner ? neighbor_rho : elem_rho;
   const Real porosity_owner = elem_is_owner ? elem_porosity : neighbor_porosity;
   const Real porosity_non_owner = elem_is_owner ? neighbor_porosity : elem_porosity;
-  Real pressure_jump;
 
-  // The reversible term is the difference in dynamic pressure between the two sides.
-  if (_use_interpolated_density)
-  {
-    const Real superficial_velocity = face_mass_flux / face_rho;
-    const Real velocity_owner = superficial_velocity / porosity_owner;
-    const Real velocity_non_owner = superficial_velocity / porosity_non_owner;
-    pressure_jump = 0.5 * face_rho *
-                    (velocity_owner * velocity_owner - velocity_non_owner * velocity_non_owner);
-  }
-  else
-  {
-    const Real velocity_owner = face_mass_flux / (rho_owner * porosity_owner);
-    const Real velocity_non_owner = face_mass_flux / (rho_non_owner * porosity_non_owner);
-    pressure_jump = 0.5 * (rho_owner * velocity_owner * velocity_owner -
-                           rho_non_owner * velocity_non_owner * velocity_non_owner);
-  }
+  // The reversible term is the difference in dynamic pressure between the two sides. Density is
+  // assumed to vary smoothly, so one face-interpolated density stands in for the owner and
+  // non-owner densities in this term.
+  const Real superficial_velocity = face_mass_flux / face_rho;
+  const Real velocity_owner = superficial_velocity / porosity_owner;
+  const Real velocity_non_owner = superficial_velocity / porosity_non_owner;
+  Real pressure_jump =
+      0.5 * face_rho * (velocity_owner * velocity_owner - velocity_non_owner * velocity_non_owner);
 
   BoundaryID boundary_id = Moose::INVALID_BOUNDARY_ID;
   for (const auto candidate_id : fi.boundaryIDs())

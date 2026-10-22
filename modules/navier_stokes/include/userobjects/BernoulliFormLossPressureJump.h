@@ -41,9 +41,6 @@ private:
   /// Density on each side of a pressure-jump face.
   const Moose::Functor<Real> & _density;
 
-  /// Whether the reversible Bernoulli term uses one interpolated face density.
-  const bool _use_interpolated_density;
-
   /// Form-loss coefficient associated with each pressure-jump boundary.
   std::unordered_map<BoundaryID, Real> _form_loss_by_id;
 

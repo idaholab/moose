@@ -102,7 +102,6 @@ nonorthogonal = false
     boundary = baffle
     porosity = porosity
     density = density
-    use_interpolated_density = true
   []
   [rc]
     type = PorousRhieChowMassFlux

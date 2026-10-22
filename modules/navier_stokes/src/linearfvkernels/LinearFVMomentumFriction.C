@@ -90,7 +90,7 @@ LinearFVMomentumFriction::computeFrictionCoefficient(const Moose::ElemArg & elem
   {
     const Real porosity = _porosity(elem_arg, state);
     if (porosity <= 0.0)
-      mooseError(name(), ": porosity must be positive when using Forchheimer friction.");
+      mooseError("porosity must be positive when using Forchheimer friction.");
 
     const Real u = (*_u)(elem_arg, state);
     const Real v = _v ? (*_v)(elem_arg, state) : 0.0;

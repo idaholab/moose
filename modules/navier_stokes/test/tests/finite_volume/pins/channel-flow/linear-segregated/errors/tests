@@ -60,6 +60,16 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [jump-boundary-external-to-blocks]
+    type = RunException
+    input = pressure-jump-errors.i
+    cli_args = "UserObjects/pressure_jump/boundary='baffle left'"
+    expect_err = "is not internal to this object's blocks"
+    requirement = 'The system shall reject a pressure-jump model whose boundary is external to the flow domain rather than an internal baffle.'
+    design = 'PorousRhieChowMassFlux.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
   [reconstructed-wrong-base]
     type = RunException
     input = pressure-jump-errors.i

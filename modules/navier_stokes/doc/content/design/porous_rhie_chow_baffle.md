@@ -54,18 +54,17 @@ A sideset listed in
 [!param](/UserObjects/BernoulliFormLossPressureJump/boundary) carries the reversible Bernoulli jump
 
 \begin{equation}
-J = \frac{1}{2}\left(\rho_o u_{n,o}^2-\rho_n u_{n,n}^2\right),
+J = \frac{1}{2}\rho_f\left(u_{n,o}^2-u_{n,n}^2\right),
 \qquad
-u_{n,s}=\frac{\phi_f}{\rho_s\epsilon_s},
+u_{n,s}=\frac{\phi_f}{\rho_f\epsilon_s},
 \end{equation}
 
-where $o$ and $n$ denote the owner and non-owner sides. The stored jump $J$ is
-pressure on the non-owner side minus pressure on the owner side. An optional form-loss term adds
+where $o$ and $n$ denote the owner and non-owner sides, and $\rho_f$ is the face-interpolated
+density. This assumes density varies smoothly, so one interpolated face density stands in for the
+owner and non-owner densities. The stored jump $J$ is pressure on the non-owner side minus pressure
+on the owner side. An optional form-loss term adds
 $-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$. The reference side is selected with
-[!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side).
-[!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) selects whether the
-reversible term uses side densities or a common interpolated face density; it does not select either
-numerical reconstruction policy. The
+[!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side). The
 [BernoulliFormLossPressureJump.md] model provides this jump to the
 [PorousRhieChowMassFlux.md] object named by
 [!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models).

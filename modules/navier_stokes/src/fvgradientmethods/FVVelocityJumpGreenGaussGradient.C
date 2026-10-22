@@ -33,9 +33,7 @@ void
 FVVelocityJumpGreenGaussGradient::linkFlowSystem(const PorousRhieChowMassFlux & rc)
 {
   if (_rhie_chow && _rhie_chow != &rc)
-    mooseError("FVVelocityJumpGreenGaussGradient '",
-               name(),
-               "' is already linked to PorousRhieChowMassFlux '",
+    mooseError("Already linked to PorousRhieChowMassFlux '",
                _rhie_chow->name(),
                "'. Use a separate gradient method for each flow system.");
 
@@ -67,9 +65,7 @@ FVVelocityJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
             _rhie_chow->baffleFaceVelocity(fi, /*elem_side=*/false)(component)};
   }
 
-  mooseError("FVVelocityJumpGreenGaussGradient '",
-             name(),
-             "' can only compute gradients of the velocity variables of PorousRhieChowMassFlux '",
+  mooseError("Can only compute gradients of the velocity variables of PorousRhieChowMassFlux '",
              _rhie_chow->name(),
              "', but it was used for variable '",
              variable.name(),

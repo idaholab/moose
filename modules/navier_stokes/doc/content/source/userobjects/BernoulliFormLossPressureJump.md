@@ -13,16 +13,16 @@ pressure jump from the current face mass flux.
 The reversible jump is
 
 \begin{equation}
-J = \frac{1}{2}\left(\rho_o u_{n,o}^2-\rho_n u_{n,n}^2\right),
+J = \frac{1}{2}\rho_f\left(u_{n,o}^2-u_{n,n}^2\right),
 \qquad
-u_{n,s}=\frac{\phi_f}{\rho_s\epsilon_s},
+u_{n,s}=\frac{\phi_f}{\rho_f\epsilon_s},
 \end{equation}
 
-where $o$ and $n$ denote the owner and non-owner sides, $\phi_f$ is the face mass flux, and
-$\epsilon$ is supplied by [!param](/UserObjects/BernoulliFormLossPressureJump/porosity). Setting
-[!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) uses the
-face-interpolated [!param](/UserObjects/BernoulliFormLossPressureJump/density) in place of the two
-side densities in this term.
+where $o$ and $n$ denote the owner and non-owner sides, $\phi_f$ is the face mass flux, $\rho_f$ is
+the face-interpolated [!param](/UserObjects/BernoulliFormLossPressureJump/density), and $\epsilon$
+is supplied by [!param](/UserObjects/BernoulliFormLossPressureJump/porosity). This assumes density
+varies smoothly, so one interpolated face density stands in for the owner and non-owner densities
+in this term.
 
 Each entry of [!param](/UserObjects/BernoulliFormLossPressureJump/form_loss) adds the irreversible
 term $-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$ on the corresponding

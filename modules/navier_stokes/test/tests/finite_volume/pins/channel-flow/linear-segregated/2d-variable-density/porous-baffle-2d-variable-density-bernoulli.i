@@ -101,7 +101,6 @@ advected_interp_method = 'average'
     boundary = baffle
     porosity = porosity
     density = rho_aux
-    use_interpolated_density = true
   []
   [rc]
     type = PorousRhieChowMassFlux

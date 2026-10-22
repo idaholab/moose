@@ -36,22 +36,16 @@ FVPressureJumpGreenGaussGradient::linkFlowSystem(PorousRhieChowMassFlux & rc,
                                                  const LinearFVGradientReader & pressure_gradient)
 {
   if (&pressure_gradient.method() != this)
-    mooseError("FVPressureJumpGreenGaussGradient '",
-               name(),
-               "' must be linked using a gradient field produced by that method.");
+    mooseError("Must be linked using a gradient field produced by that method.");
 
   if (pressure_gradient.system().number() != rc.pressureSystem().number() ||
       pressure_gradient.variableNumber() != rc.pressureVariableNumber())
-    mooseError("FVPressureJumpGreenGaussGradient '",
-               name(),
-               "' must be linked to the pressure variable owned by PorousRhieChowMassFlux '",
+    mooseError("Must be linked to the pressure variable owned by PorousRhieChowMassFlux '",
                rc.name(),
                "'.");
 
   if (_rhie_chow && _rhie_chow != &rc)
-    mooseError("FVPressureJumpGreenGaussGradient '",
-               name(),
-               "' is already linked to PorousRhieChowMassFlux '",
+    mooseError("Already linked to PorousRhieChowMassFlux '",
                _rhie_chow->name(),
                "'. Use a separate gradient method for each flow system.");
 
@@ -68,9 +62,7 @@ FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   if (variable_numbers.size() != 1)
-    mooseError("FVPressureJumpGreenGaussGradient '",
-               name(),
-               "' must be used by exactly one pressure variable, but it is used by ",
+    mooseError("must be used by exactly one pressure variable, but it is used by ",
                variable_numbers.size(),
                ".");
 

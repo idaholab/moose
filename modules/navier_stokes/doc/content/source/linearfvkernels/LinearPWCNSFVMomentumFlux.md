@@ -126,25 +126,22 @@ right-hand side.
 Rather than representing the omitted porosity-gradient term as a volumetric or distributional
 advection force, the interface model replaces its normal kinetic-head effect with the reversible
 Bernoulli pressure jump. If $o$ and $n$ denote the owner and non-owner sides, respectively, the
-[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model uses, with its default
-side-density treatment,
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model uses
 
 \begin{equation}
 \begin{aligned}
-  p_n-p_o &= \frac{1}{2}\left(\rho_o v_{n,o}^2-\rho_n v_{n,n}^2\right), \\
-  v_{n,s} &= \frac{\phi_f}{\rho_s\epsilon_s}, \qquad s\in\{o,n\}.
+  p_n-p_o &= \frac{1}{2}\rho_f\left(v_{n,o}^2-v_{n,n}^2\right), \\
+  v_{n,s} &= \frac{\phi_f}{\rho_f\epsilon_s}, \qquad s\in\{o,n\},
 \end{aligned}
 \label{eq:pw-momentum-bernoulli-replacement}
 \end{equation}
 
-Thus, the advection kernel uses the cell-wise, pulled-$1/\epsilon$ approximation, while the
-pressure-jump model carries the change in normal kinetic head across the porosity discontinuity.
-This is an interface closure: it recovers the steady one-dimensional inviscid Bernoulli balance,
-but it is not an algebraic replacement for the omitted tensor term in general multidimensional
-flow. The
-[!param](/UserObjects/BernoulliFormLossPressureJump/use_interpolated_density) option instead uses
-one face-interpolated density in the reversible term, and any configured irreversible form loss is
-added to this reversible jump. It does not select either momentum-advection reconstruction policy.
+where $\rho_f$ is the face-interpolated density. Thus, the advection kernel uses the cell-wise,
+pulled-$1/\epsilon$ approximation, while the pressure-jump model carries the change in normal
+kinetic head across the porosity discontinuity. This is an interface closure: it recovers the
+steady one-dimensional inviscid Bernoulli balance, but it is not an algebraic replacement for the
+omitted tensor term in general multidimensional flow. Any configured irreversible form loss is
+added to this reversible jump.
 
 ## Stress treatment across a porosity jump
 

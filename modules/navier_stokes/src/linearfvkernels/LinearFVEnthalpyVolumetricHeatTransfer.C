@@ -38,7 +38,7 @@ LinearFVEnthalpyVolumetricHeatTransfer::positiveCp(const Moose::ElemArg & elem,
 {
   const auto cp = _cp(elem, state);
   if (cp <= 0.0)
-    mooseError(name(), ": cp must stay positive when solving for enthalpy.");
+    mooseError("cp must stay positive when solving for enthalpy.");
   return cp;
 }
 

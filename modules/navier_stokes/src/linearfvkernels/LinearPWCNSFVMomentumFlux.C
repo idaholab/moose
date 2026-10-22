@@ -386,7 +386,7 @@ LinearPWCNSFVMomentumFlux::inversePorosity(const bool elem_side) const
   const Real porosity = _porous_mass_flux_provider.getFaceSidePorosity(
       *_current_face_info, elem_side, determineState());
   if (porosity <= 0.0)
-    mooseError(name(), ": porosity must be positive on face ", _current_face_info->id(), ".");
+    mooseError("porosity must be positive on face ", _current_face_info->id(), ".");
 
   return 1.0 / porosity;
 }

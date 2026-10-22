@@ -21,9 +21,7 @@ face value extrapolated from its own center,
 
 which is exact for a field that is linear on each side. The gradient on the right is the
 previously published one, so the method is a fixed-point iteration that converges over the
-segregated iterations, with contraction factor $|(\mathbf{x}_f-\mathbf{x}_s)\cdot\mathbf{n}_f|
-|S_f|/V_s$ per baffle face (1/2 on a uniform quadrilateral). Before the Rhie-Chow object is
-linked, the cell value is used.
+segregated iterations. Before the Rhie-Chow object is linked, the cell value is used.
 
 [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) requires this method as the default
 [!param](/Variables/MooseLinearVariableFVReal/gradient_method) of every velocity variable when it
