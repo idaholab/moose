@@ -1,4 +1,5 @@
-//* This file is part of the MOOSE framework
+
+///* This file is part of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -14,51 +15,32 @@
 
 registerMooseObject("MooseApp", MFEMMeridionalCurlAux);
 
-namespace
+MeridionalCurlVectorCoefficient::MeridionalCurlVectorCoefficient(
+    mfem::Coefficient & a_theta, mfem::VectorCoefficient & grad_a_theta)
+  : mfem::VectorCoefficient(2), _a_theta(a_theta), _grad_a_theta(grad_a_theta)
 {
+}
 
-class MeridionalCurlVectorCoefficient : public mfem::VectorCoefficient
+void
+MeridionalCurlVectorCoefficient::Eval(mfem::Vector & V,
+                                      mfem::ElementTransformation & T,
+                                      const mfem::IntegrationPoint & ip)
 {
-public:
-  MeridionalCurlAthetaVectorCoefficient(mfem::Coefficient & a_theta,
-                                        mfem::VectorCoefficient & grad_a_theta)
-    : mfem::VectorCoefficient(2), _a_theta(a_theta), _grad_a_theta(grad_a_theta)
-  {
-  }
+  mfem::Vector A_grad;
+  _grad_a_theta.Eval(A_grad, T, ip);
 
-  using mfem::VectorCoefficient::Eval;
+  mfem::Vector physical_point;
+  T.Transform(ip, physical_point);
 
-  void Eval(mfem::Vector & V,
-            mfem::ElementTransformation & T,
-            const mfem::IntegrationPoint & ip) override
-  {
-    mfem::Vector grad;
-    _grad_a_theta.Eval(grad, T, ip);
+  const mfem::real_t r = physical_point[0];
+  const mfem::real_t A = _a_theta.Eval(T, ip);
 
-    mfem::Vector physical_point;
-    T.Transform(ip, physical_point);
+  const mfem::real_t dA_dr = A_grad[0];
+  const mfem::real_t dA_dz = A_grad[1];
 
-    const mfem::real_t r = physical_point[0];
-    const mfem::real_t inv_r = 1.0 / r;
-
-    const mfem::real_t a_theta = _a_theta.Eval(T, ip);
-
-    // Meridional convention:
-    //   x = r
-    //   y = z
-    const mfem::real_t dA_dr = grad[0];
-    const mfem::real_t dA_dz = grad[1];
-
-    V.SetSize(2);
-    V[0] = -dA_dz;
-    V[1] = dA_dr + A / r;
-  }
-
-private:
-  mfem::Coefficient & _a_theta;
-  mfem::VectorCoefficient & _grad_a_theta;
-};
-
+  V.SetSize(2);
+  V[0] = -dA_dz;
+  V[1] = dA_dr + A / r;
 }
 
 InputParameters
