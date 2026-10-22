@@ -35,6 +35,8 @@
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "DirichletBCBase.h"
+#include "LibmeshDirichletBCBase.h"
+#include "LibmeshDirichletValueFunction.h"
 #include "NodalBCBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
@@ -102,6 +104,7 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/dirichlet_boundaries.h"
 #include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
@@ -241,6 +244,47 @@ NonlinearSystemBase::preInit()
 }
 
 void
+NonlinearSystemBase::addLibmeshDirichletBC(const std::string & bc_name,
+                                           const std::string & name,
+                                           InputParameters & parameters)
+{
+  auto bc = _factory.create<LibmeshDirichletBCBase>(bc_name, name, parameters);
+  _libmesh_dirichlet_bcs.push_back(bc);
+  _has_time_dependent_libmesh_dirichlet_bcs |= bc->isTimeDependent();
+}
+
+void
+NonlinearSystemBase::registerLibmeshDirichletBCs()
+{
+  if (_libmesh_dirichlet_bcs.empty())
+    return;
+
+  // The DofMap keeps its own copy of each boundary, which calls back into the object through the
+  // value functor, so the objects have to outlive the system; this system holds them for that
+  auto & dof_map = _sys.get_dof_map();
+  for (const auto & bc : _libmesh_dirichlet_bcs)
+    dof_map.add_dirichlet_boundary(libMesh::DirichletBoundary(
+        bc->boundaryIDs(), {bc->variable().number()}, LibmeshDirichletValueFunction(*bc)));
+
+  // Adding a constraint changes which degrees of freedom are unknowns, so rebuild the constraints
+  // and the send list now, before anything assembles against them
+  _sys.time = _fe_problem.time();
+  _sys.reinit_constraints();
+}
+
+void
+NonlinearSystemBase::reinitLibmeshDirichletValues()
+{
+  if (!_has_time_dependent_libmesh_dirichlet_bcs)
+    return;
+
+  // libMesh evaluates a DirichletBoundary at libMesh::System::time, which nothing else in MOOSE
+  // maintains
+  _sys.time = _fe_problem.time();
+  _sys.reinit_dirichlet_constraint_values();
+}
+
+void
 NonlinearSystemBase::reinitMortarFunctors()
 {
   // reinit is called on meshChanged() in FEProblemBase. We could implement meshChanged() instead.
@@ -281,6 +325,15 @@ NonlinearSystemBase::initialSetup()
   TIME_SECTION("nlInitialSetup", 2, "Setting Up Nonlinear System");
 
   SolverSystem::initialSetup();
+
+  // The prescribed values come from objects such as Functions, which are only ready to evaluate
+  // once their own initialSetup() has run, so the boundaries are handed to libMesh here rather than
+  // when the boundary conditions are built
+  if (!_libmesh_dirichlet_bcs_registered)
+  {
+    registerLibmeshDirichletBCs();
+    _libmesh_dirichlet_bcs_registered = true;
+  }
 
   {
     TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
@@ -950,6 +1003,11 @@ NonlinearSystemBase::setInitialSolution()
     else
       _console << " Skipping predictor this step" << std::endl;
   }
+
+  // Reproject time-dependent libMesh Dirichlet values at the time this solve is taken at. libMesh
+  // writes them into the solution before each residual evaluation and enforces them in the
+  // constrained rows, so nothing here needs to preset them.
+  reinitLibmeshDirichletValues();
 
   // do nodal BC
   {

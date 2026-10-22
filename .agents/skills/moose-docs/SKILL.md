@@ -32,8 +32,6 @@ precedent for standalone pages of this kind.
 ```markdown
 # ClassName
 
-!syntax description /ObjectType/ClassName
-
 ## Description
 
 `ClassName` [description of what the object does, mentioning the class name
@@ -62,7 +60,11 @@ When a page shows several inputs, precede each listing with its own description.
 
 For classes with AD variants, use: `# ClassName / ADClassName`
 
-The `!syntax description` line is optional if you're writing a full description yourself.
+Omit `!syntax description` from a page that has a full `## Description` section
+written for it, as in the template above. The command inserts the one-line class
+description from `addClassDescription()`, which a written description already
+covers, so the page would state the same thing twice. Use it on a stub page whose
+prose has not been written yet.
 
 ## Core Syntax Commands
 
@@ -247,8 +249,6 @@ A boundary condition documentation page:
 
 ```markdown
 # DirichletBC
-
-!syntax description /BCs/DirichletBC
 
 ## Description
 

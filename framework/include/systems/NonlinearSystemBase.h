@@ -35,6 +35,7 @@ class IntegratedBCBase;
 class NodalBCBase;
 class DirichletBCBase;
 class ADDirichletBCBase;
+class LibmeshDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernelBase;
@@ -305,6 +306,31 @@ public:
 
   void setInitialSolution();
 
+  /**
+   * Build an essential boundary condition imposed through libMesh's DofMap. It is registered there
+   * as a DirichletBoundary in initialSetup().
+   * @param bc_name The type of the boundary condition
+   * @param name The name of the boundary condition
+   * @param parameters The parameters of the boundary condition
+   */
+  void addLibmeshDirichletBC(const std::string & bc_name,
+                             const std::string & name,
+                             InputParameters & parameters);
+
+  /**
+   * Reproject the values of every time-dependent LibmeshDirichletBCBase on this system at the
+   * current time, reusing every constraint that does not depend on time
+   */
+  void reinitLibmeshDirichletValues();
+
+protected:
+  /**
+   * Register every LibmeshDirichletBCBase on this system with libMesh's DofMap as a
+   * DirichletBoundary, and rebuild the constraints
+   */
+  void registerLibmeshDirichletBCs();
+
+public:
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
 #endif
@@ -959,6 +985,16 @@ protected:
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
   ///@}
+
+  /// Essential boundary conditions imposed through libMesh's DofMap. libMesh's DirichletBoundary
+  /// copies call back into them for their values, so this system keeps them alive.
+  std::vector<std::shared_ptr<LibmeshDirichletBCBase>> _libmesh_dirichlet_bcs;
+
+  /// Whether any of _libmesh_dirichlet_bcs depends on time
+  bool _has_time_dependent_libmesh_dirichlet_bcs = false;
+
+  /// Whether _libmesh_dirichlet_bcs have been handed to libMesh
+  bool _libmesh_dirichlet_bcs_registered = false;
 
 #ifdef MOOSE_KOKKOS_ENABLED
   ///@{

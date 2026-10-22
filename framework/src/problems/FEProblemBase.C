@@ -12,6 +12,7 @@
 #endif
 
 #include "FEProblemBase.h"
+#include "LibmeshDirichletBCBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
@@ -3408,6 +3409,17 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     mooseError(
         "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
         "supported at the moment!");
+
+  // An essential boundary condition imposed through libMesh's DofMap is a constraint rather than a
+  // residual object, so it takes neither a displaced mesh nor a place in the residual warehouses
+  if (parameters.isParamValid(LibmeshDirichletBCBase::marker_param))
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    logAdd("BoundaryCondition", name, bc_name, parameters);
+    _nl[nl_sys_num]->addLibmeshDirichletBC(bc_name, name, parameters);
+    return;
+  }
 
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
