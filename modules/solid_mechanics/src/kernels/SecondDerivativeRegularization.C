@@ -14,24 +14,6 @@ registerMooseObject("SolidMechanicsApp", ADSecondDerivativeRegularization);
 
 namespace
 {
-MooseEnum
-regularizationType()
-{
-  return MooseEnum("huhu lulu huhu_lulu");
-}
-
-SecondDerivativeRegularizationType
-regularizationType(const MooseEnum & regularization)
-{
-  if (regularization == "huhu")
-    return SecondDerivativeRegularizationType::Huhu;
-  if (regularization == "lulu")
-    return SecondDerivativeRegularizationType::Lulu;
-  if (regularization == "huhu_lulu")
-    return SecondDerivativeRegularizationType::HuhuLulu;
-
-  mooseError("Unknown second-derivative regularization type '", regularization, "'.");
-}
 
 Real
 defaultLuluFactor(const unsigned int dim)
@@ -81,7 +63,7 @@ SecondDerivativeRegularizationTempl<is_ad>::validParams()
                              "or HuHu-LuLu Hessian/Laplacian contractions.");
   params.addRequiredParam<MooseEnum>(
       "regularization",
-      regularizationType(),
+      MooseEnum("huhu=0 lulu=1 huhu_lulu=2"),
       "Regularization type to apply: 'huhu' for Hessian-Hessian, 'lulu' for "
       "Laplacian-Laplacian, or 'huhu_lulu' for HuHu minus a scaled LuLu correction.");
   params.addRequiredRangeCheckedParam<Real>(
@@ -96,7 +78,7 @@ template <bool is_ad>
 SecondDerivativeRegularizationTempl<is_ad>::SecondDerivativeRegularizationTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _regularization_type(regularizationType(this->template getParam<MooseEnum>("regularization"))),
+    _regularization_type(this->template getParam<MooseEnum>("regularization").getEnum<SecondDerivativeRegularizationType>()),
     _coefficient(this->template getParam<Real>("coefficient")),
     _dim(this->_mesh.dimension()),
     _lulu_factor(this->isParamValid("lulu_factor") ? this->template getParam<Real>("lulu_factor")

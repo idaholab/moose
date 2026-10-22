@@ -13,9 +13,9 @@
 
 enum class SecondDerivativeRegularizationType
 {
-  Huhu,
-  Lulu,
-  HuhuLulu
+  Huhu = 0,
+  Lulu = 1,
+  HuhuLulu = 2
 };
 
 /**
