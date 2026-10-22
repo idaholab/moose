@@ -1,4 +1,3 @@
-
 ///* This file is part of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
@@ -8,15 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
-
 #ifdef MOOSE_MFEM_ENABLED
+
+#pragma once
 
 #include "MFEMAuxKernel.h"
 
 /**
- * Vector coefficient computing the meridional curl of an
- * azimuthal scalar field A_theta.
+ * Class to compute the meridional curl associated with an azimuthal scalar field A_theta.
  *
  * For a 2D meridional mesh with coordinates
  *
@@ -58,11 +56,11 @@ public:
 
   virtual ~MFEMMeridionalCurlAux() = default;
 
-  /// Computes the auxiliary variable.
+  /// Computes the auxvariable.
   virtual void execute() override;
 
 protected:
-  /// Custom coefficient implementing meridional curl.
+  /// Custom coefficient implementing meridional curl
   MeridionalCurlVectorCoefficient _curl_coef;
 };
 
