@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#34206'
+  [MFEMErrorsAndFunctionNorms]
+    type = CSVDiff
+    input = poisson_errors.i
+    csvdiff = 'OutputData/PoissonErrors.csv'
+    requirement = 'The system shall compute the H1 and L1 errors of a scalar MFEM variable against a '
+                  'function, and the L2 norms of scalar and vector functions with quadrature rules '
+                  'of a given order.'
+    design = 'MFEMH1Error.md MFEML1Error.md MFEMFunctionL2Norm.md MFEMVectorFunctionL2Norm.md'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMHCurlErrorAndNumElements]
+    type = CSVDiff
+    input = curlcurl_amr_errors.i
+    csvdiff = 'OutputData/CurlCurlAMRErrors.csv'
+    requirement = 'The system shall compute the H(curl) error of a vector MFEM variable against a '
+                  'function, and the number of elements of an adaptively refined MFEM mesh.'
+    design = 'MFEMHCurlError.md MFEMNumElements.md'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMRejectsDerivativeComponents]
+    design = 'MFEMH1Error.md MFEMHCurlError.md'
+    requirement = 'The system shall report an input error when the derivative of the exact solution '
+                  'given to an MFEM error postprocessor has the wrong number of components, for'
+    [h1_gradient]
+      type = RunException
+      input = poisson_errors.i
+      cli_args = 'Functions/grad_u_exact/expression_z=0'
+      expect_err = 'gradient: must have one component per spatial dimension of the mesh \(2\), but '
+                   'has 3.'
+      capabilities = 'mfem'
+      detail = 'the gradient in the H1 error, and'
+    []
+    [hcurl_curl]
+      type = RunException
+      input = curlcurl_amr_errors.i
+      cli_args = 'Functions/exact_curl_e_field/expression_y=0'
+      expect_err = 'curl: must have as many components as the curl of the variable \(1\), but has 2.'
+      capabilities = 'mfem'
+      detail = 'the curl in the H(curl) error.'
+    []
+  []
+[]

@@ -14,6 +14,9 @@ compared to a vector function.
 where $\vec{u}_{h} \in H^{1,d} \lor L^{2,d} \lor H(\mathrm{curl}) \lor
 H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 
+The quadrature rule is set by [!param](/Postprocessors/MFEMVectorL2Error/quadrature_order), as
+described in [MFEMNormPostprocessor.md].
+
 ## Example Input File Syntax
 
 !listing mfem/kernels/irrotational.i block=Postprocessors
