@@ -1,0 +1,3 @@
+time,center_pin_power_IC,center_pin_power_aux,outer_pins_power_IC,outer_pins_power_aux,total_power_TH
+0,0,0,0,0,0
+1,1000,1000,6000,6000,6999.9516217241
