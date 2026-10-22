@@ -13,16 +13,19 @@
 #include "KokkosMortarInterfaceData.h"
 
 /**
- * Computes the weighted gap of each secondary node j of a mortar contact interface,
+ * Computes the weighted gap vector of each secondary node j of a mortar contact interface,
  *
- *   g_j = sum_qp psi_j (x_primary - x_secondary) . n_j JxW,
+ *   A_j = sum_qp psi_j (x_primary - x_secondary) JxW,
  *
+ * its weighted gap g_j = A_j . n_j,
  * and its normalization sum_qp psi_j JxW over the mortar segment quadrature points, with psi the
  * basis of the Lagrange multiplier (its dual basis when it uses one) and n_j the nodal normal.
+ * With compute_slip, it also integrates the weighted relative displacement increment over the time
+ * step, sum_qp psi_j (du_secondary - du_primary) JxW with du = u - u_old.
  * Each process integrates its local secondary elements, the owner of a node sums the contributions
  * of all processes, and every process whose local secondary elements touch the node receives the
- * sum. The quantities are geometric: the constraints that read them decide the contact
- * conditions.
+ * sums. The owner also designates one of those processes to assemble the nodal terms of the node.
+ * The quantities are geometric: the constraints that read them decide the contact conditions.
  */
 class KokkosWeightedGapUserObject : public Moose::Kokkos::GeneralUserObject
 {
@@ -50,6 +53,14 @@ public:
 
   /// The weighted gap of each nodal normal of the interface geometry, summed over all processes
   const Moose::Kokkos::Array<Real> & weightedGap() const { return _gap; }
+  /// The weighted gap vector sum_qp psi_j (x_primary - x_secondary) JxW of each nodal normal,
+  /// summed over all processes
+  const Moose::Kokkos::Array<Moose::Kokkos::Real3> & weightedGapVector() const
+  {
+    return _gap_vector;
+  }
+  /// The weighted slip of each nodal normal of the interface geometry, summed over all processes
+  const Moose::Kokkos::Array<Moose::Kokkos::Real3> & weightedSlip() const { return _slip; }
   /// The normalization of each nodal normal of the interface geometry, summed over all processes
   const Moose::Kokkos::Array<Real> & normalization() const { return _normalization; }
 
@@ -59,6 +70,9 @@ public:
   /// The weighted gap and the normalization of each owned node
   const Moose::Kokkos::Array<Real> & ownedWeightedGap() const { return _owned_gap; }
   const Moose::Kokkos::Array<Real> & ownedNormalization() const { return _owned_normalization; }
+  /// Whether this process assembles the nodal terms of each nodal normal of the interface
+  /// geometry: exactly one of the processes whose local secondary elements touch a node does
+  const Moose::Kokkos::Array<bool> & designated() const { return _designated; }
   /// The number of times the owned nodes changed
   unsigned int ownedRevision() const { return _owned_revision; }
 
@@ -84,9 +98,22 @@ private:
   /// Whether the Lagrange multiplier uses a dual basis
   const bool _use_dual;
 
+  /// Whether the weighted slip is computed
+  const bool _compute_slip;
+  /// The displacements and their values at the start of the time step
+  Moose::Kokkos::Variable _disp;
+  Moose::Kokkos::Variable _disp_old;
+  /// FE type ID, family, and order of the displacements
+  unsigned int _disp_fe = 0;
+  libMesh::FEFamily _disp_family = libMesh::LAGRANGE;
+  libMesh::Order _disp_order = libMesh::FIRST;
+
   /// The nodal quantities, indexed by nodal normal
   Moose::Kokkos::Array<Real> _gap;
+  Moose::Kokkos::Array<Moose::Kokkos::Real3> _gap_vector;
   Moose::Kokkos::Array<Real> _normalization;
+  Moose::Kokkos::Array<Moose::Kokkos::Real3> _slip;
+  Moose::Kokkos::Array<bool> _designated;
 
   /// The owned nodes and their quantities
   std::vector<dof_id_type> _owned_nodes;
@@ -118,20 +145,48 @@ KokkosWeightedGapUserObject::operator()(GapLoop,
     _geometry.dualCoefficients(_lm_family, _lm_order, secondary, n_lambda, dual_coeff);
 
   for (dof_id_type qp = begin; qp < end; ++qp)
+  {
+    // The relative displacement increment of the secondary face with respect to the primary face
+    Moose::Kokkos::Real3 du;
+    if (_compute_slip)
+      for (const unsigned int face : {0u, 1u})
+      {
+        const auto elem = _geometry.elem[face][qp];
+        const auto n_disp_dofs =
+            kokkosAssembly().getNumDofs(kokkosMesh().getElementInfo(elem).type, _disp_fe);
+        const Real sign = face == 0 ? 1 : -1;
+        for (unsigned int c = 0; c < _disp.components(); ++c)
+        {
+          const auto & sys = kokkosSystem(_disp.sys(c));
+          for (unsigned int j = 0; j < n_disp_dofs; ++j)
+          {
+            const auto dof = sys.getElemLocalDofIndex(elem, j, _disp.var(c));
+            du(c) += sign *
+                     (sys.getVectorDofValue(dof, _disp.tag()) -
+                      sys.getVectorDofValue(dof, _disp_old.tag())) *
+                     _geometry.shape(_disp_family, _disp_order, face, j, qp);
+          }
+        }
+      }
+
     ::Kokkos::parallel_for(
         ::Kokkos::TeamThreadRange(team, n_lambda),
         [&](const unsigned int k)
         {
           // The shape functions of a Lagrange multiplier follow the nodes of the element
           const auto normal = _geometry.elem_node_normal[max_face_nodes * secondary + k];
-          const auto & n = _geometry.nodal_normal[normal];
           const auto & d = _geometry.gap_vector[qp];
           const auto w =
               _geometry.lowerBasis(
                   _lm_family, _lm_order, _use_dual ? dual_coeff : nullptr, n_lambda, k, qp) *
               _geometry.JxW[qp];
 
-          ::Kokkos::atomic_add(&_gap[normal], w * (d(0) * n(0) + d(1) * n(1) + d(2) * n(2)));
+          for (unsigned int c = 0; c < 3; ++c)
+            ::Kokkos::atomic_add(&_gap_vector[normal](c), w * d(c));
           ::Kokkos::atomic_add(&_normalization[normal], w);
+          if (_compute_slip)
+            for (unsigned int c = 0; c < 3; ++c)
+              ::Kokkos::atomic_add(&_slip[normal](c), w * du(c));
         });
+  }
 }

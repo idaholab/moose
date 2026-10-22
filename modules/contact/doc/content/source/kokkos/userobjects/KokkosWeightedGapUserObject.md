@@ -18,6 +18,11 @@ whose local secondary elements touch the node receives the sum. The object compu
 [KokkosComputeWeightedGapLMMechanicalContact](KokkosComputeWeightedGapLMMechanicalContact.md)
 decides the contact conditions from it.
 
+With [!param](/UserObjects/KokkosWeightedGapUserObject/compute_slip) set to true, it also integrates
+the weighted gap vector $\int_{\Gamma_c} \psi_j (\boldsymbol{x}^{(2)} - \boldsymbol{x}^{(1)}) \,
+d\Gamma$ and the weighted relative displacement increment over the time step, which frictional
+contact reads.
+
 The Lagrange multiplier must be a first-order Lagrange variable. The object always uses the correct
 edge dropping treatment.
 

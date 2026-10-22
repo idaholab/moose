@@ -37,6 +37,10 @@ KokkosWeightedGapUserObject::validParams()
                              "contact interface on the current configuration.");
   params.addRequiredParam<VariableName>(
       "lm_variable", "The Lagrange multiplier whose basis weights the gap, the contact pressure.");
+  params.addParam<bool>("compute_slip",
+                        false,
+                        "Whether to compute the weighted relative displacement increment over the "
+                        "time step, which frictional contact reads.");
 
   // The gap is the distance between the faces of the current configuration
   params.set<bool>("use_displaced_mesh") = true;
@@ -61,12 +65,23 @@ KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const InputParameters &
     _lm_var(_fe_problem.getVariable(_tid, getParam<VariableName>("lm_variable"))),
     _lm_family(_lm_var.feType().family),
     _lm_order(_lm_var.feType().order),
-    _use_dual(_lm_var.useDual())
+    _use_dual(_lm_var.useDual()),
+    _compute_slip(getParam<bool>("compute_slip"))
 {
   if (_lm_family != libMesh::LAGRANGE || _lm_order != libMesh::FIRST)
     paramError("lm_variable",
                "The Lagrange multiplier must be a first-order Lagrange variable, whose degrees of "
                "freedom are at the secondary nodes.");
+
+  if (_compute_slip)
+  {
+    _disp = kokkosCoupledVectorTagValuesByName("_displacements", Moose::SOLUTION_TAG).variable();
+    _disp_old =
+        kokkosCoupledVectorTagValuesByName("_displacements", Moose::OLD_SOLUTION_TAG).variable();
+    const auto & fe_type = _disp.mooseFieldVar()->feType();
+    _disp_family = fe_type.family;
+    _disp_order = fe_type.order;
+  }
 
   _interface_data.requireNodalNormals();
 }
@@ -81,8 +96,15 @@ KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const KokkosWeightedGap
     _lm_family(object._lm_family),
     _lm_order(object._lm_order),
     _use_dual(object._use_dual),
-    _gap(object._gap),
-    _normalization(object._normalization)
+    _compute_slip(object._compute_slip),
+    _disp(object._disp),
+    _disp_old(object._disp_old),
+    _disp_fe(object._disp_fe),
+    _disp_family(object._disp_family),
+    _disp_order(object._disp_order),
+    _gap_vector(object._gap_vector),
+    _normalization(object._normalization),
+    _slip(object._slip)
 {
 }
 
@@ -91,12 +113,16 @@ KokkosWeightedGapUserObject::compute()
 {
   _geometry = _interface_data.update();
   _lm_fe = kokkosAssembly().getFETypeID(_lm_var.feType());
+  if (_compute_slip)
+    _disp_fe = kokkosAssembly().getFETypeID(_disp.mooseFieldVar()->feType());
 
   const auto n_normals = _interface_data.normalNodes().size();
-  _gap.create(n_normals);
+  _gap_vector.create(n_normals);
   _normalization.create(n_normals);
-  _gap = 0;
+  _slip.create(_compute_slip ? n_normals : 0);
+  _gap_vector = Moose::Kokkos::Real3(0);
   _normalization = 0;
+  _slip = Moose::Kokkos::Real3(0);
 
   if (_geometry.secondary_qp_begin.size() > 1)
   {
@@ -108,8 +134,9 @@ KokkosWeightedGapUserObject::compute()
     _gap_dispatcher->parallelForTeams(launch);
   }
 
-  _gap.copyToHost();
+  _gap_vector.copyToHost();
   _normalization.copyToHost();
+  _slip.copyToHost();
 
   communicate();
 }
@@ -120,9 +147,33 @@ KokkosWeightedGapUserObject::communicate()
   const auto & nodes = _interface_data.normalNodes();
   const auto rank = processor_id();
 
-  // The sums at the owned nodes, starting from the contributions of this process
-  std::map<dof_id_type, std::pair<Real, Real>> owned;
-  using Datum = std::tuple<dof_id_type, Real, Real>;
+  // The nodal sums, packed as the gap vector, the normalization, the slip, and the weighted gap,
+  // which every process computes with the same nodal normal
+  constexpr unsigned int n_sums = 8;
+  using Sums = std::array<Real, n_sums>;
+  const auto pack = [&](const dof_id_type i)
+  {
+    Sums v{};
+    for (const auto c : make_range(3u))
+      v[c] = _gap_vector[i](c);
+    v[3] = _normalization[i];
+    if (_compute_slip)
+      for (const auto c : make_range(3u))
+        v[4 + c] = _slip[i](c);
+    v[7] = _gap_vector[i] * _geometry.nodal_normal[i];
+    return v;
+  };
+  const auto add = [](Sums & sums, const Sums & v)
+  {
+    for (const auto k : make_range(n_sums))
+      sums[k] += v[k];
+  };
+
+  // The owner of a node sums the contributions of all processes and records the processes whose
+  // local secondary elements touch the node, to send them the sums and to designate one of them
+  std::map<dof_id_type, Sums> owned;
+  std::map<dof_id_type, processor_id_type> designee;
+  using Datum = std::pair<dof_id_type, Sums>;
   std::map<processor_id_type, std::vector<Datum>> push;
 
   for (const auto i : index_range(nodes))
@@ -130,58 +181,81 @@ KokkosWeightedGapUserObject::communicate()
     const auto node = nodes[i];
     if (node->processor_id() == rank)
     {
-      auto & [gap, normalization] = owned[node->id()];
-      gap += _gap[i];
-      normalization += _normalization[i];
+      add(owned[node->id()], pack(i));
+      designee[node->id()] = rank;
     }
     else
-      push[node->processor_id()].emplace_back(node->id(), _gap[i], _normalization[i]);
+      push[node->processor_id()].emplace_back(node->id(), pack(i));
   }
 
-  // The owner of a node also records which processes contributed to it, to send them the sums
   std::map<processor_id_type, std::vector<dof_id_type>> contributors;
   auto receive = [&](const processor_id_type pid, const std::vector<Datum> & data)
   {
-    for (const auto & [id, gap, normalization] : data)
+    for (const auto & [id, v] : data)
     {
-      auto & sums = owned[id];
-      sums.first += gap;
-      sums.second += normalization;
+      add(owned[id], v);
       contributors[pid].push_back(id);
+      // The owner assembles the nodes it touches, and the lowest touching process the others
+      const auto [it, inserted] = designee.emplace(id, pid);
+      if (!inserted && it->second != rank)
+        it->second = std::min(it->second, pid);
     }
   };
   TIMPI::push_parallel_vector_data(comm(), push, receive);
 
-  std::map<processor_id_type, std::vector<Datum>> reply;
+  // The last entry of a reply is 1 for the designated process of the node
+  using Reply = std::pair<dof_id_type, std::array<Real, n_sums + 1>>;
+  const auto make_reply = [](const Sums & v, const bool designated)
+  {
+    std::array<Real, n_sums + 1> r;
+    std::copy(v.begin(), v.end(), r.begin());
+    r[n_sums] = designated;
+    return r;
+  };
+  std::map<processor_id_type, std::vector<Reply>> reply;
   for (const auto & [pid, ids] : contributors)
     for (const auto id : ids)
-    {
-      const auto & [gap, normalization] = libmesh_map_find(owned, id);
-      reply[pid].emplace_back(id, gap, normalization);
-    }
+      reply[pid].emplace_back(
+          id, make_reply(libmesh_map_find(owned, id), libmesh_map_find(designee, id) == pid));
 
-  std::unordered_map<dof_id_type, std::pair<Real, Real>> remote;
-  auto receive_reply = [&](const processor_id_type, const std::vector<Datum> & data)
+  std::unordered_map<dof_id_type, std::pair<Sums, bool>> remote;
+  auto receive_reply = [&](const processor_id_type, const std::vector<Reply> & data)
   {
-    for (const auto & [id, gap, normalization] : data)
-      remote[id] = {gap, normalization};
+    for (const auto & [id, r] : data)
+    {
+      Sums v;
+      std::copy(r.begin(), r.begin() + n_sums, v.begin());
+      remote[id] = {v, r[n_sums] != 0};
+    }
   };
   TIMPI::push_parallel_vector_data(comm(), reply, receive_reply);
 
+  _gap.create(nodes.size());
+  _designated.create(nodes.size());
   for (const auto i : index_range(nodes))
   {
     const auto id = nodes[i]->id();
-    const auto & sums = nodes[i]->processor_id() == rank ? libmesh_map_find(owned, id)
-                                                         : libmesh_map_find(remote, id);
-    _gap[i] = sums.first;
-    _normalization[i] = sums.second;
+    const bool own = nodes[i]->processor_id() == rank;
+    const auto & v = own ? libmesh_map_find(owned, id) : libmesh_map_find(remote, id).first;
+    for (const auto c : make_range(3u))
+      _gap_vector[i](c) = v[c];
+    _normalization[i] = v[3];
+    if (_compute_slip)
+      for (const auto c : make_range(3u))
+        _slip[i](c) = v[4 + c];
+    _gap[i] = v[7];
+    _designated[i] =
+        own ? libmesh_map_find(designee, id) == rank : libmesh_map_find(remote, id).second;
   }
   _gap.copyToDevice();
+  _gap_vector.copyToDevice();
   _normalization.copyToDevice();
+  _slip.copyToDevice();
+  _designated.copyToDevice();
 
   std::vector<dof_id_type> owned_nodes;
   owned_nodes.reserve(owned.size());
-  for (const auto & [id, sums] : owned)
+  for (const auto & [id, _] : owned)
     owned_nodes.push_back(id);
   if (owned_nodes != _owned_nodes)
   {
@@ -192,10 +266,10 @@ KokkosWeightedGapUserObject::communicate()
   _owned_gap.create(_owned_nodes.size());
   _owned_normalization.create(_owned_nodes.size());
   dof_id_type k = 0;
-  for (const auto & [id, sums] : owned)
+  for (const auto & [id, v] : owned)
   {
-    _owned_gap[k] = sums.first;
-    _owned_normalization[k] = sums.second;
+    _owned_gap[k] = v[7];
+    _owned_normalization[k] = v[3];
     ++k;
   }
   _owned_gap.copyToDevice();
