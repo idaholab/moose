@@ -110,6 +110,7 @@ MFEMGeometricMultigridSolver::ConstructSolver()
 {
   _mg.reset();
   _level_ops.clear();
+  _level_tdofs.clear();
   _level_blfs.clear();
 
   auto proxy = std::make_unique<MGProxy>(*this);
@@ -176,6 +177,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> new_blfs;
   std::vector<std::unique_ptr<mfem::OperatorHandle>> new_level_ops;
   new_level_ops.reserve(N - 1);
+  std::vector<std::unique_ptr<mfem::Array<int>>> new_level_tdofs;
 
   auto mg = std::make_unique<mfem::GeometricMultigrid>(*_hierarchy, ess_bdr);
   auto * mg_ptr = mg.get();
@@ -185,9 +187,11 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     auto & level_fespace =
         cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(level));
 
-    // Compute essential true DoFs for this level.
-    mfem::Array<int> level_tdofs;
-    level_fespace.GetEssentialTrueDofs(ess_bdr, level_tdofs);
+    // Compute essential true DoFs for this level. They are kept as long as the level operator,
+    // because the constrained operator of a level that is not fully assembled references them
+    // instead of copying them.
+    auto level_tdofs = std::make_unique<mfem::Array<int>>();
+    level_fespace.GetEssentialTrueDofs(ess_bdr, *level_tdofs);
 
     // Build level operator.
     mfem::Operator * level_op = nullptr;
@@ -200,9 +204,10 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
           _var_name, level_fespace, _assembly_levels[level]);
 
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
-      blf->FormSystemMatrix(level_tdofs, *level_op_handle);
+      blf->FormSystemMatrix(*level_tdofs, *level_op_handle);
       level_op = level_op_handle->Ptr();
       new_level_ops.push_back(std::move(level_op_handle));
+      new_level_tdofs.push_back(std::move(level_tdofs));
       new_blfs.push_back(std::move(blf));
     }
 
@@ -217,10 +222,12 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 
   // Atomically replace:
   //  1. Old MG freed, dropping raw pointers into level operators.
-  //  2. Old operator handles freed before old forms they may wrap.
+  //  2. Old operator handles freed before the old essential DoF lists and forms they may
+  //     reference.
   //  3. Proxy updated to point at the new MG and level data.
   _mg = std::move(mg);
   _level_ops = std::move(new_level_ops);
+  _level_tdofs = std::move(new_level_tdofs);
   _level_blfs = std::move(new_blfs);
   _mg_proxy->SetMG(*_mg);
 }

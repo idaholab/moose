@@ -12,6 +12,23 @@
     recover = false
     abs_zero = 1e-6
   []
+  [MFEMPMGPartialIntermediateLevel]
+    type = CSVDiff
+    input = pmg_diffusion.i
+    csvdiff = 'OutputData/PMGDiffusionPartialLevel.csv'
+    cli_args = 'FESpaceHierarchies/h1_hierarchy/refinements="2 3" '
+               'Solvers/chebyshev_fine/type=MFEMOperatorChebyshevSmoother '
+               'Solvers/pmg/smoothers="chebyshev chebyshev_fine" '
+               'Solvers/pmg/assembly_levels="legacy partial legacy" '
+               'Outputs/csv/file_base=OutputData/PMGDiffusionPartialLevel'
+    requirement = 'The system shall have the ability to solve a diffusion problem using a '
+                  'p-multigrid (geometric multigrid) preconditioner with MFEM whose intermediate '
+                  'level is partially assembled.'
+    issues = '#34196'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
   [MFEMPMGRejectsNonlinear]
     type = RunException
     input = pmg_nonlinear_error.i
