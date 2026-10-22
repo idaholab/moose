@@ -52,5 +52,5 @@ protected:
   usingGenericKernelMembers;
 };
 
-typedef SecondDerivativeRegularizationTempl<false> SecondDerivativeRegularization;
-typedef SecondDerivativeRegularizationTempl<true> ADSecondDerivativeRegularization;
+using SecondDerivativeRegularization = SecondDerivativeRegularizationTempl<false>;
+using ADSecondDerivativeRegularization = SecondDerivativeRegularizationTempl<true>;
