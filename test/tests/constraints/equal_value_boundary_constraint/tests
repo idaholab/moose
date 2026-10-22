@@ -121,7 +121,13 @@
       abs_zero = 1e-9
       cli_args = "Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0' "
                  "Constraints/y_top/formulation=kinematic "
-                 "Outputs/file_base=test_primary_node_coord_kinematic_out"
+                 "Outputs/file_base=test_primary_node_coord_kinematic_out "
+                 "Executioner/petsc_options_iname='-pc_type -pc_factor_mat_solver_type' "
+                 "Executioner/petsc_options_value='lu mumps'"
+      # The default preconditioner breaks down (DIVERGED_BREAKDOWN) on the kinematic Jacobian of
+      # this input, so whether the solve converges depends on the partitioning: on 7 ranks with a
+      # distributed mesh it usually does not. A direct solve removes that dependence
+      capabilities = 'mumps'
       detail = "with the primary node located by its coordinates, and"
     []
     [evbc_primary_element_ghosting]
