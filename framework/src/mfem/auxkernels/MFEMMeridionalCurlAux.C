@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", MFEMMeridionalCurlAux);
 
+namespace Moose::MFEM
+{
 MeridionalCurlVectorCoefficient::MeridionalCurlVectorCoefficient(
     mfem::Coefficient & a_theta, mfem::VectorCoefficient & grad_a_theta)
   : mfem::VectorCoefficient(2), _a_theta(a_theta), _grad_a_theta(grad_a_theta)
@@ -40,6 +42,7 @@ MeridionalCurlVectorCoefficient::Eval(mfem::Vector & V,
   V.SetSize(2);
   V[0] = -dA_dz;
   V[1] = dA_dr + A / r;
+}
 }
 
 InputParameters

@@ -26,6 +26,8 @@
  *   B_r = -dA_theta/dz
  *   B_z =  dA_theta/dr + A_theta/r
  */
+namespace Moose::MFEM
+{
 class MeridionalCurlVectorCoefficient : public mfem::VectorCoefficient
 {
 public:
@@ -41,6 +43,7 @@ public:
 private:
   mfem::Coefficient & _a_theta;
   mfem::VectorCoefficient & _grad_a_theta;
+};
 };
 
 /**
@@ -61,7 +64,7 @@ public:
 
 protected:
   /// Custom coefficient implementing meridional curl
-  MeridionalCurlVectorCoefficient _curl_coef;
+  Moose::MFEM::MeridionalCurlVectorCoefficient _curl_coef;
 };
 
 #endif

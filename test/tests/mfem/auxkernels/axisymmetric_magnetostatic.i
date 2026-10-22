@@ -121,11 +121,11 @@
   [BoomerAMG]
     type = MFEMHypreBoomerAMG
   []
-   [PCG]
-     type = MFEMHyprePCG
-     l_tol = 1e-8
+  [PCG]
+    type = MFEMHyprePCG
+    l_tol = 1e-8
     preconditioner = BoomerAMG
-   []
+  []
 []
 
 [Postprocessors]
