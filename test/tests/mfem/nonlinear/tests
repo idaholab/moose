@@ -75,6 +75,59 @@
       detail = 'the same solve reports its failure to converge within the iteration limit when no line search is used.'
     []
   []
+  [adaptive_l_tol]
+    design = 'MFEMNewtonNonlinearSolver.md'
+    issues = '#34152'
+    requirement = 'The system shall be able to set the relative tolerance of the linear solves of a '
+                  'native MFEM Newton nonlinear solve from the reduction of the residual norm, such '
+                  'that'
+    compute_devices = 'cpu'
+    [eisenstat_walker_1]
+      type = CSVDiff
+      input = nldiffusion_newton.i
+      cli_args = 'Solvers/lin/type=MFEMCGSolver '
+                 'Solvers/native_mfem_nl/adaptive_l_tol=eisenstat_walker_1 '
+                 'VectorPostprocessors/active=point_sample Outputs/active=csv'
+      csvdiff = 'nldiffusion_newton_csv_point_sample_0001.csv'
+      expect_out = 'Eisenstat-Walker rtol = 0.5\n'
+      capabilities = 'mfem'
+      recover = false
+      prereq = 'line_search/backtracking line_search/backtracking_overshoot'
+      detail = 'choice 1 of Eisenstat and Walker converges on the solution of a solve with a fixed '
+               'linear tolerance,'
+    []
+    [eisenstat_walker_2]
+      type = CSVDiff
+      input = nldiffusion_newton.i
+      cli_args = 'Solvers/lin/type=MFEMCGSolver '
+                 'Solvers/native_mfem_nl/adaptive_l_tol=eisenstat_walker_2 '
+                 'Solvers/native_mfem_nl/adaptive_l_tol_initial=0.25 '
+                 'VectorPostprocessors/active=point_sample Outputs/active=csv'
+      csvdiff = 'nldiffusion_newton_csv_point_sample_0001.csv'
+      expect_out = 'Eisenstat-Walker rtol = 0.25\n'
+      capabilities = 'mfem'
+      recover = false
+      prereq = 'adaptive_l_tol/eisenstat_walker_1'
+      detail = 'choice 2 of Eisenstat and Walker, from a given initial tolerance, converges on the '
+               'same solution,'
+    []
+    [non_iterative_linear_solver]
+      type = RunException
+      input = nldiffusion_newton.i
+      cli_args = 'Solvers/native_mfem_nl/adaptive_l_tol=eisenstat_walker_2'
+      expect_err = 'adaptive_l_tol: requires a linear solver whose relative tolerance can be set'
+      capabilities = 'mfem'
+      detail = 'a linear solver whose relative tolerance cannot be set is rejected, and'
+    []
+    [unused_parameter]
+      type = RunException
+      input = nldiffusion_newton.i
+      cli_args = 'Solvers/native_mfem_nl/adaptive_l_tol_initial=0.25'
+      expect_err = "adaptive_l_tol_initial: Only used when 'adaptive_l_tol' is not 'none'."
+      capabilities = 'mfem'
+      detail = 'its parameters are rejected when no adaptive tolerance is used.'
+    []
+  []
   [MFEMNonLinearDiffusionNonZeroRHS]
     design = 'EquationSystem.md'
     type = XMLDiff
