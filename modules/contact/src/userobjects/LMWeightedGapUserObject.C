@@ -69,6 +69,14 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
+  // The dual basis coefficients depend on the segment geometry, and their derivatives are not
+  // computed
+  if (getParam<bool>("segment_geometry_derivatives") &&
+      (_lm_var->useDual() || _use_petrov_galerkin))
+    paramError("segment_geometry_derivatives",
+               "Segment geometry derivatives are not available with dual Lagrange multiplier bases "
+               "or the Petrov-Galerkin approach.");
+
   if (_use_nodal_scaling)
   {
     // kappa_j's denominator int_e N_j is zero at TRI6 and TET10 vertices and negative at QUAD8 and
@@ -91,6 +99,15 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
     _nodal_scaling_fe = FEBase::build(lower_dim, fe_type);
     _nodal_scaling_qrule = std::make_unique<QGauss>(lower_dim, fe_type.default_quadrature_order());
     _nodal_scaling_fe->attach_quadrature_rule(_nodal_scaling_qrule.get());
+    // adFullNodalIntegrals() rebuilds the face map, which needs these before the first reinit
+    if (_segment_geometry_derivatives)
+    {
+      const auto & fe_map = _nodal_scaling_fe->get_fe_map();
+      fe_map.get_phi_map();
+      fe_map.get_dphidxi_map();
+      if (lower_dim == 2)
+        fe_map.get_dphideta_map();
+    }
   }
 }
 
@@ -139,6 +156,12 @@ LMWeightedGapUserObject::verifyLagrange(const MooseVariable & var,
                "'.");
 }
 
+const FEType &
+LMWeightedGapUserObject::testFEType() const
+{
+  return _use_petrov_galerkin ? _aux_lm_var->feType() : _lm_var->feType();
+}
+
 const VariableTestValue &
 LMWeightedGapUserObject::test() const
 {
@@ -185,6 +208,10 @@ LMWeightedGapUserObject::initializeNodalScaling()
   _elem_to_full_nodal_integral.clear();
   _dof_to_full_normalization.clear();
   _full_normalization_elems.clear();
+  _dof_to_ad_covered_fraction_sum.clear();
+  _dof_to_ad_nodal_scale.clear();
+  _elem_to_ad_full_nodal_integral.clear();
+  _dof_to_ad_full_normalization.clear();
 }
 
 void
@@ -202,11 +229,25 @@ LMWeightedGapUserObject::computeQpINodalScaling()
   const auto & full_integrals = fullNodalIntegrals(_lower_secondary_elem);
   _dof_to_covered_fraction_sum[dof] += std_phi[_i][_qp] * _qp_factor / full_integrals[_i];
 
+  // The displacement and segment geometry test functions share the first-order Lagrange basis
+  // that nodal scaling requires
+  const std::vector<ADReal> * ad_full_integrals = nullptr;
+  if (_ad_segment_geometry)
+  {
+    ad_full_integrals = &adFullNodalIntegrals(_lower_secondary_elem);
+    _dof_to_ad_covered_fraction_sum[dof] +=
+        (*_ad_test)[_i][_qp] * _ad_qp_factor / (*ad_full_integrals)[_i];
+  }
+
   // Coverage-independent divisor for `normalize_c` (see normalizeCDivisor()): sum the full-element
   // integral int_e N_j once per distinct adjacent element, not once per quadrature point, since it
   // does not depend on qp and multiple mortar segments may cover the same element.
   if (_full_normalization_elems[dof].insert(_lower_secondary_elem->id()).second)
+  {
     _dof_to_full_normalization[dof] += full_integrals[_i];
+    if (ad_full_integrals)
+      _dof_to_ad_full_normalization[dof] += (*ad_full_integrals)[_i];
+  }
 }
 
 void
@@ -236,6 +277,53 @@ LMWeightedGapUserObject::finalizeNodalScaling()
   for (const auto & [dof, fraction_sum] : _dof_to_covered_fraction_sum)
     _dof_to_nodal_scale[dof] =
         fraction_sum / libmesh_map_find(nodes_to_secondary_elem, dof->id()).size();
+
+  if (!_segment_geometry_derivatives)
+    return;
+
+  Moose::Mortar::Contact::communicateRealObject(_dof_to_ad_covered_fraction_sum,
+                                                _subproblem.mesh(),
+                                                _nodal,
+                                                _communicator,
+                                                /*send_data_back=*/true);
+  Moose::Mortar::Contact::communicateRealObject(_dof_to_ad_full_normalization,
+                                                _subproblem.mesh(),
+                                                _nodal,
+                                                _communicator,
+                                                /*send_data_back=*/true);
+  for (const auto & [dof, fraction_sum] : _dof_to_ad_covered_fraction_sum)
+    _dof_to_ad_nodal_scale[dof] =
+        fraction_sum / libmesh_map_find(nodes_to_secondary_elem, dof->id()).size();
+}
+
+ADReal
+LMWeightedGapUserObject::adNodalScale(const DofObject * const dof) const
+{
+  const auto it = _dof_to_ad_nodal_scale.find(dof);
+  if (it == _dof_to_ad_nodal_scale.end())
+    return nodalScale(dof);
+
+  ADReal ad_scale = it->second;
+  // The Real scale is the reference value
+  ad_scale.value() = nodalScale(dof);
+  return ad_scale;
+}
+
+ADReal
+LMWeightedGapUserObject::adNormalizeCDivisor(const DofObject * const dof,
+                                             const Real covered_normalization) const
+{
+  if (!_use_nodal_scaling)
+    return adNormalization(dof, covered_normalization);
+
+  const auto it = _dof_to_ad_full_normalization.find(dof);
+  if (it == _dof_to_ad_full_normalization.end())
+    return normalizeCDivisor(dof, covered_normalization);
+
+  ADReal ad_divisor = it->second;
+  // The Real divisor is the reference value
+  ad_divisor.value() = normalizeCDivisor(dof, covered_normalization);
+  return ad_divisor;
 }
 
 const std::vector<Real> &
@@ -263,6 +351,48 @@ LMWeightedGapUserObject::fullNodalIntegrals(const Elem * const elem)
   return _elem_to_full_nodal_integral.emplace(elem->id(), std::move(integrals)).first->second;
 }
 
+const std::vector<ADReal> &
+LMWeightedGapUserObject::adFullNodalIntegrals(const Elem * const elem)
+{
+  const auto it = _elem_to_ad_full_nodal_integral.find(elem->id());
+  if (it != _elem_to_ad_full_nodal_integral.end())
+    return it->second;
+
+  // The first-order map of the displaced face, rebuilt from AD node positions: in 2D the length of
+  // the tangent, in 3D the norm of the cross product of the two tangents
+  const auto & fe_map = _nodal_scaling_fe->get_fe_map();
+  const auto & phi_map = fe_map.get_phi_map();
+  const auto & dphidxi_map = fe_map.get_dphidxi_map();
+  const auto & dphideta_map = fe_map.get_dphideta_map();
+  const std::vector<std::vector<Real>> & phi = _nodal_scaling_fe->get_phi();
+  const auto & weights = _nodal_scaling_qrule->get_weights();
+  _nodal_scaling_fe->reinit(elem);
+
+  std::vector<ADPoint> nodes;
+  for (const auto & node : elem->node_ref_range())
+    nodes.push_back(nodalCoordinate(node));
+
+  std::vector<ADReal> integrals(phi.size(), 0);
+  for (const auto qp : make_range(_nodal_scaling_qrule->n_points()))
+  {
+    ADPoint xyz, dxdxi, dxdeta;
+    for (const auto n : index_range(nodes))
+    {
+      xyz += phi_map[n][qp] * nodes[n];
+      dxdxi += dphidxi_map[n][qp] * nodes[n];
+      if (elem->dim() == 2)
+        dxdeta += dphideta_map[n][qp] * nodes[n];
+    }
+    const ADReal jac = elem->dim() == 2 ? dxdxi.cross(dxdeta).norm() : dxdxi.norm();
+    ADReal coord;
+    coordTransformFactor(_subproblem, elem->subdomain_id(), xyz, coord);
+    for (const auto j : index_range(integrals))
+      integrals[j] += phi[j][qp] * weights[qp] * jac * coord;
+  }
+
+  return _elem_to_ad_full_nodal_integral.emplace(elem->id(), std::move(integrals)).first->second;
+}
+
 const VariableTestValue &
 LMWeightedGapUserObject::tractionBasis() const
 {
@@ -284,7 +414,7 @@ LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
     Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
   // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
   // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
-  return nodal_pressure / nodalScale(_subproblem.mesh().nodePtr(node.id()));
+  return nodal_pressure / adNodalScale(_subproblem.mesh().nodePtr(node.id()));
 }
 
 Real

@@ -23,6 +23,9 @@ ADMortarConstraint::validParams()
   // is expensive on displaced meshes. Derived classes that never read _grad_u_secondary or
   // _grad_u_primary set this to false.
   params.addPrivateParam<bool>("_compute_primal_gradients", true);
+  // Derived classes whose residuals use the AD test functions, AD physical points, and
+  // adJxWCoord() set this to true
+  params.addPrivateParam<bool>("_supports_segment_geometry_derivatives", false);
   return params;
 }
 
@@ -39,6 +42,26 @@ ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
                                                                 : _grad_u_dummy)
 {
   _subproblem.haveADObjects(true);
+
+  if (_segment_geometry_derivatives)
+  {
+    if (!getParam<bool>("_supports_segment_geometry_derivatives"))
+      paramError("segment_geometry_derivatives",
+                 "Segment geometry derivatives are not supported by this mortar constraint.");
+    // Petrov-Galerkin is rejected with segment geometry derivatives, so _var supplies the test
+    // functions
+    if (_var)
+      _ad_test = &adMortarTest(Moose::ElementType::Lower, _var->feType());
+    _ad_test_secondary = &adMortarTest(Moose::ElementType::Element, _secondary_var.feType());
+    _ad_test_primary = &adMortarTest(Moose::ElementType::Neighbor, _primary_var.feType());
+  }
+}
+
+ADReal
+ADMortarConstraint::adJxWCoord() const
+{
+  mooseAssert(_ad_segment_geometry, "The AD mortar segment geometry is not set");
+  return _ad_JxW_msm[_qp] * _ad_coord_msm[_qp];
 }
 
 void
@@ -108,7 +131,9 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   residuals.resize(test_space_size, 0);
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     for (_i = 0; _i < test_space_size; _i++)
-      residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+      residuals[_i] += _ad_segment_geometry
+                           ? adJxWCoord() * computeQpResidual(mortar_type)
+                           : _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
   addResidualsAndJacobianWithoutConstraints(_assembly, residuals, dof_indices, scaling_factor);
 }

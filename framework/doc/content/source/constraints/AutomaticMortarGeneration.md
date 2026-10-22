@@ -33,8 +33,46 @@ summation over the secondary face star, and final normalization. The stored noda
 retained, so residual and Jacobian evaluations use the same contact direction.
 
 The incident-face set and orientation signs are fixed during an evaluation. Mortar segment
-topology, projections, integration measures, moving overlap boundaries, and active-set changes are
-not differentiated.
+topology and active-set changes are not differentiated. The mortar segment geometry is
+differentiated only when segment geometry derivatives are requested, see below.
+
+## Segment geometry derivatives
+
+With [!param](/Constraints/EqualValueConstraint/segment_geometry_derivatives) set to `true`, the
+Jacobian of AD mortar constraints also includes the dependence of the mortar segment geometry on
+the displacements, following the consistent linearization of [!cite](popp2010dual). This covers
+the segment end points (2D) or vertices (3D), the locations of the quadrature points on the
+secondary and primary faces, the test and shape function values at those moving points, and the
+mortar segment `JxW` and coordinate transformation. The residual is unchanged.
+
+The segmentation is only piecewise smooth in the displacements: it changes when a node crosses
+another node or edge, when clipping or triangulation changes, and when the contact active set
+changes. The Jacobian is consistent with the residual on a fixed, nondegenerate segmentation and
+active set. Where segment end points from secondary and primary nodes coincide in 2D, their
+derivatives are taken to be zero. Residual-only evaluations use the `Real` geometry.
+
+The geometry is still computed with `Real` numbers. Each projection that defines a segment end
+point, vertex, or quadrature point is a nonlinear equation $\boldsymbol{F}(\boldsymbol{\xi},
+\boldsymbol{u}) = \boldsymbol{0}$ in the reference coordinates $\boldsymbol{\xi}$ and the
+displacements $\boldsymbol{u}$. At the converged `Real` solution, one implicit-function-theorem step
+
+!equation
+\delta\boldsymbol{\xi} = -\left(\frac{\partial\boldsymbol{F}}{\partial\boldsymbol{\xi}}\right)^{+}
+  \frac{\partial\boldsymbol{F}}{\partial\boldsymbol{u}}\,\delta\boldsymbol{u}
+
+adds the derivatives without changing the values. Here $(\cdot)^{+}$ is the pseudo-inverse of the
+$3\times 2$ projection Jacobian in 3D. In 3D, each mortar segment vertex is recorded as a secondary
+node, a primary node, an intersection of a secondary and a primary edge, or a polygon center when
+the segments are built. Its position is then rebuilt from the displaced nodes and, for
+`AVERAGED_NODAL_NORMAL` subpatch planes, from the nodal normals.
+
+Segment geometry derivatives require `use_displaced_mesh = true` and standard Lagrange multiplier
+bases, because the dual basis coefficients also depend on the segment geometry. They are not
+available with a stabilized [EqualValueConstraint](EqualValueConstraint.md) (`delta > 0`). Every mortar object on an interface, including mortar
+auxiliary kernels and user objects, must use the same value. Supported constraints and user
+objects opt in, and other mortar constraints report an error when the option is set. A 3D
+segment vertex that cannot be traced to the secondary and primary nodes is treated as fixed,
+with a warning.
 
 ## 2D
 

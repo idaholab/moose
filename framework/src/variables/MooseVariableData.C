@@ -800,9 +800,22 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   fetchADDofValues();
   const auto n_test = num_dofs / _count;
 
-  // Values
+  // Values. At mortar segment quadrature points that move with the displacements, the AD shape
+  // function values carry that motion.
+  const MooseArray<std::vector<ADReal>> * const ad_mortar_phi =
+      std::is_same_v<OutputType, Real> && !_use_dual
+          ? _assembly.adMortarPhi(_element_type, _fe_type)
+          : nullptr;
+  const auto fill_value = [this, ad_mortar_phi, nqp, n_test](auto & dest, const auto & dof_values)
+  {
+    libmesh_ignore(ad_mortar_phi);
+    if constexpr (std::is_same_v<OutputType, Real>)
+      if (ad_mortar_phi)
+        return fill<constant_monomial>(dest, *ad_mortar_phi, dof_values, nqp, n_test);
+    fill<constant_monomial>(dest, *_current_phi, dof_values, nqp, n_test);
+  };
   if (_need_ad_u)
-    fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
+    fill_value(_ad_u, _ad_dof_values);
   // Grad. On an element face, only fill the gradient when a face object requested it. Otherwise it
   // stays empty so that a face object that read it through the volume accessor adGradSln() fails
   // the bounds assertion instead of silently using gradients built without the AD face shape
@@ -835,7 +848,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dot)
     {
       if (_time_integrator)
-        fill<constant_monomial>(_ad_u_dot, *_current_phi, _ad_dofs_dot, nqp, n_test);
+        fill_value(_ad_u_dot, _ad_dofs_dot);
       // We are too early in the setup to have a time integrator, so we are not really using the
       // AD-derivatives. We set the AD value of the derivatives to the nonAD value
       else
@@ -849,7 +862,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dotdot)
     {
       if (_time_integrator)
-        fill<constant_monomial>(_ad_u_dotdot, *_current_phi, _ad_dofs_dotdot, nqp, n_test);
+        fill_value(_ad_u_dotdot, _ad_dofs_dotdot);
       else
       {
         _ad_u_dotdot.resize(nqp);

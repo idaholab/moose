@@ -93,6 +93,13 @@ WeightedGapUserObject::tractionBasis() const
   return test();
 }
 
+const FEType &
+WeightedGapUserObject::testFEType() const
+{
+  paramError("segment_geometry_derivatives",
+             "Segment geometry derivatives are not supported by this user object.");
+}
+
 bool
 WeightedGapUserObject::shouldRecordNodalNormalDerivatives() const
 {
@@ -120,6 +127,13 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
+  if (_segment_geometry_derivatives)
+  {
+    if (!usesNodalNormalDerivatives())
+      paramError("segment_geometry_derivatives",
+                 "Segment geometry derivatives require nodal-normal derivatives.");
+    _ad_test = &adMortarTest(Moose::ElementType::Lower, testFEType());
+  }
 
   if (!usesNodalNormalDerivatives())
     return;
@@ -177,6 +191,8 @@ WeightedGapUserObject::computeQpProperties()
 
   // Compute gap vector
   ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
+  if (_ad_segment_geometry)
+    gap_vec = _ad_phys_points_primary[_qp] - _ad_phys_points_secondary[_qp];
 
   // Generic displacement for interface problems
   _qp_displacement_nodal(0) = prim_x - sec_x;
@@ -184,19 +200,27 @@ WeightedGapUserObject::computeQpProperties()
   if (_has_disp_z)
     _qp_displacement_nodal(2) = *prim_z - *sec_z;
 
-  _qp_displacement_nodal *= _JxW_msm[_qp] * _coord[_qp];
+  // The AD physical points carry the motion of the face nodes and of the quadrature points
+  const ADReal JxW_coord = _ad_segment_geometry ? _ad_JxW_msm[_qp] * _ad_coord_msm[_qp]
+                                                : ADReal(_JxW_msm[_qp] * _coord[_qp]);
+  _qp_displacement_nodal *= JxW_coord;
 
-  gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
-  gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
-  if (_has_disp_z)
-    gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
+  if (!_ad_segment_geometry)
+  {
+    gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
+    gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
+    if (_has_disp_z)
+      gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
+  }
 
   // Compute integration point quantities: Normals (geometry) is averaged at the node, but not
   // interpolated within the weak integration.
-  _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_gap_nodal = gap_vec * JxW_coord;
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
+  if (_ad_segment_geometry)
+    _ad_qp_factor = JxW_coord;
 }
 
 void
@@ -210,12 +234,30 @@ WeightedGapUserObject::computeQpIProperties()
 
   auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
 
-  if (shouldRecordNodalNormalDerivatives())
+  if (_ad_segment_geometry && shouldRecordNodalNormalDerivatives())
+    weighted_gap +=
+        (*_ad_test)[_i][_qp] * _qp_gap_nodal * contactNormal(*_lower_secondary_elem, _i);
+  else if (shouldRecordNodalNormalDerivatives())
     weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * contactNormal(*_lower_secondary_elem, _i);
   else
     weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
   normalization += (*_test)[_i][_qp] * _qp_factor;
+  if (_ad_segment_geometry)
+    _dof_to_ad_normalization[dof] += (*_ad_test)[_i][_qp] * _ad_qp_factor;
+}
+
+ADReal
+WeightedGapUserObject::adNormalization(const DofObject * const dof, const Real normalization) const
+{
+  const auto it = _dof_to_ad_normalization.find(dof);
+  if (it == _dof_to_ad_normalization.end())
+    return normalization;
+
+  ADReal ad_normalization = it->second;
+  // The communicated Real normalization is the reference value
+  ad_normalization.value() = normalization;
+  return ad_normalization;
 }
 
 const ADRealVectorValue &
@@ -272,6 +314,7 @@ WeightedGapUserObject::initialize()
   _ad_nodal_normals.clear();
   _dof_to_weighted_gap.clear();
   _dof_to_weighted_displacements.clear();
+  _dof_to_ad_normalization.clear();
 }
 
 void
@@ -287,6 +330,9 @@ WeightedGapUserObject::finalize()
                                           /*normalize_c*/ true,
                                           _communicator,
                                           send_data_back);
+  if (_segment_geometry_derivatives)
+    Moose::Mortar::Contact::communicateRealObject(
+        _dof_to_ad_normalization, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
 void

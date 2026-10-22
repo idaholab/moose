@@ -26,6 +26,8 @@ class PenaltyWeightedGapUserObject : virtual public WeightedGapUserObject,
 public:
   static InputParameters validParams();
 
+  virtual const libMesh::FEType & testFEType() const override;
+
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

@@ -101,10 +101,23 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
   if (_has_disp_z)
     check_type(*_disp_z_var, "disp_z");
 
+  // The dual basis coefficients depend on the segment geometry, and their derivatives are not
+  // computed
+  if (getParam<bool>("segment_geometry_derivatives") && _aux_lm_var && _aux_lm_var->useDual())
+    paramError("segment_geometry_derivatives",
+               "Segment geometry derivatives are not available with dual Lagrange multiplier "
+               "bases.");
+
   if (!_augmented_lagrange_problem == isParamValid("penetration_tolerance"))
     paramError("penetration_tolerance",
                "This parameter must be supplied if and only if an augmented Lagrange problem "
                "object is used.");
+}
+
+const FEType &
+PenaltyWeightedGapUserObject::testFEType() const
+{
+  return _aux_lm_var ? _aux_lm_var->feType() : _disp_x_var->feType();
 }
 
 const VariableTestValue &
@@ -151,7 +164,8 @@ PenaltyWeightedGapUserObject::selfFinalize()
     auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
 
     // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
-    auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
+    const auto normalization = adNormalization(dof_object, wgap.second);
+    auto gap = _use_physical_gap ? wgap.first / normalization / normalization : wgap.first;
 
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object] : 0.0;

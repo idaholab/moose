@@ -30,6 +30,13 @@ std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_ele
                                                          unsigned int sub_elem);
 
 /**
+ * Map a point of a first-order sub-element of a parent face to the parent face reference element.
+ * The map is affine.
+ */
+Point
+mortarSubElementToParent(const Elem & parent_elem, unsigned int sub_elem, const Point & point);
+
+/**
  * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
  * @param msm_elem The mortar segment element that we will be mapping quadrature points from
  * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)
@@ -122,6 +129,22 @@ loopOverMortarSegments(
 
   // The element Jacobian times weights
   const auto & JxW_msm = assembly.jxWMortar();
+
+  // The secondary nodal normals with their displacement derivatives, built once per loop because
+  // every mortar segment geometry derivative needs them. Residual-only evaluations use the Real
+  // geometry.
+  const bool geometry_derivatives = amg.segmentGeometryDerivatives() && ADReal::do_derivatives;
+  const auto ad_coordinate = [&assembly](const Node & node) { return assembly.adNodalPoint(node); };
+  std::unordered_map<const Node *, ADRealVectorValue> ad_nodal_normals;
+  if (geometry_derivatives)
+    amg.computeADNodalNormals(ad_coordinate, ad_nodal_normals);
+  std::vector<ADPoint> secondary_dxi, primary_dxi, msm_nodes;
+  // Faces reinitialized outside of a mortar segment must not see the segment geometry derivatives
+  struct ClearGeometryDerivatives
+  {
+    ~ClearGeometryDerivatives() { assembly.clearMortarSegmentGeometryDerivatives(); }
+    Assembly & assembly;
+  } clear_geometry_derivatives{assembly};
 
   // Set required material properties
   std::unordered_set<unsigned int> needed_mat_props;
@@ -262,6 +285,26 @@ loopOverMortarSegments(
           xi1_pts.begin(), secondary_xi_pts.begin() + start, secondary_xi_pts.begin() + end);
       xi2_pts.insert(xi2_pts.begin(), primary_xi_pts.begin() + start, primary_xi_pts.begin() + end);
 
+      if (geometry_derivatives)
+      {
+        amg.mortarSegmentGeometryDerivatives(*msm_elem,
+                                             ad_coordinate,
+                                             ad_nodal_normals,
+                                             *qrule_msm,
+                                             xi1_pts,
+                                             xi2_pts,
+                                             secondary_dxi,
+                                             primary_dxi,
+                                             msm_nodes);
+        assembly.setMortarSegmentGeometryDerivatives(*secondary_face_elem,
+                                                     xi1_pts,
+                                                     secondary_dxi,
+                                                     *msinfo.primary_elem,
+                                                     xi2_pts,
+                                                     primary_dxi,
+                                                     msm_nodes);
+      }
+
       const Elem * reinit_secondary_elem = secondary_ip;
 
       // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
@@ -329,6 +372,7 @@ loopOverMortarSegments(
 
       act();
 
+      assembly.clearMortarSegmentGeometryDerivatives();
     } // End loop over msm segments on secondary face elem
   } // End loop over (active) secondary elems
 }
