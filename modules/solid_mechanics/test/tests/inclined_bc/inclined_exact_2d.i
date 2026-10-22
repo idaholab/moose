@@ -102,16 +102,13 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
 
-  # controls for linear iterations
   l_max_its = 10
   l_tol = 1e-4
 
-  # controls for nonlinear iterations
   nl_max_its = 100
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
 
-  # time control
   start_time = 0.0
   dt = 1
   end_time = 5

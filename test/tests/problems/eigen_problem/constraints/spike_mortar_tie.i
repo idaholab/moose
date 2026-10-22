@@ -5,10 +5,6 @@
     xmin = 0
     xmax = 1
     ymin = 0
-    # A 1 by 0.7 rectangle, not a square: the square's second and third modes are a
-    # degenerate pair, and Krylov-Schur on the singular-M mortar problem drops one member
-    # of that pair when its subspace is small or its arithmetic differs (n_basis_vectors of
-    # 12 or 16 locally, 20 on one CIVET build). The rectangle's first four modes are distinct.
     ymax = 0.7
     nx = 8
     ny = 8

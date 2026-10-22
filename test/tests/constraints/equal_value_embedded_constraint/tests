@@ -176,10 +176,6 @@
                   "constraint when the same constraint is enforced with degree of freedom "
                   "exact constraints, including with automatic differentiation, between "
     issues = '#11722 #33821'
-    # Both formulations are exact at convergence, so each case below writes the file name of its
-    # kinematic twin and diffs against that already committed kinematic gold. No gold of its own
-    # is needed. The prereq serializes the runs that share an output file; the automatic
-    # differentiation case chains onto its own non-AD twin for the same reason.
     [1D_2D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'

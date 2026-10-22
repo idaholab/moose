@@ -63,24 +63,6 @@
     pp_names = 'u_secondary u_primary'
     pp_symbols = 'u_s u_p'
   []
-
-  [num_nonlinear_iterations]
-    type = NumNonlinearIterations
-    outputs = none
-  []
-
-  [num_linear_iterations]
-    type = NumLinearIterations
-    outputs = none
-  []
-
-  [solve_time]
-    type = PerfGraphData
-    section_name = 'FEProblem::solve'
-    data_type = TOTAL
-    execute_on = 'TIMESTEP_END'
-    outputs = none
-  []
 []
 
 [Executioner]

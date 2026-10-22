@@ -1,13 +1,4 @@
 [Mesh]
-  # A 3x8 and a 5x8 piece of the unit square that meet at x = 3/8 with duplicated
-  # interface nodes. Combining them keeps every generated id: the left piece holds
-  # nodes 0-35 and the right piece 36-89, both numbered x fastest, so the coincident
-  # interface pairs are (36 + 6 j, 3 + 4 j) for j = 0..8. The cut is off centre on
-  # purpose: two equal halves would each carry the same fundamental eigenvalue, so
-  # the untied problem would be degenerate and the tie could go missing unnoticed.
-  # BreakMeshByBlockGenerator gives the same geometry but numbers its duplicate
-  # nodes in unordered_map order, which differs between standard libraries, so the
-  # pairs below could not be hard-coded on it.
   [left_half]
     type = GeneratedMeshGenerator
     dim = 2

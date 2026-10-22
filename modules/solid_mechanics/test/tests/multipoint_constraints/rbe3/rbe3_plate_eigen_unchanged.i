@@ -282,10 +282,6 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu mumps'
   eigen_tol = 1e-8
-  # The Newton phase is one SNES solve whose residual falls by about a factor of 1.5 per
-  # iteration because the plate's first two modes are close, while the eigenvalue itself is
-  # settled to twelve digits after five. At the default 1e-8 the solve needs about thirty
-  # iterations and round-off at this stiffness (68 GPa) can stop it short on some platforms.
   nl_rel_tol = 1e-6
 []
 
