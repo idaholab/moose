@@ -22,12 +22,12 @@ BernoulliFormLossPressureJump::validParams()
   params.addRequiredParam<MooseFunctorName>("porosity", "The porosity functor.");
   params.addRequiredParam<MooseFunctorName>("density", "The density functor.");
   params.addParam<std::vector<Real>>(
-      "form_loss", {}, "Form-loss coefficients aligned with the pressure-jump boundaries.");
+      "form_loss", {}, "Form-loss coefficients for each pressure-jump boundaries.");
   MultiMooseEnum reference_velocity_side("lower_porosity higher_porosity");
   params.addParam<MultiMooseEnum>(
       "reference_velocity_side",
       reference_velocity_side,
-      "Reference-velocity sides aligned with the pressure-jump boundaries. The default is "
+      "Reference-velocity sides for each the pressure-jump boundaries. The default is "
       "lower_porosity.");
   params.addParam<bool>("use_interpolated_density",
                         false,

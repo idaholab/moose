@@ -42,7 +42,7 @@ struct PressureJumpInterfaceData
 
 /**
  * Construct the conservative half-cell interface coefficients for a diagonal diffusion tensor.
- * Both half-cell displacement vectors point in the element-to-neighbor orientation.
+ * Both half-cell direction vectors point in the element-to-neighbor orientation.
  */
 inline PressureJumpInterfaceData
 pressureJumpInterfaceData(const RealVectorValue & normal,

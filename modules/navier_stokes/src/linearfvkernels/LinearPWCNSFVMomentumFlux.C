@@ -297,7 +297,7 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 
   // The shear traction q_t = T (I - n n) (U_N,f - U_P,f) acts between the superficial face
   // velocities of the two sides. A clear side extrapolates its face velocity across its half-cell,
-  // whose resistance is d_s / mu_s; a porous side's face velocity is its cell value. Hence
+  // whose resistance is d_s / mu_s; a porous side's face velocity is its cell value (we impose this, and thus there is no resistance on the porous side). Hence
   //   1 / T = sum of d_s / mu_s over the clear sides,
   // which for two clear sides is the harmonic two-point transmissibility.
   Real resistance = 0.0;
@@ -309,6 +309,7 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 
   // The explicit nonorthogonal corrections c_s = grad(U)_s . (n - d_Pf,s / d_s) of each clear
   // half-cell enter the same balance as the face values.
+  // No stress contribution on the porous side thus no correction.
   RealVectorValue elem_correction;
   RealVectorValue neighbor_correction;
   if (_dim > 1 && _use_nonorthogonal_correction)

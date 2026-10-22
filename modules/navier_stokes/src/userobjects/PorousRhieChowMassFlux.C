@@ -240,7 +240,7 @@ PorousRhieChowMassFlux::initCouplingField()
 {
   RhieChowMassFlux::initCouplingField();
 
-  for (auto & fi : _fe_problem.mesh().faceInfo())
+  for (const auto & fi : _fe_problem.mesh().faceInfo())
     _baffle_jump[fi->id()];
 }
 
