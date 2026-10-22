@@ -9,20 +9,27 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
+#include "GenericIntegratedBC.h"
 
-class ADRobinBC : public ADIntegratedBC
+template <bool is_ad>
+class RobinBCTempl : public GenericIntegratedBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ADRobinBC(const InputParameters & parameters);
+  RobinBCTempl(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
   /// Value to be applied to the Robin boundary condition
   const Real & _value;
   /// Coefficient to be applied to the Robin boundary condition
   const Real _coef;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef RobinBCTempl<false> RobinBC;
+typedef RobinBCTempl<true> ADRobinBC;
