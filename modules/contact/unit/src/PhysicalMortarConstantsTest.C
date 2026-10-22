@@ -86,7 +86,7 @@ TEST(PhysicalMortarConstants, FrictionalBeatsDefault)
 // user, so user-set and physically derived constants cannot be mixed.
 TEST(PhysicalMortarConstants, UserConstantWithPhysicalThrows)
 {
-  for (const std::string & param : {"c_normal=1e6", "c_tangential=1e3", "normalize_c=true"})
+  for (const char * param : {"c_normal=1e6", "c_tangential=1e3", "normalize_c=true"})
     EXPECT_THROW(runCumulativeNL("frictional_physical.i", {"Contact/mortar/" + param}),
                  std::exception)
         << param;

@@ -11,7 +11,7 @@ at the interface. This class requires the use of
 
 When the contact pressure comes from a mortar mechanical contact solve, pass the mortar contact
 user object through [!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure_uo).
-The [Contact action](ContactAction.md) names that object `lm_weightedgap_object_<contact block name>`.
+The `Contact` action names that object `lm_weightedgap_object_<contact block name>`.
 The contact Lagrange multiplier variable can store a scaled pressure, for example under node-based
 scaling or `c_strategy = physical`, so the user object recovers the physical pressure from it.
 Coupling a solution variable through
