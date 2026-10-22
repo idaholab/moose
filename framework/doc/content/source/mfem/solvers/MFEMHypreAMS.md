@@ -29,7 +29,9 @@ preconditioner application onto the compatible subspace orthogonal to these grad
 [!param](/Solvers/MFEMHypreAMS/projection_frequency) parameter sets the number of iterations
 between projections; if it is unset, hypre projects every fifth iteration. Restricting to
 subdomains is not supported together with
-[!param](/Solvers/MFEMHypreAMS/low_order_refined).
+[!param](/Solvers/MFEMHypreAMS/low_order_refined), and cannot be combined with
+[!param](/Solvers/MFEMHypreAMS/singular), which applies only when the mass term is zero
+everywhere.
 
 A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
 [!param](/Solvers/MFEMHypreAMS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial

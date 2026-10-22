@@ -13,6 +13,7 @@
 
 #include "MFEMLORLinearSolverBase.h"
 #include "MFEMFESpace.h"
+#include "MFEMBlockRestrictable.h"
 
 /**
  * Wrapper for mfem::HypreAMS solver.
@@ -36,13 +37,13 @@ protected:
   virtual void UpdateEquationSystemContext() override;
 
   /// Builds the true-dof vector marking nodes interior to the zero-mass ("block") region,
-  /// for use with HYPRE_AMSSetInteriorNodes. Only called when "block" is set by the user.
+  /// for use with HYPRE_AMSSetInteriorNodes. Only called when restricted to subdomains.
   std::unique_ptr<mfem::HypreParVector> BuildInteriorNodes();
 
 private:
   const MFEMFESpace & _mfem_fespace;
   /// True-dof marker (1.0 at interior nodes) passed to HYPRE_AMSSetInteriorNodes;
-  /// null until the first operator update, and always null unless "block" is set by the user.
+  /// null until the first operator update, and always null unless restricted to subdomains.
   std::unique_ptr<mfem::HypreParVector> _interior_nodes;
 };
 

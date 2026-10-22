@@ -101,13 +101,18 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
-  if (isParamValid("projection_frequency") && !isParamSetByUser("block"))
+  if (isParamValid("projection_frequency") && !isSubdomainRestricted())
     paramError("projection_frequency",
                "The compatible-subspace projection only applies when 'block' is set.");
   // The LOR solver's discrete gradient acts on a different H1 space, whose dofs the marker built
   // in BuildInteriorNodes() does not index.
-  if (_lor && isParamSetByUser("block"))
+  if (_lor && isSubdomainRestricted())
     paramError("block", "Restricting to zero-mass subdomains is not supported with LOR.");
+  // 'singular' drops the gradient-subspace correction over the whole domain, which the conducting
+  // region outside 'block' still needs.
+  if (getParam<bool>("singular") && isSubdomainRestricted())
+    paramError("singular",
+               "A singular problem has a zero mass term everywhere; 'block' must not be set.");
 
   ConstructSolver();
 }
@@ -128,7 +133,7 @@ MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
   solver.iterative_mode = getParam<bool>("use_initial_guess");
   solver.SetPrintLevel(getParam<int>("print_level"));
 
-  // Only set together with "block", which excludes LOR, so the solver is never an LOR solver here
+  // Only set together with 'block', which excludes LOR, so the solver is never an LOR solver here
   if (isParamValid("projection_frequency"))
     cast_ref<InteriorNodesHypreAMS &>(solver).SetProjectionFrequency(
         getParam<unsigned int>("projection_frequency"));
@@ -141,7 +146,7 @@ MFEMHypreAMS::UpdateEquationSystemContext()
 
   // The essential boundaries are only known once the equation system has been formed, so the
   // marker is built on the first operator update. InteriorNodesHypreAMS keeps it across later ones.
-  if (isParamSetByUser("block") && !_interior_nodes)
+  if (isSubdomainRestricted() && !_interior_nodes)
   {
     _interior_nodes = BuildInteriorNodes();
     cast_ref<InteriorNodesHypreAMS &>(GetSolver()).SetInteriorNodes(*_interior_nodes);
@@ -187,7 +192,7 @@ MFEMHypreAMS::BuildInteriorNodes()
   for (const auto e : make_range(pmesh.GetNE()))
     // Element attribute not in the zero-mass subdomain list => conducting; its vertices are
     // not interior to the zero-mass region.
-    if (getSubdomainAttributes().Find(pmesh.GetAttribute(e)) == -1)
+    if (!getSubdomainMarkers()[pmesh.GetAttribute(e) - 1])
     {
       vert_fespace.GetElementVDofs(e, vdofs);
       // The local H1 GaussLobatto basis has no sign-encoded dofs, so vdofs entries index
