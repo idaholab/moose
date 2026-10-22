@@ -40,7 +40,7 @@ public:
     mfem::DenseMatrix curlshape(nd, dim),
         curlshape_d_ft(nd, dim); // both trial and test function in Nedelec
                                  // space, represented with curlshape
-    elmat.SetSize(nd * dim);
+    elmat.SetSize(nd);
     elmat = 0.0;
     double w;
 
