@@ -34,16 +34,16 @@
 []
 
 [Functions]
-  # Meridional radius R = x
-  [R]
+  # Meridional radius r = x
+  [r]
     type = MFEMParsedFunction
     expression = 'x'
   []
-  [inv_R]
+  [inv_r]
     type = MFEMParsedFunction
     expression = '1.0/x'
   []
-  # Weighted source coefficient R * J_theta = x * 8
+  # Weighted source coefficient r * J_theta = x * 8
   [Jtheta_r_wire]
     type = MFEMParsedFunction
     expression = '8.0*x'
@@ -54,7 +54,7 @@
   [cyl_coeffs]
     type = MFEMGenericFunctorMaterial
     prop_names = 'diffCoef massCoef'
-    prop_values = 'R inv_R'
+    prop_values = 'r inv_r'
   []
   [J_wire]
     type = MFEMGenericFunctorMaterial
@@ -128,14 +128,6 @@
    []
 []
 
-[VectorPostprocessors]
-  [LineSampler]
-    type = MFEMVariableLineValueSampler
-    variable = 'B'
-    start_point = '2.899 -1.98 0'
-    end_point = '2.899 1.98 0'
-    num_points = 10
-  []
 [Postprocessors]
   [norm] # should be sqrt(8*pi)
     type = MFEMVectorL2Error
