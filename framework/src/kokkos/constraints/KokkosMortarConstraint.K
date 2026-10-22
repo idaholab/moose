@@ -78,6 +78,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
 
   _lm_var.init(_var);
   addMooseVariableDependency(&_var);
+  _pinned_lm_vars = {&_var};
 
   // The Jacobian columns of the displacements that are solution variables of this system
   _n_vars = _sys.nVariables();
@@ -142,20 +143,23 @@ MortarConstraintBase::packInactiveDofs()
   const auto & solution =
       static_cast<const libMesh::PetscVector<Number> &>(*_sys.system().current_local_solution);
   const auto sys_num = _sys.number();
-  const auto var_num = _var.number();
 
   // The non-Kokkos mortar constraints pin the same degrees of freedom in zeroInactiveLMDofs()
   std::vector<dof_id_type> dofs;
-  if (_var.isNodal())
+  for (const auto var : _pinned_lm_vars)
   {
-    for (const auto node : amg.getInactiveLMNodes())
-      if (node->processor_id() == processor_id() && node->n_comp(sys_num, var_num))
-        dofs.push_back(node->dof_number(sys_num, var_num, 0));
+    const auto var_num = var->number();
+    if (var->isNodal())
+    {
+      for (const auto node : amg.getInactiveLMNodes())
+        if (node->processor_id() == processor_id() && node->n_comp(sys_num, var_num))
+          dofs.push_back(node->dof_number(sys_num, var_num, 0));
+    }
+    else
+      for (const auto elem : amg.getInactiveLMElems())
+        for (const auto comp : make_range(elem->n_comp(sys_num, var_num)))
+          dofs.push_back(elem->dof_number(sys_num, var_num, comp));
   }
-  else
-    for (const auto elem : amg.getInactiveLMElems())
-      for (const auto comp : make_range(elem->n_comp(sys_num, var_num)))
-        dofs.push_back(elem->dof_number(sys_num, var_num, comp));
 
   _inactive_dofs.create(dofs.size());
   for (const auto i : index_range(dofs))

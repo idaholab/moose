@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "MooseVariableDependencyInterface.h"
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
@@ -3763,11 +3764,18 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _kokkos_nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
-  // Kokkos mortar constraints cover their lower-dimensional primary and secondary subdomains, as
-  // mortar constraints do
+  // Kokkos mortar constraints cover their lower-dimensional primary and secondary subdomains and
+  // their Lagrange multipliers, the variables they depend on that live on the secondary subdomain,
+  // as mortar constraints do
   for (const auto & constraint : _kokkos_constraints.getActiveObjects())
   {
     kernel_variables.insert(constraint->variable().name());
+    const auto secondary =
+        _mesh.getSubdomainID(constraint->getParam<SubdomainName>("secondary_subdomain"));
+    if (const auto deps = dynamic_cast<const MooseVariableDependencyInterface *>(constraint.get()))
+      for (const auto var : deps->getMooseVariableDependencies())
+        if (var->activeSubdomains().count(secondary))
+          kernel_variables.insert(var->name());
     for (const auto param : {"primary_subdomain", "secondary_subdomain"})
       input_subdomains.insert(_mesh.getSubdomainID(constraint->getParam<SubdomainName>(param)));
   }

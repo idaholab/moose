@@ -83,6 +83,10 @@ struct MortarInterfaceGeometry
   Array<dof_id_type> elem_node_normal;
   /// Contiguous ID of the node of each nodal normal
   Array<ContiguousNodeID> normal_node;
+  /// A local secondary element containing the node of each nodal normal, and the local index of
+  /// the node on it, through which the degrees of freedom at the node are found
+  Array<dof_id_type> normal_elem;
+  Array<unsigned int> normal_elem_node;
   /// Normalized nodal normal
   Array<Real3> nodal_normal;
   /// Range of the sensitivities of each nodal normal

@@ -204,6 +204,8 @@ MortarInterfaceData::packNodalNormals()
                                                 MortarInterfaceGeometry::max_face_nodes,
                                             libMesh::DofObject::invalid_id);
   std::vector<ContiguousNodeID> normal_node;
+  std::vector<dof_id_type> normal_elem;
+  std::vector<unsigned int> normal_elem_node;
   std::vector<Point> nodal_normal;
 
   for (const auto e : index_range(_local_secondary_elems))
@@ -222,6 +224,8 @@ MortarInterfaceData::packNodalNormals()
       {
         _normal_nodes.push_back(node);
         normal_node.push_back(kokkos_mesh.getContiguousNodeID(node));
+        normal_elem.push_back(e);
+        normal_elem_node.push_back(k);
         nodal_normal.push_back(normals[k]);
       }
       elem_node_normal[MortarInterfaceGeometry::max_face_nodes * e + k] = it->second;
@@ -231,6 +235,8 @@ MortarInterfaceData::packNodalNormals()
   auto & g = _geometry;
   g.elem_node_normal = elem_node_normal;
   g.normal_node = normal_node;
+  g.normal_elem = normal_elem;
+  g.normal_elem_node = normal_elem_node;
 
   g.nodal_normal.create(nodal_normal.size());
   for (const auto i : index_range(nodal_normal))

@@ -162,6 +162,10 @@ protected:
   /// Whether the current dispatch assembles the residual and the Jacobian
   bool _computing_residual = false, _computing_jacobian = false;
 
+  /// The Lagrange multipliers whose degrees of freedom that no mortar segment reaches are pinned,
+  /// all in the system of the variable of the constraint
+  std::vector<const MooseVariableFieldBase *> _pinned_lm_vars;
+
 private:
   /// Pack the owned Lagrange multiplier degrees of freedom that no mortar segment reaches
   void packInactiveDofs();
@@ -264,6 +268,7 @@ MortarConstraintBase::operator()(InactiveLoop, const ThreadID tid, const Derived
 {
   const auto & var = _lm_var;
   const auto dof = _inactive_dofs[tid];
+  // Every pinned multiplier lives in the system of the variable of the constraint
   const auto lambda = kokkosSystem(var.sys()).getVectorDofValue(dof, var.tag());
 
   accumulateTaggedDofDiagonal(var.sys(), dof, lambda, 1, _computing_residual, _computing_jacobian);
