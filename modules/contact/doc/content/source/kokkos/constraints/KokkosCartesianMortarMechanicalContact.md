@@ -9,7 +9,7 @@ One object applies the traction $\boldsymbol{t} = \sum_j \psi_j \boldsymbol{\lam
 Cartesian Lagrange multiplier to every displacement component of the `[Mesh]` displacements, with a
 positive sign on the secondary face and a negative sign on the primary face. It leaves the rows of
 the multiplier to a constraint such as
-[KokkosComputeFrictionalForceCartesianLMMechanicalContact](KokkosComputeFrictionalForceCartesianLMMechanicalContact.md).
+[KokkosComputeCartesianLMMechanicalContact](KokkosComputeCartesianLMMechanicalContact.md).
 
 ## Example Input Syntax
 

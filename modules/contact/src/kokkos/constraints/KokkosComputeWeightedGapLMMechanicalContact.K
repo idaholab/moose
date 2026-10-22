@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosComputeWeightedGapLMMechanicalContact.h"
-#include "KokkosWeightedGapUserObject.h"
+#include "KokkosMortarContactKinematicsUserObject.h"
 
 #include "FEProblemBase.h"
 
@@ -41,7 +41,8 @@ KokkosComputeWeightedGapLMMechanicalContact::validParams()
   params.addClassDescription("Enforces the frictionless mortar contact conditions at the secondary "
                              "nodes with a nonlinear complementarity function of the weighted gap "
                              "and the normal Lagrange multiplier.");
-  params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
+  params.addRequiredParam<UserObjectName>("kinematics_uo",
+                                          "The mortar contact kinematics user object");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
   params.addParam<bool>(
@@ -67,8 +68,8 @@ KokkosComputeWeightedGapLMMechanicalContact::validParams()
 KokkosComputeWeightedGapLMMechanicalContact::KokkosComputeWeightedGapLMMechanicalContact(
     const InputParameters & parameters)
   : MortarConstraintBase(parameters),
-    _weighted_gap_uo(_fe_problem.getKokkosUserObject<KokkosWeightedGapUserObject>(
-        getParam<UserObjectName>("weighted_gap_uo"))),
+    _kinematics_uo(_fe_problem.getKokkosUserObject<KokkosMortarContactKinematicsUserObject>(
+        getParam<UserObjectName>("kinematics_uo"))),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c"))
 {
@@ -83,7 +84,7 @@ KokkosComputeWeightedGapLMMechanicalContact::KokkosComputeWeightedGapLMMechanica
 KokkosComputeWeightedGapLMMechanicalContact::KokkosComputeWeightedGapLMMechanicalContact(
     const KokkosComputeWeightedGapLMMechanicalContact & object)
   : MortarConstraintBase(object),
-    _weighted_gap_uo(object._weighted_gap_uo),
+    _kinematics_uo(object._kinematics_uo),
     _c(object._c),
     _normalize_c(object._normalize_c),
     _gap(object._gap),
@@ -98,24 +99,24 @@ void
 KokkosComputeWeightedGapLMMechanicalContact::dispatchMortar(
     const Moose::Kokkos::ThreadID n_secondary)
 {
-  _gap = _weighted_gap_uo.weightedGap();
-  _normalization = _weighted_gap_uo.normalization();
-  _owned_gap = _weighted_gap_uo.ownedWeightedGap();
-  _owned_normalization = _weighted_gap_uo.ownedNormalization();
+  _gap = _kinematics_uo.weightedGap();
+  _normalization = _kinematics_uo.normalization();
+  _owned_gap = _kinematics_uo.ownedWeightedGap();
+  _owned_normalization = _kinematics_uo.ownedNormalization();
 
-  if (_weighted_gap_uo.ownedRevision() != _owned_revision)
+  if (_kinematics_uo.ownedRevision() != _owned_revision)
   {
     const auto & mesh = _mesh.getMesh();
     const auto & solution =
         static_cast<const libMesh::PetscVector<Number> &>(*_sys.system().current_local_solution);
-    const auto & nodes = _weighted_gap_uo.ownedNodes();
+    const auto & nodes = _kinematics_uo.ownedNodes();
 
     _owned_dofs.create(nodes.size());
     for (const auto i : index_range(nodes))
       _owned_dofs[i] = solution.map_global_to_local_index(
           mesh.node_ref(nodes[i]).dof_number(_sys.number(), _var.number(), 0));
     _owned_dofs.copyToDevice();
-    _owned_revision = _weighted_gap_uo.ownedRevision();
+    _owned_revision = _kinematics_uo.ownedRevision();
   }
 
   if (n_secondary)

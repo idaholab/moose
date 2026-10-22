@@ -27,13 +27,13 @@
  * sums. The owner also designates one of those processes to assemble the nodal terms of the node.
  * The quantities are geometric: the constraints that read them decide the contact conditions.
  */
-class KokkosWeightedGapUserObject : public Moose::Kokkos::GeneralUserObject
+class KokkosMortarContactKinematicsUserObject : public Moose::Kokkos::GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  KokkosWeightedGapUserObject(const InputParameters & parameters);
-  KokkosWeightedGapUserObject(const KokkosWeightedGapUserObject & object);
+  KokkosMortarContactKinematicsUserObject(const InputParameters & parameters);
+  KokkosMortarContactKinematicsUserObject(const KokkosMortarContactKinematicsUserObject & object);
 
   virtual void initialize() override {}
   virtual void compute() override;
@@ -49,7 +49,7 @@ public:
    */
   KOKKOS_FUNCTION void operator()(GapLoop,
                                   const Moose::Kokkos::TeamMember<GapLoop> & team,
-                                  const KokkosWeightedGapUserObject &) const;
+                                  const KokkosMortarContactKinematicsUserObject &) const;
 
   /// The weighted gap of each nodal normal of the interface geometry, summed over all processes
   const Moose::Kokkos::Array<Real> & weightedGap() const { return _gap; }
@@ -126,9 +126,10 @@ private:
 };
 
 KOKKOS_FUNCTION inline void
-KokkosWeightedGapUserObject::operator()(GapLoop,
-                                        const Moose::Kokkos::TeamMember<GapLoop> & team,
-                                        const KokkosWeightedGapUserObject &) const
+KokkosMortarContactKinematicsUserObject::operator()(
+    GapLoop,
+    const Moose::Kokkos::TeamMember<GapLoop> & team,
+    const KokkosMortarContactKinematicsUserObject &) const
 {
   constexpr auto L = static_cast<unsigned int>(Moose::Kokkos::MortarSide::Lower);
   constexpr auto max_face_nodes = Moose::Kokkos::MortarInterfaceGeometry::max_face_nodes;

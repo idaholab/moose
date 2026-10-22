@@ -7,34 +7,35 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosWeightedGapUserObject.h"
+#include "KokkosMortarContactKinematicsUserObject.h"
 
 #include "AutomaticMortarGeneration.h"
 #include "FEProblemBase.h"
 
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("ContactApp", KokkosWeightedGapUserObject);
+registerMooseObject("ContactApp", KokkosMortarContactKinematicsUserObject);
 
 static char
-registerKokkosWeightedGapUserObject()
+registerKokkosMortarContactKinematicsUserObject()
 {
-  Moose::Kokkos::DispatcherRegistry::addTeamDispatcher<KokkosWeightedGapUserObject::GapLoop,
-                                                       KokkosWeightedGapUserObject>(
-      "KokkosWeightedGapUserObject");
+  Moose::Kokkos::DispatcherRegistry::addTeamDispatcher<
+      KokkosMortarContactKinematicsUserObject::GapLoop,
+      KokkosMortarContactKinematicsUserObject>("KokkosMortarContactKinematicsUserObject");
   return 0;
 }
 
-[[maybe_unused]] static char kokkos_dispatcher_weighted_gap_user_object =
-    registerKokkosWeightedGapUserObject();
+[[maybe_unused]] static char kokkos_dispatcher_mortar_contact_kinematics_user_object =
+    registerKokkosMortarContactKinematicsUserObject();
 
 InputParameters
-KokkosWeightedGapUserObject::validParams()
+KokkosMortarContactKinematicsUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += MortarConsumerInterface::validParams();
-  params.addClassDescription("Computes the weighted gap of each secondary node of a mortar "
-                             "contact interface on the current configuration.");
+  params.addClassDescription("Computes the weighted gap, and optionally the weighted slip, of each "
+                             "secondary node of a mortar contact interface on the current "
+                             "configuration.");
   params.addRequiredParam<VariableName>(
       "lm_variable", "The Lagrange multiplier whose basis weights the gap, the contact pressure.");
   params.addParam<bool>("compute_slip",
@@ -58,7 +59,8 @@ KokkosWeightedGapUserObject::validParams()
   return params;
 }
 
-KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const InputParameters & parameters)
+KokkosMortarContactKinematicsUserObject::KokkosMortarContactKinematicsUserObject(
+    const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _interface(std::make_shared<Moose::Kokkos::MortarConsumer>(this)),
     _interface_data(_fe_problem.getKokkosMortarInterfaceData(_interface->amg())),
@@ -86,7 +88,8 @@ KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const InputParameters &
   _interface_data.requireNodalNormals();
 }
 
-KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const KokkosWeightedGapUserObject & object)
+KokkosMortarContactKinematicsUserObject::KokkosMortarContactKinematicsUserObject(
+    const KokkosMortarContactKinematicsUserObject & object)
   : GeneralUserObject(object),
     _interface(object._interface),
     _interface_data(object._interface_data),
@@ -109,7 +112,7 @@ KokkosWeightedGapUserObject::KokkosWeightedGapUserObject(const KokkosWeightedGap
 }
 
 void
-KokkosWeightedGapUserObject::compute()
+KokkosMortarContactKinematicsUserObject::compute()
 {
   _geometry = _interface_data.update();
   _lm_fe = kokkosAssembly().getFETypeID(_lm_var.feType());
@@ -142,7 +145,7 @@ KokkosWeightedGapUserObject::compute()
 }
 
 void
-KokkosWeightedGapUserObject::communicate()
+KokkosMortarContactKinematicsUserObject::communicate()
 {
   const auto & nodes = _interface_data.normalNodes();
   const auto rank = processor_id();

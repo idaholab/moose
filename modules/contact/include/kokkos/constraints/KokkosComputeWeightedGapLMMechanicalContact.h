@@ -11,7 +11,7 @@
 
 #include "KokkosMortarConstraint.h"
 
-class KokkosWeightedGapUserObject;
+class KokkosMortarContactKinematicsUserObject;
 
 /**
  * Enforces the frictionless contact conditions g_j >= 0, lambda_j >= 0, g_j lambda_j = 0 at each
@@ -19,13 +19,14 @@ class KokkosWeightedGapUserObject;
  *
  *   R_j = min(lambda_j, c_j g_j),
  *
- * where g_j is the weighted gap of KokkosWeightedGapUserObject and c_j = c, or c divided by the
- * normalization of the weighted gap with normalize_c. On a node where the gap branch is chosen,
- * the row is assembled point by point over the mortar segments that reach the node, since the
- * weighted gap is a sum over those points, so each process adds the points of its local secondary
- * elements. Its Jacobian holds the derivatives of the gap vector with respect to the displacements
- * of both faces and of the nodal normal with respect to the positions of the secondary face nodes.
- * On a node where the multiplier branch is chosen, the owner of the node assembles lambda_j.
+ * where g_j is the weighted gap of KokkosMortarContactKinematicsUserObject and c_j = c, or c
+ * divided by the normalization of the weighted gap with normalize_c. On a node where the gap branch
+ * is chosen, the row is assembled point by point over the mortar segments that reach the node,
+ * since the weighted gap is a sum over those points, so each process adds the points of its local
+ * secondary elements. Its Jacobian holds the derivatives of the gap vector with respect to the
+ * displacements of both faces and of the nodal normal with respect to the positions of the
+ * secondary face nodes. On a node where the multiplier branch is chosen, the owner of the node
+ * assembles lambda_j.
  */
 class KokkosComputeWeightedGapLMMechanicalContact : public Moose::Kokkos::MortarConstraintBase
 {
@@ -66,8 +67,8 @@ private:
     return _normalize_c ? _c / normalization : _c;
   }
 
-  /// The weighted gap user object
-  const KokkosWeightedGapUserObject & _weighted_gap_uo;
+  /// The kinematics user object
+  const KokkosMortarContactKinematicsUserObject & _kinematics_uo;
 
   /// The coefficient that balances the gap against the contact pressure
   const Real _c;

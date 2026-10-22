@@ -12,7 +12,7 @@ node $j$ it enforces the frictionless contact conditions with the nonlinear comp
 R_j = \min(\lambda_j, c_j \tilde{g}_j),
 
 where $\tilde{g}_j$ is the weighted gap of
-[KokkosWeightedGapUserObject](KokkosWeightedGapUserObject.md) and $c_j$ is
+[KokkosMortarContactKinematicsUserObject](KokkosMortarContactKinematicsUserObject.md) and $c_j$ is
 [!param](/Constraints/KokkosComputeWeightedGapLMMechanicalContact/c), divided by the normalization of
 the weighted gap when [!param](/Constraints/KokkosComputeWeightedGapLMMechanicalContact/normalize_c)
 is true. The Jacobian includes the derivatives of the nodal normals with respect to the positions of

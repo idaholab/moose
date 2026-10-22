@@ -12,35 +12,35 @@
 #include "KokkosCartesianMortarConstraintBase.h"
 #include "KokkosDenseADReal.h"
 
-class KokkosWeightedGapUserObject;
+class KokkosMortarContactKinematicsUserObject;
 
 /**
- * Enforces frictional contact with a Cartesian Lagrange multiplier lambda_j at each secondary node
- * j. With the nodal normal n_j, the normal pressure lambda_n = lambda_j . n_j, the tangential
- * traction lambda_t = (I - n_j n_j^T) lambda_j, the weighted gap g_j = A_j . n_j of the weighted
- * gap vector A_j, and the tangential weighted slip s_t = (I - n_j n_j^T) B_j of the weighted
- * displacement increment B_j of KokkosWeightedGapUserObject, the residual is
+ * Enforces the normal and Coulomb frictional contact conditions with a Cartesian Lagrange
+ * multiplier lambda_j at each secondary node j. With the nodal normal n_j, the normal pressure
+ * lambda_n = lambda_j . n_j, the tangential traction lambda_t = (I - n_j n_j^T) lambda_j, the
+ * weighted gap g_j = A_j . n_j of the weighted gap vector A_j, and the tangential weighted slip
+ * s_t = (I - n_j n_j^T) B_j of the weighted displacement increment B_j of
+ * KokkosMortarContactKinematicsUserObject, the residual is
  *
  *   R_n = min(lambda_n, c g_j),
- *   R_t = max(r, |q_t|) lambda_t - r q_t,  q_t = lambda_t + c_t s_t,  r = mu max(0, lambda_n - c
- * g_j),
+ *   R_t = max(r, |q_t|) lambda_t - r q_t,
  *
- * the degree-two Hueber-Stadler-Wohlmuth friction residual, with R_t = lambda_t where lambda_n is
- * below epsilon. R_n is the row of the multiplier component closest to the normal and the
+ * with q_t = lambda_t + c_t s_t and r = mu max(0, lambda_n - c g_j). R_t is the degree-two
+ * Hueber-Stadler-Wohlmuth friction residual, with R_t = lambda_t where lambda_n is below epsilon.
+ * R_n is the row of the multiplier component closest to the normal and the
  * components of R_t in the tangent frame of the Cartesian axes fill the other rows. The process
  * designated for a node assembles its rows: the derivatives with respect to lambda_j and n_j on
  * the node and those with respect to A_j and B_j point by point over its mortar segments, which
  * every process holding segments of the node adds.
  */
-class KokkosComputeFrictionalForceCartesianLMMechanicalContact
-  : public KokkosCartesianMortarConstraintBase
+class KokkosComputeCartesianLMMechanicalContact : public KokkosCartesianMortarConstraintBase
 {
 public:
   static InputParameters validParams();
 
-  KokkosComputeFrictionalForceCartesianLMMechanicalContact(const InputParameters & parameters);
-  KokkosComputeFrictionalForceCartesianLMMechanicalContact(
-      const KokkosComputeFrictionalForceCartesianLMMechanicalContact & object);
+  KokkosComputeCartesianLMMechanicalContact(const InputParameters & parameters);
+  KokkosComputeCartesianLMMechanicalContact(
+      const KokkosComputeCartesianLMMechanicalContact & object);
 
   using MortarConstraintBase::operator();
 
@@ -55,15 +55,13 @@ public:
   {
   };
 
-  KOKKOS_FUNCTION void
-  operator()(NodeLoop,
-             const Moose::Kokkos::ThreadID normal,
-             const KokkosComputeFrictionalForceCartesianLMMechanicalContact &) const;
+  KOKKOS_FUNCTION void operator()(NodeLoop,
+                                  const Moose::Kokkos::ThreadID normal,
+                                  const KokkosComputeCartesianLMMechanicalContact &) const;
 
-  KOKKOS_FUNCTION void
-  operator()(MortarLoop,
-             const Moose::Kokkos::TeamMember<MortarLoop> & team,
-             const KokkosComputeFrictionalForceCartesianLMMechanicalContact &) const;
+  KOKKOS_FUNCTION void operator()(MortarLoop,
+                                  const Moose::Kokkos::TeamMember<MortarLoop> & team,
+                                  const KokkosComputeCartesianLMMechanicalContact &) const;
 
   /// Number of derivative slots of the nodal residual: lambda_j, n_j, A_j, and B_j
   static constexpr unsigned int slots = 12;
@@ -83,8 +81,8 @@ private:
    */
   KOKKOS_FUNCTION void nodalResidual(dof_id_type normal, ADReal (&residual)[3]) const;
 
-  /// The weighted gap user object
-  const KokkosWeightedGapUserObject & _weighted_gap_uo;
+  /// The kinematics user object
+  const KokkosMortarContactKinematicsUserObject & _kinematics_uo;
 
   /// The coefficients that balance the gap and the slip against the contact pressure
   const Real _c, _c_t;
@@ -95,7 +93,7 @@ private:
   /// The normal pressure below which the tangential traction is set to zero
   const Real _epsilon;
 
-  /// The nodal quantities of the weighted gap user object, indexed by nodal normal
+  /// The nodal quantities of the kinematics user object, indexed by nodal normal
   Moose::Kokkos::Array<Moose::Kokkos::Real3> _gap_vector, _slip;
   Moose::Kokkos::Array<Real> _normalization;
   Moose::Kokkos::Array<bool> _designated;
@@ -105,8 +103,8 @@ private:
 };
 
 KOKKOS_FUNCTION inline void
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::nodalResidual(const dof_id_type normal,
-                                                                        ADReal (&residual)[3]) const
+KokkosComputeCartesianLMMechanicalContact::nodalResidual(const dof_id_type normal,
+                                                         ADReal (&residual)[3]) const
 {
   using Moose::Kokkos::seededDenseADReal;
   constexpr auto L = static_cast<unsigned int>(MortarSide::Lower);
@@ -179,10 +177,10 @@ KokkosComputeFrictionalForceCartesianLMMechanicalContact::nodalResidual(const do
 }
 
 KOKKOS_FUNCTION inline void
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::operator()(
+KokkosComputeCartesianLMMechanicalContact::operator()(
     NodeLoop,
     const Moose::Kokkos::ThreadID normal,
-    const KokkosComputeFrictionalForceCartesianLMMechanicalContact &) const
+    const KokkosComputeCartesianLMMechanicalContact &) const
 {
   constexpr auto L = static_cast<unsigned int>(MortarSide::Lower);
 
@@ -218,10 +216,10 @@ KokkosComputeFrictionalForceCartesianLMMechanicalContact::operator()(
 }
 
 KOKKOS_FUNCTION inline void
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::operator()(
+KokkosComputeCartesianLMMechanicalContact::operator()(
     MortarLoop,
     const Moose::Kokkos::TeamMember<MortarLoop> & team,
-    const KokkosComputeFrictionalForceCartesianLMMechanicalContact &) const
+    const KokkosComputeCartesianLMMechanicalContact &) const
 {
   constexpr auto S = static_cast<unsigned int>(MortarSide::Secondary);
   constexpr auto P = static_cast<unsigned int>(MortarSide::Primary);

@@ -128,8 +128,8 @@ refine = 3
 []
 
 [UserObjects]
-  [weighted_gap_uo]
-    type = KokkosWeightedGapUserObject
+  [kinematics_uo]
+    type = KokkosMortarContactKinematicsUserObject
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -141,14 +141,14 @@ refine = 3
 
 [Constraints]
   [friction]
-    type = KokkosComputeFrictionalForceCartesianLMMechanicalContact
+    type = KokkosComputeCartesianLMMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
     variable = lm_x
     lm_y = lm_y
-    weighted_gap_uo = weighted_gap_uo
+    kinematics_uo = kinematics_uo
     c = 1e2
     c_t = 1e2
     mu = 0.4

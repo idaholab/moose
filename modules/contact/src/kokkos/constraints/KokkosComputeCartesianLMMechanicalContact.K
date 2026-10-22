@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosComputeFrictionalForceCartesianLMMechanicalContact.h"
-#include "KokkosWeightedGapUserObject.h"
+#include "KokkosComputeCartesianLMMechanicalContact.h"
+#include "KokkosMortarContactKinematicsUserObject.h"
 
 #include "FEProblemBase.h"
 
-registerMooseObject("ContactApp", KokkosComputeFrictionalForceCartesianLMMechanicalContact);
+registerMooseObject("ContactApp", KokkosComputeCartesianLMMechanicalContact);
 
 static char
-registerKokkosComputeFrictionalForceCartesianLMMechanicalContact()
+registerKokkosComputeCartesianLMMechanicalContact()
 {
-  using Object = KokkosComputeFrictionalForceCartesianLMMechanicalContact;
+  using Object = KokkosComputeCartesianLMMechanicalContact;
   using namespace Moose::Kokkos;
-  const std::string name = "KokkosComputeFrictionalForceCartesianLMMechanicalContact";
+  const std::string name = "KokkosComputeCartesianLMMechanicalContact";
 
   DispatcherRegistry::addDispatcher<Object::NodeLoop, Object>(name);
   DispatcherRegistry::addTeamDispatcher<Object::MortarLoop, Object>(name);
@@ -27,17 +27,17 @@ registerKokkosComputeFrictionalForceCartesianLMMechanicalContact()
   return 0;
 }
 
-[[maybe_unused]] static char kokkos_dispatcher_frictional_force_cartesian_lm_mechanical_contact =
-    registerKokkosComputeFrictionalForceCartesianLMMechanicalContact();
+[[maybe_unused]] static char kokkos_dispatcher_cartesian_lm_mechanical_contact =
+    registerKokkosComputeCartesianLMMechanicalContact();
 
 InputParameters
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::validParams()
+KokkosComputeCartesianLMMechanicalContact::validParams()
 {
   InputParameters params = KokkosCartesianMortarConstraintBase::validParams();
-  params.addClassDescription("Enforces frictional mortar contact at the secondary nodes with a "
-                             "Cartesian Lagrange multiplier and the Coulomb friction law.");
+  params.addClassDescription("Enforces the normal and Coulomb frictional mortar contact conditions "
+                             "at the secondary nodes with a Cartesian Lagrange multiplier.");
   params.addRequiredParam<UserObjectName>(
-      "weighted_gap_uo", "The weighted gap user object, which must compute the slip.");
+      "kinematics_uo", "The mortar contact kinematics user object, which must compute the slip.");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
   params.addParam<Real>("c_t", 1, "Parameter for balancing the size of the slip and the traction");
@@ -62,28 +62,28 @@ KokkosComputeFrictionalForceCartesianLMMechanicalContact::validParams()
   return params;
 }
 
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::
-    KokkosComputeFrictionalForceCartesianLMMechanicalContact(const InputParameters & parameters)
+KokkosComputeCartesianLMMechanicalContact::KokkosComputeCartesianLMMechanicalContact(
+    const InputParameters & parameters)
   : KokkosCartesianMortarConstraintBase(parameters),
-    _weighted_gap_uo(_fe_problem.getKokkosUserObject<KokkosWeightedGapUserObject>(
-        getParam<UserObjectName>("weighted_gap_uo"))),
+    _kinematics_uo(_fe_problem.getKokkosUserObject<KokkosMortarContactKinematicsUserObject>(
+        getParam<UserObjectName>("kinematics_uo"))),
     _c(getParam<Real>("c")),
     _c_t(getParam<Real>("c_t")),
     _normalize_c(getParam<bool>("normalize_c")),
     _mu(getParam<Real>("mu")),
     _epsilon(getParam<Real>("epsilon"))
 {
-  if (!_weighted_gap_uo.parameters().get<bool>("compute_slip"))
-    paramError("weighted_gap_uo", "The weighted gap user object must set compute_slip = true.");
+  if (!_kinematics_uo.parameters().get<bool>("compute_slip"))
+    paramError("kinematics_uo",
+               "The mortar contact kinematics user object must set compute_slip = true.");
 
   _interface_data.requireNodalNormals();
 }
 
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::
-    KokkosComputeFrictionalForceCartesianLMMechanicalContact(
-        const KokkosComputeFrictionalForceCartesianLMMechanicalContact & object)
+KokkosComputeCartesianLMMechanicalContact::KokkosComputeCartesianLMMechanicalContact(
+    const KokkosComputeCartesianLMMechanicalContact & object)
   : KokkosCartesianMortarConstraintBase(object),
-    _weighted_gap_uo(object._weighted_gap_uo),
+    _kinematics_uo(object._kinematics_uo),
     _c(object._c),
     _c_t(object._c_t),
     _normalize_c(object._normalize_c),
@@ -97,16 +97,15 @@ KokkosComputeFrictionalForceCartesianLMMechanicalContact::
 }
 
 void
-KokkosComputeFrictionalForceCartesianLMMechanicalContact::dispatchMortar(
-    const Moose::Kokkos::ThreadID n_secondary)
+KokkosComputeCartesianLMMechanicalContact::dispatchMortar(const Moose::Kokkos::ThreadID n_secondary)
 {
   if (!n_secondary)
     return;
 
-  _gap_vector = _weighted_gap_uo.weightedGapVector();
-  _slip = _weighted_gap_uo.weightedSlip();
-  _normalization = _weighted_gap_uo.normalization();
-  _designated = _weighted_gap_uo.designated();
+  _gap_vector = _kinematics_uo.weightedGapVector();
+  _slip = _kinematics_uo.weightedSlip();
+  _normalization = _kinematics_uo.normalization();
+  _designated = _kinematics_uo.designated();
 
   if (!_node_dispatcher)
     _node_dispatcher = Moose::Kokkos::DispatcherRegistry::build<NodeLoop>(this, type());

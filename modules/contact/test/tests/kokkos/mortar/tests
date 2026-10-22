@@ -1,6 +1,6 @@
 [Tests]
   issues = '#33860'
-  design = 'KokkosWeightedGapUserObject.md KokkosComputeWeightedGapLMMechanicalContact.md KokkosNormalMortarMechanicalContact.md'
+  design = 'KokkosMortarContactKinematicsUserObject.md KokkosComputeWeightedGapLMMechanicalContact.md KokkosNormalMortarMechanicalContact.md'
 
   [frictionless]
     requirement = 'The Kokkos system shall enforce frictionless mortar mechanical contact with a Lagrange multiplier at the secondary nodes on the current configuration'
@@ -32,7 +32,7 @@
   []
   [frictional]
     requirement = 'The Kokkos system shall enforce Coulomb frictional mortar mechanical contact with a Cartesian Lagrange multiplier on the current configuration, matching the solution of the non-Kokkos frictional Cartesian contact objects,'
-    design = 'KokkosComputeFrictionalForceCartesianLMMechanicalContact.md KokkosCartesianMortarMechanicalContact.md'
+    design = 'KokkosComputeCartesianLMMechanicalContact.md KokkosCartesianMortarMechanicalContact.md'
     [reference]
       type = Exodiff
       input = 'frictional_cartesian_reference.i'

@@ -1,11 +1,12 @@
-# KokkosComputeFrictionalForceCartesianLMMechanicalContact
+# KokkosComputeCartesianLMMechanicalContact
 
 !if! function=hasCapability('kokkos')
 
-!syntax description /Constraints/KokkosComputeFrictionalForceCartesianLMMechanicalContact
+!syntax description /Constraints/KokkosComputeCartesianLMMechanicalContact
 
 This is the Kokkos counterpart of
-[ComputeFrictionalForceCartesianLMMechanicalContact](ComputeFrictionalForceCartesianLMMechanicalContact.md).
+[ComputeFrictionalForceCartesianLMMechanicalContact](ComputeFrictionalForceCartesianLMMechanicalContact.md),
+which enforces the normal and frictional contact conditions together.
 The Lagrange multiplier is a Cartesian vector $\boldsymbol{\lambda}_j$ at each secondary node $j$,
 one first-order Lagrange variable per direction. With the nodal normal $\boldsymbol{n}_j$, it is
 split into the normal pressure $\lambda_n = \boldsymbol{\lambda}_j \cdot \boldsymbol{n}_j$ and the
@@ -24,9 +25,9 @@ r = \mu \max(0, \lambda_n - c \tilde{g}_j),
 
 where $\tilde{g}_j$ is the weighted gap and $\tilde{\boldsymbol{s}}_t$ the tangential part of the
 weighted relative displacement increment over the time step, both from
-[KokkosWeightedGapUserObject](KokkosWeightedGapUserObject.md) with
-[!param](/UserObjects/KokkosWeightedGapUserObject/compute_slip) set to true. Below a normal pressure
-of [!param](/Constraints/KokkosComputeFrictionalForceCartesianLMMechanicalContact/epsilon) the
+[KokkosMortarContactKinematicsUserObject](KokkosMortarContactKinematicsUserObject.md) with
+[!param](/UserObjects/KokkosMortarContactKinematicsUserObject/compute_slip) set to true. Below a normal pressure
+of [!param](/Constraints/KokkosComputeCartesianLMMechanicalContact/epsilon) the
 tangential traction is set to zero.
 
 The nodal residual is differentiated with forward-mode dual numbers. Its Jacobian includes the
@@ -39,11 +40,11 @@ the traction.
 
 !listing contact/test/tests/kokkos/mortar/frictional_cartesian.i block=Constraints
 
-!syntax parameters /Constraints/KokkosComputeFrictionalForceCartesianLMMechanicalContact
+!syntax parameters /Constraints/KokkosComputeCartesianLMMechanicalContact
 
-!syntax inputs /Constraints/KokkosComputeFrictionalForceCartesianLMMechanicalContact
+!syntax inputs /Constraints/KokkosComputeCartesianLMMechanicalContact
 
-!syntax children /Constraints/KokkosComputeFrictionalForceCartesianLMMechanicalContact
+!syntax children /Constraints/KokkosComputeCartesianLMMechanicalContact
 
 !if-end!
 

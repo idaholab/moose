@@ -168,8 +168,8 @@ offset = 0.00
 []
 
 [UserObjects]
-  [weighted_gap_uo]
-    type = KokkosWeightedGapUserObject
+  [kinematics_uo]
+    type = KokkosMortarContactKinematicsUserObject
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -186,7 +186,7 @@ offset = 0.00
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
     variable = mortar_normal_lm
-    weighted_gap_uo = weighted_gap_uo
+    kinematics_uo = kinematics_uo
     c = 1
   []
   [normal]
