@@ -47,7 +47,8 @@ public:
   };
   virtual bool getActiveSetState(const Node * const node) const
   {
-    return _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()))->second > 0;
+    const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+    return it != _dof_to_normal_pressure.end() && it->second > 0;
   }
 
   virtual bool isAugmentedLagrangianConverged() override;
