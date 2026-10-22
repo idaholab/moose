@@ -56,34 +56,60 @@
     recover = false
   []
   [MFEMHypreAMSInteriorNodes]
-    design = 'MFEMHypreAMS.md'
-    issues = '#33625'
-    type = CSVDiff
-    input = magnetostatic.i
-    # A mass term in the coil (block 1) leaves the curl-curl operator singular only in block 2, so
-    # the interior nodes are those strictly inside block 2, away from the coil interface and the
-    # essential boundary. Sample the gauge-invariant b_field rather than a_field. The line is
-    # skewed so that no sample point lies on an element face, where the tangential H(div)
-    # components are discontinuous.
-    cli_args = 'Kernels/mass/type=MFEMVectorFEMassKernel '
-               'Kernels/mass/variable=a_field '
-               'Kernels/mass/block=1 '
-               'Solvers/ams/singular=false '
-               'Solvers/ams/block=2 '
-               'Solvers/ams/projection_frequency=1 '
-               'VectorPostprocessors/line_sample/variable=b_field '
-               'VectorPostprocessors/line_sample/start_point="0.013 0.47 -0.43" '
-               'VectorPostprocessors/line_sample/end_point="0.027 0.53 0.43" '
-               'Outputs/CSV/file_base=OutputData/hypreams_interior_nodes '
-               'Outputs/inactive=ParaViewDataCollection'
-    csvdiff = 'OutputData/hypreams_interior_nodes_line_sample_0001.csv'
     requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
                   'preconditioner whose interior-node correction is restricted to the subdomains '
                   'in which the mass term is zero and whose compatible-subspace projection '
-                  'frequency is set.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    recover = false
+                  'frequency is set, when the zero-mass subdomain is bounded by'
+    design = 'MFEMHypreAMS.md'
+    issues = '#33625'
+    # A mass term in the coil (block 1) leaves the curl-curl operator singular only in block 2, so
+    # the interior nodes are those inside block 2, away from the coil interface and any essential
+    # boundary. Sample the gauge-invariant b_field rather than a_field. The line is skewed so that
+    # no sample point lies on an element face, where the tangential H(div) components are
+    # discontinuous.
+    [essential_boundary]
+      type = CSVDiff
+      input = magnetostatic.i
+      cli_args = 'Kernels/mass/type=MFEMVectorFEMassKernel '
+                 'Kernels/mass/variable=a_field '
+                 'Kernels/mass/block=1 '
+                 'Solvers/ams/singular=false '
+                 'Solvers/ams/block=2 '
+                 'Solvers/ams/projection_frequency=1 '
+                 'VectorPostprocessors/line_sample/variable=b_field '
+                 'VectorPostprocessors/line_sample/start_point="0.013 0.47 -0.43" '
+                 'VectorPostprocessors/line_sample/end_point="0.027 0.53 0.43" '
+                 'Outputs/CSV/file_base=OutputData/hypreams_interior_nodes '
+                 'Outputs/inactive=ParaViewDataCollection'
+      csvdiff = 'OutputData/hypreams_interior_nodes_line_sample_0001.csv'
+      detail = 'essential boundaries only, and'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+    []
+    # Sideset 3 bounds only block 2, so dropping its essential BC leaves a natural boundary on the
+    # zero-mass subdomain, whose nodes remain interior.
+    [natural_boundary]
+      type = CSVDiff
+      input = magnetostatic.i
+      cli_args = 'Kernels/mass/type=MFEMVectorFEMassKernel '
+                 'Kernels/mass/variable=a_field '
+                 'Kernels/mass/block=1 '
+                 'BCs/tangential_a_bdr/boundary="1 2" '
+                 'Solvers/ams/singular=false '
+                 'Solvers/ams/block=2 '
+                 'Solvers/ams/projection_frequency=1 '
+                 'VectorPostprocessors/line_sample/variable=b_field '
+                 'VectorPostprocessors/line_sample/start_point="0.013 0.47 -0.43" '
+                 'VectorPostprocessors/line_sample/end_point="0.027 0.53 0.43" '
+                 'Outputs/CSV/file_base=OutputData/hypreams_interior_nodes_natural_bc '
+                 'Outputs/inactive=ParaViewDataCollection'
+      csvdiff = 'OutputData/hypreams_interior_nodes_natural_bc_line_sample_0001.csv'
+      detail = 'both essential and natural boundaries.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+    []
   []
   [MFEMHypreAMSInteriorNodesErrors]
     requirement = 'The system shall report an error when a HypreAMS preconditioner'
@@ -100,10 +126,21 @@
     [block_with_lor]
       type = RunException
       input = magnetostatic.i
-      cli_args = 'Solvers/ams/block=2 Solvers/ams/low_order_refined=true'
+      cli_args = 'Solvers/ams/singular=false '
+                 'Solvers/ams/block=2 '
+                 'Solvers/ams/low_order_refined=true'
       expect_err = 'Restricting to zero-mass subdomains is not supported with LOR.'
       detail = 'restricts its interior-node correction to zero-mass subdomains when using a '
-               'low-order-refined discretization.'
+               'low-order-refined discretization, or'
+      capabilities = 'mfem'
+    []
+    [block_with_singular]
+      type = RunException
+      input = magnetostatic.i
+      cli_args = 'Solvers/ams/block=2'
+      expect_err = "A singular problem has a zero mass term everywhere; 'block' must not be set."
+      detail = 'restricts its interior-node correction to zero-mass subdomains while also '
+               'declaring the whole problem singular.'
       capabilities = 'mfem'
     []
   []
