@@ -257,4 +257,36 @@
       mesh_mode = REPLICATED
     []
   []
+  issues = '#33088'
+  [param_errors]
+    design = 'meshgenerators/AssemblyMeshGenerator.md'
+    requirement = 'The system shall throw an error for assembly definitions in --csg-only mode where '
+    [assembly_duct_pitch_larger_than_assembly_pitch]
+      detail = 'the assembly duct pitch exceeds the assembly pitch'
+      type = RunException
+      input = assembly_error.i
+      cli_args = '--csg-only'
+      mesh_mode = REPLICATED
+      expect_err = "Duct halfpitches of assembly must not exceed half the assembly pitch"
+    []
+    [assembly_lattice_missing_pin_reference]
+      detail = 'the assembly lattice references a pin that does not exist'
+      type = RunException
+      input = assembly_error.i
+      cli_args = 'Mesh/amg/duct_halfpitch="5"
+                  Mesh/amg/pattern="0 0; 0 1 0; 0 0"
+                  --csg-only'
+      expect_err = "Assembly lattice contains an index that exceeds the number of input pins"
+      mesh_mode = REPLICATED
+    []
+    [assembly_duct_halfpitch_overlaps_with_lattice]
+      detail = 'the assembly duct halfpitch overlaps with the pin lattice region'
+      type = RunException
+      input = assembly_error.i
+      cli_args = 'Mesh/amg/duct_halfpitch=0.1
+                  --csg-only'
+      expect_err = "Hexagonal diameter of assembly ducts and outer boundary must be larger than the number of assembly rows times the pin pitch"
+      mesh_mode = REPLICATED
+    []
+  []
 []

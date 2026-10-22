@@ -463,8 +463,9 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     }
     else
     {
-      tangential_lm = -tangential_trial_traction / tangential_trial_traction_norm *
-                          penalty_friction * normal_lm -
+      // Project the total tangential traction onto the Coulomb cone
+      tangential_lm = tangential_trial_traction / tangential_trial_traction_norm *
+                          abs(_friction_coefficient * normal_lm) -
                       old_tangential_traction;
     }
 

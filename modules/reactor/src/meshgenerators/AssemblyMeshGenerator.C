@@ -200,8 +200,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   {
     if ((_background_region_id.size() == 0) || _background_intervals == 0)
       mooseError("Hexagonal assemblies must have a background region defined");
-    if (assembly_pitch / std::sin(M_PI / 3.0) < _pattern.size() * base_pitch)
-      mooseError("Hexagonal diameter of assembly must be larger than the number of assembly rows "
+    auto smallest_duct = _duct_sizes.size() ? _duct_sizes.back() * 2. : assembly_pitch;
+    if (smallest_duct / std::sin(M_PI / 3.0) < _pattern.size() * base_pitch)
+      mooseError("Hexagonal diameter of assembly ducts and outer boundary must be larger than the "
+                 "number of assembly rows "
                  "times the pin pitch");
     // Check size of background region id matches number of axial levels
     if (_background_region_id.size() != n_axial_levels)
@@ -399,10 +401,26 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
   }
-  // If mesh generation should be bypassed, call getMeshes to resolve MeshGeneratorSystem
-  // dependencies
   else
+  {
+    // If mesh generation should be bypassed, call getMeshes to resolve MeshGeneratorSystem
+    // dependencies
     auto input_meshes = getMeshes("inputs");
+
+    // Since subgenerators are not called, error checking on input parameters needs to happen here
+    if (!checkUndefinedLatticeRefs(_pattern, _inputs.size()))
+      paramError("pattern",
+                 "Assembly lattice contains an index that exceeds the number of input pins");
+
+    if (_duct_sizes.size())
+    {
+      if (!checkInputVectorInAscendingOrder(_duct_sizes))
+        paramError("duct_halfpitch", "This parameter must be strictly ascending.");
+      if (_duct_sizes.back() > assembly_pitch / 2.)
+        paramError("duct_halfpitch",
+                   "Duct halfpitches of assembly must not exceed half the assembly pitch");
+    }
+  }
 
   // If we are in CSG only mode, store the CSGBase objects associated with input MG's
   if (_app.getMeshGeneratorSystem().getCSGOnly())

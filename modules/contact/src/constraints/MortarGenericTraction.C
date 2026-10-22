@@ -27,6 +27,9 @@ MortarGenericTraction::validParams()
   params.addRequiredParam<UserObjectName>("cohesive_zone_uo", "The cohesive zone user object.");
   params.set<bool>("interpolate_normals") = false;
   params.set<bool>("compute_lm_residual") = false;
+  // The cohesive zone user object runs on the displaced mesh and is only reinitialized for
+  // constraints that also run there.
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -36,6 +39,9 @@ MortarGenericTraction::MortarGenericTraction(const InputParameters & parameters)
     _cohesize_zone_uo(const_cast<CohesiveZoneModelBase &>(
         getUserObject<CohesiveZoneModelBase>("cohesive_zone_uo")))
 {
+  if (!getParam<bool>("use_displaced_mesh"))
+    paramError("use_displaced_mesh",
+               "'use_displaced_mesh' must be true for the MortarGenericTraction object");
 }
 
 ADReal

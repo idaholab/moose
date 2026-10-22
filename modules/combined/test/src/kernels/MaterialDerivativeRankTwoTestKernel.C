@@ -9,7 +9,7 @@
 
 #include "MaterialDerivativeRankTwoTestKernel.h"
 
-registerMooseObject("MooseApp", MaterialDerivativeRankTwoTestKernel);
+registerMooseObject("CombinedTestApp", MaterialDerivativeRankTwoTestKernel);
 
 InputParameters
 MaterialDerivativeRankTwoTestKernel::validParams()
