@@ -317,7 +317,7 @@ the cooling has spread into the rock matrix, controlled by the thermal-opening c
 [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature).  Only conductive heat transfer between the fracture and the
 matrix is included in this estimate.
 
-The 3D model (`matrix_app.i` with `fracture_only_aperture_changing.i` as its sub-application) was
+The 3D model (`matrix_app.i` with 20$\,$m elements, and `fracture_only_aperture_changing.i` with 9.2$\,$m elements as its sub-application) was
 run for 30 days in three cases: the base case (pressure opening only), and the same model with
 thermal opening at $D = 1.6\times 10^{-6}\,$K$^{-1}$ and $D = 1.6\times 10^{-5}\,$K$^{-1}$.
 
@@ -363,9 +363,13 @@ production well faster: after 30 days, the production temperature is about 10 $^
 in the base case. This trade-off between injectivity and early thermal breakthrough ("thermal
 short-circuiting") cannot be captured when the aperture depends on pressure alone.
 
-The thermal opening grows without limit in this model, because the Material does not include
-how the fracture closes under the confining stress. The results for the larger $D$ should
-therefore be read as an upper bound.
+The thermal opening grows without limit in this model, for two reasons.  Most importantly, the
+Vinsome-Westerveld method assumes that the matrix on each side of the fracture is semi-infinite,
+so the cooled region, and hence the magnitude of $I$, keeps growing (as $\sqrt{t}$ when the
+fracture-face temperature is constant) instead of being limited by the spacing between fractures.
+Even with confining stress included, this assumption would still allow the porosity to keep
+increasing.  In addition, the Material does not include how the fracture closes under the
+confining stress.  The results for the larger $D$ should therefore be read as an upper bound.
 
 ## Extensions and comments
 
