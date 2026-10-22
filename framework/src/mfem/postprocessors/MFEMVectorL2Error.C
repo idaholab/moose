@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMVectorL2Error);
 InputParameters
 MFEMVectorL2Error::validParams()
 {
-  InputParameters params = MFEMPostprocessor::validParams();
+  InputParameters params = MFEMNormPostprocessor::validParams();
   params.addClassDescription(
       "Computes L2 error $\\left\\Vert \\vec u_{ex} - \\vec u_{h}\\right\\Vert_{\\rm L2}$ for "
       "vector gridfunctions.");
@@ -29,7 +29,7 @@ MFEMVectorL2Error::validParams()
 }
 
 MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
-  : MFEMPostprocessor(parameters),
+  : MFEMNormPostprocessor(parameters),
     _vec_coeff(getVectorCoefficient("function")),
     _var(*getMFEMProblem().getGridFunction(getParam<VariableName>("variable")))
 {
@@ -38,7 +38,7 @@ MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
 PostprocessorValue
 MFEMVectorL2Error::getValue() const
 {
-  return _var.ComputeL2Error(_vec_coeff);
+  return _var.ComputeL2Error(_vec_coeff, getIntegrationRules());
 }
 
 #endif
