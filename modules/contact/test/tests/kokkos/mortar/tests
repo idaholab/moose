@@ -8,7 +8,7 @@
       type = Exodiff
       input = 'frictionless_weighted_gap.i'
       exodiff = 'frictionless_weighted_gap_out.e'
-      detail = 'matching the solution of the non-Kokkos weighted gap contact objects, and'
+      detail = 'in two dimensions, matching the solution of the non-Kokkos weighted gap contact objects,'
       capabilities = 'kokkos & mumps'
       compute_devices = 'cpu cuda xpu'
     []
@@ -16,9 +16,18 @@
       type = PetscJacobianTester
       input = 'frictionless_weighted_gap.i'
       cli_args = 'Executioner/end_time=20 Outputs/exodus=false'
-      detail = 'with an exact Jacobian, including the derivatives of the nodal normals.'
+      detail = 'with an exact Jacobian, including the derivatives of the nodal normals, and'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
+    []
+    [3d_dual]
+      type = Exodiff
+      input = 'frictionless_mortar_3d.i'
+      exodiff = 'frictionless_mortar_3d_out.e'
+      custom_cmp = 'frictionless_mortar_3d.cmp'
+      detail = 'in three dimensions with a dual Lagrange multiplier basis, matching the solution of the non-Kokkos objects.'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []
