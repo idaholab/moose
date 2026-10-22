@@ -78,7 +78,8 @@ template <bool is_ad>
 SecondDerivativeRegularizationTempl<is_ad>::SecondDerivativeRegularizationTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _regularization_type(this->template getParam<MooseEnum>("regularization").getEnum<SecondDerivativeRegularizationType>()),
+    _regularization_type(this->template getParam<MooseEnum>("regularization")
+                             .getEnum<SecondDerivativeRegularizationType>()),
     _coefficient(this->template getParam<Real>("coefficient")),
     _dim(this->_mesh.dimension()),
     _lulu_factor(this->isParamValid("lulu_factor") ? this->template getParam<Real>("lulu_factor")
