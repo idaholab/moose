@@ -124,6 +124,13 @@ protected:
   /// Use scaled or physical gap
   const bool _use_physical_gap;
 
+  /// The gap multiplied by the penalty factor to obtain the normal pressure: the physical gap
+  /// divided by the nodal area if _use_physical_gap, otherwise the weighted gap
+  ADReal penaltyGap(const std::pair<ADReal, Real> & wgap) const
+  {
+    return _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
+  }
+
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
 
