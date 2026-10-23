@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "MortarContactUtils.h"
 
 #include <unordered_map>
 
@@ -27,6 +28,7 @@ public:
   void computeResidual(Moose::MortarType mortar_type) override;
   using ADMortarConstraint::computeJacobian;
   void computeJacobian(Moose::MortarType mortar_type) override;
+  void initialSetup() override;
   void residualSetup() override;
   void jacobianSetup() override final;
   void post() override;
@@ -110,13 +112,16 @@ protected:
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
 
   /// A map from node to normal vector (2D)
-  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_normal_vector;
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_normal_vector;
 
   /// A map from node to normal vector (2D) - old
   std::unordered_map<const DofObject *, RealVectorValue> _dof_to_old_normal_vector;
 
   /// A map from node to tangent vector (2D for now)
-  std::unordered_map<const DofObject *, std::array<RealVectorValue, 2>> _dof_to_tangent_vectors;
+  std::unordered_map<const DofObject *, std::array<ADRealVectorValue, 2>> _dof_to_tangent_vectors;
+
+  /// Secondary nodal normals and tangents with their displacement derivatives
+  Moose::Mortar::Contact::ADNodalFrames _nodal_frames;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;
