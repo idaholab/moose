@@ -16,7 +16,7 @@ submodule, and the conda recipes build from the in-tree source.
 
 | Submodule path | Upstream | Versioner package | Notes |
 |---|---|---|---|
-| `petsc` | gitlab.com/petsc/petsc | `petsc` | Track release tags (`v3.25.4`), not `main`. The `version:` in `versioner.yaml` is the bare release number. |
+| `petsc` | gitlab.com/petsc/petsc | `petsc` | Currently tracks release tags (`v3.25.4`). The `version:` in `versioner.yaml` is the bare release number. |
 | `libmesh` | github.com/libMesh/libmesh | `libmesh` | Tracks upstream `devel`/master tip. Coordinate with libMesh PRs when a fix is needed. |
 | `framework/contrib/wasp` | code.ornl.gov/neams-workbench/wasp (mirrored at github.com/ornl-neams-workbench/wasp) | `wasp` | |
 | `framework/contrib/mfem` | github.com/mfem/mfem | `moose-dev` | apptainer only; no conda package. |
@@ -48,7 +48,7 @@ never `-dirty`.
 | Base MPI container images | `apptainer/mpi.def` — `FROM_IMAGES` (digest-pinned) | the human-readable tag list in the jinja comment directly above `FROM_IMAGES` | `idaholab/moose-containers` — the images must be published there first |
 | code-server, moose-language-support, python, FMI/Assimulo/PyFMI/PythonFMU, gperftools, go | `apptainer/moose-dev.def` — the `*_VERSION=` block near the top of `%post` | none | each project's releases page |
 | PETSc configure options | `scripts/configure_petsc.sh` | — | often changes with a PETSc bump (e.g. dropping a `--download-*-commit` pin once upstream catches up) |
-| Libraries PETSc downloads (OpenBLAS, MUMPS, hypre, SuperLU_DIST, SLEPc, ...) | the PETSc tag's `config/BuildSystem/config/packages/<Name>.py` default, unless `scripts/configure_petsc.sh` passes `--download-<pkg>-commit` | — | they move silently with the `petsc` submodule; compare the two tags' package files (troubleshooting.md, Section 5) |
+| Libraries PETSc downloads (OpenBLAS, MUMPS, hypre, SuperLU_DIST, SLEPc, ...) | the PETSc tag's `config/BuildSystem/config/packages/<Name>.py` default, unless `scripts/configure_petsc.sh` passes `--download-<pkg>-commit` | — | they move silently with the `petsc` submodule; compare the two tags' package files (troubleshooting.md, Section 3) |
 | libMesh / wasp / MFEM / conduit / NEML2 / libtorch build options | `scripts/configure_*.sh`, `scripts/update_and_rebuild_*.sh` | — | these are `influential:` files, so touching them forces a package bump |
 
 ## Which package a file belongs to
@@ -70,5 +70,5 @@ entry you did not intend is a signal the list is wrong.
 `conda/conda_build_config.yaml` defines the variant matrix via `zip_keys`: `mpi` ×
 `mpi_version` × `mpi_friendly_name`, plus the `python` list. The `[linux]`, `[osx]`,
 `[osx and arm64]` selectors decide per-platform availability — OpenMPI is linux and
-arm64-mac only. A pin that works on linux and breaks on Mac is the normal failure mode,
+arm64-mac only. A pin that works on linux and breaks on Mac is a normal failure mode,
 so read the selectors before assuming a pin is safe.
