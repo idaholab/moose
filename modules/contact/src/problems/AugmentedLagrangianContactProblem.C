@@ -89,15 +89,7 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
     if (!this->shouldSolve() || !T::solverSystemConverged(nl_sys_num))
       break;
 
-    if (_lagrangian_iteration_number >= _maximum_number_lagrangian_iterations)
-    {
-      this->_console << "Maximum Augmented Lagrangian contact iterations have been reached."
-                     << std::endl;
-      _augmented_lagrangian_failed = true;
-      break;
-    }
-
-    if (updateAugmentedLagrangianMultipliers())
+    if (updateAugmentedLagrangianMultipliers() || _augmented_lagrangian_failed)
       break;
 
     if (_lagrangian_iteration_number == 1)
@@ -184,6 +176,14 @@ AugmentedLagrangianContactProblemTempl<T>::updateAugmentedLagrangianMultipliers(
     this->_console << "Augmented Lagrangian contact constraint enforcement is satisfied."
                    << std::endl;
     return true;
+  }
+
+  if (_lagrangian_iteration_number >= _maximum_number_lagrangian_iterations)
+  {
+    this->_console << "Maximum Augmented Lagrangian contact iterations have been reached."
+                   << std::endl;
+    _augmented_lagrangian_failed = true;
+    return false;
   }
 
   _lagrangian_iteration_number++;
