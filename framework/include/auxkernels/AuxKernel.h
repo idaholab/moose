@@ -37,12 +37,6 @@ public:
   virtual void compute() override;
 
   /**
-   * Nodal or elemental kernel?
-   * @return true if this is a nodal kernel, otherwise false
-   */
-  bool isNodal() const { return _nodal; }
-
-  /**
    * @return whether this is a mortar auxiliary kernel
    */
   bool isMortar();
@@ -111,9 +105,6 @@ protected:
 
   /// This is a regular kernel so we cast to a regular MooseVariable, hides base _var
   MooseVariableField<ComputeValueType> & _var;
-
-  /// Flag indicating if the AuxKernel is nodal
-  const bool _nodal;
 
   /// Holds the solution at current quadrature points
   const typename OutputTools<ComputeValueType>::VariableValue & _u;

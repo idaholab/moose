@@ -12,18 +12,17 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
+#include "TheWarehouse.h"
 
 // Forward declarations
-template <typename T>
-class MooseObjectWarehouse;
+class AuxiliarySystem;
 
 template <typename AuxKernelType>
 class ComputeNodalAuxBcsThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
-                           const MooseObjectWarehouse<AuxKernelType> & storage);
+  ComputeNodalAuxBcsThread(FEProblemBase & fe_problem, const TheWarehouse::Query & query);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
@@ -38,6 +37,8 @@ protected:
 
   AuxiliarySystem & _aux_sys;
 
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernelType> & _storage;
+  /// Query for every kernel this loop may run, before restricting to a block or boundary. Only
+  /// used to list them in the debug execution output; the loop itself queries the cache below.
+  const TheWarehouse::Query _all_kernels_query;
+  TheWarehouse::QueryCache<AttribThread, AttribBoundaries> _query_boundary;
 };
