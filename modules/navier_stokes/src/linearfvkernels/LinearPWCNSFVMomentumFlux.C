@@ -176,7 +176,7 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
   // (Brinkman) layer on the porous side of an interface is of the order of the square root of the
   // permeability, much thinner than the cells next to a lumped interface. Clear fluid therefore
   // shears against the porous side as against a rough wall moving with the superficial velocity
-  // of the porous cell, and two porous sides transmit no shear.
+  // of the porous medium at the interface, and two porous sides transmit no shear.
   const bool elem_clear = isClearFluidSide(/*elem_side=*/true);
   const bool neighbor_clear = isClearFluidSide(/*elem_side=*/false);
   if (!elem_clear && !neighbor_clear)
@@ -196,7 +196,7 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 
   // The shear traction q_t = T (I - n n) (U_N,f - U_P,f) acts between the superficial face
   // velocities of the two sides. A clear side extrapolates its face velocity across its half-cell,
-  // whose resistance is d_s / mu_f; a porous side's face velocity is its cell value (we impose this, and thus there is no resistance on the porous side). Hence
+  // whose resistance is d_s / mu_f; a porous side adds no resistance. Hence
   //   1 / T = sum of d_s / mu_f over the clear sides,
   // which for two clear sides is the ordinary two-point transmissibility.
   Real distance = 0.0;
@@ -208,7 +208,6 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 
   // The explicit nonorthogonal corrections c_s = grad(U)_s . (n - d_Pf,s / d_s) of each clear
   // half-cell enter the same balance as the face values.
-  // No stress contribution on the porous side thus no correction.
   RealVectorValue elem_correction;
   RealVectorValue neighbor_correction;
   if (_dim > 1 && _use_nonorthogonal_correction)
@@ -235,17 +234,24 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
     neighbor_velocity(component) = velocity.getElemValue(neighbor_info, state);
   }
 
-  const auto face_velocity_difference =
-      (neighbor_velocity + neighbor_distance * neighbor_correction) -
-      (elem_velocity - elem_distance * elem_correction);
+  // A porous side's face velocity is the extrapolated face state that the baffle advection also
+  // uses, so the clear fluid shears against the porous velocity at the interface rather than at
+  // the cell center. It is exact for a linear velocity and so needs no nonorthogonal correction.
+  const auto elem_face_velocity =
+      elem_clear ? RealVectorValue(elem_velocity - elem_distance * elem_correction)
+                 : _porous_mass_flux_provider.baffleFaceVelocity(fi, /*elem_side=*/true);
+  const auto neighbor_face_velocity =
+      neighbor_clear ? RealVectorValue(neighbor_velocity + neighbor_distance * neighbor_correction)
+                     : _porous_mass_flux_provider.baffleFaceVelocity(fi, /*elem_side=*/false);
+  const auto face_velocity_difference = neighbor_face_velocity - elem_face_velocity;
   const auto shear_traction =
       transmissibility * (face_velocity_difference - (face_velocity_difference * normal) * normal);
 
   // There is no normal viscous stress on a baffle face: the pressure jump carries the normal
   // momentum balance, and a normal stress of the interstitial velocity would read the jump of
-  // mdot / (rho_f eps_s) as a gradient. The element row adds -q_t, the neighbor row +q_t. The part proportional to the
-  // kernel variable is implicit; everything else, including the coupling to the other velocity
-  // components, is lagged on the right-hand side.
+  // mdot / (rho_f eps_s) as a gradient. The element row adds -q_t, the neighbor row +q_t. The part
+  // proportional to the kernel variable is implicit; everything else, including the coupling to the
+  // other velocity components, is lagged on the right-hand side.
   const Real n_i = normal(_index);
   const Real coefficient = transmissibility * (1.0 - n_i * n_i);
 
@@ -266,8 +272,8 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
       data.elem_rhs +=
           face_viscosity * computeCellStressExplicitCorrection(elem_info, RealVectorValue());
     if (neighbor_clear)
-      data.neighbor_rhs -= face_viscosity *
-                           computeCellStressExplicitCorrection(neighbor_info, RealVectorValue());
+      data.neighbor_rhs -=
+          face_viscosity * computeCellStressExplicitCorrection(neighbor_info, RealVectorValue());
   }
 
   return data;
@@ -276,10 +282,9 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 bool
 LinearPWCNSFVMomentumFlux::isClearFluidSide(const bool elem_side) const
 {
-  return MooseUtils::absoluteFuzzyEqual(
-      _porous_mass_flux_provider.getFaceSidePorosity(
-          *_current_face_info, elem_side, determineState()),
-      1.0);
+  return MooseUtils::absoluteFuzzyEqual(_porous_mass_flux_provider.getFaceSidePorosity(
+                                            *_current_face_info, elem_side, determineState()),
+                                        1.0);
 }
 
 Real

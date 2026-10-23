@@ -496,17 +496,17 @@ RhieChowMassFlux::setupMeshInformation()
 {
   // We cache the cell volumes into a petsc vector for corrections here so we can use
   // the optimized petsc operations for the normalization
-  _cell_volumes = _pressure_system->currentSolution()->zero_clone();
+  _cell_fluid_volumes = _pressure_system->currentSolution()->zero_clone();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
     // We have to check this because the variable might not be defined on the given
     // block
     if (hasBlocks(elem_info->subdomain_id()))
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
-      _cell_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
+      _cell_fluid_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
     }
 
-  _cell_volumes->close();
+  _cell_fluid_volumes->close();
 
   _flow_face_info.clear();
   for (auto & fi : _fe_problem.mesh().faceInfo())
@@ -786,13 +786,23 @@ RhieChowMassFlux::velocityBoundaryValue(const unsigned int component,
   const auto face_type = fi.faceType(
       std::make_pair(_vel[component]->number(), _global_momentum_system_numbers[component]));
 
+  LinearFVBoundaryCondition * dirichlet_bc = nullptr;
   for (const auto bnd_id : fi.boundaryIDs())
     if (auto * const bc_pointer = _vel[component]->getBoundaryCondition(bnd_id))
       if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc_pointer))
       {
-        bc_pointer->setupFaceData(&fi, face_type);
-        return bc_pointer->computeBoundaryValue();
+        // Two Dirichlet conditions on one face would prescribe conflicting velocities.
+        mooseAssert(!dirichlet_bc,
+                    "Face " + std::to_string(fi.id()) +
+                        " carries more than one Dirichlet velocity boundary condition.");
+        dirichlet_bc = bc_pointer;
       }
+
+  if (dirichlet_bc)
+  {
+    dirichlet_bc->setupFaceData(&fi, face_type);
+    return dirichlet_bc->computeBoundaryValue();
+  }
 
   return MetaPhysicL::raw_value((*_vel[component])(boundary_face, Moose::currentState()));
 }
@@ -1078,7 +1088,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     // Unfortunately, the pressure forces are included in the momentum RHS
     // so we have to correct them back using the same coupling gradient that
     // assembled the momentum pressure source.
-    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i], *_cell_volumes);
+    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i],
+                                         *_cell_fluid_volumes);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -1153,14 +1164,14 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       // Correct HbyA
       Ainv_full->add(-1.0, Ainv);
       working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
-      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_fluid_volumes);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
       Ainv = *Ainv_full_old;
     }
 
-    Ainv.pointwise_mult(Ainv, *_cell_volumes);
+    Ainv.pointwise_mult(Ainv, *_cell_fluid_volumes);
 
     if (verbose)
     {

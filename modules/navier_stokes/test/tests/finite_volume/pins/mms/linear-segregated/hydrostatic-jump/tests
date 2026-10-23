@@ -44,9 +44,15 @@
   []
 
   [oblique-baffle]
-    requirement = 'The system shall keep a fluid at rest to within the discretization error of a '
-                  'parallelogram mesh across an oblique pressure baffle with a porosity jump and gravity '
-                  'normal to the baffle'
+    # The residual velocity is not round-off: the stratified density gives a quadratic pressure,
+    # whose curvature enters the Green-Gauss gradient through one-sided face values at the walls
+    # and the baffle, and the nonorthogonal correction turns that gradient error into flow. It
+    # vanishes for constant density or an orthogonal mesh, has the same size without the baffle,
+    # and converges at second order.
+    requirement = 'The system shall keep a stably stratified fluid at rest across an oblique '
+                  'pressure baffle with a porosity jump and gravity normal to the baffle, on a '
+                  'nonorthogonal parallelogram mesh, up to a spurious velocity of the size of the '
+                  'nonorthogonal discretization error without the baffle'
     type = CSVDiff
     input = hydrostatic-jump.i
     csvdiff = oblique-baffle.csv

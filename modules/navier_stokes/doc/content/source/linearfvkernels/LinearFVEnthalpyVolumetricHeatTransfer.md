@@ -1,7 +1,8 @@
 # LinearFVEnthalpyVolumetricHeatTransfer
 
 This object adds the volumetric fluid-solid heat transfer term for linear finite
-volume formulations where the solved variable is the specific enthalpy.
+volume formulations where the solved variable is the specific enthalpy.  This kernel
+*cannot* be used when the solved variable is the temperature.
 
 For the current-side equation it contributes
 

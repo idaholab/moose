@@ -40,11 +40,19 @@ PressureJumpModel::PressureJumpModel(const InputParameters & params)
 bool
 PressureJumpModel::appliesTo(const FaceInfo & fi) const
 {
+  bool applies = false;
   for (const auto boundary_id : fi.boundaryIDs())
     if (_boundary_ids.count(boundary_id))
-      return true;
+    {
+      // Per-boundary model data would be ambiguous on a face carrying more than one of this
+      // model's boundaries.
+      mooseAssert(!applies,
+                  "Pressure-jump face " + std::to_string(fi.id()) +
+                      " lies on more than one boundary of this model.");
+      applies = true;
+    }
 
-  return false;
+  return applies;
 }
 
 bool

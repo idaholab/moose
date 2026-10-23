@@ -2,7 +2,11 @@ import mms
 import unittest
 from mooseutils import fuzzyAbsoluteEqual
 
-BAFFLE = ["baffle=1", "UserObjects/rc/pressure_jump_models=pressure_jump", "form_loss=0.5"]
+BAFFLE = [
+    "baffle=1",
+    "UserObjects/rc/pressure_jump_models=pressure_jump",
+    "form_loss=0.5",
+]
 INVISCID = ["mu0=0", "reaction=10"]
 L2 = ["L2u", "L2v", "L2p"]
 MAX = ["max_u_error", "max_v_error", "max_p_error"]

@@ -27,21 +27,35 @@ factor to each cell row.
 Across a baffle, mass conservation keeps $\rho\mathbf{U}\cdot\mathbf{n}$ continuous, and a
 stream crossing the baffle carries its interstitial tangential velocity with it, so the
 superficial velocity jumps wherever density or porosity does. Every operator that would otherwise
-interpolate velocity across the baffle uses one-sided states instead:
+interpolate velocity across the baffle uses one-sided states instead.
 
-- [FVVelocityJumpGreenGaussGradient.md] computes the velocity gradients from face states
-  extrapolated within each side, so the gradient does not read the jump as a slope. It is required
-  as the default gradient method of every velocity variable.
-- [LinearPWCNSFVMomentumFlux.md] advects the upstream interstitial tangential velocity and each
-  side's extrapolated normal velocity. The baffle transmits only a shear traction, chosen by the
-  kind of fluid on each side: two-point between clear sides (unit porosity), from a clear side
-  against the porous cell velocity, and none between porous sides.
-- [FVReconstructedPressureGradient.md] recovers each side's face normal velocity from the shared
-  mass flux and that side's density.
+Face values, which would otherwise be interpolated between the two cells:
+
+- Momentum advection in [LinearPWCNSFVMomentumFlux.md] uses the same tangential velocity on both
+  sides, the interstitial value of the upstream side, while each side keeps its own normal
+  velocity.
 - The Rhie-Chow face flux combines the one-sided fluxes $\rho_s(\mathbf{H}/\mathbf{A})_s\cdot\mathbf{n}$
   with the half-cell conductance weights of the pressure operator
   ([LinearFVPressureCorrectionDiffusionJump.md]) rather than interpolating
   $\mathbf{H}/\mathbf{A}$, which also carries the body forces, to the face.
+
+Gradients and stresses, which would otherwise read the jump as a slope:
+
+- [FVVelocityJumpGreenGaussGradient.md] computes the velocity gradients from face states
+  extrapolated within each side. It is required as the default gradient method of every velocity
+  variable.
+- The viscous stress in [LinearPWCNSFVMomentumFlux.md] is reduced to a tangential shear, set by the
+  porosity of the two sides (see
+  [the baffle stress treatment](LinearPWCNSFVMomentumFlux.md#baffle-stress)):
+
+  - Clear fluid on both sides (porosity of one): ordinary viscous shear between the two cells.
+  - Clear fluid against a porous medium: the clear fluid shears against the porous side as
+    against a rough wall moving with the superficial velocity of the porous medium at the
+    interface, extrapolated from the porous cell.
+  - Porous media on both sides: no shear, because drag in the beds dominates it.
+- [FVReconstructedPressureGradient.md] reconstructs the cell pressure gradient from each side's
+  face normal velocity, recovered from the shared mass flux and that side's density, and uses the
+  owning cell's velocity gradient at a baffle face instead of a face average.
 
 With these, a velocity field that is linear on each side of a baffle, together with its
 piecewise-constant pressure, is reproduced to round-off on uniform meshes, and a fluid at rest

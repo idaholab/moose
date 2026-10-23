@@ -42,10 +42,10 @@
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = viscous-porosity-jump.csv
-      # Clear left side: continuous viscosity requires equal slopes, and with d = 1 / (2 nx) = 1 / 16
-      # the slope 0.8 satisfies 0.8 * d = (1 - eps_right) * 0.1.
-      cli_args = 'mu=0.01 tangential_slope_left=0.8 tangential_slope_right=0.8 '
-                 'eps_right=0.5 Outputs/file_base=viscous-porosity-jump'
+      # Clear left side: continuous viscosity requires equal slopes, and the porosity jump requires
+      # a zero interface tangential velocity so the superficial tangential velocity is continuous.
+      cli_args = 'mu=0.01 tangential_velocity=0 tangential_slope_left=0.8 '
+                 'tangential_slope_right=0.8 eps_right=0.5 Outputs/file_base=viscous-porosity-jump'
       abs_zero = 1e-10
       detail = 'with viscosity and a clear side shearing against a porous side,'
       recover = false # we don't support recovery for SIMPLE yet
@@ -67,11 +67,9 @@
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = skewed.csv
-      # Clear left side: the projected half-cell distance is d = 1 / (2 nx sqrt(1 + skew^2)), and
-      # the equal slopes satisfy the clear-porous balance of the viscous-porosity-jump case.
-      cli_args = 'skew=0.25 nonorthogonal=true mu=0.01 '
-                 'tangential_slope_left=0.8246211251235321 '
-                 'tangential_slope_right=0.8246211251235321 eps_right=0.5 '
+      # Clear left side with the clear-porous balance of the viscous-porosity-jump case.
+      cli_args = 'skew=0.25 nonorthogonal=true mu=0.01 tangential_velocity=0 '
+                 'tangential_slope_left=0.8 tangential_slope_right=0.8 eps_right=0.5 '
                  'Outputs/file_base=skewed'
       abs_zero = 1e-10
       detail = 'on a uniform parallelogram mesh with nonorthogonal correction and a porosity '

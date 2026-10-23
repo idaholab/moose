@@ -12,8 +12,8 @@
 #include "LinearFVMomentumPressure.h"
 
 /**
- * Adds the porosity-weighted pressure gradient to a momentum equation written in superficial
- * velocity.
+ * Adds the porosity-weighted pressure gradient to the right hand side of the
+ *  momentum equation written for the superficial velocity.
  */
 class LinearPWCNSFVMomentumPressure : public LinearFVMomentumPressure
 {

@@ -104,8 +104,12 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
   for (const auto candidate_id : fi.boundaryIDs())
     if (boundaryIDs().count(candidate_id))
     {
+      // The form loss and reference side are set per boundary, so they would be ambiguous on a
+      // face carrying more than one of this model's boundaries.
+      mooseAssert(boundary_id == Moose::INVALID_BOUNDARY_ID,
+                  "Pressure-jump face " + std::to_string(fi.id()) +
+                      " lies on more than one boundary of this model.");
       boundary_id = candidate_id;
-      break;
     }
 
   const Real form_loss = libmesh_map_find(_form_loss_by_id, boundary_id);
