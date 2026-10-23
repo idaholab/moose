@@ -45,4 +45,19 @@
     # MFEM problems do not currently support recovery.
     recover = false
   []
+  [SteadyComposerTransient]
+    type = CSVDiff
+    input = steady_composer_transient.i
+    csvdiff = 'OutputData/SteadyComposerTransient.csv'
+    requirement = 'The system shall solve a steady MFEM equation system again at every step of a '
+                  'transient executioner, with time-dependent coefficients evaluated at the end of '
+                  'the step.'
+    design = 'MFEMProblemComposer.md MFEMTransient.md'
+    issues = '#34152'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    # MFEMTransient does not retry time steps, so it cannot be tested with --test-restep
+    restep = false
+  []
 []

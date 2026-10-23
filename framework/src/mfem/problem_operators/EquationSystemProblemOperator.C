@@ -33,6 +33,11 @@ EquationSystemProblemOperator::Solve()
 {
   auto * const es = GetEquationSystem();
 
+  // Solve at the problem time: the end of the step under a transient executioner, or the time of a
+  // steady one. Another operator solved earlier in the same step may have left the coefficients
+  // at a different time.
+  _problem_data.coefficients.setTime(_problem.time());
+
   {
     TIME_SECTION("EquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
     FormEquationSystemOperator();
