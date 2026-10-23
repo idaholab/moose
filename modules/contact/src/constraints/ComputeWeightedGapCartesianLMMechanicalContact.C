@@ -64,6 +64,9 @@ ComputeWeightedGapCartesianLMMechanicalContact::validParams()
       "lm_y", "Mechanical contact Lagrange multiplier along the y Cartesian axis.");
   params.addCoupledVar("lm_z",
                        "Mechanical contact Lagrange multiplier along the z Cartesian axis.");
+  // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
+  // needs the secondary face point-neighbor ghosted and coupled.
+  params.set<bool>("ghost_point_neighbors") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addParam<bool>(
       "normalize_c",
@@ -91,7 +94,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
-    _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
+    _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
+    _nodal_frames(std::array<const MooseVariable *, 3>{{_disp_x_var, _disp_y_var, _disp_z_var}})
 {
   _lm_vars.push_back(getVar("lm_x", 0));
   _lm_vars.push_back(getVar("lm_y", 0));
@@ -109,10 +113,24 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
 
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
+
   for (const auto i : index_range(_lm_vars))
     if (!_lm_vars[i]->isNodal())
       if (_lm_vars[i]->feType().order != static_cast<Order>(0))
         mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
+}
+
+void
+ComputeWeightedGapCartesianLMMechanicalContact::initialSetup()
+{
+  ADMortarConstraint::initialSetup();
+
+  Moose::Mortar::Contact::checkNodalNormalDisplacements(
+      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 
 ADReal
@@ -178,7 +196,11 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties()
                               ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
-  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal *
+                                     _nodal_frames.normal(amg(),
+                                                          _lower_secondary_elem->node_ref(_i),
+                                                          _normals[_i],
+                                                          Moose::doDerivatives(_subproblem, _sys));
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
@@ -189,8 +211,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::timestepSetup()
 {
   _dof_to_old_normal_vector.clear();
 
-  for (auto & map_pr : _dof_to_normal_vector)
-    _dof_to_old_normal_vector.emplace(map_pr);
+  for (const auto & [dof, normal] : _dof_to_normal_vector)
+    _dof_to_old_normal_vector.emplace(dof, MetaPhysicL::raw_value(normal));
 }
 
 void
@@ -199,6 +221,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::residualSetup()
   _dof_to_weighted_gap.clear();
   _dof_to_normal_vector.clear();
   _dof_to_tangent_vectors.clear();
+  _nodal_frames.clear();
 }
 
 void
@@ -231,10 +254,11 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeResidual(const Moose::Mor
                                   ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                                   : cast_ptr<const DofObject *>(_lower_secondary_elem);
       // We do not interpolate geometry, so just match the local node _i with the corresponding _i
-      _dof_to_normal_vector[dof] = _normals[_i];
-      const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
-      _dof_to_tangent_vectors[dof][0] = nodal_tangents[0][_i];
-      _dof_to_tangent_vectors[dof][1] = nodal_tangents[1][_i];
+      const auto & node = _lower_secondary_elem->node_ref(_i);
+      const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
+      _dof_to_normal_vector[dof] = _nodal_frames.normal(amg(), node, _normals[_i], do_derivatives);
+      _dof_to_tangent_vectors[dof] =
+          _nodal_frames.tangents(amg(), node, _normals[_i], do_derivatives);
     }
   }
 }
@@ -344,8 +368,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
   // Intially, use the current normal vector
   if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
   {
-    ny = _dof_to_normal_vector[dof](1);
-    nz = _dof_to_normal_vector[dof](2);
+    ny = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](1));
+    nz = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](2));
   }
   else
   {
