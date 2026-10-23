@@ -25,6 +25,7 @@ public:
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 
+  virtual void timestepSetup() override;
   virtual void meshChanged() override;
   virtual void initialize() override;
   virtual void execute() override;
@@ -248,6 +249,38 @@ private:
 
   /// Data structure to hold element ID ranges when using Distributed Mesh (populated on rank 0 only)
   std::vector<std::pair<dof_id_type, dof_id_type>> _all_ranges;
+
+  /// Save the state that a timestep_end execution changes, so a rejected timestep can be undone
+  void backupStepState();
+
+  /// Restore the state saved by backupStepState() and the remapped solution history
+  void restoreStepState();
+
+  /**
+   * The timestep at which the step state was last saved. The state is saved on the first
+   * timestep_end execution of each timestep, so finding it already saved for the current timestep
+   * in timestepSetup() means the previous attempt at this timestep was rejected.
+   */
+  int _backup_t_step;
+
+  ///@{ Tracker state and field maps at the start of the current timestep
+  std::vector<FeatureData> _feature_sets_backup;
+  bool _first_time_backup;
+  unsigned int _max_curr_grain_id_backup;
+  unsigned int _reserve_grain_first_index_backup;
+  unsigned int _feature_count_backup;
+  std::vector<std::size_t> _feature_id_to_local_index_backup;
+  std::vector<std::map<dof_id_type, int>> _feature_maps_backup;
+  std::vector<std::map<dof_id_type, int>> _var_index_maps_backup;
+  std::vector<std::map<dof_id_type, int>> _halo_ids_backup;
+  std::map<dof_id_type, int> _ghosted_entity_ids_backup;
+  std::map<dof_id_type, std::vector<unsigned int>> _entity_var_to_features_backup;
+  ///@}
+
+  ///@{ Old and older solutions at the start of the current timestep, saved before the first remap
+  std::unique_ptr<NumericVector<Number>> _solution_old_backup;
+  std::unique_ptr<NumericVector<Number>> _solution_older_backup;
+  ///@}
 };
 
 /**
