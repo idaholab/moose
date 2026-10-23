@@ -65,18 +65,18 @@
 []
 
 [NEML2]
+  eager = true
   input = 'elasticity.i'
-  verbose = true
   device = 'cpu'
   [forward]
     model = 'forward_elasticity_model'
-    parameter_types = 'MATERIAL'
+    parameter_types = 'FUNCTION'
     parameters = 'E'
     parameter_derivatives = 'forward_stress E'
   []
   [adjoint]
     model = 'adjoint_elasticity_model'
-    parameter_types = 'MATERIAL'
+    parameter_types = 'FUNCTION'
     parameters = 'E'
     derivatives = 'adjoint_stress adjoint_strain'
   []

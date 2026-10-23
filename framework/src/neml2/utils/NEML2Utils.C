@@ -8,11 +8,48 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Utils.h"
-#include "SubProblem.h"
+
+#ifdef NEML2_ENABLED
+#include "ConsoleStream.h"
+#include "neml2/csrc/aoti/log.h"
+#include <torch/script.h> // torch::jit::Module (TorchScript serialization)
+#include <cctype>
+#endif
 
 namespace NEML2Utils
 {
 #ifdef NEML2_ENABLED
+
+void
+dumpInputsToTorchScript(const std::map<std::string, at::Tensor> & inputs,
+                        const std::string & filename)
+{
+  // Stash each defined input tensor (moved to host) as a buffer on a TorchScript module, then save.
+  // Buffer names must be valid identifiers, so sanitize '~'/'/' etc. to '_'.
+  torch::jit::Module mod("neml2_failed_inputs");
+  for (const auto & [name, tensor] : inputs)
+  {
+    if (!tensor.defined())
+      continue;
+    std::string key = name;
+    for (auto & c : key)
+      if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_')
+        c = '_';
+    mod.register_buffer(key, tensor.detach().to(at::kCPU).contiguous());
+  }
+  mod.save(filename);
+}
+
+void
+redirectLogsToConsole(const ConsoleStream & console)
+{
+  // Capture a copy of the ConsoleStream (it binds the app-owned OutputWarehouse by reference, so
+  // the copy stays valid for the app's lifetime) and hand every NEML2 log line to it. The line
+  // already carries the [neml2:<channel>] prefix; NEML2's verbosity levels are left at their
+  // defaults.
+  neml2::aoti::log::set_sink([console](neml2::aoti::log::Level, const std::string & line)
+                             { console << line << std::endl; });
+}
 
 std::string
 stringify(MOOSEIOType type)
@@ -33,39 +70,10 @@ stringify(MOOSEIOType type)
       mooseError("Unknown MOOSE IO type.");
   }
 }
-
-std::shared_ptr<neml2::Model>
-getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype)
-{
-  const auto prev_dtype = neml2::get_default_dtype();
-  neml2::set_default_dtype(dtype);
-  auto model = factory.get_model(name);
-  model->to(dtype);
-  neml2::set_default_dtype(prev_dtype);
-  return model;
-}
 #endif // NEML2_ENABLED
 
 static const std::string missing_neml2 = "The `NEML2` library is required but not enabled. Refer "
                                          "to the documentation for guidance on how to enable it.";
-
-bool
-shouldCompute(const SubProblem & problem)
-{
-  // NEML2 computes residual and Jacobian together at EXEC_LINEAR
-  // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
-  // automatic scaling.
-  if (problem.computingScalingJacobian())
-    return true;
-
-  if (problem.currentlyComputingResidualAndJacobian())
-    return true;
-
-  if (problem.currentlyComputingJacobian())
-    return false;
-
-  return true;
-}
 
 std::string
 docstring(const std::string & desc)
