@@ -41,7 +41,8 @@ ADArrayIntegratedBC::ADArrayIntegratedBC(const InputParameters & parameters)
     _u(_var.adSlnFace()),
     _grad_u(_var.adGradSlnFace()),
     _count(_var.count()),
-    _work_vector(_count)
+    _work_vector(_count),
+    _raw_work_vector(_count)
 {
   _subproblem.haveADObjects(true);
   addMooseVariableDependency(mooseVariable());
@@ -56,19 +57,17 @@ ADArrayIntegratedBC::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
-  // computeQpResidual() reads the current quadrature point and test function from _qp and _i
-  for (const auto qp : make_range(_qrule->n_points()))
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _qp = qp;
     initQpResidual();
-    for (const auto i : index_range(_test))
+    for (_i = 0; _i < _test.size(); _i++)
     {
-      _i = i;
       _work_vector.setZero();
       computeQpResidual(_work_vector);
-      auto raw_work_vector = MetaPhysicL::raw_value(_work_vector);
-      raw_work_vector *= _JxW[_qp] * _coord[_qp];
-      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), raw_work_vector);
+      for (const auto c : make_range(_count))
+        _raw_work_vector(c) = MetaPhysicL::raw_value(_work_vector(c));
+      _raw_work_vector *= _JxW[_qp] * _coord[_qp];
+      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), _raw_work_vector);
     }
   }
 
@@ -83,17 +82,15 @@ ADArrayIntegratedBC::computeResidualsForJacobian()
     residual = 0;
 
   precalculateJacobian();
-  for (const auto qp : make_range(_qrule->n_points()))
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _qp = qp;
     // on a displaced mesh the surface measure depends on the displacements, so its derivatives
     // enter the Jacobian
     const ADReal jxw_c = _use_displaced_mesh ? ADReal(_ad_JxW[_qp] * _ad_coord[_qp])
                                              : ADReal(_JxW[_qp] * _coord[_qp]);
     initQpResidual();
-    for (const auto i : index_range(_test))
+    for (_i = 0; _i < _test.size(); _i++)
     {
-      _i = i;
       _work_vector.setZero();
       computeQpResidual(_work_vector);
       _work_vector *= jxw_c;

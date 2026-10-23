@@ -92,6 +92,8 @@ that request requires.
   make_range(n))`) instead of raw index loops. Use `index_range(container)`
   when iterating over the indices of a container. But don't use `make_range`
   in Kokkos functions or any other device functons.
+  Exception: loops whose index is a data member, such as `_qp` and `_i` in
+  residual objects, keep the classic `for (_qp = 0; ...)` form.
 - Use `libmesh_map_find` for map lookups instead of `.at()`.
 - MOOSE requires C++17, so modern C++ constructs up through that standard are
   encouraged where they increase code readability. Along those lines, when a member

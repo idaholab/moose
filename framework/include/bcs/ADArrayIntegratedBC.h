@@ -42,7 +42,7 @@ protected:
   virtual void computeQpResidual(ADRealEigenVector & residual) = 0;
 
   /**
-   * Put necessary evaluations depending on qp but independent on test functions here
+   * Put necessary evaluations depending on qp but independent of test functions here
    */
   virtual void initQpResidual() {}
 
@@ -82,6 +82,9 @@ private:
 
   /// Work vector for the residual at a quadrature point
   ADRealEigenVector _work_vector;
+
+  /// Values of _work_vector without derivatives, for the residual computation
+  RealEigenVector _raw_work_vector;
 
   /// Local AD residuals for the Jacobian computation
   std::vector<ADReal> _local_ad_re;
