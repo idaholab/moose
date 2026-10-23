@@ -23,7 +23,7 @@ mainMesh(const InputParameters & parameters)
 {
   auto & problem =
       cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
-  return problem.mesh().getMFEMParMesh();
+  return problem.mfemParMesh();
 }
 }
 

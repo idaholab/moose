@@ -19,6 +19,13 @@ As MOOSE checks for the existence of a libMesh MOOSE mesh at various points duri
 is not the simulation mesh; all MFEM objects should access the `mfem::ParMesh` via the
 `getMFEMParMesh()` accessor as needed.
 
+It is not necessary to use an `MFEMMesh` with an
+`MFEMProblem`. `MFEMProblem` is also capable of creating an
+`mfem::ParMesh` from a `libMesh`-based mesh, although not all element
+types are currently supported. For more information on this conversion
+process and its limitations, see the [documentation on
+`buildMFEMMesh`](source/mfem/utils/BuildMFEMMesh.md).
+
 !if-end!
 
 !else

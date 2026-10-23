@@ -317,6 +317,9 @@ conf_vars.mk
 modules/reactor/test/tests/functions/multi_control_drum_function/positions_meta.data
 modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/positions_meta.data
 
+# MFEM meshes written and compared by the libMesh to MFEM mesh conversion tests
+test/tests/mfem/mesh/libmesh_mfem_conversion/*.mesh
+
 # Ignore share directory
 share/
 
