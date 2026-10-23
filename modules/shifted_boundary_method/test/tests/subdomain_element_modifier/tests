@@ -69,7 +69,7 @@
       type = RunException
       input = 'grain_marking.i'
       cli_args = 'Mesh/boundary_mesh/file=../distance_calc/cube_surface.msh'
-      expect_err = 'does not match the surface mesh dimension'
+      expect_err = 'does not match the boundary mesh dimension'
       mesh_mode = REPLICATED
       recover = false
       detail = 'if the embedding mesh dimension does not match the surface mesh dimension plus one.'

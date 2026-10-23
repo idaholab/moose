@@ -110,67 +110,46 @@ InterceptedElementModifier::computeSubdomainID()
   if (!elem)
     mooseError("InterceptedElementModifier: _current_elem is null!");
 
-  const auto classify_element = [this](const bool all_nodes_active,
-                                       const bool all_nodes_inactive,
-                                       const Real ratio_active) -> SubdomainID
+  const auto classify_from_occupancy =
+      [this](const SBMUtils::ElementDomainOccupancy & occupancy) -> SubdomainID
   {
-    const SBMUtils::ElementActivity activity{all_nodes_active, all_nodes_inactive, ratio_active};
-    const SBMUtils::ClassificationSubdomains subdomains{
-        _subdomain_id_inside, _subdomain_id_outside, _subdomain_id_intercepted};
-    return SBMUtils::classifyPartialElement(activity, subdomains, _mark_intercepted, _lambda);
+    const SBMUtils::ClassificationSubdomains subdomain_id_settings{
+        _subdomain_id_inside, _subdomain_id_outside, _intercepted_subdomain_policy.subdomain_id};
+    return SBMUtils::classifySubdomainFromOccupancy(
+        occupancy, subdomain_id_settings, _intercepted_subdomain_policy.mark_intercepted, _lambda);
   };
 
   switch (_in_out_test_type)
   {
     case DistanceType::SIGNED_DISTANCE:
     {
-      Real min_val = std::numeric_limits<Real>::max();
-      Real max_val = std::numeric_limits<Real>::lowest();
-
-      for (const auto node : make_range(elem->n_nodes()))
-      {
-        const Real val = _parsed_function->value(_t, elem->point(node));
-        min_val = std::min(min_val, val);
-        max_val = std::max(max_val, val);
-      }
-
-      const bool all_nodes_active = (_is_domain_inside_surface && max_val < _threshold) ||
-                                    (!_is_domain_inside_surface && min_val > _threshold);
-
-      const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
-                                      (!_is_domain_inside_surface && max_val < _threshold);
-
-      const auto is_active = [this](const Point & point)
+      const auto is_in_domain = [this](const Point & point)
       {
         const Real val = _parsed_function->value(_t, point);
         return (_is_domain_inside_surface && val < _threshold) ||
                (!_is_domain_inside_surface && val > _threshold);
       };
+      const auto is_outside_domain = [this](const Point & point)
+      {
+        const Real val = _parsed_function->value(_t, point);
+        return (_is_domain_inside_surface && val > _threshold) ||
+               (!_is_domain_inside_surface && val < _threshold);
+      };
 
-      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
-
-      return classify_element(all_nodes_active, all_nodes_inactive, ratio_active);
+      return classify_from_occupancy(
+          SBMUtils::elementDomainOccupancy(*elem, _qrule_order, is_in_domain, is_outside_domain));
     }
 
     case DistanceType::GEOMETRY:
     {
-      unsigned int inside_nodes = 0;
-      for (const auto node : make_range(elem->n_nodes()))
-        if (_in_out_test_base->contains(elem->point(node)))
-          ++inside_nodes;
-
-      const unsigned int active_nodes =
-          _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
-
-      const auto is_active = [this](const Point & point)
+      const auto is_in_domain = [this](const Point & point)
       {
         const bool is_inside = _in_out_test_base->contains(point);
         return _is_domain_inside_surface ? is_inside : !is_inside;
       };
 
-      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
-
-      return classify_element(active_nodes == elem->n_nodes(), active_nodes == 0, ratio_active);
+      return classify_from_occupancy(
+          SBMUtils::elementDomainOccupancy(*elem, _qrule_order, is_in_domain));
     }
 
     case DistanceType::NONE:
