@@ -9,10 +9,10 @@
 # With viscosity, the baffle transmits only a shear traction, and only from a clear side (unit
 # porosity). Between two clear sides it is continuous, so the slopes must be equal. Two porous
 # sides transmit none, so viscous cases with porosity below one on both sides need zero slopes. A
-# clear side shears against the superficial cell velocity of a porous side at the projected
-# half-cell distance d, so with the clear side on the left the traction balance on both rows
-# requires equal slopes and
-#   tangential_slope_right * d = (1 - eps_right) * tangential_velocity.
+# clear side shears against the superficial velocity of a porous side at the interface, so with
+# the clear side on the left the traction balance on both rows requires equal slopes and a
+# continuous superficial tangential velocity, eps_left * tangential_velocity =
+# eps_right * tangential_velocity, which with a porosity jump means tangential_velocity = 0.
 # The normal velocity is constant and carries no viscous stress. A consistent scheme reproduces
 # this piecewise-linear solution to round-off on uniform meshes.
 

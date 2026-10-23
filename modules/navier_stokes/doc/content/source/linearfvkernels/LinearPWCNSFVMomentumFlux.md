@@ -72,8 +72,20 @@ $\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contribu
 \end{equation}
 
 where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
-[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name). On a pressure
-baffle, the shared interpolated state is replaced by a baffle face state built from the face
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name).
+
+On a face that is not a pressure baffle, nothing replaces the omitted porosity-gradient term.
+[#baffle-advection] describes the interface closure used on baffles.
+
+## Advection treatment on a pressure baffle id=baffle-advection
+
+A pressure baffle is an internal face on a boundary of one of the pressure jump models listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models). A baffle usually coincides with
+a porosity discontinuity, across which the tangential superficial velocity jumps, as described in
+[#baffle-stress]. With equal porosity on both sides, the reversible jump below vanishes and the
+baffle carries only its form loss.
+
+On a baffle, the shared interpolated state is replaced by a baffle face state built from the face
 velocities extrapolated from each row's cell with its own velocity gradient,
 
 \begin{equation}
@@ -115,10 +127,9 @@ for a velocity that is linear on each side with a continuous interstitial tangen
 implicit stencil keeps the shared interpolation weights and the difference is deferred to the
 right-hand side.
 
-Rather than representing the omitted porosity-gradient term as a volumetric or distributional
-advection force, the interface model replaces its normal kinetic-head effect with the reversible
-Bernoulli pressure jump. If $o$ and $n$ denote the owner and non-owner sides, respectively, the
-[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model uses
+On a baffle, the [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model replaces
+the omitted porosity-gradient term with the reversible Bernoulli pressure jump. With $o$ and $n$ the
+owner and non-owner sides, chosen from the mesh as described on that page, the jump is
 
 \begin{equation}
 \begin{aligned}
@@ -128,11 +139,9 @@ Bernoulli pressure jump. If $o$ and $n$ denote the owner and non-owner sides, re
 \label{eq:pw-momentum-bernoulli-replacement}
 \end{equation}
 
-where $\rho_f$ is the face-interpolated density. Thus, the advection kernel uses the cell-wise,
-pulled-$1/\epsilon$ approximation, while the pressure-jump model carries the change in normal
-kinetic head across the porosity discontinuity. This is an interface closure: it recovers the
-steady one-dimensional inviscid Bernoulli balance, but it is not an algebraic replacement for the
-omitted tensor term in general multidimensional flow. Any configured irreversible form loss is
+where $\rho_f$ is the face-interpolated density. This closure recovers the steady one-dimensional
+inviscid Bernoulli balance, but it does not reproduce the omitted term in general multidimensional
+flow. Any configured irreversible form loss is
 added to this reversible jump.
 
 ## Stress treatment across a porosity jump
@@ -236,25 +245,35 @@ side is a porous medium.
 - Between two porous sides, the shear in the Brinkman layers is negligible against the drag, and no
   traction is transmitted.
 - A clear side shears against the porous side as against a rough wall that moves with the
-  superficial velocity of the porous cell.
+  superficial velocity of the porous medium at the interface.
 - Between two clear sides, the traction is the ordinary two-point traction.
+
+Porosity serves here only as an indicator that drag dominates shear on a side. The model holds when
+the square root of the permeability is much smaller than the cell size, as in packed beds. It does
+not suit a side of unit porosity that carries a drag term, such as a screen, nor a sparse medium
+whose Brinkman layer spans the adjacent cells.
 
 With $C$ the set of clear sides, the traction is
 
 \begin{equation}
 \begin{aligned}
-  \boldsymbol{t}_f &= T_f^{b}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)\left[
-    \left(\boldsymbol{U}_N+\delta_N d_N\boldsymbol{c}_N\right)
-    -\left(\boldsymbol{U}_P-\delta_P d_P\boldsymbol{c}_P\right)\right], \\
+  \boldsymbol{t}_f &= T_f^{b}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)
+    \left(\boldsymbol{W}_N-\boldsymbol{W}_P\right), \\
   T_f^{b} &= \mu_f\left(\sum_{s\in C}d_s\right)^{-1},
 \end{aligned}
 \label{eq:pw-momentum-baffle-shear}
 \end{equation}
 
-where $\delta_s$ is one for a clear side and zero for a porous side, $\boldsymbol{c}_s$ collects
-the nonorthogonal corrections of [eq:pw-momentum-nonorthogonal-corrections] for all velocity
-components, and the traction is zero if neither side is clear. For two clear sides,
-$T_f^{b}=\mu_f/(d_P+d_N)$ is the ordinary two-point transmissibility.
+where the traction is zero if neither side is clear. The face velocity $\boldsymbol{W}_s$ of a
+clear side is the two-point value $\boldsymbol{W}_P=\boldsymbol{U}_P-d_P\boldsymbol{c}_P$ or
+$\boldsymbol{W}_N=\boldsymbol{U}_N+d_N\boldsymbol{c}_N$, in which $\boldsymbol{c}_s$ collects the
+nonorthogonal corrections of [eq:pw-momentum-nonorthogonal-corrections] for all velocity
+components. The face velocity of a porous side is the extrapolated face state
+$\boldsymbol{W}_s=\boldsymbol{V}_s$ of [#baffle-advection], which the baffle advection also uses.
+It approximates the porous velocity at the interface to second order; the cell value would leave
+a traction error of order $\mu_f\lVert\nabla\boldsymbol{U}_s\rVert$ that does not vanish under
+refinement, because the velocity difference is divided by the clear half-cell distance. For two
+clear sides, $T_f^{b}=\mu_f/(d_P+d_N)$ is the ordinary two-point transmissibility.
 
 No normal viscous stress acts on a baffle face. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) carries the normal momentum

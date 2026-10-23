@@ -31,6 +31,30 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [form-loss-reference-lower-higher]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'form-loss-reference-lower-higher.csv'
+    requirement = 'The system shall evaluate the irreversible baffle form loss with the lower-porosity velocity on the first baffle and the higher-porosity velocity on the second baffle, where both reference sides are the element side of the face.'
+    design = 'BernoulliFormLossPressureJump.md'
+    cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=form-loss-reference-lower-higher "
+               "UserObjects/pressure_jump/form_loss='10 10' "
+               "UserObjects/pressure_jump/reference_velocity_side='lower_porosity higher_porosity'"
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [form-loss-reference-higher-lower]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'form-loss-reference-higher-lower.csv'
+    requirement = 'The system shall evaluate the irreversible baffle form loss with the higher-porosity velocity on the first baffle and the lower-porosity velocity on the second baffle, where both reference sides are the neighbor side of the face.'
+    design = 'BernoulliFormLossPressureJump.md'
+    cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=form-loss-reference-higher-lower "
+               "UserObjects/pressure_jump/form_loss='10 10' "
+               "UserObjects/pressure_jump/reference_velocity_side='higher_porosity lower_porosity'"
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [reject-ordinary-velocity-gradient]
     type = RunException

@@ -260,10 +260,11 @@ PorousRhieChowMassFlux::setupPorousMeshInformation()
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
       const Real cell_volume = elem_info->volume() * elem_info->coordFactor();
-      _cell_volumes->set(elem_dof, cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
+      _cell_fluid_volumes->set(elem_dof,
+                               cell_volume * _eps(makeElemArg(elem_info->elem()), time_arg));
     }
 
-  _cell_volumes->close();
+  _cell_fluid_volumes->close();
 }
 
 void
@@ -432,9 +433,17 @@ PorousRhieChowMassFlux::pressureJumpInterfaceData(const FaceInfo & fi,
 const PressureJumpModel *
 PorousRhieChowMassFlux::getPressureJumpModel(const FaceInfo & fi) const
 {
+  const PressureJumpModel * face_model = nullptr;
   for (const auto * const model : _pressure_jump_models)
     if (model->appliesTo(fi))
-      return model;
+    {
+      // The models act on disjoint boundaries, but a face can still carry boundaries of two
+      // models, which would make its jump ambiguous.
+      mooseAssert(!face_model,
+                  "Pressure-jump face " + std::to_string(fi.id()) +
+                      " lies on boundaries of more than one pressure jump model.");
+      face_model = model;
+    }
 
-  return nullptr;
+  return face_model;
 }

@@ -8,7 +8,7 @@
     cli_args = 'Outputs/file_base=dirichlet'
     abs_zero = 1e-10
     max_threads = 1 # see libmesh issue #3808
-    requirement = 'The system shall evaluate a Dirichlet boundary functor defined on both sides of an internal boundary on the side of the linear finite volume variable.'
+    requirement = 'The system shall evaluate a Dirichlet boundary condition using a functor defined on both sides of an internal boundary on the side of the linear finite volume variable.'
   []
   [anisotropic-neumann]
     type = CSVDiff
@@ -20,6 +20,6 @@
                "Outputs/file_base=anisotropic-neumann"
     abs_zero = 1e-10
     max_threads = 1 # see libmesh issue #3808
-    requirement = 'The system shall evaluate an anisotropic Neumann boundary flux functor defined only on the side of an internal boundary opposite to the linear finite volume variable.'
+    requirement = 'The system shall evaluate an anisotropic Neumann boundary flux from a functor defined only on the side of an internal boundary opposite to the linear finite volume variable.'
   []
 []

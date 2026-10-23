@@ -4,6 +4,10 @@
 # so p_left = p_right = p_jump = 0. With mu = 1 and Forchheimer = 50, the porous block
 # adds a pressure drop of 0.25. A form-loss coefficient of 10 adds 0.4 at each baffle,
 # giving p_jump = p_left - p_right = 1.05 and baffle jumps of -0.37 and -0.43.
+# Referencing the higher-porosity velocity 0.1 instead of the lower-porosity velocity 0.2 makes the
+# form loss 0.1 at that baffle. With reference_velocity_side = 'lower_porosity higher_porosity',
+# the baffle jumps are -0.37 and -0.13; with 'higher_porosity lower_porosity', they are -0.07 and
+# -0.43. Both give p_jump = 0.75.
 
 mu = 0.0 # 1e-2
 rho = 2.0

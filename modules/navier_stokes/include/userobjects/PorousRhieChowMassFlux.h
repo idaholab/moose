@@ -105,7 +105,7 @@ public:
   void meshChanged() override;
 
 private:
-  /// Cache cell volume times porosity in the pressure-system degree-of-freedom ordering.
+  /// Overwrite the cached cell fluid volumes with cell volume times porosity.
   void setupPorousMeshInformation();
 
   /// Recompute and relax the pressure jumps using the current face mass fluxes.

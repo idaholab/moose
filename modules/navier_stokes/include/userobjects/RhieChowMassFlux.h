@@ -303,8 +303,11 @@ protected:
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
 
-  /// We will hold a vector of cell volumes to make sure we can do volume corrections rapidly
-  std::unique_ptr<NumericVector<Number>> _cell_volumes;
+  /**
+   * Fluid volume of each cell, used to rapidly scale the pressure-gradient force in H/A and 1/A.
+   * This is the cell volume, or the cell volume times porosity for porous flow.
+   */
+  std::unique_ptr<NumericVector<Number>> _cell_fluid_volumes;
 
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;

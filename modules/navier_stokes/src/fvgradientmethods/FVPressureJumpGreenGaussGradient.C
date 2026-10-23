@@ -22,7 +22,9 @@ FVPressureJumpGreenGaussGradient::validParams()
   InputParameters params = FVGreenGaussGradient::validParams();
   params.suppressParameter<MooseEnum>("limiter");
   params.addClassDescription(
-      "Computes a Green-Gauss pressure gradient without smearing prescribed baffle jumps.");
+      "Computes a Green-Gauss pressure gradient that excludes the pressure jump across baffles, "
+      "using a one-sided face pressure for each cell, so the zero-thickness jump does not appear "
+      "as a mesh-dependent gradient in the adjacent cells.");
   return params;
 }
 

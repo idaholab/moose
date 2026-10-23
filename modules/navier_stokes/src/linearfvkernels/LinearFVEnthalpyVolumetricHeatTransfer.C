@@ -38,7 +38,15 @@ LinearFVEnthalpyVolumetricHeatTransfer::positiveCp(const Moose::ElemArg & elem,
 {
   const auto cp = _cp(elem, state);
   if (cp <= 0.0)
-    mooseError("cp must stay positive when solving for enthalpy.");
+    mooseError("cp must stay positive when solving for enthalpy, but cp = ",
+               cp,
+               " in element ",
+               elem.elem->id(),
+               " (subdomain ",
+               elem.elem->subdomain_id(),
+               ", vertex average ",
+               elem.elem->vertex_average(),
+               ").");
   return cp;
 }
 
@@ -64,6 +72,7 @@ LinearFVEnthalpyVolumetricHeatTransfer::computeRightHandSideContribution()
   const auto h_current = _var.getElemValue(*_current_elem_info, state);
   const auto linearized_current_temperature = h_current / cp;
 
+  // linearized temperature is added to the matrix and removed here
   return _h_solid_fluid(elem, state) *
          (other_temperature.getElemValue(*_current_elem_info, state) -
           current_temperature.getElemValue(*_current_elem_info, state) +

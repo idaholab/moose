@@ -50,8 +50,8 @@ protected:
    * Compute the pressure-correction transmissibility for the current face.
    *
    * Baffle faces use the transmissibility obtained by eliminating the two one-sided interface
-   * pressures. Non-baffle faces use the inherited diffusion transmissibility selected by the
-   * Rhie-Chow object.
+   * pressures when expressing the fluxes from both sides. Non-baffle faces use the inherited
+   * diffusion transmissibility selected by the Rhie-Chow object.
    */
   Real computeJumpAwareFluxMatrixContribution();
 
