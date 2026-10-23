@@ -41,7 +41,6 @@
     skip_keys = 'part number_of_parts'
 
     requirement = "The system shall support the ability to transfer integer, real, vector, and string reporter data."
-    min_slots = 2
   []
 
   [errors]
@@ -85,7 +84,6 @@
       skip_keys = 'part number_of_parts'
       max_parallel = 1
       # observed OOM in recover
-      min_slots = 2
 
       detail = 'in serial and'
     []

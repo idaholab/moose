@@ -9,6 +9,7 @@
 
 #include "SCMTriPowerAux.h"
 #include "Function.h"
+#include "Receiver.h"
 #include "TriSubChannelMesh.h"
 #include "SCM.h"
 
@@ -25,10 +26,14 @@ SCMTriPowerAux::validParams()
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
       "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
-  params.addParam<FunctionName>("axial_heat_rate",
-                                "1.0",
-                                "user provided normalized function of axial heat rate [Unitless]. "
-                                "The integral over pin length should equal the heated length");
+  params.addParam<FunctionName>(
+      "axial_heat_rate",
+      "1.0",
+      "Axial shape of the heat rate as a function of the distance from the start of the "
+      "heated section [Unitless]. Its magnitude does not matter because each pin is "
+      "rescaled to its assigned power");
+  params.addParam<bool>(
+      "verbose", false, "Print the per-pin power correction every time it is computed");
   return params;
 }
 
@@ -38,7 +43,8 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     _power(getPostprocessorValue("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
-    _axial_heat_rate(getFunction("axial_heat_rate"))
+    _axial_heat_rate(getFunction("axial_heat_rate")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (processor_id() > 0)
     return;
@@ -49,8 +55,6 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
   // Matrix sizing
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
-  _pin_power_correction.resize(n_pins, 1);
-  _pin_power_correction.setOnes();
 
   Real vin;
   std::ifstream inFile;
@@ -82,40 +86,64 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
 void
 SCMTriPowerAux::initialSetup()
 {
+  // q_prime uses the value the power postprocessor holds when this object executes, so it is
+  // current only if the postprocessor executes before this object on the same flags. A
+  // Receiver is filled by a transfer instead, so its execute_on does not set when it changes.
+  if (!isDefaultPostprocessorValue("power") &&
+      !dynamic_cast<const Receiver *>(&getUserObjectBase("power")))
+  {
+    const auto & power_pp = getUserObjectBase("power");
+    if (!power_pp.getExecuteOnEnum().isValueSet(getExecuteOnEnum()))
+      paramWarning("power",
+                   "The power postprocessor does not execute on every execute_on flag of this "
+                   "object, so q_prime may use a lagged power");
+    if (power_pp.getParam<bool>("force_postaux"))
+      paramWarning("power",
+                   "The power postprocessor sets force_postaux, so it executes after this object "
+                   "and q_prime uses a lagged power");
+  }
+
+  computeShapeIntegral();
+}
+
+void
+SCMTriPowerAux::timestepSetup()
+{
+  // The axial power shape may depend on time, and the time is advanced before this is called
+  computeShapeIntegral();
+}
+
+void
+SCMTriPowerAux::computeShapeIntegral()
+{
   if (processor_id() > 0)
     return;
-
-  auto heated_length = _triMesh.getHeatedLength();
-  auto sum = _power_dis.sum();
-  // full (100%) power of one pin [W]
-  auto fpin_power = _power / sum;
-  // actual pin power [W]
-  _ref_power = _power_dis * fpin_power;
-  // Convert the actual pin power to a linear heat rate [W/m]
-  _ref_qprime = _ref_power / heated_length;
 
   auto n_pins = _triMesh.getNumOfPins();
   auto nz = _triMesh.getNumOfAxialCells();
   auto z_grid = _triMesh.getZGrid();
+  auto heated_length = _triMesh.getHeatedLength();
   auto unheated_length_entry = _triMesh.getHeatedLengthEntry();
 
-  _estimate_power.resize(n_pins, 1);
-  _estimate_power.setZero();
+  _shape_integral.resize(n_pins, 1);
+  _shape_integral.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute axial location of nodes.
     auto z2 = z_grid[iz];
     auto z1 = z_grid[iz - 1];
-    Point p1(0, 0, z1 - unheated_length_entry);
-    Point p2(0, 0, z2 - unheated_length_entry);
-    auto heat1 = _axial_heat_rate.value(_t, p1);
-    auto heat2 = _axial_heat_rate.value(_t, p2);
     if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
         MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
+        // Evaluate the axial shape at this pin's nodes, where computeValue() assigns q_prime and
+        // the solver integrates it, so the correction also holds for shapes that vary between pins
+        const Point shift(0, 0, unheated_length_entry);
+        auto heat1 = _axial_heat_rate.value(_t, Point(*_triMesh.getPinNode(i_pin, iz - 1) - shift));
+        auto heat2 = _axial_heat_rate.value(_t, Point(*_triMesh.getPinNode(i_pin, iz) - shift));
+
         // Compute the height of this element.
         auto dz = z2 - z1;
 
@@ -132,29 +160,22 @@ SCMTriPowerAux::initialSetup()
         {
           heat2 = 0.0;
         }
-        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
+        _shape_integral(i_pin) += (heat1 + heat2) * dz / 2.0;
       }
     }
   }
 
-  // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
-  // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
-  // _ref_qprime(i_pin) = 0.0
-  auto total_power = 0.0;
-  for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
+  if (_verbose)
   {
-    total_power += _estimate_power(i_pin);
-    if (_estimate_power(i_pin) == 0.0)
-      _estimate_power(i_pin) = 1.0;
+    // The correction is the factor between q_prime and the uncorrected average linear heat
+    // rate of each pin, the pin power over the heated length
+    Eigen::MatrixXd correction = Eigen::MatrixXd::Zero(n_pins, 1);
+    for (const auto i_pin : make_range(n_pins))
+      if (_shape_integral(i_pin) != 0.0)
+        correction(i_pin) = heated_length / _shape_integral(i_pin);
+    _console << "###########################################" << std::endl;
+    _console << "Aux Power correction vector :\n" << correction << " \n";
   }
-  // We need to correct the linear power assigned to the nodes of each pin
-  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
-  // the user.
-  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
-  _console << "###########################################" << std::endl;
-  _console << "Total power estimation by Aux kernel before correction: " << total_power << " [W] "
-           << std::endl;
-  _console << "Aux Power correction vector :\n" << _pin_power_correction << " \n";
 }
 
 Real
@@ -171,7 +192,15 @@ SCMTriPowerAux::computeValue()
       MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
     auto i_pin = _triMesh.getPinIndexFromPoint(p);
-    return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    // A pin with a zero axial shape receives no power
+    if (_shape_integral(i_pin) == 0.0)
+      return 0.0;
+    // The power postprocessor is a dependency of this object, so it executes first on every
+    // execute_on flag they share and holds its current value here
+    const auto pin_power = _power * _power_dis(i_pin) / _power_dis.sum();
+    // Dividing by the trapezoidal integral of the shape makes the trapezoidal integral of
+    // q_prime over the pin, which the subchannel solver uses, equal the pin power
+    return pin_power * _axial_heat_rate.value(_t, P) / _shape_integral(i_pin);
   }
   else
     return 0.0;

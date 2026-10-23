@@ -1391,6 +1391,27 @@
     design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
   []
 
+  [vinsome_westerveld_por]
+    type = PetscJacobianTester
+    input = vinsome_westerveld_por.i
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = 'Executioner/abort_on_solve_fail=true'
+    requirement = 'The system shall be able to calculate the analytic Jacobian of systems that include a porosity with a Vinsome-Westerveld thermal-opening term.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_por_only]
+    type = PetscJacobianTester
+    input = vinsome_westerveld_por.i
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = 'Executioner/abort_on_solve_fail=true Materials/porosity/P_coeff=0 Materials/porosity/T_coeff=0 Materials/porosity/epv_coeff=0'
+    requirement = 'The system shall be able to calculate the analytic Jacobian of systems that include a porosity with only a Vinsome-Westerveld thermal-opening term.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+
   [fv_flux]
     type = 'PetscJacobianTester'
     input = 'fv_mass_flux.i'

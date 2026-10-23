@@ -14,7 +14,8 @@
 #include "MFEMComplexAuxKernel.h"
 
 /**
- * Projects a vector coefficient onto a vector-valued auxvariable.
+ * Projects a complex vector coefficient, optionally scaled by a real scalar coefficient, onto a
+ * complex vector-valued auxvariable.
  */
 class MFEMComplexVectorProjectionAux : public MFEMComplexAuxKernel
 {
@@ -28,10 +29,10 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Reference to source coefficient for the real part
-  mfem::VectorCoefficient & _vec_coef_real;
-  /// Reference to source coefficient for the imaginary part
-  mfem::VectorCoefficient & _vec_coef_imag;
+  /// Product of the scalar coefficient and the real part of the source vector coefficient
+  mfem::ScalarVectorProductCoefficient _vec_coef_real;
+  /// Product of the scalar coefficient and the imaginary part of the source vector coefficient
+  mfem::ScalarVectorProductCoefficient _vec_coef_imag;
 };
 
 #endif

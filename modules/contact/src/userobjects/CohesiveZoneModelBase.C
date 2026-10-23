@@ -303,7 +303,8 @@ CohesiveZoneModelBase::reinit()
     auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node->id()];
 
     Real normal_lm = -1;
-    if (auto it = _dof_to_lagrange_multiplier.find(node); it != _dof_to_lagrange_multiplier.end())
+    if (auto it = _dof_to_lagrange_multiplier.find(node->id());
+        it != _dof_to_lagrange_multiplier.end())
       normal_lm = it->second;
 
     // Keep active set fixed from second Uzawa loop

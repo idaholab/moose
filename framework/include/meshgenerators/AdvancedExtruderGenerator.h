@@ -79,6 +79,11 @@ protected:
   const bool _has_bottom_boundary;
   const BoundaryName _bottom_boundary;
 
+  /// Whether to add the lateral exterior sides (and their nodes) to a boundary
+  const bool _has_side_boundary;
+  /// Boundary for the lateral exterior sides and their nodes
+  const BoundaryName _side_boundary;
+
   /// The list of input mesh's blocks that need to be assigned upward boundary interfaces for each layer of elevation
   const std::vector<std::vector<subdomain_id_type>> _upward_boundary_source_blocks;
 

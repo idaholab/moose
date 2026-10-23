@@ -32,6 +32,18 @@
     absent_out = 'Some secondary elements on mortar interface'
     prereq = 'mortar_stats_reporter/3d'
   []
+  [no_mortar_segments]
+    issues = '#34173'
+    requirement = 'The system shall report mortar segment mesh statistics for an interface on which '
+                  'no mortar segments form.'
+    type = RunApp
+    input = 'mortar_stats_reporter_3d.i'
+    # Shift the primary block so it does not overlap the secondary face
+    cli_args = 'Mesh/right_block/ymin=1 Mesh/right_block/ymax=1.5 '
+               'Outputs/file_base=no_mortar_segments'
+    expect_out = 'primary_lower\s*\|\s*0\s*\|.*\n.*mortar_segment\s*\|\s*0\s*\|'
+    allow_warnings = true
+  []
   [adjacent_corner_mortar_segment_mesh]
     issues = '#33282'
     requirement = 'The system shall be able to build a three dimensional mortar segment mesh for '

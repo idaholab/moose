@@ -163,7 +163,7 @@ The above will result in an intermediate mesh file 'left_in.e' in addition to th
 
 ## Using data-driven generation
 
-The system optionally supports the capability to do "data-driven" generation. With data-driven generation, a `generateData()` method is overriden on each generator and
+The system optionally supports the capability to do "data-driven" generation. With data-driven generation, a `generateData()` method is overridden on each generator and
 said generator is set to support this generation by calling
 
 ```
