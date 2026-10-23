@@ -107,6 +107,16 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     paramError("penetration_tolerance",
                "This parameter must be supplied if and only if an augmented Lagrange problem "
                "object is used.");
+
+  // The penalty pressure is applied on every process contributing to a node's weighted gap (see
+  // constrainedByOwner()), so with point-neighbor coupling those processes need the couplings of
+  // nonlocal secondary elements
+  if (getParam<bool>("ghost_point_neighbors"))
+    _fe_problem
+        .getMortarInterface(std::make_pair(_primary_id, _secondary_id),
+                            std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
+                            getParam<bool>("use_displaced_mesh"))
+        .requestNonlocalSecondaryCouplings();
 }
 
 const VariableTestValue &
