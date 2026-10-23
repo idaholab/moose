@@ -51,7 +51,7 @@ public:
 private:
   /**
    * Checks the augmented Lagrangian constraints and, if they are not met, updates the Lagrange
-   * multipliers
+   * multipliers or, if the maximum number of updates has been reached, marks the solve as failed
    * @return Whether the constraints are met
    */
   bool updateAugmentedLagrangianMultipliers();
