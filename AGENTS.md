@@ -145,12 +145,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 9. Communication
-
-Be *very* concise in replies, PR and review comments, and contribution materials. Give the result
-and what the reader needs to act on it; leave out detail they can ask for in a follow-up.
-
-## 10. Writing MOOSE Contribution Materials
+## 9. Writing MOOSE Contribution Materials
 
 Apply these rules to MOOSE contribution materials and their drafts: commit messages, pull
 request descriptions, review reports and comments, documentation, and code comments. They do
@@ -170,10 +165,10 @@ not govern unrelated conversations or prescribe the user's conversational style.
   one line.
 - Leave investigation dead ends out. A path that looked related and turned out not to be is not
   a finding, and reporting it competes with the actual change for the reviewer's attention.
-- Write clear, grammatical, concise prose for peer computational scientists and engineers.
-  Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes, parameters,
-  input syntax, commands, and diagnostics, and remove repetition and boilerplate before
-  presenting.
+- Write clear, grammatical, *very* concise prose for peer computational scientists and
+  engineers. Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes,
+  parameters, input syntax, commands, and diagnostics, and remove repetition and boilerplate
+  before presenting.
 - Use the vocabulary a MOOSE developer would use, and avoid stock phrasing that reads as
   machine-drafted. "bit-for-bit" is one such tell; say that results are unchanged.
 - Prefer self-explanatory code, using comments for non-obvious behavior, correctness
