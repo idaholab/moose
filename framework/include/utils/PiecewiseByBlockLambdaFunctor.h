@@ -82,6 +82,8 @@ protected:
   ValueType evaluate(const Moose::ElemPointArg & elem_point,
                      const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::NodeArg & node_arg, const Moose::StateArg & time) const override;
+  ValueType evaluate(const Moose::PointArg & point_arg,
+                     const Moose::StateArg & time) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
@@ -336,6 +338,16 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
     subdomainErrorMessage(sub_id, _node_functor);
 
   return it->second(node_arg, time);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::PointArg & point_arg,
+                                           const Moose::StateArg & time) const
+{
+  // A point has no subdomain, so this is only available for functors defined on all blocks
+  const Node node(point_arg.point);
+  return evaluate(Moose::NodeArg{&node, &Moose::NodeArg::undefined_subdomain_connection}, time);
 }
 
 template <typename T>
