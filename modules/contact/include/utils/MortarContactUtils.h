@@ -33,10 +33,6 @@
 #include <unordered_map>
 #include <vector>
 
-class AutomaticMortarGeneration;
-class MooseBase;
-class SystemBase;
-
 namespace TIMPI
 {
 
@@ -598,69 +594,6 @@ void communicateGaps(
     bool normalize_c,
     const Parallel::Communicator & communicator,
     bool send_data_back);
-
-/**
- * @param node A node of the displaced mesh
- * @param disp_vars The x, y, and z displacement variables; the z entry is null in 2D
- * @return The current coordinates of \p node, carrying a unit derivative with respect to each of
- * its displacement degrees of freedom
- */
-ADPoint nodalCoordinate(const Node & node, const std::array<const MooseVariable *, 3> & disp_vars);
-
-/**
- * Error unless every displacement variable is nodal and belongs to \p sys, as nodal-normal
- * derivatives require
- * @param object The contact object whose parameters name the displacement variables
- * @param disp_vars The x, y, and z displacement variables; the z entry is null in 2D
- * @param sys The nonlinear system assembled by \p object
- */
-void checkNodalNormalDisplacements(const MooseBase & object,
-                                   const std::array<const MooseVariable *, 3> & disp_vars,
-                                   const SystemBase & sys);
-
-/**
- * Cache of the secondary nodal normals and Householder tangents of one mortar interface, carrying
- * their displacement derivatives while a Jacobian is assembled. Residual-only evaluations hold the
- * stored nodal geometry values. Call \p clear() whenever the displaced geometry changes.
- */
-class ADNodalFrames
-{
-public:
-  /**
-   * @param disp_vars The x, y, and z displacement variables; the z entry is null in 2D
-   */
-  explicit ADNodalFrames(const std::array<const MooseVariable *, 3> & disp_vars)
-    : _disp_vars(disp_vars)
-  {
-  }
-
-  /**
-   * @param amg The mortar generation object of the interface
-   * @param node A secondary node
-   * @param stored_normal The stored normal at \p node, used when \p do_derivatives is false
-   * @param do_derivatives Whether to include displacement derivatives
-   * @return The unit normal at \p node
-   */
-  const ADRealVectorValue & normal(const AutomaticMortarGeneration & amg,
-                                   const Node & node,
-                                   const Point & stored_normal,
-                                   bool do_derivatives);
-
-  /**
-   * @return The Householder tangents at \p node, consistent with \p normal()
-   */
-  const std::array<ADRealVectorValue, 2> & tangents(const AutomaticMortarGeneration & amg,
-                                                    const Node & node,
-                                                    const Point & stored_normal,
-                                                    bool do_derivatives);
-
-  void clear();
-
-private:
-  const std::array<const MooseVariable *, 3> _disp_vars;
-  std::unordered_map<const Node *, ADRealVectorValue> _normals;
-  std::unordered_map<const Node *, std::array<ADRealVectorValue, 2>> _tangents;
-};
 }
 }
 }

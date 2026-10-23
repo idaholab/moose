@@ -13,6 +13,7 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 #include "AutomaticMortarGeneration.h"
 #include "ADUtils.h"
 
@@ -129,7 +130,7 @@ WeightedGapUserObject::initialSetup()
                "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
                "combined with quadrature-point normal interpolation.");
 
-  Moose::Mortar::Contact::checkNodalNormalDisplacements(
+  Moose::Mortar::checkNodalNormalDisplacements(
       *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 
@@ -235,7 +236,7 @@ WeightedGapUserObject::nodalCoordinate(const Node & node) const
               "derivatives.");
   mooseAssert(Moose::doDerivatives(_subproblem, _sys),
               "AD nodal coordinates require derivative recording.");
-  return Moose::Mortar::Contact::nodalCoordinate(node, {{_disp_x_var, _disp_y_var, _disp_z_var}});
+  return Moose::Mortar::nodalCoordinate(node, {{_disp_x_var, _disp_y_var, _disp_z_var}});
 }
 
 void

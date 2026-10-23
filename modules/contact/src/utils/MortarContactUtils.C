@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MortarContactUtils.h"
-#include "AutomaticMortarGeneration.h"
-#include "SystemBase.h"
 
 #include <tuple>
 
@@ -116,87 +114,6 @@ communicateGaps(
     }
   };
   TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
-}
-
-ADPoint
-nodalCoordinate(const Node & node, const std::array<const MooseVariable *, 3> & disp_vars)
-{
-  ADPoint point = node;
-
-  for (const auto component : index_range(disp_vars))
-    if (const auto * const variable = disp_vars[component])
-    {
-      const auto sys_num = variable->sys().number();
-      const auto var_num = variable->number();
-      // Enriched elements can have mapping nodes without independent displacement degrees of
-      // freedom. Their positions enter the geometric map, but they contribute no independent
-      // displacement derivative.
-      if (node.n_dofs(sys_num, var_num))
-        Moose::derivInsert(
-            point(component).derivatives(), node.dof_number(sys_num, var_num, 0), 1.0);
-    }
-
-  return point;
-}
-
-void
-checkNodalNormalDisplacements(const MooseBase & object,
-                              const std::array<const MooseVariable *, 3> & disp_vars,
-                              const SystemBase & sys)
-{
-  const std::array<const char *, 3> parameter_names{{"disp_x", "disp_y", "disp_z"}};
-  for (const auto component : index_range(disp_vars))
-    if (const auto * const variable = disp_vars[component])
-    {
-      if (!variable->isNodal())
-        object.paramError(parameter_names[component],
-                          "Nodal-normal derivatives require a nodal displacement variable.");
-      if (&variable->sys() != &sys)
-        object.paramError(parameter_names[component],
-                          "Nodal-normal derivatives require displacement variables in the "
-                          "nonlinear system assembled by this contact object.");
-    }
-}
-
-const ADRealVectorValue &
-ADNodalFrames::normal(const AutomaticMortarGeneration & amg,
-                      const Node & node,
-                      const Point & stored_normal,
-                      const bool do_derivatives)
-{
-  if (const auto it = _normals.find(&node); it != _normals.end())
-    return it->second;
-
-  if (!do_derivatives)
-    return _normals.emplace(&node, stored_normal).first->second;
-
-  amg.computeADNodalNormals([this](const Node & coordinate_node)
-                            { return nodalCoordinate(coordinate_node, _disp_vars); },
-                            _normals);
-  return libmesh_map_find(_normals, &node);
-}
-
-const std::array<ADRealVectorValue, 2> &
-ADNodalFrames::tangents(const AutomaticMortarGeneration & amg,
-                        const Node & node,
-                        const Point & stored_normal,
-                        const bool do_derivatives)
-{
-  auto it = _tangents.find(&node);
-  if (it == _tangents.end())
-    it = _tangents
-             .emplace(&node,
-                      Moose::Mortar::householderTangents(
-                          normal(amg, node, stored_normal, do_derivatives)))
-             .first;
-  return it->second;
-}
-
-void
-ADNodalFrames::clear()
-{
-  _normals.clear();
-  _tangents.clear();
 }
 }
 }

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
-#include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 
 #include <unordered_map>
 
@@ -172,5 +172,5 @@ protected:
   bool _retried_timestep;
 
   /// Secondary nodal normals and tangents with their displacement derivatives
-  Moose::Mortar::Contact::ADNodalFrames _nodal_frames;
+  Moose::Mortar::ADNodalFrames _nodal_frames;
 };
