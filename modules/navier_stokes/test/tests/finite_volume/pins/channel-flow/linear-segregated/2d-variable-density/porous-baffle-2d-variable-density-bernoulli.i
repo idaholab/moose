@@ -148,7 +148,6 @@ advected_interp_method = 'average'
     momentum_component = 'x'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    use_two_point_stress_transmissibility = true
   []
   [v_advection]
     type = LinearPWCNSFVMomentumFlux
@@ -160,7 +159,6 @@ advected_interp_method = 'average'
     momentum_component = 'y'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    use_two_point_stress_transmissibility = true
   []
   [u_pressure]
     type = LinearPWCNSFVMomentumPressure

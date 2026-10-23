@@ -73,10 +73,10 @@ protected:
   Real computeInternalStressRHSContribution();
 
   /// Computes the implicit internal-face stress transmissibility.
-  virtual Real computeInternalStressTransmissibility() const;
+  Real computeInternalStressTransmissibility() const;
 
   /// Computes the explicit internal-face stress correction.
-  virtual Real computeInternalStressExplicitCorrection() const;
+  Real computeInternalStressExplicitCorrection() const;
 
   /**
    * Compute the explicit stress correction reconstructed from one adjacent cell.

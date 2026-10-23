@@ -1,18 +1,15 @@
 # Fluid at rest under gravity in a closed box split by a pressure baffle across which porosity
-# (and optionally density) jumps. The interface x - skew * y = interface is a mesh line.
+# jumps. The interface x - skew * y = interface is a mesh line.
 # The superficial momentum balance at rest is 0 = -eps grad(p) + eps rho g, so
 #   U = 0 and grad(p) = rho g on both sides,
-# independent of porosity. With density rho = rho_s + strat * z linear in the height
+# independent of porosity. With density rho = rho_0 + strat * z linear in the height
 # z = -g . x / |g|, the exact pressure is
-#   p = -|g| (rho_s z + strat z^2 / 2) + const.
-# A density jump (rho_left != rho_right) is hydrostatic only if the interface is a level
-# surface (gravity along the interface normal). With mdot = 0 the Bernoulli jump vanishes.
+#   p = -|g| (rho_0 z + strat z^2 / 2) + const.
 # The body force is the porosity-weighted buoyancy eps rho g, applied either by
 # LinearFVMomentumBuoyancy or, with LinearFVKernels/inactive = 'u_buoyancy v_buoyancy', by
 # LinearFVMomentumBoussinesq with a temperature chosen so that -alpha rho_ref (T - T_ref) = rho.
 
-rho_left = 1
-rho_right = 1
+rho_0 = 1
 strat = -0.1
 eps_left = 1
 eps_right = 1
@@ -145,7 +142,6 @@ pressure_gradient_method = reconstructed
     momentum_component = x
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = ${nonorthogonal}
-    use_two_point_stress_transmissibility = true
   []
   [v_advection]
     type = LinearPWCNSFVMomentumFlux
@@ -157,7 +153,6 @@ pressure_gradient_method = reconstructed
     momentum_component = y
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = ${nonorthogonal}
-    use_two_point_stress_transmissibility = true
   []
   [u_pressure]
     type = LinearPWCNSFVMomentumPressure
@@ -320,25 +315,16 @@ pressure_gradient_method = reconstructed
   []
   [exact_density]
     type = ParsedFunction
-    expression = 'if(x-skew*y<interface,rho_left,rho_right)+strat*hz'
-    symbol_names = 'skew interface rho_left rho_right strat hz'
-    symbol_values = '${skew} ${interface} ${rho_left} ${rho_right} ${strat} height'
+    expression = 'rho_0+strat*hz'
+    symbol_names = 'rho_0 strat hz'
+    symbol_values = '${rho_0} ${strat} height'
   []
-  # Hydrostatic pressure with the pin at (0.3, 0.3), inside a cell on 2^n meshes, set to zero. The pin is on the left side,
-  # and a density jump is allowed only across a level interface, where the side constants
-  # rho_s z_interface agree.
-  [raw_pressure]
-    type = ParsedFunction
-    expression = '-sqrt(gx^2+gy^2)*(if(x-skew*y<interface,rho_left,rho_right)*(hz-hi)+rho_left*hi+strat*hz^2/2)'
-    symbol_names = 'gx gy skew interface rho_left rho_right strat hz hi'
-    symbol_values = '${gx} ${gy} ${skew} ${interface} ${rho_left} ${rho_right} ${strat} height '
-                    '${fparse -(gx*interface)/sqrt(gx^2+gy^2)}'
-  []
+  # Hydrostatic pressure with the pin at (0.3, 0.3), inside a cell on 2^n meshes, set to zero.
   [exact_pressure]
     type = ParsedFunction
-    expression = 'p+sqrt(gx^2+gy^2)*(rho_left*hp+strat*hp^2/2)'
-    symbol_names = 'p gx gy rho_left strat hp'
-    symbol_values = 'raw_pressure ${gx} ${gy} ${rho_left} ${strat} '
+    expression = '-sqrt(gx^2+gy^2)*(rho_0*(hz-hp)+strat*(hz^2-hp^2)/2)'
+    symbol_names = 'gx gy rho_0 strat hz hp'
+    symbol_values = '${gx} ${gy} ${rho_0} ${strat} height '
                     '${fparse -(gx*(0.3+skew*0.3)+gy*0.3)/sqrt(gx^2+gy^2)}'
   []
 []

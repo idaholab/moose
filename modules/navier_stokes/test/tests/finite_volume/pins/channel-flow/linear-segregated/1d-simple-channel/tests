@@ -43,17 +43,6 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
-  [reject-interpolated-baffle-stress]
-    type = RunException
-    input = porous-baffle-1d.i
-    cli_args = 'LinearFVKernels/u_advection/use_two_point_stress_transmissibility=false'
-    expect_err = 'Must be true when PorousRhieChowMassFlux'
-    requirement = 'The system shall reject the interpolated-viscosity momentum stress when internal pressure jumps are present.'
-    design = 'LinearPWCNSFVMomentumFlux.md'
-    recover = false # we don't support recovery for SIMPLE yet
-    max_threads = 1 # see libmesh issue #3808
-  []
-
   [reject-ordinary-pressure-gradient]
     type = RunException
     input = porous-baffle-1d.i

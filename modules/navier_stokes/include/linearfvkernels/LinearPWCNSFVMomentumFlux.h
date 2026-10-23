@@ -18,8 +18,7 @@ class PorousRhieChowMassFlux;
  *
  * The advective contribution is divided by the porosity on each side of a face. Internal baffle
  * faces advect the upstream interstitial tangential velocity with each side's normal velocity and
- * transmit only a shear traction that depends on which sides are clear fluid. Elsewhere, the stress
- * contribution may use a two-point transmissibility.
+ * transmit only a shear traction that depends on which sides are clear fluid.
  */
 class LinearPWCNSFVMomentumFlux : public LinearWCNSFVMomentumFlux
 {
@@ -42,12 +41,6 @@ public:
   Real computeNeighborRightHandSideContribution() override;
 
 protected:
-  /// Compute the stress transmissibility, optionally using the two-point harmonic form.
-  Real computeInternalStressTransmissibility() const override;
-
-  /// Compute the explicit nonorthogonal and deviatoric corrections to the two-point stress.
-  Real computeInternalStressExplicitCorrection() const override;
-
   /// Compute the boundary advection matrix contribution with local porosity scaling.
   Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
@@ -57,19 +50,6 @@ protected:
 private:
   /// Porous Rhie-Chow object supplying porosity and pressure-baffle data.
   const PorousRhieChowMassFlux & _porous_mass_flux_provider;
-
-  struct TwoPointStressData
-  {
-    Real transmissibility;
-    Real elem_distance;
-    Real neighbor_distance;
-  };
-
-  /// Whether to use a two-point harmonic transmissibility for the stress term.
-  const bool _use_two_point_stress_transmissibility;
-
-  /// Compute the geometry and material data used by the harmonic stress discretization.
-  TwoPointStressData twoPointStressData() const;
 
   /**
    * Compute the correction that replaces the shared advected state with the baffle face state:
@@ -94,7 +74,7 @@ private:
 
   /**
    * Compute the stress on the current baffle face, per unit face area. Only a shear traction is
-   * transmitted: between two clear sides with the harmonic two-point transmissibility, from a
+   * transmitted: between two clear sides with the two-point transmissibility, from a
    * clear side against the superficial cell velocity of a porous side, and none between two
    * porous sides.
    */

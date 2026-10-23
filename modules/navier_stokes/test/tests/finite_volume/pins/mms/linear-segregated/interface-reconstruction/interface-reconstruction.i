@@ -1,30 +1,26 @@
 # Manufactured pressure-baffle problem whose superficial velocity is linear on each side of the
 # baffle. In coordinates normal (r) and tangent (t) to the interface:
-#  - rho_s * U_r = mass_flux on both sides, so mass is conserved and U_r jumps with density;
+#  - rho * U_r = mass_flux, so mass is conserved;
 #  - U_t = eps_s * tangential_velocity + tangential_slope_s * r, so the interstitial tangential
 #    velocity U_t / eps is continuous at r = 0 while the one-sided slopes may differ.
 # The forcing balances advection and reaction exactly, so the pressure is constant on each side.
-# Its jump is the BernoulliFormLossPressureJump with the interpolated face density
-# rho_f = (rho_left + rho_right) / 2 and side velocities mass_flux / (rho_f eps_s):
-#   p_right - p_left = mass_flux^2 / (2 rho_f) * (1 / eps_left^2 - 1 / eps_right^2).
+# Its jump is the BernoulliFormLossPressureJump with side velocities mass_flux / (rho eps_s):
+#   p_right - p_left = mass_flux^2 / (2 rho) * (1 / eps_left^2 - 1 / eps_right^2).
 # With viscosity, the baffle transmits only a shear traction, and only from a clear side (unit
-# porosity). Between two clear sides it is continuous,
-# mu_left * tangential_slope_left = mu_right * tangential_slope_right. Two porous sides transmit
-# none, so viscous cases with porosity below one on both sides need zero slopes. A clear side
-# shears against the superficial cell velocity of a porous side at the projected half-cell
-# distance d, so with the clear side on the left the traction balance on both rows requires
-#   mu_left * tangential_slope_left = mu_right * tangential_slope_right and
-#   (tangential_slope_left - tangential_slope_right) * d = (1 - eps_right) * tangential_velocity.
-# The normal velocity is constant on each side and carries no viscous stress. A consistent scheme
-# reproduces this piecewise-linear solution to round-off on uniform meshes.
+# porosity). Between two clear sides it is continuous, so the slopes must be equal. Two porous
+# sides transmit none, so viscous cases with porosity below one on both sides need zero slopes. A
+# clear side shears against the superficial cell velocity of a porous side at the projected
+# half-cell distance d, so with the clear side on the left the traction balance on both rows
+# requires equal slopes and
+#   tangential_slope_right * d = (1 - eps_right) * tangential_velocity.
+# The normal velocity is constant and carries no viscous stress. A consistent scheme reproduces
+# this piecewise-linear solution to round-off on uniform meshes.
 
-rho_left = 1
-rho_right = 1
+rho = 1
 eps_left = 1
 eps_right = 1
 mass_flux = 0.02
-mu_left = 0
-mu_right = 0
+mu = 0
 reaction = 10
 tangential_velocity = 0.1
 tangential_slope_left = 0.2
@@ -148,7 +144,6 @@ nonorthogonal = false
     momentum_component = x
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = ${nonorthogonal}
-    use_two_point_stress_transmissibility = true
   []
   [v_advection]
     type = LinearPWCNSFVMomentumFlux
@@ -160,7 +155,6 @@ nonorthogonal = false
     momentum_component = y
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = ${nonorthogonal}
-    use_two_point_stress_transmissibility = true
   []
   [u_pressure]
     type = LinearPWCNSFVMomentumPressure
@@ -241,7 +235,7 @@ nonorthogonal = false
   [density]
     type = ParsedFunctorMaterial
     property_name = density
-    expression = 'if(x-${skew}*y<${interface},${rho_left},${rho_right})'
+    expression = '${rho}'
   []
   [porosity]
     type = ParsedFunctorMaterial
@@ -251,7 +245,7 @@ nonorthogonal = false
   [viscosity]
     type = ParsedFunctorMaterial
     property_name = viscosity
-    expression = 'if(x-${skew}*y<${interface},${mu_left},${mu_right})'
+    expression = '${mu}'
   []
   [pressure_error]
     type = ParsedFunctorMaterial
@@ -287,9 +281,7 @@ nonorthogonal = false
   []
   [exact_normal_velocity]
     type = ParsedFunction
-    expression = 'mass_flux/if(x-skew*y<interface,rho_left,rho_right)'
-    symbol_names = 'skew interface mass_flux rho_left rho_right'
-    symbol_values = '${skew} ${interface} ${mass_flux} ${rho_left} ${rho_right}'
+    expression = '${mass_flux}/${rho}'
   []
   [exact_tangential_velocity]
     type = ParsedFunction
@@ -299,9 +291,9 @@ nonorthogonal = false
   []
   [exact_pressure]
     type = ParsedFunction
-    expression = 'if(x-skew*y<interface,0,mass_flux^2/(rho_left+rho_right)*(1/eps_left^2-1/eps_right^2))'
-    symbol_names = 'skew interface mass_flux rho_left rho_right eps_left eps_right'
-    symbol_values = '${skew} ${interface} ${mass_flux} ${rho_left} ${rho_right} ${eps_left} ${eps_right}'
+    expression = 'if(x-skew*y<interface,0,mass_flux^2/(2*rho)*(1/eps_left^2-1/eps_right^2))'
+    symbol_names = 'skew interface mass_flux rho eps_left eps_right'
+    symbol_values = '${skew} ${interface} ${mass_flux} ${rho} ${eps_left} ${eps_right}'
   []
   [exact_u]
     type = ParsedFunction

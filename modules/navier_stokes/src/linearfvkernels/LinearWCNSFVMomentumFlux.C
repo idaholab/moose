@@ -127,7 +127,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   for (const auto dir : make_range(_dim))
     _velocity_vars[dir] = velocity_vars[dir];
 
-  if (_use_deviatoric_terms)
+  if (_use_deviatoric_terms || _use_nonorthogonal_correction)
     for (const auto dir : make_range(_dim))
       _velocity_gradient_fields[dir] = &velocity_vars[dir]->requestCellGradients();
 }

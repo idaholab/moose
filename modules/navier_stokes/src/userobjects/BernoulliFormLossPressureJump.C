@@ -93,7 +93,7 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
 
   // The reversible term is the difference in dynamic pressure between the two sides. Density is
   // assumed to vary smoothly, so one face-interpolated density stands in for the owner and
-  // non-owner densities in this term.
+  // non-owner densities in this term and in the form loss.
   const Real superficial_velocity = face_mass_flux / face_rho;
   const Real velocity_owner = superficial_velocity / porosity_owner;
   const Real velocity_non_owner = superficial_velocity / porosity_non_owner;
@@ -114,8 +114,8 @@ BernoulliFormLossPressureJump::computePressureJump(const FaceInfo & fi,
     const bool use_higher_porosity = libmesh_map_find(_use_higher_porosity_by_id, boundary_id);
     const bool use_elem = use_higher_porosity ? elem_porosity >= neighbor_porosity
                                               : elem_porosity <= neighbor_porosity;
-    const Real reference_velocity = use_elem ? face_mass_flux / (elem_rho * elem_porosity)
-                                             : face_mass_flux / (neighbor_rho * neighbor_porosity);
+    const Real reference_velocity =
+        superficial_velocity / (use_elem ? elem_porosity : neighbor_porosity);
     const Real owner_to_non_owner_mass_flux = elem_is_owner ? face_mass_flux : -face_mass_flux;
     const Real flow_sign = owner_to_non_owner_mass_flux > 0.0 ? 1.0 : -1.0;
     pressure_jump -=

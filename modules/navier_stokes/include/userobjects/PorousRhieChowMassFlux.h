@@ -76,21 +76,6 @@ public:
    */
   RealVectorValue baffleFaceVelocity(const FaceInfo & fi, bool elem_side) const;
 
-  /**
-   * Return the face-normal superficial velocity mdot_f / rho_s on one side of a baffle face,
-   * oriented along FaceInfo::normal().
-   * @param fi The baffle face
-   * @param elem_side Whether to use the element-side density
-   */
-  Real baffleNormalVelocity(const FaceInfo & fi, bool elem_side) const;
-
-  /**
-   * Return the published gradient of one velocity component, available once pressure baffles
-   * have been linked to the momentum systems.
-   * @param component The velocity component
-   */
-  const LinearFVGradientReader & velocityGradient(unsigned int component) const;
-
   /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
   Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 

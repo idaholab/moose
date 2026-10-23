@@ -10,7 +10,6 @@
 #include "LinearPWCNSFVMomentumFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
 #include "LinearFVGradientReader.h"
-#include "MathFVUtils.h"
 #include "PorousRhieChowMassFlux.h"
 
 #include <cmath>
@@ -22,105 +21,13 @@ LinearPWCNSFVMomentumFlux::validParams()
 {
   InputParameters params = LinearWCNSFVMomentumFlux::validParams();
   params.addClassDescription("Momentum flux kernel with porous-specific advection handling.");
-  params.addParam<bool>(
-      "use_two_point_stress_transmissibility",
-      false,
-      "Use a harmonic two-point treatment for the normal stress term and side-local gradients "
-      "for the explicit nonorthogonal and deviatoric stress corrections. Required when the "
-      "Rhie-Chow object has pressure baffles.");
   return params;
 }
 
 LinearPWCNSFVMomentumFlux::LinearPWCNSFVMomentumFlux(const InputParameters & params)
   : LinearWCNSFVMomentumFlux(params),
-    _porous_mass_flux_provider(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object")),
-    _use_two_point_stress_transmissibility(getParam<bool>("use_two_point_stress_transmissibility"))
+    _porous_mass_flux_provider(getUserObject<PorousRhieChowMassFlux>("rhie_chow_user_object"))
 {
-  // The baffle stress splits the two-point flux into one-sided half-cell fluxes, which the
-  // interpolated-viscosity flux has no counterpart for.
-  if (_porous_mass_flux_provider.hasPressureBaffles() && !_use_two_point_stress_transmissibility)
-    paramError("use_two_point_stress_transmissibility",
-               "Must be true when PorousRhieChowMassFlux '",
-               _porous_mass_flux_provider.name(),
-               "' has pressure baffles.");
-}
-
-Real
-LinearPWCNSFVMomentumFlux::computeInternalStressTransmissibility() const
-{
-  if (!_use_two_point_stress_transmissibility)
-    return LinearWCNSFVMomentumFlux::computeInternalStressTransmissibility();
-
-  return twoPointStressData().transmissibility;
-}
-
-LinearPWCNSFVMomentumFlux::TwoPointStressData
-LinearPWCNSFVMomentumFlux::twoPointStressData() const
-{
-  const auto & fi = *_current_face_info;
-  const auto state = determineState();
-  const Real elem_viscosity = _mu(makeElemArg(fi.elemPtr()), state);
-  const Real neighbor_viscosity = _mu(makeElemArg(fi.neighborPtr()), state);
-  if (elem_viscosity == 0.0 || neighbor_viscosity == 0.0)
-    return {0.0, 0.0, 0.0};
-
-  const auto elem_to_face = fi.faceCentroid() - fi.elemCentroid();
-  const auto face_to_neighbor = fi.neighborCentroid() - fi.faceCentroid();
-  const Real elem_distance =
-      _use_nonorthogonal_correction ? std::abs(elem_to_face * fi.normal()) : elem_to_face.norm();
-  const Real neighbor_distance = _use_nonorthogonal_correction
-                                     ? std::abs(face_to_neighbor * fi.normal())
-                                     : face_to_neighbor.norm();
-
-  const Real total_distance = elem_distance + neighbor_distance;
-  const Real face_viscosity = Moose::FV::harmonicInterpolation(elem_viscosity,
-                                                               neighbor_viscosity,
-                                                               elem_distance / total_distance,
-                                                               neighbor_distance / total_distance);
-  return {face_viscosity / total_distance, elem_distance, neighbor_distance};
-}
-
-Real
-LinearPWCNSFVMomentumFlux::computeInternalStressExplicitCorrection() const
-{
-  if (!_use_two_point_stress_transmissibility)
-    return LinearWCNSFVMomentumFlux::computeInternalStressExplicitCorrection();
-
-  if ((!_use_nonorthogonal_correction || _dim == 1) && !_use_deviatoric_terms)
-    return 0.0;
-
-  const auto & fi = *_current_face_info;
-  const auto stress_data = twoPointStressData();
-  if (stress_data.transmissibility == 0.0)
-    return 0.0;
-
-  RealVectorValue elem_correction_vector;
-  RealVectorValue neighbor_correction_vector;
-
-  if (_dim > 1 && _use_nonorthogonal_correction)
-  {
-    const auto elem_to_face = fi.faceCentroid() - fi.elemCentroid();
-    const auto face_to_neighbor = fi.neighborCentroid() - fi.faceCentroid();
-
-    // Apply a separate tangential reconstruction over each half-cell, then combine both
-    // corrections through the same series resistance as the normal two-point flux. This recovers
-    // the exact normal gradient for a linear field without interpolating a gradient across a
-    // material jump.
-    elem_correction_vector = fi.normal() - elem_to_face / stress_data.elem_distance;
-    neighbor_correction_vector = fi.normal() - face_to_neighbor / stress_data.neighbor_distance;
-  }
-
-  const Real elem_correction =
-      computeCellStressExplicitCorrection(*fi.elemInfo(), elem_correction_vector);
-  const Real neighbor_correction =
-      computeCellStressExplicitCorrection(*fi.neighborInfo(), neighbor_correction_vector);
-
-  // Eliminate the common face value while enforcing one total traction on both half-cells. Both
-  // explicit corrections must participate in the same series-resistance balance as the normal
-  // two-point term; averaging them separately would not preserve an exact traction across a
-  // viscosity jump.
-  return stress_data.transmissibility * (stress_data.elem_distance * elem_correction +
-                                         stress_data.neighbor_distance * neighbor_correction);
 }
 
 void
@@ -275,10 +182,9 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
   if (!elem_clear && !neighbor_clear)
     return {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
-  const Real elem_viscosity = _mu(makeElemArg(fi.elemPtr()), state);
-  const Real neighbor_viscosity = _mu(makeElemArg(fi.neighborPtr()), state);
-  // Like the two-point stress, an inviscid clear side transmits no traction.
-  if ((elem_clear && elem_viscosity == 0.0) || (neighbor_clear && neighbor_viscosity == 0.0))
+  // Viscosity varies continuously, so the face value serves both half-cells, as on ordinary faces.
+  const Real face_viscosity = _mu(makeCDFace(fi), state);
+  if (face_viscosity == 0.0)
     return {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   const auto elem_to_face = fi.faceCentroid() - elem_info.centroid();
@@ -290,15 +196,15 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 
   // The shear traction q_t = T (I - n n) (U_N,f - U_P,f) acts between the superficial face
   // velocities of the two sides. A clear side extrapolates its face velocity across its half-cell,
-  // whose resistance is d_s / mu_s; a porous side's face velocity is its cell value (we impose this, and thus there is no resistance on the porous side). Hence
-  //   1 / T = sum of d_s / mu_s over the clear sides,
-  // which for two clear sides is the harmonic two-point transmissibility.
-  Real resistance = 0.0;
+  // whose resistance is d_s / mu_f; a porous side's face velocity is its cell value (we impose this, and thus there is no resistance on the porous side). Hence
+  //   1 / T = sum of d_s / mu_f over the clear sides,
+  // which for two clear sides is the ordinary two-point transmissibility.
+  Real distance = 0.0;
   if (elem_clear)
-    resistance += elem_distance / elem_viscosity;
+    distance += elem_distance;
   if (neighbor_clear)
-    resistance += neighbor_distance / neighbor_viscosity;
-  const Real transmissibility = 1.0 / resistance;
+    distance += neighbor_distance;
+  const Real transmissibility = face_viscosity / distance;
 
   // The explicit nonorthogonal corrections c_s = grad(U)_s . (n - d_Pf,s / d_s) of each clear
   // half-cell enter the same balance as the face values.
@@ -311,7 +217,7 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
     const auto neighbor_correction_vector = normal - face_to_neighbor / neighbor_distance;
     for (const auto component : make_range(_dim))
     {
-      const auto & gradient = _porous_mass_flux_provider.velocityGradient(component);
+      const auto & gradient = velocityGradientField(component);
       if (elem_clear)
         elem_correction(component) = gradient.gradient(elem_info) * elem_correction_vector;
       if (neighbor_clear)
@@ -336,8 +242,8 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
       transmissibility * (face_velocity_difference - (face_velocity_difference * normal) * normal);
 
   // There is no normal viscous stress on a baffle face: the pressure jump carries the normal
-  // momentum balance, and a two-point normal stress would read the jump of mdot / rho_s as a
-  // gradient. The element row adds -q_t, the neighbor row +q_t. The part proportional to the
+  // momentum balance, and a normal stress of the interstitial velocity would read the jump of
+  // mdot / (rho_f eps_s) as a gradient. The element row adds -q_t, the neighbor row +q_t. The part proportional to the
   // kernel variable is implicit; everything else, including the coupling to the other velocity
   // components, is lagged on the right-hand side.
   const Real n_i = normal(_index);
@@ -353,14 +259,14 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
   data.neighbor_rhs =
       -shear_traction(_index) + coefficient * (neighbor_velocity(_index) - elem_velocity(_index));
 
-  // The deviatoric stress is lagged in each clear half-cell with that side's viscosity.
+  // The deviatoric stress is lagged in each clear half-cell.
   if (_use_deviatoric_terms)
   {
     if (elem_clear)
       data.elem_rhs +=
-          elem_viscosity * computeCellStressExplicitCorrection(elem_info, RealVectorValue());
+          face_viscosity * computeCellStressExplicitCorrection(elem_info, RealVectorValue());
     if (neighbor_clear)
-      data.neighbor_rhs -= neighbor_viscosity *
+      data.neighbor_rhs -= face_viscosity *
                            computeCellStressExplicitCorrection(neighbor_info, RealVectorValue());
   }
 
@@ -370,7 +276,10 @@ LinearPWCNSFVMomentumFlux::baffleStressData() const
 bool
 LinearPWCNSFVMomentumFlux::isClearFluidSide(const bool elem_side) const
 {
-  return MooseUtils::absoluteFuzzyEqual(1.0 / inversePorosity(elem_side), 1.0);
+  return MooseUtils::absoluteFuzzyEqual(
+      _porous_mass_flux_provider.getFaceSidePorosity(
+          *_current_face_info, elem_side, determineState()),
+      1.0);
 }
 
 Real

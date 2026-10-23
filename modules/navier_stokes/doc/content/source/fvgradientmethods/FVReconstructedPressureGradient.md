@@ -43,8 +43,8 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    \end{equation}
 
    Replacing $\mathbf{u}_f\cdot\mathbf{n}_f$ with the corrected face-normal velocity
-   $q_f/|\mathbf{S}_f|$ (on a pressure baffle, the side's own value $\phi_f/\rho_P$, since
-   mass conservation keeps only $\rho\mathbf{u}\cdot\mathbf{n}_f$ continuous) and moving the already-known Taylor term to the right-hand side gives, for
+   $q_f/|\mathbf{S}_f|$, which is continuous across a pressure baffle because density varies
+   continuously, and moving the already-known Taylor term to the right-hand side gives, for
    every face of $P$, one linear equation for the unknown cell velocity,
 
    \begin{equation}

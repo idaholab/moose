@@ -6,8 +6,8 @@
 
 `FVVelocityJumpGreenGaussGradient` computes the cell gradient of a superficial velocity component
 without interpreting the velocity jump at a pressure baffle as a resolved slope. Mass conservation
-keeps $\rho\mathbf{U}\cdot\mathbf{n}_f$ continuous across a baffle, so the superficial velocity
-jumps wherever density or porosity jumps. An ordinary Green-Gauss gradient interpolates the two
+keeps $\rho\mathbf{U}\cdot\mathbf{n}_f$ continuous across a baffle and density varies
+continuously, but the tangential superficial velocity jumps wherever porosity jumps. An ordinary Green-Gauss gradient interpolates the two
 cell values to the face and turns a jump $\Delta U$ into a slope of order $\Delta U/h$.
 
 On an ordinary internal face this method uses the standard interpolated face value. On a baffle

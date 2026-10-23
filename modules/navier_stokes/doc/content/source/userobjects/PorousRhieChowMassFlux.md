@@ -33,7 +33,8 @@ The pressure variable's [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGa
 then removes that jump when interpolating pressure across each baffle. A zero jump recovers the
 standard Green-Gauss face value exactly.
 
-The superficial velocity also jumps across a baffle wherever density or porosity does. Every
+The tangential superficial velocity also jumps across a baffle wherever porosity does. Density
+and viscosity must vary continuously. Every
 velocity variable must therefore use
 [FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md) as its default gradient
 method. On baffle faces the $\rho\mathbf{H}/\mathbf{A}$ flux of each side is weighted with the same

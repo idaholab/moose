@@ -1,21 +1,20 @@
 rho = 1
-mu_left = 1
-mu_right = 4
-eps_left = 1
-eps_right = 1
+mu = 1
+eps_left = 0.4
+eps_right = 0.8
 interface = 0.5
 skew = 0.35
-normal_velocity = 1
-tangential_velocity = 0
-tangential_gradient = 0.4
-tangential_curvature = 0
+normal_velocity = 0
+tangential_velocity = 1
+tangential_gradient = 0
+tangential_curvature = 0.5
 shear_traction = 2
 
 # In interface-normal coordinates (r,t), the manufactured velocity is
 # v_n = normal_velocity + tangential_gradient*t and
 # v_t = tangential_velocity + (shear_traction/mu - tangential_gradient)*r
 #       + tangential_curvature*r^2. It is divergence-free and
-# mu*(d(v_t)/dr + d(v_n)/dt) = shear_traction on both sides of the viscosity jump.
+# mu*(d(v_t)/dr + d(v_n)/dt) = shear_traction on both sides of the porosity interface.
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -97,7 +96,6 @@ shear_traction = 2
     v = vel_y
     momentum_component = x
     rhie_chow_user_object = rc
-    use_two_point_stress_transmissibility = true
     use_nonorthogonal_correction = true
     use_deviatoric_terms = true
   []
@@ -110,7 +108,6 @@ shear_traction = 2
     v = vel_y
     momentum_component = y
     rhie_chow_user_object = rc
-    use_two_point_stress_transmissibility = true
     use_nonorthogonal_correction = true
     use_deviatoric_terms = true
   []
@@ -182,17 +179,10 @@ shear_traction = 2
 []
 
 [FunctorMaterials]
-  [viscosity_left]
+  [viscosity]
     type = GenericFunctorMaterial
-    block = left
     prop_names = dynamic_viscosity
-    prop_values = ${mu_left}
-  []
-  [viscosity_right]
-    type = GenericFunctorMaterial
-    block = right
-    prop_names = dynamic_viscosity
-    prop_values = ${mu_right}
+    prop_values = ${mu}
   []
   [porosity_left]
     type = GenericFunctorMaterial
@@ -229,35 +219,28 @@ shear_traction = 2
   []
   [exact_tangential_velocity]
     type = ParsedFunction
-    expression = 'Vt+(q/if(x-skew*y<interface,mu_left,mu_right)-b)'
-                 '*(x-skew*y-interface)/sqrt(1+skew^2)'
+    expression = 'Vt+(q/mu-b)*(x-skew*y-interface)/sqrt(1+skew^2)'
                  '+c*((x-skew*y-interface)/sqrt(1+skew^2))^2'
-    symbol_names = 'interface skew mu_left mu_right q b Vt c'
-    symbol_values = '${interface} ${skew} ${mu_left} ${mu_right} ${shear_traction} ${tangential_gradient} ${tangential_velocity} ${tangential_curvature}'
+    symbol_names = 'interface skew mu q b Vt c'
+    symbol_values = '${interface} ${skew} ${mu} ${shear_traction} ${tangential_gradient} ${tangential_velocity} ${tangential_curvature}'
   []
   [tangential_velocity_derivative]
     type = ParsedFunction
     expression = 'q/mu-b+2*c*(x-skew*y-interface)/sqrt(1+skew^2)'
     symbol_names = 'interface skew mu q b c'
-    symbol_values = '${interface} ${skew} viscosity ${shear_traction} ${tangential_gradient} ${tangential_curvature}'
+    symbol_values = '${interface} ${skew} ${mu} ${shear_traction} ${tangential_gradient} ${tangential_curvature}'
   []
   [forcing_u]
     type = ParsedFunction
     expression = '(b*vt+skew*(dvtdr*vn-2*mu*c))/sqrt(1+skew^2)'
     symbol_names = 'skew mu vn vt dvtdr b c'
-    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
+    symbol_values = '${skew} ${mu} exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
   []
   [forcing_v]
     type = ParsedFunction
     expression = '(-skew*b*vt+dvtdr*vn-2*mu*c)/sqrt(1+skew^2)'
     symbol_names = 'skew mu vn vt dvtdr b c'
-    symbol_values = '${skew} viscosity exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
-  []
-  [viscosity]
-    type = ParsedFunction
-    expression = 'if(x-skew*y<interface,mu_left,mu_right)'
-    symbol_names = 'interface skew mu_left mu_right'
-    symbol_values = '${interface} ${skew} ${mu_left} ${mu_right}'
+    symbol_values = '${skew} ${mu} exact_normal_velocity exact_tangential_velocity tangential_velocity_derivative ${tangential_gradient} ${tangential_curvature}'
   []
 []
 

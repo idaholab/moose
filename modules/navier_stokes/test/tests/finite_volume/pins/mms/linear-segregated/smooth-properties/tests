@@ -1,0 +1,47 @@
+[Tests]
+  issues = '#31995'
+  design = 'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+           'FVReconstructedPressureGradient.md SIMPLE.md'
+
+  [smooth-properties]
+    requirement = 'The system shall converge, without non-decaying oscillations, to a manufactured '
+                  'porous-flow solution with continuously varying density and viscosity'
+
+    [viscous]
+      type = MMSTest
+      input = test.py
+      test_case = TestViscous
+      min_parallel = 2
+      max_threads = 1 # see libmesh issue #3808
+      heavy = true
+      detail = 'with the full viscous stress tensor, at second order,'
+    []
+    [inviscid]
+      type = MMSTest
+      input = test.py
+      test_case = TestInviscid
+      min_parallel = 2
+      max_threads = 1 # see libmesh issue #3808
+      heavy = true
+      detail = 'without viscosity,'
+    []
+    [viscous-baffle]
+      type = MMSTest
+      input = test.py
+      test_case = TestViscousBaffle
+      min_parallel = 2
+      max_threads = 1 # see libmesh issue #3808
+      heavy = true
+      detail = 'across a pressure baffle with form loss between two clear sides, and'
+    []
+    [inviscid-porosity-baffle]
+      type = MMSTest
+      input = test.py
+      test_case = TestInviscidPorosityBaffle
+      min_parallel = 2
+      max_threads = 1 # see libmesh issue #3808
+      heavy = true
+      detail = 'without viscosity across a pressure baffle with form loss and a porosity jump.'
+    []
+  []
+[]

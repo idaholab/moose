@@ -350,25 +350,6 @@ PorousRhieChowMassFlux::baffleFaceVelocity(const FaceInfo & fi, const bool elem_
 }
 
 Real
-PorousRhieChowMassFlux::baffleNormalVelocity(const FaceInfo & fi, const bool elem_side) const
-{
-  mooseAssert(fi.neighborPtr() && faceIsBaffle(fi), "Baffle face states require a baffle face.");
-
-  // Mass conservation makes rho U.n continuous, so each side recovers its own normal velocity
-  // from the shared face mass flux.
-  const Elem * const elem = elem_side ? fi.elemPtr() : fi.neighborPtr();
-  return _face_mass_flux.evaluate(&fi) / _rho(makeElemArg(elem), Moose::currentState());
-}
-
-const LinearFVGradientReader &
-PorousRhieChowMassFlux::velocityGradient(const unsigned int component) const
-{
-  mooseAssert(component < _velocity_gradients.size(),
-              "Velocity gradients are linked only when pressure baffles are present.");
-  return *_velocity_gradients[component];
-}
-
-Real
 PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
                                                          const unsigned int component) const
 {

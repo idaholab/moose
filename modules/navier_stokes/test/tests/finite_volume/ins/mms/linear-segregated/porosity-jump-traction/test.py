@@ -14,7 +14,7 @@ def run_spatial(*args, **kwargs):
 
 def check_convergence(test, output_base, labels, *cli_args, minimum_slopes=None):
     data = run_spatial(
-        "traction-jump.i",
+        "porosity-jump-traction.i",
         4,
         *cli_args,
         y_pp=labels,
@@ -42,11 +42,6 @@ def check_convergence(test, output_base, labels, *cli_args, minimum_slopes=None)
             test.assertTrue(fuzzyAbsoluteEqual(slope, 2.0, 0.2))
 
 
-class TestDiscontinuousViscosityTraction(unittest.TestCase):
-    def test(self):
-        check_convergence(self, "traction-jump", ["L2u", "L2v", "L2p"])
-
-
 class TestDiscontinuousPorosityTraction(unittest.TestCase):
     def test(self):
         # This case has an analytically zero pressure correction, so its normalized residual
@@ -55,13 +50,6 @@ class TestDiscontinuousPorosityTraction(unittest.TestCase):
             self,
             "porosity-jump",
             ["L2u", "L2v", "L2p"],
-            "eps_left=0.4",
-            "eps_right=0.8",
-            "mu_right=1",
-            "normal_velocity=0",
-            "tangential_velocity=1",
-            "tangential_gradient=0",
-            "tangential_curvature=0.5",
             "Executioner/pressure_absolute_tolerance=1e-4",
             minimum_slopes={"L2p": 1.5},
         )

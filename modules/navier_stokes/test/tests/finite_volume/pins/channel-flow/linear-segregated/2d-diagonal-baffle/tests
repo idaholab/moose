@@ -15,7 +15,7 @@
     type = 'CSVDiff'
     input = porous-baffle-straight-diagonal.i
     csvdiff = 'porous-baffle-straight-diagonal-complete-stress_out.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_right_of_interface_0001.csv'
-    requirement = 'The system shall include conservative nonorthogonal and deviatoric viscous stress corrections with harmonic two-point transmissibility across a diagonal porous baffle with discontinuous viscosity.'
+    requirement = 'The system shall include conservative nonorthogonal and deviatoric viscous stress corrections across a diagonal porous baffle.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
              'FVPressureJumpGreenGaussGradient.md LinearFVPressureCorrectionDiffusionJump.md '
              'LinearPWCNSFVMomentumFlux.md'
@@ -24,7 +24,6 @@
                "LinearFVKernels/u_advection/use_deviatoric_terms=true "
                "LinearFVKernels/v_advection/use_deviatoric_terms=true "
                "mu=0.2 "
-               "mu_zone_2=2.0 "
                "Outputs/file_base=porous-baffle-straight-diagonal-complete-stress_out"
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808

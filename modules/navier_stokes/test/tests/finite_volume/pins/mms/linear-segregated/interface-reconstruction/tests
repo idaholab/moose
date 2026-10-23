@@ -28,16 +28,6 @@
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []
-    [density-jump]
-      type = CSVDiff
-      input = interface-reconstruction.i
-      csvdiff = density-jump.csv
-      cli_args = 'rho_right=2 Outputs/file_base=density-jump'
-      abs_zero = 1e-10
-      detail = 'with a density jump and both normal and tangential velocity,'
-      recover = false # we don't support recovery for SIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
     [porosity-jump]
       type = CSVDiff
       input = interface-reconstruction.i
@@ -48,23 +38,13 @@
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []
-    [viscous-density-jump]
-      type = CSVDiff
-      input = interface-reconstruction.i
-      csvdiff = viscous-density-jump.csv
-      cli_args = 'mu_left=0.01 mu_right=0.01 rho_right=2 Outputs/file_base=viscous-density-jump'
-      abs_zero = 1e-10
-      detail = 'with viscosity and a density jump,'
-      recover = false # we don't support recovery for SIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
     [viscous-porosity-jump]
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = viscous-porosity-jump.csv
-      # Clear left side: with d = 1 / (2 nx) = 1 / 16, the slopes 1.6 and 0.8 satisfy
-      # mu_left * 1.6 = mu_right * 0.8 and (1.6 - 0.8) * d = (1 - eps_right) * 0.1.
-      cli_args = 'mu_left=0.01 mu_right=0.02 tangential_slope_left=1.6 tangential_slope_right=0.8 '
+      # Clear left side: continuous viscosity requires equal slopes, and with d = 1 / (2 nx) = 1 / 16
+      # the slope 0.8 satisfies 0.8 * d = (1 - eps_right) * 0.1.
+      cli_args = 'mu=0.01 tangential_slope_left=0.8 tangential_slope_right=0.8 '
                  'eps_right=0.5 Outputs/file_base=viscous-porosity-jump'
       abs_zero = 1e-10
       detail = 'with viscosity and a clear side shearing against a porous side,'
@@ -75,7 +55,7 @@
       type = CSVDiff
       input = interface-reconstruction.i
       csvdiff = viscous-porous-porous.csv
-      cli_args = 'mu_left=0.01 mu_right=0.02 eps_left=0.8 eps_right=0.5 rho_right=2 '
+      cli_args = 'mu=0.01 eps_left=0.8 eps_right=0.5 '
                  'tangential_slope_left=0 tangential_slope_right=0 '
                  'Outputs/file_base=viscous-porous-porous'
       abs_zero = 1e-10
@@ -88,14 +68,14 @@
       input = interface-reconstruction.i
       csvdiff = skewed.csv
       # Clear left side: the projected half-cell distance is d = 1 / (2 nx sqrt(1 + skew^2)), and
-      # the slopes satisfy the clear-porous balance of the viscous-porosity-jump case.
-      cli_args = 'skew=0.25 nonorthogonal=true mu_left=0.01 mu_right=0.02 '
-                 'tangential_slope_left=1.6492422502470643 '
-                 'tangential_slope_right=0.8246211251235321 eps_right=0.5 rho_right=2 '
+      # the equal slopes satisfy the clear-porous balance of the viscous-porosity-jump case.
+      cli_args = 'skew=0.25 nonorthogonal=true mu=0.01 '
+                 'tangential_slope_left=0.8246211251235321 '
+                 'tangential_slope_right=0.8246211251235321 eps_right=0.5 '
                  'Outputs/file_base=skewed'
       abs_zero = 1e-10
-      detail = 'on a uniform parallelogram mesh with nonorthogonal correction and jumps in '
-               'density, porosity, and viscosity.'
+      detail = 'on a uniform parallelogram mesh with nonorthogonal correction and a porosity '
+               'jump.'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []

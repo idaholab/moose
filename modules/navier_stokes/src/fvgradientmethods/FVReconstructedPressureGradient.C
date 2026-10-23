@@ -428,12 +428,9 @@ FVReconstructedPressureGradient::assembleFaceProjection(
   // corrected flux, including zero normal flux on impermeable boundaries.
   const Real normal_alignment =
       pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH && !elem_has_info ? -1.0 : 1.0;
-  // The superficial normal velocity jumps with density across a pressure baffle. Each side
-  // recovers its own face value from the shared mass flux and its own density.
-  const bool baffle_face = pressure_face_type == FaceInfo::VarFaceNeighbors::BOTH &&
-                           _porous_rhie_chow && _porous_rhie_chow->faceIsBaffle(*fi);
-  const Real face_flux = baffle_face ? _porous_rhie_chow->baffleNormalVelocity(*fi, elem_has_info)
-                                     : rc.getVolumetricFaceFlux(*fi);
+  // Density varies continuously, so the face density also gives the normal velocity on both sides
+  // of a pressure baffle.
+  const Real face_flux = rc.getVolumetricFaceFlux(*fi);
   mooseAssert(std::isfinite(face_flux), "Corrected face flux must be finite.");
   Real face_normal_reconstructed_quantity = face_flux * normal_alignment;
 

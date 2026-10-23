@@ -33,28 +33,14 @@
 
   [baffle-body-force]
     requirement = 'The system shall keep a fluid at rest, with the hydrostatic pressure, to round-off '
-                  'across a pressure baffle normal to gravity'
-
-    [porosity-jump]
-      type = CSVDiff
-      input = hydrostatic-jump.i
-      csvdiff = level-porosity-jump.csv
-      cli_args = 'eps_left=0.39 gx=-9.81 gy=0 Outputs/file_base=level-porosity-jump'
-      abs_zero = 1e-10
-      detail = 'with a porosity jump, and'
-      recover = false # we don't support recovery for SIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
-    [density-jump]
-      type = CSVDiff
-      input = hydrostatic-jump.i
-      csvdiff = level-density-jump.csv
-      cli_args = 'eps_left=0.39 rho_left=2 gx=-9.81 gy=0 Outputs/file_base=level-density-jump'
-      abs_zero = 1e-10
-      detail = 'with porosity and density jumps.'
-      recover = false # we don't support recovery for SIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
+                  'across a pressure baffle normal to gravity with a porosity jump'
+    type = CSVDiff
+    input = hydrostatic-jump.i
+    csvdiff = level-porosity-jump.csv
+    cli_args = 'eps_left=0.39 gx=-9.81 gy=0 Outputs/file_base=level-porosity-jump'
+    abs_zero = 1e-10
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
   []
 
   [oblique-baffle]
