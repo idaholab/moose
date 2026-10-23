@@ -686,6 +686,11 @@ public:
 
   /**
    * Return list of blocks to which the given node belongs.
+   *
+   * The node may belong to any element this rank holds, local or ghosted, including the parent
+   * elements that adaptive refinement keeps. Callers that loop over more than this rank's local
+   * nodes rely on this, e.g. MultiApp transfers looping over a parent or child app's mesh, and
+   * MoveNodesToGeometryModifierBase looping over every node of a replicated mesh.
    */
   const std::set<SubdomainID> & getNodeBlockIds(const Node & node) const;
 
@@ -1713,8 +1718,27 @@ protected:
       _elem_to_side_to_qp_to_quadrature_nodes;
   std::vector<BndNode> _extra_bnd_nodes;
 
-  /// list of nodes that belongs to a specified block (domain)
-  std::map<dof_id_type, std::set<SubdomainID>> _block_node_list;
+  /**
+   * Whether the elements of the mesh all have the same subdomain, according to the subdomain set
+   * that libMesh caches, which cacheInfo() refreshes. In that case cacheInfo() skips filling
+   * _node_block and _interface_node_blocks, and getNodeBlockIds() returns that set for every node.
+   */
+  bool hasSingleSubdomain() const { return getMesh().get_mesh_subdomains().size() == 1; }
+
+  /// The subdomain of the elements incident on a node, for the nodes whose incident elements all
+  /// agree, which is every node away from a subdomain interface. Left empty when
+  /// hasSingleSubdomain().
+  std::unordered_map<dof_id_type, SubdomainID> _node_block;
+
+  /// The full subdomain set of the nodes whose incident elements disagree, that is the nodes on a
+  /// subdomain interface. Interface nodes are typically a small fraction of the mesh, so storing a
+  /// set for each of them costs little.
+  std::unordered_map<dof_id_type, std::set<SubdomainID>> _interface_node_blocks;
+
+  /// For each subdomain, a std::set containing just that subdomain ID, e.g. {3} for subdomain 3.
+  /// getNodeBlockIds() returns a set reference, so for a node in _node_block, which stores only a
+  /// SubdomainID, it returns the stored set for that subdomain.
+  std::unordered_map<SubdomainID, std::set<SubdomainID>> _block_singletons;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
   std::map<boundary_id_type, std::vector<dof_id_type>> _node_set_nodes;
