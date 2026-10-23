@@ -84,7 +84,10 @@ that request requires.
   obvious from their names.
 - Omit process narration and edit history. A comment records what the code does
   and why, not the sequence of changes or investigation that produced it.
-- Use ASCII characters.
+- Use only the Unicode that `scripts/pre_check.py` allows in `.C`, `.h`, `.i`, and `.py`
+  files: Latin accented letters, Greek, superscripts and subscripts, the micro sign, and
+  the math symbols it names (e.g. `∇`, `∂`, `±`, `×`, `≈`). Use ASCII for everything else,
+  including dashes and quotes. Check a branch with `CHECK_UNICODE=1 scripts/pre_check.py`.
 
 ## 5. Code Style
 
