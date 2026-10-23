@@ -1,6 +1,5 @@
 [Tests]
   design = 'ScalarKernels/index.md'
-  issues = '#18535'
   [jacobian]
     type = PetscJacobianTester
     input = 'ad_scalar_kernel.i'
@@ -11,5 +10,31 @@
     max_parallel = 1
     # AD scalar kernels only work with global AD indexing
     requirement = 'The system shall be able to correctly compute the Jacobian of an ADScalarKernel using automatic differentiation.'
+    issues = '#18535'
+  []
+  [functor]
+    type = CSVDiff
+    input = 'ad_functor_scalar_test_kernel.i'
+    csvdiff = 'ad_functor_scalar_test_kernel_out.csv'
+    requirement = 'The system shall allow an ADScalarKernel to evaluate functors, including functions, functor materials, postprocessors, and scalar variables, at a point given by the user.'
+    issues = '#34191'
+  []
+  [functor_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_functor_scalar_test_kernel.i'
+    cli_args = 'Outputs/csv=false'
+    run_sim = true
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall compute the exact Jacobian of an ADScalarKernel that evaluates functors depending on scalar variables.'
+    issues = '#34191'
+  []
+  [field_variable_error]
+    type = RunException
+    input = 'ad_functor_scalar_test_kernel.i'
+    cli_args = 'AuxVariables/v/family=LAGRANGE ScalarKernels/constant_source/functor=v'
+    expect_err = 'Evaluation at a point is not supported for functor v'
+    requirement = 'The system shall report an error when a functor that requires mesh information, such as a field variable, is evaluated at a point without an element.'
+    issues = '#34191'
   []
 []
