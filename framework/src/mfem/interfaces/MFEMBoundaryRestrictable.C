@@ -28,7 +28,7 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
                                                    const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _boundary_names(parameters.get<std::vector<BoundaryName>>("boundary")),
-    _boundary_attributes(boundariesToAttributes())
+    _boundary_attributes(boundariesToAttributes(parameters))
 {
   if (!_boundary_attributes.IsEmpty())
     mfem::common::AttrToMarker(
@@ -36,7 +36,7 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
 }
 
 mfem::Array<int>
-MFEMBoundaryRestrictable::boundariesToAttributes()
+MFEMBoundaryRestrictable::boundariesToAttributes(const InputParameters & parameters)
 {
   mfem::Array<int> attributes(_boundary_names.size());
   auto & mesh = getMesh();
@@ -44,7 +44,7 @@ MFEMBoundaryRestrictable::boundariesToAttributes()
       _boundary_names.begin(),
       _boundary_names.end(),
       attributes.begin(),
-      [&mesh](const BoundaryName & boundary) -> int
+      [&mesh, &parameters](const BoundaryName & boundary) -> int
       {
         try
         {
@@ -54,6 +54,8 @@ MFEMBoundaryRestrictable::boundariesToAttributes()
         catch (...)
         {
           // It was not
+          if (!mesh.bdr_attribute_sets.AttributeSetExists(boundary))
+            parameters.paramError("boundary", "the mesh has no boundary named '", boundary, "'.");
           auto & boundary_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary);
           if (boundary_ids.Size() != 1)
             mooseError(
@@ -61,6 +63,11 @@ MFEMBoundaryRestrictable::boundariesToAttributes()
           return boundary_ids[0];
         }
       });
+
+  // The ID -1 stands for every boundary
+  for (const auto attribute : attributes)
+    if (attribute != -1 && mesh.bdr_attributes.Find(attribute) == -1)
+      parameters.paramError("boundary", "the mesh has no boundary with ID ", attribute, ".");
   return attributes;
 }
 
