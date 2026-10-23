@@ -10,6 +10,8 @@
 #include "UELThread.h"
 #include "NonlinearSystemBase.h"
 
+#include <limits>
+
 UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _sys(fe_problem.currentNonlinearSystem()),
@@ -18,8 +20,16 @@ UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
     _aux_variables(uel_uo.getAuxVariables()),
     _uel_uo(uel_uo),
     _uel(uel_uo.getPlugin()),
-    _statev_copy(uel_uo._nstatev)
+    _lflags{},
+    _statev_copy(uel_uo._nstatev),
+    _min_pnewdt(std::numeric_limits<Real>::max())
 {
+  // static analysis
+  _lflags[0] = 1;
+
+  // small displacement analysis
+  _lflags[1] = 0;
+
   // general solve step
   _lflags[3] = 0;
 
@@ -38,7 +48,8 @@ UELThread::UELThread(UELThread & x, Threads::split split)
     _uel_uo(x._uel_uo),
     _uel(x._uel),
     _lflags(x._lflags),
-    _statev_copy(_uel_uo._nstatev)
+    _statev_copy(_uel_uo._nstatev),
+    _min_pnewdt(std::numeric_limits<Real>::max())
 {
 }
 
@@ -80,14 +91,14 @@ UELThread::onElement(const Elem * elem)
 
   // Get solution values
   _all_dof_values.resize(ndofel);
-
-  _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
   _all_dof_increments.resize(ndofel);
-  _sys.solutionOld().get(_all_dof_indices, _all_dof_values);
+
+  _sys.currentSolution()->get(_all_dof_indices, _all_dof_values);
+  _sys.solutionOld().get(_all_dof_indices, _all_dof_increments);
 
   mooseAssert(_all_dof_values.size() == _all_dof_increments.size(), "Inconsistent solution size.");
   for (const auto i : index_range(_all_dof_values))
-    _all_dof_increments[i] -= _all_dof_values[i];
+    _all_dof_increments[i] = _all_dof_values[i] - _all_dof_increments[i];
 
   _all_udot_dof_values.resize(ndofel);
   _all_udotdot_dof_values.resize(ndofel);
@@ -139,14 +150,7 @@ UELThread::onElement(const Elem * elem)
   const bool do_jacobian = _sys.hasMatrix(_sys.systemMatrixTag());
 
   // set flags
-  if (do_residual && do_jacobian)
-    _lflags[2] = 0;
-  else if (!do_residual && do_jacobian)
-    _lflags[2] = 4;
-  else if (do_residual && !do_jacobian)
-    _lflags[2] = 5;
-  else
-    _lflags[2] = 0;
+  _lflags[2] = AbaqusUserElement::computeLFlag3(do_residual, do_jacobian);
 
   // copy coords
   int dim = _uel_uo._dim;
@@ -159,87 +163,83 @@ UELThread::onElement(const Elem * elem)
   _local_re.resize(ndofel);
   _local_ke.resize(ndofel, ndofel);
 
-  int nrhs = 1;               // : RHS should contain the residual vector
-  int jtype = _uel_uo._jtype; // type of user element
-
   Real dt = _fe_problem.dt();
   Real time = _fe_problem.time();
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
 
-  std::array<Real, 8> energy;
-  int jelem = elem->id() + 1; // User-assigned element number
-  Real pnewdt;
-
-  int npredf = nvar_aux; // Number of external fields.
-
-  // dummy vars
-  Real rdummy = 0;
-  int idummy = 0;
-
   // stateful data
   if (_uel_uo._nstatev)
-  {
-    const auto & statev_old = _uel_uo._statev[_uel_uo._statev_index_old][elem->id()];
-    std::copy(statev_old.begin(), statev_old.end(), _statev_copy.begin());
-  }
+    _statev_copy = libmesh_map_find(_uel_uo._statev[_uel_uo._statev_index_old], elem->id());
+  if (_uel_uo._use_energy)
+    _energy_copy = libmesh_map_find(_uel_uo._energy_old, elem->id());
+  else
+    _energy_copy = {};
 
   // call the plugin
-  _uel(_local_re.get_values().data(),
-       _local_ke.get_values().data(),
-       _statev_copy.data(),
-       energy.data(),
-       &ndofel,
-       &nrhs,
-       &_uel_uo._nstatev,
-       _uel_uo._props.data(),
-       &_uel_uo._nprops,
-       _coords.data(),
-       &dim,
-       &nnode,
-       _all_dof_values.data() /* U[] */,
-       _all_dof_increments.data() /* DU[] */,
-       _all_udot_dof_values.data() /* V[] */,
-       _all_udotdot_dof_values.data() /* A[] */,
-       &jtype,
-       times.data(),
-       &dt,
-       &idummy /* KSTEP */,
-       &idummy /* KINC */,
-       &jelem,
-       nullptr /* PARAMS[] */,
-       &idummy /* NDLOAD */,
-       nullptr /* JDLTYP[] */,
-       nullptr /* ADLMAG[] */,
-       _aux_var_values_to_uel.data() /* PREDEF[] */,
-       &npredf /* NPREDF */,
-       nullptr /* LFLAGS[] */,
-       &ndofel /* MLVARX */,
-       nullptr /* DDLMAG[] */,
-       &idummy /* MDLOAD */,
-       &pnewdt,
-       nullptr /* JPROPS[] */,
-       &idummy /* NJPROP */,
-       &rdummy /* PERIOD */
-  );
+  auto & args = _uel_args;
+  args.rhs = _local_re.get_values().data();
+  args.amatrx = _local_ke.get_values().data();
+  args.svars = _statev_copy.data();
+  args.energy = _energy_copy.data();
+  args.ndofel = ndofel;
+  args.nrhs = 1; // RHS should contain the residual vector
+  args.nsvars = _uel_uo._nstatev;
+  args.props = _uel_uo._props.data();
+  args.nprops = _uel_uo._nprops;
+  args.coords = _coords.data();
+  args.mcrd = dim;
+  args.nnode = nnode;
+  args.u = _all_dof_values.data();
+  args.du = _all_dof_increments.data();
+  args.v = _all_udot_dof_values.data();
+  args.a = _all_udotdot_dof_values.data();
+  args.jtype = _uel_uo._jtype; // type of user element
+  args.time = times.data();
+  args.dtime = dt;
+  args.kstep = 0;
+  args.kinc = 0;
+  args.jelem = elem->id() + 1; // User-assigned element number
+  args.params = nullptr;
+  args.ndload = 0;
+  args.jdltyp = nullptr;
+  args.adlmag = nullptr;
+  args.predef = _aux_var_values_to_uel.data();
+  args.npredf = nvar_aux; // Number of external fields.
+  args.lflags = _lflags.data();
+  args.mlvarx = ndofel;
+  args.ddlmag = nullptr;
+  args.mdload = 0;
+  args.pnewdt = std::numeric_limits<Real>::max();
+  args.jprops = nullptr;
+  args.njprop = 0;
+  args.period = 0;
+  args.call(_uel);
+
+  AbaqusUserElement::updatePNewDt(_min_pnewdt, args.pnewdt);
 
   if (_uel_uo._nstatev)
-  {
-    auto & statev_current = _uel_uo._statev[_uel_uo._statev_index_current][elem->id()];
-    std::copy(_statev_copy.begin(), _statev_copy.end(), statev_current.begin());
-  }
+    libmesh_map_find(_uel_uo._statev[_uel_uo._statev_index_current], elem->id()) = _statev_copy;
+  if (_uel_uo._use_energy)
+    libmesh_map_find(_uel_uo._energy, elem->id()) = _energy_copy;
 
-  // write to the residual vector
-  // sign of 'residuals' has been tested with external loading and matches that of moose-umat
-  // setups.
-  if (do_residual)
-    _uel_uo.addResiduals(
-        _fe_problem.assembly(_tid, _sys.number()), _local_re, _all_dof_indices, -1.0);
+  _uel_uo.assembleUEL(_fe_problem.assembly(_tid, _sys.number()),
+                      _local_re,
+                      _local_ke,
+                      _local_ke_T,
+                      _all_dof_indices,
+                      do_residual,
+                      do_jacobian);
+}
 
-  // write to the Jacobian (hope we don't have to transpose...)
-  if (do_jacobian)
-    _uel_uo.addJacobian(_fe_problem.assembly(_tid, _sys.number()),
-                        _local_ke,
-                        _all_dof_indices,
-                        _all_dof_indices,
-                        -1.0);
+void
+UELThread::pre()
+{
+  // reset pnewdt for the next element loop
+  _min_pnewdt = std::numeric_limits<Real>::max();
+}
+
+void
+UELThread::join(const UELThread & other)
+{
+  AbaqusUserElement::updatePNewDt(_min_pnewdt, other._min_pnewdt);
 }

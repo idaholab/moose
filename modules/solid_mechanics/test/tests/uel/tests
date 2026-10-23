@@ -1,6 +1,8 @@
 [Tests]
   issues = '#25163'
   design = 'AbaqusUserElement.md'
+  # the inputs pin a nodeset by node id, and a distributed mesh renumbers the nodes
+  mesh_mode = REPLICATED
 
   [build_uel_tri_tests]
     type = RunCommand
@@ -198,5 +200,16 @@
     # method: only test plugins in dbg and opt.
     # installation_type=in_tree: see #25279
     capabilities = 'method=dbg & installation_type=in_tree'
+  []
+
+  [uel_energy]
+    type = CSVDiff
+    input = uel_energy.i
+    csvdiff = uel_energy_out.csv
+    design = 'AbaqusTotalUELEnergy.md'
+    issues = '#29382'
+    requirement = 'The system shall sum the element energies that a UEL plugin computes, and the strain energy of a linear elastic body under a traction load shall equal half the work of that traction.'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 []

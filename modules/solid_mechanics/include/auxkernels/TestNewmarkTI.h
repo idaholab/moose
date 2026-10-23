@@ -11,15 +11,15 @@
 
 #include "AuxKernel.h"
 
+/**
+ * Stores the velocity/acceleration computed using the time integrator into
+ * the provided auxvariable
+ */
 class TestNewmarkTI : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Stores the velocity/acceleration computed using the time integrator into
-   * the provided auxvariable
-   */
   TestNewmarkTI(const InputParameters & parameters);
 
   virtual ~TestNewmarkTI() {}
