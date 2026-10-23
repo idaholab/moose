@@ -82,8 +82,8 @@ packages:
       - scripts/update_and_rebuild_libmesh.sh
   # dependers: pyhit, moose-dev
   wasp:
-    version: 2026.08.13_ce25dcd
-    build_number: 2
+    version: 2026.10.22_4eb02a2
+    build_number: 0
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
