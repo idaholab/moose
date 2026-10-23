@@ -114,7 +114,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {% if PROFILING | to_bool %}
     # pprof and its dependencies
     GPERFTOOLS_VERSION=2.18.1
-    GO_VERSION=1.27.1
+    GO_VERSION=1.27.3
     PPROF_SHA=a0b0bb1d4134f37be44de6c328680339b0fc13ad
 {%- endif %}
 
