@@ -1,0 +1,20 @@
+[Tests]
+  design = 'MechanicalCopperProperties.md'
+  issues = '#33677'
+
+  [E]
+    type = GoogleTest
+    unit_test = MechanicalCopperPropertiesTest.E
+    requirement = 'The system shall compute Young's modulus for OFHC copper at cryogenic and room temperatures using NIST quadratic correlation and verify analytical derivatives against finite differences.'
+  []
+  [nu]
+    type = GoogleTest
+    unit_test = MechanicalCopperPropertiesTest.nu
+    requirement = 'The system shall compute Poisson's ratio for OFHC copper at cryogenic and room temperatures using NIST quadratic correlation and verify analytical derivatives against finite differences.'
+  []
+  [alpha]
+    type = GoogleTest
+    unit_test = MechanicalCopperPropertiesTest.alpha
+    requirement = 'The system shall compute coefficient of thermal expansion for OFHC copper at cryogenic and room temperatures using NIST logarithmic polynomial correlation and verify analytical derivatives against finite differences.'
+  []
+[]
