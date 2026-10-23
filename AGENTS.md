@@ -148,7 +148,12 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 9. Writing MOOSE Contribution Materials
+## 9. Communication
+
+Be *very* concise in replies, PR and review comments, and contribution materials. Give the result
+and what the reader needs to act on it; leave out detail they can ask for in a follow-up.
+
+## 10. Writing MOOSE Contribution Materials
 
 Apply these rules to MOOSE contribution materials and their drafts: commit messages, pull
 request descriptions, review reports and comments, documentation, and code comments. They do

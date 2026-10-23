@@ -117,7 +117,7 @@ regolds, compiler-warning fixes) belong under `## MOOSE Improvements`,
 
 ## PR body
 
-Not the standard `.github/PULL_REQUEST_TEMPLATE.md`. `AGENTS.md` section 9 says not to
+Not the standard `.github/PULL_REQUEST_TEMPLATE.md`. `AGENTS.md` section 10 says not to
 impose boilerplate headings on a PR description; a package update is the case that earns
 them, because the body is a per-package changelog that reviewers diff against the
 newsletter. Use the headings below and nothing else — in particular, no "Summary",

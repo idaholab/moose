@@ -54,7 +54,7 @@ Bug report:
 ### Impact
 ```
 
-Write the content under the contribution-material rules in AGENTS.md section 9: lead with the
+Write the content under the contribution-material rules in AGENTS.md section 10: lead with the
 problem and why it matters, keep it concise, preserve exact class, parameter, and command names,
 and state numbers a reader can check. Under Impact, say whether existing APIs, defaults, or input
 syntax change.
