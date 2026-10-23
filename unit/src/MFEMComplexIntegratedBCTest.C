@@ -11,7 +11,7 @@
 
 #include "MFEMObjectUnitTest.h"
 #include "MFEMComplexIntegratedBC.h"
-#include "MFEMBoundaryNormalIntegratedBC.h"
+#include "MFEMBoundaryNormalLFIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
 
 class MFEMComplexIntegratedBCTest : public MFEMObjectUnitTest
@@ -34,7 +34,7 @@ public:
 TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
 {
   // Construct boundary condition
-  InputParameters bc_normal_params = _factory.getValidParams("MFEMBoundaryNormalIntegratedBC");
+  InputParameters bc_normal_params = _factory.getValidParams("MFEMBoundaryNormalLFIntegratedBC");
   InputParameters bc_complex_params = _factory.getValidParams("MFEMComplexIntegratedBC");
 
   bc_complex_params.set<VariableName>("variable") = "test_cmplx_variable_name";
@@ -42,8 +42,9 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
   bc_normal_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_normal_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
-  MFEMBoundaryNormalIntegratedBC & normal_integrated_bc = addObject<MFEMBoundaryNormalIntegratedBC>(
-      "MFEMBoundaryNormalIntegratedBC", "bc1", bc_normal_params);
+  MFEMBoundaryNormalLFIntegratedBC & normal_integrated_bc =
+      addObject<MFEMBoundaryNormalLFIntegratedBC>(
+          "MFEMBoundaryNormalLFIntegratedBC", "bc1", bc_normal_params);
   MFEMComplexIntegratedBC & complex_integrated_bc = addObject<MFEMComplexIntegratedBC>(
       "MFEMComplexIntegratedBC", "bc_complex", bc_complex_params);
 
