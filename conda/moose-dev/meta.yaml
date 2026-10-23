@@ -22,14 +22,14 @@ build:
     - moose-build 2026.10.19 {{ mpi }}
     - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_0
     - moose-wasp 2026.10.22_4eb02a2 build_0
-    - moose-tools 2026.10.19
+    - moose-tools 2026.10.23
 
 requirements:
   run:
     - moose-build 2026.10.19 {{ mpi }}
     - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_0
     - moose-wasp 2026.10.22_4eb02a2 build_0
-    - moose-tools 2026.10.19
+    - moose-tools 2026.10.23
   run_constrained:
     - {{ moose_python_constrained }}
 
