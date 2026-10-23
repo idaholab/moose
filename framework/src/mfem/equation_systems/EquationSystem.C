@@ -413,6 +413,31 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
 }
 
 void
+EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
+{
+  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+              "Non-legacy assembly is only supported for single test and trial variable systems");
+
+  const auto & test_var_name = _test_var_names.at(0);
+  auto nlf = _nlfs.Get(test_var_name);
+
+  mfem::Operator * nlf_grad = &nlf->GetGradient(u);
+
+  // Check if it casts into ConstrainedOperator so we can set the diagonal policy. Without
+  // this, we get 2s on the diagonal of essential rows when we should have 1s, due to the
+  // linear operator already contributing 1s.
+  mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+  mooseAssert(c_nlf_grad, "Could not cast the nlf gradient into Constrained Operator");
+  c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
+  // ComplexEquationSystem::FormSystemOperator does not store aux_a. So we
+  // guard against dereferencing nullptr here.
+  mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
+
+  _jacobian.Reset(new JacobianSumOperator(nlf_grad, _linear_operator.Ptr(), nlf));
+}
+
+void
 EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
 {
   DeleteJacobianBlocks();
@@ -472,31 +497,6 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
     _jacobian = _linear_operator;
 
   return *_jacobian;
-}
-
-void
-EquationSystem::FormJacobianOperator(const mfem::Vector & u) const
-{
-  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
-              "Non-legacy assembly is only supported for single test and trial variable systems");
-
-  const auto & test_var_name = _test_var_names.at(0);
-  auto nlf = _nlfs.Get(test_var_name);
-
-  mfem::Operator * nlf_grad = &nlf->GetGradient(u);
-
-  // Check if it casts into ConstrainedOperator so we can set the diagonal policy. Without
-  // this, we get 2s on the diagonal of essential rows when we should have 1s, due to the
-  // linear operator already contributing 1s.
-  mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
-  mooseAssert(c_nlf_grad, "Could not cast the nlf gradient into Constrained Operator");
-  c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
-
-  // ComplexEquationSystem::FormSystemOperator does not store aux_a. So we
-  // guard against dereferencing nullptr here.
-  mooseAssert(_linear_operator.Ptr(), "Bilinear Operator is null!");
-
-  _jacobian.Reset(new JacobianSumOperator(nlf_grad, _linear_operator.Ptr(), nlf));
 }
 
 void
