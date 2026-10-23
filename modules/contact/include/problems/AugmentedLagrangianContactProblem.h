@@ -31,8 +31,39 @@ public:
   AugmentedLagrangianContactProblemTempl(const InputParameters & params);
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params) override;
+  /**
+   * Solves the problem at fixed Lagrange multipliers, then updates the multipliers and solves
+   * again until the augmented Lagrangian constraints are met
+   */
+  virtual void solve(const unsigned int nl_sys_num) override;
+
+  virtual bool solverSystemConverged(const unsigned int sys_num) override;
+
+  /// The augmented Lagrangian loop sets the forced iterations of the default nonlinear convergence
   virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
+
+  /// @return the total number of nonlinear iterations of all solves in the augmented Lagrangian loop
+  virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
+
+  /// @return the total number of linear iterations of all solves in the augmented Lagrangian loop
+  virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
+
+private:
+  /**
+   * Checks the augmented Lagrangian constraints and, if they are not met, updates the Lagrange
+   * multipliers
+   * @return Whether the constraints are met
+   */
+  bool updateAugmentedLagrangianMultipliers();
+
+  /// Whether the augmented Lagrangian loop reached its maximum number of iterations
+  bool _augmented_lagrangian_failed;
+
+  /// Nonlinear iterations of all solves in the current augmented Lagrangian loop
+  unsigned int _n_nonlinear_iterations;
+
+  /// Linear iterations of all solves in the current augmented Lagrangian loop
+  unsigned int _n_linear_iterations;
 };
 
 typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>
