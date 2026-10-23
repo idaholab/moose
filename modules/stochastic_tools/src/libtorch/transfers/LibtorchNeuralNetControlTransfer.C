@@ -50,18 +50,23 @@ LibtorchNeuralNetControlTransfer::execute()
   // Get the control neural net from the trainer
   const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
-  // Get the control object from the other app
-  FEProblemBase & app_problem = _multi_app->appProblemBase(0);
-  auto & control_warehouse = app_problem.getControlWarehouse();
-  std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
-  LibtorchNeuralNetControl * control_object =
-      dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
+  // Copy the neural net into the control object of every (local) sub-app
+  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
+  {
+    if (!_multi_app->hasLocalApp(i))
+      continue;
+    FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+    auto & control_warehouse = app_problem.getControlWarehouse();
+    std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
+    LibtorchNeuralNetControl * control_object =
+        dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
 
-  if (!control_object)
-    paramError("control_name", "The given gontrol is not a LibtorchNeuralNetrControl!");
+    if (!control_object)
+      paramError("control_name", "The given control is not a LibtorchNeuralNetControl!");
 
-  // Copy and the neural net and execute it to get the initial values
-  control_object->loadControlNeuralNet(trainer_nn);
-  control_object->execute();
+    // Copy and the neural net and execute it to get the initial values
+    control_object->loadControlNeuralNet(trainer_nn);
+    control_object->execute();
+  }
 }
 #endif
