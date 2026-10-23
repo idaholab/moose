@@ -88,12 +88,15 @@
   []
 []
 
-[ControlLogic]
-  [pump_head_ctrl]
-    type = TimeFunctionComponentControl
-    component = pump
-    parameter = head
+[ChainControls]
+  [pump_head_ctrl_fn]
+    type = GetFunctionValueChainControl
     function = pump_head_fn
+  []
+  [pump_head_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::pump/head
+    value = pump_head_ctrl_fn:value
   []
 []
 
