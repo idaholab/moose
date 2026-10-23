@@ -11,6 +11,10 @@
     valgrind = none
   []
   [mixture_lid_driven_two_phase_physics]
+    # Golded on its own rather than through the link to the hand-built gold: the two inputs differ
+    # at the 1e-5 level in a corner cell from the first step, which the drag solved inside the slip
+    # closure amplifies to a per cent at steady state. The source of that difference is not yet
+    # identified; the channel pair agrees to the last digit.
     type = 'CSVDiff'
     input = 'lid-driven-two-phase-physics.i'
     csvdiff = 'lid-driven-two-phase-physics_CSV.csv'
@@ -28,6 +32,10 @@
     valgrind = none
     allow_warnings = true
   []
+  # The two cases below solve the coupled system with automatic differentiation over a five cell
+  # ghosted stencil, which needs more derivative slots than the default build provides: they are
+  # skipped rather than run wherever the container is smaller. Changes to the drift flux therefore
+  # have to be checked against them in a configuration built with the larger size.
   [mixture_channel_drift_flux]
     type = 'Exodiff'
     input = 'channel-drift-flux.i'
