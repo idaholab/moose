@@ -25,19 +25,19 @@ source:
 build:
   number: 0
   run_exports:
-    - moose-wasp 2026.08.13_ce25dcd build_2
+    - moose-wasp 2026.10.22_4eb02a2 build_0
 
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - moose-wasp 2026.08.13_ce25dcd build_2
+    - moose-wasp 2026.10.22_4eb02a2 build_0
     - make
   host:
     - python {{ python }}
-    - moose-wasp 2026.08.13_ce25dcd build_2
+    - moose-wasp 2026.10.22_4eb02a2 build_0
   run:
     - python {{ python }}
-    - moose-wasp 2026.08.13_ce25dcd build_2
+    - moose-wasp 2026.10.22_4eb02a2 build_0
 
 test:
   imports:
