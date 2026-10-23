@@ -190,6 +190,9 @@ MortarGapHeatTransferAction::addRelationshipManagers(Moose::RelationshipManagerT
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   params.set<BoundaryName>("primary_boundary") = getParam<BoundaryName>("primary_boundary");
   params.set<BoundaryName>("secondary_boundary") = getParam<BoundaryName>("secondary_boundary");
+  // The gap width uses secondary nodal normals, whose derivatives span each secondary node's
+  // incident faces
+  params.set<bool>("ghost_point_neighbors") = true;
 
   if (_user_provided_mortar_meshes)
   {

@@ -10,6 +10,7 @@
 #include "ComputeWeightedGapCartesianLMMechanicalContact.h"
 #include "DisplacedProblem.h"
 #include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
 #include "metaphysicl/metaphysicl_version.h"
@@ -129,7 +130,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::initialSetup()
 {
   ADMortarConstraint::initialSetup();
 
-  Moose::Mortar::Contact::checkNodalNormalDisplacements(
+  Moose::Mortar::checkNodalNormalDisplacements(
       *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 

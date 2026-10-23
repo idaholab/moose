@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
-#include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 
 #include <unordered_map>
 
@@ -121,7 +121,7 @@ protected:
   std::unordered_map<const DofObject *, std::array<ADRealVectorValue, 2>> _dof_to_tangent_vectors;
 
   /// Secondary nodal normals and tangents with their displacement derivatives
-  Moose::Mortar::Contact::ADNodalFrames _nodal_frames;
+  Moose::Mortar::ADNodalFrames _nodal_frames;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

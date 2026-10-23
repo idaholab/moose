@@ -9,6 +9,7 @@
 
 #include "ComputeDynamicWeightedGapLMMechanicalContact.h"
 #include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
@@ -131,7 +132,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::initialSetup()
 {
   ADMortarConstraint::initialSetup();
 
-  Moose::Mortar::Contact::checkNodalNormalDisplacements(
+  Moose::Mortar::checkNodalNormalDisplacements(
       *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 

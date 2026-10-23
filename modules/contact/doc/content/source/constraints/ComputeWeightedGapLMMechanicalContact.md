@@ -77,8 +77,9 @@ their weighted contributions are already contained in $\boldsymbol{G}_A$.
 Dynamic mortar contact and Cartesian-LM contact
 ([ComputeWeightedGapCartesianLMMechanicalContact](/ComputeWeightedGapCartesianLMMechanicalContact.md))
 use the same linearized directions in their weighted-gap, weighted-velocity, and Cartesian
-multiplier projections. Cohesive-zone and nonmortar contact do not include displacement
-derivatives of normal and tangent vectors in their Jacobians. Quadrature-point normal
+multiplier projections. The thermal mortar gap constraints of the heat transfer module
+differentiate the interpolated normal in their gap width. Cohesive-zone and nonmortar contact do not include
+displacement derivatives of normal and tangent vectors in their Jacobians. Quadrature-point normal
 interpolation is not supported for these Lagrange multiplier formulations. The displacement
 variables must be nodal nonlinear variables in the system assembled by the contact objects.
 
