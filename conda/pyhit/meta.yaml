@@ -1,6 +1,6 @@
 package:
   name: moose-pyhit
-  version: 2026.10.19
+  version: 2026.10.23
 
 source:
   - path: ../../python/moosetree
