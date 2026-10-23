@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#33949'
+  design = 'InterfaceKernels/index.md'
+  [orientation]
+    requirement = 'The system shall report an error if an interface kernel cannot contribute on its boundary because'
+    [flipped]
+      type = RunException
+      input = 'flipped.i'
+      expect_err = "The variables appear to be flipped relative to the boundary orientation"
+      detail = "its variable and neighbor variable are swapped relative to the boundary orientation, or"
+    []
+    [undefined]
+      type = RunException
+      input = 'flipped.i'
+      cli_args = "InterfaceKernels/penalty/variable=u InterfaceKernels/penalty/neighbor_var=u"
+      expect_err = "'neighbor_var' \(u\) on the secondary side \(block\(s\) 1\)"
+      detail = "its neighbor variable is not defined on the secondary side of the boundary."
+    []
+  []
+[]
