@@ -10,10 +10,11 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "WeightedGapUserObject.h"
 
 #include <unordered_map>
 
-class WeightedGapUserObject;
+class LMWeightedGapUserObject;
 
 /**
  * Computes the weighted gap that will later be used to enforce the
@@ -61,6 +62,19 @@ protected:
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof);
 
+  /// Return the positive characteristic displacement equation scaling used by contact scaling.
+  Real displacementScaling() const;
+
+  /// Return the row compensation between displacement and multiplier equations.
+  Real equationCompensation(const MooseVariable & multiplier) const;
+
+  /// Return the positive nodal contact stiffness scale for \p dof: the derived scale D when
+  /// 'use_derived_c' is true, and 'c' otherwise
+  Real normalContactScale(const DofObject * dof) const;
+
+  /// Return the positive mortar weight used to normalize gap and slip values.
+  Real contactNormalization() const;
+
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
   /// x-displacement on the primary face
@@ -81,6 +95,10 @@ protected:
   /// should be of a value such that its product with the gap is on the same scale as the lagrange
   /// multiplier
   const Real _c;
+
+  /// Whether to use the weighted gap user object's per-node derived contact stiffness scale D in
+  /// place of _c and to represent each contact Lagrange multiplier as D times its stored value
+  const bool _use_derived_c;
 
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
@@ -110,4 +128,7 @@ protected:
 
   /// The weighted gap user object
   const WeightedGapUserObject & _weighted_gap_uo;
+
+  /// Non-null only when 'use_derived_c' is true; provides the per-node derived scales
+  const LMWeightedGapUserObject * const _lm_weighted_gap_uo;
 };
