@@ -11,11 +11,11 @@
     valgrind = heavy
   []
   [variable_dependency]
-    requirement = 'The framework shall gather variable inputs to a NEML2 model when other user objects executing at the same time declare their own variable dependencies.'
+    requirement = 'The framework shall gather variable dependencies of a NEML2 model to perform selective variable computations in user object loops.'
     type = Exodiff
     input = 'custom_model.i'
     exodiff = 'custom_model_out.e'
-    # this postprocessor restricts element reinitialization to the variables user objects declare
+    # the presence of this postprocessor declaring a variable dependency triggers the restriction of element reinitialization to the variables that the user objects declare as dependencies. If no dependencies are declared, all variables would be computed by default.
     cli_args = 'Postprocessors/u_avg/type=ElementAverageValue Postprocessors/u_avg/variable=u '
                'Postprocessors/u_avg/execute_on=LINEAR Postprocessors/u_avg/outputs=none'
     prereq = 'custom_model'
