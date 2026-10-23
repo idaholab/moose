@@ -303,6 +303,74 @@ The `Transfers` described above are:
 	id=matrix_T
 	caption=Evolution of the cooled matrix material.  Colors on the fracture system show fracture temperature.  The small boxes are matrix elements that have cooled by more than 10degC.  The green color-bar shows the time simulated.
 
+## Thermal opening of the fracture (Vinsome-Westerveld)
+
+This example was contributed by Bernard Che Ngu (Baylor University).
+
+In the models above, the fracture aperture responds only to fluid pressure, through
+[PorousFlowPorosityLinear](PorousFlowPorosityLinear.md). In an EGS, cold injected water also
+cools the rock around the fracture. The rock contracts as it cools, so the fracture opens wider.
+[PorousFlowPorosityVinsomeWesterveld](PorousFlowPorosityVinsomeWesterveld.md) adds this thermal
+opening to the fracture porosity. It uses the analytical Vinsome-Westerveld estimate of how far
+the cooling has spread into the rock matrix, controlled by the thermal-opening coefficient $D$
+([!param](/Materials/PorousFlowPorosityVinsomeWesterveld/thermal_opening_coeff)), [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_thermal_diffusivity) and
+[!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature).  Only conductive heat transfer between the fracture and the
+matrix is included in this estimate.
+
+The 3D model (`matrix_app.i` with 20$\,$m elements, and `fracture_only_aperture_changing.i` with 9.2$\,$m elements as its sub-application) was
+run for 30 days in three cases: the base case (pressure opening only), and the same model with
+thermal opening at $D = 1.6\times 10^{-6}\,$K$^{-1}$ and $D = 1.6\times 10^{-5}\,$K$^{-1}$.
+
+To switch on thermal opening, the `porosity` Material of the fracture sub-application is
+changed to `PorousFlowPorosityVinsomeWesterveld`. This can be done from the command line,
+without editing the input files:
+
+```
+cd modules/porous_flow/examples/multiapp_fracture_flow/3dFracture
+../../../porous_flow-opt -i matrix_app.i Executioner/end_time=2592000 \
+  fracture_app:Materials/porosity/type=PorousFlowPorosityVinsomeWesterveld \
+  fracture_app:Materials/porosity/thermal_opening_coeff=1.6E-5 \
+  fracture_app:Materials/porosity/matrix_thermal_diffusivity=1E-6 \
+  fracture_app:Materials/porosity/matrix_reference_temperature=473
+```
+
+The reference temperature is the initial rock temperature (473$\,$K), and the thermal diffusivity
+is typical of granite. The pressure-dependent opening ([!param](/Materials/PorousFlowPorosityLinear/P_coeff)
+and the other parameters of the original [PorousFlowPorosityLinear](PorousFlowPorosityLinear.md) Material) is unchanged. The aperture at the injection point
+was recorded by adding a `PointValue` postprocessor of the `aperture` variable at the injection
+point (58.8124, 0.50384, 74.7838).
+
+All other parameters are the same in the three runs. The results are shown in
+[fracture_3d_vw_comparison] and [table:vw_results].
+
+!media porous_flow/fracture_3d_vw_comparison.png
+       id=fracture_3d_vw_comparison
+       style=width:100%;margin:auto;
+       caption=Injection pressure, fracture aperture at the injection point and production temperature for the 3D model, with and without Vinsome-Westerveld thermal opening.
+
+!table id=table:vw_results caption=Results after 30 days of injection.
+| Case | Injection pressure (MPa) | Aperture at injection (mm) | Production temperature ($^\circ$C) |
+| --- | --- | --- | --- |
+| Pressure opening only | 11.90 | 2.52 | 158.2 |
+| Thermal opening, $D = 1.6\times 10^{-6}\,$K$^{-1}$ | 11.73 | 2.64 | 157.2 |
+| Thermal opening, $D = 1.6\times 10^{-5}\,$K$^{-1}$ | 10.70 | 4.20 | 148.3 |
+
+Without thermal opening, the injection pressure and the aperture stop changing after about
+0.2 days. With thermal opening, the fracture keeps widening as the cooled region of rock grows.
+In the case with the larger $D$, the aperture at the injection point is 67% larger after 30 days,
+and the injection pressure is 1.2 MPa lower. The wider fracture also brings cold water to the
+production well faster: after 30 days, the production temperature is about 10 $^\circ$C lower than
+in the base case. This trade-off between injectivity and early thermal breakthrough ("thermal
+short-circuiting") cannot be captured when the aperture depends on pressure alone.
+
+The thermal opening grows without limit in this model, for two reasons.  Most importantly, the
+Vinsome-Westerveld method assumes that the matrix on each side of the fracture is semi-infinite,
+so the cooled region, and hence the magnitude of $I$, keeps growing (as $\sqrt{t}$ when the
+fracture-face temperature is constant) instead of being limited by the spacing between fractures.
+Even with confining stress included, this assumption would still allow the porosity to keep
+increasing.  In addition, the Material does not include how the fracture closes under the
+confining stress.  The results for the larger $D$ should therefore be read as an upper bound.
+
 ## Extensions and comments
 
 This page has described a sample model and workflow for simulating mixed-dimensional, fractured porous systems with PorousFlow.  Various simplifying assumptions have been made, and these may need to be modified in a more sophisticated approach.
