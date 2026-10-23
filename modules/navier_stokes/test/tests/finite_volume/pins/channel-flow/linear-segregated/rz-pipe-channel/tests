@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#31995'
+  design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+           'LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+  [rz-pipe]
+    requirement = 'The system shall reproduce the one-dimensional porous baffle results for axial flow '
+                  'in an axisymmetric pipe with symmetry conditions on the axis and the wall'
+
+    [no-visc]
+      type = CSVDiff
+      input = porous-baffle-rz.i
+      csvdiff = 'linear-bernoulli-no-visc.csv'
+      gold_dir = '../1d-simple-channel/gold'
+      cli_args = 'forchheimer_value=0 Outputs/file_base=linear-bernoulli-no-visc'
+      detail = 'with Bernoulli jumps only,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [forchheimer]
+      type = CSVDiff
+      input = porous-baffle-rz.i
+      csvdiff = 'linear-bernoulli-forchheimer.csv'
+      gold_dir = '../1d-simple-channel/gold'
+      cli_args = 'forchheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forchheimer'
+      detail = 'with Forchheimer friction, and'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [forchheimer-form-loss]
+      type = CSVDiff
+      input = porous-baffle-rz.i
+      csvdiff = 'linear-bernoulli-forchheimer-form-loss.csv'
+      gold_dir = '../1d-simple-channel/gold'
+      cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forchheimer-form-loss "
+                 "UserObjects/pressure_jump/form_loss='10 10'"
+      detail = 'with Forchheimer friction and baffle form losses.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]
