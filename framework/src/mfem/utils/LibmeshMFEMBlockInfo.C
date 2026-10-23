@@ -17,7 +17,7 @@
 namespace
 {
 const std::vector<std::vector<mfem::real_t>> no_additional_points(0);
-};
+}
 
 const std::map<libMesh::ElemType, LibmeshMFEMBlockInfo::ElementInfo>
     LibmeshMFEMBlockInfo::_elem_info{
