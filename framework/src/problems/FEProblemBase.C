@@ -114,6 +114,7 @@
 #include "FVFluxBC.h"
 #include "LinearFVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "Reporter.h"
 #include "ADUtils.h"
 #include "Executioner.h"
@@ -1589,6 +1590,59 @@ FEProblemBase::initialSetup()
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict, numThreads());
+
+    // Interface kernels skip any face where 'variable' is not active on the primary (element)
+    // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
+    // variables do not match the sideset orientation silently contributes nothing
+    for (const auto & nl : _nl)
+      for (const auto & ik : nl->getInterfaceKernelWarehouse().getObjects())
+        for (const auto bnd_id : ik->boundaryIDs())
+        {
+          const auto primary_blocks = _mesh.getBoundaryConnectedBlocks(bnd_id);
+          const auto secondary_blocks = _mesh.getBoundaryConnectedSecondaryBlocks(bnd_id);
+          // A boundary without neighbors is reported as an external side during assembly
+          if (secondary_blocks.empty())
+            continue;
+          const auto & var = ik->variable();
+          const auto & neighbor_var = ik->neighborVariable();
+          const auto active_on_any = [](const auto & v, const std::set<SubdomainID> & blocks)
+          {
+            return std::any_of(blocks.begin(),
+                               blocks.end(),
+                               [&v](const auto blk) { return v.activeOnSubdomain(blk); });
+          };
+          if (active_on_any(var, primary_blocks) && active_on_any(neighbor_var, secondary_blocks))
+            continue;
+
+          const auto block_names = [this](const std::set<SubdomainID> & blocks)
+          {
+            std::vector<std::string> names;
+            for (const auto blk : blocks)
+              names.push_back(_mesh.getSubdomainName(blk).empty() ? std::to_string(blk)
+                                                                  : _mesh.getSubdomainName(blk));
+            return MooseUtils::join(names, ", ");
+          };
+          const bool flipped =
+              active_on_any(var, secondary_blocks) && active_on_any(neighbor_var, primary_blocks);
+          ik->paramError(
+              "boundary",
+              "The interface kernel will not contribute on boundary '",
+              _mesh.getBoundaryName(bnd_id),
+              "': 'variable' (",
+              var.name(),
+              ") must be defined on the primary side of the boundary (block(s) ",
+              block_names(primary_blocks),
+              ") and 'neighbor_var' (",
+              neighbor_var.name(),
+              ") on the secondary side (block(s) ",
+              block_names(secondary_blocks),
+              ").",
+              flipped ? " The variables appear to be flipped relative to the boundary orientation; "
+                        "swap 'variable' and 'neighbor_var', or reverse the orientation of the "
+                        "boundary (e.g. swap 'primary_block' and 'paired_block' in "
+                        "SideSetsBetweenSubdomainsGenerator)."
+                      : "");
+        }
   }
 
   if (_fv_face_integrity_check)
