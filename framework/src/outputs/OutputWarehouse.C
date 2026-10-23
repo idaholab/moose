@@ -210,41 +210,51 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
 {
   std::lock_guard<std::mutex> lock(moose_console_mutex);
 
-  std::string message = buffer.str();
-
-  // If someone else is writing - then we may need a newline
-  if (&buffer != _last_buffer && !_last_message_ended_in_newline)
-    message = '\n' + message;
-
-  // Loop through all Console Output objects and pass the current output buffer
-  std::vector<Console *> objects = getOutputs<Console>();
-  if (!objects.empty())
+  const auto clear_buffer = [&buffer]()
   {
-    for (const auto & obj : objects)
-      obj->mooseConsole(message);
-
-    // Reset
     buffer.clear();
     buffer.str("");
+  };
+
+  const auto objects = getOutputs<Console>();
+  const auto & awh = _app.actionWarehouse();
+  const bool has_add_output = awh.hasTask("add_output");
+  const bool add_output_done = has_add_output && awh.isTaskComplete("add_output");
+
+  if (objects.empty() && add_output_done)
+  {
+    // No Console exists and none can be added anymore (e.g. console = false): drop the
+    // message, otherwise the buffer grows without bound and every flush copies it.
+    // No need to build the message string or track newline state.
+    clear_buffer();
   }
-  else if (_app.actionWarehouse().hasTask("add_output") &&
-           !_app.actionWarehouse().isTaskComplete("add_output") && !_buffer_action_console_outputs)
+  else
   {
-    // this will cause messages to console before its construction immediately flushed and
-    // cleared.
-    bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
+    std::string message = buffer.str();
 
-    // If that last message ended in newline then this one may need
-    // to start with indenting
-    // Note that we only indent the first line if the last message ended in new line
-    if (_app.multiAppLevel() > 0)
-      MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
+    // If someone else is writing - then we may need a newline
+    if (&buffer != _last_buffer && !_last_message_ended_in_newline)
+      message = '\n' + message;
 
-    Moose::out << message << std::flush;
-    buffer.clear();
-    buffer.str("");
+    if (!objects.empty())
+    {
+      // Pass the current output buffer to all Console Output objects
+      for (const auto & obj : objects)
+        obj->mooseConsole(message);
+      clear_buffer();
+    }
+    else if (has_add_output && !_buffer_action_console_outputs)
+    {
+      // Messages to console before its construction are immediately flushed and cleared.
+      // Only indent the first line if the last message ended in a newline.
+      const bool ends_in_newline = message.empty() || message.back() == '\n';
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
 
-    _last_message_ended_in_newline = this_message_ends_in_newline;
+      Moose::out << message << std::flush;
+      clear_buffer();
+      _last_message_ended_in_newline = ends_in_newline;
+    }
   }
 
   _last_buffer = &buffer;

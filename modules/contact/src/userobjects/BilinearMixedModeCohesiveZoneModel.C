@@ -43,10 +43,12 @@ BilinearMixedModeCohesiveZoneModel::validParams()
   params.addParam<Real>("viscosity", 0.0, "Viscosity for damage model.");
   params.addParam<MooseEnum>(
       "mixed_mode_criterion", criterion, "Option for mixed mode propagation criterion.");
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "lag_displacement_jump",
       false,
-      "Whether to use old displacement jumps to compute the effective displacement jump.");
+      "Whether to use old displacement jumps to compute the effective displacement jump.",
+      "This parameter has no effect in the mortar cohesive zone model and will be removed. Use "
+      "'viscosity' to regularize the damage evolution.");
   params.addParam<bool>("set_compressive_traction_to_zero",
                         false,
                         "Zero compressive traction (set to true, allowing the use of standard "
@@ -58,7 +60,7 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "penalty_stiffness", "penalty_stiffness > 0.0", "Penalty stiffness for CZM.");
   params.addParamNamesToGroup(
       "GI_c GII_c normal_strength shear_strength power_law_parameter viscosity "
-      "mixed_mode_criterion lag_displacement_jump regularization_alpha "
+      "mixed_mode_criterion regularization_alpha "
       "penalty_stiffness",
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.

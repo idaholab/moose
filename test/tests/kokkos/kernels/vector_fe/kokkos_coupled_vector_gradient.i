@@ -94,28 +94,28 @@
     boundary = 'left'
   []
   [right_u]
-    type = KokkosVectorFunctionDirichletBC
+    type = KokkosParsedVectorFunctionDirichletBC
     variable = u
     boundary = 'right'
     function_x = 'x_exact'
     function_y = 'y_exact'
   []
   [right_v]
-    type = KokkosVectorFunctionDirichletBC
+    type = KokkosParsedVectorFunctionDirichletBC
     variable = v
     boundary = 'right'
     function_x = 'x_exact'
     function_y = 'y_exact'
   []
   [right_w]
-    type = KokkosVectorFunctionDirichletBC
+    type = KokkosParsedVectorFunctionDirichletBC
     variable = w
     boundary = 'right'
     function_x = 'x_exact_old'
     function_y = 'y_exact_old'
   []
   [right_s]
-    type = KokkosVectorFunctionDirichletBC
+    type = KokkosParsedVectorFunctionDirichletBC
     variable = s
     boundary = 'right'
     function_x = 'x_exact_older'

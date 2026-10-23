@@ -207,6 +207,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _bulk_Re(1.0),
+    _bulk_V(1.0),
     _P_tol(getParam<Real>("P_tol")),
     _P_maxit(getParam<int>("P_maxit")),
     _T_tol(getParam<Real>("T_tol")),
@@ -366,18 +367,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
 void
 SubChannel1PhaseProblem::initialSetup()
 {
-  ExternalProblem::initialSetup();
-
-  _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
-  _friction_closure =
-      &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
-  _mixing_closure =
-      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
-
-  /// Set value for turbulent momentum modeling parameter CT
-  _CT = _mixing_closure->getCT();
-
-  // Create variables for output and storage
+  // Create variables for output and storage. This comes before the base class setup, which runs
+  // the user objects executed on initial, such as SCMPinPowerPostprocessor, that read them.
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
   _P_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE));
@@ -394,8 +385,6 @@ SubChannel1PhaseProblem::initialSetup()
     _Dpin_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PIN_DIAMETER));
     _HTC_soln =
         std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::HEAT_TRANSFER_COEFFICIENT));
-    _pin_HTC_closure =
-        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("pin_HTC_closure"));
   }
   _rho_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::VISCOSITY));
@@ -409,30 +398,61 @@ SubChannel1PhaseProblem::initialSetup()
     _duct_heat_flux_soln =
         std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_HEAT_FLUX));
     _Tduct_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
+  }
+
+  ExternalProblem::initialSetup();
+
+  _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
+  _friction_closure =
+      &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
+  _mixing_closure =
+      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
+
+  /// Set value for turbulent momentum modeling parameter CT
+  _CT = _mixing_closure->getCT();
+
+  if (_pin_mesh_exist)
+    _pin_HTC_closure =
+        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("pin_HTC_closure"));
+  if (_duct_mesh_exist)
     _duct_HTC_closure =
         &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("duct_HTC_closure"));
-  }
 }
 
 void
 SubChannel1PhaseProblem::computeBulkReynoldsNumber()
 {
-  if (processor_id() != 0)
-    return;
-
-  Real viscosity_in = 0.0;
-  Real mass_flow_in = 0.0;
-  for (const auto i_ch : make_range(_n_channels))
+  if (processor_id() == 0)
   {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    const Real mdot_in = (*_mdot_soln)(node_in);
-    viscosity_in += mdot_in * (*_mu_soln)(node_in);
-    mass_flow_in += mdot_in;
+    Real viscosity_in = 0.0;
+    Real volumetric_flow_in = 0.0;
+    Real mass_flow_in = 0.0;
+    for (const auto i_ch : make_range(_n_channels))
+    {
+      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+      const Real mdot_in = (*_mdot_soln)(node_in);
+      const Real rho_in = (*_rho_soln)(node_in);
+      viscosity_in += mdot_in * (*_mu_soln)(node_in);
+      volumetric_flow_in += mdot_in / rho_in;
+      mass_flow_in += mdot_in;
+    }
+    const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+    const Real flow_area = _subchannel_mesh.getAssemblyFlowArea();
+    const Real inlet_mu = viscosity_in / mass_flow_in;
+    _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * flow_area);
+    _bulk_V = volumetric_flow_in / flow_area;
   }
+  // Only rank 0 owns the subchannel DOFs (SingleRankPartitioner), so share the result
+  _communicator.broadcast(_bulk_Re);
+  _communicator.broadcast(_bulk_V);
 
-  const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
-  const Real inlet_mu = viscosity_in / mass_flow_in;
-  _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * _subchannel_mesh.getAssemblyFlowArea());
+  if (MooseUtils::absoluteFuzzyEqual(_bulk_Re, 0.0))
+    mooseError("The computed bulk Reynolds number is zero.");
+
+  if (MooseUtils::absoluteFuzzyEqual(_bulk_V, 0.0))
+    mooseError("The computed bulk velocity is zero.");
+
+  _mixing_closure->computeBulkMixingParameters();
 }
 
 void
@@ -1934,6 +1954,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   const unsigned int last_node = (iblock + 1) * _block_size;
   const unsigned int first_node = iblock * _block_size + 1;
+  _mixing_closure->computeBlockMixingParameters(first_node, last_node);
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     auto dz = _z_grid[iz] - _z_grid[iz - 1];
@@ -1952,6 +1973,10 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto Sj_out = (*_S_flow_soln)(node_out_j);
       auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
       auto Sij = dz * gap;
+      // Mass flux of the gap: total mass flow rate of the two subchannels over their total flow
+      // area, averaged over the inlet and outlet of the cell. This is the area-weighted mean of rho
+      // V of the two subchannels; Eq. (30) of Pacio et al. (2022) uses the arithmetic mean rho (V_i
+      // + V_j) / 2, which differs when the two subchannels have different flow areas
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
@@ -3033,6 +3058,9 @@ SubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
   _aux->update();
 
+  // Called before the rank-0 early return since it broadcasts to all ranks
+  computeBulkReynoldsNumber();
+
   if (processor_id() != 0)
     return;
   Real power_in = 0.0;
@@ -3053,7 +3081,6 @@ SubChannel1PhaseProblem::externalSolve()
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
   const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
-  computeBulkReynoldsNumber();
   if (_verbose_subchannel)
   {
     _console << " ======================================= " << std::endl;

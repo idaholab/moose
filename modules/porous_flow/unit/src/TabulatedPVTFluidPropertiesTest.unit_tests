@@ -1,0 +1,67 @@
+[Tests]
+  [tabulated_pvt_fluid_properties]
+    requirement = 'The system shall compute fluid properties from a table of pressure, formation volume factor and viscosity,'
+    design = 'TabulatedPVTFluidProperties.md'
+    issues = '#34051'
+    [fluid_name]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.fluidName
+      detail = 'returning the fluid name;'
+    []
+    [molar_mass]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.molarMass
+      detail = 'returning the user-supplied molar mass;'
+    []
+    [table_values]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.tableValues
+      detail = 'reproducing the tabulated density and viscosity exactly at the tabulated pressures;'
+    []
+    [interpolation]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.interpolation
+      detail = 'interpolating the reciprocal formation volume factor and the reciprocal of its product with viscosity linearly in pressure, and computing internal energy and enthalpy;'
+    []
+    [extrapolation]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.extrapolation
+      detail = 'extrapolating linearly from the end intervals outside the tabulated pressure range if out-of-bounds pressures are ignored;'
+    []
+    [throw]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.throwException
+      detail = 'throwing an exception by default for pressures outside the tabulated range;'
+    []
+    [invalid_solution]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.invalidSolution
+      detail = 'using the end values of the table outside the tabulated pressure range while declaring the solution invalid or recording a warning, when requested;'
+    []
+    [set_to_closest_bound]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.setToClosestBound
+      detail = 'using the end values of the table outside the tabulated pressure range when requested;'
+    []
+    [derivatives]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.derivatives
+      detail = 'with derivatives that match finite differences inside and outside the tabulated range;'
+    []
+    [ad]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.ad
+      detail = 'with automatic-differentiation derivatives that match the hand-coded derivatives;'
+    []
+    [extrapolation_error]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.extrapolationError
+      detail = 'throwing an exception if extrapolation gives a non-positive formation volume factor; and'
+    []
+    [invalid_tables]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.invalidTables
+      detail = 'reporting an error for tables with too few entries, mismatched lengths, non-increasing pressures or non-positive values.'
+    []
+  []
+[]

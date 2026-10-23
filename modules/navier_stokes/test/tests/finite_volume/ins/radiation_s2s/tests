@@ -33,6 +33,7 @@
       type = MMSTest
       input = mms_spatial.py
       test_case = TestGrayLambertCHTTwoSlabs
+      heavy = true
       detail = 'and demonstrate first-order spatial convergence of the interface temperatures and of the conductive, radiative, and total heat fluxes for two solid slabs coupled through a transparent conducting gap by Robin-Robin interfaces with surface-to-surface radiation,'
       max_threads = 1 # Linear FV doesn't support threading at the moment
       recover = false # We don't support recover for SIMPLE at the moment
@@ -56,6 +57,7 @@
                  "Outputs/file_base=diff_heated_cavity_slabs_cht_radiation"
       detail = 'for a cavity with surface-to-surface radiation exchanged between all cavity walls.'
       mesh_mode = REPLICATED # UnobstructedPlanarViewFactor does not allow distributed mesh
+      valgrind = none # long running test
       max_threads = 1 # Linear FV doesn't support threading at the moment
       recover = false # We don't support recover for SIMPLE at the moment
     []

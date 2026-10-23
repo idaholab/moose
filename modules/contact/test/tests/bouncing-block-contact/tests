@@ -114,7 +114,6 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
       capabilities = 'ad_size>=73'
-      restep = false # Issue #31054
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -192,11 +191,9 @@
     requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
                   'back to any process that contributed to computing said weighted quantities. We '
                   'check against the serial numerical results.'
-    issues = '#21329'
+    issues = '#21329 #30642'
     type = 'Exodiff'
     input = frictional-penalty-weighted-vel.i
-    # this test does not converge, see #30642
-    expect_exit_code = 1
     exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                "Postprocessors/active='' "
@@ -215,7 +212,7 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp_out.e'
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
-      abs_zero = 5e-9
+      custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
     [action]
       type = 'Exodiff'
@@ -235,6 +232,8 @@
                   'mechanical contact problem in which the secondary side of the contact interface '
                   'is split between processes when run in parallel.'
     capabilities = 'method!=dbg'
+    # Three ranks are required to split the secondary interface across processes.
+    min_parallel = 3
     valgrind = 'heavy'
   []
   [recoverable_invalid_orientation]
@@ -289,5 +288,33 @@
     expect_err = "Boundary '10' is listed more than once in 'automatic_pairing_boundaries'"
     requirement = 'The system shall report an error if a boundary is listed more than once for '
                   'automatic pairing.'
+  []
+  [mortar_user_object_aux]
+    design = 'MortarUserObjectAux.md'
+    issues = '#34138'
+    requirement = 'The system shall output mortar contact quantities to auxiliary variables,'
+    [active_set_frictionless_penalty]
+      type = RunApp
+      input = frictionless-penalty-weighted-gap.i
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=5 "
+                 "Postprocessors/active='' Outputs/exodus=false AuxVariables/q/block=3 "
+                 "AuxKernels/q/type=MortarUserObjectAux AuxKernels/q/variable=q "
+                 "AuxKernels/q/boundary=10 AuxKernels/q/user_object=weighted_gap_uo "
+                 "AuxKernels/q/contact_quantity=active_set "
+                 "Outputs/file_base=active_set_frictionless_penalty"
+      detail = 'including the active set from a frictionless penalty user object, and'
+    []
+    [delta_tangential_lm_lagrange_multiplier]
+      type = RunException
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
+      cli_args = "Executioner/end_time=5 Outputs/exodus=false AuxVariables/q/block=3 "
+                 "AuxKernels/q/type=MortarUserObjectAux AuxKernels/q/variable=q "
+                 "AuxKernels/q/boundary=10 AuxKernels/q/user_object=weighted_velocities_uo "
+                 "AuxKernels/q/contact_quantity=delta_tangential_lm_one"
+      expect_err = "The 'DELTA_TANGENTIAL_LM_ONE' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+      detail = 'report an error when the tangential multiplier increment is requested from a '
+               'Lagrange multiplier friction user object.'
+    []
   []
 []

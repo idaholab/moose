@@ -44,6 +44,7 @@ CohesiveZoneModelBase::validParams()
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
   params.setParameters("penalty", 0.0);
+  params.set<bool>("ghost_point_neighbors") = false;
   return params;
 }
 
@@ -245,6 +246,14 @@ CohesiveZoneModelBase::initialize()
     map_pr.second.setToIdentity();
 }
 
+ADReal
+CohesiveZoneModelBase::nodalTangentialPressure(const Node & node,
+                                               const unsigned int direction) const
+{
+  mooseAssert(direction < 2, "There are at most two tangent directions.");
+  return libmesh_map_find(_dof_to_tangential_traction, node.id()).first(direction);
+}
+
 void
 CohesiveZoneModelBase::reinit()
 {
@@ -294,7 +303,8 @@ CohesiveZoneModelBase::reinit()
     auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node->id()];
 
     Real normal_lm = -1;
-    if (auto it = _dof_to_lagrange_multiplier.find(node); it != _dof_to_lagrange_multiplier.end())
+    if (auto it = _dof_to_lagrange_multiplier.find(node->id());
+        it != _dof_to_lagrange_multiplier.end())
       normal_lm = it->second;
 
     // Keep active set fixed from second Uzawa loop

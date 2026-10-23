@@ -186,6 +186,12 @@ protected:
                                    const std::set<TagID> & matrix_tags,
                                    const bool compute_gradients = true);
 
+  /**
+   * Set the PETSc options used for assembling the system matrices of the given tags
+   * @param matrix_tags The matrix tags
+   */
+  void setMatrixOptions(const std::set<TagID> & matrix_tags);
+
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Perform the initial setup of the Kokkos linear finite volume kernels and boundary conditions

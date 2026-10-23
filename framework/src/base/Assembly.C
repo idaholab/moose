@@ -1079,8 +1079,10 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
-  auto num_shapes = FEInterface::n_shape_functions(fe->get_fe_type(), elem);
   const auto & phi_map = fe->get_fe_map().get_phi_map();
+  // The mapping basis includes every mapping node, including enriched nodes on elements such as
+  // TET14.
+  const auto num_shapes = phi_map.size();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
@@ -2142,6 +2144,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
         const_cast<std::vector<Real> &>(_holder_fe_face_helper[elem_dim]->get_curvatures()));
 
   computeADFace(*elem, elem_side);
+
+  // Keep the current-side bookkeeping consistent with the other elem/side reinit overloads so
+  // that consumers of _current_side, _current_side_elem, and _current_side_volume (e.g.
+  // InterfaceKernelBase) see correct values rather than whatever was left over from a previous
+  // reinit.
+  _current_side = elem_side;
+  _current_side_elem = &_current_side_elem_builder(*elem, elem_side);
+  _current_side_volume_computed = false;
+  computeCurrentFaceVolume();
 }
 
 void

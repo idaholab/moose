@@ -43,7 +43,6 @@ MFEMHypreLOBPCG::ConstructSolver()
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  SetPreconditioner(*_eigensolver);
 }
 
 #endif

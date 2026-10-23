@@ -1,0 +1,3 @@
+time,pin0_power_IC,pin0_power_aux,pin1_power_IC,pin1_power_aux,total_power_TH
+0,0,0,0,0,0
+1,10000,10000,20000,20000,30000

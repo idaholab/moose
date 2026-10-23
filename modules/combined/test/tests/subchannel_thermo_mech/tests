@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#34154'
+  design = 'SCMPinPowerPostprocessor.md'
+  [one_pin]
+    type = CSVDiff
+    input = one_pin_problem.i
+    csvdiff = "one_pin_problem_out.csv one_pin_problem_out_sub0_csv.csv"
+    # The visualization app only projects the solution onto a detailed mesh
+    cli_args = "Outputs/exodus=false MultiApps/active=sub "
+               "Transfers/inactive='Tpin_interpolated subchannel_transfer pin_transfer'"
+    capabilities = 'method!=dbg'
+    recover = false
+    max_threads = 1
+    requirement = 'The system shall couple a subchannel model to a thermo-mechanical pin model, transferring the pin surface temperature from the nearest subchannel node, and preserve the pin power transferred back to the coolant.'
+  []
+  [one_pin_interpolated]
+    type = CSVDiff
+    input = one_pin_problem.i
+    csvdiff = "one_pin_problem_interpolated_out.csv one_pin_problem_interpolated_out_sub0_csv.csv"
+    cli_args = "Outputs/exodus=false MultiApps/active=sub "
+               "Transfers/inactive='Tpin subchannel_transfer pin_transfer' sub:BCs/inactive=right "
+               "Outputs/file_base=one_pin_problem_interpolated_out"
+    # Both tests write the same slice value files
+    prereq = one_pin
+    capabilities = 'method!=dbg'
+    recover = false
+    # MultiAppReporterTransfer warns about the rotation of the pin app, which it does not apply. The
+    # transferred profile is a function of the axial coordinate only, so the rotation does not
+    # affect it
+    allow_warnings = true
+    max_threads = 1
+    requirement = 'The system shall couple a subchannel model to a thermo-mechanical pin model, interpolating the pin surface temperature linearly along the pin, and preserve the pin power transferred back to the coolant.'
+  []
+[]

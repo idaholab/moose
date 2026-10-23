@@ -154,7 +154,7 @@ class Runner(OutputInterface):
             )
             if os.access(file_path, os.R_OK):
                 with open(file_path, "r+b") as f:
-                    run_output.appendOutput(self.readOutput(f))
+                    run_output.appendOutput(self.readOutput(f, file_path))
             else:
                 self.job.setStatus(self.job.error, "FILE TIMEOUT")
                 self.appendOutput(f"File {file_path} unavailable")
@@ -185,17 +185,53 @@ class Runner(OutputInterface):
         """
         raise Exception("sendSignal not supported for this Runner")
 
-    def readOutput(self, stream):
+    @staticmethod
+    def describeInvalidUTF8(data: bytes, name: str, context: int = 80) -> str:
+        """
+        Describe every invalid UTF-8 sequence in data, with the bytes around
+        each one, so that the source of the bytes can be identified.
+        """
+        lines = [util.outputHeader(f"Begin invalid UTF-8 in {name}")]
+        pos = 0
+        while True:
+            try:
+                data[pos:].decode("utf-8")
+                break
+            except UnicodeDecodeError as e:
+                start, end = pos + e.start, pos + e.end
+                before = data[max(0, start - context) : start]
+                after = data[end : end + context]
+                lines.append(
+                    f"offset {start} of {len(data)}: {e.reason}: {data[start:end]!r}\n"
+                    f"  before: {before!r}\n"
+                    f"  after:  {after!r}\n"
+                )
+                pos = end
+        lines.append(util.outputHeader(f"End invalid UTF-8 in {name}"))
+        return "".join(lines)
+
+    def readOutput(self, stream, name="output"):
         """
         Helper for reading output from a stream, and setting an error state
         if the read failed.
+
+        Bytes that are not valid UTF-8 are kept as backslash escapes, followed
+        by a description of each invalid sequence, and flagged with a caveat.
+        A test's result is determined by its own checks, and launchers such as
+        mpiexec can write arbitrary bytes that are unrelated to the application.
         """
         output = ""
         try:
             stream.seek(0)
-            output = stream.read().decode("utf-8")
-        except UnicodeDecodeError:
-            self.job.setStatus(self.job.error, "non-unicode characters in output")
+            data = stream.read()
+            try:
+                output = data.decode("utf-8")
+            except UnicodeDecodeError:
+                output = data.decode("utf-8", errors="backslashreplace")
+                if output and output[-1] != "\n":
+                    output += "\n"
+                output += self.describeInvalidUTF8(data, name)
+                self.job.addCaveats(f"invalid UTF-8 in {name}")
         except:
             self.job.setStatus(self.job.error, "error reading output")
         if output and output[-1] != "\n":
