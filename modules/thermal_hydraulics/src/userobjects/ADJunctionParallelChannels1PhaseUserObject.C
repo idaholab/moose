@@ -80,9 +80,9 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
   const ADReal eJ = rhoEV / rhoV - 0.5 * rhouV2 / (rhoV * rhoV);
   const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
 
-  _residual[VolumeJunction1Phase::RHOUV_INDEX] -= pJ * ni(0) * _A[0];
-  _residual[VolumeJunction1Phase::RHOVV_INDEX] -= pJ * ni(1) * _A[0];
-  _residual[VolumeJunction1Phase::RHOWV_INDEX] -= pJ * ni(2) * _A[0];
+  _residual[VolumeJunction1Phase::RHOUV_INDEX] -= pJ * ni(0) * _A_linear[0];
+  _residual[VolumeJunction1Phase::RHOVV_INDEX] -= pJ * ni(1) * _A_linear[0];
+  _residual[VolumeJunction1Phase::RHOWV_INDEX] -= pJ * ni(2) * _A_linear[0];
 
   if (c == 0)
   {
@@ -100,9 +100,9 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
                ": Connected flow channels are not parallel, use VolumeJunction1Phase "
                "component instead.");
 
-  _areas[c] = _A[0];
+  _areas[c] = _A_linear[0];
   _is_inlet[c] = THM::isOutlet(_rhouA[0], _normal[c]);
-  _stored_pA[c] = _p[0] * _A[0];
+  _stored_pA[c] = _p[0] * _A_linear[0];
 }
 
 void
