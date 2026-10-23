@@ -5,8 +5,6 @@
     type = RunApp
     input = 'MWE_array_aux.i'
     requirement = 'The system shall be able to use nodal constraints in the presence of array variables.'
-    # see #29005
-    mesh_mode = 'replicated'
   []
 
   [run_with_nodal_constraint_exact]
@@ -19,7 +17,6 @@
               source/constraints/LinearNodalConstraint.md'
     requirement = 'The system shall be able to use nodal constraints enforced with '
                   'exact constraints in the presence of array variables.'
-    mesh_mode = 'replicated'
     prereq = 'run_with_nodal_constraints'
   []
 []

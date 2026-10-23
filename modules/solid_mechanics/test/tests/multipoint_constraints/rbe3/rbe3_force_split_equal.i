@@ -91,6 +91,30 @@
     new_boundary = 'stub_top'
     coord = '0.5 0.5 1'
   []
+  [bottom1]
+    type = ExtraNodesetGenerator
+    input = stub_top
+    new_boundary = 'bottom1'
+    coord = '0 0 -1'
+  []
+  [bottom2]
+    type = ExtraNodesetGenerator
+    input = bottom1
+    new_boundary = 'bottom2'
+    coord = '1 0 -1'
+  []
+  [bottom3]
+    type = ExtraNodesetGenerator
+    input = bottom2
+    new_boundary = 'bottom3'
+    coord = '1 1 -1'
+  []
+  [bottom4]
+    type = ExtraNodesetGenerator
+    input = bottom3
+    new_boundary = 'bottom4'
+    coord = '0 1 -1'
+  []
 []
 
 [GlobalParams]
@@ -309,29 +333,49 @@
 []
 
 [Postprocessors]
-  [force_corner1]
-    type = NodalVariableValue
+  [reaction1]
+    type = NodalSum
     variable = react_z
-    nodeid = 0
-    scale_factor = -1
+    boundary = bottom1
+    outputs = none
+  []
+  [force_corner1]
+    type = ScalePostprocessor
+    value = reaction1
+    scaling_factor = -1
+  []
+  [reaction2]
+    type = NodalSum
+    variable = react_z
+    boundary = bottom2
+    outputs = none
   []
   [force_corner2]
-    type = NodalVariableValue
+    type = ScalePostprocessor
+    value = reaction2
+    scaling_factor = -1
+  []
+  [reaction3]
+    type = NodalSum
     variable = react_z
-    nodeid = 2
-    scale_factor = -1
+    boundary = bottom3
+    outputs = none
   []
   [force_corner3]
-    type = NodalVariableValue
+    type = ScalePostprocessor
+    value = reaction3
+    scaling_factor = -1
+  []
+  [reaction4]
+    type = NodalSum
     variable = react_z
-    nodeid = 4
-    scale_factor = -1
+    boundary = bottom4
+    outputs = none
   []
   [force_corner4]
-    type = NodalVariableValue
-    variable = react_z
-    nodeid = 6
-    scale_factor = -1
+    type = ScalePostprocessor
+    value = reaction4
+    scaling_factor = -1
   []
 []
 

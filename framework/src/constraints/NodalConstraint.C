@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "DisplacedProblem.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
@@ -182,6 +183,16 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
               "Mismatch between number of primary nodes and connected elements");
 
   return elem_ids;
+}
+
+void
+NodalConstraint::ghostPrimaryNodes()
+{
+  for (const auto elem_id : gatherAndRetainConnectedElems(_fe_problem.mesh(), _primary_node_vector))
+    _subproblem.addGhostedElem(elem_id);
+
+  if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
+    gatherAndRetainConnectedElems(displaced_problem->mesh(), _primary_node_vector);
 }
 
 void

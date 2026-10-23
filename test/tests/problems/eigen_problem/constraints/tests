@@ -51,7 +51,6 @@
     abs_zero = 1e-10
     requirement = 'The system shall condense a user-added multipoint constraint out of '
                   'both eigen matrices and restore the constrained value on the eigenvector.'
-    mesh_mode = REPLICATED
   []
 
   [nodal_exact_eigen]
@@ -67,7 +66,6 @@
       rel_err = 1e-6
       abs_zero = 1e-10
       detail = 'with the tie enforced by exact constraints,'
-      mesh_mode = REPLICATED
     []
     [penalty]
       type = 'CSVDiff'
@@ -82,7 +80,6 @@
       rel_err = 1e-6
       abs_zero = 1e-10
       detail = 'with the same tie enforced by a penalty, giving a different eigenvalue'
-      mesh_mode = REPLICATED
     []
     [penalty_eigenvector]
       type = 'Exodiff'
@@ -100,7 +97,6 @@
       abs_zero = 1e-10
       prereq = 'nodal_exact_eigen/penalty'
       detail = 'and an eigenvector that does not satisfy the tie.'
-      mesh_mode = REPLICATED
     []
   []
 []

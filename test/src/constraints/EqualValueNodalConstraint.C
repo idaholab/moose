@@ -32,6 +32,7 @@ EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & par
 
   _connected_nodes.push_back(getParam<unsigned int>("secondary"));
   _primary_node_vector.push_back(getParam<unsigned int>("primary"));
+  ghostPrimaryNodes();
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint() {}

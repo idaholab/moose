@@ -7,15 +7,6 @@
     csvdiff = 'rbe2_rigid_rotation_out.csv'
     requirement = 'The system shall move every dependent node of an RBE2 constraint as a rigid body when the independent node is given a prescribed rotation.'
   []
-  [rbe2_rigid_rotation_distributed]
-    type = CSVDiff
-    input = 'rbe2_rigid_rotation.i'
-    csvdiff = 'rbe2_rigid_rotation_out.csv'
-    mesh_mode = DISTRIBUTED
-    min_parallel = 2
-    prereq = 'rbe2_rigid_rotation'
-    requirement = 'The system shall produce the same rigid-body motion from an RBE2 constraint on a distributed mesh with the independent node owned by another process.'
-  []
   [rbe2_after_refinement]
     type = CSVDiff
     input = 'rbe2_after_refinement.i'

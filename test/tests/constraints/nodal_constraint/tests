@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values."
   []
 
@@ -13,7 +12,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_displaced_test.i'
     exodiff = 'nodal_constraint_displaced_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values using a displaced mesh."
   []
 
@@ -21,7 +19,6 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint.i'
     exodiff = 'linear_nodal_constraint_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
 
@@ -29,7 +26,6 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint_different_variables.i'
     exodiff = 'linear_nodal_constraint_different_variables_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values of different variables."
   []
 
@@ -57,7 +53,6 @@
                   Outputs/file_base=nodal_constraint_test_exact_out'
       exodiff = 'nodal_constraint_test_exact_out.e'
       detail = 'tying the value of a variable at two nodes,'
-      mesh_mode = REPLICATED
     []
     [displaced]
       type = 'Exodiff'
@@ -66,7 +61,6 @@
                   Outputs/file_base=nodal_constraint_displaced_test_exact_out'
       exodiff = 'nodal_constraint_displaced_test_exact_out.e'
       detail = 'tying the value of a variable at two nodes of a displaced mesh, and'
-      mesh_mode = REPLICATED
     []
     [linear]
       type = 'Exodiff'
@@ -75,7 +69,6 @@
                   Outputs/file_base=linear_nodal_constraint_exact_out'
       exodiff = 'linear_nodal_constraint_exact_out.e'
       detail = 'tying a secondary node to a weighted primary node.'
-      mesh_mode = REPLICATED
     []
   []
 
@@ -92,7 +85,6 @@
     requirement = "The system shall tie a secondary node of one variable to a weighted primary "
                   "node of another variable with exact constraints, on a problem "
                   "the kinematic formulation cannot solve."
-    mesh_mode = REPLICATED
   []
 
   [tie_error]
@@ -111,7 +103,6 @@
       csvdiff = 'linear_nodal_constraint_tie_error_exact.csv'
       abs_zero = 1e-12
       detail = 'reporting a tie error at machine zero with the exact formulation,'
-      mesh_mode = REPLICATED
     []
     [kinematic]
       type = 'CSVDiff'
@@ -122,7 +113,6 @@
       abs_zero = 1e-8
       detail = 'reporting a tie error at the nonlinear solve tolerance with the kinematic '
                'formulation, and'
-      mesh_mode = REPLICATED
     []
     [penalty]
       type = 'CSVDiff'
@@ -133,36 +123,20 @@
       rel_err = 1e-6
       detail = 'reporting a tie error of the order of one over the penalty with the penalty '
                'formulation.'
-      mesh_mode = REPLICATED
     []
   []
 
   [exact_reinit]
+    type = 'CSVDiff'
+    input = 'exact_reinit.i'
+    csvdiff = 'exact_reinit_out.csv'
+    abs_zero = 1e-10
     requirement = "The system shall rebuild the exact constraints of a nodal "
-                  "constraint whose weights a control changes between time steps"
+                  "constraint whose weights a control changes between time steps."
     issues = '#665 #33821'
     design = 'syntax/Constraints/index.md
               source/constraints/NodalConstraint.md
               source/constraints/LinearNodalConstraint.md'
-    [serial]
-      type = 'CSVDiff'
-      input = 'exact_reinit.i'
-      csvdiff = 'exact_reinit_out.csv'
-      abs_zero = 1e-10
-      detail = 'when the solve runs on one process, and'
-      mesh_mode = REPLICATED
-    []
-    [parallel]
-      type = 'CSVDiff'
-      input = 'exact_reinit.i'
-      csvdiff = 'exact_reinit_out.csv'
-      abs_zero = 1e-10
-      min_parallel = 2
-      max_parallel = 2
-      mesh_mode = 'replicated'
-      prereq = 'exact_reinit/serial'
-      detail = 'when the solve runs on two processes.'
-    []
   []
 
 []

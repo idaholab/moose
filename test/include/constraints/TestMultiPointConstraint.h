@@ -33,10 +33,11 @@ protected:
   const MooseVariable & coupledSecondaryVariable();
 
   /**
-   * @param node_id The id of the node
-   * @return The dof of the constrained variable at the node
+   * Gather the dof of the constrained variable at the dependent node and at every primary node,
+   * from the ranks that own them. Every rank must call this.
+   * @return The dof of each of those nodes, keyed by node id
    */
-  dof_id_type nodeDof(const dof_id_type node_id) const;
+  std::map<dof_id_type, dof_id_type> gatherNodeDofs() const;
 
   /// The variable whose degrees of freedom this constraint ties together
   const MooseVariable & _var;

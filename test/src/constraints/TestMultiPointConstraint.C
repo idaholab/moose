@@ -16,7 +16,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/node.h"
 
-#include <algorithm>
+#include <map>
 
 registerMooseObject("MooseTestApp", TestMultiPointConstraint);
 
@@ -57,24 +57,6 @@ TestMultiPointConstraint::TestMultiPointConstraint(const InputParameters & param
                ") must match the number of entries of 'primary_nodes' (",
                _primary_nodes.size(),
                ").");
-
-  // Checked here, on every rank, because erroring inside the collective addExactConstraints()
-  // would hang
-  dof_id_type missing_node = libMesh::DofObject::invalid_id;
-  for (const auto node_id : _primary_nodes)
-    if (!_mesh.queryNodePtr(node_id))
-      missing_node = std::min(missing_node, node_id);
-  if (!_mesh.queryNodePtr(_secondary_node))
-    missing_node = std::min(missing_node, _secondary_node);
-  _communicator.min(missing_node);
-
-  if (missing_node != libMesh::DofObject::invalid_id)
-    mooseError("The node ",
-               missing_node,
-               " is not present on every process. This constraint builds its exact constraint from "
-               "node ids "
-               "alone, so every node it names must be present wherever the dependent node is; use "
-               "a replicated mesh.");
 }
 
 const MooseVariable &
@@ -95,28 +77,58 @@ TestMultiPointConstraint::variable() const
   return _var;
 }
 
-dof_id_type
-TestMultiPointConstraint::nodeDof(const dof_id_type node_id) const
+std::map<dof_id_type, dof_id_type>
+TestMultiPointConstraint::gatherNodeDofs() const
 {
-  const Node * const node = _mesh.queryNodePtr(node_id);
-  mooseAssert(node, "The node " << node_id << " is not present on this process");
+  // Each node is contributed by its owner, so remote nodes are covered
+  std::vector<std::pair<dof_id_type, dof_id_type>> node_dofs;
+  auto add_node = [&](const dof_id_type node_id)
+  {
+    const Node * const node = _mesh.queryNodePtr(node_id);
+    if (!node || node->processor_id() != processor_id())
+      return;
 
-  const auto sys_num = _sys.number();
-  if (node->n_comp(sys_num, _var.number()) == 0)
-    mooseError("The variable '", _var.name(), "' has no degree of freedom at node ", node_id, ".");
+    const auto sys_num = _sys.number();
+    node_dofs.emplace_back(node_id,
+                           node->n_comp(sys_num, _var.number()) > 0
+                               ? node->dof_number(sys_num, _var.number(), 0)
+                               : libMesh::DofObject::invalid_id);
+  };
+  for (const auto node_id : _primary_nodes)
+    add_node(node_id);
+  add_node(_secondary_node);
+  _communicator.allgather(node_dofs);
 
-  return node->dof_number(sys_num, _var.number(), 0);
+  std::map<dof_id_type, dof_id_type> dofs(node_dofs.begin(), node_dofs.end());
+  auto check_node = [&](const dof_id_type node_id)
+  {
+    const auto it = dofs.find(node_id);
+    if (it == dofs.end())
+      mooseError("The node ", node_id, " is not in the mesh.");
+    if (it->second == libMesh::DofObject::invalid_id)
+      mooseError(
+          "The variable '", _var.name(), "' has no degree of freedom at node ", node_id, ".");
+  };
+  for (const auto node_id : _primary_nodes)
+    check_node(node_id);
+  check_node(_secondary_node);
+
+  return dofs;
 }
 
 void
 TestMultiPointConstraint::addExactConstraints(libMesh::DofMap & dof_map) const
 {
+  // Collective, so every rank gathers before the ranks without the dependent node return
+  const auto dofs = gatherNodeDofs();
+
   if (!_mesh.queryNodePtr(_secondary_node))
     return;
 
   libMesh::DofConstraintRow row;
   for (const auto i : index_range(_primary_nodes))
-    row[nodeDof(_primary_nodes[i])] += _weights[i];
+    row[libmesh_map_find(dofs, _primary_nodes[i])] += _weights[i];
 
-  dof_map.add_constraint_row(nodeDof(_secondary_node), row, /*forbid_constraint_overwrite=*/true);
+  dof_map.add_constraint_row(
+      libmesh_map_find(dofs, _secondary_node), row, /*forbid_constraint_overwrite=*/true);
 }

@@ -75,25 +75,9 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
     }
   }
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
-
-  // Add elements connected to primary node to Ghosted Elements
-  for (const auto & dof : _primary_node_ids)
-  {
-    auto node_to_elem_pair = node_to_elem_map.find(dof);
-
-    // Our mesh may be distributed
-    if (node_to_elem_pair == node_to_elem_map.end())
-      continue;
-
-    // defining primary nodes in base class
-    _primary_node_vector.push_back(dof);
-
-    const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
-
-    for (const auto & elem_id : elems)
-      _subproblem.addGhostedElem(elem_id);
-  }
+  // defining primary nodes in base class
+  _primary_node_vector.assign(_primary_node_ids.begin(), _primary_node_ids.end());
+  ghostPrimaryNodes();
 }
 
 void

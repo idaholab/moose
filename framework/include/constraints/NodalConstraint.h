@@ -89,6 +89,12 @@ protected:
                                                          const std::vector<dof_id_type> & node_ids);
 
   /**
+   * Make every node of _primary_node_vector present on every rank, on the reference mesh and on
+   * the displaced mesh, by gathering, retaining and ghosting one element connected to each.
+   */
+  void ghostPrimaryNodes();
+
+  /**
    * Tie the secondary variable at each secondary node to the weighted sum of the primary variable
    * at the primary nodes. Every rank must call this. Nodes this rank does not have, and primary
    * nodes, are skipped.
