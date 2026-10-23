@@ -400,6 +400,17 @@
     capabilities = 'thermochimica'
   []
 
+  [pressure_override]
+    type = CSVDiff
+    input = typed_outputs_subblocks.i
+    csvdiff = pressure_override_out.csv
+    cli_args = "ChemicalComposition/system_thermodynamics/pressure=1e-4 Outputs/file_base=pressure_override_out"
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'A pressure set on a named ChemicalComposition subblock shall override the common-block pressure default.'
+    capabilities = 'thermochimica'
+  []
+
   [typed_outputs_batch_one]
     type = CSVDiff
     input = typed_outputs.i

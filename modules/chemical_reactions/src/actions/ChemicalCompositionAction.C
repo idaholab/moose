@@ -133,7 +133,10 @@ ChemicalCompositionAction::initializeConfiguration()
 
   const auto common = _awh.getActions<CommonChemicalCompositionAction>();
   if (common.size() == 1)
-    pars.applyParameters(common[0]->parameters());
+    // Only apply parameters the user actually set on the common block. applyParameters()
+    // would also apply a parameter's registered C++ default (e.g. pressure = 1.0), which
+    // would silently override a value this subblock set itself.
+    pars.applyCommonUserSetParameters(common[0]->parameters());
 
   for (const auto & parameter : {"thermodynamic_database",
                                  "temperature_unit",
