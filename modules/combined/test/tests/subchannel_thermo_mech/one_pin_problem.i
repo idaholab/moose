@@ -48,6 +48,7 @@ heated_length = 1.0
   compute_power = true
   P_out = ${P_out}
   verbose_subchannel = true
+  full_output = true
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'
   pin_HTC_closure = 'Dittus-Boelter'
@@ -145,8 +146,34 @@ heated_length = 1.0
     []
 []
 
+[Postprocessors]
+    # Heat rate from the pins to the coolant, which the q_prime transfer preserves
+    [pin_power]
+        type = SCMPinPowerPostprocessor
+        execute_on = 'timestep_end transfer'
+    []
+    [coolant_power]
+        type = SCMTHPowerPostprocessor
+    []
+[]
+
+[VectorPostprocessors]
+    # Pin surface temperature at the SCM axial nodes, interpolated linearly in the pin model when the
+    # Tpin_interpolated transfer is active
+    [Tpin_profile]
+        type = LineValueSampler
+        variable = Tpin
+        start_point = '0 0 0'
+        end_point = '0 0 ${heated_length}'
+        num_points = 26 # n_cells + 1, one point per SCM axial node
+        sort_by = z
+        execute_on = 'timestep_end'
+    []
+[]
+
 [Outputs]
     exodus = true
+    csv = true
     [Temp_Out_MATRIX]
         type = QuadSubChannelNormalSliceValues
         variable = T
@@ -174,9 +201,10 @@ heated_length = 1.0
     type = Steady
     petsc_options_iname = '-pc_type -pc_hypre_type'
     petsc_options_value = 'hypre boomeramg'
-    fixed_point_max_its = 8
-    fixed_point_min_its = 6
-    fixed_point_rel_tol = 1e-6
+    # SCM does not compute a nonlinear residual, so the fixed-point tolerance has no effect and the
+    # number of coupling iterations is fixed. The pin power in SCM is converged after two iterations
+    fixed_point_max_its = 3
+    fixed_point_min_its = 3
 []
 
 ################################################################################
@@ -204,13 +232,23 @@ heated_length = 1.0
 []
 
 [Transfers]
-    [Tpin] # send pin surface temperature to pin model,
+    # Tpin_interpolated replaces Tpin when the pin model uses the right_interpolated boundary condition
+    inactive = Tpin_interpolated
+    [Tpin] # send the nearest SCM pin surface temperature to each pin surface node
         type = MultiAppGeneralFieldNearestLocationTransfer
         to_multi_app = sub
         variable = Pin_surface_temperature
         source_variable = Tpin
         execute_on = 'timestep_end'
         greedy_search = true
+    []
+
+    [Tpin_interpolated] # alternative: send the pin surface temperature profile to the pin model
+        type = MultiAppReporterTransfer
+        to_multi_app = sub
+        from_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        to_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        execute_on = 'timestep_end'
     []
 
     [diameter] # send diameter information from pin model to subchannel
@@ -227,10 +265,13 @@ heated_length = 1.0
         type = MultiAppGeneralFieldNearestLocationTransfer
         from_multi_app = sub
         variable = q_prime
-        source_variable = q_prime
+        source_variable = q_prime_nodal
         from_boundaries = right
         execute_on = 'timestep_end'
         greedy_search = true
+        # Scale q_prime so that the pin power in SCM equals the heat rate through the pin surface
+        from_postprocessors_to_be_preserved = pin_surface_heat_rate
+        to_postprocessors_to_be_preserved = pin_power
     []
 
     [subchannel_transfer]
