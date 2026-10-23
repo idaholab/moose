@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "MortarNodalFrames.h"
 
 #include <unordered_map>
 
@@ -22,6 +23,8 @@ public:
   static InputParameters validParams();
 
   ComputeDynamicWeightedGapLMMechanicalContact(const InputParameters & parameters);
+
+  void initialSetup() override;
 
 protected:
   /**
@@ -167,4 +170,7 @@ protected:
   /// that derived classes advancing their own history in an overriding timestepSetup() can skip
   /// doing so as well.
   bool _retried_timestep;
+
+  /// Secondary nodal normals and tangents with their displacement derivatives
+  Moose::Mortar::ADNodalFrames _nodal_frames;
 };
