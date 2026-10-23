@@ -95,9 +95,6 @@ protected:
   /// The adaptivity method for the penalty factor at augmentations
   const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
 
-  /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
-  const Real _epsilon_tolerance;
-
   /// The timestep index at which the accumulated slip and tangential traction history were last
   /// advanced. Used to detect a retried timestep (e.g. from --test-restep or a rejected step),
   /// since timestepSetup() runs once per time step attempt rather than once per accepted step.
