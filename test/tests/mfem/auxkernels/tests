@@ -85,4 +85,16 @@
     recover = false
     restep = false
   []
+  [MFEMMeridionalCurlAux]
+    type = CSVDiff
+    input = axisymmetric_magnetostatic.i
+    csvdiff = 'AxisymmetricMagnetostatic.csv'
+    design = 'MFEMMeridionalCurlAux.md'
+    issues = '#33569'
+    requirement = 'The system shall have the ability to compute the curl in meridional RZ coordinates'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
 []
