@@ -153,7 +153,7 @@ PenaltyWeightedGapUserObject::selfFinalize()
     auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
 
     // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
-    auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
+    auto gap = penaltyGap(wgap);
 
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object->id()] : 0.0;
@@ -340,14 +340,14 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object->id()];
 
-    const auto possible_normalization =
-        (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
+    // Increment the multiplier by the penalty pressure computed in selfFinalize
+    const Real penalty_gap = MetaPhysicL::raw_value(penaltyGap(wgap));
 
     // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
     // caps the penalty increase)
     // Before we were updating the LM before adapting the penalty factor
-    if (lagrange_multiplier + gap * penalty / possible_normalization <= 0)
-      lagrange_multiplier += gap * penalty / possible_normalization;
+    if (lagrange_multiplier + penalty_gap * penalty <= 0)
+      lagrange_multiplier += penalty_gap * penalty;
     else
       lagrange_multiplier = 0.0;
 
