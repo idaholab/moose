@@ -96,6 +96,7 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
   // With components whose specific heats depend on temperature, Newton's method starts at the
   // lowest of their start temperatures (see IdealGasMixtureInterface)
   _component_fps.resize(_n_components);
+  _lennard_jones.resize(_n_components);
   for (const auto i : make_range(_n_components))
   {
     const auto & single_phase_fp =
@@ -110,6 +111,7 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
       _constant_specific_heats = false;
       _T_newton_start = std::min(_T_newton_start, ideal_gas_fp->newtonStartTemperature());
     }
+    _lennard_jones[i] = ideal_gas_fp->lennardJonesParameters();
     _component_fps[i] = &single_phase_fp;
   }
 
@@ -611,4 +613,41 @@ IdealGasMixtureFluidProperties::k_from_p_T(Real p,
                                            const std::vector<Real> & x_secondary) const
 {
   return k_from_p_T_templ(p, T, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::binaryDiffusionCoefficient_templ(const CppType & p,
+                                                                 const CppType & T,
+                                                                 const unsigned int i,
+                                                                 const unsigned int j) const
+{
+  mooseAssert(i < _n_components && j < _n_components, "Component index too high");
+  if (!_lennard_jones[i] || !_lennard_jones[j])
+    mooseError("Binary diffusion coefficients require components with Lennard-Jones parameters, "
+               "such as 'NASA7IdealGasFluidProperties'.");
+  return GasTransport::binaryDiffusionCoefficient(p,
+                                                  T,
+                                                  _component_fps[i]->molarMass(),
+                                                  _component_fps[j]->molarMass(),
+                                                  *_lennard_jones[i],
+                                                  *_lennard_jones[j]);
+}
+
+Real
+IdealGasMixtureFluidProperties::binaryDiffusionCoefficient(Real p,
+                                                           Real T,
+                                                           unsigned int i,
+                                                           unsigned int j) const
+{
+  return binaryDiffusionCoefficient_templ(p, T, i, j);
+}
+
+ADReal
+IdealGasMixtureFluidProperties::binaryDiffusionCoefficient(const ADReal & p,
+                                                           const ADReal & T,
+                                                           unsigned int i,
+                                                           unsigned int j) const
+{
+  return binaryDiffusionCoefficient_templ(p, T, i, j);
 }

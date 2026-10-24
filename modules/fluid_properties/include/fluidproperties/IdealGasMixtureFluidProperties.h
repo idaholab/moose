@@ -11,6 +11,7 @@
 
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
+#include "GasTransport.h"
 
 class SinglePhaseFluidProperties;
 
@@ -114,6 +115,17 @@ public:
 
 #undef override_property
 
+  /**
+   * Computes the Chapman-Enskog binary diffusion coefficient of a pair of components, which must
+   * both have Lennard-Jones parameters (see IdealGasMixtureInterface) [m^2/s]
+   */
+  virtual Real
+  binaryDiffusionCoefficient(Real p, Real T, unsigned int i, unsigned int j) const override;
+  virtual ADReal binaryDiffusionCoefficient(const ADReal & p,
+                                            const ADReal & T,
+                                            unsigned int i,
+                                            unsigned int j) const override;
+
 protected:
   /// Names of component fluid properties
   const std::vector<UserObjectName> _component_fp_names;
@@ -124,6 +136,8 @@ protected:
 
   /// Component fluid properties objects
   std::vector<const SinglePhaseFluidProperties *> _component_fps;
+  /// Lennard-Jones parameters of the components, or nullptr for components without them
+  std::vector<const GasTransport::LennardJonesParameters *> _lennard_jones;
 
   /// Whether all components have constant specific heats, so that the internal energy is linear
   /// in temperature and the temperature follows explicitly from it
@@ -161,6 +175,13 @@ private:
   CppType mixTransportProperty(const std::vector<CppType> & psi,
                                const std::vector<CppType> & y,
                                const std::vector<CppType> & mu) const;
+
+  /// Implements binaryDiffusionCoefficient for Real and AD arguments
+  template <typename CppType>
+  CppType binaryDiffusionCoefficient_templ(const CppType & p,
+                                           const CppType & T,
+                                           unsigned int i,
+                                           unsigned int j) const;
 
   /// Implements the deprecated mixtureSpecificHeatRatio(x)
   template <typename CppType>

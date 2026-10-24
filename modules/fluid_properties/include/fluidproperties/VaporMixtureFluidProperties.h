@@ -159,6 +159,20 @@ public:
   virtual unsigned int numberOfComponents() const = 0;
 
   /**
+   * Computes the binary diffusion coefficient of a pair of components [m^2/s]
+   *
+   * @param[in] p   Pressure [Pa]
+   * @param[in] T   Temperature [K]
+   * @param[in] i   Index of the first component (0 is the primary component)
+   * @param[in] j   Index of the second component (0 is the primary component)
+   */
+  virtual Real binaryDiffusionCoefficient(Real p, Real T, unsigned int i, unsigned int j) const;
+  virtual ADReal binaryDiffusionCoefficient(const ADReal & p,
+                                            const ADReal & T,
+                                            unsigned int i,
+                                            unsigned int j) const;
+
+  /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
    * secondary vapors.
    *

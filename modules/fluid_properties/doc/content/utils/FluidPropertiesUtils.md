@@ -84,9 +84,10 @@ $2 \times 10^{-5}$ J/(mol K) in $s^\circ$.
 
 ## Gas transport properties id=gas-transport
 
-The `GasTransport` utilities, as used in [NASA7IdealGasFluidProperties.md], evaluate transport
-properties of dilute gases from kinetic theory [!citep](poling2001). The Chapman-Enskog viscosity of
-a species and binary diffusion coefficient of a pair of species $i$ and $j$ are
+The `GasTransport` utilities, as used in [NASA7IdealGasFluidProperties.md] and
+[IdealGasMixtureFluidProperties.md], evaluate transport properties of dilute gases from kinetic
+theory [!citep](poling2001). The Chapman-Enskog viscosity of a species and binary diffusion
+coefficient of a pair of species $i$ and $j$ are
 
 !equation
 \mu = \frac{5}{16} \frac{\sqrt{\pi m k_B T}}{\pi \sigma^2 \Omega^{(2,2)*}(T^*)} \,, \qquad

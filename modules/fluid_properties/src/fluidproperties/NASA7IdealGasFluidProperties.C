@@ -59,6 +59,12 @@ NASA7IdealGasFluidProperties::newtonStartTemperature() const
   return _data.T_max;
 }
 
+const GasTransport::LennardJonesParameters *
+NASA7IdealGasFluidProperties::lennardJonesParameters() const
+{
+  return &_lennard_jones;
+}
+
 template <typename CppType>
 void
 NASA7IdealGasFluidProperties::checkTemperature(const CppType & T) const

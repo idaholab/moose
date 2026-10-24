@@ -69,6 +69,8 @@ public:
   /// The upper end of the temperature range of the NASA 7-coefficient data [K]
   virtual Real newtonStartTemperature() const override;
 
+  virtual const GasTransport::LennardJonesParameters * lennardJonesParameters() const override;
+
 private:
   /// NASA 7-coefficient data of the species
   const NASA7::SpeciesData _data;

@@ -28,6 +28,24 @@ VaporMixtureFluidProperties::~VaporMixtureFluidProperties() {}
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 Real
+VaporMixtureFluidProperties::binaryDiffusionCoefficient(Real,
+                                                        Real,
+                                                        unsigned int,
+                                                        unsigned int) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+ADReal
+VaporMixtureFluidProperties::binaryDiffusionCoefficient(const ADReal &,
+                                                        const ADReal &,
+                                                        unsigned int,
+                                                        unsigned int) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+Real
 VaporMixtureFluidProperties::primaryMassFraction(const std::vector<Real> & x) const
 {
   return 1 - std::accumulate(x.begin(), x.end(), 0.0);

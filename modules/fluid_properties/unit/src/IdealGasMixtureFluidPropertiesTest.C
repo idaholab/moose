@@ -407,3 +407,39 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, wilkeAdDerivatives)
                         x);
   }
 }
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, binaryDiffusion)
+{
+  // Binary diffusion coefficients at 1e5 Pa and 1000 K computed with Cantera 3.2.0 from
+  // gri30.yaml, which the Chapman-Enskog coefficients reproduce within 0.1% for pairs without H2O
+  const auto & fp = buildNASA7Mixture({"N2", "O2", "H2"}, "diffusion");
+  const Real p = 1e5;
+  const Real T = 1000;
+  const Real tol = 2e-3;
+  REL_TEST(fp.binaryDiffusionCoefficient(p, T, 0, 1), 0.00016508453019480936, tol);
+  REL_TEST(fp.binaryDiffusionCoefficient(p, T, 2, 0), 0.0005928256767875003, tol);
+
+  // The coefficient is symmetric in the pair
+  REL_TEST(fp.binaryDiffusionCoefficient(p, T, 0, 2),
+           fp.binaryDiffusionCoefficient(p, T, 2, 0),
+           REL_TOL_CONSISTENCY);
+
+  // The derivatives with respect to pressure (index 0) and temperature (index 1): the coefficient
+  // is inversely proportional to pressure
+  DNDerivativeType dp_dp, dT_dT;
+  Moose::derivInsert(dp_dp, 0, 1);
+  Moose::derivInsert(dT_dT, 1, 1);
+  const ADReal D_ad = fp.binaryDiffusionCoefficient(ADReal(p, dp_dp), ADReal(T, dT_dT), 0, 2);
+  const Real D = fp.binaryDiffusionCoefficient(p, T, 0, 2);
+  const Real h = REL_PERTURBATION * T;
+  REL_TEST(D_ad, D, REL_TOL_CONSISTENCY);
+  REL_TEST(D_ad.derivatives()[0], -D / p, REL_TOL_CONSISTENCY);
+  REL_TEST(D_ad.derivatives()[1],
+           (fp.binaryDiffusionCoefficient(p, T + h, 0, 2) -
+            fp.binaryDiffusionCoefficient(p, T - h, 0, 2)) /
+               (2 * h),
+           REL_TOL_DERIVATIVE);
+
+  // IdealGasFluidProperties components have no Lennard-Jones parameters
+  EXPECT_THROW(_fp_mix->binaryDiffusionCoefficient(p, T, 0, 1), std::exception);
+}

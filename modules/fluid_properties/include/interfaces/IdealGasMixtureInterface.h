@@ -11,6 +11,11 @@
 
 #include "MooseTypes.h"
 
+namespace GasTransport
+{
+struct LennardJonesParameters;
+}
+
 /**
  * Interface of the fluid properties of ideal gases that can be components of
  * IdealGasMixtureFluidProperties
@@ -32,4 +37,10 @@ public:
    * whose specific heats are not constant.
    */
   virtual Real newtonStartTemperature() const = 0;
+
+  /**
+   * Lennard-Jones parameters of the gas, from which a mixture computes binary diffusion
+   * coefficients, or nullptr for a gas without them
+   */
+  virtual const GasTransport::LennardJonesParameters * lennardJonesParameters() const = 0;
 };

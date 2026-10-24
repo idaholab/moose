@@ -97,6 +97,12 @@ where $M_i$ is the molar mass of component $i$. The rule of Mason and Saxena has
 interaction factors $\phi_{ij}$ when its ratio of translational thermal conductivities is written
 with viscosities and its empirical constant is one.
 
+The binary diffusion coefficient of a pair of components, `binaryDiffusionCoefficient(p, T, i, j)`,
+follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters of the components, as
+described with the [gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). It is
+available for components that provide these parameters through `IdealGasMixtureInterface`, such as
+[NASA7IdealGasFluidProperties.md], but not for [IdealGasFluidProperties.md].
+
 The gas-mixture flow channels of the thermal hydraulics module do not yet accept
 [NASA7IdealGasFluidProperties.md] components.
 
