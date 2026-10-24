@@ -92,6 +92,28 @@ householderTangents(const Vector & normal)
                   -2.0 * h_vector(1) * h_vector(2) / h_squared,
                   1.0 - 2.0 * h_vector(2) * h_vector(2) / h_squared)}};
 }
+
+/**
+ * Construct the two tangent vectors used by mortar from a unit normal on a \p dim dimensional
+ * mesh.
+ *
+ * In 2D the first tangent is e_z x n and the second is e_z, as in Gitterle, Popp, Gee, and Wall,
+ * Int. J. Numer. Meth. Engng. 84(5), 2010, pp. 543-571, eq. (37). This frame is smooth for every
+ * in-plane normal, whereas householderTangents() switches charts near n = (-1, 0, 0) and flips the
+ * sign of both tangents there. Away from that pole the two constructions coincide. Tangential
+ * Lagrange multipliers are stored in this frame, so a sign flip would reverse their meaning during
+ * a nonlinear solve. In 3D every frame built from the normal alone has a discontinuity somewhere,
+ * and householderTangents() is used.
+ */
+template <typename Vector>
+std::array<Vector, 2>
+nodalTangents(const Vector & normal, const unsigned int dim)
+{
+  if (dim == 2)
+    return {{Vector(-normal(1), normal(0), 0.0), Vector(0.0, 0.0, 1.0)}};
+
+  return householderTangents(normal);
+}
 }
 }
 
