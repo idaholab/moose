@@ -1,0 +1,10 @@
+[Tests]
+  design = 'IdealGasMixtureFluidProperties.md'
+  issues = '#34221'
+
+  [mixing_entropy]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.mixingEntropy
+    requirement = 'The system shall compute the specific entropy of an ideal gas mixture as the sum of the component entropies at their partial pressures, including the entropy of mixing and its derivative with respect to the mass fractions, with vanishing and slightly negative mass fractions contributing no entropy of mixing.'
+  []
+[]

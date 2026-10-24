@@ -20,7 +20,7 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   const Real v = 1.38490747936373;
   const Real rho = 0.7220698962933115;
   const Real e = 1.995566878921797e+06;
-  const Real s = 3129.64317643634;
+  const Real s = 3362.645373543747;
   const Real c = 442.127817187648;
   const Real cp = 1187.64406714542;
   const Real cv = 841.417197304492;
@@ -72,4 +72,36 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
 
   const Real v_gold = FluidProperties::_R * T / (M * p);
   REL_TEST(v, v_gold, REL_TOL_SAVED_VALUE);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, mixingEntropy)
+{
+  const Real p = 100000;
+  const Real T = 400;
+
+  // Each component is at its partial pressure
+  for (const Real x : {0.3, 0.7})
+  {
+    const auto psi = _fp_mix->molarFractionsFromMassFractions(std::vector<Real>{1 - x, x});
+    const Real s = (1 - x) * _fp_steam->s_from_p_T(psi[0] * p, T) +
+                   x * _fp_nitrogen->s_from_p_T(psi[1] * p, T);
+    REL_TEST(_fp_mix->s_from_p_T(p, T, {x}), s, REL_TOL_CONSISTENCY);
+  }
+
+  // A vanishing mass fraction contributes no entropy of mixing
+  REL_TEST(_fp_mix->s_from_p_T(p, T, {0}), _fp_steam->s_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  REL_TEST(_fp_mix->s_from_p_T(p, T, {1}), _fp_nitrogen->s_from_p_T(p, T), REL_TOL_CONSISTENCY);
+
+  // A slightly negative mass fraction, as from numerical overshoot, gives a finite entropy
+  EXPECT_TRUE(std::isfinite(_fp_mix->s_from_p_T(p, T, {-1e-12})));
+
+  // The automatic differentiation version carries the derivative with respect to the mass fraction
+  const Real x = 0.7;
+  DNDerivativeType dx_dx;
+  Moose::derivInsert(dx_dx, 0, 1);
+  const ADReal s_ad = _fp_mix->s_from_p_T(ADReal(p), ADReal(T), {ADReal(x, dx_dx)});
+  const Real h = REL_PERTURBATION * x;
+  REL_TEST(s_ad.derivatives()[0],
+           (_fp_mix->s_from_p_T(p, T, {x + h}) - _fp_mix->s_from_p_T(p, T, {x - h})) / (2 * h),
+           REL_TOL_DERIVATIVE);
 }

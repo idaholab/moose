@@ -32,8 +32,8 @@ p_k = \psi_k p \,,
 
 where $p_k$ is the partial pressure of component $k$ and $p$ is the mixture pressure.
 
-Mixture mass-specific properties, such as specific volume $v$, specific internal
-energy $e$, and specific entropy $s$ are computed as mass-fraction-weighted
+Mixture mass-specific properties, such as specific volume $v$ and specific internal
+energy $e$, are computed as mass-fraction-weighted
 sums of the component properties evaluated at the mixture temperature and pressure:
 
 !equation
@@ -45,6 +45,17 @@ sums of the component properties evaluated at the mixture temperature and pressu
 
 !equation
 y(p, T) = \sum\limits_k \psi_k y_k(p, T) \,.
+
+The specific entropy $s$ is instead the sum of the component entropies at their partial pressures,
+which adds the entropy of mixing to the mass-fraction-weighted sum at the mixture pressure:
+
+!equation
+s(p, T) = \sum\limits_k \xi_k s_k(\psi_k p, T)
+  = \sum\limits_k \xi_k s_k(p, T) - \frac{R}{M} \sum\limits_k \psi_k \ln \psi_k \,,
+
+where $R$ is the universal gas constant. The entropy of mixing of a vanishing mole fraction tends to
+zero, so non-positive mole fractions, which can result from numerical overshoot, are omitted from
+it.
 
 !syntax parameters /FluidProperties/IdealGasMixtureFluidProperties
 
