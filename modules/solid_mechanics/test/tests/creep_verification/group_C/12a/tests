@@ -1,0 +1,13 @@
+[Tests]
+  [12a]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '12a_out.csv'
+    input = '12a.i'
+    requirement = 'The system shall compute 3-D, uniaxial combined primary and secondary creep in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]
