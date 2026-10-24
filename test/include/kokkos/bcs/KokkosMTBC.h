@@ -19,9 +19,8 @@ public:
   KokkosMTBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 private:
   /**
@@ -33,9 +32,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMTBC::computeQpResidual(const unsigned int i,
-                              const unsigned int qp,
-                              AssemblyDatum & datum) const
+KokkosMTBC::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_test(datum, i, qp) * _value * _mat(datum, qp);
+  return -_value * _mat(datum, qp);
 }
