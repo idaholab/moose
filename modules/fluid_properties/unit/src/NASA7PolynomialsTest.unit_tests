@@ -1,0 +1,33 @@
+[Tests]
+  design = 'FluidPropertiesUtils.md'
+  issues = '#34116'
+
+  [cantera]
+    requirement = 'The system shall evaluate the standard-state heat capacity, enthalpy, and entropy of H2, O2, H2O, CH4, CO, CO2, and N2 from the GRI-Mech 3.0 NASA 7-coefficient polynomials, reproducing the values computed by Cantera'
+    [below_midpoint]
+      type = GoogleTest
+      unit_test = NASA7PolynomialsTest.canteraBelowMidpoint
+      detail = 'below the temperature where the low- and high-temperature polynomials meet,'
+    []
+    [at_midpoint]
+      type = GoogleTest
+      unit_test = NASA7PolynomialsTest.canteraAtMidpoint
+      detail = 'at that temperature, where the low-temperature polynomial applies, and'
+    []
+    [above_midpoint]
+      type = GoogleTest
+      unit_test = NASA7PolynomialsTest.canteraAboveMidpoint
+      detail = 'above that temperature.'
+    []
+  []
+  [molar_mass]
+    type = GoogleTest
+    unit_test = NASA7PolynomialsTest.molarMass
+    requirement = 'The system shall provide the molar masses of the built-in NASA 7-coefficient species, matching the values Cantera computes for GRI-Mech 3.0.'
+  []
+  [consistent_derivatives]
+    type = GoogleTest
+    unit_test = NASA7PolynomialsTest.consistentDerivatives
+    requirement = 'The system shall compute NASA 7-coefficient enthalpies and entropies whose temperature derivatives, obtained by automatic differentiation, equal the heat capacity and the heat capacity divided by temperature, respectively.'
+  []
+[]
