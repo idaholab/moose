@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosUserObjectWrapperRegistry.h"
+#endif
+
 // MOOSE includes
 #include "MooseTypes.h"
 #include "MooseUtils.h"
@@ -80,6 +84,18 @@ public:
   template <class T>
   const T & getUserObjectByName(const UserObjectName & object_name,
                                 bool is_dependency = true) const;
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get a typed device-polymorphic Kokkos user object.
+   * @tparam Base The registered virtual Kokkos user object base class
+   * @param param_name The parameter key containing the user object name
+   * @param is_dependency Whether the retrieved user object is a dependency
+   */
+  template <typename Base>
+  Moose::Kokkos::VirtualUserObject<Base>
+  getVirtualKokkosUserObject(const std::string & param_name, bool is_dependency = true) const;
+#endif
 
   /**
    * Get an user object with a given parameter \p param_name
@@ -181,6 +197,22 @@ UserObjectInterface::getUserObjectByName(const UserObjectName & object_name,
 {
   return castUserObject<T>(getUserObjectBaseByName(object_name, is_dependency));
 }
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename Base>
+Moose::Kokkos::VirtualUserObject<Base>
+UserObjectInterface::getVirtualKokkosUserObject(const std::string & param_name,
+                                                const bool is_dependency) const
+{
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  mooseError("Retrieving a virtual Kokkos user object is currently not supported for GPU.");
+#else
+  const auto & object = getUserObjectBase(param_name, is_dependency);
+  return Moose::Kokkos::VirtualUserObject<Base>(
+      Moose::Kokkos::UserObjectWrapperRegistry::build<Base>(&object, userObjectType(object)));
+#endif
+}
+#endif
 
 template <class T>
 bool
