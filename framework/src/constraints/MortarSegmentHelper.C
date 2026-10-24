@@ -136,8 +136,16 @@ pointInCircumcircleHelper(const Point & a, const Point & b, const Point & c, con
   const Real det = (ax * ax + ay * ay) * (bx * cy - by * cx) -
                    (bx * bx + by * by) * (ax * cy - ay * cx) +
                    (cx * cx + cy * cy) * (ax * by - ay * bx);
+  // The roundoff error of det is a small multiple of machine epsilon times this sum of absolute
+  // terms (Shewchuk 1997, incircle error bound). Measuring det against it keeps the test
+  // independent of the mesh scale, and a relative tolerance far above roundoff keeps a cocircular
+  // quad from calling for a flip of both of its diagonals.
+  const Real permanent = (ax * ax + ay * ay) * (std::abs(bx * cy) + std::abs(by * cx)) +
+                         (bx * bx + by * by) * (std::abs(ax * cy) + std::abs(ay * cx)) +
+                         (cx * cx + cy * cy) * (std::abs(ax * by) + std::abs(ay * bx));
+  const Real tolerance = TOLERANCE * permanent;
   const Real orientation = orient2dHelper(a, b, c);
-  return orientation >= 0 ? det > TOLERANCE : det < -TOLERANCE;
+  return orientation >= 0 ? det > tolerance : det < -tolerance;
 }
 
 void
@@ -187,7 +195,11 @@ performLocalDelaunayFlips(const std::vector<Point> & poly_nodes,
           orient2dHelper(poly_nodes[first_opposite], poly_nodes[second_opposite], poly_nodes[a]);
       const auto side_b =
           orient2dHelper(poly_nodes[first_opposite], poly_nodes[second_opposite], poly_nodes[b]);
-      if (side_a * side_b >= -TOLERANCE)
+      // side_a and side_b are each the new diagonal length times a distance from it, so their
+      // product scales with the fourth power of the diagonal length
+      const auto diagonal_length_sq =
+          (poly_nodes[second_opposite] - poly_nodes[first_opposite]).norm_sq();
+      if (side_a * side_b >= -TOLERANCE * diagonal_length_sq * diagonal_length_sq)
         continue;
 
       if (!pointInCircumcircleHelper(poly_nodes[first_triangle[0]],
