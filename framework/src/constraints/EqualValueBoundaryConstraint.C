@@ -18,21 +18,25 @@ InputParameters
 EqualValueBoundaryConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
-  params.addClassDescription(
-      "Constraint for enforcing that variables on each side of a boundary are equivalent.");
+  params.addClassDescription("Constraint for enforcing that variables on each side of a boundary "
+                             "are equivalent, with a penalty term or with exact constraints.");
   params.addParam<unsigned int>(
       "primary",
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
   params.addParam<Point>("primary_node_coord", "Coordinates of the primary node to locate.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
   params.addParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
-  params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
+  params.addParam<Real>("penalty",
+                        "The penalty used for the boundary term. It is required with the penalty "
+                        "and kinematic formulations and unused with the exact formulation");
   return params;
 }
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
-  : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
+  : NodalConstraint(parameters), _penalty(isParamValid("penalty") ? getParam<Real>("penalty") : 0.0)
 {
+  checkPenaltyParam();
+
   updateConstrainedNodes();
 }
 
@@ -40,6 +44,19 @@ void
 EqualValueBoundaryConstraint::meshChanged()
 {
   updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::addExactConstraints(libMesh::DofMap & dof_map) const
+{
+  if (!isParamValid("secondary"))
+  {
+    NodalConstraint::addExactConstraints(dof_map);
+    return;
+  }
+
+  // Read at call time: libMesh rebuilds the constraints before meshChanged() runs
+  addTieConstraints(dof_map, ownedBoundaryNodes(getParam<BoundaryName>("secondary")));
 }
 
 void

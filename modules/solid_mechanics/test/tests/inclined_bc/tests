@@ -26,4 +26,89 @@
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions while using automatic differentiation.'
     capabilities = 'superlu & method!=dbg'
   []
+
+  [exact]
+    issues = '#13128 #33821'
+    design = 'InclinedNoDisplacementConstraint.md PenaltyInclinedNoDisplacementBC.md'
+    requirement = 'The system shall enforce a no-normal-displacement condition on an inclined '
+                  'boundary with exact constraints and reproduce the penalty '
+                  'solution in two and three dimensions,'
+    [2D]
+      type = Exodiff
+      input = 'inclined_exact_2d.i'
+      exodiff = 'inclined_bc_2d_out.e'
+      abs_zero = 1e-3
+      rel_err = 8.5e-2
+      capabilities = 'superlu'
+      prereq = '2D'
+      detail = 'reproducing the penalty solution of a rotated two dimensional block,'
+    []
+    [2D_un_max]
+      type = CSVDiff
+      input = 'inclined_exact_2d.i'
+      csvdiff = 'inclined_exact_2d_out.csv'
+      abs_zero = 1e-12
+      capabilities = 'superlu'
+      prereq = 'exact/2D'
+      detail = 'holding the normal displacement of that two dimensional block at machine zero,'
+    []
+    [3D]
+      type = Exodiff
+      input = 'inclined_exact_3d.i'
+      exodiff = 'inclined_bc_3d_out.e'
+      abs_zero = 1e-3
+      rel_err = 1.4e-1
+      capabilities = 'superlu'
+      prereq = '3D'
+      detail = 'reproducing the penalty solution of a rotated three dimensional block, and'
+    []
+    [3D_un_max]
+      type = CSVDiff
+      input = 'inclined_exact_3d.i'
+      csvdiff = 'inclined_exact_3d_out.csv'
+      abs_zero = 1e-12
+      capabilities = 'superlu'
+      prereq = 'exact/3D'
+      detail = 'holding the normal displacement of that three dimensional block at machine zero.'
+    []
+  []
+
+  [exact_eigen]
+    issues = '#13128 #33821'
+    design = 'InclinedNoDisplacementConstraint.md PenaltyInclinedNoDisplacementBC.md'
+    requirement = 'The system shall produce the same fundamental eigenvalue for a block on two '
+                  'inclined roller supports enforced with exact constraints as for the same block '
+                  'un-rotated on axis-aligned Dirichlet rollers, while the penalty support shifts '
+                  'it, where '
+    [reference]
+      type = CSVDiff
+      input = 'inclined_exact_eigen.i'
+      cli_args = "BCs/inactive='InclinedNoDisplacementBC' Constraints/inactive='bottom left' "
+                 "Mesh/rotate/vector_value='0 0 0'"
+      csvdiff = 'inclined_exact_eigen_out_omega_squared_0001.csv'
+      rel_err = 1e-8
+      capabilities = 'slepc & mumps'
+      detail = 'the un-rotated block on axis-aligned Dirichlet rollers sets the eigenvalue,'
+    []
+    [exact]
+      type = CSVDiff
+      input = 'inclined_exact_eigen.i'
+      csvdiff = 'inclined_exact_eigen_out_omega_squared_0001.csv'
+      rel_err = 1e-8
+      capabilities = 'slepc & mumps'
+      prereq = 'exact_eigen/reference'
+      detail = 'the block rotated thirty degrees with both supports enforced by exact constraints '
+               'reproduces that eigenvalue, and'
+    []
+    [penalty]
+      type = CSVDiff
+      input = 'inclined_exact_eigen.i'
+      cli_args = "BCs/inactive='roller_x roller_y roller_x_eigen roller_y_eigen' "
+                 "Constraints/inactive='bottom left' "
+                 "Outputs/file_base=inclined_exact_eigen_penalty"
+      csvdiff = 'inclined_exact_eigen_penalty_omega_squared_0001.csv'
+      capabilities = 'slepc & mumps'
+      detail = 'the same rotated block on penalty supports gives a different eigenvalue.'
+    []
+  []
 []

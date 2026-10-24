@@ -1,0 +1,102 @@
+[Tests]
+  design = 'syntax/Constraints/index.md source/constraints/MultiPointConstraint.md '
+           'source/constraints/NodalConstraint.md '
+           'source/constraints/LinearNodalConstraint.md '
+           'source/constraints/EqualValueConstraint.md'
+  issues = '#33821'
+
+  [spike_penalty_nodal]
+    requirement = 'The system shall report the eigenvalues of a Laplace problem in which two nodes '
+                  'are tied by a penalty nodal constraint, with default tags and with the '
+                  'constraint marked as an eigen object, so the matrices the penalty enters are '
+                  'visible.'
+    [default_tags]
+      type = 'CSVDiff'
+      input = 'spike_penalty_nodal.i'
+      csvdiff = 'spike_penalty_nodal_out_eigenvalues_0001.csv'
+      capabilities = 'slepc & mumps'
+      rel_err = 1e-10
+      detail = 'with the constraint left on its default tags, and'
+    []
+    [eigen_tag]
+      type = 'CSVDiff'
+      input = 'spike_penalty_nodal.i'
+      cli_args = 'Constraints/tie/extra_vector_tags=eigen
+                  Outputs/file_base=spike_penalty_nodal_eigen_tag'
+      csvdiff = 'spike_penalty_nodal_eigen_tag_eigenvalues_0001.csv'
+      capabilities = 'slepc & mumps'
+      rel_err = 1e-10
+      detail = 'with the constraint marked as an eigen object.'
+    []
+  []
+
+  [spike_mortar_tie]
+    type = 'CSVDiff'
+    input = 'spike_mortar_tie.i'
+    csvdiff = 'spike_mortar_tie_out_eigenvalues_0001.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-6
+    abs_zero = 1e-9
+    requirement = 'The system shall report the eigenvalues of a Laplace problem whose interior '
+                  'interface is tied by a mortar equal-value constraint, matching the untied '
+                  'single-domain spectrum for the physical modes.'
+  []
+
+  [spike_exact_dof]
+    type = 'CSVDiff'
+    input = 'spike_exact_dof.i'
+    csvdiff = 'spike_exact_dof_out_eigenvalues_0001.csv spike_exact_dof_out.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    requirement = 'The system shall condense a user-added multipoint constraint out of '
+                  'both eigen matrices and restore the constrained value on the eigenvector.'
+  []
+
+  [nodal_exact_eigen]
+    requirement = 'The system shall condense a linear nodal constraint enforced with '
+                  'exact constraints out of both matrices of an eigenvalue problem so that '
+                  'the tie is exact, while the same constraint enforced with a penalty leaves the '
+                  'tie open.'
+    [exact]
+      type = 'CSVDiff'
+      input = 'nodal_exact_eigen.i'
+      csvdiff = 'nodal_exact_eigen_out_eigenvalues_0001.csv nodal_exact_eigen_out.csv'
+      capabilities = 'slepc & mumps'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'with the tie enforced by exact constraints,'
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'nodal_exact_eigen.i'
+      cli_args = 'Constraints/tie/formulation=penalty
+                  Executioner/solve_type=krylovschur
+                  Executioner/petsc_options_iname="-st_type -eps_target -st_pc_type -st_pc_factor_mat_solver_type"
+                  Executioner/petsc_options_value="sinvert 0 lu mumps"
+                  Outputs/file_base=nodal_exact_eigen_penalty'
+      csvdiff = 'nodal_exact_eigen_penalty_eigenvalues_0001.csv'
+      capabilities = 'slepc & mumps'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'with the same tie enforced by a penalty, giving a different eigenvalue'
+    []
+    [penalty_eigenvector]
+      type = 'Exodiff'
+      input = 'nodal_exact_eigen.i'
+      cli_args = 'Constraints/tie/formulation=penalty
+                  Executioner/solve_type=krylovschur
+                  Executioner/petsc_options_iname="-st_type -eps_target -st_pc_type -st_pc_factor_mat_solver_type"
+                  Executioner/petsc_options_value="sinvert 0 lu mumps"
+                  Outputs/exodus=true
+                  Outputs/file_base=nodal_exact_eigen_penalty'
+      exodiff = 'nodal_exact_eigen_penalty.e'
+      exodiff_opts = '-eigen_relative'
+      capabilities = 'slepc & mumps'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      prereq = 'nodal_exact_eigen/penalty'
+      detail = 'and an eigenvector that does not satisfy the tie.'
+    []
+  []
+[]

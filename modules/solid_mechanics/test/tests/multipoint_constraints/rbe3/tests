@@ -1,0 +1,38 @@
+[Tests]
+  design = 'source/constraints/RBE3Constraint.md'
+  issues = '#33821'
+  [rbe3_force_split_equal]
+    type = 'CSVDiff'
+    input = 'rbe3_force_split_equal.i'
+    csvdiff = 'rbe3_force_split_equal_out.csv'
+    abs_zero = 1e-8
+    requirement = 'The system shall distribute a force applied at the reference node of an RBE3 constraint with equal weights onto four independent nodes as one quarter each.'
+  []
+
+  [rbe3_force_split_weighted]
+    type = 'CSVDiff'
+    input = 'rbe3_force_split_equal.i'
+    cli_args = 'Constraints/rbe3/weights="2 1 1 1"
+                Outputs/file_base=rbe3_force_split_weighted'
+    csvdiff = 'rbe3_force_split_weighted.csv'
+    abs_zero = 1e-8
+    requirement = 'The system shall distribute a force applied at the reference node of an RBE3 constraint with weights two, one, one, one onto the four independent nodes as the weighted least-squares solution.'
+  []
+
+  [plate_eigen_reference]
+    type = 'CSVDiff'
+    input = 'plate_eigen_reference.i'
+    csvdiff = 'plate_eigen_reference_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    requirement = 'The system shall compute the lowest eigenvalue of a plate clamped along one edge.'
+  []
+
+  [rbe3_plate_eigen_unchanged]
+    type = 'CSVDiff'
+    input = 'rbe3_plate_eigen_unchanged.i'
+    csvdiff = 'rbe3_plate_eigen_unchanged_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-3
+    requirement = 'The system shall leave the lowest eigenvalue of a plate unchanged within 0.1 percent when an RBE3 constraint with a reference node above a four-node patch is added, because the constraint adds no stiffness.'
+  []
+[]

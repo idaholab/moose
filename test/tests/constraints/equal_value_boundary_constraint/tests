@@ -89,4 +89,47 @@
     cli_args = "Constraints/corner/primary_node_coord='0.5 0.5 0.0'"
     requirement = "The system shall report an error when multiple nodes are found for the specified node coordinates."
   []
+
+  [exact]
+    issues = '#617 #33821'
+    design = 'source/constraints/EqualValueBoundaryConstraint.md '
+             'source/constraints/NodalConstraint.md'
+    requirement = "The system shall enforce an equal value boundary constraint with exact "
+                  "constraints, tying every node of a boundary to a single primary node,"
+    [test]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_exact_out.e'
+      cli_args = "Constraints/y_top/primary=45 Constraints/y_top/formulation=exact "
+                 "Outputs/file_base=test_exact_out"
+      detail = "with the primary node selected by its node ID,"
+    []
+    [test_primary_node_coord]
+      type = 'Exodiff'
+      input = 'equal_value_boundary_constraint_test.i'
+      exodiff = 'test_primary_node_coord_exact_out.e'
+      cli_args = "Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0' "
+                 "Constraints/y_top/formulation=exact "
+                 "Outputs/file_base=test_primary_node_coord_exact_out"
+      detail = "with the primary node located by its coordinates,"
+    []
+    [adaptivity]
+      type = 'Exodiff'
+      input = 'adaptivity.i'
+      exodiff = 'adaptivity_out.e adaptivity_out.e-s002 adaptivity_out.e-s003'
+      rel_err = 1e-5
+      mesh_mode = REPLICATED
+      cli_args = "Constraints/y_top/formulation=exact"
+      prereq = 'adaptivity'
+      detail = "on a mesh that adaptivity refines during the solve, and"
+    []
+    [evbc_primary_element_ghosting]
+      type = 'Exodiff'
+      input = 'evbc_primary_element_ghosting.i'
+      exodiff = 'evbc_primary_element_ghosting_exact_out.e'
+      cli_args = "Constraints/top/formulation=exact "
+                 "Outputs/file_base=evbc_primary_element_ghosting_exact_out"
+      detail = "with the element of the primary node retained when remote elements are deleted."
+    []
+  []
 []

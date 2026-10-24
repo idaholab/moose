@@ -17,17 +17,20 @@ InputParameters
 LinearNodalConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
-  params.addClassDescription(
-      "Constrains secondary node to move as a linear combination of primary nodes.");
+  params.addClassDescription("Constrains secondary node to move as a linear combination of primary "
+                             "nodes, with a penalty term or with exact constraints.");
   params.addRequiredParam<std::vector<unsigned int>>("primary", "The primary node IDs.");
   params.addParam<std::vector<unsigned int>>(
       "secondary_node_ids", {}, "The list of secondary node ids");
   params.addParam<BoundaryName>(
       "secondary_node_set", "NaN", "The boundary ID associated with the secondary side");
-  params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
+  params.addParam<Real>("penalty",
+                        "The penalty used for the boundary term. It is required with the penalty "
+                        "and kinematic formulations and unused with the exact formulation");
   params.addRequiredParam<std::vector<Real>>("weights",
                                              "The weights associated with the primary node ids. "
                                              "Must be of the same size as primary nodes");
+  params.declareControllable("weights");
   return params;
 }
 
@@ -36,8 +39,10 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
     _primary_node_ids(getParam<std::vector<unsigned int>>("primary")),
     _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
     _secondary_node_set_id(getParam<BoundaryName>("secondary_node_set")),
-    _penalty(getParam<Real>("penalty"))
+    _penalty(isParamValid("penalty") ? getParam<Real>("penalty") : 0.0)
 {
+  checkPenaltyParam();
+
   _weights = getParam<std::vector<Real>>("weights");
 
   if (_primary_node_ids.size() != _weights.size())
@@ -70,25 +75,55 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
     }
   }
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  // defining primary nodes in base class
+  _primary_node_vector.assign(_primary_node_ids.begin(), _primary_node_ids.end());
+  ghostPrimaryNodes();
+}
 
-  // Add elements connected to primary node to Ghosted Elements
-  for (const auto & dof : _primary_node_ids)
+void
+LinearNodalConstraint::addExactConstraints(libMesh::DofMap & dof_map) const
+{
+  if (_secondary_node_set_id == "NaN")
   {
-    auto node_to_elem_pair = node_to_elem_map.find(dof);
-
-    // Our mesh may be distributed
-    if (node_to_elem_pair == node_to_elem_map.end())
-      continue;
-
-    // defining primary nodes in base class
-    _primary_node_vector.push_back(dof);
-
-    const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
-
-    for (const auto & elem_id : elems)
-      _subproblem.addGhostedElem(elem_id);
+    NodalConstraint::addExactConstraints(dof_map);
+    return;
   }
+
+  // Read at call time: libMesh rebuilds the constraints before meshChanged() refreshes
+  // _connected_nodes
+  addTieConstraints(dof_map, ownedBoundaryNodes(_secondary_node_set_id));
+}
+
+void
+LinearNodalConstraint::residualSetup()
+{
+  NodalConstraint::residualSetup();
+  refreshWeights();
+}
+
+void
+LinearNodalConstraint::jacobianSetup()
+{
+  NodalConstraint::jacobianSetup();
+  refreshWeights();
+}
+
+void
+LinearNodalConstraint::refreshWeights()
+{
+  // 'weights' is controllable
+  _weights = getParam<std::vector<Real>>("weights");
+}
+
+bool
+LinearNodalConstraint::exactConstraintsChanged()
+{
+  const auto & weights = getParam<std::vector<Real>>("weights");
+  if (weights == _weights)
+    return false;
+
+  _weights = weights;
+  return true;
 }
 
 Real

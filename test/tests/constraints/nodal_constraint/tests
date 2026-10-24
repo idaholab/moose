@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values."
   []
 
@@ -13,7 +12,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_displaced_test.i'
     exodiff = 'nodal_constraint_displaced_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values using a displaced mesh."
   []
 
@@ -21,7 +19,6 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint.i'
     exodiff = 'linear_nodal_constraint_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
 
@@ -29,7 +26,6 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint_different_variables.i'
     exodiff = 'linear_nodal_constraint_different_variables_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values of different variables."
   []
 
@@ -43,4 +39,104 @@
     requirement = "The system shall be able to tally the contributions of nodal constraints in "
                   "additional tagged system vectors and matrices."
   []
+
+  [exact]
+    requirement = "The system shall enforce a nodal constraint with exact constraints"
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [nodal]
+      type = 'Exodiff'
+      input = 'nodal_constraint_test.i'
+      cli_args = 'Constraints/c1/formulation=exact
+                  Outputs/file_base=nodal_constraint_test_exact_out'
+      exodiff = 'nodal_constraint_test_exact_out.e'
+      detail = 'tying the value of a variable at two nodes,'
+    []
+    [displaced]
+      type = 'Exodiff'
+      input = 'nodal_constraint_displaced_test.i'
+      cli_args = 'Constraints/c1/formulation=exact
+                  Outputs/file_base=nodal_constraint_displaced_test_exact_out'
+      exodiff = 'nodal_constraint_displaced_test_exact_out.e'
+      detail = 'tying the value of a variable at two nodes of a displaced mesh, and'
+    []
+    [linear]
+      type = 'Exodiff'
+      input = 'linear_nodal_constraint.i'
+      cli_args = 'Constraints/c1/formulation=exact
+                  Outputs/file_base=linear_nodal_constraint_exact_out'
+      exodiff = 'linear_nodal_constraint_exact_out.e'
+      detail = 'tying a secondary node to a weighted primary node.'
+    []
+  []
+
+  [exact_different_variables]
+    type = 'Exodiff'
+    input = 'linear_nodal_constraint_different_variables.i'
+    cli_args = 'Constraints/c1/formulation=exact
+                Outputs/file_base=linear_nodal_constraint_different_variables_exact_out'
+    exodiff = 'linear_nodal_constraint_different_variables_exact_out.e'
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    requirement = "The system shall tie a secondary node of one variable to a weighted primary "
+                  "node of another variable with exact constraints, on a problem "
+                  "the kinematic formulation cannot solve."
+  []
+
+  [tie_error]
+    requirement = "The system shall enforce a linear nodal constraint exactly when it is enforced "
+                  "with exact constraints and only approximately when it is "
+                  "enforced with a penalty."
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+    [exact]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=exact
+                  Outputs/file_base=linear_nodal_constraint_tie_error_exact'
+      csvdiff = 'linear_nodal_constraint_tie_error_exact.csv'
+      abs_zero = 1e-12
+      detail = 'reporting a tie error at machine zero with the exact formulation,'
+    []
+    [kinematic]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=kinematic
+                  Outputs/file_base=linear_nodal_constraint_tie_error_kinematic'
+      csvdiff = 'linear_nodal_constraint_tie_error_kinematic.csv'
+      abs_zero = 1e-8
+      detail = 'reporting a tie error at the nonlinear solve tolerance with the kinematic '
+               'formulation, and'
+    []
+    [penalty]
+      type = 'CSVDiff'
+      input = 'linear_nodal_constraint_tie_error.i'
+      cli_args = 'Constraints/c1/formulation=penalty
+                  Outputs/file_base=linear_nodal_constraint_tie_error_penalty'
+      csvdiff = 'linear_nodal_constraint_tie_error_penalty.csv'
+      rel_err = 1e-6
+      detail = 'reporting a tie error of the order of one over the penalty with the penalty '
+               'formulation.'
+    []
+  []
+
+  [exact_reinit]
+    type = 'CSVDiff'
+    input = 'exact_reinit.i'
+    csvdiff = 'exact_reinit_out.csv'
+    abs_zero = 1e-10
+    requirement = "The system shall rebuild the exact constraints of a nodal "
+                  "constraint whose weights a control changes between time steps."
+    issues = '#665 #33821'
+    design = 'syntax/Constraints/index.md
+              source/constraints/NodalConstraint.md
+              source/constraints/LinearNodalConstraint.md'
+  []
+
 []
