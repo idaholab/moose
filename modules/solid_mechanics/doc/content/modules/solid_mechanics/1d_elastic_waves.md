@@ -34,6 +34,11 @@ This equation represents the generalized eigenvalue problem for modal analysis.
 The terms on the left side, which involve the stress divergence, will contribute
 to the "A" matrix, and the terms on the right side, which are the mass terms, will contribute
 to the "B" matrix.
+A kernel contributes to the "B" matrix when it carries `extra_vector_tags = 'eigen'`.
+[!param](/Problem/EigenProblem/negative_sign_eigen_kernel) on [EigenProblem.md] defaults to `true`,
+which negates what those kernels assemble. A mass kernel whose residual is $-\rho\, u\, \psi_i$
+therefore produces a positive $\mathbf{B}$, and the eigenvalue reported by the solve is
+$\lambda = \omega^2$.
 
 
 ## Cantilever Beam Example
@@ -53,7 +58,7 @@ $k_2=4.694$\\
 $k_3=7.855$\\
 The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
 
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$2700 kg/m$^3$.
 The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
 $\omega_{1a}=$509Hz\\
 $\omega_{1b}=$763Hz\\
@@ -64,13 +69,15 @@ Both of these frequencies use the same value of $k_1$, but with the moment of in
 
 In the Kernels block, we define the kernels that contribute to the "A" and "B"
 matrices in the eigenvalue problem. The StressDivergenceTensor kernels represent the stress divergence terms and contribute to the "A"
-matrix. The ADCoefReaction kernels
-represent the mass terms and contribute to the "B" matrix. The
-[!param](/Kernels/CoefReaction/coefficient) in [kernels/CoefReaction.md] is set
-to a negative value which corresponds to a positive density. The
+matrix. The [ADMatReaction.md] kernels
+represent the mass terms and contribute to the "B" matrix. [ADMatReaction.md]
+assembles $-\rho u \psi_i$, where $\rho$ is the material property named by
+[!param](/Kernels/ADMatReaction/reaction_rate); here that property is `density`,
+declared as 2700 kg/m$^3$ by an `ADGenericConstantMaterial`. The
 `extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
-contribute to "B" matrix. In other literature the A matrix would be the
-stiffness matrix (K) and B would be the Mass matrix (M).
+contribute to "B" matrix, where the default sign flip described above turns the
+negative residual into a positive mass matrix. In other literature the A matrix
+would be the stiffness matrix (K) and B would be the Mass matrix (M).
 
 !listing test/tests/modal_analysis/modal.i block=Kernels id=m_kernel caption=
 Kernels for A and B
@@ -113,6 +120,41 @@ long as the sweeps are granular enough. The second mode is visualized in
 [mode2], and the outline of the undeformed state is shown in black.
 
 !media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100% caption=Cantilever Beam: Mode 2 id=mode2
+
+## Natural Frequencies
+
+The eigenvalues reported above are $\omega^2$, in rad$^2$/s$^2$. To read the modes as frequencies
+instead, set [!param](/VectorPostprocessors/Eigenvalues/natural_frequency) to `true` on the
+[vectorpostprocessors/Eigenvalues.md] vector postprocessor. Three more columns are then written:
+`angular_frequency` in rad/s, `frequency` in Hz, and `period` in s, each computed from the real part
+of the eigenvalue.
+
+!listing test/tests/modal_analysis/fixed_fixed_bar.i block=VectorPostprocessors id=f_vpp
+caption=Requesting the frequency columns.
+
+The input that produces those columns is a bar of length $L=$1m held fixed at both ends, meshed with
+40 EDGE2 elements. It is aluminum, $E=$68e9 Pa and $\rho=$2700 kg/m$^3$, and
+[!param](/Materials/ComputeIsotropicElasticityTensor/poissons_ratio) is set to zero so that the
+one-dimensional stiffness is exactly $E$. The mass term is the same [ADMatReaction.md] on the `eigen`
+tag that the cantilever uses.
+
+The longitudinal natural frequencies of a fixed-fixed bar are known analytically,
+\begin{equation}
+  f_n = \frac{n\,c_0}{2L}, \qquad c_0 = \sqrt{\frac{E}{\rho}}
+\end{equation}
+where $c_0$ is the wave speed, 5018.48 m/s for this material. The first three computed frequencies
+compare with the analytic values as follows.
+
+| Mode $n$ | Analytic $f_n$ (Hz) | Computed (Hz) | Difference |
+| :- | :- | :- | :- |
+| 1 | 2509.24 | 2509.89 | +0.026% |
+| 2 | 5018.48 | 5023.65 | +0.103% |
+| 3 | 7527.73 | 7545.15 | +0.231% |
+
+Every computed frequency is above the analytic one, and the error grows with the mode number because
+the higher modes are resolved by fewer elements per wavelength. This is the expected behavior of the
+consistent mass matrix that `ADMatReaction` assembles: it overestimates the frequencies and
+converges on them from above as the mesh is refined.
 
 ## Frequency Response Function
 

@@ -31,22 +31,22 @@ index = 0
 
 [Kernels]
   [mass_x]
-    type = ADCoefReaction
+    type = ADMatReaction
     variable = disp_x
+    reaction_rate = density
     extra_vector_tags = 'eigen'
-    coefficient = -2.7e3
   []
   [mass_y]
-    type = ADCoefReaction
+    type = ADMatReaction
     variable = disp_y
+    reaction_rate = density
     extra_vector_tags = 'eigen'
-    coefficient = -2.7e3
   []
   [mass_z]
-    type = ADCoefReaction
+    type = ADMatReaction
     variable = disp_z
+    reaction_rate = density
     extra_vector_tags = 'eigen'
-    coefficient = -2.7e3
   []
   [stiffness_x]
     type = StressDivergenceTensors
@@ -113,7 +113,11 @@ index = 0
   [compute_strain]
     type = ComputeSmallStrain
   []
-
+  [density]
+    type = ADGenericConstantMaterial
+    prop_names = density
+    prop_values = 2700
+  []
 []
 [Executioner]
   type = Eigenvalue
