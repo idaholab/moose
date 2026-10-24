@@ -82,11 +82,11 @@ a species do not match exactly at $T_\text{mid}$: for the built-in species, the 
 $4 \times 10^{-7}$ relative in $c_p^\circ$, $6 \times 10^{-3}$ J/mol in $h^\circ$, and
 $2 \times 10^{-5}$ J/(mol K) in $s^\circ$.
 
-## Gas transport properties
+## Gas transport properties id=gas-transport
 
-The `GasTransport` utilities evaluate transport properties of dilute gases from kinetic theory
-[!citep](poling2001). The Chapman-Enskog viscosity of a species and binary diffusion coefficient of
-a pair of species $i$ and $j$ are
+The `GasTransport` utilities, as used in [NASA7IdealGasFluidProperties.md], evaluate transport
+properties of dilute gases from kinetic theory [!citep](poling2001). The Chapman-Enskog viscosity of
+a species and binary diffusion coefficient of a pair of species $i$ and $j$ are
 
 !equation
 \mu = \frac{5}{16} \frac{\sqrt{\pi m k_B T}}{\pi \sigma^2 \Omega^{(2,2)*}(T^*)} \,, \qquad
@@ -108,6 +108,14 @@ remain within the range of the fits over the temperature ranges of the NASA 7-co
 The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
 GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
 so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
+
+The thermal conductivity of a nonpolar gas follows from its viscosity $\mu$ and molar heat capacity
+$c_p$ with the modified Eucken correlation [!citep](poling2001),
+
+!equation
+k = \mu R_s \left( 1.32 \, \frac{c_p}{R} + 0.45 \right) ,
+
+where $R_s$ is the specific gas constant and $R$ the universal gas constant.
 
 The viscosity of steam in the limit of zero density follows the formulation of [!citet](iapws2008),
 as in [Water97FluidProperties.md], and its thermal conductivity in the limit of zero density that of

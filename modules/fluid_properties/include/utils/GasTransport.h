@@ -18,9 +18,9 @@
 
 /**
  * Transport properties of dilute gases: Lennard-Jones parameters of the NASA 7-coefficient
- * species, collision integrals, Chapman-Enskog viscosity and binary diffusion coefficients, and the
- * low-density viscosity and thermal conductivity of steam. The functions are templated so that they
- * accept automatic differentiation types.
+ * species, collision integrals, Chapman-Enskog viscosity and binary diffusion coefficients, the
+ * modified Eucken thermal conductivity, and the low-density viscosity and thermal conductivity of
+ * steam. The functions are templated so that they accept automatic differentiation types.
  */
 namespace GasTransport
 {
@@ -113,6 +113,21 @@ binaryDiffusionCoefficient(const CppType & p,
   const Real k_B = PhysicalConstants::boltzmann_constant;
   return 3.0 / 16.0 * sqrt(2 * libMesh::pi * k_B * T / reduced_mass) * k_B * T /
          (p * libMesh::pi * sigma * sigma * collisionIntegral11(T / epsilon_over_k));
+}
+
+/**
+ * Thermal conductivity of a dilute gas from the modified Eucken correlation [W/(m K)],
+ * k = mu R_s (1.32 cp/R + 0.45), with the specific gas constant R_s
+ *
+ * @param[in] mu           viscosity [Pa s]
+ * @param[in] cp_over_R    molar isobaric heat capacity divided by the gas constant
+ * @param[in] R_specific   specific gas constant [J/(kg K)]
+ */
+template <typename CppType>
+CppType
+modifiedEuckenConductivity(const CppType & mu, const CppType & cp_over_R, const Real R_specific)
+{
+  return mu * R_specific * (1.32 * cp_over_R + 0.45);
 }
 
 /**

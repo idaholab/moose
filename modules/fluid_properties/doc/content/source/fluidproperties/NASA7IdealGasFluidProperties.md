@@ -53,9 +53,32 @@ expressions above, so they are exact.
 This class provides the properties from pressure and temperature, from temperature and specific
 volume, from specific volume and internal energy, and from pressure and enthalpy, as well as the
 pressure from enthalpy and entropy and the internal energy from pressure and density and from
-specific volume and enthalpy. It does not provide viscosity or thermal conductivity, so it cannot
-yet be used in flow models that need them, such as the gas-mixture flow channels of the thermal
-hydraulics module. Mixtures of these gases are described by [IdealGasMixtureFluidProperties.md].
+specific volume and enthalpy. Mixtures of these gases are described by
+[IdealGasMixtureFluidProperties.md].
+
+## Viscosity and thermal conductivity
+
+The viscosity and thermal conductivity are those of the dilute gas, which depend on temperature
+only, and are evaluated with the
+[gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). For all species except
+H$_2$O, the viscosity follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters
+of GRI-Mech 3.0, and the thermal conductivity from the modified Eucken correlation
+[!citep](poling2001) with the heat capacity of the polynomials:
+
+!equation
+k = \mu R_s \left( 1.32 \, \frac{c_p^\circ}{R} + 0.45 \right) .
+
+Compared with the fluid properties of the real fluids at 1 bar from 300 K to 900 K, the viscosities
+of N$_2$, CH$_4$, and CO$_2$ agree within 2.5%, that of H$_2$ is up to 6% low at 900 K, and the
+thermal conductivities agree within 9%.
+
+The modified Eucken correlation overestimates the thermal conductivity of polar gases, that of
+steam by about 40% at 400 K and 20% at 1000 K. For H$_2$O, the viscosity and thermal conductivity
+therefore follow the IAPWS formulations in the limit of zero density, [!citet](iapws2008) and
+[!citet](iapws2011). These
+formulations are fitted from 273.16 K to 1173.15 K, and each evaluation outside that range is
+counted as a solution warning. At low pressure, where steam is close to an ideal gas, they agree
+with [Water97FluidProperties.md] within 2%.
 
 ## Comparison with IdealGasFluidProperties
 
@@ -69,7 +92,7 @@ Both classes describe ideal gases, but they differ as follows:
 | Entropy | Relative to an arbitrary reference | Absolute |
 | Temperature from internal energy or enthalpy | Explicit | Newton iteration |
 | Temperature range | Unlimited | That of the data, with a solution warning outside it |
-| Viscosity and thermal conductivity | Constant, user-supplied | Not provided |
+| Viscosity and thermal conductivity | Constant, user-supplied | Kinetic theory, or IAPWS formulations for steam |
 | Density from pressure and entropy, critical-point properties | Provided | Not provided |
 
 ## Temperature from internal energy or enthalpy

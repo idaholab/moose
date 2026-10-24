@@ -81,9 +81,8 @@ sums of the component properties evaluated at the mixture temperature and pressu
 !equation
 y(p, T) = \sum\limits_k \psi_k y_k(p, T) \,.
 
-[NASA7IdealGasFluidProperties.md] does not yet provide viscosity or thermal conductivity, so these
-properties are not yet available for mixtures with its components, and neither are flow models that
-need them, such as the gas-mixture flow channels of the thermal hydraulics module.
+The gas-mixture flow channels of the thermal hydraulics module do not yet accept
+[NASA7IdealGasFluidProperties.md] components.
 
 !syntax parameters /FluidProperties/IdealGasMixtureFluidProperties
 
