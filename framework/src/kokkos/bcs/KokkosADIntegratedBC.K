@@ -20,15 +20,19 @@ ADIntegratedBC::validParams()
 }
 
 ADIntegratedBC::ADIntegratedBC(const InputParameters & parameters)
-  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _test(),
-    _grad_test(),
-    _phi(),
-    _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _test(), _grad_test()
 {
   addMooseVariableDependency(&_var);
+}
+
+void
+ADIntegratedBC::initialSetup()
+{
+  IntegratedBCBase::initialSetup();
+
+  _max_ad_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
+  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots, _configuration.displacements(), kokkosMesh());
+  _ad_slots = _ad_setup.table();
 }
 
 void
@@ -61,15 +65,31 @@ ADIntegratedBC::computeResidualAndJacobian()
 void
 ADIntegratedBC::dispatch()
 {
-  _thread.resize(_computing_jacobian ? _num_local_jacobian_threads : _num_local_residual_threads,
-                 numKokkosBoundarySides());
+  TeamLaunch launch;
+  launch.league_size = numKokkosBoundarySides();
 
-  Policy policy(0, _thread.size());
+  // An object posed on the current configuration, or reading a property that depends on the
+  // displacements, dispatches the instantiation whose dual numbers also carry the displacement
+  // slots
+  if (_ad_slots.hasDisplacements())
+  {
+    if (!_displaced_residual_dispatcher)
+      _displaced_residual_dispatcher =
+          DispatcherRegistry::build<DisplacedResidualLoop>(this, type());
 
-  if (!_residual_dispatcher)
-    _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
+    launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(),
+                                                  _max_ad_slots + AD_DISPLACEMENT_SLOTS);
+    _displaced_residual_dispatcher->parallelForTeams(launch);
+  }
+  else
+  {
+    if (!_residual_dispatcher)
+      _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
 
-  _residual_dispatcher->parallelFor(policy);
+    launch.scratch_bytes =
+        ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), _max_ad_slots);
+    _residual_dispatcher->parallelForTeams(launch);
+  }
 }
 
 } // namespace Moose::Kokkos

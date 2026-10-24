@@ -260,6 +260,12 @@ public:
   void meshChanged() { _msm_node_id_start = std::nullopt; }
 
   /**
+   * The number of times the mortar segment mesh was cleared for a rebuild, by which a consumer
+   * tells whether data it derived from the mortar segment mesh is current
+   */
+  unsigned int buildCount() const { return _build_count; }
+
+  /**
    * returns whether this object is on the displaced mesh
    */
   bool onDisplaced() const { return _on_displaced; }
@@ -653,6 +659,9 @@ private:
   /// buildMortarSegmentMesh3d() call. Reset by meshChanged() on topology change so the allgather
   /// is skipped for displaced-mesh residual updates that only move nodes.
   std::optional<dof_id_type> _msm_node_id_start;
+
+  /// The number of times the mortar segment mesh was cleared for a rebuild
+  unsigned int _build_count = 0;
 
   /// Debugging container for printing information about fraction of successful projections for
   /// secondary nodes. If !_debug then this should always be empty

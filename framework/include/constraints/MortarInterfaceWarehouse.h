@@ -139,6 +139,14 @@ public:
   void meshChanged();
 
   /**
+   * Whether the mortar interface couplings of a displaced interface gained an element pair since
+   * the last call, which is when the sparsity pattern last accounted for them. Displaced
+   * interfaces re-pair as the mesh moves while keeping the same interior-parent subdomains, so
+   * update() does not report these changes.
+   */
+  bool displacedCouplingGrew();
+
+  /**
    * Returns whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
    */
   bool hasDisplacedObjects() const { return _displaced_mortar_interfaces.size(); }
@@ -208,4 +216,10 @@ private:
 
   /// Whether we have performed any mortar mesh construction
   bool _mortar_initd;
+
+  /// The mortar interface couplings of each displaced interface when displacedCouplingGrew() was
+  /// last called, keyed by the address of the interface
+  std::unordered_map<const AutomaticMortarGeneration *,
+                     std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>>
+      _patterned_displaced_coupling;
 };

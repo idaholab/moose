@@ -19,34 +19,29 @@ public:
   KokkosCoefDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::Scalar<const Real> _coef;
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosCoefDiffusion::computeQpResidual(const unsigned int i,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosCoefDiffusion::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _coef * _grad_test(datum, i, qp) * _grad_u(datum, qp);
+  return _coef * _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosCoefDiffusion::computeQpJacobian(const unsigned int i,
-                                       const unsigned int j,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosCoefDiffusion::precomputeQpJacobianGrad(const unsigned int j,
+                                              const unsigned int qp,
+                                              AssemblyDatum & datum) const
 {
-  return _coef * _grad_test(datum, i, qp) * _grad_phi(datum, j, qp);
+  return _coef * _grad_phi(datum, j, qp);
 }

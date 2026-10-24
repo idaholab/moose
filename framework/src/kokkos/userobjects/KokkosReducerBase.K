@@ -26,7 +26,8 @@ ReducerBase::ReducerBase(const ReducerBase & reducer)
   : MeshHolder(reducer),
     AssemblyHolder(reducer),
     FESystemHolder(reducer),
-    _reducer_object(reducer._reducer_object)
+    _reducer_object(reducer._reducer_object),
+    _configuration(reducer._configuration)
 {
 }
 

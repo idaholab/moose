@@ -60,11 +60,13 @@ DirichletBCBase::computeQpResidual(const unsigned int qp, AssemblyDatum & datum)
 {
   auto bc = static_cast<const Derived *>(this);
 
-  return _u(datum, qp) - bc->computeValue(qp, datum);
+  return _u(datum, qp) - bc->template computeValue<Derived>(qp, datum);
 }
 ```
 
 Also note here the static implementation of `computeValue` which is originally a virtual function.
+In AD Dirichlet boundary conditions, `computeValue()` returns a dual number, so a boundary value that depends on other variables contributes the derivatives of that dependence to the Jacobian.
+AD nodal boundary conditions derive from `Moose::Kokkos::ADNodalBC` and read nodal values through the accessors created by `adNodalValue()` and `adCoupledNodalValue()`, with one derivative direction per coupled nodal value.
 
 See the following source codes of `KokkosMatchedValueBC` for another example of a nodal boundary condition:
 

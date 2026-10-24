@@ -19,16 +19,7 @@ ResidualObject::validParams()
 {
   auto params = ::ResidualObject::validParams();
 
-  params.addParam<bool>("use_displaced_mesh",
-                        false,
-                        "Whether or not this object should use the "
-                        "displaced mesh for computation. Note that in "
-                        "the case this is true but no displacements "
-                        "are provided in the Mesh block the "
-                        "undisplaced mesh will still be used.");
-
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addCoupledVar("displacements", "The displacements");
+  addConfigurationParams(params);
 
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
@@ -66,6 +57,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     FESystemHolder(object),
     _var(object._var),
     _kokkos_var(object._kokkos_var),
+    _configuration(object._configuration),
     _thread(object._thread),
     _dimension(object._dimension),
     _t(object._t),
@@ -73,6 +65,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _t_step(object._t_step),
     _dt(object._dt),
     _dt_old(object._dt_old),
+    _displacement_component(object._displacement_component),
     _vector_tags(object._vector_tags),
     _matrix_tags(object._matrix_tags)
 {
@@ -82,6 +75,40 @@ ResidualObject::ResidualObject(const ResidualObject & object)
   // on copying the tag set from object's \p _vector_tags and \p _matrix_tags arrays
   _vector_tags = object.getVectorTags({});
   _matrix_tags = object.getMatrixTags({});
+}
+
+void
+ResidualObject::dispatchDisplacementJacobian(const ThreadID league_size, const bool vector)
+{
+  if (!_displacement_jacobian_dispatcher)
+    _displacement_jacobian_dispatcher =
+        DispatcherRegistry::build<DisplacementJacobianLoop>(this, type());
+
+  TeamLaunch launch;
+  launch.league_size = league_size;
+
+  const auto max_qps = kokkosAssembly().getMaxQpsPerElem();
+  launch.scratch_bytes = vector ? DisplacementScratchLayout<true>::bytes(max_qps)
+                                : DisplacementScratchLayout<false>::bytes(max_qps);
+
+  // Each nonlinear displacement component of the residual system that the coupling matrix couples
+  // to the residual variable contributes a Jacobian block
+  auto & ivar = const_cast<Variable &>(_kokkos_var);
+  const auto & problem = ivar.mooseVar()->sys().feProblem();
+  const auto residual_sys = _kokkos_var.sys();
+  const auto & disp = _configuration.displacements();
+
+  for (const auto c : make_range(disp.components()))
+  {
+    const auto * moose_var = const_cast<Variable &>(disp).mooseVar(c);
+
+    if (disp.sys(c) != residual_sys || moose_var->kind() != Moose::VarKindType::VAR_SOLVER ||
+        !problem.areCoupled(_kokkos_var.var(), disp.var(c), residual_sys))
+      continue;
+
+    _displacement_component = c;
+    _displacement_jacobian_dispatcher->parallelForTeams(launch);
+  }
 }
 
 } // namespace Moose::Kokkos

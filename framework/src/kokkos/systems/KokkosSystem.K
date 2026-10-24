@@ -120,6 +120,16 @@ System::setupDofs()
             std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
       }
 
+      // Ghost elements may be of types that no local element has
+      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+        if (_dof_map.is_evaluable(*ghost_elem, var))
+        {
+          _dof_map.dof_indices(ghost_elem, dof_indices, var);
+
+          _max_dofs_per_elem[var] =
+              std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
+        }
+
       _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
       _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
 
@@ -290,6 +300,23 @@ System::setupSparsity()
 
   _sparsity.col_idx = col_idx;
   _sparsity.row_ptr = row_ptr;
+}
+
+void
+System::updateSparsity()
+{
+  mooseAssert(_dof_map.n_local_dofs() == _num_local_dofs &&
+                  _dof_map.get_send_list().size() == _num_ghost_dofs,
+              "Kokkos system error: the sparsity pattern can be updated only for an unchanged DOF "
+              "numbering.");
+
+  if (dynamic_cast<AuxiliarySystem *>(&_system))
+    return;
+
+  setupSparsity();
+
+  for (const auto tag : make_range(_matrices.size()))
+    _matrices[tag].destroy();
 }
 
 void

@@ -22,11 +22,12 @@ public:
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidual(const unsigned int qp,
-                                                            AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualValue(const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3
-  precomputeQpJacobian(const unsigned int j, const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianValue(const unsigned int j,
+                                                                 const unsigned int qp,
+                                                                 AssemblyDatum & datum) const;
 
 protected:
   const bool _lumping;
@@ -60,7 +61,7 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
       for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
       {
         Moose::Kokkos::Real3 value =
-            datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
+            datum.JxW(qp) * kernel.template precomputeQpJacobianValue<Derived>(j, qp, datum);
 
         for (unsigned int i = ib; i < ie; ++i)
           local_ke[i - ib] += value * _test(datum, i, qp);
@@ -75,16 +76,17 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorTimeDerivative::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosVectorTimeDerivative::precomputeQpResidualValue(const unsigned int qp,
+                                                      AssemblyDatum & datum) const
 {
   return _u_dot(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorTimeDerivative::precomputeQpJacobian(const unsigned int j,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
+KokkosVectorTimeDerivative::precomputeQpJacobianValue(const unsigned int j,
+                                                      const unsigned int qp,
+                                                      AssemblyDatum & datum) const
 {
   return _phi(datum, j, qp) * _du_dot_du;
 }

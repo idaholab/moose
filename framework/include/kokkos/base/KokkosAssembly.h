@@ -253,9 +253,9 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION Real33 getJacobian(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real33 getDxiDx(ElementInfo info, unsigned int qp) const
   {
-    return _jacobian[info.subdomain][getQpOffset(info) + qp];
+    return _dxi_dx[info.subdomain][getQpOffset(info) + qp];
   }
   /**
    * Get the transformed Jacobian weight of an element quadrature point
@@ -287,16 +287,24 @@ public:
   KOKKOS_FUNCTION Real coordTransformFactor(const ContiguousSubdomainID subdomain,
                                             const Real3 point) const;
   /**
+   * Get the gradient of the coordinate transform factor with respect to the point coordinate
+   * @param subdomain The contiguous subdomain ID
+   * @param point The point coordinate
+   * @returns The gradient of the coordinate transform factor
+   */
+  KOKKOS_FUNCTION Real3 coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                                     const Real3 point) const;
+  /**
    * Compute physical transformation data for an element
    * @param info The element information object
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points) const;
   /**
@@ -304,7 +312,7 @@ public:
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    * @param normal The pointer to store normal vector
@@ -312,7 +320,7 @@ public:
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int side,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points,
                                           Real3 * const normal) const;
@@ -321,6 +329,25 @@ public:
    * Kokkos function for caching physical maps on element quadrature points
    */
   KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
+
+  /**
+   * Get the inverse of the Jacobian of the map of a reference element of a dimension, which is the
+   * right inverse J^T (J J^T)^{-1} of the map of an element embedded in a higher-dimensional mesh
+   * @param J The Jacobian of the map, with rows of the derivatives with respect to the reference
+   * coordinates
+   * @param dim The dimension of the reference element
+   * @returns The inverse of the Jacobian
+   */
+  KOKKOS_FUNCTION Real33 inverseMap(const Real33 & J, const unsigned int dim) const;
+  /**
+   * Get the measure of the map of a reference element of a dimension, which is
+   * sqrt(det(J J^T)) for an element embedded in a higher-dimensional mesh
+   * @param J The Jacobian of the map, with rows of the derivatives with respect to the reference
+   * coordinates
+   * @param dim The dimension of the reference element
+   * @returns The measure of the map
+   */
+  KOKKOS_FUNCTION Real mapMeasure(const Real33 & J, const unsigned int dim) const;
 
   /**
    * Get the list of boundaries to cache face material properties
@@ -446,7 +473,7 @@ private:
    * Cached physical maps on element quadrature points
    */
   ///@{
-  Array<Array<Real33>> _jacobian;
+  Array<Array<Real33>> _dxi_dx;
   Array<Array<Real>> _jxw;
   Array<Array<Real3>> _xyz;
   ///@}
@@ -478,10 +505,58 @@ Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real
   }
 }
 
+KOKKOS_FUNCTION inline Real3
+Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                       const Real3 point) const
+{
+  Real3 gradient(0);
+
+  switch (_coord_type[subdomain])
+  {
+    case Moose::COORD_RZ:
+      if (_rz_radial_coord == libMesh::invalid_uint)
+      {
+        // The factor is 2 pi times the distance to the axis, whose gradient is 2 pi times the unit
+        // vector normal to the axis pointing toward the point
+        auto radial = point - _rz_axis[subdomain].first;
+        radial -= (radial * _rz_axis[subdomain].second) * _rz_axis[subdomain].second;
+        gradient = (2 * M_PI / radial.norm()) * radial;
+      }
+      else
+        gradient(_rz_radial_coord) = 2 * M_PI;
+      break;
+    case Moose::COORD_RSPHERICAL:
+      gradient(0) = 8 * M_PI * point(0);
+      break;
+    default:
+      break;
+  }
+
+  return gradient;
+}
+
+KOKKOS_FUNCTION inline Real33
+Assembly::inverseMap(const Real33 & J, const unsigned int dim) const
+{
+  if (dim == _dimension)
+    return J.inverse(dim);
+
+  return J.transpose() * (J * J.transpose()).inverse(dim);
+}
+
+KOKKOS_FUNCTION inline Real
+Assembly::mapMeasure(const Real33 & J, const unsigned int dim) const
+{
+  if (dim == _dimension)
+    return J.determinant(dim);
+
+  return ::Kokkos::sqrt((J * J.transpose()).determinant(dim));
+}
+
 KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points) const
 {
@@ -500,18 +575,19 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian || JxW)
+    if (dxi_dx || JxW)
       J += grad_phi(node, qp).cartesian_product(points);
 
     xyz += phi(node, qp) * points;
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  const auto dim = kokkosMesh().getElementDimension(elem_type);
+
+  if (dxi_dx)
+    *dxi_dx = inverseMap(J, dim);
 
   if (JxW)
-    *JxW =
-        J.determinant(_dimension) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
+    *JxW = mapMeasure(J, dim) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
 
   if (q_points)
     *q_points = xyz;
@@ -521,7 +597,7 @@ KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int side,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points,
                              Real3 * const normal) const
@@ -544,11 +620,13 @@ Assembly::computePhysicalMap(const ElementInfo info,
   Real3 dxyz_dxi;
   Real3 dxyz_deta;
 
+  const auto dim = kokkosMesh().getElementDimension(elem_type);
+
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian)
+    if (dxi_dx)
       J += grad_phi(node, qp).cartesian_product(points);
 
     if (JxW || q_points)
@@ -556,20 +634,20 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     if (normal)
     {
-      if (_dimension < 3)
+      if (dim < 3)
         dxyz_dxi += normal_dx_dxi(node, qp) * points;
-      if (_dimension == 2)
+      if (dim == 2)
         dxyz_deta += normal_dx_deta(node, qp) * points;
     }
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  if (dxi_dx)
+    *dxi_dx = inverseMap(J, dim);
 
   if (q_points)
     *q_points = xyz;
 
-  if (JxW || (normal && _dimension > 1))
+  if (JxW || (normal && dim > 1))
   {
     J = 0;
 
@@ -584,14 +662,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   }
 
   if (JxW)
-    *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
+    *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(dim - 1)) *
            _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
 
   if (normal)
   {
-    if (_dimension == 3)
+    if (dim == 3)
       *normal = J.row(0).cross_product(J.row(1));
-    else if (_dimension == 2)
+    else if (dim == 2)
       *normal = J.row(0).cross_product(dxyz_dxi.cross_product(dxyz_deta));
     else
       *normal = side ? dxyz_dxi : -dxyz_dxi;

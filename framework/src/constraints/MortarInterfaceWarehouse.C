@@ -211,6 +211,37 @@ MortarInterfaceWarehouse::meshChanged()
 }
 
 bool
+MortarInterfaceWarehouse::displacedCouplingGrew()
+{
+  bool grew = false;
+
+  for (const auto & mortar_pair : _displaced_mortar_interfaces)
+  {
+    const auto & amg = *mortar_pair.second.amg;
+    const auto & coupling = amg.mortarInterfaceCoupling();
+    auto & patterned = _patterned_displaced_coupling[&amg];
+
+    for (const auto & [elem_id, coupled_ids] : coupling)
+    {
+      const auto it = patterned.find(elem_id);
+      for (const auto coupled_id : coupled_ids)
+        if (it == patterned.end() || !it->second.count(coupled_id))
+        {
+          grew = true;
+          break;
+        }
+      if (grew)
+        break;
+    }
+
+    patterned = coupling;
+  }
+
+  comm().max(grew);
+  return grew;
+}
+
+bool
 MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 {
   // Snapshot the interior-parent subdomain coverage before clearing so we can tell afterward

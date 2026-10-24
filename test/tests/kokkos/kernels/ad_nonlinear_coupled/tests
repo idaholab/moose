@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#33860'
+  design = 'syntax/KokkosKernels/index.md'
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_coupled.i'
+    requirement = 'The Kokkos system shall compute exact Jacobians with pointwise automatic differentiation for residuals depending nonlinearly on the values and gradients of coupled variables of different finite element orders.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

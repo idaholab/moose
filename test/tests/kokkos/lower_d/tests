@@ -1,0 +1,42 @@
+[Tests]
+  issues = '#33860'
+  design = 'LowerDBlockFromSidesetGenerator.md'
+
+  [lower_d]
+    requirement = 'The Kokkos system shall solve for variables on lower-dimensional subdomains embedded in the mesh, matching the solution of the same problem without Kokkos,'
+    [2d]
+      type = CSVDiff
+      input = 'lower_d_diffusion.i'
+      csvdiff = 'lower_d_diffusion_out.csv'
+      detail = 'on edges of a two-dimensional mesh,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = CSVDiff
+      input = 'lower_d_diffusion.i'
+      cli_args = 'Mesh/square/dim=3 Mesh/square/nz=4 Outputs/file_base=lower_d_diffusion_3d_out'
+      csvdiff = 'lower_d_diffusion_3d_out.csv'
+      detail = 'on faces of a three-dimensional mesh,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'lower_d_diffusion.i'
+      cli_args = 'Outputs/csv=false'
+      detail = 'with an exact Jacobian, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [displaced_error]
+      type = RunException
+      input = 'lower_d_diffusion.i'
+      cli_args = 'Mesh/displacements="disp_x disp_y" AuxVariables/disp_x/block=0 AuxVariables/disp_y/block=0 Kernels/diff_v/use_displaced_mesh=true'
+      expect_err = 'Kokkos kernels on lower-dimensional blocks cannot be posed on the current configuration.'
+      detail = 'with an error for a kernel on a lower-dimensional block posed on the current configuration.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

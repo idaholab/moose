@@ -158,6 +158,11 @@ public:
    * @returns The sparisty pattern data
    */
   const Sparsity & getSparsity() const { return _sparsity; }
+  /**
+   * Copy the sparsity pattern of the DOF map again after the pattern was rebuilt with the same DOF
+   * numbering, and preallocate the matrices from it at the next synchronization
+   */
+  void updateSparsity();
 
   /**
    * Build the COO index arrays describing the sparsity pattern

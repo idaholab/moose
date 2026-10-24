@@ -192,6 +192,16 @@ public:
   void addKokkosBoundaryCondition(const std::string & bc_name,
                                   const std::string & name,
                                   InputParameters & parameters);
+
+  /**
+   * Adds a Kokkos constraint
+   * @param c_name The type of the constraint
+   * @param name The name of the constraint
+   * @param parameters Constraint parameters
+   */
+  void addKokkosConstraint(const std::string & c_name,
+                           const std::string & name,
+                           InputParameters & parameters);
 #endif
 
   /**
@@ -968,6 +978,7 @@ protected:
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
   MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_constraints;
   ///@}
 #endif
 

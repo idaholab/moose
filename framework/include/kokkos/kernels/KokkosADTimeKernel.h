@@ -15,7 +15,9 @@ namespace Moose::Kokkos
 {
 
 /**
- * The base class for Kokkos time-derivative kernels
+ * The base class for Kokkos time-derivative kernels whose Jacobians are computed with pointwise
+ * automatic differentiation. It tags the residual and Jacobian as time contributions; the derived
+ * class reads the time derivative it needs through adDot() or adCoupledDot().
  */
 class ADTimeKernel : public ADKernel
 {
@@ -26,12 +28,6 @@ public:
    * Constructor
    */
   ADTimeKernel(const InputParameters & parameters);
-
-protected:
-  /**
-   * Time derivative of the current solution at quadrature points
-   */
-  const ADVariableValue _u_dot;
 };
 
 } // namespace Moose::Kokkos

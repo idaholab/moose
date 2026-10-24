@@ -116,6 +116,7 @@ namespace Moose::Kokkos
 class MaterialPropertyStorage;
 class Function;
 class UserObject;
+class MortarInterfaceData;
 }
 #endif
 
@@ -885,6 +886,18 @@ public:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
+   * Update the sparsity patterns that the Kokkos systems copy from their DOF maps, after the
+   * patterns were rebuilt with the same DOF numbering
+   */
+  void updateKokkosSparsity();
+  /**
+   * Get the geometry of a mortar interface shared by the Kokkos objects posed on it
+   * @param amg The mortar interface
+   * @returns The host owner of the interface geometry
+   */
+  Moose::Kokkos::MortarInterfaceData &
+  getKokkosMortarInterfaceData(const AutomaticMortarGeneration & amg);
+  /**
    * Get the Kokkos System array (always populated when any Kokkos object exists)
    * @returns The array of Kokkos System objects
    */
@@ -1032,6 +1045,9 @@ public:
   virtual void addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters);
+  virtual void addKokkosConstraint(const std::string & c_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
   virtual void addKokkosLinearFVKernel(const std::string & kernel_name,
                                        const std::string & name,
                                        InputParameters & parameters);
@@ -3258,6 +3274,10 @@ protected:
   Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
   /// FESystem array - sparsely populated (only slots for systems needing a Kokkos::FESystem)
   Moose::Kokkos::Array<Moose::Kokkos::FESystem> _kokkos_fe_systems;
+  /// The geometry of each mortar interface shared by the Kokkos objects posed on it
+  std::unordered_map<const AutomaticMortarGeneration *,
+                     std::unique_ptr<Moose::Kokkos::MortarInterfaceData>>
+      _kokkos_mortar_interface_data;
 #endif
 
   /// Dimension of the subspace spanned by the vectors with a given prefix

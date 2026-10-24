@@ -19,22 +19,19 @@ public:
   KokkosEFieldAdvection(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidualGrad(const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpJacobianGrad(const unsigned int j,
+                                                                const unsigned int qp,
+                                                                AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int jvar,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpOffDiagJacobianGrad(const unsigned int j,
+                                                                       const unsigned int jvar,
+                                                                       const unsigned int qp,
+                                                                       AssemblyDatum & datum) const;
 
 protected:
   const unsigned int _efield_id;
@@ -46,34 +43,29 @@ protected:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosEFieldAdvection::computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosEFieldAdvection::precomputeQpResidualGrad(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_sgn * _mobility * (_grad_test(datum, i, qp) * _efield(datum, qp)) * _u(datum, qp);
+  return -_sgn * _mobility * _efield(datum, qp) * _u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosEFieldAdvection::computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const
-{
-  return -_sgn * _mobility * (_grad_test(datum, i, qp) * _efield(datum, qp)) * _phi(datum, j, qp);
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosEFieldAdvection::computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int jvar,
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosEFieldAdvection::precomputeQpJacobianGrad(const unsigned int j,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const
 {
+  return -_sgn * _mobility * _efield(datum, qp) * _phi(datum, j, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosEFieldAdvection::precomputeQpOffDiagJacobianGrad(const unsigned int j,
+                                                       const unsigned int jvar,
+                                                       const unsigned int qp,
+                                                       AssemblyDatum & datum) const
+{
   return jvar == _efield_id && _efield_coupled
-             ? -_sgn * _mobility * (_grad_test(datum, i, qp) * _vector_phi(datum, j, qp)) *
-                   _u(datum, qp)
-             : 0;
+             ? -_sgn * _mobility * _vector_phi(datum, j, qp) * _u(datum, qp)
+             : Moose::Kokkos::Real3(0);
 }
