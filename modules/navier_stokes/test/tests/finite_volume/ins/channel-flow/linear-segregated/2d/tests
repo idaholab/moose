@@ -192,6 +192,8 @@
     type = 'RunException'
     input = reconstructed-gradient-partial-blocks.i
     cli_args = "Variables/pressure/gradient_method=reconstructed "
+               "Variables/vel_x/block='0 1' "
+               "Variables/vel_y/block='0 1' "
                "LinearFVKernels/u_advection_stress/block='0 1' "
                "LinearFVKernels/v_advection_stress/block='0 1' "
                "LinearFVKernels/u_pressure_left/block=0 "
@@ -212,8 +214,6 @@
     type = 'RunException'
     input = reconstructed-gradient-partial-blocks.i
     cli_args = "Variables/pressure/block='0 1' Variables/pressure/gradient_method=reconstructed "
-               "LinearFVKernels/u_advection_stress/block='0 1' "
-               "LinearFVKernels/v_advection_stress/block='0 1' "
                "LinearFVKernels/u_pressure_left/block=0 "
                "LinearFVKernels/u_pressure_right/block=1 "
                "LinearFVKernels/v_pressure_left/block=0 "
@@ -227,6 +227,18 @@
     max_threads = 1 # see libmesh issue #3808
     design = 'FVReconstructedPressureGradient.md SIMPLE.md'
     issues = '#32995'
+  []
+  [momentum-flux-block-mismatch]
+    type = 'RunException'
+    input = momentum-pressure-block-restricted.i
+    cli_args = "LinearFVKernels/u_advection_stress/block='0 1'"
+    expect_err = "Must match the block restriction of variable 'vel_x'"
+    requirement = "The system shall reject a momentum flux kernel block-restricted to fewer "
+                  "blocks than its velocity variable."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    design = 'LinearWCNSFVMomentumFlux.md'
+    issues = '#31995'
   []
   [momentum-pressure-overlap-on-rc-block]
     type = 'RunException'

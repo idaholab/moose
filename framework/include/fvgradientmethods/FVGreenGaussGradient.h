@@ -11,6 +11,14 @@
 
 #include "FVGradientMethod.h"
 
+#include <utility>
+
+class ComputeLinearFVGreenGaussGradientFaceThread;
+class ElemInfo;
+class FaceInfo;
+template <typename>
+class MooseLinearVariableFV;
+
 /**
  * Green-Gauss cell-centered gradient method for linear finite-volume variables.
  */
@@ -20,9 +28,33 @@ public:
   static InputParameters validParams();
   FVGreenGaussGradient(const InputParameters & params);
 
-private:
+protected:
   void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
+
+  /// Element-side and neighbor-side values contributed by an internal face.
+  using InternalFaceValues = std::pair<Real, Real>;
+
+  /**
+   * Return the two Green-Gauss face values on an internal face.
+   *
+   * The first value is multiplied by the outward element surface vector. The second value is
+   * multiplied by its opposite for the neighbor row.
+   * @param fi The internal face
+   * @param elem_info The element-side cell
+   * @param neighbor_info The neighbor-side cell
+   * @param variable The variable whose gradient is computed
+   * @param elem_value The variable value in the element-side cell
+   * @param neighbor_value The variable value in the neighbor-side cell
+   */
+  virtual InternalFaceValues internalFaceValues(const FaceInfo & fi,
+                                                const ElemInfo & elem_info,
+                                                const ElemInfo & neighbor_info,
+                                                const MooseLinearVariableFV<Real> & variable,
+                                                Real elem_value,
+                                                Real neighbor_value) const;
+
+  friend class ComputeLinearFVGreenGaussGradientFaceThread;
 };

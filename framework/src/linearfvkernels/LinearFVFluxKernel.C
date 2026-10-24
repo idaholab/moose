@@ -193,7 +193,13 @@ LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
                                        const bool correct_skewness) const
 {
   mooseAssert(fi, "FaceInfo should not be null!");
-  return makeFace(*fi, limiter_type, true, correct_skewness);
+  const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
+  mooseAssert(face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+                  face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+              "Single-sided face arguments should only be evaluated on one-sided faces.");
+
+  return makeFace(
+      *fi, limiter_type, face_type == FaceInfo::VarFaceNeighbors::ELEM, correct_skewness);
 }
 
 Real

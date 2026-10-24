@@ -1,0 +1,123 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+
+#include "FVPressureJumpGreenGaussGradient.h"
+
+#include "LinearFVGradientReader.h"
+#include "LinearSystem.h"
+#include "MathFVUtils.h"
+#include "PorousRhieChowMassFlux.h"
+#include "PressureJumpInterface.h"
+
+registerMooseObject("NavierStokesApp", FVPressureJumpGreenGaussGradient);
+
+InputParameters
+FVPressureJumpGreenGaussGradient::validParams()
+{
+  InputParameters params = FVGreenGaussGradient::validParams();
+  params.suppressParameter<MooseEnum>("limiter");
+  params.addClassDescription(
+      "Computes a Green-Gauss pressure gradient that excludes the pressure jump across baffles, "
+      "using a one-sided face pressure for each cell, so the zero-thickness jump does not appear "
+      "as a mesh-dependent gradient in the adjacent cells.");
+  return params;
+}
+
+FVPressureJumpGreenGaussGradient::FVPressureJumpGreenGaussGradient(const InputParameters & params)
+  : FVGreenGaussGradient(params)
+{
+}
+
+void
+FVPressureJumpGreenGaussGradient::linkFlowSystem(PorousRhieChowMassFlux & rc,
+                                                 const LinearFVGradientReader & pressure_gradient)
+{
+  if (&pressure_gradient.method() != this)
+    mooseError("Must be linked using a gradient field produced by that method.");
+
+  if (pressure_gradient.system().number() != rc.pressureSystem().number() ||
+      pressure_gradient.variableNumber() != rc.pressureVariableNumber())
+    mooseError("Must be linked to the pressure variable owned by PorousRhieChowMassFlux '",
+               rc.name(),
+               "'.");
+
+  if (_rhie_chow && _rhie_chow != &rc)
+    mooseError("Already linked to PorousRhieChowMassFlux '",
+               _rhie_chow->name(),
+               "'. Use a separate gradient method for each flow system.");
+
+  _rhie_chow = &rc;
+  _pressure_gradient = &pressure_gradient;
+  _pressure_system = &pressure_gradient.system();
+  _pressure_variable_number = pressure_gradient.variableNumber();
+}
+
+void
+FVPressureJumpGreenGaussGradient::computeGradientWithoutLimiter(
+    SystemBase & system,
+    GradientContainer & gradient,
+    const std::unordered_set<unsigned int> & variable_numbers) const
+{
+  if (variable_numbers.size() != 1)
+    mooseError("must be used by exactly one pressure variable, but it is used by ",
+               variable_numbers.size(),
+               ".");
+
+  if (_pressure_system)
+  {
+    mooseAssert(_pressure_system == &system,
+                "FVPressureJumpGreenGaussGradient can only compute gradients for its linked "
+                "pressure system.");
+    mooseAssert(_pressure_variable_number == *variable_numbers.begin(),
+                "FVPressureJumpGreenGaussGradient can only compute the linked pressure variable.");
+  }
+
+  FVGreenGaussGradient::computeGradientWithoutLimiter(system, gradient, variable_numbers);
+}
+
+FVGreenGaussGradient::InternalFaceValues
+FVPressureJumpGreenGaussGradient::internalFaceValues(const FaceInfo & fi,
+                                                     const ElemInfo & elem_info,
+                                                     const ElemInfo & neighbor_info,
+                                                     const MooseLinearVariableFV<Real> & variable,
+                                                     const Real elem_value,
+                                                     const Real neighbor_value) const
+{
+  if (!_rhie_chow || !_rhie_chow->faceIsBaffle(fi))
+    return FVGreenGaussGradient::internalFaceValues(
+        fi, elem_info, neighbor_info, variable, elem_value, neighbor_value);
+
+  mooseAssert(_pressure_gradient, "A linked pressure gradient is required on pressure-jump faces.");
+
+  const Real jump = _rhie_chow->getSignedBaffleJump(fi, /*elem_side=*/true);
+  if (!_rhie_chow->pressureDiffusionDataReady())
+  {
+    // Gradient history is initialized before the pressure-diffusion coefficients exist.
+    // Preserve the jump during this startup pass using jump-adjusted interpolation.
+    return {Moose::FV::linearInterpolation(elem_value, neighbor_value + jump, fi, true),
+            Moose::FV::linearInterpolation(elem_value - jump, neighbor_value, fi, true)};
+  }
+
+  // Use the published geometric pressure gradient to match the deferred correction in the
+  // pressure equation. The reconstructed coupling gradient must not enter this correction.
+  const auto face_operator =
+      _rhie_chow->pressureJumpInterfaceData(fi,
+                                            _pressure_gradient->gradient(elem_info),
+                                            _pressure_gradient->gradient(neighbor_info),
+                                            fi.faceArea() * fi.faceCoord());
+
+  // Eliminate the interface pressures to obtain one conservative mass flux, then recover the
+  // one-sided face value used in each cell's Green-Gauss surface sum. Each side's H/A flux enters
+  // its face value, so the face pressure carries the body force, e.g. the hydrostatic slope.
+  const Real mass_flux = NS::FV::pressureJumpFlux(face_operator, elem_value, neighbor_value) -
+                         NS::FV::pressureJumpHbyAFlux(face_operator);
+  return {NS::FV::pressureJumpOneSidedFaceValue(
+              face_operator, elem_value, mass_flux, /*elem_side=*/true),
+          NS::FV::pressureJumpOneSidedFaceValue(
+              face_operator, neighbor_value, mass_flux, /*elem_side=*/false)};
+}
