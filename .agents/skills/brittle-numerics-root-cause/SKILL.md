@@ -5,9 +5,13 @@ description: >-
   optimization level, hardware, thread count, or execution order. Treat this as a symptom that
   some part of the algorithm is ill-conditioned (near-singular solve, an algebraically-truncated
   slowly-converging series, large cancelling terms) — not as flaky-test noise to suppress by
-  pinning flags, loosening tolerances, or blindly regolding. Walks through instrumenting for real
-  per-iteration data, finding the actual non-robust mechanism, validating a targeted fix against
-  that data, and anticipating the blast radius on other tests before regolding.
+  pinning flags, loosening tolerances, or blindly regolding. Also covers a transient run whose
+  adaptive time-step history differs between machines, because rounding decides whether a
+  nonlinear solve fails. Walks through these steps: instrument for real per-iteration data, find
+  the ill-conditioned mechanism that amplifies small differences such as rounding, and validate a
+  targeted fix against that data. Before regolding, anticipate the blast radius on other tests.
+  Shows how to reproduce a failure that occurs only on another machine with a perturbation
+  ensemble.
 ---
 
 # Brittle Numerics Root Cause
@@ -30,6 +34,14 @@ residual only bounds the solution error by roughly `condition number x solver to
 (or `-snes_view`) on the passing and failing runs confirms whether a PC/solver-type change is what's
 different before chasing per-iteration instrumentation.
 
+A transient run adds a mechanism that is not about the accuracy of any single solve. With an
+adaptive time stepper, rounding can decide whether a nonlinear solve converges or exhausts
+`nl_max_its`. A failed solve triggers a cutback, which changes every later time step. Two runs
+whose solves fail at different steps therefore follow different time-step sequences for the rest
+of the run, and every output on those sequences differs. One flipped solve early in a long
+simulation can produce a percent-level gold diff at the end. See
+[Failure-path divergence](#failure-path-divergence).
+
 ## Anti-patterns (don't reach for these first)
 
 - Pinning or loosening compiler flags to make the test pass again.
@@ -39,12 +51,17 @@ different before chasing per-iteration instrumentation.
 Any of these can be a legitimate *final* step, but only after you understand why the value is
 unstable — otherwise you're just relocating where the instability bites next time.
 
+Successive regolds that each match a different set of CI jobs are the signature of this pattern.
+Each gold records one machine's rounding path, and the next regold only moves which machines fail.
+
 ## Procedure
 
 1. **Reproduce deterministically first.** Confirm the failure is deterministic given fixed
    inputs/flags (same build + same run always gives the same wrong answer). This rules out actual
    nondeterminism (uninitialized memory, races, order-dependent floating sums) and confirms you're
-   chasing numerical conditioning, not a different bug class.
+   chasing numerical conditioning, not a different bug class. If the failure occurs only on a
+   machine you cannot run on, use a [perturbation ensemble](#perturbation-ensembles) to reproduce
+   its sensitivity locally.
 2. **Instrument, don't guess.** Add temporary per-iteration/per-mode debug prints of the internal
    quantities actually accumulating error (partial sums, determinants, convergence-criterion
    values), or step through with a debugger/conditional breakpoints when the quantity of interest
@@ -74,6 +91,18 @@ unstable — otherwise you're just relocating where the instability bites next t
    conditioned that roundoff itself is the exposed mechanism — the main procedure's case. Only
    fall back to the tolerance-widening path below if the near-singularity itself is physically
    expected and tightening the solve isn't warranted.
+
+   Tightening has a floor. A relative tolerance is reachable only if the residual it implies is
+   above the round-off floor of the converged solve. Per-variable checks such as
+   `ReferenceResidualConvergence` make this limit easy to exceed. A variable with a tiny reference
+   residual turns `nl_rel_tol` into an absolute target far below the round-off floor. The
+   signature has three parts:
+
+   - The residual drops normally and then stays at a fixed level.
+   - The solve keeps iterating until `nl_max_its`.
+   - The time stepper then cuts dt to `dtmin`.
+
+   The fix is an `nl_abs_tol` above that level, not a tighter relative tolerance.
 4. **Look for precedent in sibling code.** If a related algorithm/branch in the same codebase
    already handles this class of problem (e.g., a fallback for non-convergence), extend that
    pattern rather than inventing a new one.
@@ -96,11 +125,74 @@ unstable — otherwise you're just relocating where the instability bites next t
    stress the fix differently (e.g. a much smaller iteration cap, a much faster-converging case) to
    confirm it degrades gracefully rather than blowing up outside the regime it was tuned against,
    (c) only then regold in bulk, checking the diffs are smooth/deterministic/physically sensible
-   rather than erratic.
+   rather than erratic. For a validation test, also recompute the metric that the test's
+   requirement rests on before you regold. An example is the RMSPE against experiment that the
+   documentation's comparison script produces. Large changes in compared columns can leave that
+   metric unchanged, and small changes can move it. Only the metric shows whether the requirement
+   still holds.
 8. **Separate "already-known artifact in the gold" from "new bug."** If something ugly turns up
    mid-investigation (e.g. a value that should be physically non-negative but isn't), diff against
    old logs/gold to check whether it predates your change before treating it as something you
    caused.
+
+## Perturbation ensembles
+
+Rerunning cannot reproduce a failure that occurs on one CI machine and not on yours, but you can
+reproduce its sensitivity. Run several copies of the same input; each copy is a member of the
+ensemble. In each member, perturb one parameter that feeds the solve by a relative amount of
+hundreds to thousands of machine epsilon. In double precision (epsilon about `2.2e-16`), scale a
+source magnitude or a material fraction by `1 + k * 1e-13`, with `k = 0..7`. A different compiler,
+CPU, or reduction order accumulates a difference of that size over a solve. Run at least four
+members. Run more when the first members agree, because a small ensemble can agree by chance.
+
+- **As a reproducer.** If members disagree in the quantity that the test compares, the test is
+  sensitive to rounding. One member usually reproduces the remote failure. A diff of the members'
+  solver logs finds the first solve where they differ. The remote log alone cannot show that solve.
+- **As the acceptance test for a fix.** A fix passes when every member produces the same output to
+  round-off. Fewer failed solves is not the criterion, and a closer match to one member is not the
+  criterion either. If a change reduces failures but the members still disagree, the instability
+  is still there in a different place.
+- **For sizing tolerances afterward.** The spread across the members of a fixed run is the
+  measured noise floor. Any remaining tolerance must be larger than that floor.
+
+Make sure that the perturbation actually reaches the solve: the members must differ in their
+residual history. While you try candidate fixes, keep the ensemble short. For example, run only the
+first segment of a transient that contains the sensitive solves. Confirm the chosen fix on the full
+run.
+
+## Failure-path divergence
+
+In a transient with an adaptive time stepper, a nonlinear solve can sometimes converge and
+sometimes exhaust `nl_max_its`. Such a solve makes the whole time-step history depend on rounding.
+These signatures separate this case from an ill-conditioned linear system:
+
+- The linear solves converge to round-off on every iteration, so the matrix is not the problem.
+- The nonlinear residual cycles: the same short sequence of values repeats until `nl_max_its`.
+- With a variational inequality solver (`vinewtonrsls`), `-snes_vi_monitor` shows the active set
+  alternating between the same configurations in each cycle. The reduced-space method switches
+  constraints on and off discontinuously. A last-digit difference can therefore decide on which
+  side of a switch a Newton step lands.
+
+This case is still ill-conditioned, but the conditioning that matters belongs to a different map.
+The Jacobian's condition number bounds how much a perturbation of the linear system's inputs
+perturbs that solve's output, and even an optimal condition number leaves a small nonzero output
+perturbation. The active-set decision then compares that output against a bound, which is a step
+function. The map from simulation input to final output therefore has an effectively infinite
+local condition number at the switching surface: an arbitrarily small input change near the switch
+produces an O(1) output change. A single decision rarely lands close enough to the switch to flip,
+because the chance is roughly proportional to the size of the perturbation. A cycling solve
+revisits the same switch on every cycle, though, and a long transient makes many such decisions, so
+the chance of at least one flip grows until a machine-dependent history is likely.
+
+Tighter tolerances and direct factorizations do not help here. A change to the bound value or to
+`nl_max_its` does not help either. Each cycling solve already reaches the same impasse. Remove
+what drives the cycling instead, and then judge the result with a perturbation ensemble. The
+change that works is different for each case, so try more than one:
+
+- Damp the Newton step with a line search (e.g. `l2`). Damping stops the full step from
+  overshooting into the alternate active set.
+- Remove the extrapolated initial guess of a `Predictor` (`Executioner/Predictor/scale=0`). Use
+  this change when that guess starts solves on the far side of a constraint switch.
 
 ## When targeted tolerance widening is legitimate, not an anti-pattern
 
