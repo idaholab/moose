@@ -24,10 +24,10 @@ NEML2StressDivergence::validParams()
   InputParameters params = NEML2PostKernel::validParams();
   params.addClassDescription(
       "This user object calculates the stress divergence for a given set of displacement "
-      "variables and assemble the contribution into the residual vector.");
+      "variables and assembles the contribution into the residual vector.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements",
-      "The displacements variables whose function space will be used to define the test "
+      "The displacement variables whose function spaces will be used to define the test "
       "functions.");
   params.addRequiredParam<std::string>("stress",
                                        "The name of the NEML2 variable to use as the stress.");
@@ -65,8 +65,12 @@ NEML2StressDivergence::forward()
   auto dphix = neml2::Tensor(*_grad_test_x, 3);
   auto dphiy = _ndisp >= 2 ? neml2::Tensor(*_grad_test_y, 3) : neml2::Tensor::zeros_like(dphix);
   auto dphiz = _ndisp >= 3 ? neml2::Tensor(*_grad_test_z, 3) : neml2::Tensor::zeros_like(dphix);
-  auto dphi = neml2::base_stack({dphix, dphiy, dphiz}, 0);            // (nelem, ndofe, nqp; 3, 3)
-  auto stress = neml2::R2(neml2::SR2(_stress)).dynamic_unsqueeze(-2); // (nelem, 1,     nqp; 3, 3)
+  auto dphi = neml2::base_stack({dphix, dphiy, dphiz}, 0); // (nelem, ndofe, nqp; 3, 3)
+  // The stress may be a symmetric small/Cauchy stress in Mandel notation (SR2) or a full,
+  // generally non-symmetric stress such as the first Piola-Kirchhoff stress (R2) from a
+  // total-Lagrangian model. The weak form below is the same for both.
+  auto stress = (_stress.base_dim() == 2 ? neml2::R2(_stress) : neml2::R2(neml2::SR2(_stress)))
+                    .dynamic_unsqueeze(-2); // (nelem, 1, nqp; 3, 3)
 
   // weak form
   auto re_qp = neml2::base_sum(dphi * neml2::Tensor(stress), -1); // (nelem, ndofe, nqp; 3)
