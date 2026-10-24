@@ -75,7 +75,6 @@ registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
 // clang-format off
 define_mass_specific_prop_from_p_T(v)
 define_mass_specific_prop_from_p_T(e)
-define_mass_specific_prop_from_p_T(s)
 define_mass_specific_prop_from_p_T(cp)
 define_mass_specific_prop_from_p_T(cv)
 
@@ -265,6 +264,50 @@ IdealGasMixtureFluidProperties::rho_from_p_T(Real p,
                                              const std::vector<Real> & x_secondary) const
 {
   return 1.0 / v_from_p_T(p, T, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::s_from_p_T_templ(const CppType & p,
+                                                 const CppType & T,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  using std::log;
+
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+  const auto psi = molarFractionsFromMassFractions(x);
+
+  // Each component is at its partial pressure psi_k p (Dalton's law), so the mixture entropy is the
+  // sum of the component entropies at the mixture pressure plus the entropy of mixing,
+  // -(R / M) sum_k psi_k ln(psi_k). The mixing term of a vanishing mole fraction tends to zero;
+  // non-positive mole fractions, which can result from numerical overshoot, are omitted from it.
+  CppType s = 0;
+  CppType psi_ln_psi = 0;
+  for (const auto i : make_range(_n_components))
+  {
+    s += x[i] * _component_fps[i]->s_from_p_T(p, T);
+    if (MetaPhysicL::raw_value(psi[i]) > 0)
+      psi_ln_psi += psi[i] * log(psi[i]);
+  }
+
+  return s - _R / mixtureMolarMass(x) * psi_ln_psi;
+}
+
+ADReal
+IdealGasMixtureFluidProperties::s_from_p_T(const ADReal & p,
+                                           const ADReal & T,
+                                           const std::vector<ADReal> & x_secondary) const
+{
+  return s_from_p_T_templ(p, T, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::s_from_p_T(Real p,
+                                           Real T,
+                                           const std::vector<Real> & x_secondary) const
+{
+  return s_from_p_T_templ(p, T, x_secondary);
 }
 
 template <typename CppType>
