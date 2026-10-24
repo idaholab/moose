@@ -58,6 +58,9 @@ public:
   std::string fluidName() const override;
   Real molarMass() const override;
 
+  /// Upper end of the temperature range of the NASA 7-coefficient data [K]
+  Real maximumTemperature() const;
+
 private:
   /// NASA 7-coefficient data of the species
   const NASA7::SpeciesData _data;

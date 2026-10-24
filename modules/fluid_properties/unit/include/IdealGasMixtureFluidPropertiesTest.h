@@ -65,7 +65,31 @@ protected:
     }
   }
 
+  /// Builds a mixture of NASA 7-coefficient gases; the first species is the primary component
+  const IdealGasMixtureFluidProperties & buildNASA7Mixture(const std::vector<std::string> & species,
+                                                           const std::string & name);
+
   const IdealGasFluidProperties * _fp_steam;
   const IdealGasFluidProperties * _fp_nitrogen;
   const IdealGasMixtureFluidProperties * _fp_mix;
 };
+
+inline const IdealGasMixtureFluidProperties &
+IdealGasMixtureFluidPropertiesTest::buildNASA7Mixture(const std::vector<std::string> & species,
+                                                      const std::string & name)
+{
+  std::vector<UserObjectName> component_names;
+  for (const auto & component_species : species)
+  {
+    const std::string component_name = name + "_" + component_species;
+    InputParameters params = _factory.getValidParams("NASA7IdealGasFluidProperties");
+    params.set<MooseEnum>("species") = component_species;
+    _fe_problem->addUserObject("NASA7IdealGasFluidProperties", component_name, params);
+    component_names.push_back(component_name);
+  }
+
+  InputParameters params = _factory.getValidParams("IdealGasMixtureFluidProperties");
+  params.set<std::vector<UserObjectName>>("component_fluid_properties") = component_names;
+  _fe_problem->addUserObject("IdealGasMixtureFluidProperties", name, params);
+  return _fe_problem->getUserObject<IdealGasMixtureFluidProperties>(name);
+}

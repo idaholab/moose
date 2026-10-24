@@ -7,4 +7,14 @@
     unit_test = IdealGasMixtureFluidPropertiesTest.adDerivatives
     requirement = 'The system shall compute the derivatives of the temperature and pressure from the specific volume and internal energy, of the internal energy from the pressure and density, and of the sound speed from the pressure and temperature of an ideal gas mixture with respect to their arguments and the mass fractions with automatic differentiation, in agreement with finite differences.'
   []
+  [nasa7_cantera]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.nasa7Cantera
+    requirement = 'The system shall compute the density, specific internal energy, isobaric and isochoric specific heats, and sound speed of a mixture of ideal gases from NASA 7-coefficient polynomials, reproducing Cantera values, and the temperature and pressure from its specific volume and internal energy.'
+  []
+  [nasa7_inversion]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.nasa7Inversion
+    requirement = 'The system shall compute the temperature of mixtures of ideal gases from NASA 7-coefficient polynomials, alone or with an ideal gas of constant specific heats, from their specific volume and internal energy, from half the highest lower end to 1.5 times the lowest upper end of the temperature ranges of the data of their components, and where the internal energy is close to zero.'
+  []
 []

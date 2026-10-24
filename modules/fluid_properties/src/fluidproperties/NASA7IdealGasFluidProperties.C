@@ -44,6 +44,12 @@ NASA7IdealGasFluidProperties::molarMass() const
   return _data.molar_mass;
 }
 
+Real
+NASA7IdealGasFluidProperties::maximumTemperature() const
+{
+  return _data.T_max;
+}
+
 template <typename CppType>
 void
 NASA7IdealGasFluidProperties::checkTemperature(const CppType & T) const
