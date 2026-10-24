@@ -58,9 +58,9 @@ MFEMGeometricMultigridSolver::validParams()
                                        "Name of the trial variable this preconditioner acts on.");
   params.addRequiredParam<std::vector<MFEMSolverName>>(
       "smoothers",
-      "Names of LinearSolverBase objects used as smoothers on the interior levels "
-      "(levels 1 to N-1). May have length 1 (used on all interior levels) or "
-      "N-1 (one per interior level, ordered coarse-to-fine).");
+      "Names of LinearSolverBase objects used as smoothers on levels 1 to N-1, one per level, "
+      "ordered coarse-to-fine. Each level needs its own solver object, distinct from the "
+      "coarse solver.");
   params.addRequiredParam<MFEMSolverName>(
       "coarse_solver", "Name of the LinearSolverBase used on the coarsest level.");
   params.addParam<std::vector<std::string>>(
@@ -102,6 +102,23 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
   for (const auto i : make_range(N))
     _assembly_levels[i] = ParseAssemblyLevel(n_asm == 1 ? asm_strs[0] : asm_strs[i]);
 
+  // A solver is set up for the operator of one level, so each level needs its own solver object.
+  const int n_smooth = _smoother_names.size();
+  if (n_smooth != N - 1)
+    paramError("smoothers",
+               "must have one entry per level above the coarsest (N-1 = ",
+               N - 1,
+               "), got ",
+               n_smooth,
+               ", because each level needs its own solver object.");
+  std::set<std::string> level_solver_names = {_coarse_solver_name};
+  for (const auto & smoother_name : _smoother_names)
+    if (!level_solver_names.insert(smoother_name).second)
+      paramError("smoothers",
+                 "names solver '",
+                 smoother_name,
+                 "' for more than one level, but each level needs its own solver object.");
+
   ConstructSolver();
 }
 
@@ -110,6 +127,7 @@ MFEMGeometricMultigridSolver::ConstructSolver()
 {
   _mg.reset();
   _level_ops.clear();
+  _level_tdofs.clear();
   _level_blfs.clear();
 
   auto proxy = std::make_unique<MGProxy>(*this);
@@ -141,17 +159,9 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   const int N = _hierarchy->GetNumLevels();
   const int finest_level = _hierarchy->GetFinestLevelIndex();
 
-  // Validate smoother vector length (levels 1 to N-1 each need a smoother).
-  const int n_smooth = _smoother_names.size();
-  if (n_smooth != 1 && n_smooth != N - 1)
-    paramError("smoothers", "must have length 1 or N-1 = ", N - 1, ", got ", n_smooth, ".");
-
   auto get_smoother = [&](int level) -> Moose::MFEM::LinearSolverBase &
   {
-    if (level == 0)
-      return problem.getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase",
-                                                                  _coarse_solver_name);
-    const std::string & sname = (n_smooth == 1) ? _smoother_names[0] : _smoother_names[level - 1];
+    const auto & sname = (level == 0) ? _coarse_solver_name : _smoother_names[level - 1];
     return problem.getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase", sname);
   };
 
@@ -176,6 +186,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> new_blfs;
   std::vector<std::unique_ptr<mfem::OperatorHandle>> new_level_ops;
   new_level_ops.reserve(N - 1);
+  std::vector<std::unique_ptr<mfem::Array<int>>> new_level_tdofs;
 
   auto mg = std::make_unique<mfem::GeometricMultigrid>(*_hierarchy, ess_bdr);
   auto * mg_ptr = mg.get();
@@ -185,9 +196,11 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     auto & level_fespace =
         cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(level));
 
-    // Compute essential true DoFs for this level.
-    mfem::Array<int> level_tdofs;
-    level_fespace.GetEssentialTrueDofs(ess_bdr, level_tdofs);
+    // Compute essential true DoFs for this level. They are kept as long as the level operator,
+    // because the constrained operator of a level that is not fully assembled references them
+    // instead of copying them.
+    auto level_tdofs = std::make_unique<mfem::Array<int>>();
+    level_fespace.GetEssentialTrueDofs(ess_bdr, *level_tdofs);
 
     // Build level operator.
     mfem::Operator * level_op = nullptr;
@@ -200,9 +213,10 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
           _var_name, level_fespace, _assembly_levels[level]);
 
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
-      blf->FormSystemMatrix(level_tdofs, *level_op_handle);
+      blf->FormSystemMatrix(*level_tdofs, *level_op_handle);
       level_op = level_op_handle->Ptr();
       new_level_ops.push_back(std::move(level_op_handle));
+      new_level_tdofs.push_back(std::move(level_tdofs));
       new_blfs.push_back(std::move(blf));
     }
 
@@ -217,10 +231,12 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 
   // Atomically replace:
   //  1. Old MG freed, dropping raw pointers into level operators.
-  //  2. Old operator handles freed before old forms they may wrap.
+  //  2. Old operator handles freed before the old essential DoF lists and forms they may
+  //     reference.
   //  3. Proxy updated to point at the new MG and level data.
   _mg = std::move(mg);
   _level_ops = std::move(new_level_ops);
+  _level_tdofs = std::move(new_level_tdofs);
   _level_blfs = std::move(new_blfs);
   _mg_proxy->SetMG(*_mg);
 }
