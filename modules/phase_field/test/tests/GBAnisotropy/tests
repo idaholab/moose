@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'test1.i'
     exodiff = 'test1_out.e'
-    issues = '#4580'
+    issues = '#4580 #33932'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
   [../]
@@ -11,7 +11,7 @@
     type = 'Exodiff'
     input = 'test2.i'
     exodiff = 'test2_out.e'
-    issues = '#4580'
+    issues = '#4580 #33932'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
   [../]
@@ -19,7 +19,7 @@
     type = 'Exodiff'
     input = 'test3.i'
     exodiff = 'test3_out.e'
-    issues = '#4580'
+    issues = '#4580 #33932'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities with an inclination dependence.'
   [../]
@@ -27,8 +27,26 @@
     type = 'Exodiff'
     input = 'testwidth1.i'
     exodiff = 'testwidth1_out.e'
-    issues = '#8079'
+    issues = '#8079 #33932'
     design = 'GBWidthAnisotropy.md'
     requirement = 'The anisotropic grain boundary system shall allow the user to specify grain boundary widths independently for each interface between grains.'
+  [../]
+  [./testwidth1_moelans2009]
+    type = 'Exodiff'
+    input = 'testwidth1.i'
+    exodiff = 'testwidth1_moelans2009_out.e'
+    cli_args = 'Materials/CuGrGranisotropic/interface_fit=moelans2009 Outputs/file_base=testwidth1_moelans2009_out'
+    issues = '#33932'
+    design = 'GBWidthAnisotropy.md'
+    requirement = 'The anisotropic grain boundary system shall optionally use the earlier 2009 polynomial fits of Moelans to reproduce earlier results.'
+  [../]
+  [./out_of_range]
+    type = 'RunException'
+    input = 'testwidth1.i'
+    cli_args = 'Materials/CuGrGranisotropic/kappa=10'
+    expect_err = 'outside the range 0.098 <= g <= 0.766'
+    issues = '#33932'
+    design = 'GBWidthAnisotropy.md'
+    requirement = 'The anisotropic grain boundary system shall report an error if the grain boundary energies lie outside the range covered by the polynomial fit used to compute the model parameters.'
   [../]
 []
