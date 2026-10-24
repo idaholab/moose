@@ -34,4 +34,8 @@ protected:
 
   /// The weighted gap user object which supplies the contact force
   const WeightedGapUserObject & _weighted_gap_uo;
+
+  /// The AD traction basis that carries the motion of the mortar segment quadrature points. Only
+  /// set when segment_geometry_derivatives = true.
+  const MooseArray<std::vector<ADReal>> * _ad_traction_basis = nullptr;
 };

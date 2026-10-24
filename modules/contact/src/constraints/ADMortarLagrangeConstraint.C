@@ -184,7 +184,9 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     for (const auto index : is_index_on_lower_dimension)
     {
       _i = index;
-      residuals_lower[index_lower] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+      residuals_lower[index_lower] +=
+          _ad_segment_geometry ? adJxWCoord() * computeQpResidual(mortar_type)
+                               : _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
       // Get rid of derivatives that we assume won't count (tolerance prescribed by user)
       // This can cause zero diagonal terms with the variable condensation preconditioner when the
@@ -197,6 +199,7 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
 
   // cacheJacobian() uses the first row's column layout. Every row here has that same derivative
   // support because the interpolated quadrature-point traction is independent of the test-function
-  // index and multiplication by a Real preserves the AD sparsity pattern.
+  // index, and the test functions are either Real or share the derivative support of the mortar
+  // segment geometry.
   addResidualsAndJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
 }

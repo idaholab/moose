@@ -18,6 +18,7 @@ NormalMortarMechanicalContact::validParams()
   InputParameters params = ADMortarLagrangeConstraint::validParams();
   // Mechanical contact residuals use only primal values and normals
   params.set<bool>("_compute_primal_gradients") = false;
+  params.set<bool>("_supports_segment_geometry_derivatives") = true;
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -45,6 +46,15 @@ void
 NormalMortarMechanicalContact::initialSetup()
 {
   ADMortarLagrangeConstraint::initialSetup();
+
+  if (_segment_geometry_derivatives)
+  {
+    if (!_weighted_gap_uo.segmentGeometryDerivatives())
+      paramError("weighted_gap_uo",
+                 "'weighted_gap_uo' must also set 'segment_geometry_derivatives = true'.");
+    _ad_traction_basis =
+        &adMortarTest(Moose::ElementType::Lower, _weighted_gap_uo.tractionBasisFEType());
+  }
 
   if (!_weighted_gap_uo.usesNodalNormalDerivatives())
     return;
@@ -81,7 +91,11 @@ NormalMortarMechanicalContact::precomputeQpQuantities()
     const auto nodal_pressure =
         _weighted_gap_uo.nodalContactPressure(_lower_secondary_elem->node_ref(j));
 
-    if (ad_normals)
+    if (_ad_segment_geometry && ad_normals)
+      _qp_traction_component +=
+          (*_ad_traction_basis)[j][_qp] * nodal_pressure *
+          _weighted_gap_uo.contactNormal(*_lower_secondary_elem, j)(_component);
+    else if (ad_normals)
       _qp_traction_component +=
           phi[j][_qp] * nodal_pressure *
           _weighted_gap_uo.contactNormal(*_lower_secondary_elem, j)(_component);
@@ -104,12 +118,14 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // indicates the momentum will tend to increase at this location with time, which is what we
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
-      return _test_secondary[_i][_qp] * _qp_traction_component;
+      return _ad_segment_geometry ? adTestSecondary() * _qp_traction_component
+                                  : _test_secondary[_i][_qp] * _qp_traction_component;
 
     case Moose::MortarType::Primary:
       // The traction is signed according to the secondary face, so we need to introduce a negative
       // sign here
-      return -_test_primary[_i][_qp] * _qp_traction_component;
+      return _ad_segment_geometry ? -adTestPrimary() * _qp_traction_component
+                                  : -_test_primary[_i][_qp] * _qp_traction_component;
 
     default:
       return 0;

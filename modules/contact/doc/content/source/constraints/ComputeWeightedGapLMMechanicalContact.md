@@ -146,10 +146,11 @@ Node-based scaling is implemented for Lagrange multiplier contact
 multiplier and first-order displacements. An error is reported for a second-order Lagrange
 multiplier or displacement, or `correct_edge_dropping = false`. Second order is
 excluded because the normalization $\int_e N_j$ is zero at TRI6 and TET10 vertices and negative at
-QUAD8 and HEX20 corners, which makes $\kappa_j$ undefined or negative. The consistent linearization of
-$\kappa_j$ (its dependence on displacement) is omitted because the mortar segment geometry is carried
-non-AD throughout the framework, so Newton convergence near a dropping edge may be less than
-quadratic; the converged solution is unaffected.
+QUAD8 and HEX20 corners, which makes $\kappa_j$ undefined or negative. The dependence of $\kappa_j$
+on the displacements enters the Jacobian only with
+[!param](/Constraints/ComputeWeightedGapLMMechanicalContact/segment_geometry_derivatives), see
+[AutomaticMortarGeneration.md#segment-geometry-derivatives]. Without it, Newton convergence near a
+dropping edge may be less than quadratic; the converged solution is unaffected.
 
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 

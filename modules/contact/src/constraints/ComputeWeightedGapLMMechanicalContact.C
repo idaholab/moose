@@ -49,6 +49,8 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   InputParameters params = ADMortarConstraint::validParams();
   // Mechanical contact residuals use only primal values and normals
   params.set<bool>("_compute_primal_gradients") = false;
+  // The weighted gap user object assembles the constraint residuals
+  params.set<bool>("_supports_segment_geometry_derivatives") = true;
   params.addClassDescription("Computes the weighted gap that will later be used to enforce the "
                              "zero-penetration mechanical contact conditions");
   params.suppressParameter<VariableName>("secondary_variable");
@@ -219,13 +221,14 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   // normalizeCDivisor() returns *_normalization_ptr unchanged unless node-based scaling is active,
   // in which case it substitutes a coverage-independent (full-element) integral so the two
   // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
-  const Real c =
-      _normalize_c ? _c / _weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr) : _c;
+  const ADReal c = !_normalize_c
+                       ? ADReal(_c)
+                       : _c / _weighted_gap_uo.adNormalizeCDivisor(dof, *_normalization_ptr);
 
   // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
   // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j
   // lambda_j.
-  const Real kappa = _weighted_gap_uo.nodalScale(dof);
+  const ADReal kappa = _weighted_gap_uo.adNodalScale(dof);
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);

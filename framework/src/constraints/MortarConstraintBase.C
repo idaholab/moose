@@ -163,6 +163,13 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
+  // The dual basis coefficients depend on the segment geometry, and their derivatives are not
+  // computed
+  if (getParam<bool>("segment_geometry_derivatives") && (_use_dual || _use_petrov_galerkin))
+    paramError("segment_geometry_derivatives",
+               "Segment geometry derivatives are not available with dual Lagrange multiplier bases "
+               "or the Petrov-Galerkin approach.");
+
   if (_use_petrov_galerkin && (!_use_dual))
     paramError("use_petrov_galerkin",
                "We need to set `use_dual = true` while using the Petrov-Galerkin approach");

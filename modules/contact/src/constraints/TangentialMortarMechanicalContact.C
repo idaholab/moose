@@ -19,6 +19,7 @@ TangentialMortarMechanicalContact::validParams()
   InputParameters params = ADMortarLagrangeConstraint::validParams();
   // Mechanical contact residuals use only primal values and normals
   params.set<bool>("_compute_primal_gradients") = false;
+  params.set<bool>("_supports_segment_geometry_derivatives") = true;
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -55,6 +56,17 @@ void
 TangentialMortarMechanicalContact::initialSetup()
 {
   ADMortarLagrangeConstraint::initialSetup();
+
+  if (_segment_geometry_derivatives)
+  {
+    if (!_weighted_velocities_uo.segmentGeometryDerivatives())
+      paramError("weighted_velocities_uo",
+                 "'weighted_velocities_uo' must also set 'segment_geometry_derivatives = true'.");
+    // LMWeightedVelocitiesUserObject verifies that every tangential Lagrange multiplier shares the
+    // finite element type of the normal one
+    _ad_traction_basis =
+        &adMortarTest(Moose::ElementType::Lower, _weighted_velocities_uo.tractionBasisFEType());
+  }
 
   if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
     return;
@@ -96,7 +108,11 @@ TangentialMortarMechanicalContact::precomputeQpQuantities()
       // householderTangents() applies a Householder reflection to two Cartesian basis vectors, so
       // the frame it returns is already orthonormal and needs no normalization here.
       const auto & tangents = _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, j);
-      _qp_traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
+      if (_ad_segment_geometry)
+        _qp_traction_component +=
+            (*_ad_traction_basis)[j][_qp] * nodal_pressure * tangents[direction](_component);
+      else
+        _qp_traction_component += phi[j][_qp] * nodal_pressure * tangents[direction](_component);
     }
   else
   {
@@ -125,10 +141,12 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      return _test_secondary[_i][_qp] * _qp_traction_component;
+      return _ad_segment_geometry ? adTestSecondary() * _qp_traction_component
+                                  : _test_secondary[_i][_qp] * _qp_traction_component;
 
     case Moose::MortarType::Primary:
-      return -_test_primary[_i][_qp] * _qp_traction_component;
+      return _ad_segment_geometry ? -adTestPrimary() * _qp_traction_component
+                                  : -_test_primary[_i][_qp] * _qp_traction_component;
 
     default:
       return 0;

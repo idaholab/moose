@@ -137,6 +137,70 @@ getMortarSubElementNodeIndices(const Elem & parent_elem, const unsigned int sub_
   }
 }
 
+Point
+mortarSubElementToParent(const Elem & parent_elem, const unsigned int sub_elem, const Point & point)
+{
+  const auto primal_type = parent_elem.type();
+  const Real nu = point(0);
+  const Real xi = point(1);
+  switch (primal_type)
+  {
+    case TRI3:
+      return Point(nu, xi, 0);
+    case QUAD4:
+      return Point(nu, xi, 0);
+    case TRI6:
+    case TRI7:
+      switch (sub_elem)
+      {
+        case 0:
+          return Point(0.5 * nu, 0.5 * xi, 0);
+        case 1:
+          return Point(0.5 * (1 - xi), 0.5 * (nu + xi), 0);
+        case 2:
+          return Point(0.5 * (1 + nu), 0.5 * xi, 0);
+        case 3:
+          return Point(0.5 * nu, 0.5 * (1 + xi), 0);
+        default:
+          mooseError("mortarSubElementToParent: Invalid sub_elem: ", sub_elem);
+      }
+    case QUAD8:
+      switch (sub_elem)
+      {
+        case 0:
+          return Point(nu - 1, xi - 1, 0);
+        case 1:
+          return Point(nu + xi, xi - 1, 0);
+        case 2:
+          return Point(1 - xi, nu + xi, 0);
+        case 3:
+          return Point(nu - 1, nu + xi, 0);
+        case 4:
+          return Point(0.5 * (nu - xi), 0.5 * (nu + xi), 0);
+        default:
+          mooseError("mortarSubElementToParent: Invalid sub_elem: ", sub_elem);
+      }
+    case QUAD9:
+      switch (sub_elem)
+      {
+        case 0:
+          return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
+        case 1:
+          return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
+        case 2:
+          return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
+        case 3:
+          return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
+        default:
+          mooseError("mortarSubElementToParent: Invalid sub_elem: ", sub_elem);
+      }
+    default:
+      mooseError("mortarSubElementToParent: Face element type: ",
+                 libMesh::Utility::enum_to_string<ElemType>(primal_type),
+                 " invalid for 3D mortar");
+  }
+}
+
 namespace
 {
 ElemType
@@ -568,67 +632,8 @@ projectQPoints3d(const Elem * const msm_elem,
   const ElemType primal_type = primal_elem->type();
   const ElemType sub_elem_type = subElementType(primal_type, sub_elem);
 
-  // Transforms quadrature point from first order sub-elements (in case of second-order)
-  // to primal element
-  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
-  {
-    switch (primal_type)
-    {
-      case TRI3:
-        return Point(nu, xi, 0);
-      case QUAD4:
-        return Point(nu, xi, 0);
-      case TRI6:
-      case TRI7:
-        switch (sub_elem)
-        {
-          case 0:
-            return Point(0.5 * nu, 0.5 * xi, 0);
-          case 1:
-            return Point(0.5 * (1 - xi), 0.5 * (nu + xi), 0);
-          case 2:
-            return Point(0.5 * (1 + nu), 0.5 * xi, 0);
-          case 3:
-            return Point(0.5 * nu, 0.5 * (1 + xi), 0);
-          default:
-            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
-        }
-      case QUAD8:
-        switch (sub_elem)
-        {
-          case 0:
-            return Point(nu - 1, xi - 1, 0);
-          case 1:
-            return Point(nu + xi, xi - 1, 0);
-          case 2:
-            return Point(1 - xi, nu + xi, 0);
-          case 3:
-            return Point(nu - 1, nu + xi, 0);
-          case 4:
-            return Point(0.5 * (nu - xi), 0.5 * (nu + xi), 0);
-          default:
-            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
-        }
-      case QUAD9:
-        switch (sub_elem)
-        {
-          case 0:
-            return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
-          case 1:
-            return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
-          case 2:
-            return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
-          case 3:
-            return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
-          default:
-            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
-        }
-      default:
-        mooseError("transform_qp: Face element type: ",
-                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
-                   " invalid for 3D mortar");
-    }
-  };
+  auto transform_qp = [primal_elem, sub_elem](const Real nu, const Real xi)
+  { return mortarSubElementToParent(*primal_elem, sub_elem, Point(nu, xi, 0)); };
 
   // Get sub-elem node indices
   const auto sub_elem_node_indices = getMortarSubElementNodeIndices(*primal_elem, sub_elem);

@@ -305,6 +305,7 @@ ContactAction::validParams()
   params.transferParam<Real>(mortar_constraint_params, "minimum_projection_angle");
   params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_subpatch_plane");
   params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_qp_mapping");
+  params.transferParam<bool>(mortar_constraint_params, "segment_geometry_derivatives");
 
   // Contact surface definition
   params.addParamNamesToGroup("primary secondary displacements", "Contact Surface Definition");
@@ -328,13 +329,15 @@ ContactAction::validParams()
   params.addParamNamesToGroup("friction_coefficient tension_release friction_projection_degree",
                               "Friction");
   // Mortar-specific parameters
-  params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
-                              "lm_space "
-                              "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
-                              "use_nodal_scaling "
-                              "generate_mortar_mesh segment_quadrature minimum_projection_angle "
-                              "mortar_3d_subpatch_plane mortar_3d_qp_mapping wear_depth debug_mesh",
-                              "Mortar");
+  params.addParamNamesToGroup(
+      "c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
+      "lm_space "
+      "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
+      "use_nodal_scaling "
+      "generate_mortar_mesh segment_quadrature minimum_projection_angle "
+      "mortar_3d_subpatch_plane mortar_3d_qp_mapping segment_geometry_derivatives "
+      "wear_depth debug_mesh",
+      "Mortar");
   // Mortar dynamics (Newmark-beta)
   params.addParamNamesToGroup("mortar_dynamics newmark_beta newmark_gamma", "Mortar Dynamics");
   // Gap and tolerance settings
@@ -488,6 +491,11 @@ ContactAction::ContactAction(const InputParameters & params)
              _formulation != ContactFormulation::MORTAR_PENALTY)
       paramError("mortar_3d_qp_mapping",
                  "The 'mortar_3d_qp_mapping' option can only be used with mortar-based "
+                 "formulations.");
+    else if (params.isParamSetByUser("segment_geometry_derivatives") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("segment_geometry_derivatives",
+                 "The 'segment_geometry_derivatives' option can only be used with mortar-based "
                  "formulations.");
     else if (params.isParamSetByUser("use_dual") &&
              _formulation != ContactFormulation::MORTAR_PENALTY)
@@ -1117,6 +1125,7 @@ ContactAction::addMortarContact()
                                            "minimum_projection_angle",
                                            "mortar_3d_subpatch_plane",
                                            "mortar_3d_qp_mapping",
+                                           "segment_geometry_derivatives",
                                            "use_petrov_galerkin",
                                            "debug_mesh"});
         if (getParam<bool>("use_petrov_galerkin"))
@@ -1157,6 +1166,7 @@ ContactAction::addMortarContact()
                                            "minimum_projection_angle",
                                            "mortar_3d_subpatch_plane",
                                            "mortar_3d_qp_mapping",
+                                           "segment_geometry_derivatives",
                                            "use_petrov_galerkin",
                                            "debug_mesh"});
         if (getParam<bool>("use_petrov_galerkin"))
@@ -1188,6 +1198,7 @@ ContactAction::addMortarContact()
                                            "minimum_projection_angle",
                                            "mortar_3d_subpatch_plane",
                                            "mortar_3d_qp_mapping",
+                                           "segment_geometry_derivatives",
                                            "penalty",
                                            "debug_mesh",
                                            "max_penalty_multiplier",
@@ -1264,6 +1275,7 @@ ContactAction::addMortarContact()
                                            "minimum_projection_angle",
                                            "mortar_3d_subpatch_plane",
                                            "mortar_3d_qp_mapping",
+                                           "segment_geometry_derivatives",
                                            "friction_coefficient",
                                            "penalty",
                                            "penalty_friction"});
@@ -1334,6 +1346,7 @@ ContactAction::addMortarContact()
                                         "minimum_projection_angle",
                                         "mortar_3d_subpatch_plane",
                                         "mortar_3d_qp_mapping",
+                                        "segment_geometry_derivatives",
                                         "normalize_c",
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
@@ -1402,6 +1415,7 @@ ContactAction::addMortarContact()
                                         "minimum_projection_angle",
                                         "mortar_3d_subpatch_plane",
                                         "mortar_3d_qp_mapping",
+                                        "segment_geometry_derivatives",
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});
@@ -1449,6 +1463,7 @@ ContactAction::addMortarContact()
                                         "minimum_projection_angle",
                                         "mortar_3d_subpatch_plane",
                                         "mortar_3d_qp_mapping",
+                                        "segment_geometry_derivatives",
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});

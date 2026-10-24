@@ -134,7 +134,8 @@ public:
                             const MortarSegmentTriangulationMode triangulation_mode,
                             const bool triangulate_triangles,
                             const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
+                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION,
+                            const bool segment_geometry_derivatives = false);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -287,6 +288,38 @@ public:
                         std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const;
 
   /**
+   * Compute the displacement derivatives of the geometry of one mortar segment. In 2D the segment
+   * end points are projections of secondary and primary nodes, so their reference coordinates
+   * depend on the node positions and the nodal normals. In 3D the segment nodes are secondary and
+   * primary nodes, intersections of their edges, or polygon centers in the secondary subpatch
+   * plane, and the quadrature points are projected onto the face subpatches. One
+   * implicit-function-theorem step on each projection equation gives these derivatives without
+   * changing the Real geometry.
+   * @param msm_elem The mortar segment element
+   * @param coordinate Functor returning the position of a node with its displacement derivatives
+   * @param nodal_normals The secondary nodal normals with their displacement derivatives, as
+   * built by computeADNodalNormals()
+   * @param qrule_msm The quadrature rule on the mortar segment
+   * @param secondary_xi The reference coordinates of the quadrature points on the secondary face
+   * @param primary_xi The reference coordinates of the quadrature points on the primary face
+   * @param secondary_dxi The derivatives (zero values) of the reference coordinates of the
+   * quadrature points on the secondary face
+   * @param primary_dxi The derivatives (zero values) of the reference coordinates of the
+   * quadrature points on the primary face
+   * @param msm_nodes The positions of the mortar segment nodes with their derivatives
+   */
+  void mortarSegmentGeometryDerivatives(
+      const Elem & msm_elem,
+      const std::function<ADPoint(const Node &)> & coordinate,
+      const std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals,
+      const libMesh::QBase & qrule_msm,
+      const std::vector<Point> & secondary_xi,
+      const std::vector<Point> & primary_xi,
+      std::vector<ADPoint> & secondary_dxi,
+      std::vector<ADPoint> & primary_dxi,
+      std::vector<ADPoint> & msm_nodes) const;
+
+  /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
    * @return The map from secondary interior parent nodes to lower dimensional nodes
    */
@@ -385,6 +418,9 @@ public:
   /// Return the 3D mortar quadrature-point mapping method.
   Mortar3DQuadraturePointMapping mortar3DQpMapping() const { return _mortar_3d_qp_mapping; }
 
+  /// Whether AD includes the displacement dependence of the mortar segment geometry
+  bool segmentGeometryDerivatives() const { return _segment_geometry_derivatives; }
+
   /// Return the parent-face reference coordinates for a mortar segment.
   const MortarSegmentReferencePoints &
   mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const;
@@ -452,6 +488,18 @@ public:
   void initOutput();
 
 private:
+  /// The 3D part of mortarSegmentGeometryDerivatives()
+  void mortarSegmentGeometryDerivatives3d(
+      const Elem & msm_elem,
+      const std::function<ADPoint(const Node &)> & coordinate,
+      const std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals,
+      const libMesh::QBase & qrule_msm,
+      const std::vector<Point> & secondary_xi,
+      const std::vector<Point> & primary_xi,
+      std::vector<ADPoint> & secondary_dxi,
+      std::vector<ADPoint> & primary_dxi,
+      std::vector<ADPoint> & msm_nodes) const;
+
   /**
    * Write the mortar segment mesh to exodus
    */
@@ -643,8 +691,15 @@ private:
   /// Method used to map 3D mortar segment quadrature points to primary and secondary faces.
   const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
 
+  /// Whether AD includes the displacement dependence of the mortar segment geometry
+  const bool _segment_geometry_derivatives;
+
   /// Reference-coordinate data used only by the reference-interpolation mapping mode.
   std::unordered_map<const Elem *, MortarSegmentReferencePoints> _msm_elem_to_reference_points;
+
+  /// Map from 3D mortar segment elements to the origins of their nodes. Only filled when
+  /// _segment_geometry_derivatives is true.
+  std::unordered_map<const Elem *, MortarSegmentNodeOrigins> _msm_elem_to_node_origins;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

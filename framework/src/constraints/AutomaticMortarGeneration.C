@@ -399,7 +399,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MortarSegmentTriangulationMode triangulation_mode,
     const bool triangulate_triangles,
-    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping,
+    const bool segment_geometry_derivatives)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -415,7 +416,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _mortar_3d_subpatch_plane(mortar_3d_subpatch_plane),
     _triangulation_mode(triangulation_mode),
     _triangulate_triangles(triangulate_triangles),
-    _mortar_3d_qp_mapping(mortar_3d_qp_mapping)
+    _mortar_3d_qp_mapping(mortar_3d_qp_mapping),
+    _segment_geometry_derivatives(segment_geometry_derivatives)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -466,6 +468,7 @@ void
 AutomaticMortarGeneration::clear()
 {
   _msm_elem_to_reference_points.clear();
+  _msm_elem_to_node_origins.clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();
   _nodes_to_primary_elem_map.clear();
@@ -1445,6 +1448,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
         std::vector<std::array<Point, 3>> elem_to_secondary_reference_points;
         std::vector<std::array<Point, 3>> elem_to_primary_reference_points;
+        std::vector<MortarSegmentNodeOrigins> elem_to_node_origins;
 
         /**
          * Step 1.3.2: Sub-divide primary element candidate, then project onto secondary
@@ -1494,6 +1498,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Mortar segment helpers append a list of mortar segment nodes and connectivities that
             // can be directly used to build mortar segments
             const auto segments_before_helper = elem_to_node_map.size();
+            auto * const node_origins =
+                _segment_geometry_derivatives ? &elem_to_node_origins : nullptr;
             if (use_reference_interpolation)
               mortar_segment_helper[s_el]->getMortarSegments(primary_sub_elem,
                                                              sub_elem_reference_points,
@@ -1501,10 +1507,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
                                                              elem_to_node_map,
                                                              elem_to_secondary_reference_points,
                                                              elem_to_primary_reference_points,
-                                                             TOLERANCE * secondary_volume);
+                                                             TOLERANCE * secondary_volume,
+                                                             node_origins);
             else
               mortar_segment_helper[s_el]->getMortarSegments(
-                  primary_sub_elem, nodal_points, elem_to_node_map);
+                  primary_sub_elem, nodal_points, elem_to_node_map, node_origins);
 
             // Keep track of which secondary and primary sub-elements created segment
             for (auto i = segments_before_helper; i < elem_to_node_map.size(); ++i)
@@ -1639,6 +1646,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
               _msm_elem_to_reference_points.emplace(msm_new_elem, reference_points);
             }
 
+            if (_segment_geometry_derivatives)
+              _msm_elem_to_node_origins.emplace(msm_new_elem, elem_to_node_origins[el]);
+
             // Add this mortar segment to the secondary elem to mortar segment map
             secondary_to_msm_element_set.insert(msm_new_elem);
 
@@ -1679,6 +1689,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   mooseAssert(!use_reference_interpolation ||
                   _msm_elem_to_reference_points.size() == _msm_elem_to_info.size(),
               "Mortar segment info and reference-point maps must remain aligned.");
+  mooseAssert(!_segment_geometry_derivatives ||
+                  _msm_elem_to_node_origins.size() == _msm_elem_to_info.size(),
+              "Mortar segment info and node-origin maps must remain aligned.");
 
   _mortar_segment_mesh->cache_elem_data();
 
@@ -2323,6 +2336,362 @@ AutomaticMortarGeneration::computeADNodalNormals(
     for (const auto component : make_range(Moose::dim))
       nodal_normal(component).value() = stored_normal(component);
     nodal_normals.emplace(secondary_node, std::move(nodal_normal));
+  }
+}
+
+void
+AutomaticMortarGeneration::mortarSegmentGeometryDerivatives(
+    const Elem & msm_elem,
+    const std::function<ADPoint(const Node &)> & coordinate,
+    const std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals,
+    const QBase & qrule_msm,
+    const std::vector<Point> & secondary_xi,
+    const std::vector<Point> & primary_xi,
+    std::vector<ADPoint> & secondary_dxi,
+    std::vector<ADPoint> & primary_dxi,
+    std::vector<ADPoint> & msm_nodes) const
+{
+  if (dim() == 3)
+    return mortarSegmentGeometryDerivatives3d(msm_elem,
+                                              coordinate,
+                                              nodal_normals,
+                                              qrule_msm,
+                                              secondary_xi,
+                                              primary_xi,
+                                              secondary_dxi,
+                                              primary_dxi,
+                                              msm_nodes);
+
+  const auto & msinfo = libmesh_map_find(_msm_elem_to_info, &msm_elem);
+  const Elem & secondary_elem = *msinfo.secondary_elem;
+  const Elem & primary_elem = *msinfo.primary_elem;
+
+  // A point on a face and its reference tangent, with the derivatives of the face node positions.
+  // The optional normals are interpolated with the same basis.
+  struct FacePoint
+  {
+    ADPoint x;
+    Point dx_dxi;
+    ADRealVectorValue normal;
+    Point dnormal_dxi;
+  };
+  const auto evaluate =
+      [&coordinate, &nodal_normals](const Elem & face, const Real xi, const bool with_normals)
+  {
+    FacePoint result;
+    const auto order = face.default_order();
+    for (const auto n : make_range(face.n_nodes()))
+    {
+      const auto phi = Moose::fe_lagrange_1D_shape(order, n, xi);
+      const auto dphi = Moose::fe_lagrange_1D_shape_deriv(order, n, xi);
+      result.x.add_scaled(coordinate(face.node_ref(n)), phi);
+      result.dx_dxi.add_scaled(face.point(n), dphi);
+      if (with_normals)
+      {
+        const auto & normal = libmesh_map_find(nodal_normals, face.node_ptr(n));
+        result.normal.add_scaled(normal, phi);
+        result.dnormal_dxi.add_scaled(MetaPhysicL::raw_value(normal), dphi);
+      }
+    }
+    return result;
+  };
+
+  // The 2D projections solve F(xi) = (x(xi) - y) x n = 0 (scalar cross product), with y the
+  // projected node. At the converged Real solution, the implicit function theorem gives
+  // dxi = -dF/(dF/dxi), where dF holds the derivatives of the node positions and normals at fixed
+  // xi.
+  const auto cross = [](const auto & u, const auto & v) { return u(0) * v(1) - u(1) * v(0); };
+  const auto end_point_derivatives = [&](const Real xi1, const Real xi2)
+  {
+    ADReal dxi1 = 0, dxi2 = 0;
+    // Projections onto a node store exactly +/-1, so exact comparisons identify the nodes
+    const bool secondary_node = std::abs(xi1) == 1;
+    const bool primary_node = std::abs(xi2) == 1;
+    // Aligned secondary and primary nodes form a kink of the segmentation, whose derivative we take
+    // to be zero
+    if (secondary_node && primary_node)
+      return std::make_pair(dxi1, dxi2);
+    mooseAssert(secondary_node || primary_node,
+                "A 2D mortar segment end point must come from a secondary or primary node");
+
+    if (secondary_node)
+    {
+      // A secondary node projected onto the primary face along its nodal normal
+      const Node & node = secondary_elem.node_ref(xi1 < 0 ? 0 : 1);
+      const auto & normal = libmesh_map_find(nodal_normals, &node);
+      const auto primary_point = evaluate(primary_elem, xi2, false);
+      const ADReal F = cross(primary_point.x - coordinate(node), normal);
+      const Real dF_dxi = cross(primary_point.dx_dxi, MetaPhysicL::raw_value(normal));
+      dxi2 = -F / dF_dxi;
+    }
+    else
+    {
+      // A primary node projected onto the secondary face along the interpolated nodal normal
+      const Node & node = primary_elem.node_ref(xi2 < 0 ? 0 : 1);
+      const auto secondary_point = evaluate(secondary_elem, xi1, true);
+      const auto u = secondary_point.x - coordinate(node);
+      const ADReal F = cross(u, secondary_point.normal);
+      const Real dF_dxi =
+          cross(secondary_point.dx_dxi, MetaPhysicL::raw_value(secondary_point.normal)) +
+          cross(MetaPhysicL::raw_value(u), secondary_point.dnormal_dxi);
+      dxi1 = -F / dF_dxi;
+    }
+    // The Real projection converged to F = 0 within the Newton tolerance; only the derivatives
+    // carry information
+    dxi1.value() = 0;
+    dxi2.value() = 0;
+    return std::make_pair(dxi1, dxi2);
+  };
+
+  const auto [dxi1_a, dxi2_a] = end_point_derivatives(msinfo.xi1_a, msinfo.xi2_a);
+  const auto [dxi1_b, dxi2_b] = end_point_derivatives(msinfo.xi1_b, msinfo.xi2_b);
+
+  // The quadrature points interpolate the end point reference coordinates linearly, see
+  // Moose::Mortar::loopOverMortarSegments
+  const auto n_qp = qrule_msm.n_points();
+  secondary_dxi.resize(n_qp);
+  primary_dxi.resize(n_qp);
+  for (const auto qp : make_range(n_qp))
+  {
+    const Real eta = qrule_msm.qp(qp)(0);
+    secondary_dxi[qp] = ADPoint(0.5 * (1 - eta) * dxi1_a + 0.5 * (1 + eta) * dxi1_b, 0, 0);
+    primary_dxi[qp] = ADPoint(0.5 * (1 - eta) * dxi2_a + 0.5 * (1 + eta) * dxi2_b, 0, 0);
+  }
+
+  // The mortar segment nodes lie on the secondary face at the end points and, for second order
+  // segments, at the midpoint of the end point reference coordinates
+  msm_nodes.resize(msm_elem.n_nodes());
+  for (const auto n : make_range(msm_elem.n_nodes()))
+  {
+    const Real weight_b = n == 0 ? 0 : (n == 1 ? 1 : 0.5);
+    const Real xi1 = (1 - weight_b) * msinfo.xi1_a + weight_b * msinfo.xi1_b;
+    const ADReal dxi1 = (1 - weight_b) * dxi1_a + weight_b * dxi1_b;
+    const auto secondary_point = evaluate(secondary_elem, xi1, false);
+    msm_nodes[n] = secondary_point.x + secondary_point.dx_dxi * dxi1;
+    for (const auto d : make_range(Moose::dim))
+      msm_nodes[n](d).value() = msm_elem.point(n)(d);
+  }
+}
+
+void
+AutomaticMortarGeneration::mortarSegmentGeometryDerivatives3d(
+    const Elem & msm_elem,
+    const std::function<ADPoint(const Node &)> & coordinate,
+    const std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals,
+    const QBase & qrule_msm,
+    const std::vector<Point> & secondary_xi,
+    const std::vector<Point> & primary_xi,
+    std::vector<ADPoint> & secondary_dxi,
+    std::vector<ADPoint> & primary_dxi,
+    std::vector<ADPoint> & msm_nodes) const
+{
+  using Type = MortarSegmentNodeOrigin::Type;
+
+  const auto & msinfo = libmesh_map_find(_msm_elem_to_info, &msm_elem);
+  const auto & origins = libmesh_map_find(_msm_elem_to_node_origins, &msm_elem);
+
+  // The first-order sub-elements of the secondary and primary faces that formed this segment
+  struct SubElem
+  {
+    const Elem * face;
+    unsigned int sub_elem;
+    ElemType type;
+    std::vector<const Node *> nodes;
+    std::vector<ADPoint> points;
+  };
+  const auto sub_elem = [this, &msm_elem, &coordinate](const Elem & face, const char * const name)
+  {
+    SubElem result;
+    result.face = &face;
+    result.sub_elem =
+        msm_elem.get_extra_integer(_mortar_segment_mesh->get_elem_integer_index(name));
+    for (const auto n : Moose::Mortar::getMortarSubElementNodeIndices(face, result.sub_elem))
+    {
+      result.nodes.push_back(face.node_ptr(n));
+      result.points.push_back(coordinate(face.node_ref(n)));
+    }
+    result.type = result.nodes.size() == 3 ? TRI3 : QUAD4;
+    return result;
+  };
+  const auto secondary = sub_elem(*msinfo.secondary_elem, "secondary_sub_elem");
+  const auto primary = sub_elem(*msinfo.primary_elem, "primary_sub_elem");
+
+  // The secondary subpatch plane, built as in buildMortarSegmentMesh3d(). The sign of its normal
+  // does not matter for the projections and intersections below.
+  ADPoint center;
+  for (const auto & point : secondary.points)
+    center += point;
+  center /= secondary.points.size();
+  ADRealVectorValue normal;
+  if (_mortar_3d_subpatch_plane == Mortar3DSubpatchPlane::GEOMETRIC_NORMAL)
+  {
+    const auto & x = secondary.points;
+    if (x.size() == 3)
+      normal = (x[1] - x[0]).cross(x[2] - x[0]);
+    else
+      normal = (0.25 * (x[1] + x[2] - x[0] - x[3])).cross(0.25 * (x[2] + x[3] - x[0] - x[1]));
+  }
+  else
+    for (const auto * const node : secondary.nodes)
+      normal += libmesh_map_find(nodal_normals, node);
+  normal /= normal.norm();
+  const auto project = [&center, &normal](const ADPoint & point)
+  { return point - ((point - center) * normal) * normal; };
+
+  // The overlap polygon in the plane
+  std::vector<ADPoint> polygon;
+  polygon.reserve(origins.polygon.size());
+  for (const auto & origin : origins.polygon)
+  {
+    const auto & ids = origin.indices;
+    switch (origin.type)
+    {
+      case Type::SecondaryNode:
+        polygon.push_back(project(secondary.points[ids[0]]));
+        break;
+      case Type::PrimaryNode:
+        polygon.push_back(project(primary.points[ids[0]]));
+        break;
+      case Type::EdgeIntersection:
+      {
+        // In-plane intersection of a + s ds with b + t dp
+        const auto a = project(secondary.points[ids[0]]);
+        const auto ds = project(secondary.points[ids[1]]) - a;
+        const auto b = project(primary.points[ids[2]]);
+        const auto dp = project(primary.points[ids[3]]) - b;
+        const ADReal s = ((b - a).cross(dp) * normal) / (ds.cross(dp) * normal);
+        polygon.push_back(a + s * ds);
+        break;
+      }
+      case Type::MeanCenter:
+      {
+        ADPoint mean;
+        for (const auto i : make_range(ids[0], ids[0] + ids[1]))
+          mean += polygon[i];
+        polygon.push_back(mean / ids[1]);
+        break;
+      }
+      case Type::AreaCenter:
+      {
+        ADPoint weighted;
+        ADReal double_area = 0;
+        for (const auto i : make_range(ids[1]))
+        {
+          const auto a = polygon[ids[0] + i] - center;
+          const auto b = polygon[ids[0] + (i + 1) % ids[1]] - center;
+          const ADReal cross = a.cross(b) * normal;
+          weighted += (a + b) * cross;
+          double_area += cross;
+        }
+        polygon.push_back(center + weighted / (3 * double_area));
+        break;
+      }
+      case Type::Fixed:
+        // Only the derivatives of the polygon nodes are used, and a fixed node has none
+        polygon.emplace_back();
+        break;
+    }
+  }
+
+  msm_nodes.resize(msm_elem.n_nodes());
+  for (const auto n : make_range(msm_elem.n_nodes()))
+  {
+    msm_nodes[n] = polygon[origins.nodes[n]];
+    for (const auto d : make_range(Moose::dim))
+      msm_nodes[n](d).value() = msm_elem.point(n)(d);
+  }
+
+  // A point x on the plane maps to the sub-element point nu solving F(nu) = (x_sub(nu) - x) x d = 0
+  // along the projection direction d. At the converged Real solution, the implicit function
+  // theorem gives dnu = -(J^T J)^-1 J^T dF with J = dF/dnu, where dF holds the derivatives of
+  // x_sub, x, and d at fixed nu. The sub-element maps affinely to the parent face, xi = A nu + b.
+  const auto parent_dxi = [](const SubElem & sub,
+                             const Point & xi,
+                             const ADPoint & x,
+                             const ADRealVectorValue & direction)
+  {
+    const Point b =
+        Moose::Mortar::mortarSubElementToParent(*sub.face, sub.sub_elem, Point(0, 0, 0));
+    const Point a0 =
+        Moose::Mortar::mortarSubElementToParent(*sub.face, sub.sub_elem, Point(1, 0, 0)) - b;
+    const Point a1 =
+        Moose::Mortar::mortarSubElementToParent(*sub.face, sub.sub_elem, Point(0, 1, 0)) - b;
+    const Real det = a0(0) * a1(1) - a1(0) * a0(1);
+    const Point r = xi - b;
+    const Point nu((r(0) * a1(1) - a1(0) * r(1)) / det, (a0(0) * r(1) - r(0) * a0(1)) / det, 0);
+
+    ADPoint x_sub;
+    std::array<Point, 2> dx_dnu;
+    for (const auto k : index_range(sub.points))
+    {
+      x_sub.add_scaled(sub.points[k], Moose::fe_lagrange_2D_shape(sub.type, FIRST, k, nu));
+      for (const auto j : make_range(2))
+        dx_dnu[j].add_scaled(MetaPhysicL::raw_value(sub.points[k]),
+                             Moose::fe_lagrange_2D_shape_deriv(sub.type, FIRST, k, j, nu));
+    }
+    const auto F = (x_sub - x).cross(direction);
+    const Point d = MetaPhysicL::raw_value(direction);
+    const std::array<Point, 2> J{{dx_dnu[0].cross(d), dx_dnu[1].cross(d)}};
+    const Real m00 = J[0] * J[0], m01 = J[0] * J[1], m11 = J[1] * J[1];
+    const ADReal r0 = J[0] * F, r1 = J[1] * F;
+    const Real m_det = m00 * m11 - m01 * m01;
+    ADReal dnu0 = -(m11 * r0 - m01 * r1) / m_det;
+    ADReal dnu1 = -(m00 * r1 - m01 * r0) / m_det;
+    // The Real projection converged to F = 0; only the derivatives carry information
+    dnu0.value() = 0;
+    dnu1.value() = 0;
+    return ADPoint(a0(0) * dnu0 + a1(0) * dnu1, a0(1) * dnu0 + a1(1) * dnu1, 0);
+  };
+
+  const auto n_qp = qrule_msm.n_points();
+  secondary_dxi.resize(n_qp);
+  primary_dxi.resize(n_qp);
+  const auto msm_type = msm_elem.type();
+  const auto msm_order = msm_elem.default_order();
+  if (_mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
+  {
+    // The vertex reference points are projections along the plane normal, and the quadrature
+    // points interpolate them, see Moose::Mortar::mapQPoints3dFromReference
+    const auto & reference_points = mortarSegmentReferencePoints(msm_elem);
+    std::array<ADPoint, 3> secondary_vertex_dxi, primary_vertex_dxi;
+    for (const auto v : make_range(3))
+    {
+      secondary_vertex_dxi[v] = parent_dxi(
+          secondary, reference_points.secondary_reference_points[v], msm_nodes[v], normal);
+      primary_vertex_dxi[v] =
+          parent_dxi(primary, reference_points.primary_reference_points[v], msm_nodes[v], normal);
+    }
+    for (const auto qp : make_range(n_qp))
+    {
+      secondary_dxi[qp].zero();
+      primary_dxi[qp].zero();
+      for (const auto v : make_range(3))
+      {
+        const Real phi = Moose::fe_lagrange_2D_shape(
+            msm_type, msm_order, v, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp)));
+        secondary_dxi[qp].add_scaled(secondary_vertex_dxi[v], phi);
+        primary_dxi[qp].add_scaled(primary_vertex_dxi[v], phi);
+      }
+    }
+  }
+  else
+  {
+    // The quadrature points are projected along the mortar segment normal, see
+    // Moose::Mortar::projectQPoints3d
+    const auto msm_normal_unnormalized =
+        (msm_nodes[2] - msm_nodes[1]).cross(msm_nodes[0] - msm_nodes[1]);
+    const auto msm_normal = msm_normal_unnormalized / msm_normal_unnormalized.norm();
+    for (const auto qp : make_range(n_qp))
+    {
+      ADPoint x_qp;
+      for (const auto n : make_range(msm_elem.n_nodes()))
+        x_qp.add_scaled(
+            msm_nodes[n],
+            Moose::fe_lagrange_2D_shape(
+                msm_type, msm_order, n, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))));
+      secondary_dxi[qp] = parent_dxi(secondary, secondary_xi[qp], x_qp, msm_normal);
+      primary_dxi[qp] = parent_dxi(primary, primary_xi[qp], x_qp, msm_normal);
+    }
   }
 }
 
