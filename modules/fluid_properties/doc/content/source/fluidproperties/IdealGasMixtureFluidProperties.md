@@ -39,6 +39,19 @@ sums of the component properties evaluated at the mixture temperature and pressu
 !equation
 z(p, T) = \sum\limits_k \xi_k z_k(p, T) \,.
 
+The temperature is computed from the specific volume $v$ and the specific internal energy $e$
+by solving
+
+!equation
+e = \sum\limits_k \xi_k e_k(T)
+
+for $T$ with the 1D Newton solver of the [fluid properties utilities](utils/FluidPropertiesUtils.md);
+the internal energy of an ideal gas does not depend on pressure. The equation is offset by a
+constant that makes both of its sides close to $c_v T$, where $c_v$ is the mixture isochoric
+specific heat, so that the convergence test of the solver bounds the relative error in temperature
+even where the internal energy is close to zero. The pressure then follows from the ideal gas law,
+$p = R T / (M v)$, where $R$ is the universal gas constant.
+
 Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are
 computed as molar-fraction-weighted
 sums of the component properties evaluated at the mixture temperature and pressure:
