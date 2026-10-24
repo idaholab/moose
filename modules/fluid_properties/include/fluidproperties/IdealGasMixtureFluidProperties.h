@@ -115,4 +115,7 @@ protected:
 
   /// Component fluid properties objects
   std::vector<const SinglePhaseFluidProperties *> _component_fps;
+
+  /// Temperature at which Newton's method starts to compute the temperature [K]
+  Real _T_newton_start;
 };

@@ -1,6 +1,14 @@
 # IdealGasMixtureFluidProperties
 
-This is a [VaporMixtureFluidProperties.md] where each of the components are assumed to be ideal gases (see [IdealGasFluidProperties.md]).
+This is a [VaporMixtureFluidProperties.md] where each of the components are assumed to be ideal gases,
+either with constant specific heats (see [IdealGasFluidProperties.md]) or with specific heats from
+NASA 7-coefficient polynomials (see [NASA7IdealGasFluidProperties.md]).
+
+!alert note
+The internal energies of these two kinds of components have different references: that of
+[IdealGasFluidProperties.md] is $c_v T$ plus a user-supplied reference value, whereas that of
+[NASA7IdealGasFluidProperties.md] includes the enthalpy of formation. Only the latter accounts
+for the heat of reaction when the composition changes by reaction.
 
 First note the following definitions and relations:
 
@@ -49,7 +57,9 @@ for $T$ with the 1D Newton solver of the [fluid properties utilities](utils/Flui
 the internal energy of an ideal gas does not depend on pressure. The equation is offset by a
 constant that makes both of its sides close to $c_v T$, where $c_v$ is the mixture isochoric
 specific heat, so that the convergence test of the solver bounds the relative error in temperature
-even where the internal energy is close to zero. The pressure then follows from the ideal gas law,
+even where the internal energy is close to zero. With NASA 7-coefficient components, the iteration
+starts at the lowest upper end of the temperature ranges of their data, above the solution, for the
+reasons given in [NASA7IdealGasFluidProperties.md]. The pressure then follows from the ideal gas law,
 $p = R T / (M v)$, where $R$ is the universal gas constant.
 
 Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are

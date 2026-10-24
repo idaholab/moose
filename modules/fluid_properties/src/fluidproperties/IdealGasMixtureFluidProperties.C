@@ -9,7 +9,10 @@
 
 #include "IdealGasMixtureFluidProperties.h"
 #include "IdealGasFluidProperties.h"
+#include "NASA7IdealGasFluidProperties.h"
 #include "NewtonInversion.h"
+
+#include <limits>
 
 registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
 
@@ -112,16 +115,30 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
   if (_n_components == 0)
     mooseError("There must be at least one entry in 'component_fluid_properties'.");
 
+  // Newton's method starts above the solution, at the lowest upper end of the temperature ranges
+  // of the NASA 7-coefficient components, because their internal energies are convex in temperature
+  // over nearly all of these ranges (see NASA7IdealGasFluidProperties). The internal energies of
+  // IdealGasFluidProperties components are linear in temperature, so without NASA 7-coefficient
+  // components Newton's method converges in one iteration from any start temperature.
+  _T_newton_start = std::numeric_limits<Real>::max();
+
   _component_fps.resize(_n_components);
   for (const auto i : make_range(_n_components))
   {
     const auto & single_phase_fp =
         getUserObjectByName<SinglePhaseFluidProperties>(_component_fp_names[i]);
-    if (!dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp))
-      mooseError(
-          "Each entry in 'component_fluid_properties' must have type 'IdealGasFluidProperties'.");
+    const auto nasa7_fp = dynamic_cast<const NASA7IdealGasFluidProperties *>(&single_phase_fp);
+    if (nasa7_fp)
+      _T_newton_start = std::min(_T_newton_start, nasa7_fp->maximumTemperature());
+    else if (!dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp))
+      mooseError("Each entry in 'component_fluid_properties' must have type "
+                 "'IdealGasFluidProperties' or 'NASA7IdealGasFluidProperties'.");
     _component_fps[i] = &single_phase_fp;
   }
+
+  // Any start temperature works without NASA 7-coefficient components
+  if (_T_newton_start == std::numeric_limits<Real>::max())
+    _T_newton_start = 300;
 }
 
 const SinglePhaseFluidProperties &
@@ -353,9 +370,7 @@ IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & v,
     }
   };
 
-  // The internal energies of IdealGasFluidProperties components are linear in temperature, so
-  // Newton's method converges in one iteration from any start temperature
-  const Real T0 = 300;
+  const Real T0 = _T_newton_start;
 
   // The internal energy can be close to zero, where the convergence test of NewtonSolve, which is
   // relative to the target value, would demand accuracy below roundoff. Solve e(T) + shift =
