@@ -44,7 +44,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.26.0
-    build_number: 0
+    build_number: 1
     conda: conda/petsc
     templates:
       conda/petsc/meta.yaml.template: conda/petsc/meta.yaml
