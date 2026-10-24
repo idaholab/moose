@@ -69,7 +69,8 @@ private:
 
   /**
    * Flags a temperature outside the range of the data as a solution warning, because the
-   * polynomials are then extrapolated, and a non-positive temperature as an invalid solution
+   * polynomials are then extrapolated, and a non-positive or not-a-number temperature as an
+   * invalid solution
    */
   template <typename CppType>
   void checkTemperature(const CppType & T) const;

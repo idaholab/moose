@@ -20,7 +20,7 @@
   [out_of_range]
     type = GoogleTest
     unit_test = NASA7IdealGasFluidPropertiesTest.outOfRange
-    requirement = 'The system shall extrapolate NASA 7-coefficient polynomials outside the temperature range of their data and count each such evaluation, including the evaluation of a temperature found by inverting the internal energy, as a solution warning, and shall flag a non-positive temperature as an invalid solution.'
+    requirement = 'The system shall extrapolate NASA 7-coefficient polynomials outside the temperature range of their data and count each such evaluation, including the evaluation of a temperature found by inverting the internal energy, as a solution warning, and shall flag a non-positive or not-a-number temperature as an invalid solution.'
   []
   [inverses]
     type = GoogleTest

@@ -19,6 +19,11 @@ NASA7IdealGasFluidProperties::validParams()
   MooseEnum species(NASA7::speciesNames());
   params.addRequiredParam<MooseEnum>("species", species, "Gas species");
 
+  // The temperature inversions start at the upper end of the temperature range of the data, and
+  // none of them needs a pressure guess
+  params.suppressParameter<Real>("T_initial_guess");
+  params.suppressParameter<Real>("p_initial_guess");
+
   params.addClassDescription("Ideal gas with temperature-dependent heat capacity, enthalpy, and "
                              "entropy from NASA 7-coefficient polynomials");
 
@@ -55,8 +60,8 @@ void
 NASA7IdealGasFluidProperties::checkTemperature(const CppType & T) const
 {
   const auto T_raw = MetaPhysicL::raw_value(T);
-  if (T_raw <= 0)
-    flagInvalidSolution("Non-positive temperature");
+  if (std::isnan(T_raw) || T_raw <= 0)
+    flagInvalidSolution("Non-positive or not-a-number temperature");
   else if (T_raw < _data.T_min || T_raw > _data.T_max)
     flagSolutionWarning(
         "Temperature outside the range of the NASA-7 data; the polynomials are extrapolated");

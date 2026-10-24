@@ -68,8 +68,8 @@ whose relative tolerance and maximum number of iterations are set with
 [!param](/FluidProperties/NASA7IdealGasFluidProperties/max_newton_its). Two choices make this
 inversion robust:
 
-- The iteration starts at the upper end of the temperature range of the data, and
-  [!param](/FluidProperties/NASA7IdealGasFluidProperties/T_initial_guess) is not used. The
+- The iteration starts at the upper end of the temperature range of the data, so this class has
+  no initial-guess parameters. The
   internal energy and the enthalpy are convex functions of temperature over nearly all of that
   range, because the heat capacity increases with temperature, so the iterates approach the
   solution from above. An iteration started below the solution can overshoot far beyond the
@@ -91,8 +91,8 @@ $3 \times 10^{-4}$ K for the built-in species. The inversion may return either t
 The polynomials are fitted from 200 K to 3500 K, except for N$_2$, whose fit extends from 300 K to
 5000 K. Outside its range, the polynomials of a species are still evaluated, and each such
 evaluation is counted as a solution warning, which appears in the solution invalidity summary. For
-example, N$_2$ at room temperature lies slightly below its range. A non-positive temperature is
-flagged as an invalid solution.
+example, N$_2$ at room temperature lies slightly below its range. A non-positive or not-a-number
+temperature is flagged as an invalid solution.
 
 !syntax parameters /FluidProperties/NASA7IdealGasFluidProperties
 

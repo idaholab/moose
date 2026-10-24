@@ -11,6 +11,8 @@
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 #include "SolutionInvalidity.h"
 
+#include <limits>
+
 namespace
 {
 /// Mass-specific properties at a state, computed with Cantera
@@ -223,10 +225,12 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, outOfRange)
   REL_TEST(_fp_n2->T_from_v_e(1, e), 250, REL_TOL_CONSISTENCY);
   EXPECT_EQ(flagCount(*_app, true), warnings_before_inversion + 1);
 
-  // A non-positive temperature is an invalid solution
+  // A non-positive or not-a-number temperature is an invalid solution
   const auto errors = flagCount(*_app, false);
   _fp_n2->e_from_p_T(p, -10);
   EXPECT_EQ(flagCount(*_app, false), errors + 1);
+  _fp_n2->e_from_p_T(p, std::numeric_limits<Real>::quiet_NaN());
+  EXPECT_EQ(flagCount(*_app, false), errors + 2);
 }
 
 TEST_F(NASA7IdealGasFluidPropertiesTest, inverses)
