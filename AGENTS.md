@@ -165,10 +165,10 @@ not govern unrelated conversations or prescribe the user's conversational style.
   one line.
 - Leave investigation dead ends out. A path that looked related and turned out not to be is not
   a finding, and reporting it competes with the actual change for the reviewer's attention.
-- Write clear, grammatical, concise prose for peer computational scientists and engineers.
-  Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes, parameters,
-  input syntax, commands, and diagnostics, and remove repetition and boilerplate before
-  presenting.
+- Write clear, grammatical, *very* concise prose for peer computational scientists and
+  engineers. Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes,
+  parameters, input syntax, commands, and diagnostics, and remove repetition and boilerplate
+  before presenting.
 - Use the vocabulary a MOOSE developer would use, and avoid stock phrasing that reads as
   machine-drafted. "bit-for-bit" is one such tell; say that results are unchanged.
 - Prefer self-explanatory code, using comments for non-obvious behavior, correctness
