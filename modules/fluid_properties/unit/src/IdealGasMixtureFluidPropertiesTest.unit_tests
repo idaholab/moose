@@ -1,0 +1,10 @@
+[Tests]
+  design = 'IdealGasMixtureFluidProperties.md'
+  issues = '#34116'
+
+  [ad_derivatives]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.adDerivatives
+    requirement = 'The system shall compute the derivatives of the temperature and pressure from the specific volume and internal energy, of the internal energy from the pressure and density, and of the sound speed from the pressure and temperature of an ideal gas mixture with respect to their arguments and the mass fractions with automatic differentiation, in agreement with finite differences.'
+  []
+[]

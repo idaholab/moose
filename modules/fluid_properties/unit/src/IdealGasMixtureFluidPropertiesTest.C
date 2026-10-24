@@ -88,3 +88,59 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   const Real v_gold = FluidProperties::_R * T / (M * p);
   REL_TEST(v, v_gold, REL_TOL_SAVED_VALUE);
 }
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, adDerivatives)
+{
+  // Compares the derivatives of the automatic differentiation version of a property f(a, b, x)
+  // with respect to a, b, and the secondary mass fraction x with central differences of its Real
+  // version
+  const auto check = [](const auto & f, const Real a, const Real b, const Real x)
+  {
+    DNDerivativeType da, db, dx;
+    Moose::derivInsert(da, 0, 1);
+    Moose::derivInsert(db, 1, 1);
+    Moose::derivInsert(dx, 2, 1);
+    const ADReal f_ad = f(ADReal(a, da), ADReal(b, db), std::vector<ADReal>{ADReal(x, dx)});
+    REL_TEST(f_ad, f(a, b, std::vector<Real>{x}), REL_TOL_CONSISTENCY);
+
+    const Real ha = REL_PERTURBATION * a;
+    const Real hb = REL_PERTURBATION * b;
+    const Real hx = REL_PERTURBATION * x;
+    REL_TEST(f_ad.derivatives()[0],
+             (f(a + ha, b, std::vector<Real>{x}) - f(a - ha, b, std::vector<Real>{x})) / (2 * ha),
+             REL_TOL_DERIVATIVE);
+    REL_TEST(f_ad.derivatives()[1],
+             (f(a, b + hb, std::vector<Real>{x}) - f(a, b - hb, std::vector<Real>{x})) / (2 * hb),
+             REL_TOL_DERIVATIVE);
+    REL_TEST(f_ad.derivatives()[2],
+             (f(a, b, std::vector<Real>{x + hx}) - f(a, b, std::vector<Real>{x - hx})) / (2 * hx),
+             REL_TOL_DERIVATIVE);
+  };
+
+  const Real p = 100000;
+  const Real T = 400;
+  const Real x = 0.7;
+  const Real v = _fp_mix->v_from_p_T(p, T, {x});
+  const Real e = _fp_mix->e_from_p_T(p, T, {x});
+
+  check([this](const auto & v, const auto & e, const auto & x)
+        { return _fp_mix->T_from_v_e(v, e, x); },
+        v,
+        e,
+        x);
+  check([this](const auto & v, const auto & e, const auto & x)
+        { return _fp_mix->p_from_v_e(v, e, x); },
+        v,
+        e,
+        x);
+  check([this](const auto & p, const auto & rho, const auto & x)
+        { return _fp_mix->e_from_p_rho(p, rho, x); },
+        p,
+        1 / v,
+        x);
+  check([this](const auto & p, const auto & T, const auto & x)
+        { return _fp_mix->c_from_p_T(p, T, x); },
+        p,
+        T,
+        x);
+}

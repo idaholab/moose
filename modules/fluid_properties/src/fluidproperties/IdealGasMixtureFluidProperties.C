@@ -9,6 +9,7 @@
 
 #include "IdealGasMixtureFluidProperties.h"
 #include "IdealGasFluidProperties.h"
+#include "NewtonInversion.h"
 
 registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
 
@@ -115,10 +116,10 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
   {
     const auto & single_phase_fp =
         getUserObjectByName<SinglePhaseFluidProperties>(_component_fp_names[i]);
-    _component_fps[i] = dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp);
-    if (!_component_fps[i])
+    if (!dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp))
       mooseError(
           "Each entry in 'component_fluid_properties' must have type 'IdealGasFluidProperties'.");
+    _component_fps[i] = &single_phase_fp;
   }
 }
 
@@ -196,31 +197,36 @@ IdealGasMixtureFluidProperties::mixtureMolarMass(const std::vector<Real> & x) co
 
 template <typename CppType>
 CppType
-IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio_templ(const std::vector<CppType> & x) const
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio_templ(const CppType & p,
+                                                               const CppType & T,
+                                                               const std::vector<CppType> & x) const
 {
   mooseAssert(x.size() == _n_components, "Size mismatch");
 
   CppType cp_mix = 0, cv_mix = 0;
   for (const auto i : make_range(_n_components))
   {
-    // cp and cv are constant due to ideal gas assumption; any (p, T) is fine:
-    cp_mix += x[i] * _component_fps[i]->cp_from_p_T(0, 0);
-    cv_mix += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
+    cp_mix += x[i] * _component_fps[i]->cp_from_p_T(p, T);
+    cv_mix += x[i] * _component_fps[i]->cv_from_p_T(p, T);
   }
 
   return cp_mix / cv_mix;
 }
 
 ADReal
-IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const ADReal & p,
+                                                         const ADReal & T,
+                                                         const std::vector<ADReal> & x) const
 {
-  return mixtureSpecificHeatRatio_templ(x);
+  return mixtureSpecificHeatRatio_templ(p, T, x);
 }
 
 Real
-IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<Real> & x) const
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(Real p,
+                                                         Real T,
+                                                         const std::vector<Real> & x) const
 {
-  return mixtureSpecificHeatRatio_templ(x);
+  return mixtureSpecificHeatRatio_templ(p, T, x);
 }
 
 template <typename CppType>
@@ -307,20 +313,8 @@ IdealGasMixtureFluidProperties::e_from_p_rho_templ(const CppType & p,
                                                    const std::vector<CppType> & x_secondary) const
 {
   const auto x = secondaryToAllMassFractions(x_secondary);
-  mooseAssert(x.size() == _n_components, "Size mismatch");
-
-  const auto M = mixtureMolarMass(x);
-
-  CppType e_ref_sum = 0;
-  CppType cv_sum = 0;
-  for (const auto i : make_range(_n_components))
-  {
-    e_ref_sum += x[i] * _component_fps[i]->referenceSpecificInternalEnergy();
-    // cv is constant due to ideal gas assumption; any (p, T) is fine:
-    cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
-  }
-
-  return cv_sum * M * p / (_R * rho) + e_ref_sum;
+  const auto T = p * mixtureMolarMass(x) / (_R * rho);
+  return e_from_p_T(p, T, x_secondary);
 }
 
 ADReal
@@ -369,23 +363,60 @@ IdealGasMixtureFluidProperties::p_from_v_e(Real v,
 
 template <typename CppType>
 CppType
-IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & /*v*/,
+IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & v,
                                                  const CppType & e,
                                                  const std::vector<CppType> & x_secondary) const
 {
   const auto x = secondaryToAllMassFractions(x_secondary);
   mooseAssert(x.size() == _n_components, "Size mismatch");
+  const auto M = mixtureMolarMass(x);
 
-  CppType e_ref_sum = 0;
-  CppType cv_sum = 0;
-  for (const auto i : make_range(_n_components))
+  // Mixture internal energy and isochoric specific heat at a temperature. The internal energy of
+  // an ideal gas does not depend on pressure; the components are evaluated at the mixture pressure
+  // for that temperature and specific volume.
+  const auto e_cv_from_T = [this, &x, &v, &M](const CppType & T, CppType & e_T, CppType & cv_T)
   {
-    e_ref_sum += x[i] * _component_fps[i]->referenceSpecificInternalEnergy();
-    // cv is constant due to ideal gas assumption; any (p, T) is fine:
-    cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
-  }
+    const CppType p = _R * T / (M * v);
+    e_T = 0;
+    cv_T = 0;
+    for (const auto i : make_range(_n_components))
+    {
+      e_T += x[i] * _component_fps[i]->e_from_p_T(p, T);
+      cv_T += x[i] * _component_fps[i]->cv_from_p_T(p, T);
+    }
+  };
 
-  return (e - e_ref_sum) / cv_sum;
+  // The internal energies of IdealGasFluidProperties components are linear in temperature, so
+  // Newton's method converges in one iteration from any start temperature
+  const Real T0 = 300;
+
+  // The internal energy can be close to zero, where the convergence test of NewtonSolve, which is
+  // relative to the target value, would demand accuracy below roundoff. Solve e(T) + shift =
+  // e + shift instead, with the shift cv T - e(T) at T0. Both sides are then close to cv T, and the
+  // convergence test bounds the relative error in temperature.
+  CppType e0, cv0;
+  e_cv_from_T(CppType(T0), e0, cv0);
+  const Real shift = MetaPhysicL::raw_value(cv0) * T0 - MetaPhysicL::raw_value(e0);
+
+  const auto shifted_e = [&e_cv_from_T, shift](const CppType & /*e*/,
+                                               const CppType & T,
+                                               CppType & e_T,
+                                               CppType & de_T_de,
+                                               CppType & de_T_dT)
+  {
+    e_cv_from_T(T, e_T, de_T_dT);
+    e_T += shift;
+    de_T_de = 0;
+  };
+
+  // Relative tolerance of the Newton iteration, the default of the corresponding parameter of
+  // SinglePhaseFluidProperties. Newton's method applies one more update after it converges, so the
+  // temperature is accurate to roundoff.
+  const Real tolerance = 1e-8;
+  const CppType target = e + shift;
+  return FluidPropertiesUtils::NewtonSolve(
+             e, target, T0, tolerance, shifted_e, name() + "::T_from_v_e")
+      .first;
 }
 
 ADReal
@@ -406,7 +437,7 @@ IdealGasMixtureFluidProperties::T_from_v_e(Real v,
 
 template <typename CppType>
 CppType
-IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & /*p*/,
+IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & p,
                                                  const CppType & T,
                                                  const std::vector<CppType> & x_secondary) const
 {
@@ -414,7 +445,7 @@ IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & /*p*/,
 
   const auto x = secondaryToAllMassFractions(x_secondary);
   const auto M = mixtureMolarMass(x);
-  const auto gamma = mixtureSpecificHeatRatio(x);
+  const auto gamma = mixtureSpecificHeatRatio(p, T, x);
 
   return sqrt(gamma * _R * T / M);
 }
