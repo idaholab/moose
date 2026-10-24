@@ -136,9 +136,9 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
   Real c2 = _gamma * _R_specific * T;
   if (c2 < 0)
   {
-    c2 = 0;
     flagInvalidSolution(
         "Sound speed squared (gamma * R * T) is negative: c2 = " + Moose::stringify(c2) + ".");
+    c2 = 0;
   }
 
   return std::sqrt(c2);
@@ -153,9 +153,9 @@ IdealGasFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
   auto c2 = _gamma * _R_specific * T;
   if (MetaPhysicL::raw_value(c2) < 0)
   {
+    flagInvalidSolution("Sound speed squared (gamma * R * T) is negative: c2 = " +
+                        Moose::stringify(MetaPhysicL::raw_value(c2)) + ".");
     c2 = 0;
-    flagInvalidSolution(
-        "Sound speed squared (gamma * R * T) is negative: c2 = " + Moose::stringify(c2) + ".");
   }
 
   return sqrt(c2);
@@ -167,7 +167,20 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
-  c = std::sqrt(_gamma * _R_specific * T);
+  const Real c2 = _gamma * _R_specific * T;
+  if (c2 <= 0)
+  {
+    // Consistent with the value overload: the sound speed is set to zero and the state flagged
+    if (c2 < 0)
+      flagInvalidSolution(
+          "Sound speed squared (gamma * R * T) is negative: c2 = " + Moose::stringify(c2) + ".");
+    c = 0;
+    dc_dv = 0;
+    dc_de = 0;
+    return;
+  }
+
+  c = std::sqrt(c2);
 
   const Real dc_dT = 0.5 / c * _gamma * _R_specific;
   dc_dv = dc_dT * dT_dv;
@@ -641,7 +654,8 @@ IdealGasFluidProperties::g_from_v_e(Real v, Real e) const
   const Real p = p_from_v_e(v, e);
   const Real T = T_from_v_e(v, e);
 
-  return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0));
+  return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0)) +
+         _e_ref;
 }
 
 Real

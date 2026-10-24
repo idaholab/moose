@@ -63,6 +63,14 @@ TemperaturePressureFunctionFluidProperties::initialSetup()
   _initialized = true;
 }
 
+Real
+TemperaturePressureFunctionFluidProperties::fdStep(Real x, Real rel_step)
+{
+  // Relative step, falling back to the relative step itself as an absolute step when the
+  // argument is zero and a relative step would vanish
+  return x == 0 ? rel_step : rel_step * std::abs(x);
+}
+
 std::string
 TemperaturePressureFunctionFluidProperties::fluidName() const
 {
@@ -153,11 +161,10 @@ TemperaturePressureFunctionFluidProperties::cp_from_v_e(
 {
   cp = cp_from_v_e(v, e);
   // Using finite difference to get around difficulty of implementation
-  Real eps = 1e-10;
-  Real cp_pert = cp_from_v_e(v * (1 + eps), e);
-  dcp_dv = (cp_pert - cp) / eps / v;
-  cp_pert = cp_from_v_e(v, e * (1 + eps));
-  dcp_de = (cp_pert - cp) / eps / e;
+  const Real dv = fdStep(v, 1e-10);
+  dcp_dv = (cp_from_v_e(v + dv, e) - cp) / dv;
+  const Real de = fdStep(e, 1e-10);
+  dcp_de = (cp_from_v_e(v, e + de) - cp) / de;
 }
 
 Real
@@ -175,7 +182,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real v, Real e) const
     if (conversion_succeeded)
       return cv_from_p_T(p, T);
     else
-      mooseError("cp_from_v_e calculation failed.");
+      mooseError("cv_from_v_e calculation failed.");
   }
 }
 
@@ -199,21 +206,23 @@ TemperaturePressureFunctionFluidProperties::cv_from_v_e(
     Real dcv_dp, dcv_dT;
     cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     Real p1, T1;
-    p_T_from_v_e(v * (1 + 1e-6), e, p0, T0, p1, T1, conversion_succeeded);
-    Real dp_dv = (p1 - p) / (v * 1e-6);
-    Real dT_dv = (T1 - T) / (v * 1e-6);
+    const Real dv = fdStep(v, 1e-6);
+    p_T_from_v_e(v + dv, e, p0, T0, p1, T1, conversion_succeeded);
+    Real dp_dv = (p1 - p) / dv;
+    Real dT_dv = (T1 - T) / dv;
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     Real p2, T2;
-    p_T_from_v_e(v, e * (1 + 1e-6), p0, T0, p2, T2, conversion_succeeded);
-    Real dp_de = (p2 - p) / (e * 1e-6);
-    Real dT_de = (T2 - T) / (e * 1e-6);
+    const Real de = fdStep(e, 1e-6);
+    p_T_from_v_e(v, e + de, p0, T0, p2, T2, conversion_succeeded);
+    Real dp_de = (p2 - p) / de;
+    Real dT_de = (T2 - T) / de;
     if (!conversion_succeeded)
-      mooseError("cp_from_v_e and derivatives calculation failed.");
+      mooseError("cv_from_v_e and derivatives calculation failed.");
 
     dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
     dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
@@ -391,8 +400,8 @@ TemperaturePressureFunctionFluidProperties::e_from_p_T(
   else
   {
     e = e_from_p_T(pressure, temperature);
-    Real ep = e_from_p_T(pressure * (1 + 1e-8), temperature);
-    de_dp = (ep - e) / (pressure * 1e-8);
+    const Real dp = fdStep(pressure, 1e-8);
+    de_dp = (e_from_p_T(pressure + dp, temperature) - e) / dp;
     de_dT = cv_from_p_T(pressure, temperature);
   }
 }
@@ -429,7 +438,7 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real p, Real T) const
     rho_from_p_T(p, T, rho, drho_dp, drho_dT);
     // Wikipedia notation for thermal expansion / compressibility coefficients
     Real alpha = -drho_dT / rho;
-    Real beta = -drho_dp / rho;
+    Real beta = drho_dp / rho;
     if (!MooseUtils::absoluteFuzzyEqual(beta, 0))
       return _cv + MathUtils::pow(alpha, 2) * T / rho / beta;
     else
@@ -450,11 +459,10 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(
   if (_cv_is_constant)
   {
     cp = cp_from_p_T(pressure, temperature);
-    Real eps = 1e-8;
-    Real cp_1p = cp_from_p_T(pressure * (1 + eps), temperature);
-    Real cp_1T = cp_from_p_T(pressure, temperature * (1 + eps));
-    dcp_dp = (cp_1p - cp) / (pressure * eps);
-    dcp_dT = (cp_1T - cp) / (temperature * eps);
+    const Real dp = fdStep(pressure, 1e-8);
+    const Real dT = fdStep(temperature, 1e-8);
+    dcp_dp = (cp_from_p_T(pressure + dp, temperature) - cp) / dp;
+    dcp_dT = (cp_from_p_T(pressure, temperature + dT) - cp) / dT;
   }
   else
   {
@@ -477,7 +485,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real pressure, Real temp
     rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     // Wikipedia notation for thermal expansion / compressibility coefficients
     Real alpha = -drho_dT / rho;
-    Real beta = -drho_dp / rho;
+    Real beta = drho_dp / rho;
     if (!MooseUtils::absoluteFuzzyEqual(beta, 0))
       return cp_from_p_T(pressure, temperature) -
              MathUtils::pow(alpha, 2) * temperature / rho / beta;
@@ -499,11 +507,10 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(
   else
   {
     cv = cv_from_p_T(pressure, temperature);
-    Real eps = 1e-10;
-    Real cv_1p = cv_from_p_T(pressure * (1 + eps), temperature);
-    Real cv_1T = cv_from_p_T(pressure, temperature * (1 + eps));
-    dcv_dp = (cv_1p - cv) / (pressure * eps);
-    dcv_dT = (cv_1T - cv) / (temperature * eps);
+    const Real dp = fdStep(pressure, 1e-10);
+    const Real dT = fdStep(temperature, 1e-10);
+    dcv_dp = (cv_from_p_T(pressure + dp, temperature) - cv) / dp;
+    dcv_dT = (cv_from_p_T(pressure, temperature + dT) - cv) / dT;
   }
 }
 

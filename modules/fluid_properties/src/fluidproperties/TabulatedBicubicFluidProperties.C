@@ -282,18 +282,18 @@ TabulatedBicubicFluidProperties::checkNaNs(Real min_1,
   // replace nan values with pmax or pmin
   if (std::isnan(variable_1))
   {
-    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
+    if (_specific_volume[i] >= ((_v_min + _v_max) / 2))
       variable_1 = min_1;
-    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
+    else
       variable_1 = max_1;
     num_nans_1++;
   }
   // replace nan values with Tmax or Tmin
   if (std::isnan(variable_2))
   {
-    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
+    if (_specific_volume[i] >= ((_v_min + _v_max) / 2))
       variable_2 = max_2;
-    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
+    else
       variable_2 = min_2;
     num_nans_2++;
   }

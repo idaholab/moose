@@ -32,12 +32,19 @@ p_k = \psi_k p \,,
 
 where $p_k$ is the partial pressure of component $k$ and $p$ is the mixture pressure.
 
-Mixture mass-specific properties, such as specific volume $v$, specific internal
-energy $e$, and specific entropy $s$ are computed as mass-fraction-weighted
+Mixture mass-specific properties, such as specific volume $v$ and specific internal
+energy $e$ are computed as mass-fraction-weighted
 sums of the component properties evaluated at the mixture temperature and pressure:
 
 !equation
 z(p, T) = \sum\limits_k \xi_k z_k(p, T) \,.
+
+Mixture entropy is an exception to this rule, as the component entropies must be
+evaluated at their partial pressures, rather than the mixture pressure, in accordance
+with the Gibbs' theorem, which accounts for the entropy of mixing [!citep](cengel2008thermodynamics):
+
+!equation
+s(p, T) = \sum\limits_k \xi_k s_k(p_k, T) \,.
 
 Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are
 computed as molar-fraction-weighted
