@@ -74,12 +74,28 @@ test of the solver bounds the relative error in temperature even where the inter
 to zero. The pressure then follows from the ideal gas law, $p = R T / (M v)$, where $R$ is the
 universal gas constant.
 
-Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are
-computed as molar-fraction-weighted
-sums of the component properties evaluated at the mixture temperature and pressure:
+Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are combined
+from the component properties evaluated at the mixture temperature and pressure with the rule
+selected by [!param](/FluidProperties/IdealGasMixtureFluidProperties/transport_mixing_rule). The
+default, `mole_fraction_average`, computes molar-fraction-weighted sums:
 
 !equation
 y(p, T) = \sum\limits_k \psi_k y_k(p, T) \,.
+
+This average is a rough estimate when the molar masses of the components differ widely. For a
+mixture of N$_2$, O$_2$, H$_2$, and CO$_2$ with molar fractions 0.4, 0.1, 0.3, and 0.2 at 1000 K, for
+example, it gives a viscosity 15% below that of the rule of Wilke, which Cantera also uses. The
+option `wilke` applies the rule of Wilke to the viscosity and the rule of Mason and Saxena to the
+thermal conductivity [!citep](poling2001):
+
+!equation
+y(p, T) = \sum\limits_i \frac{\psi_i y_i}{\sum\limits_j \psi_j \phi_{ij}} \,, \qquad
+\phi_{ij} = \frac{\left[ 1 + (\mu_i / \mu_j)^{1/2} (M_j / M_i)^{1/4} \right]^2}
+  {\left[ 8 (1 + M_i / M_j) \right]^{1/2}} \,,
+
+where $M_i$ is the molar mass of component $i$. The rule of Mason and Saxena has the same
+interaction factors $\phi_{ij}$ when its ratio of translational thermal conductivities is written
+with viscosities and its empirical constant is one.
 
 The gas-mixture flow channels of the thermal hydraulics module do not yet accept
 [NASA7IdealGasFluidProperties.md] components.
@@ -89,3 +105,5 @@ The gas-mixture flow channels of the thermal hydraulics module do not yet accept
 !syntax inputs /FluidProperties/IdealGasMixtureFluidProperties
 
 !syntax children /FluidProperties/IdealGasMixtureFluidProperties
+
+!bibtex bibliography

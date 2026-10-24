@@ -294,3 +294,116 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7AdDerivatives)
   for (const Real T : {700.0, 1500.0})
     expectMixtureADDerivatives(air, 100000, T, 0.233);
 }
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, wilkeCantera)
+{
+  // Mixture-averaged viscosity of N2, O2, H2, and CO2 with mole fractions 0.4, 0.1, 0.3, and 0.2
+  // at 1000 K, computed with Cantera 3.2.0 from gri30.yaml, which applies the rule of Wilke to the
+  // species viscosities below. Components with these viscosities and the molar masses of Cantera
+  // reproduce it.
+  const std::vector<std::string> species = {"N2", "O2", "H2", "CO2"};
+  const std::vector<Real> molar_masses = {0.028014, 0.031998, 0.002016, 0.044009};
+  const std::vector<Real> viscosities = {
+      4.149814387750263e-05, 4.791169430728531e-05, 1.967636836557897e-05, 4.099132511194919e-05};
+  const std::vector<Real> x = {0.1343776247270284, 0.025398958508315132, 0.3696371577355955};
+  const Real mu_mix = 4.1726130812941113e-05;
+
+  std::vector<UserObjectName> component_names;
+  for (const auto i : index_range(species))
+  {
+    const std::string name = "wilke_" + species[i];
+    InputParameters params = _factory.getValidParams("IdealGasFluidProperties");
+    params.set<Real>("molar_mass") = molar_masses[i];
+    params.set<Real>("mu") = viscosities[i];
+    _fe_problem->addUserObject("IdealGasFluidProperties", name, params);
+    component_names.push_back(name);
+  }
+  InputParameters params = _factory.getValidParams("IdealGasMixtureFluidProperties");
+  params.set<std::vector<UserObjectName>>("component_fluid_properties") = component_names;
+  params.set<MooseEnum>("transport_mixing_rule") = "wilke";
+  _fe_problem->addUserObject("IdealGasMixtureFluidProperties", "wilke_mixture", params);
+  const auto & fp = _fe_problem->getUserObject<IdealGasMixtureFluidProperties>("wilke_mixture");
+
+  const Real p = 1e5;
+  const Real T = 1000;
+  REL_TEST(fp.mu_from_p_T(p, T, x), mu_mix, REL_TOL_SAVED_VALUE);
+
+  // A single component keeps its own viscosity
+  REL_TEST(fp.mu_from_p_T(p, T, {0, 0, 0}), viscosities[0], REL_TOL_SAVED_VALUE);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, masonSaxena)
+{
+  // The rule of Mason and Saxena for the thermal conductivity uses the interaction factors of the
+  // rule of Wilke for the viscosity, which depend on the component viscosities and molar masses
+  // only. Two consequences are checked: components whose thermal conductivities are proportional
+  // to their viscosities give a mixture thermal conductivity proportional to the mixture viscosity
+  // with the same factor, and components with equal viscosities and molar masses give the average
+  // of their thermal conductivities weighted by molar fraction.
+  const auto build_mixture = [this](const std::string & name,
+                                    const std::vector<Real> & molar_masses,
+                                    const std::vector<Real> & viscosities,
+                                    const std::vector<Real> & conductivities)
+  {
+    std::vector<UserObjectName> component_names;
+    for (const auto i : index_range(molar_masses))
+    {
+      const std::string component_name = name + "_" + std::to_string(i);
+      InputParameters params = _factory.getValidParams("IdealGasFluidProperties");
+      params.set<Real>("molar_mass") = molar_masses[i];
+      params.set<Real>("mu") = viscosities[i];
+      params.set<Real>("k") = conductivities[i];
+      _fe_problem->addUserObject("IdealGasFluidProperties", component_name, params);
+      component_names.push_back(component_name);
+    }
+    InputParameters params = _factory.getValidParams("IdealGasMixtureFluidProperties");
+    params.set<std::vector<UserObjectName>>("component_fluid_properties") = component_names;
+    params.set<MooseEnum>("transport_mixing_rule") = "wilke";
+    _fe_problem->addUserObject("IdealGasMixtureFluidProperties", name, params);
+    return &_fe_problem->getUserObject<IdealGasMixtureFluidProperties>(name);
+  };
+
+  const Real p = 1e5;
+  const Real T = 1000;
+
+  // Molar masses and viscosities of N2, O2, H2, and CO2 near 1000 K, and an arbitrary factor
+  const std::vector<Real> molar_masses = {0.028014, 0.031998, 0.002016, 0.044009};
+  const std::vector<Real> viscosities = {4.15e-05, 4.79e-05, 1.97e-05, 4.10e-05};
+  const Real factor = 1500;
+  std::vector<Real> conductivities;
+  for (const auto mu : viscosities)
+    conductivities.push_back(factor * mu);
+  const auto * proportional =
+      build_mixture("proportional", molar_masses, viscosities, conductivities);
+  const std::vector<Real> x = {0.13, 0.03, 0.37};
+  REL_TEST(proportional->k_from_p_T(p, T, x),
+           factor * proportional->mu_from_p_T(p, T, x),
+           REL_TOL_CONSISTENCY);
+
+  const auto * equal = build_mixture("equal", {0.028, 0.028}, {4e-5, 4e-5}, {0.06, 0.08});
+  REL_TEST(equal->k_from_p_T(p, T, {0.25}), 0.75 * 0.06 + 0.25 * 0.08, REL_TOL_CONSISTENCY);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, wilkeAdDerivatives)
+{
+  // Air, with the O2 mass fraction 0.233, and a fuel of H2O and H2, with the H2 mass fraction
+  // 0.05, near the temperature of a solid oxide cell. The viscosity of H2O comes from the IAPWS
+  // formulation and the others from kinetic theory.
+  const std::vector<std::pair<std::vector<std::string>, Real>> mixtures = {{{"N2", "O2"}, 0.233},
+                                                                           {{"H2O", "H2"}, 0.05}};
+  for (const auto & [species, x] : mixtures)
+  {
+    const std::string name = "wilke_" + species[0] + "_" + species[1];
+    const auto & fp = buildNASA7Mixture(species, name, "wilke");
+    expectADDerivatives([&fp](const auto & p, const auto & T, const auto & x)
+                        { return fp.mu_from_p_T(p, T, x); },
+                        1e5,
+                        1073.15,
+                        x);
+    expectADDerivatives([&fp](const auto & p, const auto & T, const auto & x)
+                        { return fp.k_from_p_T(p, T, x); },
+                        1e5,
+                        1073.15,
+                        x);
+  }
+}

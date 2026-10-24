@@ -12,6 +12,8 @@
 #include "SinglePhaseFluidProperties.h"
 #include "NewtonInversion.h"
 
+#include "libmesh/utility.h"
+
 #include <limits>
 
 registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
@@ -45,48 +47,13 @@ registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
     return z;                                                                                      \
   }
 
-/**
- * Defines a transport property y from (p,T)
- */
-#define define_transport_prop_from_p_T(prop)                                                       \
-  Real IdealGasMixtureFluidProperties::prop##_from_p_T(                                            \
-      Real p, Real T, const std::vector<Real> & x_secondary) const                                 \
-  {                                                                                                \
-    const auto x = secondaryToAllMassFractions(x_secondary);                                       \
-    const auto psi = molarFractionsFromMassFractions(x);                                           \
-    mooseAssert(psi.size() == _n_components, "Size mismatch");                                     \
-                                                                                                   \
-    Real y = 0;                                                                                    \
-    for (const auto i : make_range(_n_components))                                                 \
-      y += psi[i] * _component_fps[i]->prop##_from_p_T(p, T);                                      \
-                                                                                                   \
-    return y;                                                                                      \
-  }                                                                                                \
-  ADReal IdealGasMixtureFluidProperties::prop##_from_p_T(                                          \
-      const ADReal & p, const ADReal & T, const std::vector<ADReal> & x_secondary) const           \
-  {                                                                                                \
-    const auto x = secondaryToAllMassFractions(x_secondary);                                       \
-    const auto psi = molarFractionsFromMassFractions(x);                                           \
-    mooseAssert(psi.size() == _n_components, "Size mismatch");                                     \
-                                                                                                   \
-    ADReal y = 0;                                                                                  \
-    for (const auto i : make_range(_n_components))                                                 \
-      y += psi[i] * _component_fps[i]->prop##_from_p_T(p, T);                                      \
-                                                                                                   \
-    return y;                                                                                      \
-  }
-
 // clang-format off
 define_mass_specific_prop_from_p_T(v)
 define_mass_specific_prop_from_p_T(e)
 define_mass_specific_prop_from_p_T(cp)
 define_mass_specific_prop_from_p_T(cv)
 
-define_transport_prop_from_p_T(mu)
-define_transport_prop_from_p_T(k)
-
 #undef define_mass_specific_prop_from_p_T
-#undef define_transport_prop_from_p_T
 
 InputParameters IdealGasMixtureFluidProperties::validParams()
 // clang-format on
@@ -101,6 +68,14 @@ InputParameters IdealGasMixtureFluidProperties::validParams()
       "Name of component fluid properties user objects. The first entry should be the primary "
       "component.");
 
+  MooseEnum transport_mixing_rule("mole_fraction_average wilke", "mole_fraction_average");
+  params.addParam<MooseEnum>(
+      "transport_mixing_rule",
+      transport_mixing_rule,
+      "Rule that combines the viscosities and thermal conductivities of the components: their "
+      "average weighted by molar fraction, or the rule of Wilke for the viscosity and that of "
+      "Mason and Saxena for the thermal conductivity");
+
   return params;
 }
 
@@ -111,7 +86,9 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
     _n_components(_component_fp_names.size()),
     _n_secondary_components(_n_components - 1),
     _constant_specific_heats(true),
-    _T_newton_start(std::numeric_limits<Real>::max())
+    _T_newton_start(std::numeric_limits<Real>::max()),
+    _transport_mixing_rule(
+        getParam<MooseEnum>("transport_mixing_rule").getEnum<TransportMixingRule>())
 {
   if (_n_components == 0)
     mooseError("There must be at least one entry in 'component_fluid_properties'.");
@@ -134,6 +111,20 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
       _T_newton_start = std::min(_T_newton_start, ideal_gas_fp->newtonStartTemperature());
     }
     _component_fps[i] = &single_phase_fp;
+  }
+
+  if (_transport_mixing_rule == TransportMixingRule::WILKE)
+  {
+    _wilke_molar_mass_factor.assign(_n_components, std::vector<Real>(_n_components));
+    _wilke_normalization.assign(_n_components, std::vector<Real>(_n_components));
+    for (const auto i : make_range(_n_components))
+      for (const auto j : make_range(_n_components))
+      {
+        const Real M_i = _component_fps[i]->molarMass();
+        const Real M_j = _component_fps[j]->molarMass();
+        _wilke_molar_mass_factor[i][j] = std::pow(M_j / M_i, 0.25);
+        _wilke_normalization[i][j] = 1 / std::sqrt(8 * (1 + M_i / M_j));
+      }
   }
 }
 
@@ -515,4 +506,109 @@ IdealGasMixtureFluidProperties::c_from_p_T(Real p,
                                            const std::vector<Real> & x_secondary) const
 {
   return c_from_p_T_templ(p, T, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::mixTransportProperty(const std::vector<CppType> & psi,
+                                                     const std::vector<CppType> & y,
+                                                     const std::vector<CppType> & mu) const
+{
+  mooseAssert(psi.size() == _n_components && y.size() == _n_components, "Size mismatch");
+
+  CppType y_mix = 0;
+  if (_transport_mixing_rule == TransportMixingRule::MOLE_FRACTION_AVERAGE)
+  {
+    for (const auto i : make_range(_n_components))
+      y_mix += psi[i] * y[i];
+    return y_mix;
+  }
+
+  // y_mix = sum_i psi_i y_i / (sum_j psi_j phi_ij), with the interaction factor of Wilke
+  // phi_ij = [1 + (mu_i / mu_j)^(1/2) (M_j / M_i)^(1/4)]^2 / [8 (1 + M_i / M_j)]^(1/2)
+  // (Poling et al., 2001). The rule of Mason and Saxena for the thermal conductivity has the same
+  // factors when its ratio of translational thermal conductivities is written with viscosities,
+  // mu_i M_j / (mu_j M_i), and its empirical constant is one.
+  using std::sqrt;
+  mooseAssert(mu.size() == _n_components, "Size mismatch");
+  for (const auto i : make_range(_n_components))
+  {
+    CppType denominator = 0;
+    for (const auto j : make_range(_n_components))
+    {
+      const CppType phi_ij =
+          Utility::pow<2>(1 + sqrt(mu[i] / mu[j]) * _wilke_molar_mass_factor[i][j]) *
+          _wilke_normalization[i][j];
+      denominator += psi[j] * phi_ij;
+    }
+    y_mix += psi[i] * y[i] / denominator;
+  }
+  return y_mix;
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::mu_from_p_T_templ(const CppType & p,
+                                                  const CppType & T,
+                                                  const std::vector<CppType> & x_secondary) const
+{
+  const auto psi = molarFractionsFromMassFractions(secondaryToAllMassFractions(x_secondary));
+  std::vector<CppType> mu(_n_components);
+  for (const auto i : make_range(_n_components))
+    mu[i] = _component_fps[i]->mu_from_p_T(p, T);
+  return mixTransportProperty(psi, mu, mu);
+}
+
+ADReal
+IdealGasMixtureFluidProperties::mu_from_p_T(const ADReal & p,
+                                            const ADReal & T,
+                                            const std::vector<ADReal> & x_secondary) const
+{
+  return mu_from_p_T_templ(p, T, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::mu_from_p_T(Real p,
+                                            Real T,
+                                            const std::vector<Real> & x_secondary) const
+{
+  return mu_from_p_T_templ(p, T, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::k_from_p_T_templ(const CppType & p,
+                                                 const CppType & T,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  const auto psi = molarFractionsFromMassFractions(secondaryToAllMassFractions(x_secondary));
+  std::vector<CppType> k(_n_components);
+  for (const auto i : make_range(_n_components))
+    k[i] = _component_fps[i]->k_from_p_T(p, T);
+
+  // The rule of Mason and Saxena needs the viscosities of the components
+  std::vector<CppType> mu;
+  if (_transport_mixing_rule == TransportMixingRule::WILKE)
+  {
+    mu.resize(_n_components);
+    for (const auto i : make_range(_n_components))
+      mu[i] = _component_fps[i]->mu_from_p_T(p, T);
+  }
+  return mixTransportProperty(psi, k, mu);
+}
+
+ADReal
+IdealGasMixtureFluidProperties::k_from_p_T(const ADReal & p,
+                                           const ADReal & T,
+                                           const std::vector<ADReal> & x_secondary) const
+{
+  return k_from_p_T_templ(p, T, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::k_from_p_T(Real p,
+                                           Real T,
+                                           const std::vector<Real> & x_secondary) const
+{
+  return k_from_p_T_templ(p, T, x_secondary);
 }

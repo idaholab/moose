@@ -132,7 +132,36 @@ protected:
   /// energy when some components have temperature-dependent specific heats [K]
   Real _T_newton_start;
 
+  /// Rules that combine the viscosities and thermal conductivities of the components
+  enum class TransportMixingRule
+  {
+    MOLE_FRACTION_AVERAGE,
+    WILKE
+  };
+  /// Rule that combines the viscosities and thermal conductivities of the components
+  const TransportMixingRule _transport_mixing_rule;
+  ///@{ Factors (M_j / M_i)^(1/4) and [8 (1 + M_i / M_j)]^(-1/2) of the interaction factors of
+  /// Wilke, which depend on the molar masses M_i and M_j of components i and j only
+  std::vector<std::vector<Real>> _wilke_molar_mass_factor;
+  std::vector<std::vector<Real>> _wilke_normalization;
+  ///@}
+
 private:
+  /**
+   * Combines a transport property of the components with the transport mixing rule. The option
+   * wilke weights the component values with the interaction factors of Wilke, computed from the
+   * component viscosities and molar masses, which gives the rule of Wilke for the viscosity and
+   * that of Mason and Saxena for the thermal conductivity.
+   *
+   * @param[in] psi   Molar fractions of the components
+   * @param[in] y     Transport property of the components
+   * @param[in] mu    Viscosities of the components, used by the rule of Wilke only
+   */
+  template <typename CppType>
+  CppType mixTransportProperty(const std::vector<CppType> & psi,
+                               const std::vector<CppType> & y,
+                               const std::vector<CppType> & mu) const;
+
   /// Implements the deprecated mixtureSpecificHeatRatio(x)
   template <typename CppType>
   CppType constantSpecificHeatRatio(const std::vector<CppType> & x) const;
