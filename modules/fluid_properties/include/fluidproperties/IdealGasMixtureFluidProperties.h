@@ -71,6 +71,15 @@ public:
   Real mixtureSpecificHeatRatio(Real p, Real T, const std::vector<Real> & x) const;
 
   /**
+   * Computes the specific heat ratio of a mixture whose components all have constant specific
+   * heats. Deprecated: use the version with pressure and temperature arguments.
+   *
+   * @param[in] x   All mass fractions
+   */
+  ADReal mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const;
+  Real mixtureSpecificHeatRatio(const std::vector<Real> & x) const;
+
+  /**
    * Computes the mixture molar mass
    *
    * @param[in] x   All mass fractions
@@ -116,6 +125,15 @@ protected:
   /// Component fluid properties objects
   std::vector<const SinglePhaseFluidProperties *> _component_fps;
 
-  /// Temperature at which Newton's method starts to compute the temperature [K]
+  /// Whether all components have constant specific heats, so that the internal energy is linear
+  /// in temperature and the temperature follows explicitly from it
+  bool _constant_specific_heats;
+  /// Temperature at which Newton's method starts to compute the temperature from the internal
+  /// energy when some components have temperature-dependent specific heats [K]
   Real _T_newton_start;
+
+private:
+  /// Implements the deprecated mixtureSpecificHeatRatio(x)
+  template <typename CppType>
+  CppType constantSpecificHeatRatio(const std::vector<CppType> & x) const;
 };

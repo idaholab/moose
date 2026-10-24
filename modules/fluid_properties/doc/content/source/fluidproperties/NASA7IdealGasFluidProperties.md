@@ -55,8 +55,9 @@ expressions above, so they are exact.
 This class provides the properties from pressure and temperature, from temperature and specific
 volume, from specific volume and internal energy, and from pressure and enthalpy, as well as the
 pressure from enthalpy and entropy and the internal energy from pressure and density and from
-specific volume and enthalpy. It does not provide viscosity or thermal conductivity. Mixtures of
-these gases are described by [IdealGasMixtureFluidProperties.md].
+specific volume and enthalpy. It does not provide viscosity or thermal conductivity, so it cannot
+yet be used in flow models that need them, such as the gas-mixture flow channels of the thermal
+hydraulics module. Mixtures of these gases are described by [IdealGasMixtureFluidProperties.md].
 
 ## Temperature from internal energy or enthalpy
 

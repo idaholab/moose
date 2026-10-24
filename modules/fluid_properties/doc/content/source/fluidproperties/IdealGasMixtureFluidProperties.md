@@ -60,14 +60,16 @@ by solving
 !equation
 e = \sum\limits_k \xi_k e_k(T)
 
-for $T$ with the 1D Newton solver of the [fluid properties utilities](utils/FluidPropertiesUtils.md);
-the internal energy of an ideal gas does not depend on pressure. The equation is offset by a
-constant that makes both of its sides close to $c_v T$, where $c_v$ is the mixture isochoric
-specific heat, so that the convergence test of the solver bounds the relative error in temperature
-even where the internal energy is close to zero. With NASA 7-coefficient components, the iteration
-starts at the lowest upper end of the temperature ranges of their data, above the solution, for the
-reasons given in [NASA7IdealGasFluidProperties.md]. The pressure then follows from the ideal gas law,
-$p = R T / (M v)$, where $R$ is the universal gas constant.
+for $T$; the internal energy of an ideal gas does not depend on pressure. When all components have
+constant specific heats, the internal energy is linear in temperature and $T$ follows explicitly.
+With NASA 7-coefficient components, $T$ is found with the 1D Newton solver of the
+[fluid properties utilities](utils/FluidPropertiesUtils.md), starting at the lowest upper end of the
+temperature ranges of their data, above the solution, for the reasons given in
+[NASA7IdealGasFluidProperties.md]. The equation is offset by a constant that makes both of its
+sides close to $c_v T$, where $c_v$ is the mixture isochoric specific heat, so that the convergence
+test of the solver bounds the relative error in temperature even where the internal energy is close
+to zero. The pressure then follows from the ideal gas law, $p = R T / (M v)$, where $R$ is the
+universal gas constant.
 
 Transport properties such as dynamic viscosity $\mu$ and thermal conductivity $k$ are
 computed as molar-fraction-weighted
@@ -75,6 +77,10 @@ sums of the component properties evaluated at the mixture temperature and pressu
 
 !equation
 y(p, T) = \sum\limits_k \psi_k y_k(p, T) \,.
+
+[NASA7IdealGasFluidProperties.md] does not yet provide viscosity or thermal conductivity, so these
+properties are not yet available for mixtures with its components, and neither are flow models that
+need them, such as the gas-mixture flow channels of the thermal hydraulics module.
 
 !syntax parameters /FluidProperties/IdealGasMixtureFluidProperties
 

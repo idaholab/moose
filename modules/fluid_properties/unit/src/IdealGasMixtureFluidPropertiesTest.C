@@ -89,60 +89,94 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   REL_TEST(v, v_gold, REL_TOL_SAVED_VALUE);
 }
 
+namespace
+{
+/**
+ * Compares the derivatives of the automatic differentiation version of a mixture property
+ * f(a, b, x) with respect to a, b, and the secondary mass fraction x with central differences of
+ * its Real version
+ */
+template <typename F>
+void
+expectADDerivatives(const F & f, const Real a, const Real b, const Real x)
+{
+  DNDerivativeType da, db, dx;
+  Moose::derivInsert(da, 0, 1);
+  Moose::derivInsert(db, 1, 1);
+  Moose::derivInsert(dx, 2, 1);
+  const ADReal f_ad = f(ADReal(a, da), ADReal(b, db), std::vector<ADReal>{ADReal(x, dx)});
+  REL_TEST(f_ad, f(a, b, std::vector<Real>{x}), REL_TOL_CONSISTENCY);
+
+  const Real ha = REL_PERTURBATION * a;
+  const Real hb = REL_PERTURBATION * b;
+  const Real hx = REL_PERTURBATION * x;
+  REL_TEST(f_ad.derivatives()[0],
+           (f(a + ha, b, std::vector<Real>{x}) - f(a - ha, b, std::vector<Real>{x})) / (2 * ha),
+           REL_TOL_DERIVATIVE);
+  REL_TEST(f_ad.derivatives()[1],
+           (f(a, b + hb, std::vector<Real>{x}) - f(a, b - hb, std::vector<Real>{x})) / (2 * hb),
+           REL_TOL_DERIVATIVE);
+  REL_TEST(f_ad.derivatives()[2],
+           (f(a, b, std::vector<Real>{x + hx}) - f(a, b, std::vector<Real>{x - hx})) / (2 * hx),
+           REL_TOL_DERIVATIVE);
+}
+
+/**
+ * Checks the automatic differentiation derivatives of the temperature and pressure from (v, e), of
+ * the internal energy from (p, rho), and of the sound speed from (p, T) of a two-component mixture
+ * at a pressure, temperature, and secondary mass fraction
+ */
+void
+expectMixtureADDerivatives(const IdealGasMixtureFluidProperties & fp,
+                           const Real p,
+                           const Real T,
+                           const Real x)
+{
+  const Real v = fp.v_from_p_T(p, T, {x});
+  const Real e = fp.e_from_p_T(p, T, {x});
+
+  expectADDerivatives([&fp](const auto & v, const auto & e, const auto & x)
+                      { return fp.T_from_v_e(v, e, x); },
+                      v,
+                      e,
+                      x);
+  expectADDerivatives([&fp](const auto & v, const auto & e, const auto & x)
+                      { return fp.p_from_v_e(v, e, x); },
+                      v,
+                      e,
+                      x);
+  expectADDerivatives([&fp](const auto & p, const auto & rho, const auto & x)
+                      { return fp.e_from_p_rho(p, rho, x); },
+                      p,
+                      1 / v,
+                      x);
+  expectADDerivatives([&fp](const auto & p, const auto & T, const auto & x)
+                      { return fp.c_from_p_T(p, T, x); },
+                      p,
+                      T,
+                      x);
+}
+}
+
 TEST_F(IdealGasMixtureFluidPropertiesTest, adDerivatives)
 {
-  // Compares the derivatives of the automatic differentiation version of a property f(a, b, x)
-  // with respect to a, b, and the secondary mass fraction x with central differences of its Real
-  // version
-  const auto check = [](const auto & f, const Real a, const Real b, const Real x)
-  {
-    DNDerivativeType da, db, dx;
-    Moose::derivInsert(da, 0, 1);
-    Moose::derivInsert(db, 1, 1);
-    Moose::derivInsert(dx, 2, 1);
-    const ADReal f_ad = f(ADReal(a, da), ADReal(b, db), std::vector<ADReal>{ADReal(x, dx)});
-    REL_TEST(f_ad, f(a, b, std::vector<Real>{x}), REL_TOL_CONSISTENCY);
+  expectMixtureADDerivatives(*_fp_mix, 100000, 400, 0.7);
+}
 
-    const Real ha = REL_PERTURBATION * a;
-    const Real hb = REL_PERTURBATION * b;
-    const Real hx = REL_PERTURBATION * x;
-    REL_TEST(f_ad.derivatives()[0],
-             (f(a + ha, b, std::vector<Real>{x}) - f(a - ha, b, std::vector<Real>{x})) / (2 * ha),
-             REL_TOL_DERIVATIVE);
-    REL_TEST(f_ad.derivatives()[1],
-             (f(a, b + hb, std::vector<Real>{x}) - f(a, b - hb, std::vector<Real>{x})) / (2 * hb),
-             REL_TOL_DERIVATIVE);
-    REL_TEST(f_ad.derivatives()[2],
-             (f(a, b, std::vector<Real>{x + hx}) - f(a, b, std::vector<Real>{x - hx})) / (2 * hx),
-             REL_TOL_DERIVATIVE);
-  };
+TEST_F(IdealGasMixtureFluidPropertiesTest, deprecatedSpecificHeatRatio)
+{
+  // The deprecated specific heat ratio without pressure and temperature arguments still works for
+  // components with constant specific heats
+  const std::vector<Real> x = {0.3, 0.7};
+  REL_TEST(_fp_mix->mixtureSpecificHeatRatio(x),
+           _fp_mix->mixtureSpecificHeatRatio(100000.0, 400.0, x),
+           REL_TOL_CONSISTENCY);
 
-  const Real p = 100000;
-  const Real T = 400;
-  const Real x = 0.7;
-  const Real v = _fp_mix->v_from_p_T(p, T, {x});
-  const Real e = _fp_mix->e_from_p_T(p, T, {x});
-
-  check([this](const auto & v, const auto & e, const auto & x)
-        { return _fp_mix->T_from_v_e(v, e, x); },
-        v,
-        e,
-        x);
-  check([this](const auto & v, const auto & e, const auto & x)
-        { return _fp_mix->p_from_v_e(v, e, x); },
-        v,
-        e,
-        x);
-  check([this](const auto & p, const auto & rho, const auto & x)
-        { return _fp_mix->e_from_p_rho(p, rho, x); },
-        p,
-        1 / v,
-        x);
-  check([this](const auto & p, const auto & T, const auto & x)
-        { return _fp_mix->c_from_p_T(p, T, x); },
-        p,
-        T,
-        x);
+  // It reports an error for components with temperature-dependent specific heats
+  const std::vector<std::string> species = {"N2", "O2"};
+  const std::string name = "air";
+  const auto & air = buildNASA7Mixture(species, name);
+  EXPECT_THROW(air.mixtureSpecificHeatRatio(std::vector<Real>{0.767, 0.233}), std::exception);
 }
 
 TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7Cantera)
@@ -247,4 +281,16 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7Inversion)
   }
   sweep(
       _fe_problem->getUserObject<IdealGasMixtureFluidProperties>("nitrogen_co2"), {0.3}, 100, 5250);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7AdDerivatives)
+{
+  // Air, with the O2 mass fraction 0.233, on each side of the midpoint temperature of the data. The
+  // temperature from (v, e) comes from a nonlinear Newton solve here, whose derivatives with
+  // respect to the internal energy and the mass fraction the automatic differentiation must carry.
+  const std::vector<std::string> species = {"N2", "O2"};
+  const std::string name = "air";
+  const auto & air = buildNASA7Mixture(species, name);
+  for (const Real T : {700.0, 1500.0})
+    expectMixtureADDerivatives(air, 100000, T, 0.233);
 }

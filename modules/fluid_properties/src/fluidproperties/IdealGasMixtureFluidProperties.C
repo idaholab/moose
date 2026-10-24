@@ -109,18 +109,16 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
     NaNInterface(this),
     _component_fp_names(getParam<std::vector<UserObjectName>>("component_fluid_properties")),
     _n_components(_component_fp_names.size()),
-    _n_secondary_components(_n_components - 1)
+    _n_secondary_components(_n_components - 1),
+    _constant_specific_heats(true),
+    _T_newton_start(std::numeric_limits<Real>::max())
 {
   if (_n_components == 0)
     mooseError("There must be at least one entry in 'component_fluid_properties'.");
 
-  // Newton's method starts above the solution, at the lowest upper end of the temperature ranges
-  // of the NASA 7-coefficient components, because their internal energies are convex in temperature
-  // over nearly all of these ranges (see NASA7IdealGasFluidProperties). The internal energies of
-  // IdealGasFluidProperties components are linear in temperature, so without NASA 7-coefficient
-  // components Newton's method converges in one iteration from any start temperature.
-  _T_newton_start = std::numeric_limits<Real>::max();
-
+  // With NASA 7-coefficient components, Newton's method starts above the solution, at the lowest
+  // upper end of the temperature ranges of their data, because their internal energies are convex
+  // in temperature over nearly all of these ranges (see NASA7IdealGasFluidProperties)
   _component_fps.resize(_n_components);
   for (const auto i : make_range(_n_components))
   {
@@ -128,16 +126,15 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
         getUserObjectByName<SinglePhaseFluidProperties>(_component_fp_names[i]);
     const auto nasa7_fp = dynamic_cast<const NASA7IdealGasFluidProperties *>(&single_phase_fp);
     if (nasa7_fp)
+    {
+      _constant_specific_heats = false;
       _T_newton_start = std::min(_T_newton_start, nasa7_fp->maximumTemperature());
+    }
     else if (!dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp))
       mooseError("Each entry in 'component_fluid_properties' must have type "
                  "'IdealGasFluidProperties' or 'NASA7IdealGasFluidProperties'.");
     _component_fps[i] = &single_phase_fp;
   }
-
-  // Any start temperature works without NASA 7-coefficient components
-  if (_T_newton_start == std::numeric_limits<Real>::max())
-    _T_newton_start = 300;
 }
 
 const SinglePhaseFluidProperties &
@@ -244,6 +241,32 @@ IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(Real p,
                                                          const std::vector<Real> & x) const
 {
   return mixtureSpecificHeatRatio_templ(p, T, x);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::constantSpecificHeatRatio(const std::vector<CppType> & x) const
+{
+  mooseDoOnce(mooseDeprecated("mixtureSpecificHeatRatio(x) is deprecated; use "
+                              "mixtureSpecificHeatRatio(p, T, x) instead."));
+  if (!_constant_specific_heats)
+    mooseError("mixtureSpecificHeatRatio(x) requires components with constant specific heats; use "
+               "mixtureSpecificHeatRatio(p, T, x) instead.");
+
+  // The specific heats are constant, so any pressure and temperature give the same ratio
+  return mixtureSpecificHeatRatio_templ(CppType(0), CppType(0), x);
+}
+
+ADReal
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const
+{
+  return constantSpecificHeatRatio(x);
+}
+
+Real
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<Real> & x) const
+{
+  return constantSpecificHeatRatio(x);
 }
 
 template <typename CppType>
@@ -380,20 +403,33 @@ IdealGasMixtureFluidProperties::p_from_v_e(Real v,
 
 template <typename CppType>
 CppType
-IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & v,
+IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & /*v*/,
                                                  const CppType & e,
                                                  const std::vector<CppType> & x_secondary) const
 {
   const auto x = secondaryToAllMassFractions(x_secondary);
   mooseAssert(x.size() == _n_components, "Size mismatch");
-  const auto M = mixtureMolarMass(x);
 
-  // Mixture internal energy and isochoric specific heat at a temperature. The internal energy of
-  // an ideal gas does not depend on pressure; the components are evaluated at the mixture pressure
-  // for that temperature and specific volume.
-  const auto e_cv_from_T = [this, &x, &v, &M](const CppType & T, CppType & e_T, CppType & cv_T)
+  // The internal energy and specific heats of an ideal gas do not depend on pressure, so the
+  // components are evaluated at zero pressure
+  if (_constant_specific_heats)
   {
-    const CppType p = _R * T / (M * v);
+    // The internal energy of each component is linear in temperature, e_k(T) = e_k(0) + cv_k T, so
+    // the temperature follows explicitly
+    CppType e0_sum = 0;
+    CppType cv_sum = 0;
+    for (const auto i : make_range(_n_components))
+    {
+      e0_sum += x[i] * _component_fps[i]->e_from_p_T(0.0, 0.0);
+      cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0.0, 0.0);
+    }
+    return (e - e0_sum) / cv_sum;
+  }
+
+  // Mixture internal energy and isochoric specific heat at a temperature
+  const auto e_cv_from_T = [this, &x](const CppType & T, CppType & e_T, CppType & cv_T)
+  {
+    const CppType p = 0;
     e_T = 0;
     cv_T = 0;
     for (const auto i : make_range(_n_components))
