@@ -103,7 +103,8 @@ described with the [gas transport utilities](utils/FluidPropertiesUtils.md#gas-t
 available for components that provide these parameters through `IdealGasMixtureInterface`, such as
 [NASA7IdealGasFluidProperties.md], but not for [IdealGasFluidProperties.md].
 
-The gas-mixture flow channels of the thermal hydraulics module do not yet accept
+In the gas-mixture flow channels of the thermal hydraulics module, the material
+`FluidPropertiesBinaryDiffusionCoefMaterial` provides this coefficient for mixtures of
 [NASA7IdealGasFluidProperties.md] components.
 
 !syntax parameters /FluidProperties/IdealGasMixtureFluidProperties
