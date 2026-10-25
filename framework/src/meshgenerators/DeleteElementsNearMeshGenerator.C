@@ -10,6 +10,7 @@
 #include "DeleteElementsNearMeshGenerator.h"
 #include "SetupQuadratureAction.h"
 #include "KDTree.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/type_vector.h"
 #include "libmesh/point.h"
