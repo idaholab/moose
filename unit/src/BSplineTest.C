@@ -134,3 +134,27 @@ TEST(BSplineTest, CP_MakerDegree4Test)
   EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, libMesh::TOLERANCE);
   EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, libMesh::TOLERANCE);
 }
+
+TEST(BSplineTest, TooFewControlPointsError)
+{
+  // A single control point per half gives 2 control points, too few for a degree 4 spline
+  const libMesh::Point start(1, 2, 1);
+  const libMesh::Point end(2, 1, 0);
+  const libMesh::RealVectorValue direction1(1, 0, 0);
+  const libMesh::RealVectorValue direction2(0, 1, 0);
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::BSpline b_spline(4, start, end, direction1, direction2, 1, 0.5, "my_curve");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_STREQ(
+              e.what(),
+              "my_curve: Number of control points must be greater than or equal to degree + 1!");
+          throw;
+        }
+      },
+      std::exception);
+}

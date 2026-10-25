@@ -122,6 +122,38 @@ TEST(SplineUtilsTest, ClosestPoint3DTest2)
   EXPECT_NEAR((expected_points.second - evaluated_points.second).norm(), 0, libMesh::TOLERANCE);
 }
 
+TEST(SplineUtilsTest, ClosestPointAlignedTest)
+{
+  // Collinear lines have infinitely many closest points, the midpoint is used
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 2, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  const auto evaluated_points = SplineUtils::closestPoints(start, end, direction, direction);
+  const libMesh::Point expected_point(2, 2, 0);
+  EXPECT_NEAR((expected_point - evaluated_points.first).norm(), 0, libMesh::TOLERANCE);
+  EXPECT_NEAR((expected_point - evaluated_points.second).norm(), 0, libMesh::TOLERANCE);
+}
+
+TEST(SplineUtilsTest, ClosestPointParallelError)
+{
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 3, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  EXPECT_THROW(
+      {
+        try
+        {
+          SplineUtils::closestPoints(start, end, direction, direction);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_STREQ(e.what(), "Lines are parallel! Infinitely many closest points exist.");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST(SplineUtilsTest, CPsAlongLineTest)
 {
   const libMesh::Point start(1, 2, 0);
@@ -167,6 +199,26 @@ TEST(SplineUtilsTest, TrivialCPsTest)
                                            libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0)};
+  for (const auto i : index_range(expected_cps))
+    EXPECT_NEAR((expected_cps[i] - evaluated_cps[i]).norm(), 0, libMesh::TOLERANCE);
+}
+
+TEST(SplineUtilsTest, StraightCPsTest)
+{
+  // Aligned start and end directions along the segment produce a straight spline rather than
+  // falling back to circular control points
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 2, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  const unsigned int cps_per_half = 2;
+  const auto evaluated_cps = SplineUtils::bSplineControlPoints(
+      start, end, direction, direction, cps_per_half, /*sharpness*/ 1, "test");
+
+  const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
+                                           libMesh::Point(2, 2, 0),
+                                           libMesh::Point(2, 2, 0),
+                                           libMesh::Point(3, 2, 0)};
+  ASSERT_EQ(evaluated_cps.size(), expected_cps.size());
   for (const auto i : index_range(expected_cps))
     EXPECT_NEAR((expected_cps[i] - evaluated_cps[i]).norm(), 0, libMesh::TOLERANCE);
 }
