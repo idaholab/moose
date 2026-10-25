@@ -10,6 +10,17 @@
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
     issues = '#13276 #3554 #5634'
   []
+  [swap_by_name]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = "Mesh/extrude/subdomain_swaps='0 first; 0 second; 0 1' --mesh-only swap_by_name_in.e"
+    exodiff = 'swap_by_name_in.e'
+    exodiff_opts = '-match_by_name -pedantic'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh and swap subdomains using subdomain names, creating new subdomains as needed'
+    issues = '#20976'
+  []
   [test_flip]
     type = 'Exodiff'
     input = 'gen_extrude.i'

@@ -51,6 +51,16 @@
       detail = 'with multiple boundary layers,'
       recover = false
     []
+    [named_block_boundary_layer]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_named_BL_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/boundary_layer_width=1 ActionComponents/cyl/block=pipe --mesh-only 3D_cylinder_named_BL_in.e'
+      exodiff_opts = '-pedantic'
+      detail = 'with a named block and a boundary layer in a separate block,'
+      issues = '#20976'
+      recover = false
+    []
     [radial_rings]
       type = Exodiff
       input = '3D_cylinder.i'
