@@ -343,7 +343,7 @@ point (58.8124, 0.50384, 74.7838).
 All other parameters are the same in the three runs. The results are shown in
 [fracture_3d_vw_comparison] and [table:vw_results].
 
-!media porous_flow/fracture_3d_vw_comparison.png
+!media large_media/porous_flow/examples/multiapp_flow/fracture_3d_vw_comparison.png
        id=fracture_3d_vw_comparison
        style=width:100%;margin:auto;
        caption=Injection pressure, fracture aperture at the injection point and production temperature for the 3D model, with and without Vinsome-Westerveld thermal opening.
