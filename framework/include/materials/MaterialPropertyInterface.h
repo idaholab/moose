@@ -676,6 +676,12 @@ protected:
   void checkExecutionStage();
 
   /**
+   * @returns True if all materials have been added (the task associated with adding them is
+   * complete)
+   */
+  bool materialsAdded() const;
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -867,6 +873,13 @@ template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericOrZeroMaterialPropertyByName(const std::string & prop_name)
 {
+  // Whether the property is declared is decided right here, so a material declaring it must
+  // already exist, or this would silently return zero instead of the declared property
+  mooseAssert(materialsAdded(),
+              "getGenericOrZeroMaterialPropertyByName() was called for '" + prop_name +
+                  "' before Materials have been constructed. A Material declaring it would be "
+                  "ignored and zero returned.");
+
   // if found return the requested property
   if (hasGenericMaterialPropertyByName<T, is_ad>(prop_name))
     return getGenericMaterialPropertyByName<T, is_ad>(prop_name);
