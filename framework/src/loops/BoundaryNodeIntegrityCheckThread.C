@@ -62,33 +62,24 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
     if (uo->checkVariableBoundaryIntegrity())
       boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*node), bnd_name);
 
-  // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
-  // boundaries they couple across, but their coupled variables are only required to be defined
-  // on the mortar segment mesh, not on every node of those boundaries.
-  auto check_aux_from_the_warehouse = [node, boundary_id, &bnd_name, this](auto & system_type)
-  {
-    std::vector<AuxKernelBase *> auxkernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>(system_type)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribAuxKernelType>(AuxKernelType::Nodal | AuxKernelType::Elemental)
-        .template condition<AttribBoundaries>(boundary_id, true)
-        .queryInto(auxkernels);
-    if (auxkernels.empty())
-      return;
-
-    for (const auto & aux : auxkernels)
-      // Skip if this object uses geometric search because coupled variables may be defined on
-      // paired boundaries instead of the boundary this node is on
-      if (!aux->requiresGeometricSearch() && aux->checkVariableBoundaryIntegrity())
-        boundaryIntegrityCheckError(*aux, aux->checkAllVariables(*node), bnd_name);
-  };
-
-  // AttribSystem groups AuxKernel/VectorAuxKernel/ArrayAuxKernel under the same "AuxKernel" tag
-  // (they execute through the same AuxiliarySystem machinery), so one call already covers all
-  // three value types here since we only ever query into the common AuxKernelBase type.
-  check_aux_from_the_warehouse("AuxKernel");
+  // AttribSystem groups AuxKernel/VectorAuxKernel/ArrayAuxKernel under the same "AuxKernel" tag,
+  // so one query into the common AuxKernelBase type covers all three value types. Mortar
+  // AuxKernels are excluded: their boundaryIDs() report the primary/secondary boundaries they
+  // couple across, but their coupled variables are only required to be defined on the mortar
+  // segment mesh, not on every node of those boundaries.
+  std::vector<AuxKernelBase *> auxkernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("AuxKernel")
+      .condition<AttribThread>(_tid)
+      .condition<AttribAuxKernelType>(AuxKernelType::Nodal | AuxKernelType::Elemental)
+      .condition<AttribBoundaries>(boundary_id, true)
+      .queryInto(auxkernels);
+  for (const auto & aux : auxkernels)
+    // Skip if this object uses geometric search because coupled variables may be defined on
+    // paired boundaries instead of the boundary this node is on
+    if (!aux->requiresGeometricSearch() && aux->checkVariableBoundaryIntegrity())
+      boundaryIntegrityCheckError(*aux, aux->checkAllVariables(*node), bnd_name);
 }
 
 void
