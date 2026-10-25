@@ -937,8 +937,8 @@ AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
   // The non-emptiness checks span every thread's copy of each kernel (no AttribThread condition),
   // so they must stay unsorted: sorting would run dependency resolution across per-thread
   // duplicates of the same kernel, which can falsely detect a cycle.
-  const TheWarehouse::Query block_query =
-      query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
+  const TheWarehouse::Query block_query = query.clone().condition<AttribBoundaries>(
+      Moose::ANY_BOUNDARY_ID, AttribBoundaries::Restriction::UnrestrictedOnly);
   std::vector<AuxKernelType *> block_auxs;
   block_query.clone().queryIntoUnsorted(block_auxs);
 
@@ -969,7 +969,10 @@ AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
 
   // Boundary Elemental AuxKernels
   std::vector<AuxKernelType *> boundary_auxs;
-  query.clone().condition<AttribAuxKernelBoundaryRestricted>(true).queryIntoUnsorted(boundary_auxs);
+  query.clone()
+      .condition<AttribBoundaries>(Moose::ANY_BOUNDARY_ID,
+                                   AttribBoundaries::Restriction::RestrictedOnly)
+      .queryIntoUnsorted(boundary_auxs);
 
   if (boundary_auxs.size())
   {
@@ -1010,8 +1013,8 @@ AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
   // The non-emptiness checks span every thread's copy of each kernel (no AttribThread condition),
   // so they must stay unsorted: sorting would run dependency resolution across per-thread
   // duplicates of the same kernel, which can falsely detect a cycle.
-  const TheWarehouse::Query block_query =
-      query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
+  const TheWarehouse::Query block_query = query.clone().condition<AttribBoundaries>(
+      Moose::ANY_BOUNDARY_ID, AttribBoundaries::Restriction::UnrestrictedOnly);
   std::vector<AuxKernelType *> block_auxs;
   block_query.clone().queryIntoUnsorted(block_auxs);
 
@@ -1031,7 +1034,10 @@ AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
 
   // Boundary Nodal AuxKernels
   std::vector<AuxKernelType *> boundary_auxs;
-  query.clone().condition<AttribAuxKernelBoundaryRestricted>(true).queryIntoUnsorted(boundary_auxs);
+  query.clone()
+      .condition<AttribBoundaries>(Moose::ANY_BOUNDARY_ID,
+                                   AttribBoundaries::Restriction::RestrictedOnly)
+      .queryIntoUnsorted(boundary_auxs);
 
   if (boundary_auxs.size())
   {

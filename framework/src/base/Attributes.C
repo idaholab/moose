@@ -243,10 +243,18 @@ AttribBoundaries::isMatch(const Attribute & other) const
   if (!a || a->_vals.size() < 1)
     return false;
 
+  // An object that is not boundary restricted stores only Moose::ANY_BOUNDARY_ID
+  const bool unrestricted =
+      std::find(_vals.begin(), _vals.end(), Moose::ANY_BOUNDARY_ID) != _vals.end();
+  if (a->_restriction == Restriction::UnrestrictedOnly)
+    return unrestricted;
+  if (a->_restriction == Restriction::RestrictedOnly && unrestricted)
+    return false;
+
   // return true if a single tag matches between the two attribute objects
   for (auto val : _vals)
   {
-    if (!a->_must_be_restricted && (val == Moose::ANY_BOUNDARY_ID))
+    if (a->_restriction == Restriction::Any && (val == Moose::ANY_BOUNDARY_ID))
       return true;
     if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
       return true;
@@ -260,7 +268,7 @@ bool
 AttribBoundaries::isEqual(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribBoundaries *>(&other);
-  if (!a || a->_vals.size() != _vals.size())
+  if (!a || a->_vals.size() != _vals.size() || a->_restriction != _restriction)
     return false;
 
   for (size_t i = 0; i < a->_vals.size(); i++)
@@ -353,24 +361,6 @@ AttribAuxKernelType::isEqual(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribAuxKernelType *>(&other);
   return a && (a->_val == _val);
-}
-
-void
-AttribAuxKernelBoundaryRestricted::initFrom(const MooseObject * obj)
-{
-  const auto * bnd = dynamic_cast<const BoundaryRestrictable *>(obj);
-  _val = bnd && bnd->boundaryRestricted();
-}
-bool
-AttribAuxKernelBoundaryRestricted::isMatch(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribAuxKernelBoundaryRestricted *>(&other);
-  return a && (a->_val == _val);
-}
-bool
-AttribAuxKernelBoundaryRestricted::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
 }
 
 void

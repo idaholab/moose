@@ -222,24 +222,40 @@ private:
 class AttribBoundaries : public Attribute
 {
 public:
+  /// Which boundary restriction a query accepts, on top of matching its boundary IDs
+  enum class Restriction
+  {
+    /// Objects restricted to one of the query boundaries, and unrestricted objects
+    Any,
+    /// Only objects restricted to one of the query boundaries. With Moose::ANY_BOUNDARY_ID as the
+    /// query boundary, every boundary-restricted object
+    RestrictedOnly,
+    /// Only objects that are not boundary restricted, whatever the query boundaries
+    UnrestrictedOnly
+  };
+
   typedef std::tuple<BoundaryID, bool> Key;
   void setFrom(Key k)
   {
     _vals.clear();
     _vals.push_back(std::get<0>(k));
-    _must_be_restricted = std::get<1>(k);
+    _restriction = toRestriction(std::get<1>(k));
   }
 
   AttribBoundaries(TheWarehouse & w) : Attribute(w, "boundaries") {}
   AttribBoundaries(TheWarehouse & w, BoundaryID id, bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : AttribBoundaries(w, id, toRestriction(must_be_restricted))
+  {
+  }
+  AttribBoundaries(TheWarehouse & w, BoundaryID id, Restriction restriction)
+    : Attribute(w, "boundaries"), _restriction(restriction)
   {
     _vals.push_back(id);
   }
   AttribBoundaries(TheWarehouse & w,
                    const std::set<BoundaryID> & ids,
                    bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : Attribute(w, "boundaries"), _restriction(toRestriction(must_be_restricted))
   {
     for (auto id : ids)
       _vals.push_back(id);
@@ -247,7 +263,7 @@ public:
   AttribBoundaries(TheWarehouse & w,
                    const std::vector<BoundaryID> & ids,
                    bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : Attribute(w, "boundaries"), _restriction(toRestriction(must_be_restricted))
   {
     _vals.reserve(ids.size());
     for (auto id : ids)
@@ -256,12 +272,17 @@ public:
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_vals, _must_be_restricted);
+  hashfunc(_vals, static_cast<int>(_restriction));
   clonefunc(AttribBoundaries);
 
 private:
+  static Restriction toRestriction(bool must_be_restricted)
+  {
+    return must_be_restricted ? Restriction::RestrictedOnly : Restriction::Any;
+  }
+
   std::vector<BoundaryID> _vals;
-  bool _must_be_restricted = false;
+  Restriction _restriction = Restriction::Any;
 };
 
 class AttribThread : public Attribute
@@ -330,39 +351,6 @@ public:
 
 private:
   AuxKernelType _val = static_cast<AuxKernelType>(0);
-};
-
-/**
- * Whether an AuxKernel is boundary restricted (BoundaryRestrictable::boundaryRestricted()).
- * The old ExecuteMooseObjectWarehouse-based dispatch treated block and boundary restriction as
- * mutually exclusive (MooseObjectWarehouseBase::addObject's if/else-if): a boundary-restricted
- * nodal AuxKernel is handled entirely by the boundary-node loop, never by the block-based one -
- * unlike AttribSubdomains, which (correctly, for its own purpose) treats a block-unrestricted
- * object as matching every block. Without this, a boundary-restricted-but-block-unrestricted
- * AuxKernel would incorrectly also run once per node in the general block-based sweep.
- */
-class AttribAuxKernelBoundaryRestricted : public Attribute
-{
-public:
-  typedef bool Key;
-  void setFrom(const Key & k) { _val = k; }
-
-  AttribAuxKernelBoundaryRestricted(TheWarehouse & w)
-    : Attribute(w, "aux_kernel_boundary_restricted"), _val(false)
-  {
-  }
-  AttribAuxKernelBoundaryRestricted(TheWarehouse & w, bool is_boundary_restricted)
-    : Attribute(w, "aux_kernel_boundary_restricted"), _val(is_boundary_restricted)
-  {
-  }
-  virtual void initFrom(const MooseObject * obj) override;
-  virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
-  clonefunc(AttribAuxKernelBoundaryRestricted);
-
-private:
-  bool _val;
 };
 
 /**

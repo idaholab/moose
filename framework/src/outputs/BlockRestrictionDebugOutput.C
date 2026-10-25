@@ -561,19 +561,25 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
       .condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
       .condition<AttribThread>(0)
       .queryIntoUnsorted(objects);
+  // AuxKernels are treated like the "custom warehouse" objects below: only boundary-restricted ones
+  // belong in these groups, since unrestricted (block-only) ones are already represented in the
+  // block-restriction groups.
+  std::vector<MooseObject *> unrestricted_aux_kernel_vec;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribSystem>("AuxKernel")
+      .condition<AttribBoundaries>(Moose::ANY_BOUNDARY_ID,
+                                   AttribBoundaries::Restriction::UnrestrictedOnly)
+      .condition<AttribThread>(0)
+      .queryIntoUnsorted(unrestricted_aux_kernel_vec);
+  const std::set<const MooseObject *> unrestricted_aux_kernels(unrestricted_aux_kernel_vec.begin(),
+                                                               unrestricted_aux_kernel_vec.end());
 
   for (const auto object : objects)
-    if (object->enabled())
+    if (object->enabled() && !unrestricted_aux_kernels.count(object))
     {
       const auto * const boundary_restrictable = dynamic_cast<const BoundaryRestrictable *>(object);
       mooseAssert(boundary_restrictable, "Query returned an object without BoundaryRestrictable");
-
-      // AuxKernels are treated like the "custom warehouse" objects below: only boundary-restricted
-      // ones belong in these groups, since unrestricted (block-only) ones are already represented
-      // in the block-restriction groups.
-      if (!boundary_restrictable->boundaryRestricted() &&
-          dynamic_cast<const AuxKernelBase *>(object))
-        continue;
 
       const auto & ids = boundary_restrictable->boundaryRestricted()
                              ? boundary_restrictable->boundaryIDs()
