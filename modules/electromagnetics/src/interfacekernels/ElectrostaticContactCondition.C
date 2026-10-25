@@ -41,7 +41,7 @@ ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParamete
     _conductivity_primary(getADMaterialProperty<Real>("primary_conductivity")),
     _conductivity_secondary(getNeighborADMaterialProperty<Real>("secondary_conductivity")),
     _mean_hardness(isParamValid("user_electrical_contact_conductance")
-                       ? getGenericZeroMaterialProperty<Real, true>("mean_hardness")
+                       ? getGenericOrZeroMaterialProperty<Real, true>("mean_hardness")
                        : getADMaterialProperty<Real>("mean_hardness")),
     _mechanical_pressure(getFunction("mechanical_pressure")),
     _user_contact_conductance(isParamValid("user_electrical_contact_conductance")

@@ -161,7 +161,16 @@ public:
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialPropertyByName(const std::string & prop_name);
+
+  /// Deprecated, use getGenericOrZeroMaterialProperty()
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialProperty(const std::string & name);
+  /// Deprecated, use getGenericOrZeroMaterialPropertyByName()
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialPropertyByName(const std::string & prop_name);
@@ -232,7 +241,7 @@ public:
 
   /**
    * Record a dependency on the material property with the given ID. Called by
-   * getGenericZeroMaterialPropertyByName() when the "optional" property it looked up turns out to
+   * getGenericOrZeroMaterialPropertyByName() when the "optional" property it looked up turns out to
    * be supplied by another material, so that dependency is still reflected in
    * getMatPropDependencies() even though this access went through the zero-default API. No-op by
    * default; overridden where getMatPropDependencies() is backed by a real container.
@@ -359,9 +368,9 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
-  /// Names requested through getGenericZeroMaterialPropertyByName(). The material declaring one
+  /// Names requested through getGenericOrZeroMaterialPropertyByName(). The material declaring one
   /// of these may be constructed after this object, so whether another material declares it is
-  /// only checked by resolveZeroMaterialPropertyDependencies(), once every material exists.
+  /// only checked by resolveGetGenericOrZeroPropertyDependencies(), once every material exists.
   std::set<std::string> _zero_optional_mat_prop_names;
 
   /// The ids of the supplied properties, i.e. the indices where they
@@ -399,7 +408,7 @@ protected:
    * be called only after every material has been constructed, e.g. from
    * resolveOptionalProperties().
    */
-  void resolveZeroMaterialPropertyDependencies();
+  void resolveGetGenericOrZeroPropertyDependencies();
 
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
@@ -483,26 +492,44 @@ MaterialBase::declareGenericPropertyByName(const std::string & prop_name)
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
-MaterialBase::getGenericZeroMaterialProperty(const std::string & name)
+MaterialBase::getGenericOrZeroMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = name;
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialBase::getGenericZeroMaterialProperty(const std::string & name)
+{
+  mooseDeprecated("getGenericZeroMaterialProperty(name) was renamed to "
+                  "getGenericOrZeroMaterialProperty(name)");
+  return getGenericOrZeroMaterialProperty<T, is_ad>(name);
 }
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
 {
+  mooseDeprecated("getGenericZeroMaterialPropertyByName() was renamed to "
+                  "getGenericOrZeroMaterialPropertyByName()");
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialBase::getGenericOrZeroMaterialPropertyByName(const std::string & prop_name)
+{
   checkExecutionStage();
 
   // This "optional" property may be declared by another material (declareProperty and
   // getProperty share the same registry), in which case this object depends on that material and
   // it must be computed first. That material may not have been constructed yet, so the dependency
-  // is recorded by resolveZeroMaterialPropertyDependencies() once every material exists.
+  // is recorded by resolveGetGenericOrZeroPropertyDependencies() once every material exists.
   _zero_optional_mat_prop_names.insert(prop_name);
 
   auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);

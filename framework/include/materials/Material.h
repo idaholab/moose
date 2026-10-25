@@ -195,6 +195,8 @@ public:
   }
   ///@}
 
+  using MaterialBase::getGenericOrZeroMaterialProperty;
+  using MaterialBase::getGenericOrZeroMaterialPropertyByName;
   using MaterialBase::getGenericZeroMaterialProperty;
   using MaterialBase::getGenericZeroMaterialPropertyByName;
   using MaterialBase::getZeroMaterialProperty;

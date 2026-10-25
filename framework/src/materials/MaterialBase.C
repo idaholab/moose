@@ -302,7 +302,7 @@ MaterialBase::markMatPropRequested(const std::string & name)
 }
 
 void
-MaterialBase::resolveZeroMaterialPropertyDependencies()
+MaterialBase::resolveGetGenericOrZeroPropertyDependencies()
 {
   for (const auto & prop_name : _zero_optional_mat_prop_names)
     if (materialData().hasProperty(prop_name))

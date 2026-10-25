@@ -311,7 +311,16 @@ public:
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialPropertyByName(const std::string & prop_name);
+
+  /// Deprecated, use getGenericOrZeroMaterialProperty()
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialProperty(const std::string & name);
+  /// Deprecated, use getGenericOrZeroMaterialPropertyByName()
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialPropertyByName(const std::string & prop_name);
@@ -830,15 +839,33 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
-MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
+MaterialPropertyInterface::getGenericOrZeroMaterialProperty(const std::string & name)
 {
   const auto prop_name = getMaterialPropertyName(name);
-  return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
+{
+  mooseDeprecated("getGenericZeroMaterialProperty(name) was renamed to "
+                  "getGenericOrZeroMaterialProperty(name)");
+  return getGenericOrZeroMaterialProperty<T, is_ad>(name);
 }
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
+{
+  mooseDeprecated("getGenericZeroMaterialPropertyByName() was renamed to "
+                  "getGenericOrZeroMaterialPropertyByName()");
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericOrZeroMaterialPropertyByName(const std::string & prop_name)
 {
   // if found return the requested property
   if (hasGenericMaterialPropertyByName<T, is_ad>(prop_name))
