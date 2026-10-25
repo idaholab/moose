@@ -71,7 +71,7 @@ and an advective flux calculator is added for each component in the phase that c
 
 !listing modules/porous_flow/examples/dead_oil/waterflood_1d_kt.i block=UserObjects
 
-!media porous_flow/dead_oil_waterflood_1d.png caption=Water saturation in the one-dimensional waterflood after 25 and 50 days: PorousFlow with full upwinding (filled circles) and with Kuzmin-Turek stabilization (open triangles), and the Buckley-Leverett solution (lines). id=dead_oil_waterflood_1d_fig
+!media large_media/porous_flow/examples/dead_oil/waterflood_1d.png caption=Water saturation in the one-dimensional waterflood after 25 and 50 days: PorousFlow with full upwinding (filled circles) and with Kuzmin-Turek stabilization (open triangles), and the Buckley-Leverett solution (lines). id=dead_oil_waterflood_1d_fig
 
 Both schemes agree with the Buckley-Leverett solution behind the front and place the front
 correctly ([dead_oil_waterflood_1d_fig]). With full upwinding the front is spread over about
@@ -108,7 +108,7 @@ production are computed with postprocessors:
 
 !listing modules/porous_flow/examples/dead_oil/waterflood_2d.i block=Postprocessors
 
-!media porous_flow/dead_oil_waterflood_2d.png caption=Oil and water production rates at surface conditions (top) and water cut (bottom) for the two-dimensional waterflood. id=dead_oil_waterflood_2d_fig
+!media large_media/porous_flow/examples/dead_oil/waterflood_2d.png caption=Oil and water production rates at surface conditions (top) and water cut (bottom) for the two-dimensional waterflood. id=dead_oil_waterflood_2d_fig
 
 The production history is shown in [dead_oil_waterflood_2d_fig]. After a brief initial period,
 during which the pressure around the production well falls towards the bottomhole pressure, the
