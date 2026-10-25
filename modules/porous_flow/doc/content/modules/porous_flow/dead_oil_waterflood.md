@@ -50,16 +50,35 @@ f_{w} = \frac{k_{r,w}/\mu_{w}}{k_{r,w}/\mu_{w} + k_{r,o}/\mu_{o}},
 where $u$ is the Darcy velocity of the injected water and $f_{w}$ is the water fractional flow.
 Each saturation behind the front travels at speed $u f_{w}'(S_{w})/\phi$, and the saturation at
 the front is found with the Welge tangent construction. The script `buckley_leverett.py` in the
-example directory computes this solution and compares it with the PorousFlow results.
+example directory computes this solution and compares it with the PorousFlow results of both
+`waterflood_1d.i` and `waterflood_1d_kt.i`.
 With the oil viscosity of 1.17$\,$mPa$\,$s at 20$\,$MPa, the saturation at the front is 0.528 and
 the front reaches 25.2$\,$m after 25 days and 50.4$\,$m after 50 days.
 
-!media porous_flow/dead_oil_waterflood_1d.png caption=Water saturation in the one-dimensional waterflood after 25 and 50 days: PorousFlow (points) and the Buckley-Leverett solution (lines). id=dead_oil_waterflood_1d_fig
+### Full upwinding and Kuzmin-Turek stabilization
 
-The PorousFlow results agree with the Buckley-Leverett solution
-([dead_oil_waterflood_1d_fig]). The front is smeared over a few elements by the
-[numerical diffusion](numerical_diffusion.md) of the upwinded scheme, and becomes sharper as the
-mesh is refined.
+`waterflood_1d.i` uses the default [full upwinding](porous_flow/upwinding.md): the Darcy flux is computed from
+the pressure gradient, and the mobility $k_{r}\rho/\mu$ (multiplied by the mass fraction) of
+each phase is taken from the upstream node. This is a first-order scheme, so it adds
+[numerical diffusion](porous_flow/numerical_diffusion.md) that smears the saturation front over a few
+elements.
+
+`waterflood_1d_kt.i` solves the same problem using [Kuzmin-Turek stabilization](porous_flow/kt.md), a
+flux-limited TVD scheme that adds much less numerical diffusion. Only the flux kernels change,
+and an advective flux calculator is added for each component in the phase that contains it:
+
+!listing modules/porous_flow/examples/dead_oil/waterflood_1d_kt.i block=Kernels
+
+!listing modules/porous_flow/examples/dead_oil/waterflood_1d_kt.i block=UserObjects
+
+!media porous_flow/dead_oil_waterflood_1d.png caption=Water saturation in the one-dimensional waterflood after 25 and 50 days: PorousFlow with full upwinding (filled circles) and with Kuzmin-Turek stabilization (open triangles), and the Buckley-Leverett solution (lines). id=dead_oil_waterflood_1d_fig
+
+Both schemes agree with the Buckley-Leverett solution behind the front and place the front
+correctly ([dead_oil_waterflood_1d_fig]). With full upwinding the front is spread over about
+3$-$4$\,$m, slightly ahead of the analytical position, whereas Kuzmin-Turek stabilization
+resolves it over 1$-$2$\,$m and comes closer to the saturation at the shock. The front can also be
+sharpened by refining the mesh. See [porous_flow/stabilization.md] for a discussion of the costs and benefits
+of each scheme.
 
 ## Two-dimensional waterflood with wells
 

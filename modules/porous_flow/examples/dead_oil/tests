@@ -8,6 +8,13 @@
     csvdiff = 'waterflood_1d.csv'
     requirement = 'PorousFlow shall be able to simulate a one-dimensional waterflood of a dead-oil reservoir, with oil properties interpolated from a table of pressure, formation volume factor and viscosity, in agreement with the Buckley-Leverett solution.'
   []
+  [waterflood_1d_kt]
+    type = CSVDiff
+    input = 'waterflood_1d_kt.i'
+    cli_args = 'Mesh/nx=50 Executioner/end_time=2.16e6 Outputs/csv/sync_times=2.16e6'
+    csvdiff = 'waterflood_1d_kt.csv'
+    requirement = 'PorousFlow shall be able to simulate a one-dimensional waterflood of a dead-oil reservoir using Kuzmin-Turek stabilization of the advective fluxes.'
+  []
   [waterflood_2d]
     type = CSVDiff
     input = 'waterflood_2d.i'

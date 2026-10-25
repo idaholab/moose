@@ -289,5 +289,6 @@
     type = CSV
     sync_only = true
     sync_times = '2.16e6 4.32e6' # 25 and 50 days
+    time_data = true # records the time of each profile file, for buckley_leverett.py
   []
 []
