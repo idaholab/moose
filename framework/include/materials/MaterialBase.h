@@ -359,10 +359,9 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
-  /// Names requested through getGenericZeroMaterialPropertyByName(). Whether each one is actually
-  /// supplied by another material can only be checked once every material has been constructed,
-  /// so that is deferred to resolveZeroMaterialPropertyDependencies() instead of being done
-  /// immediately: a supplier declared later than this object would otherwise look unsupplied.
+  /// Names requested through getGenericZeroMaterialPropertyByName(). The material declaring one
+  /// of these may be constructed after this object, so whether another material declares it is
+  /// only checked by resolveZeroMaterialPropertyDependencies(), once every material exists.
   std::set<std::string> _zero_optional_mat_prop_names;
 
   /// The ids of the supplied properties, i.e. the indices where they
@@ -500,11 +499,10 @@ MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name
 {
   checkExecutionStage();
 
-  // This "optional" property may turn out to be supplied by another material (declareProperty
-  // vs. getProperty share the same registry), in which case this object must depend on it so
-  // that supplier is reinited before this one. A supplier constructed after this object would
-  // look unsupplied if checked right now, so the check is deferred until every material has been
-  // constructed; see resolveZeroMaterialPropertyDependencies().
+  // This "optional" property may be declared by another material (declareProperty and
+  // getProperty share the same registry), in which case this object depends on that material and
+  // it must be computed first. That material may not have been constructed yet, so the dependency
+  // is recorded by resolveZeroMaterialPropertyDependencies() once every material exists.
   _zero_optional_mat_prop_names.insert(prop_name);
 
   auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);
